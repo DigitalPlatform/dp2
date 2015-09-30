@@ -929,7 +929,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = "OrderControl GetOrderInfoByPublishTime() exception: " + ExceptionUtil.GetAutoText(ex);
                         return -1;
                     }
                 }

@@ -8224,7 +8224,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, "创建 C# 脚本时出错: " + ex.Message);
                 return;
             }
 
@@ -8283,9 +8283,10 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "初始化 XLWorkbook 时出错: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
+
             OutputAcountBookTextFileDialog option_dialog = new OutputAcountBookTextFileDialog();
             MainForm.SetControlFont(option_dialog, this.Font, false);
 

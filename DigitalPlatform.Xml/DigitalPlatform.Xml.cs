@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 
 using System.IO;
@@ -25,14 +25,14 @@ namespace DigitalPlatform.Xml
 		public const string unimarcxml = "http://dp2003.com/UNIMARC";
 	}
 
-	// ·½±ã½«×Ö·û´®ÖĞµÄxmlÃô¸Ğ×Ö·û×ª»»ÎªÊµÌå·½Ê½.
-	// ±¾À´¿ÉÒÔÓÃÀàÖĞstaticº¯ÊıÊµÏÖ¹¦ÄÜ, µ«ÊÇ¿¼ÂÇµ½Ã¿´Îº¯Êı²Ù×÷Ê±,
-	// new XmlTextWriterºÍStringWriter¶ÔÏóºÄ·ÑÊ±¼äºÍ×ÊÔ´,
-	// Òò´Ë,±¾ÀàÉè¼Æ³É¶ÔÏóÄÚ°üº¬ÉÏÊö2¶ÔÏó,ÔÚÊ¹ÓÃÖĞ,½¨ÒéÊµÀı»¯
-	// ±¾Àà¶ÔÏóºó, ³¤¾Ã±£Áô, Ö»ĞèÓÃWriteString()+GetString()¾Í¿ÉÊµÏÖ
-	// ËùĞè¹¦ÄÜ¡£
-	// ·´¹ıÀ´Ëµ£¬Èç¹ûÃ¿´ÎÊ¹ÓÃ¶¼ÊÇÊµÀı»¯±¾Àà¶ÔÏóÈ»ºóÁ¢¼´Ïú»Ù£¬±¾ÀàµÄÓÅÊÆ
-	// ¾ÍÎŞ·¨ÌåÏÖÁË¡£¿ÉÒÔ¿¼ÂÇÁíĞĞÉè¼ÆÀàÖĞstaticº¯ÊıÊµÏÖÍ¬Ñù¹¦ÄÜ¡£
+	// æ–¹ä¾¿å°†å­—ç¬¦ä¸²ä¸­çš„xmlæ•æ„Ÿå­—ç¬¦è½¬æ¢ä¸ºå®ä½“æ–¹å¼.
+	// æœ¬æ¥å¯ä»¥ç”¨ç±»ä¸­staticå‡½æ•°å®ç°åŠŸèƒ½, ä½†æ˜¯è€ƒè™‘åˆ°æ¯æ¬¡å‡½æ•°æ“ä½œæ—¶,
+	// new XmlTextWriterå’ŒStringWriterå¯¹è±¡è€—è´¹æ—¶é—´å’Œèµ„æº,
+	// å› æ­¤,æœ¬ç±»è®¾è®¡æˆå¯¹è±¡å†…åŒ…å«ä¸Šè¿°2å¯¹è±¡,åœ¨ä½¿ç”¨ä¸­,å»ºè®®å®ä¾‹åŒ–
+	// æœ¬ç±»å¯¹è±¡å, é•¿ä¹…ä¿ç•™, åªéœ€ç”¨WriteString()+GetString()å°±å¯å®ç°
+	// æ‰€éœ€åŠŸèƒ½ã€‚
+	// åè¿‡æ¥è¯´ï¼Œå¦‚æœæ¯æ¬¡ä½¿ç”¨éƒ½æ˜¯å®ä¾‹åŒ–æœ¬ç±»å¯¹è±¡ç„¶åç«‹å³é”€æ¯ï¼Œæœ¬ç±»çš„ä¼˜åŠ¿
+	// å°±æ— æ³•ä½“ç°äº†ã€‚å¯ä»¥è€ƒè™‘å¦è¡Œè®¾è®¡ç±»ä¸­staticå‡½æ•°å®ç°åŒæ ·åŠŸèƒ½ã€‚
 	public class XmlStringWriter
 	{
 		public XmlTextWriter xmlTextWriter = null;
@@ -89,32 +89,32 @@ namespace DigitalPlatform.Xml
 
 	//
 
-	// Éè¼ÆÒâÍ¼:ÓÃÓÚ´æ·ÅÃüÃû¿Õ¼ä
-	// ÄÚ²¿°üº¬Ò»¸öXmlNamespacemanager³ÉÔ±£¬ÓÃÊı¾İdomÀ´´´½¨
-	// ¶ÔÓÚµ¥¶ÀµÄÊı¾İdom£¬°ÑÊı¾İdom°üº¬µÄÃüÃû¿Õ¼äÕÒµ½£¬²¢¼Óµ½m_nsmgrÀï
-	// ¶ÔÓÚÅäÖÃÎÄ¼ş£¬»¹ĞèÔÚÊ¹ÓÃÊ±´«ÈëÒ»¸öÊı¾İdom£¬²Å»á´´½¨m_nsmgr£¬²¢°ÑÅäÖÃdomÃüÃû¿Õ¼äÕÒµ½£¬¼Óµ½m_nsmgrÀï
-	// Íâ²¿ÔÚSelectNodes()»òSelectSingleNode()Ê±£¬Ö»ĞèÓÃÊ¹ÓÃ¸Ã¶ÔÏóµÄm_nsmgr¼´¿É¡£
+	// è®¾è®¡æ„å›¾:ç”¨äºå­˜æ”¾å‘½åç©ºé—´
+	// å†…éƒ¨åŒ…å«ä¸€ä¸ªXmlNamespacemanageræˆå‘˜ï¼Œç”¨æ•°æ®domæ¥åˆ›å»º
+	// å¯¹äºå•ç‹¬çš„æ•°æ®domï¼ŒæŠŠæ•°æ®domåŒ…å«çš„å‘½åç©ºé—´æ‰¾åˆ°ï¼Œå¹¶åŠ åˆ°m_nsmgré‡Œ
+	// å¯¹äºé…ç½®æ–‡ä»¶ï¼Œè¿˜éœ€åœ¨ä½¿ç”¨æ—¶ä¼ å…¥ä¸€ä¸ªæ•°æ®domï¼Œæ‰ä¼šåˆ›å»ºm_nsmgrï¼Œå¹¶æŠŠé…ç½®domå‘½åç©ºé—´æ‰¾åˆ°ï¼ŒåŠ åˆ°m_nsmgré‡Œ
+	// å¤–éƒ¨åœ¨SelectNodes()æˆ–SelectSingleNode()æ—¶ï¼Œåªéœ€ç”¨ä½¿ç”¨è¯¥å¯¹è±¡çš„m_nsmgrå³å¯ã€‚
 	public class PrefixURIColl : ArrayList
 	{
 		public XmlNamespaceManager nsmgr = null;
 
 		public int nSeed = 1;
 
-		#region ¹¹Ôìº¯Êı
+		#region æ„é€ å‡½æ•°
 
-		//strDataFileName:Êı¾İÎÄ¼şÃû
+		//strDataFileName:æ•°æ®æ–‡ä»¶å
 		public PrefixURIColl(string strDataFileName)
 		{
 			CreateNSOfData(strDataFileName);
 		}
-		//dom_data:Êı¾İdom
+		//dom_data:æ•°æ®dom
 		public PrefixURIColl(XmlDocument dom_data)
 		{
 			CreateNSOfData(dom_data);
 		}
 
-		//dom_data:Êı¾İdom
-		//dom_cfg:ÅäÖÃdom
+		//dom_data:æ•°æ®dom
+		//dom_cfg:é…ç½®dom
 		public PrefixURIColl(string strDataFileName,
 			string strCfgFileName)
 		{
@@ -122,8 +122,8 @@ namespace DigitalPlatform.Xml
 				strCfgFileName);
 		}
 
-		//dom_data:Êı¾İdom
-		//dom_cfg:ÅäÖÃdom
+		//dom_data:æ•°æ®dom
+		//dom_cfg:é…ç½®dom
 		public PrefixURIColl(XmlDocument domData,
 			XmlDocument domCfg)
 		{
@@ -138,9 +138,9 @@ namespace DigitalPlatform.Xml
 
 		#endregion 
 
-		#region ´´½¨º¯Êı
+		#region åˆ›å»ºå‡½æ•°
 
-		//µ¥¶ÀµÄÊı¾İdom
+		//å•ç‹¬çš„æ•°æ®dom
 		public void CreateNSOfData(string strDataFileName)
 		{
 			XmlDocument domData = new XmlDocument ();
@@ -150,7 +150,7 @@ namespace DigitalPlatform.Xml
 			}
 			catch(Exception ex)
 			{
-				throw(new Exception ("CreateNSOfData()Àï£¬¼ÓÔØdom²»ºÏ·¨" + ex.Message));
+				throw(new Exception ("CreateNSOfData()é‡Œï¼ŒåŠ è½½domä¸åˆæ³•" + ex.Message));
 			}
 			CreateNSOfData(domData);
 		}
@@ -197,7 +197,7 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		//¶ÔÓÚÅäÖÃÎÄ¼ş
+		//å¯¹äºé…ç½®æ–‡ä»¶
 		public void CreateNSOfCfg(string strDataFileName,
 			string strCfgFileName)
 		{
@@ -208,7 +208,7 @@ namespace DigitalPlatform.Xml
 			}
 			catch(Exception ex)
 			{
-				throw(new Exception ("CreateNSOfCfg()Àï£¬¼ÓÔØÊı¾İdom²»ºÏ·¨" + ex.Message));
+				throw(new Exception ("CreateNSOfCfg()é‡Œï¼ŒåŠ è½½æ•°æ®domä¸åˆæ³•" + ex.Message));
 			}
 
 			CreateNSOfCfg(domData,strCfgFileName);
@@ -224,7 +224,7 @@ namespace DigitalPlatform.Xml
 			}
 			catch(Exception ex1)
 			{
-				throw(new Exception ("CreateNSOfCfg()Àï£¬¼ÓÔØÅäÖÃdom²»ºÏ·¨" + ex1.Message));
+				throw(new Exception ("CreateNSOfCfg()é‡Œï¼ŒåŠ è½½é…ç½®domä¸åˆæ³•" + ex1.Message));
 			}
 			CreateNSOfCfg(domData,domCfg);
 		}
@@ -245,7 +245,7 @@ namespace DigitalPlatform.Xml
 				    prefixUri.strURI  = DomUtil.GetNodeText(nsNode);
 				
 				if (prefixUri.strPrefix != ""
-					&& prefixUri.strURI != "")  //ÔÚÅäÖÃÎÄ¼şÀï²»ÔÊĞíÇ°×ºÎª¿Õ
+					&& prefixUri.strURI != "")  //åœ¨é…ç½®æ–‡ä»¶é‡Œä¸å…è®¸å‰ç¼€ä¸ºç©º
 				{
 					this.Add (prefixUri);
 				}
@@ -265,7 +265,7 @@ namespace DigitalPlatform.Xml
 		#endregion
 
 
-		//½«±¾¼¯ºÏµÄÖµ¶Ô¼Óµ½nsmgrÀï
+		//å°†æœ¬é›†åˆçš„å€¼å¯¹åŠ åˆ°nsmgré‡Œ
 		public void Add2nsmgr()
 		{
 			foreach(PrefixURI ns in this)
@@ -274,7 +274,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		//È¥ÖØ
+		//å»é‡
 		public void DumpRep()
 		{
 			int i,j;
@@ -295,7 +295,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 		
-		//ĞÅÏ¢º¯Êı
+		//ä¿¡æ¯å‡½æ•°
 		public string Dump()
 		{
 			string strInfo = "";
@@ -310,17 +310,17 @@ namespace DigitalPlatform.Xml
 		}
 	}
 
-	// Éè¼ÆÒâÍ¼:´æ·ÅÃüÁî¿Õ¼ä¶Ô
-	// ±àĞ´Õß£ºÈÎÑÓ»ª
+	// è®¾è®¡æ„å›¾:å­˜æ”¾å‘½ä»¤ç©ºé—´å¯¹
+	// ç¼–å†™è€…ï¼šä»»å»¶å
 	public class PrefixURI:IComparable
 	{
-		public string strPrefix;  //Ç°×º
+		public string strPrefix;  //å‰ç¼€
 		public string strURI;     //URI
 		public string strNodeName;
 
-		//ÒşÊ½Ö´ĞĞ£¬¿ÉÄÜÖ±½ÓÍ¨¹ıDpKeyµÄ¶ÔÏóÊµÀıÀ´·ÃÎÊ
-		//obj: ±È½ÏµÄ¶ÔÏó
-		//0±íÊ¾ÏàµÈ£¬ÆäËü±íÊ¾²»µÈ
+		//éšå¼æ‰§è¡Œï¼Œå¯èƒ½ç›´æ¥é€šè¿‡DpKeyçš„å¯¹è±¡å®ä¾‹æ¥è®¿é—®
+		//obj: æ¯”è¾ƒçš„å¯¹è±¡
+		//0è¡¨ç¤ºç›¸ç­‰ï¼Œå…¶å®ƒè¡¨ç¤ºä¸ç­‰
 		public int CompareTo(object obj)
 		{
 			PrefixURI prefixURI = (PrefixURI)obj;

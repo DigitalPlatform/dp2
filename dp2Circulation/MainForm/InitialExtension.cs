@@ -526,7 +526,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
             #endregion
 
@@ -2006,11 +2006,12 @@ Culture=neutral, PublicKeyToken=null
                     FileInfo fi = new FileInfo(strLocalFilePath);
                     fi.LastWriteTimeUtc = DateTimeUtil.FromRfc1123DateTimeString(strPrevFileTime);
                 }
+
                 return 1;   // 从服务器获得了内容
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "InitialExtension GetSystemFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally
@@ -2075,7 +2076,7 @@ Culture=neutral, PublicKeyToken=null
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "InitialExtension RemoveFiles() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -3777,7 +3778,7 @@ Culture=neutral, PublicKeyToken=null
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "InitialExtension CheckServerClock() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally

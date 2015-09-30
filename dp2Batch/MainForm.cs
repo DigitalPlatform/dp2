@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,32 +47,32 @@ namespace dp2Batch
 
 		ScriptManager scriptManager = new ScriptManager();
 
-		Hashtable m_tableMarcSyntax = new Hashtable();	// Êı¾İ¿âÈ«Â·¾¶ºÍMARC¸ñÊ½µÄ¶ÔÕÕ±í
-		string CurMarcSyntax = "";	// µ±Ç°MARC¸ñÊ½
-		bool OutputCrLf = false;	// ISO2709ÎÄ¼ş¼ÇÂ¼Î²²¿ÊÇ·ñ¼ÓÈë»Ø³µ»»ĞĞ·ûºÅ
-        bool AddG01 = false;    // ISO2709ÎÄ¼şÖĞµÄ¼ÇÂ¼ÄÚÊÇ·ñ¼ÓÈë-01×Ö¶Î£¿(²»¼ÓÊ±¾ÍÒªÈ¥³ıÔ­ÓĞµÄ£¬ÒÔÃâÎó»á)
-        bool Remove998 = false; // Êä³ö ISO2709 ÎÄ¼şµÄÊ±ºòÊÇ·ñÉ¾³ı 998 ×Ö¶Î?
+		Hashtable m_tableMarcSyntax = new Hashtable();	// æ•°æ®åº“å…¨è·¯å¾„å’ŒMARCæ ¼å¼çš„å¯¹ç…§è¡¨
+		string CurMarcSyntax = "";	// å½“å‰MARCæ ¼å¼
+		bool OutputCrLf = false;	// ISO2709æ–‡ä»¶è®°å½•å°¾éƒ¨æ˜¯å¦åŠ å…¥å›è½¦æ¢è¡Œç¬¦å·
+        bool AddG01 = false;    // ISO2709æ–‡ä»¶ä¸­çš„è®°å½•å†…æ˜¯å¦åŠ å…¥-01å­—æ®µï¼Ÿ(ä¸åŠ æ—¶å°±è¦å»é™¤åŸæœ‰çš„ï¼Œä»¥å…è¯¯ä¼š)
+        bool Remove998 = false; // è¾“å‡º ISO2709 æ–‡ä»¶çš„æ—¶å€™æ˜¯å¦åˆ é™¤ 998 å­—æ®µ?
 
 		public CfgCache cfgCache = new CfgCache();
 
-        // ²»ÖªµÀÎªÊ²Ã´ÒªÊ¹ÓÃÊÂ¼ş£¿ÄÑµÀÔÚ this ÀïÃæÖ±½Óµ÷ÓÃº¯Êı²»ÊÇ¸ü¼òµ¥Ã´?
+        // ä¸çŸ¥é“ä¸ºä»€ä¹ˆè¦ä½¿ç”¨äº‹ä»¶ï¼Ÿéš¾é“åœ¨ this é‡Œé¢ç›´æ¥è°ƒç”¨å‡½æ•°ä¸æ˜¯æ›´ç®€å•ä¹ˆ?
 		public event CheckTargetDbEventHandler CheckTargetDb = null;
 
 		public DigitalPlatform.StopManager	stopManager = new DigitalPlatform.StopManager();
 
 		public ServerCollection Servers = null;
 
-		//±£´æ½çÃæĞÅÏ¢
+		//ä¿å­˜ç•Œé¢ä¿¡æ¯
 		public ApplicationInfo	AppInfo = new ApplicationInfo("dp2batch.xml");
 
 
 		//
 
-		RmsChannel channel = null;	// ÁÙÊ±Ê¹ÓÃµÄchannel¶ÔÏó
+		RmsChannel channel = null;	// ä¸´æ—¶ä½¿ç”¨çš„channelå¯¹è±¡
 
 		public AutoResetEvent eventClose = new AutoResetEvent(false);
 
-		RmsChannelCollection	Channels = new RmsChannelCollection();	// ÓµÓĞ
+		RmsChannelCollection	Channels = new RmsChannelCollection();	// æ‹¥æœ‰
 
 		DigitalPlatform.Stop stop = null;
 
@@ -81,7 +81,7 @@ namespace dp2Batch
 
 		// double ProgressRatio = 1.0;
 
-		bool bNotAskTimestampMismatchWhenOverwrite = false;	// µ±×ªÈëÊı¾İµÄÊ±ºò,Èç¹û·¢ÉúÊ±¼ä´Á²»Æ¥Åä,ÊÇ·ñ²»Ñ¯ÎÊ¾ÍÇ¿ĞĞ¸²¸Ç
+		bool bNotAskTimestampMismatchWhenOverwrite = false;	// å½“è½¬å…¥æ•°æ®çš„æ—¶å€™,å¦‚æœå‘ç”Ÿæ—¶é—´æˆ³ä¸åŒ¹é…,æ˜¯å¦ä¸è¯¢é—®å°±å¼ºè¡Œè¦†ç›–
 
 		private System.Windows.Forms.MainMenu mainMenu1;
 		private System.Windows.Forms.MenuItem menuItem_exit;
@@ -251,12 +251,12 @@ namespace dp2Batch
             this.menuItem_rebuildKeysByDbnames,
             this.menuItem1,
             this.menuItem_exit});
-            this.menuItem_file.Text = "ÎÄ¼ş(&F)";
+            this.menuItem_file.Text = "æ–‡ä»¶(&F)";
             // 
             // menuItem_run
             // 
             this.menuItem_run.Index = 0;
-            this.menuItem_run.Text = "ÔËĞĞ(&R)...";
+            this.menuItem_run.Text = "è¿è¡Œ(&R)...";
             this.menuItem_run.Click += new System.EventHandler(this.menuItem_run_Click);
             // 
             // menuItem2
@@ -267,20 +267,20 @@ namespace dp2Batch
             // menuItem_projectManage
             // 
             this.menuItem_projectManage.Index = 2;
-            this.menuItem_projectManage.Text = "·½°¸¹ÜÀí(&M)...";
+            this.menuItem_projectManage.Text = "æ–¹æ¡ˆç®¡ç†(&M)...";
             this.menuItem_projectManage.Click += new System.EventHandler(this.menuItem_projectManage_Click);
             // 
             // menuItem_cfg
             // 
             this.menuItem_cfg.Enabled = false;
             this.menuItem_cfg.Index = 3;
-            this.menuItem_cfg.Text = "ÅäÖÃ(&C)...";
+            this.menuItem_cfg.Text = "é…ç½®(&C)...";
             this.menuItem_cfg.Click += new System.EventHandler(this.menuItem_cfg_Click);
             // 
             // menuItem_serversCfg
             // 
             this.menuItem_serversCfg.Index = 4;
-            this.menuItem_serversCfg.Text = "È±Ê¡ÕÊ»§¹ÜÀí(&A)...";
+            this.menuItem_serversCfg.Text = "ç¼ºçœå¸æˆ·ç®¡ç†(&A)...";
             this.menuItem_serversCfg.Click += new System.EventHandler(this.menuItem_serversCfg_Click);
             // 
             // menuItem3
@@ -291,13 +291,13 @@ namespace dp2Batch
             // menuItem_rebuildKeys
             // 
             this.menuItem_rebuildKeys.Index = 6;
-            this.menuItem_rebuildKeys.Text = "ÖØ½¨¼ìË÷µã(&B)";
+            this.menuItem_rebuildKeys.Text = "é‡å»ºæ£€ç´¢ç‚¹(&B)";
             this.menuItem_rebuildKeys.Click += new System.EventHandler(this.menuItem_rebuildKeys_Click);
             // 
             // menuItem_rebuildKeysByDbnames
             // 
             this.menuItem_rebuildKeysByDbnames.Index = 7;
-            this.menuItem_rebuildKeysByDbnames.Text = "ÖØ½¨¼ìË÷µã[¸ù¾İ¼ôÌù°åÄÚµÄÊı¾İ¿âÂ·¾¶](&R)...";
+            this.menuItem_rebuildKeysByDbnames.Text = "é‡å»ºæ£€ç´¢ç‚¹[æ ¹æ®å‰ªè´´æ¿å†…çš„æ•°æ®åº“è·¯å¾„](&R)...";
             this.menuItem_rebuildKeysByDbnames.Click += new System.EventHandler(this.menuItem_rebuildKeysByDbnames_Click);
             // 
             // menuItem1
@@ -308,7 +308,7 @@ namespace dp2Batch
             // menuItem_exit
             // 
             this.menuItem_exit.Index = 9;
-            this.menuItem_exit.Text = "ÍË³ö(&X)";
+            this.menuItem_exit.Text = "é€€å‡º(&X)";
             this.menuItem_exit.Click += new System.EventHandler(this.menuItem_exit_Click);
             // 
             // menuItem_help
@@ -317,18 +317,18 @@ namespace dp2Batch
             this.menuItem_help.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem_copyright,
             this.menuItem_openDataFolder});
-            this.menuItem_help.Text = "°ïÖú(&H)";
+            this.menuItem_help.Text = "å¸®åŠ©(&H)";
             // 
             // menuItem_copyright
             // 
             this.menuItem_copyright.Index = 0;
-            this.menuItem_copyright.Text = "°æÈ¨(&C)...";
+            this.menuItem_copyright.Text = "ç‰ˆæƒ(&C)...";
             this.menuItem_copyright.Click += new System.EventHandler(this.menuItem_copyright_Click);
             // 
             // menuItem_openDataFolder
             // 
             this.menuItem_openDataFolder.Index = 1;
-            this.menuItem_openDataFolder.Text = "´ò¿ªÊı¾İÎÄ¼ş¼Ğ(&D)...";
+            this.menuItem_openDataFolder.Text = "æ‰“å¼€æ•°æ®æ–‡ä»¶å¤¹(&D)...";
             this.menuItem_openDataFolder.Click += new System.EventHandler(this.menuItem_openDataFolder_Click);
             // 
             // tabControl_main
@@ -353,7 +353,7 @@ namespace dp2Batch
             this.tabPage_range.Padding = new System.Windows.Forms.Padding(6);
             this.tabPage_range.Size = new System.Drawing.Size(626, 246);
             this.tabPage_range.TabIndex = 0;
-            this.tabPage_range.Text = "°´¼ÇÂ¼IDµ¼³ö";
+            this.tabPage_range.Text = "æŒ‰è®°å½•IDå¯¼å‡º";
             this.tabPage_range.UseVisualStyleBackColor = true;
             // 
             // panel_range
@@ -408,7 +408,7 @@ namespace dp2Batch
             this.checkBox_export_fastMode.Name = "checkBox_export_fastMode";
             this.checkBox_export_fastMode.Size = new System.Drawing.Size(90, 18);
             this.checkBox_export_fastMode.TabIndex = 7;
-            this.checkBox_export_fastMode.Text = "¿ìËÙÄ£Ê½(&F)";
+            this.checkBox_export_fastMode.Text = "å¿«é€Ÿæ¨¡å¼(&F)";
             this.checkBox_export_fastMode.UseVisualStyleBackColor = true;
             // 
             // checkBox_export_delete
@@ -417,7 +417,7 @@ namespace dp2Batch
             this.checkBox_export_delete.Name = "checkBox_export_delete";
             this.checkBox_export_delete.Size = new System.Drawing.Size(117, 24);
             this.checkBox_export_delete.TabIndex = 6;
-            this.checkBox_export_delete.Text = "É¾³ı¼ÇÂ¼(&D)";
+            this.checkBox_export_delete.Text = "åˆ é™¤è®°å½•(&D)";
             this.checkBox_export_delete.CheckedChanged += new System.EventHandler(this.checkBox_export_delete_CheckedChanged);
             // 
             // checkBox_verifyNumber
@@ -426,7 +426,7 @@ namespace dp2Batch
             this.checkBox_verifyNumber.Name = "checkBox_verifyNumber";
             this.checkBox_verifyNumber.Size = new System.Drawing.Size(124, 18);
             this.checkBox_verifyNumber.TabIndex = 4;
-            this.checkBox_verifyNumber.Text = "Ğ£×¼Ê×Î²ID(&V)";
+            this.checkBox_verifyNumber.Text = "æ ¡å‡†é¦–å°¾ID(&V)";
             // 
             // textBox_dbPath
             // 
@@ -445,7 +445,7 @@ namespace dp2Batch
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(62, 18);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Êı¾İ¿â:";
+            this.label1.Text = "æ•°æ®åº“:";
             // 
             // groupBox1
             // 
@@ -462,7 +462,7 @@ namespace dp2Batch
             this.groupBox1.Size = new System.Drawing.Size(253, 134);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = " Êä³ö¼ÇÂ¼·¶Î§ ";
+            this.groupBox1.Text = " è¾“å‡ºè®°å½•èŒƒå›´ ";
             // 
             // textBox_endNo
             // 
@@ -480,7 +480,7 @@ namespace dp2Batch
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(85, 19);
             this.label3.TabIndex = 4;
-            this.label3.Text = "½áÊø¼ÇÂ¼ID:";
+            this.label3.Text = "ç»“æŸè®°å½•ID:";
             // 
             // textBox_startNo
             // 
@@ -498,7 +498,7 @@ namespace dp2Batch
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(85, 18);
             this.label2.TabIndex = 2;
-            this.label2.Text = "ÆğÊ¼¼ÇÂ¼ID:";
+            this.label2.Text = "èµ·å§‹è®°å½•ID:";
             // 
             // radioButton_startEnd
             // 
@@ -510,7 +510,7 @@ namespace dp2Batch
             this.radioButton_startEnd.Size = new System.Drawing.Size(143, 19);
             this.radioButton_startEnd.TabIndex = 1;
             this.radioButton_startEnd.TabStop = true;
-            this.radioButton_startEnd.Text = "ÆğÖ¹ID(&S) ";
+            this.radioButton_startEnd.Text = "èµ·æ­¢ID(&S) ";
             // 
             // radioButton_all
             // 
@@ -520,7 +520,7 @@ namespace dp2Batch
             this.radioButton_all.Name = "radioButton_all";
             this.radioButton_all.Size = new System.Drawing.Size(56, 19);
             this.radioButton_all.TabIndex = 0;
-            this.radioButton_all.Text = "È«²¿(&A)";
+            this.radioButton_all.Text = "å…¨éƒ¨(&A)";
             this.radioButton_all.CheckedChanged += new System.EventHandler(this.radioButton_all_CheckedChanged);
             // 
             // checkBox_forceLoop
@@ -529,7 +529,7 @@ namespace dp2Batch
             this.checkBox_forceLoop.Name = "checkBox_forceLoop";
             this.checkBox_forceLoop.Size = new System.Drawing.Size(158, 18);
             this.checkBox_forceLoop.TabIndex = 5;
-            this.checkBox_forceLoop.Text = "Î´ÃüÖĞÊ±¼ÌĞøÑ­»·(&C)";
+            this.checkBox_forceLoop.Text = "æœªå‘½ä¸­æ—¶ç»§ç»­å¾ªç¯(&C)";
             // 
             // tabPage_resultset
             // 
@@ -538,7 +538,7 @@ namespace dp2Batch
             this.tabPage_resultset.Name = "tabPage_resultset";
             this.tabPage_resultset.Size = new System.Drawing.Size(626, 98);
             this.tabPage_resultset.TabIndex = 1;
-            this.tabPage_resultset.Text = "°´½á¹û¼¯µ¼³ö";
+            this.tabPage_resultset.Text = "æŒ‰ç»“æœé›†å¯¼å‡º";
             this.tabPage_resultset.UseVisualStyleBackColor = true;
             this.tabPage_resultset.Visible = false;
             // 
@@ -559,7 +559,7 @@ namespace dp2Batch
             this.tabPage_import.Name = "tabPage_import";
             this.tabPage_import.Size = new System.Drawing.Size(626, 98);
             this.tabPage_import.TabIndex = 2;
-            this.tabPage_import.Text = "µ¼Èë";
+            this.tabPage_import.Text = "å¯¼å…¥";
             this.tabPage_import.UseVisualStyleBackColor = true;
             // 
             // checkBox_import_fastMode
@@ -569,7 +569,7 @@ namespace dp2Batch
             this.checkBox_import_fastMode.Name = "checkBox_import_fastMode";
             this.checkBox_import_fastMode.Size = new System.Drawing.Size(90, 18);
             this.checkBox_import_fastMode.TabIndex = 8;
-            this.checkBox_import_fastMode.Text = "¿ìËÙÄ£Ê½(&F)";
+            this.checkBox_import_fastMode.Text = "å¿«é€Ÿæ¨¡å¼(&F)";
             this.checkBox_import_fastMode.UseVisualStyleBackColor = true;
             // 
             // textBox_import_range
@@ -588,7 +588,7 @@ namespace dp2Batch
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(76, 14);
             this.label6.TabIndex = 6;
-            this.label6.Text = "µ¼Èë·¶Î§(&R):";
+            this.label6.Text = "å¯¼å…¥èŒƒå›´(&R):";
             // 
             // button_import_findFileName
             // 
@@ -616,7 +616,7 @@ namespace dp2Batch
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(63, 14);
             this.label5.TabIndex = 3;
-            this.label5.Text = "ÎÄ¼şÃû(&F):";
+            this.label5.Text = "æ–‡ä»¶å(&F):";
             // 
             // button_import_dbMap
             // 
@@ -647,7 +647,7 @@ namespace dp2Batch
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(101, 14);
             this.label4.TabIndex = 0;
-            this.label4.Text = "¿âÃûÓ³Éä¹æÔò(&T):";
+            this.label4.Text = "åº“åæ˜ å°„è§„åˆ™(&T):";
             // 
             // toolBar_main
             // 
@@ -670,13 +670,13 @@ namespace dp2Batch
             this.toolBarButton_stop.Enabled = false;
             this.toolBarButton_stop.ImageIndex = 0;
             this.toolBarButton_stop.Name = "toolBarButton_stop";
-            this.toolBarButton_stop.ToolTipText = "Í£Ö¹";
+            this.toolBarButton_stop.ToolTipText = "åœæ­¢";
             // 
             // toolBarButton_begin
             // 
             this.toolBarButton_begin.ImageIndex = 1;
             this.toolBarButton_begin.Name = "toolBarButton_begin";
-            this.toolBarButton_begin.ToolTipText = "¿ªÊ¼";
+            this.toolBarButton_begin.ToolTipText = "å¼€å§‹";
             // 
             // imageList_toolbar
             // 
@@ -734,7 +734,7 @@ namespace dp2Batch
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
-            this.Text = "dp2batch V2 -- Åú´¦Àí";
+            this.Text = "dp2batch V2 -- æ‰¹å¤„ç†";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
             this.Closed += new System.EventHandler(this.MainForm_Closed);
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -780,13 +780,13 @@ namespace dp2Batch
                 DataDir = Environment.CurrentDirectory;
             }
 
-			// ´ÓÎÄ¼şÖĞ×°ÔØ´´½¨Ò»¸öServerCollection¶ÔÏó
+			// ä»æ–‡ä»¶ä¸­è£…è½½åˆ›å»ºä¸€ä¸ªServerCollectionå¯¹è±¡
 			// parameters:
-			//		bIgnorFileNotFound	ÊÇ·ñ²»Å×³öFileNotFoundExceptionÒì³£¡£
-			//							Èç¹û==true£¬º¯ÊıÖ±½Ó·µ»ØÒ»¸öĞÂµÄ¿ÕServerCollection¶ÔÏó
+			//		bIgnorFileNotFound	æ˜¯å¦ä¸æŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸ã€‚
+			//							å¦‚æœ==trueï¼Œå‡½æ•°ç›´æ¥è¿”å›ä¸€ä¸ªæ–°çš„ç©ºServerCollectionå¯¹è±¡
 			// Exception:
-			//			FileNotFoundException	ÎÄ¼şÃ»ÕÒµ½
-			//			SerializationException	°æ±¾Ç¨ÒÆÊ±ÈİÒ×³öÏÖ
+			//			FileNotFoundException	æ–‡ä»¶æ²¡æ‰¾åˆ°
+			//			SerializationException	ç‰ˆæœ¬è¿ç§»æ—¶å®¹æ˜“å‡ºç°
 			try 
 			{
                 Servers = ServerCollection.Load(this.DataDir
@@ -798,7 +798,7 @@ namespace dp2Batch
 			{
 				MessageBox.Show(this, ex.Message);
 				Servers = new ServerCollection();
-				// ÉèÖÃÎÄ¼şÃû£¬ÒÔ±ã±¾´ÎÔËĞĞ½áÊøÊ±¸²¸Ç¾ÉÎÄ¼ş
+				// è®¾ç½®æ–‡ä»¶åï¼Œä»¥ä¾¿æœ¬æ¬¡è¿è¡Œç»“æŸæ—¶è¦†ç›–æ—§æ–‡ä»¶
                 Servers.FileName = this.DataDir
 					+ "\\dp2batch_servers.bin";
 
@@ -819,11 +819,11 @@ namespace dp2Batch
 			cfgCache.InstantSave = true;
 
 		
-			// ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+			// è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
 			if (AppInfo != null) 
 			{
                 /*
-                // Ê×´ÎÔËĞĞ£¬¾¡Á¿ÀûÓÃ¡°Î¢ÈíÑÅºÚ¡±×ÖÌå
+                // é¦–æ¬¡è¿è¡Œï¼Œå°½é‡åˆ©ç”¨â€œå¾®è½¯é›…é»‘â€å­—ä½“
                 if (this.IsFirstRun == true)
                 {
                     SetFirstDefaultFont();
@@ -847,7 +847,7 @@ namespace dp2Batch
 			// ////////////////
 
 			stop = new DigitalPlatform.Stop();
-			stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+			stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             this.Channels.AskAccountInfo +=new AskAccountInfoEventHandle(this.Servers.OnAskAccountInfo);
             /*
@@ -855,12 +855,12 @@ namespace dp2Batch
 				new Delegate_AskAccountInfo(this.Servers.AskAccountInfo);
              */
 
-			// ¼òµ¥¼ìË÷½çÃæ×¼±¸¹¤×÷
+			// ç®€å•æ£€ç´¢ç•Œé¢å‡†å¤‡å·¥ä½œ
 			treeView_rangeRes.stopManager = this.stopManager;
 
-			treeView_rangeRes.Servers = this.Servers;	// ÒıÓÃ
+			treeView_rangeRes.Servers = this.Servers;	// å¼•ç”¨
 
-			treeView_rangeRes.Channels = this.Channels;	// ÒıÓÃ
+			treeView_rangeRes.Channels = this.Channels;	// å¼•ç”¨
             treeView_rangeRes.AppInfo = this.AppInfo;   // 2013/2/15
 			treeView_rangeRes.Fill(null);
 
@@ -956,7 +956,7 @@ namespace dp2Batch
 			scriptManager.CreateDefaultContent -=new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
 			scriptManager.CreateDefaultContent +=new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
 
-			// °´ÕÕÉÏ´Î±£´æµÄÂ·¾¶Õ¹¿ªresdircontrolÊ÷
+			// æŒ‰ç…§ä¸Šæ¬¡ä¿å­˜çš„è·¯å¾„å±•å¼€resdircontrolæ ‘
 			string strResDirPath = AppInfo.GetString(
 				"rangePage",
 				"resdirpath",
@@ -981,14 +981,14 @@ namespace dp2Batch
 
 		void ExpandResDir(string strResDirPath)
 		{
-			this.toolStripStatusLabel_main.Text = "ÕıÔÚÕ¹¿ª×ÊÔ´Ä¿Â¼ " + strResDirPath + ", ÇëÉÔºò...";
+			this.toolStripStatusLabel_main.Text = "æ­£åœ¨å±•å¼€èµ„æºç›®å½• " + strResDirPath + ", è¯·ç¨å€™...";
 			this.Update();
 
 			ResPath respath = new ResPath(strResDirPath);
 
 			EnableControls(false);
 
-			// Õ¹¿ªµ½Ö¸¶¨µÄ½Úµã
+			// å±•å¼€åˆ°æŒ‡å®šçš„èŠ‚ç‚¹
 			treeView_rangeRes.ExpandPath(respath);
 
 			EnableControls(true);
@@ -1021,9 +1021,9 @@ namespace dp2Batch
 
             this.Servers.ServerChanged -= new ServerChangedEventHandle(Servers_ServerChanged);
 
-			// ±£´æµ½ÎÄ¼ş
+			// ä¿å­˜åˆ°æ–‡ä»¶
 			// parameters:
-			//		strFileName	ÎÄ¼şÃû¡£Èç¹û==null,±íÊ¾Ê¹ÓÃ×°ÔØÊ±±£´æµÄÄÇ¸öÎÄ¼şÃû
+			//		strFileName	æ–‡ä»¶åã€‚å¦‚æœ==null,è¡¨ç¤ºä½¿ç”¨è£…è½½æ—¶ä¿å­˜çš„é‚£ä¸ªæ–‡ä»¶å
 			Servers.Save(null);
 			Servers = null;
 
@@ -1033,7 +1033,7 @@ namespace dp2Batch
 				MessageBox.Show(this, strError);
 
 
-			// ±£´æ´°¿Ú³ß´ç×´Ì¬
+			// ä¿å­˜çª—å£å°ºå¯¸çŠ¶æ€
 			if (AppInfo != null) 
 			{
 				AppInfo.SaveFormStates(this,
@@ -1104,7 +1104,7 @@ this.checkBox_import_fastMode.Checked);
 				"lastoutputfilterindex",
 				nLastOutputFilterIndex);
 
-			// ±£´æresdircontrol×îºóµÄÑ¡Ôñ
+			// ä¿å­˜resdircontrolæœ€åçš„é€‰æ‹©
 
 			ResPath respath = new ResPath(treeView_rangeRes.SelectedNode);
 			AppInfo.SetString(
@@ -1113,14 +1113,14 @@ this.checkBox_import_fastMode.Checked);
 				respath.FullPath);
 
 
-			//¼Ç×¡save,±£´æĞÅÏ¢XMLÎÄ¼ş
+			//è®°ä½save,ä¿å­˜ä¿¡æ¯XMLæ–‡ä»¶
 			AppInfo.Save();
-			AppInfo = null;	// ±ÜÃâºóÃæÔÙÓÃÕâ¸ö¶ÔÏó		
+			AppInfo = null;	// é¿å…åé¢å†ç”¨è¿™ä¸ªå¯¹è±¡		
 
 		}
 
 
-		#region ²Ëµ¥ÃüÁî
+		#region èœå•å‘½ä»¤
 
 		private void menuItem_cfg_Click(object sender, System.EventArgs e)
 		{
@@ -1145,7 +1145,7 @@ this.checkBox_import_fastMode.Checked);
 
 			if (e.Button == toolBarButton_begin) 
 			{
-				// ³öÏÖ¶Ô»°¿ò£¬Ñ¯ÎÊProjectÃû×Ö
+				// å‡ºç°å¯¹è¯æ¡†ï¼Œè¯¢é—®Projectåå­—
 				GetProjectNameDlg dlg = new GetProjectNameDlg();
                 MainForm.SetControlFont(dlg, this.DefaultFont);
 
@@ -1168,7 +1168,7 @@ this.checkBox_import_fastMode.Checked);
 					return;
 
 				string strProjectName = "";
-				string strLocate = "";	// ·½°¸ÎÄ¼şÄ¿Â¼
+				string strLocate = "";	// æ–¹æ¡ˆæ–‡ä»¶ç›®å½•
 
 				if (dlg.NoneProject == false)
 				{
@@ -1176,8 +1176,8 @@ this.checkBox_import_fastMode.Checked);
 
 					strProjectName = dlg.ProjectName;
 
-					// »ñµÃ·½°¸²ÎÊı
-					// strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+					// è·å¾—æ–¹æ¡ˆå‚æ•°
+					// strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
 					// return:
 					//		-1	error
 					//		0	not found project
@@ -1188,7 +1188,7 @@ this.checkBox_import_fastMode.Checked);
 
 					if (nRet == 0) 
 					{
-						strError = "·½°¸ " + strProjectName + " Ã»ÓĞÕÒµ½...";
+						strError = "æ–¹æ¡ˆ " + strProjectName + " æ²¡æœ‰æ‰¾åˆ°...";
 						goto ERROR1;
 					}
 					if (nRet == -1) 
@@ -1239,7 +1239,7 @@ this.checkBox_import_fastMode.Checked);
             batchObj = null;
             m_nRecordCount = -1;
 
-            // ×¼±¸½Å±¾
+            // å‡†å¤‡è„šæœ¬
             if (strProjectName != "" && strProjectName != null)
             {
                 nRet = PrepareScript(strProjectName,
@@ -1260,10 +1260,10 @@ this.checkBox_import_fastMode.Checked);
                 this.MarcFilter = filter;
             }
 
-            // Ö´ĞĞ½Å±¾µÄOnInitial()
+            // æ‰§è¡Œè„šæœ¬çš„OnInitial()
 
-            // ´¥·¢ScriptÖĞOnInitial()´úÂë
-            // OnInitial()ºÍOnBeginµÄ±¾ÖÊÇø±ğ, ÔÚÓÚOnInitial()ÊÊºÏ¼ì²éºÍÉèÖÃÃæ°å²ÎÊı
+            // è§¦å‘Scriptä¸­OnInitial()ä»£ç 
+            // OnInitial()å’ŒOnBeginçš„æœ¬è´¨åŒºåˆ«, åœ¨äºOnInitial()é€‚åˆæ£€æŸ¥å’Œè®¾ç½®é¢æ¿å‚æ•°
             if (batchObj != null)
             {
                 BatchEventArgs args = new BatchEventArgs();
@@ -1273,7 +1273,7 @@ this.checkBox_import_fastMode.Checked);
                     goto END1;
                 if (args.Continue == ContinueType.SkipMiddle) 
                 {
-                    strError = "OnInitial()ÖĞargs.Continue²»ÄÜÊ¹ÓÃContinueType.SkipMiddle.Ó¦Ê¹ÓÃContinueType.SkipBeginMiddle";
+                    strError = "OnInitial()ä¸­args.Continueä¸èƒ½ä½¿ç”¨ContinueType.SkipMiddle.åº”ä½¿ç”¨ContinueType.SkipBeginMiddle";
                     goto ERROR1;
                 }
                 */
@@ -1284,27 +1284,27 @@ this.checkBox_import_fastMode.Checked);
 
             if (this.textBox_import_fileName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÊäÈëÎÄ¼şÃû...";
+                strError = "å°šæœªæŒ‡å®šè¾“å…¥æ–‡ä»¶å...";
                 goto ERROR1;
             }
             FileInfo fi = new FileInfo(this.textBox_import_fileName.Text);
             if (fi.Exists == false)
             {
-                strError = "ÎÄ¼ş" + this.textBox_import_fileName.Text + "²»´æÔÚ...";
+                strError = "æ–‡ä»¶" + this.textBox_import_fileName.Text + "ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
             OpenMarcFileDlg dlg = null;
 
-            // ISO2709ÎÄ¼şĞèÒªÔ¤ÏÈ×¼±¸Ìõ¼ş
+            // ISO2709æ–‡ä»¶éœ€è¦é¢„å…ˆå‡†å¤‡æ¡ä»¶
             if (String.Compare(fi.Extension, ".iso", true) == 0
                 || String.Compare(fi.Extension, ".mrc", true) == 0)
             {
-                // Ñ¯ÎÊencodingºÍmarcsyntax
+                // è¯¢é—®encodingå’Œmarcsyntax
                 dlg = new OpenMarcFileDlg();
                 MainForm.SetControlFont(dlg, this.DefaultFont);
 
-                dlg.Text = "ÇëÖ¸¶¨Òªµ¼ÈëµÄ ISO2709 ÎÄ¼şÊôĞÔ";
+                dlg.Text = "è¯·æŒ‡å®šè¦å¯¼å…¥çš„ ISO2709 æ–‡ä»¶å±æ€§";
                 dlg.FileName = this.textBox_import_fileName.Text;
 
                 this.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_input_state");
@@ -1318,8 +1318,8 @@ this.checkBox_import_fastMode.Checked);
                 this.CurMarcSyntax = dlg.MarcSyntax;
             }
 
-            // ´¥·¢ScriptÖĞOnBegin()´úÂë
-            // OnBegin()ÖĞÈÔÈ»ÓĞĞŞ¸ÄMainFormÃæ°åµÄ×ÔÓÉ
+            // è§¦å‘Scriptä¸­OnBegin()ä»£ç 
+            // OnBegin()ä¸­ä»ç„¶æœ‰ä¿®æ”¹MainFormé¢æ¿çš„è‡ªç”±
             if (batchObj != null)
             {
                 BatchEventArgs args = new BatchEventArgs();
@@ -1363,13 +1363,13 @@ this.checkBox_import_fastMode.Checked);
             }
             else
             {
-                strError = "Î´ÖªµÄÎÄ¼şÀàĞÍ...";
+                strError = "æœªçŸ¥çš„æ–‡ä»¶ç±»å‹...";
                 goto ERROR1;
             }
 
 
         END1:
-            // ´¥·¢ScriptµÄOnEnd()´úÂë
+            // è§¦å‘Scriptçš„OnEnd()ä»£ç 
             if (batchObj != null)
             {
                 BatchEventArgs args = new BatchEventArgs();
@@ -1402,11 +1402,11 @@ this.checkBox_import_fastMode.Checked);
         }
 
 
-		// µ¼ÈëXMLÊı¾İ
+		// å¯¼å…¥XMLæ•°æ®
 		// parameter: 
-		//		strFileName: Òªµ¼ÈëµÄÔ´XMLÎÄ¼ş
-		// ËµÃ÷: µ¼ÈëÊı¾İÊÇÒ»¸öÁ¬ĞøµÄ¹ı³Ì,
-		//		Ö»ÒªÒÀ¾İÁ÷µÄ×ÔÈ»Ë³ĞòÒÀ´ÎÉÏÔØÃ¿¸ö¼ÇÂ¼¾Í¿ÉÒÔÁË¡£
+		//		strFileName: è¦å¯¼å…¥çš„æºXMLæ–‡ä»¶
+		// è¯´æ˜: å¯¼å…¥æ•°æ®æ˜¯ä¸€ä¸ªè¿ç»­çš„è¿‡ç¨‹,
+		//		åªè¦ä¾æ®æµçš„è‡ªç„¶é¡ºåºä¾æ¬¡ä¸Šè½½æ¯ä¸ªè®°å½•å°±å¯ä»¥äº†ã€‚
 		int DoImportXml(string strFileName,
 			out string strError)
 		{
@@ -1415,9 +1415,9 @@ this.checkBox_import_fastMode.Checked);
 
             bool bFastMode = this.checkBox_import_fastMode.Checked;
 
-			this.bNotAskTimestampMismatchWhenOverwrite = false;	// ÒªÑ¯ÎÊ
+			this.bNotAskTimestampMismatchWhenOverwrite = false;	// è¦è¯¢é—®
 
-			// ×¼±¸¿âÃû¶ÔÕÕ±í
+			// å‡†å¤‡åº“åå¯¹ç…§è¡¨
 			DbNameMap map = DbNameMap.Build(this.textBox_import_dbMap.Text.Replace("\r\n", ";"),
                 out strError);
             if (map == null)
@@ -1438,7 +1438,7 @@ this.checkBox_import_fastMode.Checked);
 			int nReadRet = 0;
 			string strCount = "";
 
-			//·¶Î§
+			//èŒƒå›´
 			if (textBox_import_range.Text != "") 
 			{
 				rl = new RangeList(textBox_import_range.Text);
@@ -1449,39 +1449,39 @@ this.checkBox_import_fastMode.Checked);
 			}
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼Èë");
+            stop.Initial("æ­£åœ¨å¯¼å…¥");
             stop.BeginLoop();
 
             stop.SetProgressRange(0, file.Length);
 
             EnableControls(false);
 
-            WriteLog("¿ªÊ¼µ¼ÈëXMLÊı¾İ");
+            WriteLog("å¼€å§‹å¯¼å…¥XMLæ•°æ®");
 
 			try
 			{
 				bool bRet = false;
 			
-                // ÒÆ¶¯µ½¸ùÔªËØ
+                // ç§»åŠ¨åˆ°æ ¹å…ƒç´ 
 				while(true) 
 				{
 					bRet = reader.Read();
 					if (bRet == false) 
 					{
-						strError = "Ã»ÓĞ¸ùÔªËØ";
+						strError = "æ²¡æœ‰æ ¹å…ƒç´ ";
 						goto ERROR1;
 					}
 					if (reader.NodeType == XmlNodeType.Element)
 						break;
 				}
 
-                // ÒÆ¶¯µ½ÆäÏÂ¼¶µÚÒ»¸öelement
+                // ç§»åŠ¨åˆ°å…¶ä¸‹çº§ç¬¬ä¸€ä¸ªelement
                 while (true)
                 {
                     bRet = reader.Read();
                     if (bRet == false)
                     {
-                        strError = "Ã»ÓĞµÚÒ»¸ö¼ÇÂ¼ÔªËØ";
+                        strError = "æ²¡æœ‰ç¬¬ä¸€ä¸ªè®°å½•å…ƒç´ ";
                         goto END1;
                     }
                     if (reader.NodeType == XmlNodeType.Element)
@@ -1496,19 +1496,19 @@ this.checkBox_import_fastMode.Checked);
 					nReadRet = 0;
 
 
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+					Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 					if (stop.State != 0)
 					{
 						DialogResult result = MessageBox.Show(this,
-							"È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+							"ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
 							"dp2batch",
 							MessageBoxButtons.YesNo,
 							MessageBoxIcon.Question,
 							MessageBoxDefaultButton.Button2);
 						if (result == DialogResult.Yes)
 						{
-							strError = "ÓÃ»§ÖĞ¶Ï";
+							strError = "ç”¨æˆ·ä¸­æ–­";
 							nReadRet = 100;
 							goto ERROR1;
 						}
@@ -1519,13 +1519,13 @@ this.checkBox_import_fastMode.Checked);
 					}
 
 
-					//¼ìË÷µ±Ç°¼ÇÂ¼ÊÇ·ñÔÚ´¦Àí·¶Î§ÄÚ
+					//æ£€ç´¢å½“å‰è®°å½•æ˜¯å¦åœ¨å¤„ç†èŒƒå›´å†…
 					if (rl != null) 
 					{
-						if (lMax != -1) // -1:²»È·¶¨
+						if (lMax != -1) // -1:ä¸ç¡®å®š
 						{
 							if (lCount > lMax)
-								nReadRet = 2;	// ºóÃæ¿´µ½Õâ¸ö×´Ì¬½«»ábreak¡£ÎªÊ²Ã´²»ÔÚÕâÀïbreak£¬¾ÍÊÇÎªÁËºóÃæÏÔÊ¾labelĞÅÏ¢
+								nReadRet = 2;	// åé¢çœ‹åˆ°è¿™ä¸ªçŠ¶æ€å°†ä¼šbreakã€‚ä¸ºä»€ä¹ˆä¸åœ¨è¿™é‡Œbreakï¼Œå°±æ˜¯ä¸ºäº†åé¢æ˜¾ç¤ºlabelä¿¡æ¯
 						}
 						if (rl.IsInRange(lCount, true) == false) 
 						{
@@ -1537,10 +1537,10 @@ this.checkBox_import_fastMode.Checked);
 					// progressBar_main.Value = (int)((file.Position)/ProgressRatio);
                     stop.SetProgressValue(file.Position);
 
-					// ÏÔÊ¾ĞÅÏ¢
+					// æ˜¾ç¤ºä¿¡æ¯
 					if (bSkip == true) 
 					{
-						stop.SetMessage( ((bSkip == true) ? "ÕıÔÚÌø¹ı " : "ÕıÔÚ´¦Àí" )
+						stop.SetMessage( ((bSkip == true) ? "æ­£åœ¨è·³è¿‡ " : "æ­£åœ¨å¤„ç†" )
 							+ Convert.ToString(lCount+1) );
 					}
 
@@ -1554,12 +1554,12 @@ this.checkBox_import_fastMode.Checked);
 
 
 					/*
-					// ·ÀÖ¹Ò»Ìõ¼ÇÂ¼Ò²Ã»ÓĞµÄÇé¿ö,ËùÒÔ°ÑÕâ¸ö¾äĞ´µ½Ç°Ãæ
+					// é˜²æ­¢ä¸€æ¡è®°å½•ä¹Ÿæ²¡æœ‰çš„æƒ…å†µ,æ‰€ä»¥æŠŠè¿™ä¸ªå¥å†™åˆ°å‰é¢
 					if (file.Position >= file.Length)
 						break;
 					*/
 
-					// ÉÏÔØÒ»¸öItem
+					// ä¸Šè½½ä¸€ä¸ªItem
 					nRet = DoXmlItemUpload(
                         bFastMode,
                         reader,
@@ -1572,16 +1572,16 @@ this.checkBox_import_fastMode.Checked);
 					if (nRet == 1)
 						break;
 
-					strCount = "´¦ÀíÊı "
+					strCount = "å¤„ç†æ•° "
 						+ Convert.ToString(lCount - lSkipCount)
-						+ "¡¡/ Ìø¹ıÊı " 
+						+ "ã€€/ è·³è¿‡æ•° " 
 						+ Convert.ToString(lSkipCount);
 
 
 					if (bSkip)
 						lSkipCount ++;
 
-					if (nReadRet == 1 || nReadRet == 2)  //ÅĞ¶Ï´óÎÄ¼ş½áÊø
+					if (nReadRet == 1 || nReadRet == 2)  //åˆ¤æ–­å¤§æ–‡ä»¶ç»“æŸ
 						break;
 
 				}
@@ -1591,7 +1591,7 @@ this.checkBox_import_fastMode.Checked);
 			{
 				file.Close();
 
-                WriteLog("½áÊøµ¼ÈëXMLÊı¾İ");
+                WriteLog("ç»“æŸå¯¼å…¥XMLæ•°æ®");
 			}
 
         END1:
@@ -1602,7 +1602,7 @@ this.checkBox_import_fastMode.Checked);
 
             EnableControls(true);
 
-            strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' Íê³É¡£";
+            strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' å®Œæˆã€‚";
             return 0;
         ERROR1:
             stop.EndLoop();
@@ -1611,16 +1611,16 @@ this.checkBox_import_fastMode.Checked);
             EnableControls(true);
 
             if (nReadRet == 100)
-                strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' ±»ÖĞ¶Ï¡£Ô­Òò£º " + strError;
+                strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' è¢«ä¸­æ–­ã€‚åŸå› ï¼š " + strError;
             else
-                strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' Ê§°Ü¡£Ô­Òò: " + strError;
+                strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' å¤±è´¥ã€‚åŸå› : " + strError;
             return -1;
 		}
 
 
-		// µ¼ÈëISO2709Êı¾İ
+		// å¯¼å…¥ISO2709æ•°æ®
 		// parameter: 
-		//		strFileName: Òªµ¼ÈëµÄÔ´ISO2709ÎÄ¼ş
+		//		strFileName: è¦å¯¼å…¥çš„æºISO2709æ–‡ä»¶
 		int DoImportIso2709(string strFileName,
 			string strMarcSyntax,
 			Encoding encoding,
@@ -1631,16 +1631,16 @@ this.checkBox_import_fastMode.Checked);
 
             bool bFastMode = this.checkBox_import_fastMode.Checked;
 
-			this.CurMarcSyntax = strMarcSyntax;	// ÎªC#½Å±¾µ÷ÓÃGetMarc()µÈº¯ÊıÌá¹©Ìõ¼ş
+			this.CurMarcSyntax = strMarcSyntax;	// ä¸ºC#è„šæœ¬è°ƒç”¨GetMarc()ç­‰å‡½æ•°æä¾›æ¡ä»¶
 
-			this.bNotAskTimestampMismatchWhenOverwrite = false;	// ÒªÑ¯ÎÊ
+			this.bNotAskTimestampMismatchWhenOverwrite = false;	// è¦è¯¢é—®
 
-			// ×¼±¸¿âÃû¶ÔÕÕ±í
+			// å‡†å¤‡åº“åå¯¹ç…§è¡¨
 			DbNameMap map = DbNameMap.Build(this.textBox_import_dbMap.Text.Replace("\r\n",";"),
                 out strError);
             if (map == null)
             {
-                strError = "¸ù¾İ¿âÃûÓ³Éä¹æÔò´´½¨¿âÃû¶ÔÕÕ±íÊ±³ö´í: " + strError;
+                strError = "æ ¹æ®åº“åæ˜ å°„è§„åˆ™åˆ›å»ºåº“åå¯¹ç…§è¡¨æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -1656,7 +1656,7 @@ this.checkBox_import_fastMode.Checked);
 			int nReadRet = 0;
 			string strCount = "";
 
-			//·¶Î§
+			//èŒƒå›´
 			if (textBox_import_range.Text != "") 
 			{
 				rl = new RangeList(textBox_import_range.Text);
@@ -1667,14 +1667,14 @@ this.checkBox_import_fastMode.Checked);
 			}
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼Èë");
+            stop.Initial("æ­£åœ¨å¯¼å…¥");
             stop.BeginLoop();
 
             stop.SetProgressRange(0, file.Length);
 
             EnableControls(false);
 
-            WriteLog("¿ªÊ¼µ¼ÈëISO2709¸ñÊ½Êı¾İ");
+            WriteLog("å¼€å§‹å¯¼å…¥ISO2709æ ¼å¼æ•°æ®");
 
 			try
 			{
@@ -1692,20 +1692,20 @@ this.checkBox_import_fastMode.Checked);
 					nReadRet = 0;
 
 
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+					Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 
 					if (stop.State != 0)
 					{
 						DialogResult result = MessageBox.Show(this,
-							"È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+							"ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
 							"dp2batch",
 							MessageBoxButtons.YesNo,
 							MessageBoxIcon.Question,
 							MessageBoxDefaultButton.Button2);
 						if (result == DialogResult.Yes)
 						{
-							strError = "ÓÃ»§ÖĞ¶Ï";
+							strError = "ç”¨æˆ·ä¸­æ–­";
 							nReadRet = 100;
 							goto ERROR1;
 						}
@@ -1716,13 +1716,13 @@ this.checkBox_import_fastMode.Checked);
 					}
 
 
-					//¼ìË÷µ±Ç°¼ÇÂ¼ÊÇ·ñÔÚ´¦Àí·¶Î§ÄÚ
+					//æ£€ç´¢å½“å‰è®°å½•æ˜¯å¦åœ¨å¤„ç†èŒƒå›´å†…
 					if (rl != null) 
 					{
-						if (lMax != -1) // -1:²»È·¶¨
+						if (lMax != -1) // -1:ä¸ç¡®å®š
 						{
 							if (lCount > lMax)
-								nReadRet = 2;	// ºóÃæ¿´µ½Õâ¸ö×´Ì¬½«»ábreak¡£ÎªÊ²Ã´²»ÔÚÕâÀïbreak£¬¾ÍÊÇÎªÁËºóÃæÏÔÊ¾labelĞÅÏ¢
+								nReadRet = 2;	// åé¢çœ‹åˆ°è¿™ä¸ªçŠ¶æ€å°†ä¼šbreakã€‚ä¸ºä»€ä¹ˆä¸åœ¨è¿™é‡Œbreakï¼Œå°±æ˜¯ä¸ºäº†åé¢æ˜¾ç¤ºlabelä¿¡æ¯
 						}
 						if (rl.IsInRange(lCount, true) == false) 
 						{
@@ -1734,29 +1734,29 @@ this.checkBox_import_fastMode.Checked);
 					// progressBar_main.Value = (int)((file.Position)/ProgressRatio);
                     stop.SetProgressValue(file.Position);
 
-					// ÏÔÊ¾ĞÅÏ¢
+					// æ˜¾ç¤ºä¿¡æ¯
 					if (bSkip == true) 
 					{
-						stop.SetMessage( ((bSkip == true) ? "ÕıÔÚÌø¹ı " : "ÕıÔÚ´¦Àí" )
+						stop.SetMessage( ((bSkip == true) ? "æ­£åœ¨è·³è¿‡ " : "æ­£åœ¨å¤„ç†" )
 							+ Convert.ToString(lCount+1) );
 					}
 
 
 					/*
-					// ·ÀÖ¹Ò»Ìõ¼ÇÂ¼Ò²Ã»ÓĞµÄÇé¿ö,ËùÒÔ°ÑÕâ¸ö¾äĞ´µ½Ç°Ãæ
+					// é˜²æ­¢ä¸€æ¡è®°å½•ä¹Ÿæ²¡æœ‰çš„æƒ…å†µ,æ‰€ä»¥æŠŠè¿™ä¸ªå¥å†™åˆ°å‰é¢
 					if (file.Position >= file.Length)
 						break;
 					*/
 
 					string strMARC = "";
 
-					// ´ÓISO2709ÎÄ¼şÖĞ¶ÁÈëÒ»ÌõMARC¼ÇÂ¼
+					// ä»ISO2709æ–‡ä»¶ä¸­è¯»å…¥ä¸€æ¡MARCè®°å½•
 					// return:
-					//	-2	MARC¸ñÊ½´í
-					//	-1	³ö´í
-					//	0	ÕıÈ·
-					//	1	½áÊø(µ±Ç°·µ»ØµÄ¼ÇÂ¼ÓĞĞ§)
-					//	2	½áÊø(µ±Ç°·µ»ØµÄ¼ÇÂ¼ÎŞĞ§)
+					//	-2	MARCæ ¼å¼é”™
+					//	-1	å‡ºé”™
+					//	0	æ­£ç¡®
+					//	1	ç»“æŸ(å½“å‰è¿”å›çš„è®°å½•æœ‰æ•ˆ)
+					//	2	ç»“æŸ(å½“å‰è¿”å›çš„è®°å½•æ— æ•ˆ)
 					nRet = MarcUtil.ReadMarcRecord(file, 
 						encoding,
 						true,	// bRemoveEndCrLf,
@@ -1766,7 +1766,7 @@ this.checkBox_import_fastMode.Checked);
                     if (nRet == -2 || nRet == -1)
                     {
                         DialogResult result = MessageBox.Show(this,
-                            "¶ÁÈëMARC¼ÇÂ¼(" + lCount .ToString()+ ")³ö´í: " + strError + "\r\n\r\nÈ·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+                            "è¯»å…¥MARCè®°å½•(" + lCount .ToString()+ ")å‡ºé”™: " + strError + "\r\n\r\nç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
@@ -1791,7 +1791,7 @@ this.checkBox_import_fastMode.Checked);
 
 					string strXml = "";
 
-					// ½«MARC¼ÇÂ¼×ª»»Îªxml¸ñÊ½
+					// å°†MARCè®°å½•è½¬æ¢ä¸ºxmlæ ¼å¼
 					nRet = MarcUtil.Marc2Xml(strMARC,
 						strMarcSyntax,
 						out strXml,
@@ -1799,10 +1799,10 @@ this.checkBox_import_fastMode.Checked);
 					if (nRet == -1)
 						goto ERROR1;
 
-                    // TODO: ÄÜÀûÓÃMARC¼ÇÂ¼ÖĞµÄ-01×Ö¶Î£¬½øĞĞ¸²¸Ç²Ù×÷
-                    // ÄÑµãÓĞÁ½¸ö£º1)Ô­À´ÓĞÈô¸É¸ö-01£¬Òª¸ù¾İÌõ¼ş(Ö¸¶¨µÄÄ¿±ê¿â)É¸Ñ¡³öÒ»¸ö 2) dt1000µÄ-01ÖĞÖ»ÄÜ¿âÃû£¬ÎŞ·¨ÈİÄÉweb service urlÃû
+                    // TODO: èƒ½åˆ©ç”¨MARCè®°å½•ä¸­çš„-01å­—æ®µï¼Œè¿›è¡Œè¦†ç›–æ“ä½œ
+                    // éš¾ç‚¹æœ‰ä¸¤ä¸ªï¼š1)åŸæ¥æœ‰è‹¥å¹²ä¸ª-01ï¼Œè¦æ ¹æ®æ¡ä»¶(æŒ‡å®šçš„ç›®æ ‡åº“)ç­›é€‰å‡ºä¸€ä¸ª 2) dt1000çš„-01ä¸­åªèƒ½åº“åï¼Œæ— æ³•å®¹çº³web service urlå
 
-					// ÉÏÔØÒ»¸öItem
+					// ä¸Šè½½ä¸€ä¸ªItem
 					nRet = DoXmlItemUpload(
                         bFastMode,
                         strXml,
@@ -1815,16 +1815,16 @@ this.checkBox_import_fastMode.Checked);
 					if (nRet == 1)
 						break;
 
-					strCount = "´¦ÀíÊı "
+					strCount = "å¤„ç†æ•° "
 						+ Convert.ToString(lCount - lSkipCount)
-						+ "¡¡/ Ìø¹ıÊı " 
+						+ "ã€€/ è·³è¿‡æ•° " 
 						+ Convert.ToString(lSkipCount);
 
 
 					if (bSkip)
 						lSkipCount ++;
 
-					if (nReadRet == 1 || nReadRet == 2)  //ÅĞ¶Ï´óÎÄ¼ş½áÊø
+					if (nReadRet == 1 || nReadRet == 2)  //åˆ¤æ–­å¤§æ–‡ä»¶ç»“æŸ
 						break;
 
 				}
@@ -1833,7 +1833,7 @@ this.checkBox_import_fastMode.Checked);
 			{
 				file.Close();
 
-                WriteLog("½áÊøµ¼ÈëISO2709¸ñÊ½Êı¾İ");
+                WriteLog("ç»“æŸå¯¼å…¥ISO2709æ ¼å¼æ•°æ®");
 			}
 
             stop.EndLoop();
@@ -1842,7 +1842,7 @@ this.checkBox_import_fastMode.Checked);
 
             EnableControls(true);
 
-            strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' Íê³É¡£";
+            strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' å®Œæˆã€‚";
             return 0;
         ERROR1:
             stop.EndLoop();
@@ -1851,19 +1851,19 @@ this.checkBox_import_fastMode.Checked);
             EnableControls(true);
 
             if (nReadRet == 100)
-                strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' ±»ÖĞ¶Ï: " + strError;
+                strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' è¢«ä¸­æ–­: " + strError;
             else
-                strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' ³ö´í: " + strError;
+                strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' å‡ºé”™: " + strError;
             return -1;
 		}
 
-		// ÉÏÔØÒ»¸öitem
+		// ä¸Šè½½ä¸€ä¸ªitem
 		// parameter:
 		//		strError: error info
 		// return:
-		//		-1	³ö´í
-		//		0	Õı³£
-		//		1	½áÊø
+		//		-1	å‡ºé”™
+		//		0	æ­£å¸¸
+		//		1	ç»“æŸ
 		public int DoXmlItemUpload(
             bool bFastMode,
             XmlTextReader reader,
@@ -1886,7 +1886,7 @@ this.checkBox_import_fastMode.Checked);
 
             /*
 			if (bRet == false)
-				return 1;	// ½áÊø
+				return 1;	// ç»“æŸ
              * */
 
 
@@ -1909,13 +1909,13 @@ this.checkBox_import_fastMode.Checked);
 				searchpanel.Initial(this.Servers,
 					this.cfgCache);
 
-                // ´ËÊ±searchpanel.ServerUrlÎ´¶¨
+                // æ­¤æ—¶searchpanel.ServerUrlæœªå®š
 
 				return searchpanel;
 			}
 		}
 
-		// ¼ì²éÄ¿±ê¿âÊÂ¼ş
+		// æ£€æŸ¥ç›®æ ‡åº“äº‹ä»¶
 		void CheckTargetDbCallBack(object sender,
 			CheckTargetDbEventArgs e)
 		{
@@ -1925,11 +1925,11 @@ this.checkBox_import_fastMode.Checked);
 			{
 				string strError = "";
 
-				// ´ÓmarcdefÅäÖÃÎÄ¼şÖĞ»ñµÃmarc¸ñÊ½¶¨Òå
+				// ä»marcdefé…ç½®æ–‡ä»¶ä¸­è·å¾—marcæ ¼å¼å®šä¹‰
 				// return:
-				//		-1	³ö´í
-				//		0	Ã»ÓĞÕÒµ½
-				//		1	ÕÒµ½
+				//		-1	å‡ºé”™
+				//		0	æ²¡æœ‰æ‰¾åˆ°
+				//		1	æ‰¾åˆ°
 				int nRet = this.SearchPanel.GetMarcSyntax(e.DbFullPath,
 					out strMarcSyntax,
 					out strError);
@@ -1947,13 +1947,13 @@ this.checkBox_import_fastMode.Checked);
             if (String.Compare(e.CurrentMarcSyntax, strMarcSyntax, true) != 0)
             {
                 e.Cancel = true;
-                // e.ErrorInfo = "ÄúÑ¡ÔñµÄ MARC ¸ñÊ½ '" + this.CurMarcSyntax + "' ºÍÄ¿±ê¿â '" + e.DbFullPath + "' ÖĞµÄ cfgs/marcdef ÅäÖÃÎÄ¼şÖĞ¶¨ÒåµÄ MARC ¸ñÊ½ '" + strMarcSyntax + "' ²»ÎÇºÏ, ²Ù×÷±»ÆÈÖĞ¶Ï";
-                e.ErrorInfo = "ÄúÑ¡ÔñµÄ MARC ¸ñÊ½ '" + e.CurrentMarcSyntax + "' ºÍÄ¿±ê¿â '" + e.DbFullPath + "' ÖĞµÄ cfgs/marcdef ÅäÖÃÎÄ¼şÖĞ¶¨ÒåµÄ MARC ¸ñÊ½ '" + strMarcSyntax + "' ²»ÎÇºÏ, ²Ù×÷±»ÆÈÖĞ¶Ï";
+                // e.ErrorInfo = "æ‚¨é€‰æ‹©çš„ MARC æ ¼å¼ '" + this.CurMarcSyntax + "' å’Œç›®æ ‡åº“ '" + e.DbFullPath + "' ä¸­çš„ cfgs/marcdef é…ç½®æ–‡ä»¶ä¸­å®šä¹‰çš„ MARC æ ¼å¼ '" + strMarcSyntax + "' ä¸å»åˆ, æ“ä½œè¢«è¿«ä¸­æ–­";
+                e.ErrorInfo = "æ‚¨é€‰æ‹©çš„ MARC æ ¼å¼ '" + e.CurrentMarcSyntax + "' å’Œç›®æ ‡åº“ '" + e.DbFullPath + "' ä¸­çš„ cfgs/marcdef é…ç½®æ–‡ä»¶ä¸­å®šä¹‰çš„ MARC æ ¼å¼ '" + strMarcSyntax + "' ä¸å»åˆ, æ“ä½œè¢«è¿«ä¸­æ–­";
                 return;
             }
 		}
 
-		// ¸²¸ÇÒ»ÌõXML¼ÇÂ¼
+		// è¦†ç›–ä¸€æ¡XMLè®°å½•
 		int DoOverwriteXmlRecord(
             bool bFastMode,
             string strRecFullPath,
@@ -1978,7 +1978,7 @@ this.checkBox_import_fastMode.Checked);
 
 			REDOSAVE:
 
-				// ±£´æXml¼ÇÂ¼
+				// ä¿å­˜Xmlè®°å½•
 				long lRet = channel.DoSaveTextRes(respath.Path,
 					strXmlBody,
 					false,	// bIncludePreamble
@@ -2003,15 +2003,15 @@ this.checkBox_import_fastMode.Checked);
 						{
 							timestamp = new byte[output_timestamp.Length];
 							Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-							strWarning = " (Ê±¼ä´Á²»Æ¥Åä, ×Ô¶¯ÖØÊÔ)";
+							strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, è‡ªåŠ¨é‡è¯•)";
 							goto REDOSAVE;
 						}
 
 
 						DialogResult result = MessageDlg.Show(this,
-                            "ÉÏÔØ '" + strDisplayRecPath  
-							+" Ê±·¢ÏÖÊ±¼ä´Á²»Æ¥Åä¡£ÏêÏ¸Çé¿öÈçÏÂ£º\r\n---\r\n"
-							+ strError + "\r\n---\r\n\r\nÊÇ·ñÒÔĞÂÊ±¼ä´ÁÇ¿ĞĞÉÏÔØ?\r\n×¢£º(ÊÇ)Ç¿ĞĞÉÏÔØ (·ñ)ºöÂÔµ±Ç°¼ÇÂ¼»ò×ÊÔ´ÉÏÔØ£¬µ«¼ÌĞøºóÃæµÄ´¦Àí (È¡Ïû)ÖĞ¶ÏÕû¸öÅú´¦Àí",
+                            "ä¸Šè½½ '" + strDisplayRecPath  
+							+" æ—¶å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚è¯¦ç»†æƒ…å†µå¦‚ä¸‹ï¼š\r\n---\r\n"
+							+ strError + "\r\n---\r\n\r\næ˜¯å¦ä»¥æ–°æ—¶é—´æˆ³å¼ºè¡Œä¸Šè½½?\r\næ³¨ï¼š(æ˜¯)å¼ºè¡Œä¸Šè½½ (å¦)å¿½ç•¥å½“å‰è®°å½•æˆ–èµ„æºä¸Šè½½ï¼Œä½†ç»§ç»­åé¢çš„å¤„ç† (å–æ¶ˆ)ä¸­æ–­æ•´ä¸ªæ‰¹å¤„ç†",
 							"dp2batch",
 							MessageBoxButtons.YesNoCancel,
 							MessageBoxDefaultButton.Button1,
@@ -2020,27 +2020,27 @@ this.checkBox_import_fastMode.Checked);
 						{
 							timestamp = new byte[output_timestamp.Length];
 							Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-							strWarning = " (Ê±¼ä´Á²»Æ¥Åä, Ó¦ÓÃ»§ÒªÇóÖØÊÔ)";
+							strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, åº”ç”¨æˆ·è¦æ±‚é‡è¯•)";
 							goto REDOSAVE;
 						}
 
 						if (result == DialogResult.No) 
 						{
-							return 0;	// ¼ÌĞø×÷ºóÃæµÄ×ÊÔ´
+							return 0;	// ç»§ç»­ä½œåé¢çš„èµ„æº
 						}
 
 						if (result == DialogResult.Cancel) 
 						{
-							strError = "ÓÃ»§ÖĞ¶Ï";
-							goto ERROR1;	// ÖĞ¶ÏÕû¸ö´¦Àí
+							strError = "ç”¨æˆ·ä¸­æ–­";
+							goto ERROR1;	// ä¸­æ–­æ•´ä¸ªå¤„ç†
 						}
 					}
 
-					// Ñ¯ÎÊÊÇ·ñÖØÊÔ
+					// è¯¢é—®æ˜¯å¦é‡è¯•
 					DialogResult result1 = MessageBox.Show(this, 
-						"ÉÏÔØ '" + respath.Path  
-						+" Ê±·¢Éú´íÎó¡£ÏêÏ¸Çé¿öÈçÏÂ£º\r\n---\r\n"
-						+ strError + "\r\n---\r\n\r\nÊÇ·ñÖØÊÔ?\r\n×¢£º(ÊÇ)ÖØÊÔ (·ñ)²»ÖØÊÔ£¬µ«¼ÌĞøºóÃæµÄ´¦Àí (È¡Ïû)ÖĞ¶ÏÕû¸öÅú´¦Àí",
+						"ä¸Šè½½ '" + respath.Path  
+						+" æ—¶å‘ç”Ÿé”™è¯¯ã€‚è¯¦ç»†æƒ…å†µå¦‚ä¸‹ï¼š\r\n---\r\n"
+						+ strError + "\r\n---\r\n\r\næ˜¯å¦é‡è¯•?\r\næ³¨ï¼š(æ˜¯)é‡è¯• (å¦)ä¸é‡è¯•ï¼Œä½†ç»§ç»­åé¢çš„å¤„ç† (å–æ¶ˆ)ä¸­æ–­æ•´ä¸ªæ‰¹å¤„ç†",
 						"dp2batch",
 						MessageBoxButtons.YesNoCancel,
 						MessageBoxIcon.Question,
@@ -2048,7 +2048,7 @@ this.checkBox_import_fastMode.Checked);
 					if (result1 == DialogResult.Yes) 
 						goto REDOSAVE;
 					if (result1 == DialogResult.No) 
-						return 0;	// ¼ÌĞø×÷ºóÃæµÄ×ÊÔ´
+						return 0;	// ç»§ç»­ä½œåé¢çš„èµ„æº
 
 
 					goto ERROR1;
@@ -2064,13 +2064,13 @@ this.checkBox_import_fastMode.Checked);
 			}
 		}
 
-		// ÉÏÔØÒ»¸öitem
+		// ä¸Šè½½ä¸€ä¸ªitem
 		// parameter:
 		//		strError: error info
 		// return:
-		//		-1	³ö´í
-		//		0	Õı³£
-		//		1	½áÊø
+		//		-1	å‡ºé”™
+		//		0	æ­£å¸¸
+		//		1	ç»“æŸ
 		public int DoXmlItemUpload(
             bool bFastMode,
             string strXml,
@@ -2095,7 +2095,7 @@ this.checkBox_import_fastMode.Checked);
 			}
 			catch(Exception ex)
 			{
-				strError = "¼ÓÔØÊı¾İµ½dom³ö´í!\r\n" + ex.Message;
+				strError = "åŠ è½½æ•°æ®åˆ°domå‡ºé”™!\r\n" + ex.Message;
 				goto ERROR1;
 			}
 
@@ -2109,7 +2109,7 @@ this.checkBox_import_fastMode.Checked);
 
             if (strResPath != "")
             {
-                // ´ÓmapÖĞ²éÑ¯¸²¸Ç»¹ÊÇ×·¼Ó£¿
+                // ä»mapä¸­æŸ¥è¯¢è¦†ç›–è¿˜æ˜¯è¿½åŠ ï¼Ÿ
                 ResPath respath0 = new ResPath(strResPath);
                 respath0.MakeDbName();
                 strSourceDbPath = respath0.FullPath;
@@ -2129,20 +2129,20 @@ this.checkBox_import_fastMode.Checked);
 
                 if (strSourceDbPath/*strResPath*/ == "")
                 {
-                    string strText = "Ô´Êı¾İÎÄ¼şÖĞ¼ÇÂ¼ " + Convert.ToString(this.m_nRecordCount) + " Ã»ÓĞÀ´Ô´Êı¾İ¿â,¶ÔËùÓĞÕâÑùµÄÊı¾İ,½«×÷ÈçºÎ´¦Àí?";
-                    WriteLog("´ò¿ª¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    string strText = "æºæ•°æ®æ–‡ä»¶ä¸­è®°å½• " + Convert.ToString(this.m_nRecordCount) + " æ²¡æœ‰æ¥æºæ•°æ®åº“,å¯¹æ‰€æœ‰è¿™æ ·çš„æ•°æ®,å°†ä½œå¦‚ä½•å¤„ç†?";
+                    WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                     nRet = DbNameMapItemDlg.AskNullOriginBox(
                         this,
                         this.AppInfo,
                         strText,
                         this.SearchPanel,
                         map);
-                    WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'"); 
+                    WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'"); 
 
                     if (nRet == 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
-                        goto ERROR1;	// ÖĞ¶ÏÕû¸ö´¦Àí
+                        strError = "ç”¨æˆ·ä¸­æ–­";
+                        goto ERROR1;	// ä¸­æ–­æ•´ä¸ªå¤„ç†
                     }
 
                     goto REDO;
@@ -2150,8 +2150,8 @@ this.checkBox_import_fastMode.Checked);
                 }
                 else
                 {
-                    string strText = "Ô´Êı¾İÎÄ¼şÖĞ¼ÇÂ¼ " + Convert.ToString(this.m_nRecordCount) + " µÄÀ´Ô´Êı¾İ¿â '" + strSourceDbPath/*strResPath*/ + "' Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÄ¿±ê¿â, ¶ÔËùÓĞÕâÑùµÄÊı¾İ,½«×÷ÈçºÎ´¦Àí?";
-                    WriteLog("´ò¿ª¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    string strText = "æºæ•°æ®æ–‡ä»¶ä¸­è®°å½• " + Convert.ToString(this.m_nRecordCount) + " çš„æ¥æºæ•°æ®åº“ '" + strSourceDbPath/*strResPath*/ + "' æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç›®æ ‡åº“, å¯¹æ‰€æœ‰è¿™æ ·çš„æ•°æ®,å°†ä½œå¦‚ä½•å¤„ç†?";
+                    WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                     nRet = DbNameMapItemDlg.AskNotMatchOriginBox(
                         this,
                         this.AppInfo,
@@ -2159,11 +2159,11 @@ this.checkBox_import_fastMode.Checked);
                         this.SearchPanel,
                         strSourceDbPath/*strResPath*/,
                         map);
-                    WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                     if (nRet == 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
-                        goto ERROR1;	// ÖĞ¶ÏÕû¸ö´¦Àí
+                        strError = "ç”¨æˆ·ä¸­æ–­";
+                        goto ERROR1;	// ä¸­æ–­æ•´ä¸ªå¤„ç†
                     }
 
                     goto REDO;
@@ -2175,9 +2175,9 @@ this.checkBox_import_fastMode.Checked);
             if (mapItem.Style == "skip")
                 return 0;
 
-            // ¹¹ÔìÄ¿±êÂ·¾¶
+            // æ„é€ ç›®æ ‡è·¯å¾„
 
-            // 1)´ÓÔ´Â·¾¶ÖĞÌáÈ¡id¡£Ô´Â·¾¶À´×Ô±¸·İÎÄ¼şÊı¾İ
+            // 1)ä»æºè·¯å¾„ä¸­æå–idã€‚æºè·¯å¾„æ¥è‡ªå¤‡ä»½æ–‡ä»¶æ•°æ®
             ResPath respath = new ResPath(strResPath);
             string strID = respath.GetRecordId();
 
@@ -2185,18 +2185,18 @@ this.checkBox_import_fastMode.Checked);
                 || (mapItem.Style == "append")
                 )
             {
-                strID = "?";	// ½«À´¼ÓÒ»¸ö¶Ô»°¿ò
+                strID = "?";	// å°†æ¥åŠ ä¸€ä¸ªå¯¹è¯æ¡†
             }
 
-			// 2)ÓÃÄ¿±ê¿âÂ·¾¶¹¹ÔìÍêÕûµÄ¼ÇÂ¼Â·¾¶
+			// 2)ç”¨ç›®æ ‡åº“è·¯å¾„æ„é€ å®Œæ•´çš„è®°å½•è·¯å¾„
 			string strTargetFullPath = "";
 			if (mapItem.Target == "*") 
 			{
-				// ´ËÊ±targetÎª*, ĞèÒª´ÓstrResPathÖĞ»ñµÃ¿âÃû
+				// æ­¤æ—¶targetä¸º*, éœ€è¦ä»strResPathä¸­è·å¾—åº“å
 
 				if (strResPath == "")
 				{
-					Debug.Assert(false, "²»¿ÉÄÜ³öÏÖµÄÇé¿ö");
+					Debug.Assert(false, "ä¸å¯èƒ½å‡ºç°çš„æƒ…å†µ");
 				}
 
 				respath = new ResPath(strResPath);
@@ -2211,7 +2211,7 @@ this.checkBox_import_fastMode.Checked);
 			respath = new ResPath(strTargetFullPath);
 
 
-			// ĞèÒª¼ì²éÄ¿±ê¿âËùÔÊĞíµÄMARC¸ñÊ½
+			// éœ€è¦æ£€æŸ¥ç›®æ ‡åº“æ‰€å…è®¸çš„MARCæ ¼å¼
 			if (CheckTargetDb != null)
 			{
 				CheckTargetDbEventArgs e = new CheckTargetDbEventArgs();
@@ -2221,7 +2221,7 @@ this.checkBox_import_fastMode.Checked);
 				if (e.Cancel == true)
 				{
 					if (e.ErrorInfo == "")
-						strError = "CheckTargetDb ÊÂ¼şµ¼ÖÂÖĞ¶Ï";
+						strError = "CheckTargetDb äº‹ä»¶å¯¼è‡´ä¸­æ–­";
 					else
 						strError = e.ErrorInfo;
 					return -1;
@@ -2242,11 +2242,11 @@ this.checkBox_import_fastMode.Checked);
             // 2012/5/29
             string strOutMarcSyntax = "";
             string strMARC = "";
-            // ½«MARCXML¸ñÊ½µÄxml¼ÇÂ¼×ª»»Îªmarc»úÄÚ¸ñÊ½×Ö·û´®
+            // å°†MARCXMLæ ¼å¼çš„xmlè®°å½•è½¬æ¢ä¸ºmarcæœºå†…æ ¼å¼å­—ç¬¦ä¸²
             // parameters:
-            //		bWarning	==true, ¾¯¸æºó¼ÌĞø×ª»»,²»ÑÏ¸ñ¶Ô´ı´íÎó; = false, ·Ç³£ÑÏ¸ñ¶Ô´ı´íÎó,Óöµ½´íÎóºó²»¼ÌĞø×ª»»
-            //		strMarcSyntax	Ö¸Ê¾marcÓï·¨,Èç¹û==""£¬Ôò×Ô¶¯Ê¶±ğ
-            //		strOutMarcSyntax	out²ÎÊı£¬·µ»Ømarc£¬Èç¹ûstrMarcSyntax == ""£¬·µ»ØÕÒµ½marcÓï·¨£¬·ñÔò·µ»ØÓëÊäÈë²ÎÊıstrMarcSyntaxÏàÍ¬µÄÖµ
+            //		bWarning	==true, è­¦å‘Šåç»§ç»­è½¬æ¢,ä¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯; = false, éå¸¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯,é‡åˆ°é”™è¯¯åä¸ç»§ç»­è½¬æ¢
+            //		strMarcSyntax	æŒ‡ç¤ºmarcè¯­æ³•,å¦‚æœ==""ï¼Œåˆ™è‡ªåŠ¨è¯†åˆ«
+            //		strOutMarcSyntax	outå‚æ•°ï¼Œè¿”å›marcï¼Œå¦‚æœstrMarcSyntax == ""ï¼Œè¿”å›æ‰¾åˆ°marcè¯­æ³•ï¼Œå¦åˆ™è¿”å›ä¸è¾“å…¥å‚æ•°strMarcSyntaxç›¸åŒçš„å€¼
             nRet = MarcUtil.Xml2Marc(strXml,
                 false,
                 "",
@@ -2263,13 +2263,13 @@ this.checkBox_import_fastMode.Checked);
             {
                 batchObj.MarcSyntax = strOutMarcSyntax;
                 batchObj.MarcRecord = strMARC;
-                batchObj.MarcRecordChanged = false;	// Îª±¾ÂÖScriptÔËĞĞ×¼±¸³õÊ¼×´Ì¬
+                batchObj.MarcRecordChanged = false;	// ä¸ºæœ¬è½®Scriptè¿è¡Œå‡†å¤‡åˆå§‹çŠ¶æ€
             }
 
 
 			if (this.MarcFilter != null)
 			{
-				// ´¥·¢filterÖĞµÄRecordÏà¹Ø¶¯×÷
+				// è§¦å‘filterä¸­çš„Recordç›¸å…³åŠ¨ä½œ
 				nRet = MarcFilter.DoRecord(
 					null,
 					batchObj.MarcRecord,
@@ -2279,22 +2279,22 @@ this.checkBox_import_fastMode.Checked);
 					goto ERROR1;
 			}
 
-			// C#½Å±¾ -- Inputing
+			// C#è„šæœ¬ -- Inputing
 			if (this.AssemblyMain != null) 
 			{
-				// ÕâĞ©±äÁ¿ÒªÏÈ³õÊ¼»¯,ÒòÎªfilter´úÂë¿ÉÄÜÓÃµ½ÕâĞ©Batch³ÉÔ±.
+				// è¿™äº›å˜é‡è¦å…ˆåˆå§‹åŒ–,å› ä¸ºfilterä»£ç å¯èƒ½ç”¨åˆ°è¿™äº›Batchæˆå‘˜.
 				batchObj.SkipInput = false;
 				batchObj.XmlRecord = strXml;
 
 				//batchObj.MarcSyntax = this.CurMarcSyntax;
-				//batchObj.MarcRecord = strMarc;	// MARC¼ÇÂ¼Ìå
-				//batchObj.MarcRecordChanged = false;	// Îª±¾ÂÖScriptÔËĞĞ×¼±¸³õÊ¼×´Ì¬
+				//batchObj.MarcRecord = strMarc;	// MARCè®°å½•ä½“
+				//batchObj.MarcRecordChanged = false;	// ä¸ºæœ¬è½®Scriptè¿è¡Œå‡†å¤‡åˆå§‹çŠ¶æ€
 
 
 				batchObj.SearchPanel.ServerUrl = channel.Url;
 				batchObj.ServerUrl = channel.Url;
-				batchObj.RecPath = strTargetPath;	// ¼ÇÂ¼Â·¾¶
-				batchObj.RecIndex = m_nRecordCount;	// µ±Ç°¼ÇÂ¼ÔÚÒ»ÅúÖĞµÄĞòºÅ
+				batchObj.RecPath = strTargetPath;	// è®°å½•è·¯å¾„
+				batchObj.RecIndex = m_nRecordCount;	// å½“å‰è®°å½•åœ¨ä¸€æ‰¹ä¸­çš„åºå·
 				batchObj.TimeStamp = timestamp;
 
 
@@ -2303,12 +2303,12 @@ this.checkBox_import_fastMode.Checked);
 				batchObj.Inputing(this, args);
 				if (args.Continue == ContinueType.SkipAll)
 				{
-					strError = "½Å±¾ÖĞ¶ÏSkipAll";
+					strError = "è„šæœ¬ä¸­æ–­SkipAll";
 					goto END2;
 				}
 
 				if (batchObj.SkipInput == true)
-					return 0;	// ¼ÌĞø´¦ÀíºóÃæµÄ
+					return 0;	// ç»§ç»­å¤„ç†åé¢çš„
 			}
 
 
@@ -2321,13 +2321,13 @@ this.checkBox_import_fastMode.Checked);
 				{
 					if (strTargetPath.IndexOf("?") == -1)
 					{
-						stop.SetMessage("ÕıÔÚÉÏÔØ " 
+						stop.SetMessage("æ­£åœ¨ä¸Šè½½ " 
 							+ strTargetPath + strWarning + " " + strCount);
 					}
 				}
 
 
-			// ±£´æXml¼ÇÂ¼
+			// ä¿å­˜Xmlè®°å½•
 			long lRet = channel.DoSaveTextRes(strTargetPath,
 				strXml,
 				false,	// bIncludePreamble
@@ -2352,47 +2352,47 @@ this.checkBox_import_fastMode.Checked);
                     {
                         timestamp = new byte[output_timestamp.Length];
                         Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                        strWarning = " (Ê±¼ä´Á²»Æ¥Åä, ×Ô¶¯ÖØÊÔ)";
+                        strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, è‡ªåŠ¨é‡è¯•)";
                         goto REDOSAVE;
                     }
 
-                    string strText = "ÉÏÔØ '" + strDisplayRecPath
-                        + " Ê±·¢ÏÖÊ±¼ä´Á²»Æ¥Åä¡£ÏêÏ¸Çé¿öÈçÏÂ£º\r\n---\r\n"
-                        + strError + "\r\n---\r\n\r\nÊÇ·ñÒÔĞÂÊ±¼ä´ÁÇ¿ĞĞÉÏÔØ?\r\n×¢£º(ÊÇ)Ç¿ĞĞÉÏÔØ (·ñ)ºöÂÔµ±Ç°¼ÇÂ¼»ò×ÊÔ´ÉÏÔØ£¬µ«¼ÌĞøºóÃæµÄ´¦Àí (È¡Ïû)ÖĞ¶ÏÕû¸öÅú´¦Àí";
-                    WriteLog("´ò¿ª¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    string strText = "ä¸Šè½½ '" + strDisplayRecPath
+                        + " æ—¶å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚è¯¦ç»†æƒ…å†µå¦‚ä¸‹ï¼š\r\n---\r\n"
+                        + strError + "\r\n---\r\n\r\næ˜¯å¦ä»¥æ–°æ—¶é—´æˆ³å¼ºè¡Œä¸Šè½½?\r\næ³¨ï¼š(æ˜¯)å¼ºè¡Œä¸Šè½½ (å¦)å¿½ç•¥å½“å‰è®°å½•æˆ–èµ„æºä¸Šè½½ï¼Œä½†ç»§ç»­åé¢çš„å¤„ç† (å–æ¶ˆ)ä¸­æ–­æ•´ä¸ªæ‰¹å¤„ç†";
+                    WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                     DialogResult result = MessageDlg.Show(this,
                         strText,
                         "dp2batch",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxDefaultButton.Button1,
                         ref this.bNotAskTimestampMismatchWhenOverwrite);
-                    WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                     if (result == DialogResult.Yes)
                     {
                         timestamp = new byte[output_timestamp.Length];
                         Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                        strWarning = " (Ê±¼ä´Á²»Æ¥Åä, Ó¦ÓÃ»§ÒªÇóÖØÊÔ)";
+                        strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, åº”ç”¨æˆ·è¦æ±‚é‡è¯•)";
                         goto REDOSAVE;
                     }
 
                     if (result == DialogResult.No)
                     {
-                        return 0;	// ¼ÌĞø×÷ºóÃæµÄ×ÊÔ´
+                        return 0;	// ç»§ç»­ä½œåé¢çš„èµ„æº
                     }
 
                     if (result == DialogResult.Cancel)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
-                        goto ERROR1;	// ÖĞ¶ÏÕû¸ö´¦Àí
+                        strError = "ç”¨æˆ·ä¸­æ–­";
+                        goto ERROR1;	// ä¸­æ–­æ•´ä¸ªå¤„ç†
                     }
                 }
 
-                // Ñ¯ÎÊÊÇ·ñÖØÊÔ
+                // è¯¢é—®æ˜¯å¦é‡è¯•
                 {
-                    string strText = "ÉÏÔØ '" + strTargetPath
-                        + " Ê±·¢Éú´íÎó¡£ÏêÏ¸Çé¿öÈçÏÂ£º\r\n---\r\n"
-                        + strError + "\r\n---\r\n\r\nÊÇ·ñÖØÊÔ?\r\n×¢£º(ÊÇ)ÖØÊÔ (·ñ)²»ÖØÊÔ£¬µ«¼ÌĞøºóÃæµÄ´¦Àí (È¡Ïû)ÖĞ¶ÏÕû¸öÅú´¦Àí";
-                    WriteLog("´ò¿ª¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    string strText = "ä¸Šè½½ '" + strTargetPath
+                        + " æ—¶å‘ç”Ÿé”™è¯¯ã€‚è¯¦ç»†æƒ…å†µå¦‚ä¸‹ï¼š\r\n---\r\n"
+                        + strError + "\r\n---\r\n\r\næ˜¯å¦é‡è¯•?\r\næ³¨ï¼š(æ˜¯)é‡è¯• (å¦)ä¸é‡è¯•ï¼Œä½†ç»§ç»­åé¢çš„å¤„ç† (å–æ¶ˆ)ä¸­æ–­æ•´ä¸ªæ‰¹å¤„ç†";
+                    WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
 
                     DialogResult result1 = MessageBox.Show(this,
                         strText,
@@ -2400,22 +2400,22 @@ this.checkBox_import_fastMode.Checked);
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
-                    WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                    WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                     if (result1 == DialogResult.Yes)
                         goto REDOSAVE;
                     if (result1 == DialogResult.No)
-                        return 0;	// ¼ÌĞø×÷ºóÃæµÄ×ÊÔ´
+                        return 0;	// ç»§ç»­ä½œåé¢çš„èµ„æº
                 }
 
                 goto ERROR1;
             }
 
-			// C#½Å±¾ -- Inputed()
+			// C#è„šæœ¬ -- Inputed()
 			if (this.AssemblyMain != null) 
 			{
-				// ´ó²¿·Ö±äÁ¿±£Áô¸Õ²ÅInputing()Ê±µÄÔ­Ñù£¬Ö»ĞŞ¸Ä²¿·Ö
+				// å¤§éƒ¨åˆ†å˜é‡ä¿ç•™åˆšæ‰Inputing()æ—¶çš„åŸæ ·ï¼Œåªä¿®æ”¹éƒ¨åˆ†
 
-				batchObj.RecPath = strOutputPath;	// ¼ÇÂ¼Â·¾¶
+				batchObj.RecPath = strOutputPath;	// è®°å½•è·¯å¾„
 				batchObj.TimeStamp = output_timestamp;
 
 				BatchEventArgs args = new BatchEventArgs();
@@ -2424,18 +2424,18 @@ this.checkBox_import_fastMode.Checked);
                 /*
                 if (args.Continue == ContinueType.SkipMiddle)
                 {
-                    strError = "½Å±¾ÖĞ¶ÏSkipMiddle";
+                    strError = "è„šæœ¬ä¸­æ–­SkipMiddle";
                     goto END1;
                 }
                 if (args.Continue == ContinueType.SkipBeginMiddle)
                 {
-                    strError = "½Å±¾ÖĞ¶ÏSkipBeginMiddle";
+                    strError = "è„šæœ¬ä¸­æ–­SkipBeginMiddle";
                     goto END1;
                 }
                 */
                 if (args.Continue == ContinueType.SkipAll)
                 {
-                    strError = "½Å±¾ÖĞ¶ÏSkipAll";
+                    strError = "è„šæœ¬ä¸­æ–­SkipAll";
                     goto END1;
                 }
             }
@@ -2444,7 +2444,7 @@ this.checkBox_import_fastMode.Checked);
 
             if (stop != null)
             {
-                stop.SetMessage("ÒÑÉÏÔØ³É¹¦ '"
+                stop.SetMessage("å·²ä¸Šè½½æˆåŠŸ '"
                     + strOutputPath + "' " + strCount);
             }
 
@@ -2459,20 +2459,20 @@ this.checkBox_import_fastMode.Checked);
             return -1;
         }
 
-		// µ¼ÈëÊı¾İ
+		// å¯¼å…¥æ•°æ®
 		// parameter: 
-		//		strFileName: Òª»Ö¸´µÄÔ´±¸·İÎÄ¼ş
-		// ËµÃ÷: µ¼ÈëÊı¾İÊÇÒ»¸öÁ¬ĞøµÄ¹ı³Ì,
-		//		Ö»ÒªÒÀ¾İÁ÷µÄ×ÔÈ»Ë³ĞòÒÀ´ÎÉÏÔØÃ¿¸ö¼ÇÂ¼¾Í¿ÉÒÔÁË¡£
+		//		strFileName: è¦æ¢å¤çš„æºå¤‡ä»½æ–‡ä»¶
+		// è¯´æ˜: å¯¼å…¥æ•°æ®æ˜¯ä¸€ä¸ªè¿ç»­çš„è¿‡ç¨‹,
+		//		åªè¦ä¾æ®æµçš„è‡ªç„¶é¡ºåºä¾æ¬¡ä¸Šè½½æ¯ä¸ªè®°å½•å°±å¯ä»¥äº†ã€‚
 		int DoImportBackup(string strFileName,
 			out string strError)
 		{
 			int nRet;
 			strError = "";
 
-			this.bNotAskTimestampMismatchWhenOverwrite = false;	// ÒªÑ¯ÎÊ
+			this.bNotAskTimestampMismatchWhenOverwrite = false;	// è¦è¯¢é—®
 
-			// ×¼±¸¿âÃû¶ÔÕÕ±í
+			// å‡†å¤‡åº“åå¯¹ç…§è¡¨
 			DbNameMap map = DbNameMap.Build(this.textBox_import_dbMap.Text.Replace("\r\n", ";"),
                 out strError);
             if (map == null)
@@ -2491,7 +2491,7 @@ this.checkBox_import_fastMode.Checked);
 			int nReadRet = 0;
 			string strCount = "";
 
-			//·¶Î§
+			//èŒƒå›´
 			if (textBox_import_range.Text != "") 
 			{
 				rl = new RangeList(textBox_import_range.Text);
@@ -2502,14 +2502,14 @@ this.checkBox_import_fastMode.Checked);
 			}
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼Èë");
+            stop.Initial("æ­£åœ¨å¯¼å…¥");
             stop.BeginLoop();
 
             stop.SetProgressRange(0, file.Length);
 
             EnableControls(false);
 
-            WriteLog("¿ªÊ¼µ¼Èë.dp2bak¸ñÊ½Êı¾İ");
+            WriteLog("å¼€å§‹å¯¼å…¥.dp2bakæ ¼å¼æ•°æ®");
 
 			try
 			{
@@ -2523,19 +2523,19 @@ this.checkBox_import_fastMode.Checked);
 					bool bSkip = false;
 					nReadRet = 0;
 
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+					Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 					if (stop.State != 0)
 					{
 						DialogResult result = MessageBox.Show(this,
-							"È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+							"ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
 							"dp2batch",
 							MessageBoxButtons.YesNo,
 							MessageBoxIcon.Question,
 							MessageBoxDefaultButton.Button2);
 						if (result == DialogResult.Yes)
 						{
-							strError = "ÓÃ»§ÖĞ¶Ï";
+							strError = "ç”¨æˆ·ä¸­æ–­";
 							nReadRet = 100;
 							goto ERROR1;
 						}
@@ -2546,13 +2546,13 @@ this.checkBox_import_fastMode.Checked);
 					}
 
 
-					//¼ìË÷µ±Ç°¼ÇÂ¼ÊÇ·ñÔÚ´¦Àí·¶Î§ÄÚ
+					//æ£€ç´¢å½“å‰è®°å½•æ˜¯å¦åœ¨å¤„ç†èŒƒå›´å†…
 					if (rl != null) 
 					{
-						if (lMax != -1) // -1:²»È·¶¨
+						if (lMax != -1) // -1:ä¸ç¡®å®š
 						{
 							if (lCount > lMax)
-								nReadRet = 2;	// ºóÃæ¿´µ½Õâ¸ö×´Ì¬½«»ábreak¡£ÎªÊ²Ã´²»ÔÚÕâÀïbreak£¬¾ÍÊÇÎªÁËºóÃæÏÔÊ¾labelĞÅÏ¢
+								nReadRet = 2;	// åé¢çœ‹åˆ°è¿™ä¸ªçŠ¶æ€å°†ä¼šbreakã€‚ä¸ºä»€ä¹ˆä¸åœ¨è¿™é‡Œbreakï¼Œå°±æ˜¯ä¸ºäº†åé¢æ˜¾ç¤ºlabelä¿¡æ¯
 						}
 						if (rl.IsInRange(lCount, true) == false) 
 						{
@@ -2563,18 +2563,18 @@ this.checkBox_import_fastMode.Checked);
 					// progressBar_main.Value = (int)((file.Position)/ProgressRatio);
                     stop.SetProgressValue(file.Position);
 
-					// ÏÔÊ¾ĞÅÏ¢
+					// æ˜¾ç¤ºä¿¡æ¯
 					if (bSkip == true) 
 					{
-						stop.SetMessage( ((bSkip == true) ? "ÕıÔÚÌø¹ı " : "ÕıÔÚ´¦Àí" )
+						stop.SetMessage( ((bSkip == true) ? "æ­£åœ¨è·³è¿‡ " : "æ­£åœ¨å¤„ç†" )
 							+ Convert.ToString(lCount+1) );
 					}
 
-					// ·ÀÖ¹Ò»Ìõ¼ÇÂ¼Ò²Ã»ÓĞµÄÇé¿ö,ËùÒÔ°ÑÕâ¸ö¾äĞ´µ½Ç°Ãæ
+					// é˜²æ­¢ä¸€æ¡è®°å½•ä¹Ÿæ²¡æœ‰çš„æƒ…å†µ,æ‰€ä»¥æŠŠè¿™ä¸ªå¥å†™åˆ°å‰é¢
 					if (file.Position >= file.Length)
 						break;
 
-					// ÉÏÔØÒ»¸öItem
+					// ä¸Šè½½ä¸€ä¸ªItem
 					nRet = DoBackupItemUpload(file,
 						ref map,
 						bSkip == true || nReadRet == 2,
@@ -2584,18 +2584,18 @@ this.checkBox_import_fastMode.Checked);
 						goto ERROR1;
 
                     Debug.Assert(file.Position <= file.Length,
-                        "¾­¹ıDoBackupItemUpload()·½·¨ºó, fileµÄµ±Ç°Î»ÖÃ´¦ÔÚ·Ç·¨Î»ÖÃ");
+                        "ç»è¿‡DoBackupItemUpload()æ–¹æ³•å, fileçš„å½“å‰ä½ç½®å¤„åœ¨éæ³•ä½ç½®");
 
 
 					if (bSkip)
 						lSkipCount ++;
 
-					strCount = "´¦ÀíÊı "
+					strCount = "å¤„ç†æ•° "
 						+ Convert.ToString(lCount - lSkipCount)
-						+ "¡¡/ Ìø¹ıÊı " 
+						+ "ã€€/ è·³è¿‡æ•° " 
 						+ Convert.ToString(lSkipCount);
 
-					if (nReadRet == 1 || nReadRet == 2)  //ÅĞ¶Ï´óÎÄ¼ş½áÊø
+					if (nReadRet == 1 || nReadRet == 2)  //åˆ¤æ–­å¤§æ–‡ä»¶ç»“æŸ
 						break;
 
 				}
@@ -2604,7 +2604,7 @@ this.checkBox_import_fastMode.Checked);
 			{
 				file.Close();
 
-                WriteLog("½áÊøµ¼Èë.dp2bak¸ñÊ½Êı¾İ");
+                WriteLog("ç»“æŸå¯¼å…¥.dp2bakæ ¼å¼æ•°æ®");
 			}
 
             stop.EndLoop();
@@ -2613,7 +2613,7 @@ this.checkBox_import_fastMode.Checked);
 
             EnableControls(true);
 
-            strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' Íê³É¡£";
+            strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' å®Œæˆã€‚";
             return 0;
         ERROR1:
             stop.EndLoop();
@@ -2622,9 +2622,9 @@ this.checkBox_import_fastMode.Checked);
             EnableControls(true);
 
             if (nReadRet == 100)
-                strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' ±»ÖĞ¶Ï: " + strError;
+                strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' è¢«ä¸­æ–­: " + strError;
             else
-                strError = "»Ö¸´Êı¾İÎÄ¼ş '" + strFileName + "' ³ö´í: " + strError;
+                strError = "æ¢å¤æ•°æ®æ–‡ä»¶ '" + strFileName + "' å‡ºé”™: " + strError;
             return -1;
 
 
@@ -2632,9 +2632,9 @@ this.checkBox_import_fastMode.Checked);
 		}
 
 
-		// ÉÏÔØÒ»¸öitem
+		// ä¸Šè½½ä¸€ä¸ªitem
 		// parameter:
-		//		file:     Ô´Êı¾İÎÄ¼şÁ÷
+		//		file:     æºæ•°æ®æ–‡ä»¶æµ
 		//		strError: error info
 		// return:
 		//		-1: error
@@ -2652,15 +2652,15 @@ this.checkBox_import_fastMode.Checked);
 			byte [] data = new byte[8];
 			int nRet = file.Read(data, 0 , 8);
 			if (nRet == 0)
-				return 1;	// ÒÑ¾­½áÊø
+				return 1;	// å·²ç»ç»“æŸ
 			if (nRet < 8) 
 			{
 				strError = "read file error...";
 				return -1;
 			}
 
-			// Ã«³¤¶È
-			long lLength = BitConverter.ToInt64(data, 0);   // +8¿ÉÄÜÊÇÒ»¸öbug!!!
+			// æ¯›é•¿åº¦
+			long lLength = BitConverter.ToInt64(data, 0);   // +8å¯èƒ½æ˜¯ä¸€ä¸ªbug!!!
 
 			if (bSkip == true)
 			{
@@ -2674,19 +2674,19 @@ this.checkBox_import_fastMode.Checked);
 
 			for(int i=0;;i++)
 			{
-				Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+				Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 				if (stop.State != 0)
 				{
 					DialogResult result = MessageBox.Show(this,
-						"È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+						"ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
 						"dp2batch",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
 						MessageBoxDefaultButton.Button2);
 					if (result == DialogResult.Yes)
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï";
+						strError = "ç”¨æˆ·ä¸­æ–­";
 						return -1;
 					}
 					else 
@@ -2703,7 +2703,7 @@ this.checkBox_import_fastMode.Checked);
 				if (file.Position - lStart >= lLength+8)    // 2006/8/29 changed
 					break;
 
-				// ÉÏÔØ¶ÔÏó×ÊÔ´
+				// ä¸Šè½½å¯¹è±¡èµ„æº
 				nRet = this.DoResUpload(
 					ref this.channel,
 					ref strRecordPath,
@@ -2720,13 +2720,13 @@ this.checkBox_import_fastMode.Checked);
 		}
 
 
-		// ÉÏÔØÒ»¸öres
+		// ä¸Šè½½ä¸€ä¸ªres
 		// parameter: 
-		//		inputfile:   Ô´Á÷
-		//		bIsFirstRes: ÊÇ·ñÊÇµÚÒ»¸ö×ÊÔ´(xml)
+		//		inputfile:   æºæµ
+		//		bIsFirstRes: æ˜¯å¦æ˜¯ç¬¬ä¸€ä¸ªèµ„æº(xml)
 		//		strError:    error info
 		// return:
-		//		-2	Æ¬¶ÏÖĞ·¢ÏÖÊ±¼ä´Á²»Æ¥Åä¡£±¾º¯Êıµ÷Ö÷¿ÉÖØÉÏÔØÕû¸ö×ÊÔ´
+		//		-2	ç‰‡æ–­ä¸­å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚æœ¬å‡½æ•°è°ƒä¸»å¯é‡ä¸Šè½½æ•´ä¸ªèµ„æº
 		//		-1	error
 		//		0	successed
 		public int DoResUpload(
@@ -2744,7 +2744,7 @@ this.checkBox_import_fastMode.Checked);
 			long lBodyStart = 0;
 			long lBodyLength = 0;
 
-			// 1. ´ÓÊäÈëÁ÷ÖĞµÃµ½strMetadata,Óëbody(body·Åµ½Ò»¸öÁÙÊ±ÎÄ¼şÀï)
+			// 1. ä»è¾“å…¥æµä¸­å¾—åˆ°strMetadata,ä¸body(bodyæ”¾åˆ°ä¸€ä¸ªä¸´æ—¶æ–‡ä»¶é‡Œ)
 			string strMetaDataXml = "";
 
 			nRet = GetResInfo(inputfile,
@@ -2757,10 +2757,10 @@ this.checkBox_import_fastMode.Checked);
 				goto ERROR1; 
 
 			if (lBodyLength == 0)
-				return 0;	// ¿Õ°ü²»ĞèÉÏÔØ
+				return 0;	// ç©ºåŒ…ä¸éœ€ä¸Šè½½
 			
 
-			// 2.ÎªÉÏÔØ×ö×¼±¸
+			// 2.ä¸ºä¸Šè½½åšå‡†å¤‡
 			XmlDocument metadataDom = new XmlDocument();
 			try
 			{
@@ -2768,7 +2768,7 @@ this.checkBox_import_fastMode.Checked);
 			}
 			catch(Exception ex)
 			{
-				strError = "¼ÓÔØÔªÊı¾İµ½dom³ö´í!\r\n" + ex.Message;
+				strError = "åŠ è½½å…ƒæ•°æ®åˆ°domå‡ºé”™!\r\n" + ex.Message;
 				goto ERROR1;
 			}
 
@@ -2778,9 +2778,9 @@ this.checkBox_import_fastMode.Checked);
 
 			string strTargetPath = "";
 
-			if (bIsFirstRes == true) // µÚÒ»¸ö×ÊÔ´
+			if (bIsFirstRes == true) // ç¬¬ä¸€ä¸ªèµ„æº
 			{
-				// ´ÓmapÖĞ²éÑ¯¸²¸Ç»¹ÊÇ×·¼Ó£¿
+				// ä»mapä¸­æŸ¥è¯¢è¦†ç›–è¿˜æ˜¯è¿½åŠ ï¼Ÿ
 				ResPath respath = new ResPath(strResPath);
 				respath.MakeDbName();
 
@@ -2799,7 +2799,7 @@ this.checkBox_import_fastMode.Checked);
 					OriginNotFoundDlg dlg = new OriginNotFoundDlg();
                     MainForm.SetControlFont(dlg, this.DefaultFont);
 
-					dlg.Message = "Êı¾İÖĞÉùÃ÷µÄÊı¾İ¿âÂ·¾¶ '" +respath.FullPath+ "' ÔÚ¸²¸Ç¹ØÏµ¶ÔÕÕ±íÖĞÃ»ÓĞÕÒµ½, ÇëÑ¡Ôñ¸²¸Ç·½Ê½: " ;
+					dlg.Message = "æ•°æ®ä¸­å£°æ˜çš„æ•°æ®åº“è·¯å¾„ '" +respath.FullPath+ "' åœ¨è¦†ç›–å…³ç³»å¯¹ç…§è¡¨ä¸­æ²¡æœ‰æ‰¾åˆ°, è¯·é€‰æ‹©è¦†ç›–æ–¹å¼: " ;
 					dlg.Origin = respath.FullPath.ToUpper();
 					dlg.Servers = this.Servers;
 					dlg.Channels = this.Channels;
@@ -2810,7 +2810,7 @@ this.checkBox_import_fastMode.Checked);
 
 					if (dlg.DialogResult != DialogResult.OK) 
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï...";
+						strError = "ç”¨æˆ·ä¸­æ–­...";
 						goto ERROR1;
 					}
 
@@ -2821,9 +2821,9 @@ this.checkBox_import_fastMode.Checked);
 				if (mapItem.Style == "skip")
 					return 0;
 
-				// ¹¹ÔìÄ¿±êÂ·¾¶
+				// æ„é€ ç›®æ ‡è·¯å¾„
 
-				// 1)´ÓÔ´Â·¾¶ÖĞÌáÈ¡id¡£Ô´Â·¾¶À´×Ô±¸·İÎÄ¼şÊı¾İ
+				// 1)ä»æºè·¯å¾„ä¸­æå–idã€‚æºè·¯å¾„æ¥è‡ªå¤‡ä»½æ–‡ä»¶æ•°æ®
 				respath = new ResPath(strResPath);
 				string strID = respath.GetRecordId();
 
@@ -2831,10 +2831,10 @@ this.checkBox_import_fastMode.Checked);
 					|| (mapItem.Style == "append")
 					)
 				{
-					strID = "?";	// ½«À´¼ÓÒ»¸ö¶Ô»°¿ò
+					strID = "?";	// å°†æ¥åŠ ä¸€ä¸ªå¯¹è¯æ¡†
 				}
 
-				// 2)ÓÃÄ¿±ê¿âÂ·¾¶¹¹ÔìÍêÕûµÄ¼ÇÂ¼Â·¾¶
+				// 2)ç”¨ç›®æ ‡åº“è·¯å¾„æ„é€ å®Œæ•´çš„è®°å½•è·¯å¾„
 				string strTargetFullPath = "";
 				if (mapItem.Target == "*") 
 				{
@@ -2854,11 +2854,11 @@ this.checkBox_import_fastMode.Checked);
 				channel = this.Channels.GetChannel(respath.Url);
 
 			}
-			else // µÚ¶ş¸öÒÔºóµÄ×ÊÔ´
+			else // ç¬¬äºŒä¸ªä»¥åçš„èµ„æº
 			{
 				if (channel == null)
 				{
-					strError = "µ±bIsFirstRes==falseÊ±£¬²ÎÊıchannel²»Ó¦Îªnull...";
+					strError = "å½“bIsFirstRes==falseæ—¶ï¼Œå‚æ•°channelä¸åº”ä¸ºnull...";
 					goto ERROR1;
 				}
 
@@ -2867,13 +2867,13 @@ this.checkBox_import_fastMode.Checked);
 				string strObjectId = respath.GetObjectId();
 				if (strObjectId == null || strObjectId == "") 
 				{
-					strError = "object idÎª¿Õ...";
+					strError = "object idä¸ºç©º...";
 					goto ERROR1;
 				}
 				strTargetPath = strRecordPath + "/object/" + strObjectId;
 				if (strRecordPath == "")
 				{
-					strError = "strRecordPath²ÎÊıÖµÎª¿Õ...";
+					strError = "strRecordPathå‚æ•°å€¼ä¸ºç©º...";
 					goto ERROR1;
 				}
 			}
@@ -2882,15 +2882,15 @@ this.checkBox_import_fastMode.Checked);
 			// string strLocalPath = DomUtil.GetAttr(node,"localpath");
 			// string strMimeType = DomUtil.GetAttr(node,"mimetype");
 			string strTimeStamp = DomUtil.GetAttr(node,"timestamp");
-			// ×¢Òâ,strLocalPath²¢²»ÊÇÒªÉÏÔØµÄbodyÎÄ¼ş,ËüÖ»ÓÃÀ´×÷ÔªÊı¾İ\
-			// bodyÎÄ¼şÎªstrBodyTempFileName
+			// æ³¨æ„,strLocalPathå¹¶ä¸æ˜¯è¦ä¸Šè½½çš„bodyæ–‡ä»¶,å®ƒåªç”¨æ¥ä½œå…ƒæ•°æ®\
+			// bodyæ–‡ä»¶ä¸ºstrBodyTempFileName
 
 
-			// 3.½«bodyÎÄ¼ş²ğ·Ö³ÉÆ¬¶Ï½øĞĞÉÏÔØ
+			// 3.å°†bodyæ–‡ä»¶æ‹†åˆ†æˆç‰‡æ–­è¿›è¡Œä¸Šè½½
 			string[] ranges = null;
 
 			if (lBodyLength == 0)	
-			{ // ¿ÕÎÄ¼ş
+			{ // ç©ºæ–‡ä»¶
 				ranges = new string[1];
 				ranges[0] = "";
 			}
@@ -2899,7 +2899,7 @@ this.checkBox_import_fastMode.Checked);
 				string strRange = "";
 				strRange = "0-" + Convert.ToString(lBodyLength-1);
 
-				// °´ÕÕ100K×÷ÎªÒ»¸öchunk
+				// æŒ‰ç…§100Kä½œä¸ºä¸€ä¸ªchunk
 				ranges = RangeList.ChunkRange(strRange,
 					100*1024);
 			}
@@ -2917,19 +2917,19 @@ this.checkBox_import_fastMode.Checked);
 			{
 			REDOSINGLESAVE:
 
-				Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+				Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 				if (stop.State != 0)
 				{
 					DialogResult result = MessageBox.Show(this,
-						"È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+						"ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
 						"dp2batch",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
 						MessageBoxDefaultButton.Button2);
 					if (result == DialogResult.Yes)
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï";
+						strError = "ç”¨æˆ·ä¸­æ–­";
 						goto ERROR1;
 					}
 					else 
@@ -2941,7 +2941,7 @@ this.checkBox_import_fastMode.Checked);
 
 				string strWaiting = "";
 				if (j == ranges.Length - 1)
-					strWaiting = " ÇëÄÍĞÄµÈ´ı...";
+					strWaiting = " è¯·è€å¿ƒç­‰å¾…...";
 
 				string strPercent = "";
 				RangeList rl = new RangeList(ranges[j]);
@@ -2952,7 +2952,7 @@ this.checkBox_import_fastMode.Checked);
 				}
 
 				if (stop != null)
-					stop.SetMessage("ÕıÔÚÉÏÔØ " + ranges[j] + "/"
+					stop.SetMessage("æ­£åœ¨ä¸Šè½½ " + ranges[j] + "/"
 						+ Convert.ToString(lBodyLength)
 						+ " " + strPercent + " " + strTargetPath + strWarning + strWaiting + " " + strCount);
 
@@ -2965,7 +2965,7 @@ this.checkBox_import_fastMode.Checked);
 					"",	// style
 					strMetaDataXml,
 					ranges[j],
-					j == ranges.Length - 1 ? true : false,	// ×îÎ²Ò»´Î²Ù×÷£¬ÌáĞÑµ×²ã×¢ÒâÉèÖÃÌØÊâµÄWebService API³¬Ê±Ê±¼ä
+					j == ranges.Length - 1 ? true : false,	// æœ€å°¾ä¸€æ¬¡æ“ä½œï¼Œæé†’åº•å±‚æ³¨æ„è®¾ç½®ç‰¹æ®Šçš„WebService APIè¶…æ—¶æ—¶é—´
 					timestamp,
 					out output_timestamp,
 					out strOutputPath,
@@ -2988,7 +2988,7 @@ this.checkBox_import_fastMode.Checked);
 						{
 							timestamp = new byte[output_timestamp.Length];
 							Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-							strWarning = " (Ê±¼ä´Á²»Æ¥Åä, ×Ô¶¯ÖØÊÔ)";
+							strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, è‡ªåŠ¨é‡è¯•)";
 							if (ranges.Length == 1 || j==0) 
 								goto REDOSINGLESAVE;
 							goto REDOWHOLESAVE;
@@ -2996,9 +2996,9 @@ this.checkBox_import_fastMode.Checked);
 
 
 						DialogResult result = MessageDlg.Show(this,
-                            "ÉÏÔØ '" + strDisplayRecPath + "' (Æ¬¶Ï:" + ranges[j] + "/×Ü³ß´ç:" + Convert.ToString(lBodyLength)
-							+") Ê±·¢ÏÖÊ±¼ä´Á²»Æ¥Åä¡£ÏêÏ¸Çé¿öÈçÏÂ£º\r\n---\r\n"
-							+ strError + "\r\n---\r\n\r\nÊÇ·ñÒÔĞÂÊ±¼ä´ÁÇ¿ĞĞÉÏÔØ?\r\n×¢£º(ÊÇ)Ç¿ĞĞÉÏÔØ (·ñ)ºöÂÔµ±Ç°¼ÇÂ¼»ò×ÊÔ´ÉÏÔØ£¬µ«¼ÌĞøºóÃæµÄ´¦Àí (È¡Ïû)ÖĞ¶ÏÕû¸öÅú´¦Àí",
+                            "ä¸Šè½½ '" + strDisplayRecPath + "' (ç‰‡æ–­:" + ranges[j] + "/æ€»å°ºå¯¸:" + Convert.ToString(lBodyLength)
+							+") æ—¶å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚è¯¦ç»†æƒ…å†µå¦‚ä¸‹ï¼š\r\n---\r\n"
+							+ strError + "\r\n---\r\n\r\næ˜¯å¦ä»¥æ–°æ—¶é—´æˆ³å¼ºè¡Œä¸Šè½½?\r\næ³¨ï¼š(æ˜¯)å¼ºè¡Œä¸Šè½½ (å¦)å¿½ç•¥å½“å‰è®°å½•æˆ–èµ„æºä¸Šè½½ï¼Œä½†ç»§ç»­åé¢çš„å¤„ç† (å–æ¶ˆ)ä¸­æ–­æ•´ä¸ªæ‰¹å¤„ç†",
 							"dp2batch",
 							MessageBoxButtons.YesNoCancel,
 							MessageBoxDefaultButton.Button1,
@@ -3015,7 +3015,7 @@ this.checkBox_import_fastMode.Checked);
 							{
 								timestamp = output_timestamp;
 							}
-							strWarning = " (Ê±¼ä´Á²»Æ¥Åä, Ó¦ÓÃ»§ÒªÇóÖØÊÔ)";
+							strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, åº”ç”¨æˆ·è¦æ±‚é‡è¯•)";
 							if (ranges.Length == 1 || j==0) 
 								goto REDOSINGLESAVE;
 							goto REDOWHOLESAVE;
@@ -3023,13 +3023,13 @@ this.checkBox_import_fastMode.Checked);
 
 						if (result == DialogResult.No) 
 						{
-							return 0;	// ¼ÌĞø×÷ºóÃæµÄ×ÊÔ´
+							return 0;	// ç»§ç»­ä½œåé¢çš„èµ„æº
 						}
 
 						if (result == DialogResult.Cancel) 
 						{
-							strError = "ÓÃ»§ÖĞ¶Ï";
-							goto ERROR1;	// ÖĞ¶ÏÕû¸ö´¦Àí
+							strError = "ç”¨æˆ·ä¸­æ–­";
+							goto ERROR1;	// ä¸­æ–­æ•´ä¸ªå¤„ç†
 						}
 					}
 
@@ -3040,7 +3040,7 @@ this.checkBox_import_fastMode.Checked);
 				timestamp = output_timestamp;
 			}
 
-			// ¿¼ÂÇµ½±£´æµÚÒ»¸ö×ÊÔ´µÄÊ±ºò£¬id¿ÉÄÜÎª¡°?¡±£¬Òò´ËĞèÒªµÃµ½Êµ¼ÊµÄidÖµ
+			// è€ƒè™‘åˆ°ä¿å­˜ç¬¬ä¸€ä¸ªèµ„æºçš„æ—¶å€™ï¼Œidå¯èƒ½ä¸ºâ€œ?â€ï¼Œå› æ­¤éœ€è¦å¾—åˆ°å®é™…çš„idå€¼
 			if (bIsFirstRes)
 				strRecordPath = strOutputPath;
 
@@ -3051,11 +3051,11 @@ this.checkBox_import_fastMode.Checked);
 		}
 
 
-		// ´ÓÊäÈëÁ÷ÖĞµÃµ½Ò»¸öresµÄmetadataºÍbody
+		// ä»è¾“å…¥æµä¸­å¾—åˆ°ä¸€ä¸ªresçš„metadataå’Œbody
 		// parameter:
-		//		inputfile:       Ô´Á÷
-		//		bIsFirstRes:     ÊÇ·ñÊÇµÚÒ»¸ö×ÊÔ´
-		//		strMetaDataXml:  ·µ»ØmetadataÄÚÈİ
+		//		inputfile:       æºæµ
+		//		bIsFirstRes:     æ˜¯å¦æ˜¯ç¬¬ä¸€ä¸ªèµ„æº
+		//		strMetaDataXml:  è¿”å›metadataå†…å®¹
 		//		strError:        error info
 		// return:
 		//		-1: error
@@ -3074,21 +3074,21 @@ this.checkBox_import_fastMode.Checked);
 
 			byte [] length = new byte[8];
 
-			// ¶ÁÈë×Ü³¤¶È
+			// è¯»å…¥æ€»é•¿åº¦
 			int nRet = inputfile.Read(length, 0 , 8);
 			if (nRet < 8) 
 			{
-				strError = "¶ÁÈ¡res×Ü³¤¶È²¿·Ö³ö´í...";
+				strError = "è¯»å–resæ€»é•¿åº¦éƒ¨åˆ†å‡ºé”™...";
 				return -1;
 			}
 
 			long lTotalLength = BitConverter.ToInt64(length, 0);
 
-			// ¶ÁÈëmetadata³¤¶È
+			// è¯»å…¥metadataé•¿åº¦
 			nRet = inputfile.Read(length, 0 , 8);
 			if (nRet < 8) 
 			{
-				strError = "¶ÁÈ¡metadata³¤¶È²¿·Ö³ö´í...";
+				strError = "è¯»å–metadataé•¿åº¦éƒ¨åˆ†å‡ºé”™...";
 				return -1;
 			}
 
@@ -3096,7 +3096,7 @@ this.checkBox_import_fastMode.Checked);
 
 			if (lMetaDataLength >= 100*1024)
 			{
-				strError = "metadataÊı¾İ³¤¶È³¬¹ı100K£¬ËÆ²»ÊÇÕıÈ·¸ñÊ½...";
+				strError = "metadataæ•°æ®é•¿åº¦è¶…è¿‡100Kï¼Œä¼¼ä¸æ˜¯æ­£ç¡®æ ¼å¼...";
 				return -1;
 			}
 
@@ -3106,17 +3106,17 @@ this.checkBox_import_fastMode.Checked);
 				(int)lMetaDataLength);
 			if (nReadLength < (int)lMetaDataLength)
 			{
-				strError = "metadataÉùÃ÷µÄ³¤¶È³¬¹ıÎÄ¼şÄ©Î²£¬¸ñÊ½´íÎó";
+				strError = "metadataå£°æ˜çš„é•¿åº¦è¶…è¿‡æ–‡ä»¶æœ«å°¾ï¼Œæ ¼å¼é”™è¯¯";
 				return -1;
 			}
 
-			strMetaDataXml = Encoding.UTF8.GetString(metadata);	// ? ÊÇ·ñ¿ÉÄÜÅ×³öÒì³£
+			strMetaDataXml = Encoding.UTF8.GetString(metadata);	// ? æ˜¯å¦å¯èƒ½æŠ›å‡ºå¼‚å¸¸
 
-			// ¶Ábody²¿·ÖµÄ³¤¶È
+			// è¯»bodyéƒ¨åˆ†çš„é•¿åº¦
 			nRet = inputfile.Read(length, 0 , 8);
 			if (nRet < 8) 
 			{
-				strError = "¶ÁÈ¡body³¤¶È²¿·Ö³ö´í...";
+				strError = "è¯»å–bodyé•¿åº¦éƒ¨åˆ†å‡ºé”™...";
 				return -1;
 			}
 
@@ -3125,14 +3125,14 @@ this.checkBox_import_fastMode.Checked);
 			lBodyLength = BitConverter.ToInt64(length, 0);
 			if (bIsFirstRes == true && lBodyLength >= 2000*1024)
 			{
-				strError = "µÚÒ»¸öresÖĞbodyµÄxmlÊı¾İ³¤¶È³¬¹ı2000K£¬ËÆ²»ÊÇÕıÈ·¸ñÊ½...";
+				strError = "ç¬¬ä¸€ä¸ªresä¸­bodyçš„xmlæ•°æ®é•¿åº¦è¶…è¿‡2000Kï¼Œä¼¼ä¸æ˜¯æ­£ç¡®æ ¼å¼...";
 				return -1;
 			}
 
 			return 0;
 		}
 
-		// ¹ÜÀí¿âÃû¶ÔÕÕ±í
+		// ç®¡ç†åº“åå¯¹ç…§è¡¨
 		private void button_import_dbMap_Click(object sender, System.EventArgs e)
 		{
 			DbNameMapDlg dlg = new DbNameMapDlg();
@@ -3165,7 +3165,7 @@ this.checkBox_import_fastMode.Checked);
 		{
 			OpenResDlg dlg = new OpenResDlg();
 
-			dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+			dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
 			dlg.ap = this.applicationInfo;
 			dlg.ApCfgTitle = "pageimport_openresdlg";
@@ -3196,7 +3196,7 @@ this.checkBox_import_fastMode.Checked);
 			OpenFileDialog dlg = new OpenFileDialog();
 
 			dlg.FileName = textBox_import_fileName.Text;
-			dlg.Filter = "±¸·İÎÄ¼ş (*.dp2bak)|*.dp2bak|XMLÎÄ¼ş (*.xml)|*.xml|ISO2709ÎÄ¼ş (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*" ;
+			dlg.Filter = "å¤‡ä»½æ–‡ä»¶ (*.dp2bak)|*.dp2bak|XMLæ–‡ä»¶ (*.xml)|*.xml|ISO2709æ–‡ä»¶ (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*" ;
 			dlg.RestoreDirectory = true ;
 
 			if(dlg.ShowDialog() != DialogResult.OK)
@@ -3208,7 +3208,7 @@ this.checkBox_import_fastMode.Checked);
 
 		}
 
-		// ×¼±¸½Å±¾»·¾³
+		// å‡†å¤‡è„šæœ¬ç¯å¢ƒ
 		int PrepareScript(string strProjectName,
 			string strProjectLocate,
 			out Assembly assemblyMain,
@@ -3242,10 +3242,10 @@ this.checkBox_import_fastMode.Checked);
 									Environment.CurrentDirectory + "\\dp2batch.exe"};
 
 
-			// ´´½¨ProjectÖĞScript main.csµÄAssembly
+			// åˆ›å»ºProjectä¸­Script main.csçš„Assembly
 			// return:
-			//		-2	³ö´í£¬µ«ÊÇÒÑ¾­ÌáÊ¾¹ı´íÎóĞÅÏ¢ÁË¡£
-			//		-1	³ö´í
+			//		-2	å‡ºé”™ï¼Œä½†æ˜¯å·²ç»æç¤ºè¿‡é”™è¯¯ä¿¡æ¯äº†ã€‚
+			//		-1	å‡ºé”™
 			int nRet = scriptManager.BuildAssembly(
                 "MainForm",
 				strProjectName,
@@ -3272,19 +3272,19 @@ this.checkBox_import_fastMode.Checked);
 			}
 
 
-			// µÃµ½AssemblyÖĞBatchÅÉÉúÀàType
+			// å¾—åˆ°Assemblyä¸­Batchæ´¾ç”Ÿç±»Type
 			Type entryClassType = ScriptManager.GetDerivedClassType(
 				assemblyMain,
 				"dp2Batch.Batch");
 
-			// newÒ»¸öBatchÅÉÉú¶ÔÏó
+			// newä¸€ä¸ªBatchæ´¾ç”Ÿå¯¹è±¡
 			batchObj = (Batch)entryClassType.InvokeMember(null, 
 				BindingFlags.DeclaredOnly | 
 				BindingFlags.Public | BindingFlags.NonPublic | 
 				BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
 				null);
 
-			// ÎªBatchÅÉÉúÀàÉèÖÃ²ÎÊı
+			// ä¸ºBatchæ´¾ç”Ÿç±»è®¾ç½®å‚æ•°
 			batchObj.MainForm = this;
 			batchObj.ap = this.AppInfo;
 			batchObj.ProjectDir = strProjectLocate;
@@ -3302,7 +3302,7 @@ this.checkBox_import_fastMode.Checked);
 			//	"");
 
 			////////////////////////////
-			// ×°ÔØmarfilter.fltx
+			// è£…è½½marfilter.fltx
 			string strFilterFileName = strProjectLocate + "\\marcfilter.fltx";
 
 			if (FileUtil.FileExist(strFilterFileName) == true) 
@@ -3341,7 +3341,7 @@ this.checkBox_import_fastMode.Checked);
 
 				string strfilterCsDllName = strProjectLocate + "\\~marcfilter_" + Convert.ToString(m_nAssemblyVersion++)+ ".dll";
 
-				// ´´½¨ProjectÖĞScriptµÄAssembly
+				// åˆ›å»ºProjectä¸­Scriptçš„Assembly
 				nRet = scriptManager.BuildAssembly(
                     "MainForm",
 					strProjectName,
@@ -3389,7 +3389,7 @@ this.checkBox_import_fastMode.Checked);
                 strText);
         }
 
-        // Êä³ö
+        // è¾“å‡º
 		void DoExport(string strProjectName,
 			string strProjectLocate)
 		{
@@ -3402,7 +3402,7 @@ this.checkBox_import_fastMode.Checked);
 			m_nRecordCount = -1;
 
 
-			// ×¼±¸½Å±¾
+			// å‡†å¤‡è„šæœ¬
 			if (strProjectName != "" && strProjectName != null)
 			{
 				nRet = PrepareScript(strProjectName,
@@ -3423,10 +3423,10 @@ this.checkBox_import_fastMode.Checked);
 			}
 
 
-			// Ö´ĞĞ½Å±¾µÄOnInitial()
+			// æ‰§è¡Œè„šæœ¬çš„OnInitial()
 
-			// ´¥·¢ScriptÖĞOnInitial()´úÂë
-			// OnInitial()ºÍOnBeginµÄ±¾ÖÊÇø±ğ, ÔÚÓÚOnInitial()ÊÊºÏ¼ì²éºÍÉèÖÃÃæ°å²ÎÊı
+			// è§¦å‘Scriptä¸­OnInitial()ä»£ç 
+			// OnInitial()å’ŒOnBeginçš„æœ¬è´¨åŒºåˆ«, åœ¨äºOnInitial()é€‚åˆæ£€æŸ¥å’Œè®¾ç½®é¢æ¿å‚æ•°
 			if (batchObj != null)
 			{
 				BatchEventArgs args = new BatchEventArgs();
@@ -3436,7 +3436,7 @@ this.checkBox_import_fastMode.Checked);
 					goto END1;
 				if (args.Continue == ContinueType.SkipMiddle) 
 				{
-					strError = "OnInitial()ÖĞargs.Continue²»ÄÜÊ¹ÓÃContinueType.SkipMiddle.Ó¦Ê¹ÓÃContinueType.SkipBeginMiddle";
+					strError = "OnInitial()ä¸­args.Continueä¸èƒ½ä½¿ç”¨ContinueType.SkipMiddle.åº”ä½¿ç”¨ContinueType.SkipBeginMiddle";
 					goto ERROR1;
 				}
 				*/
@@ -3448,7 +3448,7 @@ this.checkBox_import_fastMode.Checked);
 
 			if (textBox_dbPath.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÔ´¿â...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©æºåº“...");
 				return;
 			}
 
@@ -3456,17 +3456,17 @@ this.checkBox_import_fastMode.Checked);
 
             Debug.Assert(dbpaths.Length != 0, "");
 
-            // Èç¹ûÎªµ¥¿âÊä³ö
+            // å¦‚æœä¸ºå•åº“è¾“å‡º
             if (dbpaths.Length == 1)
             {
-                // ·ñÔòÒÆµ½DoExportFile()º¯ÊıÀïÃæÈ¥Ğ£Ñé
+                // å¦åˆ™ç§»åˆ°DoExportFile()å‡½æ•°é‡Œé¢å»æ ¡éªŒ
                 ResPath respath = new ResPath(dbpaths[0]);
 
                 channel = this.Channels.GetChannel(respath.Url);
 
                 string strDbName = respath.Path;
 
-                // Ğ£ÑéÆğÖ¹ºÅ
+                // æ ¡éªŒèµ·æ­¢å·
                 if (checkBox_verifyNumber.Checked == true)
                 {
                     nRet = VerifyRange(channel,
@@ -3479,19 +3479,19 @@ this.checkBox_import_fastMode.Checked);
                 {
                     if (this.textBox_startNo.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨ÆğÊ¼ºÅ";
+                        strError = "å°šæœªæŒ‡å®šèµ·å§‹å·";
                         goto ERROR1;
                     }
                     if (this.textBox_endNo.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨½áÊøºÅ";
+                        strError = "å°šæœªæŒ‡å®šç»“æŸå·";
                         goto ERROR1;
                     }
                 }
             }
             else
             {
-                // ¶à¿âÊä³ö¡£ĞŞ¸Ä½çÃæÒªËØ£¬±íÊ¾Õë¶ÔÃ¿¸ö¿â¶¼ÊÇÈ«¿â´¦Àí
+                // å¤šåº“è¾“å‡ºã€‚ä¿®æ”¹ç•Œé¢è¦ç´ ï¼Œè¡¨ç¤ºé’ˆå¯¹æ¯ä¸ªåº“éƒ½æ˜¯å…¨åº“å¤„ç†
                 this.radioButton_all.Checked = true;
                 this.textBox_startNo.Text = "1";
                 this.textBox_endNo.Text = "9999999999";
@@ -3503,19 +3503,19 @@ this.checkBox_import_fastMode.Checked);
             if (checkBox_export_delete.Checked == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                        "È·ÊµÒª(ÔÚÊä³öµÄÍ¬Ê±)É¾³ıÊı¾İ¿â¼ÇÂ¼?\r\n\r\n---------\r\n(È·¶¨)É¾³ı (·ÅÆú)·ÅÆúÅú´¦Àí",
+                        "ç¡®å®è¦(åœ¨è¾“å‡ºçš„åŒæ—¶)åˆ é™¤æ•°æ®åº“è®°å½•?\r\n\r\n---------\r\n(ç¡®å®š)åˆ é™¤ (æ”¾å¼ƒ)æ”¾å¼ƒæ‰¹å¤„ç†",
                         "dp2batch",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.OK)
                 {
-                    strError = "·ÅÆú´¦Àí...";
+                    strError = "æ”¾å¼ƒå¤„ç†...";
                     goto ERROR1;
                 }
 
                 result = MessageBox.Show(this,
-                    "ÔÚÉ¾³ı¼ÇÂ¼µÄÍ¬Ê±, ÊÇ·ñ½«¼ÇÂ¼Êä³öµ½ÎÄ¼ş?\r\n\r\n--------\r\n(ÊÇ)Ò»±ßÉ¾³ıÒ»±ßÊä³ö (·ñ)Ö»É¾³ı²»Êä³ö",
+                    "åœ¨åˆ é™¤è®°å½•çš„åŒæ—¶, æ˜¯å¦å°†è®°å½•è¾“å‡ºåˆ°æ–‡ä»¶?\r\n\r\n--------\r\n(æ˜¯)ä¸€è¾¹åˆ é™¤ä¸€è¾¹è¾“å‡º (å¦)åªåˆ é™¤ä¸è¾“å‡º",
                     "dp2batch",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -3525,22 +3525,22 @@ this.checkBox_import_fastMode.Checked);
             }
 
 
-			// »ñµÃÊä³öÎÄ¼şÃû
+			// è·å¾—è¾“å‡ºæ–‡ä»¶å
 			dlg = new SaveFileDialog();
 
-			dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ±¸·İÎÄ¼şÃû";
+			dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„å¤‡ä»½æ–‡ä»¶å";
 			dlg.CreatePrompt = false;
 			dlg.OverwritePrompt = false;
 			dlg.FileName = strLastOutputFileName;
 			dlg.FilterIndex = nLastOutputFilterIndex;
 
-			dlg.Filter = "±¸·İÎÄ¼ş (*.dp2bak)|*.dp2bak|XMLÎÄ¼ş (*.xml)|*.xml|ISO2709ÎÄ¼ş (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*" ;
+			dlg.Filter = "å¤‡ä»½æ–‡ä»¶ (*.dp2bak)|*.dp2bak|XMLæ–‡ä»¶ (*.xml)|*.xml|ISO2709æ–‡ä»¶ (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*" ;
 
 			dlg.RestoreDirectory = true;
 
 			if (dlg.ShowDialog(this) != DialogResult.OK) 
 			{
-				strError = "·ÅÆú´¦Àí...";
+				strError = "æ”¾å¼ƒå¤„ç†...";
 				goto ERROR1;
 			}
 
@@ -3550,8 +3550,8 @@ this.checkBox_import_fastMode.Checked);
 
 			SKIPASKFILENAME:
 
-				// ´¥·¢ScriptÖĞOnBegin()´úÂë
-				// OnBegin()ÖĞÈÔÈ»ÓĞĞŞ¸ÄMainFormÃæ°åµÄ×ÔÓÉ
+				// è§¦å‘Scriptä¸­OnBegin()ä»£ç 
+				// OnBegin()ä¸­ä»ç„¶æœ‰ä¿®æ”¹MainFormé¢æ¿çš„è‡ªç”±
 			if (batchObj != null)
 			{
 				BatchEventArgs args = new BatchEventArgs();
@@ -3587,21 +3587,21 @@ this.checkBox_import_fastMode.Checked);
                 ResPath respath = new ResPath(dbpaths[0]);
 
                 string strMarcSyntax = "";
-                // ´ÓmarcdefÅäÖÃÎÄ¼şÖĞ»ñµÃmarc¸ñÊ½¶¨Òå
+                // ä»marcdefé…ç½®æ–‡ä»¶ä¸­è·å¾—marcæ ¼å¼å®šä¹‰
                 // return:
-                //		-1	³ö´í
-                //		0	Ã»ÓĞÕÒµ½
-                //		1	ÕÒµ½
+                //		-1	å‡ºé”™
+                //		0	æ²¡æœ‰æ‰¾åˆ°
+                //		1	æ‰¾åˆ°
                 nRet = this.SearchPanel.GetMarcSyntax(respath.FullPath,
                     out strMarcSyntax,
                     out strError);
                 if (nRet == 0 || nRet == -1)
                 {
-                    strError = "»ñÈ¡Êı¾İ¿â '" + dbpaths[0] + "' µÄMARC¸ñÊ½Ê±·¢Éú´íÎó: " + strError;
+                    strError = "è·å–æ•°æ®åº“ '" + dbpaths[0] + "' çš„MARCæ ¼å¼æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     goto ERROR1;
                 }
 
-                // Èç¹û¶àÓÚÒ»¸öÊı¾İ¿âÊä³öµ½Ò»¸öÎÄ¼ş£¬ĞèÒª¹ØĞÄÃ¿¸öÊı¾İ¿âµÄMARC¸ñÊ½ÊÇ·ñÏàÍ¬£¬¸øÓëÊÊµ±µÄ¾¯¸æ
+                // å¦‚æœå¤šäºä¸€ä¸ªæ•°æ®åº“è¾“å‡ºåˆ°ä¸€ä¸ªæ–‡ä»¶ï¼Œéœ€è¦å…³å¿ƒæ¯ä¸ªæ•°æ®åº“çš„MARCæ ¼å¼æ˜¯å¦ç›¸åŒï¼Œç»™ä¸é€‚å½“çš„è­¦å‘Š
                 if (dbpaths.Length > 1)
                 {
                     string strWarning = "";
@@ -3610,17 +3610,17 @@ this.checkBox_import_fastMode.Checked);
                         ResPath current_respath = new ResPath(dbpaths[i]);
 
                         string strPerMarcSyntax = "";
-                        // ´ÓmarcdefÅäÖÃÎÄ¼şÖĞ»ñµÃmarc¸ñÊ½¶¨Òå
+                        // ä»marcdefé…ç½®æ–‡ä»¶ä¸­è·å¾—marcæ ¼å¼å®šä¹‰
                         // return:
-                        //		-1	³ö´í
-                        //		0	Ã»ÓĞÕÒµ½
-                        //		1	ÕÒµ½
+                        //		-1	å‡ºé”™
+                        //		0	æ²¡æœ‰æ‰¾åˆ°
+                        //		1	æ‰¾åˆ°
                         nRet = this.SearchPanel.GetMarcSyntax(current_respath.FullPath,
                             out strPerMarcSyntax,
                             out strError);
                         if (nRet == 0 || nRet == -1)
                         {
-                            strError = "»ñÈ¡Êı¾İ¿â '" + dbpaths[i] + "' µÄMARC¸ñÊ½Ê±·¢Éú´íÎó: " + strError;
+                            strError = "è·å–æ•°æ®åº“ '" + dbpaths[i] + "' çš„MARCæ ¼å¼æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                             goto ERROR1;
                         }
 
@@ -3628,14 +3628,14 @@ this.checkBox_import_fastMode.Checked);
                         {
                             if (String.IsNullOrEmpty(strWarning) == false)
                                 strWarning += "\r\n";
-                            strWarning += "Êı¾İ¿â '" + dbpaths[i] + "' (" + strPerMarcSyntax + ")";
+                            strWarning += "æ•°æ®åº“ '" + dbpaths[i] + "' (" + strPerMarcSyntax + ")";
 
                         }
                     }
 
                     if (String.IsNullOrEmpty(strWarning) == false)
                     {
-                        strWarning = "ËùÑ¡ÔñµÄÊı¾İ¿âÖĞ£¬ÏÂÁĞÊı¾İ¿âµÄMARC¸ñÊ½ºÍµÚÒ»¸öÊı¾İ¿â( '"+dbpaths[0]+"' ("+strMarcSyntax+"))µÄ²»Í¬: \r\n---\r\n" + strWarning + "\r\n---\r\n\r\nÈç¹û°ÑÕâĞ©²»Í¬MARC¸ñÊ½µÄ¼ÇÂ¼»ìºÏÊä³öµ½Ò»¸öÎÄ¼şÖĞ£¬¿ÉÄÜ»áÔì³ÉĞí¶àÈí¼şÒÔºó¶ÁÈ¡ËüÊ±·¢ÉúÀ§ÄÑ¡£\r\n\r\nÈ·ÊµÒªÕâÑù»ìºÏ×Å×ª³öµ½Ò»¸öÎÄ¼şÖĞ?";
+                        strWarning = "æ‰€é€‰æ‹©çš„æ•°æ®åº“ä¸­ï¼Œä¸‹åˆ—æ•°æ®åº“çš„MARCæ ¼å¼å’Œç¬¬ä¸€ä¸ªæ•°æ®åº“( '"+dbpaths[0]+"' ("+strMarcSyntax+"))çš„ä¸åŒ: \r\n---\r\n" + strWarning + "\r\n---\r\n\r\nå¦‚æœæŠŠè¿™äº›ä¸åŒMARCæ ¼å¼çš„è®°å½•æ··åˆè¾“å‡ºåˆ°ä¸€ä¸ªæ–‡ä»¶ä¸­ï¼Œå¯èƒ½ä¼šé€ æˆè®¸å¤šè½¯ä»¶ä»¥åè¯»å–å®ƒæ—¶å‘ç”Ÿå›°éš¾ã€‚\r\n\r\nç¡®å®è¦è¿™æ ·æ··åˆç€è½¬å‡ºåˆ°ä¸€ä¸ªæ–‡ä»¶ä¸­?";
                         DialogResult result = MessageBox.Show(this,
                             strWarning,
                             "dp2batch",
@@ -3644,7 +3644,7 @@ this.checkBox_import_fastMode.Checked);
                             MessageBoxDefaultButton.Button2);
                         if (result == DialogResult.No)
                         {
-                            strError = "·ÅÆú´¦Àí...";
+                            strError = "æ”¾å¼ƒå¤„ç†...";
                             goto ERROR1;
                         }
                     }
@@ -3653,10 +3653,10 @@ this.checkBox_import_fastMode.Checked);
                 OpenMarcFileDlg marcdlg = new OpenMarcFileDlg();
                 MainForm.SetControlFont(marcdlg, this.DefaultFont);
                 marcdlg.IsOutput = true;
-                marcdlg.Text = "ÇëÖ¸¶¨ÒªÊä³öµÄ ISO2709 ÎÄ¼şÊôĞÔ";
+                marcdlg.Text = "è¯·æŒ‡å®šè¦è¾“å‡ºçš„ ISO2709 æ–‡ä»¶å±æ€§";
                 marcdlg.FileName = strOutputFileName;
                 marcdlg.MarcSyntax = strMarcSyntax;
-                marcdlg.EnableMarcSyntax = false;   // ²»ÔÊĞíÓÃ»§Ñ¡Ôñmarc syntax£¬ÒòÎªÕâÊÇÊı¾İ¿âÅäÖÃºÃÁËµÄÊôĞÔ 2007/8/18
+                marcdlg.EnableMarcSyntax = false;   // ä¸å…è®¸ç”¨æˆ·é€‰æ‹©marc syntaxï¼Œå› ä¸ºè¿™æ˜¯æ•°æ®åº“é…ç½®å¥½äº†çš„å±æ€§ 2007/8/18
 
                 marcdlg.CrLf = this.OutputCrLf;
                 marcdlg.AddG01 = this.AddG01;
@@ -3670,13 +3670,13 @@ this.checkBox_import_fastMode.Checked);
 
                 if (marcdlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "·ÅÆú´¦Àí...";
+                    strError = "æ”¾å¼ƒå¤„ç†...";
                     goto ERROR1;
                 }
 
                 if (marcdlg.AddG01 == true)
                 {
-                    MessageBox.Show(this, "ÄúÑ¡ÔñÁËÔÚµ¼³öµÄISO2709¼ÇÂ¼ÖĞ¼ÓÈë-01×Ö¶Î¡£Çë×¢Òâdp2BatchÔÚ½«À´µ¼ÈëÕâÑùµÄISO2709ÎÄ¼şµÄÊ±ºò£¬¼ÇÂ¼ÖĞ-01×Ö¶Î***Æğ²»µ½***¸²¸Ç¶¨Î»µÄ×÷ÓÃ¡£¡°¼ÓÈë-01×Ö¶Î¡±¹¦ÄÜÊÇÎªÁË½«µ¼³öµÄISO2709ÎÄ¼şÓ¦ÓÃµ½dt1000ÏµÍ³¶øÉè¼ÆµÄ¡£\r\n\r\nÈç¹ûÄúÕâÑù×öµÄÄ¿µÄÊÇÎªÁË¶Ôdp2ÏµÍ³ÊéÄ¿¿âÖĞµÄÊı¾İ½øĞĞ±¸·İ£¬Çë¸ÄÓÃ.xml¸ñÊ½»ò.dp2bak¸ñÊ½¡£");
+                    MessageBox.Show(this, "æ‚¨é€‰æ‹©äº†åœ¨å¯¼å‡ºçš„ISO2709è®°å½•ä¸­åŠ å…¥-01å­—æ®µã€‚è¯·æ³¨æ„dp2Batchåœ¨å°†æ¥å¯¼å…¥è¿™æ ·çš„ISO2709æ–‡ä»¶çš„æ—¶å€™ï¼Œè®°å½•ä¸­-01å­—æ®µ***èµ·ä¸åˆ°***è¦†ç›–å®šä½çš„ä½œç”¨ã€‚â€œåŠ å…¥-01å­—æ®µâ€åŠŸèƒ½æ˜¯ä¸ºäº†å°†å¯¼å‡ºçš„ISO2709æ–‡ä»¶åº”ç”¨åˆ°dt1000ç³»ç»Ÿè€Œè®¾è®¡çš„ã€‚\r\n\r\nå¦‚æœæ‚¨è¿™æ ·åšçš„ç›®çš„æ˜¯ä¸ºäº†å¯¹dp2ç³»ç»Ÿä¹¦ç›®åº“ä¸­çš„æ•°æ®è¿›è¡Œå¤‡ä»½ï¼Œè¯·æ”¹ç”¨.xmlæ ¼å¼æˆ–.dp2bakæ ¼å¼ã€‚");
                 }
 
 
@@ -3695,7 +3695,7 @@ this.checkBox_import_fastMode.Checked);
             }
             else
             {
-                strError = "²»Ö§³ÖµÄÎÄ¼şÀàĞÍ...";
+                strError = "ä¸æ”¯æŒçš„æ–‡ä»¶ç±»å‹...";
                 goto ERROR1;
             }
 
@@ -3706,7 +3706,7 @@ this.checkBox_import_fastMode.Checked);
             if (nRet == -1)
                 goto ERROR1;
         END1:
-            // ´¥·¢ScriptµÄOnEnd()´úÂë
+            // è§¦å‘Scriptçš„OnEnd()ä»£ç 
             if (batchObj != null)
             {
                 BatchEventArgs args = new BatchEventArgs();
@@ -3748,7 +3748,7 @@ this.checkBox_import_fastMode.Checked);
 
 			if (textBox_dbPath.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÔ´¿â...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©æºåº“...");
 				return;
 			}
 
@@ -3760,24 +3760,24 @@ this.checkBox_import_fastMode.Checked);
 
 			if (strOutputFileName != null && strOutputFileName != "") 
 			{
-				// Ì½²âÎÄ¼şÊÇ·ñ´æÔÚ
+				// æ¢æµ‹æ–‡ä»¶æ˜¯å¦å­˜åœ¨
 				FileInfo fi = new FileInfo(strOutputFileName);
 				if (fi.Exists == true && fi.Length > 0)
 				{
 					DialogResult result = MessageBox.Show(this,
-						"ÎÄ¼ş '" + strOutputFileName + "' ÒÑ´æÔÚ£¬ÊÇ·ñ¸²¸Ç?\r\n\r\n--------------------\r\n×¢£º(ÊÇ)¸²¸Ç  (·ñ)ÖĞ¶Ï´¦Àí",
+						"æ–‡ä»¶ '" + strOutputFileName + "' å·²å­˜åœ¨ï¼Œæ˜¯å¦è¦†ç›–?\r\n\r\n--------------------\r\næ³¨ï¼š(æ˜¯)è¦†ç›–  (å¦)ä¸­æ–­å¤„ç†",
 						"dp2batch",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
 						MessageBoxDefaultButton.Button2);
 					if (result != DialogResult.Yes) 
 					{
-						strError = "·ÅÆú´¦Àí...";
+						strError = "æ”¾å¼ƒå¤„ç†...";
 						goto ERROR1;
 					}
 				}
 
-				// ´ò¿ªÎÄ¼ş
+				// æ‰“å¼€æ–‡ä»¶
 				outputfile = File.Create(
 					strOutputFileName);
 
@@ -3797,7 +3797,7 @@ this.checkBox_import_fastMode.Checked);
 				bool bAsc = GetDirection(out nStart,
 					out nEnd);
 
-				// ÉèÖÃ½ø¶ÈÌõ·¶Î§
+				// è®¾ç½®è¿›åº¦æ¡èŒƒå›´
 				Int64 nMax = nEnd - nStart;
 				if (nMax < 0)
 					nMax *= -1;
@@ -3812,13 +3812,13 @@ this.checkBox_import_fastMode.Checked);
 				progressBar_main.Value = 0;
 
 
-				bool bFirst = true;	// ÊÇ·ñÎªµÚÒ»´ÎÈ¡¼ÇÂ¼
+				bool bFirst = true;	// æ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡å–è®°å½•
 
 				string strID = this.textBox_startNo.Text;
 
 
 				stop.Initial(new Delegate_doStop(this.DoStop),
-					"ÕıÔÚµ¼³öÊı¾İ");
+					"æ­£åœ¨å¯¼å‡ºæ•°æ®");
 				stop.BeginLoop();
 
 				EnableControls(false);
@@ -3833,14 +3833,14 @@ this.checkBox_import_fastMode.Checked);
 
 				}
 
-				// Ñ­»·
+				// å¾ªç¯
 				for(;;) 
 				{
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+					Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 					if (stop.State != 0)
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï";
+						strError = "ç”¨æˆ·ä¸­æ–­";
 						goto ERROR1;
 					}
 
@@ -3848,7 +3848,7 @@ this.checkBox_import_fastMode.Checked);
 					if (outputfile != null)
 						strStyle = "data,content,timestamp,outputpath";
 					else
-						strStyle = "timestamp,outputpath";	// ÓÅ»¯
+						strStyle = "timestamp,outputpath";	// ä¼˜åŒ–
 
 					if (bFirst == true)
 						strStyle += "";
@@ -3869,10 +3869,10 @@ this.checkBox_import_fastMode.Checked);
 
 					bool bFoundRecord = false;
 
-					// »ñµÃ×ÊÔ´
+					// è·å¾—èµ„æº
 					// return:
-					//		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-					//		0	³É¹¦
+					//		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+					//		0	æˆåŠŸ
 					long lRet = channel.GetRes(strPath,
 						strStyle,
 						out strXmlBody,
@@ -3888,7 +3888,7 @@ this.checkBox_import_fastMode.Checked);
 						{
 							if (checkBox_forceLoop.Checked == true && bFirst == true)
 							{
-								AutoCloseMessageBox.Show(this, "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£\r\n\r\n°´ È·ÈÏ ¼ÌĞø¡£");
+								AutoCloseMessageBox.Show(this, "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­ã€‚");
 
 								bFirst = false;
 								goto CONTINUE;
@@ -3897,14 +3897,14 @@ this.checkBox_import_fastMode.Checked);
 							{
 								if (bFirst == true)
 								{
-									strError = "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£´¦Àí½áÊø¡£";
+									strError = "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚å¤„ç†ç»“æŸã€‚";
 								}
 								else 
 								{
 									if (bAsc == true)
-										strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÄ©Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+										strError = "è®°å½• " + strID + " æ˜¯æœ€æœ«ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
 									else
-										strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÇ°Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+										strError = "è®°å½• " + strID + " æ˜¯æœ€å‰ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
 								}
 							}
 
@@ -3913,7 +3913,7 @@ this.checkBox_import_fastMode.Checked);
 						{
 							bFirst = false;
 							bFoundRecord = false;
-							// °Ñid½âÎö³öÀ´
+							// æŠŠidè§£æå‡ºæ¥
 							strID = ResPath.GetRecordId(strOutputPath);
 							goto CONTINUE;
 
@@ -3926,13 +3926,13 @@ this.checkBox_import_fastMode.Checked);
 
 					bFoundRecord = true;
 
-					// °Ñid½âÎö³öÀ´
+					// æŠŠidè§£æå‡ºæ¥
 					strID = ResPath.GetRecordId(strOutputPath);
 
 				CONTINUE:
 					stop.SetMessage(strID);
 
-					// ÊÇ·ñ³¬¹ıÑ­»··¶Î§
+					// æ˜¯å¦è¶…è¿‡å¾ªç¯èŒƒå›´
 					try 
 					{
 						nCur = Convert.ToInt64(strID);
@@ -3951,7 +3951,7 @@ this.checkBox_import_fastMode.Checked);
 					if (bFoundRecord == true 
 						&& writer != null) 
 					{
-						// Ğ´´ÅÅÌ
+						// å†™ç£ç›˜
 						XmlDocument dom = new XmlDocument();
 
 						try 
@@ -3965,7 +3965,7 @@ this.checkBox_import_fastMode.Checked);
 
 
 							// DomUtil.SetAttr(dom.DocumentElement, "xmlns:dprms", DpNs.dprms);
-							// ¸ø¸ùÔªËØÉèÖÃ¼¸¸ö²ÎÊı
+							// ç»™æ ¹å…ƒç´ è®¾ç½®å‡ ä¸ªå‚æ•°
 							DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
 							DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(baOutputTimeStamp));
 
@@ -3975,7 +3975,7 @@ this.checkBox_import_fastMode.Checked);
 						catch (Exception ex)
 						{
 							strError = ex.Message;
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 
@@ -3983,18 +3983,18 @@ this.checkBox_import_fastMode.Checked);
 						/*
 						if (nRet == -1) 
 						{
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 						*/
 					}
 
-					// É¾³ı
+					// åˆ é™¤
 					if (checkBox_export_delete.Checked == true)
 					{
 
 						byte [] baOutputTimeStamp1 = null;
-						strPath = strOutputPath;	// µÃµ½Êµ¼ÊµÄÂ·¾¶
+						strPath = strOutputPath;	// å¾—åˆ°å®é™…çš„è·¯å¾„
 
 						lRet = channel.DoDeleteRecord(
 							strPath,
@@ -4003,7 +4003,7 @@ this.checkBox_import_fastMode.Checked);
 							out strError);
 						if (lRet == -1) 
 						{
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 					}
@@ -4020,7 +4020,7 @@ this.checkBox_import_fastMode.Checked);
 					}
 
 
-					// ¶ÔÒÑ¾­×÷¹ıµÄ½øĞĞÅĞ¶Ï
+					// å¯¹å·²ç»ä½œè¿‡çš„è¿›è¡Œåˆ¤æ–­
 					if (bAsc == true && nCur >= nEnd)
 						break;
 					if (bAsc == false && nCur <= nEnd)
@@ -4058,9 +4058,9 @@ this.checkBox_import_fastMode.Checked);
 			END1:
 				channel = null;
 			if (checkBox_export_delete.Checked == true)
-				MessageBox.Show(this, "Êı¾İµ¼³öºÍÉ¾³ıÍê³É¡£");
+				MessageBox.Show(this, "æ•°æ®å¯¼å‡ºå’Œåˆ é™¤å®Œæˆã€‚");
 			else
-				MessageBox.Show(this, "Êı¾İµ¼³öÍê³É¡£");
+				MessageBox.Show(this, "æ•°æ®å¯¼å‡ºå®Œæˆã€‚");
 			return;
 
 			ERROR1:
@@ -4081,8 +4081,8 @@ this.checkBox_import_fastMode.Checked);
 
 		// return:
 		//		-1	error
-		//		0	Õı³£½áÊø
-		//		1	Ï£ÍûÌø¹ıºóÀ´µÄOnEnd()
+		//		0	æ­£å¸¸ç»“æŸ
+		//		1	å¸Œæœ›è·³è¿‡åæ¥çš„OnEnd()
         int DoExportFile(
             string[] dbpaths,
             string strOutputFileName,
@@ -4097,10 +4097,10 @@ this.checkBox_import_fastMode.Checked);
             if (this.checkBox_export_fastMode.Checked == true)
                 strDeleteStyle = "fastmode";
 
-            string strInfo = "";    // »ã×ÜĞÅÏ¢£¬ÔÚÍê³ÉºóÏÔÊ¾
+            string strInfo = "";    // æ±‡æ€»ä¿¡æ¯ï¼Œåœ¨å®Œæˆåæ˜¾ç¤º
 
-            FileStream outputfile = null;	// BackupºÍXml¸ñÊ½Êä³ö¶¼ĞèÒªÕâ¸ö
-            XmlTextWriter writer = null;   // Xml¸ñÊ½Êä³öÊ±ĞèÒªÕâ¸ö
+            FileStream outputfile = null;	// Backupå’ŒXmlæ ¼å¼è¾“å‡ºéƒ½éœ€è¦è¿™ä¸ª
+            XmlTextWriter writer = null;   // Xmlæ ¼å¼è¾“å‡ºæ—¶éœ€è¦è¿™ä¸ª
 
             bool bAppend = true;
 
@@ -4108,14 +4108,14 @@ this.checkBox_import_fastMode.Checked);
 
             if (dbpaths.Length == 0)
             {
-                strError = "ÉĞÎ´Ö¸¶¨Ô´¿â...";
+                strError = "å°šæœªæŒ‡å®šæºåº“...";
                 goto ERROR1;
             }
 
 
             if (String.IsNullOrEmpty(strOutputFileName) == false)
             {
-                // Ì½²âÊä³öÎÄ¼şÊÇ·ñÒÑ¾­´æÔÚ
+                // æ¢æµ‹è¾“å‡ºæ–‡ä»¶æ˜¯å¦å·²ç»å­˜åœ¨
                 FileInfo fi = new FileInfo(strOutputFileName);
                 bAppend = true;
                 if (fi.Exists == true && fi.Length > 0)
@@ -4124,7 +4124,7 @@ this.checkBox_import_fastMode.Checked);
                         || exportType == ExportFileType.ISO2709File)
                     {
                         DialogResult result = MessageBox.Show(this,
-                            "ÎÄ¼ş '" + strOutputFileName + "' ÒÑ´æÔÚ£¬ÊÇ·ñ×·¼Ó?\r\n\r\n--------------------\r\n×¢£º(ÊÇ)×·¼Ó  (·ñ)¸²¸Ç  (È¡Ïû)ÖĞ¶Ï´¦Àí",
+                            "æ–‡ä»¶ '" + strOutputFileName + "' å·²å­˜åœ¨ï¼Œæ˜¯å¦è¿½åŠ ?\r\n\r\n--------------------\r\næ³¨ï¼š(æ˜¯)è¿½åŠ   (å¦)è¦†ç›–  (å–æ¶ˆ)ä¸­æ–­å¤„ç†",
                             "dp2batch",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
@@ -4139,21 +4139,21 @@ this.checkBox_import_fastMode.Checked);
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            strError = "·ÅÆú´¦Àí...";
+                            strError = "æ”¾å¼ƒå¤„ç†...";
                             goto ERROR1;
                         }
                     }
                     else if (exportType == ExportFileType.XmlFile)
                     {
                         DialogResult result = MessageBox.Show(this,
-                            "ÎÄ¼ş '" + strOutputFileName + "' ÒÑ´æÔÚ£¬ÊÇ·ñ¸²¸Ç?\r\n\r\n--------------------\r\n×¢£º(ÊÇ)¸²¸Ç  (·ñ)ÖĞ¶Ï´¦Àí",
+                            "æ–‡ä»¶ '" + strOutputFileName + "' å·²å­˜åœ¨ï¼Œæ˜¯å¦è¦†ç›–?\r\n\r\n--------------------\r\næ³¨ï¼š(æ˜¯)è¦†ç›–  (å¦)ä¸­æ–­å¤„ç†",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
                         if (result != DialogResult.Yes)
                         {
-                            strError = "·ÅÆú´¦Àí...";
+                            strError = "æ”¾å¼ƒå¤„ç†...";
                             goto ERROR1;
                         }
                     }
@@ -4161,13 +4161,13 @@ this.checkBox_import_fastMode.Checked);
 
                 }
 
-                // ´ò¿ªÎÄ¼ş
+                // æ‰“å¼€æ–‡ä»¶
                 if (exportType == ExportFileType.BackupFile
                     || exportType == ExportFileType.ISO2709File)
                 {
                     outputfile = File.Open(
                         strOutputFileName,
-                        FileMode.OpenOrCreate,	// Ô­À´ÊÇOpen£¬ºóÀ´ĞŞ¸ÄÎªOpenOrCreate¡£ÕâÑù¶ÔÁÙÊ±ÎÄ¼ş±»ÏµÍ³¹ÜÀíÔ±ÊÖ¶¯ÒâÍâÉ¾³ı(µ«ÊÇxmlÎÄ¼şÖĞÈÔÈ»¼ÇÔØÁËÈÎÎñ)µÄÇé¿öÄÜ¹»ÊÊÓ¦¡£·ñÔò»áÅ×³öFileNotFoundExceptionÒì³£
+                        FileMode.OpenOrCreate,	// åŸæ¥æ˜¯Openï¼Œåæ¥ä¿®æ”¹ä¸ºOpenOrCreateã€‚è¿™æ ·å¯¹ä¸´æ—¶æ–‡ä»¶è¢«ç³»ç»Ÿç®¡ç†å‘˜æ‰‹åŠ¨æ„å¤–åˆ é™¤(ä½†æ˜¯xmlæ–‡ä»¶ä¸­ä»ç„¶è®°è½½äº†ä»»åŠ¡)çš„æƒ…å†µèƒ½å¤Ÿé€‚åº”ã€‚å¦åˆ™ä¼šæŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸
                         FileAccess.Write,
                         FileShare.ReadWrite);
                 }
@@ -4188,12 +4188,12 @@ this.checkBox_import_fastMode.Checked);
                 && outputfile != null)
             {
                 if (bAppend == true)
-                    outputfile.Seek(0, SeekOrigin.End);	// ¾ßÓĞ×·¼ÓµÄÄÜÁ¦
+                    outputfile.Seek(0, SeekOrigin.End);	// å…·æœ‰è¿½åŠ çš„èƒ½åŠ›
                 else
                     outputfile.SetLength(0);
             }
 
-            WriteLog("¿ªÊ¼Êä³ö");
+            WriteLog("å¼€å§‹è¾“å‡º");
 
             try
             {
@@ -4213,7 +4213,7 @@ this.checkBox_import_fastMode.Checked);
                         strInfo += "\r\n";
                     strInfo += "" + strDbName;
 
-                    // Êµ¼Ê´¦ÀíµÄÊ×Î²ºÅ
+                    // å®é™…å¤„ç†çš„é¦–å°¾å·
                     string strRealStartNo = "";
                     string strRealEndNo = "";
 
@@ -4222,7 +4222,7 @@ this.checkBox_import_fastMode.Checked);
                     if (checkBox_export_delete.Checked == true)
                     {
                         result = MessageBox.Show(this,
-                            "È·ÊµÒªÉ¾³ı '" + respath.Path + "' ÄÚÖ¸¶¨·¶Î§µÄ¼ÇÂ¼?\r\n\r\n---------\r\n(ÊÇ)É¾³ı (·ñ)·ÅÆúÅú´¦Àí",
+                            "ç¡®å®è¦åˆ é™¤ '" + respath.Path + "' å†…æŒ‡å®šèŒƒå›´çš„è®°å½•?\r\n\r\n---------\r\n(æ˜¯)åˆ é™¤ (å¦)æ”¾å¼ƒæ‰¹å¤„ç†",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
@@ -4238,18 +4238,18 @@ this.checkBox_import_fastMode.Checked);
 
                     //string strDbName = respath.Path;
 
-                    // Èç¹ûÎª¶à¿âÊä³ö
+                    // å¦‚æœä¸ºå¤šåº“è¾“å‡º
                     if (dbpaths.Length > 0)
                     {
-                        // Èç¹ûÎªÈ«Ñ¡
+                        // å¦‚æœä¸ºå…¨é€‰
                         if (this.radioButton_all.Checked == true)
                         {
-                            // »Ö¸´Îª×î´ó·¶Î§
+                            // æ¢å¤ä¸ºæœ€å¤§èŒƒå›´
                             this.textBox_startNo.Text = "1";
                             this.textBox_endNo.Text = "9999999999";
                         }
 
-                        // Ğ£ÑéÆğÖ¹ºÅ
+                        // æ ¡éªŒèµ·æ­¢å·
                         if (checkBox_verifyNumber.Checked == true)
                         {
                             nRet = VerifyRange(channel,
@@ -4260,10 +4260,10 @@ this.checkBox_import_fastMode.Checked);
 
                             if (nRet == 0)
                             {
-                                // ¿âÖĞÎŞ¼ÇÂ¼
-                                AutoCloseMessageBox.Show(this, "Êı¾İ¿â " + strDbName + " ÖĞÎŞ¼ÇÂ¼¡£");
-                                strInfo += "(ÎŞ¼ÇÂ¼)";
-                                WriteLog("·¢ÏÖÊı¾İ¿â " + strDbName + " ÖĞÎŞ¼ÇÂ¼");
+                                // åº“ä¸­æ— è®°å½•
+                                AutoCloseMessageBox.Show(this, "æ•°æ®åº“ " + strDbName + " ä¸­æ— è®°å½•ã€‚");
+                                strInfo += "(æ— è®°å½•)";
+                                WriteLog("å‘ç°æ•°æ®åº“ " + strDbName + " ä¸­æ— è®°å½•");
                                 continue;
                             }
                         }
@@ -4271,12 +4271,12 @@ this.checkBox_import_fastMode.Checked);
                         {
                             if (this.textBox_startNo.Text == "")
                             {
-                                strError = "ÉĞÎ´Ö¸¶¨ÆğÊ¼ºÅ";
+                                strError = "å°šæœªæŒ‡å®šèµ·å§‹å·";
                                 goto ERROR1;
                             }
                             if (this.textBox_endNo.Text == "")
                             {
-                                strError = "ÉĞÎ´Ö¸¶¨½áÊøºÅ";
+                                strError = "å°šæœªæŒ‡å®šç»“æŸå·";
                                 goto ERROR1;
                             }
                         }
@@ -4284,13 +4284,13 @@ this.checkBox_import_fastMode.Checked);
 
                     string strOutputStartNo = "";
                     string strOutputEndNo = "";
-                    // ËäÈ»½çÃæ²»ÈÃĞ£ÑéÆğÖ¹ºÅ£¬µ«ÊÇÒ²ÒªĞ£Ñé£¬ÎªÁËÉèÖÃºÃ½ø¶ÈÌõ
+                    // è™½ç„¶ç•Œé¢ä¸è®©æ ¡éªŒèµ·æ­¢å·ï¼Œä½†æ˜¯ä¹Ÿè¦æ ¡éªŒï¼Œä¸ºäº†è®¾ç½®å¥½è¿›åº¦æ¡
                     if (checkBox_verifyNumber.Checked == false)
                     {
-                        // Ğ£ÑéÆğÖ¹ºÅ
+                        // æ ¡éªŒèµ·æ­¢å·
                         // return:
-                        //      0   ²»´æÔÚ¼ÇÂ¼
-                        //      1   ´æÔÚ¼ÇÂ¼
+                        //      0   ä¸å­˜åœ¨è®°å½•
+                        //      1   å­˜åœ¨è®°å½•
                         nRet = VerifyRange(channel,
                             strDbName,
                             this.textBox_startNo.Text,
@@ -4314,7 +4314,7 @@ this.checkBox_import_fastMode.Checked);
                         out nStart,
                         out nEnd);
 
-                    // Ì½²âµ½µÄºÅÂë
+                    // æ¢æµ‹åˆ°çš„å·ç 
                     long nOutputEnd = 0;
                     long nOutputStart = 0;
                     if (checkBox_verifyNumber.Checked == false)
@@ -4326,7 +4326,7 @@ this.checkBox_import_fastMode.Checked);
                             out nOutputEnd);
                     }
 
-                    // ÉèÖÃ½ø¶ÈÌõ·¶Î§
+                    // è®¾ç½®è¿›åº¦æ¡èŒƒå›´
                     if (checkBox_verifyNumber.Checked == true)
                     {
 
@@ -4356,12 +4356,12 @@ this.checkBox_import_fastMode.Checked);
                     }
 
 
-                    bool bFirst = true;	// ÊÇ·ñÎªµÚÒ»´ÎÈ¡¼ÇÂ¼
+                    bool bFirst = true;	// æ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡å–è®°å½•
 
                     string strID = this.textBox_startNo.Text;
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("ÕıÔÚµ¼³öÊı¾İ");
+                    stop.Initial("æ­£åœ¨å¯¼å‡ºæ•°æ®");
                     stop.BeginLoop();
 
                     EnableControls(false);
@@ -4377,27 +4377,27 @@ this.checkBox_import_fastMode.Checked);
 
                     }
 
-                    WriteLog("¿ªÊ¼Êä³öÊı¾İ¿â '"+strDbName+"' ÄÚµÄÊı¾İ¼ÇÂ¼");
+                    WriteLog("å¼€å§‹è¾“å‡ºæ•°æ®åº“ '"+strDbName+"' å†…çš„æ•°æ®è®°å½•");
 
                     m_nRecordCount = 0;
-                    // Ñ­»·
+                    // å¾ªç¯
                     for (; ; )
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop.State != 0)
                         {
-                            WriteLog("´ò¿ª¶Ô»°¿ò 'È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?'");
+                            WriteLog("æ‰“å¼€å¯¹è¯æ¡† 'ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?'");
                             DialogResult result = MessageBox.Show(this,
-                                "È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+                                "ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
                                 "dp2batch",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Question,
                                 MessageBoxDefaultButton.Button2);
-                            WriteLog("¹Ø±Õ¶Ô»°¿ò 'È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?'");
+                            WriteLog("å…³é—­å¯¹è¯æ¡† 'ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?'");
                             if (result == DialogResult.Yes)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 goto ERROR1;
                             }
                             else
@@ -4411,7 +4411,7 @@ this.checkBox_import_fastMode.Checked);
                         if (outputfile != null)
                             strStyle = "data,content,timestamp,outputpath";
                         else
-                            strStyle = "timestamp,outputpath";	// ÓÅ»¯
+                            strStyle = "timestamp,outputpath";	// ä¼˜åŒ–
 
                         if (bFirst == true)
                         {
@@ -4422,12 +4422,12 @@ this.checkBox_import_fastMode.Checked);
                             if (bAsc == true)
                             {
                                 strStyle += ",next";
-                                strDirectionComment = "µÄºóÒ»Ìõ¼ÇÂ¼";
+                                strDirectionComment = "çš„åä¸€æ¡è®°å½•";
                             }
                             else
                             {
                                 strStyle += ",prev";
-                                strDirectionComment = "µÄÇ°Ò»Ìõ¼ÇÂ¼";
+                                strDirectionComment = "çš„å‰ä¸€æ¡è®°å½•";
                             }
                         }
 
@@ -4443,10 +4443,10 @@ this.checkBox_import_fastMode.Checked);
                         bool bNeedRetry = true;
 
                     REDO_GETRES:
-                        // »ñµÃ×ÊÔ´
+                        // è·å¾—èµ„æº
                         // return:
-                        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-                        //		0	³É¹¦
+                        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+                        //		0	æˆåŠŸ
                         long lRet = channel.GetRes(strPath,
                             strStyle,
                             out strXmlBody,
@@ -4464,21 +4464,21 @@ this.checkBox_import_fastMode.Checked);
                                 {
                                     if (checkBox_forceLoop.Checked == true)
                                     {
-                                        string strText = "¼ÇÂ¼ " + strID + strDirectionComment + " ²»´æÔÚ¡£\r\n\r\n°´ È·ÈÏ ¼ÌĞø¡£";
-                                        WriteLog("´ò¿ª¶Ô»°¿ò '"+strText.Replace("\r\n", "\\n")+"'");
+                                        string strText = "è®°å½• " + strID + strDirectionComment + " ä¸å­˜åœ¨ã€‚\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­ã€‚";
+                                        WriteLog("æ‰“å¼€å¯¹è¯æ¡† '"+strText.Replace("\r\n", "\\n")+"'");
                                         AutoCloseMessageBox.Show(this, strText);
-                                        WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                                        WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
 
                                         bFirst = false;
                                         goto CONTINUE;
                                     }
                                     else
                                     {
-                                        // Èç¹û²»ÒªÇ¿ÖÆÑ­»·£¬´ËÊ±Ò²²»ÄÜ½áÊø£¬·ñÔò»áÈÃÓÃ»§ÒÔÎªÊı¾İ¿âÀïÃæ¸ù±¾Ã»ÓĞÊı¾İ
-                                        string strText = "ÄúÎªÊı¾İ¿â " + strDbName + " Ö¸¶¨µÄÊ×¼ÇÂ¼ " + strID + strDirectionComment + " ²»´æÔÚ¡£\r\n\r\n(×¢£ºÎª±ÜÃâ³öÏÖ´ËÌáÊ¾£¬¿ÉÔÚ²Ù×÷Ç°¹´Ñ¡¡°Ğ£×¼Ê×Î²ID¡±)\r\n\r\n°´ È·ÈÏ ¼ÌĞøÏòºóÕÒ...";
-                                        WriteLog("´ò¿ª¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                                        // å¦‚æœä¸è¦å¼ºåˆ¶å¾ªç¯ï¼Œæ­¤æ—¶ä¹Ÿä¸èƒ½ç»“æŸï¼Œå¦åˆ™ä¼šè®©ç”¨æˆ·ä»¥ä¸ºæ•°æ®åº“é‡Œé¢æ ¹æœ¬æ²¡æœ‰æ•°æ®
+                                        string strText = "æ‚¨ä¸ºæ•°æ®åº“ " + strDbName + " æŒ‡å®šçš„é¦–è®°å½• " + strID + strDirectionComment + " ä¸å­˜åœ¨ã€‚\r\n\r\n(æ³¨ï¼šä¸ºé¿å…å‡ºç°æ­¤æç¤ºï¼Œå¯åœ¨æ“ä½œå‰å‹¾é€‰â€œæ ¡å‡†é¦–å°¾IDâ€)\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­å‘åæ‰¾...";
+                                        WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                                         AutoCloseMessageBox.Show(this, strText);
-                                        WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                                        WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
 
                                         bFirst = false;
                                         goto CONTINUE;
@@ -4490,25 +4490,25 @@ this.checkBox_import_fastMode.Checked);
 
                                     if (bFirst == true)
                                     {
-                                        strError = "¼ÇÂ¼ " + strID + strDirectionComment + " ²»´æÔÚ¡£´¦Àí½áÊø¡£";
+                                        strError = "è®°å½• " + strID + strDirectionComment + " ä¸å­˜åœ¨ã€‚å¤„ç†ç»“æŸã€‚";
                                     }
                                     else
                                     {
                                         if (bAsc == true)
-                                            strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÄ©Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+                                            strError = "è®°å½• " + strID + " æ˜¯æœ€æœ«ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
                                         else
-                                            strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÇ°Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+                                            strError = "è®°å½• " + strID + " æ˜¯æœ€å‰ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
                                     }
 
                                     if (dbpaths.Length > 1)
-                                        break;  // ¶à¿âÇé¿ö£¬¼ÌĞøÆäËü¿âÑ­»·
+                                        break;  // å¤šåº“æƒ…å†µï¼Œç»§ç»­å…¶å®ƒåº“å¾ªç¯
                                     else
                                     {
-                                        bNeedRetry = false; // µ¥¿âÇé¿ö£¬Ò²Ã»ÓĞ±ØÒª³öÏÖÖØÊÔ¶Ô»°¿ò
+                                        bNeedRetry = false; // å•åº“æƒ…å†µï¼Œä¹Ÿæ²¡æœ‰å¿…è¦å‡ºç°é‡è¯•å¯¹è¯æ¡†
 
-                                        WriteLog("´ò¿ª¶Ô»°¿ò '" + strError.Replace("\r\n", "\\n") + "'");
+                                        WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strError.Replace("\r\n", "\\n") + "'");
                                         MessageBox.Show(this, strError);
-                                        WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strError.Replace("\r\n", "\\n") + "'");
+                                        WriteLog("å…³é—­å¯¹è¯æ¡† '" + strError.Replace("\r\n", "\\n") + "'");
                                         break;
                                     }
                                 }
@@ -4518,24 +4518,24 @@ this.checkBox_import_fastMode.Checked);
                             {
                                 bFirst = false;
                                 bFoundRecord = false;
-                                // °Ñid½âÎö³öÀ´
+                                // æŠŠidè§£æå‡ºæ¥
                                 strID = ResPath.GetRecordId(strOutputPath);
                                 goto CONTINUE;
 
                             }
 
-                            // ÔÊĞíÖØÊÔ
+                            // å…è®¸é‡è¯•
                             if (bNeedRetry == true)
                             {
-                                string strText = "»ñÈ¡¼ÇÂ¼ '" + strPath + "' (style='" + strStyle + "')Ê±³öÏÖ´íÎó: " + strError + "\r\n\r\nÖØÊÔ£¬»¹ÊÇÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?\r\n(Retry ÖØÊÔ£»Cancel ÖĞ¶ÏÅú´¦Àí)";
-                                WriteLog("´ò¿ª¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                                string strText = "è·å–è®°å½• '" + strPath + "' (style='" + strStyle + "')æ—¶å‡ºç°é”™è¯¯: " + strError + "\r\n\r\né‡è¯•ï¼Œè¿˜æ˜¯ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?\r\n(Retry é‡è¯•ï¼›Cancel ä¸­æ–­æ‰¹å¤„ç†)";
+                                WriteLog("æ‰“å¼€å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                                 DialogResult redo_result = MessageBox.Show(this,
                                     strText,
                                     "dp2batch",
                                     MessageBoxButtons.RetryCancel,
                                     MessageBoxIcon.Question,
                                     MessageBoxDefaultButton.Button1);
-                                WriteLog("¹Ø±Õ¶Ô»°¿ò '" + strText.Replace("\r\n", "\\n") + "'");
+                                WriteLog("å…³é—­å¯¹è¯æ¡† '" + strText.Replace("\r\n", "\\n") + "'");
                                 if (redo_result == DialogResult.Cancel)
                                     goto ERROR1;
                                 goto
@@ -4552,7 +4552,7 @@ this.checkBox_import_fastMode.Checked);
                         {
                             bFirst = false;
                             bFoundRecord = false;
-                            // °Ñid½âÎö³öÀ´
+                            // æŠŠidè§£æå‡ºæ¥
                             strID = ResPath.GetRecordId(strOutputPath);
                             goto CONTINUE;
                         }
@@ -4561,9 +4561,9 @@ this.checkBox_import_fastMode.Checked);
 
                         bFoundRecord = true;
 
-                        // °Ñid½âÎö³öÀ´
+                        // æŠŠidè§£æå‡ºæ¥
                         strID = ResPath.GetRecordId(strOutputPath);
-                        stop.SetMessage("ÒÑµ¼³ö¼ÇÂ¼ " + strOutputPath + "  " + m_nRecordCount.ToString());
+                        stop.SetMessage("å·²å¯¼å‡ºè®°å½• " + strOutputPath + "  " + m_nRecordCount.ToString());
 
                         if (String.IsNullOrEmpty(strRealStartNo) == true)
                         {
@@ -4574,7 +4574,7 @@ this.checkBox_import_fastMode.Checked);
 
                     CONTINUE:
 
-                        // ÊÇ·ñ³¬¹ıÑ­»··¶Î§
+                        // æ˜¯å¦è¶…è¿‡å¾ªç¯èŒƒå›´
                         try
                         {
                             nCur = Convert.ToInt64(strID);
@@ -4587,7 +4587,7 @@ this.checkBox_import_fastMode.Checked);
 
                         if (checkBox_verifyNumber.Checked == false)
                         {
-                            // Èç¹ûµ±Ç°¼ÇÂ¼ºÅÂëÍ»ÆÆÔ¤¼ÆµÄÍ·²¿ºÍÎ²²¿
+                            // å¦‚æœå½“å‰è®°å½•å·ç çªç ´é¢„è®¡çš„å¤´éƒ¨å’Œå°¾éƒ¨
                             if (nCur > nOutputEnd
                                 || nCur < nOutputStart)
                             {
@@ -4597,7 +4597,7 @@ this.checkBox_import_fastMode.Checked);
                                 if (nCur < nOutputStart)
                                     nOutputStart = nCur;
 
-                                // ÖØĞÂ¼ÆËãºÍÉèÖÃ½ø¶ÈÌõ
+                                // é‡æ–°è®¡ç®—å’Œè®¾ç½®è¿›åº¦æ¡
                                 long nMax = nOutputEnd - nOutputStart;
                                 if (nMax < 0)
                                     nMax *= -1;
@@ -4614,7 +4614,7 @@ this.checkBox_import_fastMode.Checked);
 
                         string strMarc = "";
 
-                        // ½«Xml×ª»»ÎªMARC
+                        // å°†Xmlè½¬æ¢ä¸ºMARC
                         if (exportType == ExportFileType.ISO2709File
                             && bFoundRecord == true)    // 2008/11/13 
                         {
@@ -4623,15 +4623,15 @@ this.checkBox_import_fastMode.Checked);
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "¼ÇÂ¼ " + strOutputPath + " ÔÚ½«XML¸ñÊ½×ª»»ÎªMARCÊ±³ö´í: " + strError;
+                                strError = "è®°å½• " + strOutputPath + " åœ¨å°†XMLæ ¼å¼è½¬æ¢ä¸ºMARCæ—¶å‡ºé”™: " + strError;
                                 goto ERROR1;
                             }
                         }
 
                         if (this.MarcFilter != null)
                         {
-                            // ´¥·¢filterÖĞµÄRecordÏà¹Ø¶¯×÷
-                            // TODO: ÓĞ¿ÉÄÜstrMarcÎª¿ÕÓ´£¬ĞèÒª²âÊÔÒ»ÏÂ
+                            // è§¦å‘filterä¸­çš„Recordç›¸å…³åŠ¨ä½œ
+                            // TODO: æœ‰å¯èƒ½strMarcä¸ºç©ºå“Ÿï¼Œéœ€è¦æµ‹è¯•ä¸€ä¸‹
                             nRet = MarcFilter.DoRecord(
                                 null,
                                 strMarc,
@@ -4641,21 +4641,21 @@ this.checkBox_import_fastMode.Checked);
                                 goto ERROR1;
                         }
 
-                        // ´¥·¢ScriptµÄOutputing()´úÂë
+                        // è§¦å‘Scriptçš„Outputing()ä»£ç 
                         if (bFoundRecord == true && this.AssemblyMain != null)
                         {
-                            // ÕâĞ©±äÁ¿ÒªÏÈ³õÊ¼»¯,ÒòÎªfilter´úÂë¿ÉÄÜÓÃµ½ÕâĞ©Batch³ÉÔ±.
+                            // è¿™äº›å˜é‡è¦å…ˆåˆå§‹åŒ–,å› ä¸ºfilterä»£ç å¯èƒ½ç”¨åˆ°è¿™äº›Batchæˆå‘˜.
                             batchObj.XmlRecord = strXmlBody;
 
                             batchObj.MarcSyntax = this.CurMarcSyntax;
 
-                            batchObj.MarcRecord = strMarc;	// MARC¼ÇÂ¼Ìå
-                            batchObj.MarcRecordChanged = false;	// Îª±¾ÂÖScriptÔËĞĞ×¼±¸³õÊ¼×´Ì¬
+                            batchObj.MarcRecord = strMarc;	// MARCè®°å½•ä½“
+                            batchObj.MarcRecordChanged = false;	// ä¸ºæœ¬è½®Scriptè¿è¡Œå‡†å¤‡åˆå§‹çŠ¶æ€
 
                             batchObj.SearchPanel.ServerUrl = channel.Url;
                             batchObj.ServerUrl = channel.Url;
-                            batchObj.RecPath = strOutputPath;	// ¼ÇÂ¼Â·¾¶
-                            batchObj.RecIndex = m_nRecordCount;	// µ±Ç°¼ÇÂ¼ÔÚÒ»ÅúÖĞµÄĞòºÅ
+                            batchObj.RecPath = strOutputPath;	// è®°å½•è·¯å¾„
+                            batchObj.RecIndex = m_nRecordCount;	// å½“å‰è®°å½•åœ¨ä¸€æ‰¹ä¸­çš„åºå·
                             batchObj.TimeStamp = baOutputTimeStamp;
 
 
@@ -4671,11 +4671,11 @@ this.checkBox_import_fastMode.Checked);
                             if (args.Continue == ContinueType.SkipAll)
                                 goto CONTINUEDBS;
 
-                            // ¹Û²ìÓÃÓÚÊä³öµÄMARC¼ÇÂ¼ÊÇ·ñ±»¸Ä±ä
+                            // è§‚å¯Ÿç”¨äºè¾“å‡ºçš„MARCè®°å½•æ˜¯å¦è¢«æ”¹å˜
                             if (batchObj.MarcRecordChanged == true)
                                 strMarc = batchObj.MarcRecord;
 
-                            // ¹Û²ìXML¼ÇÂ¼ÊÇ·ñ±»¸Ä±ä
+                            // è§‚å¯ŸXMLè®°å½•æ˜¯å¦è¢«æ”¹å˜
                             if (batchObj.XmlRecordChanged == true)
                                 strXmlBody = batchObj.XmlRecord;
 
@@ -4687,7 +4687,7 @@ this.checkBox_import_fastMode.Checked);
                         {
                             if (exportType == ExportFileType.BackupFile)
                             {
-                                // Ğ´´ÅÅÌ
+                                // å†™ç£ç›˜
                                 nRet = WriteRecordToBackupFile(
                                     outputfile,
                                     strDbName,
@@ -4698,13 +4698,13 @@ this.checkBox_import_fastMode.Checked);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    // Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+                                    // è¯¢é—®æ˜¯å¦ç»§ç»­
                                     goto ERROR1;
                                 }
                             }
                             else if (exportType == ExportFileType.ISO2709File)
                             {
-                                // Ğ´´ÅÅÌ
+                                // å†™ç£ç›˜
                                 nRet = WriteRecordToISO2709File(
                                     outputfile,
                                     strDbName,
@@ -4718,7 +4718,7 @@ this.checkBox_import_fastMode.Checked);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    // Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+                                    // è¯¢é—®æ˜¯å¦ç»§ç»­
                                     goto ERROR1;
                                 }
                             }
@@ -4736,7 +4736,7 @@ this.checkBox_import_fastMode.Checked);
 
 
                                     // DomUtil.SetAttr(dom.DocumentElement, "xmlns:dprms", DpNs.dprms);
-                                    // ¸ø¸ùÔªËØÉèÖÃ¼¸¸ö²ÎÊı
+                                    // ç»™æ ¹å…ƒç´ è®¾ç½®å‡ ä¸ªå‚æ•°
                                     DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
                                     DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(baOutputTimeStamp));
 
@@ -4745,20 +4745,20 @@ this.checkBox_import_fastMode.Checked);
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = ex.Message;
-                                    // Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+                                    strError = ExceptionUtil.GetAutoText(ex);
+                                    // è¯¢é—®æ˜¯å¦ç»§ç»­
                                     goto ERROR1;
                                 }
 
                             }
                         }
 
-                        // É¾³ı
+                        // åˆ é™¤
                         if (checkBox_export_delete.Checked == true)
                         {
 
                             byte[] baOutputTimeStamp1 = null;
-                            strPath = strOutputPath;	// µÃµ½Êµ¼ÊµÄÂ·¾¶
+                            strPath = strOutputPath;	// å¾—åˆ°å®é™…çš„è·¯å¾„
                             lRet = channel.DoDeleteRes(
                                 strPath,
                                 baOutputTimeStamp,
@@ -4767,10 +4767,10 @@ this.checkBox_import_fastMode.Checked);
                                 out strError);
                             if (lRet == -1)
                             {
-                                // Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+                                // è¯¢é—®æ˜¯å¦ç»§ç»­
                                 goto ERROR1;
                             }
-                            stop.SetMessage("ÒÑÉ¾³ı¼ÇÂ¼" + strPath + "  " + m_nRecordCount.ToString());
+                            stop.SetMessage("å·²åˆ é™¤è®°å½•" + strPath + "  " + m_nRecordCount.ToString());
                         }
 
                         if (bFoundRecord == true)
@@ -4790,7 +4790,7 @@ this.checkBox_import_fastMode.Checked);
                         }
 
 
-                        // ¶ÔÒÑ¾­×÷¹ıµÄ½øĞĞÅĞ¶Ï
+                        // å¯¹å·²ç»ä½œè¿‡çš„è¿›è¡Œåˆ¤æ–­
                         if (bAsc == true && nCur >= nEnd)
                             break;
                         if (bAsc == false && nCur <= nEnd)
@@ -4808,7 +4808,7 @@ this.checkBox_import_fastMode.Checked);
                 //}
 
             CONTINUEDBS:
-                    strInfo += " : " + m_nRecordCount.ToString() + "Ìõ (ID " + strRealStartNo + "-" + strRealEndNo + ")";
+                    strInfo += " : " + m_nRecordCount.ToString() + "æ¡ (ID " + strRealStartNo + "-" + strRealEndNo + ")";
 
                 }   // end of dbpaths loop
 
@@ -4836,11 +4836,11 @@ this.checkBox_import_fastMode.Checked);
             channel = null;
 
             if (checkBox_export_delete.Checked == true)
-                strError = "Êı¾İµ¼³öºÍÉ¾³ıÍê³É¡£\r\n---\r\n" + strInfo;
+                strError = "æ•°æ®å¯¼å‡ºå’Œåˆ é™¤å®Œæˆã€‚\r\n---\r\n" + strInfo;
             else
-                strError = "Êı¾İµ¼³öÍê³É¡£\r\n---\r\n" + strInfo;
+                strError = "æ•°æ®å¯¼å‡ºå®Œæˆã€‚\r\n---\r\n" + strInfo;
 
-            WriteLog("½áÊøÊä³ö");
+            WriteLog("ç»“æŸè¾“å‡º");
 
             return 0;
         ERROR1:
@@ -4853,8 +4853,8 @@ this.checkBox_import_fastMode.Checked);
             return -1;
         }
 
-		// ½«Xml×ª»»ÎªMARC
-		// ¿É¹©C#½Å±¾µ÷ÓÃ
+		// å°†Xmlè½¬æ¢ä¸ºMARC
+		// å¯ä¾›C#è„šæœ¬è°ƒç”¨
 		public int GetMarc(string strXmlBody,
 			out string strMarc,
 			out string strError)
@@ -4862,13 +4862,13 @@ this.checkBox_import_fastMode.Checked);
 			string strOutMarcSyntax = "";
 			strMarc = "";
 
-			// ½«MARCXML¸ñÊ½µÄxml¼ÇÂ¼×ª»»Îªmarc»úÄÚ¸ñÊ½×Ö·û´®
+			// å°†MARCXMLæ ¼å¼çš„xmlè®°å½•è½¬æ¢ä¸ºmarcæœºå†…æ ¼å¼å­—ç¬¦ä¸²
 			// parameters:
-			//		bWarning	==true, ¾¯¸æºó¼ÌĞø×ª»»,²»ÑÏ¸ñ¶Ô´ı´íÎó; = false, ·Ç³£ÑÏ¸ñ¶Ô´ı´íÎó,Óöµ½´íÎóºó²»¼ÌĞø×ª»»
-			//		strMarcSyntax	Ö¸Ê¾marcÓï·¨,Èç¹û==""£¬Ôò×Ô¶¯Ê¶±ğ
-			//		strOutMarcSyntax	out²ÎÊı£¬·µ»Ømarc£¬Èç¹ûstrMarcSyntax == ""£¬·µ»ØÕÒµ½marcÓï·¨£¬·ñÔò·µ»ØÓëÊäÈë²ÎÊıstrMarcSyntaxÏàÍ¬µÄÖµ
+			//		bWarning	==true, è­¦å‘Šåç»§ç»­è½¬æ¢,ä¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯; = false, éå¸¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯,é‡åˆ°é”™è¯¯åä¸ç»§ç»­è½¬æ¢
+			//		strMarcSyntax	æŒ‡ç¤ºmarcè¯­æ³•,å¦‚æœ==""ï¼Œåˆ™è‡ªåŠ¨è¯†åˆ«
+			//		strOutMarcSyntax	outå‚æ•°ï¼Œè¿”å›marcï¼Œå¦‚æœstrMarcSyntax == ""ï¼Œè¿”å›æ‰¾åˆ°marcè¯­æ³•ï¼Œå¦åˆ™è¿”å›ä¸è¾“å…¥å‚æ•°strMarcSyntaxç›¸åŒçš„å€¼
 			int nRet = MarcUtil.Xml2Marc(strXmlBody,
-				true,  // true ±È false Òª¿íËÉ // false,
+				true,  // true æ¯” false è¦å®½æ¾ // false,
 				this.CurMarcSyntax,
 				out strOutMarcSyntax,
 				out strMarc,
@@ -4879,8 +4879,8 @@ this.checkBox_import_fastMode.Checked);
 			return 0;
 		}
 
-        // ÔÚMARC¼ÇÂ¼ÖĞ¼ÓÈëÒ»¸ö-01×Ö¶Î
-        // ×ÜÊÇ²åÈëÔÚµÚÒ»¸ö×Ö¶Î
+        // åœ¨MARCè®°å½•ä¸­åŠ å…¥ä¸€ä¸ª-01å­—æ®µ
+        // æ€»æ˜¯æ’å…¥åœ¨ç¬¬ä¸€ä¸ªå­—æ®µ
         static int AddG01ToMarc(ref string strMARC,
             string strFieldContent,
             out string strError)
@@ -4897,11 +4897,11 @@ this.checkBox_import_fastMode.Checked);
             strMARC = strMARC.Insert(24, "-01" + strFieldContent + new string(MarcUtil.FLDEND, 1));
 
             /*
-        // Èç¹ûÔ­ÓĞ¼ÇÂ¼ÖĞ´æÔÚ-01×Ö¶Î£¬ÔòµÚÒ»¸ö-01×Ö¶Î½«±»¸²¸Ç
+        // å¦‚æœåŸæœ‰è®°å½•ä¸­å­˜åœ¨-01å­—æ®µï¼Œåˆ™ç¬¬ä¸€ä¸ª-01å­—æ®µå°†è¢«è¦†ç›–
             // return:
-            //		-1	³ö´í
-            //		0	Ã»ÓĞÕÒµ½Ö¸¶¨µÄ×Ö¶Î£¬Òò´Ë½«strFieldÄÚÈİ²åÈëµ½ÊÊµ±Î»ÖÃÁË¡£
-            //		1	ÕÒµ½ÁËÖ¸¶¨µÄ×Ö¶Î£¬²¢ÇÒÒ²³É¹¦ÓÃstrFieldÌæ»»µôÁË¡£
+            //		-1	å‡ºé”™
+            //		0	æ²¡æœ‰æ‰¾åˆ°æŒ‡å®šçš„å­—æ®µï¼Œå› æ­¤å°†strFieldå†…å®¹æ’å…¥åˆ°é€‚å½“ä½ç½®äº†ã€‚
+            //		1	æ‰¾åˆ°äº†æŒ‡å®šçš„å­—æ®µï¼Œå¹¶ä¸”ä¹ŸæˆåŠŸç”¨strFieldæ›¿æ¢æ‰äº†ã€‚
             int nRet = MarcUtil.ReplaceField(
                 ref strMARC,
                 "-01",
@@ -4916,7 +4916,7 @@ this.checkBox_import_fastMode.Checked);
             return 1;
         }
 
-        // È¥³ıMARC¼ÇÂ¼ÖĞµÄËùÓĞ-01×Ö¶Î
+        // å»é™¤MARCè®°å½•ä¸­çš„æ‰€æœ‰-01å­—æ®µ
         // return:
         //      -1  error
         //      0   not changed
@@ -4936,9 +4936,9 @@ this.checkBox_import_fastMode.Checked);
                 string strField = "";
                 string strNextFieldName = "";
                 // return:
-                //		-1	³ö´í
-                //		0	ËùÖ¸¶¨µÄ×Ö¶ÎÃ»ÓĞÕÒµ½
-                //		1	ÕÒµ½¡£ÕÒµ½µÄ×Ö¶Î·µ»ØÔÚstrField²ÎÊıÖĞ
+                //		-1	å‡ºé”™
+                //		0	æ‰€æŒ‡å®šçš„å­—æ®µæ²¡æœ‰æ‰¾åˆ°
+                //		1	æ‰¾åˆ°ã€‚æ‰¾åˆ°çš„å­—æ®µè¿”å›åœ¨strFieldå‚æ•°ä¸­
                 int nRet = MarcUtil.GetField(strMARC,
                     "-01",
                     0,
@@ -4954,9 +4954,9 @@ this.checkBox_import_fastMode.Checked);
                     break;
 
                 // return:
-                //		-1	³ö´í
-                //		0	Ã»ÓĞÕÒµ½Ö¸¶¨µÄ×Ö¶Î£¬Òò´Ë½«strFieldÄÚÈİ²åÈëµ½ÊÊµ±Î»ÖÃÁË¡£
-                //		1	ÕÒµ½ÁËÖ¸¶¨µÄ×Ö¶Î£¬²¢ÇÒÒ²³É¹¦ÓÃstrFieldÌæ»»µôÁË¡£
+                //		-1	å‡ºé”™
+                //		0	æ²¡æœ‰æ‰¾åˆ°æŒ‡å®šçš„å­—æ®µï¼Œå› æ­¤å°†strFieldå†…å®¹æ’å…¥åˆ°é€‚å½“ä½ç½®äº†ã€‚
+                //		1	æ‰¾åˆ°äº†æŒ‡å®šçš„å­—æ®µï¼Œå¹¶ä¸”ä¹ŸæˆåŠŸç”¨strFieldæ›¿æ¢æ‰äº†ã€‚
                 nRet = MarcUtil.ReplaceField(
                     ref strMARC,
                     "-01",
@@ -4978,7 +4978,7 @@ this.checkBox_import_fastMode.Checked);
         }
 
 
-		// ½«¼ÇÂ¼Ğ´ÈëISO2709ÎÄ¼ş
+		// å°†è®°å½•å†™å…¥ISO2709æ–‡ä»¶
 		int WriteRecordToISO2709File(
 			Stream outputfile,
 			string strDbName,
@@ -4996,7 +4996,7 @@ this.checkBox_import_fastMode.Checked);
 
 			string strPath = strDbName + "/" + strID;
 
-			long lStart = outputfile.Position;	// ¼ÇÒäÆğÊ¼Î»ÖÃ
+			long lStart = outputfile.Position;	// è®°å¿†èµ·å§‹ä½ç½®
 
 
 			ResPath respath = new ResPath();
@@ -5004,7 +5004,7 @@ this.checkBox_import_fastMode.Checked);
 			respath.Path = strPath;
 
             
-                    // È¥³ıMARC¼ÇÂ¼ÖĞµÄËùÓĞ-01×Ö¶Î
+                    // å»é™¤MARCè®°å½•ä¸­çš„æ‰€æœ‰-01å­—æ®µ
         // return:
         //      -1  error
         //      0   not changed
@@ -5034,13 +5034,13 @@ this.checkBox_import_fastMode.Checked);
             }
 
 			byte [] baResult = null;
-            // ½«MARC»úÄÚ¸ñÊ½×ª»»ÎªISO2709¸ñÊ½
+            // å°†MARCæœºå†…æ ¼å¼è½¬æ¢ä¸ºISO2709æ ¼å¼
             // parameters:
-            //		nMARCType	[in]MARC¸ñÊ½ÀàĞÍ¡£0ÎªUNIMARC 1ÎªUSMARC
-            //		strSourceMARC		[in]»úÄÚ¸ñÊ½MARC¼ÇÂ¼¡£
-            //		targetEncoding	[in]Êä³öISO2709µÄ±àÂë·½Ê½Îª UTF8 codepage-936µÈµÈ
-            //		baResult	[out]Êä³öµÄISO2709¼ÇÂ¼¡£×Ö·û¼¯ÊÜnCharset²ÎÊı¿ØÖÆ¡£
-            //					×¢Òâ£¬»º³åÇøÄ©Î²²»°üº¬0×Ö·û¡£
+            //		nMARCType	[in]MARCæ ¼å¼ç±»å‹ã€‚0ä¸ºUNIMARC 1ä¸ºUSMARC
+            //		strSourceMARC		[in]æœºå†…æ ¼å¼MARCè®°å½•ã€‚
+            //		targetEncoding	[in]è¾“å‡ºISO2709çš„ç¼–ç æ–¹å¼ä¸º UTF8 codepage-936ç­‰ç­‰
+            //		baResult	[out]è¾“å‡ºçš„ISO2709è®°å½•ã€‚å­—ç¬¦é›†å—nCharsetå‚æ•°æ§åˆ¶ã€‚
+            //					æ³¨æ„ï¼Œç¼“å†²åŒºæœ«å°¾ä¸åŒ…å«0å­—ç¬¦ã€‚
             nRet = MarcUtil.CvtJineiToISO2709(
                 strMarc,
                 this.CurMarcSyntax,
@@ -5070,7 +5070,7 @@ this.checkBox_import_fastMode.Checked);
 			*/
 		}
 
-		// ½«Ö÷¼ÇÂ¼ºÍÏà¹Ø×ÊÔ´Ğ´Èë±¸·İÎÄ¼ş
+		// å°†ä¸»è®°å½•å’Œç›¸å…³èµ„æºå†™å…¥å¤‡ä»½æ–‡ä»¶
 		int WriteRecordToBackupFile(
 			Stream outputfile,
 			string strDbName,
@@ -5081,21 +5081,21 @@ this.checkBox_import_fastMode.Checked);
 			out string strError)
 		{
 
-            Debug.Assert(String.IsNullOrEmpty(strXmlBody) == false, "strXmlBody²»ÄÜÎª¿Õ");
+            Debug.Assert(String.IsNullOrEmpty(strXmlBody) == false, "strXmlBodyä¸èƒ½ä¸ºç©º");
 
 			string strPath = strDbName + "/" + strID;
 
-			long lStart = outputfile.Position;	// ¼ÇÒäÆğÊ¼Î»ÖÃ
+			long lStart = outputfile.Position;	// è®°å¿†èµ·å§‹ä½ç½®
 
 			byte [] length = new byte[8];
 
-			outputfile.Write(length, 0, 8);	// ÁÙÊ±Ğ´µãÊı¾İ,Õ¼¾İ¼ÇÂ¼×Ü³¤¶ÈÎ»ÖÃ
+			outputfile.Write(length, 0, 8);	// ä¸´æ—¶å†™ç‚¹æ•°æ®,å æ®è®°å½•æ€»é•¿åº¦ä½ç½®
 
 			ResPath respath = new ResPath();
 			respath.Url = channel.Url;
 			respath.Path = strPath;
 
-			// ¼Ó¹¤ÔªÊı¾İ
+			// åŠ å·¥å…ƒæ•°æ®
             ExportUtil.ChangeMetaData(ref strMetaData,
 				null,
 				null,
@@ -5104,24 +5104,24 @@ this.checkBox_import_fastMode.Checked);
 				respath.FullPath,
 				ByteArray.GetHexTimeStampString(body_timestamp));   // 2005/6/11
 
-			// ÏòbackupÎÄ¼şÖĞ±£´æµÚÒ»¸ö res
+			// å‘backupæ–‡ä»¶ä¸­ä¿å­˜ç¬¬ä¸€ä¸ª res
 			long lRet = Backup.WriteFirstResToBackupFile(
 				outputfile,
 				strMetaData,
 				strXmlBody);
 
-			// ÆäÓà
+			// å…¶ä½™
 
 			string [] ids = null;
 
-			// µÃµ½Xml¼ÇÂ¼ÖĞËùÓĞ<file>ÔªËØµÄidÊôĞÔÖµ
+			// å¾—åˆ°Xmlè®°å½•ä¸­æ‰€æœ‰<file>å…ƒç´ çš„idå±æ€§å€¼
 			int nRet = ExportUtil.GetFileIds(strXmlBody,
 				out ids,
 				out strError);
 			if (nRet == -1) 
 			{
-				outputfile.SetLength(lStart);	// °Ñ±¾´Î×·¼ÓĞ´ÈëµÄÈ«²¿È¥µô
-				strError = "GetFileIds()³ö´í£¬ÎŞ·¨»ñµÃ XML ¼ÇÂ¼ÖĞµÄ <dprms:file>ÔªËØµÄ id ÊôĞÔ£¬ Òò´Ë±£´æ¼ÇÂ¼Ê§°Ü£¬Ô­Òò: "+ strError;
+				outputfile.SetLength(lStart);	// æŠŠæœ¬æ¬¡è¿½åŠ å†™å…¥çš„å…¨éƒ¨å»æ‰
+				strError = "GetFileIds()å‡ºé”™ï¼Œæ— æ³•è·å¾— XML è®°å½•ä¸­çš„ <dprms:file>å…ƒç´ çš„ id å±æ€§ï¼Œ å› æ­¤ä¿å­˜è®°å½•å¤±è´¥ï¼ŒåŸå› : "+ strError;
 				goto ERROR1;
 			}
 
@@ -5136,15 +5136,15 @@ this.checkBox_import_fastMode.Checked);
 				out strError);
 			if (nRet == -1) 
 			{
-				outputfile.SetLength(lStart);	// °Ñ±¾´Î×·¼ÓĞ´ÈëµÄÈ«²¿È¥µô
-				strError = "WriteResToBackupFile()³ö´í£¬Òò´Ë±£´æ¼ÇÂ¼Ê§°Ü£¬Ô­Òò: "+ strError;
+				outputfile.SetLength(lStart);	// æŠŠæœ¬æ¬¡è¿½åŠ å†™å…¥çš„å…¨éƒ¨å»æ‰
+				strError = "WriteResToBackupFile()å‡ºé”™ï¼Œå› æ­¤ä¿å­˜è®°å½•å¤±è´¥ï¼ŒåŸå› : "+ strError;
 				goto ERROR1;
 			}
 
 			///
 
 
-			// Ğ´Èë×Ü³¤¶È
+			// å†™å…¥æ€»é•¿åº¦
 			long lTotalLength = outputfile.Position - lStart - 8;
 			byte[] data = BitConverter.GetBytes(lTotalLength);
 
@@ -5158,7 +5158,7 @@ this.checkBox_import_fastMode.Checked);
 				return -1;
 		}
 
-		// ÏÂÔØ×ÊÔ´£¬±£´æµ½±¸·İÎÄ¼ş
+		// ä¸‹è½½èµ„æºï¼Œä¿å­˜åˆ°å¤‡ä»½æ–‡ä»¶
 		public static int WriteResToBackupFile(
 			IWin32Window owner,
 			Stream outputfile,
@@ -5175,19 +5175,19 @@ this.checkBox_import_fastMode.Checked);
 
 			for(int i=0;i<res_ids.Length;i++)
 			{
-				Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+				Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 				if (stop.State != 0)
 				{
 					DialogResult result = MessageBox.Show(owner,
-						"È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+						"ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
 						"dp2batch",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
 						MessageBoxDefaultButton.Button2);
 					if (result == DialogResult.Yes)
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï";
+						strError = "ç”¨æˆ·ä¸­æ–­";
 						return -1;
 					}
 					else 
@@ -5206,16 +5206,16 @@ this.checkBox_import_fastMode.Checked);
 				string strMetaData;
 
 				if (stop != null)
-					stop.SetMessage("ÕıÔÚÏÂÔØ " + strResPath);
+					stop.SetMessage("æ­£åœ¨ä¸‹è½½ " + strResPath);
 
 				long lResStart = 0;
-				// Ğ´resµÄÍ·¡£
-				// Èç¹û²»ÄÜÔ¤ÏÈÈ·ÖªÕû¸öresµÄ³¤¶È£¬¿ÉÒÔÓÃËæ±ãÒ»¸ölTotalLengthÖµµ÷ÓÃ±¾º¯Êı£¬
-				// µ«ÊÇĞèÒª¼ÇÒäÏÂº¯ÊıËù·µ»ØµÄlStart£¬×îºóµ÷ÓÃEndWriteResToBackupFile()¡£
-				// Èç¹ûÄÜÔ¤ÏÈÈ·ÖªÕû¸öresµÄ³¤¶È£¬Ôò×îºó²»±Øµ÷ÓÃEndWriteResToBackupFile()
+				// å†™resçš„å¤´ã€‚
+				// å¦‚æœä¸èƒ½é¢„å…ˆç¡®çŸ¥æ•´ä¸ªresçš„é•¿åº¦ï¼Œå¯ä»¥ç”¨éšä¾¿ä¸€ä¸ªlTotalLengthå€¼è°ƒç”¨æœ¬å‡½æ•°ï¼Œ
+				// ä½†æ˜¯éœ€è¦è®°å¿†ä¸‹å‡½æ•°æ‰€è¿”å›çš„lStartï¼Œæœ€åè°ƒç”¨EndWriteResToBackupFile()ã€‚
+				// å¦‚æœèƒ½é¢„å…ˆç¡®çŸ¥æ•´ä¸ªresçš„é•¿åº¦ï¼Œåˆ™æœ€åä¸å¿…è°ƒç”¨EndWriteResToBackupFile()
 				lRet = Backup.BeginWriteResToBackupFile(
 					outputfile,
-					0,	// Î´Öª
+					0,	// æœªçŸ¥
 					out lResStart);
 
 				byte [] baOutputTimeStamp = null;
@@ -5223,19 +5223,19 @@ this.checkBox_import_fastMode.Checked);
 
             REDO_GETRES:
 				lRet = channel.GetRes(strResPath,
-					(Stream)null,	// ¹ÊÒâ²»»ñÈ¡×ÊÔ´Ìå
+					(Stream)null,	// æ•…æ„ä¸è·å–èµ„æºä½“
 					stop,
 					"metadata,timestamp,outputpath",
 					null,
-					out strMetaData,	// µ«ÊÇÒª»ñµÃmetadata
+					out strMetaData,	// ä½†æ˜¯è¦è·å¾—metadata
 					out baOutputTimeStamp,
 					out strOutputPath,
 					out strError);
                 if (lRet == -1)
                 {
-                    // TODO: ÔÊĞíÖØÊÔ
+                    // TODO: å…è®¸é‡è¯•
                     DialogResult redo_result = MessageBox.Show(owner,
-                        "»ñÈ¡¼ÇÂ¼ '" + strResPath + "' Ê±³öÏÖ´íÎó: " + strError + "\r\n\r\nÖØÊÔ£¬»¹ÊÇÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?\r\n(Retry ÖØÊÔ£»Cancel ÖĞ¶ÏÅú´¦Àí)",
+                        "è·å–è®°å½• '" + strResPath + "' æ—¶å‡ºç°é”™è¯¯: " + strError + "\r\n\r\né‡è¯•ï¼Œè¿˜æ˜¯ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?\r\n(Retry é‡è¯•ï¼›Cancel ä¸­æ–­æ‰¹å¤„ç†)",
                         "dp2batch",
                         MessageBoxButtons.RetryCancel,
                         MessageBoxIcon.Question,
@@ -5252,7 +5252,7 @@ this.checkBox_import_fastMode.Checked);
 				respath.Url = channel.Url;
 				respath.Path = strOutputPath;	// strResPath;
 
-				// strMetaData»¹Òª¼ÓÈë×ÊÔ´id?
+				// strMetaDataè¿˜è¦åŠ å…¥èµ„æºid?
                 ExportUtil.ChangeMetaData(ref strMetaData,
 					strID,
 					null,
@@ -5268,19 +5268,19 @@ this.checkBox_import_fastMode.Checked);
 					return -1;
 
 				long lBodyStart = 0;
-				// Ğ´res bodyµÄÍ·¡£
-				// Èç¹û²»ÄÜÔ¤ÏÈÈ·ÖªbodyµÄ³¤¶È£¬¿ÉÒÔÓÃËæ±ãÒ»¸ölBodyLengthÖµµ÷ÓÃ±¾º¯Êı£¬
-				// µ«ÊÇĞèÒª¼ÇÒäÏÂº¯ÊıËù·µ»ØµÄlBodyStart£¬×îºóµ÷ÓÃEndWriteResBodyToBackupFile()¡£
-				// Èç¹ûÄÜÔ¤ÏÈÈ·ÖªbodyµÄ³¤¶È£¬Ôò×îºó²»±Øµ÷ÓÃEndWriteResBodyToBackupFile()
+				// å†™res bodyçš„å¤´ã€‚
+				// å¦‚æœä¸èƒ½é¢„å…ˆç¡®çŸ¥bodyçš„é•¿åº¦ï¼Œå¯ä»¥ç”¨éšä¾¿ä¸€ä¸ªlBodyLengthå€¼è°ƒç”¨æœ¬å‡½æ•°ï¼Œ
+				// ä½†æ˜¯éœ€è¦è®°å¿†ä¸‹å‡½æ•°æ‰€è¿”å›çš„lBodyStartï¼Œæœ€åè°ƒç”¨EndWriteResBodyToBackupFile()ã€‚
+				// å¦‚æœèƒ½é¢„å…ˆç¡®çŸ¥bodyçš„é•¿åº¦ï¼Œåˆ™æœ€åä¸å¿…è°ƒç”¨EndWriteResBodyToBackupFile()
 				lRet = Backup.BeginWriteResBodyToBackupFile(
 					outputfile,
-					0, // Î´Öª
+					0, // æœªçŸ¥
 					out lBodyStart);
 				if (lRet == -1)
 					return -1;
 
 				if (stop != null)
-					stop.SetMessage("ÕıÔÚÏÂÔØ " + strResPath + " µÄÊı¾İÌå");
+					stop.SetMessage("æ­£åœ¨ä¸‹è½½ " + strResPath + " çš„æ•°æ®ä½“");
 
             REDO_GETRES_1:
 				lRet = channel.GetRes(strResPath,
@@ -5296,13 +5296,13 @@ this.checkBox_import_fastMode.Checked);
 				{
 					if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
 					{
-						// ¿Õ¼ÇÂ¼
+						// ç©ºè®°å½•
 					}
 					else 
 					{
-                        // TODO: ÔÊĞíÖØÊÔ
+                        // TODO: å…è®¸é‡è¯•
                         DialogResult redo_result = MessageBox.Show(owner,
-                            "»ñÈ¡¼ÇÂ¼ '" + strResPath + "' Ê±³öÏÖ´íÎó: " + strError + "\r\n\r\nÖØÊÔ£¬»¹ÊÇÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?\r\n(Retry ÖØÊÔ£»Cancel ÖĞ¶ÏÅú´¦Àí)",
+                            "è·å–è®°å½• '" + strResPath + "' æ—¶å‡ºç°é”™è¯¯: " + strError + "\r\n\r\né‡è¯•ï¼Œè¿˜æ˜¯ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?\r\n(Retry é‡è¯•ï¼›Cancel ä¸­æ–­æ‰¹å¤„ç†)",
                             "dp2batch",
                             MessageBoxButtons.RetryCancel,
                             MessageBoxIcon.Question,
@@ -5315,7 +5315,7 @@ this.checkBox_import_fastMode.Checked);
 				}
 
 				long lBodyLength = outputfile.Position - lBodyStart - 8;
-				// res bodyÊÕÎ²
+				// res bodyæ”¶å°¾
 				lRet = Backup.EndWriteResBodyToBackupFile(
 					outputfile,
 					lBodyLength,
@@ -5335,7 +5335,7 @@ this.checkBox_import_fastMode.Checked);
 
 			/*
 			if (stop != null)
-				stop.SetMessage("±£´æ×ÊÔ´µ½±¸·İÎÄ¼şÈ«²¿Íê³É");
+				stop.SetMessage("ä¿å­˜èµ„æºåˆ°å¤‡ä»½æ–‡ä»¶å…¨éƒ¨å®Œæˆ");
 			*/
 
 			return 0;
@@ -5343,8 +5343,8 @@ this.checkBox_import_fastMode.Checked);
 
 
         // return:
-        //		true	ÆğÊ¼ºÅÎªĞ¡ºÅ
-        //		false	ÆğÊ¼ºÅÎª´óºÅ
+        //		true	èµ·å§‹å·ä¸ºå°å·
+        //		false	èµ·å§‹å·ä¸ºå¤§å·
         static bool GetDirection(
             string strStartNo,
             string strEndNo,
@@ -5383,8 +5383,8 @@ this.checkBox_import_fastMode.Checked);
 
 #if NOOOOOOOOOOOO
 		// return:
-		//		true	ÆğÊ¼ºÅÎªĞ¡ºÅ
-		//		false	ÆğÊ¼ºÅÎª´óºÅ
+		//		true	èµ·å§‹å·ä¸ºå°å·
+		//		false	èµ·å§‹å·ä¸ºå¤§å·
 		bool GetDirection(out Int64 nStart,
 			out Int64 nEnd)
 		{
@@ -5419,10 +5419,10 @@ this.checkBox_import_fastMode.Checked);
 		}
 #endif
 
-        // Ğ£ÑéÆğÖ¹ºÅ
+        // æ ¡éªŒèµ·æ­¢å·
         // return:
-        //      0   ²»´æÔÚ¼ÇÂ¼
-        //      1   ´æÔÚ¼ÇÂ¼
+        //      0   ä¸å­˜åœ¨è®°å½•
+        //      1   å­˜åœ¨è®°å½•
         int VerifyRange(RmsChannel channel,
             string strDbName,
             string strInputStartNo,
@@ -5438,7 +5438,7 @@ this.checkBox_import_fastMode.Checked);
             bool bStartNotFound = false;
             bool bEndNotFound = false;
 
-            // Èç¹ûÊäÈë²ÎÊıÖĞÎª¿Õ£¬Ôò¼Ù¶¨Îª¡°È«²¿·¶Î§¡±
+            // å¦‚æœè¾“å…¥å‚æ•°ä¸­ä¸ºç©ºï¼Œåˆ™å‡å®šä¸ºâ€œå…¨éƒ¨èŒƒå›´â€
             if (strInputStartNo == "")
                 strInputStartNo = "1";
 
@@ -5493,10 +5493,10 @@ this.checkBox_import_fastMode.Checked);
             string strStartID = "";
             string strEndID = "";
 
-            // »ñµÃ×ÊÔ´
+            // è·å¾—èµ„æº
             // return:
-            //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-            //		0	³É¹¦
+            //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+            //		0	æˆåŠŸ
             long lRet = channel.GetRes(strPath,
                 strStyle,
                 out strResult,
@@ -5512,18 +5512,18 @@ this.checkBox_import_fastMode.Checked);
                     bStartNotFound = true;
                 }
                 else
-                    strError += "Ğ£ÑéstartnoÊ±³ö´í£º " + strError0 + " ";
+                    strError += "æ ¡éªŒstartnoæ—¶å‡ºé”™ï¼š " + strError0 + " ";
 
             }
             else
             {
-                // È¡µÃ·µ»ØµÄid
+                // å–å¾—è¿”å›çš„id
                 strStartID = ResPath.GetRecordId(strOutputPath);
             }
 
             if (strStartID == "")
             {
-                strError = "strStartIDÎª¿Õ..." + (string.IsNullOrEmpty(strError) == false? " : " + strError : "");
+                strError = "strStartIDä¸ºç©º..." + (string.IsNullOrEmpty(strError) == false? " : " + strError : "");
                 return -1;
             }
 
@@ -5535,10 +5535,10 @@ this.checkBox_import_fastMode.Checked);
             else
                 strStyle += ",next,myself";
 
-            // »ñµÃ×ÊÔ´
+            // è·å¾—èµ„æº
             // return:
-            //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-            //		0	³É¹¦
+            //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+            //		0	æˆåŠŸ
             lRet = channel.GetRes(strPath,
                 strStyle,
                 out strResult,
@@ -5556,19 +5556,19 @@ this.checkBox_import_fastMode.Checked);
                 }
                 else
                 {
-                    strError += "Ğ£ÑéendnoÊ±³ö´í£º " + strError0 + " ";
+                    strError += "æ ¡éªŒendnoæ—¶å‡ºé”™ï¼š " + strError0 + " ";
                 }
 
             }
             else
             {
-                // È¡µÃ·µ»ØµÄid
+                // å–å¾—è¿”å›çš„id
                 strEndID = ResPath.GetRecordId(strOutputPath);
             }
 
             if (strEndID == "")
             {
-                strError = "strEndIDÎª¿Õ..." + (string.IsNullOrEmpty(strError) == false ? " : " + strError : ""); ;
+                strError = "strEndIDä¸ºç©º..." + (string.IsNullOrEmpty(strError) == false ? " : " + strError : ""); ;
                 return -1;
             }
 
@@ -5582,7 +5582,7 @@ this.checkBox_import_fastMode.Checked);
             }
             catch
             {
-                strError = "strStartIDÖµ '" + strStartID + "' ²»ÊÇÊı×Ö...";
+                strError = "strStartIDå€¼ '" + strStartID + "' ä¸æ˜¯æ•°å­—...";
                 return -1;
             }
 
@@ -5617,7 +5617,7 @@ this.checkBox_import_fastMode.Checked);
             }
             catch
             {
-                strError = "strEndIDÖµ '" + strEndID + "' ²»ÊÇÊı×Ö...";
+                strError = "strEndIDå€¼ '" + strEndID + "' ä¸æ˜¯æ•°å­—...";
                 return -1;
             }
             if (bAsc == true)
@@ -5646,10 +5646,10 @@ this.checkBox_import_fastMode.Checked);
             return 1;
         }
 
-        		// Ğ£ÑéÆğÖ¹ºÅ
+        		// æ ¡éªŒèµ·æ­¢å·
         // return:
-        //      0   ²»´æÔÚ¼ÇÂ¼
-        //      1   ´æÔÚ¼ÇÂ¼
+        //      0   ä¸å­˜åœ¨è®°å½•
+        //      1   å­˜åœ¨è®°å½•
         int VerifyRange(RmsChannel channel,
             string strDbName,
             out string strError)
@@ -5675,10 +5675,10 @@ this.checkBox_import_fastMode.Checked);
         }
 
 #if NOOOOOOOOOOOOOOOOOOOOOOOOOO
-		// Ğ£ÑéÆğÖ¹ºÅ
+		// æ ¡éªŒèµ·æ­¢å·
         // return:
-        //      0   ²»´æÔÚ¼ÇÂ¼
-        //      1   ´æÔÚ¼ÇÂ¼
+        //      0   ä¸å­˜åœ¨è®°å½•
+        //      1   å­˜åœ¨è®°å½•
         int VerifyRange(RmsChannel channel,
 			string strDbName,
 			out string strError)
@@ -5688,7 +5688,7 @@ this.checkBox_import_fastMode.Checked);
 
 			strError = "";
 
-			// Èç¹ûeditÖĞÎª¿Õ£¬Ôò¼Ù¶¨Îª¡°È«²¿·¶Î§¡±
+			// å¦‚æœeditä¸­ä¸ºç©ºï¼Œåˆ™å‡å®šä¸ºâ€œå…¨éƒ¨èŒƒå›´â€
 			if (textBox_startNo.Text == "")
 				textBox_startNo.Text = "1";
 
@@ -5743,10 +5743,10 @@ this.checkBox_import_fastMode.Checked);
 			string strStartID = "";
 			string strEndID = "";
 
-			// »ñµÃ×ÊÔ´
+			// è·å¾—èµ„æº
 			// return:
-			//		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-			//		0	³É¹¦
+			//		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+			//		0	æˆåŠŸ
 			long lRet = channel.GetRes(strPath,
 				strStyle,
 				out strResult,
@@ -5762,12 +5762,12 @@ this.checkBox_import_fastMode.Checked);
                     bStartNotFound = true;
 				}
 				else 
-					strError += "Ğ£ÑéstartnoÊ±³ö´í£º " + strError0 + " ";
+					strError += "æ ¡éªŒstartnoæ—¶å‡ºé”™ï¼š " + strError0 + " ";
 				
 			}
 			else 
 			{
-				// È¡µÃ·µ»ØµÄid
+				// å–å¾—è¿”å›çš„id
 				strStartID = ResPath.GetRecordId(strOutputPath);
 
 
@@ -5775,7 +5775,7 @@ this.checkBox_import_fastMode.Checked);
 
 			if (strStartID == "")
 			{
-				strError = "strStartIDÎª¿Õ...";
+				strError = "strStartIDä¸ºç©º...";
 				return -1;
 			}
 
@@ -5787,10 +5787,10 @@ this.checkBox_import_fastMode.Checked);
 			else 
 				strStyle += ",next,myself";
 
-			// »ñµÃ×ÊÔ´
+			// è·å¾—èµ„æº
 			// return:
-			//		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-			//		0	³É¹¦
+			//		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+			//		0	æˆåŠŸ
 			lRet = channel.GetRes(strPath,
 				strStyle,
 				out strResult,
@@ -5807,19 +5807,19 @@ this.checkBox_import_fastMode.Checked);
                     bEndNotFound = true;
 				}
 				else
-					strError += "Ğ£ÑéendnoÊ±³ö´í£º " + strError0 + " ";
+					strError += "æ ¡éªŒendnoæ—¶å‡ºé”™ï¼š " + strError0 + " ";
 
 			}
 			else 
 			{
-				// È¡µÃ·µ»ØµÄid
+				// å–å¾—è¿”å›çš„id
 				strEndID = ResPath.GetRecordId(strOutputPath);
 
 			}
 
 			if (strEndID == "")
 			{
-				strError = "strEndIDÎª¿Õ...";
+				strError = "strEndIDä¸ºç©º...";
 				return -1;
 			}
 
@@ -5833,7 +5833,7 @@ this.checkBox_import_fastMode.Checked);
 			}
 			catch
 			{
-				strError = "strStartIDÖµ '" + strStartID + "' ²»ÊÇÊı×Ö...";
+				strError = "strStartIDå€¼ '" + strStartID + "' ä¸æ˜¯æ•°å­—...";
 				return -1;
 			}
 
@@ -5868,7 +5868,7 @@ this.checkBox_import_fastMode.Checked);
 			}
 			catch
 			{
-				strError = "strEndIDÖµ '" + strEndID + "' ²»ÊÇÊı×Ö...";
+				strError = "strEndIDå€¼ '" + strEndID + "' ä¸æ˜¯æ•°å­—...";
 				return -1;
 			}
 			if (bAsc == true) 
@@ -5914,7 +5914,7 @@ this.checkBox_import_fastMode.Checked);
                 return;
             }
 
-            // ¶à¸öÊı¾İ¿âÂ·¾¶Ö®¼äÓÃ';'¸ô¿ª
+            // å¤šä¸ªæ•°æ®åº“è·¯å¾„ä¹‹é—´ç”¨';'éš”å¼€
             string strText = "";
             for (int i = 0; i < paths.Count; i++)
             {
@@ -5937,7 +5937,7 @@ this.checkBox_import_fastMode.Checked);
 			textBox_dbPath.Text = respath.FullPath;
              */
 
-            // µ±Ñ¡Ôñ·¢Éú¸Ä±äºó£¬Èç¹ûµ±Ç°ÔÚ¡°È«²¿¡±×´Ì¬£¬ÔòÒªÖØÉèÆğÖ¹·¶Î§£¬ÒÔÃâÎóÓÃÁËÏÈÇ°ËõĞ¡¹ıµÄÆäËû¿âµÄ·¶Î§
+            // å½“é€‰æ‹©å‘ç”Ÿæ”¹å˜åï¼Œå¦‚æœå½“å‰åœ¨â€œå…¨éƒ¨â€çŠ¶æ€ï¼Œåˆ™è¦é‡è®¾èµ·æ­¢èŒƒå›´ï¼Œä»¥å…è¯¯ç”¨äº†å…ˆå‰ç¼©å°è¿‡çš„å…¶ä»–åº“çš„èŒƒå›´
             if (this.radioButton_all.Checked == true)
             {
                 this.textBox_startNo.Text = "1";
@@ -6059,7 +6059,7 @@ this.checkBox_import_fastMode.Checked);
 			dlg.ShowDialog(this);
 		}
 
-        // Æô¶¯ÔËĞĞÒ»¸ö·½°¸
+        // å¯åŠ¨è¿è¡Œä¸€ä¸ªæ–¹æ¡ˆ
 		private void menuItem_run_Click(object sender, System.EventArgs e)
 		{
 		
@@ -6086,7 +6086,7 @@ this.checkBox_import_fastMode.Checked);
 
 		}
 
-		// ´´½¨È±Ê¡µÄmain.csÎÄ¼ş
+		// åˆ›å»ºç¼ºçœçš„main.csæ–‡ä»¶
 		public static int CreateDefaultMainCsFile(string strFileName)
 		{
 
@@ -6116,7 +6116,7 @@ this.checkBox_import_fastMode.Checked);
 			return 0;
 		}
 
-		// ´´½¨È±Ê¡µÄmarcfilter.fltxÎÄ¼ş
+		// åˆ›å»ºç¼ºçœçš„marcfilter.fltxæ–‡ä»¶
 		public static int CreateDefaultMarcFilterFile(string strFileName)
 		{
 
@@ -6179,19 +6179,19 @@ this.checkBox_import_fastMode.Checked);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
 
         }
 
-        // ÖØ½¨¼ìË÷µã
+        // é‡å»ºæ£€ç´¢ç‚¹
         private void menuItem_rebuildKeys_Click(object sender, EventArgs e)
         {
             DoRebuildKeys();
         }
 
-        // ÖØ½¨¼ìË÷µã
-        // TODO: ĞèÒª¸ÄÔìÎªÔÚ²»Ğ£×¼Ê×Î»ºÅµÄÇé¿öÏÂ½ø¶ÈÌõÒ²ÒªÏÔÊ¾ÕıÈ·¡£¿É²Î¿¼DoExportFile()
+        // é‡å»ºæ£€ç´¢ç‚¹
+        // TODO: éœ€è¦æ”¹é€ ä¸ºåœ¨ä¸æ ¡å‡†é¦–ä½å·çš„æƒ…å†µä¸‹è¿›åº¦æ¡ä¹Ÿè¦æ˜¾ç¤ºæ­£ç¡®ã€‚å¯å‚è€ƒDoExportFile()
         // parameters:
         void DoRebuildKeys()
         {
@@ -6199,10 +6199,10 @@ this.checkBox_import_fastMode.Checked);
             int nRet = 0;
             long lRet = 0;
 
-            string strInfo = "";    // »ã×ÜĞÅÏ¢£¬ÔÚÍê³ÉºóÏÔÊ¾
+            string strInfo = "";    // æ±‡æ€»ä¿¡æ¯ï¼Œåœ¨å®Œæˆåæ˜¾ç¤º
 
-        //      bClearKeysAtBegin   Åú´¦Àí¿ªÊ¼µÄÊ±ºòÇå³ıÁËËùÓĞµÄkeys±í
-        //      bDeleteOldKeysPerRecord ×öÃ¿Ìõ¼ÇÂ¼µÄÊ±ºòÊÇ·ñÒªÏÈÉ¾³ıÊôÓÚÕâÌõ¼ÇÂ¼µÄ¾ÉµÄ¼ìË÷µã¡£
+        //      bClearKeysAtBegin   æ‰¹å¤„ç†å¼€å§‹çš„æ—¶å€™æ¸…é™¤äº†æ‰€æœ‰çš„keysè¡¨
+        //      bDeleteOldKeysPerRecord åšæ¯æ¡è®°å½•çš„æ—¶å€™æ˜¯å¦è¦å…ˆåˆ é™¤å±äºè¿™æ¡è®°å½•çš„æ—§çš„æ£€ç´¢ç‚¹ã€‚
             bool bClearKeysAtBegin = true;
             bool bDeleteOldKeysPerRecord = false;
 
@@ -6210,12 +6210,12 @@ this.checkBox_import_fastMode.Checked);
 
             if (textBox_dbPath.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªÖØ½¨¼ìË÷µãµÄÊı¾İ¿â ...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦é‡å»ºæ£€ç´¢ç‚¹çš„æ•°æ®åº“ ...");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒª¶ÔÏÂÁĞÊı¾İ¿â\r\n---\r\n"+this.textBox_dbPath.Text.Replace(";","\r\n")+"\r\n---\r\n½øĞĞÖØ½¨¼ìË÷µãµÄ²Ù×÷?",
+                "ç¡®å®è¦å¯¹ä¸‹åˆ—æ•°æ®åº“\r\n---\r\n"+this.textBox_dbPath.Text.Replace(";","\r\n")+"\r\n---\r\nè¿›è¡Œé‡å»ºæ£€ç´¢ç‚¹çš„æ“ä½œ?",
                 "dp2batch",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -6243,17 +6243,17 @@ this.checkBox_import_fastMode.Checked);
 
             string[] dbpaths = textBox_dbPath.Text.Split(new char[] { ';' });
 
-            // Èç¹ûÎªµ¥¿âÊä³ö
+            // å¦‚æœä¸ºå•åº“è¾“å‡º
             if (dbpaths.Length == 1)
             {
-                // ·ñÔòÒÆµ½DoExportFile()º¯ÊıÀïÃæÈ¥Ğ£Ñé
+                // å¦åˆ™ç§»åˆ°DoExportFile()å‡½æ•°é‡Œé¢å»æ ¡éªŒ
                 ResPath respath = new ResPath(dbpaths[0]);
 
                 channel = this.Channels.GetChannel(respath.Url);
 
                 string strDbName = respath.Path;
 
-                // Ğ£ÑéÆğÖ¹ºÅ
+                // æ ¡éªŒèµ·æ­¢å·
                 if (checkBox_verifyNumber.Checked == true)
                 {
                     nRet = VerifyRange(channel,
@@ -6266,12 +6266,12 @@ this.checkBox_import_fastMode.Checked);
                 {
                     if (this.textBox_startNo.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨ÆğÊ¼ºÅ";
+                        strError = "å°šæœªæŒ‡å®šèµ·å§‹å·";
                         goto ERROR1;
                     }
                     if (this.textBox_endNo.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨½áÊøºÅ";
+                        strError = "å°šæœªæŒ‡å®šç»“æŸå·";
                         goto ERROR1;
                     }
                 }
@@ -6280,7 +6280,7 @@ this.checkBox_import_fastMode.Checked);
             {
                 Debug.Assert(dbpaths.Length > 1, "");
 
-                // ¶à¿âÊä³ö¡£ĞŞ¸Ä½çÃæÒªËØ£¬±íÊ¾Õë¶ÔÃ¿¸ö¿â¶¼ÊÇÈ«¿â´¦Àí
+                // å¤šåº“è¾“å‡ºã€‚ä¿®æ”¹ç•Œé¢è¦ç´ ï¼Œè¡¨ç¤ºé’ˆå¯¹æ¯ä¸ªåº“éƒ½æ˜¯å…¨åº“å¤„ç†
                 this.radioButton_all.Checked = true;
                 this.textBox_startNo.Text = "1";
                 this.textBox_endNo.Text = "9999999999";
@@ -6288,7 +6288,7 @@ this.checkBox_import_fastMode.Checked);
 
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÖØ½¨¼ìË÷µã");
+            stop.Initial("æ­£åœ¨é‡å»ºæ£€ç´¢ç‚¹");
             stop.BeginLoop();
 
 
@@ -6296,7 +6296,7 @@ this.checkBox_import_fastMode.Checked);
             try
             {
 
-                // TODO: Èç¹ûÊÇ¶à¿âÊä³ö£¬ÊÇ·ñÒª¶Ô·Ç¡°È«²¿¡±µÄÆğÖ¹ºÅ·¶Î§½øĞĞ¾¯¸æ? ÒòÎªºóÃæÊÇÇ¿ÆÈ°´ÕÕÈ«²¿À´½øĞĞµÄ
+                // TODO: å¦‚æœæ˜¯å¤šåº“è¾“å‡ºï¼Œæ˜¯å¦è¦å¯¹éâ€œå…¨éƒ¨â€çš„èµ·æ­¢å·èŒƒå›´è¿›è¡Œè­¦å‘Š? å› ä¸ºåé¢æ˜¯å¼ºè¿«æŒ‰ç…§å…¨éƒ¨æ¥è¿›è¡Œçš„
 
                 for (int f = 0; f < dbpaths.Length; f++)
                 {
@@ -6313,7 +6313,7 @@ this.checkBox_import_fastMode.Checked);
 
                     strInfo += "" + strDbName;
 
-                    // Êµ¼Ê´¦ÀíµÄÊ×Î²ºÅ
+                    // å®é™…å¤„ç†çš„é¦–å°¾å·
                     string strRealStartNo = "";
                     string strRealEndNo = "";
                     /*
@@ -6321,7 +6321,7 @@ this.checkBox_import_fastMode.Checked);
                     if (checkBox_export_delete.Checked == true)
                     {
                         result = MessageBox.Show(this,
-                            "È·ÊµÒªÉ¾³ı" + respath.Path + "ÄÚÖ¸¶¨·¶Î§µÄ¼ÇÂ¼?\r\n\r\n---------\r\n(ÊÇ)É¾³ı (·ñ)·ÅÆúÅú´¦Àí",
+                            "ç¡®å®è¦åˆ é™¤" + respath.Path + "å†…æŒ‡å®šèŒƒå›´çš„è®°å½•?\r\n\r\n---------\r\n(æ˜¯)åˆ é™¤ (å¦)æ”¾å¼ƒæ‰¹å¤„ç†",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
@@ -6332,19 +6332,19 @@ this.checkBox_import_fastMode.Checked);
 
                     // 
 
-                    // Èç¹ûÎª¶à¿âÖØ½¨
+                    // å¦‚æœä¸ºå¤šåº“é‡å»º
                     if (dbpaths.Length > 1)
                     {
-                        // Èç¹ûÎªÈ«Ñ¡
+                        // å¦‚æœä¸ºå…¨é€‰
                         if (this.radioButton_all.Checked == true
                             || f > 0)
                         {
-                            // »Ö¸´Îª×î´ó·¶Î§
+                            // æ¢å¤ä¸ºæœ€å¤§èŒƒå›´
                             this.textBox_startNo.Text = "1";
                             this.textBox_endNo.Text = "9999999999";
                         }
 
-                        // Ğ£ÑéÆğÖ¹ºÅ
+                        // æ ¡éªŒèµ·æ­¢å·
                         if (checkBox_verifyNumber.Checked == true)
                         {
                             nRet = VerifyRange(channel,
@@ -6355,18 +6355,18 @@ this.checkBox_import_fastMode.Checked);
 
                             if (nRet == 0)
                             {
-                                // ¿âÖĞÎŞ¼ÇÂ¼
-                                AutoCloseMessageBox.Show(this, "Êı¾İ¿â " + strDbName + " ÖĞÎŞ¼ÇÂ¼¡£");
-                                strInfo += "(ÎŞ¼ÇÂ¼)";
+                                // åº“ä¸­æ— è®°å½•
+                                AutoCloseMessageBox.Show(this, "æ•°æ®åº“ " + strDbName + " ä¸­æ— è®°å½•ã€‚");
+                                strInfo += "(æ— è®°å½•)";
 
                                 /*
                                 if (bClearKeysAtBegin == true)
                                 {
-                                    // ½áÊøRefreshÊı¾İ¿â¶¨Òå
+                                    // ç»“æŸRefreshæ•°æ®åº“å®šä¹‰
                                     lRet = channel.DoRefreshDB(
                                         "end",
                                         strDbName,
-                                        false,  // ´Ë²ÎÊı´ËÊ±ÎŞÓÃ
+                                        false,  // æ­¤å‚æ•°æ­¤æ—¶æ— ç”¨
                                         out strError);
                                     if (lRet == -1)
                                         goto ERROR1;
@@ -6380,12 +6380,12 @@ this.checkBox_import_fastMode.Checked);
                         {
                             if (this.textBox_startNo.Text == "")
                             {
-                                strError = "ÉĞÎ´Ö¸¶¨ÆğÊ¼ºÅ";
+                                strError = "å°šæœªæŒ‡å®šèµ·å§‹å·";
                                 goto ERROR1;
                             }
                             if (this.textBox_endNo.Text == "")
                             {
-                                strError = "ÉĞÎ´Ö¸¶¨½áÊøºÅ";
+                                strError = "å°šæœªæŒ‡å®šç»“æŸå·";
                                 goto ERROR1;
                             }
 
@@ -6402,7 +6402,7 @@ this.checkBox_import_fastMode.Checked);
                         out nStart,
                         out nEnd);
 
-                    // ÉèÖÃ½ø¶ÈÌõ·¶Î§
+                    // è®¾ç½®è¿›åº¦æ¡èŒƒå›´
                     Int64 nMax = nEnd - nStart;
                     if (nMax < 0)
                         nMax *= -1;
@@ -6419,7 +6419,7 @@ this.checkBox_import_fastMode.Checked);
                      * */
                     stop.SetProgressRange(0, nMax);
 
-                    // RefreshÊı¾İ¿â¶¨Òå
+                    // Refreshæ•°æ®åº“å®šä¹‰
                     lRet = channel.DoRefreshDB(
                         "begin",
                         strDbName,
@@ -6429,27 +6429,27 @@ this.checkBox_import_fastMode.Checked);
                         goto ERROR1;
 
 
-                    bool bFirst = true;	// ÊÇ·ñÎªµÚÒ»´ÎÈ¡¼ÇÂ¼
+                    bool bFirst = true;	// æ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡å–è®°å½•
 
                     string strID = this.textBox_startNo.Text;
 
                     m_nRecordCount = 0;
-                    // Ñ­»·
+                    // å¾ªç¯
                     for (; ; )
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop.State != 0)
                         {
                             result = MessageBox.Show(this,
-                                "È·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+                                "ç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
                                 "dp2batch",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Question,
                                 MessageBoxDefaultButton.Button2);
                             if (result == DialogResult.Yes)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 goto ERROR1;
                             }
                             else
@@ -6462,7 +6462,7 @@ this.checkBox_import_fastMode.Checked);
 
                         string strStyle = "";
 
-                        strStyle = "timestamp,outputpath";	// ÓÅ»¯
+                        strStyle = "timestamp,outputpath";	// ä¼˜åŒ–
 
                         if (bDeleteOldKeysPerRecord == true)
                             strStyle += ",forcedeleteoldkeys";
@@ -6470,7 +6470,7 @@ this.checkBox_import_fastMode.Checked);
 
                         if (bFirst == true)
                         {
-                            // ×¢£ºÈç¹û²»Ğ£ÑéÊ×ºÅ£¬Ö»ÓĞÇ¿ÖÆÑ­»·µÄÇé¿öÏÂ£¬²ÅÄÜ²»ĞèÒªnext·ç¸ñ
+                            // æ³¨ï¼šå¦‚æœä¸æ ¡éªŒé¦–å·ï¼Œåªæœ‰å¼ºåˆ¶å¾ªç¯çš„æƒ…å†µä¸‹ï¼Œæ‰èƒ½ä¸éœ€è¦nexté£æ ¼
                             strStyle += "";
                         }
                         else
@@ -6478,12 +6478,12 @@ this.checkBox_import_fastMode.Checked);
                             if (bAsc == true)
                             {
                                 strStyle += ",next";
-                                strDirectionComment = "µÄºóÒ»Ìõ¼ÇÂ¼";
+                                strDirectionComment = "çš„åä¸€æ¡è®°å½•";
                             }
                             else
                             {
                                 strStyle += ",prev";
-                                strDirectionComment = "µÄÇ°Ò»Ìõ¼ÇÂ¼";
+                                strDirectionComment = "çš„å‰ä¸€æ¡è®°å½•";
                             }
                         }
 
@@ -6495,10 +6495,10 @@ this.checkBox_import_fastMode.Checked);
                         bool bNeedRetry = true;
 
                     REDO_REBUILD:
-                        // »ñµÃ×ÊÔ´
+                        // è·å¾—èµ„æº
                         // return:
-                        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-                        //		0	³É¹¦
+                        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+                        //		0	æˆåŠŸ
                         lRet = channel.DoRebuildResKeys(strPath,
                             strStyle,
                             out strOutputPath,
@@ -6509,17 +6509,17 @@ this.checkBox_import_fastMode.Checked);
                             {
                                 if (bFirst == true)
                                 {
-                                    // Èç¹ûÒªÇ¿ÖÆÑ­»·
+                                    // å¦‚æœè¦å¼ºåˆ¶å¾ªç¯
                                     if (checkBox_forceLoop.Checked == true)
                                     {
-                                        AutoCloseMessageBox.Show(this, "ÄúÎªÊı¾İ¿â "+strDbName+" Ö¸¶¨µÄÊ×¼ÇÂ¼ " + strID + strDirectionComment + " ²»´æÔÚ¡£\r\n\r\n°´ È·ÈÏ ¼ÌĞøÏòºóÕÒ¡£");
+                                        AutoCloseMessageBox.Show(this, "æ‚¨ä¸ºæ•°æ®åº“ "+strDbName+" æŒ‡å®šçš„é¦–è®°å½• " + strID + strDirectionComment + " ä¸å­˜åœ¨ã€‚\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­å‘åæ‰¾ã€‚");
                                         bFirst = false;
                                         goto CONTINUE;
                                     }
                                     else
                                     {
-                                        // Èç¹û²»ÒªÇ¿ÖÆÑ­»·£¬´ËÊ±Ò²²»ÄÜ½áÊø£¬·ñÔò»áÈÃÓÃ»§ÒÔÎªÊı¾İ¿âÀïÃæ¸ù±¾Ã»ÓĞÊı¾İ
-                                        AutoCloseMessageBox.Show(this, "ÄúÎªÊı¾İ¿â " + strDbName + " Ö¸¶¨µÄÊ×¼ÇÂ¼ " + strID + strDirectionComment + " ²»´æÔÚ¡£\r\n\r\n(×¢£ºÎª±ÜÃâ³öÏÖ´ËÌáÊ¾£¬¿ÉÔÚ²Ù×÷Ç°¹´Ñ¡¡°Ğ£×¼Ê×Î²ID¡±)\r\n\r\n°´ È·ÈÏ ¼ÌĞøÏòºóÕÒ...");
+                                        // å¦‚æœä¸è¦å¼ºåˆ¶å¾ªç¯ï¼Œæ­¤æ—¶ä¹Ÿä¸èƒ½ç»“æŸï¼Œå¦åˆ™ä¼šè®©ç”¨æˆ·ä»¥ä¸ºæ•°æ®åº“é‡Œé¢æ ¹æœ¬æ²¡æœ‰æ•°æ®
+                                        AutoCloseMessageBox.Show(this, "æ‚¨ä¸ºæ•°æ®åº“ " + strDbName + " æŒ‡å®šçš„é¦–è®°å½• " + strID + strDirectionComment + " ä¸å­˜åœ¨ã€‚\r\n\r\n(æ³¨ï¼šä¸ºé¿å…å‡ºç°æ­¤æç¤ºï¼Œå¯åœ¨æ“ä½œå‰å‹¾é€‰â€œæ ¡å‡†é¦–å°¾IDâ€)\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­å‘åæ‰¾...");
                                         bFirst = false;
                                         goto CONTINUE;
                                     }
@@ -6530,21 +6530,21 @@ this.checkBox_import_fastMode.Checked);
 
                                     if (bFirst == true)
                                     {
-                                        strError = "¼ÇÂ¼ " + strID + strDirectionComment + " ²»´æÔÚ¡£´¦Àí½áÊø¡£";
+                                        strError = "è®°å½• " + strID + strDirectionComment + " ä¸å­˜åœ¨ã€‚å¤„ç†ç»“æŸã€‚";
                                     }
                                     else
                                     {
                                         if (bAsc == true)
-                                            strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÄ©Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+                                            strError = "è®°å½• " + strID + " æ˜¯æœ€æœ«ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
                                         else
-                                            strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÇ°Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+                                            strError = "è®°å½• " + strID + " æ˜¯æœ€å‰ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
                                     }
 
                                     if (dbpaths.Length > 1)
-                                        break;  // ¶à¿âÇé¿ö£¬¼ÌĞøÆäËü¿âÑ­»·
+                                        break;  // å¤šåº“æƒ…å†µï¼Œç»§ç»­å…¶å®ƒåº“å¾ªç¯
                                     else
                                     {
-                                        bNeedRetry = false; // µ¥¿âÇé¿ö£¬Ò²Ã»ÓĞ±ØÒª³öÏÖÖØÊÔ¶Ô»°¿ò
+                                        bNeedRetry = false; // å•åº“æƒ…å†µï¼Œä¹Ÿæ²¡æœ‰å¿…è¦å‡ºç°é‡è¯•å¯¹è¯æ¡†
                                         MessageBox.Show(this, strError);
                                         break;
                                     }
@@ -6555,17 +6555,17 @@ this.checkBox_import_fastMode.Checked);
                             {
                                 bFirst = false;
                                 // bFoundRecord = false;
-                                // °Ñid½âÎö³öÀ´
+                                // æŠŠidè§£æå‡ºæ¥
                                 strID = ResPath.GetRecordId(strOutputPath);
                                 goto CONTINUE;
 
                             }
 
-                            // ÔÊĞíÖØÊÔ
+                            // å…è®¸é‡è¯•
                             if (bNeedRetry == true)
                             {
                                 DialogResult redo_result = MessageBox.Show(this,
-                                    "ÖØ½¨¼ìË÷µã ¼ÇÂ¼ '" + strPath + "' (style='" + strStyle + "')Ê±³öÏÖ´íÎó: " + strError + "\r\n\r\nÖØÊÔ£¬»¹ÊÇÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?\r\n(Retry ÖØÊÔ£»Cancel ÖĞ¶ÏÅú´¦Àí)",
+                                    "é‡å»ºæ£€ç´¢ç‚¹ è®°å½• '" + strPath + "' (style='" + strStyle + "')æ—¶å‡ºç°é”™è¯¯: " + strError + "\r\n\r\né‡è¯•ï¼Œè¿˜æ˜¯ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?\r\n(Retry é‡è¯•ï¼›Cancel ä¸­æ–­æ‰¹å¤„ç†)",
                                     "dp2batch",
                                     MessageBoxButtons.RetryCancel,
                                     MessageBoxIcon.Question,
@@ -6586,9 +6586,9 @@ this.checkBox_import_fastMode.Checked);
 
                         bFoundRecord = true;
 
-                        // °Ñid½âÎö³öÀ´
+                        // æŠŠidè§£æå‡ºæ¥
                         strID = ResPath.GetRecordId(strOutputPath);
-                        stop.SetMessage("ÒÑÖØ½¨¼ìË÷µã ¼ÇÂ¼ " + strOutputPath + "  " + m_nRecordCount.ToString());
+                        stop.SetMessage("å·²é‡å»ºæ£€ç´¢ç‚¹ è®°å½• " + strOutputPath + "  " + m_nRecordCount.ToString());
 
                         if (String.IsNullOrEmpty(strRealStartNo) == true)
                         {
@@ -6599,7 +6599,7 @@ this.checkBox_import_fastMode.Checked);
 
                     CONTINUE:
 
-                        // ÊÇ·ñ³¬¹ıÑ­»··¶Î§
+                        // æ˜¯å¦è¶…è¿‡å¾ªç¯èŒƒå›´
                         try
                         {
                             nCur = Convert.ToInt64(strID);
@@ -6634,7 +6634,7 @@ this.checkBox_import_fastMode.Checked);
                         }
 
 
-                        // ¶ÔÒÑ¾­×÷¹ıµÄ½øĞĞÅĞ¶Ï
+                        // å¯¹å·²ç»ä½œè¿‡çš„è¿›è¡Œåˆ¤æ–­
                         if (bAsc == true && nCur >= nEnd)
                             break;
                         if (bAsc == false && nCur <= nEnd)
@@ -6643,17 +6643,17 @@ this.checkBox_import_fastMode.Checked);
 
                     if (bClearKeysAtBegin == true)
                     {
-                        // ½áÊøRefreshÊı¾İ¿â¶¨Òå
+                        // ç»“æŸRefreshæ•°æ®åº“å®šä¹‰
                         lRet = channel.DoRefreshDB(
                             "end",
                             strDbName,
-                            false,  // ´Ë²ÎÊı´ËÊ±ÎŞÓÃ
+                            false,  // æ­¤å‚æ•°æ­¤æ—¶æ— ç”¨
                             out strError);
                         if (lRet == -1)
                             goto ERROR1;
                     }
 
-                    strInfo += " : " + m_nRecordCount.ToString() + "Ìõ (ID " + strRealStartNo + "-" + strRealEndNo + ")";
+                    strInfo += " : " + m_nRecordCount.ToString() + "æ¡ (ID " + strRealStartNo + "-" + strRealEndNo + ")";
 
                 }   // end of dbpaths loop
 
@@ -6668,7 +6668,7 @@ this.checkBox_import_fastMode.Checked);
                 stop.Initial("");
             }
 
-            strError = "ÖØ½¨¼ìË÷µãÍê³É¡£\r\n---\r\n" + strInfo;
+            strError = "é‡å»ºæ£€ç´¢ç‚¹å®Œæˆã€‚\r\n---\r\n" + strInfo;
 
         // END1:
 
@@ -6706,14 +6706,14 @@ this.checkBox_import_fastMode.Checked);
 
             if (bHasClipboardObject == false)
             {
-                strError = "µ±Ç°Windows¼ôÌù°åÖĞ²¢Ã»ÓĞ°üº¬Êı¾İ¿âÃûĞÅÏ¢";
+                strError = "å½“å‰Windowså‰ªè´´æ¿ä¸­å¹¶æ²¡æœ‰åŒ…å«æ•°æ®åº“åä¿¡æ¯";
                 goto ERROR1;
             }
 
             string strDbnames = (string)iData.GetData(typeof(string));
             if (String.IsNullOrEmpty(strDbnames) == true)
             {
-                strError = "µ±Ç°Windows¼ôÌù°åÖĞµÄÊı¾İ¿âÃûĞÅÏ¢Îª¿Õ";
+                strError = "å½“å‰Windowså‰ªè´´æ¿ä¸­çš„æ•°æ®åº“åä¿¡æ¯ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -6724,7 +6724,7 @@ this.checkBox_import_fastMode.Checked);
                 if (strText.Length > 1000)
                     strText = strText.Substring(0, 1000) + "...";
 
-                strError = "µ±Ç°Windows¼ôÌù°åÖĞËù°üº¬µÄ×Ö·û´® '" + strText + "' ²»ÊÇÊı¾İ¿âÃû¸ñÊ½";
+                strError = "å½“å‰Windowså‰ªè´´æ¿ä¸­æ‰€åŒ…å«çš„å­—ç¬¦ä¸² '" + strText + "' ä¸æ˜¯æ•°æ®åº“åæ ¼å¼";
                 goto ERROR1;
             }
 
@@ -6740,7 +6740,7 @@ this.checkBox_import_fastMode.Checked);
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
-            Application.DoEvents(); // ÈÃ¹â±êĞÎ×´ÏÔÊ¾³öÀ´
+            Application.DoEvents(); // è®©å…‰æ ‡å½¢çŠ¶æ˜¾ç¤ºå‡ºæ¥
 
             bool bRet = this.treeView_rangeRes.SelectDatabases(paths, out strError);
 
@@ -6748,7 +6748,7 @@ this.checkBox_import_fastMode.Checked);
 
             if (bRet == false)
             {
-                strError = "ÏÂÁĞÊı¾İ¿âÂ·¾¶ÔÚ×ÊÔ´Ê÷ÖĞ²»´æÔÚ: \r\n---\r\n" + strError + "\r\n---\r\n\r\nÇë(ÓÃÖ÷²Ëµ¥¡°ÎÄ¼ş/È±Ê¡ÕÊ»§¹ÜÀí¡±ÃüÁî)Ïò×ÊÔ´Ê÷ÖĞÌí¼ÓĞÂµÄ·şÎñÆ÷½Úµã£¬»òË¢ĞÂ×ÊÔ´Ê÷ºó£¬ÔÙÖØĞÂ½øĞĞÖØ½¨¼ìË÷µãµÄ²Ù×÷";
+                strError = "ä¸‹åˆ—æ•°æ®åº“è·¯å¾„åœ¨èµ„æºæ ‘ä¸­ä¸å­˜åœ¨: \r\n---\r\n" + strError + "\r\n---\r\n\r\nè¯·(ç”¨ä¸»èœå•â€œæ–‡ä»¶/ç¼ºçœå¸æˆ·ç®¡ç†â€å‘½ä»¤)å‘èµ„æºæ ‘ä¸­æ·»åŠ æ–°çš„æœåŠ¡å™¨èŠ‚ç‚¹ï¼Œæˆ–åˆ·æ–°èµ„æºæ ‘åï¼Œå†é‡æ–°è¿›è¡Œé‡å»ºæ£€ç´¢ç‚¹çš„æ“ä½œ";
                 goto ERROR1;
             }
 
@@ -6764,7 +6764,7 @@ this.checkBox_import_fastMode.Checked);
         {
             if (m_nPreventNest == 0)
             {
-                m_nPreventNest++;   // ·ÀÖ¹radioButton_all_CheckedChanged()Ëæ¶¯
+                m_nPreventNest++;   // é˜²æ­¢radioButton_all_CheckedChanged()éšåŠ¨
                 this.radioButton_startEnd.Checked = true;
                 m_nPreventNest--;
             }
@@ -6774,7 +6774,7 @@ this.checkBox_import_fastMode.Checked);
         {
             if (m_nPreventNest == 0)
             {
-                m_nPreventNest++;      // ·ÀÖ¹radioButton_all_CheckedChanged()Ëæ¶¯
+                m_nPreventNest++;      // é˜²æ­¢radioButton_all_CheckedChanged()éšåŠ¨
                 this.radioButton_startEnd.Checked = true;
                 m_nPreventNest--;
             }
@@ -6814,13 +6814,13 @@ this.checkBox_import_fastMode.Checked);
 
             try
             {
-                FontFamily family = new FontFamily("Î¢ÈíÑÅºÚ");
+                FontFamily family = new FontFamily("å¾®è½¯é›…é»‘");
             }
             catch
             {
                 return;
             }
-            this.DefaultFontString = "Î¢ÈíÑÅºÚ, 9pt";
+            this.DefaultFontString = "å¾®è½¯é›…é»‘, 9pt";
         }
 
         public string DefaultFontString
@@ -6861,7 +6861,7 @@ this.checkBox_import_fastMode.Checked);
         }
 
         // parameters:
-        //      bForce  ÊÇ·ñÇ¿ÖÆÉèÖÃ¡£Ç¿ÖÆÉèÖÃÊÇÖ¸DefaultFont == null µÄÊ±ºò£¬Ò²Òª°´ÕÕControl.DefaultFontÀ´ÉèÖÃ
+        //      bForce  æ˜¯å¦å¼ºåˆ¶è®¾ç½®ã€‚å¼ºåˆ¶è®¾ç½®æ˜¯æŒ‡DefaultFont == null çš„æ—¶å€™ï¼Œä¹Ÿè¦æŒ‰ç…§Control.DefaultFontæ¥è®¾ç½®
         public static void SetControlFont(Control control,
             Font font,
             bool bForce = false)
@@ -6885,7 +6885,7 @@ this.checkBox_import_fastMode.Checked);
         static void ChangeDifferentFaceFont(Control parent,
             Font font)
         {
-            // ĞŞ¸ÄËùÓĞÏÂ¼¶¿Ø¼şµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰ä¸‹çº§æ§ä»¶çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             foreach (Control sub in parent.Controls)
             {
                 Font subfont = sub.Font;
@@ -6904,7 +6904,7 @@ this.checkBox_import_fastMode.Checked);
                     ChangeDifferentFaceFont((ToolStrip)sub, font);
                 }
 
-                // µİ¹é
+                // é€’å½’
                 ChangeDifferentFaceFont(sub, font);
             }
         }
@@ -6912,7 +6912,7 @@ this.checkBox_import_fastMode.Checked);
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
-            // ĞŞ¸ÄËùÓĞÊÂÏîµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰äº‹é¡¹çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             for (int i = 0; i < tool.Items.Count; i++)
             {
                 ToolStripItem item = tool.Items[i];
@@ -6943,16 +6943,16 @@ this.checkBox_import_fastMode.Checked);
 		public Batch Batch = null;
 	}
 
-	// ä¯ÀÀ¼ÇÂ¼µ½´ï
+	// æµè§ˆè®°å½•åˆ°è¾¾
 	public delegate void CheckTargetDbEventHandler(object sender,
 	CheckTargetDbEventArgs e);
 
 	public class CheckTargetDbEventArgs: EventArgs
 	{
-		public string DbFullPath = "";	// Ä¿±êÊı¾İ¿âÈ«Â·¾¶
-        public string CurrentMarcSyntax = "";   // µ±Ç°¼ÇÂ¼µÄ MARC ¸ñÊ½ 2014/5/28
-		public bool Cancel = false;	// ÊÇ·ñĞèÒªÖĞ¶Ï
-		public string ErrorInfo = "";	// »Øµ÷ÆÚ¼ä·¢ÉúµÄ´íÎóĞÅÏ¢
+		public string DbFullPath = "";	// ç›®æ ‡æ•°æ®åº“å…¨è·¯å¾„
+        public string CurrentMarcSyntax = "";   // å½“å‰è®°å½•çš„ MARC æ ¼å¼ 2014/5/28
+		public bool Cancel = false;	// æ˜¯å¦éœ€è¦ä¸­æ–­
+		public string ErrorInfo = "";	// å›è°ƒæœŸé—´å‘ç”Ÿçš„é”™è¯¯ä¿¡æ¯
 	}
 
 }

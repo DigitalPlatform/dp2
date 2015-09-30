@@ -208,7 +208,7 @@ namespace dp2Library
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -8915,7 +8915,7 @@ namespace dp2Library
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = ExceptionUtil.GetAutoText(ex);
                         goto ERROR1;
                     }
                 }

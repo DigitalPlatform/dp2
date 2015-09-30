@@ -783,7 +783,7 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "IssueHost InOrderRange() exception: " + ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -843,7 +843,7 @@ out strError);
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = "IssueHost InOrderRange() {303315A3-E6B2-4720-A073-BCBCB98196BD} exception: " + ex.Message;
                         return -1;
                     }
 
@@ -1182,7 +1182,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "IssueHost this.Issues.Sort() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
         }

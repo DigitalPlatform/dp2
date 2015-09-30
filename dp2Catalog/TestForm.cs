@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.CommonControl;
+using DigitalPlatform;
 
 namespace dp2Catalog
 {
@@ -32,7 +33,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -46,7 +47,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
     }

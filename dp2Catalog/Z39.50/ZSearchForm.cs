@@ -941,7 +941,7 @@ this.splitContainer_queryAndResultInfo,
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -2452,7 +2452,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -29,12 +29,12 @@ namespace dp2rms
     {
         public ObjectCache<XmlDocument> DomCache = new ObjectCache<XmlDocument>();
 
-        // ÏÈÇ°ÓÃ¹ıµÄ±¸·İÎÄ¼şÃû
+        // å…ˆå‰ç”¨è¿‡çš„å¤‡ä»½æ–‡ä»¶å
         public string UsedBackupFileName = "*.dp2bak";
 
         public string DataDir = "";
 
-        // ÎªC#½Å±¾Ëù×¼±¸
+        // ä¸ºC#è„šæœ¬æ‰€å‡†å¤‡
         public Hashtable ParamTable = new Hashtable();
 
         public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
@@ -45,7 +45,7 @@ namespace dp2rms
 
         // bool	m_bFirstMdiOpened = false;
 
-        //±£´æ½çÃæĞÅÏ¢
+        //ä¿å­˜ç•Œé¢ä¿¡æ¯
         public ApplicationInfo AppInfo = new ApplicationInfo("dp2rms.xml");
 
         public QuickPinyin QuickPinyin = null;
@@ -61,7 +61,7 @@ namespace dp2rms
         {
             strError = "";
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (this.IsbnSplitter != null)
                 return 0;
 
@@ -73,7 +73,7 @@ namespace dp2rms
             }
             catch (FileNotFoundException ex)
             {
-                strError = "×°ÔØ±¾µØisbn¹æÔòÎÄ¼ş·¢Éú´íÎó :" + ex.Message;
+                strError = "è£…è½½æœ¬åœ°isbnè§„åˆ™æ–‡ä»¶å‘ç”Ÿé”™è¯¯ :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
@@ -82,7 +82,7 @@ namespace dp2rms
                         out strError1);
                     if (nRet == -1)
                     {
-                        strError = strError + "\r\n×Ô¶¯ÏÂÔØÎÄ¼ş¡£\r\n" + strError1;
+                        strError = strError + "\r\nè‡ªåŠ¨ä¸‹è½½æ–‡ä»¶ã€‚\r\n" + strError1;
                         return -1;
                     }
                     goto REDO;
@@ -94,7 +94,7 @@ namespace dp2rms
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØ±¾µØisbn¹æÔòÎÄ¼ş·¢Éú´íÎó :" + ex.Message;
+                strError = "è£…è½½æœ¬åœ°isbnè§„åˆ™æ–‡ä»¶å‘ç”Ÿé”™è¯¯ :" + ex.Message;
                 return -1;
             }
 
@@ -107,7 +107,7 @@ namespace dp2rms
         {
             strError = "";
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (this.QuickPinyin != null)
                 return 0;
 
@@ -119,7 +119,7 @@ namespace dp2rms
             }
             catch (FileNotFoundException ex)
             {
-                strError = "×°ÔØ±¾µØÆ´ÒôÎÄ¼ş·¢Éú´íÎó :" + ex.Message;
+                strError = "è£…è½½æœ¬åœ°æ‹¼éŸ³æ–‡ä»¶å‘ç”Ÿé”™è¯¯ :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
@@ -128,7 +128,7 @@ namespace dp2rms
                         out strError1);
                     if (nRet == -1)
                     {
-                        strError = strError + "\r\n×Ô¶¯ÏÂÔØÎÄ¼ş¡£\r\n" + strError1;
+                        strError = strError + "\r\nè‡ªåŠ¨ä¸‹è½½æ–‡ä»¶ã€‚\r\n" + strError1;
                         return -1;
                     }
                     goto REDO;
@@ -140,7 +140,7 @@ namespace dp2rms
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØ±¾µØÆ´ÒôÎÄ¼ş·¢Éú´íÎó :" + ex.Message;
+                strError = "è£…è½½æœ¬åœ°æ‹¼éŸ³æ–‡ä»¶å‘ç”Ÿé”™è¯¯ :" + ex.Message;
                 return -1;
             }
 
@@ -149,7 +149,7 @@ namespace dp2rms
 
         private void MainFormNew_Load(object sender, EventArgs e)
         {
-            Searching(false);   // Òş²Øsearching ToolStripLabel
+            Searching(false);   // éšè—searching ToolStripLabel
 
             if (ApplicationDeployment.IsNetworkDeployed == true)
             {
@@ -163,17 +163,17 @@ namespace dp2rms
             }
 
 
-            this.SetMenuItemState(); //ÈÎÑÓ»ª¼Ó 2006/1/5
-            this.toolBarButton_stop.Enabled = false; //ÈÎÑÓ»ª¼Ó 2006/1/5
+            this.SetMenuItemState(); //ä»»å»¶ååŠ  2006/1/5
+            this.toolBarButton_stop.Enabled = false; //ä»»å»¶ååŠ  2006/1/5
 
 
-            // ´ÓÎÄ¼şÖĞ×°ÔØ´´½¨Ò»¸öServerCollection¶ÔÏó
+            // ä»æ–‡ä»¶ä¸­è£…è½½åˆ›å»ºä¸€ä¸ªServerCollectionå¯¹è±¡
             // parameters:
-            //		bIgnorFileNotFound	ÊÇ·ñ²»Å×³öFileNotFoundExceptionÒì³£¡£
-            //							Èç¹û==true£¬º¯ÊıÖ±½Ó·µ»ØÒ»¸öĞÂµÄ¿ÕServerCollection¶ÔÏó
+            //		bIgnorFileNotFound	æ˜¯å¦ä¸æŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸ã€‚
+            //							å¦‚æœ==trueï¼Œå‡½æ•°ç›´æ¥è¿”å›ä¸€ä¸ªæ–°çš„ç©ºServerCollectionå¯¹è±¡
             // Exception:
-            //			FileNotFoundException	ÎÄ¼şÃ»ÕÒµ½
-            //			SerializationException	°æ±¾Ç¨ÒÆÊ±ÈİÒ×³öÏÖ
+            //			FileNotFoundException	æ–‡ä»¶æ²¡æ‰¾åˆ°
+            //			SerializationException	ç‰ˆæœ¬è¿ç§»æ—¶å®¹æ˜“å‡ºç°
             try
             {
 
@@ -186,7 +186,7 @@ namespace dp2rms
             {
                 MessageBox.Show(this, ex.Message);
                 Servers = new ServerCollection();
-                // ÉèÖÃÎÄ¼şÃû£¬ÒÔ±ã±¾´ÎÔËĞĞ½áÊøÊ±¸²¸Ç¾ÉÎÄ¼ş
+                // è®¾ç½®æ–‡ä»¶åï¼Œä»¥ä¾¿æœ¬æ¬¡è¿è¡Œç»“æŸæ—¶è¦†ç›–æ—§æ–‡ä»¶
                 Servers.FileName = this.DataDir
                     + "\\servers.bin";
 
@@ -210,7 +210,7 @@ namespace dp2rms
             cfgCache.InstantSave = true;
 
 
-            // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+            // è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
             if (AppInfo != null)
             {
                 SetFirstDefaultFont();
@@ -226,19 +226,19 @@ namespace dp2rms
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
 
-            // ´æÔÚÉÏ´ÎÒÅÁôµÄ´°¿Ú
+            // å­˜åœ¨ä¸Šæ¬¡é—ç•™çš„çª—å£
             int nLastSearchWindow = this.AppInfo.GetInt(
                 "main_form",
                 "last_search_window",
                 1);
             if (nLastSearchWindow == 1)
             {
-                MenuItem_openSearch_Click(null, null);	// ´ò¿ªÒ»¸ö¼ìË÷´°
+                MenuItem_openSearch_Click(null, null);	// æ‰“å¼€ä¸€ä¸ªæ£€ç´¢çª—
             }
 
             if (IsFirstRun == true && this.Servers.Count == 0)
             {
-                MessageBox.Show(this, "»¶Ó­Äú°²×°Ê¹ÓÃdp2rms -- ×ÊÔ´¹ÜÀí¡£");
+                MessageBox.Show(this, "æ¬¢è¿æ‚¨å®‰è£…ä½¿ç”¨dp2rms -- èµ„æºç®¡ç†ã€‚");
                 ManageServers(true);
                 ManagePreference();
             }
@@ -299,9 +299,9 @@ namespace dp2rms
 
             this.Servers.ServerChanged -= new ServerChangedEventHandle(Servers_ServerChanged);
 
-            // ±£´æµ½ÎÄ¼ş
+            // ä¿å­˜åˆ°æ–‡ä»¶
             // parameters:
-            //		strFileName	ÎÄ¼şÃû¡£Èç¹û==null,±íÊ¾Ê¹ÓÃ×°ÔØÊ±±£´æµÄÄÇ¸öÎÄ¼şÃû
+            //		strFileName	æ–‡ä»¶åã€‚å¦‚æœ==null,è¡¨ç¤ºä½¿ç”¨è£…è½½æ—¶ä¿å­˜çš„é‚£ä¸ªæ–‡ä»¶å
             Servers.Save(null);
             Servers = null;
 
@@ -310,11 +310,11 @@ namespace dp2rms
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
-            // ±£´æ´°¿Ú³ß´ç×´Ì¬
+            // ä¿å­˜çª—å£å°ºå¯¸çŠ¶æ€
             if (AppInfo != null)
             {
 
-                // Ö»Òª´æÔÚSearch´°¿Ú
+                // åªè¦å­˜åœ¨Searchçª—å£
                 this.AppInfo.SetInt(
                     "main_form",
                     "last_search_window",
@@ -322,7 +322,7 @@ namespace dp2rms
 
 
                 /*
-                // MDI×Ó´°¿ÚÊÇ·ñ×î´ó»¯
+                // MDIå­çª—å£æ˜¯å¦æœ€å¤§åŒ–
                 if (this.ActiveMdiChild != null) 
                 {
                     this.applicationInfo.SetString(
@@ -336,19 +336,19 @@ namespace dp2rms
                     "mainformstate");
             }
 
-            //¼Ç×¡save,±£´æĞÅÏ¢XMLÎÄ¼ş
+            //è®°ä½save,ä¿å­˜ä¿¡æ¯XMLæ–‡ä»¶
             AppInfo.Save();
-            AppInfo = null;	// ±ÜÃâºóÃæÔÙÓÃÕâ¸ö¶ÔÏó		
+            AppInfo = null;	// é¿å…åé¢å†ç”¨è¿™ä¸ªå¯¹è±¡		
 
         }
 
-        // ´ò¿ª...
+        // æ‰“å¼€...
         private void MenuItem_open_Click(object sender, EventArgs e)
         {
 
         }
 
-        // ´ò¿ª¼ìË÷´°
+        // æ‰“å¼€æ£€ç´¢çª—
         private void MenuItem_openSearch_Click(object sender, EventArgs e)
         {
             SearchForm child = new SearchForm();
@@ -360,7 +360,7 @@ namespace dp2rms
             //SetFirstMdiWindowState();
         }
 
-        // ´ò¿ªĞÂÏêÏ¸´°[¿Õ°×]
+        // æ‰“å¼€æ–°è¯¦ç»†çª—[ç©ºç™½]
         private void MenuItem_openDetail_Click(object sender, EventArgs e)
         {
             DetailForm child = new DetailForm();
@@ -372,7 +372,7 @@ namespace dp2rms
 
         }
 
-        // ÓĞ¹ØMDI×Ó´°¿ÚÅÅÁĞµÄ²Ëµ¥ÃüÁî
+        // æœ‰å…³MDIå­çª—å£æ’åˆ—çš„èœå•å‘½ä»¤
         private void MenuItem_openDetailWithTemplate_Click(object sender, EventArgs e)
         {
             DetailForm child = new DetailForm();
@@ -386,7 +386,7 @@ namespace dp2rms
             child.LoadTemplate();
         }
 
-        // ±£´æ
+        // ä¿å­˜
         private void MenuItem_save_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -396,7 +396,7 @@ namespace dp2rms
 
         }
 
-        // Áí´æÎª
+        // å¦å­˜ä¸º
         private void MenuItem_saveas_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -407,7 +407,7 @@ namespace dp2rms
             }
         }
 
-        // Áí´æµ½Êı¾İ¿â
+        // å¦å­˜åˆ°æ•°æ®åº“
         private void MenuItem_saveasToDB_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -417,7 +417,7 @@ namespace dp2rms
 
         }
 
-        // ÊôĞÔ
+        // å±æ€§
         private void MenuItem_properties_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -432,7 +432,7 @@ namespace dp2rms
             }
         }
 
-        // ·şÎñÆ÷¹ÜÀí
+        // æœåŠ¡å™¨ç®¡ç†
         private void MenuItem_serversManagement_Click(object sender, EventArgs e)
         {
             ManageServers(false);
@@ -457,7 +457,7 @@ namespace dp2rms
             ServerCollection newServers = Servers.Dup();
 
             if (bFirstRun == true)
-                dlg.Text = "Ê×´ÎÔËĞĞ: ÇëÖ¸¶¨·şÎñÆ÷²ÎÊı";
+                dlg.Text = "é¦–æ¬¡è¿è¡Œ: è¯·æŒ‡å®šæœåŠ¡å™¨å‚æ•°";
             dlg.Servers = newServers;
             this.AppInfo.LinkFormState(dlg, "serversdlg_state");
             dlg.ShowDialog(this);
@@ -476,7 +476,7 @@ namespace dp2rms
             this.Servers.Import(newServers);
         }
 
-        // ÍË³ö
+        // é€€å‡º
         private void MenuItem_exit_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -489,7 +489,7 @@ namespace dp2rms
             if (bSearching == true)
             {
                 this.toolStripLabel_searching.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLabel_searching.Image")));
-                this.toolStripLabel_searching.ToolTipText = "ÕıÔÚ¼ìË÷...";
+                this.toolStripLabel_searching.ToolTipText = "æ­£åœ¨æ£€ç´¢...";
             }
             else
             {
@@ -498,7 +498,7 @@ namespace dp2rms
             }
         }
 
-        // ¹Û²ì¼ìË÷µã
+        // è§‚å¯Ÿæ£€ç´¢ç‚¹
         private void MenuItem_viewAccessPoint_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -509,7 +509,7 @@ namespace dp2rms
             }
         }
 
-        // ±£´æµ½Ä£°å
+        // ä¿å­˜åˆ°æ¨¡æ¿
         private void MenuItem_saveToTemplate_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -520,7 +520,7 @@ namespace dp2rms
             }
         }
 
-        // ×Ô¶¯´´½¨Êı¾İ
+        // è‡ªåŠ¨åˆ›å»ºæ•°æ®
         private void MenuItem_autoGenerate_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -532,7 +532,7 @@ namespace dp2rms
 
         }
 
-        // ²éÖØ
+        // æŸ¥é‡
         private void MenuItem_dup_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -543,16 +543,16 @@ namespace dp2rms
             }
         }
 
-        // Çå³ıÅäÖÃÎÄ¼ş±¾µØ»º´æ
+        // æ¸…é™¤é…ç½®æ–‡ä»¶æœ¬åœ°ç¼“å­˜
         private void MenuItem_clearCfgCache_Click(object sender, EventArgs e)
         {
             cfgCache.Clear();
 
-            // Îª¼òµ¥Æğ¼û£¬Çå³ıDOM»º´æµÄ¹¦ÄÜÒ²ÔÚÕâÀïµ÷ÓÃÁË
+            // ä¸ºç®€å•èµ·è§ï¼Œæ¸…é™¤DOMç¼“å­˜çš„åŠŸèƒ½ä¹Ÿåœ¨è¿™é‡Œè°ƒç”¨äº†
             this.DomCache.Clear();
         }
 
-        // ¹ÜÀíÖÖ´ÎºÅ
+        // ç®¡ç†ç§æ¬¡å·
         private void MenuItem_manageZhongcihao_Click(object sender, EventArgs e)
         {
             ZhongcihaoDlg dlg = new ZhongcihaoDlg();
@@ -569,7 +569,7 @@ namespace dp2rms
             dlg.OpenDetail -= new OpenDetailEventHandler(this.OpenDetailCallBack);
             dlg.OpenDetail += new OpenDetailEventHandler(this.OpenDetailCallBack);
 
-            // »ñµÃÉÏ´ÎÒÅÁôµÄURL
+            // è·å¾—ä¸Šæ¬¡é—ç•™çš„URL
             string strLastUrl = this.AppInfo.GetString(
                 "zhongcihao",
                 "url",
@@ -583,14 +583,14 @@ namespace dp2rms
 
             dlg.Initial(searchpanel,
                 strLastUrl,
-                "ÖĞÎÄÊéÄ¿",
+                "ä¸­æ–‡ä¹¦ç›®",
                 "",
                 false);
             dlg.Show();
             dlg.MdiParent = this;
         }
 
-        // »Øµ÷º¯Êı£¬±£´æÊ¹ÓÃ¹ıµÄUrl
+        // å›è°ƒå‡½æ•°ï¼Œä¿å­˜ä½¿ç”¨è¿‡çš„Url
         private void zhongcihaodlg_Closed(object sender,
             EventArgs e)
         {
@@ -610,7 +610,7 @@ namespace dp2rms
             }
         }
 
-        // ¹«ÓÃµÄSearchPanel
+        // å…¬ç”¨çš„SearchPanel
         public SearchPanel SearchPanel
         {
             get
@@ -626,7 +626,7 @@ namespace dp2rms
             }
         }
 
-        // ·ÖÀàÖ÷Ìâ¶ÔÕÕ
+        // åˆ†ç±»ä¸»é¢˜å¯¹ç…§
         private void MenuItem_class2Subject_Click(object sender, EventArgs e)
         {
             Class2SubjectDlg dlg = new Class2SubjectDlg();
@@ -642,7 +642,7 @@ namespace dp2rms
             searchpanel.ap = this.AppInfo;
             searchpanel.ApCfgTitle = "mainform_class2subjectdlg";
 
-            // »ñµÃÉÏ´ÎÒÅÁôµÄURL
+            // è·å¾—ä¸Šæ¬¡é—ç•™çš„URL
             string strLastUrl = this.AppInfo.GetString(
                 "class2subject",
                 "url",
@@ -655,13 +655,13 @@ namespace dp2rms
 
             dlg.Initial(searchpanel,
                 strLastUrl, // "http://dp2003.com/rmsws/rmsws.asmx",
-                "·ÖÀàÖ÷Ìâ¶ÔÕÕ");
+                "åˆ†ç±»ä¸»é¢˜å¯¹ç…§");
             dlg.CssUrl = Environment.CurrentDirectory + "\\class2subject.css";
             dlg.Show();
             dlg.MdiParent = this;
         }
 
-        // »Øµ÷º¯Êı£¬±£´æÊ¹ÓÃ¹ıµÄUrl
+        // å›è°ƒå‡½æ•°ï¼Œä¿å­˜ä½¿ç”¨è¿‡çš„Url
         private void class2subjectdlg_Closed(object sender, 
             EventArgs e)
         {
@@ -702,10 +702,10 @@ namespace dp2rms
         }
         */
 
-        // ÓĞ¹ØMDI×Ó´°¿ÚÅÅÁĞµÄ²Ëµ¥ÃüÁî
+        // æœ‰å…³MDIå­çª—å£æ’åˆ—çš„èœå•å‘½ä»¤
         private void MenuItem_mdi_arrange_Click(object sender, System.EventArgs e)
         {
-            // Æ½ÆÌ Ë®Æ½·½Ê½
+            // å¹³é“º æ°´å¹³æ–¹å¼
             if (sender == MenuItem_tileHorizontal)
                 this.LayoutMdi(MdiLayout.TileHorizontal);
 
@@ -720,7 +720,7 @@ namespace dp2rms
 
         }
 
-        // °æÈ¨
+        // ç‰ˆæƒ
         private void MenuItem_copyright_Click(object sender, EventArgs e)
         {
             CopyrightDlg dlg = new CopyrightDlg();
@@ -731,7 +731,7 @@ namespace dp2rms
 
         }
 
-        // ÏµÍ³²ÎÊıÅäÖÃ
+        // ç³»ç»Ÿå‚æ•°é…ç½®
         private void MenuItem_preference_Click(object sender, EventArgs e)
         {
             ManagePreference();
@@ -747,7 +747,7 @@ namespace dp2rms
             dlg.ShowDialog(this);
         }
 
-        // ÉèÖÃ×ÖÌå
+        // è®¾ç½®å­—ä½“
         private void MenuItem_font_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is DetailForm)
@@ -760,7 +760,7 @@ namespace dp2rms
 
         public void SetMenuItemState()
         {
-            // ²Ëµ¥
+            // èœå•
             MenuItem_properties.Enabled = false;
             MenuItem_viewAccessPoint.Enabled = false;
             MenuItem_dup.Enabled = false;
@@ -773,7 +773,7 @@ namespace dp2rms
 
             MenuItem_font.Enabled = false;
 
-            // ¹¤¾ßÌõ°´Å¥
+            // å·¥å…·æ¡æŒ‰é’®
             toolBarButton_save.Enabled = false;
             toolBarButton_refresh.Enabled = false;
             toolBarButton_delete.Enabled = false;
@@ -792,7 +792,7 @@ namespace dp2rms
             }
         }
 
-        // µ±Ç°¶¥²ãµÄDetailForm
+        // å½“å‰é¡¶å±‚çš„DetailForm
         public DetailForm TopDetailForm
         {
             get
@@ -802,7 +802,7 @@ namespace dp2rms
 
         }
 
-        // µ±Ç°¶¥²ãµÄSearchForm
+        // å½“å‰é¡¶å±‚çš„SearchForm
         public SearchForm TopSearchForm
         {
             get
@@ -812,7 +812,7 @@ namespace dp2rms
 
         }
 
-        // µ±Ç°¶¥²ãµÄViewAccessPointForm
+        // å½“å‰é¡¶å±‚çš„ViewAccessPointForm
         public ViewAccessPointForm TopViewAccessPointForm
         {
             get
@@ -822,13 +822,13 @@ namespace dp2rms
 
         }
 
-        // µÃµ½ÌØ¶¨ÀàĞÍµÄ¶¥²ãMDI´°¿Ú
+        // å¾—åˆ°ç‰¹å®šç±»å‹çš„é¡¶å±‚MDIçª—å£
         Form GetTopChildWindow(Type type)
         {
             if (ActiveMdiChild == null)
                 return null;
 
-            // µÃµ½¶¥²ãµÄMDI Child
+            // å¾—åˆ°é¡¶å±‚çš„MDI Child
             IntPtr hwnd = this.ActiveMdiChild.Handle;
 
             if (hwnd == IntPtr.Zero)
@@ -958,7 +958,7 @@ namespace dp2rms
         }
 
 
-        // »Øµ÷ ¸´ÖÆÖ÷Ìâ´Ê¡£¸´ÖÆµ½¼ôÌù°å
+        // å›è°ƒ å¤åˆ¶ä¸»é¢˜è¯ã€‚å¤åˆ¶åˆ°å‰ªè´´æ¿
         void CopySubject(object sender, CopySubjectEventArgs e)
         {
             Clipboard.SetDataObject(e.Subject);
@@ -974,7 +974,7 @@ namespace dp2rms
             RegisterBarcodeDlg dlg = new RegisterBarcodeDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
 
-            // ×°ÔØÉÏ´ÎÔËĞĞµÄÒÅÁô²ÎÊı
+            // è£…è½½ä¸Šæ¬¡è¿è¡Œçš„é—ç•™å‚æ•°
             dlg.ServerUrl = this.AppInfo.GetString(
                 "registerbarcode",
                 "serverurl",
@@ -996,7 +996,7 @@ namespace dp2rms
 
             dlg.ShowDialog();
 
-            // ¼ÇÒä±¾´ÎµÄ²ÎÊı
+            // è®°å¿†æœ¬æ¬¡çš„å‚æ•°
             this.AppInfo.SetString(
                 "registerbarcode",
                 "serverurl",
@@ -1016,7 +1016,7 @@ namespace dp2rms
             RegisterBarcodeDlg dlg = new RegisterBarcodeDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
 
-            // ×°ÔØÉÏ´ÎÔËĞĞµÄÒÅÁô²ÎÊı
+            // è£…è½½ä¸Šæ¬¡è¿è¡Œçš„é—ç•™å‚æ•°
             dlg.ServerUrl = this.AppInfo.GetString(
                 "registerbarcode",
                 "serverurl",
@@ -1038,7 +1038,7 @@ namespace dp2rms
 
             dlg.ShowDialog();
 
-            // ¼ÇÒä±¾´ÎµÄ²ÎÊı
+            // è®°å¿†æœ¬æ¬¡çš„å‚æ•°
             this.AppInfo.SetString(
                 "registerbarcode",
                 "serverurl",
@@ -1060,7 +1060,7 @@ namespace dp2rms
             MessageBox.Show(this, strError);
         }
 
-        // ÏÂÔØÊı¾İÎÄ¼ş
+        // ä¸‹è½½æ•°æ®æ–‡ä»¶
         public int DownloadDataFile(string strFileName,
             out string strError)
         {
@@ -1077,11 +1077,11 @@ namespace dp2rms
             }
             catch (Exception ex)
             {
-                strError = "ÏÂÔØ" + strFileName + "ÎÄ¼ş·¢Éú´íÎó :" + ex.Message;
+                strError = "ä¸‹è½½" + strFileName + "æ–‡ä»¶å‘ç”Ÿé”™è¯¯ :" + ex.Message;
                 return -1;
             }
 
-            strError = "ÏÂÔØ" + strFileName + "ÎÄ¼ş³É¹¦ :\r\n" + strUrl + " --> " + strLocalFileName;
+            strError = "ä¸‹è½½" + strFileName + "æ–‡ä»¶æˆåŠŸ :\r\n" + strUrl + " --> " + strLocalFileName;
             return 0;
         }
 
@@ -1119,13 +1119,13 @@ namespace dp2rms
 
             try
             {
-                FontFamily family = new FontFamily("Î¢ÈíÑÅºÚ");
+                FontFamily family = new FontFamily("å¾®è½¯é›…é»‘");
             }
             catch
             {
                 return;
             }
-            this.DefaultFontString = "Î¢ÈíÑÅºÚ, 9pt";
+            this.DefaultFontString = "å¾®è½¯é›…é»‘, 9pt";
         }
 
         public string DefaultFontString
@@ -1163,7 +1163,7 @@ namespace dp2rms
         }
 
         // parameters:
-        //      bForce  ÊÇ·ñÇ¿ÖÆÉèÖÃ¡£Ç¿ÖÆÉèÖÃÊÇÖ¸DefaultFont == null µÄÊ±ºò£¬Ò²Òª°´ÕÕControl.DefaultFontÀ´ÉèÖÃ
+        //      bForce  æ˜¯å¦å¼ºåˆ¶è®¾ç½®ã€‚å¼ºåˆ¶è®¾ç½®æ˜¯æŒ‡DefaultFont == null çš„æ—¶å€™ï¼Œä¹Ÿè¦æŒ‰ç…§Control.DefaultFontæ¥è®¾ç½®
         public static void SetControlFont(Control control,
             Font font,
             bool bForce = false)
@@ -1187,7 +1187,7 @@ namespace dp2rms
         static void ChangeDifferentFaceFont(Control parent,
             Font font)
         {
-            // ĞŞ¸ÄËùÓĞÏÂ¼¶¿Ø¼şµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰ä¸‹çº§æ§ä»¶çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             foreach (Control sub in parent.Controls)
             {
                 Font subfont = sub.Font;
@@ -1206,7 +1206,7 @@ namespace dp2rms
                     ChangeDifferentFaceFont((ToolStrip)sub, font);
                 }
 
-                // µİ¹é
+                // é€’å½’
                 ChangeDifferentFaceFont(sub, font);
             }
         }
@@ -1214,7 +1214,7 @@ namespace dp2rms
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
-            // ĞŞ¸ÄËùÓĞÊÂÏîµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰äº‹é¡¹çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             for (int i = 0; i < tool.Items.Count; i++)
             {
                 ToolStripItem item = tool.Items[i];
@@ -1230,7 +1230,7 @@ namespace dp2rms
             }
         }
 
-        // ±£´æ·Ö¸îÌõÎ»ÖÃ
+        // ä¿å­˜åˆ†å‰²æ¡ä½ç½®
         public void SaveSplitterPos(SplitContainer container,
             string strSection,
             string strEntry)
@@ -1250,7 +1250,7 @@ namespace dp2rms
 
         }
 
-        // »ñµÃ²¢ÉèÖÃ·Ö¸îÌõÎ»ÖÃ
+        // è·å¾—å¹¶è®¾ç½®åˆ†å‰²æ¡ä½ç½®
         public void LoadSplitterPos(SplitContainer container,
             string strSection,
             string strEntry)

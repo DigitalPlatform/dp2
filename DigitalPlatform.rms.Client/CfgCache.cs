@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
@@ -10,13 +10,13 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.rms.Client
 {
 	/// <summary>
-	/// ÅäÖÃÎÄ¼şÇ°¶Ë»º³å
+	/// é…ç½®æ–‡ä»¶å‰ç«¯ç¼“å†²
 	/// </summary>
 	public class CfgCache
 	{
 		XmlDocument dom = null;
 
-		string m_strXmlFileName = "";	// ´æ´¢»º³å¶ÔÕÕĞÅÏ¢µÄxmlÎÄ¼ş
+		string m_strXmlFileName = "";	// å­˜å‚¨ç¼“å†²å¯¹ç…§ä¿¡æ¯çš„xmlæ–‡ä»¶
 
 		bool m_bChanged = false;
 
@@ -28,8 +28,8 @@ namespace DigitalPlatform.rms.Client
 		{
 		}
 
-		// »ñµÃ»òÉèÖÃÁÙÊ±ÎÄ¼şÄ¿Â¼
-		// Èç¹û²»ÉèÖÃÁÙÊ±ÎÄ¼şÄ¿Â¼, ÔòÔÚĞèÒª´´½¨ÁÙÊ±ÎÄ¼şµÄÊ±ºò, ×Ô¶¯´´½¨ÔÚÏµÍ³ÁÙÊ±ÎÄ¼şÄ¿Â¼ÖĞ
+		// è·å¾—æˆ–è®¾ç½®ä¸´æ—¶æ–‡ä»¶ç›®å½•
+		// å¦‚æœä¸è®¾ç½®ä¸´æ—¶æ–‡ä»¶ç›®å½•, åˆ™åœ¨éœ€è¦åˆ›å»ºä¸´æ—¶æ–‡ä»¶çš„æ—¶å€™, è‡ªåŠ¨åˆ›å»ºåœ¨ç³»ç»Ÿä¸´æ—¶æ–‡ä»¶ç›®å½•ä¸­
 		public string TempDir
 		{
 			get 
@@ -39,13 +39,13 @@ namespace DigitalPlatform.rms.Client
 			set 
 			{
 				m_strTempDir = value;
-				// ´´½¨Ä¿Â¼
+				// åˆ›å»ºç›®å½•
 				if (m_strTempDir != "")
 					PathUtil.CreateDirIfNeed(m_strTempDir);
 			}
 		}
 
-		// ÊÇ·ñÔÚĞŞ¸ÄºóÁ¢¼´±£´æµ½ÎÄ¼ş
+		// æ˜¯å¦åœ¨ä¿®æ”¹åç«‹å³ä¿å­˜åˆ°æ–‡ä»¶
 		public bool InstantSave
 		{
 			get
@@ -58,8 +58,8 @@ namespace DigitalPlatform.rms.Client
 			}
 		}
 
-		// »ñµÃÒ»¸öÁÙÊ±ÎÄ¼şÃû
-		// ÁÙÊ±ÎÄ¼ş´´½¨ÔÚ m_strTempDirÄ¿Â¼ÖĞ
+		// è·å¾—ä¸€ä¸ªä¸´æ—¶æ–‡ä»¶å
+		// ä¸´æ—¶æ–‡ä»¶åˆ›å»ºåœ¨ m_strTempDirç›®å½•ä¸­
 		string NewTempFileName()
 		{
 			if (m_strTempDir == "")
@@ -73,7 +73,7 @@ namespace DigitalPlatform.rms.Client
 				FileInfo fi = new FileInfo(strFileName);
 				if (fi.Exists == false) 
 				{
-					// ´´½¨Ò»¸ö0 byteµÄÎÄ¼ş
+					// åˆ›å»ºä¸€ä¸ª0 byteçš„æ–‡ä»¶
 					FileStream f = File.Create(strFileName);
 					f.Close();
 					return strFileName;
@@ -87,7 +87,7 @@ namespace DigitalPlatform.rms.Client
 			strError = "";
 			dom = new XmlDocument();
 
-			m_strXmlFileName = strXmlFileName;	// ³ö´íºóÒ²ĞèÒª
+			m_strXmlFileName = strXmlFileName;	// å‡ºé”™åä¹Ÿéœ€è¦
 
 			try 
 			{
@@ -95,8 +95,8 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
-				dom.LoadXml("<root/>");	// ËäÈ»·µ»Ø³ö´í,µ«ÊÇdomÊÇÕıÈ·³õÊ¼»¯ÁËµÄ
+                strError = ExceptionUtil.GetAutoText(ex);
+				dom.LoadXml("<root/>");	// è™½ç„¶è¿”å›å‡ºé”™,ä½†æ˜¯domæ˜¯æ­£ç¡®åˆå§‹åŒ–äº†çš„
 				return -1;
 			}
 
@@ -115,7 +115,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 		// parameters:
-		//		strXmlFileName	¿ÉÒÔÎªnull
+		//		strXmlFileName	å¯ä»¥ä¸ºnull
 		public int Save(string strXmlFileName,
 			out string strError)
 		{
@@ -126,7 +126,7 @@ namespace DigitalPlatform.rms.Client
 
 			if (strXmlFileName == null)
 			{
-				strError = "m_strXmlFileNameÉĞÎ´³õÊ¼»¯...";
+				strError = "m_strXmlFileNameå°šæœªåˆå§‹åŒ–...";
 				return -1;
 			}
 
@@ -136,7 +136,7 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
-		// ²éÕÒÅäÖÃÎÄ¼şÍøÂçÂ·¾¶Ëù¶ÔÓ¦µÄ±¾µØÎÄ¼ş
+		// æŸ¥æ‰¾é…ç½®æ–‡ä»¶ç½‘ç»œè·¯å¾„æ‰€å¯¹åº”çš„æœ¬åœ°æ–‡ä»¶
 		// return:
 		//		0	not found
 		//		1	found
@@ -144,7 +144,7 @@ namespace DigitalPlatform.rms.Client
 			out string strLocalName,
 			out string strTimeStamp)
 		{
-			strCfgPath = strCfgPath.ToLower();	// µ¼ÖÂ´óĞ¡Ğ´²»Ãô¸Ğ
+			strCfgPath = strCfgPath.ToLower();	// å¯¼è‡´å¤§å°å†™ä¸æ•æ„Ÿ
 
 			XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" +strCfgPath+ "']");
 
@@ -161,7 +161,7 @@ namespace DigitalPlatform.rms.Client
 			if (strLocalName == "")
 				goto DELETE;
 
-			// ¼ì²é±¾µØÎÄ¼şÊÇ·ñ´æÔÚ
+			// æ£€æŸ¥æœ¬åœ°æ–‡ä»¶æ˜¯å¦å­˜åœ¨
 			FileInfo fi = new FileInfo(strLocalName);
 			if (fi.Exists == false)
 				goto DELETE;
@@ -174,7 +174,7 @@ namespace DigitalPlatform.rms.Client
 			strLocalName = "";
 			strTimeStamp = "";
 
-			// É¾³ıÕâ¸öĞÅÏ¢²»ÍêÕûµÄ½Úµã
+			// åˆ é™¤è¿™ä¸ªä¿¡æ¯ä¸å®Œæ•´çš„èŠ‚ç‚¹
 			dom.DocumentElement.RemoveChild(node);
 			m_bChanged = true;
 			AutoSave();
@@ -182,19 +182,19 @@ namespace DigitalPlatform.rms.Client
 
 		}
 
-		// ÎªÒ»¸öÍøÂçÂ·¾¶×¼±¸±¾µØÎÄ¼ş
+		// ä¸ºä¸€ä¸ªç½‘ç»œè·¯å¾„å‡†å¤‡æœ¬åœ°æ–‡ä»¶
 		public int PrepareLocalFile(string strCfgPath,
 			out string strLocalName)
 		{
-			strCfgPath = strCfgPath.ToLower();	// µ¼ÖÂ´óĞ¡Ğ´²»Ãô¸Ğ
+			strCfgPath = strCfgPath.ToLower();	// å¯¼è‡´å¤§å°å†™ä¸æ•æ„Ÿ
 
 			XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
 
 			if (node != null)
 			{
-				// ½ÚµãÒÑ¾­´æÔÚ
+				// èŠ‚ç‚¹å·²ç»å­˜åœ¨
 				strLocalName = DomUtil.GetAttr(node, "localname");
-				Debug.Assert(strLocalName != "", "ÒÑ¾­´æÔÚµÄ½ÚµãÖĞlocalnameÊôĞÔÎª¿Õ");
+				Debug.Assert(strLocalName != "", "å·²ç»å­˜åœ¨çš„èŠ‚ç‚¹ä¸­localnameå±æ€§ä¸ºç©º");
 			}
 			else
 			{
@@ -211,20 +211,20 @@ namespace DigitalPlatform.rms.Client
 			return 1;
 		}
 
-		// ÎªÒÑ¾­´æÔÚµÄ½ÚµãÉèÖÃÊ±¼ä´ÁÖµ
+		// ä¸ºå·²ç»å­˜åœ¨çš„èŠ‚ç‚¹è®¾ç½®æ—¶é—´æˆ³å€¼
 		public int SetTimeStamp(string strCfgPath,
 			string strTimeStamp,
 			out string strError)
 		{
 			strError = "";
 
-			strCfgPath = strCfgPath.ToLower();	// µ¼ÖÂ´óĞ¡Ğ´²»Ãô¸Ğ
+			strCfgPath = strCfgPath.ToLower();	// å¯¼è‡´å¤§å°å†™ä¸æ•æ„Ÿ
 
 			XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
 
 			if (node == null)
 			{
-				strError = "ÊôĞÔpathÖµÎª '" + strCfgPath + "'µÄ<cfg>ÔªËØ²»´æÔÚ...";
+				strError = "å±æ€§pathå€¼ä¸º '" + strCfgPath + "'çš„<cfg>å…ƒç´ ä¸å­˜åœ¨...";
 				return -1;
 			}
 
@@ -234,7 +234,7 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
-		// Çå³ıÈ«²¿½Úµã
+		// æ¸…é™¤å…¨éƒ¨èŠ‚ç‚¹
 		public void Clear()
 		{
 			XmlNodeList nodes = dom.DocumentElement.SelectNodes("cfg");
@@ -249,7 +249,7 @@ namespace DigitalPlatform.rms.Client
 				}
 			}
 
-			// É¾³ıËùÓĞ<cfg>½Úµã
+			// åˆ é™¤æ‰€æœ‰<cfg>èŠ‚ç‚¹
 			for(int i=0;i<nodes.Count;i++)
 			{
 				dom.DocumentElement.RemoveChild(nodes[i]);
@@ -263,14 +263,14 @@ namespace DigitalPlatform.rms.Client
 		{
 			strError = "";
 
-			strCfgPath = strCfgPath.ToLower();	// µ¼ÖÂ´óĞ¡Ğ´²»Ãô¸Ğ
+			strCfgPath = strCfgPath.ToLower();	// å¯¼è‡´å¤§å°å†™ä¸æ•æ„Ÿ
 
 
 			XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" +strCfgPath+ "']");
 
 			if (node == null)
 			{
-				strError = "ÊôĞÔpathÖµÎª '" + strCfgPath + "'µÄ<cfg>ÔªËØ²»´æÔÚ...";
+				strError = "å±æ€§pathå€¼ä¸º '" + strCfgPath + "'çš„<cfg>å…ƒç´ ä¸å­˜åœ¨...";
 				return -1;
 			}
 			string strLocalName = DomUtil.GetAttr(node, "localname");

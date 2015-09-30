@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -109,7 +109,7 @@ namespace DigitalPlatform.rms.Client
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(41, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Ô´(&O):";
+            this.label1.Text = "æº(&O):";
             // 
             // textBox_origin
             // 
@@ -128,7 +128,7 @@ namespace DigitalPlatform.rms.Client
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(53, 12);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Ä¿±ê(&T):";
+            this.label2.Text = "ç›®æ ‡(&T):";
             // 
             // textBox_target
             // 
@@ -147,20 +147,20 @@ namespace DigitalPlatform.rms.Client
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 12);
             this.label3.TabIndex = 6;
-            this.label3.Text = "Ğ´Èë·½Ê½(&M):";
+            this.label3.Text = "å†™å…¥æ–¹å¼(&M):";
             // 
             // comboBox_writeMode
             // 
             this.comboBox_writeMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.comboBox_writeMode.Items.AddRange(new object[] {
-            "overwrite -- ¸²¸Ç",
-            "append -- ×·¼Ó",
-            "skip -- Ìø¹ı"});
+            "overwrite -- è¦†ç›–",
+            "append -- è¿½åŠ ",
+            "skip -- è·³è¿‡"});
             this.comboBox_writeMode.Location = new System.Drawing.Point(120, 192);
             this.comboBox_writeMode.Name = "comboBox_writeMode";
             this.comboBox_writeMode.Size = new System.Drawing.Size(152, 20);
             this.comboBox_writeMode.TabIndex = 7;
-            this.comboBox_writeMode.Text = "overwrite -- ¸²¸Ç";
+            this.comboBox_writeMode.Text = "overwrite -- è¦†ç›–";
             this.comboBox_writeMode.TextChanged += new System.EventHandler(this.comboBox_writeMode_TextChanged);
             // 
             // button_OK
@@ -170,7 +170,7 @@ namespace DigitalPlatform.rms.Client
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 8;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -181,7 +181,7 @@ namespace DigitalPlatform.rms.Client
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 9;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_findOrigin
@@ -211,7 +211,7 @@ namespace DigitalPlatform.rms.Client
             this.button_directAllServerMap.Name = "button_directAllServerMap";
             this.button_directAllServerMap.Size = new System.Drawing.Size(136, 23);
             this.button_directAllServerMap.TabIndex = 10;
-            this.button_directAllServerMap.Text = "È«²¿·şÎñÆ÷¶ÔÓ¦(&A)";
+            this.button_directAllServerMap.Text = "å…¨éƒ¨æœåŠ¡å™¨å¯¹åº”(&A)";
             this.button_directAllServerMap.Click += new System.EventHandler(this.button_directAllServerMap_Click);
             // 
             // textBox_comment
@@ -234,7 +234,7 @@ namespace DigitalPlatform.rms.Client
             this.button_explain.Name = "button_explain";
             this.button_explain.Size = new System.Drawing.Size(75, 23);
             this.button_explain.TabIndex = 12;
-            this.button_explain.Text = "½âÊÍ(&E)";
+            this.button_explain.Text = "è§£é‡Š(&E)";
             this.button_explain.Click += new System.EventHandler(this.button_explain_Click);
             // 
             // button_directSingleServerMap
@@ -245,7 +245,7 @@ namespace DigitalPlatform.rms.Client
             this.button_directSingleServerMap.Name = "button_directSingleServerMap";
             this.button_directSingleServerMap.Size = new System.Drawing.Size(131, 23);
             this.button_directSingleServerMap.TabIndex = 13;
-            this.button_directSingleServerMap.Text = "µ±Ç°·şÎñÆ÷ÄÚ¶ÔÓ¦(&S)";
+            this.button_directSingleServerMap.Text = "å½“å‰æœåŠ¡å™¨å†…å¯¹åº”(&S)";
             this.button_directSingleServerMap.Click += new System.EventHandler(this.button_directSingleServerMap_Click);
             // 
             // button_directSingleDbMap
@@ -255,7 +255,7 @@ namespace DigitalPlatform.rms.Client
             this.button_directSingleDbMap.Name = "button_directSingleDbMap";
             this.button_directSingleDbMap.Size = new System.Drawing.Size(102, 23);
             this.button_directSingleDbMap.TabIndex = 14;
-            this.button_directSingleDbMap.Text = "Ô­¿â¶ÔÓ¦(&D)";
+            this.button_directSingleDbMap.Text = "åŸåº“å¯¹åº”(&D)";
             this.button_directSingleDbMap.Click += new System.EventHandler(this.button_directSingleDbMap_Click);
             // 
             // DbNameMapItemDlg
@@ -282,7 +282,7 @@ namespace DigitalPlatform.rms.Client
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DbNameMapItemDlg";
             this.ShowInTaskbar = false;
-            this.Text = "¿âÃûÓ³ÉäÊÂÏî";
+            this.Text = "åº“åæ˜ å°„äº‹é¡¹";
             this.Load += new System.EventHandler(this.DbNameMapItemDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -294,20 +294,20 @@ namespace DigitalPlatform.rms.Client
 		{
 			if (this.textBox_origin.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Ô´");
+				MessageBox.Show(this, "å°šæœªæŒ‡å®šæº");
 				return;
 			}
 
 			if (this.textBox_target.Text == ""
 				&& this.WriteMode != "skip")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Ä¿±ê");
+				MessageBox.Show(this, "å°šæœªæŒ‡å®šç›®æ ‡");
 				return;
 			}
 
 			if (this.comboBox_writeMode.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Ğ´Èë·½Ê½");
+				MessageBox.Show(this, "å°šæœªæŒ‡å®šå†™å…¥æ–¹å¼");
 				return;
 			}
 		
@@ -326,7 +326,7 @@ namespace DigitalPlatform.rms.Client
 			OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "ÇëÑ¡ÔñÔ´Êı¾İ¿â";
+			dlg.Text = "è¯·é€‰æ‹©æºæ•°æ®åº“";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
 			dlg.ap = this.AppInfo;
 			dlg.ApCfgTitle = "dbnamemapitemdlg_origin";
@@ -348,13 +348,13 @@ namespace DigitalPlatform.rms.Client
 			OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+			dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
 			dlg.ap = this.AppInfo;
 			dlg.ApCfgTitle = "dbnamemapitemdlg_origin";
 			dlg.MultiSelect = false;
 
-            // Èç¹ûÄ¿±êtextboxÓĞÄÚÈİ£¬ÓÅÏÈÓÃËü¾ö¶¨È±Ê¡Ñ¡¶¨µÄÊı¾İ¿â½Úµã¡£·ñÔòÓÃÔ´textboxµÄÄÚÈİ
+            // å¦‚æœç›®æ ‡textboxæœ‰å†…å®¹ï¼Œä¼˜å…ˆç”¨å®ƒå†³å®šç¼ºçœé€‰å®šçš„æ•°æ®åº“èŠ‚ç‚¹ã€‚å¦åˆ™ç”¨æºtextboxçš„å†…å®¹
             if (string.IsNullOrEmpty(this.textBox_target.Text) == false)
 			    dlg.Path = this.textBox_target.Text;
             else if (string.IsNullOrEmpty(this.textBox_origin.Text) == false)
@@ -363,7 +363,7 @@ namespace DigitalPlatform.rms.Client
 			dlg.Initial( this.Servers,
 				this.Channels);	
 			// dlg.StartPositon = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);   // ¶ÔÓÚÊı¾İ¿â½Úµã£¬²»ÒªÖ÷¶¯Õ¹¿ªÆäÏÂÒ»¼¶
+			dlg.ShowDialog(this);   // å¯¹äºæ•°æ®åº“èŠ‚ç‚¹ï¼Œä¸è¦ä¸»åŠ¨å±•å¼€å…¶ä¸‹ä¸€çº§
 
 			if (dlg.DialogResult != DialogResult.OK)
 				return;
@@ -371,11 +371,11 @@ namespace DigitalPlatform.rms.Client
 			textBox_target.Text = dlg.Path;		
 		}
 
-		// Ñ¯ÎÊ¿ÕÔ´Â·¾¶ÈçºÎ´¦Àí
+		// è¯¢é—®ç©ºæºè·¯å¾„å¦‚ä½•å¤„ç†
 		// return:
-        //      -1  ³ö´í
-		//		0	cancelÈ«²¿´¦Àí
-		//		1	ÒÑ¾­Ñ¡Ôñ´¦Àí°ì·¨
+        //      -1  å‡ºé”™
+		//		0	cancelå…¨éƒ¨å¤„ç†
+		//		1	å·²ç»é€‰æ‹©å¤„ç†åŠæ³•
 		public static int AskNullOriginBox(
 			IWin32Window owner,
 			ApplicationInfo ap,
@@ -396,7 +396,7 @@ namespace DigitalPlatform.rms.Client
             dlg.Target = strSelectedLongPath;
 			dlg.WriteMode = "append";
 
-			dlg.Text = "ÇëÖ¸¶¨Ó³Éä¹ØÏµ";
+			dlg.Text = "è¯·æŒ‡å®šæ˜ å°„å…³ç³»";
 
 			if (ap != null)
 				ap.LinkFormState(dlg, "AskNotMatchOriginBox_state");
@@ -410,7 +410,7 @@ namespace DigitalPlatform.rms.Client
 
             string strError = "";
             if (map.NewItem(dlg.Origin, dlg.Target, dlg.WriteMode,
-                0,// ²åÈë×îÇ°Ãæ
+                0,// æ’å…¥æœ€å‰é¢
                 out strError) == null)
             {
                 MessageBox.Show(owner, strError);
@@ -420,11 +420,11 @@ namespace DigitalPlatform.rms.Client
 			return 1;
 		}
 
-        // Ñ¯ÎÊÎŞ·¨Æ¥ÅäµÄÔ´Â·¾¶ÈçºÎ´¦Àí
+        // è¯¢é—®æ— æ³•åŒ¹é…çš„æºè·¯å¾„å¦‚ä½•å¤„ç†
         // return:
-        //      -1  ³ö´í
-        //		0	cancelÈ«²¿´¦Àí
-        //		1	ÒÑ¾­Ñ¡Ôñ´¦Àí°ì·¨
+        //      -1  å‡ºé”™
+        //		0	cancelå…¨éƒ¨å¤„ç†
+        //		1	å·²ç»é€‰æ‹©å¤„ç†åŠæ³•
         public static int AskNotMatchOriginBox(
             IWin32Window owner,
             ApplicationInfo ap,
@@ -446,7 +446,7 @@ namespace DigitalPlatform.rms.Client
             dlg.Target = strSelectedLongPath;
             dlg.WriteMode = "append";
 
-            dlg.Text = "ÇëÖ¸¶¨Ó³Éä¹ØÏµ";
+            dlg.Text = "è¯·æŒ‡å®šæ˜ å°„å…³ç³»";
 
             if (ap != null)
                 ap.LinkFormState(dlg, "AskNotMatchOriginBox_state");
@@ -460,7 +460,7 @@ namespace DigitalPlatform.rms.Client
             string strError = "";
             if (map.NewItem(dlg.Origin, dlg.Target,
                 dlg.WriteMode,
-                0, // ²åÈë×îÇ°Ãæ
+                0, // æ’å…¥æœ€å‰é¢
                 out strError) == null)
             {
                 MessageBox.Show(owner, strError);
@@ -470,7 +470,7 @@ namespace DigitalPlatform.rms.Client
             return 1;
         }
 
-        // È«²¿·şÎñÆ÷Ö±½Ó¶ÔÓ¦
+        // å…¨éƒ¨æœåŠ¡å™¨ç›´æ¥å¯¹åº”
 		private void button_directAllServerMap_Click(object sender, System.EventArgs e)
 		{
 			this.textBox_origin.Text = "*";
@@ -483,12 +483,12 @@ namespace DigitalPlatform.rms.Client
 
 		}
 
-        // µ±Ç°·şÎñÆ÷ÄÚÖ±½Ó¶ÔÓ¦
+        // å½“å‰æœåŠ¡å™¨å†…ç›´æ¥å¯¹åº”
         private void button_directSingleServerMap_Click(object sender, EventArgs e)
         {
             if (this.textBox_origin.Text.IndexOf("?") == -1)
             {
-                MessageBox.Show("ÎŞ·¨ÉèÖÃ¶ÔÓ¦");
+                MessageBox.Show("æ— æ³•è®¾ç½®å¯¹åº”");
                 return;
             }
 
@@ -503,12 +503,12 @@ namespace DigitalPlatform.rms.Client
             this.button_findTarget.Enabled = true;
         }
 
-        // Ô­¿â¶ÔÓ¦
+        // åŸåº“å¯¹åº”
         private void button_directSingleDbMap_Click(object sender, EventArgs e)
         {
             if (this.textBox_origin.Text.IndexOf("?") == -1)
             {
-                MessageBox.Show("ÎŞ·¨ÉèÖÃ¶ÔÓ¦");
+                MessageBox.Show("æ— æ³•è®¾ç½®å¯¹åº”");
                 return;
             }
 
@@ -526,8 +526,8 @@ namespace DigitalPlatform.rms.Client
 				this.button_directAllServerMap.Enabled = false;
 
 				this.comboBox_writeMode.Items.Clear();
-				this.comboBox_writeMode.Items.Add("append -- ×·¼Ó");
-				this.comboBox_writeMode.Items.Add("skip -- Ìø¹ı");
+				this.comboBox_writeMode.Items.Add("append -- è¿½åŠ ");
+				this.comboBox_writeMode.Items.Add("skip -- è·³è¿‡");
 			}
 			else if (this.AskMode == AskMode.AskNotMatchOrigin)
 			{
@@ -545,9 +545,9 @@ namespace DigitalPlatform.rms.Client
 			if (this.textBox_origin.Text == "{null}")
 			{
 				if (this.WriteMode == "skip")
-					strText = "½«Ô´Êı¾İÎÄ¼şÖĞÃ»ÓĞÀ´Ô´¿âĞÅÏ¢µÄ¼ÇÂ¼£¬È«²¿Ìø¹ı¡£";
+					strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­æ²¡æœ‰æ¥æºåº“ä¿¡æ¯çš„è®°å½•ï¼Œå…¨éƒ¨è·³è¿‡ã€‚";
 				else
-					strText = "½«Ô´Êı¾İÎÄ¼şÖĞÃ»ÓĞÀ´Ô´¿âĞÅÏ¢µÄ¼ÇÂ¼, ÒÔ " +this.WriteModeCaption + "·½Ê½Ğ´ÈëÄ¿±ê Êı¾İ¿â "+this.textBox_target.Text+" ÖĞ¡£";
+					strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­æ²¡æœ‰æ¥æºåº“ä¿¡æ¯çš„è®°å½•, ä»¥ " +this.WriteModeCaption + "æ–¹å¼å†™å…¥ç›®æ ‡ æ•°æ®åº“ "+this.textBox_target.Text+" ä¸­ã€‚";
 				goto DONE;
 			}
 
@@ -555,9 +555,9 @@ namespace DigitalPlatform.rms.Client
 				&& this.textBox_target.Text == "*")
 			{
 				if (this.WriteMode == "skip")
-					strText = "½«Ô´Êı¾İÎÄ¼şÖĞÓĞÀ´Ô´Êı¾İ¿âĞÅÏ¢µÄ¼ÇÂ¼, È«²¿Ìø¹ı¡£";
+					strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­æœ‰æ¥æºæ•°æ®åº“ä¿¡æ¯çš„è®°å½•, å…¨éƒ¨è·³è¿‡ã€‚";
 				else
-                    strText = "½«Ô´Êı¾İÎÄ¼şÖĞÓĞÀ´Ô´Êı¾İ¿âĞÅÏ¢µÄ¼ÇÂ¼, ÒÔ " + this.WriteModeCaption + " ·½Ê½Ğ´Èë·şÎñÆ÷¶ËÍ¬ÑùÊı¾İ¿âÖĞ¡£";
+                    strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­æœ‰æ¥æºæ•°æ®åº“ä¿¡æ¯çš„è®°å½•, ä»¥ " + this.WriteModeCaption + " æ–¹å¼å†™å…¥æœåŠ¡å™¨ç«¯åŒæ ·æ•°æ®åº“ä¸­ã€‚";
 				goto DONE;
 			}
 
@@ -565,9 +565,9 @@ namespace DigitalPlatform.rms.Client
 				&& this.textBox_target.Text != "*")
 			{
 				if (this.WriteMode == "skip")
-					strText = "½«Ô´Êı¾İÎÄ¼şÖĞÓĞÀ´Ô´Êı¾İ¿âĞÅÏ¢µÄ¼ÇÂ¼, È«²¿Ìø¹ı¡£";
+					strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­æœ‰æ¥æºæ•°æ®åº“ä¿¡æ¯çš„è®°å½•, å…¨éƒ¨è·³è¿‡ã€‚";
 				else
-                    strText = "½«Ô´Êı¾İÎÄ¼şÖĞÓĞÀ´Ô´Êı¾İ¿âĞÅÏ¢µÄ¼ÇÂ¼, ²»¹ÜÆäÀ´Ô´Êı¾İ¿âÃûÊÇÊ²Ã´, ¶¼ÒÔ " + this.WriteModeCaption + " ·½Ê½Ğ´Èë·şÎñÆ÷¶ËÊı¾İ¿â " + this.textBox_target.Text + " ÖĞ¡£";
+                    strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­æœ‰æ¥æºæ•°æ®åº“ä¿¡æ¯çš„è®°å½•, ä¸ç®¡å…¶æ¥æºæ•°æ®åº“åæ˜¯ä»€ä¹ˆ, éƒ½ä»¥ " + this.WriteModeCaption + " æ–¹å¼å†™å…¥æœåŠ¡å™¨ç«¯æ•°æ®åº“ " + this.textBox_target.Text + " ä¸­ã€‚";
 				goto DONE;
 			}
 
@@ -575,16 +575,16 @@ namespace DigitalPlatform.rms.Client
 				&& this.textBox_target.Text == "*")
 			{
 				if (this.WriteMode == "skip")
-					strText = "½«Ô´Êı¾İÎÄ¼şÖĞµÄ¼ÇÂ¼, Èç¹ûÆäËæÎÄ¼ş¼ÇÔØµÄÀ´Ô´Êı¾İ¿âÃûÊÇ "+this.textBox_origin.Text+" £¬ÔòÌø¹ı¡£";
+					strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­çš„è®°å½•, å¦‚æœå…¶éšæ–‡ä»¶è®°è½½çš„æ¥æºæ•°æ®åº“åæ˜¯ "+this.textBox_origin.Text+" ï¼Œåˆ™è·³è¿‡ã€‚";
 				else
-                    strText = "½«Ô´Êı¾İÎÄ¼şÖĞµÄ¼ÇÂ¼, Èç¹ûÆäËæÎÄ¼ş¼ÇÔØµÄÀ´Ô´Êı¾İ¿âÃûÊÇ " + this.textBox_origin.Text + " £¬ÔòÒÔ " + this.WriteModeCaption + " ·½Ê½Ğ´Èë·şÎñÆ÷¶ËÍ¬ÃûÊı¾İ¿âÖĞ¡£";
+                    strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­çš„è®°å½•, å¦‚æœå…¶éšæ–‡ä»¶è®°è½½çš„æ¥æºæ•°æ®åº“åæ˜¯ " + this.textBox_origin.Text + " ï¼Œåˆ™ä»¥ " + this.WriteModeCaption + " æ–¹å¼å†™å…¥æœåŠ¡å™¨ç«¯åŒåæ•°æ®åº“ä¸­ã€‚";
 				goto DONE;
 			}
 	
 			if (this.WriteMode == "skip")
-				strText = "½«Ô´Êı¾İÎÄ¼şÖĞµÄ¼ÇÂ¼, Èç¹ûÆäËæÎÄ¼ş¼ÇÔØµÄÀ´Ô´Êı¾İ¿âÃûÊÇ "+this.textBox_origin.Text+" £¬ÔòÌø¹ı¡£";
+				strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­çš„è®°å½•, å¦‚æœå…¶éšæ–‡ä»¶è®°è½½çš„æ¥æºæ•°æ®åº“åæ˜¯ "+this.textBox_origin.Text+" ï¼Œåˆ™è·³è¿‡ã€‚";
 			else
-                strText = "½«Ô´Êı¾İÎÄ¼şÖĞµÄ¼ÇÂ¼, Èç¹ûÆäËæÎÄ¼ş¼ÇÔØµÄÀ´Ô´Êı¾İ¿âÃûÊÇ " + this.textBox_origin.Text + " £¬ÔòÒÔ " + this.WriteModeCaption + " ·½Ê½Ğ´Èë·şÎñÆ÷¶ËÊı¾İ¿â " + this.textBox_target.Text + " ÖĞ¡£";
+                strText = "å°†æºæ•°æ®æ–‡ä»¶ä¸­çš„è®°å½•, å¦‚æœå…¶éšæ–‡ä»¶è®°è½½çš„æ¥æºæ•°æ®åº“åæ˜¯ " + this.textBox_origin.Text + " ï¼Œåˆ™ä»¥ " + this.WriteModeCaption + " æ–¹å¼å†™å…¥æœåŠ¡å™¨ç«¯æ•°æ®åº“ " + this.textBox_target.Text + " ä¸­ã€‚";
 
 			DONE:
 			MessageBox.Show(this, strText);
@@ -645,11 +645,11 @@ namespace DigitalPlatform.rms.Client
             {
                 string strText = this.WriteMode;
                 if (strText == "append")
-                    return "×·¼Ó";
+                    return "è¿½åŠ ";
                 if (strText == "overwrite")
-                    return "¸²¸Ç";
+                    return "è¦†ç›–";
                 if (strText == "skip")
-                    return "Ìø¹ı";
+                    return "è·³è¿‡";
 
                 return strText;
             }

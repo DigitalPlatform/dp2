@@ -1279,7 +1279,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -2346,7 +2346,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                         }
                         catch (Exception ex)
                         {
-                            strError = ex.Message;
+                            strError = ExceptionUtil.GetAutoText(ex);
                             return -1;
                         }
                     }
@@ -2354,7 +2354,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 #if NO
@@ -2464,7 +2464,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -2762,7 +2762,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -2774,7 +2774,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -2786,7 +2786,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -3544,7 +3544,7 @@ this.Font);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -3667,7 +3667,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -3702,7 +3702,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -3768,7 +3768,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             return 0;
@@ -4121,7 +4121,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             return;

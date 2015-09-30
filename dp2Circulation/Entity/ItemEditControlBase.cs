@@ -381,7 +381,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "RefreshDom() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

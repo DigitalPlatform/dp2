@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace DigitalPlatform.Xml
 {
-	// DomUtilÀà°üº¬XML DOMµÄÒ»Ğ©À©Õ¹¹¦ÄÜº¯Êı
+	// DomUtilç±»åŒ…å«XML DOMçš„ä¸€äº›æ‰©å±•åŠŸèƒ½å‡½æ•°
 	public class DomUtil
 	{
         public static XmlNode RenameNode(XmlNode node, 
@@ -47,9 +47,9 @@ namespace DigitalPlatform.Xml
 
 
         // 2010/12/18
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNodeµÄInnerText
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNodeçš„InnerText
         // parameters:
-        //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+        //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
         public static string GetLangedNodeText(
             string strLang,
             XmlNode parent,
@@ -67,9 +67,9 @@ namespace DigitalPlatform.Xml
         }
 
         // 2010/12/18
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNode
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNode
         // parameters:
-        //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+        //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
         public static XmlNode GetLangedNode(
             string strLang,
             XmlNode parent,
@@ -80,7 +80,7 @@ namespace DigitalPlatform.Xml
 
             if (String.IsNullOrEmpty(strLang) == true)
             {
-                return parent.SelectSingleNode(strElementName);  // µÚÒ»¸östrElementNameÔªËØ
+                return parent.SelectSingleNode(strElementName);  // ç¬¬ä¸€ä¸ªstrElementNameå…ƒç´ 
             }
             else
             {
@@ -97,7 +97,7 @@ namespace DigitalPlatform.Xml
                out strLangLeft,
                out strLangRight);
 
-            // ËùÓĞ<caption>ÔªËØ
+            // æ‰€æœ‰<caption>å…ƒç´ 
             XmlNodeList nodes = parent.SelectNodes(strElementName);
 
             for (int i = 0; i < nodes.Count; i++)
@@ -111,7 +111,7 @@ namespace DigitalPlatform.Xml
                    out strThisLangLeft,
                    out strThisLangRight);
 
-                // ÊÇ²»ÊÇ×óÓÒ¶¼Æ¥ÅäÔò¸üºÃ?Èç¹û²»ĞĞ²ÅÊÇµÚÒ»¸ö×ó±ßÆ¥ÅäµÄ
+                // æ˜¯ä¸æ˜¯å·¦å³éƒ½åŒ¹é…åˆ™æ›´å¥½?å¦‚æœä¸è¡Œæ‰æ˜¯ç¬¬ä¸€ä¸ªå·¦è¾¹åŒ¹é…çš„
 
                 if (strThisLangLeft == strLangLeft)
                     return nodes[i];
@@ -119,7 +119,7 @@ namespace DigitalPlatform.Xml
 
             if (bReturnFirstNode == true)
             {
-                // ÊµÔÚ²»ĞĞ£¬ÔòÑ¡µÚÒ»¸ö<caption>µÄÎÄ×ÖÖµ
+                // å®åœ¨ä¸è¡Œï¼Œåˆ™é€‰ç¬¬ä¸€ä¸ª<caption>çš„æ–‡å­—å€¼
                 node = parent.SelectSingleNode(strElementName);
                 if (node != null)
                     return node;
@@ -128,9 +128,9 @@ namespace DigitalPlatform.Xml
             return null;    // not found
         }
 
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNodeµÄInnerText
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNodeçš„InnerText
         // parameters:
-        //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+        //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
         public static string GetXmlLangedNodeText(
             string strLang,
             XmlNode parent,
@@ -147,9 +147,9 @@ namespace DigitalPlatform.Xml
             return node.InnerText;
         }
 
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNode
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNode
         // parameters:
-        //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+        //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
         public static XmlNode GetXmlLangedNode(
             string strLang,
             XmlNode parent,
@@ -160,7 +160,7 @@ namespace DigitalPlatform.Xml
 
             if (String.IsNullOrEmpty(strLang) == true)
             {
-                return parent.SelectSingleNode(strElementName);  // µÚÒ»¸östrElementNameÔªËØ
+                return parent.SelectSingleNode(strElementName);  // ç¬¬ä¸€ä¸ªstrElementNameå…ƒç´ 
             }
             else
             {
@@ -180,7 +180,7 @@ namespace DigitalPlatform.Xml
                out strLangLeft,
                out strLangRight);
 
-            // ËùÓĞ<strElementName>ÔªËØ
+            // æ‰€æœ‰<strElementName>å…ƒç´ 
             XmlNodeList nodes = parent.SelectNodes(strElementName);
 
             for (int i = 0; i < nodes.Count; i++)
@@ -194,7 +194,7 @@ namespace DigitalPlatform.Xml
                    out strThisLangLeft,
                    out strThisLangRight);
 
-                // ÊÇ²»ÊÇ×óÓÒ¶¼Æ¥ÅäÔò¸üºÃ?Èç¹û²»ĞĞ²ÅÊÇµÚÒ»¸ö×ó±ßÆ¥ÅäµÄ
+                // æ˜¯ä¸æ˜¯å·¦å³éƒ½åŒ¹é…åˆ™æ›´å¥½?å¦‚æœä¸è¡Œæ‰æ˜¯ç¬¬ä¸€ä¸ªå·¦è¾¹åŒ¹é…çš„
 
                 if (strThisLangLeft == strLangLeft)
                     return nodes[i];
@@ -202,7 +202,7 @@ namespace DigitalPlatform.Xml
 
             if (bReturnFirstNode == true)
             {
-                // ÊµÔÚ²»ĞĞ£¬ÔòÑ¡µÚÒ»¸ö<strElementName>µÄÎÄ×ÖÖµ
+                // å®åœ¨ä¸è¡Œï¼Œåˆ™é€‰ç¬¬ä¸€ä¸ª<strElementName>çš„æ–‡å­—å€¼
                 node = parent.SelectSingleNode(strElementName);
                 if (node != null)
                     return node;
@@ -211,8 +211,8 @@ namespace DigitalPlatform.Xml
             return null;    // not found
         }
 
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶<caption>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄÎÄ×ÖÖµ
-        // ºÍGetCaption()º¯ÊıµÄ²îÒì£¬ÔÚÓÚÈç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬²»×ö·µ»ØµÚÒ»¸ö<caption>
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§<caption>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„æ–‡å­—å€¼
+        // å’ŒGetCaption()å‡½æ•°çš„å·®å¼‚ï¼Œåœ¨äºå¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œä¸åšè¿”å›ç¬¬ä¸€ä¸ª<caption>
         public static string GetCaptionExt(string strLang,
             XmlNode parent)
         {
@@ -220,7 +220,7 @@ namespace DigitalPlatform.Xml
 
             if (String.IsNullOrEmpty(strLang) == true)
             {
-                node = parent.SelectSingleNode("caption");  // µÚÒ»¸öcaptionÔªËØ
+                node = parent.SelectSingleNode("caption");  // ç¬¬ä¸€ä¸ªcaptionå…ƒç´ 
                 if (node != null)
                     return node.InnerText;
 
@@ -241,7 +241,7 @@ namespace DigitalPlatform.Xml
                out strLangLeft,
                out strLangRight);
 
-            // ËùÓĞ<caption>ÔªËØ
+            // æ‰€æœ‰<caption>å…ƒç´ 
             XmlNodeList nodes = parent.SelectNodes("caption");
 
             for (int i = 0; i < nodes.Count; i++)
@@ -255,14 +255,14 @@ namespace DigitalPlatform.Xml
                    out strThisLangLeft,
                    out strThisLangRight);
 
-                // ÊÇ²»ÊÇ×óÓÒ¶¼Æ¥ÅäÔò¸üºÃ?Èç¹û²»ĞĞ²ÅÊÇµÚÒ»¸ö×ó±ßÆ¥ÅäµÄ
+                // æ˜¯ä¸æ˜¯å·¦å³éƒ½åŒ¹é…åˆ™æ›´å¥½?å¦‚æœä¸è¡Œæ‰æ˜¯ç¬¬ä¸€ä¸ªå·¦è¾¹åŒ¹é…çš„
 
                 if (strThisLangLeft == strLangLeft)
                     return nodes[i].InnerText;
             }
 
             /*
-            // ÊµÔÚ²»ĞĞ£¬ÔòÑ¡µÚÒ»¸ö<caption>µÄÎÄ×ÖÖµ
+            // å®åœ¨ä¸è¡Œï¼Œåˆ™é€‰ç¬¬ä¸€ä¸ª<caption>çš„æ–‡å­—å€¼
             node = parent.SelectSingleNode("caption");
             if (node != null)
                 return node.InnerText;
@@ -271,7 +271,7 @@ namespace DigitalPlatform.Xml
             return null;    // not found
         }
 
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶<caption>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄÎÄ×ÖÖµ
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§<caption>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„æ–‡å­—å€¼
         public static string GetCaption(string strLang,
             XmlNode parent)
         {
@@ -279,7 +279,7 @@ namespace DigitalPlatform.Xml
 
             if (String.IsNullOrEmpty(strLang) == true)
             {
-                node = parent.SelectSingleNode("caption");  // µÚÒ»¸öcaptionÔªËØ
+                node = parent.SelectSingleNode("caption");  // ç¬¬ä¸€ä¸ªcaptionå…ƒç´ 
                 if (node != null)
                     return node.InnerText;
 
@@ -300,7 +300,7 @@ namespace DigitalPlatform.Xml
                out strLangLeft,
                out strLangRight);
 
-            // ËùÓĞ<caption>ÔªËØ
+            // æ‰€æœ‰<caption>å…ƒç´ 
             XmlNodeList nodes = parent.SelectNodes("caption");
 
             for (int i = 0; i < nodes.Count; i++)
@@ -314,13 +314,13 @@ namespace DigitalPlatform.Xml
                    out strThisLangLeft,
                    out strThisLangRight);
 
-                // ÊÇ²»ÊÇ×óÓÒ¶¼Æ¥ÅäÔò¸üºÃ?Èç¹û²»ĞĞ²ÅÊÇµÚÒ»¸ö×ó±ßÆ¥ÅäµÄ
+                // æ˜¯ä¸æ˜¯å·¦å³éƒ½åŒ¹é…åˆ™æ›´å¥½?å¦‚æœä¸è¡Œæ‰æ˜¯ç¬¬ä¸€ä¸ªå·¦è¾¹åŒ¹é…çš„
 
                 if (strThisLangLeft == strLangLeft)
                     return nodes[i].InnerText;
             }
 
-            // ÊµÔÚ²»ĞĞ£¬ÔòÑ¡µÚÒ»¸ö<caption>µÄÎÄ×ÖÖµ
+            // å®åœ¨ä¸è¡Œï¼Œåˆ™é€‰ç¬¬ä¸€ä¸ª<caption>çš„æ–‡å­—å€¼
             node = parent.SelectSingleNode("caption");
             if (node != null)
                 return node.InnerText;
@@ -345,13 +345,13 @@ namespace DigitalPlatform.Xml
             }
         }
 
-        // °Ñ±íÊ¾²¼¶ûÖµµÄ×Ö·û´®·­ÒëÎª²¼¶ûÖµ
-        // ×¢Òâ£¬strValue²»ÄÜÎª¿Õ£¬±¾º¯ÊıÎŞ·¨½âÊÍÈ±Ê¡Öµ
+        // æŠŠè¡¨ç¤ºå¸ƒå°”å€¼çš„å­—ç¬¦ä¸²ç¿»è¯‘ä¸ºå¸ƒå°”å€¼
+        // æ³¨æ„ï¼ŒstrValueä¸èƒ½ä¸ºç©ºï¼Œæœ¬å‡½æ•°æ— æ³•è§£é‡Šç¼ºçœå€¼
         public static bool IsBooleanTrue(string strValue)
         {
             // 2008/6/4
             if (String.IsNullOrEmpty(strValue) == true)
-                throw new Exception("DomUtil.IsBoolean() ²»ÄÜ½ÓÊÜ¿Õ×Ö·û´®²ÎÊı");
+                throw new Exception("DomUtil.IsBoolean() ä¸èƒ½æ¥å—ç©ºå­—ç¬¦ä¸²å‚æ•°");
 
             strValue = strValue.ToLower();  // 2008/6/4
 
@@ -369,7 +369,7 @@ namespace DigitalPlatform.Xml
             return IsBooleanTrue(strValue);
         }
 
-        // °ü×°°æ±¾
+        // åŒ…è£…ç‰ˆæœ¬
         public static bool GetBooleanParam(XmlNode node,
             string strParamName,
             bool bDefaultValue)
@@ -384,7 +384,7 @@ namespace DigitalPlatform.Xml
             return bValue;
         }
 
-        // °ü×°ºóµÄ°æ±¾¡£²»ÓÃÊÂÏÈ»ñµÃÔªËØµÄ Node
+        // åŒ…è£…åçš„ç‰ˆæœ¬ã€‚ä¸ç”¨äº‹å…ˆè·å¾—å…ƒç´ çš„ Node
         public static bool GetBooleanParam(
             XmlNode root,
             string strElementPath,
@@ -399,14 +399,14 @@ namespace DigitalPlatform.Xml
                 bDefaultValue);
         }
 
-        // ÉèÖÃ bool ÀàĞÍµÄ²ÎÊı
+        // è®¾ç½® bool ç±»å‹çš„å‚æ•°
         // parameters:
-        //      root    Æğµã XmlNode
-        //      strElementPath  ÔªËØÂ·¾¶
-        //      strParamName    ÊôĞÔÃû
-        //      bValue  ÒªÉèÖÃµÄÖµ
+        //      root    èµ·ç‚¹ XmlNode
+        //      strElementPath  å…ƒç´ è·¯å¾„
+        //      strParamName    å±æ€§å
+        //      bValue  è¦è®¾ç½®çš„å€¼
         // return:
-        //      ±¾´ÎÊÇ·ñ´´½¨ÁËĞÂµÄÔªËØ
+        //      æœ¬æ¬¡æ˜¯å¦åˆ›å»ºäº†æ–°çš„å…ƒç´ 
         public static bool SetBooleanParam(
             XmlNode root,
             string strElementPath,
@@ -430,11 +430,11 @@ namespace DigitalPlatform.Xml
             return bCreateElement;
         }
 
-        // »ñµÃ²¼¶ûĞÍµÄÊôĞÔ²ÎÊıÖµ
+        // è·å¾—å¸ƒå°”å‹çš„å±æ€§å‚æ•°å€¼
         // return:
-        //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-        //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-        //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+        //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+        //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+        //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
         public static int GetBooleanParam(XmlNode node,
             string strParamName,
             bool bDefaultValue,
@@ -463,7 +463,7 @@ namespace DigitalPlatform.Xml
                 return 0;
             }
 
-            // TODO: ¿ÉÒÔ¼ì²é×Ö·û´®£¬ÒªÔÚ¹æ¶¨µÄÖµ·¶Î§ÄÚ
+            // TODO: å¯ä»¥æ£€æŸ¥å­—ç¬¦ä¸²ï¼Œè¦åœ¨è§„å®šçš„å€¼èŒƒå›´å†…
 
             bValue = false;
             return 0;
@@ -471,11 +471,11 @@ namespace DigitalPlatform.Xml
 
 
 
-        // »ñµÃÕûÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+        // è·å¾—æ•´æ•°å‹çš„å±æ€§å‚æ•°å€¼
         // return:
-        //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-        //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-        //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+        //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+        //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+        //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
         public static int GetIntegerParam(XmlNode node,
             string strParamName,
             int nDefaultValue,
@@ -500,18 +500,18 @@ namespace DigitalPlatform.Xml
             }
             catch (Exception ex)
             {
-                strError = "ÊôĞÔ " + strParamName + " µÄÖµÓ¦µ±ÎªÊıÖµĞÍ¡£³ö´íĞÅÏ¢: " + ex.Message;
+                strError = "å±æ€§ " + strParamName + " çš„å€¼åº”å½“ä¸ºæ•°å€¼å‹ã€‚å‡ºé”™ä¿¡æ¯: " + ex.Message;
                 return -1;
             }
 
             return 0;
         }
 
-        // »ñµÃÕûÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+        // è·å¾—æ•´æ•°å‹çš„å±æ€§å‚æ•°å€¼
         // return:
-        //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-        //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-        //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+        //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+        //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+        //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
         public static int GetIntegerParam(XmlNode node,
             string strParamName,
             long nDefaultValue,
@@ -536,18 +536,18 @@ namespace DigitalPlatform.Xml
             }
             catch (Exception ex)
             {
-                strError = "ÊôĞÔ " + strParamName + " µÄÖµÓ¦µ±ÎªÊıÖµĞÍ¡£³ö´íĞÅÏ¢: " + ex.Message;
+                strError = "å±æ€§ " + strParamName + " çš„å€¼åº”å½“ä¸ºæ•°å€¼å‹ã€‚å‡ºé”™ä¿¡æ¯: " + ex.Message;
                 return -1;
             }
 
             return 0;
         }
 
-        // »ñµÃ¸¡µãÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+        // è·å¾—æµ®ç‚¹æ•°å‹çš„å±æ€§å‚æ•°å€¼
         // return:
-        //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-        //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-        //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+        //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+        //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+        //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
         public static int GetDoubleParam(XmlNode node,
             string strParamName,
             double nDefaultValue,
@@ -572,15 +572,15 @@ namespace DigitalPlatform.Xml
             }
             catch (Exception ex)
             {
-                strError = "ÊôĞÔ " + strParamName + " µÄÖµÓ¦µ±Îª(¸¡µã)ÊıÖµĞÍ¡£³ö´íĞÅÏ¢: " + ex.Message;
+                strError = "å±æ€§ " + strParamName + " çš„å€¼åº”å½“ä¸º(æµ®ç‚¹)æ•°å€¼å‹ã€‚å‡ºé”™ä¿¡æ¯: " + ex.Message;
                 return -1;
             }
 
             return 0;
         }
 
-        // °ü×°ºóµÄ°æ±¾
-        // ²»°üº¬prolog
+        // åŒ…è£…åçš„ç‰ˆæœ¬
+        // ä¸åŒ…å«prolog
         public static int GetIndentXml(string strXml,
             out string strOutXml,
             out string strError)
@@ -605,7 +605,7 @@ namespace DigitalPlatform.Xml
         }
 
         // parameters:
-        //      bHasProlog  ÊÇ·ñprolog
+        //      bHasProlog  æ˜¯å¦prolog
 		public static int GetIndentXml(string strXml,
             bool bHasProlog,
 			out string strOutXml,
@@ -626,7 +626,7 @@ namespace DigitalPlatform.Xml
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ex.Message;
 				return -1;
 			}
 
@@ -640,7 +640,7 @@ namespace DigitalPlatform.Xml
 
 
 
-        // »ñµÃËõ½øµÄXMLÔ´´úÂë
+        // è·å¾—ç¼©è¿›çš„XMLæºä»£ç 
         public static string GetIndentXml(XmlNode node)
         {
             MemoryStream m = new MemoryStream();
@@ -707,8 +707,8 @@ namespace DigitalPlatform.Xml
             return false;
         }
 
-		// »ñµÃËõ½øµÄXMLÔ´´úÂë
-        // ×¢£º°üº¬prologµÈ¡£Èç¹û²»Ïë°üº¬ÕâĞ©£¬ÇëÓÃGetIndentXml(XmlNode)°æ±¾
+		// è·å¾—ç¼©è¿›çš„XMLæºä»£ç 
+        // æ³¨ï¼šåŒ…å«prologç­‰ã€‚å¦‚æœä¸æƒ³åŒ…å«è¿™äº›ï¼Œè¯·ç”¨GetIndentXml(XmlNode)ç‰ˆæœ¬
 		public static string GetIndentXml(XmlDocument dom)
 		{
             string strEncoding = GetDomEncodingString(dom);
@@ -746,15 +746,15 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// µÃµ½Ò»¸ö½ÚµãÔÚ¸¸Ç×µÄ¶ù×Ó¼¯ÖĞµÄĞòºÅ ´Ó0¿ªÊ¼
+		// å¾—åˆ°ä¸€ä¸ªèŠ‚ç‚¹åœ¨çˆ¶äº²çš„å„¿å­é›†ä¸­çš„åºå· ä»0å¼€å§‹
         // parameters:
-        //      node    ¶ù×Ó½Úµã
+        //      node    å„¿å­èŠ‚ç‚¹
         // return:
-        //      ·µ»ØÔÚ¸¸Ç×µÄ¶ù×Ó¼¯ÖĞµÄĞòºÅ£¬-1Ã»ÕÒµ½
-		// ±àĞ´Õß: ÈÎÑÓ»ª
+        //      è¿”å›åœ¨çˆ¶äº²çš„å„¿å­é›†ä¸­çš„åºå·ï¼Œ-1æ²¡æ‰¾åˆ°
+		// ç¼–å†™è€…: ä»»å»¶å
 		public static int GetIndex(XmlNode node)
 		{
-            Debug.Assert(node != null, "GetIndex()µ÷ÓÃ³ö´í£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "GetIndex()è°ƒç”¨å‡ºé”™ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
 			XmlNode parentNode = node.ParentNode;
 			for(int i=0;i<parentNode.ChildNodes.Count;i++)
@@ -767,15 +767,15 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// µÃµ½parentNodeµÄµÚÒ»¸öelement¶ù×Ó½Úµã
+		// å¾—åˆ°parentNodeçš„ç¬¬ä¸€ä¸ªelementå„¿å­èŠ‚ç‚¹
 		// parameter:
-		//		parentNode	¸¸Ç×½Úµã
+		//		parentNode	çˆ¶äº²èŠ‚ç‚¹
 		// return:
-		//		µÚÒ»¸öelement¶ù×Ó½Úµã£¬Î´ÕÒµ½·µ»Ønull
-		// ±àĞ´Õß: ÈÎÑÓ»ª
+		//		ç¬¬ä¸€ä¸ªelementå„¿å­èŠ‚ç‚¹ï¼Œæœªæ‰¾åˆ°è¿”å›null
+		// ç¼–å†™è€…: ä»»å»¶å
 		public static XmlElement GetFirstElementChild(XmlNode parentNode)
 		{
-            Debug.Assert(parentNode != null, "GetFirstElementChild()³ö´í£¬parentNode²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(parentNode != null, "GetFirstElementChild()å‡ºé”™ï¼ŒparentNodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
 			for(int i=0;i<parentNode.ChildNodes.Count;i++)
 			{
@@ -786,15 +786,15 @@ namespace DigitalPlatform.Xml
 			return null;
 		}
 
-		// µÃµ½parentNodeµÄµÚÒ»¸öCDATA¶ù×Ó½Úµã
+		// å¾—åˆ°parentNodeçš„ç¬¬ä¸€ä¸ªCDATAå„¿å­èŠ‚ç‚¹
 		// parameter:
-		//		parentNode	¸¸Ç×½Úµã
+		//		parentNode	çˆ¶äº²èŠ‚ç‚¹
 		// return:
-		//		µÚÒ»¸öXmlCDataSection¶ù×Ó½Úµã
-		// ±àĞ´Õß: ÈÎÑÓ»ª
+		//		ç¬¬ä¸€ä¸ªXmlCDataSectionå„¿å­èŠ‚ç‚¹
+		// ç¼–å†™è€…: ä»»å»¶å
 		public static XmlCDataSection GetFirstCDATAChild(XmlNode parentNode)
 		{
-            Debug.Assert(parentNode != null, "GetFirstCDATAChild()³ö´í£¬parentNode²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(parentNode != null, "GetFirstCDATAChild()å‡ºé”™ï¼ŒparentNodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
 			for(int i=0;i<parentNode.ChildNodes.Count;i++)
 			{
@@ -806,8 +806,8 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// ´Ó¸ù½Úµã¿ªÊ¼£¬¸ù¾İÖ¸¶¨µÄÔªËØ½ÚµãxpathºÍÊôĞÔÃû£¬µÃµ½ÊôĞÔÖµ
-        // ±àĞ´Õß£ºĞ»ÌÎ
+		// ä»æ ¹èŠ‚ç‚¹å¼€å§‹ï¼Œæ ¹æ®æŒ‡å®šçš„å…ƒç´ èŠ‚ç‚¹xpathå’Œå±æ€§åï¼Œå¾—åˆ°å±æ€§å€¼
+        // ç¼–å†™è€…ï¼šè°¢æ¶›
 		public static string GetAttr(XmlNode nodeRoot, 
 			string strNodePath,
 			string strAttrName)
@@ -820,18 +820,18 @@ namespace DigitalPlatform.Xml
 			return GetAttr(node, strAttrName);
 		}
 
-        // Ì½²âXmlNode½ÚµãµÄÖ¸¶¨ÊôĞÔÊÇ·ñ´æÔÚ
+        // æ¢æµ‹XmlNodeèŠ‚ç‚¹çš„æŒ‡å®šå±æ€§æ˜¯å¦å­˜åœ¨
         // parameters:
-        //      node        XmlNode½Úµã
-        //      strAttrName    ÊôĞÔÃû³Æ
+        //      node        XmlNodeèŠ‚ç‚¹
+        //      strAttrName    å±æ€§åç§°
         // return:
         public static bool HasAttr(XmlNode node,
             string strAttrName)
         {
-            Debug.Assert(node != null, "GetAttr()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()µ÷ÓÃ´íÎó£¬strAttrName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "GetAttr()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             if (node.Attributes == null)
                 return false;
 
@@ -840,48 +840,48 @@ namespace DigitalPlatform.Xml
             return true;
         }
 
-		// µÃµ½XmlNode½ÚµãµÄÖ¸¶¨ÊôĞÔµÄÖµ
-        // TODO: ÕÒÊôĞÔÊ¹ÓÃµÄSelectSingleNode()º¯Êı£¬ÊÇ·ñ»áÀË·ÑÊ±¼ä£¬¿É×ö²âÊÔÓëÖ±½Ó´Ónode¶ÔÓ¦µÄÊôĞÔ¼¯ºÏÖĞÕÒÊôĞÔÓÃµÄÊ±¼ä±È½Ï¡£
+		// å¾—åˆ°XmlNodeèŠ‚ç‚¹çš„æŒ‡å®šå±æ€§çš„å€¼
+        // TODO: æ‰¾å±æ€§ä½¿ç”¨çš„SelectSingleNode()å‡½æ•°ï¼Œæ˜¯å¦ä¼šæµªè´¹æ—¶é—´ï¼Œå¯åšæµ‹è¯•ä¸ç›´æ¥ä»nodeå¯¹åº”çš„å±æ€§é›†åˆä¸­æ‰¾å±æ€§ç”¨çš„æ—¶é—´æ¯”è¾ƒã€‚
         // parameters:
-        //      node        XmlNode½Úµã
-        //      strAttrName    ÊôĞÔÃû³Æ
+        //      node        XmlNodeèŠ‚ç‚¹
+        //      strAttrName    å±æ€§åç§°
         // return:
-        //      ·µ»ØÊôĞÔÖµ
-        //      ×¢£ºÈçºÎÎ´ÕÒµ½Ö¸¶¨µÄÊôĞÔ½Úµã£¬·µ»Ø""
+        //      è¿”å›å±æ€§å€¼
+        //      æ³¨ï¼šå¦‚ä½•æœªæ‰¾åˆ°æŒ‡å®šçš„å±æ€§èŠ‚ç‚¹ï¼Œè¿”å›""
 		public static string GetAttr(XmlNode node,
             string strAttrName)
 		{
-            Debug.Assert(node != null, "GetAttr()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()µ÷ÓÃ´íÎó£¬strAttrName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "GetAttr()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
             
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             if (node.Attributes == null)
                 return "";
 
-            // 2012/2/16 ÓÅ»¯
+            // 2012/2/16 ä¼˜åŒ–
             XmlAttribute attr = node.Attributes[strAttrName];
             if (attr == null)
                 return "";
             return attr.Value;
 		}
 
-		// µÃµ½XmlNode½ÚµãÖ¸¶¨Ãû³Æ¿Õ¼äµÄÊôĞÔµÄÖµ
+		// å¾—åˆ°XmlNodeèŠ‚ç‚¹æŒ‡å®šåç§°ç©ºé—´çš„å±æ€§çš„å€¼
         // parameters:
-        //      strNameSpaceUrl ÊôĞÔµÄÃû×Ö¿Õ¼äµÄurl
-        //      node            XmlNode½Úµã
-        //      strAttrName        ÊôĞÔÃû³Æ
+        //      strNameSpaceUrl å±æ€§çš„åå­—ç©ºé—´çš„url
+        //      node            XmlNodeèŠ‚ç‚¹
+        //      strAttrName        å±æ€§åç§°
         // return:
-        //      Ö¸¶¨ÊôĞÔµÄÖµ
-        //      ×¢£ºÈç¹ûÎ´ÕÒµ½Ö¸¶¨µÄÊôĞÔ½Úµã£¬·µ»Ø"";
-        // ???ÕÒÊôĞÔÊ¹ÓÃµÄSelectSingleNode()º¯Êı£¬ÊÇ·ñ»áÀË·ÑÊ±¼ä£¬¿É×ö²âÊÔÓëÖ±½Ó´Ónode¶ÔÓ¦µÄÊôĞÔ¼¯ºÏÖĞÕÒÊôĞÔÓÃµÄÊ±¼ä±È½Ï¡£
+        //      æŒ‡å®šå±æ€§çš„å€¼
+        //      æ³¨ï¼šå¦‚æœæœªæ‰¾åˆ°æŒ‡å®šçš„å±æ€§èŠ‚ç‚¹ï¼Œè¿”å›"";
+        // ???æ‰¾å±æ€§ä½¿ç”¨çš„SelectSingleNode()å‡½æ•°ï¼Œæ˜¯å¦ä¼šæµªè´¹æ—¶é—´ï¼Œå¯åšæµ‹è¯•ä¸ç›´æ¥ä»nodeå¯¹åº”çš„å±æ€§é›†åˆä¸­æ‰¾å±æ€§ç”¨çš„æ—¶é—´æ¯”è¾ƒã€‚
 		public static string GetAttr(string strAttrNameSpaceUri,
 			XmlNode node,
 			string strAttrName)
 		{
-            Debug.Assert(node != null, "GetAttr()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()µ÷ÓÃ´íÎó£¬strAttrName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "GetAttr()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
             Debug.Assert(strAttrNameSpaceUri != null && strAttrNameSpaceUri != "",
-                "GetAttr()µ÷ÓÃ´íÎó£¬strNameSpaceUri²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+                "GetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrNameSpaceUriå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
 			XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("abc", strAttrNameSpaceUri);
@@ -894,20 +894,20 @@ namespace DigitalPlatform.Xml
 		}
 
 
-        // µÃµ½XmlNode½ÚµãµÄÖ¸¶¨ÊôĞÔµÄÖµ
+        // å¾—åˆ°XmlNodeèŠ‚ç‚¹çš„æŒ‡å®šå±æ€§çš„å€¼
         // parameters:
-        //      node        XmlNode½Úµã
-        //      strAttrName    ÊôĞÔÃû³Æ
+        //      node        XmlNodeèŠ‚ç‚¹
+        //      strAttrName    å±æ€§åç§°
         // return:
-        //      ·µ»ØÊôĞÔÖµ
-        //      ×¢£ºÈçºÎÎ´ÕÒµ½Ö¸¶¨µÄÊôĞÔ½Úµã£¬·µ»Ønull
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
-        // ???ÕÒÊôĞÔÊ¹ÓÃµÄSelectSingleNode()º¯Êı£¬ÊÇ·ñ»áÀË·ÑÊ±¼ä£¬¿É×ö²âÊÔÓëÖ±½Ó´Ónode¶ÔÓ¦µÄÊôĞÔ¼¯ºÏÖĞÕÒÊôĞÔÓÃµÄÊ±¼ä±È½Ï¡£
+        //      è¿”å›å±æ€§å€¼
+        //      æ³¨ï¼šå¦‚ä½•æœªæ‰¾åˆ°æŒ‡å®šçš„å±æ€§èŠ‚ç‚¹ï¼Œè¿”å›null
+        // ç¼–å†™è€…ï¼šä»»å»¶å
+        // ???æ‰¾å±æ€§ä½¿ç”¨çš„SelectSingleNode()å‡½æ•°ï¼Œæ˜¯å¦ä¼šæµªè´¹æ—¶é—´ï¼Œå¯åšæµ‹è¯•ä¸ç›´æ¥ä»nodeå¯¹åº”çš„å±æ€§é›†åˆä¸­æ‰¾å±æ€§ç”¨çš„æ—¶é—´æ¯”è¾ƒã€‚
         public static string GetAttrDiff(XmlNode node,
             string strAttrName)
         {
-            Debug.Assert(node != null, "GetAttrDiff()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttrDiff()µ÷ÓÃ´íÎó£¬strAttrName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "GetAttrDiff()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strAttrName != null && strAttrName != "", "GetAttrDiff()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
 
             /*
@@ -918,18 +918,18 @@ namespace DigitalPlatform.Xml
             else
                 return nodeAttr.Value;
              * */
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             if (node.Attributes == null)
                 return null;
 
-            // 2012/2/16 ÓÅ»¯
+            // 2012/2/16 ä¼˜åŒ–
             XmlAttribute attr = node.Attributes[strAttrName];
             if (attr == null)
                 return null;
             return attr.Value;
         }
 
-        // ±àĞ´Õß£ºĞ»ÌÎ
+        // ç¼–å†™è€…ï¼šè°¢æ¶›
 		public static string GetAttrOrDefault(XmlNode node,
             string strAttrName,
 			string strDefault)
@@ -947,12 +947,12 @@ namespace DigitalPlatform.Xml
 
             Debug.Assert(node.Attributes != null, "");
             /*
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             if (node.Attributes == null)
                 return strDefault;
              * */
 
-            // 2012/2/16 ÓÅ»¯
+            // 2012/2/16 ä¼˜åŒ–
             XmlAttribute attr = node.Attributes[strAttrName];
             if (attr == null)
                 return strDefault;
@@ -961,20 +961,20 @@ namespace DigitalPlatform.Xml
 		}
 
 
-        // ÉèÖÃXmlNode½ÚµãÖ¸¶¨ÊôĞÔµÄÖµ
-        // ×¢: 2013/2/22 ½ñºó×îºÃÓÃ XmlElement node.SetAttribute(strAttrName, strAttrValue) À´Ìæ´ú±¾º¯Êı
+        // è®¾ç½®XmlNodeèŠ‚ç‚¹æŒ‡å®šå±æ€§çš„å€¼
+        // æ³¨: 2013/2/22 ä»Šåæœ€å¥½ç”¨ XmlElement node.SetAttribute(strAttrName, strAttrValue) æ¥æ›¿ä»£æœ¬å‡½æ•°
         // parameters:
-        //      node            XmlNode½Úµã
-        //      strAttrName     ÊôĞÔÃû³Æ
-        //      strAttrValue    ÊôĞÔÖµ,¿ÉÒÔÎª""»ònull,Èç¹û==null,±íÊ¾É¾³ıÕâ¸öÊôĞÔ
+        //      node            XmlNodeèŠ‚ç‚¹
+        //      strAttrName     å±æ€§åç§°
+        //      strAttrValue    å±æ€§å€¼,å¯ä»¥ä¸º""æˆ–null,å¦‚æœ==null,è¡¨ç¤ºåˆ é™¤è¿™ä¸ªå±æ€§
 		public static void SetAttr(XmlNode node,
 			string strAttrName,
 			string strAttrValue)
 		{
-            Debug.Assert(node != null, "SetAttr()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strAttrName != null && strAttrName != "", "SetAttr()µ÷ÓÃ´íÎó£¬strAttrName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "SetAttr()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strAttrName != null && strAttrName != "", "SetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             Debug.Assert(node.Attributes != null, "");
 
 			XmlAttributeCollection listAttr = node.Attributes;
@@ -983,7 +983,7 @@ namespace DigitalPlatform.Xml
             if (attrFound == null) 
 			{
                 if (strAttrValue == null)
-					return ;	// ±¾À´¾Í²»´æÔÚ
+					return ;	// æœ¬æ¥å°±ä¸å­˜åœ¨
 
                 XmlElement element = (XmlElement)node; 
                 element.SetAttribute(strAttrName, strAttrValue);
@@ -997,22 +997,22 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-        // ÉèÖÃXmlNodeÔªËØ½ÚµãµÄÊôĞÔÖµ£¬Ãû×Ö¿Õ¼ä°æ±¾
+        // è®¾ç½®XmlNodeå…ƒç´ èŠ‚ç‚¹çš„å±æ€§å€¼ï¼Œåå­—ç©ºé—´ç‰ˆæœ¬
         // parameters:
-        //      node                XmlNode½Úµã
-        //      strAttrName         ÊôĞÔÃû³Æ
-        //      strAttrNameSpaceURI ÊôĞÔÃû×Ö¿Õ¼äµÄURI
-        //      strAttrValue        ÊôĞÔÖµ,Èç¹û==null,ÔòÉ¾³ıÕâ¸öÊôĞÔ
+        //      node                XmlNodeèŠ‚ç‚¹
+        //      strAttrName         å±æ€§åç§°
+        //      strAttrNameSpaceURI å±æ€§åå­—ç©ºé—´çš„URI
+        //      strAttrValue        å±æ€§å€¼,å¦‚æœ==null,åˆ™åˆ é™¤è¿™ä¸ªå±æ€§
 		public static void SetAttr(XmlNode node,
 			string strAttrName,
 			string strAttrNameSpaceURI,
 			string strAttrValue)
 		{
-            Debug.Assert(node != null, "SetAttr()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strAttrName != null && strAttrName != "", "SetAttr()µ÷ÓÃ´íÎó£¬strAttrName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
-            Debug.Assert(strAttrNameSpaceURI != null && strAttrNameSpaceURI != "", "SetAttr()µ÷ÓÃ´íÎó£¬strAttrNameSpaceURI²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "SetAttr()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strAttrName != null && strAttrName != "", "SetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
+            Debug.Assert(strAttrNameSpaceURI != null && strAttrNameSpaceURI != "", "SetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrAttrNameSpaceURIå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             Debug.Assert(node.Attributes != null, "");
 
 			XmlAttributeCollection listAttr = node.Attributes;
@@ -1021,7 +1021,7 @@ namespace DigitalPlatform.Xml
             if (attrFound == null)
             {
                 if (strAttrValue == null)
-                    return;	// ±¾À´¾Í²»´æÔÚ
+                    return;	// æœ¬æ¥å°±ä¸å­˜åœ¨
 
                 XmlElement element = (XmlElement)node;
                 element.SetAttribute(strAttrName, strAttrNameSpaceURI, strAttrValue);
@@ -1035,25 +1035,25 @@ namespace DigitalPlatform.Xml
             }
 		}
 
-        // ÉèÖÃXmlNodeÔªËØ½ÚµãµÄÊôĞÔÖµ£¬Ç°×ººÍÃû×Ö¿Õ¼ä°æ±¾
+        // è®¾ç½®XmlNodeå…ƒç´ èŠ‚ç‚¹çš„å±æ€§å€¼ï¼Œå‰ç¼€å’Œåå­—ç©ºé—´ç‰ˆæœ¬
         // parameters:
-        //      node                XmlNode½Úµã
-        //      strAttrName         ÊôĞÔÃû³Æ
-        //      strPrefix   Ç°×º
-        //      strAttrNameSpaceURI ÊôĞÔÃû×Ö¿Õ¼äµÄURI
-        //      strAttrValue        ÊôĞÔÖµ,Èç¹û==null,ÔòÉ¾³ıÕâ¸öÊôĞÔ
+        //      node                XmlNodeèŠ‚ç‚¹
+        //      strAttrName         å±æ€§åç§°
+        //      strPrefix   å‰ç¼€
+        //      strAttrNameSpaceURI å±æ€§åå­—ç©ºé—´çš„URI
+        //      strAttrValue        å±æ€§å€¼,å¦‚æœ==null,åˆ™åˆ é™¤è¿™ä¸ªå±æ€§
         public static void SetAttr(XmlNode node,
             string strName,
             string strPrefix,
             string strNamespaceURI,
             string strValue)
         {
-            Debug.Assert(node != null, "SetAttr()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(String.IsNullOrEmpty(strName) == false, "SetAttr()µ÷ÓÃ´íÎó£¬strName²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
-            Debug.Assert(String.IsNullOrEmpty(strNamespaceURI) == false, "SetAttr()µ÷ÓÃ´íÎó£¬strNamespaceURI²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
-            Debug.Assert(String.IsNullOrEmpty(strPrefix) == false, "SetAttr()µ÷ÓÃ´íÎó£¬strPrefix²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(node != null, "SetAttr()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(String.IsNullOrEmpty(strName) == false, "SetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrNameå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
+            Debug.Assert(String.IsNullOrEmpty(strNamespaceURI) == false, "SetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrNamespaceURIå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
+            Debug.Assert(String.IsNullOrEmpty(strPrefix) == false, "SetAttr()è°ƒç”¨é”™è¯¯ï¼ŒstrPrefixå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
-            // 2012/4/25 NodeType == DocumentµÄ½Úµã£¬ÆäAttributes³ÉÔ±Îªnull
+            // 2012/4/25 NodeType == Documentçš„èŠ‚ç‚¹ï¼Œå…¶Attributesæˆå‘˜ä¸ºnull
             Debug.Assert(node.Attributes != null, "");
 
             XmlAttribute attrFound = node.Attributes[strName, strNamespaceURI];
@@ -1061,7 +1061,7 @@ namespace DigitalPlatform.Xml
             if (attrFound == null)
             {
                 if (strValue == null)
-                    return;	// ±¾À´¾Í²»´æÔÚ
+                    return;	// æœ¬æ¥å°±ä¸å­˜åœ¨
 
                 XmlElement element = (XmlElement)node;
                 XmlAttribute attr = node.OwnerDocument.CreateAttribute(strPrefix, strName, strNamespaceURI);
@@ -1077,15 +1077,15 @@ namespace DigitalPlatform.Xml
             }
         }
 
-        // µÃµ½childNodes¼¯ºÏÖĞ£¬ËùÓĞµÄCDATA½Úµã
+        // å¾—åˆ°childNodesé›†åˆä¸­ï¼Œæ‰€æœ‰çš„CDATAèŠ‚ç‚¹
 		// parameters:
-        //      childNodes: ¶ù×Ó½Úµã¼¯ºÏ£¬ÀïÃæÓĞ¸÷ÖÖÀàĞÍµÄ½Úµã
+        //      childNodes: å„¿å­èŠ‚ç‚¹é›†åˆï¼Œé‡Œé¢æœ‰å„ç§ç±»å‹çš„èŠ‚ç‚¹
         // return:
-        //      ·µ»ØËùÓĞCDATA½Úµã×é³ÉµÄÊı×é,Èç¹ûÒ»¸öCDATA½Úµã¶¼Ã»ÓĞ£¬·µ»ØÒ»¸ö¿Õ¼¯ºÏ
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        //      è¿”å›æ‰€æœ‰CDATAèŠ‚ç‚¹ç»„æˆçš„æ•°ç»„,å¦‚æœä¸€ä¸ªCDATAèŠ‚ç‚¹éƒ½æ²¡æœ‰ï¼Œè¿”å›ä¸€ä¸ªç©ºé›†åˆ
+        // ç¼–å†™è€…ï¼šä»»å»¶å
 		public static ArrayList GetCdataNodes(XmlNodeList childNodes)
 		{
-            Debug.Assert(childNodes != null, "GetCdataNodes()µ÷ÓÃ´íÎó£¬childNodes²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(childNodes != null, "GetCdataNodes()è°ƒç”¨é”™è¯¯ï¼ŒchildNodeså‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
 			ArrayList aCDATA = new ArrayList();
 			foreach(XmlNode item in childNodes)
@@ -1097,17 +1097,17 @@ namespace DigitalPlatform.Xml
 		}		
 			
 
-		// Í¨¹ıstrXpathÂ·¾¶Öğ¼¶´´½¨node£¬Èç¹ûstrXpath¶ÔÓ¦µÄ½ÚµãÒÑ´æÔÚ£¬ÔòÖ±½Ó·µ»Ø
+		// é€šè¿‡strXpathè·¯å¾„é€çº§åˆ›å»ºnodeï¼Œå¦‚æœstrXpathå¯¹åº”çš„èŠ‚ç‚¹å·²å­˜åœ¨ï¼Œåˆ™ç›´æ¥è¿”å›
 		// paramter:
-        //		nodeRoot	¸ù½Úµã
-		//		strXpath	¼òµ¥µÄxpath£¬×îºóÒ»²ã¿ÉÒÔÊÇÊôĞÔÃû³Æ(¼´@ÊôĞÔÃû)
+        //		nodeRoot	æ ¹èŠ‚ç‚¹
+		//		strXpath	ç®€å•çš„xpathï¼Œæœ€åä¸€å±‚å¯ä»¥æ˜¯å±æ€§åç§°(å³@å±æ€§å)
         // return:
-        //      ·µ»ØstrXpath¶ÔÓ¦µÄ½Úµã
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        //      è¿”å›strXpathå¯¹åº”çš„èŠ‚ç‚¹
+        // ç¼–å†™è€…ï¼šä»»å»¶å
 		public static XmlNode CreateNodeByPath(XmlNode nodeRoot,
 			string strXpath)
 		{
-            Debug.Assert(nodeRoot != null, "CreateNodeByPath()µ÷ÓÃ´íÎó£¬nodeRoot²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(nodeRoot != null, "CreateNodeByPath()è°ƒç”¨é”™è¯¯ï¼ŒnodeRootå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
 			if (nodeFound != null)
@@ -1117,13 +1117,13 @@ namespace DigitalPlatform.Xml
             return DomUtil.CreateNode(nodeRoot, aNodeName);
 		}
 
-        // ¸ù¾İÃû³ÆÊı×éÖğ¼¶´´½¨½Úµã
+        // æ ¹æ®åç§°æ•°ç»„é€çº§åˆ›å»ºèŠ‚ç‚¹
         // parameters:
-        //      nodeRoot    ¸ù½Úµã
-        //      aNodeName   ½ÚµãÃû³ÆÊı×é
+        //      nodeRoot    æ ¹èŠ‚ç‚¹
+        //      aNodeName   èŠ‚ç‚¹åç§°æ•°ç»„
         // return:
-        //      ·µ»ØĞÂ´´½¨µÄXmlNode½Úµã
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        //      è¿”å›æ–°åˆ›å»ºçš„XmlNodeèŠ‚ç‚¹
+        // ç¼–å†™è€…ï¼šä»»å»¶å
         public static XmlNode CreateNode(XmlNode nodeRoot,
             string[] aNodeName)
         {
@@ -1133,7 +1133,7 @@ namespace DigitalPlatform.Xml
                 if (nodeRoot is XmlDocument)
                     dom = (XmlDocument)nodeRoot;
                 else
-                    throw (new Exception("CreateNode()·¢ÉúÒì³££¬nodeRootµÄOwnerDocumentÊôĞÔÖµÎªnull£¬ÇÒnodeRoot²»ÊÇXmlDocumentÀàĞÍ¡£"));
+                    throw (new Exception("CreateNode()å‘ç”Ÿå¼‚å¸¸ï¼ŒnodeRootçš„OwnerDocumentå±æ€§å€¼ä¸ºnullï¼Œä¸”nodeRootä¸æ˜¯XmlDocumentç±»å‹ã€‚"));
             }
 
             if (aNodeName.Length == 0)
@@ -1149,7 +1149,7 @@ namespace DigitalPlatform.Xml
             {
                 string strOneName = aNodeName[i];
                 if (strOneName == "")
-                    throw new Exception("Í¨¹ıCreateNode()´´½¨ÔªËØÊ±£¬µÚ'" + Convert.ToInt32(i) + "'¼¶µÄÃû³ÆÎª¿Õ¡£");
+                    throw new Exception("é€šè¿‡CreateNode()åˆ›å»ºå…ƒç´ æ—¶ï¼Œç¬¬'" + Convert.ToInt32(i) + "'çº§çš„åç§°ä¸ºç©ºã€‚");
 
                 temp = nodeCurrent.SelectSingleNode(strOneName);
                 if (temp == null)
@@ -1159,11 +1159,11 @@ namespace DigitalPlatform.Xml
                     {
                         string strAttrName = strOneName.Substring(1);
                         if (strAttrName == "")
-                            throw new Exception("Í¨¹ıCreateNode()´´½¨ÔªËØÊ±£¬µÚ'" + Convert.ToInt32(i) + "'¼¶µÄÊôĞÔÃû³ÆÎª¿Õ¡£");
+                            throw new Exception("é€šè¿‡CreateNode()åˆ›å»ºå…ƒç´ æ—¶ï¼Œç¬¬'" + Convert.ToInt32(i) + "'çº§çš„å±æ€§åç§°ä¸ºç©ºã€‚");
                         DomUtil.SetAttr(nodeCurrent, strAttrName, "");
                         temp = nodeCurrent.SelectSingleNode("@" + strAttrName);
                         if (temp == null)
-                            throw new Exception("ÒÑ¾­´´½¨ÁË'" + strAttrName + "'ÊôĞÔ£¬²»¿ÉÄÜÕÒ²»µ½¡£");
+                            throw new Exception("å·²ç»åˆ›å»ºäº†'" + strAttrName + "'å±æ€§ï¼Œä¸å¯èƒ½æ‰¾ä¸åˆ°ã€‚");
                     }
                     else
                     {
@@ -1177,17 +1177,17 @@ namespace DigitalPlatform.Xml
             return nodeCurrent;
         }
 
-        // TODO: Öğ½¥·ÏÖ¹Õâ¸öº¯Êı
-        // µÃµ½node½ÚµãµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄÖµ,Ïàµ±ÓÚGetNodeFirstText()
+        // TODO: é€æ¸åºŸæ­¢è¿™ä¸ªå‡½æ•°
+        // å¾—åˆ°nodeèŠ‚ç‚¹çš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å€¼,ç›¸å½“äºGetNodeFirstText()
         // parameter:
-        //		node    XmlNode½Úµã
+        //		node    XmlNodeèŠ‚ç‚¹
         // result:
-        //		nodeµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄ×Ö·û´®£¬²»È¥¿Õ°×
-        //      ×¢£ºÈç¹ûnodeÏÂ¼¶²»´æÔÚÎÄ±¾½Úµã£¬·µ»Ø"";
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        //		nodeçš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å­—ç¬¦ä¸²ï¼Œä¸å»ç©ºç™½
+        //      æ³¨ï¼šå¦‚æœnodeä¸‹çº§ä¸å­˜åœ¨æ–‡æœ¬èŠ‚ç‚¹ï¼Œè¿”å›"";
+        // ç¼–å†™è€…ï¼šä»»å»¶å
         public static string GetNodeText(XmlNode node)
         {
-            Debug.Assert(node != null, "GetNodeText()µ÷ÓÃ³ö´í£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "GetNodeText()è°ƒç”¨å‡ºé”™ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             XmlNode nodeText = node.SelectSingleNode("text()");
             if (nodeText == null)
@@ -1196,17 +1196,17 @@ namespace DigitalPlatform.Xml
                 return nodeText.Value;
         }
 
-        // TODO: Öğ½¥·ÏÖ¹Õâ¸öº¯Êı
-        // µÃµ½node½ÚµãµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄÖµ
+        // TODO: é€æ¸åºŸæ­¢è¿™ä¸ªå‡½æ•°
+        // å¾—åˆ°nodeèŠ‚ç‚¹çš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å€¼
         // parameter:
-        //		node    XmlNode½Úµã
+        //		node    XmlNodeèŠ‚ç‚¹
         // result:
-        //		nodeµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄ×Ö·û´®£¬×óÓÒÈ¥¿Õ°×
-        //      ×¢£ºÈç¹ûnodeÏÂ¼¶²»´æÔÚÎÄ±¾½Úµã£¬·µ»Ønull;
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        //		nodeçš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å­—ç¬¦ä¸²ï¼Œå·¦å³å»ç©ºç™½
+        //      æ³¨ï¼šå¦‚æœnodeä¸‹çº§ä¸å­˜åœ¨æ–‡æœ¬èŠ‚ç‚¹ï¼Œè¿”å›null;
+        // ç¼–å†™è€…ï¼šä»»å»¶å
 		public static string  GetNodeTextDiff(XmlNode node)
 		{
-            Debug.Assert(node != null, "GetNodeTextDiff()µ÷ÓÃ³ö´í£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "GetNodeTextDiff()è°ƒç”¨å‡ºé”™ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             XmlNode nodeText = node.SelectSingleNode("text()");
 			if (nodeText == null)
@@ -1216,16 +1216,16 @@ namespace DigitalPlatform.Xml
 		}
 
 		
-		// µÃµ½node½ÚµãµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄÖµ
+		// å¾—åˆ°nodeèŠ‚ç‚¹çš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å€¼
 		// parameter:
-		//		node    XmlNode½Úµã
+		//		node    XmlNodeèŠ‚ç‚¹
 		// result:
-		//		nodeµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄ×Ö·û´®£¬×óÓÒÈ¥¿Õ°×
-        //      ×¢£ºÈç¹ûnodeÏÂ¼¶²»´æÔÚÎÄ±¾½Úµã£¬·µ»Ø"";
-		// ±àĞ´Õß£ºÈÎÑÓ»ª
+		//		nodeçš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å­—ç¬¦ä¸²ï¼Œå·¦å³å»ç©ºç™½
+        //      æ³¨ï¼šå¦‚æœnodeä¸‹çº§ä¸å­˜åœ¨æ–‡æœ¬èŠ‚ç‚¹ï¼Œè¿”å›"";
+		// ç¼–å†™è€…ï¼šä»»å»¶å
 		public static string GetNodeFirstText(XmlNode node)
 		{
-            Debug.Assert(node != null, "GetNodeFirstText()µ÷ÓÃ³ö´í£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "GetNodeFirstText()è°ƒç”¨å‡ºé”™ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
 			XmlNode nodeText = node.SelectSingleNode("text()");
             if (nodeText == null)
@@ -1235,39 +1235,39 @@ namespace DigitalPlatform.Xml
 		}
 
 #if NO
-        // TODO: Öğ½¥·ÏÖ¹Õâ¸öº¯Êı
-        // µÃµ½µ±Ç°½ÚµãËùÓĞµÄÎÄ±¾½ÚµãÖµ
+        // TODO: é€æ¸åºŸæ­¢è¿™ä¸ªå‡½æ•°
+        // å¾—åˆ°å½“å‰èŠ‚ç‚¹æ‰€æœ‰çš„æ–‡æœ¬èŠ‚ç‚¹å€¼
 		// parameter:
-		//      node    XmlNode½Úµã
+		//      node    XmlNodeèŠ‚ç‚¹
 		// result:
-		//		nodeµÄËùÓĞÎÄ±¾½Úµã×éºÏÆğÀ´µÄ×Ö·û´®£¬ÖĞ¼ä²»¼ÓÈÎºÎ·ûºÅ£¬È¥Ã¿¸öÎÄ×Ö½ÚµãÄÚÈİµÄ×óÓÒ¿Õ°×
-        //      ×¢£ºÈç¹ûnodeÏÂ¼¶²»´æÔÚÎÄ±¾½Úµã£¬·µ»Ø"";
-		// ±àĞ´Õß£ºÈÎÑÓ»ª
+		//		nodeçš„æ‰€æœ‰æ–‡æœ¬èŠ‚ç‚¹ç»„åˆèµ·æ¥çš„å­—ç¬¦ä¸²ï¼Œä¸­é—´ä¸åŠ ä»»ä½•ç¬¦å·ï¼Œå»æ¯ä¸ªæ–‡å­—èŠ‚ç‚¹å†…å®¹çš„å·¦å³ç©ºç™½
+        //      æ³¨ï¼šå¦‚æœnodeä¸‹çº§ä¸å­˜åœ¨æ–‡æœ¬èŠ‚ç‚¹ï¼Œè¿”å›"";
+		// ç¼–å†™è€…ï¼šä»»å»¶å
 		public static string  GetNodeAllText(XmlNode node)
 		{
-            Debug.Assert(node != null, "GetNodeAllText()µ÷ÓÃ³ö´í£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "GetNodeAllText()è°ƒç”¨å‡ºé”™ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
 			XmlNodeList nodeTextList = node.SelectNodes("text()");
 			string strResult = "";
 			foreach(XmlNode oneNode in nodeTextList)
 			{
-				strResult += oneNode.Value.Trim ();   //°Ñ×óÓÒ¿Õ°×¶¼È¥µô
+				strResult += oneNode.Value.Trim ();   //æŠŠå·¦å³ç©ºç™½éƒ½å»æ‰
 			}
 			return strResult;
 		}
 #endif
 
-        // Éènode½ÚµãµÄµÚÒ»¸öÎÄ±¾½ÚµãµÄÄÚÈİ
+        // è®¾nodeèŠ‚ç‚¹çš„ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å†…å®¹
         // parameters:
-        //      node    XmlNode½Úµã
-        //      strNewText  ĞÂµÄÎÄ×ÖÄÚÈİ
+        //      node    XmlNodeèŠ‚ç‚¹
+        //      strNewText  æ–°çš„æ–‡å­—å†…å®¹
         // return:
         //      void
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        // ç¼–å†™è€…ï¼šä»»å»¶å
         public static void SetNodeText(XmlNode node,
             string newText)
         {
-            Debug.Assert(node != null, "SetNodeText()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "SetNodeText()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             XmlNode nodeText = node.SelectSingleNode("text()");
             if (nodeText == null)
@@ -1276,18 +1276,18 @@ namespace DigitalPlatform.Xml
                 nodeText.Value = newText;
         }
 
-        // ¶ÔÖ¸¶¨µÄ½ÚµãÉèµÚÒ»¸öÎÄ±¾½ÚµãµÄÖµ
-        // Èç¹ûµÚÒ»¸öÎÄ±¾½Úµã´æÔÚ,ÔòÖ±½Ó¸øtext¸³Öµ£¬
-        // Èç¹ûµÚÒ»¸öÎÄ±¾½Úµã²»´æÔÚ£¬Ôòµ÷CreateNode()Öğ¼¶´´½¨½Úµã£¬È»ºó¸³Öµ
+        // å¯¹æŒ‡å®šçš„èŠ‚ç‚¹è®¾ç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹çš„å€¼
+        // å¦‚æœç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹å­˜åœ¨,åˆ™ç›´æ¥ç»™textèµ‹å€¼ï¼Œ
+        // å¦‚æœç¬¬ä¸€ä¸ªæ–‡æœ¬èŠ‚ç‚¹ä¸å­˜åœ¨ï¼Œåˆ™è°ƒCreateNode()é€çº§åˆ›å»ºèŠ‚ç‚¹ï¼Œç„¶åèµ‹å€¼
         // parameters:
-        //      nodeRoot    ¸ù½Úµã
-        //      strXpath    ½ÚµãÂ·¾¶
-        //      strNewText  ĞÂÎÄ±¾Öµ
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      nodeRoot    æ ¹èŠ‚ç‚¹
+        //      strXpath    èŠ‚ç‚¹è·¯å¾„
+        //      strNewText  æ–°æ–‡æœ¬å€¼
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // ±àĞ´Õß£ºÈÎÑÓ»ª
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // ç¼–å†™è€…ï¼šä»»å»¶å
         public static int SetNodeValue(XmlNode nodeRoot,
             string strXpath,
             string strNewText,
@@ -1295,8 +1295,8 @@ namespace DigitalPlatform.Xml
         {
             strError = "";
 
-            Debug.Assert(nodeRoot != null, "SetNodeValue()µ÷ÓÃ´íÎó£¬nodeRoot²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strXpath != null && strXpath != "", "SetNodeValue()µ÷ÓÃ´íÎó£¬strXpath²ÎÊıÖµ²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£");
+            Debug.Assert(nodeRoot != null, "SetNodeValue()è°ƒç”¨é”™è¯¯ï¼ŒnodeRootå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strXpath != null && strXpath != "", "SetNodeValue()è°ƒç”¨é”™è¯¯ï¼ŒstrXpathå‚æ•°å€¼ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚");
 
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
@@ -1309,14 +1309,14 @@ namespace DigitalPlatform.Xml
                 }
                 catch (Exception ex)
                 {
-                    strError = "CreateNode()³ö´í£¬Ô­Òò£º" + ex.Message;
+                    strError = "CreateNode()å‡ºé”™ï¼ŒåŸå› ï¼š" + ex.Message;
                     return -1;
                 }
             }
 
             if (nodeFound == null)
             {
-                strError = "SetNodeValue()£¬´ËÊ±nodeFound²»¿ÉÄÜÎªnullÁË¡£";
+                strError = "SetNodeValue()ï¼Œæ­¤æ—¶nodeFoundä¸å¯èƒ½ä¸ºnulläº†ã€‚";
                 return -1;
             }
 
@@ -1324,8 +1324,8 @@ namespace DigitalPlatform.Xml
             return 0;
         }
 
-        // TODO: Õâ¸öº¯ÊıµÄ¹¦ÄÜÁîÈË·Ñ½â£¬Öğ²½·ÏÖ¹?
-        // ±àĞ´Õß: Ğ»ÌÎ
+        // TODO: è¿™ä¸ªå‡½æ•°çš„åŠŸèƒ½ä»¤äººè´¹è§£ï¼Œé€æ­¥åºŸæ­¢?
+        // ç¼–å†™è€…: è°¢æ¶›
         public static int SetNodeValue(XmlNode nodeRoot,
             string strXpath,
             XmlNode newNode)
@@ -1368,16 +1368,16 @@ namespace DigitalPlatform.Xml
             return node.InnerXml;
         }
 
-        // Ğ´ÈëÒ»¸öÔªËØÎÄ±¾
+        // å†™å…¥ä¸€ä¸ªå…ƒç´ æ–‡æœ¬
         // return:
-        //      ·µ»Ø¸ÃÔªËØµÄXmlNode
+        //      è¿”å›è¯¥å…ƒç´ çš„XmlNode
         public static XmlNode SetElementInnerXml(XmlNode nodeRoot,
             string strXpath,
             string strInnerXml)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
@@ -1421,16 +1421,16 @@ namespace DigitalPlatform.Xml
             return false;
         }
 
-        // Ğ´ÈëÒ»¸öÔªËØÎÄ±¾
+        // å†™å…¥ä¸€ä¸ªå…ƒç´ æ–‡æœ¬
         // return:
-        //      ·µ»Ø¸ÃÔªËØµÄXmlNode
+        //      è¿”å›è¯¥å…ƒç´ çš„XmlNode
         public static XmlNode SetElementOuterXml(XmlNode nodeRoot,
             string strXpath,
             string strOuterXml)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
@@ -1458,15 +1458,15 @@ namespace DigitalPlatform.Xml
         }
 
         // 2009/10/31
-        // Ğ´ÈëÒ»¸öÔªËØµÄOuterXml
+        // å†™å…¥ä¸€ä¸ªå…ƒç´ çš„OuterXml
         // return:
-        //      ·µ»Ø±ä¶¯ºó¸ÃÔªËØµÄXmlNode
+        //      è¿”å›å˜åŠ¨åè¯¥å…ƒç´ çš„XmlNode
         public static XmlNode SetElementOuterXml(XmlNode node,
             string strOuterXml)
         {
             if (node == null)
             {
-                throw (new Exception("node²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlDocumentFragment fragment = node.OwnerDocument.CreateDocumentFragment();
@@ -1474,14 +1474,14 @@ namespace DigitalPlatform.Xml
 
             node.ParentNode.InsertAfter(fragment, node);
 
-            XmlNode new_node = node.NextSibling;    // 2012/12/12 ĞÂÔö¼Ó
+            XmlNode new_node = node.NextSibling;    // 2012/12/12 æ–°å¢åŠ 
 
             node.ParentNode.RemoveChild(node);
 
             return new_node;
         }
 
-        // ²åÈëĞÂ¶ÔÏóµ½¶ù×ÓÃÇµÄ×îÇ°Ãæ
+        // æ’å…¥æ–°å¯¹è±¡åˆ°å„¿å­ä»¬çš„æœ€å‰é¢
         public static XmlNode InsertFirstChild(XmlNode parent, XmlNode newChild)
         {
             XmlNode refChild = null;
@@ -1503,7 +1503,7 @@ namespace DigitalPlatform.Xml
         }
 
         // 2012/9/30
-        // »ñµÃÒ»¸öÔªËØµÄÒ»¸öÊôĞÔÖµ
+        // è·å¾—ä¸€ä¸ªå…ƒç´ çš„ä¸€ä¸ªå±æ€§å€¼
         public static string GetElementAttr(XmlNode nodeRoot,
             string strXpath,
             string strAttrName)
@@ -1517,7 +1517,7 @@ namespace DigitalPlatform.Xml
             return attr.Value.Trim();
         }
 
-        // ±àĞ´Õß: Ğ»ÌÎ
+        // ç¼–å†™è€…: è°¢æ¶›
         public static string GetElementText(XmlNode nodeRoot,
             string strXpath)
         {
@@ -1534,9 +1534,9 @@ namespace DigitalPlatform.Xml
                 return nodeText.Value;
         }
 
-        // ĞÂ°æ±¾ 2006/10/24
-        // »ñµÃÒ»¸öÔªËØµÄÏÂ¼¶ÎÄ±¾
-        // Ò»²¢·µ»ØÔªËØ½Úµã¶ÔÏó
+        // æ–°ç‰ˆæœ¬ 2006/10/24
+        // è·å¾—ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§æ–‡æœ¬
+        // ä¸€å¹¶è¿”å›å…ƒç´ èŠ‚ç‚¹å¯¹è±¡
         public static string GetElementText(XmlNode nodeRoot,
             string strXpath,
             out XmlNode node)
@@ -1548,7 +1548,7 @@ namespace DigitalPlatform.Xml
             return node.InnerText;
         }
 
-        // ±àĞ´Õß: Ğ»ÌÎ
+        // ç¼–å†™è€…: è°¢æ¶›
         public static string GetElementText(XmlNode nodeRoot,
             string strXpath,
             XmlNamespaceManager mngr)
@@ -1566,41 +1566,41 @@ namespace DigitalPlatform.Xml
                 return nodeText.Value;
         }
 
-        // É¾³ıÒ»¸öÔªËØ 2006/10/26
+        // åˆ é™¤ä¸€ä¸ªå…ƒç´  2006/10/26
         // return:
-        //      ·µ»Ø±»É¾³ıµôµÄXmlNode
+        //      è¿”å›è¢«åˆ é™¤æ‰çš„XmlNode
         public static XmlNode DeleteElement(XmlNode nodeRoot,
             string strXpath)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
 
             if (nodeFound == null)
-                return null;    // ¼ÈÈ»²»´æÔÚ£¬ÕıºÃÒ²²»±ØÉ¾³ıÁË
+                return null;    // æ—¢ç„¶ä¸å­˜åœ¨ï¼Œæ­£å¥½ä¹Ÿä¸å¿…åˆ é™¤äº†
 
             return nodeFound.ParentNode.RemoveChild(nodeFound);
         }
 
-        // É¾³ıÈô¸É¸öÔªËØ 2011/1/11
+        // åˆ é™¤è‹¥å¹²ä¸ªå…ƒç´  2011/1/11
         // return:
-        //      ·µ»Ø±»É¾³ıµôµÄXmlNodeÊı×é
+        //      è¿”å›è¢«åˆ é™¤æ‰çš„XmlNodeæ•°ç»„
         public static List<XmlNode> DeleteElements(XmlNode nodeRoot,
             string strXpath)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
 
             XmlNodeList nodes = nodeRoot.SelectNodes(strXpath);
 
             if (nodes.Count == 0)
-                return null;    // ¼ÈÈ»²»´æÔÚ£¬ÕıºÃÒ²²»±ØÉ¾³ıÁË
+                return null;    // æ—¢ç„¶ä¸å­˜åœ¨ï¼Œæ­£å¥½ä¹Ÿä¸å¿…åˆ é™¤äº†
 
             List<XmlNode> deleted_nodes = new List<XmlNode>();
             foreach (XmlNode node in nodes)
@@ -1614,21 +1614,21 @@ namespace DigitalPlatform.Xml
         }
 
         /*
-        // ÒÆ³ıÒ»¸öÔªËØ
+        // ç§»é™¤ä¸€ä¸ªå…ƒç´ 
         // 2007/6/19
         public static XmlNode RemoveElement(XmlNode nodeRoot,
             string strXPath)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXPath);
 
             if (nodeFound == null)
             {
-                // ÕıºÃ²»´æÔÚ£¬Ò²²»±ØÉ¾³ıÁË
+                // æ­£å¥½ä¸å­˜åœ¨ï¼Œä¹Ÿä¸å¿…åˆ é™¤äº†
                 return null;
             }
 
@@ -1637,9 +1637,9 @@ namespace DigitalPlatform.Xml
             return nodeFound;
         }*/
 
-        // Ìæ»»È«²¿¿ØÖÆ×Ö·û
+        // æ›¿æ¢å…¨éƒ¨æ§åˆ¶å­—ç¬¦
         // parameters:
-        //      chReplace   ÒªÌæ»»³ÉµÄ×Ö·û¡£Èç¹ûÎª 0 £¬±íÊ¾É¾³ı¿ØÖÆ×Ö·û
+        //      chReplace   è¦æ›¿æ¢æˆçš„å­—ç¬¦ã€‚å¦‚æœä¸º 0 ï¼Œè¡¨ç¤ºåˆ é™¤æ§åˆ¶å­—ç¬¦
         static string ReplaceControlChars(string strText,
             char chReplace)
         {
@@ -1662,9 +1662,9 @@ namespace DigitalPlatform.Xml
             return sb.ToString();
         }
 
-        // Ìæ»»¿ØÖÆ×Ö·û£¬µ«²»Ìæ»» \0d \0a
+        // æ›¿æ¢æ§åˆ¶å­—ç¬¦ï¼Œä½†ä¸æ›¿æ¢ \0d \0a
         // parameters:
-        //      chReplace   ÒªÌæ»»³ÉµÄ×Ö·û¡£Èç¹ûÎª 0 £¬±íÊ¾É¾³ı¿ØÖÆ×Ö·û
+        //      chReplace   è¦æ›¿æ¢æˆçš„å­—ç¬¦ã€‚å¦‚æœä¸º 0 ï¼Œè¡¨ç¤ºåˆ é™¤æ§åˆ¶å­—ç¬¦
         static string ReplaceControlCharsButCrLf(string strText,
     char chReplace)
         {
@@ -1688,17 +1688,17 @@ namespace DigitalPlatform.Xml
         }
 
         // 2010/21/16
-        // Ğ´ÈëÒ»¸öÔªËØÎÄ±¾
-        // ²»È¥Ìæ»»ControlChars
+        // å†™å…¥ä¸€ä¸ªå…ƒç´ æ–‡æœ¬
+        // ä¸å»æ›¿æ¢ControlChars
         // return:
-        //      ·µ»Ø¸ÃÔªËØµÄXmlNode
+        //      è¿”å›è¯¥å…ƒç´ çš„XmlNode
         public static XmlNode SetElementTextPure(XmlNode nodeRoot,
             string strXpath,
             string strText)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
@@ -1707,7 +1707,7 @@ namespace DigitalPlatform.Xml
             // 2007/6/19
             if (nodeFound == null && strText == null)
             {
-                // ÕıºÃ²»´æÔÚ£¬Ò²²»±ØÉ¾³ıÁË
+                // æ­£å¥½ä¸å­˜åœ¨ï¼Œä¹Ÿä¸å¿…åˆ é™¤äº†
                 return null;
             }*/
 
@@ -1731,17 +1731,17 @@ namespace DigitalPlatform.Xml
             return nodeFound;
         }
 
-        // Ğ´ÈëÒ»¸öÔªËØÎÄ±¾
-        // ÎÄ±¾ÄÚÈİÖĞ¿ÉÒÔ°üº¬»Ø³µ»»ĞĞ·ûºÅ£¬µ«ÆäËû¿ØÖÆ×Ö·ûÔÚĞ´ÈëµÄÊ±ºò»á±»¹ıÂËÎªĞÇºÅ
+        // å†™å…¥ä¸€ä¸ªå…ƒç´ æ–‡æœ¬
+        // æ–‡æœ¬å†…å®¹ä¸­å¯ä»¥åŒ…å«å›è½¦æ¢è¡Œç¬¦å·ï¼Œä½†å…¶ä»–æ§åˆ¶å­—ç¬¦åœ¨å†™å…¥çš„æ—¶å€™ä¼šè¢«è¿‡æ»¤ä¸ºæ˜Ÿå·
         // return:
-        //      ·µ»Ø¸ÃÔªËØµÄXmlNode
+        //      è¿”å›è¯¥å…ƒç´ çš„XmlNode
         public static XmlNode SetElementText(XmlNode nodeRoot,
             string strXpath,
             string strText)
         {
             if (nodeRoot == null)
             {
-                throw (new Exception("nodeRoot²ÎÊı²»ÄÜÎªnull"));
+                throw (new Exception("nodeRootå‚æ•°ä¸èƒ½ä¸ºnull"));
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
@@ -1750,7 +1750,7 @@ namespace DigitalPlatform.Xml
             // 2007/6/19
             if (nodeFound == null && strText == null)
             {
-                // ÕıºÃ²»´æÔÚ£¬Ò²²»±ØÉ¾³ıÁË
+                // æ­£å¥½ä¸å­˜åœ¨ï¼Œä¹Ÿä¸å¿…åˆ é™¤äº†
                 return null;
             }*/
 
@@ -1783,16 +1783,16 @@ namespace DigitalPlatform.Xml
             return nodeFound;
         }
 		
-		// µÃµ½node½ÚµãÏà¶ÔÓÚnodeRoot½ÚµãµÄxpathÂ·¾¶
+		// å¾—åˆ°nodeèŠ‚ç‚¹ç›¸å¯¹äºnodeRootèŠ‚ç‚¹çš„xpathè·¯å¾„
         // parameters:
-        //      nodeRoot    ¸ù½Úµã
-        //      node        Ö¸¶¨µÄ½Úµã
-        //      strXpath    out²ÎÊı£¬·µ»ØnodeÏà¶ÔÓÚnodeRootµÄxpathÂ·¾¶
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      nodeRoot    æ ¹èŠ‚ç‚¹
+        //      node        æŒ‡å®šçš„èŠ‚ç‚¹
+        //      strXpath    outå‚æ•°ï¼Œè¿”å›nodeç›¸å¯¹äºnodeRootçš„xpathè·¯å¾„
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í,µ±node²»ÊôÓÚnodeRootÏÂ¼¶Ê±
-        //      0   ³É¹¦
-		// ±àĞ´Õß: ÈÎÑÓ»ª
+        //      -1  å‡ºé”™,å½“nodeä¸å±äºnodeRootä¸‹çº§æ—¶
+        //      0   æˆåŠŸ
+		// ç¼–å†™è€…: ä»»å»¶å
 		public static int Node2Path(XmlNode nodeRoot,
             XmlNode node,
             out string strXpath,
@@ -1801,10 +1801,10 @@ namespace DigitalPlatform.Xml
             strXpath = "";
             strError = "";
 
-            Debug.Assert(nodeRoot != null, "Node2Path()µ÷ÓÃ´íÎó£¬nodeRoot²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(node != null, "Node2Path()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(nodeRoot != null, "Node2Path()è°ƒç”¨é”™è¯¯ï¼ŒnodeRootå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(node != null, "Node2Path()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
-			//µ±nodeÎªÊôĞÔ½ÚµãÊ±£¬¼ÓÁËÊôĞÔxpath×Ö·û´®
+			//å½“nodeä¸ºå±æ€§èŠ‚ç‚¹æ—¶ï¼ŒåŠ äº†å±æ€§xpathå­—ç¬¦ä¸²
 			string strAttr = "";
 			if (node.NodeType == XmlNodeType.Attribute)
 			{
@@ -1850,7 +1850,7 @@ namespace DigitalPlatform.Xml
 
             if (bBelongRoot == false)
             {
-                strError = "Node2Path()µ÷ÓÃ´íÎó£¬node²»ÊôÓÚnodeRootµÄÏÂ¼¶";
+                strError = "Node2Path()è°ƒç”¨é”™è¯¯ï¼Œnodeä¸å±äºnodeRootçš„ä¸‹çº§";
                 return -1;
             }
 
@@ -1860,7 +1860,7 @@ namespace DigitalPlatform.Xml
 
 
 
-	} // DomUtilÀà½áÊø
+	} // DomUtilç±»ç»“æŸ
 
 
 }

@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -89,7 +90,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "OpacBrowseFormatDialog LoadCaptionsXml() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

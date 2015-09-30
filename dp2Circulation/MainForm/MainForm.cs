@@ -1697,7 +1697,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -1710,7 +1710,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -6814,7 +6814,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -7575,7 +7575,7 @@ Keys keyData)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "MainForm BuildServersCfgFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
         }
@@ -7861,7 +7861,7 @@ Keys keyData)
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
             }
             finally

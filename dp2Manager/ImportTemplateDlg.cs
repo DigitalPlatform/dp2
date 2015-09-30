@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.rms.Client;
+using DigitalPlatform;
 
 namespace dp2Manager
 {
@@ -43,7 +44,7 @@ namespace dp2Manager
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 
@@ -89,9 +90,9 @@ namespace dp2Manager
 
                 if (t.Object.Type == ResTree.RESTYPE_DB)
                 {
-                    // ´´½¨Êı¾İ¿â
+                    // åˆ›å»ºæ•°æ®åº“
                     DatabaseDlg dlg = new DatabaseDlg();
-                    dlg.Text = "¸ù¾İÄ£°å´´½¨ĞÂÊı¾İ¿â";
+                    dlg.Text = "æ ¹æ®æ¨¡æ¿åˆ›å»ºæ–°æ•°æ®åº“";
                     dlg.IsCreate = true;
                     dlg.BatchMode = true;
                     // dlg.RefDbName = strRefDbName;
@@ -113,7 +114,7 @@ namespace dp2Manager
                     if (result == DialogResult.Cancel && i < this.listView_objects.Items.Count - 1)
                     {
                         DialogResult resultTemp = MessageBox.Show(this,
-                            "ÊÇ·ñÒªÖĞ¶ÏÅú´¦Àí?",
+                            "æ˜¯å¦è¦ä¸­æ–­æ‰¹å¤„ç†?",
                             "dp2Manager",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,

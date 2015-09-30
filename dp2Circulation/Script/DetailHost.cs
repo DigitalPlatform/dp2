@@ -3861,7 +3861,7 @@ chi	中文	如果是中文，则为空。
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = "DetailHost {3D00C7E0-9E54-43D4-B77A-84BCC91BE45A} exception: " + ExceptionUtil.GetAutoText(ex);
                         goto ERROR1;
                     }
                     finally

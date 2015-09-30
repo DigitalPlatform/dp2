@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -12,21 +12,21 @@ using DigitalPlatform.GUI;
 namespace DigitalPlatform.CirculationClient
 {
 	/// <summary>
-    /// Ñ¡ÔñĞÂ¼ÇÂ¼Ä£°åÃûµÄ¶Ô»°¿ò
-    /// ±¾¶Ô»°¿ò¸ù¾İÒ»¸öxmlÄ£°åÎÄ¼ş£¬ÁĞ³öÆäÖĞ template ÔªËØµÄnameÊôĞÔÖµ£¬ÈÃÓÃ»§Ñ¡Ôñ£¬
-	/// ×îºó¶Ô»°¿ò½«Ñ¡ÔñµÄÔªËØÒÔ¼°ÆäÏÂÈ«²¿ÔªËØ´´½¨Ò»¸öĞÂµÄxmlÎÄµµ(×Ö·û´®ĞÎÊ½).
-	/// ±¾¶Ô»°¿ò²»¸ºÔğ´Ó·şÎñ»ñµÃÎÄ¼ş¡£
+    /// é€‰æ‹©æ–°è®°å½•æ¨¡æ¿åçš„å¯¹è¯æ¡†
+    /// æœ¬å¯¹è¯æ¡†æ ¹æ®ä¸€ä¸ªxmlæ¨¡æ¿æ–‡ä»¶ï¼Œåˆ—å‡ºå…¶ä¸­ template å…ƒç´ çš„nameå±æ€§å€¼ï¼Œè®©ç”¨æˆ·é€‰æ‹©ï¼Œ
+	/// æœ€åå¯¹è¯æ¡†å°†é€‰æ‹©çš„å…ƒç´ ä»¥åŠå…¶ä¸‹å…¨éƒ¨å…ƒç´ åˆ›å»ºä¸€ä¸ªæ–°çš„xmlæ–‡æ¡£(å­—ç¬¦ä¸²å½¢å¼).
+	/// æœ¬å¯¹è¯æ¡†ä¸è´Ÿè´£ä»æœåŠ¡è·å¾—æ–‡ä»¶ã€‚
 	/// </summary>
 	public class SelectRecordTemplateDlg : System.Windows.Forms.Form
 	{
         const int WM_AUTO_CLOSE = API.WM_USER + 200;
-        public bool AutoClose = false;  // ¶Ô»°¿ò¿Ú´ò¿ªºóÁ¢¼´¹Ø±Õ?
+        public bool AutoClose = false;  // å¯¹è¯æ¡†å£æ‰“å¼€åç«‹å³å…³é—­?
 
         // 2008/6/24
-        public bool SaveMode = false;   // ÊÇ·ñÎª±£´æÄ£Ê½£¿
+        public bool SaveMode = false;   // æ˜¯å¦ä¸ºä¿å­˜æ¨¡å¼ï¼Ÿ
 
-		public ApplicationInfo ap = null;	// ÒıÓÃ
-		public string ApCfgTitle = "";	// ÔÚapÖĞ±£´æ´°¿ÚÍâ¹Û×´Ì¬µÄ±êÌâ×Ö·û´®
+		public ApplicationInfo ap = null;	// å¼•ç”¨
+		public string ApCfgTitle = "";	// åœ¨apä¸­ä¿å­˜çª—å£å¤–è§‚çŠ¶æ€çš„æ ‡é¢˜å­—ç¬¦ä¸²
 
 
 		// public string InputXml = "";
@@ -37,7 +37,7 @@ namespace DigitalPlatform.CirculationClient
 		public bool CheckNameExist = true;
 
 		XmlDocument dom = null;
-		bool m_bChanged = false;	// DOMÄÚÈİÊÇ·ñÓĞ±ä»¯
+		bool m_bChanged = false;	// DOMå†…å®¹æ˜¯å¦æœ‰å˜åŒ–
 
         private DigitalPlatform.GUI.ListViewNF listView1;
 		private System.Windows.Forms.ColumnHeader columnHeader_name;
@@ -118,12 +118,12 @@ namespace DigitalPlatform.CirculationClient
             // 
             // columnHeader_name
             // 
-            this.columnHeader_name.Text = "Ä£°åÃû";
+            this.columnHeader_name.Text = "æ¨¡æ¿å";
             this.columnHeader_name.Width = 200;
             // 
             // columnHeader_comment
             // 
-            this.columnHeader_comment.Text = "ËµÃ÷";
+            this.columnHeader_comment.Text = "è¯´æ˜";
             this.columnHeader_comment.Width = 300;
             // 
             // checkBox_notAsk
@@ -135,7 +135,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_notAsk.Name = "checkBox_notAsk";
             this.checkBox_notAsk.Size = new System.Drawing.Size(144, 16);
             this.checkBox_notAsk.TabIndex = 1;
-            this.checkBox_notAsk.Text = "ÏÂ´Î²»ÔÙ³öÏÖ´Ë¶Ô»°¿ò";
+            this.checkBox_notAsk.Text = "ä¸‹æ¬¡ä¸å†å‡ºç°æ­¤å¯¹è¯æ¡†";
             // 
             // button_OK
             // 
@@ -144,7 +144,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
             this.button_OK.TabIndex = 2;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -155,7 +155,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 3;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // label1
@@ -166,7 +166,7 @@ namespace DigitalPlatform.CirculationClient
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Ä£°åÃû(&N):";
+            this.label1.Text = "æ¨¡æ¿å(&N):";
             // 
             // textBox_name
             // 
@@ -194,7 +194,7 @@ namespace DigitalPlatform.CirculationClient
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SelectRecordTemplateDlg";
             this.ShowInTaskbar = false;
-            this.Text = "ÇëÑ¡ÔñĞÂ¼ÇÂ¼Ä£°å";
+            this.Text = "è¯·é€‰æ‹©æ–°è®°å½•æ¨¡æ¿";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.SelectRecordTemplateDlg_Closing);
             this.Closed += new System.EventHandler(this.SelectRecordTemplateDlg_Closed);
             this.Load += new System.EventHandler(this.SelectRecordTemplateDlg_Load);
@@ -215,7 +215,7 @@ namespace DigitalPlatform.CirculationClient
 				}
 				else 
 				{
-					Debug.Assert(true, "ÈôÒªÓÃap±£´æºÍ»Ö¸´´°¿ÚÍâ¹Û×´Ì¬£¬±ØĞëÏÈÉèÖÃApCfgTitle³ÉÔ±");
+					Debug.Assert(true, "è‹¥è¦ç”¨apä¿å­˜å’Œæ¢å¤çª—å£å¤–è§‚çŠ¶æ€ï¼Œå¿…é¡»å…ˆè®¾ç½®ApCfgTitleæˆå‘˜");
 				}
 
 			}
@@ -226,7 +226,7 @@ namespace DigitalPlatform.CirculationClient
 			}
 			else 
 			{
-				Debug.Assert(true, "ÄãÒ»¶¨Íü¼ÇÁËÏÈÓÃInitial()");
+				Debug.Assert(true, "ä½ ä¸€å®šå¿˜è®°äº†å…ˆç”¨Initial()");
 			}
 
             //if (this.SaveMode == false)
@@ -248,7 +248,7 @@ namespace DigitalPlatform.CirculationClient
 				}
 				else 
 				{
-					Debug.Assert(true, "ÈôÒªÓÃap±£´æºÍ»Ö¸´´°¿ÚÍâ¹Û×´Ì¬£¬±ØĞëÏÈÉèÖÃApCfgTitle³ÉÔ±");
+					Debug.Assert(true, "è‹¥è¦ç”¨apä¿å­˜å’Œæ¢å¤çª—å£å¤–è§‚çŠ¶æ€ï¼Œå¿…é¡»å…ˆè®¾ç½®ApCfgTitleæˆå‘˜");
 				}
 
 			}
@@ -256,8 +256,8 @@ namespace DigitalPlatform.CirculationClient
 
         // 2015/5/11
         /// <summary>
-        /// ÊÇ·ñÔÊĞí ¡°ÏÂ´Î²»ÔÙ³öÏÖ ...¡± checkbox¡£È±Ê¡Îª false
-        /// ÕâÊÇÒ»¸ö¶ÀÁ¢µÄ×´Ì¬£¬ºÍ SaveMode ÎŞ¹Ø
+        /// æ˜¯å¦å…è®¸ â€œä¸‹æ¬¡ä¸å†å‡ºç° ...â€ checkboxã€‚ç¼ºçœä¸º false
+        /// è¿™æ˜¯ä¸€ä¸ªç‹¬ç«‹çš„çŠ¶æ€ï¼Œå’Œ SaveMode æ— å…³
         /// </summary>
         public bool EnableNotAsk
         {
@@ -288,7 +288,7 @@ namespace DigitalPlatform.CirculationClient
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
@@ -296,9 +296,9 @@ namespace DigitalPlatform.CirculationClient
 		}
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -339,7 +339,7 @@ namespace DigitalPlatform.CirculationClient
 
             if (bAutoSelect == true && listView1.SelectedItems.Count == 0)
             {
-                // Ñ¡ÔñµÚÒ»Ïî
+                // é€‰æ‹©ç¬¬ä¸€é¡¹
                     if (listView1.Items.Count != 0)
                         listView1.Items[0].Selected = true;
             }
@@ -347,10 +347,10 @@ namespace DigitalPlatform.CirculationClient
 
 		private void button_OK_Click(object sender, System.EventArgs e)
 		{
-			// Èç¹ûm_bChanged == true£¬ÔÊĞí¿Õ°××ÅOKÍË³ö
+			// å¦‚æœm_bChanged == trueï¼Œå…è®¸ç©ºç™½ç€OKé€€å‡º
 			if (m_bChanged == false && textBox_name.Text == "")
 			{
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Ä£°åÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ¨¡æ¿å");
 				return ;
 			}
 
@@ -358,7 +358,7 @@ namespace DigitalPlatform.CirculationClient
             if (checkBox_delete.Checked == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "È·ÊµÒªÉ¾³ıÏÂÁĞÄ£°å¼ÇÂ¼?\r\n\r\n" + textBox_name.Text,
+                    "ç¡®å®è¦åˆ é™¤ä¸‹åˆ—æ¨¡æ¿è®°å½•?\r\n\r\n" + textBox_name.Text,
                     "SelectRecordTemplateDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question, 
@@ -377,8 +377,8 @@ namespace DigitalPlatform.CirculationClient
 			if (CheckNameExist == true 
 				&& node == null) 
 			{
-                MessageBox.Show(this, "Ä£°åÃû '" + strName + "ÔÚÄ£°åÎÄ¼şÖĞ²»´æÔÚ...");
-				// MessageBox.Show(this, "SelectSingleNode()Ê§°Ü...");
+                MessageBox.Show(this, "æ¨¡æ¿å '" + strName + "åœ¨æ¨¡æ¿æ–‡ä»¶ä¸­ä¸å­˜åœ¨...");
+				// MessageBox.Show(this, "SelectSingleNode()å¤±è´¥...");
 				return;
 			}
 
@@ -386,7 +386,7 @@ namespace DigitalPlatform.CirculationClient
 			{
 				if (node.ChildNodes.Count == 0) 
 				{
-					MessageBox.Show(this, "<template name='"+strName+"'>ÔªËØÏÂ±ØĞëÓĞÒ»¸ö¶ù×Ó½Úµã£¬Õâ¸ö½Úµã½«³äµ±¸ù½Úµã...");
+					MessageBox.Show(this, "<template name='"+strName+"'>å…ƒç´ ä¸‹å¿…é¡»æœ‰ä¸€ä¸ªå„¿å­èŠ‚ç‚¹ï¼Œè¿™ä¸ªèŠ‚ç‚¹å°†å……å½“æ ¹èŠ‚ç‚¹...");
 					return;
 				}
 
@@ -422,7 +422,7 @@ namespace DigitalPlatform.CirculationClient
 			else 
 			{
 				/*
-				if () // ¸´Ñ¡
+				if () // å¤é€‰
 				{
 					textBox_name.Text = "";
 
@@ -456,7 +456,7 @@ namespace DigitalPlatform.CirculationClient
 			*/
 		}
 
-		// Ìæ»»»òÕß×·¼ÓÒ»¸ö¼ÇÂ¼
+		// æ›¿æ¢æˆ–è€…è¿½åŠ ä¸€ä¸ªè®°å½•
 		public int ReplaceRecord(string strName,
 			string strContent,
 			out string strError)
@@ -466,7 +466,7 @@ namespace DigitalPlatform.CirculationClient
 
 			if (dom == null)
 			{
-				strError = "domÎªnull";
+				strError = "domä¸ºnull";
 				return -1;
 			}
 
@@ -477,12 +477,12 @@ namespace DigitalPlatform.CirculationClient
 				
 				node = dom.CreateElement("template");
 				DomUtil.SetAttr(node, "name", strName);
-				// ĞÂ½¨Á¢Ò»¸ö¼ÇÂ¼
+				// æ–°å»ºç«‹ä¸€ä¸ªè®°å½•
 				node = dom.DocumentElement.AppendChild(node);
 			}
 
 
-			// Òª·ÀÖ¹strContentÊÇÈ«XMLÎÄ¼şÄÚÈİ
+			// è¦é˜²æ­¢strContentæ˜¯å…¨XMLæ–‡ä»¶å†…å®¹
 			XmlDocument temp = new XmlDocument();
 			try 
 			{
@@ -490,11 +490,11 @@ namespace DigitalPlatform.CirculationClient
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
-			node.InnerXml = temp.DocumentElement.OuterXml;	// ¸ùµÄ´¿XML
+			node.InnerXml = temp.DocumentElement.OuterXml;	// æ ¹çš„çº¯XML
 
 			m_bChanged = true;
 
@@ -504,7 +504,7 @@ namespace DigitalPlatform.CirculationClient
 		}
 
 		/*
-		// É¾³ıÈô¸É¼ÇÂ¼
+		// åˆ é™¤è‹¥å¹²è®°å½•
 		public int DeleteRecords(string strNameList,
 			out string strOutputXml,
 			out string strError)
@@ -514,7 +514,7 @@ namespace DigitalPlatform.CirculationClient
 
 			if (dom == null)
 			{
-				strError = "domÎªnull";
+				strError = "domä¸ºnull";
 				return -1;
 			}
 
@@ -552,7 +552,7 @@ namespace DigitalPlatform.CirculationClient
 			bool bSelected = listView1.SelectedItems.Count > 0;
 
 			//
-			menuItem = new MenuItem("ĞŞ¸Ä(&M)");
+			menuItem = new MenuItem("ä¿®æ”¹(&M)");
 			menuItem.Click += new System.EventHandler(this.menu_modify);
 			if (bSelected == false || this.SaveMode == false) 
 			{
@@ -565,7 +565,7 @@ namespace DigitalPlatform.CirculationClient
 			contextMenu.MenuItems.Add(menuItem);
 
 
-			menuItem = new MenuItem("É¾³ı(&D)");
+			menuItem = new MenuItem("åˆ é™¤(&D)");
 			menuItem.Click += new System.EventHandler(this.menu_deleteRecord);
 			if (bSelected == false || this.SaveMode == false)
 				menuItem.Enabled = false;
@@ -576,12 +576,12 @@ namespace DigitalPlatform.CirculationClient
 		}
 
 #if NO
-		// ĞŞ¸ÄÃû×ÖºÍ×¢ÊÍ
+		// ä¿®æ”¹åå­—å’Œæ³¨é‡Š
 		void menu_Modify(object sender, System.EventArgs e)
 		{
 			if (listView1.SelectedItems.Count == 0)
 			{
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÄâĞŞ¸ÄµÄÄ£°å¼ÇÂ¼ÊÂÏî...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©æ‹Ÿä¿®æ”¹çš„æ¨¡æ¿è®°å½•äº‹é¡¹...");
 				return;
 			}
 			TemplateRecordDlg dlg = new TemplateRecordDlg();
@@ -610,14 +610,14 @@ namespace DigitalPlatform.CirculationClient
 			FillList(false);
 		}
 #endif
-        // ĞŞ¸ÄÃû×ÖºÍ×¢ÊÍ
+        // ä¿®æ”¹åå­—å’Œæ³¨é‡Š
         void menu_modify(object sender, System.EventArgs e)
         {
             string strError = "";
 
             if (listView1.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÄâĞŞ¸ÄµÄÄ£°å¼ÇÂ¼ÊÂÏî...";
+                strError = "å°šæœªé€‰æ‹©æ‹Ÿä¿®æ”¹çš„æ¨¡æ¿è®°å½•äº‹é¡¹...";
                 goto ERROR1;
             }
 
@@ -636,11 +636,11 @@ namespace DigitalPlatform.CirculationClient
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            // ²éÖØ 2014/6/21
+            // æŸ¥é‡ 2014/6/21
             ListViewItem dup = ListViewUtil.FindItem(this.listView1, dlg.TemplateName, 0);
             if (dup != null && dup != item)
             {
-                strError = "Ä£°åÃû '" + dlg.TemplateName + "' ÒÑ¾­±»Ê¹ÓÃÁË£¬²»ÔÊĞíÖØ¸´³öÏÖ¡£ÇëÖØĞÂÊäÈëÄ£°åÃû";
+                strError = "æ¨¡æ¿å '" + dlg.TemplateName + "' å·²ç»è¢«ä½¿ç”¨äº†ï¼Œä¸å…è®¸é‡å¤å‡ºç°ã€‚è¯·é‡æ–°è¾“å…¥æ¨¡æ¿å";
                 MessageBox.Show(this, strError);
                 goto REDO_INPUT;
             }
@@ -662,7 +662,7 @@ namespace DigitalPlatform.CirculationClient
 		{
 			if (listView1.SelectedItems.Count == 0)
 			{
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÄâÉ¾³ıµÄÄ£°å¼ÇÂ¼ÊÂÏî...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©æ‹Ÿåˆ é™¤çš„æ¨¡æ¿è®°å½•äº‹é¡¹...");
 				return;
 			}
 
@@ -670,7 +670,7 @@ namespace DigitalPlatform.CirculationClient
 			int nRet = 0;
 
 			DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıËùÑ¡ÔñµÄÄ£°å¼ÇÂ¼?",
+                "ç¡®å®è¦åˆ é™¤æ‰€é€‰æ‹©çš„æ¨¡æ¿è®°å½•?",
 				"SelectRecordTemplateDlg",
 				MessageBoxButtons.YesNo,
 				MessageBoxIcon.Question, 
@@ -697,9 +697,9 @@ namespace DigitalPlatform.CirculationClient
 			FillList(false);
 		}
 
-		// ĞŞ¸ÄDOMÖĞµÄ¼ÇÂ¼ÊôĞÔ£¬»òÕßÉ¾³ıDOMÖĞµÄ¼ÇÂ¼
+		// ä¿®æ”¹DOMä¸­çš„è®°å½•å±æ€§ï¼Œæˆ–è€…åˆ é™¤DOMä¸­çš„è®°å½•
 		// parameters:
-		//		strNewName	Èç¹û==null£¬±íÊ¾É¾³ı´Ë¼ÇÂ¼
+		//		strNewName	å¦‚æœ==nullï¼Œè¡¨ç¤ºåˆ é™¤æ­¤è®°å½•
 		int ChangeRecordProperty(string strOldName,
 			string strNewName,
 			string strNewComment,
@@ -710,7 +710,7 @@ namespace DigitalPlatform.CirculationClient
 
 			if (dom == null)
 			{
-				strError = "domÎªnull";
+				strError = "domä¸ºnull";
 				return -1;
 			}
 
@@ -718,7 +718,7 @@ namespace DigitalPlatform.CirculationClient
 
 			if (node == null) 
 			{
-                strError = "Ä£°å¼ÇÂ¼ '" + strOldName + "' Ã»ÓĞÕÒµ½...";
+                strError = "æ¨¡æ¿è®°å½• '" + strOldName + "' æ²¡æœ‰æ‰¾åˆ°...";
 				return -1;
 			}
 
@@ -743,7 +743,7 @@ namespace DigitalPlatform.CirculationClient
 				&& m_bChanged == true)
 			{
 				DialogResult result = MessageBox.Show(this,
-                    "È·ÊµÒª·ÅÆúÏÈÇ°Ëù×öµÄÈ«²¿ĞŞ¸ÄÃ´?\r\n\r\n(ÊÇ)·ÅÆúĞŞ¸Ä (·ñ)²»¹Ø±Õ´°¿Ú\r\n\r\n(×¢: Ä£°åÃûÎª¿ÕµÄÇé¿öÏÂÈÔ¿ÉÒÔ°´\"È·¶¨\"°´Å¥±£´æËù×öµÄĞŞ¸Ä¡£)",
+                    "ç¡®å®è¦æ”¾å¼ƒå…ˆå‰æ‰€åšçš„å…¨éƒ¨ä¿®æ”¹ä¹ˆ?\r\n\r\n(æ˜¯)æ”¾å¼ƒä¿®æ”¹ (å¦)ä¸å…³é—­çª—å£\r\n\r\n(æ³¨: æ¨¡æ¿åä¸ºç©ºçš„æƒ…å†µä¸‹ä»å¯ä»¥æŒ‰\"ç¡®å®š\"æŒ‰é’®ä¿å­˜æ‰€åšçš„ä¿®æ”¹ã€‚)",
 					"SelectRecordTemplateDlg",
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question, 
@@ -757,7 +757,7 @@ namespace DigitalPlatform.CirculationClient
 		}
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
 		{

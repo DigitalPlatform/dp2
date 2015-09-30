@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,16 +37,16 @@ namespace dp2rms
 
 		public string Lang = "zh";
 
-		RmsChannel channel = null;	// ÁÙÊ±Ê¹ÓÃµÄchannel¶ÔÏó
+		RmsChannel channel = null;	// ä¸´æ—¶ä½¿ç”¨çš„channelå¯¹è±¡
 
 		public AutoResetEvent eventClose = new AutoResetEvent(false);
-		public RmsChannelCollection	Channels = new RmsChannelCollection();	// ÓµÓĞ
+		public RmsChannelCollection	Channels = new RmsChannelCollection();	// æ‹¥æœ‰
 		DigitalPlatform.Stop stop = null;
 
-		byte [] TimeStamp = null;	// µ±Ç°¼ÇÂ¼µÄÊ±¼ä´Á
-		string	m_strMetaData = "";	// µ±Ç°¼ÇÂ¼µÄÔªÊı¾İ
+		byte [] TimeStamp = null;	// å½“å‰è®°å½•çš„æ—¶é—´æˆ³
+		string	m_strMetaData = "";	// å½“å‰è®°å½•çš„å…ƒæ•°æ®
 
-        string strDatabaseOriginPath = ""; // ¸Õ´ÓÊı¾İ¿âµ÷ÈëÊ±ºòµÄÈ«Â·¾¶
+        string strDatabaseOriginPath = ""; // åˆšä»æ•°æ®åº“è°ƒå…¥æ—¶å€™çš„å…¨è·¯å¾„
 
 		// ViewAccessPointForm accessPointWindow = null;
 
@@ -66,7 +66,7 @@ namespace dp2rms
 
 		ArrayList m_queueTextChanged = new ArrayList();
 
-        MacroUtil m_macroutil = new MacroUtil();   // ºê´¦ÀíÆ÷
+        MacroUtil m_macroutil = new MacroUtil();   // å®å¤„ç†å™¨
 
         SeedManager m_seedmanager = new SeedManager();
 
@@ -250,7 +250,7 @@ namespace dp2rms
             // MarcEditor
             // 
             this.MarcEditor.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.MarcEditor.CaptionFont = new System.Drawing.Font("ËÎÌå", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.MarcEditor.CaptionFont = new System.Drawing.Font("å®‹ä½“", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.MarcEditor.Changed = true;
             this.MarcEditor.ContentBackColor = System.Drawing.SystemColors.Window;
             this.MarcEditor.ContentTextColor = System.Drawing.SystemColors.WindowText;
@@ -292,7 +292,7 @@ namespace dp2rms
             this.tabPage_xmlText.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_xmlText.Size = new System.Drawing.Size(556, 183);
             this.tabPage_xmlText.TabIndex = 2;
-            this.tabPage_xmlText.Text = "XML´¿ÎÄ±¾";
+            this.tabPage_xmlText.Text = "XMLçº¯æ–‡æœ¬";
             this.tabPage_xmlText.UseVisualStyleBackColor = true;
             // 
             // textBox_xmlPureText
@@ -329,7 +329,7 @@ namespace dp2rms
             this.tabPage_resFiles.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_resFiles.Size = new System.Drawing.Size(556, 46);
             this.tabPage_resFiles.TabIndex = 0;
-            this.tabPage_resFiles.Text = "×ÊÔ´ÎÄ¼ş";
+            this.tabPage_resFiles.Text = "èµ„æºæ–‡ä»¶";
             this.tabPage_resFiles.UseVisualStyleBackColor = true;
             // 
             // listView_resFiles
@@ -374,7 +374,7 @@ namespace dp2rms
             this.Controls.Add(this.tableLayoutPanel_recpath);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DetailForm";
-            this.Text = "ÏêÏ¸´°";
+            this.Text = "è¯¦ç»†çª—";
             this.Activated += new System.EventHandler(this.DetailForm_Activated);
             this.Closing += new System.ComponentModel.CancelEventHandler(this.DetailForm_Closing);
             this.Closed += new System.EventHandler(this.DetailForm_Closed);
@@ -411,13 +411,13 @@ namespace dp2rms
             this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
 
-			// ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+			// è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
 			if (MainForm.AppInfo != null) 
 			{
 				MainForm.AppInfo.LoadMdiChildFormStates(this,
                     "mdi_form_state");
 
-                // »Ö¸´tab×´Ì¬
+                // æ¢å¤tabçŠ¶æ€
                 this.tabControl_record.SelectedIndex = MainForm.AppInfo.GetInt(
                     "detailform",
                     "tab_state",
@@ -429,7 +429,7 @@ namespace dp2rms
 
 			stop = new DigitalPlatform.Stop();
 
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             this.Channels.AskAccountInfo += new AskAccountInfoEventHandle(MainForm.Servers.OnAskAccountInfo);
             /*
@@ -449,7 +449,7 @@ namespace dp2rms
 
 			this.listView_resFiles.editor = this.XmlEditor;
 
-			// ×îºÃµ±È·Öª¿âÓĞmarcdefÅäÖÃÎÄ¼şÊ±,²Å´ò¿ªÊ±ÖÓ.
+			// æœ€å¥½å½“ç¡®çŸ¥åº“æœ‰marcdefé…ç½®æ–‡ä»¶æ—¶,æ‰æ‰“å¼€æ—¶é’Ÿ.
 			if (timer_crossRefresh.Enabled == false)
 				timer_crossRefresh.Enabled = true;
 
@@ -478,13 +478,13 @@ namespace dp2rms
             return strValue;
         }
 
-        // ½âÎöÃ¿Ò»¸öºê
+        // è§£ææ¯ä¸€ä¸ªå®
         void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
         {
             string strError = "";
-            string strName = Unquote(e.Macro);  // È¥µô°Ù·ÖºÅ
+            string strName = Unquote(e.Macro);  // å»æ‰ç™¾åˆ†å·
 
-            // º¯ÊıÃû£º
+            // å‡½æ•°åï¼š
             string strFuncName = "";
             string strParams = "";
 
@@ -504,7 +504,7 @@ namespace dp2rms
                 string[] aParam = strParams.Split(new char[] {','});
                 if (aParam.Length != 3 && aParam.Length != 2)
                 {
-                    strError = "IncSeedĞèÒª2»ò3¸ö²ÎÊı¡£";
+                    strError = "IncSeedéœ€è¦2æˆ–3ä¸ªå‚æ•°ã€‚";
                     goto ERROR1;
                 }
 
@@ -540,7 +540,7 @@ namespace dp2rms
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ²¹×ã×ó·½'0'
+                // è¡¥è¶³å·¦æ–¹'0'
                 if (aParam.Length == 3)
                 {
                     int nWidth = 0;
@@ -549,7 +549,7 @@ namespace dp2rms
                     }
                     catch 
                     {
-                        strError = "µÚÈı²ÎÊıÓ¦µ±Îª´¿Êı×Ö£¨±íÊ¾²¹×ãµÄ¿í¶È£©";
+                        strError = "ç¬¬ä¸‰å‚æ•°åº”å½“ä¸ºçº¯æ•°å­—ï¼ˆè¡¨ç¤ºè¡¥è¶³çš„å®½åº¦ï¼‰";
                         goto ERROR1;
                     }
                     e.Value = strValue.PadLeft(nWidth, '0');
@@ -559,20 +559,20 @@ namespace dp2rms
                 return;
             }
 
-            e.Canceled = true;  // ²»ÄÜ½âÊÍ´¦Àí
+            e.Canceled = true;  // ä¸èƒ½è§£é‡Šå¤„ç†
             return;
 
         ERROR1:
             e.ErrorInfo = strError;
         }
 
-        // MARC±à¼­Æ÷½â¾ö²»ÁËµÄºê, ÇóÖúÓÚÕâÀï
+        // MARCç¼–è¾‘å™¨è§£å†³ä¸äº†çš„å®, æ±‚åŠ©äºè¿™é‡Œ
         void MarcEditor_ParseMacro(object sender, ParseMacroEventArgs e)
         {
             string strResult = "";
             string strError = "";
 
-            // ½èÖúÓÚMacroUtil½øĞĞ´¦Àí
+            // å€ŸåŠ©äºMacroUtilè¿›è¡Œå¤„ç†
             int nRet = m_macroutil.Parse(
                 e.Simulate,
                 e.Macro,
@@ -608,7 +608,7 @@ namespace dp2rms
 			{
 
 				DialogResult result = MessageBox.Show(this, 
-					"µ±Ç°´°¿ÚÖĞÄÚÈİĞŞ¸ÄºóÎ´±£´æ¡£ÊÇ·ñÒª·ÅÆú±£´æ²¢¹Ø±Õ´°¿Ú?\r\n\r\n(ÊÇ)·ÅÆú±£´æ²¢¹Ø±Õ´°¿Ú (·ñ)²»¹Ø±Õ´°¿Ú",
+					"å½“å‰çª—å£ä¸­å†…å®¹ä¿®æ”¹åæœªä¿å­˜ã€‚æ˜¯å¦è¦æ”¾å¼ƒä¿å­˜å¹¶å…³é—­çª—å£?\r\n\r\n(æ˜¯)æ”¾å¼ƒä¿å­˜å¹¶å…³é—­çª—å£ (å¦)ä¸å…³é—­çª—å£",
 					"dp2rms",
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question,
@@ -660,9 +660,9 @@ namespace dp2rms
 		{
 			eventClose.Set();
 
-			if (stop != null) // ÍÑÀë¹ØÁª
+			if (stop != null) // è„±ç¦»å…³è”
 			{
-				stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+				stop.Unregister();	// å’Œå®¹å™¨å…³è”
 
 				// MainForm.stopManager.Remove(stop);
 				stop = null;
@@ -681,16 +681,16 @@ namespace dp2rms
 
             if (MainForm.AppInfo != null)
             {
-                // ¼ÇÒä´°¿ÚÒ»°ã×´Ì¬
+                // è®°å¿†çª—å£ä¸€èˆ¬çŠ¶æ€
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
                 "mdi_form_state");
 
-                // ¼ÇÒätab×´Ì¬
+                // è®°å¿†tabçŠ¶æ€
                 MainForm.AppInfo.SetInt("detailform",
                 "tab_state", 
                 this.tabControl_record.SelectedIndex);
 
-                // ¼ÇÒäMARC±à¼­Æ÷×´Ì¬
+                // è®°å¿†MARCç¼–è¾‘å™¨çŠ¶æ€
                 MainForm.AppInfo.SetBoolean(
                     "marceditor",
                     "EnterAsAutoGenerate",
@@ -702,7 +702,7 @@ namespace dp2rms
             this.MarcEditor.GenerateData -= new GenerateDataEventHandler(MarcEditor_GenerateData);
             this.MarcEditor.ParseMacro -= new ParseMacroEventHandler(MarcEditor_ParseMacro);
 
-            // MacroUtilĞèÒªÊÂ¼şÖ§³Å
+            // MacroUtiléœ€è¦äº‹ä»¶æ”¯æ’‘
             this.m_macroutil.ParseOneMacro -= new ParseOneMacroEventHandler(m_macroutil_ParseOneMacro);
 
             this.XmlEditor.GenerateData -= new GenerateDataEventHandler(XmlEditor_GenerateData);
@@ -719,7 +719,7 @@ namespace dp2rms
 
             try
             {
-                // »ñµÃsplitContainer_mainµÄ×´Ì¬
+                // è·å¾—splitContainer_mainçš„çŠ¶æ€
                 this.MainForm.LoadSplitterPos(
                     this.splitContainer_main,
                     "detailform",
@@ -735,8 +735,8 @@ namespace dp2rms
             if (sender != this)
                 return;
 
-            // ·Ö¸îÌõÎ»ÖÃ
-            // ±£´æsplitContainer_mainµÄ×´Ì¬
+            // åˆ†å‰²æ¡ä½ç½®
+            // ä¿å­˜splitContainer_mainçš„çŠ¶æ€
             this.MainForm.SaveSplitterPos(
                 this.splitContainer_main,
                 "detailform",
@@ -750,14 +750,14 @@ namespace dp2rms
 			{
 
 				DialogResult result = MessageBox.Show(this, 
-					"×°ÔØÄ£°åÇ°,·¢ÏÖµ±Ç°´°¿ÚÖĞÒÑÓĞÄÚÈİĞŞ¸ÄºóÎ´À´µÃ¼°±£´æ¡£ÊÇ·ñÒª¼ÌĞø×°ÔØÄ£°åµ½´°¿ÚÖĞ(ÕâÑù½«¶ªÊ§ÏÈÇ°ĞŞ¸ÄµÄÄÚÈİ)?\r\n\r\n(ÊÇ)¼ÌĞø×°ÔØÄ£°å (·ñ)²»×°ÔØÄ£°å",
+					"è£…è½½æ¨¡æ¿å‰,å‘ç°å½“å‰çª—å£ä¸­å·²æœ‰å†…å®¹ä¿®æ”¹åæœªæ¥å¾—åŠä¿å­˜ã€‚æ˜¯å¦è¦ç»§ç»­è£…è½½æ¨¡æ¿åˆ°çª—å£ä¸­(è¿™æ ·å°†ä¸¢å¤±å…ˆå‰ä¿®æ”¹çš„å†…å®¹)?\r\n\r\n(æ˜¯)ç»§ç»­è£…è½½æ¨¡æ¿ (å¦)ä¸è£…è½½æ¨¡æ¿",
 					"dp2rms",
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question,
 					MessageBoxDefaultButton.Button2);
 				if (result != DialogResult.Yes) 
 				{
-					MessageBox.Show(this, "×°ÔØÄ£°å²Ù×÷±»·ÅÆú...");
+					MessageBox.Show(this, "è£…è½½æ¨¡æ¿æ“ä½œè¢«æ”¾å¼ƒ...");
 					return;
 				}
 			}
@@ -765,7 +765,7 @@ namespace dp2rms
 			OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+			dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
 			dlg.ap = this.MainForm.AppInfo;
 			dlg.ApCfgTitle = "detailform_openresdlg";
@@ -778,18 +778,18 @@ namespace dp2rms
 			if (dlg.DialogResult != DialogResult.OK)
 				return;
 
-			textBox_recPath.Text = dlg.Path + "/?";	// ÎªÁË×·¼Ó±£´æ
+			textBox_recPath.Text = dlg.Path + "/?";	// ä¸ºäº†è¿½åŠ ä¿å­˜
 
-			// ÏÂÔØÅäÖÃÎÄ¼ş
+			// ä¸‹è½½é…ç½®æ–‡ä»¶
 			ResPath respath = new ResPath(dlg.Path);
 
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
@@ -800,7 +800,7 @@ namespace dp2rms
 				string strCfgFilePath = respath.Path + "/cfgs/template";
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strCfgFilePath);
+				stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strCfgFilePath);
 				stop.BeginLoop();
 
 				byte[] baTimeStamp = null;
@@ -837,7 +837,7 @@ namespace dp2rms
                     int nRet = tempdlg.Initial(strContent, out strError);
 					if (nRet == -1) 
 					{
-						MessageBox.Show(this, "×°ÔØÅäÖÃÎÄ¼ş '" + strCfgFilePath + "' ·¢Éú´íÎó: " + strError);
+						MessageBox.Show(this, "è£…è½½é…ç½®æ–‡ä»¶ '" + strCfgFilePath + "' å‘ç”Ÿé”™è¯¯: " + strError);
 						return;
 					}
 
@@ -850,9 +850,9 @@ namespace dp2rms
 
 
 					this.TimeStamp = null;
-					this.m_strMetaData = "";	// ¼ÇÒäXML¼ÇÂ¼µÄÔªÊı¾İ
+					this.m_strMetaData = "";	// è®°å¿†XMLè®°å½•çš„å…ƒæ•°æ®
 
-                    this.strDatabaseOriginPath = ""; // ±£´æ´ÓÊı¾İ¿âÖĞÀ´µÄÔ­Ê¼path
+                    this.strDatabaseOriginPath = ""; // ä¿å­˜ä»æ•°æ®åº“ä¸­æ¥çš„åŸå§‹path
 
 					nRet = this.SetRecordToControls(tempdlg.SelectedRecordXml,
 						out strError);
@@ -895,7 +895,7 @@ namespace dp2rms
 
             MainForm.SetMenuItemState();
 
-			// ²Ëµ¥
+			// èœå•
 			MainForm.MenuItem_properties.Enabled = true;
 			MainForm.MenuItem_viewAccessPoint.Enabled = true;
 			MainForm.MenuItem_dup.Enabled = true;
@@ -910,7 +910,7 @@ namespace dp2rms
             else
                 MainForm.MenuItem_font.Enabled = false;  // ??
 
-			// ¹¤¾ßÌõ°´Å¥
+			// å·¥å…·æ¡æŒ‰é’®
 			MainForm.toolBarButton_save.Enabled = true;
 			MainForm.toolBarButton_refresh.Enabled = true;
 			MainForm.toolBarButton_loadTemplate.Enabled = true;
@@ -933,18 +933,18 @@ namespace dp2rms
 
 		}
 
-		// ×°ÔØ¼ÇÂ¼
-		// °ÑstrRecordPath±íÊ¾µÄ¼ÇÂ¼×°ÔØµ½´°¿ÚÖĞ£¬²¢ÇÒÔÚ´°¿ÚµÚÒ»ĞĞ
-		// Â·¾¶ÄÚÈİÉèÖÃºÃ
+		// è£…è½½è®°å½•
+		// æŠŠstrRecordPathè¡¨ç¤ºçš„è®°å½•è£…è½½åˆ°çª—å£ä¸­ï¼Œå¹¶ä¸”åœ¨çª—å£ç¬¬ä¸€è¡Œ
+		// è·¯å¾„å†…å®¹è®¾ç½®å¥½
 		// parameters:
-		//		strRecordPath	¼ÇÂ¼Â·¾¶¡£Èç¹û==null£¬±íÊ¾Ö±½ÓÓÃtextBox_recPathÖĞµ±Ç°µÄÄÚÈİ×÷ÎªÂ·¾¶
-		//		strExtStyle	Èç¹ûÎªnull£¬±íÊ¾»ñÈ¡strRecordPath»òtextbox±íÊ¾µÄ¼ÇÂ¼¡£Èç¹ûÎª"next"»ò"prev"£¬
-		//					Ôò±íÊ¾È¡Æäºó»òÇ°Ò»Ìõ¼ÇÂ¼
+		//		strRecordPath	è®°å½•è·¯å¾„ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç›´æ¥ç”¨textBox_recPathä¸­å½“å‰çš„å†…å®¹ä½œä¸ºè·¯å¾„
+		//		strExtStyle	å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºè·å–strRecordPathæˆ–textboxè¡¨ç¤ºçš„è®°å½•ã€‚å¦‚æœä¸º"next"æˆ–"prev"ï¼Œ
+		//					åˆ™è¡¨ç¤ºå–å…¶åæˆ–å‰ä¸€æ¡è®°å½•
 		// return:
-		//		-2	·ÅÆú
-		//		-1	³ö´í
-		//		0	Õı³£
-		//		1	µ½Í·»òÕßµ½Î²
+		//		-2	æ”¾å¼ƒ
+		//		-1	å‡ºé”™
+		//		0	æ­£å¸¸
+		//		1	åˆ°å¤´æˆ–è€…åˆ°å°¾
 		public int LoadRecord(string strRecordPath,
 			string strExtStyle,
 			out string strError)
@@ -960,14 +960,14 @@ namespace dp2rms
 				{
 
 					DialogResult result = MessageBox.Show(this, 
-						"×°ÔØĞÂÄÚÈİÇ°, ·¢ÏÖµ±Ç°´°¿ÚÖĞÒÑÓĞÄÚÈİĞŞ¸ÄºóÎ´À´µÃ¼°±£´æ¡£ÊÇ·ñÒª¼ÌĞø×°ÔØĞÂÄÚÈİµ½´°¿ÚÖĞ(ÕâÑù½«¶ªÊ§ÏÈÇ°ĞŞ¸Ä¹ıµÄÄÚÈİ)?\r\n\r\n(ÊÇ)¼ÌĞø×°ÔØĞÂÄÚÈİ (·ñ)²»×°ÔØĞÂÄÚÈİ",
+						"è£…è½½æ–°å†…å®¹å‰, å‘ç°å½“å‰çª—å£ä¸­å·²æœ‰å†…å®¹ä¿®æ”¹åæœªæ¥å¾—åŠä¿å­˜ã€‚æ˜¯å¦è¦ç»§ç»­è£…è½½æ–°å†…å®¹åˆ°çª—å£ä¸­(è¿™æ ·å°†ä¸¢å¤±å…ˆå‰ä¿®æ”¹è¿‡çš„å†…å®¹)?\r\n\r\n(æ˜¯)ç»§ç»­è£…è½½æ–°å†…å®¹ (å¦)ä¸è£…è½½æ–°å†…å®¹",
 						"dp2rms",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
 						MessageBoxDefaultButton.Button2);
 					if (result != DialogResult.Yes) 
 					{
-						strError = "×°ÔØĞÂÄÚÈİ²Ù×÷±»·ÅÆú...";
+						strError = "è£…è½½æ–°å†…å®¹æ“ä½œè¢«æ”¾å¼ƒ...";
 						return -2;
 					}
 				}
@@ -987,11 +987,11 @@ namespace dp2rms
 				string strOutputPath;
 
 
-				// Ê¹ÓÃChannel
+				// ä½¿ç”¨Channel
 				RmsChannel channelSave = channel;
 
 				channel = Channels.GetChannel(respath.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+				Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 				try 
 				{
@@ -1004,7 +1004,7 @@ namespace dp2rms
 					}
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-					stop.Initial("ÕıÔÚ×°ÔØ¼ÇÂ¼" + respath.FullPath);
+					stop.Initial("æ­£åœ¨è£…è½½è®°å½•" + respath.FullPath);
 					stop.BeginLoop();
 
 
@@ -1023,30 +1023,30 @@ namespace dp2rms
                     stop.OnStop -= new StopEventHandler(this.DoStop);
 					stop.Initial("");
 
-					this.TimeStamp = baTimeStamp;	// ÉèÖÃÊ±¼ä´ÁºÜÖØÒª¡£¼´±ãxml²»ºÏ·¨£¬Ò²Ó¦ÉèÖÃºÃÊ±¼ä´Á£¬·ñÔò´°¿ÚÎŞ·¨½øĞĞÕı³£É¾³ı¡£
+					this.TimeStamp = baTimeStamp;	// è®¾ç½®æ—¶é—´æˆ³å¾ˆé‡è¦ã€‚å³ä¾¿xmlä¸åˆæ³•ï¼Œä¹Ÿåº”è®¾ç½®å¥½æ—¶é—´æˆ³ï¼Œå¦åˆ™çª—å£æ— æ³•è¿›è¡Œæ­£å¸¸åˆ é™¤ã€‚
 
-                    this.strDatabaseOriginPath = respath.Url+"?"+strOutputPath; // ±£´æ´ÓÊı¾İ¿âÖĞÀ´µÄÔ­Ê¼path
+                    this.strDatabaseOriginPath = respath.Url+"?"+strOutputPath; // ä¿å­˜ä»æ•°æ®åº“ä¸­æ¥çš„åŸå§‹path
 
 					if (lRet == -1) 
 					{
                         if (channel.ErrorCode == ChannelErrorCode.NotFoundSubRes)
                         {
-                            // ÏÂ¼¶×ÊÔ´²»´æÔÚ, ¾¯¸æÒ»ÏÂ¾ÍĞĞÁË
+                            // ä¸‹çº§èµ„æºä¸å­˜åœ¨, è­¦å‘Šä¸€ä¸‹å°±è¡Œäº†
                             MessageBox.Show(this, strError);
                             goto CONTINUELOAD;
                         }
 						else if (channel.ErrorCode == ChannelErrorCode.NotFound) 
 						{
 							if (strExtStyle == "prev")
-								strError = "µ½Í·";
+								strError = "åˆ°å¤´";
 							else if (strExtStyle == "next")
-								strError = "µ½Î²";
+								strError = "åˆ°å°¾";
 							return 1;
 						}
 						else 
 						{
 							// this.TimeStamp = null;
-							strError = "´ÓÂ·¾¶ '"+respath.Path+"' »ñÈ¡¼ÇÂ¼Ê±³ö´í: " + strError;
+							strError = "ä»è·¯å¾„ '"+respath.Path+"' è·å–è®°å½•æ—¶å‡ºé”™: " + strError;
 							return -1;
 						}
 					}
@@ -1064,7 +1064,7 @@ namespace dp2rms
 
 				//string strTemp = ByteArray.GetHexTimeStampString(baTimeStamp);
 
-				this.m_strMetaData = strMetaData;	// ¼ÇÒäXML¼ÇÂ¼µÄÔªÊı¾İ
+				this.m_strMetaData = strMetaData;	// è®°å¿†XMLè®°å½•çš„å…ƒæ•°æ®
 
 				int nRet = SetRecordToControls(strContent,
 					out strError);
@@ -1080,22 +1080,22 @@ namespace dp2rms
 			}
 		}
 
-		// ½«XML¼ÇÂ¼×°Èë¸÷¸ö¿Ø¼ş
+		// å°†XMLè®°å½•è£…å…¥å„ä¸ªæ§ä»¶
 		int SetRecordToControls(string strContent,
 			out string strError)
 		{
 			strError = "";
 
-			// Í³Ò»¿Ø¼şÊ±¼ä´Á
+			// ç»Ÿä¸€æ§ä»¶æ—¶é—´æˆ³
 			//this.m_nTimeStampMarc = 0;
 			//this.m_nTimeStampXml = 0;
 			m_queueTextChanged.Clear();
 
-            // Çå³ıMARC¸ñÊ½µÄ»º´æ
+            // æ¸…é™¤MARCæ ¼å¼çš„ç¼“å­˜
             this.MarcSyntax = "";
 
 
-			listView_resFiles.Initial(XmlEditor);	// °Ñ×ÊÔ´listviewºÍXmlEditor¹´Á¬ÉÏ
+			listView_resFiles.Initial(XmlEditor);	// æŠŠèµ„æºlistviewå’ŒXmlEditorå‹¾è¿ä¸Š
 
 			try 
 			{
@@ -1105,28 +1105,28 @@ namespace dp2rms
 
 				XmlEditor.EndUpdate();
 
-                this.Changed = false;	// xmlÄÚÈİµÄ±ä»¯,»áµ¼ÖÂResFileListÒ²±ä»¯,ËùÒÔÏû³ıbChanged on±êÖ¾,Ó¦µ±´Ó×ÜÌåÈëÊÖ
+                this.Changed = false;	// xmlå†…å®¹çš„å˜åŒ–,ä¼šå¯¼è‡´ResFileListä¹Ÿå˜åŒ–,æ‰€ä»¥æ¶ˆé™¤bChanged onæ ‡å¿—,åº”å½“ä»æ€»ä½“å…¥æ‰‹
 
                 /*
-                // ²âÊÔ
+                // æµ‹è¯•
                 XmlDocument dom = new XmlDocument();
-                dom.PreserveWhitespace = true;  // ÔÚÒâ¿Õ°×·ûºÅ
+                dom.PreserveWhitespace = true;  // åœ¨æ„ç©ºç™½ç¬¦å·
                 dom.LoadXml(strContent);
                  * */
 			}
 			catch (Exception ex)
 			{
-				// ×°ÈëÆÕÍ¨textbox
+				// è£…å…¥æ™®é€štextbox
 				this.textBox_xmlPureText.Text = strContent;
 
 				if (strContent.Length < 4096)
-					strError = "×°ÔØXML¼ÇÂ¼ÄÚÈİ '"+strContent+"' µ½DOMÊ±³ö´í: " + ex.Message;
+					strError = "è£…è½½XMLè®°å½•å†…å®¹ '"+strContent+"' åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
 				else
-					strError = "×°ÔØXML¼ÇÂ¼µ½DOMÊ±³ö´í: " + ex.Message;
+					strError = "è£…è½½XMLè®°å½•åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
 				return -1;
 			}
 
-            // ¹æÕûËõ½ø
+            // è§„æ•´ç¼©è¿›
             if (SetPlainTextXml(strContent, out strError) == -1)
                 return -1;
 
@@ -1137,7 +1137,7 @@ namespace dp2rms
 			return 0;
 		}
 
-        // ÏòXMLÎÄ±¾±à¼­Æ÷ÉèÖÃÄÚÈİ¡£½«¹æÕû¸ñÊ½
+        // å‘XMLæ–‡æœ¬ç¼–è¾‘å™¨è®¾ç½®å†…å®¹ã€‚å°†è§„æ•´æ ¼å¼
         int SetPlainTextXml(string strXml,
             out string strError)
         {
@@ -1148,18 +1148,18 @@ namespace dp2rms
                 out strError);
             if (nRet == -1)
             {
-                strError = "½«XML×Ö·û´®¹æÕû¸ñÊ½Ê±³ö´í: " + strError;
+                strError = "å°†XMLå­—ç¬¦ä¸²è§„æ•´æ ¼å¼æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
             this.textBox_xmlPureText.Text = strOutXml;
             return 0;
         }
 
-		// ´ÓmarcdefÅäÖÃÎÄ¼şÖĞ»ñµÃmarc¸ñÊ½¶¨Òå
+		// ä»marcdefé…ç½®æ–‡ä»¶ä¸­è·å¾—marcæ ¼å¼å®šä¹‰
 		// return:
-		//		-1	³ö´í
-		//		0	Ã»ÓĞÕÒµ½
-		//		1	ÕÒµ½
+		//		-1	å‡ºé”™
+		//		0	æ²¡æœ‰æ‰¾åˆ°
+		//		1	æ‰¾åˆ°
 		int GetMarcSyntax(out string strMarcSyntax,
 			out string strError)
 		{
@@ -1167,7 +1167,7 @@ namespace dp2rms
 
 			if (this.MarcSyntax != "")
 			{
-                // Èç¹ûĞèÒª¸Ä±ä´°¿ÚµÄMARC¸ñÊ½£¬ĞèÒªÇå³ıthis.MarcSyntax
+                // å¦‚æœéœ€è¦æ”¹å˜çª—å£çš„MARCæ ¼å¼ï¼Œéœ€è¦æ¸…é™¤this.MarcSyntax
 				strMarcSyntax = this.MarcSyntax;
 				return 1;
 			}
@@ -1190,11 +1190,11 @@ namespace dp2rms
 
 			s.Seek(0, SeekOrigin.Begin);
 
-			// ´ÓmarcdefÅäÖÃÎÄ¼şÖĞµÃµ½marc¸ñÊ½×Ö·û´®
+			// ä»marcdefé…ç½®æ–‡ä»¶ä¸­å¾—åˆ°marcæ ¼å¼å­—ç¬¦ä¸²
 			// return:
-			//		-1	³ö´í
-			//		0	Ã»ÓĞÕÒµ½
-			//		1	ÕÒµ½
+			//		-1	å‡ºé”™
+			//		0	æ²¡æœ‰æ‰¾åˆ°
+			//		1	æ‰¾åˆ°
 			nRet = MarcUtil.GetMarcSyntaxFromCfgFile(s,
 				out strMarcSyntax,
 				out strError);
@@ -1212,14 +1212,14 @@ namespace dp2rms
 			return nRet;
 		}
 
-		// ±£´æ¼ÇÂ¼µ½ÁíÒ»Êı¾İ¿â
+		// ä¿å­˜è®°å½•åˆ°å¦ä¸€æ•°æ®åº“
 		// parameters:
 		public void SaveAsRecord()
 		{
 			OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+			dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
 			dlg.ap = this.MainForm.AppInfo;
 			dlg.ApCfgTitle = "detailform_openresdlg";
@@ -1235,15 +1235,15 @@ namespace dp2rms
 			SaveRecord(dlg.Path + "/?");
 		}
 
-		// ±£´æ¼ÇÂ¼µ½Ä£°åÅäÖÃÎÄ¼ş
+		// ä¿å­˜è®°å½•åˆ°æ¨¡æ¿é…ç½®æ–‡ä»¶
 		// parameters:
 		public void SaveToTemplate()
 		{
-			// Ñ¡ÔñÄ¿±êÊı¾İ¿â
+			// é€‰æ‹©ç›®æ ‡æ•°æ®åº“
 			OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+			dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
 			dlg.ap = this.MainForm.AppInfo;
 			dlg.ApCfgTitle = "detailform_openresdlg";
@@ -1257,7 +1257,7 @@ namespace dp2rms
 				return;
 
 
-			// ÏÂÔØÄ£°åÅäÖÃÎÄ¼ş
+			// ä¸‹è½½æ¨¡æ¿é…ç½®æ–‡ä»¶
 			ResPath respath = new ResPath(dlg.Path);
 
 			string strError;
@@ -1270,17 +1270,17 @@ namespace dp2rms
 
 			long lRet = 0;
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strCfgFilePath);
+				stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strCfgFilePath);
 				stop.BeginLoop();
 
 
@@ -1319,8 +1319,8 @@ namespace dp2rms
 				goto ERROR1;
 
 
-			tempdlg.Text = "ÇëÑ¡ÔñÒªĞŞ¸ÄµÄÄ£°å¼ÇÂ¼";
-			tempdlg.CheckNameExist = false;	// °´OK°´Å¥Ê±²»¾¯¸æ"Ãû×Ö²»´æÔÚ",ÕâÑùÔÊĞíĞÂ½¨Ò»¸öÄ£°å
+			tempdlg.Text = "è¯·é€‰æ‹©è¦ä¿®æ”¹çš„æ¨¡æ¿è®°å½•";
+			tempdlg.CheckNameExist = false;	// æŒ‰OKæŒ‰é’®æ—¶ä¸è­¦å‘Š"åå­—ä¸å­˜åœ¨",è¿™æ ·å…è®¸æ–°å»ºä¸€ä¸ªæ¨¡æ¿
 			tempdlg.ap = this.MainForm.AppInfo;
 			tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
 			tempdlg.ShowDialog(this);
@@ -1340,10 +1340,10 @@ namespace dp2rms
 
 
 
-			// ĞŞ¸ÄÅäÖÃÎÄ¼şÄÚÈİ
+			// ä¿®æ”¹é…ç½®æ–‡ä»¶å†…å®¹
 			if (tempdlg.textBox_name.Text != "")
 			{
-				// Ìæ»»»òÕß×·¼ÓÒ»¸ö¼ÇÂ¼
+				// æ›¿æ¢æˆ–è€…è¿½åŠ ä¸€ä¸ªè®°å½•
 				nRet = tempdlg.ReplaceRecord(tempdlg.textBox_name.Text,
 					strXmlBody,
 					out strError);
@@ -1353,26 +1353,26 @@ namespace dp2rms
 				}
 			}
 
-			if (tempdlg.Changed == false)	// Ã»ÓĞ±ØÒª±£´æ»ØÈ¥
+			if (tempdlg.Changed == false)	// æ²¡æœ‰å¿…è¦ä¿å­˜å›å»
 				return;
 
 			string strOutputXml = tempdlg.OutputXml;
 
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			channelSave = channel;
 
-			// ÖØĞÂ»ñµÃÒ»´Îchannel, ÊÇÒòÎªÇ°ÃæGetXmlRecord()º¯ÊıÓĞ¿ÉÄÜ´İ»ÙÕâ¸ö±äÁ¿
+			// é‡æ–°è·å¾—ä¸€æ¬¡channel, æ˜¯å› ä¸ºå‰é¢GetXmlRecord()å‡½æ•°æœ‰å¯èƒ½æ‘§æ¯è¿™ä¸ªå˜é‡
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
 
-				// ´æ»ØÅäÖÃÎÄ¼ş
+				// å­˜å›é…ç½®æ–‡ä»¶
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚ±£´æÅäÖÃÎÄ¼ş " + strCfgFilePath);
+				stop.Initial("æ­£åœ¨ä¿å­˜é…ç½®æ–‡ä»¶ " + strCfgFilePath);
 				stop.BeginLoop();
 
 				byte [] baOutputTimeStamp = null;
@@ -1398,7 +1398,7 @@ namespace dp2rms
 
 				if (lRet == -1) 
 				{
-					strError = "±£´æÅäÖÃÎÄ¼ş"+ strCfgFilePath +"Ê§°Ü£¬Ô­Òò: "+strError;
+					strError = "ä¿å­˜é…ç½®æ–‡ä»¶"+ strCfgFilePath +"å¤±è´¥ï¼ŒåŸå› : "+strError;
 					goto ERROR1;
 				}
 			}
@@ -1407,7 +1407,7 @@ namespace dp2rms
 				channel = channelSave;
 			}
 
-			MessageBox.Show(this, "ĞŞ¸ÄÄ£°åÅäÖÃÎÄ¼ş³É¹¦¡£");
+			MessageBox.Show(this, "ä¿®æ”¹æ¨¡æ¿é…ç½®æ–‡ä»¶æˆåŠŸã€‚");
 
 			return;
 
@@ -1417,9 +1417,9 @@ namespace dp2rms
 		}
 
 
-		// ±£´æ¼ÇÂ¼
+		// ä¿å­˜è®°å½•
 		// parameters:
-		//		strRecordPath	¼ÇÂ¼Â·¾¶¡£Èç¹û==null£¬±íÊ¾Ö±½ÓÓÃtextBox_recPathÖĞµ±Ç°µÄÄÚÈİ×÷ÎªÂ·¾¶
+		//		strRecordPath	è®°å½•è·¯å¾„ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç›´æ¥ç”¨textBox_recPathä¸­å½“å‰çš„å†…å®¹ä½œä¸ºè·¯å¾„
 		public void SaveRecord(string strRecordPath)
 		{
 			if (strRecordPath != null)
@@ -1427,7 +1427,7 @@ namespace dp2rms
 
 			if (textBox_recPath.Text == "")
 			{
-				MessageBox.Show(this, "Â·¾¶²»ÄÜÎª¿Õ");
+				MessageBox.Show(this, "è·¯å¾„ä¸èƒ½ä¸ºç©º");
 				return;
 			}
 
@@ -1440,13 +1440,13 @@ namespace dp2rms
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(this, "Â·¾¶´íÎó: " + ex.Message);
+				MessageBox.Show(this, "è·¯å¾„é”™è¯¯: " + ex.Message);
 				return;
 			}
-			// ±£´æµ½ÎÄ¼ş
+			// ä¿å­˜åˆ°æ–‡ä»¶
 			if (uri.IsFile)
 			{
-				MessageBox.Show(this, "ÔİÊ±²»Ö§³Ö±£´æµ½ÎÄ¼ş");
+				MessageBox.Show(this, "æš‚æ—¶ä¸æ”¯æŒä¿å­˜åˆ°æ–‡ä»¶");
 				return;
 			}
 
@@ -1472,17 +1472,17 @@ namespace dp2rms
 
             int nUploadCount = 0;
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚ±£´æ¼ÇÂ¼ " + respath.FullPath);
+				stop.Initial("æ­£åœ¨ä¿å­˜è®°å½• " + respath.FullPath);
 				stop.BeginLoop();
 
 
@@ -1498,13 +1498,13 @@ namespace dp2rms
 
                     if (respath_old.Url != respath.Url)
                     {
-                        MessageBox.Show(this, "Ä¿Ç°Ôİ²»Ö§³Ö¿ç·şÎñÆ÷Çé¿öÏÂµÄ×ÊÔ´¸´ÖÆ¡£±¾¼ÇÂ¼ÖĞÔ­ÓĞµÄÒÑÉÏÔØ×ÊÔ´£¬ÔÚÁí´æµ½Ä¿±ê¿âµÄÊ±¶ªÊ§£¨Îª¿Õ£©£¬Çë×¢Òâ±£´æÍêºóÊÖ¶¯ÉÏÔØ¡£");
+                        MessageBox.Show(this, "ç›®å‰æš‚ä¸æ”¯æŒè·¨æœåŠ¡å™¨æƒ…å†µä¸‹çš„èµ„æºå¤åˆ¶ã€‚æœ¬è®°å½•ä¸­åŸæœ‰çš„å·²ä¸Šè½½èµ„æºï¼Œåœ¨å¦å­˜åˆ°ç›®æ ‡åº“çš„æ—¶ä¸¢å¤±ï¼ˆä¸ºç©ºï¼‰ï¼Œè¯·æ³¨æ„ä¿å­˜å®Œåæ‰‹åŠ¨ä¸Šè½½ã€‚");
                         goto SKIPCOPYRECORD;
                     }
-                    // ¸´ÖÆ¼ÇÂ¼
+                    // å¤åˆ¶è®°å½•
                     // return:
-                    //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-                    //		0»òÕßÆäËû		³É¹¦
+                    //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+                    //		0æˆ–è€…å…¶ä»–		æˆåŠŸ
                     nRet = channel.DoCopyRecord(respath_old.Path,
                         respath.Path,
                         false,  // bool bDeleteOriginRecord,
@@ -1513,12 +1513,12 @@ namespace dp2rms
                         out strError);
                     if (nRet == -1)
                     {
-                        MessageBox.Show(this, "¸´ÖÆ×ÊÔ´Ê±·¢Éú´íÎó: " + strError);
+                        MessageBox.Show(this, "å¤åˆ¶èµ„æºæ—¶å‘ç”Ÿé”™è¯¯: " + strError);
                     }
                     else
                     {
-                        // Îª¼ÌĞø±£´æ×îĞÂXML¼ÇÂ¼×÷×¼±¸
-                        respath.Path = strOutputPath;   // ?ĞÎÊ½Â·¾¶ÆäÊµÒÑ¾­È·¶¨
+                        // ä¸ºç»§ç»­ä¿å­˜æœ€æ–°XMLè®°å½•ä½œå‡†å¤‡
+                        respath.Path = strOutputPath;   // ?å½¢å¼è·¯å¾„å…¶å®å·²ç»ç¡®å®š
                         this.TimeStamp = baOutputTimeStamp;
                     }
                 }
@@ -1543,7 +1543,7 @@ namespace dp2rms
 
 				if (lRet == -1) 
 				{
-					MessageBox.Show(this, "±£´æ¼ÇÂ¼Ê§°Ü£¬Ô­Òò: "+strError);
+					MessageBox.Show(this, "ä¿å­˜è®°å½•å¤±è´¥ï¼ŒåŸå› : "+strError);
 					return;
                 }
 
@@ -1555,15 +1555,15 @@ namespace dp2rms
                 textBox_recPath.Text = respath.FullPath;
 
                 ////
-                this.strDatabaseOriginPath = respath.Url + "?" + strOutputPath; // ±£´æ´ÓÊı¾İ¿âÖĞÀ´µÄÔ­Ê¼path
+                this.strDatabaseOriginPath = respath.Url + "?" + strOutputPath; // ä¿å­˜ä»æ•°æ®åº“ä¸­æ¥çš„åŸå§‹path
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ±£´æ×ÊÔ´ " + respath.FullPath);
+                stop.Initial("æ­£åœ¨ä¿å­˜èµ„æº " + respath.FullPath);
                 stop.BeginLoop();
 
                 EnableControlsInLoading(true);
                 Debug.Assert(channel != null, "");
-                // ±£´æ¶ÔÏó×ÊÔ´,Ñ­»·¶ÔÏóÁĞ±í¾Í¿ÉÒÔÁË
+                // ä¿å­˜å¯¹è±¡èµ„æº,å¾ªç¯å¯¹è±¡åˆ—è¡¨å°±å¯ä»¥äº†
                 nUploadCount = this.listView_resFiles.DoUpload(
                     respath.Path,
                     channel,
@@ -1583,20 +1583,20 @@ namespace dp2rms
 
 			if (nUploadCount == -1) 
 			{
-				MessageBox.Show(this, "XML¼ÇÂ¼±£´æ³É¹¦, µ«±£´æ×ÊÔ´Ê§°Ü£¬Ô­Òò: "+strError);
+				MessageBox.Show(this, "XMLè®°å½•ä¿å­˜æˆåŠŸ, ä½†ä¿å­˜èµ„æºå¤±è´¥ï¼ŒåŸå› : "+strError);
 				return;
 			}
 
 			if (nUploadCount > 0)
 			{
-				// Ê¹ÓÃChannel
+				// ä½¿ç”¨Channel
 				channelSave = channel;
 
 				channel = Channels.GetChannel(respath.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+				Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 
-				// ĞèÒªÖØĞÂ»ñµÃÊ±¼ä´Á
+				// éœ€è¦é‡æ–°è·å¾—æ—¶é—´æˆ³
 				string strStyle = "timestamp,metadata";	// withresmetadata
 				string strMetaData = "";
 				string strContent = "";
@@ -1612,7 +1612,7 @@ namespace dp2rms
 						out strError);
 					if (lRet == -1)
 					{
-						MessageBox.Show(this, "ÖØĞÂ»ñµÃÊ±¼ä´Á '" + respath.FullPath + "' Ê§°Ü¡£Ô­Òò : " + strError);
+						MessageBox.Show(this, "é‡æ–°è·å¾—æ—¶é—´æˆ³ '" + respath.FullPath + "' å¤±è´¥ã€‚åŸå›  : " + strError);
 						return;
 					}
 				}
@@ -1620,8 +1620,8 @@ namespace dp2rms
 				{
 					channel = channelSave;
 				}
-				this.TimeStamp = baOutputTimeStamp;	// ÉèÖÃÊ±¼ä´ÁºÜÖØÒª¡£¼´±ãxml²»ºÏ·¨£¬Ò²Ó¦ÉèÖÃºÃÊ±¼ä´Á£¬·ñÔò´°¿ÚÎŞ·¨½øĞĞÕı³£É¾³ı¡£
-				this.m_strMetaData = strMetaData;	// ¼ÇÒäXML¼ÇÂ¼µÄÔªÊı¾İ
+				this.TimeStamp = baOutputTimeStamp;	// è®¾ç½®æ—¶é—´æˆ³å¾ˆé‡è¦ã€‚å³ä¾¿xmlä¸åˆæ³•ï¼Œä¹Ÿåº”è®¾ç½®å¥½æ—¶é—´æˆ³ï¼Œå¦åˆ™çª—å£æ— æ³•è¿›è¡Œæ­£å¸¸åˆ é™¤ã€‚
+				this.m_strMetaData = strMetaData;	// è®°å¿†XMLè®°å½•çš„å…ƒæ•°æ®
 
 
 
@@ -1629,12 +1629,12 @@ namespace dp2rms
 
 			this.Changed = false;
 
-			MessageBox.Show(this, "±£´æ¼ÇÂ¼ '" + respath.FullPath + "' ³É¹¦¡£");
+			MessageBox.Show(this, "ä¿å­˜è®°å½• '" + respath.FullPath + "' æˆåŠŸã€‚");
 		}
 
-		// É¾³ı¼ÇÂ¼
+		// åˆ é™¤è®°å½•
 		// parameters:
-		//		strRecordPath	¼ÇÂ¼Â·¾¶¡£Èç¹û==null£¬±íÊ¾Ö±½ÓÓÃtextBox_recPathÖĞµ±Ç°µÄÄÚÈİ×÷ÎªÂ·¾¶
+		//		strRecordPath	è®°å½•è·¯å¾„ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç›´æ¥ç”¨textBox_recPathä¸­å½“å‰çš„å†…å®¹ä½œä¸ºè·¯å¾„
 		public void DeleteRecord(string strRecordPath)
 		{
 			if (strRecordPath != null)
@@ -1642,7 +1642,7 @@ namespace dp2rms
 
 			if (textBox_recPath.Text == "")
 			{
-				MessageBox.Show(this, "Â·¾¶²»ÄÜÎª¿Õ");
+				MessageBox.Show(this, "è·¯å¾„ä¸èƒ½ä¸ºç©º");
 				return;
 			}
 
@@ -1655,17 +1655,17 @@ namespace dp2rms
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(this, "Â·¾¶´íÎó: " + ex.Message);
+				MessageBox.Show(this, "è·¯å¾„é”™è¯¯: " + ex.Message);
 				return;
-			}			// ±£´æµ½ÎÄ¼ş
+			}			// ä¿å­˜åˆ°æ–‡ä»¶
 			if (uri.IsFile)
 			{
-				MessageBox.Show(this, "ÔİÊ±²»Ö§³ÖÉ¾³ıÎÄ¼ş");
+				MessageBox.Show(this, "æš‚æ—¶ä¸æ”¯æŒåˆ é™¤æ–‡ä»¶");
 				return;
 			}
 
 
-			string strText = "ÄãÈ·ÊµÒªÉ¾³ıÎ»ÓÚ·şÎñÆ÷ '"+respath.Url+"' ÉÏµÄ¼ÇÂ¼ '"+respath.Path + "' Âğ?";
+			string strText = "ä½ ç¡®å®è¦åˆ é™¤ä½äºæœåŠ¡å™¨ '"+respath.Url+"' ä¸Šçš„è®°å½• '"+respath.Path + "' å—?";
 
 			DialogResult msgResult = MessageBox.Show(this,
 				strText,
@@ -1676,24 +1676,24 @@ namespace dp2rms
 				
 			if (msgResult != DialogResult.OK) 
 			{
-				MessageBox.Show(this, "É¾³ı²Ù×÷±»·ÅÆú...");
+				MessageBox.Show(this, "åˆ é™¤æ“ä½œè¢«æ”¾å¼ƒ...");
 				return;
 			}
 
 			string strError;
 			byte [] baOutputTimeStamp = null;
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÉ¾³ı¼ÇÂ¼ " + respath.FullPath);
+                stop.Initial("æ­£åœ¨åˆ é™¤è®°å½• " + respath.FullPath);
 				stop.BeginLoop();
 
 
@@ -1712,7 +1712,7 @@ namespace dp2rms
 
 				if (lRet == -1) 
 				{
-					MessageBox.Show(this, "É¾³ı¼ÇÂ¼ '"+respath.Path+"' Ê§°Ü£¬Ô­Òò: "+strError);
+					MessageBox.Show(this, "åˆ é™¤è®°å½• '"+respath.Path+"' å¤±è´¥ï¼ŒåŸå› : "+strError);
 					return;
 				}
 
@@ -1724,16 +1724,16 @@ namespace dp2rms
 
 
 
-			// Èç¹ûÉ¾³ı³É¹¦,Ô­À´Ê±¼ä´ÁÒÅÁôÔÚthis.TimeStampÖĞ,Ò²ÎŞº¦
+			// å¦‚æœåˆ é™¤æˆåŠŸ,åŸæ¥æ—¶é—´æˆ³é—ç•™åœ¨this.TimeStampä¸­,ä¹Ÿæ— å®³
 
-			MessageBox.Show(this, "É¾³ı¼ÇÂ¼ '" + respath.FullPath + "' ³É¹¦¡£");
+			MessageBox.Show(this, "åˆ é™¤è®°å½• '" + respath.FullPath + "' æˆåŠŸã€‚");
 
 		}
 
 
-		// ¹Û²ì¼ìË÷µã
+		// è§‚å¯Ÿæ£€ç´¢ç‚¹
 		// parameters:
-		//		strRecordPath	¼ÇÂ¼Â·¾¶¡£Èç¹û==null£¬±íÊ¾Ö±½ÓÓÃtextBox_recPathÖĞµ±Ç°µÄÄÚÈİ×÷ÎªÂ·¾¶
+		//		strRecordPath	è®°å½•è·¯å¾„ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç›´æ¥ç”¨textBox_recPathä¸­å½“å‰çš„å†…å®¹ä½œä¸ºè·¯å¾„
 		public void ViewAccessPoint(string strRecordPath)
 		{
 			if (strRecordPath == null || strRecordPath == "")
@@ -1741,7 +1741,7 @@ namespace dp2rms
 
 			if (strRecordPath == "")
 			{
-				MessageBox.Show(this, "±ØĞëÖ¸¶¨ºÃÂ·¾¶ºó, ²ÅÄÜÄ£Äâ´´½¨¼ìË÷µã");
+				MessageBox.Show(this, "å¿…é¡»æŒ‡å®šå¥½è·¯å¾„å, æ‰èƒ½æ¨¡æ‹Ÿåˆ›å»ºæ£€ç´¢ç‚¹");
 				return;
 			}
 
@@ -1751,11 +1751,11 @@ namespace dp2rms
 
 			string strXml = "";
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
@@ -1782,7 +1782,7 @@ namespace dp2rms
                 accessPointWindow = new ViewAccessPointForm();
                 // accessPointWindow.StartPosition = FormStartPosition.CenterScreen;
                 accessPointWindow.Show();
-                accessPointWindow.MdiParent = MainForm; // MDI×Ó´°¿Ú
+                accessPointWindow.MdiParent = MainForm; // MDIå­çª—å£
             }
             else
                 accessPointWindow.Activate();
@@ -1801,7 +1801,7 @@ namespace dp2rms
             /*
 			if (accessPointWindow.Visible == false) 
 			{
-				try // Close()¹ıµÄ´°¿Ú
+				try // Close()è¿‡çš„çª—å£
 				{
 					accessPointWindow.Show();
 				}
@@ -1815,16 +1815,16 @@ namespace dp2rms
              */
 
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚ»ñÈ¡¼ìË÷µã " + respath.FullPath);
+				stop.Initial("æ­£åœ¨è·å–æ£€ç´¢ç‚¹ " + respath.FullPath);
 				stop.BeginLoop();
 
 
@@ -1847,13 +1847,13 @@ namespace dp2rms
 
 				if (lRet == -1) 
 				{
-					MessageBox.Show(this, "»ñÈ¡¼ìË÷µãÊ§°Ü£¬Ô­Òò: "+strError);
+					MessageBox.Show(this, "è·å–æ£€ç´¢ç‚¹å¤±è´¥ï¼ŒåŸå› : "+strError);
 					return;
 				}
 
-                // ÉèÖÃ±êÌâ
+                // è®¾ç½®æ ‡é¢˜
                 // ResPath respath = new ResPath(this.textBox_recPath.Text);
-                accessPointWindow.Text = "¹Û²ì¼ìË÷µã: " + respath.ReverseFullPath;
+                accessPointWindow.Text = "è§‚å¯Ÿæ£€ç´¢ç‚¹: " + respath.ReverseFullPath;
 
 
 			}
@@ -1868,9 +1868,9 @@ namespace dp2rms
 		}
 
 
-		// Æô¶¯²éÖØ
+		// å¯åŠ¨æŸ¥é‡
 		// parameters:
-		//		strRecordPath	¼ÇÂ¼Â·¾¶¡£Èç¹û==null£¬±íÊ¾Ö±½ÓÓÃtextBox_recPathÖĞµ±Ç°µÄÄÚÈİ×÷ÎªÂ·¾¶
+		//		strRecordPath	è®°å½•è·¯å¾„ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç›´æ¥ç”¨textBox_recPathä¸­å½“å‰çš„å†…å®¹ä½œä¸ºè·¯å¾„
 		public void SearchDup(string strRecordPath)
 		{
 			if (strRecordPath == null || strRecordPath == "")
@@ -1878,7 +1878,7 @@ namespace dp2rms
 
 			if (strRecordPath == "")
 			{
-				MessageBox.Show(this, "±ØĞëÖ¸¶¨ºÃÂ·¾¶ºó, ²ÅÄÜ½øĞĞ²éÖØ");
+				MessageBox.Show(this, "å¿…é¡»æŒ‡å®šå¥½è·¯å¾„å, æ‰èƒ½è¿›è¡ŒæŸ¥é‡");
 				return;
 			}
 
@@ -1899,7 +1899,7 @@ namespace dp2rms
 			}
 
 
-			// ×îºÃ¼¤»îµ±Ç°ÒÑ¾­´æÔÚµÄ²éÖØmdi´°¿Ú
+			// æœ€å¥½æ¿€æ´»å½“å‰å·²ç»å­˜åœ¨çš„æŸ¥é‡mdiçª—å£
 
 			DupDlg dlg = new DupDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
@@ -1918,7 +1918,7 @@ namespace dp2rms
 			searchpanel.ApCfgTitle = "detailform_dupdlg";
 
 			string strDbFullName = respath.Url + "?" + ResPath.GetDbName(respath.Path);
-			// »ñµÃÉÏ´ÎÒÅÁôµÄÈ±Ê¡²éÖØ·½°¸Ãû
+			// è·å¾—ä¸Šæ¬¡é—ç•™çš„ç¼ºçœæŸ¥é‡æ–¹æ¡ˆå
 			string strDupProjectName = GetUsedDefaultDupProject(strDbFullName);
 
 			dlg.Initial(searchpanel,
@@ -1927,7 +1927,7 @@ namespace dp2rms
 			dlg.ProjectName = strDupProjectName;
 			dlg.RecordFullPath = strRecordPath;
 			dlg.Record = strXml;
-			dlg.MdiParent = this.MainForm;	// MDI»¯
+			dlg.MdiParent = this.MainForm;	// MDIåŒ–
 			dlg.Show();
 
 
@@ -1935,11 +1935,11 @@ namespace dp2rms
 			// this.MainForm.SetFirstMdiWindowState();
 		}
 
-		// »ñµÃÊ¹ÓÃ¹ıµÄ·½°¸Ãû
+		// è·å¾—ä½¿ç”¨è¿‡çš„æ–¹æ¡ˆå
 		public string GetUsedDefaultDupProject(string strOriginDbFullPath)
 		{
 			string strEntry = AttrNameEncode(strOriginDbFullPath);
-			// »ñµÃÉÏ´ÎÒÅÁôµÄÈ±Ê¡²éÖØ·½°¸Ãû
+			// è·å¾—ä¸Šæ¬¡é—ç•™çš„ç¼ºçœæŸ¥é‡æ–¹æ¡ˆå
 			string strDupProjectName = this.MainForm.AppInfo.GetString(
 				"origin_project_name",
 				strEntry,
@@ -1947,7 +1947,7 @@ namespace dp2rms
 			return strDupProjectName;
 		}
 
-		// ÉèÖÃÊ¹ÓÃ¹ıµÄ·½°¸Ãû
+		// è®¾ç½®ä½¿ç”¨è¿‡çš„æ–¹æ¡ˆå
 		public void SetUsedDefaultDupProject(string strOriginDbFullPath,
 			string strDupProjectName)
 		{
@@ -1989,24 +1989,24 @@ namespace dp2rms
 		{
 			get 
 			{
-				return "¼ÇÂ¼Â·¾¶:\t" + this.textBox_recPath.Text + "\r\n"
-					+ "Ê±¼ä´Á:\t" + (this.TimeStamp == null ? "(¿Õ)" : ByteArray.GetHexTimeStampString(this.TimeStamp)) + "\r\n";
+				return "è®°å½•è·¯å¾„:\t" + this.textBox_recPath.Text + "\r\n"
+					+ "æ—¶é—´æˆ³:\t" + (this.TimeStamp == null ? "(ç©º)" : ByteArray.GetHexTimeStampString(this.TimeStamp)) + "\r\n";
 			}
 		}
 
-		// ÔÚ×°ÔØ¼ÇÂ¼µÄÊ±ÆÚ, disableÄ³Ğ©½çÃæÔªËØ
+		// åœ¨è£…è½½è®°å½•çš„æ—¶æœŸ, disableæŸäº›ç•Œé¢å…ƒç´ 
 		void EnableControlsInLoading(bool bLoading)
 		{
 			if (bLoading == true) 
 			{
 				textBox_recPath.Enabled = false;
 				button_findRecPath.Enabled = false;
-				// XmlEditor.Enabled = false;	// ĞèÒªÓÅ»¯»æÖÆ¹ı³Ì
+				// XmlEditor.Enabled = false;	// éœ€è¦ä¼˜åŒ–ç»˜åˆ¶è¿‡ç¨‹
 				listView_resFiles.Enabled = false;
 
 				if (MainForm.ActiveMdiChild == this) 
 				{
-					// ¹¤¾ßÌõ°´Å¥
+					// å·¥å…·æ¡æŒ‰é’®
 					MainForm.toolBarButton_save.Enabled = false;
 					MainForm.toolBarButton_refresh.Enabled = false;
 					MainForm.toolBarButton_loadTemplate.Enabled = false;
@@ -2025,7 +2025,7 @@ namespace dp2rms
 
 				if (MainForm.ActiveMdiChild == this) 
 				{
-					// ¹¤¾ßÌõ°´Å¥
+					// å·¥å…·æ¡æŒ‰é’®
 					MainForm.toolBarButton_save.Enabled = true;
 					MainForm.toolBarButton_refresh.Enabled = true;
 					MainForm.toolBarButton_loadTemplate.Enabled = true;
@@ -2039,7 +2039,7 @@ namespace dp2rms
 
 		}
 
-		// ¼ÇÂ¼Â·¾¶·¢ÉúÈÎºÎĞŞ¸Ä
+		// è®°å½•è·¯å¾„å‘ç”Ÿä»»ä½•ä¿®æ”¹
 		private void textBox_recPath_TextChanged(object sender, System.EventArgs e)
 		{
 			SetDeleteToolButton();
@@ -2061,7 +2061,7 @@ namespace dp2rms
 		}
 
 
-		// »Øµ÷º¯Êı
+		// å›è°ƒå‡½æ•°
 		public void DownloadFiles()
 		{
 			string[] ids = this.listView_resFiles.GetSelectedDownloadIds();
@@ -2076,7 +2076,7 @@ namespace dp2rms
 
 			}
 
-			MessageBox.Show(this, "ÏÂÔØ×ÊÔ´ÎÄ¼şÍê³É ...");
+			MessageBox.Show(this, "ä¸‹è½½èµ„æºæ–‡ä»¶å®Œæˆ ...");
 			return;
 
 			ERROR1:
@@ -2098,7 +2098,7 @@ namespace dp2rms
 
 			SaveFileDialog dlg = new SaveFileDialog();
 
-			dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ±¾µØÎÄ¼şÃû";
+			dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æœ¬åœ°æ–‡ä»¶å";
 			dlg.CreatePrompt = false;
 			dlg.FileName = strLocalPath == "" ? strID + ".res" : strLocalPath;
 			dlg.InitialDirectory = Environment.CurrentDirectory;
@@ -2108,22 +2108,22 @@ namespace dp2rms
 
 			if(dlg.ShowDialog() != DialogResult.OK)
 			{
-				strError = "·ÅÆú";
+				strError = "æ”¾å¼ƒ";
 				return -1;
 			}
 
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØ×ÊÔ´ÎÄ¼ş " + strResPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½èµ„æºæ–‡ä»¶ " + strResPath);
 				stop.BeginLoop();
 
 				byte [] baOutputTimeStamp = null;
@@ -2150,7 +2150,7 @@ namespace dp2rms
 
 				if (lRet == -1) 
 				{
-					MessageBox.Show(this, "ÏÂÔØ×ÊÔ´ÎÄ¼şÊ§°Ü£¬Ô­Òò: "+strError);
+					MessageBox.Show(this, "ä¸‹è½½èµ„æºæ–‡ä»¶å¤±è´¥ï¼ŒåŸå› : "+strError);
 					goto ERROR1;
 				}
 
@@ -2166,7 +2166,7 @@ namespace dp2rms
 
 		}
 
-		// »Øµ÷º¯Êı
+		// å›è°ƒå‡½æ•°
 		int DownloadOneFileMetaData(string strID,
 			out string strResultXml,
 			out byte[] timestamp,
@@ -2179,18 +2179,18 @@ namespace dp2rms
 
 			strResPath = strResPath.Replace(":", "/");
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØ×ÊÔ´ÎÄ¼şµÄÔªÊı¾İ " + strResPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½èµ„æºæ–‡ä»¶çš„å…ƒæ•°æ® " + strResPath);
 				stop.BeginLoop();
 
 				byte [] baOutputTimeStamp = null;
@@ -2198,7 +2198,7 @@ namespace dp2rms
 
 				EnableControlsInLoading(true);
 
-				// Ö»µÃµ½metadata
+				// åªå¾—åˆ°metadata
 				long lRet = channel.GetRes(strResPath,
 					(Stream)null,
 					stop,
@@ -2218,7 +2218,7 @@ namespace dp2rms
 
 				if (lRet == -1) 
 				{
-					MessageBox.Show(this, "ÏÂÔØ×ÊÔ´ÎÄ¼şÔªÊı¾İÊ§°Ü£¬Ô­Òò: "+strError);
+					MessageBox.Show(this, "ä¸‹è½½èµ„æºæ–‡ä»¶å…ƒæ•°æ®å¤±è´¥ï¼ŒåŸå› : "+strError);
 					goto ERROR1;
 				}
 
@@ -2235,10 +2235,10 @@ namespace dp2rms
 			return -1;
 		}
 
-		// »ñµÃXml¼ÇÂ¼
-		// ±¾º¯ÊıÓĞĞŞ¸Äthis.channelµÄÎ£ÏÕ
+		// è·å¾—Xmlè®°å½•
+		// æœ¬å‡½æ•°æœ‰ä¿®æ”¹this.channelçš„å±é™©
         // parameters:
-        //      bHasFile    ÊÇ·ñ¾ßÓĞÒÑÉÏÔØµÄ×ÊÔ´ÎÄ¼ş?
+        //      bHasFile    æ˜¯å¦å…·æœ‰å·²ä¸Šè½½çš„èµ„æºæ–‡ä»¶?
 		int GetXmlRecord(out string strXml,
             out bool bHasUploadedFile,
 			out string strError)
@@ -2250,21 +2250,21 @@ namespace dp2rms
 
 			if (!(Control.ModifierKeys == Keys.Control))
 			{
-				// È·±£¿Ø¼şÄÚÈİÍ¬²½
+				// ç¡®ä¿æ§ä»¶å†…å®¹åŒæ­¥
 				nRet = this.Flush(out strError);
 				if (nRet == -1)
 					return -1;
 			}
 
 
-			// ´ÓXMLÊı¾İÖĞÒÆ³ı¹¤×÷ÓÃµÄÁÙÊ±ÊôĞÔ
+			// ä»XMLæ•°æ®ä¸­ç§»é™¤å·¥ä½œç”¨çš„ä¸´æ—¶å±æ€§
 			nRet = ResFileList.RemoveWorkingAttrs(XmlEditor.Xml,
 				out strXml,
                 out bHasUploadedFile,
 				out strError);
 			if (nRet == -1)
 			{
-				strError = "RemoveWorkingAttrs()Ê§°Ü£¬Ô­Òò: "+strError;
+				strError = "RemoveWorkingAttrs()å¤±è´¥ï¼ŒåŸå› : "+strError;
 				return -1;
 			}
 
@@ -2274,17 +2274,17 @@ namespace dp2rms
 
 	
 
-		// ±£´æµ½±¸·İ¸ñÊ½
+		// ä¿å­˜åˆ°å¤‡ä»½æ ¼å¼
 		public void SaveToBackup(string strOutputFileName)
 		{
 			string strError;
 
-			// Ñ¯ÎÊÎÄ¼şÃû
+			// è¯¢é—®æ–‡ä»¶å
 			if (strOutputFileName == null)
 			{
 				SaveFileDialog dlg = new SaveFileDialog();
 
-				dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ±¸·İÎÄ¼şÃû";
+				dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„å¤‡ä»½æ–‡ä»¶å";
 				dlg.CreatePrompt = false;
 				dlg.OverwritePrompt = false;
                 dlg.FileName = MainForm.UsedBackupFileName;  // "*.dp2bak";
@@ -2297,7 +2297,7 @@ namespace dp2rms
 					return;
 
 				strOutputFileName = dlg.FileName;
-                MainForm.UsedBackupFileName = strOutputFileName;    // ¼ÇÒäÏÂÀ´
+                MainForm.UsedBackupFileName = strOutputFileName;    // è®°å¿†ä¸‹æ¥
 			}
 
             bool bOverwrite = false;
@@ -2307,28 +2307,28 @@ namespace dp2rms
                 OverwriteOrAppendBackupFileDlg dlg = new OverwriteOrAppendBackupFileDlg();
                 dlg.Font = GuiUtil.GetDefaultFont();
 
-                dlg.Text = "ÎÄ¼şÒÑ¾­´æÔÚ£¬ÊÇ·ñ¸²¸Ç?";
-                dlg.Message = "ÎÄ¼ş " + strOutputFileName + " ÒÑ¾­´æÔÚ£¬ÊÇ×·¼Ó»¹ÊÇ¸²¸Ç£¿";
+                dlg.Text = "æ–‡ä»¶å·²ç»å­˜åœ¨ï¼Œæ˜¯å¦è¦†ç›–?";
+                dlg.Message = "æ–‡ä»¶ " + strOutputFileName + " å·²ç»å­˜åœ¨ï¼Œæ˜¯è¿½åŠ è¿˜æ˜¯è¦†ç›–ï¼Ÿ";
                 dlg.ShowDialog(this);
 
                 if (dlg.DialogResult == DialogResult.Yes)
                 {
-                    // ×·¼Ó
+                    // è¿½åŠ 
                     bOverwrite = false;
                 }
                 else if (dlg.DialogResult == DialogResult.No)
                 {
-                    // ¸²¸Ç
+                    // è¦†ç›–
                     bOverwrite = true;
                 }
-                return; // ·ÅÆú
+                return; // æ”¾å¼ƒ
             }
 
-			// ´ò¿ªÎÄ¼ş
+			// æ‰“å¼€æ–‡ä»¶
 
 			FileStream fileTarget = File.Open(
 				strOutputFileName,
-				FileMode.OpenOrCreate,	// Ô­À´ÊÇOpen£¬ºóÀ´ĞŞ¸ÄÎªOpenOrCreate¡£ÕâÑù¶ÔÁÙÊ±ÎÄ¼ş±»ÏµÍ³¹ÜÀíÔ±ÊÖ¶¯ÒâÍâÉ¾³ı(µ«ÊÇxmlÎÄ¼şÖĞÈÔÈ»¼ÇÔØÁËÈÎÎñ)µÄÇé¿öÄÜ¹»ÊÊÓ¦¡£·ñÔò»áÅ×³öFileNotFoundExceptionÒì³£
+				FileMode.OpenOrCreate,	// åŸæ¥æ˜¯Openï¼Œåæ¥ä¿®æ”¹ä¸ºOpenOrCreateã€‚è¿™æ ·å¯¹ä¸´æ—¶æ–‡ä»¶è¢«ç³»ç»Ÿç®¡ç†å‘˜æ‰‹åŠ¨æ„å¤–åˆ é™¤(ä½†æ˜¯xmlæ–‡ä»¶ä¸­ä»ç„¶è®°è½½äº†ä»»åŠ¡)çš„æƒ…å†µèƒ½å¤Ÿé€‚åº”ã€‚å¦åˆ™ä¼šæŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸
 				FileAccess.Write,
 				FileShare.ReadWrite);
 
@@ -2338,55 +2338,55 @@ namespace dp2rms
 			try 
 			{
 
-				fileTarget.Seek(0, SeekOrigin.End);	// ¾ßÓĞ×·¼ÓµÄÄÜÁ¦
+				fileTarget.Seek(0, SeekOrigin.End);	// å…·æœ‰è¿½åŠ çš„èƒ½åŠ›
 
-				long lStart = fileTarget.Position;	// ¼ÇÒäÆğÊ¼Î»ÖÃ
+				long lStart = fileTarget.Position;	// è®°å¿†èµ·å§‹ä½ç½®
 
 				byte [] length = new byte[8];
 
-				fileTarget.Write(length, 0, 8);	// ÁÙÊ±Ğ´µãÊı¾İ,Õ¼¾İ¼ÇÂ¼×Ü³¤¶ÈÎ»ÖÃ
+				fileTarget.Write(length, 0, 8);	// ä¸´æ—¶å†™ç‚¹æ•°æ®,å æ®è®°å½•æ€»é•¿åº¦ä½ç½®
 
                 bool bHasUploadedFile = false;
 
 
-				// »ñµÃXml¼ÇÂ¼
+				// è·å¾—Xmlè®°å½•
 				string strXmlBody;	
 				int nRet = GetXmlRecord(out strXmlBody,
                     out bHasUploadedFile,
                     out strError);
 				if (nRet == -1)
 				{
-					fileTarget.SetLength(lStart);	// °Ñ±¾´Î×·¼ÓĞ´ÈëµÄÈ«²¿È¥µô
+					fileTarget.SetLength(lStart);	// æŠŠæœ¬æ¬¡è¿½åŠ å†™å…¥çš„å…¨éƒ¨å»æ‰
 					goto ERROR1;
 				}
 
 				ResPath respath = new ResPath(textBox_recPath.Text);
 
-				// ÏòbackupÎÄ¼şÖĞ±£´æµÚÒ»¸ö res
+				// å‘backupæ–‡ä»¶ä¸­ä¿å­˜ç¬¬ä¸€ä¸ª res
 				ExportUtil.ChangeMetaData(ref this.m_strMetaData, // ResFileList
 					null,
 					null,
 					null,
 					null,
 					respath.FullPath,
-					ByteArray.GetHexTimeStampString(this.TimeStamp));   // ÈÎÑÓ»ª¼Ó 2005/6/11
+					ByteArray.GetHexTimeStampString(this.TimeStamp));   // ä»»å»¶ååŠ  2005/6/11
 
 				long lRet = Backup.WriteFirstResToBackupFile(
 					fileTarget,
 					this.m_strMetaData,
 					strXmlBody);
 
-				// Ê¹ÓÃChannel
+				// ä½¿ç”¨Channel
 				RmsChannel channelSave = channel;
 
 				channel = Channels.GetChannel(respath.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+				Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 				try 
 				{
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("ÕıÔÚ±£´æ¼ÇÂ¼ " + respath.FullPath + "µ½±¸·İÎÄ¼ş " + strOutputFileName);
+                    stop.Initial("æ­£åœ¨ä¿å­˜è®°å½• " + respath.FullPath + "åˆ°å¤‡ä»½æ–‡ä»¶ " + strOutputFileName);
 					stop.BeginLoop();
 
 					EnableControlsInLoading(true);
@@ -2407,8 +2407,8 @@ namespace dp2rms
 
 					if (nRet == -1) 
 					{
-						fileTarget.SetLength(lStart);	// °Ñ±¾´Î×·¼ÓĞ´ÈëµÄÈ«²¿È¥µô
-						strError = "±£´æ¼ÇÂ¼Ê§°Ü£¬Ô­Òò: "+ strError;
+						fileTarget.SetLength(lStart);	// æŠŠæœ¬æ¬¡è¿½åŠ å†™å…¥çš„å…¨éƒ¨å»æ‰
+						strError = "ä¿å­˜è®°å½•å¤±è´¥ï¼ŒåŸå› : "+ strError;
 						goto ERROR1;
 					}
 				}
@@ -2417,7 +2417,7 @@ namespace dp2rms
 					channel = channelSave;
 				}
 
-				// Ğ´Èë×Ü³¤¶È
+				// å†™å…¥æ€»é•¿åº¦
 				long lTotalLength = fileTarget.Position - lStart - 8;
 				byte[] data = BitConverter.GetBytes(lTotalLength);
 
@@ -2433,9 +2433,9 @@ namespace dp2rms
             string strText = "";
 
             if (bOverwrite == false)
-                strText = "×·¼Ó±£´æ±¸·İÎÄ¼şÍê³É...";
+                strText = "è¿½åŠ ä¿å­˜å¤‡ä»½æ–‡ä»¶å®Œæˆ...";
             else
-                strText = "¸²¸Ç±£´æ±¸·İÎÄ¼şÍê³É ...";
+                strText = "è¦†ç›–ä¿å­˜å¤‡ä»½æ–‡ä»¶å®Œæˆ ...";
 
 			MessageBox.Show(this, strText);
 			return;
@@ -2445,10 +2445,10 @@ namespace dp2rms
 				MessageBox.Show(this, strError);
 		}
 
-		// ×Ô¶¯¼Ó¹¤Êı¾İ
+		// è‡ªåŠ¨åŠ å·¥æ•°æ®
 		public void AutoGenerate()
 		{
-			// ¿âÃû²¿·ÖÂ·¾¶
+			// åº“åéƒ¨åˆ†è·¯å¾„
 			ResPath respath = new ResPath(textBox_recPath.Text);
 			respath.MakeDbName();
 
@@ -2456,11 +2456,11 @@ namespace dp2rms
 			string strCode;
 			string strRef;
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
@@ -2469,7 +2469,7 @@ namespace dp2rms
 				string strCfgRefPath = respath.Path + "/cfgs/autoGenerate.cs.ref";
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strCfgPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strCfgPath);
 				stop.BeginLoop();
 
 				byte[] baTimeStamp = null;
@@ -2497,7 +2497,7 @@ namespace dp2rms
 
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strCfgRefPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strCfgRefPath);
 				stop.BeginLoop();
 
 				lRet = channel.GetRes(
@@ -2528,7 +2528,7 @@ namespace dp2rms
 
 
 
-			// Ö´ĞĞ´úÂë
+			// æ‰§è¡Œä»£ç 
 			int nRet = RunScript(strCode,
                 strRef,
                 out strError);
@@ -2589,23 +2589,23 @@ namespace dp2rms
 				out strWarning);
 			if (assembly == null)
 			{
-				strError = "½Å±¾±àÒë·¢ÏÖ´íÎó»ò¾¯¸æ:\r\n" + strError;
+				strError = "è„šæœ¬ç¼–è¯‘å‘ç°é”™è¯¯æˆ–è­¦å‘Š:\r\n" + strError;
 				return -1;
 			}
 
-			// µÃµ½AssemblyÖĞHostÅÉÉúÀàType
+			// å¾—åˆ°Assemblyä¸­Hostæ´¾ç”Ÿç±»Type
 			Type entryClassType = Script.GetDerivedClassType(
 				assembly,
 				"dp2rms.Host");
 
-			// newÒ»¸öHostÅÉÉú¶ÔÏó
+			// newä¸€ä¸ªHostæ´¾ç”Ÿå¯¹è±¡
 			Host hostObj = (Host)entryClassType.InvokeMember(null, 
 				BindingFlags.DeclaredOnly | 
 				BindingFlags.Public | BindingFlags.NonPublic | 
 				BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
 				null);
 
-			// ÎªHostÅÉÉúÀàÉèÖÃ²ÎÊı
+			// ä¸ºHostæ´¾ç”Ÿç±»è®¾ç½®å‚æ•°
 			hostObj.DetailForm = this;
 			hostObj.Assembly = assembly;
 
@@ -2629,7 +2629,7 @@ namespace dp2rms
 		/*
 		public char[] GetSpecialChars()
 		{
-			string strChars = "£¡¡¤£££¤£¥¡­¡­¡ª£ª£¨£©¡ª¡ª£«£­£½£Û£İ¡¶¡·£¼£¾£¬¡££¿£¯£Ü£ü£û£ı¡°¡±¡®¡¯";
+			string strChars = "ï¼Â·ï¼ƒï¿¥ï¼…â€¦â€¦â€”ï¼Šï¼ˆï¼‰â€”â€”ï¼‹ï¼ï¼ï¼»ï¼½ã€Šã€‹ï¼œï¼ï¼Œã€‚ï¼Ÿï¼ï¼¼ï½œï½›ï½â€œâ€â€˜â€™";
 			char[] result = new char[strChars.Length];
 
 			for(int i=0;i<result.Length;i++)
@@ -2641,7 +2641,7 @@ namespace dp2rms
 		}
 		*/
 
-        // ¼æÈİÒÔÇ°°æ±¾
+        // å…¼å®¹ä»¥å‰ç‰ˆæœ¬
         public int HanziTextToPinyin(
             string strText,
             PinyinStyle style,
@@ -2657,13 +2657,13 @@ namespace dp2rms
         }
 
 
-		// °Ñ×Ö·û´®ÖĞµÄºº×ÖºÍÆ´Òô·ÖÀë
+		// æŠŠå­—ç¬¦ä¸²ä¸­çš„æ±‰å­—å’Œæ‹¼éŸ³åˆ†ç¦»
         // parameters:
-        //      bLocal  ÊÇ·ñ´Ó±¾µØ»ñÈ¡Æ´Òô
+        //      bLocal  æ˜¯å¦ä»æœ¬åœ°è·å–æ‹¼éŸ³
         // return:
-        //      -1  ³ö´í
-        //      0   ÓÃ»§Ï£ÍûÖĞ¶Ï
-        //      1   Õı³£
+        //      -1  å‡ºé”™
+        //      0   ç”¨æˆ·å¸Œæœ›ä¸­æ–­
+        //      1   æ­£å¸¸
 		public int HanziTextToPinyin(
             bool bLocal,
             string strText,
@@ -2674,11 +2674,11 @@ namespace dp2rms
 			strError = "";
 			strPinyin = "";
 
-			string strSpecialChars = "£¡¡¤£££¤£¥¡­¡­¡ª£ª£¨£©¡ª¡ª£«£­£½£Û£İ¡¶¡·£¼£¾£¬¡££¿£¯£Ü£ü£û£ı¡°¡±¡®¡¯";
+			string strSpecialChars = "ï¼Â·ï¼ƒï¿¥ï¼…â€¦â€¦â€”ï¼Šï¼ˆï¼‰â€”â€”ï¼‹ï¼ï¼ï¼»ï¼½ã€Šã€‹ï¼œï¼ï¼Œã€‚ï¼Ÿï¼ï¼¼ï½œï½›ï½â€œâ€â€˜â€™";
 
 
 			string strHanzi;
-			int nStatus = -1;	// Ç°ÃæÒ»¸ö×Ö·ûµÄÀàĞÍ -1:Ç°ÃæÃ»ÓĞ×Ö·û 0:ÆÕÍ¨Ó¢ÎÄ×ÖÄ¸ 1:¿Õ¸ñ 2:ºº×Ö
+			int nStatus = -1;	// å‰é¢ä¸€ä¸ªå­—ç¬¦çš„ç±»å‹ -1:å‰é¢æ²¡æœ‰å­—ç¬¦ 0:æ™®é€šè‹±æ–‡å­—æ¯ 1:ç©ºæ ¼ 2:æ±‰å­—
 
 
 			for(int i=0;i<strText.Length;i++)
@@ -2702,25 +2702,25 @@ namespace dp2rms
 					continue;
 				}
 				else 
-				{	// ºº×Ö
+				{	// æ±‰å­—
 					strHanzi += ch;
 				}
 
-				// ºº×ÖÇ°Ãæ³öÏÖÁËÓ¢ÎÄ»òÕßºº×Ö£¬ÖĞ¼ä¼ä¸ô¿Õ¸ñ
+				// æ±‰å­—å‰é¢å‡ºç°äº†è‹±æ–‡æˆ–è€…æ±‰å­—ï¼Œä¸­é—´é—´éš”ç©ºæ ¼
 				if (nStatus == 2 || nStatus == 0)
 					strPinyin += " ";
 
 				
-				// ¿´¿´ÊÇ·ñÌØÊâ·ûºÅ
+				// çœ‹çœ‹æ˜¯å¦ç‰¹æ®Šç¬¦å·
 				if (strSpecialChars.IndexOf(strHanzi) != -1)
 				{
-					strPinyin += strHanzi;	// ·ÅÔÚ±¾Ó¦ÊÇÆ´ÒôµÄÎ»ÖÃ
+					strPinyin += strHanzi;	// æ”¾åœ¨æœ¬åº”æ˜¯æ‹¼éŸ³çš„ä½ç½®
 					nStatus = 2;
 					continue;
 				}
 
 
-				// »ñµÃÆ´Òô
+				// è·å¾—æ‹¼éŸ³
 				string strResultPinyin = "";
 
                 int nRet = 0;
@@ -2745,7 +2745,7 @@ namespace dp2rms
 					return -1;
 				if (nRet == 0) 
 				{	// canceld
-					strPinyin += strHanzi;	// Ö»ºÃ½«ºº×Ö·ÅÔÚ±¾Ó¦ÊÇÆ´ÒôµÄÎ»ÖÃ
+					strPinyin += strHanzi;	// åªå¥½å°†æ±‰å­—æ”¾åœ¨æœ¬åº”æ˜¯æ‹¼éŸ³çš„ä½ç½®
 					nStatus = 2;
 					continue;
 				}
@@ -2754,7 +2754,7 @@ namespace dp2rms
 
 				strResultPinyin = strResultPinyin.Trim();
 				if (strResultPinyin.IndexOf(";", 0) != -1)
-				{	// Èç¹ûÊÇ¶à¸öÆ´Òô
+				{	// å¦‚æœæ˜¯å¤šä¸ªæ‹¼éŸ³
 					SelPinyinDlg dlg = new SelPinyinDlg();
                     dlg.Font = GuiUtil.GetDefaultFont();
 
@@ -2769,7 +2769,7 @@ namespace dp2rms
 
 					MainForm.AppInfo.UnlinkFormState(dlg);
 
-                    Debug.Assert(DialogResult.Cancel != DialogResult.Abort, "ÍÆ¶Ï");
+                    Debug.Assert(DialogResult.Cancel != DialogResult.Abort, "æ¨æ–­");
 
 					if (dlg.DialogResult == DialogResult.Cancel)
 					{
@@ -2783,16 +2783,16 @@ namespace dp2rms
 					}
                     else if (dlg.DialogResult == DialogResult.Abort)
                     {
-                        return 0;   // ÓÃ»§Ï£ÍûÕû¸öÖĞ¶Ï
+                        return 0;   // ç”¨æˆ·å¸Œæœ›æ•´ä¸ªä¸­æ–­
                     }
                     else
                     {
-                        Debug.Assert(false, "SelPinyinDlg·µ»ØÊ±³öÏÖÒâÍâµÄDialogResultÖµ");
+                        Debug.Assert(false, "SelPinyinDlgè¿”å›æ—¶å‡ºç°æ„å¤–çš„DialogResultå€¼");
                     }
 				}
 				else 
 				{ 
-					// µ¥¸öÆ´Òô
+					// å•ä¸ªæ‹¼éŸ³
 
 					strPinyin += ConvertSinglePinyinByStyle(
 						strResultPinyin,
@@ -2801,11 +2801,11 @@ namespace dp2rms
 				nStatus = 2;
 			}
 
-			return 1;   // Õı³£½áÊø
+			return 1;   // æ­£å¸¸ç»“æŸ
 		}
 		
-		// »ñµÃÒ»¸öºº×ÖµÄÆ´Òô
-		// Ëù»ñµÃµÄÆ´Òô, ÊÇÒ»¸ö·ÖºÅ¼ä¸ôµÄ×Ö·û´®, ±íÊ¾¶ÔÓ¦ÓÚÕâ¸öºº×ÖµÄ¶àÒô
+		// è·å¾—ä¸€ä¸ªæ±‰å­—çš„æ‹¼éŸ³
+		// æ‰€è·å¾—çš„æ‹¼éŸ³, æ˜¯ä¸€ä¸ªåˆ†å·é—´éš”çš„å­—ç¬¦ä¸², è¡¨ç¤ºå¯¹åº”äºè¿™ä¸ªæ±‰å­—çš„å¤šéŸ³
 		// return:
 		//		-1	error
 		//		1	found
@@ -2817,14 +2817,14 @@ namespace dp2rms
 			strPinyin = "";
 			strError = "";
 
-			// Æ´Òô¿âÂ·¾¶
+			// æ‹¼éŸ³åº“è·¯å¾„
 			string strPinyinDbPath = MainForm.AppInfo.GetString("pinyin",
 				"pinyin_db_path",
 				"");
 
             if (String.IsNullOrEmpty(strPinyinDbPath) == true)
             {
-                strError = "Æ´Òô¿âÂ·¾¶ÉĞÎ´ÅäÖÃ¡£ÇëÏÈÓÃ²Ëµ¥¡°°ïÖú£¯ÏµÍ³²ÎÊıÉèÖÃ¡±¹¦ÄÜÅäÖÃÊÊµ±µÄÆ´Òô¿âÂ·¾¶¡£";
+                strError = "æ‹¼éŸ³åº“è·¯å¾„å°šæœªé…ç½®ã€‚è¯·å…ˆç”¨èœå•â€œå¸®åŠ©ï¼ç³»ç»Ÿå‚æ•°è®¾ç½®â€åŠŸèƒ½é…ç½®é€‚å½“çš„æ‹¼éŸ³åº“è·¯å¾„ã€‚";
                 return -1;
             }
 
@@ -2832,22 +2832,22 @@ namespace dp2rms
 
 			string strDbName = respath.Path;
 
-            // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
-			string strQueryXml = "<target list='" + strDbName + ":" + "ºº×Ö'><item><word>"
+            // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
+			string strQueryXml = "<target list='" + strDbName + ":" + "æ±‰å­—'><item><word>"
 				+ StringUtil.GetXmlStringSimple(strOneHanzi)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>10</maxCount></item><lang>chi</lang></target>";
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ¼ìË÷Æ´Òô '" + strOneHanzi + "'");
+                stop.Initial("æ­£åœ¨æ£€ç´¢æ‹¼éŸ³ '" + strOneHanzi + "'");
 				stop.BeginLoop();
 
 				try 
@@ -2858,7 +2858,7 @@ namespace dp2rms
                         out strError);
 					if (nRet == -1) 
 					{
-						strError = "¼ìË÷Æ´Òô¿âÊ±³ö´í: " + strError;
+						strError = "æ£€ç´¢æ‹¼éŸ³åº“æ—¶å‡ºé”™: " + strError;
 						return -1;
 					}
 					if (nRet == 0)
@@ -2874,13 +2874,13 @@ namespace dp2rms
 						out strError);
 					if (nRet == -1) 
 					{
-						strError = "¼ìË÷Æ´Òô¿â»ñÈ¡¼ìË÷½á¹ûÊ±³ö´í: " + strError;
+						strError = "æ£€ç´¢æ‹¼éŸ³åº“è·å–æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
 						return -1;
 					}
 
 					if (aPath.Count == 0)
 					{
-						strError = "¼ìË÷Æ´Òô¿â»ñÈ¡µÄ¼ìË÷½á¹ûÎª¿Õ";
+						strError = "æ£€ç´¢æ‹¼éŸ³åº“è·å–çš„æ£€ç´¢ç»“æœä¸ºç©º";
 						return -1;
 					}
 
@@ -2901,11 +2901,11 @@ namespace dp2rms
 						out strError);
 					if (nRet == -1) 
 					{
-						strError = "»ñÈ¡Æ´Òô¼ÇÂ¼ÌåÊ±³ö´í: " + strError;
+						strError = "è·å–æ‹¼éŸ³è®°å½•ä½“æ—¶å‡ºé”™: " + strError;
 						return -1;
 					}
 
-					// È¡³öÆ´Òô×Ö·û´®
+					// å–å‡ºæ‹¼éŸ³å­—ç¬¦ä¸²
 					XmlDocument dom = new XmlDocument();
 
 
@@ -2915,7 +2915,7 @@ namespace dp2rms
 					}
 					catch (Exception ex)
 					{
-						strError  = "ºº×Ö '" + strOneHanzi + "' Ëù»ñÈ¡µÄÆ´Òô¼ÇÂ¼ " + strContent + " XMLÊı¾İ×°ÔØ³ö´í: " + ex.Message;
+						strError  = "æ±‰å­— '" + strOneHanzi + "' æ‰€è·å–çš„æ‹¼éŸ³è®°å½• " + strContent + " XMLæ•°æ®è£…è½½å‡ºé”™: " + ex.Message;
 						return -1;
 					}
 
@@ -2940,9 +2940,9 @@ namespace dp2rms
 		}
 
 		// return:
-		//		-1	³ö´í
-		//		0	Ã»ÓĞÕÒµ½
-		//		1	ÕÒµ½
+		//		-1	å‡ºé”™
+		//		0	æ²¡æœ‰æ‰¾åˆ°
+		//		1	æ‰¾åˆ°
 		int GetMarcDefCfgFile(string strUrl,
 			string strDbName,
 			out Stream s,
@@ -2954,7 +2954,7 @@ namespace dp2rms
             if (String.IsNullOrEmpty(strUrl) == true)
             {
                 /*
-                strError = "URLÎª¿Õ";
+                strError = "URLä¸ºç©º";
                 goto ERROR1;
                  */
                 return 0;
@@ -2962,11 +2962,11 @@ namespace dp2rms
 
 			string strPath = strDbName + "/cfgs/marcdef";
 
-			// Ê¹ÓÃChannel
+			// ä½¿ç”¨Channel
 			RmsChannel channelSave = channel;
 
 			channel = Channels.GetChannel(strUrl);
-			Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
 			try 
 			{
@@ -2975,7 +2975,7 @@ namespace dp2rms
 				// string strError;
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strPath);
 				stop.BeginLoop();
 
 				byte[] baTimeStamp = null;
@@ -3001,7 +3001,7 @@ namespace dp2rms
 					if (channel.ErrorCode == ChannelErrorCode.NotFound)
 						return 0;
 
-					strError = "»ñµÃÅäÖÃÎÄ¼ş '" +strPath+ "' Ê±³ö´í£º" + strError;
+					strError = "è·å¾—é…ç½®æ–‡ä»¶ '" +strPath+ "' æ—¶å‡ºé”™ï¼š" + strError;
 					goto ERROR1;
 				}
 				else 
@@ -3022,7 +3022,7 @@ namespace dp2rms
 			return -1;
 		}
 
-		// ±£Ö¤¿Ø¼şÄÚÈİÍ¬²½
+		// ä¿è¯æ§ä»¶å†…å®¹åŒæ­¥
 		int CrossRefreshControls(out string strError)
 		{
 			strError = "";
@@ -3040,7 +3040,7 @@ namespace dp2rms
 
 				if (tail.ControlChanged == this.MarcEditor)	// m_nTimeStampMarc > m_nTimeStampXml
 				{
-					// MARC¿Ø¼şÖĞÄÚÈİ¸üĞÂÒ»Ğ©. ĞèÒªË¢ĞÂµ½xml¿Ø¼şÖĞ
+					// MARCæ§ä»¶ä¸­å†…å®¹æ›´æ–°ä¸€äº›. éœ€è¦åˆ·æ–°åˆ°xmlæ§ä»¶ä¸­
 					MemoryStream s = new MemoryStream();
 
 					MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8);
@@ -3051,7 +3051,7 @@ namespace dp2rms
 					if (nRet == -1)
 						goto ERROR1;
 
-                    // ÔÚµ±Ç°Ã»ÓĞ¶¨ÒåMARCÓï·¨µÄÇé¿öÏÂ£¬Ä¬ÈÏunimarc
+                    // åœ¨å½“å‰æ²¡æœ‰å®šä¹‰MARCè¯­æ³•çš„æƒ…å†µä¸‹ï¼Œé»˜è®¤unimarc
                     if (nRet == 0 && strMarcSyntax == "")
                         strMarcSyntax = "unimarc";
 					
@@ -3124,7 +3124,7 @@ namespace dp2rms
 					mngr.AddNamespace("usmarc", Ns.usmarcxml);
 					mngr.AddNamespace("dprms", DpNs.dprms);
 
-                    // ±£»¤unimarc usmarcÃû×Ö¿Õ¼äÒÔÍâµÄÔªËØ
+                    // ä¿æŠ¤unimarc usmarcåå­—ç©ºé—´ä»¥å¤–çš„å…ƒç´ 
                     // XmlNodeList filenodes = dom.DocumentElement.SelectNodes("child::*[not(unimarc:controlfield) AND not(unimarc:datafield) AND not(unimarc:leader)]", mngr);    // "//dprms:file"
                     List<XmlNode> filenodes = new List<XmlNode>();
                     for (int i = 0; i < dom.DocumentElement.ChildNodes.Count; i++)
@@ -3154,13 +3154,13 @@ namespace dp2rms
 						marcroot = (XmlElement)recordItems[0];
 
 #if NO
-                        // Èç¹ûMARC¸ù¾ÍÊÇÎÄµµ¸ù,²¢ÇÒÒÑ¾­ÓĞ<dprms:file>ÔªËØ
+                        // å¦‚æœMARCæ ¹å°±æ˜¯æ–‡æ¡£æ ¹,å¹¶ä¸”å·²ç»æœ‰<dprms:file>å…ƒç´ 
                         if (marcroot == dom.DocumentElement && filenodes.Count > 0)
                         {
-                            // ±£´æÈ«²¿<file>ÔªËØ
+                            // ä¿å­˜å…¨éƒ¨<file>å…ƒç´ 
                             // List<XmlNode> fs = new List<XmlNode>();
 
-                            // ĞŞ¸ÄÎÄµµ¸ù?
+                            // ä¿®æ”¹æ–‡æ¡£æ ¹?
                             dom.LoadXml("<root/>");
 
                             marcroot = dom.CreateElement(strMarcSyntax,
@@ -3168,7 +3168,7 @@ namespace dp2rms
                                 MarcUtil.GetMarcURI(strMarcSyntax));
                             marcroot = (XmlElement)dom.DocumentElement.AppendChild(marcroot);
 
-                            // ²åÈëÏÈÇ°±£´æµÄ<dprms:file>ÔªËØ
+                            // æ’å…¥å…ˆå‰ä¿å­˜çš„<dprms:file>å…ƒç´ 
                             for (int i = 0; i < filenodes.Count; i++)
                             {
                                 dom.DocumentElement.AppendChild(filenodes[i]);
@@ -3184,11 +3184,11 @@ namespace dp2rms
 					}
 					catch (Exception ex)
 					{
-						strError = ex.Message;
+                        strError = ExceptionUtil.GetAutoText(ex);
 						goto ERROR1;
 					}
 
-                    // ²åÈëÏÈÇ°±£´æµÄ<dprms:file>ÔªËØ
+                    // æ’å…¥å…ˆå‰ä¿å­˜çš„<dprms:file>å…ƒç´ 
                     for (int i = 0; i < filenodes.Count; i++)
                     {
                         dom.DocumentElement.AppendChild(filenodes[i]);
@@ -3196,7 +3196,7 @@ namespace dp2rms
 
 					this.XmlEditor.Xml = dom.DocumentElement.OuterXml;
 
-                    // ĞèÒª¹æÕûËõ½ø
+                    // éœ€è¦è§„æ•´ç¼©è¿›
                     if (SetPlainTextXml(dom.DocumentElement.OuterXml, out strError) == -1)
                         goto ERROR1;
 
@@ -3235,7 +3235,7 @@ namespace dp2rms
 						*/
 
 
-					// Í³Ò»¿Ø¼şÊ±¼ä´Á
+					// ç»Ÿä¸€æ§ä»¶æ—¶é—´æˆ³
 					//this.m_nTimeStampMarc = 0;
 					//this.m_nTimeStampXml = 0;
 
@@ -3243,8 +3243,8 @@ namespace dp2rms
 
 				if (tail.ControlChanged == this.XmlEditor)	// m_nTimeStampXml > m_nTimeStampMarc
 				{
-					// xml¿Ø¼şÖĞÄÚÈİ¸üĞÂÒ»Ğ©. ĞèÒªË¢ĞÂµ½MARC¿Ø¼şÖĞ
-					// ´Óxml¿Ø¼şµ½marc¿Ø¼ş
+					// xmlæ§ä»¶ä¸­å†…å®¹æ›´æ–°ä¸€äº›. éœ€è¦åˆ·æ–°åˆ°MARCæ§ä»¶ä¸­
+					// ä»xmlæ§ä»¶åˆ°marcæ§ä»¶
 					string strMarc = "";
 					string strMarcSyntax = "";
 
@@ -3267,7 +3267,7 @@ namespace dp2rms
 							out strError);
 						if (nRet == -1)
 						{
-							strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+							strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
 							goto ERROR1;
 						}
 					}
@@ -3278,15 +3278,15 @@ namespace dp2rms
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = ExceptionUtil.GetAutoText(ex);
                         return -1;
                     }
 
-                    // ĞèÒª¹æÕûËõ½ø
+                    // éœ€è¦è§„æ•´ç¼©è¿›
                     if (SetPlainTextXml(strXml, out strError) == -1)
                         return -1;
 
-					// Í³Ò»¿Ø¼şÊ±¼ä´Á
+					// ç»Ÿä¸€æ§ä»¶æ—¶é—´æˆ³
 					//this.m_nTimeStampMarc = 0;
 					//this.m_nTimeStampXml = 0;
 
@@ -3294,8 +3294,8 @@ namespace dp2rms
 
                 if (tail.ControlChanged == this.textBox_xmlPureText)
                 {
-                    // textbox¿Ø¼şÖĞÄÚÈİ¸üĞÂÒ»Ğ©. ĞèÒªË¢ĞÂµ½MARC¿Ø¼şÖĞ
-                    // ´Ótextbox¿Ø¼şµ½marc¿Ø¼ş
+                    // textboxæ§ä»¶ä¸­å†…å®¹æ›´æ–°ä¸€äº›. éœ€è¦åˆ·æ–°åˆ°MARCæ§ä»¶ä¸­
+                    // ä»textboxæ§ä»¶åˆ°marcæ§ä»¶
                     string strMarc = "";
                     string strMarcSyntax = "";
 
@@ -3317,7 +3317,7 @@ namespace dp2rms
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                            strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                             goto ERROR1;
                         }
                     }
@@ -3328,7 +3328,7 @@ namespace dp2rms
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = ExceptionUtil.GetAutoText(ex);
                         return -1;
                     }
 
@@ -3349,7 +3349,7 @@ namespace dp2rms
 
 		private void tabControl_record_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
-            // ²Ëµ¥ÓĞËù±ä»¯
+            // èœå•æœ‰æ‰€å˜åŒ–
             if (this.tabControl_record.SelectedTab == this.tabPage_marc)
                 MainForm.MenuItem_font.Enabled = true;  // ??
             else
@@ -3379,7 +3379,7 @@ namespace dp2rms
             // m_nTimeStampMarc ++;
 
 
-            // µ±Ç°xmleditor´¦ÓÚ¿´²»¼ûµÄ×´Ì¬, ×¢Òâ¼°Ê±Ë¢ĞÂmarc
+            // å½“å‰xmleditorå¤„äºçœ‹ä¸è§çš„çŠ¶æ€, æ³¨æ„åŠæ—¶åˆ·æ–°marc
             string strError = "";
             int nRet = 0;
 
@@ -3388,7 +3388,7 @@ namespace dp2rms
             if (nRet == -1)
                 goto ERROR1;
 
-            // Èç¹ûÆäËû´°¿ÚÎª¿É¼û£¬Á¢¼´¶ÒÏÖË¢ĞÂ 2006/5/30 add
+            // å¦‚æœå…¶ä»–çª—å£ä¸ºå¯è§ï¼Œç«‹å³å…‘ç°åˆ·æ–° 2006/5/30 add
             if (this.tabControl_record.SelectedTab != this.tabPage_marc)
             {
                 nRet = CrossRefreshControls(out strError);
@@ -3418,7 +3418,7 @@ namespace dp2rms
             else 
             {
             */
-            // µ±Ç°xmleditor´¦ÓÚ¿´²»¼ûµÄ×´Ì¬, ×¢Òâ¼°Ê±Ë¢ĞÂmarc
+            // å½“å‰xmleditorå¤„äºçœ‹ä¸è§çš„çŠ¶æ€, æ³¨æ„åŠæ—¶åˆ·æ–°marc
             string strError = "";
             int nRet = 0;
 
@@ -3428,7 +3428,7 @@ namespace dp2rms
                 goto ERROR1;
 
             /*
-            // Èç¹ûÆäËû´°¿ÚÎª¿É¼û£¬Á¢¼´¶ÒÏÖË¢ĞÂ 2006/5/30 add
+            // å¦‚æœå…¶ä»–çª—å£ä¸ºå¯è§ï¼Œç«‹å³å…‘ç°åˆ·æ–° 2006/5/30 add
             if (this.tabControl_record.SelectedTab != this.tabPage_xml
                 && String.IsNullOrEmpty(this.textBox_recPath.Text) == false)
             {
@@ -3461,7 +3461,7 @@ namespace dp2rms
 			TextChangedInfo info = new TextChangedInfo();
 			info.ControlChanged = controlChanged;
 
-			// ¿´²åÈëÇ°, ¶ÓÁĞÎ²²¿×îºóÒ»¸öµÄ·½ÏòÊÇ·ñÏàÍ¬
+			// çœ‹æ’å…¥å‰, é˜Ÿåˆ—å°¾éƒ¨æœ€åä¸€ä¸ªçš„æ–¹å‘æ˜¯å¦ç›¸åŒ
 			if (this.m_queueTextChanged.Count > 0)
 			{
 				TextChangedInfo tail = (TextChangedInfo)this.m_queueTextChanged[this.m_queueTextChanged.Count - 1];
@@ -3536,7 +3536,7 @@ namespace dp2rms
 		private void timer_crossRefresh_Tick(object sender, System.EventArgs e)
 		{
             /*
-			 Flush();   // ´ò¿ª
+			 Flush();   // æ‰“å¼€
              */
 		}
 
@@ -3565,12 +3565,12 @@ namespace dp2rms
 				return strPinyin;
 			}
 
-			Debug.Assert(false,"Î´¶¨ÒåµÄÆ´Òô·ç¸ñ");
+			Debug.Assert(false,"æœªå®šä¹‰çš„æ‹¼éŸ³é£æ ¼");
 			return strPinyin;
 		}
 
 
-		// µ±Ç°´°¿ÚÖĞ¼ÇÂ¼µÄÂ·¾¶
+		// å½“å‰çª—å£ä¸­è®°å½•çš„è·¯å¾„
 		public string RecPath
 		{
 			get 
@@ -3583,7 +3583,7 @@ namespace dp2rms
 			}
 		}
 
-        // ÉèÖÃ×ÖÌå
+        // è®¾ç½®å­—ä½“
         public void SetFont()
         {
             FontDialog dlg = new FontDialog();
@@ -3602,7 +3602,7 @@ namespace dp2rms
             this.MarcEditor.Font = dlg.Font;
             this.MarcEditor.ContentTextColor = dlg.Color;
 
-            // ±£´æµ½ÅäÖÃÎÄ¼ş
+            // ä¿å­˜åˆ°é…ç½®æ–‡ä»¶
             SaveFontForMarcEditor();
         }
 
@@ -3613,7 +3613,7 @@ namespace dp2rms
             this.MarcEditor.Font = dlg.Font;
             this.MarcEditor.ContentTextColor = dlg.Color;
 
-            // ±£´æµ½ÅäÖÃÎÄ¼ş
+            // ä¿å­˜åˆ°é…ç½®æ–‡ä»¶
             SaveFontForMarcEditor();
         }
 
@@ -3678,26 +3678,26 @@ namespace dp2rms
 
         }
 
-        int m_nInGetCfgFile = 0;    // ·ÀÖ¹GetCfgFile()º¯ÊıÖØÈë 2008/3/6
+        int m_nInGetCfgFile = 0;    // é˜²æ­¢GetCfgFile()å‡½æ•°é‡å…¥ 2008/3/6
 
-        // marc±à¼­´°Òª´ÓÍâ²¿»ñµÃÅäÖÃÎÄ¼şÄÚÈİ
+        // marcç¼–è¾‘çª—è¦ä»å¤–éƒ¨è·å¾—é…ç½®æ–‡ä»¶å†…å®¹
         private void MarcEditor_GetConfigFile(object sender,
             DigitalPlatform.Marc.GetConfigFileEventArgs e)
         {
 
             if (m_nInGetCfgFile > 0)
             {
-                e.ErrorInfo = "MarcEditor_GetConfigFile() ÖØÈëÁË";
+                e.ErrorInfo = "MarcEditor_GetConfigFile() é‡å…¥äº†";
                 return;
             }
 
             if (String.IsNullOrEmpty(textBox_recPath.Text))
             {
-                e.ErrorInfo = "URLÎª¿Õ";
+                e.ErrorInfo = "URLä¸ºç©º";
                 return;
             }
 
-            // ÏÂÔØÅäÖÃÎÄ¼ş
+            // ä¸‹è½½é…ç½®æ–‡ä»¶
             ResPath respath = new ResPath(textBox_recPath.Text);
 
             string strCfgFileName = e.Path;
@@ -3709,12 +3709,12 @@ namespace dp2rms
 
             string strPath = ResPath.GetDbName(respath.Path) + "/cfgs/" + strCfgFileName;
 
-            // Ê¹ÓÃChannel
+            // ä½¿ç”¨Channel
 
             RmsChannel channelSave = channel;
 
             channel = Channels.GetChannel(respath.Url);
-            Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+            Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
             m_nInGetCfgFile++;
 
@@ -3725,7 +3725,7 @@ namespace dp2rms
                 string strError;
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strPath);
                 stop.BeginLoop();
 
                 byte[] baTimeStamp = null;
@@ -3755,7 +3755,7 @@ namespace dp2rms
                     }
 
 
-                    e.ErrorInfo = "»ñµÃÅäÖÃÎÄ¼ş '" + strPath + "' Ê±³ö´í£º" + strError;
+                    e.ErrorInfo = "è·å¾—é…ç½®æ–‡ä»¶ '" + strPath + "' æ—¶å‡ºé”™ï¼š" + strError;
                     return;
                 }
                 else
@@ -3779,12 +3779,12 @@ namespace dp2rms
         {
             if (String.IsNullOrEmpty(textBox_recPath.Text) == true)
             {
-                e.ErrorInfo = "¼ÇÂ¼Â·¾¶Îª¿Õ£¬ÎŞ·¨»ñµÃÅäÖÃÎÄ¼ş '" + e.Path + "'";
+                e.ErrorInfo = "è®°å½•è·¯å¾„ä¸ºç©ºï¼Œæ— æ³•è·å¾—é…ç½®æ–‡ä»¶ '" + e.Path + "'";
                 return;
             }
             ResPath respath = new ResPath(textBox_recPath.Text);
 
-            // µÃµ½¸É¾»µÄÎÄ¼şÃû
+            // å¾—åˆ°å¹²å‡€çš„æ–‡ä»¶å
             string strCfgFileName = e.Path;
             int nRet = strCfgFileName.IndexOf("#");
             if (nRet != -1)
@@ -3794,17 +3794,17 @@ namespace dp2rms
 
             string strPath = ResPath.GetDbName(respath.Path) + "/cfgs/" + strCfgFileName;
 
-            // ÔÚcacheÖĞÑ°ÕÒ
+            // åœ¨cacheä¸­å¯»æ‰¾
             e.XmlDocument = this.MainForm.DomCache.FindObject(strPath);
             if (e.XmlDocument != null)
                 return;
 
-            // Ê¹ÓÃChannel
+            // ä½¿ç”¨Channel
 
             RmsChannel channelSave = channel;
 
             channel = Channels.GetChannel(respath.Url);
-            Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+            Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
             m_nInGetCfgFile++;
 
@@ -3814,7 +3814,7 @@ namespace dp2rms
                 string strError;
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÏÂÔØÎÄ¼ş" + strPath);
+                stop.Initial("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strPath);
                 stop.BeginLoop();
 
                 byte[] baTimeStamp = null;
@@ -3843,7 +3843,7 @@ namespace dp2rms
                     }
 
 
-                    e.ErrorInfo = "»ñµÃÅäÖÃÎÄ¼ş '" + strPath + "' Ê±³ö´í£º" + strError;
+                    e.ErrorInfo = "è·å¾—é…ç½®æ–‡ä»¶ '" + strPath + "' æ—¶å‡ºé”™ï¼š" + strError;
                     return;
                 }
 
@@ -3855,11 +3855,11 @@ namespace dp2rms
                 }
                 catch (Exception ex)
                 {
-                    e.ErrorInfo = "ÅäÖÃÎÄ¼ş '" + strPath + "' ×°ÈëXMLDUMÊ±³ö´í: " + ex.Message;
+                    e.ErrorInfo = "é…ç½®æ–‡ä»¶ '" + strPath + "' è£…å…¥XMLDUMæ—¶å‡ºé”™: " + ex.Message;
                     return;
                 }
                 e.XmlDocument = dom;
-                this.MainForm.DomCache.SetObject(strPath, dom);  // ±£´æµ½»º´æ
+                this.MainForm.DomCache.SetObject(strPath, dom);  // ä¿å­˜åˆ°ç¼“å­˜
             }
             finally
             {
@@ -3894,12 +3894,12 @@ namespace dp2rms
 	}
 
 
-	// ¼ÓÆ´ÒôÊ±µÄ´óĞ¡Ğ´·ç¸ñ
+	// åŠ æ‹¼éŸ³æ—¶çš„å¤§å°å†™é£æ ¼
 	public enum PinyinStyle
 	{
-		None = 0,	// ²»×öÈÎºÎ¸Ä±ä
-		Upper = 1,	// È«²¿´óĞ´
-		Lower = 2,	// È«²¿Ğ¡Ğ´
-		UpperFirst = 3,	// Ê××ÖÄ¸´óĞ´,ÆäËüĞ¡Ğ´
+		None = 0,	// ä¸åšä»»ä½•æ”¹å˜
+		Upper = 1,	// å…¨éƒ¨å¤§å†™
+		Lower = 2,	// å…¨éƒ¨å°å†™
+		UpperFirst = 3,	// é¦–å­—æ¯å¤§å†™,å…¶å®ƒå°å†™
 	}
 }

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
@@ -57,7 +57,7 @@ namespace DigitalPlatform.rms.Client
 			// 
 			// columnHeader_id
 			// 
-			this.columnHeader_id.Text = "¼ÇÂ¼Â·¾¶";
+			this.columnHeader_id.Text = "è®°å½•è·¯å¾„";
 			this.columnHeader_id.Width = 150;
 			// 
 			// columnHeader_first
@@ -78,7 +78,7 @@ namespace DigitalPlatform.rms.Client
 		#endregion
 
 
-		// È·±£ÁĞ±êÌâÊıÁ¿×ã¹»
+		// ç¡®ä¿åˆ—æ ‡é¢˜æ•°é‡è¶³å¤Ÿ
 		void EnsureColumns(int nCount)
 		{
 			if (this.Columns.Count >= nCount)
@@ -89,7 +89,7 @@ namespace DigitalPlatform.rms.Client
 				string strText = "";
 				if (i == 0) 
 				{
-					strText = "¼ÇÂ¼Â·¾¶";
+					strText = "è®°å½•è·¯å¾„";
 				}
 				else 
 				{
@@ -105,7 +105,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ÔÚlistview×îºó×·¼ÓÒ»ĞĞ
+		// åœ¨listviewæœ€åè¿½åŠ ä¸€è¡Œ
 		public void NewLine(string strID, string []others)
 		{
 			EnsureColumns(others.Length + 1);
@@ -133,7 +133,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// »ñµÃµ±Ç°Ñ¡ÔñµÄÈô¸É¼ÇÂ¼Â·¾¶
+		// è·å¾—å½“å‰é€‰æ‹©çš„è‹¥å¹²è®°å½•è·¯å¾„
 		public static string[] GetSelectedRecordPaths(
 			ListView listview,
 			bool bIncludeFocuedItem)

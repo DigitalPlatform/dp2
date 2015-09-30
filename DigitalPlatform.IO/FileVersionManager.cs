@@ -33,7 +33,7 @@ namespace DigitalPlatform.IO
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 dom.LoadXml("<root/>");	// 虽然返回出错,但是dom是正确初始化了的
                 m_bChanged = true;
                 return;

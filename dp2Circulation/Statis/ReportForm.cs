@@ -955,7 +955,7 @@ MessageBoxDefaultButton.Button1);
                         }
                         catch (Exception ex)
                         {
-                            strError = ex.Message;
+                            strError = "ReportForm {72A00ADB-1F9F-45FA-A31E-6956569045D9} exception: " + ExceptionUtil.GetAutoText(ex);
                             return -1;
                         }
                         biblio_recpaths.Clear();
@@ -6938,7 +6938,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally

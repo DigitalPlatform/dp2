@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,14 +7,15 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.rms.Client;
+using DigitalPlatform;
 
 namespace dp2Manager
 {
     public partial class ExportTemplateDlg : Form
     {
         public MainForm MainForm = null;
-        public List<ObjectInfo> Objects = null; // ÊäÈëµÄ¶ÔÏóÊı×é
-        public List<ObjectInfo> SelectedObjects = null; // Êä³öµÄ¶ÔÏóÊı×é
+        public List<ObjectInfo> Objects = null; // è¾“å…¥çš„å¯¹è±¡æ•°ç»„
+        public List<ObjectInfo> SelectedObjects = null; // è¾“å‡ºçš„å¯¹è±¡æ•°ç»„
 
 
         public ExportTemplateDlg()
@@ -50,7 +51,7 @@ namespace dp2Manager
         {
             if (this.textBox_exportFileName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Êä³öÎÄ¼şÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šè¾“å‡ºæ–‡ä»¶å");
                 return;
             }
 
@@ -70,7 +71,7 @@ namespace dp2Manager
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -163,7 +164,7 @@ namespace dp2Manager
 
             dlg.CreatePrompt = false;
             dlg.FileName = this.textBox_exportFileName.Text;
-            dlg.Filter = "Ä£°åÎÄ¼ş (*.template)|*.template|All files (*.*)|*.*";
+            dlg.Filter = "æ¨¡æ¿æ–‡ä»¶ (*.template)|*.template|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)

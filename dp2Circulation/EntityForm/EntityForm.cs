@@ -4744,7 +4744,7 @@ true);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "GetBiblioFromStyle() exception:" + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 
@@ -8442,7 +8442,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "EntityForm filter.Load() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

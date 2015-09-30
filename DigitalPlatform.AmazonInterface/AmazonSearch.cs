@@ -350,7 +350,7 @@ strServerUrl);
             catch (Exception ex)
             {
                 this.m_exception = ex;
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 this.m_bError = true;
                 goto ERROR1;
             }
@@ -468,7 +468,7 @@ strServerUrl);
             catch (Exception ex)
             {
                 this.m_exception = ex;
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 this.m_bError = true;
                 goto ERROR1;
             }

@@ -205,7 +205,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             finally
@@ -393,7 +393,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -429,7 +429,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -442,7 +442,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -454,7 +454,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -466,7 +466,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
 
         }

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 
@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform;
 
 namespace dp2Manager
 {
@@ -18,11 +19,11 @@ namespace dp2Manager
 	{
 		XmlDocument cfgDom = new XmlDocument();
 
-		public string CfgFileName = "";	// ÅäÖÃÎÄ¼şÃû
+		public string CfgFileName = "";	// é…ç½®æ–‡ä»¶å
 
-		public QuickRights QuickRights = null;	// ·µ»ØÑ¡ÔñµÄÈ¨ÏŞ²ÎÊı
+		public QuickRights QuickRights = null;	// è¿”å›é€‰æ‹©çš„æƒé™å‚æ•°
 
-		public bool AllUsers = false;	// ·µ»ØÊÇ·ñÑ¡ÔñÁËÕë¶ÔÈ«²¿ÓÃ»§
+		public bool AllUsers = false;	// è¿”å›æ˜¯å¦é€‰æ‹©äº†é’ˆå¯¹å…¨éƒ¨ç”¨æˆ·
 
 		public ArrayList AllUserNames = new ArrayList();
 		public ArrayList SelectedUserNames = new ArrayList();
@@ -109,12 +110,12 @@ namespace dp2Manager
             // 
             // columnHeader_name
             // 
-            this.columnHeader_name.Text = "·ç¸ñÃû";
+            this.columnHeader_name.Text = "é£æ ¼å";
             this.columnHeader_name.Width = 146;
             // 
             // columnHeader_comment
             // 
-            this.columnHeader_comment.Text = "×¢ÊÍ";
+            this.columnHeader_comment.Text = "æ³¨é‡Š";
             this.columnHeader_comment.Width = 279;
             // 
             // radioButton_selectedUsers
@@ -125,7 +126,7 @@ namespace dp2Manager
             this.radioButton_selectedUsers.Size = new System.Drawing.Size(104, 24);
             this.radioButton_selectedUsers.TabIndex = 3;
             this.radioButton_selectedUsers.TabStop = true;
-            this.radioButton_selectedUsers.Text = "ËùÑ¡ÓÃ»§(&S)";
+            this.radioButton_selectedUsers.Text = "æ‰€é€‰ç”¨æˆ·(&S)";
             // 
             // radioButton_allUsers
             // 
@@ -133,7 +134,7 @@ namespace dp2Manager
             this.radioButton_allUsers.Name = "radioButton_allUsers";
             this.radioButton_allUsers.Size = new System.Drawing.Size(104, 24);
             this.radioButton_allUsers.TabIndex = 2;
-            this.radioButton_allUsers.Text = "È«²¿ÓÃ»§(&A)";
+            this.radioButton_allUsers.Text = "å…¨éƒ¨ç”¨æˆ·(&A)";
             this.radioButton_allUsers.CheckedChanged += new System.EventHandler(this.radioButton_allUsers_CheckedChanged);
             // 
             // groupBox1
@@ -147,7 +148,7 @@ namespace dp2Manager
             this.groupBox1.Size = new System.Drawing.Size(416, 160);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = " Õë¶Ô: ";
+            this.groupBox1.Text = " é’ˆå¯¹: ";
             // 
             // listView_userNames
             // 
@@ -168,7 +169,7 @@ namespace dp2Manager
             // 
             // columnHeader_userName
             // 
-            this.columnHeader_userName.Text = "ÓÃ»§Ãû";
+            this.columnHeader_userName.Text = "ç”¨æˆ·å";
             this.columnHeader_userName.Width = 288;
             // 
             // button_OK
@@ -178,7 +179,7 @@ namespace dp2Manager
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 4;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -188,7 +189,7 @@ namespace dp2Manager
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 5;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // QuickSetRightsDlg
@@ -204,7 +205,7 @@ namespace dp2Manager
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "QuickSetRightsDlg";
             this.ShowInTaskbar = false;
-            this.Text = "¿ìËÙÉèÖÃÈ¨ÏŞ";
+            this.Text = "å¿«é€Ÿè®¾ç½®æƒé™";
             this.Load += new System.EventHandler(this.QuickSetRightsDlg_Load);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -225,7 +226,7 @@ namespace dp2Manager
 				return ;
 			}
 
-			// Ñ¡ÔñµÚÒ»Ïî
+			// é€‰æ‹©ç¬¬ä¸€é¡¹
 			if (this.listView_style.Items.Count >= 1)
 				this.listView_style.Items[0].Selected = true;
 		
@@ -264,7 +265,7 @@ namespace dp2Manager
 			}
 			catch(Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
@@ -290,13 +291,13 @@ namespace dp2Manager
             string strError = "";
 			if (this.listView_style.SelectedItems.Count == 0)
 			{
-				strError = "ÉĞÎ´Ñ¡¶¨·ç¸ñÃû";
+				strError = "å°šæœªé€‰å®šé£æ ¼å";
 				goto ERROR1;
 			}
 
 			if (this.listView_userNames.SelectedItems.Count == 0)
 			{
-				strError = "ÉĞÎ´Ñ¡¶¨ÒªÕë¶ÔµÄÓÃ»§Ãû";
+				strError = "å°šæœªé€‰å®šè¦é’ˆå¯¹çš„ç”¨æˆ·å";
 				goto ERROR1;
 			}
 
@@ -313,7 +314,7 @@ namespace dp2Manager
 			XmlNode parent = this.cfgDom.DocumentElement.SelectSingleNode(strXPath);
 			if (parent == null)
 			{
-				MessageBox.Show(this, "dom³ö´í");
+				MessageBox.Show(this, "domå‡ºé”™");
 				return;
 			}
 
@@ -357,7 +358,7 @@ namespace dp2Manager
 			else
 				this.AllUsers = false;
 			*/
-			// ÊÕ¼¯ÒÑ¾­Ñ¡ÔñµÄÓÃ»§Ãû
+			// æ”¶é›†å·²ç»é€‰æ‹©çš„ç”¨æˆ·å
 			this.SelectedUserNames.Clear();
 			for(int i=0;i<this.listView_userNames.SelectedItems.Count;i++)
 			{
@@ -382,7 +383,7 @@ namespace dp2Manager
 		{
 			if (this.radioButton_allUsers.Checked == true)
 			{
-				// È«Ñ¡
+				// å…¨é€‰
 				for(int i=0;i<this.listView_userNames.Items.Count;i++)
 				{
 					if (this.listView_userNames.Items[i].Selected != true)
@@ -393,7 +394,7 @@ namespace dp2Manager
 
 		private void listView_userNames_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
-			// ÊÇ·ñÈ«Ñ¡
+			// æ˜¯å¦å…¨é€‰
 			if (this.listView_userNames.SelectedItems.Count == this.listView_userNames.Items.Count)
 			{
 				if (this.radioButton_allUsers.Checked != true)

@@ -1475,7 +1475,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintBindingForm dom.LoadXml() {9A208D62-AB50-420B-A83D-E82E6A00A9AF} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -3277,7 +3277,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintBindingForm {A56F4878-8E46-4770-9C68-0D303AE48B43} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             finally
@@ -3466,7 +3466,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintBindingForm {5D761CDB-EBB1-448D-956E-2F864AA3FED6} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             finally

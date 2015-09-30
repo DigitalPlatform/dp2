@@ -796,7 +796,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 SetErrorText(info, strError);
 #if NO
                 info.Row[COLUMN_IMAGE].Text = strError;

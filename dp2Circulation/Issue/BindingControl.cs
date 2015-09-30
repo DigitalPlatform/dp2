@@ -3014,7 +3014,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "BindingControl PlaceMemberItems() exception: " + ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
             }
@@ -3108,7 +3108,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "BindingControl PlaceMemberItems() {2115A4A3-14E3-4A03-B0EA-C6687C16EAB7} exception: " + ex.Message;
                     return -1;
                 }
 
@@ -11266,7 +11266,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "BindingControl SetBindingRange() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -11551,7 +11551,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "BindingControl SetBindingRange() {B59FB04A-3F0A-45DE-B527-9A73167BB03C} exception: " + ex.Message;
                     return -1;
                 }
 #if DEBUG

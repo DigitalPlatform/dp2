@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Net;
@@ -37,44 +37,44 @@ namespace DigitalPlatform.rms.Client
 
     public enum LoginStyle
     {
-        None = 0x0,	// Ê²Ã´·ç¸ñÒ²Ã»ÓĞ
-        AutoLogin = 0x1,	// µÚÒ»´Î²»³öÏÖ¶Ô»°¿ò¾ÍÏÈÒÔÈ±Ê¡ÕÊ»§ÊÔÑéµÇÂ¼Ò»´Î¡£
-        FillDefaultInfo = 0x2,	// ³öÏÖµÇÂ¼¶Ô»°¿òÊ±£¬ÊÇ·ñÌî³äÈ±Ê¡ÕÊ»§ÃûºÍÃÜÂëĞÅÏ¢¡£
+        None = 0x0,	// ä»€ä¹ˆé£æ ¼ä¹Ÿæ²¡æœ‰
+        AutoLogin = 0x1,	// ç¬¬ä¸€æ¬¡ä¸å‡ºç°å¯¹è¯æ¡†å°±å…ˆä»¥ç¼ºçœå¸æˆ·è¯•éªŒç™»å½•ä¸€æ¬¡ã€‚
+        FillDefaultInfo = 0x2,	// å‡ºç°ç™»å½•å¯¹è¯æ¡†æ—¶ï¼Œæ˜¯å¦å¡«å……ç¼ºçœå¸æˆ·åå’Œå¯†ç ä¿¡æ¯ã€‚
     }
 
     public enum ChannelErrorCode
     {
-        // ÒÔÏÂ´íÎóÂëÎªÇ°¶Ë¶ÀÓĞ
+        // ä»¥ä¸‹é”™è¯¯ç ä¸ºå‰ç«¯ç‹¬æœ‰
         None = 0,
-        RequestTimeOut = 1,	// ÇëÇó³¬Ê±
-        RequestCanceled = 2,	// ÇëÇó±»ÖĞ¶Ï
-        RequestError = 3,	// ÆäËûÍ¨Ñ¶´íÎó
-        RequestCanceledByEventClose = 4,	// ÇëÇó±»ÖĞ¶Ï£¬ÒòÎªeventClose´¥·¢
-        QuotaExceeded = 5,  // ³¬¹ıÍ¨Ñ¶°ü³ß´çÅä¶î
-        OtherError = 6,	// Î´·­ÒëµÄ´íÎóÂë
+        RequestTimeOut = 1,	// è¯·æ±‚è¶…æ—¶
+        RequestCanceled = 2,	// è¯·æ±‚è¢«ä¸­æ–­
+        RequestError = 3,	// å…¶ä»–é€šè®¯é”™è¯¯
+        RequestCanceledByEventClose = 4,	// è¯·æ±‚è¢«ä¸­æ–­ï¼Œå› ä¸ºeventCloseè§¦å‘
+        QuotaExceeded = 5,  // è¶…è¿‡é€šè®¯åŒ…å°ºå¯¸é…é¢
+        OtherError = 6,	// æœªç¿»è¯‘çš„é”™è¯¯ç 
 
 
-        // ÒÔÏÂ´íÎóÂëºÍ·şÎñÆ÷¶ÔÓ¦
-        TimestampMismatch = 10,	// Ê±¼ä´Á²»Æ¥Åä
-        NotFound = 11,	// Î´ÃüÖĞ
-        NotLogin = 12,	// ÉĞÎ´µÇÂ¼
-        EmptyRecord = 13,	// ¿Õ¼ÇÂ¼
-        //NoHasManagement = 14,	// ²»¾ß±¸¹ÜÀíÔ±È¨ÏŞ
-        NotHasEnoughRights = 15, // Ã»ÓĞ×ã¹»µÄÈ¨ÏŞ
-        PartNotFound = 16,	// ¼ÇÂ¼¾Ö²¿Ã»ÓĞÕÒµ½
-        AlreadyExist = 17,	// Òª´´½¨µÄÍ¬Ãû¶ÔÏóÒÑ¾­´æÔÚ
-        AlreadyExistOtherType = 18,	// Òª´´½¨µÄÍ¬Ãû¶ÔÏóÒÑ¾­´æÔÚ£¬µ«ÊÇÎª²»Í¬ÀàĞÍ
+        // ä»¥ä¸‹é”™è¯¯ç å’ŒæœåŠ¡å™¨å¯¹åº”
+        TimestampMismatch = 10,	// æ—¶é—´æˆ³ä¸åŒ¹é…
+        NotFound = 11,	// æœªå‘½ä¸­
+        NotLogin = 12,	// å°šæœªç™»å½•
+        EmptyRecord = 13,	// ç©ºè®°å½•
+        //NoHasManagement = 14,	// ä¸å…·å¤‡ç®¡ç†å‘˜æƒé™
+        NotHasEnoughRights = 15, // æ²¡æœ‰è¶³å¤Ÿçš„æƒé™
+        PartNotFound = 16,	// è®°å½•å±€éƒ¨æ²¡æœ‰æ‰¾åˆ°
+        AlreadyExist = 17,	// è¦åˆ›å»ºçš„åŒåå¯¹è±¡å·²ç»å­˜åœ¨
+        AlreadyExistOtherType = 18,	// è¦åˆ›å»ºçš„åŒåå¯¹è±¡å·²ç»å­˜åœ¨ï¼Œä½†æ˜¯ä¸ºä¸åŒç±»å‹
 
-        ApplicationStartError = 24,	//ApplicationÆô¶¯´íÎó
+        ApplicationStartError = 24,	//Applicationå¯åŠ¨é”™è¯¯
 
-        NotFoundSubRes = 25,    // ²¿·ÖÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ
+        NotFoundSubRes = 25,    // éƒ¨åˆ†ä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨
 
-        // LoginFail = 26, // dp2libraryÏòdp2KernelµÇÂ¼Ê§°Ü¡£ÕâÒâÎ¶×Ålibrary.xmlÖĞµÄ´úÀíÕÊ»§ÓĞÎÊÌâ
+        // LoginFail = 26, // dp2libraryå‘dp2Kernelç™»å½•å¤±è´¥ã€‚è¿™æ„å‘³ç€library.xmlä¸­çš„ä»£ç†å¸æˆ·æœ‰é—®é¢˜
 
     }
 
 
-    // Ò»¸öÍ¨Ñ¶Í¨µÀ
+    // ä¸€ä¸ªé€šè®¯é€šé“
     public class RmsChannel
     {
         /// <summary>
@@ -108,7 +108,7 @@ namespace DigitalPlatform.rms.Client
         public TimeSpan OperationTimeout = new TimeSpan(0, 40, 0);
 
         /// <summary>
-        /// »ñµÃ»òÉèÖÃ³¬Ê±Ê±¼ä¡£Ïàµ±ÓÚÍ¨µÀ µÄ OperationTimeout
+        /// è·å¾—æˆ–è®¾ç½®è¶…æ—¶æ—¶é—´ã€‚ç›¸å½“äºé€šé“ çš„ OperationTimeout
         /// </summary>
         public TimeSpan Timeout
         {
@@ -137,11 +137,11 @@ namespace DigitalPlatform.rms.Client
         public RmsChannelCollection Container = null;
         public string Url = "";
 
-        KernelServiceClient m_ws = null;	// ÓµÓĞ
+        KernelServiceClient m_ws = null;	// æ‹¥æœ‰
 
-        bool m_bStoped = false; // ¼ìË÷ÊÇ·ñ±»ÖĞ¶Ï¹ıÒ»´Î
+        bool m_bStoped = false; // æ£€ç´¢æ˜¯å¦è¢«ä¸­æ–­è¿‡ä¸€æ¬¡
         int m_nInSearching = 0;
-        int m_nRedoCount = 0;   // MessageSecurityExceptionÒÔºóÖØÊÔµÄ´ÎÊı
+        int m_nRedoCount = 0;   // MessageSecurityExceptionä»¥åé‡è¯•çš„æ¬¡æ•°
         // public AutoResetEvent eventFinish = new AutoResetEvent(false);
 
         public ChannelErrorCode ErrorCode = ChannelErrorCode.None;
@@ -361,9 +361,9 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (String.IsNullOrEmpty(this.Url) == true)
                 {
-                    throw(new Exception("UrlÖµ´ËÊ±Ó¦µ±²»µÈÓÚ¿Õ"));
+                    throw(new Exception("Urlå€¼æ­¤æ—¶åº”å½“ä¸ç­‰äºç©º"));
                 }
-                Debug.Assert(this.Url != "", "UrlÖµ´ËÊ±Ó¦µ±²»µÈÓÚ¿Õ");
+                Debug.Assert(this.Url != "", "Urlå€¼æ­¤æ—¶åº”å½“ä¸ç­‰äºç©º");
 
                 // m_ws.Url = this.Url;
                 // m_ws.CookieContainer = this.Cookies;
@@ -409,12 +409,12 @@ namespace DigitalPlatform.rms.Client
                     if (this.m_bStoped == false)
                     {
                         this.DoStop();
-                        // TODO: Èç¹ûÊ±¼äÌ«³¤ÁË²»·µ»Ø£¬Ôòµ÷ÓÃAbort()?
+                        // TODO: å¦‚æœæ—¶é—´å¤ªé•¿äº†ä¸è¿”å›ï¼Œåˆ™è°ƒç”¨Abort()?
                         this.m_bStoped = true;
                         return;
                     }
 
-                    // ·ñÔò£¬¾Í×ßµ½Abort()ÄÇÀï
+                    // å¦åˆ™ï¼Œå°±èµ°åˆ°Abort()é‚£é‡Œ
                 }
             }
 
@@ -448,7 +448,7 @@ namespace DigitalPlatform.rms.Client
         {
             if (this.m_ws != null)
             {
-                // TODO: Search()Òªµ¥¶À´¦Àí
+                // TODO: Search()è¦å•ç‹¬å¤„ç†
                 try
                 {
                     if (this.m_ws.State != CommunicationState.Faulted)
@@ -529,23 +529,23 @@ namespace DigitalPlatform.rms.Client
         }
 
         // return:
-        //      0   Ö÷Á÷³ÌĞè·µ»Ø-1
-        //      1   ĞèÒªÖØ×öAPI
+        //      0   ä¸»æµç¨‹éœ€è¿”å›-1
+        //      1   éœ€è¦é‡åšAPI
         int ConvertWebError(Exception ex0,
             out string strError)
         {
-            // ·şÎñÆ÷ÖØÆôºó
+            // æœåŠ¡å™¨é‡å¯å
             if (ex0 is System.ServiceModel.Security.MessageSecurityException)
             {
                 System.ServiceModel.Security.MessageSecurityException ex = (System.ServiceModel.Security.MessageSecurityException)ex0;
-                this.ErrorCode = ChannelErrorCode.RequestError;	// Ò»°ã´íÎó
+                this.ErrorCode = ChannelErrorCode.RequestError;	// ä¸€èˆ¬é”™è¯¯
                 this.ErrorInfo = GetExceptionMessage(ex);
                 this.m_ws = null;
                 strError = this.ErrorInfo;
                 if (this.m_nRedoCount == 0)
                 {
                     this.m_nRedoCount++;
-                    return 1;   // ÖØ×ö
+                    return 1;   // é‡åš
                 }
                 return 0;
             }
@@ -553,7 +553,7 @@ namespace DigitalPlatform.rms.Client
             if (ex0 is CommunicationObjectFaultedException)
             {
                 CommunicationObjectFaultedException ex = (CommunicationObjectFaultedException)ex0;
-                this.ErrorCode = ChannelErrorCode.RequestError;	// Ò»°ã´íÎó
+                this.ErrorCode = ChannelErrorCode.RequestError;	// ä¸€èˆ¬é”™è¯¯
                 this.ErrorInfo = GetExceptionMessage(ex);
                 this.m_ws = null;
                 strError = this.ErrorInfo;
@@ -561,7 +561,7 @@ namespace DigitalPlatform.rms.Client
                 if (this.m_nRedoCount == 0)
                 {
                     this.m_nRedoCount++;
-                    return 1;   // ÖØ×ö
+                    return 1;   // é‡åš
                 }
                 return 0;
             }
@@ -569,8 +569,8 @@ namespace DigitalPlatform.rms.Client
             if (ex0 is EndpointNotFoundException)
             {
                 EndpointNotFoundException ex = (EndpointNotFoundException)ex0;
-                this.ErrorCode = ChannelErrorCode.RequestError;	// Ò»°ã´íÎó
-                this.ErrorInfo = "·şÎñÆ÷ " + this.Url + " Ã»ÓĞÏìÓ¦";
+                this.ErrorCode = ChannelErrorCode.RequestError;	// ä¸€èˆ¬é”™è¯¯
+                this.ErrorInfo = "æœåŠ¡å™¨ " + this.Url + " æ²¡æœ‰å“åº”";
                 this.m_ws = null;
                 strError = this.ErrorInfo;
                 return 0;
@@ -591,19 +591,19 @@ namespace DigitalPlatform.rms.Client
                 if (ex.Status == WebExceptionStatus.Timeout)
                 {
                     this.ErrorCode = ChannelErrorCode.RequestTimeOut;
-                    this.ErrorInfo = "ÇëÇó³¬Ê±";    // (µ±Ç°³¬Ê±ÉèÖÃÎª" + Convert.ToString(this.Timeout) + ")";
+                    this.ErrorInfo = "è¯·æ±‚è¶…æ—¶";    // (å½“å‰è¶…æ—¶è®¾ç½®ä¸º" + Convert.ToString(this.Timeout) + ")";
                     strError = this.ErrorInfo;
                     return 0;
                 }
                 if (ex.Status == WebExceptionStatus.RequestCanceled)
                 {
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
-                    this.ErrorInfo = "ÓÃ»§ÖĞ¶Ï";
+                    this.ErrorInfo = "ç”¨æˆ·ä¸­æ–­";
                     strError = this.ErrorInfo;
                     return 0;
                 }
 
-                this.ErrorCode = ChannelErrorCode.RequestError;	// Ò»°ã´íÎó
+                this.ErrorCode = ChannelErrorCode.RequestError;	// ä¸€èˆ¬é”™è¯¯
                 this.ErrorInfo = GetExceptionMessage(ex);
                 strError = this.ErrorInfo;
                 return 0;
@@ -619,14 +619,14 @@ namespace DigitalPlatform.rms.Client
                 if (this.m_nRedoCount == 0)
                 {
                     this.m_nRedoCount++;
-                    return 1;   // ÖØ×ö
+                    return 1;   // é‡åš
                 }
                 return 0;
             }
 
-            this.ErrorCode = ChannelErrorCode.RequestError;	// Ò»°ã´íÎó
+            this.ErrorCode = ChannelErrorCode.RequestError;	// ä¸€èˆ¬é”™è¯¯
             this.ErrorInfo = GetExceptionMessage(ex0);
-            this.m_ws = null;   // ²»ÖªÊÇ·ñÕıÈ·
+            this.m_ws = null;   // ä¸çŸ¥æ˜¯å¦æ­£ç¡®
             strError = this.ErrorInfo;
             return 0;
         }
@@ -654,7 +654,7 @@ namespace DigitalPlatform.rms.Client
                 && this.Container.GUI == false)
                 bDoEvents = false;
 
-            // System.Threading.Thread.Sleep(1);	// ±ÜÃâCPU×ÊÔ´¹ı¶ÈºÄ·Ñ
+            // System.Threading.Thread.Sleep(1);	// é¿å…CPUèµ„æºè¿‡åº¦è€—è´¹
 
             if (this.Idle != null)
             {
@@ -667,23 +667,23 @@ namespace DigitalPlatform.rms.Client
             {
                 try
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
                 }
                 catch
                 {
                 }
             }
 
-            // System.Threading.Thread.Sleep(1);	// ±ÜÃâCPU×ÊÔ´¹ı¶ÈºÄ·Ñ
+            // System.Threading.Thread.Sleep(1);	// é¿å…CPUèµ„æºè¿‡åº¦è€—è´¹
         }
 
-        // µÇÂ¼¡£Èç¹û±ØÒª£¬³öÏÖ¶Ô»°¿ò
+        // ç™»å½•ã€‚å¦‚æœå¿…è¦ï¼Œå‡ºç°å¯¹è¯æ¡†
         // parameters:
-        //		strPath	×ÊÔ´Â·¾¶¡£²»°üº¬URL²¿·Ö¡£
-        //		bAutoLogin	ÊÇ·ñ²»³öÏÖ¶Ô»°¿òÏÈ×Ô¶¯µÇÂ¼Ò»´Î¡£
+        //		strPath	èµ„æºè·¯å¾„ã€‚ä¸åŒ…å«URLéƒ¨åˆ†ã€‚
+        //		bAutoLogin	æ˜¯å¦ä¸å‡ºç°å¯¹è¯æ¡†å…ˆè‡ªåŠ¨ç™»å½•ä¸€æ¬¡ã€‚
         // return:
         //		-1	error
-        //		0	login failed£¬³ö´íĞÅÏ¢ÔÚstrErrorÖĞ
+        //		0	login failedï¼Œå‡ºé”™ä¿¡æ¯åœ¨strErrorä¸­
         //		1	login succeed
         public int UiLogin(
             string strPath,
@@ -695,13 +695,13 @@ namespace DigitalPlatform.rms.Client
                 out strError);
         }
 
-        // µÇÂ¼¡£Èç¹û±ØÒª£¬³öÏÖ¶Ô»°¿ò
+        // ç™»å½•ã€‚å¦‚æœå¿…è¦ï¼Œå‡ºç°å¯¹è¯æ¡†
         // parameters:
-        //		strPath	×ÊÔ´Â·¾¶¡£²»°üº¬URL²¿·Ö¡£
-        //		bAutoLogin	ÊÇ·ñ²»³öÏÖ¶Ô»°¿òÏÈ×Ô¶¯µÇÂ¼Ò»´Î¡£
+        //		strPath	èµ„æºè·¯å¾„ã€‚ä¸åŒ…å«URLéƒ¨åˆ†ã€‚
+        //		bAutoLogin	æ˜¯å¦ä¸å‡ºç°å¯¹è¯æ¡†å…ˆè‡ªåŠ¨ç™»å½•ä¸€æ¬¡ã€‚
         // return:
         //		-1	error
-        //		0	login failed£¬³ö´íĞÅÏ¢ÔÚstrErrorÖĞ
+        //		0	login failedï¼Œå‡ºé”™ä¿¡æ¯åœ¨strErrorä¸­
         //		1	login succeed
         public int UiLogin(
             string strComment,
@@ -714,7 +714,7 @@ namespace DigitalPlatform.rms.Client
             /*
             if (this.Container.AskAccountInfo == null)
             {
-                strError = "AskAccountInfoÊÂ¼şº¯ÊıÎ´ÉèÖÃ";
+                strError = "AskAccountInfoäº‹ä»¶å‡½æ•°æœªè®¾ç½®";
                 return -1;
             }
              */
@@ -725,7 +725,7 @@ namespace DigitalPlatform.rms.Client
 
         REDOINPUT:
 
-            // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+            // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
             // return:
             //		2	already login succeed
             //		1	dialog return OK
@@ -771,11 +771,11 @@ namespace DigitalPlatform.rms.Client
 
             if (e.Result == 1)
             {
-                // µÇÂ¼
+                // ç™»å½•
                 // return:
-                //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-                //		0	µÇÂ¼Ê§°Ü¡£´íÎóĞÅÏ¢Ò²ÔÚstrError
-                //		1	µÇÂ¼³É¹¦
+                //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+                //		0	ç™»å½•å¤±è´¥ã€‚é”™è¯¯ä¿¡æ¯ä¹Ÿåœ¨strError
+                //		1	ç™»å½•æˆåŠŸ
                 int nRet = this.Login(strUserName,
                     strPassword,
                     out strError);
@@ -792,25 +792,25 @@ namespace DigitalPlatform.rms.Client
                     goto REDOINPUT;
                 }
                 // this.m_nRedoCount = 0;
-                return 1;   // µÇÂ¼³É¹¦,¿ÉÒÔÖØ×öAPI¹¦ÄÜÁË
+                return 1;   // ç™»å½•æˆåŠŸ,å¯ä»¥é‡åšAPIåŠŸèƒ½äº†
             }
 
             if (e.Result == 0)
             {
-                strError = "·ÅÆúµÇÂ¼";
+                strError = "æ”¾å¼ƒç™»å½•";
                 return -1;
             }
 
-            strError = "UiLogin() ²»Ó¦¸Ã×ßµ½ÕâÀï";
+            strError = "UiLogin() ä¸åº”è¯¥èµ°åˆ°è¿™é‡Œ";
             return -1;
         }
 
 
-        // µÇÂ¼(·ÏÆú)
+        // ç™»å½•(åºŸå¼ƒ)
         // return:
-        //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //		0	µÇÂ¼Ê§°Ü¡£´íÎóĞÅÏ¢Ò²ÔÚstrError
-        //		1	µÇÂ¼³É¹¦
+        //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //		0	ç™»å½•å¤±è´¥ã€‚é”™è¯¯ä¿¡æ¯ä¹Ÿåœ¨strError
+        //		1	ç™»å½•æˆåŠŸ
         public int LoginOld(string strUserName,
             string strPassword,
             out string strError)
@@ -826,7 +826,7 @@ namespace DigitalPlatform.rms.Client
             catch (Exception ex)
             {
                 /*
-                this.ErrorCode = ChannelErrorCode.RequestError;	// Ò»°ã´íÎó
+                this.ErrorCode = ChannelErrorCode.RequestError;	// ä¸€èˆ¬é”™è¯¯
                 this.ErrorInfo = ex.Message;
                 strError = this.ErrorInfo;
                 */
@@ -858,10 +858,10 @@ namespace DigitalPlatform.rms.Client
             return 1;
         }
 
-        // »ñµÃdpKernel°æ±¾ºÅ
+        // è·å¾—dpKernelç‰ˆæœ¬å·
         // return:
-        //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //		0	æˆåŠŸ
         public int GetVersion(out string strVersion,
             out string strError)
         {
@@ -877,7 +877,7 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
@@ -889,7 +889,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -921,11 +921,11 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // µÇÂ¼
+        // ç™»å½•
         // return:
-        //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //		0	µÇÂ¼Ê§°Ü¡£´íÎóĞÅÏ¢Ò²ÔÚstrError
-        //		1	µÇÂ¼³É¹¦
+        //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //		0	ç™»å½•å¤±è´¥ã€‚é”™è¯¯ä¿¡æ¯ä¹Ÿåœ¨strError
+        //		1	ç™»å½•æˆåŠŸ
         public int Login(string strUserName,
             string strPassword,
             out string strError)
@@ -942,7 +942,7 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
@@ -950,7 +950,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -987,18 +987,18 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // ĞŞ¸ÄÃÜÂë
-        // ²ÎÊıstrUserNameºÍ strOldPassword¿ÉÒÔÎªnull¡£ÕâÖÖÇé¿öÏÂ£¬
-        // ±¾º¯ÊıÖ±½ÓÈ¥ĞŞ¸ÄÃÜÂë£¬Èç¹û´ËÊ±channelÈ·ÊµÒÑ¾­µÇÂ¼¹ı£¬¾ÍÕıºÃ²»ĞèÒª
-        // ÆäËûÇ°ÌáÌõ¼ş£»Èç¹û´ËÊ±channelÉĞÎ´µÇÂ¼¹ı£¬º¯ÊıLogin()µÄ¹ÌÓĞ»úÖÆ
-        // ¿ÉÄÜ»áµ¯³öµÇÂ¼¶Ô»°¿ò¡£
+        // ä¿®æ”¹å¯†ç 
+        // å‚æ•°strUserNameå’Œ strOldPasswordå¯ä»¥ä¸ºnullã€‚è¿™ç§æƒ…å†µä¸‹ï¼Œ
+        // æœ¬å‡½æ•°ç›´æ¥å»ä¿®æ”¹å¯†ç ï¼Œå¦‚æœæ­¤æ—¶channelç¡®å®å·²ç»ç™»å½•è¿‡ï¼Œå°±æ­£å¥½ä¸éœ€è¦
+        // å…¶ä»–å‰ææ¡ä»¶ï¼›å¦‚æœæ­¤æ—¶channelå°šæœªç™»å½•è¿‡ï¼Œå‡½æ•°Login()çš„å›ºæœ‰æœºåˆ¶
+        // å¯èƒ½ä¼šå¼¹å‡ºç™»å½•å¯¹è¯æ¡†ã€‚
         // parameters:
-        //		bManager	ÊÇ·ñÒÔ¹ÜÀíÔ±Éí·İ½øĞĞĞŞ¸Ä¡£¹ÜÀíÔ±·½Ê½µÄÌØµã£¬ÊÇ
-        //				1) ±ØĞëÓÃ¹ÜÀíÔ±ÕÊ»§ÏÈµÇÂ¼(Õâ¸öÕÊ»§ºÍ¼´½«±»ĞŞ¸ÄµÄÕÊ»§¿ÉÒÔÃ»ÓĞÁªÏµ)
-        //				2) ÓÃÌØÊâµÄWebServiceAPI ChangeOtherPassword()
+        //		bManager	æ˜¯å¦ä»¥ç®¡ç†å‘˜èº«ä»½è¿›è¡Œä¿®æ”¹ã€‚ç®¡ç†å‘˜æ–¹å¼çš„ç‰¹ç‚¹ï¼Œæ˜¯
+        //				1) å¿…é¡»ç”¨ç®¡ç†å‘˜å¸æˆ·å…ˆç™»å½•(è¿™ä¸ªå¸æˆ·å’Œå³å°†è¢«ä¿®æ”¹çš„å¸æˆ·å¯ä»¥æ²¡æœ‰è”ç³»)
+        //				2) ç”¨ç‰¹æ®Šçš„WebServiceAPI ChangeOtherPassword()
         // return:
-        //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //		0	³É¹¦¡£
+        //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //		0	æˆåŠŸã€‚
         public int ChangePassword(
             string strUserName,
             string strOldPassword,
@@ -1014,7 +1014,7 @@ namespace DigitalPlatform.rms.Client
             {
                 if (strUserName == null)
                 {
-                    strError = "bManager²ÎÊıÎªtrueÊ±£¬strUserName²ÎÊı²»ÄÜÎªnull...";
+                    strError = "bManagerå‚æ•°ä¸ºtrueæ—¶ï¼ŒstrUserNameå‚æ•°ä¸èƒ½ä¸ºnull...";
                     return -1;
                 }
             }
@@ -1024,9 +1024,9 @@ namespace DigitalPlatform.rms.Client
                 && bManager == false)
             {
                 // return:
-                //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-                //		0	µÇÂ¼Ê§°Ü¡£´íÎóĞÅÏ¢Ò²ÔÚstrError
-                //		1	µÇÂ¼³É¹¦
+                //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+                //		0	ç™»å½•å¤±è´¥ã€‚é”™è¯¯ä¿¡æ¯ä¹Ÿåœ¨strError
+                //		1	ç™»å½•æˆåŠŸ
                 nRet = this.Login(strUserName,
                     strOldPassword,
                     out strError);
@@ -1034,7 +1034,7 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 if (nRet == 0)
                 {
-                    strError = "Ô­ÃÜÂë²»ÕıÈ·";
+                    strError = "åŸå¯†ç ä¸æ­£ç¡®";
                     return -1;
                 }
             }
@@ -1063,7 +1063,7 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
@@ -1071,7 +1071,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1097,8 +1097,8 @@ namespace DigitalPlatform.rms.Client
                         //		1	login succeed
                         nRet = this.UiLogin(
                             strUserName == null ?
-                            ("ÃÜÂëĞŞ¸Ä²Ù×÷±»ÑÓ³Ù¡£ÇëÏÈÓÃ¾ÉÃÜÂë ¶Ô ÄâĞŞ¸ÄÃÜÂëµÄÕÊ»§½øĞĞÒ»´ÎµÇÂ¼£¬ÒÔ±ãĞŞ¸ÄÃÜÂë²Ù×÷×Ô¶¯¼ÌĞø½øĞĞ...")
-                            : ("ÇëÏÈÓÃ¾ÉÃÜÂë¶ÔÕÊ»§ '" + strUserName + "' ½øĞĞÒ»´ÎµÇÂ¼£¬ÒÔ±ãĞŞ¸ÄÃÜÂë²Ù×÷Ë³Àû½øĞĞ...")
+                            ("å¯†ç ä¿®æ”¹æ“ä½œè¢«å»¶è¿Ÿã€‚è¯·å…ˆç”¨æ—§å¯†ç  å¯¹ æ‹Ÿä¿®æ”¹å¯†ç çš„å¸æˆ·è¿›è¡Œä¸€æ¬¡ç™»å½•ï¼Œä»¥ä¾¿ä¿®æ”¹å¯†ç æ“ä½œè‡ªåŠ¨ç»§ç»­è¿›è¡Œ...")
+                            : ("è¯·å…ˆç”¨æ—§å¯†ç å¯¹å¸æˆ· '" + strUserName + "' è¿›è¡Œä¸€æ¬¡ç™»å½•ï¼Œä»¥ä¾¿ä¿®æ”¹å¯†ç æ“ä½œé¡ºåˆ©è¿›è¡Œ...")
                             ,
                             "",
                             LoginStyle.None,
@@ -1121,7 +1121,7 @@ namespace DigitalPlatform.rms.Client
                         //		0	login failed
                         //		1	login succeed
                         nRet = this.UiLogin(
-                            "ÇëÏÈÓÃ¾ß±¸¹ÜÀíÔ±È¨ÏŞµÄÕÊ»§µÇÂ¼£¬²ÅÄÜĞŞ¸ÄÕÊ»§ '" + strUserName + "' ÃÜÂë...",
+                            "è¯·å…ˆç”¨å…·å¤‡ç®¡ç†å‘˜æƒé™çš„å¸æˆ·ç™»å½•ï¼Œæ‰èƒ½ä¿®æ”¹å¸æˆ· '" + strUserName + "' å¯†ç ...",
                             "",
                             LoginStyle.None,
                             out strError);
@@ -1137,7 +1137,7 @@ namespace DigitalPlatform.rms.Client
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
                      * */
-                    // Ô­À´ÔÚÕâÀï£¬ÉÔÍí
+                    // åŸæ¥åœ¨è¿™é‡Œï¼Œç¨æ™š
                     return -1;
                 }
 
@@ -1164,10 +1164,10 @@ namespace DigitalPlatform.rms.Client
             this.m_nRedoCount = 0;
         }
 
-        // ³õÊ¼»¯Êı¾İ¿â
+        // åˆå§‹åŒ–æ•°æ®åº“
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦(»ùÓÚWebService½Ó¿ÚInitializeDbµÄ·µ»ØÖµ)
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ(åŸºäºWebServiceæ¥å£InitializeDbçš„è¿”å›å€¼)
         public long DoInitialDB(string strDBName,
             out string strError)
         {
@@ -1181,14 +1181,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1236,10 +1236,10 @@ namespace DigitalPlatform.rms.Client
 
 
         // 2008/11/14
-        // Ë¢ĞÂÊı¾İ¿â¶¨Òå
+        // åˆ·æ–°æ•°æ®åº“å®šä¹‰
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦(»ùÓÚWebService½Ó¿ÚInitializeDbµÄ·µ»ØÖµ)
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ(åŸºäºWebServiceæ¥å£InitializeDbçš„è¿”å›å€¼)
         public long DoRefreshDB(
             string strAction,
             string strDBName,
@@ -1249,7 +1249,7 @@ namespace DigitalPlatform.rms.Client
             strError = "";
             /*
             int nOldTimeout = this.Timeout;
-            this.Timeout = 20 * 60 * 1000;  // ¼Ó´ó³¬Ê±Ê±¼ä
+            this.Timeout = 20 * 60 * 1000;  // åŠ å¤§è¶…æ—¶æ—¶é—´
              * */
             REDO:
             try
@@ -1263,14 +1263,14 @@ namespace DigitalPlatform.rms.Client
                     null);
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1321,10 +1321,10 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-        // É¾³ıÊı¾İ¿â
+        // åˆ é™¤æ•°æ®åº“
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦(»ùÓÚWebService½Ó¿ÚDeleteDbµÄ·µ»ØÖµ)
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ(åŸºäºWebServiceæ¥å£DeleteDbçš„è¿”å›å€¼)
         public long DoDeleteDB(string strDBName,
             out string strError)
         {
@@ -1338,14 +1338,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1393,12 +1393,12 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-        // ´´½¨Êı¾İ¿â
+        // åˆ›å»ºæ•°æ®åº“
         // parameters:
-        //		logicNames	Âß¼­¿âÃû¡£ArrayList¡£Ã¿¸öÔªËØÎªÒ»¸östring[2]ÀàĞÍ¡£ÆäÖĞµÚÒ»¸ö×Ö·û´®ÎªÃû×Ö£¬µÚ¶ş¸öÎªÓïÑÔ´úÂë
+        //		logicNames	é€»è¾‘åº“åã€‚ArrayListã€‚æ¯ä¸ªå…ƒç´ ä¸ºä¸€ä¸ªstring[2]ç±»å‹ã€‚å…¶ä¸­ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²ä¸ºåå­—ï¼Œç¬¬äºŒä¸ªä¸ºè¯­è¨€ä»£ç 
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦(»ùÓÚWebService½Ó¿ÚCreateDbµÄ·µ»ØÖµ)
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ(åŸºäºWebServiceæ¥å£CreateDbçš„è¿”å›å€¼)
         public long DoCreateDB(
             List<string[]> logicNames,
             string strType,
@@ -1432,14 +1432,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1490,12 +1490,12 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        // »ñµÃÊı¾İ¿âĞÅÏ¢
+        // è·å¾—æ•°æ®åº“ä¿¡æ¯
         // parameters:
-        //		logicNames	Âß¼­¿âÃû¡£ArrayList¡£Ã¿¸öÔªËØÎªÒ»¸östring[2]ÀàĞÍ¡£ÆäÖĞµÚÒ»¸ö×Ö·û´®ÎªÃû×Ö£¬µÚ¶ş¸öÎªÓïÑÔ´úÂë
+        //		logicNames	é€»è¾‘åº“åã€‚ArrayListã€‚æ¯ä¸ªå…ƒç´ ä¸ºä¸€ä¸ªstring[2]ç±»å‹ã€‚å…¶ä¸­ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²ä¸ºåå­—ï¼Œç¬¬äºŒä¸ªä¸ºè¯­è¨€ä»£ç 
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦(»ùÓÚWebService½Ó¿ÚCreateDbµÄ·µ»ØÖµ)
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ(åŸºäºWebServiceæ¥å£CreateDbçš„è¿”å›å€¼)
         public long DoGetDBInfo(
             string strDbName,
             string strStyle,
@@ -1526,14 +1526,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1596,12 +1596,12 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // ĞŞ¸ÄÊı¾İ¿âĞÅÏ¢
+        // ä¿®æ”¹æ•°æ®åº“ä¿¡æ¯
         // parameters:
-        //		logicNames	Âß¼­¿âÃû¡£ArrayList¡£Ã¿¸öÔªËØÎªÒ»¸östring[2]ÀàĞÍ¡£ÆäÖĞµÚÒ»¸ö×Ö·û´®ÎªÃû×Ö£¬µÚ¶ş¸öÎªÓïÑÔ´úÂë
+        //		logicNames	é€»è¾‘åº“åã€‚ArrayListã€‚æ¯ä¸ªå…ƒç´ ä¸ºä¸€ä¸ªstring[2]ç±»å‹ã€‚å…¶ä¸­ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²ä¸ºåå­—ï¼Œç¬¬äºŒä¸ªä¸ºè¯­è¨€ä»£ç 
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦(»ùÓÚWebService½Ó¿ÚCreateDbµÄ·µ»ØÖµ)
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ(åŸºäºWebServiceæ¥å£CreateDbçš„è¿”å›å€¼)
         public long DoSetDBInfo(
             string strOldDbName,
             List<string[]> logicNames,
@@ -1637,14 +1637,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1694,10 +1694,10 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        // µÇ³ö
+        // ç™»å‡º
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         public long DoLogout(out string strError)
         {
             strError = "";
@@ -1709,14 +1709,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1745,7 +1745,7 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // °ü×°ºóµÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public int DoCopyRecord(string strOriginRecordPath,
     string strTargetRecordPath,
     bool bDeleteOriginRecord,
@@ -1764,10 +1764,10 @@ namespace DigitalPlatform.rms.Client
                 out strError);
         }
 
-        // ¸´ÖÆ¼ÇÂ¼
+        // å¤åˆ¶è®°å½•
         // return:
-        //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //		0»òÕßÆäËû		³É¹¦
+        //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //		0æˆ–è€…å…¶ä»–		æˆåŠŸ
         public int DoCopyRecord(string strOriginRecordPath,
             string strTargetRecordPath,
             bool bDeleteOriginRecord,
@@ -1798,16 +1798,16 @@ namespace DigitalPlatform.rms.Client
                     /*
                     try 
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
                     }
                     catch
                     {
                     }
 					
 
-                    // System.Threading.Thread.Sleep(10);	// ±ÜÃâCPU×ÊÔ´¹ı¶ÈºÄ·Ñ
+                    // System.Threading.Thread.Sleep(10);	// é¿å…CPUèµ„æºè¿‡åº¦è€—è´¹
                      */
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
@@ -1815,7 +1815,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1874,10 +1874,10 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-        // Åú´¦ÀíÈÎÎñ
+        // æ‰¹å¤„ç†ä»»åŠ¡
         // return:
-        //		-1	³ö´í¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //		0»òÕßÆäËû		³É¹¦
+        //		-1	å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //		0æˆ–è€…å…¶ä»–		æˆåŠŸ
         public int DoBatchTask(string strName,
             string strAction,
             TaskInfo info,
@@ -1898,7 +1898,7 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
@@ -1906,7 +1906,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -1960,8 +1960,8 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // ¼ìË÷
-        // °ü×°ºóµÄ°æ±¾
+        // æ£€ç´¢
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public long DoSearch(string strQueryXml,
             string strResultSetName,
             out string strError)
@@ -1976,11 +1976,11 @@ namespace DigitalPlatform.rms.Client
         object resultParam = null;
         AutoResetEvent eventComplete = new AutoResetEvent(false);
 
-        // ¼ìË÷
+        // æ£€ç´¢
         // return:
         //		-1	error
         //		0	not found
-        //		>=1	ÃüÖĞ¼ÇÂ¼ÌõÊı
+        //		>=1	å‘½ä¸­è®°å½•æ¡æ•°
         public long DoSearch(string strQueryXml,
             string strResultSetName,
             string strOutputStyle,
@@ -2003,7 +2003,7 @@ namespace DigitalPlatform.rms.Client
 
                     while (true)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         bool bRet = this.eventComplete.WaitOne(10, true);
                         if (bRet == true)
@@ -2026,7 +2026,7 @@ namespace DigitalPlatform.rms.Client
 
                 /*
                 if (e.Cancelled == true)
-                    strError = "ÓÃ»§ÖĞ¶Ï2";
+                    strError = "ç”¨æˆ·ä¸­æ–­2";
                 else
                     strError = e.Result.ErrorString;
                  * */
@@ -2079,19 +2079,19 @@ namespace DigitalPlatform.rms.Client
         }
 #endif
 
-        // ( À©Õ¹¹¦ÄÜºóµÄ)¼ìË÷
+        // ( æ‰©å±•åŠŸèƒ½åçš„)æ£€ç´¢
         // parameters:
-        //		strQuery	XML¼ìË÷Ê½
-        //      strResultSetName    ½á¹û¼¯Ãû
-        //      strSearchStyle  ¼ìË÷·ç¸ñ
-        //      lRecordCount    Ï£Íû»ñµÃµÄ¼ÇÂ¼ÊıÁ¿¡£-1±íÊ¾¾¡¿ÉÄÜ¶à¡£Èç¹ûÎª0£¬±íÊ¾²»Ïë»ñµÃÈÎºÎ¼ÇÂ¼
-        //                      ×ÜÊÇ´ÓÆ«ÒÆÁ¿0¿ªÊ¼»ñµÃ¼ÇÂ¼
-        //      strRecordStyle  »ñµÃ¼ÇÂ¼µÄ·ç¸ñ¡£ÒÔ¶ººÅ·Ö¸ô£¬id±íÊ¾È¡id,cols±íÊ¾È¡ä¯ÀÀ¸ñÊ½
-        //                      xml timestamp metadata ·Ö±ğ±íÊ¾Òª»ñÈ¡µÄ¼ÇÂ¼ÌåµÄXML×Ö·û´®¡¢Ê±¼ä´Á¡¢ÔªÊı¾İ
+        //		strQuery	XMLæ£€ç´¢å¼
+        //      strResultSetName    ç»“æœé›†å
+        //      strSearchStyle  æ£€ç´¢é£æ ¼
+        //      lRecordCount    å¸Œæœ›è·å¾—çš„è®°å½•æ•°é‡ã€‚-1è¡¨ç¤ºå°½å¯èƒ½å¤šã€‚å¦‚æœä¸º0ï¼Œè¡¨ç¤ºä¸æƒ³è·å¾—ä»»ä½•è®°å½•
+        //                      æ€»æ˜¯ä»åç§»é‡0å¼€å§‹è·å¾—è®°å½•
+        //      strRecordStyle  è·å¾—è®°å½•çš„é£æ ¼ã€‚ä»¥é€—å·åˆ†éš”ï¼Œidè¡¨ç¤ºå–id,colsè¡¨ç¤ºå–æµè§ˆæ ¼å¼
+        //                      xml timestamp metadata åˆ†åˆ«è¡¨ç¤ºè¦è·å–çš„è®°å½•ä½“çš„XMLå­—ç¬¦ä¸²ã€æ—¶é—´æˆ³ã€å…ƒæ•°æ®
         // return:
         //		-1	error
         //		0	not found
-        //		>=1	ÃüÖĞ¼ÇÂ¼ÌõÊı
+        //		>=1	å‘½ä¸­è®°å½•æ¡æ•°
         public long DoSearchEx(string strQueryXml,
             string strResultSetName,
             string strSearchStyle,
@@ -2121,14 +2121,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -2178,11 +2178,11 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // ¼ìË÷
+        // æ£€ç´¢
         // return:
         //		-1	error
         //		0	not found
-        //		>=1	ÃüÖĞ¼ÇÂ¼ÌõÊı
+        //		>=1	å‘½ä¸­è®°å½•æ¡æ•°
         public long DoSearch(string strQueryXml,
             string strResultSetName,
             string strOutputStyle,
@@ -2204,14 +2204,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -2264,11 +2264,11 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        // ¼ìË÷
+        // æ£€ç´¢
         // return:
         //		-1	error
         //		0	not found
-        //		>=1	ÃüÖĞ¼ÇÂ¼ÌõÊı
+        //		>=1	å‘½ä¸­è®°å½•æ¡æ•°
         public long DoSearchWithoutLoginDlg(
             string strQueryXml,	
             string strResultSetName,
@@ -2290,14 +2290,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -2329,8 +2329,8 @@ namespace DigitalPlatform.rms.Client
         }
 
         // 2009/11/6
-        // ¸ù¾İÖ¸¶¨µÄ¼ÇÂ¼Â·¾¶»ñµÃä¯ÀÀ¸ñÊ½¼ÇÂ¼
-        // Ç³°ü×°°æ±¾
+        // æ ¹æ®æŒ‡å®šçš„è®°å½•è·¯å¾„è·å¾—æµè§ˆæ ¼å¼è®°å½•
+        // æµ…åŒ…è£…ç‰ˆæœ¬
         // parameter:
         public long GetBrowseRecords(string[] paths,
             string strStyle,
@@ -2351,14 +2351,14 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -2393,12 +2393,12 @@ namespace DigitalPlatform.rms.Client
                 else
                 {
                     if (records == null)
-                        throw new Exception("WebService GetBrowse() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        throw new Exception("WebService GetBrowse() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                     //lTotalCount = result.Value;
                 }
 
-                // ½«½á¹ûÒÆ³ö
+                // å°†ç»“æœç§»å‡º
                 searchresults = new Record[records.Length]; // SearchResult
                 for (int i = 0; i < records.Length; i++)
                 {
@@ -2431,10 +2431,10 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-        // ¸ù¾İÖ¸¶¨µÄ¼ÇÂ¼Â·¾¶»ñµÃä¯ÀÀ¸ñÊ½¼ÇÂ¼
+        // æ ¹æ®æŒ‡å®šçš„è®°å½•è·¯å¾„è·å¾—æµè§ˆæ ¼å¼è®°å½•
         // parameter:
-        //		aRecord	·µ»ØµÄä¯ÀÀ¼ÇÂ¼ĞÅÏ¢¡£Ò»¸öArrayListÊı×é¡£Ã¿¸öÔªËØÎªÒ»¸östring[]£¬Ëù°üº¬µÄÄÚÈİ
-        //				¸ù¾İstrStyle¶ø¶¨¡£Èç¹ûstrStyleÖĞÓĞid£¬ÔòaRecordÃ¿¸öÔªËØÖĞµÄstring[]µÚÒ»¸ö×Ö·û´®¾ÍÊÇid£¬ºóÃæÊÇ¸÷ÁĞÄÚÈİ¡£
+        //		aRecord	è¿”å›çš„æµè§ˆè®°å½•ä¿¡æ¯ã€‚ä¸€ä¸ªArrayListæ•°ç»„ã€‚æ¯ä¸ªå…ƒç´ ä¸ºä¸€ä¸ªstring[]ï¼Œæ‰€åŒ…å«çš„å†…å®¹
+        //				æ ¹æ®strStyleè€Œå®šã€‚å¦‚æœstrStyleä¸­æœ‰idï¼Œåˆ™aRecordæ¯ä¸ªå…ƒç´ ä¸­çš„string[]ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²å°±æ˜¯idï¼Œåé¢æ˜¯å„åˆ—å†…å®¹ã€‚
         public int GetBrowseRecords(string[] paths,
             string strStyle,
             out ArrayList aRecord,
@@ -2449,7 +2449,7 @@ namespace DigitalPlatform.rms.Client
 
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                 try
                 {
                     int nPerCount = paths.Length - nStart;
@@ -2465,14 +2465,14 @@ namespace DigitalPlatform.rms.Client
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -2489,12 +2489,12 @@ namespace DigitalPlatform.rms.Client
                     else
                     {
                         if (records == null)
-                            throw new Exception("WebService GetBrowse() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                            throw new Exception("WebService GetBrowse() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         //lTotalCount = result.Value;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
                         Record record = records[i];
@@ -2526,7 +2526,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -2537,10 +2537,10 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        // »ñµÃä¯ÀÀ¸ñÊ½¼ÇÂ¼
+        // è·å¾—æµè§ˆæ ¼å¼è®°å½•
         // parameter:
-        //		nStart	ÆğÊ¼ĞòºÅ
-        //		nLength	³¤¶È
+        //		nStart	èµ·å§‹åºå·
+        //		nLength	é•¿åº¦
         public int GetRecords(
             string strResultSetName,
             long nStart,
@@ -2552,13 +2552,13 @@ namespace DigitalPlatform.rms.Client
             strError = "";
             aRecord = new ArrayList();
 
-            long nPerCount = -1;    // BUG? ÕâÀïÓĞÒ»µãÎÊÌâ£¬¿ÉÄÜ»ñÈ¡¹ı¶àµÄ¼ÇÂ¼£¬³¬¹ınLength
+            long nPerCount = -1;    // BUG? è¿™é‡Œæœ‰ä¸€ç‚¹é—®é¢˜ï¼Œå¯èƒ½è·å–è¿‡å¤šçš„è®°å½•ï¼Œè¶…è¿‡nLength
 
             int nCount = 0;
             long lTotalCount = nLength;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginGetRecords(
@@ -2572,14 +2572,14 @@ namespace DigitalPlatform.rms.Client
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -2595,19 +2595,19 @@ namespace DigitalPlatform.rms.Client
                     else
                     {
                         if (records == null)
-                            throw new Exception("WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                            throw new Exception("WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         //lTotalCount = result.Value;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         Record record = records[i];
 
-                        // »»³É×Ô¼ºµÄÀàĞÍ£¬°üº¬Ò»¸öÔÚ½á¹û¼¯µÄĞòºÅ
+                        // æ¢æˆè‡ªå·±çš„ç±»å‹ï¼ŒåŒ…å«ä¸€ä¸ªåœ¨ç»“æœé›†çš„åºå·
                         dp2opacRecord opacRecord = new dp2opacRecord();
                         opacRecord.Record = record;
                         opacRecord.IndexOfResult = nStart;
@@ -2631,7 +2631,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -2642,10 +2642,10 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        // »ñµÃä¯ÀÀ¸ñÊ½¼ÇÂ¼
+        // è·å¾—æµè§ˆæ ¼å¼è®°å½•
         // parameter:
-        //		nStart	ÆğÊ¼ĞòºÅ
-        //		nLength	³¤¶È
+        //		nStart	èµ·å§‹åºå·
+        //		nLength	é•¿åº¦
         public int GetRichRecords(
             string strResultSetName,
             long nStart,
@@ -2664,7 +2664,7 @@ namespace DigitalPlatform.rms.Client
             long lTotalCount = nLength;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                 try
                 {
                     string strRange = nStart.ToString() + "-" + (nStart + nPerCount - 1).ToString();
@@ -2679,14 +2679,14 @@ namespace DigitalPlatform.rms.Client
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -2702,15 +2702,15 @@ namespace DigitalPlatform.rms.Client
                     else
                     {
                         if (records == null)
-                            throw new Exception("WebService GetRichRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                            throw new Exception("WebService GetRichRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         //lTotalCount = result.Value;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         RichRecord record = records[i];
 
@@ -2738,7 +2738,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
             } // end of for
@@ -2766,7 +2766,7 @@ namespace DigitalPlatform.rms.Client
             return strResult;
         }
 
-        // »ñÈ¡ä¯ÀÀ¼ÇÂ¼
+        // è·å–æµè§ˆè®°å½•
         public long DoBrowse(
             BrowseList listView,
             string strLang,
@@ -2789,13 +2789,13 @@ namespace DigitalPlatform.rms.Client
             long lTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -2815,14 +2815,14 @@ namespace DigitalPlatform.rms.Client
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -2855,7 +2855,7 @@ namespace DigitalPlatform.rms.Client
                     }
                     else
                     {
-                        Debug.Assert(records != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(records != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lTotalCount = result.Value;
 
@@ -2871,20 +2871,20 @@ namespace DigitalPlatform.rms.Client
                     listView.BeginUpdate();
                     try
                     {
-                        // ×öÊÂ
+                        // åšäº‹
                         for (int i = 0; i < records.Length; i++)
                         {
-                            DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                            DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                             if (stop != null)
                             {
                                 if (stop.State != 0)
                                 {
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
                                     return -1;
                                 }
 
-                                stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(nStart + i) + " / "
+                                stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(nStart + i) + " / "
                                     + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                             }
 
@@ -2903,8 +2903,8 @@ namespace DigitalPlatform.rms.Client
 
                             listView.NewLine(record.Path + " @" + this.Url,
                                 cols);
-                            // record.ID ·ÅÈëµÚÒ»ÁĞ
-                            // record.Cols ·ÅÈëÆäËûÁĞ(Èç¹ûÎªkeyid·½Ê½£¬keyÔÚÕâÒ»ÈºµÄµÚÒ»ÁĞ)
+                            // record.ID æ”¾å…¥ç¬¬ä¸€åˆ—
+                            // record.Cols æ”¾å…¥å…¶ä»–åˆ—(å¦‚æœä¸ºkeyidæ–¹å¼ï¼Œkeyåœ¨è¿™ä¸€ç¾¤çš„ç¬¬ä¸€åˆ—)
                         }
 
                         if (stop != null)
@@ -2937,7 +2937,7 @@ namespace DigitalPlatform.rms.Client
                     if (this.ErrorCode == ChannelErrorCode.QuotaExceeded)
                     {
                         if (nPerCount > 1 || nPerCount == -1)
-                            nPerCount = 1;   // ĞŞ¸ÄÎª×îĞ¡ÊıÁ¿ÖØ×öÒ»´Î
+                            nPerCount = 1;   // ä¿®æ”¹ä¸ºæœ€å°æ•°é‡é‡åšä¸€æ¬¡
                         else
                             return -1;
                     }
@@ -2969,12 +2969,12 @@ namespace DigitalPlatform.rms.Client
                 out strError);
         }
 
-        // Ï£ÍûÖğ²½·ÏÖ¹±¾º¯Êı
-        // »ñÈ¡¼ìË÷ÃüÖĞ½á¹û
-        // Ö»»ñÈ¡idÁĞ
+        // å¸Œæœ›é€æ­¥åºŸæ­¢æœ¬å‡½æ•°
+        // è·å–æ£€ç´¢å‘½ä¸­ç»“æœ
+        // åªè·å–idåˆ—
         // return:
-        //      -1  ³ö´í
-        //      ÆäËû    aPathÖĞµÄ½á¹ûÊıÄ¿
+        //      -1  å‡ºé”™
+        //      å…¶ä»–    aPathä¸­çš„ç»“æœæ•°ç›®
         public long DoGetSearchResult(
             string strResultSetName,
             long lStart,
@@ -2996,13 +2996,13 @@ namespace DigitalPlatform.rms.Client
             long lTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -3015,20 +3015,20 @@ REDO:
                         lStart,
                         nPerCount,
                         strLang,
-                        "id",	// ²»Òªcols
+                        "id",	// ä¸è¦cols
                         null,
                         null);
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -3060,7 +3060,7 @@ REDO:
                     }
                     else
                     {
-                        Debug.Assert(records != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(records != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lTotalCount = result.Value;
                         if (lMax != -1)
@@ -3074,20 +3074,20 @@ REDO:
                         nPerCount = lTotalCount - lStart;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
 
-                            stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(lStart + i) + " / "
+                            stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(lStart + i) + " / "
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                         }
 
@@ -3095,7 +3095,7 @@ REDO:
                         aPath.Add(record.Path);
                     }
 
-                    // BUGĞŞ¸Ä 2010/11/16
+                    // BUGä¿®æ”¹ 2010/11/16
                     if (/*lStart + nCount >= result.Value
                         || */ lStart >= lTotalCount)
                         break;
@@ -3114,7 +3114,7 @@ REDO:
                     if (this.ErrorCode == ChannelErrorCode.QuotaExceeded)
                     {
                         if (nPerCount > 1 || nPerCount == -1)
-                            nPerCount = 1;   // ĞŞ¸ÄÎª×îĞ¡ÊıÁ¿ÖØ×öÒ»´Î
+                            nPerCount = 1;   // ä¿®æ”¹ä¸ºæœ€å°æ•°é‡é‡åšä¸€æ¬¡
                         else
                             return -1;
                     }
@@ -3126,12 +3126,12 @@ REDO:
             return aPath.Count;
         }
 
-        // ¸Ä½ø°æ
-        // »ñÈ¡¼ìË÷ÃüÖĞ½á¹û
-        // Ö»»ñÈ¡idÁĞ
+        // æ”¹è¿›ç‰ˆ
+        // è·å–æ£€ç´¢å‘½ä¸­ç»“æœ
+        // åªè·å–idåˆ—
         // return:
-        //      -1  ³ö´í
-        //      ÆäËû    ½á¹û¼¯ÄÚ¼ÇÂ¼×ÜÊı
+        //      -1  å‡ºé”™
+        //      å…¶ä»–    ç»“æœé›†å†…è®°å½•æ€»æ•°
         public long DoGetSearchResultEx(
             string strResultSetName,
             long lStart,
@@ -3154,13 +3154,13 @@ REDO:
             long lTempTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -3173,20 +3173,20 @@ REDO:
                         lStart,
                         nPerCount,
                         strLang,
-                        "id",	// ²»Òªcols
+                        "id",	// ä¸è¦cols
                         null,
                         null);
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -3218,7 +3218,7 @@ REDO:
                     }
                     else
                     {
-                        Debug.Assert(records != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(records != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lResultTotalCount = result.Value;
 
@@ -3234,20 +3234,20 @@ REDO:
                         nPerCount = lTempTotalCount - lStart;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
 
-                            stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(lStart + i) + " / "
+                            stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(lStart + i) + " / "
                                 + ((lTempTotalCount == -1) ? "?" : Convert.ToString(lTempTotalCount)));
                         }
 
@@ -3256,7 +3256,7 @@ REDO:
                         aPath.Add(record.Path);
                     }
 
-                    // BUGĞŞ¸Ä 2010/11/16
+                    // BUGä¿®æ”¹ 2010/11/16
                     if (/*lStart + nCount >= result.Value
                         || */
                              lStart >= lTempTotalCount)
@@ -3275,7 +3275,7 @@ REDO:
                     if (this.ErrorCode == ChannelErrorCode.QuotaExceeded)
                     {
                         if (nPerCount > 1 || nPerCount == -1)
-                            nPerCount = 1;   // ĞŞ¸ÄÎª×îĞ¡ÊıÁ¿ÖØ×öÒ»´Î
+                            nPerCount = 1;   // ä¿®æ”¹ä¸ºæœ€å°æ•°é‡é‡åšä¸€æ¬¡
                         else
                             return -1;
                     } 
@@ -3285,11 +3285,11 @@ REDO:
             }
 
             this.ClearRedoCount();
-            return lResultTotalCount; // ½á¹û¼¯ÄÚµÄ¼ÇÂ¼×ÜÊı
+            return lResultTotalCount; // ç»“æœé›†å†…çš„è®°å½•æ€»æ•°
         }
 
-        // »ñÈ¡¼ìË÷ÃüÖĞ½á¹û
-        // »ñµÃÃ¿ÁĞÏêÏ¸ĞÅÏ¢µÄ°æ±¾
+        // è·å–æ£€ç´¢å‘½ä¸­ç»“æœ
+        // è·å¾—æ¯åˆ—è¯¦ç»†ä¿¡æ¯çš„ç‰ˆæœ¬
         public long DoGetSearchFullResult(
             string strResultSetName,
             long lStart,
@@ -3311,13 +3311,13 @@ REDO:
             long lTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -3331,20 +3331,20 @@ REDO:
                         lStart,
                         nPerCount,
                         strLang,
-                        "id,cols",	// ²»Òªcols
+                        "id,cols",	// ä¸è¦cols
                         null,
                         null);
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -3376,7 +3376,7 @@ REDO:
                     }
                     else
                     {
-                        Debug.Assert(records != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(records != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lTotalCount = result.Value;
                         if (lMax != -1)
@@ -3390,20 +3390,20 @@ REDO:
                         nPerCount = lTotalCount - lStart;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
 
-                            stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(lStart + i) + " / "
+                            stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(lStart + i) + " / "
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                         }
 
@@ -3439,7 +3439,7 @@ REDO:
                     if (this.ErrorCode == ChannelErrorCode.QuotaExceeded)
                     {
                         if (nPerCount > 1 || nPerCount == -1)
-                            nPerCount = 1;   // ĞŞ¸ÄÎª×îĞ¡ÊıÁ¿ÖØ×öÒ»´Î
+                            nPerCount = 1;   // ä¿®æ”¹ä¸ºæœ€å°æ•°é‡é‡åšä¸€æ¬¡
                         else
                             return -1;
                     } 
@@ -3453,8 +3453,8 @@ REDO:
         }
 
         // 2009/7/19
-        // »ñÈ¡¼ìË÷ÃüÖĞ½á¹û
-        // »ñµÃÄ³Ò»ÁĞĞÅÏ¢µÄ°æ±¾
+        // è·å–æ£€ç´¢å‘½ä¸­ç»“æœ
+        // è·å¾—æŸä¸€åˆ—ä¿¡æ¯çš„ç‰ˆæœ¬
         public long DoGetSearchResultOneColumn(
             string strResultSetName,
             long lStart,
@@ -3477,13 +3477,13 @@ REDO:
             long lTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -3497,20 +3497,20 @@ REDO:
                         lStart,
                         nPerCount,
                         strLang,
-                        "id,cols",	// ²»Òªcols
+                        "id,cols",	// ä¸è¦cols
                         null,
                         null);
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -3542,7 +3542,7 @@ REDO:
                     }
                     else
                     {
-                        Debug.Assert(records != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(records != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lTotalCount = result.Value;
                         if (lMax != -1)
@@ -3556,20 +3556,20 @@ REDO:
                         nPerCount = lTotalCount - lStart;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < records.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
 
-                            stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(lStart + i) + " / "
+                            stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(lStart + i) + " / "
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                         }
 
@@ -3598,7 +3598,7 @@ REDO:
                     if (this.ErrorCode == ChannelErrorCode.QuotaExceeded)
                     {
                         if (nPerCount > 1 || nPerCount == -1)
-                            nPerCount = 1;   // ĞŞ¸ÄÎª×îĞ¡ÊıÁ¿ÖØ×öÒ»´Î
+                            nPerCount = 1;   // ä¿®æ”¹ä¸ºæœ€å°æ•°é‡é‡åšä¸€æ¬¡
                         else
                             return -1;
                     }
@@ -3612,11 +3612,11 @@ REDO:
         }
 
         // 2012/11/11
-        // ³ÉÅúĞ´ÈëXML¼ÇÂ¼
-        // Ç³°ü×°°æ±¾
-        // Ã¿¸öÔªËØÖĞXml³ÉÔ±ÄÚ·ÅÁËÒ»ÌõÍêÕûµÄXML¼ÇÂ¼¡£Èç¹û¼ÇÂ¼²»ÍêÕû£¬Çë²»ÒªÊ¹ÓÃ´ËAPI¡£
-        // resultsÖĞ·µ»ØºÍinputsÒ»ÑùÊıÄ¿µÄÔªËØ£¬Ã¿¸öÔªËØ±íÊ¾¶ÔÓ¦µÄinputsÔªËØĞ´ÈëÊÇ·ñ³É¹¦£¬·µ»ØÊ±¼ä´ÁºÍÊµ¼ÊĞ´ÈëµÄÂ·¾¶
-        // ÔÚÖĞÍ¾³ö´íµÄÇé¿öÏÂ£¬resultsÖĞµÄÔªËØÊıÄ¿»á±ÈinputsÖĞµÄÉÙ£¬µ«´ÓÇ°µ½ºóË³ĞòÊÇ¹Ì¶¨µÄ£¬¿ÉÒÔ¶ÔÓ¦
+        // æˆæ‰¹å†™å…¥XMLè®°å½•
+        // æµ…åŒ…è£…ç‰ˆæœ¬
+        // æ¯ä¸ªå…ƒç´ ä¸­Xmlæˆå‘˜å†…æ”¾äº†ä¸€æ¡å®Œæ•´çš„XMLè®°å½•ã€‚å¦‚æœè®°å½•ä¸å®Œæ•´ï¼Œè¯·ä¸è¦ä½¿ç”¨æ­¤APIã€‚
+        // resultsä¸­è¿”å›å’Œinputsä¸€æ ·æ•°ç›®çš„å…ƒç´ ï¼Œæ¯ä¸ªå…ƒç´ è¡¨ç¤ºå¯¹åº”çš„inputså…ƒç´ å†™å…¥æ˜¯å¦æˆåŠŸï¼Œè¿”å›æ—¶é—´æˆ³å’Œå®é™…å†™å…¥çš„è·¯å¾„
+        // åœ¨ä¸­é€”å‡ºé”™çš„æƒ…å†µä¸‹ï¼Œresultsä¸­çš„å…ƒç´ æ•°ç›®ä¼šæ¯”inputsä¸­çš„å°‘ï¼Œä½†ä»å‰åˆ°åé¡ºåºæ˜¯å›ºå®šçš„ï¼Œå¯ä»¥å¯¹åº”
         public long DoWriteRecords(
             DigitalPlatform.Stop stop,
             RecordBody[] inputs,
@@ -3638,14 +3638,14 @@ REDO:
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -3679,11 +3679,11 @@ REDO:
                 }
                 else
                 {
-                    // ¿ÉÒÔÔÚÕâÀï¼ì²é·µ»Ø²ÎÊı
+                    // å¯ä»¥åœ¨è¿™é‡Œæ£€æŸ¥è¿”å›å‚æ•°
                 }
 
                 this.ClearRedoCount();
-                return result.Value;    // ½á¹û¼¯ÄÚ×ÜÊı
+                return result.Value;    // ç»“æœé›†å†…æ€»æ•°
             }
             catch (Exception ex)
             {
@@ -3694,8 +3694,8 @@ REDO:
             }
         }
 
-        // »ñµÃ¼ìË÷½á¹ûµÄä¯ÀÀ¸ñÊ½
-        // Ç³°ü×°°æ±¾
+        // è·å¾—æ£€ç´¢ç»“æœçš„æµè§ˆæ ¼å¼
+        // æµ…åŒ…è£…ç‰ˆæœ¬
         public long DoGetSearchResult(
             string strResultSetName,
             long lStart,
@@ -3724,14 +3724,14 @@ REDO:
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -3768,11 +3768,11 @@ REDO:
                 }
                 else
                 {
-                    // Debug.Assert(records != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                    // Debug.Assert(records != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
                 }
 
 #if NO
-                // ½«½á¹ûÒÆ³ö
+                // å°†ç»“æœç§»å‡º
                 searchresults = new Record[records.Length]; // SearchResult
                 for (int i = 0; i < records.Length; i++)
                 {
@@ -3781,7 +3781,7 @@ REDO:
 #endif
 
                 this.ClearRedoCount();
-                return result.Value;    // ½á¹û¼¯ÄÚ×ÜÊı
+                return result.Value;    // ç»“æœé›†å†…æ€»æ•°
             }
 
             catch (Exception ex)
@@ -3798,7 +3798,7 @@ REDO:
                 if (this.ErrorCode == ChannelErrorCode.QuotaExceeded)
                 {
                     if (lMax > 1 || lMax == -1)
-                        lMax = 1;   // ĞŞ¸ÄÎª×îĞ¡ÊıÁ¿ÖØ×öÒ»´Î
+                        lMax = 1;   // ä¿®æ”¹ä¸ºæœ€å°æ•°é‡é‡åšä¸€æ¬¡
                     else
                         return -1;
                 }
@@ -3807,7 +3807,7 @@ REDO:
             }
         }
 
-        // Ä£Äâ´´½¨¼ìË÷µã
+        // æ¨¡æ‹Ÿåˆ›å»ºæ£€ç´¢ç‚¹
         public long DoGetKeys(
             string strRecPath,
             string strXmlBody,
@@ -3822,7 +3822,7 @@ REDO:
 
             if (strRecPath == "")
             {
-                strError = "¼ÇÂ¼Â·¾¶Îª¿ÕÊ±ÎŞ·¨Ä£Äâ´´½¨¼ìË÷µã";
+                strError = "è®°å½•è·¯å¾„ä¸ºç©ºæ—¶æ— æ³•æ¨¡æ‹Ÿåˆ›å»ºæ£€ç´¢ç‚¹";
                 return -1;
             }
 
@@ -3838,13 +3838,13 @@ REDO:
             long lTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -3865,14 +3865,14 @@ REDO:
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -3905,7 +3905,7 @@ REDO:
                     }
                     else
                     {
-                        Debug.Assert(keys != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(keys != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lTotalCount = result.Value;
                     }
@@ -3916,21 +3916,21 @@ REDO:
                         nCount += keys.Length;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < keys.Length; i++)
                     {
                         /*
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null) 
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
 
-                            stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(nStart+i)+" / "
+                            stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(nStart+i)+" / "
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)) );
                         }
                         */
@@ -3968,7 +3968,7 @@ REDO:
             return 0;
         }
 
-        // Ä£Äâ´´½¨¼ìË÷µã
+        // æ¨¡æ‹Ÿåˆ›å»ºæ£€ç´¢ç‚¹
         public long DoGetKeys(
             string strRecPath,
             string strXmlBody,
@@ -3982,7 +3982,7 @@ REDO:
 
             if (strRecPath == "")
             {
-                strError = "¼ÇÂ¼Â·¾¶Îª¿ÕÊ±ÎŞ·¨Ä£Äâ´´½¨¼ìË÷µã";
+                strError = "è®°å½•è·¯å¾„ä¸ºç©ºæ—¶æ— æ³•æ¨¡æ‹Ÿåˆ›å»ºæ£€ç´¢ç‚¹";
                 return -1;
             }
 
@@ -3998,13 +3998,13 @@ REDO:
             long lTotalCount = -1;
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
                 }
@@ -4025,14 +4025,14 @@ REDO:
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -4064,7 +4064,7 @@ REDO:
                     }
                     else
                     {
-                        Debug.Assert(keys != null, "WebService GetRecords() API record²ÎÊı·µ»ØÖµ²»Ó¦Îªnull");
+                        Debug.Assert(keys != null, "WebService GetRecords() API recordå‚æ•°è¿”å›å€¼ä¸åº”ä¸ºnull");
 
                         lTotalCount = result.Value;
                     }
@@ -4075,20 +4075,20 @@ REDO:
                         nCount += keys.Length;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < keys.Length; i++)
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
 
-                            stop.SetMessage("ÕıÔÚ×°Èë " + Convert.ToString(nStart + i) + " / "
+                            stop.SetMessage("æ­£åœ¨è£…å…¥ " + Convert.ToString(nStart + i) + " / "
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                         }
 
@@ -4122,9 +4122,9 @@ REDO:
         }
 
 
-        // ÁĞÄ¿Â¼¡£·µ»Ø×Ö·û´®Êı×éµÄ¼ò»¯°æ±¾
+        // åˆ—ç›®å½•ã€‚è¿”å›å­—ç¬¦ä¸²æ•°ç»„çš„ç®€åŒ–ç‰ˆæœ¬
         // parameters:
-        //      nType   Ö»·µ»ØÌØ¶¨µÄ×ÊÔ´ÀàĞÍ
+        //      nType   åªè¿”å›ç‰¹å®šçš„èµ„æºç±»å‹
         public long DoDir(string strPath,
             string strLang,
             string strStyle,
@@ -4160,7 +4160,7 @@ REDO:
             return lRet;
         }
 
-        // ÁĞ×ÊÔ´Ä¿Â¼
+        // åˆ—èµ„æºç›®å½•
         public long DoDir(string strPath,
             string strLang,
             string strStyle,
@@ -4181,7 +4181,7 @@ REDO:
 
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
             REDO:
                 try
@@ -4198,14 +4198,14 @@ REDO:
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -4241,7 +4241,7 @@ REDO:
                         nCount += items.Length;
                     }
 
-                    // ×öÊÂ
+                    // åšäº‹
                     for (int i = 0; i < items.Length; i++)
                     {
                         aItem.Add(items[i]);
@@ -4276,7 +4276,7 @@ REDO:
         }
 
 
-        // Ğ´Èë×ÊÔ´¡£Ô­Ê¼°æ±¾¡£2007/5/27
+        // å†™å…¥èµ„æºã€‚åŸå§‹ç‰ˆæœ¬ã€‚2007/5/27
         public long WriteRes(string strResPath,
             string strRanges,
             long lTotalLength,
@@ -4310,14 +4310,14 @@ REDO:
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -4325,7 +4325,7 @@ REDO:
                     out strOutputResPath,
                     out baOutputTimestamp,soapresult);
 
-                this.ErrorInfo = result.ErrorString;	// ÎŞÂÛÊÇ·ñ·µ»Ø´íÎó£¬¶¼½«resultµÄErrorString·Åµ½ChannelÖĞ
+                this.ErrorInfo = result.ErrorString;	// æ— è®ºæ˜¯å¦è¿”å›é”™è¯¯ï¼Œéƒ½å°†resultçš„ErrorStringæ”¾åˆ°Channelä¸­
 
                 if (result.Value == -1)
                 {
@@ -4352,11 +4352,11 @@ REDO:
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        strError = "Ê±¼ä´Á²»Æ¥Åä¡£\r\n\r\nÇëÇóµÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(baInputTimestamp) + "] ÏìÓ¦µÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(baOutputTimestamp) + "]";
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚\r\n\r\nè¯·æ±‚çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(baInputTimestamp) + "] å“åº”çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(baOutputTimestamp) + "]";
                         return -1;
                     }
 
-                    // Ô­À´Convert....ÔÚÕâÀï£¬ÉÔÍí
+                    // åŸæ¥Convert....åœ¨è¿™é‡Œï¼Œç¨æ™š
                     return -1;
                 }
 
@@ -4376,7 +4376,7 @@ REDO:
             }
         }
 
-        // ±£´æXml¼ÇÂ¼
+        // ä¿å­˜Xmlè®°å½•
         public long DoSaveTextRes(string strPath,
             string strXml,
             bool bInlucdePreamble,
@@ -4392,7 +4392,7 @@ REDO:
             output_timestamp = null;
             int nDoCount = 0;
 
-            int nChunkMaxLength = 500 * 1024;	// chunk size¡£ÎªÁËÌáÉıËÙ¶È£¬Ó¦¸Ã¾¡Á¿´ó¡£ Ô­À´ÊÇ 4096
+            int nChunkMaxLength = 500 * 1024;	// chunk sizeã€‚ä¸ºäº†æå‡é€Ÿåº¦ï¼Œåº”è¯¥å°½é‡å¤§ã€‚ åŸæ¥æ˜¯ 4096
 
             int nStart = 0;
 
@@ -4421,14 +4421,14 @@ REDO:
 
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
-                // ÇĞ³öchunk
+                // åˆ‡å‡ºchunk
                 int nThisChunkSize = nChunkMaxLength;
 
                 if (nThisChunkSize + nStart > lTotalLength)
                 {
-                    nThisChunkSize = (int)lTotalLength - nStart;	// ×îºóÒ»´Î
+                    nThisChunkSize = (int)lTotalLength - nStart;	// æœ€åä¸€æ¬¡
                     if (nThisChunkSize <= 0 && nDoCount > 1)
                         break;
                 }
@@ -4451,7 +4451,7 @@ REDO:
                     IAsyncResult soapresult = this.ws.BeginWriteRes(strPath,
                         strRange,
                         //nStart,
-                        lTotalLength,	// ÕâÊÇÕû¸ö°ü³ß´ç£¬²»ÊÇ±¾´ÎchunkµÄ³ß´ç¡£ÒòÎª·şÎñÆ÷ÏÔÈ»¿ÉÒÔ´ÓbaChunkÖĞ¿´³öÆä³ß´ç£¬²»±ØÔÙ×¨ÃÅÓÃÒ»¸ö²ÎÊı±íÊ¾Õâ¸ö³ß´çÁË
+                        lTotalLength,	// è¿™æ˜¯æ•´ä¸ªåŒ…å°ºå¯¸ï¼Œä¸æ˜¯æœ¬æ¬¡chunkçš„å°ºå¯¸ã€‚å› ä¸ºæœåŠ¡å™¨æ˜¾ç„¶å¯ä»¥ä»baChunkä¸­çœ‹å‡ºå…¶å°ºå¯¸ï¼Œä¸å¿…å†ä¸“é—¨ç”¨ä¸€ä¸ªå‚æ•°è¡¨ç¤ºè¿™ä¸ªå°ºå¯¸äº†
                         baChunk,
                         // null,	// attachmentid
                         strMetadata,
@@ -4463,14 +4463,14 @@ REDO:
 
                     for (; ; )
                     {
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
                             break;
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -4478,8 +4478,8 @@ REDO:
                         out strOutputPath,
                         out output_timestamp/*baOutputTimeStamp*/,soapresult);
 
-                    this.ErrorInfo = result.ErrorString;	// ÎŞÂÛÊÇ·ñ·µ»Ø´íÎó£¬¶¼½«resultµÄErrorString·Åµ½ChannelÖĞ
-                    strError = result.ErrorString;  // 2007/6/28 ·şÎñÓÚ ´øÓĞ¾Ö²¿pathµÄ±£´æÖĞ·µ»ØÖµ·ÅÔÚstrErrorµÄÇé¿ö
+                    this.ErrorInfo = result.ErrorString;	// æ— è®ºæ˜¯å¦è¿”å›é”™è¯¯ï¼Œéƒ½å°†resultçš„ErrorStringæ”¾åˆ°Channelä¸­
+                    strError = result.ErrorString;  // 2007/6/28 æœåŠ¡äº å¸¦æœ‰å±€éƒ¨pathçš„ä¿å­˜ä¸­è¿”å›å€¼æ”¾åœ¨strErrorçš„æƒ…å†µ
 
                     if (result.Value == -1)
                     {
@@ -4507,11 +4507,11 @@ REDO:
                         if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                         {
                             this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                            strError = "Ê±¼ä´Á²»Æ¥Åä¡£\r\n\r\nÇëÇóµÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(baInputTimeStamp) + "] ÏìÓ¦µÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(output_timestamp/*baOutputTimeStamp*/) + "]";
+                            strError = "æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚\r\n\r\nè¯·æ±‚çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(baInputTimeStamp) + "] å“åº”çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(output_timestamp/*baOutputTimeStamp*/) + "]";
                             return -1;
                         }
 
-                        // Ô­À´Convert....ÔÚÕâÀï£¬ÉÔÍí
+                        // åŸæ¥Convert....åœ¨è¿™é‡Œï¼Œç¨æ™š
                         return -1;
                     }
 
@@ -4520,9 +4520,9 @@ REDO:
                     if (nStart >= lTotalLength)
                         break;
 
-                    Debug.Assert(strOutputPath != "", "outputpath²»ÄÜÎª¿Õ");
+                    Debug.Assert(strOutputPath != "", "outputpathä¸èƒ½ä¸ºç©º");
 
-                    strPath = strOutputPath;	// Èç¹ûµÚÒ»´ÎµÄstrPathÖĞ°üº¬'?'id, ±ØĞëÓÃoutputpath²ÅÄÜÕıÈ·¼ÌĞø
+                    strPath = strOutputPath;	// å¦‚æœç¬¬ä¸€æ¬¡çš„strPathä¸­åŒ…å«'?'id, å¿…é¡»ç”¨outputpathæ‰èƒ½æ­£ç¡®ç»§ç»­
                     baInputTimeStamp = output_timestamp;	//baOutputTimeStamp;
 
                 }
@@ -4546,8 +4546,8 @@ REDO:
             return 0;
         }
 
-        // °ü×°ºóµÄ°æ±¾
-                // É¾³ıÊı¾İ¿â¼ÇÂ¼
+        // åŒ…è£…åçš„ç‰ˆæœ¬
+                // åˆ é™¤æ•°æ®åº“è®°å½•
         public long DoDeleteRes(string strPath,
             byte[] timestamp,
             out byte[] output_timestamp,
@@ -4560,7 +4560,7 @@ REDO:
                 out strError);
         }
 
-        // É¾³ıÊı¾İ¿â¼ÇÂ¼
+        // åˆ é™¤æ•°æ®åº“è®°å½•
         public long DoDeleteRes(string strPath,
             byte[] timestamp,
             string strStyle,
@@ -4573,8 +4573,8 @@ REDO:
             /*
             if (timestamp == null)
             {
-                Debug.Assert(true, "timestamp²ÎÊı²»ÄÜÎªnull");
-                strError = "timestamp²ÎÊı²»ÄÜÎªnull";
+                Debug.Assert(true, "timestampå‚æ•°ä¸èƒ½ä¸ºnull");
+                strError = "timestampå‚æ•°ä¸èƒ½ä¸ºnull";
                 return -1;
             }
              */
@@ -4596,14 +4596,14 @@ REDO:
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -4635,12 +4635,12 @@ REDO:
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        Debug.Assert(output_timestamp != null, "WebService API DeleteRes() TimestampMismatchÊ±±ØĞë·µ»Ø¾ÉÊ±¼ä´Á ...");
-                        strError = "Ê±¼ä´Á²»Æ¥Åä¡£\r\n\r\nÇëÇóµÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(timestamp) + "] ÏìÓ¦µÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        Debug.Assert(output_timestamp != null, "WebService API DeleteRes() TimestampMismatchæ—¶å¿…é¡»è¿”å›æ—§æ—¶é—´æˆ³ ...");
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚\r\n\r\nè¯·æ±‚çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(timestamp) + "] å“åº”çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
                         return -1;
                     }
 
-                    // Ô­À´ÔÚÕâÀï£¬ÉÔÍí
+                    // åŸæ¥åœ¨è¿™é‡Œï¼Œç¨æ™š
                     return -1;
                 }
 
@@ -4666,11 +4666,11 @@ REDO:
             return 0;
         }
 
-        // Ë¢ĞÂÊı¾İ¿â¼ÇÂ¼keys
+        // åˆ·æ–°æ•°æ®åº“è®°å½•keys
         // parameters:
         //      strStyle    next prev outputpath forcedeleteoldkeys
-        //                  forcedeleteoldkeys ÒªÔÚ´´½¨ĞÂkeysÇ°Ç¿ÖÆÉ¾³ıÒ»ÏÂ¾ÉÓĞµÄkeys? Èç¹ûÎª°üº¬£¬ÔòÇ¿ÖÆÉ¾³ıÔ­ÓĞµÄkeys£»Èç¹ûÎª²»°üº¬£¬ÔòÊÔÌ½×Å´´½¨ĞÂµÄkeys£¬Èç¹ûÓĞ¾ÉµÄkeysºÍĞÂ´òËã´´½¨µÄkeysÖØºÏ£¬ÄÇ¾Í²»ÖØ¸´´´½¨£»Èç¹û¾ÉµÄkeysÓĞ²ĞÓàÃ»ÓĞ±»É¾³ı£¬Ò²²»¹ÜËüÃÇÁË
-        //                          °üº¬ Ò»°ãÓÃÔÚµ¥Ìõ¼ÇÂ¼µÄ´¦Àí£»²»°üº¬ Ò»°ãÓÃÔÚÔ¤ÏÈÉ¾³ıÁËËùÓĞkeys±íµÄÄÚÈİĞĞÒÔºóÔÚÑ­»·ÖØ½¨¿âÖĞÃ¿Ìõ¼ÇÂ¼µÄÅú´¦Àí·½Ê½
+        //                  forcedeleteoldkeys è¦åœ¨åˆ›å»ºæ–°keyså‰å¼ºåˆ¶åˆ é™¤ä¸€ä¸‹æ—§æœ‰çš„keys? å¦‚æœä¸ºåŒ…å«ï¼Œåˆ™å¼ºåˆ¶åˆ é™¤åŸæœ‰çš„keysï¼›å¦‚æœä¸ºä¸åŒ…å«ï¼Œåˆ™è¯•æ¢ç€åˆ›å»ºæ–°çš„keysï¼Œå¦‚æœæœ‰æ—§çš„keyså’Œæ–°æ‰“ç®—åˆ›å»ºçš„keysé‡åˆï¼Œé‚£å°±ä¸é‡å¤åˆ›å»ºï¼›å¦‚æœæ—§çš„keysæœ‰æ®‹ä½™æ²¡æœ‰è¢«åˆ é™¤ï¼Œä¹Ÿä¸ç®¡å®ƒä»¬äº†
+        //                          åŒ…å« ä¸€èˆ¬ç”¨åœ¨å•æ¡è®°å½•çš„å¤„ç†ï¼›ä¸åŒ…å« ä¸€èˆ¬ç”¨åœ¨é¢„å…ˆåˆ é™¤äº†æ‰€æœ‰keysè¡¨çš„å†…å®¹è¡Œä»¥ååœ¨å¾ªç¯é‡å»ºåº“ä¸­æ¯æ¡è®°å½•çš„æ‰¹å¤„ç†æ–¹å¼
         public long DoRebuildResKeys(string strPath,
             string strStyle,
             out string strOutputResPath,
@@ -4694,14 +4694,14 @@ REDO:
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -4734,12 +4734,12 @@ REDO:
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        Debug.Assert(output_timestamp != null, "WebService API RebuildResKeys() TimestampMismatchÊ±±ØĞë·µ»Ø¾ÉÊ±¼ä´Á ...");
-                        strError = "Ê±¼ä´Á²»Æ¥Åä¡£\r\n\r\nÇëÇóµÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(timestamp) + "] ÏìÓ¦µÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        Debug.Assert(output_timestamp != null, "WebService API RebuildResKeys() TimestampMismatchæ—¶å¿…é¡»è¿”å›æ—§æ—¶é—´æˆ³ ...");
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚\r\n\r\nè¯·æ±‚çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(timestamp) + "] å“åº”çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
                         return -1;
                     }*/
 
-                    // Ô­À´ÔÚÕâÀï£¬ÉÔÍí
+                    // åŸæ¥åœ¨è¿™é‡Œï¼Œç¨æ™š
                     return -1;
                 }
 
@@ -4766,11 +4766,11 @@ REDO:
             return 0;
         }
 
-        // »ñµÃ×ÊÔ´¡£·µ»Ø×Ö·û´®°æ±¾¡£ÊÊÓÃÓÚ»ñµÃÖ÷¼ÇÂ¼Ìå¡£
-        // ¿ÉÓÃÀ´»ñµÃÅäÖÃÎÄ¼ş
+        // è·å¾—èµ„æºã€‚è¿”å›å­—ç¬¦ä¸²ç‰ˆæœ¬ã€‚é€‚ç”¨äºè·å¾—ä¸»è®°å½•ä½“ã€‚
+        // å¯ç”¨æ¥è·å¾—é…ç½®æ–‡ä»¶
         // return:
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(
             CfgCache cache,
             string strPath,
@@ -4793,10 +4793,10 @@ REDO:
         }
 
 
-        // »ñµÃ×ÊÔ´¡£·µ»Ø×Ö·û´®°æ±¾¡£Cache°æ±¾¡£
+        // è·å¾—èµ„æºã€‚è¿”å›å­—ç¬¦ä¸²ç‰ˆæœ¬ã€‚Cacheç‰ˆæœ¬ã€‚
         // return:
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(
             CfgCache cache,
             string strPath,
@@ -4817,7 +4817,7 @@ REDO:
 
             if (StringUtil.IsInList("forceget", strStyle) == true)
             {
-                // Ç¿ÖÆ»ñÈ¡
+                // å¼ºåˆ¶è·å–
 
                 StringUtil.RemoveFromInList("forceget",
                     true,
@@ -4825,7 +4825,7 @@ REDO:
                 goto GETDATA;
             }
 
-            // ´ÓcacheÖĞµÃµ½timestamp
+            // ä»cacheä¸­å¾—åˆ°timestamp
             // return:
             //      -1  error
             //		0	not found
@@ -4839,34 +4839,34 @@ REDO:
                 strMetaData = "";
                 baOutputTimeStamp = null;
                 strOutputResPath = "";
-                strError = "CfgCache ÉĞÎ´³õÊ¼»¯";
+                strError = "CfgCache å°šæœªåˆå§‹åŒ–";
                 return -1;
             }
             if (nRet == 1)
             {
-                Debug.Assert(strLocalName != "", "FindLocalFile()·µ»ØµÄstrLocalNameÎª¿Õ");
+                Debug.Assert(strLocalName != "", "FindLocalFile()è¿”å›çš„strLocalNameä¸ºç©º");
 
                 if (strTimeStamp == "")
-                    goto GETDATA;	// Ê±¼ä´Á²»¶Ô, ÄÇ¾ÍÖ»ºÃÖØĞÂ»ñÈ¡·şÎñÆ÷¶ËÄÚÈİ
+                    goto GETDATA;	// æ—¶é—´æˆ³ä¸å¯¹, é‚£å°±åªå¥½é‡æ–°è·å–æœåŠ¡å™¨ç«¯å†…å®¹
 
-                Debug.Assert(strTimeStamp != "", "FindLocalFile()»ñµÃµÄstrTimeStampÎª¿Õ");
+                Debug.Assert(strTimeStamp != "", "FindLocalFile()è·å¾—çš„strTimeStampä¸ºç©º");
                 cached_timestamp = ByteArray.GetTimeStampByteArray(strTimeStamp);
                 // bExistInCache = true;
             }
             else
                 goto GETDATA;
 
-            // Ì½²âÊ±¼ä´Á¹ØÏµ
+            // æ¢æµ‹æ—¶é—´æˆ³å…³ç³»
             string strNewStyle = strStyle;
 
             /*
             StringUtil.RemoveFromInList("metadata",
                 true,
-                ref strNewStyle);	// ²»Òªmetadata
+                ref strNewStyle);	// ä¸è¦metadata
             */
-            StringUtil.RemoveFromInList("content,data,metadata",    // 2012/12/31 BUG ÒÔÇ°Íü¼ÇÁË¼ÓÈëcontent
+            StringUtil.RemoveFromInList("content,data,metadata",    // 2012/12/31 BUG ä»¥å‰å¿˜è®°äº†åŠ å…¥content
 true,
-ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
+ref strNewStyle);	// ä¸è¦æ•°æ®ä½“å’Œmetadata
 
             long lRet = GetRes(strPath,
                 strNewStyle,
@@ -4878,11 +4878,11 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             if (lRet == -1)
                 return -1;
 
-            // Èç¹ûÖ¤Ã÷timestampÃ»ÓĞ±ä»¯, µ«ÊÇ±¾´Î²¢Î´·µ»ØÄÚÈİ,Ôò´ÓcacheÖĞÈ¡Ô­À´µÄÄÚÈİ
+            // å¦‚æœè¯æ˜timestampæ²¡æœ‰å˜åŒ–, ä½†æ˜¯æœ¬æ¬¡å¹¶æœªè¿”å›å†…å®¹,åˆ™ä»cacheä¸­å–åŸæ¥çš„å†…å®¹
 
-            if (ByteArray.Compare(baOutputTimeStamp, cached_timestamp) == 0)	// Ê±¼ä´ÁÏàµÈ
+            if (ByteArray.Compare(baOutputTimeStamp, cached_timestamp) == 0)	// æ—¶é—´æˆ³ç›¸ç­‰
             {
-                Debug.Assert(strLocalName != "", "strLocalName²»Ó¦Îª¿Õ");
+                Debug.Assert(strLocalName != "", "strLocalNameä¸åº”ä¸ºç©º");
 
                 StreamReader sr = null;
 
@@ -4892,18 +4892,18 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
                 strResult = sr.ReadToEnd();
                 sr.Close();
 
-                return 0;	// ÒÔÎŞ´íÎó×ËÌ¬·µ»Ø
+                return 0;	// ä»¥æ— é”™è¯¯å§¿æ€è¿”å›
             }
 
         GETDATA:
 
-            // ÖØĞÂÕıÊ½»ñÈ¡ÄÚÈİ
+            // é‡æ–°æ­£å¼è·å–å†…å®¹
             lRet = GetRes(strPath,
                 strStyle,
                 out strResult,
@@ -4914,12 +4914,12 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             if (lRet == -1)
                 return -1;
 
-            // ÒòÎªÊ±¼ä´Á²»Æ¥Åä¶øĞÂ»ñµÃÁËÄÚÈİ
-            // ±£´æµ½cache
+            // å› ä¸ºæ—¶é—´æˆ³ä¸åŒ¹é…è€Œæ–°è·å¾—äº†å†…å®¹
+            // ä¿å­˜åˆ°cache
             cache.PrepareLocalFile(strFullPath, out strLocalName);
-            Debug.Assert(strLocalName != "", "PrepareLocalFile()·µ»ØµÄstrLocalNameÎª¿Õ");
+            Debug.Assert(strLocalName != "", "PrepareLocalFile()è¿”å›çš„strLocalNameä¸ºç©º");
 
-            // Ğ´ÈëÎÄ¼ş,ÒÔ±ãÒÔºó´Ócache»ñÈ¡
+            // å†™å…¥æ–‡ä»¶,ä»¥ä¾¿ä»¥åä»cacheè·å–
             StreamWriter sw = new StreamWriter(strLocalName,
                 false,	// append
                 System.Text.Encoding.UTF8);
@@ -4927,7 +4927,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             sw.Close();
             sw = null;
 
-            Debug.Assert(baOutputTimeStamp != null, "ÏÂ²ãGetRes()·µ»ØµÄbaOutputTimeStampÎª¿Õ");
+            Debug.Assert(baOutputTimeStamp != null, "ä¸‹å±‚GetRes()è¿”å›çš„baOutputTimeStampä¸ºç©º");
             nRet = cache.SetTimeStamp(strFullPath,
                 ByteArray.GetHexTimeStampString(baOutputTimeStamp),
                 out strError);
@@ -4938,11 +4938,11 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             return lRet;
         }
 
-        // »ñµÃ×ÊÔ´¡£·µ»Ø×Ö·û´®°æ±¾¡£ÊÊÓÃÓÚ»ñµÃÖ÷¼ÇÂ¼Ìå¡£
-        // ¿ÉÓÃÀ´»ñµÃÅäÖÃÎÄ¼ş
+        // è·å¾—èµ„æºã€‚è¿”å›å­—ç¬¦ä¸²ç‰ˆæœ¬ã€‚é€‚ç”¨äºè·å¾—ä¸»è®°å½•ä½“ã€‚
+        // å¯ç”¨æ¥è·å¾—é…ç½®æ–‡ä»¶
         // return:
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(string strPath,
             out string strResult,
             out string strMetaData,
@@ -4960,9 +4960,9 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                 out strError);
         }
 
-        // »ñµÃ×ÊÔ´¡£Ô­Ê¼°æ±¾¡£2007/5/27
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        // è·å¾—èµ„æºã€‚åŸå§‹ç‰ˆæœ¬ã€‚2007/5/27
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(string strResPath,
             long lStart,
             int nLength,
@@ -4997,7 +4997,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
@@ -5005,7 +5005,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -5016,7 +5016,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     out strOutputResPath,
                     out baOutputTimestamp,soapresult);
 
-                // ¼´±ã²»ÊÇ·µ»Ø-1,Ò²¿ÉÄÜÓĞ´íÎóÂëºÍ´íÎóĞÅÏ¢×Ö·û´®
+                // å³ä¾¿ä¸æ˜¯è¿”å›-1,ä¹Ÿå¯èƒ½æœ‰é”™è¯¯ç å’Œé”™è¯¯ä¿¡æ¯å­—ç¬¦ä¸²
                 ConvertErrorCode(result);
                 strError = result.ErrorString;
 
@@ -5059,10 +5059,10 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             // return 0;
         }
 
-        // »ñµÃ×ÊÔ´¡£·µ»Ø×Ö·û´®°æ±¾¡£ÊÊÓÃÓÚ»ñµÃÖ÷¼ÇÂ¼Ìå¡£
+        // è·å¾—èµ„æºã€‚è¿”å›å­—ç¬¦ä¸²ç‰ˆæœ¬ã€‚é€‚ç”¨äºè·å¾—ä¸»è®°å½•ä½“ã€‚
         // return:
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(string strPath,
             string strStyle,
             out string strResult,
@@ -5094,13 +5094,13 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
             if (StringUtil.IsInList("attachmentid", strStyle) == true)
             {
-                strError = "Ä¿Ç°²»Ö§³Ö attachmentid";
+                strError = "ç›®å‰ä¸æ”¯æŒ attachmentid";
                 return -1;
             }
 
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 REDO:
                 try
@@ -5120,16 +5120,16 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                         /*
                         try 
                         {
-                            Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                            Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
                         }
                         catch
                         {
                         }
 					
 
-                        // System.Threading.Thread.Sleep(10);	// ±ÜÃâCPU×ÊÔ´¹ı¶ÈºÄ·Ñ
+                        // System.Threading.Thread.Sleep(10);	// é¿å…CPUèµ„æºè¿‡åº¦è€—è´¹
                          */
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
@@ -5137,7 +5137,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -5150,7 +5150,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                         out strOutputResPath,
                         out baOutputTimeStamp,soapresult);
 
-                    // ¼´±ã²»ÊÇ·µ»Ø-1,Ò²¿ÉÄÜÓĞ´íÎóÂëºÍ´íÎóĞÅÏ¢×Ö·û´®
+                    // å³ä¾¿ä¸æ˜¯è¿”å›-1,ä¹Ÿå¯èƒ½æœ‰é”™è¯¯ç å’Œé”™è¯¯ä¿¡æ¯å­—ç¬¦ä¸²
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
 
@@ -5190,11 +5190,11 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     baTotal = ByteArray.Add(baTotal, baContent);
                     // bytes.AddRange(baContent);
 
-                    Debug.Assert(baContent.Length <= result.Value, "Ã¿´Î·µ»ØµÄ°ü³ß´ç[" + Convert.ToString(baContent.Length) + "]Ó¦µ±Ğ¡ÓÚresult.Value[" + Convert.ToString(result.Value) + "]");
+                    Debug.Assert(baContent.Length <= result.Value, "æ¯æ¬¡è¿”å›çš„åŒ…å°ºå¯¸[" + Convert.ToString(baContent.Length) + "]åº”å½“å°äºresult.Value[" + Convert.ToString(result.Value) + "]");
 
                     lStart += baContent.Length;
                     if (lStart >= result.Value)
-                        break;	// ½áÊø
+                        break;	// ç»“æŸ
 
                     baContent = null;
                 } // end try
@@ -5225,21 +5225,21 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             strResult = Encoding.UTF8.GetString(baTemp);
 #endif
 
-            // ×ª»»³É×Ö·û´®
+            // è½¬æ¢æˆå­—ç¬¦ä¸²
             strResult = ByteArray.ToString(baTotal/*,
 				Encoding.UTF8*/
-                               );	// ½«À´×ö×Ô¶¯Ê¶±ğ±àÂë·½Ê½
+                               );	// å°†æ¥åšè‡ªåŠ¨è¯†åˆ«ç¼–ç æ–¹å¼
 
             return 0;
         }
 
 
-        // »ñµÃ×ÊÔ´¡£Ğ´ÈëÎÄ¼şµÄ°æ±¾¡£ÌØ±ğÊÊÓÃÓÚ»ñµÃ×ÊÔ´£¬Ò²¿ÉÓÃÓÚ»ñµÃÖ÷¼ÇÂ¼Ìå¡£
+        // è·å¾—èµ„æºã€‚å†™å…¥æ–‡ä»¶çš„ç‰ˆæœ¬ã€‚ç‰¹åˆ«é€‚ç”¨äºè·å¾—èµ„æºï¼Œä¹Ÿå¯ç”¨äºè·å¾—ä¸»è®°å½•ä½“ã€‚
         // parameters:
-        //		strOutputFileName	Êä³öÎÄ¼şÃû¡£¿ÉÒÔÎªnull¡£Èç¹ûµ÷ÓÃÇ°ÎÄ¼şÒÑ¾­´æÔÚ, »á±»¸²¸Ç¡£
+        //		strOutputFileName	è¾“å‡ºæ–‡ä»¶åã€‚å¯ä»¥ä¸ºnullã€‚å¦‚æœè°ƒç”¨å‰æ–‡ä»¶å·²ç»å­˜åœ¨, ä¼šè¢«è¦†ç›–ã€‚
         // return:
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(string strPath,
             string strOutputFileName,
             DigitalPlatform.Stop stop,
@@ -5281,7 +5281,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             }
         }
 
-        /* ÈÎÑÓ»ª¼ÓµÄ£¬ºóÀ´ÓÖÈ¥µôÁË£¬ÒòÎª¿ÉÒÔ´«WebPageStopÁË
+        /* ä»»å»¶ååŠ çš„ï¼Œåæ¥åˆå»æ‰äº†ï¼Œå› ä¸ºå¯ä»¥ä¼ WebPageStopäº†
                 public long GetRes(string strPath,
                     Stream targetStream,
                     out string strMetaData,
@@ -5303,8 +5303,8 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                 }
         */
 
-        // °ü×°°æ±¾
-        // ÉÙÁËÒ»¸öflushOutputMethod²ÎÊı
+        // åŒ…è£…ç‰ˆæœ¬
+        // å°‘äº†ä¸€ä¸ªflushOutputMethodå‚æ•°
         public long GetRes(string strPath,
     Stream fileTarget,
     DigitalPlatform.Stop stop,
@@ -5327,14 +5327,14 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             out strError);
         }
 
-        // »ñµÃ×ÊÔ´¡£Ğ´ÈëÎÄ¼şµÄ°æ±¾¡£ÌØ±ğÊÊÓÃÓÚ»ñµÃ×ÊÔ´£¬Ò²¿ÉÓÃÓÚ»ñµÃÖ÷¼ÇÂ¼Ìå¡£
+        // è·å¾—èµ„æºã€‚å†™å…¥æ–‡ä»¶çš„ç‰ˆæœ¬ã€‚ç‰¹åˆ«é€‚ç”¨äºè·å¾—èµ„æºï¼Œä¹Ÿå¯ç”¨äºè·å¾—ä¸»è®°å½•ä½“ã€‚
         // parameters:
-        //		fileTarget	ÎÄ¼ş¡£×¢ÒâÔÚµ÷ÓÃº¯ÊıÇ°ÊÊµ±ÉèÖÃÎÄ¼şÖ¸ÕëÎ»ÖÃ¡£º¯ÊıÖ»»áÔÚµ±Ç°Î»ÖÃ¿ªÊ¼ÏòºóĞ´£¬Ğ´ÈëÇ°²»»áÖ÷¶¯¸Ä±äÎÄ¼şÖ¸Õë¡£
-        //		strStyleParam	Ò»°ãÉèÖÃÎª"content,data,metadata,timestamp,outputpath";
-        //		input_timestamp	Èô!=null£¬Ôò±¾º¯Êı»á°ÑµÚÒ»¸ö·µ»ØµÄtimestampºÍ±¾²ÎÊıÄÚÈİ±È½Ï£¬Èç¹û²»ÏàµÈ£¬Ôò±¨´í
+        //		fileTarget	æ–‡ä»¶ã€‚æ³¨æ„åœ¨è°ƒç”¨å‡½æ•°å‰é€‚å½“è®¾ç½®æ–‡ä»¶æŒ‡é’ˆä½ç½®ã€‚å‡½æ•°åªä¼šåœ¨å½“å‰ä½ç½®å¼€å§‹å‘åå†™ï¼Œå†™å…¥å‰ä¸ä¼šä¸»åŠ¨æ”¹å˜æ–‡ä»¶æŒ‡é’ˆã€‚
+        //		strStyleParam	ä¸€èˆ¬è®¾ç½®ä¸º"content,data,metadata,timestamp,outputpath";
+        //		input_timestamp	è‹¥!=nullï¼Œåˆ™æœ¬å‡½æ•°ä¼šæŠŠç¬¬ä¸€ä¸ªè¿”å›çš„timestampå’Œæœ¬å‚æ•°å†…å®¹æ¯”è¾ƒï¼Œå¦‚æœä¸ç›¸ç­‰ï¼Œåˆ™æŠ¥é”™
         // return:
-        //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-        //		0	³É¹¦
+        //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+        //		0	æˆåŠŸ
         public long GetRes(string strPath,
             Stream fileTarget,
 			FlushOutput flushOutputMethod,
@@ -5358,16 +5358,16 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
             if (StringUtil.IsInList("attachment", strStyle) == true)
             {
-                Debug.Assert(false, "attachment styleÔİÊ±²»ÄÜÊ¹ÓÃ");
+                Debug.Assert(false, "attachment styleæš‚æ—¶ä¸èƒ½ä½¿ç”¨");
             }
 
 
-            // ¼ì²é²ÎÊı
+            // æ£€æŸ¥å‚æ•°
             if (StringUtil.IsInList("data", strStyle) == false)
             {
                 if (fileTarget != null)
                 {
-                    strError = "strStyle²ÎÊıÖĞÈô²»°üº¬data·ç¸ñ£¬ÔòÎŞ·¨»ñµÃÊı¾İ...";
+                    strError = "strStyleå‚æ•°ä¸­è‹¥ä¸åŒ…å«dataé£æ ¼ï¼Œåˆ™æ— æ³•è·å¾—æ•°æ®...";
                     return -1;
                 }
             }
@@ -5375,7 +5375,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             {
                 if (fileTarget == null)
                 {
-                    strError = "strStyle²ÎÊıÖĞÈô°üº¬data·ç¸ñ£¬¶øfileTargetÎªnull£¬»áÀË·ÑÍ¨Ñ¶×ÊÔ´...";
+                    strError = "strStyleå‚æ•°ä¸­è‹¥åŒ…å«dataé£æ ¼ï¼Œè€ŒfileTargetä¸ºnullï¼Œä¼šæµªè´¹é€šè®¯èµ„æº...";
                     return -1;
                 }
             }
@@ -5399,11 +5399,11 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
             for (; ; )
             {
-                DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                 if (stop != null && stop.State != 0)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     return -1;
                 }
 
@@ -5422,7 +5422,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                     if (stop != null)
                     {
-                        strMessage = "ÕıÔÚÏÂÔØ " + Convert.ToString(lStart) + "-"
+                        strMessage = "æ­£åœ¨ä¸‹è½½ " + Convert.ToString(lStart) + "-"
                             + (lTotalLength == -1 ? "?" : Convert.ToString(lTotalLength))
                             + " " + strPercent + " "
                             + strPath;
@@ -5442,16 +5442,16 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                         /*
                         try 
                         {
-                            Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                            Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
                         }
                         catch
                         {
                         }
 					
 
-                        // System.Threading.Thread.Sleep(10);	// ±ÜÃâCPU×ÊÔ´¹ı¶ÈºÄ·Ñ
+                        // System.Threading.Thread.Sleep(10);	// é¿å…CPUèµ„æºè¿‡åº¦è€—è´¹
                          */
-                        DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                        DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
 
                         bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                         if (bRet == true)
@@ -5459,7 +5459,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     }
                     if (this.m_ws == null)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         this.ErrorCode = ChannelErrorCode.RequestCanceled;
                         return -1;
                     }
@@ -5471,7 +5471,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                         out strOutputPath,
                         out timestamp,soapresult);
 
-                    // ¼´±ã²»ÊÇ·µ»Ø-1,Ò²¿ÉÄÜÓĞ´íÎóÂëºÍ´íÎóĞÅÏ¢×Ö·û´®
+                    // å³ä¾¿ä¸æ˜¯è¿”å›-1,ä¹Ÿå¯èƒ½æœ‰é”™è¯¯ç å’Œé”™è¯¯ä¿¡æ¯å­—ç¬¦ä¸²
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
 
@@ -5522,7 +5522,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                         {
                             if (ByteArray.Compare(input_timestamp, timestamp) != 0)
                             {
-                                strError = "ÏÂÔØ¹ı³ÌÖĞ·¢ÏÖÊ±¼ä´ÁºÍinput_timestamp²ÎÊıÖĞµÄÊ±¼ä´Á²»Ò»ÖÂ£¬ÏÂÔØÊ§°Ü ...";
+                                strError = "ä¸‹è½½è¿‡ç¨‹ä¸­å‘ç°æ—¶é—´æˆ³å’Œinput_timestampå‚æ•°ä¸­çš„æ—¶é—´æˆ³ä¸ä¸€è‡´ï¼Œä¸‹è½½å¤±è´¥ ...";
                                 return -1;
                             }
                         }
@@ -5530,7 +5530,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                         {
                             if (ByteArray.Compare(old_timestamp, timestamp) != 0)
                             {
-                                strError = "ÏÂÔØ¹ı³ÌÖĞ·¢ÏÖÊ±¼ä´Á±ä»¯£¬ÏÂÔØÊ§°Ü ...";
+                                strError = "ä¸‹è½½è¿‡ç¨‹ä¸­å‘ç°æ—¶é—´æˆ³å˜åŒ–ï¼Œä¸‹è½½å¤±è´¥ ...";
                                 return -1;
                             }
                         }
@@ -5541,38 +5541,38 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     if (fileTarget == null)
                         break;
 
-                    // Ğ´ÈëÎÄ¼ş
+                    // å†™å…¥æ–‡ä»¶
                     if (StringUtil.IsInList("attachment", strStyle) == true)
                     {
-                        Debug.Assert(false, "attachment styleÔİÊ±²»ÄÜÊ¹ÓÃ");
+                        Debug.Assert(false, "attachment styleæš‚æ—¶ä¸èƒ½ä½¿ç”¨");
                         /*
 						Attachment attachment = ws.ResponseSoapContext.Attachments[id];
 						if (attachment == null)
 						{
-							strError = "idÎª '" +id+ "' µÄattachmentÔÚWebServiceÏìÓ¦ÖĞÃ»ÓĞÕÒµ½...";
+							strError = "idä¸º '" +id+ "' çš„attachmentåœ¨WebServiceå“åº”ä¸­æ²¡æœ‰æ‰¾åˆ°...";
 							return -1;
 						}
 						StreamUtil.DumpStream(attachment.Stream, fileTarget);
 						nStart += (int)attachment.Stream.Length;
 
-						Debug.Assert(attachment.Stream.Length <= result.Value, "Ã¿´Î·µ»ØµÄ°ü³ß´ç["+Convert.ToString(attachment.Stream.Length)+"]Ó¦µ±Ğ¡ÓÚresult.Value["+Convert.ToString(result.Value)+"]");
+						Debug.Assert(attachment.Stream.Length <= result.Value, "æ¯æ¬¡è¿”å›çš„åŒ…å°ºå¯¸["+Convert.ToString(attachment.Stream.Length)+"]åº”å½“å°äºresult.Value["+Convert.ToString(result.Value)+"]");
                          */
 
                     }
                     else
                     {
                         Debug.Assert(StringUtil.IsInList("content", strStyle) == true,
-                            "²»ÊÇattachment·ç¸ñ£¬¾ÍÓ¦ÊÇcontent·ç¸ñ");
+                            "ä¸æ˜¯attachmenté£æ ¼ï¼Œå°±åº”æ˜¯contenté£æ ¼");
 
-                        Debug.Assert(baContent != null, "·µ»ØµÄbaContent²»ÄÜÎªnull");
-                        Debug.Assert(baContent.Length <= result.Value, "Ã¿´Î·µ»ØµÄ°ü³ß´ç[" + Convert.ToString(baContent.Length) + "]Ó¦µ±Ğ¡ÓÚresult.Value[" + Convert.ToString(result.Value) + "]");
+                        Debug.Assert(baContent != null, "è¿”å›çš„baContentä¸èƒ½ä¸ºnull");
+                        Debug.Assert(baContent.Length <= result.Value, "æ¯æ¬¡è¿”å›çš„åŒ…å°ºå¯¸[" + Convert.ToString(baContent.Length) + "]åº”å½“å°äºresult.Value[" + Convert.ToString(result.Value) + "]");
 
                         fileTarget.Write(baContent, 0, baContent.Length);
                         if (flushOutputMethod != null)
                         {
                             if (flushOutputMethod() == false)
                             {
-                                strError = "FlushOutputMethod()ÓÃ»§ÖĞ¶Ï";
+                                strError = "FlushOutputMethod()ç”¨æˆ·ä¸­æ–­";
                                 return -1;
                             }
                         } 
@@ -5580,7 +5580,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     }
 
                     if (lStart >= result.Value)
-                        break;	// ½áÊø
+                        break;	// ç»“æŸ
 
                 } // end try
 
@@ -5618,16 +5618,16 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             return dom.OuterXml;
         }
 
-        // ±£´æ×ÊÔ´¼ÇÂ¼
+        // ä¿å­˜èµ„æºè®°å½•
         // parameters:
-        //		strPath	¸ñÊ½: ¿âÃû/¼ÇÂ¼ºÅ/object/¶ÔÏóxpath
-        //		bTailHint	ÊÇ·ñÎª×îºóÒ»´ÎĞ´Èë²Ù×÷¡£ÕâÊÇÒ»¸ö°µÊ¾²ÎÊı£¬±¾º¯Êı½«¸ù¾İ´Ë²ÎÊıÎª×îºóÒ»´ÎĞ´Èë²Ù×÷ÉèÖÃÌØÊâµÄ³¬Ê±Ê±¼ä¡£
-        //					¼Ù¶¨ÓĞÊ±Õû¸ö×ÊÔ´³ß´çºÜ´ó£¬ËäÈ»Ã¿´Î¾Ö²¿Ğ´ÈëºÄÊ±²»¶à£¬µ«ÊÇ×îºóÒ»´ÎĞ´ÈëÒòÎª·şÎñÆ÷ÒªÖ´ĞĞÕû¸ö×ÊÔ´×ª´æ
-        //					µÄ²Ù×÷ºóAPI²Å·µ»Ø£¬ËùÒÔ¿ÉÄÜ»áºÄ·ÑÀàËÆ20·ÖÖÓÕâÑùµÄ³¤Ê±¼ä£¬µ¼ÖÂWebService API³¬Ê±Ê§°Ü¡£
-        //					±¾²ÎÊıÊÇÒ»¸ö°µÊ¾²Ù×÷(±¾º¯ÊıÒ²²»µ£±£Ò»¶¨Òª×öÊ²Ã´²Ù×÷)£¬Èç¹ûµ÷ÓÃÕß²»Çå³şËüµÄº¬Òå£¬¿ÉÒÔÊ¹ÓÃfalse¡£
+        //		strPath	æ ¼å¼: åº“å/è®°å½•å·/object/å¯¹è±¡xpath
+        //		bTailHint	æ˜¯å¦ä¸ºæœ€åä¸€æ¬¡å†™å…¥æ“ä½œã€‚è¿™æ˜¯ä¸€ä¸ªæš—ç¤ºå‚æ•°ï¼Œæœ¬å‡½æ•°å°†æ ¹æ®æ­¤å‚æ•°ä¸ºæœ€åä¸€æ¬¡å†™å…¥æ“ä½œè®¾ç½®ç‰¹æ®Šçš„è¶…æ—¶æ—¶é—´ã€‚
+        //					å‡å®šæœ‰æ—¶æ•´ä¸ªèµ„æºå°ºå¯¸å¾ˆå¤§ï¼Œè™½ç„¶æ¯æ¬¡å±€éƒ¨å†™å…¥è€—æ—¶ä¸å¤šï¼Œä½†æ˜¯æœ€åä¸€æ¬¡å†™å…¥å› ä¸ºæœåŠ¡å™¨è¦æ‰§è¡Œæ•´ä¸ªèµ„æºè½¬å­˜
+        //					çš„æ“ä½œåAPIæ‰è¿”å›ï¼Œæ‰€ä»¥å¯èƒ½ä¼šè€—è´¹ç±»ä¼¼20åˆ†é’Ÿè¿™æ ·çš„é•¿æ—¶é—´ï¼Œå¯¼è‡´WebService APIè¶…æ—¶å¤±è´¥ã€‚
+        //					æœ¬å‚æ•°æ˜¯ä¸€ä¸ªæš—ç¤ºæ“ä½œ(æœ¬å‡½æ•°ä¹Ÿä¸æ‹…ä¿ä¸€å®šè¦åšä»€ä¹ˆæ“ä½œ)ï¼Œå¦‚æœè°ƒç”¨è€…ä¸æ¸…æ¥šå®ƒçš„å«ä¹‰ï¼Œå¯ä»¥ä½¿ç”¨falseã€‚
         public long DoSaveResObject(string strPath,
-            string strObjectFileName,  // ÈÎÑÓ»ª¼Ó,¸Ã²ÎÊı´ú±í´æ·Å¶ÔÏóÊı¾İµÄÎÄ¼şÃû
-            string strLocalPath,       // ¸Ã²ÎÊı´ú±í±¾µØÎÄ¼şÃû,ÓĞÊ±»áÓëstrObjectFileName²»Í¬
+            string strObjectFileName,  // ä»»å»¶ååŠ ,è¯¥å‚æ•°ä»£è¡¨å­˜æ”¾å¯¹è±¡æ•°æ®çš„æ–‡ä»¶å
+            string strLocalPath,       // è¯¥å‚æ•°ä»£è¡¨æœ¬åœ°æ–‡ä»¶å,æœ‰æ—¶ä¼šä¸strObjectFileNameä¸åŒ
             string strMime,
             string strLastModifyTime,   // 2007/12/13
             string strRange,
@@ -5642,7 +5642,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             FileInfo fi = new FileInfo(strObjectFileName);
             if (fi.Exists == false)
             {
-                strError = "ÎÄ¼ş '" + strObjectFileName + "'²»´æÔÚ...";
+                strError = "æ–‡ä»¶ '" + strObjectFileName + "'ä¸å­˜åœ¨...";
                 return -1;
             }
 
@@ -5678,7 +5678,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 IAsyncResult soapresult = this.ws.BeginWriteRes(strPath,
                     strRange,
-                    fi.Length,	// ÕâÊÇÕû¸ö°ü³ß´ç£¬²»ÊÇ±¾´ÎchunkµÄ³ß´ç¡£ÒòÎª·şÎñÆ÷ÏÔÈ»¿ÉÒÔ´ÓbaChunkÖĞ¿´³öÆä³ß´ç£¬²»±ØÔÙ×¨ÃÅÓÃÒ»¸ö²ÎÊı±íÊ¾Õâ¸ö³ß´çÁË
+                    fi.Length,	// è¿™æ˜¯æ•´ä¸ªåŒ…å°ºå¯¸ï¼Œä¸æ˜¯æœ¬æ¬¡chunkçš„å°ºå¯¸ã€‚å› ä¸ºæœåŠ¡å™¨æ˜¾ç„¶å¯ä»¥ä»baChunkä¸­çœ‹å‡ºå…¶å°ºå¯¸ï¼Œä¸å¿…å†ä¸“é—¨ç”¨ä¸€ä¸ªå‚æ•°è¡¨ç¤ºè¿™ä¸ªå°ºå¯¸äº†
                     baTotal,
                     // null,	// attachmentid
                     strMetadata,
@@ -5689,14 +5689,14 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -5729,11 +5729,11 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        strError = "Ê±¼ä´Á²»Æ¥Åä¡£\r\n\r\nÇëÇóµÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(timestamp) + "] ÏìÓ¦µÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚\r\n\r\nè¯·æ±‚çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(timestamp) + "] å“åº”çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
                         return -1;
                     }
 
-                    // Ô­À´ÔÚÕâÀï£¬ÉÔÍí
+                    // åŸæ¥åœ¨è¿™é‡Œï¼Œç¨æ™š
                     return -1;
                 }
             }
@@ -5762,15 +5762,15 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
         }
 
 
-        // ±£´æ×ÊÔ´¼ÇÂ¼
+        // ä¿å­˜èµ„æºè®°å½•
         // parameters:
-        //		strPath	¸ñÊ½: ¿âÃû/¼ÇÂ¼ºÅ/object/¶ÔÏóxpath
-        //		strRange	±¾´ÎÏë·¢ËÍ¸ø·şÎñÆ÷µÄ¾Ö²¿¡£±¾º¯Êı½«°ÑÕâ²¿·ÖÄÚÈİ¸´ÖÆµ½ÄÚ´æbyte[]½á¹¹ÖĞ£¬
-        //					Òò´Ë£¬µ÷ÓÃÕß±ØĞë¿¼ÂÇÓÃºÏÊÊµÄ³ß´ç£¬±ÜÃâ³¬¹ıÄÚ´æ¼«ÏŞÒıÆğ½ø³Ì±»É±ËÀ¡£
-        //		bTailHint	ÊÇ·ñÎª×îºóÒ»´ÎĞ´Èë²Ù×÷¡£ÕâÊÇÒ»¸ö°µÊ¾²ÎÊı£¬±¾º¯Êı½«¸ù¾İ´Ë²ÎÊıÎª×îºóÒ»´ÎĞ´Èë²Ù×÷ÉèÖÃÌØÊâµÄ³¬Ê±Ê±¼ä¡£
-        //					¼Ù¶¨ÓĞÊ±Õû¸ö×ÊÔ´³ß´çºÜ´ó£¬ËäÈ»Ã¿´Î¾Ö²¿Ğ´ÈëºÄÊ±²»¶à£¬µ«ÊÇ×îºóÒ»´ÎĞ´ÈëÒòÎª·şÎñÆ÷ÒªÖ´ĞĞÕû¸ö×ÊÔ´×ª´æ
-        //					µÄ²Ù×÷ºóAPI²Å·µ»Ø£¬ËùÒÔ¿ÉÄÜ»áºÄ·ÑÀàËÆ20·ÖÖÓÕâÑùµÄ³¤Ê±¼ä£¬µ¼ÖÂWebService API³¬Ê±Ê§°Ü¡£
-        //					±¾²ÎÊıÊÇÒ»¸ö°µÊ¾²Ù×÷(±¾º¯ÊıÒ²²»µ£±£Ò»¶¨Òª×öÊ²Ã´²Ù×÷)£¬Èç¹ûµ÷ÓÃÕß²»Çå³şËüµÄº¬Òå£¬¿ÉÒÔÊ¹ÓÃfalse¡£
+        //		strPath	æ ¼å¼: åº“å/è®°å½•å·/object/å¯¹è±¡xpath
+        //		strRange	æœ¬æ¬¡æƒ³å‘é€ç»™æœåŠ¡å™¨çš„å±€éƒ¨ã€‚æœ¬å‡½æ•°å°†æŠŠè¿™éƒ¨åˆ†å†…å®¹å¤åˆ¶åˆ°å†…å­˜byte[]ç»“æ„ä¸­ï¼Œ
+        //					å› æ­¤ï¼Œè°ƒç”¨è€…å¿…é¡»è€ƒè™‘ç”¨åˆé€‚çš„å°ºå¯¸ï¼Œé¿å…è¶…è¿‡å†…å­˜æé™å¼•èµ·è¿›ç¨‹è¢«æ€æ­»ã€‚
+        //		bTailHint	æ˜¯å¦ä¸ºæœ€åä¸€æ¬¡å†™å…¥æ“ä½œã€‚è¿™æ˜¯ä¸€ä¸ªæš—ç¤ºå‚æ•°ï¼Œæœ¬å‡½æ•°å°†æ ¹æ®æ­¤å‚æ•°ä¸ºæœ€åä¸€æ¬¡å†™å…¥æ“ä½œè®¾ç½®ç‰¹æ®Šçš„è¶…æ—¶æ—¶é—´ã€‚
+        //					å‡å®šæœ‰æ—¶æ•´ä¸ªèµ„æºå°ºå¯¸å¾ˆå¤§ï¼Œè™½ç„¶æ¯æ¬¡å±€éƒ¨å†™å…¥è€—æ—¶ä¸å¤šï¼Œä½†æ˜¯æœ€åä¸€æ¬¡å†™å…¥å› ä¸ºæœåŠ¡å™¨è¦æ‰§è¡Œæ•´ä¸ªèµ„æºè½¬å­˜
+        //					çš„æ“ä½œåAPIæ‰è¿”å›ï¼Œæ‰€ä»¥å¯èƒ½ä¼šè€—è´¹ç±»ä¼¼20åˆ†é’Ÿè¿™æ ·çš„é•¿æ—¶é—´ï¼Œå¯¼è‡´WebService APIè¶…æ—¶å¤±è´¥ã€‚
+        //					æœ¬å‚æ•°æ˜¯ä¸€ä¸ªæš—ç¤ºæ“ä½œ(æœ¬å‡½æ•°ä¹Ÿä¸æ‹…ä¿ä¸€å®šè¦åšä»€ä¹ˆæ“ä½œ)ï¼Œå¦‚æœè°ƒç”¨è€…ä¸æ¸…æ¥šå®ƒçš„å«ä¹‰ï¼Œå¯ä»¥ä½¿ç”¨falseã€‚
         public long DoSaveResObject(string strPath,
             Stream file,
             long lTotalLength,
@@ -5783,7 +5783,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             out string strOutputPath,
             out string strError)
         {
-            //string strLocalPath,       // ¸Ã²ÎÊı´ú±í±¾µØÎÄ¼şÃû,ÓĞÊ±»áÓëstrObjectFileName²»Í¬
+            //string strLocalPath,       // è¯¥å‚æ•°ä»£è¡¨æœ¬åœ°æ–‡ä»¶å,æœ‰æ—¶ä¼šä¸strObjectFileNameä¸åŒ
             //string strMime;
 
             this.ErrorCode = ChannelErrorCode.None;
@@ -5798,7 +5798,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 if (file.Position + lTotalLength > file.Length)
                 {
-                    strError = "ÎÄ¼ş´Óµ±Ç°Î»ÖÃ " + Convert.ToString(file.Position) + " ¿ªÊ¼µ½Ä©Î²³¤¶È²»×ã " + Convert.ToString(lTotalLength);
+                    strError = "æ–‡ä»¶ä»å½“å‰ä½ç½® " + Convert.ToString(file.Position) + " å¼€å§‹åˆ°æœ«å°¾é•¿åº¦ä¸è¶³ " + Convert.ToString(lTotalLength);
                     return -1;
                 }
 
@@ -5813,7 +5813,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             }
             else
             {
-                baTotal = new byte[0];	// ÕâÊÇÒ»¸öÈ±º¶¡£Ó¦µ±Ğí¿ÉÎªnull
+                baTotal = new byte[0];	// è¿™æ˜¯ä¸€ä¸ªç¼ºæ†¾ã€‚åº”å½“è®¸å¯ä¸ºnull
             }
 
 
@@ -5833,7 +5833,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                 // string strMetadata = "<file mimetype='"+strMime+"' localpath='" + strLocalPath + "'/>";
                 IAsyncResult soapresult = this.ws.BeginWriteRes(strPath,
                     strRange,
-                    lTotalLength,	// ÕâÊÇÕû¸ö°ü³ß´ç£¬²»ÊÇ±¾´ÎchunkµÄ³ß´ç¡£ÒòÎª·şÎñÆ÷ÏÔÈ»¿ÉÒÔ´ÓbaChunkÖĞ¿´³öÆä³ß´ç£¬²»±ØÔÙ×¨ÃÅÓÃÒ»¸ö²ÎÊı±íÊ¾Õâ¸ö³ß´çÁË
+                    lTotalLength,	// è¿™æ˜¯æ•´ä¸ªåŒ…å°ºå¯¸ï¼Œä¸æ˜¯æœ¬æ¬¡chunkçš„å°ºå¯¸ã€‚å› ä¸ºæœåŠ¡å™¨æ˜¾ç„¶å¯ä»¥ä»baChunkä¸­çœ‹å‡ºå…¶å°ºå¯¸ï¼Œä¸å¿…å†ä¸“é—¨ç”¨ä¸€ä¸ªå‚æ•°è¡¨ç¤ºè¿™ä¸ªå°ºå¯¸äº†
                     baTotal,
                     // null,	// attachmentid
                     strMetadata,
@@ -5844,14 +5844,14 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
                 }
                 if (this.m_ws == null)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
@@ -5884,12 +5884,12 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        // output_timestamp ÔÚ³ö´íÇé¿öÏÂ£¬Ò²»á·µ»Ø·şÎñÆ÷¶ËÏ£ÍûµÄÊ±¼ä´Á
-                        strError = "Ê±¼ä´Á²»Æ¥Åä¡£\r\n\r\nÇëÇóµÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(timestamp) + "] ÏìÓ¦µÄÊ±¼ä´Á [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        // output_timestamp åœ¨å‡ºé”™æƒ…å†µä¸‹ï¼Œä¹Ÿä¼šè¿”å›æœåŠ¡å™¨ç«¯å¸Œæœ›çš„æ—¶é—´æˆ³
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚\r\n\r\nè¯·æ±‚çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(timestamp) + "] å“åº”çš„æ—¶é—´æˆ³ [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
                         return -1;
                     }
 
-                    // Ô­À´ÔÚÕâÀï£¬ÉÔÍí
+                    // åŸæ¥åœ¨è¿™é‡Œï¼Œç¨æ™š
                     return -1;
                 }
             }
@@ -5937,7 +5937,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 for (; ; )
                 {
-                    DoIdle(); // ³öÈÃ¿ØÖÆÈ¨£¬±ÜÃâCPU×ÊÔ´ºÄ·Ñ¹ı¶È
+                    DoIdle(); // å‡ºè®©æ§åˆ¶æƒï¼Œé¿å…CPUèµ„æºè€—è´¹è¿‡åº¦
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
                     if (bRet == true)
                         break;
@@ -6004,7 +6004,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
             IEnumerable<Claim> claims = claimSet.FindClaims(ClaimTypes.Dns, Rights.PossessProperty);
             foreach (Claim claim in claims)
             {
-                // ¸ñÍâÔÊĞí"localhost"
+                // æ ¼å¤–å…è®¸"localhost"
                 if (expedtedDns.Equals("localhost", StringComparison.OrdinalIgnoreCase))
                 {
                     return claim;
@@ -6012,7 +6012,7 @@ ref strNewStyle);	// ²»ÒªÊı¾İÌåºÍmetadata
 
                 string strCurrent = (string)claim.Resource;
 
-                // ¸ñÍâÔÊĞí"DigitalPlatform"ºÍÈÎÒâ³ö·¢×Ö·û´®Æ¥Åä
+                // æ ¼å¤–å…è®¸"DigitalPlatform"å’Œä»»æ„å‡ºå‘å­—ç¬¦ä¸²åŒ¹é…
                 if (strCurrent.Equals("DigitalPlatform", StringComparison.OrdinalIgnoreCase))
                     return claim;
 

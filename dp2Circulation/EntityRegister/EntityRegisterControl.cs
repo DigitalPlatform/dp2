@@ -754,7 +754,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "EntityRegisterControl filter.Load() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -1810,7 +1810,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "EntityRegisterControl GetBiblioFromStyle() exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 
@@ -1984,7 +1984,7 @@ MessageBoxDefaultButton.Button1);
                         }
                         catch (Exception ex)
                         {
-                            strError = ex.Message;
+                            strError = "EntityRegisterControl {F8A02071-E276-4C77-B915-42564A4EB418} exception: " + ExceptionUtil.GetAutoText(ex);
                             goto ERROR1;
                         }
 

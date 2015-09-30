@@ -752,7 +752,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "SearchFormBase RefreshListViewLines() {6BB2AEC9-B53F-4745-A655-AA9B286554B8} exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -20,10 +20,10 @@ namespace DigitalPlatform.CommonControl
 
         public XmlNamespaceManager XmlNamespaceManager = null;
 
-        public DcElement LastClickElement = null;   // ×î½üÒ»´ÎclickÑ¡Ôñ¹ıµÄElement¶ÔÏó
+        public DcElement LastClickElement = null;   // æœ€è¿‘ä¸€æ¬¡clické€‰æ‹©è¿‡çš„Elementå¯¹è±¡
 
-        XmlDocument DataDom = null; // Êı¾İDOM
-        XmlNode DataRoot = null;    // DCÈİÆ÷ÔªËØ
+        XmlDocument DataDom = null; // æ•°æ®DOM
+        XmlNode DataRoot = null;    // DCå®¹å™¨å…ƒç´ 
         List<XmlNode> DcNodes = null;
 
         int m_nInSuspend = 0;
@@ -36,10 +36,10 @@ namespace DigitalPlatform.CommonControl
 
         XmlDocument CfgDom = null;
 
-        // ÔªËØÃû¶ÔÕÕÖµ
+        // å…ƒç´ åå¯¹ç…§å€¼
         public List<CaptionValue> ElementTable = null;
 
-        // ÓïÑÔ¶ÔÕÕÖµ
+        // è¯­è¨€å¯¹ç…§å€¼
         public List<CaptionValue> LanguageTable = null;
 
 
@@ -48,7 +48,7 @@ namespace DigitalPlatform.CommonControl
         bool m_bChanged = false;
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -105,11 +105,11 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ²éÕÒ·ûºÏÌõ¼şµÄDcElement¶ÔÏó
+        // æŸ¥æ‰¾ç¬¦åˆæ¡ä»¶çš„DcElementå¯¹è±¡
         // parameters:
-        //      strElementQName ÀàËÆ"dc:title"µÄQualified Dc element name
-        //      strTypeValue    typeÖµ¡£Èç¹ûÎª""£¬±íÊ¾ÕâÀï±ØĞëÎª¿Õ²ÅÄÜÆ¥Åä£»Èç¹ûÎª"*", ±íÊ¾Í¨Åä
-        //      strLangrageValue    languageÖµ¡£Èç¹ûÎª""£¬±íÊ¾ÕâÀï±ØĞëÎª¿Õ²ÅÄÜÆ¥Åä£»Èç¹ûÎª"*", ±íÊ¾Í¨Åä
+        //      strElementQName ç±»ä¼¼"dc:title"çš„Qualified Dc element name
+        //      strTypeValue    typeå€¼ã€‚å¦‚æœä¸º""ï¼Œè¡¨ç¤ºè¿™é‡Œå¿…é¡»ä¸ºç©ºæ‰èƒ½åŒ¹é…ï¼›å¦‚æœä¸º"*", è¡¨ç¤ºé€šé…
+        //      strLangrageValue    languageå€¼ã€‚å¦‚æœä¸º""ï¼Œè¡¨ç¤ºè¿™é‡Œå¿…é¡»ä¸ºç©ºæ‰èƒ½åŒ¹é…ï¼›å¦‚æœä¸º"*", è¡¨ç¤ºé€šé…
         public List<DcElement> FindElements(string strElementQName,
             string strTypeValue,
             string strLanguageValue)
@@ -122,7 +122,7 @@ namespace DigitalPlatform.CommonControl
 
                 // 
                 if (String.IsNullOrEmpty(strElementQName) == true
-                        || strElementQName == "[ÎŞ]")
+                        || strElementQName == "[æ— ]")
                 {
                     if (this.IsBlankString(element.Element) == false)
                         continue;
@@ -137,7 +137,7 @@ namespace DigitalPlatform.CommonControl
 
                 // 
                 if (String.IsNullOrEmpty(strTypeValue) == true
-                        || strTypeValue == "[ÎŞ]")
+                        || strTypeValue == "[æ— ]")
                 {
                     if (this.IsBlankString(element.SchemeCaption) == false)
                         continue;
@@ -151,7 +151,7 @@ namespace DigitalPlatform.CommonControl
                 }
 
                 if (String.IsNullOrEmpty(strLanguageValue) == true
-                    || strLanguageValue == "[ÎŞ]")
+                    || strLanguageValue == "[æ— ]")
                 {
                     if (element.Language != null)
                         continue;
@@ -160,7 +160,7 @@ namespace DigitalPlatform.CommonControl
                 if (String.IsNullOrEmpty(strLanguageValue) == false
                     && strLanguageValue != "*")
                 {
-                    // TODO: ×îºÃÖ§³ÖÍ¨Åä·û£¬ÀàËÆ"zh-*"
+                    // TODO: æœ€å¥½æ”¯æŒé€šé…ç¬¦ï¼Œç±»ä¼¼"zh-*"
                     if (element.Language != strLanguageValue)
                         continue;
                 }
@@ -172,7 +172,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         /*
-         * ÒÑ¾­ÒÆÈëDigitalPlatform.ClipboardUtil
+         * å·²ç»ç§»å…¥DigitalPlatform.ClipboardUtil
         public static string GetClipboardText()
         {
             IDataObject ido = Clipboard.GetDataObject();
@@ -248,7 +248,7 @@ namespace DigitalPlatform.CommonControl
                     DcElement cur_element = this.Elements[i];
 
                     if (cur_element == element)
-                        continue;   // ÔİÊ±²»´¦Àíµ±Ç°ĞĞ
+                        continue;   // æš‚æ—¶ä¸å¤„ç†å½“å‰è¡Œ
 
                     if ((cur_element.State & ElementState.Selected) != 0)
                     {
@@ -258,7 +258,7 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 
-            // Ñ¡ÖĞµ±Ç°ĞĞ
+            // é€‰ä¸­å½“å‰è¡Œ
             if ((element.State & ElementState.Selected) == 0)
             {
                 element.State |= ElementState.Selected;
@@ -269,8 +269,8 @@ namespace DigitalPlatform.CommonControl
 
             if (bClearOld == true)
             {
-                // ¿´¿´focusÊÇ²»ÊÇÒÑ¾­ÔÚÕâÒ»ĞĞÉÏ£¿
-                // Èç¹û²»ÔÚ£¬ÔòÒªÇĞ»»¹ıÀ´
+                // çœ‹çœ‹focusæ˜¯ä¸æ˜¯å·²ç»åœ¨è¿™ä¸€è¡Œä¸Šï¼Ÿ
+                // å¦‚æœä¸åœ¨ï¼Œåˆ™è¦åˆ‡æ¢è¿‡æ¥
                 if (element.IsSubControlFocused() == false)
                     element.comboBox_element.Focus();
             }
@@ -281,7 +281,7 @@ namespace DigitalPlatform.CommonControl
 
         public void ToggleSelectElement(DcElement element)
         {
-            // Ñ¡ÖĞµ±Ç°ĞĞ
+            // é€‰ä¸­å½“å‰è¡Œ
             if ((element.State & ElementState.Selected) == 0)
                 element.State |= ElementState.Selected;
             else
@@ -306,7 +306,7 @@ namespace DigitalPlatform.CommonControl
 
             if (nStart > nEnd)
             {
-                // ½»»»
+                // äº¤æ¢
                 int nTemp = nStart;
                 nStart = nEnd;
                 nEnd = nTemp;
@@ -323,7 +323,7 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 
-            // Çå³ıÆäÓàÎ»ÖÃ
+            // æ¸…é™¤å…¶ä½™ä½ç½®
             for (int i = 0; i < nStart; i++)
             {
                 DcElement cur_element = this.Elements[i];
@@ -368,7 +368,7 @@ namespace DigitalPlatform.CommonControl
             try
             {
                 tableLayoutPanel_main.Size = this.Size;
-                // ÖØĞÂµ÷Õûtextbox¸ß¶È
+                // é‡æ–°è°ƒæ•´textboxé«˜åº¦
                 SetElementsHeight();
             }
             finally
@@ -406,14 +406,14 @@ namespace DigitalPlatform.CommonControl
         {
             get
             {
-                return "[ÎŞ]";
+                return "[æ— ]";
             }
         }
 
         public bool IsBlankString(string strText)
         {
             if (String.IsNullOrEmpty(strText) == true
-                || strText == "[ÎŞ]")
+                || strText == "[æ— ]")
                 return true;
 
             return false;
@@ -430,7 +430,7 @@ namespace DigitalPlatform.CommonControl
             this.m_nDisableDrawCell--;
         }
 
-        // ·ÀÖ¹size changingÊ±µÄ´óÁ¿ÉÁ¶¯
+        // é˜²æ­¢size changingæ—¶çš„å¤§é‡é—ªåŠ¨
         protected override void OnSizeChanged(EventArgs e)
         {
             // MessageBox.Show(this, "begin");
@@ -511,7 +511,7 @@ namespace DigitalPlatform.CommonControl
                 // this.Elements.Clear();
                 this.ClearElements();
 
-                this.tableLayoutPanel_main.RowCount = 2;    // ÎªÊ²Ã´ÊÇ2£¿
+                this.tableLayoutPanel_main.RowCount = 2;    // ä¸ºä»€ä¹ˆæ˜¯2ï¼Ÿ
                 for (; ; )
                 {
                     if (this.tableLayoutPanel_main.RowStyles.Count <= 2)
@@ -531,7 +531,7 @@ namespace DigitalPlatform.CommonControl
              * */
         }
 
-        // Çå³ıÒ»¸öDcElement¶ÔÏó¶ÔÓ¦µÄControl
+        // æ¸…é™¤ä¸€ä¸ªDcElementå¯¹è±¡å¯¹åº”çš„Control
         public void ClearOneElementControls(
             TableLayoutPanel table,
             DcElement line)
@@ -562,7 +562,7 @@ namespace DigitalPlatform.CommonControl
         {
             strError = "";
 
-            // clear linesÔ­ÓĞÄÚÈİ
+            // clear linesåŸæœ‰å†…å®¹
             this.Clear();
             this.DataDom = null;
             this.DataRoot = null;
@@ -580,14 +580,14 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLæ•°æ®è£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
             return this.SetXml(this.DataDom, out strError);
         }
 
-            // ÉèÖÃºÃÃû×Ö¿Õ¼ä»·¾³
+            // è®¾ç½®å¥½åå­—ç©ºé—´ç¯å¢ƒ
         int PrepareNs(out XmlNamespaceManager nsmgr,
             out List<string> prefixs,
             out List<string> uris,
@@ -623,7 +623,7 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 
-            // È·±£Á½¸ö»ù±¾µÄnamespace
+            // ç¡®ä¿ä¸¤ä¸ªåŸºæœ¬çš„namespace
             strUri = "http://purl.org/dc/elements/1.1/";
             strDcPrefix = nsmgr.LookupPrefix(strUri);
             if (strDcPrefix == null)
@@ -654,7 +654,7 @@ namespace DigitalPlatform.CommonControl
 
             if (this.CfgDom == null)
             {
-                strError = "ÉĞÎ´LoadCfg()";
+                strError = "å°šæœªLoadCfg()";
                 return -1;
             }
 
@@ -674,7 +674,7 @@ namespace DigitalPlatform.CommonControl
 
 
             /*
-            // ÉèÖÃºÃÃû×Ö¿Õ¼ä»·¾³
+            // è®¾ç½®å¥½åå­—ç©ºé—´ç¯å¢ƒ
 			XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
 
             string strUri = "";
@@ -691,7 +691,7 @@ namespace DigitalPlatform.CommonControl
                 uris.Add(strUri);
             }
 
-            // È·±£Á½¸ö»ù±¾µÄnamespace
+            // ç¡®ä¿ä¸¤ä¸ªåŸºæœ¬çš„namespace
             strUri = "http://purl.org/dc/elements/1.1/";
             string strDcPrefix = nsmgr.LookupPrefix(strUri);
             if (strDcPrefix == null)
@@ -716,41 +716,41 @@ namespace DigitalPlatform.CommonControl
             nsmgr.AddNamespace("dcterms", "http://purl.org/dc/terms/");
              * */
 
-            // ÕÒµ½¸ù
+            // æ‰¾åˆ°æ ¹
             XmlNode root = null;
 
-            // ÕÒµ½µÚÒ»¸ödc»òÕßdctermsÇ°×ºµÄÔªËØ
+            // æ‰¾åˆ°ç¬¬ä¸€ä¸ªdcæˆ–è€…dctermså‰ç¼€çš„å…ƒç´ 
             XmlNode temp_first = dom.DocumentElement.SelectSingleNode("//"+strDcPrefix+":* | //"+strDcTermsPrefix+":*", nsmgr);
             if (temp_first == null)
             {
-                strError = "Ã»ÓĞ·¢ÏÖÈÎºÎDCÔªËØ»òÕßĞŞÊÎ´Ê";
+                strError = "æ²¡æœ‰å‘ç°ä»»ä½•DCå…ƒç´ æˆ–è€…ä¿®é¥°è¯";
                 return 0;
             }
 
             root = temp_first.ParentNode;
             if (root == null)
             {
-                strError = "ËùÕÒµ½µÄµÚÒ»¸öDCÔªËØ <"+root.Name+"> Ã»ÓĞ¸¸(ÈİÆ÷)¶ÔÏó";
+                strError = "æ‰€æ‰¾åˆ°çš„ç¬¬ä¸€ä¸ªDCå…ƒç´  <"+root.Name+"> æ²¡æœ‰çˆ¶(å®¹å™¨)å¯¹è±¡";
                 return 0;
             }
 
-            this.DataRoot = root;   // °ÑÈİÆ÷ÔªËØ±£´æÆğÀ´
+            this.DataRoot = root;   // æŠŠå®¹å™¨å…ƒç´ ä¿å­˜èµ·æ¥
 
             this.DisableUpdate();
 
             try
             {
-                // ±à¼­Æ÷ÄÜ´¦ÀíµÄDCÔªËØÁĞ±í¡£¸ù¾İËü¿ÉÒÔ¾ö¶¨GetXml·µ»¹Ê±ºòÒªÌæ´úµÄÎ»ÖÃ
+                // ç¼–è¾‘å™¨èƒ½å¤„ç†çš„DCå…ƒç´ åˆ—è¡¨ã€‚æ ¹æ®å®ƒå¯ä»¥å†³å®šGetXmlè¿”è¿˜æ—¶å€™è¦æ›¿ä»£çš„ä½ç½®
                 List<XmlNode> oldnodes = new List<XmlNode>();
 
-                // ±éÀúËùÓĞÏÂ¼¶ÔªËØ
+                // éå†æ‰€æœ‰ä¸‹çº§å…ƒç´ 
                 for (int i = 0; i < root.ChildNodes.Count; i++)
                 {
                     XmlNode node = root.ChildNodes[i];
                     if (node.NodeType != XmlNodeType.Element)
                         continue;
 
-                    // ºöÂÔ²»ÊÇ¶¨ÒåÃû×Ö¿Õ¼äµÄÔªËØ
+                    // å¿½ç•¥ä¸æ˜¯å®šä¹‰åå­—ç©ºé—´çš„å…ƒç´ 
                     if (uris.IndexOf(node.NamespaceURI) == -1)
                         continue;
 
@@ -804,7 +804,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 #if NOOOOOOOOOOOOOOOOOO
-        // »ñµÃXML×Ö·û´®
+        // è·å¾—XMLå­—ç¬¦ä¸²
         public int GetXml(out string strXml,
             out string strError)
         {
@@ -838,18 +838,18 @@ namespace DigitalPlatform.CommonControl
             Debug.Assert(prefixs.Count == uris.Count, "");
 
 
-            // ÔÚÈİÆ÷ÔªËØÄÚĞ´ÈëÃû×Ö¿Õ¼ä¶¨Òå
+            // åœ¨å®¹å™¨å…ƒç´ å†…å†™å…¥åå­—ç©ºé—´å®šä¹‰
             for (int i = 0; i < prefixs.Count; i++)
             {
                 w.WriteAttributeString("xmlns", prefixs[i], null, uris[i]);
             }
 
-            // Îªxsi:type×¼±¸Ãû×Ö¿Õ¼ä
+            // ä¸ºxsi:typeå‡†å¤‡åå­—ç©ºé—´
             w.WriteAttributeString("xmlns", "xsi", null,
                 "http://www.w3.org/2001/XMLSchema-instance");
 
             /*
-            // ÉèÖÃºÃÃû×Ö¿Õ¼ä»·¾³
+            // è®¾ç½®å¥½åå­—ç©ºé—´ç¯å¢ƒ
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
 
             List<string> uris = new List<string>();
@@ -885,7 +885,7 @@ namespace DigitalPlatform.CommonControl
                         continue;
                     else
                     {
-                        strError = "¸ñÊ½´íÎó£ºÄÚÈİÎª '" +line.Value+ "' µÄĞĞÃ»ÓĞÖ¸¶¨DCÔªËØÃû";
+                        strError = "æ ¼å¼é”™è¯¯ï¼šå†…å®¹ä¸º '" +line.Value+ "' çš„è¡Œæ²¡æœ‰æŒ‡å®šDCå…ƒç´ å";
                         return -1;
                     }
                 }
@@ -992,7 +992,7 @@ namespace DigitalPlatform.CommonControl
 
 
             string strXmlNsUri = nsmgr.LookupNamespace("xmlns");
-            // ÔÚÈİÆ÷ÔªËØÄÚĞ´ÈëÃû×Ö¿Õ¼ä¶¨Òå
+            // åœ¨å®¹å™¨å…ƒç´ å†…å†™å…¥åå­—ç©ºé—´å®šä¹‰
             for (int i = 0; i < prefixs.Count; i++)
             {
                 string strValue = "";
@@ -1000,7 +1000,7 @@ namespace DigitalPlatform.CommonControl
                 if (attr != null)
                     strValue = attr.Value;
                     
-                // Èç¹û²»´æÔÚÏàÓ¦µÄÊôĞÔ£¬¾ÍÒª½¨Á¢
+                // å¦‚æœä¸å­˜åœ¨ç›¸åº”çš„å±æ€§ï¼Œå°±è¦å»ºç«‹
                 if (String.IsNullOrEmpty(strValue) == true)
                 {
                     XmlAttribute attr_node = this.DataDom.CreateAttribute("xmlns", prefixs[i], strXmlNsUri);
@@ -1011,14 +1011,14 @@ namespace DigitalPlatform.CommonControl
             }
 
             /*
-            // Îªxsi:type×¼±¸Ãû×Ö¿Õ¼ä
+            // ä¸ºxsi:typeå‡†å¤‡åå­—ç©ºé—´
             w.WriteAttributeString("xmlns", "xsi", null,
                 "http://www.w3.org/2001/XMLSchema-instance");
              * */
 
-            XmlNode refTailNode = null; // ²åÈë²Î¿¼µã£¬½«²åÈëÔÚÕâ¸ö½ÚµãÒÔÇ°
+            XmlNode refTailNode = null; // æ’å…¥å‚è€ƒç‚¹ï¼Œå°†æ’å…¥åœ¨è¿™ä¸ªèŠ‚ç‚¹ä»¥å‰
             if (this.DataRoot.ChildNodes.Count > 0)
-                refTailNode = this.DataRoot.ChildNodes[0];  // ×î³õ¶¨Î»ÓÚÈİÆ÷ÏÂµÚÒ»¸öÔªËØ
+                refTailNode = this.DataRoot.ChildNodes[0];  // æœ€åˆå®šä½äºå®¹å™¨ä¸‹ç¬¬ä¸€ä¸ªå…ƒç´ 
 
             List<XmlNode> new_nodes = new List<XmlNode>();
 
@@ -1035,7 +1035,7 @@ namespace DigitalPlatform.CommonControl
                         continue;
                     else
                     {
-                        strError = "¸ñÊ½´íÎó£ºÄÚÈİÎª '" + line.Value + "' µÄĞĞÃ»ÓĞÖ¸¶¨DCÔªËØÃû";
+                        strError = "æ ¼å¼é”™è¯¯ï¼šå†…å®¹ä¸º '" + line.Value + "' çš„è¡Œæ²¡æœ‰æŒ‡å®šDCå…ƒç´ å";
                         return -1;
                     }
                 }
@@ -1057,11 +1057,11 @@ namespace DigitalPlatform.CommonControl
                 {
                     this.DataRoot.InsertAfter(element, refNode);
 
-                    // ÓÃÍê²Î¿¼½Úµãºó£¬°ÑËüÉ¾³ı
+                    // ç”¨å®Œå‚è€ƒèŠ‚ç‚¹åï¼ŒæŠŠå®ƒåˆ é™¤
                     if (refNode.ParentNode != null)
                         refNode.ParentNode.RemoveChild(refNode);
 
-                    // ËæÊ±ĞŞÕıÎ²²¿²Î¿¼½Úµã£¬ÒÔ±¸DcNodesÊı×éÓÃÍêºóÊ¹ÓÃ
+                    // éšæ—¶ä¿®æ­£å°¾éƒ¨å‚è€ƒèŠ‚ç‚¹ï¼Œä»¥å¤‡DcNodesæ•°ç»„ç”¨å®Œåä½¿ç”¨
                     refTailNode = element.NextSibling;
                 }
                 else
@@ -1116,7 +1116,7 @@ namespace DigitalPlatform.CommonControl
                  * */
             }
 
-            // É¾³ıDcNodesÖĞ²ĞÓàµÄ½Úµã
+            // åˆ é™¤DcNodesä¸­æ®‹ä½™çš„èŠ‚ç‚¹
             if (this.DcNodes != null && this.DcNodes.Count > 0)
             {
                 for (int i = 0; i < this.DcNodes.Count; i++)
@@ -1127,14 +1127,14 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 
-            this.DcNodes = new_nodes;   // Ìæ»»Îª±¾´ÎĞÂ´´½¨µÄ½Úµã
+            this.DcNodes = new_nodes;   // æ›¿æ¢ä¸ºæœ¬æ¬¡æ–°åˆ›å»ºçš„èŠ‚ç‚¹
 
             strXml = this.DataRoot.OuterXml;
 
             return 0;
         }
 
-        // »ñµÃËùÑ¡ÔñµÄ²¿·ÖÔªËØµÄXML
+        // è·å¾—æ‰€é€‰æ‹©çš„éƒ¨åˆ†å…ƒç´ çš„XML
         public int GetFragmentXml(
             List<DcElement> selected_lines,
             out string strXml,
@@ -1168,7 +1168,7 @@ namespace DigitalPlatform.CommonControl
 
 
             string strXmlNsUri = nsmgr.LookupNamespace("xmlns");
-            // ÔÚÈİÆ÷ÔªËØÄÚĞ´ÈëÃû×Ö¿Õ¼ä¶¨Òå
+            // åœ¨å®¹å™¨å…ƒç´ å†…å†™å…¥åå­—ç©ºé—´å®šä¹‰
             for (int i = 0; i < prefixs.Count; i++)
             {
                 string strValue = "";
@@ -1176,7 +1176,7 @@ namespace DigitalPlatform.CommonControl
                 if (attr != null)
                     strValue = attr.Value;
 
-                // Èç¹û²»´æÔÚÏàÓ¦µÄÊôĞÔ£¬¾ÍÒª½¨Á¢
+                // å¦‚æœä¸å­˜åœ¨ç›¸åº”çš„å±æ€§ï¼Œå°±è¦å»ºç«‹
                 if (String.IsNullOrEmpty(strValue) == true)
                 {
                     XmlAttribute attr_node = dom.CreateAttribute("xmlns", prefixs[i], strXmlNsUri);
@@ -1198,7 +1198,7 @@ namespace DigitalPlatform.CommonControl
                         continue;
                     else
                     {
-                        strError = "¸ñÊ½´íÎó£ºÄÚÈİÎª '" + line.Value + "' µÄĞĞÃ»ÓĞÖ¸¶¨DCÔªËØÃû";
+                        strError = "æ ¼å¼é”™è¯¯ï¼šå†…å®¹ä¸º '" + line.Value + "' çš„è¡Œæ²¡æœ‰æŒ‡å®šDCå…ƒç´ å";
                         return -1;
                     }
                 }
@@ -1241,8 +1241,8 @@ namespace DigitalPlatform.CommonControl
             return 0;
         }
 
-        // ÓÃÆ¬¶ÏXMLÖĞ°üº¬µÄÔªËØ£¬Ìæ»»Ö¸¶¨µÄÈô¸ÉĞĞ
-        // Èç¹ûselected_lines.Count == 0£¬Ôò±íÊ¾´ÓnInsertPos¿ªÊ¼²åÈë
+        // ç”¨ç‰‡æ–­XMLä¸­åŒ…å«çš„å…ƒç´ ï¼Œæ›¿æ¢æŒ‡å®šçš„è‹¥å¹²è¡Œ
+        // å¦‚æœselected_lines.Count == 0ï¼Œåˆ™è¡¨ç¤ºä»nInsertPoså¼€å§‹æ’å…¥
         public int ReplaceElements(
             int nInsertPos,
             List<DcElement> selected_lines,
@@ -1262,7 +1262,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -1284,23 +1284,23 @@ namespace DigitalPlatform.CommonControl
 
             XmlNode root = dom.DocumentElement;
 
-            int index = 0;  // selected_linesÏÂ±ê Ñ¡ÖĞlines¼¯ºÏÖĞµÄµÚ¼¸¸ö
+            int index = 0;  // selected_linesä¸‹æ ‡ é€‰ä¸­linesé›†åˆä¸­çš„ç¬¬å‡ ä¸ª
 
-            int nTailPos = nInsertPos;   // Ëù´¦ÀíµÄ×îºóÒ»¸öline¶ÔÏóÔÚËùÓĞĞĞÖĞµÄÎ»ÖÃ
+            int nTailPos = nInsertPos;   // æ‰€å¤„ç†çš„æœ€åä¸€ä¸ªlineå¯¹è±¡åœ¨æ‰€æœ‰è¡Œä¸­çš„ä½ç½®
 
             this.DisableUpdate();
 
             try
             {
 
-                // ±éÀúËùÓĞÏÂ¼¶ÔªËØ
+                // éå†æ‰€æœ‰ä¸‹çº§å…ƒç´ 
                 for (int i = 0; i < root.ChildNodes.Count; i++)
                 {
                     XmlNode node = root.ChildNodes[i];
                     if (node.NodeType != XmlNodeType.Element)
                         continue;
 
-                    // ºöÂÔ²»ÊÇ¶¨ÒåÃû×Ö¿Õ¼äµÄÔªËØ
+                    // å¿½ç•¥ä¸æ˜¯å®šä¹‰åå­—ç©ºé—´çš„å…ƒç´ 
                     if (uris.IndexOf(node.NamespaceURI) == -1)
                         continue;
 
@@ -1312,11 +1312,11 @@ namespace DigitalPlatform.CommonControl
                     }
                     else
                     {
-                        // ÔÚ×îºóÎ»ÖÃºóÃæ²åÈë
+                        // åœ¨æœ€åä½ç½®åé¢æ’å…¥
                         line = this.InsertNewElement(nTailPos);
                     }
 
-                    // Ñ¡ÉÏĞŞ¸Ä¹ıµÄline
+                    // é€‰ä¸Šä¿®æ”¹è¿‡çš„line
                     line.State |= ElementState.Selected;
                     bSelectedChanged = true;
 
@@ -1350,7 +1350,7 @@ namespace DigitalPlatform.CommonControl
                     line.SetTextBoxHeight(true);
                 }
 
-                // È»ºó°Ñselected_linesÖĞ¶àÓàµÄlineÉ¾³ı
+                // ç„¶åæŠŠselected_linesä¸­å¤šä½™çš„lineåˆ é™¤
                 if (selected_lines != null)
                 {
                     for (int i = index; i < selected_lines.Count; i++)
@@ -1389,7 +1389,7 @@ namespace DigitalPlatform.CommonControl
 
         public DcElement AppendNewElement()
         {
-            this.DisableUpdate();   // ·ÀÖ¹ÉÁ¶¯¡£³¹µ×½â¾öÎÊÌâ¡£2009/10/13 
+            this.DisableUpdate();   // é˜²æ­¢é—ªåŠ¨ã€‚å½»åº•è§£å†³é—®é¢˜ã€‚2009/10/13 
 
             try
             {
@@ -1414,7 +1414,7 @@ namespace DigitalPlatform.CommonControl
 
         public DcElement InsertNewElement(int index)
         {
-            this.DisableUpdate();   // ·ÀÖ¹ÉÁ¶¯¡£³¹µ×½â¾öÎÊÌâ¡£2009/10/13 
+            this.DisableUpdate();   // é˜²æ­¢é—ªåŠ¨ã€‚å½»åº•è§£å†³é—®é¢˜ã€‚2009/10/13 
 
             try
             {
@@ -1479,18 +1479,18 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "ÅäÖÃÎÄ¼ş '" + strCfgFilename + "' ×°ÔØµ½XMLDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "é…ç½®æ–‡ä»¶ '" + strCfgFilename + "' è£…è½½åˆ°XMLDOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
-            // ³õÊ¼»¯ÖµÁĞ±í
+            // åˆå§‹åŒ–å€¼åˆ—è¡¨
             this.ElementTable = GetElementCaptionValues(this.Lang);
 
             this.LanguageTable = GetLanguageCaptionValues(this.Lang);
 
 
             /*
-            // Ë¢ĞÂÒÑÓĞĞĞµÄlist
+            // åˆ·æ–°å·²æœ‰è¡Œçš„list
             foreach (Line line in this.Lines)
             {
                 line.FillLists();
@@ -1512,18 +1512,18 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "ÅäÖÃ´úÂë×°ÔØµ½XMLDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "é…ç½®ä»£ç è£…è½½åˆ°XMLDOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
-            // ³õÊ¼»¯ÖµÁĞ±í
+            // åˆå§‹åŒ–å€¼åˆ—è¡¨
             this.ElementTable = GetElementCaptionValues(this.Lang);
 
             this.LanguageTable = GetLanguageCaptionValues(this.Lang);
 
 
             /*
-            // Ë¢ĞÂÒÑÓĞĞĞµÄlist
+            // åˆ·æ–°å·²æœ‰è¡Œçš„list
             foreach (Line line in this.Lines)
             {
                 line.FillLists();
@@ -1534,7 +1534,7 @@ namespace DigitalPlatform.CommonControl
             return 0;
         }
 
-        // Ìî³äÔªËØÃûÁĞ±í
+        // å¡«å……å…ƒç´ ååˆ—è¡¨
         public void FillElementList(ComboBox list,
             List<CaptionValue> elements)
         {
@@ -1548,7 +1548,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // Ìî³äÓïÑÔÃûÁĞ±í
+        // å¡«å……è¯­è¨€ååˆ—è¡¨
         public void FillLanguageList(ComboBox list,
             List<CaptionValue> languages)
         {
@@ -1565,7 +1565,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         /*
-        // Ìî³äĞŞÊÎ´ÊÁĞ±í
+        // å¡«å……ä¿®é¥°è¯åˆ—è¡¨
         public void FillRefinementList(ComboBox list,
             List<CaptionValue> refinements)
         {
@@ -1573,7 +1573,7 @@ namespace DigitalPlatform.CommonControl
             if (refinements == null)
                 return;
 
-            list.Items.Add("[ÎŞ]"); // TODO: ĞèÒª¸ù¾İ¸÷ÓïÖÖÓĞËùÇø±ğ
+            list.Items.Add("[æ— ]"); // TODO: éœ€è¦æ ¹æ®å„è¯­ç§æœ‰æ‰€åŒºåˆ«
 
             foreach (CaptionValue pair in refinements)
             {
@@ -1582,7 +1582,7 @@ namespace DigitalPlatform.CommonControl
         }
          * */
 
-        // Ìî³äÀàĞÍÁĞ±í
+        // å¡«å……ç±»å‹åˆ—è¡¨
         public void FillTypeList(ComboBox list,
             List<CaptionValue> types)
         {
@@ -1598,8 +1598,8 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // »ñµÃÌØ¶¨½çÃæÓïÑÔÏÂµÄElementÃû³ÆÁĞ±í
-        // ÕÒÓïÑÔµÄÊ±ºò£¬ÏÈÕÒ¾«È·µÄ£¬ÕÒ²»µ½ÔÙÕÒÄ£ºıµÄ
+        // è·å¾—ç‰¹å®šç•Œé¢è¯­è¨€ä¸‹çš„Elementåç§°åˆ—è¡¨
+        // æ‰¾è¯­è¨€çš„æ—¶å€™ï¼Œå…ˆæ‰¾ç²¾ç¡®çš„ï¼Œæ‰¾ä¸åˆ°å†æ‰¾æ¨¡ç³Šçš„
         public List<CaptionValue> GetElementCaptionValues(string strLang)
         {
 
@@ -1619,9 +1619,9 @@ namespace DigitalPlatform.CommonControl
                 CaptionValue pair = null;
 
                 if (strCaption == null)
-                {   // Èç¹ûÏÂÃæ¸ù±¾Ã»ÓĞ¶¨Òå<caption>ÔªËØ£¬Ôò²ÉÓÃ<element>ÔªËØµÄnameÊôĞÔÖµ
+                {   // å¦‚æœä¸‹é¢æ ¹æœ¬æ²¡æœ‰å®šä¹‰<caption>å…ƒç´ ï¼Œåˆ™é‡‡ç”¨<element>å…ƒç´ çš„nameå±æ€§å€¼
                     if (String.IsNullOrEmpty(strElementName) == true)
-                        continue;   // ÊµÔÚÃ»ÓĞ£¬Ö»ºÃÉáÆú
+                        continue;   // å®åœ¨æ²¡æœ‰ï¼Œåªå¥½èˆå¼ƒ
                     pair = new CaptionValue();
                     pair.Caption = "<" + strElementName + ">";
                     if (bRefinement == true)
@@ -1646,8 +1646,8 @@ namespace DigitalPlatform.CommonControl
             return results;
         }
 
-        // »ñµÃÌØ¶¨½çÃæÓïÑÔÏÂµÄlanguageÃû³ÆÁĞ±í
-        // ÕÒÓïÑÔµÄÊ±ºò£¬ÏÈÕÒ¾«È·µÄ£¬ÕÒ²»µ½ÔÙÕÒÄ£ºıµÄ
+        // è·å¾—ç‰¹å®šç•Œé¢è¯­è¨€ä¸‹çš„languageåç§°åˆ—è¡¨
+        // æ‰¾è¯­è¨€çš„æ—¶å€™ï¼Œå…ˆæ‰¾ç²¾ç¡®çš„ï¼Œæ‰¾ä¸åˆ°å†æ‰¾æ¨¡ç³Šçš„
         public List<CaptionValue> GetLanguageCaptionValues(string strLang)
         {
 
@@ -1662,9 +1662,9 @@ namespace DigitalPlatform.CommonControl
                 CaptionValue pair = null;
 
                 if (strCaption == null)
-                {   // Èç¹ûÏÂÃæ¸ù±¾Ã»ÓĞ¶¨Òå<caption>ÔªËØ£¬Ôò²ÉÓÃ<element>ÔªËØµÄnameÊôĞÔÖµ
+                {   // å¦‚æœä¸‹é¢æ ¹æœ¬æ²¡æœ‰å®šä¹‰<caption>å…ƒç´ ï¼Œåˆ™é‡‡ç”¨<element>å…ƒç´ çš„nameå±æ€§å€¼
                     if (String.IsNullOrEmpty(strLanguageName) == true)
-                        continue;   // ÊµÔÚÃ»ÓĞ£¬Ö»ºÃÉáÆú
+                        continue;   // å®åœ¨æ²¡æœ‰ï¼Œåªå¥½èˆå¼ƒ
                     pair = new CaptionValue();
                     pair.Caption = "<" + strLanguageName + ">";
                     pair.Value = strCaption;
@@ -1684,7 +1684,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         /*
-        // »ñµÃÌØ¶¨½çÃæÓïÑÔÏÂµÄ¡¢ÌØ¶¨ElementµÄrefinementÁĞ±í
+        // è·å¾—ç‰¹å®šç•Œé¢è¯­è¨€ä¸‹çš„ã€ç‰¹å®šElementçš„refinementåˆ—è¡¨
         public List<CaptionValue> GetRefinementCaptionValues(string strLang,
             string strElementValue)
         {
@@ -1698,9 +1698,9 @@ namespace DigitalPlatform.CommonControl
                 CaptionValue pair = null;
 
                 if (strCaption == null)
-                {   // Èç¹ûÏÂÃæ¸ù±¾Ã»ÓĞ¶¨Òå<caption>ÔªËØ£¬Ôò²ÉÓÃ<refinement>ÔªËØµÄnameÊôĞÔÖµ
+                {   // å¦‚æœä¸‹é¢æ ¹æœ¬æ²¡æœ‰å®šä¹‰<caption>å…ƒç´ ï¼Œåˆ™é‡‡ç”¨<refinement>å…ƒç´ çš„nameå±æ€§å€¼
                     if (String.IsNullOrEmpty(strRefinementName) == true)
-                        continue;   // ÊµÔÚÃ»ÓĞ£¬Ö»ºÃÉáÆú
+                        continue;   // å®åœ¨æ²¡æœ‰ï¼Œåªå¥½èˆå¼ƒ
                     pair = new CaptionValue();
                     pair.Caption = "<" + strRefinementName + ">";
                     pair.Value = strCaption;
@@ -1719,7 +1719,7 @@ namespace DigitalPlatform.CommonControl
         }
          * */
 
-        // »ñµÃÌØ¶¨½çÃæÓïÑÔÏÂµÄ¡¢ÌØ¶¨ElementµÄ¡¢ÌØ¶¨refinementµÄtypeÁĞ±í
+        // è·å¾—ç‰¹å®šç•Œé¢è¯­è¨€ä¸‹çš„ã€ç‰¹å®šElementçš„ã€ç‰¹å®šrefinementçš„typeåˆ—è¡¨
         public List<CaptionValue> GetTypeCaptionValues(string strLang,
             string strElementValue/*,
             string strRefinementValue*/)
@@ -1738,9 +1738,9 @@ namespace DigitalPlatform.CommonControl
                 CaptionValue pair = null;
 
                 if (strCaption == null)
-                {   // Èç¹ûÏÂÃæ¸ù±¾Ã»ÓĞ¶¨Òå<caption>ÔªËØ£¬Ôò²ÉÓÃ<type>ÔªËØµÄnameÊôĞÔÖµ
+                {   // å¦‚æœä¸‹é¢æ ¹æœ¬æ²¡æœ‰å®šä¹‰<caption>å…ƒç´ ï¼Œåˆ™é‡‡ç”¨<type>å…ƒç´ çš„nameå±æ€§å€¼
                     if (String.IsNullOrEmpty(strTypeName) == true)
-                        continue;   // ÊµÔÚÃ»ÓĞ£¬Ö»ºÃÉáÆú
+                        continue;   // å®åœ¨æ²¡æœ‰ï¼Œåªå¥½èˆå¼ƒ
                     pair = new CaptionValue();
                     pair.Caption = "<" + strTypeName + ">";
                     pair.Value = strCaption;
@@ -1757,7 +1757,7 @@ namespace DigitalPlatform.CommonControl
             return results;
         }
 
-        // ¸ù¾İelement value»ñµÃCaption
+        // æ ¹æ®element valueè·å¾—Caption
         public string GetElementCaption(string strElementValue)
         {
             if (String.IsNullOrEmpty(strElementValue) == true)
@@ -1773,13 +1773,13 @@ namespace DigitalPlatform.CommonControl
             return "<" + strElementValue + ">";
         }
 
-        // ¸ù¾İelement Caption»ñµÃvalue
+        // æ ¹æ®element Captionè·å¾—value
         public string GetElementValue(string strElementCaption)
         {
             if (this.IsBlankString(strElementCaption) == true)
                 return null;
 
-            // Èç¹ûÎªÔ­Ê¼Öµ
+            // å¦‚æœä¸ºåŸå§‹å€¼
             if (strElementCaption.Length > 1
                 && strElementCaption[0] == '<')
                 return strElementCaption.Substring(1, strElementCaption.Length - 2);
@@ -1795,7 +1795,7 @@ namespace DigitalPlatform.CommonControl
 
         ///
 
-        // ¸ù¾İlanguage value»ñµÃCaption
+        // æ ¹æ®language valueè·å¾—Caption
         public string GetLanguageCaption(string strLanguageValue)
         {
             if (String.IsNullOrEmpty(strLanguageValue) == true)
@@ -1811,13 +1811,13 @@ namespace DigitalPlatform.CommonControl
             return "<" + strLanguageValue + ">";
         }
 
-        // ¸ù¾İlanguage Caption»ñµÃvalue
+        // æ ¹æ®language Captionè·å¾—value
         public string GetLanguageValue(string strLanguageCaption)
         {
             if (this.IsBlankString(strLanguageCaption) == true)
                 return null;
 
-            // Èç¹ûÎªÔ­Ê¼Öµ
+            // å¦‚æœä¸ºåŸå§‹å€¼
             if (strLanguageCaption.Length > 1
                 && strLanguageCaption[0] == '<')
                 return strLanguageCaption.Substring(1, strLanguageCaption.Length - 2);
@@ -1832,8 +1832,8 @@ namespace DigitalPlatform.CommonControl
         }
 
         /*
-        // ¸ù¾İrefinement Caption»ñµÃvalue
-        // TODO: ¿ÉÄÜĞèÒªÒ»¸ö°æ±¾£¬°ÑstrElementCaption¸ü»»ÎªstrElementValue¡£ÒòÓĞĞí¶àÇé¿ö£¬strElementValueÒÑ¾­»ñµÃ£¬¿ÉÒÔÖ±½ÓÀûÓÃÌá¸ßËÙ¶È
+        // æ ¹æ®refinement Captionè·å¾—value
+        // TODO: å¯èƒ½éœ€è¦ä¸€ä¸ªç‰ˆæœ¬ï¼ŒæŠŠstrElementCaptionæ›´æ¢ä¸ºstrElementValueã€‚å› æœ‰è®¸å¤šæƒ…å†µï¼ŒstrElementValueå·²ç»è·å¾—ï¼Œå¯ä»¥ç›´æ¥åˆ©ç”¨æé«˜é€Ÿåº¦
         public string GetRefinementValue(
             string strElementCaption,
             string strRefinementCaption)
@@ -1842,7 +1842,7 @@ namespace DigitalPlatform.CommonControl
                 return null;
 
 
-            // Èç¹ûÎªÔ­Ê¼Öµ
+            // å¦‚æœä¸ºåŸå§‹å€¼
             if (strRefinementCaption.Length > 1
                 && strRefinementCaption[0] == '<')
                 return strRefinementCaption.Substring(1, strRefinementCaption.Length - 2);
@@ -1851,7 +1851,7 @@ namespace DigitalPlatform.CommonControl
 
             strElementValue = GetElementValue(strElementCaption);
 
-            // »ñµÃÌØ¶¨½çÃæÓïÑÔÏÂµÄ¡¢ÌØ¶¨ElementµÄrefinementÁĞ±í
+            // è·å¾—ç‰¹å®šç•Œé¢è¯­è¨€ä¸‹çš„ã€ç‰¹å®šElementçš„refinementåˆ—è¡¨
             List<CaptionValue> refinements = GetRefinementCaptionValues(this.Lang,
                 strElementValue);
 
@@ -1866,7 +1866,7 @@ namespace DigitalPlatform.CommonControl
          * */
 
 
-        // ¸ù¾İtype Caption»ñµÃvalue
+        // æ ¹æ®type Captionè·å¾—value
         public string GetTypeValue(
             string strElementCaption,
             // string strRefinementCaption,
@@ -1876,7 +1876,7 @@ namespace DigitalPlatform.CommonControl
                 return null;
 
 
-            // Èç¹ûÎªÔ­Ê¼Öµ
+            // å¦‚æœä¸ºåŸå§‹å€¼
             if (strTypeCaption.Length > 1
                 && strTypeCaption[0] == '<')
                 return strTypeCaption.Substring(1, strTypeCaption.Length - 2);
@@ -1887,7 +1887,7 @@ namespace DigitalPlatform.CommonControl
                 strRefinementCaption);
              * */
 
-            // »ñµÃÌØ¶¨ÌØ¶¨ElementµÄtypeÁĞ±í
+            // è·å¾—ç‰¹å®šç‰¹å®šElementçš„typeåˆ—è¡¨
             List<CaptionValue> types = this.GetTypeCaptionValues(this.Lang,
                 strElementValue/*,
                 strRefinementValue*/);
@@ -1901,14 +1901,14 @@ namespace DigitalPlatform.CommonControl
             return null;    // not found
         }
 
-        // ¸ù¾İtype value(»¹Òª¸½¼ÓËù´ÓÊôµÄelement value)»ñµÃCaption
+        // æ ¹æ®type value(è¿˜è¦é™„åŠ æ‰€ä»å±çš„element value)è·å¾—Caption
         public string GetTypeCaption(string strElementValue,
             string strTypeValue)
         {
             if (String.IsNullOrEmpty(strTypeValue) == true)
                 return null;    // not found
 
-            // »ñµÃÌØ¶¨ÌØ¶¨ElementµÄtypeÁĞ±í
+            // è·å¾—ç‰¹å®šç‰¹å®šElementçš„typeåˆ—è¡¨
             List<CaptionValue> types = this.GetTypeCaptionValues(this.Lang,
                 strElementValue);
 
@@ -1921,7 +1921,7 @@ namespace DigitalPlatform.CommonControl
             return "<" + strTypeValue + ">";
         }
 
-        // ×óÉÏ½ÇµÄÒ»¸ölabelÉÏÓÒÊó±ê¼üpopupmenu
+        // å·¦ä¸Šè§’çš„ä¸€ä¸ªlabelä¸Šå³é¼ æ ‡é”®popupmenu
         private void label_topleft_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -1936,7 +1936,7 @@ namespace DigitalPlatform.CommonControl
                 bHasClipboardObject = true;
 
             //
-            menuItem = new MenuItem("ºó²åĞÂÔªËØ(&A)");
+            menuItem = new MenuItem("åæ’æ–°å…ƒç´ (&A)");
             menuItem.Click += new System.EventHandler(this.menu_appendElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1945,11 +1945,11 @@ namespace DigitalPlatform.CommonControl
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("¸´ÖÆÕû¸ö¼ÇÂ¼(&C)");
+            menuItem = new MenuItem("å¤åˆ¶æ•´ä¸ªè®°å½•(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copyRecord_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Õ³ÌùÌæ»»Õû¸ö¼ÇÂ¼(&P)");
+            menuItem = new MenuItem("ç²˜è´´æ›¿æ¢æ•´ä¸ªè®°å½•(&P)");
             menuItem.Click += new System.EventHandler(this.menu_pasteRecord_Click);
             if (bHasClipboardObject == true)
                 menuItem.Enabled = true;
@@ -1961,15 +1961,15 @@ namespace DigitalPlatform.CommonControl
             contextMenu.Show(this.label_topleft, new Point(e.X, e.Y));
         }
 
-        // ÔÚ×îºó×·¼ÓÒ»¸öĞÂĞĞ
+        // åœ¨æœ€åè¿½åŠ ä¸€ä¸ªæ–°è¡Œ
         public void NewElement()
         {
             DcElement element = this.InsertNewElement(this.Elements.Count);
 
-            // ¹öÈë¿É¼û·¶Î§£¿
+            // æ»šå…¥å¯è§èŒƒå›´ï¼Ÿ
             element.ScrollIntoView();
 
-            // Ñ¡¶¨Ëü
+            // é€‰å®šå®ƒ
             element.Select(1);
         }
 
@@ -1981,15 +1981,15 @@ namespace DigitalPlatform.CommonControl
 
             if (selected_lines.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÔªËØ");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦åˆ é™¤çš„å…ƒç´ ");
                 return;
             }
             string strText = "";
 
             if (selected_lines.Count == 1)
-                strText = "È·ÊµÒªÉ¾³ıÔªËØ '" + selected_lines[0].ElementCaption + "'? ";
+                strText = "ç¡®å®è¦åˆ é™¤å…ƒç´  '" + selected_lines[0].ElementCaption + "'? ";
             else
-                strText = "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ " + selected_lines.Count.ToString() + " ¸öÔªËØ?";
+                strText = "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ " + selected_lines.Count.ToString() + " ä¸ªå…ƒç´ ?";
 
             DialogResult result = MessageBox.Show(this,
                 strText,
@@ -2021,7 +2021,7 @@ namespace DigitalPlatform.CommonControl
                 this.OnSelectedIndexChanged();
         }
 
-        // ÔÚ×îºó×·¼ÓÒ»¸öĞÂĞĞ
+        // åœ¨æœ€åè¿½åŠ ä¸€ä¸ªæ–°è¡Œ
         void menu_appendElement_Click(object sender, EventArgs e)
         {
             // this.InsertNewElement(this.Elements.Count);
@@ -2029,8 +2029,8 @@ namespace DigitalPlatform.CommonControl
             NewElement();
         }
 
-        // ¸´ÖÆÕû¸ö¼ÇÂ¼
-        // TODO: ¸´ÖÆµÄÄÚÈİÖĞ£¬ÊÇ·ñ²»Òª°üº¬<dprms:file>ÔªËØ£¿»òÕßËäÈ»´ËÊ±°üº¬£¬µ«ÊÇpasteµÄÊ±ºò²»Àí»á¼´¿É
+        // å¤åˆ¶æ•´ä¸ªè®°å½•
+        // TODO: å¤åˆ¶çš„å†…å®¹ä¸­ï¼Œæ˜¯å¦ä¸è¦åŒ…å«<dprms:file>å…ƒç´ ï¼Ÿæˆ–è€…è™½ç„¶æ­¤æ—¶åŒ…å«ï¼Œä½†æ˜¯pasteçš„æ—¶å€™ä¸ç†ä¼šå³å¯
         void menu_copyRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2057,8 +2057,8 @@ namespace DigitalPlatform.CommonControl
             Clipboard.SetDataObject(strOutXml);
         }
 
-        // Õ³ÌùÌæ»»Õû¸ö¼ÇÂ¼
-        // TODO: ×¢Òâµ±¼ôÌù°åÖĞÎªÆ¬¶ÏXMLÊ±¼ä£¬±¾º¯ÊıËùÆğ×÷ÓÃÎªÓÃÕâĞ©ĞĞÌæ»»È«²¿ĞĞ(µ«²»Çå³ıÈÎºÎÆäËûÒÑÓĞÄÚÈİ)
+        // ç²˜è´´æ›¿æ¢æ•´ä¸ªè®°å½•
+        // TODO: æ³¨æ„å½“å‰ªè´´æ¿ä¸­ä¸ºç‰‡æ–­XMLæ—¶é—´ï¼Œæœ¬å‡½æ•°æ‰€èµ·ä½œç”¨ä¸ºç”¨è¿™äº›è¡Œæ›¿æ¢å…¨éƒ¨è¡Œ(ä½†ä¸æ¸…é™¤ä»»ä½•å…¶ä»–å·²æœ‰å†…å®¹)
         void menu_pasteRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2087,7 +2087,7 @@ namespace DigitalPlatform.CommonControl
         private void tableLayoutPanel_main_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
         {
             if (this.m_nInSuspend > 0)
-                return; // ·ÀÖ¹ÉÁ¶¯
+                return; // é˜²æ­¢é—ªåŠ¨
 
             if (this.m_nDisableDrawCell > 0)
                 return;
@@ -2104,29 +2104,29 @@ namespace DigitalPlatform.CommonControl
     [Flags]
     public enum ElementState
     {
-        Normal = 0x00,  // ÆÕÍ¨×´Ì¬
-        Changed = 0x01, // ÄÚÈİ±»ĞŞ¸Ä¹ı
-        New = 0x02, // ĞÂÔöµÄĞĞ
-        Selected = 0x04,    // ±»Ñ¡Ôñ
+        Normal = 0x00,  // æ™®é€šçŠ¶æ€
+        Changed = 0x01, // å†…å®¹è¢«ä¿®æ”¹è¿‡
+        New = 0x02, // æ–°å¢çš„è¡Œ
+        Selected = 0x04,    // è¢«é€‰æ‹©
     }
 
     public class DcElement : IDisposable
     {
         public DcEditor Container = null;
 
-        // ÑÕÉ«¡¢popupmenu
+        // é¢œè‰²ã€popupmenu
         public Label label_color = null;    
 
-        // ÔªËØ
+        // å…ƒç´ 
         public ComboBox comboBox_element = null;
 
-        // ±àÂë·½°¸
+        // ç¼–ç æ–¹æ¡ˆ
         public ComboBox comboBox_scheme = null;
 
-        // ÓïÖÖ
+        // è¯­ç§
         public ComboBox comboBox_language = null;
 
-        // ÄÚÈİ
+        // å†…å®¹
         public TextBox textBox_value = null;
 
         void DisposeChildControls()
@@ -2157,7 +2157,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        #region ÊÍ·Å×ÊÔ´
+        #region é‡Šæ”¾èµ„æº
 
         ~DcElement()
         {
@@ -2304,7 +2304,7 @@ namespace DigitalPlatform.CommonControl
             textBox_value.ForeColor = this.Container.tableLayoutPanel_main.ForeColor;
         }
 
-        // ÔªËØ±êÇ©
+        // å…ƒç´ æ ‡ç­¾
         public string ElementCaption
         {
             get
@@ -2313,7 +2313,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ÔªËØÃû¡£ÓÉprefixºÍname²¿·Ö×éºÏ¶ø³É
+        // å…ƒç´ åã€‚ç”±prefixå’Œnameéƒ¨åˆ†ç»„åˆè€Œæˆ
         public string Element
         {
             get
@@ -2332,7 +2332,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ÔªËØÃûprefix²¿·Ö
+        // å…ƒç´ åprefixéƒ¨åˆ†
         public string Prefix
         {
             get
@@ -2349,7 +2349,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ´¿´âµÄÔªËØÃû£¬²»°üº¬prefix
+        // çº¯ç²¹çš„å…ƒç´ åï¼Œä¸åŒ…å«prefix
         public string ElementName
         {
             get
@@ -2382,7 +2382,7 @@ namespace DigitalPlatform.CommonControl
          */
 
         /*
-        // ĞŞÊÎ´Ê±êÇ©
+        // ä¿®é¥°è¯æ ‡ç­¾
         public string RefinementCaption
         {
             get
@@ -2391,7 +2391,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ĞŞÊÎ´Ê
+        // ä¿®é¥°è¯
         public string Refinement
         {
             get
@@ -2402,7 +2402,7 @@ namespace DigitalPlatform.CommonControl
         }
          * */
 
-        // ÀàĞÍ±êÇ©
+        // ç±»å‹æ ‡ç­¾
         public string SchemeCaption
         {
             get
@@ -2411,7 +2411,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ÀàĞÍ
+        // ç±»å‹
         public string Scheme
         {
             get
@@ -2494,7 +2494,7 @@ namespace DigitalPlatform.CommonControl
         {
             TextBox textbox = this.textBox_value;
 
-            // ÏÈ»Ö¸´×îĞ¡¸ß¶È
+            // å…ˆæ¢å¤æœ€å°é«˜åº¦
             if (bResetHeightFirst == true)
                 textbox.Size = new Size(textbox.Size.Width, 28);
 
@@ -2607,7 +2607,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ½«Êó±ê¹öÂÖ×ª¶ø¶ÔtablelayoutÆğ×÷ÓÃ
+        // å°†é¼ æ ‡æ»šè½®è½¬è€Œå¯¹tablelayoutèµ·ä½œç”¨
         void textBox_value_MouseWheel(object sender, MouseEventArgs e)
         {
             int nValue = this.Container.tableLayoutPanel_main.VerticalScroll.Value;
@@ -2626,7 +2626,7 @@ namespace DigitalPlatform.CommonControl
 
 
 
-        #region ÊÂ¼ş
+        #region äº‹ä»¶
 
         void textBox_value_Enter(object sender, EventArgs e)
         {
@@ -2648,9 +2648,9 @@ namespace DigitalPlatform.CommonControl
             this.Container.SelectElement(this, true);
         }
 
-        // µ¥Ñ¡±¾ÔªËØ
+        // å•é€‰æœ¬å…ƒç´ 
         // parameters:
-        //      nCol    1 ÔªËØÃûÁĞ; 2: ÀàĞÍÁĞ 3: ÓïÑÔÁĞ 4: ÄÚÈİÁĞ
+        //      nCol    1 å…ƒç´ ååˆ—; 2: ç±»å‹åˆ— 3: è¯­è¨€åˆ— 4: å†…å®¹åˆ—
         public void Select(int nCol)
         {
 
@@ -2686,7 +2686,7 @@ namespace DigitalPlatform.CommonControl
 
         }
 
-        // ÔÚÑÕÉ«labelÉÏµ¥»÷Êó±ê
+        // åœ¨é¢œè‰²labelä¸Šå•å‡»é¼ æ ‡
         void label_color_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -2705,9 +2705,9 @@ namespace DigitalPlatform.CommonControl
             }
             else if (e.Button == MouseButtons.Right)
             {
-                // Èç¹ûµ±Ç°ÓĞ¶àÖØÑ¡Ôñ£¬Ôò²»±Ø×÷Ê²Ã´l
-                // Èç¹ûµ±Ç°Îªµ¥¶ÀÒ»¸öÑ¡Ôñ»òÕß0¸öÑ¡Ôñ£¬ÔòÑ¡Ôñµ±Ç°¶ÔÏó
-                // ÕâÑù×öµÄÄ¿µÄÊÇ·½±ã²Ù×÷
+                // å¦‚æœå½“å‰æœ‰å¤šé‡é€‰æ‹©ï¼Œåˆ™ä¸å¿…ä½œä»€ä¹ˆl
+                // å¦‚æœå½“å‰ä¸ºå•ç‹¬ä¸€ä¸ªé€‰æ‹©æˆ–è€…0ä¸ªé€‰æ‹©ï¼Œåˆ™é€‰æ‹©å½“å‰å¯¹è±¡
+                // è¿™æ ·åšçš„ç›®çš„æ˜¯æ–¹ä¾¿æ“ä½œ
                 if (this.Container.SelectedIndices.Count < 2)
                 {
                     this.Container.SelectElement(this, true);
@@ -2726,7 +2726,7 @@ namespace DigitalPlatform.CommonControl
 
         void comboBox_language_TextChanged(object sender, EventArgs e)
         {
-            // Èç¹ûlanguageÎª·Ç¿ÕÖµ£¬¾Í±ØĞë°Ñscheme±äÎª¿ÕÖµ
+            // å¦‚æœlanguageä¸ºéç©ºå€¼ï¼Œå°±å¿…é¡»æŠŠschemeå˜ä¸ºç©ºå€¼
             if (this.Container.IsBlankString(this.comboBox_language.Text) == true)
             {
             }
@@ -2743,7 +2743,7 @@ namespace DigitalPlatform.CommonControl
 
         void comboBox_scheme_TextChanged(object sender, EventArgs e)
         {
-            // Èç¹ûschemeÎª·Ç¿ÕÖµ£¬¾Í±ØĞë°Ñlanguage±äÎª¿ÕÖµ
+            // å¦‚æœschemeä¸ºéç©ºå€¼ï¼Œå°±å¿…é¡»æŠŠlanguageå˜ä¸ºç©ºå€¼
             if (this.Container.IsBlankString(this.comboBox_scheme.Text) == true)
             {
             }
@@ -2788,15 +2788,15 @@ namespace DigitalPlatform.CommonControl
         {
 
             /*
-            // ÔªËØÃû¸Ä±ä£¬Æä±àÂë·½Ê½ÁĞ±íÒ²ÒªËæÖ®¸Ä±ä£¿
+            // å…ƒç´ åæ”¹å˜ï¼Œå…¶ç¼–ç æ–¹å¼åˆ—è¡¨ä¹Ÿè¦éšä¹‹æ”¹å˜ï¼Ÿ
             this.FillTypeList();
              * */
 
-            // ÔªËØÃû¸Ä±ä£¬Æä±àÂë·½Ê½ÁĞ±íÒ²ÒªËæÖ®¸Ä±ä¡£
-            // ÕâÀïÇå¿Õ£¬ÆÈÊ¹ÏÂ´ÎdropdownµÄÊ±ºò³öĞÂµÄÁĞ±í
+            // å…ƒç´ åæ”¹å˜ï¼Œå…¶ç¼–ç æ–¹å¼åˆ—è¡¨ä¹Ÿè¦éšä¹‹æ”¹å˜ã€‚
+            // è¿™é‡Œæ¸…ç©ºï¼Œè¿«ä½¿ä¸‹æ¬¡dropdownçš„æ—¶å€™å‡ºæ–°çš„åˆ—è¡¨
             this.comboBox_scheme.Items.Clear();
 
-            // TODO: µ±Ç°comboBox_scheme.TextÖµÒ²ĞèÒªĞ£Ñé£¬¿´¿´ÊÇ·ñ»¹ÔÚºÏ·¨ÁĞ±íÖµÖĞ¡£Èç¹û²»ÔÚÁË£¬¾ÍÒªÇå¿Õ¡£
+            // TODO: å½“å‰comboBox_scheme.Textå€¼ä¹Ÿéœ€è¦æ ¡éªŒï¼Œçœ‹çœ‹æ˜¯å¦è¿˜åœ¨åˆæ³•åˆ—è¡¨å€¼ä¸­ã€‚å¦‚æœä¸åœ¨äº†ï¼Œå°±è¦æ¸…ç©ºã€‚
             this.Scheme = "";    // 2008/1/9
 
             if ((this.State & ElementState.New) == 0)
@@ -2826,12 +2826,12 @@ namespace DigitalPlatform.CommonControl
                 bHasClipboardObject = true;
 
             //
-            menuItem = new MenuItem("Ç°²å(&I)");
+            menuItem = new MenuItem("å‰æ’(&I)");
             menuItem.Click += new System.EventHandler(this.menu_insertElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("ºó²å(&A)");
+            menuItem = new MenuItem("åæ’(&A)");
             menuItem.Click += new System.EventHandler(this.menu_appendElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2840,7 +2840,7 @@ namespace DigitalPlatform.CommonControl
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("É¾³ı(&D)");
+            menuItem = new MenuItem("åˆ é™¤(&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteElements_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2848,7 +2848,7 @@ namespace DigitalPlatform.CommonControl
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("¼ôÇĞ(&T)");
+            menuItem = new MenuItem("å‰ªåˆ‡(&T)");
             menuItem.Click += new System.EventHandler(this.menu_cut_Click);
             if (nSelectedCount > 0)
                 menuItem.Enabled = true;
@@ -2857,7 +2857,7 @@ namespace DigitalPlatform.CommonControl
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("¸´ÖÆ(&C)");
+            menuItem = new MenuItem("å¤åˆ¶(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copy_Click);
             if (nSelectedCount > 0)
                 menuItem.Enabled = true;
@@ -2865,7 +2865,7 @@ namespace DigitalPlatform.CommonControl
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Õ³Ìù²åÈë[Ç°](&P)");
+            menuItem = new MenuItem("ç²˜è´´æ’å…¥[å‰](&P)");
             menuItem.Click += new System.EventHandler(this.menu_pasteInsert_Click);
             if (bHasClipboardObject == true
                 && nSelectedCount > 0)
@@ -2874,7 +2874,7 @@ namespace DigitalPlatform.CommonControl
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Õ³Ìù²åÈë[ºó](&P)");
+            menuItem = new MenuItem("ç²˜è´´æ’å…¥[å](&P)");
             menuItem.Click += new System.EventHandler(this.menu_pasteInsertAfter_Click);
             if (bHasClipboardObject == true
                 && nSelectedCount > 0)
@@ -2884,7 +2884,7 @@ namespace DigitalPlatform.CommonControl
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("Õ³ÌùÌæ»»(&R)");
+            menuItem = new MenuItem("ç²˜è´´æ›¿æ¢(&R)");
             menuItem.Click += new System.EventHandler(this.menu_pasteReplace_Click);
             if (bHasClipboardObject == true
                 && nSelectedCount > 0)
@@ -2899,7 +2899,7 @@ namespace DigitalPlatform.CommonControl
 
 
 
-            menuItem = new MenuItem("È«Ñ¡(&A)");
+            menuItem = new MenuItem("å…¨é€‰(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2909,7 +2909,7 @@ namespace DigitalPlatform.CommonControl
 
         #endregion
 
-        // ¼ôÇĞ
+        // å‰ªåˆ‡
         void menu_cut_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2918,7 +2918,7 @@ namespace DigitalPlatform.CommonControl
             List<DcElement> selected_lines = this.Container.SelectedElements;
 
 
-            // »ñµÃËùÑ¡ÔñµÄ²¿·ÖÔªËØµÄXML
+            // è·å¾—æ‰€é€‰æ‹©çš„éƒ¨åˆ†å…ƒç´ çš„XML
             int nRet = this.Container.GetFragmentXml(
                 selected_lines,
                 out strXml,
@@ -2946,12 +2946,12 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ¸´ÖÆ
+        // å¤åˆ¶
         void menu_copy_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strXml = "";
-            // »ñµÃËùÑ¡ÔñµÄ²¿·ÖÔªËØµÄXML
+            // è·å¾—æ‰€é€‰æ‹©çš„éƒ¨åˆ†å…ƒç´ çš„XML
             int nRet = this.Container.GetFragmentXml(
                 this.Container.SelectedElements,
                 out strXml,
@@ -2965,7 +2965,7 @@ namespace DigitalPlatform.CommonControl
             Clipboard.SetDataObject(strXml);
         }
 
-        // Õ³Ìù²åÈë[Ç°]
+        // ç²˜è´´æ’å…¥[å‰]
         void menu_pasteInsert_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2992,7 +2992,7 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            // °ÑÔ­À´Ñ¡ÖĞµÄÔªËØ±äÎªÃ»ÓĞÑ¡ÖĞ×´Ì¬
+            // æŠŠåŸæ¥é€‰ä¸­çš„å…ƒç´ å˜ä¸ºæ²¡æœ‰é€‰ä¸­çŠ¶æ€
             for (int i = 0; i < selected_lines.Count; i++)
             {
                 DcElement line = selected_lines[i];
@@ -3002,7 +3002,7 @@ namespace DigitalPlatform.CommonControl
 
         }
 
-        // Õ³Ìù²åÈë[ºó]
+        // ç²˜è´´æ’å…¥[å]
         void menu_pasteInsertAfter_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -3029,7 +3029,7 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            // °ÑÔ­À´Ñ¡ÖĞµÄÔªËØ±äÎªÃ»ÓĞÑ¡ÖĞ×´Ì¬
+            // æŠŠåŸæ¥é€‰ä¸­çš„å…ƒç´ å˜ä¸ºæ²¡æœ‰é€‰ä¸­çŠ¶æ€
             for (int i = 0; i < selected_lines.Count; i++)
             {
                 DcElement line = selected_lines[i];
@@ -3040,7 +3040,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // Õ³ÌùÌæ»»
+        // ç²˜è´´æ›¿æ¢
         void menu_pasteReplace_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -3060,9 +3060,9 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // ÒÆ³ı±¾Element
+        // ç§»é™¤æœ¬Element
         // parameters:
-        //      nRow    ´Ó0¿ªÊ¼¼ÆÊı
+        //      nRow    ä»0å¼€å§‹è®¡æ•°
         public void RemoveFromTable(TableLayoutPanel table,
             int nRow)
         {
@@ -3071,7 +3071,7 @@ namespace DigitalPlatform.CommonControl
             try
             {
 
-                // ÒÆ³ı±¾ĞĞÏà¹ØµÄ¿Ø¼ş
+                // ç§»é™¤æœ¬è¡Œç›¸å…³çš„æ§ä»¶
                 table.Controls.Remove(this.label_color);
                 table.Controls.Remove(this.comboBox_element);
                 table.Controls.Remove(this.comboBox_scheme);
@@ -3081,7 +3081,7 @@ namespace DigitalPlatform.CommonControl
                 Debug.Assert(this.Container.Elements.Count ==
                     table.RowCount - 2, "");
 
-                // È»ºóÑ¹Ëõºó·½µÄ
+                // ç„¶åå‹ç¼©åæ–¹çš„
                 for (int i = (table.RowCount - 2) - 1; i >= nRow + 1; i--)
                 {
                     DcElement line = this.Container.Elements[i];
@@ -3134,9 +3134,9 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // ²åÈë±¾Lineµ½Ä³ĞĞ¡£µ÷ÓÃÇ°£¬table.RowCountÒÑ¾­ÔöÁ¿
+        // æ’å…¥æœ¬Lineåˆ°æŸè¡Œã€‚è°ƒç”¨å‰ï¼Œtable.RowCountå·²ç»å¢é‡
         // parameters:
-        //      nRow    ´Ó0¿ªÊ¼¼ÆÊı
+        //      nRow    ä»0å¼€å§‹è®¡æ•°
         public void InsertToTable(TableLayoutPanel table,
             int nRow)
         {
@@ -3147,7 +3147,7 @@ namespace DigitalPlatform.CommonControl
                 Debug.Assert(table.RowCount == 
                     this.Container.Elements.Count + 3, "");
 
-                // ÏÈÒÆ¶¯ºó·½µÄ
+                // å…ˆç§»åŠ¨åæ–¹çš„
                 for (int i = (table.RowCount - 1) - 3; i >= nRow; i--)
                 {
                     DcElement line = this.Container.Elements[i];
@@ -3205,11 +3205,11 @@ namespace DigitalPlatform.CommonControl
             AddEvents(true);
         }
 
-        // Ìî³äÔªËØÃûÁĞ±í
+        // å¡«å……å…ƒç´ ååˆ—è¡¨
         public void FillElementList()
         {
 
-            // Ìî³äelementÁĞ±í
+            // å¡«å……elementåˆ—è¡¨
             this.Container.FillElementList(this.comboBox_element,
                 this.Container.ElementTable);
 
@@ -3223,10 +3223,10 @@ namespace DigitalPlatform.CommonControl
         }
 
         /*
-        // ¸ù¾İµ±Ç°µÄelement value£¬Ìî³ärefinementÁĞ±í
+        // æ ¹æ®å½“å‰çš„element valueï¼Œå¡«å……refinementåˆ—è¡¨
         public void FillRefinementList()
         {
-            // ÏÈ»ñµÃµ±Ç°µÄelement value
+            // å…ˆè·å¾—å½“å‰çš„element value
             string strElementValue = this.Container.GetElementValue(this.comboBox_element.Text);
 
             if (strElementValue == null)
@@ -3245,10 +3245,10 @@ namespace DigitalPlatform.CommonControl
         }*/
 
 
-        // ¸ù¾İµ±Ç°µÄelement valueºÍrefinement value£¬Ìî³ätypeÁĞ±í
+        // æ ¹æ®å½“å‰çš„element valueå’Œrefinement valueï¼Œå¡«å……typeåˆ—è¡¨
         public void FillTypeList()
         {
-            // ÏÈ»ñµÃµ±Ç°µÄelement value
+            // å…ˆè·å¾—å½“å‰çš„element value
             string strElementValue = this.Container.GetElementValue(
                 this.comboBox_element.Text);
 
@@ -3294,25 +3294,25 @@ namespace DigitalPlatform.CommonControl
             this.Container.InsertNewElement(nPos + 1);
         }
 
-        // È«Ñ¡
+        // å…¨é€‰
         void menu_selectAll_Click(object sender, EventArgs e)
         {
             this.Container.SelectAll();
         }
 
-        // É¾³ıµ±Ç°ÔªËØ
+        // åˆ é™¤å½“å‰å…ƒç´ 
         void menu_deleteElements_Click(object sender, EventArgs e)
         {
             this.Container.DeleteSelectedElements();
         }
 
-        // ¹öÈë¿É¼û·¶Î§
+        // æ»šå…¥å¯è§èŒƒå›´
         public void ScrollIntoView()
         {
             this.Container.tableLayoutPanel_main.ScrollControlIntoView(this.comboBox_element);
         }
 
-        // ±¾ÔªËØËù´ÓÊôµÄ¿Ø¼şÓµÓĞÁË½¹µãÁËÃ´?
+        // æœ¬å…ƒç´ æ‰€ä»å±çš„æ§ä»¶æ‹¥æœ‰äº†ç„¦ç‚¹äº†ä¹ˆ?
         public bool IsSubControlFocused()
         {
             if (this.comboBox_element.Focused == true)
@@ -3331,7 +3331,7 @@ namespace DigitalPlatform.CommonControl
         }
     }
 
-    // Ãû×Ö - Öµ ¶Ô
+    // åå­— - å€¼ å¯¹
     public class CaptionValue
     {
         public string Caption = "";

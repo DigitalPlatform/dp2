@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -17,16 +17,16 @@ namespace DigitalPlatform.Library
 {
 
 	/// <summary>
-	/// ÖÖ´ÎºÅÎ¬»¤¶Ô»°¿ò
+	/// ç§æ¬¡å·ç»´æŠ¤å¯¹è¯æ¡†
 	/// </summary>
 	public class ZhongcihaoDlg : System.Windows.Forms.Form
 	{
-		XmlNode CurrentNode = null;	// µ±Ç°Êı¾İ¿â¶¨Òå½Úµã¡£Îª»Øµ÷º¯Êı¶øÉèÖÃ
+		XmlNode CurrentNode = null;	// å½“å‰æ•°æ®åº“å®šä¹‰èŠ‚ç‚¹ã€‚ä¸ºå›è°ƒå‡½æ•°è€Œè®¾ç½®
 
 		SearchPanel SearchPanel = null;
 
         /// <summary>
-        /// ¼ìË÷½áÊøĞÅºÅ
+        /// æ£€ç´¢ç»“æŸä¿¡å·
         /// </summary>
 		public AutoResetEvent EventFinish = new AutoResetEvent(false);
 
@@ -37,7 +37,7 @@ namespace DigitalPlatform.Library
 		string m_strTailNumber = null;
 
         /// <summary>
-        /// ´ò¿ªÏêÏ¸´°
+        /// æ‰“å¼€è¯¦ç»†çª—
         /// </summary>
 		public event OpenDetailEventHandler OpenDetail = null;
 
@@ -48,7 +48,7 @@ namespace DigitalPlatform.Library
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TextBox textBox_classNumber;
         /// <summary>
-        /// ÏÔÊ¾¼ÇÂ¼ºÍÖÖ´ÎºÅµÄListView
+        /// æ˜¾ç¤ºè®°å½•å’Œç§æ¬¡å·çš„ListView
         /// </summary>
 		public  System.Windows.Forms.ListView listView_number;
 		private System.Windows.Forms.ColumnHeader columnHeader_path;
@@ -77,7 +77,7 @@ namespace DigitalPlatform.Library
 		private System.ComponentModel.Container components = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
 		public ZhongcihaoDlg()
 		{
@@ -146,7 +146,7 @@ namespace DigitalPlatform.Library
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(69, 15);
             this.label1.TabIndex = 0;
-            this.label1.Text = "ÀàºÅ(&C):";
+            this.label1.Text = "ç±»å·(&C):";
             // 
             // textBox_classNumber
             // 
@@ -180,22 +180,22 @@ namespace DigitalPlatform.Library
             // 
             // columnHeader_path
             // 
-            this.columnHeader_path.Text = "¼ÇÂ¼Â·¾¶";
+            this.columnHeader_path.Text = "è®°å½•è·¯å¾„";
             this.columnHeader_path.Width = 93;
             // 
             // columnHeader_number
             // 
-            this.columnHeader_number.Text = "ÖÖ´ÎºÅ";
+            this.columnHeader_number.Text = "ç§æ¬¡å·";
             this.columnHeader_number.Width = 115;
             // 
             // columnHeader_title
             // 
-            this.columnHeader_title.Text = "ÌâÃû";
+            this.columnHeader_title.Text = "é¢˜å";
             this.columnHeader_title.Width = 219;
             // 
             // columnHeader_author
             // 
-            this.columnHeader_author.Text = "ÖøÕß";
+            this.columnHeader_author.Text = "è‘—è€…";
             this.columnHeader_author.Width = 103;
             // 
             // button_search
@@ -205,7 +205,7 @@ namespace DigitalPlatform.Library
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(100, 29);
             this.button_search.TabIndex = 3;
-            this.button_search.Text = "¼ìË÷(&S)";
+            this.button_search.Text = "æ£€ç´¢(&S)";
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
             // button_stop
@@ -216,7 +216,7 @@ namespace DigitalPlatform.Library
             this.button_stop.Name = "button_stop";
             this.button_stop.Size = new System.Drawing.Size(100, 29);
             this.button_stop.TabIndex = 4;
-            this.button_stop.Text = "Í£Ö¹(&S)";
+            this.button_stop.Text = "åœæ­¢(&S)";
             this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
             // 
             // label_message
@@ -235,7 +235,7 @@ namespace DigitalPlatform.Library
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(84, 15);
             this.label2.TabIndex = 6;
-            this.label2.Text = "·şÎñÆ÷(&S):";
+            this.label2.Text = "æœåŠ¡å™¨(&S):";
             // 
             // textBox_serverUrl
             // 
@@ -264,7 +264,7 @@ namespace DigitalPlatform.Library
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(69, 15);
             this.label3.TabIndex = 9;
-            this.label3.Text = "¿âÈº(&G):";
+            this.label3.Text = "åº“ç¾¤(&G):";
             // 
             // textBox_groupName
             // 
@@ -283,7 +283,7 @@ namespace DigitalPlatform.Library
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(189, 15);
             this.label4.TabIndex = 11;
-            this.label4.Text = "Í³¼Æ³öµÄÖÖ´ÎºÅ×î´óÖµ(&M):";
+            this.label4.Text = "ç»Ÿè®¡å‡ºçš„ç§æ¬¡å·æœ€å¤§å€¼(&M):";
             // 
             // textBox_maxNumber
             // 
@@ -303,7 +303,7 @@ namespace DigitalPlatform.Library
             this.button_copyMaxNumber.Name = "button_copyMaxNumber";
             this.button_copyMaxNumber.Size = new System.Drawing.Size(128, 30);
             this.button_copyMaxNumber.TabIndex = 13;
-            this.button_copyMaxNumber.Text = "¸´ÖÆ×î´óºÅ+1";
+            this.button_copyMaxNumber.Text = "å¤åˆ¶æœ€å¤§å·+1";
             this.button_copyMaxNumber.Click += new System.EventHandler(this.button_copyMaxNumber_Click);
             // 
             // groupBox1
@@ -324,7 +324,7 @@ namespace DigitalPlatform.Library
             this.label_tailNumberTitle.Name = "label_tailNumberTitle";
             this.label_tailNumberTitle.Size = new System.Drawing.Size(151, 15);
             this.label_tailNumberTitle.TabIndex = 15;
-            this.label_tailNumberTitle.Text = "ÖÖ´ÎºÅ¿âÖĞµÄÎ²ºÅ(&T)";
+            this.label_tailNumberTitle.Text = "ç§æ¬¡å·åº“ä¸­çš„å°¾å·(&T)";
             // 
             // textBox_tailNumber
             // 
@@ -342,7 +342,7 @@ namespace DigitalPlatform.Library
             this.button_resetTailNumber.Name = "button_resetTailNumber";
             this.button_resetTailNumber.Size = new System.Drawing.Size(86, 30);
             this.button_resetTailNumber.TabIndex = 17;
-            this.button_resetTailNumber.Text = "ÖØÉè(&R)";
+            this.button_resetTailNumber.Text = "é‡è®¾(&R)";
             this.button_resetTailNumber.Click += new System.EventHandler(this.button_resetTailNumber_Click);
             // 
             // button_pushTailNumber
@@ -352,7 +352,7 @@ namespace DigitalPlatform.Library
             this.button_pushTailNumber.Name = "button_pushTailNumber";
             this.button_pushTailNumber.Size = new System.Drawing.Size(224, 29);
             this.button_pushTailNumber.TabIndex = 18;
-            this.button_pushTailNumber.Text = "ÍÆ¶¯ÖÖ´ÎºÅ¿âÎ²ºÅ(&P)";
+            this.button_pushTailNumber.Text = "æ¨åŠ¨ç§æ¬¡å·åº“å°¾å·(&P)";
             this.button_pushTailNumber.Click += new System.EventHandler(this.button_pushTailNumber_Click);
             // 
             // ZhongcihaoDlg
@@ -380,7 +380,7 @@ namespace DigitalPlatform.Library
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ZhongcihaoDlg";
-            this.Text = "Î¬»¤ÖÖ´ÎºÅ";
+            this.Text = "ç»´æŠ¤ç§æ¬¡å·";
             this.Load += new System.EventHandler(this.ZhongcihaoDlg_Load);
             this.Closed += new System.EventHandler(this.ZhongcihaoDlg_Closed);
             this.ResumeLayout(false);
@@ -390,7 +390,7 @@ namespace DigitalPlatform.Library
 		#endregion
 
         /// <summary>
-        /// ×éÃû¡£Èô¸ÉÊéÄ¿¿âÎª¹²ÏíÍ¬Ò»ÖÖ´ÎºÅ¿â£¬Ğè¾Û¼¯ÎªÒ»¸ö¡°×é¡±
+        /// ç»„åã€‚è‹¥å¹²ä¹¦ç›®åº“ä¸ºå…±äº«åŒä¸€ç§æ¬¡å·åº“ï¼Œéœ€èšé›†ä¸ºä¸€ä¸ªâ€œç»„â€
         /// </summary>
 		public string GroupName
 		{
@@ -405,7 +405,7 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ·şÎñÆ÷URL
+        /// æœåŠ¡å™¨URL
         /// </summary>
 		public string ServerUrl
 		{
@@ -421,7 +421,7 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ÀàºÅ
+        /// ç±»å·
         /// </summary>
 		public string ClassNumber
 		{
@@ -436,13 +436,13 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="searchpanel">¼ìË÷Ãæ°å</param>
-        /// <param name="strServerUrl">·şÎñÆ÷URL</param>
-        /// <param name="strGroupName">×éÃû³Æ</param>
-        /// <param name="strClassNumber">·ÖÀàºÅ</param>
-        /// <param name="bAutoBeginSearch">¶Ô»°¿ò´ò¿ªºóÊÇ·ñ×Ô¶¯¿ªÊ¼¼ìË÷</param>
+        /// <param name="searchpanel">æ£€ç´¢é¢æ¿</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URL</param>
+        /// <param name="strGroupName">ç»„åç§°</param>
+        /// <param name="strClassNumber">åˆ†ç±»å·</param>
+        /// <param name="bAutoBeginSearch">å¯¹è¯æ¡†æ‰“å¼€åæ˜¯å¦è‡ªåŠ¨å¼€å§‹æ£€ç´¢</param>
 		public void Initial(
 			SearchPanel searchpanel,
 			/*ServerCollection servers,
@@ -478,7 +478,7 @@ namespace DigitalPlatform.Library
 			/*
 			stop = new DigitalPlatform.GUI.Stop();
 		
-			stop.Register(this.stopManager);	// ºÍÈİÆ÷¹ØÁª
+			stop.Register(this.stopManager);	// å’Œå®¹å™¨å…³è”
 			*/
 
 			object[] pList = new object []  { null, null };
@@ -493,7 +493,7 @@ namespace DigitalPlatform.Library
 		delegate void Delegate_Search(object sender, EventArgs e);
 
         /// <summary>
-        /// µÈ´ı¼ìË÷½áÊø
+        /// ç­‰å¾…æ£€ç´¢ç»“æŸ
         /// </summary>
 		public void WaitSearchFinish()
 		{
@@ -509,9 +509,9 @@ namespace DigitalPlatform.Library
 		private void ZhongcihaoDlg_Closed(object sender, System.EventArgs e)
 		{
 			/*
-			if (stop != null) // ÍÑÀë¹ØÁª
+			if (stop != null) // è„±ç¦»å…³è”
 			{
-				stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+				stop.Unregister();	// å’Œå®¹å™¨å…³è”
 
 				// MainForm.stopManager.Remove(stop);
 				stop = null;
@@ -523,10 +523,10 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// ¼ìË÷
+        /// æ£€ç´¢
         /// </summary>
-        /// <param name="strError">·µ»ØµÄ´íÎóĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Õı³£</returns>
+        /// <param name="strError">è¿”å›çš„é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ­£å¸¸</returns>
 		public int DoSearch(out string strError)
 		{
 			strError = "";
@@ -547,7 +547,7 @@ namespace DigitalPlatform.Library
 				return -1;
 		}
 
-		// ¼ìË÷Î²ºÅ£¬·ÅÈëÃæ°åÖĞ½çÃæÔªËØ
+		// æ£€ç´¢å°¾å·ï¼Œæ”¾å…¥é¢æ¿ä¸­ç•Œé¢å…ƒç´ 
 		int PanelSearchTailNumber(out string strError)
 		{
 			strError = "";
@@ -562,7 +562,7 @@ namespace DigitalPlatform.Library
 				return 0;
 
 			this.textBox_tailNumber.Text = strTailNumber;
-			this.label_tailNumberTitle.Text = "¿â'" +this.ZhongcihaoDbName+ "'ÖĞµÄÎ²ºÅ(&T):";
+			this.label_tailNumberTitle.Text = "åº“'" +this.ZhongcihaoDbName+ "'ä¸­çš„å°¾å·(&T):";
 
 			return 0;
 		}
@@ -618,17 +618,17 @@ namespace DigitalPlatform.Library
 			strError = "";
 
 			if (this.dom != null)
-				return 0;	// ÓÅ»¯
+				return 0;	// ä¼˜åŒ–
 
 			if (this.textBox_serverUrl.Text == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷URL";
+				strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨URL";
 				return -1;
 			}
 
 			string strCfgFilePath = "cfgs/global";
 			XmlDocument tempdom = null;
-		// »ñµÃÅäÖÃÎÄ¼ş
+		// è·å¾—é…ç½®æ–‡ä»¶
 		// return:
 		//		-1	error
 		//		0	not found
@@ -642,7 +642,7 @@ namespace DigitalPlatform.Library
 				return -1;
 			if (nRet == 0) 
 			{
-				strError = "ÅäÖÃÎÄ¼ş '" + strCfgFilePath + "' Ã»ÓĞÕÒµ½...";
+				strError = "é…ç½®æ–‡ä»¶ '" + strCfgFilePath + "' æ²¡æœ‰æ‰¾åˆ°...";
 				return -1;
 			}
 
@@ -651,7 +651,7 @@ namespace DigitalPlatform.Library
 			return 0;
 		}
 
-		// Ê¹ÏàÁÚÖØ¸´ĞĞ±äÉ«
+		// ä½¿ç›¸é‚»é‡å¤è¡Œå˜è‰²
 		void ColorDup()
 		{
 			string strPrevNumber = "";
@@ -675,7 +675,7 @@ namespace DigitalPlatform.Library
 				{
 					if (nDupCount >= 1)
 					{
-						// »»Ò»ÏÂÑÕÉ«
+						// æ¢ä¸€ä¸‹é¢œè‰²
 						if (color == color1)
 							color = color2;
 						else 
@@ -705,25 +705,25 @@ namespace DigitalPlatform.Library
 
 			if (dom == null)
 			{
-				strError = "ÇëÏÈµ÷ÓÃGetGlobalCfgFile()º¯Êı";
+				strError = "è¯·å…ˆè°ƒç”¨GetGlobalCfgFile()å‡½æ•°";
 				return -1;
 			}
 
 			if (this.ClassNumber == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨·ÖÀàºÅ";
+				strError = "å°šæœªæŒ‡å®šåˆ†ç±»å·";
 				return -1;
 			}
 
 			if (this.GroupName == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨¿âÈº";
+				strError = "å°šæœªæŒ‡å®šåº“ç¾¤";
 				return -1;
 			}
 
 			if (this.ServerUrl == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷URL";
+				strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨URL";
 				return -1;
 			}
 
@@ -735,7 +735,7 @@ namespace DigitalPlatform.Library
 				string strDbName = DomUtil.GetAttr(node, "name");
 				string strFromName = DomUtil.GetAttr(node, "accessnumber", "leftfrom");
 
-                // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
+                // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
 				string strQueryXml = "<target list='"
                     + StringUtil.GetXmlStringSimple(strDbName + ":" + strFromName)        // 2007/9/14
                     + "'><item><word>"
@@ -744,7 +744,7 @@ namespace DigitalPlatform.Library
 
 				this.CurrentNode = node;
 
-				this.SearchPanel.BeginLoop("ÕıÔÚÕë¶Ô¿â '"+strDbName+"' ¼ìË÷ '" + this.ClassNumber + "'");
+				this.SearchPanel.BeginLoop("æ­£åœ¨é’ˆå¯¹åº“ '"+strDbName+"' æ£€ç´¢ '" + this.ClassNumber + "'");
 
 				long lRet = 0;
 
@@ -754,10 +754,10 @@ namespace DigitalPlatform.Library
 				try 
 				{
 					// return:
-					//		-2	ÓÃ»§ÖĞ¶Ï
-					//		-1	Ò»°ã´íÎó
-					//		0	Î´ÃüÖĞ
-					//		>=1	Õı³£½áÊø£¬·µ»ØÃüÖĞÌõÊı
+					//		-2	ç”¨æˆ·ä¸­æ–­
+					//		-1	ä¸€èˆ¬é”™è¯¯
+					//		0	æœªå‘½ä¸­
+					//		>=1	æ­£å¸¸ç»“æŸï¼Œè¿”å›å‘½ä¸­æ¡æ•°
 					lRet = this.SearchPanel.SearchAndBrowse(
 						null,
                         strQueryXml,
@@ -773,9 +773,9 @@ namespace DigitalPlatform.Library
 				// long lRet = channel.DoSearch(strQueryXml, out strError);
 				if (lRet == -1)
                 {
-                    strError = "¼ìË÷¿â " + strDbName + " Ê±³ö´í: " + strError;
+                    strError = "æ£€ç´¢åº“ " + strDbName + " æ—¶å‡ºé”™: " + strError;
                     DialogResult result = MessageBox.Show(this,
-                         strError + "\r\n\r\nÊÇ·ñ¼ÌĞø½øĞĞ²Ù×÷?",
+                         strError + "\r\n\r\næ˜¯å¦ç»§ç»­è¿›è¡Œæ“ä½œ?",
                          "ZhongcihaoDlg",
                          MessageBoxButtons.YesNo,
                          MessageBoxIcon.Question,
@@ -784,7 +784,7 @@ namespace DigitalPlatform.Library
                         continue;
                     else
                     {
-                        strError += "\r\n\r\n²Ù×÷ÒÑ±»·ÅÆú¡£";
+                        strError += "\r\n\r\næ“ä½œå·²è¢«æ”¾å¼ƒã€‚";
                         return -1;
                     }
                 }
@@ -824,11 +824,11 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ±£´æÎ²ºÅµ½ÖÖ´ÎºÅ¿â
+        /// ä¿å­˜å°¾å·åˆ°ç§æ¬¡å·åº“
         /// </summary>
-        /// <param name="strTailNumber">Òª±£´æµÄÎ²ºÅ</param>
-        /// <param name="strError">·µ»ØµÄ´íÎóĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Õı³£</returns>
+        /// <param name="strTailNumber">è¦ä¿å­˜çš„å°¾å·</param>
+        /// <param name="strError">è¿”å›çš„é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ­£å¸¸</returns>
 		public int SaveTailNumber(
             string strTailNumber,
 			out string strError)
@@ -842,7 +842,7 @@ namespace DigitalPlatform.Library
 				return -1;
 			if (nRet == 0) 
 			{
-				// ĞÂ´´½¨¼ÇÂ¼
+				// æ–°åˆ›å»ºè®°å½•
 				string strZhongcihaoDbName = "";
 
 				try 
@@ -851,7 +851,7 @@ namespace DigitalPlatform.Library
 				}
 				catch (Exception ex)
 				{
-					strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
 					return -1;
 				}
 
@@ -860,7 +860,7 @@ namespace DigitalPlatform.Library
 			}
 			else 
 			{
-				// ¸²¸Ç¼ÇÂ¼
+				// è¦†ç›–è®°å½•
 			}
 
 			string strXml = "<r c='"+this.ClassNumber+"' v='"+strTailNumber+"'/>";
@@ -873,9 +873,9 @@ namespace DigitalPlatform.Library
 
 			REDO:
 				// return:
-				//		-2	Ê±¼ä´Á²»Æ¥Åä
-				//		-1	Ò»°ã³ö´í
-				//		0	Õı³£
+				//		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+				//		-1	ä¸€èˆ¬å‡ºé”™
+				//		0	æ­£å¸¸
 				nRet = this.SearchPanel.SaveRecord(
                     null,
 					strPath,
@@ -890,8 +890,8 @@ namespace DigitalPlatform.Library
 			if (nRet == -2)
 			{
 				DialogResult result = MessageBox.Show(this, 
-					"Î²ºÅ¼ÇÂ¼Ê±¼ä´Á²»Æ¥Åä£¬ËµÃ÷¿ÉÄÜ±»ËûÈËĞŞ¸Ä¹ı¡£ÏêÏ¸Ô­Òò: " + strError
-					+ "\r\n\r\nÊÇ·ñÇ¿ĞĞ±£´æ¼ÇÂ¼?",
+					"å°¾å·è®°å½•æ—¶é—´æˆ³ä¸åŒ¹é…ï¼Œè¯´æ˜å¯èƒ½è¢«ä»–äººä¿®æ”¹è¿‡ã€‚è¯¦ç»†åŸå› : " + strError
+					+ "\r\n\r\næ˜¯å¦å¼ºè¡Œä¿å­˜è®°å½•?",
 					this.Text,
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question,
@@ -909,10 +909,10 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ÔöÁ¿Î²ºÅ¡£
+        /// å¢é‡å°¾å·ã€‚
         /// </summary>
-        /// <param name="strDefaultNumber">³õÊ¼Öµ¡£Èç¹û±¾Àà(ClassNumberÊôĞÔÖĞÓĞÀàºÅ)Ö®ÖÖ´ÎºÅÌõÄ¿²»´æÔÚ£¬Ôò²ÉÓÃ±¾³õÊ¼Öµ¡£(´ËÊ±ÊÇ·ñ»¹ÒªÔöÁ¿?)</param>
-        /// <param name="strOutputNumber">ÔöÁ¿ºóµÄÎ²ºÅ</param>
+        /// <param name="strDefaultNumber">åˆå§‹å€¼ã€‚å¦‚æœæœ¬ç±»(ClassNumberå±æ€§ä¸­æœ‰ç±»å·)ä¹‹ç§æ¬¡å·æ¡ç›®ä¸å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æœ¬åˆå§‹å€¼ã€‚(æ­¤æ—¶æ˜¯å¦è¿˜è¦å¢é‡?)</param>
+        /// <param name="strOutputNumber">å¢é‡åçš„å°¾å·</param>
         /// <param name="strError"></param>
         /// <returns></returns>
 		public int IncreaseTailNumber(string strDefaultNumber,
@@ -934,7 +934,7 @@ namespace DigitalPlatform.Library
 
 			if (nRet == 0) 
 			{
-				// ĞÂ´´½¨¼ÇÂ¼
+				// æ–°åˆ›å»ºè®°å½•
 				string strZhongcihaoDbName = "";
 
 				try 
@@ -943,7 +943,7 @@ namespace DigitalPlatform.Library
 				}
 				catch (Exception ex)
 				{
-					strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
 					return -1;
 				}
 
@@ -969,9 +969,9 @@ namespace DigitalPlatform.Library
 
 
 			// return:
-			//		-2	Ê±¼ä´Á²»Æ¥Åä
-			//		-1	Ò»°ã³ö´í
-			//		0	Õı³£
+			//		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+			//		-1	ä¸€èˆ¬å‡ºé”™
+			//		0	æ­£å¸¸
 			nRet = this.SearchPanel.SaveRecord(
                 null,
 				strPath,
@@ -1002,12 +1002,12 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// ÍÆ¶¯Î²ºÅ
+        /// æ¨åŠ¨å°¾å·
         /// </summary>
-        /// <param name="strTestNumber">ÊÔÌ½ºÅÂë¡£Èç¹û±¾ÀàµÄÎ²ºÅĞ¡ÓÚÊÔÌ½ºÅÂë£¬½«»á±»ÍÆ¶¯¡£</param>
-        /// <param name="strOutputNumber">±»ÍÆ¶¯ºóµÄÎ²ºÅ</param>
-        /// <param name="strError">·µ»ØµÄ´íÎóĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Õı³£</returns>
+        /// <param name="strTestNumber">è¯•æ¢å·ç ã€‚å¦‚æœæœ¬ç±»çš„å°¾å·å°äºè¯•æ¢å·ç ï¼Œå°†ä¼šè¢«æ¨åŠ¨ã€‚</param>
+        /// <param name="strOutputNumber">è¢«æ¨åŠ¨åçš„å°¾å·</param>
+        /// <param name="strError">è¿”å›çš„é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ­£å¸¸</returns>
 		public int PushTailNumber(string strTestNumber,
 			out string strOutputNumber,
 			out string strError)
@@ -1027,7 +1027,7 @@ namespace DigitalPlatform.Library
 
 			if (nRet == 0) 
 			{
-				// ĞÂ´´½¨¼ÇÂ¼
+				// æ–°åˆ›å»ºè®°å½•
 				string strZhongcihaoDbName = "";
 
 				try 
@@ -1036,7 +1036,7 @@ namespace DigitalPlatform.Library
 				}
 				catch (Exception ex)
 				{
-					strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
 					return -1;
 				}
 
@@ -1063,9 +1063,9 @@ namespace DigitalPlatform.Library
 
 
 			// return:
-			//		-2	Ê±¼ä´Á²»Æ¥Åä
-			//		-1	Ò»°ã³ö´í
-			//		0	Õı³£
+			//		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+			//		-1	ä¸€èˆ¬å‡ºé”™
+			//		0	æ­£å¸¸
 			nRet = this.SearchPanel.SaveRecord(
                 null,
 				strPath,
@@ -1096,7 +1096,7 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ÖÖ´ÎºÅ¿âÃû
+        /// ç§æ¬¡å·åº“å
         /// </summary>
 		public string ZhongcihaoDbName
 		{
@@ -1104,23 +1104,23 @@ namespace DigitalPlatform.Library
 			{
 				if (this.dom == null)
 				{
-					throw (new Exception("domÉĞÎ´³õÊ¼»¯..."));
+					throw (new Exception("domå°šæœªåˆå§‹åŒ–..."));
 				}
 
 				string strError = "";
 
-				// µÃµ½ÖÖ´ÎºÅ¿âÃû
+				// å¾—åˆ°ç§æ¬¡å·åº“å
 				XmlNode node = dom.DocumentElement.SelectSingleNode("//dbgroup[@name='"+this.GroupName+"']");
 				if (node == null)
 				{
-					strError = "globalÅäÖÃÎÄ¼şÖĞnameÎª'"+this.GroupName+"'µÄ<dbgroup>ÔªËØÃ»ÓĞ¶¨Òå...";
+					strError = "globalé…ç½®æ–‡ä»¶ä¸­nameä¸º'"+this.GroupName+"'çš„<dbgroup>å…ƒç´ æ²¡æœ‰å®šä¹‰...";
 					throw (new Exception(strError));
 				}
 
 				string strZhongcihaoDbName = DomUtil.GetAttr(node, "zhongcihaodb");
 				if (strZhongcihaoDbName == "")
 				{
-					strError = "globalÅäÖÃÎÄ¼şÖĞnameÎª'"+this.GroupName+"'µÄ<dbgroup>ÔªËØÖĞÈ±ÖÖ´ÎºÅ¿âÃû¶¨ÒåÊôĞÔzhongcihaodb";
+					strError = "globalé…ç½®æ–‡ä»¶ä¸­nameä¸º'"+this.GroupName+"'çš„<dbgroup>å…ƒç´ ä¸­ç¼ºç§æ¬¡å·åº“åå®šä¹‰å±æ€§zhongcihaodb";
 					throw (new Exception(strError));
 				}
 
@@ -1130,11 +1130,11 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ¼ìË÷³öÎ²ºÅ¼ÇÂ¼Â·¾¶
+        /// æ£€ç´¢å‡ºå°¾å·è®°å½•è·¯å¾„
         /// </summary>
-        /// <param name="strPath">·µ»Ø¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strError">·µ»ØµÄ³ö´íĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½;1ÕÒµ½</returns>
+        /// <param name="strPath">è¿”å›è®°å½•è·¯å¾„</param>
+        /// <param name="strError">è¿”å›çš„å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°;1æ‰¾åˆ°</returns>
 		public int SearchTailNumberPath(
 			out string strPath,
 			out string strError)
@@ -1144,25 +1144,25 @@ namespace DigitalPlatform.Library
 
 			if (dom == null)
 			{
-				strError = "ÇëÏÈµ÷ÓÃGetGlobalCfgFile()º¯Êı";
+				strError = "è¯·å…ˆè°ƒç”¨GetGlobalCfgFile()å‡½æ•°";
 				return -1;
 			}
 
 			if (this.ClassNumber == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨·ÖÀàºÅ";
+				strError = "å°šæœªæŒ‡å®šåˆ†ç±»å·";
 				return -1;
 			}
 
 			if (this.GroupName == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨¿âÈº";
+				strError = "å°šæœªæŒ‡å®šåº“ç¾¤";
 				return -1;
 			}
 
 			if (this.ServerUrl == "")
 			{
-				strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷URL";
+				strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨URL";
 				return -1;
 			}
 
@@ -1175,25 +1175,25 @@ namespace DigitalPlatform.Library
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
-            // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
+            // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
 			string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "·ÖÀàºÅ")       // 2007/9/14
+                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "åˆ†ç±»å·")       // 2007/9/14
                 + "'><item><word>"
 				+ StringUtil.GetXmlStringSimple(this.ClassNumber)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
-			this.SearchPanel.BeginLoop("ÕıÔÚÕë¶Ô¿â '"+strZhongcihaoDbName+"' ¼ìË÷ '" + this.ClassNumber + "'");
+			this.SearchPanel.BeginLoop("æ­£åœ¨é’ˆå¯¹åº“ '"+strZhongcihaoDbName+"' æ£€ç´¢ '" + this.ClassNumber + "'");
 
-			// ¼ìË÷Ò»¸öÃüÖĞ½á¹û
+			// æ£€ç´¢ä¸€ä¸ªå‘½ä¸­ç»“æœ
 			// return:
-			//		-1	Ò»°ã´íÎó
+			//		-1	ä¸€èˆ¬é”™è¯¯
 			//		0	not found
 			//		1	found
-			//		>1	ÃüÖĞ¶àÓÚÒ»Ìõ
+			//		>1	å‘½ä¸­å¤šäºä¸€æ¡
 			int nRet = this.SearchPanel.SearchOnePath(
                 null,
 				strQueryXml,
@@ -1204,17 +1204,17 @@ namespace DigitalPlatform.Library
 
 			if (nRet == -1) 
 			{
-				strError = "¼ìË÷¿â "+strZhongcihaoDbName+" Ê±³ö´í: " + strError;
+				strError = "æ£€ç´¢åº“ "+strZhongcihaoDbName+" æ—¶å‡ºé”™: " + strError;
 				return -1;
 			}
 			if (nRet == 0) 
 			{
-				return 0;	// Ã»ÓĞÕÒµ½
+				return 0;	// æ²¡æœ‰æ‰¾åˆ°
 			}
 
 			if (nRet > 1)
 			{
-				strError = "ÒÔ·ÖÀàºÅ'"+this.ClassNumber+"'¼ìË÷¿â "+strZhongcihaoDbName+" Ê±ÃüÖĞ " + Convert.ToString(nRet) + " Ìõ£¬ÎŞ·¨È¡µÃÎ²ºÅ¡£ÇëĞŞ¸Ä¿â '" +strZhongcihaoDbName + "' ÖĞÏàÓ¦¼ÇÂ¼£¬È·±£Í¬Ò»ÀàÄ¿Ö»ÓĞÒ»Ìõ¶ÔÓ¦µÄ¼ÇÂ¼¡£";
+				strError = "ä»¥åˆ†ç±»å·'"+this.ClassNumber+"'æ£€ç´¢åº“ "+strZhongcihaoDbName+" æ—¶å‘½ä¸­ " + Convert.ToString(nRet) + " æ¡ï¼Œæ— æ³•å–å¾—å°¾å·ã€‚è¯·ä¿®æ”¹åº“ '" +strZhongcihaoDbName + "' ä¸­ç›¸åº”è®°å½•ï¼Œç¡®ä¿åŒä¸€ç±»ç›®åªæœ‰ä¸€æ¡å¯¹åº”çš„è®°å½•ã€‚";
 				return -1;
 			}
 
@@ -1224,11 +1224,11 @@ namespace DigitalPlatform.Library
 	
 
         /// <summary>
-        ///  ¼ìË÷»ñµÃÖÖ´ÎºÅ¿âÖĞ¶ÔÓ¦ÀàÄ¿µÄÎ²ºÅ¡£´Ë¹¦ÄÜ±È½Ïµ¥´¿£¬Ëù»ñµÃµÄ½á¹û²¢²»·ÅÈëÃæ°å½çÃæÔªËØ
+        ///  æ£€ç´¢è·å¾—ç§æ¬¡å·åº“ä¸­å¯¹åº”ç±»ç›®çš„å°¾å·ã€‚æ­¤åŠŸèƒ½æ¯”è¾ƒå•çº¯ï¼Œæ‰€è·å¾—çš„ç»“æœå¹¶ä¸æ”¾å…¥é¢æ¿ç•Œé¢å…ƒç´ 
         /// </summary>
-        /// <param name="strTailNumber">·µ»ØÎ²ºÅ</param>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½;1ÕÒµ½</returns>
+        /// <param name="strTailNumber">è¿”å›å°¾å·</param>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°;1æ‰¾åˆ°</returns>
 		public int SearchTailNumber(
             out string strTailNumber,
 			out string strError)
@@ -1248,7 +1248,7 @@ namespace DigitalPlatform.Library
 
 			XmlDocument tempdom = null;
 			byte [] baTimeStamp = null;
-			// »ñÈ¡¼ÇÂ¼
+			// è·å–è®°å½•
 			// return:
 			//		-1	error
 			//		0	not found
@@ -1274,12 +1274,12 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// ²éÕÒnstable¶¨Òå½Úµã
+        /// æŸ¥æ‰¾nstableå®šä¹‰èŠ‚ç‚¹
         /// </summary>
-        /// <param name="nodeDatabase">databaseÔªËØ½Úµã</param>
-        /// <param name="nodeNsTable">·µ»ØnstableÔªËØ½Úµã</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½¶¨Òå½Úµã;1ÕÒµ½</returns>
+        /// <param name="nodeDatabase">databaseå…ƒç´ èŠ‚ç‚¹</param>
+        /// <param name="nodeNsTable">è¿”å›nstableå…ƒç´ èŠ‚ç‚¹</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°å®šä¹‰èŠ‚ç‚¹;1æ‰¾åˆ°</returns>
 		public static int LocateNsTableCfgNode(XmlNode nodeDatabase,
 			out XmlNode nodeNsTable,
 			out string strError)
@@ -1289,7 +1289,7 @@ namespace DigitalPlatform.Library
 
 			string strNsTableName = DomUtil.GetAttr(nodeDatabase, "nstable");
 
-			// ÏÈ´Ó<database>ÄÚ²¿ÕÒ
+			// å…ˆä»<database>å†…éƒ¨æ‰¾
 			string strXPath = "";
 			if (strNsTableName == "")
 				strXPath = "nstable";
@@ -1301,7 +1301,7 @@ namespace DigitalPlatform.Library
 			if (nodeNsTable != null)
 				return 1;
 			
-			// ÏÈ´Ó<database>Íâ²¿ÕÒ
+			// å…ˆä»<database>å¤–éƒ¨æ‰¾
 			if (strNsTableName == "")
 				strXPath = "//nstable";
 			else
@@ -1317,11 +1317,11 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ×¼±¸Ãû×Ö¿Õ¼ä»·¾³
+        /// å‡†å¤‡åå­—ç©ºé—´ç¯å¢ƒ
         /// </summary>
-        /// <param name="nodeNsTable">nstable½Úµã</param>
-        /// <param name="mngr">·µ»ØÃû×Ö¿Õ¼ä¹ÜÀíÆ÷¶ÔÏó</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="nodeNsTable">nstableèŠ‚ç‚¹</param>
+        /// <param name="mngr">è¿”å›åå­—ç©ºé—´ç®¡ç†å™¨å¯¹è±¡</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>0</returns>
 		public static int PrepareNs(
 			XmlNode nodeNsTable,
@@ -1422,7 +1422,7 @@ namespace DigitalPlatform.Library
 
 			XmlNamespaceManager mngr = null;
 
-			// ×¼±¸Ãû×Ö¿Õ¼ä»·¾³
+			// å‡†å¤‡åå­—ç©ºé—´ç¯å¢ƒ
 			nRet = PrepareNs(
 				nodeNsTable,
 				out mngr,
@@ -1462,7 +1462,7 @@ namespace DigitalPlatform.Library
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
@@ -1473,7 +1473,7 @@ namespace DigitalPlatform.Library
 		{
 			OpenResDlg dlg = new OpenResDlg();
 
-			dlg.Text = "ÇëÑ¡Ôñ·şÎñÆ÷";
+			dlg.Text = "è¯·é€‰æ‹©æœåŠ¡å™¨";
 			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
 			/*
 			dlg.ap = this.ap;
@@ -1529,7 +1529,7 @@ namespace DigitalPlatform.Library
 				out strError);
 			if (nRet == -1) 
 			{
-				MessageBox.Show(this, "ÎªÊı×Ö '" +this.MaxNumber+ "' ÔöÁ¿Ê±·¢Éú´íÎó: " + strError);
+				MessageBox.Show(this, "ä¸ºæ•°å­— '" +this.MaxNumber+ "' å¢é‡æ—¶å‘ç”Ÿé”™è¯¯: " + strError);
 				return;
 			}
 			Clipboard.SetDataObject(strResult);
@@ -1543,7 +1543,7 @@ namespace DigitalPlatform.Library
 			if (nRet == -1)
 				MessageBox.Show(this, strError);
 			else 
-				MessageBox.Show(this, "ÖØÉè³É¹¦");
+				MessageBox.Show(this, "é‡è®¾æˆåŠŸ");
 		}
 
 		private void button_pushTailNumber_Click(object sender, System.EventArgs e)
@@ -1551,7 +1551,7 @@ namespace DigitalPlatform.Library
 		
 			string strError = "";
 			string strOutputNumber = "";
-				// ÍÆ¶¯Î²ºÅ
+				// æ¨åŠ¨å°¾å·
 			int nRet = PushTailNumber(this.textBox_maxNumber.Text,
                 out strOutputNumber,
 				out strError);
@@ -1559,7 +1559,7 @@ namespace DigitalPlatform.Library
 				MessageBox.Show(this, strError);
 			else 
 			{
-				MessageBox.Show(this, "ÍÆ¶¯³É¹¦");
+				MessageBox.Show(this, "æ¨åŠ¨æˆåŠŸ");
 				this.textBox_tailNumber.Text = strOutputNumber;
 			}
 		}
@@ -1571,7 +1571,7 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// ×î´óºÅ
+        /// æœ€å¤§å·
         /// </summary>
 		public string MaxNumber
 		{
@@ -1604,7 +1604,7 @@ namespace DigitalPlatform.Library
 		}
 
         /// <summary>
-        /// Î²ºÅ
+        /// å°¾å·
         /// </summary>
 		public string TailNumber
 		{
@@ -1637,32 +1637,32 @@ namespace DigitalPlatform.Library
 				if (nRet == -1)
 					throw( new Exception(strError));
 				else 
-					m_strTailNumber = value;	// Ë¢ĞÂ¼ÇÒä
+					m_strTailNumber = value;	// åˆ·æ–°è®°å¿†
 			}
 		}
 
 	}
 
     /// <summary>
-    /// ´ò¿ªÏêÏ¸´°
+    /// æ‰“å¼€è¯¦ç»†çª—
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
 	public delegate void OpenDetailEventHandler(object sender,
 	OpenDetailEventArgs e);
 
     /// <summary>
-    /// ´ò¿ªÏêÏ¸´°ÊÂ¼şµÄ²ÎÊı
+    /// æ‰“å¼€è¯¦ç»†çª—äº‹ä»¶çš„å‚æ•°
     /// </summary>
 	public class OpenDetailEventArgs: EventArgs
 	{
         /// <summary>
-        /// ¼ÇÂ¼È«Â·¾¶¼¯ºÏ¡£
+        /// è®°å½•å…¨è·¯å¾„é›†åˆã€‚
         /// </summary>
 		public string[] Paths = null;
 
         /// <summary>
-        /// ÊÇ·ñ¿ªÎªĞÂ´°¿Ú
+        /// æ˜¯å¦å¼€ä¸ºæ–°çª—å£
         /// </summary>
 		public bool OpenNew = false;
 	}
@@ -1677,7 +1677,7 @@ namespace DigitalPlatform.Library
 
 		public int Compare(object x, object y)
 		{
-            // ÖÖ´ÎºÅ×Ö·û´®ĞèÒªÓÒ¶ÔÆë 2007/10/12
+            // ç§æ¬¡å·å­—ç¬¦ä¸²éœ€è¦å³å¯¹é½ 2007/10/12
             string s1 = ((ListViewItem)x).SubItems[1].Text;
             string s2 = ((ListViewItem)y).SubItems[1].Text;
 

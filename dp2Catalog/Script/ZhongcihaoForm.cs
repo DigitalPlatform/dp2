@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,7 +37,7 @@ namespace dp2Catalog
         DigitalPlatform.Stop stop = null;
 
         /// <summary>
-        /// ¼ìË÷½áÊøĞÅºÅ
+        /// æ£€ç´¢ç»“æŸä¿¡å·
         /// </summary>
         public AutoResetEvent EventFinish = new AutoResetEvent(false);
 
@@ -48,7 +48,7 @@ namespace dp2Catalog
 
         const int WM_INITIAL = API.WM_USER + 201;
 
-        public string MyselfBiblioRecPath = "";    // ·¢ÆğÈ¡ºÅµÄÊéÄ¿¼ÇÂ¼µÄÂ·¾¶¡£ÓÃÀ´Ğ£ÕıÍ³¼Æ¹ı³Ì£¬ÅÅ³ı×Ô¼º¡£
+        public string MyselfBiblioRecPath = "";    // å‘èµ·å–å·çš„ä¹¦ç›®è®°å½•çš„è·¯å¾„ã€‚ç”¨æ¥æ ¡æ­£ç»Ÿè®¡è¿‡ç¨‹ï¼Œæ’é™¤è‡ªå·±ã€‚
 
 
         public ZhongcihaoForm()
@@ -57,7 +57,7 @@ namespace dp2Catalog
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_number.Tag = prop;
-            // µÚÒ»ÁĞÌØÊâ£¬¼ÇÂ¼Â·¾¶
+            // ç¬¬ä¸€åˆ—ç‰¹æ®Šï¼Œè®°å½•è·¯å¾„
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
@@ -73,8 +73,8 @@ namespace dp2Catalog
         {
             string strServerName = "";
             string strPurePath = "";
-            // ½âÎö¼ÇÂ¼Â·¾¶¡£
-            // ¼ÇÂ¼Â·¾¶ÎªÈçÏÂĞÎÌ¬ "ÖĞÎÄÍ¼Êé/1 @·şÎñÆ÷"
+            // è§£æè®°å½•è·¯å¾„ã€‚
+            // è®°å½•è·¯å¾„ä¸ºå¦‚ä¸‹å½¢æ€ "ä¸­æ–‡å›¾ä¹¦/1 @æœåŠ¡å™¨"
             dp2SearchForm.ParseRecPath(e.Path,
                 out strServerName,
                 out strPurePath);
@@ -88,8 +88,8 @@ namespace dp2Catalog
             if (e.DbName == "<blank>")
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
-                e.ColumnTitles.Add("¼ìË÷µã");
-                e.ColumnTitles.Add("ÊıÁ¿");
+                e.ColumnTitles.Add("æ£€ç´¢ç‚¹");
+                e.ColumnTitles.Add("æ•°é‡");
                 return;
             }
 
@@ -97,13 +97,13 @@ namespace dp2Catalog
 
             e.ColumnTitles = new ColumnPropertyCollection();
             ColumnPropertyCollection titles = this.GetBrowseColumnNames(e.DbName);
-            if (titles == null) // ÒâÍâµÄÊı¾İ¿âÃû
+            if (titles == null) // æ„å¤–çš„æ•°æ®åº“å
                 return;
-            e.ColumnTitles.AddRange(titles);  // Òª¸´ÖÆ£¬²»ÒªÖ±½ÓÊ¹ÓÃ£¬ÒòÎªºóÃæ¿ÉÄÜ»áĞŞ¸Ä¡£ÅÂÓ°Ïìµ½Ô­¼ş
+            e.ColumnTitles.AddRange(titles);  // è¦å¤åˆ¶ï¼Œä¸è¦ç›´æ¥ä½¿ç”¨ï¼Œå› ä¸ºåé¢å¯èƒ½ä¼šä¿®æ”¹ã€‚æ€•å½±å“åˆ°åŸä»¶
 
             /*
             if (this.m_bFirstColumnIsKey == true)
-                e.ColumnTitles.Insert(0, "ÃüÖĞµÄ¼ìË÷µã");
+                e.ColumnTitles.Insert(0, "å‘½ä¸­çš„æ£€ç´¢ç‚¹");
              * */
 
         }
@@ -137,7 +137,7 @@ namespace dp2Catalog
 
             if (dp2_searchform == null)
             {
-                // ĞÂ¿ªÒ»¸ödp2¼ìË÷´°
+                // æ–°å¼€ä¸€ä¸ªdp2æ£€ç´¢çª—
                 FormWindowState old_state = this.WindowState;
 
                 dp2_searchform = new dp2SearchForm();
@@ -149,7 +149,7 @@ namespace dp2Catalog
                 this.WindowState = old_state;
                 this.Activate();
 
-                // ĞèÒªµÈ´ı³õÊ¼»¯²Ù×÷³¹µ×Íê³É
+                // éœ€è¦ç­‰å¾…åˆå§‹åŒ–æ“ä½œå½»åº•å®Œæˆ
                 dp2_searchform.WaitLoadFinish();
             }
 
@@ -172,9 +172,9 @@ namespace dp2Catalog
              * */
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
-            // ·şÎñÆ÷Ãû
+            // æœåŠ¡å™¨å
             if (string.IsNullOrEmpty(this.textBox_serverName.Text) == true)
             {
                 this.textBox_serverName.Text = this.MainForm.AppInfo.GetString(
@@ -183,7 +183,7 @@ namespace dp2Catalog
     "");
             }
 
-            // ÀàºÅ
+            // ç±»å·
             if (String.IsNullOrEmpty(this.textBox_classNumber.Text) == true)
             {
                 this.textBox_classNumber.Text = this.MainForm.AppInfo.GetString(
@@ -192,7 +192,7 @@ namespace dp2Catalog
                     "");
             }
 
-            // ÏßË÷ÊéÄ¿¿âÃû
+            // çº¿ç´¢ä¹¦ç›®åº“å
             if (String.IsNullOrEmpty(this.comboBox_biblioDbName.Text) == true)
             {
                 this.comboBox_biblioDbName.Text = this.MainForm.AppInfo.GetString(
@@ -201,7 +201,7 @@ namespace dp2Catalog
                     "");
             }
 
-            // ÊÇ·ñÒª·µ»Øä¯ÀÀÁĞ
+            // æ˜¯å¦è¦è¿”å›æµè§ˆåˆ—
             this.checkBox_returnBrowseCols.Checked = this.MainForm.AppInfo.GetBoolean(
                     "zhongcihao_form",
                     "return_browse_cols",
@@ -232,7 +232,7 @@ namespace dp2Catalog
             dp2Server server = this.MainForm.Servers[channel.Url];
             if (server == null)
             {
-                e.ErrorInfo = "Ã»ÓĞÕÒµ½ URL Îª " + channel.Url + " µÄ·şÎñÆ÷¶ÔÏó";
+                e.ErrorInfo = "æ²¡æœ‰æ‰¾åˆ° URL ä¸º " + channel.Url + " çš„æœåŠ¡å™¨å¯¹è±¡";
                 e.Failed = true;
                 e.Cancel = true;
                 return;
@@ -251,14 +251,14 @@ namespace dp2Catalog
                 e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
 
 #if SN
-                // ´ÓĞòÁĞºÅÖĞ»ñµÃ expire= ²ÎÊıÖµ
+                // ä»åºåˆ—å·ä¸­è·å¾— expire= å‚æ•°å€¼
                 string strExpire = this.MainForm.GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
 #endif
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // Á¢¼´·µ»Ø, ÒÔ±ã×÷µÚÒ»´Î ²»³öÏÖ ¶Ô»°¿òµÄ×Ô¶¯µÇÂ¼
+                    return; // ç«‹å³è¿”å›, ä»¥ä¾¿ä½œç¬¬ä¸€æ¬¡ ä¸å‡ºç° å¯¹è¯æ¡†çš„è‡ªåŠ¨ç™»å½•
             }
 
             // 
@@ -369,7 +369,7 @@ namespace dp2Catalog
                     "location",
                     "");
                 if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // Á¢¼´·µ»Ø, ÒÔ±ã×÷µÚÒ»´Î ²»³öÏÖ ¶Ô»°¿òµÄ×Ô¶¯µÇÂ¼
+                    return; // ç«‹å³è¿”å›, ä»¥ä¾¿ä½œç¬¬ä¸€æ¬¡ ä¸å‡ºç° å¯¹è¯æ¡†çš„è‡ªåŠ¨ç™»å½•
             }
 
             // 
@@ -564,7 +564,7 @@ namespace dp2Catalog
 
         public void LoadSize()
         {
-            // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+            // è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state");
         }
@@ -581,39 +581,39 @@ namespace dp2Catalog
 
         private void ZhongcihaoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                // ·şÎñÆ÷Ãû
+                // æœåŠ¡å™¨å
                 this.MainForm.AppInfo.SetString(
     "zhongcihao_form",
     "servername",
     this.textBox_serverName.Text);
 
-                // ÀàºÅ
+                // ç±»å·
                 this.MainForm.AppInfo.SetString(
                     "zhongcihao_form",
                     "classnumber",
                     this.textBox_classNumber.Text);
 
-                // ÏßË÷ÊéÄ¿¿âÃû
+                // çº¿ç´¢ä¹¦ç›®åº“å
                 this.MainForm.AppInfo.SetString(
                     "zhongcihao_form",
                     "biblio_dbname",
                     this.comboBox_biblioDbName.Text);
 
-                // ÊÇ·ñÒª·µ»Øä¯ÀÀÁĞ
+                // æ˜¯å¦è¦è¿”å›æµè§ˆåˆ—
                 this.MainForm.AppInfo.SetBoolean(
                         "zhongcihao_form",
                         "return_browse_cols",
                         this.checkBox_returnBrowseCols.Checked);
 
-                // ·şÎñÆ÷Ãû
+                // æœåŠ¡å™¨å
                 this.MainForm.AppInfo.GetString(
                         "zhongcihao_form",
                         "servername",
@@ -640,7 +640,7 @@ namespace dp2Catalog
         }
 
         /// <summary>
-        /// ÊéÄ¿¿âÃû
+        /// ä¹¦ç›®åº“å
         /// </summary>
         public string BiblioDbName
         {
@@ -655,7 +655,7 @@ namespace dp2Catalog
         }
 
         /// <summary>
-        /// ÀàºÅ
+        /// ç±»å·
         /// </summary>
         public string ClassNumber
         {
@@ -671,7 +671,7 @@ namespace dp2Catalog
 
 
         /// <summary>
-        /// ×î´óºÅ
+        /// æœ€å¤§å·
         /// </summary>
         public string MaxNumber
         {
@@ -700,7 +700,7 @@ namespace dp2Catalog
 
  
         /// <summary>
-        /// Î²ºÅ
+        /// å°¾å·
         /// </summary>
         public string TailNumber
         {
@@ -735,12 +735,12 @@ namespace dp2Catalog
                 if (nRet == -1)
                     throw (new Exception(strError));
                 else
-                    m_strTailNumber = strOutputNumber;	// Ë¢ĞÂ¼ÇÒä
+                    m_strTailNumber = strOutputNumber;	// åˆ·æ–°è®°å¿†
             }
         }
  
 
-        // ¼ìË÷
+        // æ£€ç´¢
         private void button_search_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -752,7 +752,7 @@ namespace dp2Catalog
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ²»»ñµÃ±¾ÀàÎ²ºÅ
+                // ä¸è·å¾—æœ¬ç±»å°¾å·
                 return;
             }
             finally
@@ -788,16 +788,16 @@ namespace dp2Catalog
             this.listView_number.Items.Clear();
             this.MaxNumber = "";
 
-            // »ñµÃserver url
+            // è·å¾—server url
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
@@ -808,27 +808,27 @@ namespace dp2Catalog
             /*
             if (dom == null)
             {
-                strError = "ÇëÏÈµ÷ÓÃGetGlobalCfgFile()º¯Êı";
+                strError = "è¯·å…ˆè°ƒç”¨GetGlobalCfgFile()å‡½æ•°";
                 return -1;
             }
              * */
 
             if (this.ClassNumber == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨·ÖÀàºÅ";
+                strError = "å°šæœªæŒ‡å®šåˆ†ç±»å·";
                 return -1;
             }
 
             if (this.BiblioDbName == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÊéÄ¿¿âÃû";
+                strError = "å°šæœªæŒ‡å®šä¹¦ç›®åº“å";
                 return -1;
             }
 
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¼ìË÷Í¬ÀàÊé¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨æ£€ç´¢åŒç±»ä¹¦è®°å½• ...");
             stop.BeginLoop();
 
             this.Update();
@@ -850,7 +850,7 @@ namespace dp2Catalog
                     goto ERROR1;
                 if (lRet == 0)
                 {
-                    strError = "Ã»ÓĞÃüÖĞµÄ¼ÇÂ¼¡£";
+                    strError = "æ²¡æœ‰å‘½ä¸­çš„è®°å½•ã€‚";
                     return 0;   // not found
                 }
 
@@ -864,16 +864,16 @@ namespace dp2Catalog
                 if (stop != null)
                     stop.SetProgressRange(0, lHitCount);
 
-                // ×°Èëä¯ÀÀ¸ñÊ½
+                // è£…å…¥æµè§ˆæ ¼å¼
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
@@ -889,7 +889,7 @@ namespace dp2Catalog
                     }
 
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (ÃüÖĞ " + lHitCount.ToString() + " Ìõ¼ÇÂ¼) ...");
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (å‘½ä¸­ " + lHitCount.ToString() + " æ¡è®°å½•) ...");
 
                     lRet = Channel.GetZhongcihaoSearchResult(
                         stop,
@@ -907,11 +907,11 @@ namespace dp2Catalog
 
                     if (lRet == 0)
                     {
-                        strError = "Î´ÃüÖĞ";
+                        strError = "æœªå‘½ä¸­";
                         goto ERROR1;
                     }
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         ZhongcihaoSearchResult result_item = searchresults[i];
@@ -950,11 +950,11 @@ namespace dp2Catalog
 
             if (bSort == true)
             {
-                // ÅÅĞò
+                // æ’åº
                 this.listView_number.ListViewItemSorter = new ZhongcihaoListViewItemComparer();
                 this.listView_number.ListViewItemSorter = null;
 
-                // °ÑÖØ¸´ÖÖ´ÎºÅµÄÊÂÏîÓÃÌØÊâÑÕÉ«±ê³öÀ´
+                // æŠŠé‡å¤ç§æ¬¡å·çš„äº‹é¡¹ç”¨ç‰¹æ®Šé¢œè‰²æ ‡å‡ºæ¥
                 ColorDup();
 
                 this.MaxNumber = GetTopNumber(this.listView_number);    // this.listView_number.Items[0].SubItems[1].Text;
@@ -965,8 +965,8 @@ namespace dp2Catalog
             return -1;
         }
 
-        // ´ÓÒÑ¾­ÅÅĞòµÄÊÂÏîÖĞ£¬È¡³öÎ»ÖÃ×î¸ßÊÂÏîµÄÖÖ´ÎºÅ¡£
-        // ±¾º¯Êı»á×Ô¶¯ÅÅ³ıMyselfBiblioRecPathÕâÌõ¼ÇÂ¼
+        // ä»å·²ç»æ’åºçš„äº‹é¡¹ä¸­ï¼Œå–å‡ºä½ç½®æœ€é«˜äº‹é¡¹çš„ç§æ¬¡å·ã€‚
+        // æœ¬å‡½æ•°ä¼šè‡ªåŠ¨æ’é™¤MyselfBiblioRecPathè¿™æ¡è®°å½•
         string GetTopNumber(ListView list)
         {
             for (int i = 0; i < list.Items.Count; i++)
@@ -977,12 +977,12 @@ namespace dp2Catalog
                     return item.SubItems[1].Text;
             }
 
-            // TODO: Èç¹û³ıÁË×Ô¼ºÒÔÍâ£¬²¢Ã»ÓĞÆäËû°üº¬ÓĞĞ§ÖÖ´ÎºÅµÄÊÂÏîÁË£¬ÄÇÒ²Ö»ºÃÓÃ×Ô¼ºµÄÖÖ´ÎºÅ-1À´³äµ±£¿
+            // TODO: å¦‚æœé™¤äº†è‡ªå·±ä»¥å¤–ï¼Œå¹¶æ²¡æœ‰å…¶ä»–åŒ…å«æœ‰æ•ˆç§æ¬¡å·çš„äº‹é¡¹äº†ï¼Œé‚£ä¹Ÿåªå¥½ç”¨è‡ªå·±çš„ç§æ¬¡å·-1æ¥å……å½“ï¼Ÿ
 
-            return "";  // Ã»ÓĞÕÒµ½
+            return "";  // æ²¡æœ‰æ‰¾åˆ°
         }
 
-        // Ê¹ÏàÁÚÖØ¸´ĞĞ±äÉ«
+        // ä½¿ç›¸é‚»é‡å¤è¡Œå˜è‰²
         void ColorDup()
         {
             string strPrevNumber = "";
@@ -1006,7 +1006,7 @@ namespace dp2Catalog
                 {
                     if (nDupCount >= 1)
                     {
-                        // »»Ò»ÏÂÑÕÉ«
+                        // æ¢ä¸€ä¸‹é¢œè‰²
                         if (color == color1)
                             color = color2;
                         else
@@ -1026,7 +1026,7 @@ namespace dp2Catalog
         }
 
 
-        // ¼ìË÷Î²ºÅ£¬·ÅÈëÃæ°åÖĞ½çÃæÔªËØ
+        // æ£€ç´¢å°¾å·ï¼Œæ”¾å…¥é¢æ¿ä¸­ç•Œé¢å…ƒç´ 
         // return:
         //      -1  error
         //      0   not found
@@ -1045,17 +1045,17 @@ namespace dp2Catalog
                 return 0;
 
             this.textBox_tailNumber.Text = strTailNumber;
-            // this.label_tailNumberTitle.Text = "¿â'" + this.ZhongcihaoDbName + "'ÖĞµÄÎ²ºÅ(&T):";
+            // this.label_tailNumberTitle.Text = "åº“'" + this.ZhongcihaoDbName + "'ä¸­çš„å°¾å·(&T):";
             return 1;
         }
 
 
                 /// <summary>
-        ///  ¼ìË÷»ñµÃÖÖ´ÎºÅ¿âÖĞ¶ÔÓ¦ÀàÄ¿µÄÎ²ºÅ¡£´Ë¹¦ÄÜ±È½Ïµ¥´¿£¬Ëù»ñµÃµÄ½á¹û²¢²»·ÅÈëÃæ°å½çÃæÔªËØ
+        ///  æ£€ç´¢è·å¾—ç§æ¬¡å·åº“ä¸­å¯¹åº”ç±»ç›®çš„å°¾å·ã€‚æ­¤åŠŸèƒ½æ¯”è¾ƒå•çº¯ï¼Œæ‰€è·å¾—çš„ç»“æœå¹¶ä¸æ”¾å…¥é¢æ¿ç•Œé¢å…ƒç´ 
         /// </summary>
-        /// <param name="strTailNumber">·µ»ØÎ²ºÅ</param>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½;1ÕÒµ½</returns>
+        /// <param name="strTailNumber">è¿”å›å°¾å·</param>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°;1æ‰¾åˆ°</returns>
         public int SearchTailNumber(
             out string strTailNumber,
             out string strError)
@@ -1063,16 +1063,16 @@ namespace dp2Catalog
             strTailNumber = "";
 
 
-            // »ñµÃserver url
+            // è·å¾—server url
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
@@ -1082,7 +1082,7 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñµÃÎ²ºÅ ...");
+            stop.Initial("æ­£åœ¨è·å¾—å°¾å· ...");
             stop.BeginLoop();
 
             try
@@ -1113,23 +1113,23 @@ namespace dp2Catalog
             return -1;
         }
 
-        // ÍÆ¶¯Î²ºÅ¡£Èç¹ûÒÑ¾­´æÔÚµÄÎ²ºÅ±ÈstrTestNumber»¹Òª´ó£¬Ôò²»ÍÆ¶¯
+        // æ¨åŠ¨å°¾å·ã€‚å¦‚æœå·²ç»å­˜åœ¨çš„å°¾å·æ¯”strTestNumberè¿˜è¦å¤§ï¼Œåˆ™ä¸æ¨åŠ¨
         public int PushTailNumber(string strTestNumber,
             out string strOutputNumber,
             out string strError)
         {
             strOutputNumber = "";
 
-            // »ñµÃserver url
+            // è·å¾—server url
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
@@ -1140,7 +1140,7 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÍÆ¶¯Î²ºÅ ...");
+            stop.Initial("æ­£åœ¨æ¨åŠ¨å°¾å· ...");
             stop.BeginLoop();
 
             try
@@ -1180,16 +1180,16 @@ namespace dp2Catalog
         {
             strOutputNumber = "";
 
-            // »ñµÃserver url
+            // è·å¾—server url
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
@@ -1200,7 +1200,7 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æÎ²ºÅ ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜å°¾å· ...");
             stop.BeginLoop();
 
             try
@@ -1233,7 +1233,7 @@ namespace dp2Catalog
             return -1;
         }
 
-        // »ñµÃÎ²ºÅ
+        // è·å¾—å°¾å·
         private void button_getTailNumber_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -1241,15 +1241,15 @@ namespace dp2Catalog
             EventFinish.Reset();
             try
             {
-                this.textBox_tailNumber.Text = "";   // Ô¤ÏÈÇå¿Õ£¬ÒÔ·ÀÎó»á
+                this.textBox_tailNumber.Text = "";   // é¢„å…ˆæ¸…ç©ºï¼Œä»¥é˜²è¯¯ä¼š
 
-                // »ñµÃ±¾ÀàÎ²ºÅ
+                // è·å¾—æœ¬ç±»å°¾å·
                 int nRet = PanelGetTailNumber(out strError);
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == 0)
                 {
-                    strError = "Àà '" + this.ClassNumber + "' µÄÎ²ºÅÉĞ²»´æÔÚ";
+                    strError = "ç±» '" + this.ClassNumber + "' çš„å°¾å·å°šä¸å­˜åœ¨";
                     goto ERROR1;
                 }
 
@@ -1264,14 +1264,14 @@ namespace dp2Catalog
             MessageBox.Show(this, strError);
         }
 
-        // ±£´æÎ²ºÅ
+        // ä¿å­˜å°¾å·
         private void button_saveTailNumber_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (this.textBox_tailNumber.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈëÒª±£´æµÄÎ²ºÅ";
+                strError = "å°šæœªè¾“å…¥è¦ä¿å­˜çš„å°¾å·";
                 goto ERROR1;
             }
 
@@ -1280,7 +1280,7 @@ namespace dp2Catalog
             {
                 string strOutputNumber = "";
 
-                // ±£´æ±¾ÀàÎ²ºÅ
+                // ä¿å­˜æœ¬ç±»å°¾å·
                 int nRet = SaveTailNumber(this.textBox_tailNumber.Text,
                     out strOutputNumber,
                     out strError);
@@ -1298,12 +1298,12 @@ namespace dp2Catalog
             MessageBox.Show(this, strError);
         }
 
-        // ÓÃ¼ìË÷µÃµ½µÄÍ¬ÀàÊéÖĞÊµ¼ÊÓÃµ½µÄ×î´óºÅ£¬ÊÔÌ½ĞÔÍÆ¶¯ÖÖ´ÎºÅ¿âÖĞµÄÎ²ºÅ
+        // ç”¨æ£€ç´¢å¾—åˆ°çš„åŒç±»ä¹¦ä¸­å®é™…ç”¨åˆ°çš„æœ€å¤§å·ï¼Œè¯•æ¢æ€§æ¨åŠ¨ç§æ¬¡å·åº“ä¸­çš„å°¾å·
         private void button_pushTailNumber_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strOutputNumber = "";
-            // ÍÆ¶¯Î²ºÅ
+            // æ¨åŠ¨å°¾å·
             int nRet = PushTailNumber(this.textBox_maxNumber.Text,
                 out strOutputNumber,
                 out strError);
@@ -1311,13 +1311,13 @@ namespace dp2Catalog
                 goto ERROR1;
 
             this.textBox_tailNumber.Text = strOutputNumber;
-            // MessageBox.Show(this, "ÍÆ¶¯Î²ºÅ³É¹¦");
+            // MessageBox.Show(this, "æ¨åŠ¨å°¾å·æˆåŠŸ");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // µÃµ½µ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅµÄ¼Ó1ÒÔºóµÄºÅ
+        // å¾—åˆ°å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·çš„åŠ 1ä»¥åçš„å·
         // return:
         //      -1  error
         //      0   not found
@@ -1335,7 +1335,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -1348,7 +1348,7 @@ namespace dp2Catalog
                 out strError);
             if (nRet == -1)
             {
-                strError = "ÎªÊı×Ö '" + strMaxNumber + "' ÔöÁ¿Ê±·¢Éú´íÎó: " + strError;
+                strError = "ä¸ºæ•°å­— '" + strMaxNumber + "' å¢é‡æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                 goto ERROR1;
 
             }
@@ -1357,13 +1357,13 @@ namespace dp2Catalog
             return -1;
         }
 
-        // ¸´ÖÆ±Èµ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅ»¹´ó1µÄºÅ
+        // å¤åˆ¶æ¯”å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·è¿˜å¤§1çš„å·
         private void button_copyMaxNumber_Click(object sender, EventArgs e)
         {
             string strResult = "";
             string strError = "";
 
-            // µÃµ½µ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅµÄ¼Ó1ÒÔºóµÄºÅ
+            // å¾—åˆ°å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·çš„åŠ 1ä»¥åçš„å·
             // return:
             //      -1  error
             //      1   succeed
@@ -1375,7 +1375,7 @@ namespace dp2Catalog
             }
 
             if (nRet == 0)
-                strResult = "1";    // Èç¹ûµ±Ç°´ÓÊéÄ¿ÖĞÎŞ·¨Í³¼Æ³ö×î´óºÅ£¬ÔòÊÓÎªµÃµ½"0"£¬¶ø¼Ó1ÒÔºóÕıºÃÎª"1"
+                strResult = "1";    // å¦‚æœå½“å‰ä»ä¹¦ç›®ä¸­æ— æ³•ç»Ÿè®¡å‡ºæœ€å¤§å·ï¼Œåˆ™è§†ä¸ºå¾—åˆ°"0"ï¼Œè€ŒåŠ 1ä»¥åæ­£å¥½ä¸º"1"
 
             Clipboard.SetDataObject(strResult);
             return;
@@ -1383,7 +1383,7 @@ namespace dp2Catalog
             MessageBox.Show(this, strError);
         }
 
-        // ¼ìË÷Á½ÖÖ£ºÍ¬ÀàÊé¡¢Î²ºÅ
+        // æ£€ç´¢ä¸¤ç§ï¼šåŒç±»ä¹¦ã€å°¾å·
         private void button_searchDouble_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -1391,13 +1391,13 @@ namespace dp2Catalog
             EventFinish.Reset();
             try
             {
-                this.textBox_tailNumber.Text = "";   // Ô¤·Àfilllist ÌáÇ°ÍË³ö, Íü¼Ç´¦Àí
+                this.textBox_tailNumber.Text = "";   // é¢„é˜²filllist æå‰é€€å‡º, å¿˜è®°å¤„ç†
 
                 int nRet = FillList(true, out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // Ò»²¢»ñµÃ±¾ÀàÎ²ºÅ
+                // ä¸€å¹¶è·å¾—æœ¬ç±»å°¾å·
                 nRet = PanelGetTailNumber(out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1413,7 +1413,7 @@ namespace dp2Catalog
             MessageBox.Show(this, strError);
         }
 
-        // Í¼Êé¹İ·şÎñÆ÷Ãû
+        // å›¾ä¹¦é¦†æœåŠ¡å™¨å
         public string LibraryServerName
         {
             get
@@ -1431,7 +1431,7 @@ namespace dp2Catalog
             if (this.comboBox_biblioDbName.Items.Count > 0)
                 return;
 
-            // this.comboBox_biblioDbName.Items.Add("<È«²¿>");
+            // this.comboBox_biblioDbName.Items.Add("<å…¨éƒ¨>");
 
             /*
             for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
@@ -1444,18 +1444,18 @@ namespace dp2Catalog
 
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
 
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
-            // »ñµÃserver url
+            // è·å¾—server url
             string strServerUrl = server.Url;
 
             List<string> dbnames = null;
@@ -1478,10 +1478,10 @@ namespace dp2Catalog
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃÒ»¸öÊéÄ¿¿âÃûÁĞ±í
+        // è·å¾—ä¸€ä¸ªä¹¦ç›®åº“ååˆ—è¡¨
         // parameters:
-        //      stop    Èç¹û!=null£¬±íÊ¾Ê¹ÓÃÕâ¸östop£¬ËüÒÑ¾­OnStop +=
-        //              Èç¹û==null£¬±íÊ¾»á×Ô¶¯Ê¹ÓÃthis.stop£¬²¢×Ô¶¯OnStop+=
+        //      stop    å¦‚æœ!=nullï¼Œè¡¨ç¤ºä½¿ç”¨è¿™ä¸ªstopï¼Œå®ƒå·²ç»OnStop +=
+        //              å¦‚æœ==nullï¼Œè¡¨ç¤ºä¼šè‡ªåŠ¨ä½¿ç”¨this.stopï¼Œå¹¶è‡ªåŠ¨OnStop+=
         // return:
         //      -1  error
         //      0   OK
@@ -1501,7 +1501,7 @@ namespace dp2Catalog
                 stop = this.stop;
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ»ñµÃ·şÎñÆ÷ " + strServerUrl + " µÄĞÅÏ¢ ...");
+                stop.Initial("æ­£åœ¨è·å¾—æœåŠ¡å™¨ " + strServerUrl + " çš„ä¿¡æ¯ ...");
                 stop.BeginLoop();
 
                 bInitialStop = true;
@@ -1541,37 +1541,37 @@ namespace dp2Catalog
             return 0;
         }
 
-        // ½«Ãæ°åÉÏÊäÈëµÄÏßË÷Êı¾İ¿âÃû»òÕßÖÖ´ÎºÅ·½°¸Ãû±ä»»ÎªAPIÊ¹ÓÃµÄĞÎÌ¬
+        // å°†é¢æ¿ä¸Šè¾“å…¥çš„çº¿ç´¢æ•°æ®åº“åæˆ–è€…ç§æ¬¡å·æ–¹æ¡ˆåå˜æ¢ä¸ºAPIä½¿ç”¨çš„å½¢æ€
         static string GetZhongcihaoDbGroupName(string strText)
         {
             if (String.IsNullOrEmpty(strText) == true)
                 return "";
 
-            // Èç¹ûµÚÒ»¸ö×Ö·ûÓĞ!·ûºÅ£¬±íÃ÷ÊÇ·½°¸Ãû
+            // å¦‚æœç¬¬ä¸€ä¸ªå­—ç¬¦æœ‰!ç¬¦å·ï¼Œè¡¨æ˜æ˜¯æ–¹æ¡ˆå
             if (strText[0] == '!')
                 return strText.Substring(1);
 
-            // Ã»ÓĞ£¡·ûºÅ£¬±íÃ÷ÊÇÏßË÷Êı¾İ¿âÃû
+            // æ²¡æœ‰ï¼ç¬¦å·ï¼Œè¡¨æ˜æ˜¯çº¿ç´¢æ•°æ®åº“å
             return "!" + strText;
         }
 
-        // ÔöÁ¿Î²ºÅ
+        // å¢é‡å°¾å·
         public int IncreaseTailNumber(string strDefaultNumber,
             out string strOutputNumber,
             out string strError)
         {
             strOutputNumber = "";
 
-            // »ñµÃserver url
+            // è·å¾—server url
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 goto ERROR1;
             }
 
@@ -1582,7 +1582,7 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÔöÁ¿Î²ºÅ ...");
+            stop.Initial("æ­£åœ¨å¢é‡å°¾å· ...");
             stop.BeginLoop();
 
             try
@@ -1615,10 +1615,10 @@ namespace dp2Catalog
             return -1;
         }
 
-        #region Ğ­µ÷Íâ²¿µ÷ÓÃµÄº¯Êı
+        #region åè°ƒå¤–éƒ¨è°ƒç”¨çš„å‡½æ•°
 
         /// <summary>
-        /// µÈ´ı¼ìË÷½áÊø
+        /// ç­‰å¾…æ£€ç´¢ç»“æŸ
         /// </summary>
         public void WaitSearchFinish()
         {
@@ -1633,7 +1633,7 @@ namespace dp2Catalog
 
         #endregion
 
-        // °´ÕÕÒ»¶¨µÄ²ßÂÔ£¬»ñµÃÖÖ´ÎºÅ
+        // æŒ‰ç…§ä¸€å®šçš„ç­–ç•¥ï¼Œè·å¾—ç§æ¬¡å·
         // return:
         //      -1  error
         //      0   canceled
@@ -1652,10 +1652,10 @@ namespace dp2Catalog
             this.ClassNumber = strClass;
             this.BiblioDbName = strBiblioDbName;
 
-        // ½öÀûÓÃÊéÄ¿Í³¼Æ×î´óºÅ
+        // ä»…åˆ©ç”¨ä¹¦ç›®ç»Ÿè®¡æœ€å¤§å·
             if (style == ZhongcihaoStyle.Biblio)
             {
-                // µÃµ½µ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅµÄ¼Ó1ÒÔºóµÄºÅ
+                // å¾—åˆ°å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·çš„åŠ 1ä»¥åçš„å·
                 // return:
                 //      -1  error
                 //      1   succeed
@@ -1668,19 +1668,19 @@ namespace dp2Catalog
 
 
 
-            // Ã¿´Î¶¼ÀûÓÃÊéÄ¿Í³¼Æ×î´óºÅÀ´¼ìÑé¡¢Ğ£ÕıÎ²ºÅ
+            // æ¯æ¬¡éƒ½åˆ©ç”¨ä¹¦ç›®ç»Ÿè®¡æœ€å¤§å·æ¥æ£€éªŒã€æ ¡æ­£å°¾å·
             if (style == ZhongcihaoStyle.BiblioAndSeed
                 || style == ZhongcihaoStyle.SeedAndBiblio)
             {
 
                 string strTailNumber = this.TailNumber;
 
-                // Èç¹û±¾ÀàÉĞÎ´´´½¨ÖÖ´ÎºÅÌõÄ¿
+                // å¦‚æœæœ¬ç±»å°šæœªåˆ›å»ºç§æ¬¡å·æ¡ç›®
                 if (String.IsNullOrEmpty(strTailNumber) == true)
                 {
-                     // ±Ï¾¹³õÊ¼Öµ»¹ÊÇÀûÓÃÁËÍ³¼Æ½á¹û
+                     // æ¯•ç«Ÿåˆå§‹å€¼è¿˜æ˜¯åˆ©ç”¨äº†ç»Ÿè®¡ç»“æœ
                     string strTestNumber = "";
-                    // µÃµ½µ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅµÄ¼Ó1ÒÔºóµÄºÅ
+                    // å¾—åˆ°å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·çš„åŠ 1ä»¥åçš„å·
                     // return:
                     //      -1  error
                     //      0   not found
@@ -1693,14 +1693,14 @@ namespace dp2Catalog
                     if (nRet == 0)
                         strTestNumber = "1";
 
-                    // ´ËÀà´ÓÀ´Ã»ÓĞ¹ı¼ÇÂ¼£¬µ±Ç°ÊÇµÚÒ»Ìõ
+                    // æ­¤ç±»ä»æ¥æ²¡æœ‰è¿‡è®°å½•ï¼Œå½“å‰æ˜¯ç¬¬ä¸€æ¡
                     strNumber = InputDlg.GetInput(
                         this,
                         null,
-                        "ÇëÊäÈëÀà '" + strClass + "' µÄµ±Ç°ÖÖ´ÎºÅ×î´óºÅ:",
+                        "è¯·è¾“å…¥ç±» '" + strClass + "' çš„å½“å‰ç§æ¬¡å·æœ€å¤§å·:",
                         strTestNumber);
                     if (strNumber == null)
-                        return 0;	// ·ÅÆúÕû¸ö²Ù×÷
+                        return 0;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
                     // dlg.TailNumber = strNumber;	
 
@@ -1712,11 +1712,11 @@ namespace dp2Catalog
 
                     return 1;
                 }
-                else // ±¾ÀàÒÑ¾­ÓĞÖÖ´ÎºÅÌõÄ¿
+                else // æœ¬ç±»å·²ç»æœ‰ç§æ¬¡å·æ¡ç›®
                 {
-                    // ¼ì²éºÍÍ³¼ÆÖµµÄ¹ØÏµ
+                    // æ£€æŸ¥å’Œç»Ÿè®¡å€¼çš„å…³ç³»
                     string strTestNumber = "";
-                    // µÃµ½µ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅµÄ¼Ó1ÒÔºóµÄºÅ
+                    // å¾—åˆ°å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·çš„åŠ 1ä»¥åçš„å·
                     // return:
                     //      -1  error
                     //      0   not found
@@ -1728,7 +1728,7 @@ namespace dp2Catalog
 
                     if (nRet == 0)
                     {
-                        // ÒÀ¿¿ÏÖÓĞÎ²ºÅÔöÁ¿¼´¿É
+                        // ä¾é ç°æœ‰å°¾å·å¢é‡å³å¯
                         nRet = this.IncreaseTailNumber("1",
                             out strNumber,
                             out strError);
@@ -1738,21 +1738,21 @@ namespace dp2Catalog
                         return 1;
                     }
 
-                    // ÓÃÍ³¼Æ³öÀ´µÄºÅÍÆ¶¯µ±Ç°Î²ºÅ£¬¾ÍÆğµ½ÁË¼ìÑéµÄ×÷ÓÃ
+                    // ç”¨ç»Ÿè®¡å‡ºæ¥çš„å·æ¨åŠ¨å½“å‰å°¾å·ï¼Œå°±èµ·åˆ°äº†æ£€éªŒçš„ä½œç”¨
                     nRet = PushTailNumber(strTestNumber,
                         out strNumber,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    // Èç¹ûµ½ÕâÀï¾Í·µ»Ø£¬Ğ§¹ûÎª±£ÊØĞÍÔöÁ¿£¬¼´Èç¹ûµ±Ç°¼ÇÂ¼·´¸´È¡ºÅ¶ø²»±£´æ£¬ÔòÎ²ºÅ²»Ã¤Ä¿ÔöÁ¿¡£µ±È»È±µãÒ²ÊÇºÜÃ÷ÏÔµÄ -- ÓĞ¿ÉÄÜ¶à¸ö´°¿ÚÈ¡³öÖØºÅÀ´
+                    // å¦‚æœåˆ°è¿™é‡Œå°±è¿”å›ï¼Œæ•ˆæœä¸ºä¿å®ˆå‹å¢é‡ï¼Œå³å¦‚æœå½“å‰è®°å½•åå¤å–å·è€Œä¸ä¿å­˜ï¼Œåˆ™å°¾å·ä¸ç›²ç›®å¢é‡ã€‚å½“ç„¶ç¼ºç‚¹ä¹Ÿæ˜¯å¾ˆæ˜æ˜¾çš„ -- æœ‰å¯èƒ½å¤šä¸ªçª—å£å–å‡ºé‡å·æ¥
                     if (style == ZhongcihaoStyle.BiblioAndSeed)
                         return 1;
 
-                    if (strTailNumber != strNumber)  // Èç¹ûÊµ¼Ê·¢ÉúÁËÍÆ¶¯£¬¾ÍÒªÕâ¸öºÅ£¬²»±ØÔöÁ¿ÁË
+                    if (strTailNumber != strNumber)  // å¦‚æœå®é™…å‘ç”Ÿäº†æ¨åŠ¨ï¼Œå°±è¦è¿™ä¸ªå·ï¼Œä¸å¿…å¢é‡äº†
                         return 1;
 
-                    // ÒÀ¿¿ÏÖÓĞÎ²ºÅÔöÁ¿
+                    // ä¾é ç°æœ‰å°¾å·å¢é‡
                     nRet = this.IncreaseTailNumber("1",
                         out strNumber,
                         out strError);
@@ -1765,17 +1765,17 @@ namespace dp2Catalog
                 // return 1;
             }
 
-            // ½öÀûÓÃ(ÖÖ´ÎºÅ¿â)Î²ºÅ
+            // ä»…åˆ©ç”¨(ç§æ¬¡å·åº“)å°¾å·
             if (style == ZhongcihaoStyle.Seed)
             {
                 string strTailNumber = this.TailNumber;
 
-                // Èç¹û±¾ÀàÉĞÎ´´´½¨ÖÖ´ÎºÅÌõÄ¿
+                // å¦‚æœæœ¬ç±»å°šæœªåˆ›å»ºç§æ¬¡å·æ¡ç›®
                 if (String.IsNullOrEmpty(strTailNumber) == true)
                 {
-                    // ±Ï¾¹³õÊ¼Öµ»¹ÊÇÀûÓÃÁËÍ³¼Æ½á¹û
+                    // æ¯•ç«Ÿåˆå§‹å€¼è¿˜æ˜¯åˆ©ç”¨äº†ç»Ÿè®¡ç»“æœ
                     string strTestNumber = "";
-                    // µÃµ½µ±Ç°ÊéÄ¿ÖĞÍ³¼Æ³öÀ´µÄ×î´óºÅµÄ¼Ó1ÒÔºóµÄºÅ
+                    // å¾—åˆ°å½“å‰ä¹¦ç›®ä¸­ç»Ÿè®¡å‡ºæ¥çš„æœ€å¤§å·çš„åŠ 1ä»¥åçš„å·
                     // return:
                     //      -1  error
                     //      0   not found
@@ -1787,14 +1787,14 @@ namespace dp2Catalog
 
                     if (nRet == 0)
                         strTestNumber = "1";
-                    // ´ËÀà´ÓÀ´Ã»ÓĞ¹ı¼ÇÂ¼£¬µ±Ç°ÊÇµÚÒ»Ìõ
+                    // æ­¤ç±»ä»æ¥æ²¡æœ‰è¿‡è®°å½•ï¼Œå½“å‰æ˜¯ç¬¬ä¸€æ¡
                     strNumber = InputDlg.GetInput(
                         this,
                         null,
-                        "ÇëÊäÈëÀà '" + strClass + "' µÄµ±Ç°ÖÖ´ÎºÅ×î´óºÅ:",
+                        "è¯·è¾“å…¥ç±» '" + strClass + "' çš„å½“å‰ç§æ¬¡å·æœ€å¤§å·:",
                         strTestNumber);
                     if (strNumber == null)
-                        return 0;	// ·ÅÆúÕû¸ö²Ù×÷
+                        return 0;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
                     // dlg.TailNumber = strNumber;	
 
@@ -1806,7 +1806,7 @@ namespace dp2Catalog
 
                     return 1;
                 }
-                else // ±¾ÀàÒÑ¾­ÓĞÖÖ´ÎºÅÏîÄ¿£¬ÔöÁ¿¼´¿É
+                else // æœ¬ç±»å·²ç»æœ‰ç§æ¬¡å·é¡¹ç›®ï¼Œå¢é‡å³å¯
                 {
                     nRet = this.IncreaseTailNumber("1",
                         out strNumber,
@@ -1827,17 +1827,17 @@ namespace dp2Catalog
             return -1;
         }
 
-        // Ë«»÷£º½«ÊéÄ¿¼ÇÂ¼×°ÈëÏêÏ¸´°
+        // åŒå‡»ï¼šå°†ä¹¦ç›®è®°å½•è£…å…¥è¯¦ç»†çª—
         private void listView_number_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_number.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª×°ÈëÏêÏ¸´°µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦è£…å…¥è¯¦ç»†çª—çš„äº‹é¡¹");
                 return;
             }
             string strPath = this.listView_number.SelectedItems[0].SubItems[0].Text;
 
-            MessageBox.Show(this, "ÉĞÎ´ÊµÏÖ");
+            MessageBox.Show(this, "å°šæœªå®ç°");
             /*
             EntityForm form = new EntityForm();
 
@@ -1876,7 +1876,7 @@ namespace dp2Catalog
         }
     }
 
-    // ÅÅĞò
+    // æ’åº
     // Implements the manual sorting of items by columns.
     class ZhongcihaoListViewItemComparer : IComparer
     {
@@ -1886,7 +1886,7 @@ namespace dp2Catalog
 
         public int Compare(object x, object y)
         {
-            // ÖÖ´ÎºÅ×Ö·û´®ĞèÒªÓÒ¶ÔÆë 2007/10/12
+            // ç§æ¬¡å·å­—ç¬¦ä¸²éœ€è¦å³å¯¹é½ 2007/10/12
             string s1 = ((ListViewItem)x).SubItems[1].Text;
             string s2 = ((ListViewItem)y).SubItems[1].Text;
 
@@ -1898,13 +1898,13 @@ namespace dp2Catalog
         }
     }
 
-    // ÖÖ´ÎºÅÈ¡ºÅµÄ·ç¸ñ
+    // ç§æ¬¡å·å–å·çš„é£æ ¼
     public enum ZhongcihaoStyle
     {
-        Biblio = 1, // ½öÀûÓÃÊéÄ¿Í³¼Æ×î´óºÅ
-        BiblioAndSeed = 2,  // Ã¿´Î¶¼ÀûÓÃÊéÄ¿Í³¼Æ×î´óºÅÀ´¼ìÑé¡¢Ğ£ÕıÎ²ºÅ¡£Æ«ÖØÊéÄ¿Í³¼ÆÖµ£¬²»Ã¤Ä¿ÔöÁ¿Î²ºÅ¡£
-        SeedAndBiblio = 3, // Ã¿´Î¶¼ÀûÓÃÊéÄ¿Í³¼Æ×î´óºÅÀ´¼ìÑé¡¢Ğ£ÕıÎ²ºÅ¡£Æ«ÖØÎ²ºÅ£¬Ã¿´Î¶¼ÔöÁ¿Î²ºÅ
-        Seed = 4, // ½öÀûÓÃ(ÖÖ´ÎºÅ¿â)Î²ºÅ
+        Biblio = 1, // ä»…åˆ©ç”¨ä¹¦ç›®ç»Ÿè®¡æœ€å¤§å·
+        BiblioAndSeed = 2,  // æ¯æ¬¡éƒ½åˆ©ç”¨ä¹¦ç›®ç»Ÿè®¡æœ€å¤§å·æ¥æ£€éªŒã€æ ¡æ­£å°¾å·ã€‚åé‡ä¹¦ç›®ç»Ÿè®¡å€¼ï¼Œä¸ç›²ç›®å¢é‡å°¾å·ã€‚
+        SeedAndBiblio = 3, // æ¯æ¬¡éƒ½åˆ©ç”¨ä¹¦ç›®ç»Ÿè®¡æœ€å¤§å·æ¥æ£€éªŒã€æ ¡æ­£å°¾å·ã€‚åé‡å°¾å·ï¼Œæ¯æ¬¡éƒ½å¢é‡å°¾å·
+        Seed = 4, // ä»…åˆ©ç”¨(ç§æ¬¡å·åº“)å°¾å·
     }
 
 }

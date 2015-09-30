@@ -186,7 +186,7 @@ namespace DigitalPlatform.CommonControl
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
                 if (strPart == "")
@@ -310,7 +310,7 @@ namespace DigitalPlatform.CommonControl
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
                 if (strPart == "")

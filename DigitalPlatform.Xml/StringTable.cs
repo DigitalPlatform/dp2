@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Xml;
 using System.IO;
 
@@ -9,12 +9,12 @@ namespace DigitalPlatform.Xml
     <?xml version='1.0' encoding='utf-8' ?>
     <stringtable>
         <s id="1">
-            <v lang="zh-CN">ÖĞÎÄ</v>
+            <v lang="zh-CN">ä¸­æ–‡</v>
             <v lang="en">Chinese</v>
         </s>
-        <s id="ÖĞÎÄid">
+        <s id="ä¸­æ–‡id">
             <v lang="en">Chinese value</v>
-            <v lang="zh-CN">ÖĞÎÄÖµ</v>
+            <v lang="zh-CN">ä¸­æ–‡å€¼</v>
 
         </s>
 
@@ -23,16 +23,16 @@ namespace DigitalPlatform.Xml
 
     */
 
-    /* ºóÀ´¸ÄÎª¹æ·¶µÄÓïÑÔ±íÊ¾·½·¨
+    /* åæ¥æ”¹ä¸ºè§„èŒƒçš„è¯­è¨€è¡¨ç¤ºæ–¹æ³•
     <stringtable>
     <!-- /////////////////////////////////// login ////////////////////////////-->
 
-        <s id="ÓÃ»§Ãû">
-            <v lang="zh-CN">ÓÃ»§Ãû</v>
+        <s id="ç”¨æˆ·å">
+            <v lang="zh-CN">ç”¨æˆ·å</v>
             <v lang="en-us">User name</v>
         </s>
-        <s id="ÃÜÂë">
-            <v lang="zh-CN">ÃÜÂë</v>
+        <s id="å¯†ç ">
+            <v lang="zh-CN">å¯†ç </v>
             <v lang="en-us">Password</v>
         </s>
     </stringtable>	
@@ -40,14 +40,14 @@ namespace DigitalPlatform.Xml
 
 
     /// <summary>
-	/// ¶àÓïÖÖ×Ö·û´®¶ÔÕÕ
+	/// å¤šè¯­ç§å­—ç¬¦ä¸²å¯¹ç…§
 	/// </summary>
 	public class StringTable
 	{
 		XmlDocument dom = new XmlDocument();
 
 		public string ContainerElementName = "stringtable";
-        public string CurrentLang = "zh-CN"; // È±Ê¡ÎªÖĞÎÄ
+        public string CurrentLang = "zh-CN"; // ç¼ºçœä¸ºä¸­æ–‡
 		public string DefaultValue = "????";
 		public bool ThrowException = false;
 
@@ -64,7 +64,7 @@ namespace DigitalPlatform.Xml
 
 		public StringTable(string strFileName)
 		{
-			this.dom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+			this.dom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
 			dom.Load(strFileName);
 		}
@@ -74,7 +74,7 @@ namespace DigitalPlatform.Xml
 			dom.Load(s);
 		}
 
-		// ÒÔÖ¸¶¨µÄÓïÑÔµÃµ½»òÉèÖÃ×Ö·û´®
+		// ä»¥æŒ‡å®šçš„è¯­è¨€å¾—åˆ°æˆ–è®¾ç½®å­—ç¬¦ä¸²
 		public string this[string strID, string strLang]
 		{
 			get 
@@ -89,7 +89,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		// ÒÔµ±Ç°ÓïÑÔµÃµ½»òÕßÉèÖÃ×Ö·û´®
+		// ä»¥å½“å‰è¯­è¨€å¾—åˆ°æˆ–è€…è®¾ç½®å­—ç¬¦ä¸²
 		public string this[string strID]
 		{
 			get 
@@ -105,7 +105,7 @@ namespace DigitalPlatform.Xml
 
 		}
 
-		// ³É¶Ô³öÏÖµÄ×Ö·û´®
+		// æˆå¯¹å‡ºç°çš„å­—ç¬¦ä¸²
 		public string[] GetStrings(string strLang)
 		{
 			string xpath = "";
@@ -158,7 +158,7 @@ namespace DigitalPlatform.Xml
 
 				node = dom.DocumentElement.SelectSingleNode(xpath);
 
-				// ÈÎÑÓ»ª¼Ó
+				// ä»»å»¶ååŠ 
 				if (node == null)
 				{
 					int nIndex = strLang.IndexOf('-');
@@ -172,7 +172,7 @@ namespace DigitalPlatform.Xml
 			if (node == null) 
 			{
 				if (bThrowException)
-					throw(new StringNotFoundException("idÎª" +strID+ "langÎª"+strLang+"µÄ×Ö·û´®Ã»ÓĞÕÒµ½"));
+					throw(new StringNotFoundException("idä¸º" +strID+ "langä¸º"+strLang+"çš„å­—ç¬¦ä¸²æ²¡æœ‰æ‰¾åˆ°"));
 
 				if (strDefault == "@id")
 					return strID;
@@ -186,7 +186,7 @@ namespace DigitalPlatform.Xml
 
 	}
 
-	// ×Ö·û´®ÔÚ¶ÔÕÕ±íÖĞÃ»ÓĞÕÒµ½
+	// å­—ç¬¦ä¸²åœ¨å¯¹ç…§è¡¨ä¸­æ²¡æœ‰æ‰¾åˆ°
 	public class StringNotFoundException : Exception
 	{
 		public StringNotFoundException (string s) : base(s)

@@ -457,7 +457,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "BiblioItemsHost CreateOneCallNumber() exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
                 finally

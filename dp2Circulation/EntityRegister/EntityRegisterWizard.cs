@@ -1114,7 +1114,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "EntityRegisterWizard GetBiblioFromStyle() exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 
@@ -1336,7 +1336,7 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "EntityRegisterWizard GetBiblioFromStyle() {D6B49099-CB3F-4B76-84EC-7548981B2E47} exception: " + ex.Message;
                     goto ERROR1;
                 }
 
@@ -1549,7 +1549,7 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = ex.Message;
+                            strError = "EntityRegisterWizard {414094F8-91E3-4C94-9AD6-71804FD93B67} exception: " + ExceptionUtil.GetAutoText(ex);
                             goto ERROR1;
                         }
 

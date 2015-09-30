@@ -328,7 +328,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -906,7 +906,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintOrderForm LoadFromOrderRecPathFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             finally
@@ -1221,7 +1221,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintOrderForm dom.LoadXml() {13C10700-D098-4613-9495-9E133644B8D2} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -2209,7 +2209,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "PrintOrderForm ExcelDocument.Create() exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 
@@ -6309,7 +6309,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintOrderForm dom.LoadXml() {24820B1C-0D1C-45CA-AB9C-916FF3A14078} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -8467,7 +8467,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
             }
 
@@ -9315,7 +9315,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "PrintOrderForm ExcelDocument.Create() {41833E03-BE49-47A6-8DD6-22BB3D6ED007} exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 

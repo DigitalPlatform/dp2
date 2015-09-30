@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -30,11 +30,11 @@ namespace DigitalPlatform.Install
 
 
         // parameters:
-        //      lines   Èô¸ÉĞĞ²ÎÊı¡£Ã¿ĞĞÖ´ĞĞÒ»´Î
-        //      bOutputCmdLine  ÔÚÊä³öÖĞÊÇ·ñ°üº¬ÃüÁîĞĞ? Èç¹ûÎª false£¬±íÊ¾²»°üº¬ÃüÁîĞĞ£¬Ö»ÓĞÃüÁî½á¹ûÎÄ×Ö
+        //      lines   è‹¥å¹²è¡Œå‚æ•°ã€‚æ¯è¡Œæ‰§è¡Œä¸€æ¬¡
+        //      bOutputCmdLine  åœ¨è¾“å‡ºä¸­æ˜¯å¦åŒ…å«å‘½ä»¤è¡Œ? å¦‚æœä¸º falseï¼Œè¡¨ç¤ºä¸åŒ…å«å‘½ä»¤è¡Œï¼Œåªæœ‰å‘½ä»¤ç»“æœæ–‡å­—
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦¡£strError ÀïÃæÓĞÔËĞĞÊä³öµÄĞÅÏ¢
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸã€‚strError é‡Œé¢æœ‰è¿è¡Œè¾“å‡ºçš„ä¿¡æ¯
         public static int RunCmd(
             string fileName,
             List<string> lines,
@@ -96,7 +96,7 @@ namespace DigitalPlatform.Install
             }
             catch(Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -106,15 +106,15 @@ namespace DigitalPlatform.Install
                 return -1;
             }
 
-            // ¹ı³ÌĞÅÏ¢
+            // è¿‡ç¨‹ä¿¡æ¯
             strError = result.ToString();
             return 0;
         }
 
 
         // return:
-        //      -1  ³ö´í¡£°üÀ¨³ö´íºóÖØÊÔÈ»ºó·ÅÆú
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™ã€‚åŒ…æ‹¬å‡ºé”™åé‡è¯•ç„¶åæ”¾å¼ƒ
+        //      0   æˆåŠŸ
         public static int DeleteDataDir(string strDataDir,
             out string strError)
         {
@@ -127,12 +127,12 @@ namespace DigitalPlatform.Install
             }
             catch (Exception ex)
             {
-                strError = "É¾³ıÊı¾İÄ¿Â¼ '" + strDataDir + "' Ê±³ö´í: " + ex.Message;
+                strError = "åˆ é™¤æ•°æ®ç›®å½• '" + strDataDir + "' æ—¶å‡ºé”™: " + ex.Message;
             }
 
             DialogResult temp_result = MessageBox.Show(ForegroundWindow.Instance,
-strError + "\r\n\r\nÊÇ·ñÖØÊÔ?",
-"É¾³ıÊı¾İÄ¿Â¼ '" + strDataDir + "'",
+strError + "\r\n\r\næ˜¯å¦é‡è¯•?",
+"åˆ é™¤æ•°æ®ç›®å½• '" + strDataDir + "'",
 MessageBoxButtons.RetryCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
@@ -252,11 +252,11 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ¼ì²éºÍÆäËû²úÆ·µÄbindingsÊÇ·ñ³åÍ»
+        // æ£€æŸ¥å’Œå…¶ä»–äº§å“çš„bindingsæ˜¯å¦å†²çª
         // return:
-        //      -1  ³ö´í
-        //      0   ²»ÖØ
-        //      1    ÖØ¸´
+        //      -1  å‡ºé”™
+        //      0   ä¸é‡
+        //      1    é‡å¤
         public static int IsGlobalBindingDup(string strBindings,
             string strProductName,
             out string strError)
@@ -302,11 +302,11 @@ MessageBoxDefaultButton.Button1);
                     {
                         string strStart = bindings[j];
 
-                        // ¼ì²éÊı×éÖĞµÄÄÄ¸öurlºÍstrOneBinding¶Ë¿Ú¡¢µØÖ·³åÍ»
+                        // æ£€æŸ¥æ•°ç»„ä¸­çš„å“ªä¸ªurlå’ŒstrOneBindingç«¯å£ã€åœ°å€å†²çª
                         // return:
-                        //      -2  ²»³åÍ»
-                        //      -1  ³ö´í
-                        //      >=0 ·¢Éú³åÍ»µÄurlÔÚÊı×éÖĞµÄÏÂ±ê
+                        //      -2  ä¸å†²çª
+                        //      -1  å‡ºé”™
+                        //      >=0 å‘ç”Ÿå†²çªçš„urlåœ¨æ•°ç»„ä¸­çš„ä¸‹æ ‡
                         nRet = IsBindingDup(strStart,
                             existing_urls,
                             out strError);
@@ -314,7 +314,7 @@ MessageBoxDefaultButton.Button1);
                             return -1;
                         if (nRet >= 0)
                         {
-                            strError = "µ±Ç°°ó¶¨¼¯ºÏºÍÒÑ°²×°µÄ '" + product + "' µÄÊµÀı '" + strInstanceName + "' µÄ°ó¶¨¼¯ºÏÖ®¼ä·¢ÉúÁË³åÍ»: " + strError;
+                            strError = "å½“å‰ç»‘å®šé›†åˆå’Œå·²å®‰è£…çš„ '" + product + "' çš„å®ä¾‹ '" + strInstanceName + "' çš„ç»‘å®šé›†åˆä¹‹é—´å‘ç”Ÿäº†å†²çª: " + strError;
                             return 1;
                         }
                     }
@@ -324,11 +324,11 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
-        // ¼ì²éÊı×éÖĞµÄÄÄ¸öurlºÍstrOneBinding¶Ë¿Ú¡¢µØÖ·³åÍ»
+        // æ£€æŸ¥æ•°ç»„ä¸­çš„å“ªä¸ªurlå’ŒstrOneBindingç«¯å£ã€åœ°å€å†²çª
         // return:
-        //      -2  ²»³åÍ»
-        //      -1  ³ö´í
-        //      >=0 ·¢Éú³åÍ»µÄurlÔÚÊı×éÖĞµÄÏÂ±ê
+        //      -2  ä¸å†²çª
+        //      -1  å‡ºé”™
+        //      >=0 å‘ç”Ÿå†²çªçš„urlåœ¨æ•°ç»„ä¸­çš„ä¸‹æ ‡
         public static int IsBindingDup(string strOneBinding,
             string[] bindings,
             out string strError)
@@ -337,7 +337,7 @@ MessageBoxDefaultButton.Button1);
 
             if (String.IsNullOrEmpty(strOneBinding) == true)
             {
-                strError = "strOneBinding²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strOneBindingå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -364,23 +364,23 @@ MessageBoxDefaultButton.Button1);
                 {
                     if (current_uri.Scheme.ToLower() == "net.tcp")
                     {
-                        // ¶Ë¿Ú²»ÄÜ³åÍ»
+                        // ç«¯å£ä¸èƒ½å†²çª
                         if (one_uri.Port == current_uri.Port)
                         {
-                            strError = "'" + strOneBinding + "' ºÍ '" + strCurrentBinding + "' Ö®¼ä¶Ë¿ÚºÅ³åÍ»ÁË";
+                            strError = "'" + strOneBinding + "' å’Œ '" + strCurrentBinding + "' ä¹‹é—´ç«¯å£å·å†²çªäº†";
                             return i;
                         }
                     }
                     else if (current_uri.Scheme.ToLower() == "net.pipe")
                     {
-                        // ²»´æÔÚ³åÍ»µÄ¿ÉÄÜ
+                        // ä¸å­˜åœ¨å†²çªçš„å¯èƒ½
                     }
                     else if (current_uri.Scheme.ToLower() == "http")
                     {
-                        // ¶Ë¿ÚºÅ²»ÄÜ³åÍ»
+                        // ç«¯å£å·ä¸èƒ½å†²çª
                         if (one_uri.Port == current_uri.Port)
                         {
-                            strError = "'" + strOneBinding + "' ºÍ '" + strCurrentBinding + "' Ö®¼ä¶Ë¿ÚºÅ³åÍ»ÁË";
+                            strError = "'" + strOneBinding + "' å’Œ '" + strCurrentBinding + "' ä¹‹é—´ç«¯å£å·å†²çªäº†";
                             return i;
                         }
                     }
@@ -389,16 +389,16 @@ MessageBoxDefaultButton.Button1);
                 {
                     if (current_uri.Scheme.ToLower() == "net.pipe")
                     {
-                        // ²»ÄÜÈ«²¿ÏàÍ¬
+                        // ä¸èƒ½å…¨éƒ¨ç›¸åŒ
                         if (one_uri.Equals(current_uri) == true)
                         {
-                            strError = "net.pipeÀàĞÍµÄURL '" + strOneBinding + "' ÓĞÁ½ÏîÍêÈ«ÏàÍ¬";
+                            strError = "net.pipeç±»å‹çš„URL '" + strOneBinding + "' æœ‰ä¸¤é¡¹å®Œå…¨ç›¸åŒ";
                             return i;
                         }
 
                         if (IsUrlEqual(one_uri.ToString(), current_uri.ToString()) == true)
                         {
-                            strError = "net.pipeÀàĞÍµÄURL '" + strOneBinding + "' ÓĞÁ½ÏîÊµÖÊÉÏÏàÍ¬(Ä©Î²½ö½ö²îÒìÒ»¸ö'/'×Ö·û)";
+                            strError = "net.pipeç±»å‹çš„URL '" + strOneBinding + "' æœ‰ä¸¤é¡¹å®è´¨ä¸Šç›¸åŒ(æœ«å°¾ä»…ä»…å·®å¼‚ä¸€ä¸ª'/'å­—ç¬¦)";
                             return i;
                         }
                     }
@@ -407,29 +407,29 @@ MessageBoxDefaultButton.Button1);
                 {
                     if (current_uri.Scheme.ToLower() == "net.tcp")
                     {
-                        // ¶Ë¿Ú²»ÄÜ³åÍ»
+                        // ç«¯å£ä¸èƒ½å†²çª
                         if (one_uri.Port == current_uri.Port)
                         {
-                            strError = "'" + strOneBinding + "' ºÍ '" + strCurrentBinding + "' Ö®¼ä¶Ë¿ÚºÅ³åÍ»ÁË";
+                            strError = "'" + strOneBinding + "' å’Œ '" + strCurrentBinding + "' ä¹‹é—´ç«¯å£å·å†²çªäº†";
                             return i;
                         }
                     }
                     else if (current_uri.Scheme.ToLower() == "net.pipe")
                     {
-                        // ²»¿ÉÄÜ³åÍ»
+                        // ä¸å¯èƒ½å†²çª
                     }
                     else if (current_uri.Scheme.ToLower() == "http")
                     {
-                        // ¶Ë¿ÚºÅ¿ÉÒÔÏàÍ¬£¬µ«ÊÇ²»ÄÜÈ«²¿ÏàÍ¬
+                        // ç«¯å£å·å¯ä»¥ç›¸åŒï¼Œä½†æ˜¯ä¸èƒ½å…¨éƒ¨ç›¸åŒ
                         if (one_uri.Equals(current_uri) == true)
                         {
-                            strError = "httpÀàĞÍµÄURL '" + strOneBinding + "' ÓĞÁ½ÏîÍêÈ«ÏàÍ¬";
+                            strError = "httpç±»å‹çš„URL '" + strOneBinding + "' æœ‰ä¸¤é¡¹å®Œå…¨ç›¸åŒ";
                             return i;
                         }
 
                         if (IsUrlEqual(one_uri.ToString(), current_uri.ToString()) == true)
                         {
-                            strError = "httpÀàĞÍµÄURL '" + strOneBinding + "' ÓĞÁ½ÏîÊµÖÊÉÏÏàÍ¬(Ä©Î²½ö½ö²îÒìÒ»¸ö'/'×Ö·û)";
+                            strError = "httpç±»å‹çš„URL '" + strOneBinding + "' æœ‰ä¸¤é¡¹å®è´¨ä¸Šç›¸åŒ(æœ«å°¾ä»…ä»…å·®å¼‚ä¸€ä¸ª'/'å­—ç¬¦)";
                             return i;
                         }
                     }
@@ -439,7 +439,7 @@ MessageBoxDefaultButton.Button1);
             return -2;
         }
 
-        // ¶ÔÁ½¸öURL×Ö·û´®½øĞĞºöÂÔ×îºóÒ»¸ö'/'×Ö·ûµÄ±È½Ï
+        // å¯¹ä¸¤ä¸ªURLå­—ç¬¦ä¸²è¿›è¡Œå¿½ç•¥æœ€åä¸€ä¸ª'/'å­—ç¬¦çš„æ¯”è¾ƒ
         static bool IsUrlEqual(string url1, string url2)
         {
             if (url1.Length > 0 && url1[url1.Length - 1] != '/')
@@ -450,7 +450,7 @@ MessageBoxDefaultButton.Button1);
             if (url1 == url2)
                 return true;
 
-            // ¸üÑÏ¸ñµØ±È½Ï
+            // æ›´ä¸¥æ ¼åœ°æ¯”è¾ƒ
 
             try
             {
@@ -468,10 +468,10 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // »ñµÃÌØ¶¨ÊµÀıÃûµÄ×¢²á±íÊÂÏîÏÂ±ê
+        // è·å¾—ç‰¹å®šå®ä¾‹åçš„æ³¨å†Œè¡¨äº‹é¡¹ä¸‹æ ‡
         // return:
-        //      -1  Ã»ÓĞÕÒµ½
-        //      ÆäËû  ÏÂ±ê
+        //      -1  æ²¡æœ‰æ‰¾åˆ°
+        //      å…¶ä»–  ä¸‹æ ‡
         public static int GetInstanceIndex(string strProductName, string strInstanceNameParam)
         {
             for (int i = 0; ; i++)
@@ -495,13 +495,13 @@ MessageBoxDefaultButton.Button1);
                     return i;
             }
 
-            return -1;  // Ã»ÓĞÕÒµ½
+            return -1;  // æ²¡æœ‰æ‰¾åˆ°
         }
 
-        // É¾³ıInstanceĞÅÏ¢
+        // åˆ é™¤Instanceä¿¡æ¯
         // return:
-        //      false   instanceÃ»ÓĞÕÒµ½
-        //      true    ÕÒµ½£¬²¢ÒÑ¾­É¾³ı
+        //      false   instanceæ²¡æœ‰æ‰¾åˆ°
+        //      true    æ‰¾åˆ°ï¼Œå¹¶å·²ç»åˆ é™¤
         public static bool DeleteInstanceInfo(
             string strProductName,
             string strInstanceName)
@@ -512,10 +512,10 @@ MessageBoxDefaultButton.Button1);
             return DeleteInstanceInfo(strProductName, index);
         }
 
-        // É¾³ıInstanceĞÅÏ¢
+        // åˆ é™¤Instanceä¿¡æ¯
         // return:
-        //      false   instanceÃ»ÓĞÕÒµ½
-        //      true    ÕÒµ½£¬²¢ÒÑ¾­É¾³ı
+        //      false   instanceæ²¡æœ‰æ‰¾åˆ°
+        //      true    æ‰¾åˆ°ï¼Œå¹¶å·²ç»åˆ é™¤
         public static bool DeleteInstanceInfo(
             string strProductName,
             int nIndex)
@@ -536,7 +536,7 @@ MessageBoxDefaultButton.Button1);
             return true;
         }
 
-        // °ü×°ºóµÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public static void SetInstanceInfo(
     string strProductName,
     int nIndex,
@@ -555,7 +555,7 @@ MessageBoxDefaultButton.Button1);
                 null);
         }
 
-        // ÉèÖÃinstanceĞÅÏ¢
+        // è®¾ç½®instanceä¿¡æ¯
         public static void SetInstanceInfo(
             string strProductName,
             int nIndex,
@@ -593,7 +593,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // °ü×°ºóµÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public static bool GetInstanceInfo(string strProductName,
     int nIndex,
     out string strInstanceName,
@@ -611,12 +611,12 @@ MessageBoxDefaultButton.Button1);
                 out strSN);
         }
 
-        // »ñµÃinstanceĞÅÏ¢
+        // è·å¾—instanceä¿¡æ¯
         // parameters:
-        //      urls »ñµÃ°ó¶¨µÄUrls
+        //      urls è·å¾—ç»‘å®šçš„Urls
         // return:
-        //      false   instanceÃ»ÓĞÕÒµ½
-        //      true    ÕÒµ½
+        //      false   instanceæ²¡æœ‰æ‰¾åˆ°
+        //      true    æ‰¾åˆ°
         public static bool GetInstanceInfo(string strProductName,
             int nIndex,
             out string strInstanceName,
@@ -659,8 +659,8 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ¼´½«·ÏÖ¹
-        // ÊÇ·ñÎªÒÔÇ°µÄSingleStringµÄhosturlĞÎÌ¬
+        // å³å°†åºŸæ­¢
+        // æ˜¯å¦ä¸ºä»¥å‰çš„SingleStringçš„hosturlå½¢æ€
         public static bool IsOldHostUrl(string strProductName)
         {
             // throw new Exception("test rollback");
@@ -677,8 +677,8 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ¼´½«·ÏÖ¹
-        // »ñµÃ°ó¶¨µÄUrls
+        // å³å°†åºŸæ­¢
+        // è·å¾—ç»‘å®šçš„Urls
         public static string[] GetHostUrl(string strProductName)
         {
             // throw new Exception("test rollback");
@@ -702,8 +702,8 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ¼´½«·ÏÖ¹
-        // ÉèÖÃ°ó¶¨µÄUrls
+        // å³å°†åºŸæ­¢
+        // è®¾ç½®ç»‘å®šçš„Urls
         public static void SetHostUrl(
             string strProductName,
             string[] urls)
@@ -722,7 +722,7 @@ MessageBoxDefaultButton.Button1);
 
 
 
-        // É¾³ı¼ÇÂ¼°²×°²ÎÊıµÄÎÄ¼ş
+        // åˆ é™¤è®°å½•å®‰è£…å‚æ•°çš„æ–‡ä»¶
         public static void DeleteSetupCfgFile(string strRootDir)
         {
             try
@@ -736,7 +736,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ±£´æ°²×°²ÎÊı£¬ÒÔ±ãĞŞ¸´Ê±Ê¹ÓÃ
+        // ä¿å­˜å®‰è£…å‚æ•°ï¼Œä»¥ä¾¿ä¿®å¤æ—¶ä½¿ç”¨
         public static int SetSetupParams(string strRootDir,
             Hashtable table,
             out string strError)
@@ -752,12 +752,12 @@ MessageBoxDefaultButton.Button1);
             }
             catch (FileNotFoundException /*ex*/)
             {
-                // Èç¹ûÎÄ¼ş²»´æÔÚ
+                // å¦‚æœæ–‡ä»¶ä¸å­˜åœ¨
                 dom.LoadXml("<?xml version='1.0' encoding='utf-8'?><root />");
             }
             catch (Exception ex)
             {
-                strError = "¼ÓÔØÎÄ¼ş " + strSetupCfgFileName + " µ½ XMLDOM Ê±³ö´í£º" + ex.Message;
+                strError = "åŠ è½½æ–‡ä»¶ " + strSetupCfgFileName + " åˆ° XMLDOM æ—¶å‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
 
@@ -776,7 +776,7 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
-        // ´Ó±¾µØÎÄ¼şÖĞµÃµ½°²×°²ÎÊı
+        // ä»æœ¬åœ°æ–‡ä»¶ä¸­å¾—åˆ°å®‰è£…å‚æ•°
         // VDIR TSITE
         // parameters:
         // return:
@@ -801,7 +801,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "¼ÓÔØÎÄ¼ş " + strSetupCfgFileName + "µ½ XMLDOM Ê±³ö´í£º" + ex.Message;
+                strError = "åŠ è½½æ–‡ä»¶ " + strSetupCfgFileName + "åˆ° XMLDOM æ—¶å‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
 
@@ -819,8 +819,8 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-        // »ñµÃServerBindingsµ±Ç°ÅäÖÃ
-        // ·µ»ØÒ»¸öÊı×é£¬Ã¿¸öÔªËØĞÎÌ¬Îª ":80:" »ò "ip:80:hostname"
+        // è·å¾—ServerBindingså½“å‰é…ç½®
+        // è¿”å›ä¸€ä¸ªæ•°ç»„ï¼Œæ¯ä¸ªå…ƒç´ å½¢æ€ä¸º ":80:" æˆ– "ip:80:hostname"
         public static string [] GetServerBindings(string strTargetSite)
         {
             string strFolderPath = "IIS://localhost" + strTargetSite;
@@ -844,10 +844,10 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ĞŞ¸ÄÒ»¸öĞéÄâÄ¿Â¼µÄÄ³Ğ©ÊôĞÔ ContentIndexed DontLog AppIsolated
+        // ä¿®æ”¹ä¸€ä¸ªè™šæ‹Ÿç›®å½•çš„æŸäº›å±æ€§ ContentIndexed DontLog AppIsolated
         // parameters:
-        //      strTargetSite   ĞÎÌ¬Îª"/W3SVC/1"£¬×¢ÒâÃ»ÓĞÇ°ÃæµÄ"LM"²¿·Ö
-        //      strVDir ĞéÄâÄ¿Â¼Ãû
+        //      strTargetSite   å½¢æ€ä¸º"/W3SVC/1"ï¼Œæ³¨æ„æ²¡æœ‰å‰é¢çš„"LM"éƒ¨åˆ†
+        //      strVDir è™šæ‹Ÿç›®å½•å
         public static bool SetVdirProperties(string strTargetSite,
             string strVDir)
         {
@@ -872,10 +872,10 @@ MessageBoxDefaultButton.Button1);
             return true;
         }
 
-        // ĞŞ¸ÄÒ»¸öĞéÄâÄ¿Â¼µÄapp pool id¡£Ö»¶ÔIIS 6ÓĞÓÃ
+        // ä¿®æ”¹ä¸€ä¸ªè™šæ‹Ÿç›®å½•çš„app pool idã€‚åªå¯¹IIS 6æœ‰ç”¨
         // parameters:
-        //      strTargetSite   ĞÎÌ¬Îª"/W3SVC/1"£¬×¢ÒâÃ»ÓĞÇ°ÃæµÄ"LM"²¿·Ö
-        //      strVDir ĞéÄâÄ¿Â¼Ãû
+        //      strTargetSite   å½¢æ€ä¸º"/W3SVC/1"ï¼Œæ³¨æ„æ²¡æœ‰å‰é¢çš„"LM"éƒ¨åˆ†
+        //      strVDir è™šæ‹Ÿç›®å½•å
         public static bool SetAppPoolId(string strTargetSite,
             string strVDir,
             string strAppPoolName)
@@ -900,7 +900,7 @@ MessageBoxDefaultButton.Button1);
             return true;
         }
 
-        // ´´½¨Ò»¸öapp pool¡£Ö»¶ÔIIS 6ÓĞÓÃ
+        // åˆ›å»ºä¸€ä¸ªapp poolã€‚åªå¯¹IIS 6æœ‰ç”¨
         public static bool CreateAppPool(string strAppPoolName)
         {
 
@@ -909,14 +909,14 @@ MessageBoxDefaultButton.Button1);
             try
             {
                 folder = new DirectoryEntry("IIS://localhost/W3SVC/AppPools");
-                int temp = folder.Properties.Count; // ¾¡Ôç´¥·¢Òì³££¬ÒÔ±ãµÃÖªAppPools¸ù±¾²»´æÔÚ(IIS 5.0)
+                int temp = folder.Properties.Count; // å°½æ—©è§¦å‘å¼‚å¸¸ï¼Œä»¥ä¾¿å¾—çŸ¥AppPoolsæ ¹æœ¬ä¸å­˜åœ¨(IIS 5.0)
             }
             catch (Exception /*ex*/)
             {
                 return false;
             }
 
-            // ¿´¿´Ãû×ÖÊÇ·ñÒÑ¾­ÓĞÁË?
+            // çœ‹çœ‹åå­—æ˜¯å¦å·²ç»æœ‰äº†?
             DirectoryEntry pool = null;
 
             try
@@ -938,34 +938,34 @@ MessageBoxDefaultButton.Button1);
 
 
 
-            // É¾³ıPeriodicRestartTime 
+            // åˆ é™¤PeriodicRestartTime 
             pool.Properties["PeriodicRestartTime"][0] = 0;
 
-            // É¾³ıIdleTimeout 
+            // åˆ é™¤IdleTimeout 
             pool.Properties["IdleTimeout"][0] = 0;
 
-            // ½«DisallowOverlappingRotationÉèÖÃÎªtrue
+            // å°†DisallowOverlappingRotationè®¾ç½®ä¸ºtrue
             pool.Properties["DisallowOverlappingRotation"][0] = true;
 
             pool.CommitChanges();
             return true;
         }
 
-        // ÉèÖÃÒ»¸öĞéÄâÄ¿Â¼µÄ×Ô¶¯Æô¶¯ÎÄ¼ş
+        // è®¾ç½®ä¸€ä¸ªè™šæ‹Ÿç›®å½•çš„è‡ªåŠ¨å¯åŠ¨æ–‡ä»¶
         // parameters:
-        //      strTargetSite   ĞÎÌ¬Îª"/W3SVC/1"£¬×¢ÒâÃ»ÓĞÇ°ÃæµÄ"LM"²¿·Ö
-        //      strVDir ĞéÄâÄ¿Â¼Ãû
-        //      strFileName £¨´¿£©ÎÄ¼şÃû
+        //      strTargetSite   å½¢æ€ä¸º"/W3SVC/1"ï¼Œæ³¨æ„æ²¡æœ‰å‰é¢çš„"LM"éƒ¨åˆ†
+        //      strVDir è™šæ‹Ÿç›®å½•å
+        //      strFileName ï¼ˆçº¯ï¼‰æ–‡ä»¶å
         public static void SetDefaultDoc(string strTargetSite,
             string strVDir,
             string strFileName)
         {
-            // ²Î¿¼ http://geekswithblogs.net/mnf/articles/78888.aspx
+            // å‚è€ƒ http://geekswithblogs.net/mnf/articles/78888.aspx
             string strFolderPath = "IIS://localhost" + strTargetSite + "/ROOT/" + strVDir;
 
             DirectoryEntry folderEntry = new DirectoryEntry(strFolderPath);
 
-            // Debug.Assert(false, "µ÷ÊÔ");
+            // Debug.Assert(false, "è°ƒè¯•");
 
             // string strText = GetAllChildrenNames(entry);
 
@@ -986,7 +986,7 @@ MessageBoxDefaultButton.Button1);
             string strAccount = "";
             try
             {
-                // ¶ÔÊı¾İÄ¿Â¼¼ÓAPSNETÍêÈ«¿ØÖÆÈ¨ÏŞ
+                // å¯¹æ•°æ®ç›®å½•åŠ APSNETå®Œå…¨æ§åˆ¶æƒé™
                 strAccount = Environment.MachineName + "\\ASPNET";
                 InstallHelper.AddDirectorySecurity(strDataDir,
                     strAccount,
@@ -1000,7 +1000,7 @@ MessageBoxDefaultButton.Button1);
 
             try
             {
-                // ¶ÔÊı¾İÄ¿Â¼¼ÓIIS_WPGÍêÈ«¿ØÖÆÈ¨ÏŞ
+                // å¯¹æ•°æ®ç›®å½•åŠ IIS_WPGå®Œå…¨æ§åˆ¶æƒé™
                 strAccount = Environment.MachineName + "\\IIS_WPG";
                 InstallHelper.AddDirectorySecurity(strDataDir,
                     strAccount,
@@ -1016,7 +1016,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        // ÈÃÓ¦ÓÃdownÏÂÀ´
+        // è®©åº”ç”¨downä¸‹æ¥
         public static void DownApplication(string strRootDir)
         {
             string strBinDir = PathUtil.MergePath(strRootDir, "bin");
@@ -1036,11 +1036,11 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // Ö´ĞĞaspnet_regiis.exe, ½«ĞéÄâÄ¿Â¼ÉèÖÃÎªASP.NET 4.0ÊôĞÔ
-        // ×¢£ºWindows 8 ÏÂÕâ¸ö·½·¨ÎŞĞ§¡£ĞèÓÃ dism À´´ò¿ª IIS µÄÌØĞÔ
+        // æ‰§è¡Œaspnet_regiis.exe, å°†è™šæ‹Ÿç›®å½•è®¾ç½®ä¸ºASP.NET 4.0å±æ€§
+        // æ³¨ï¼šWindows 8 ä¸‹è¿™ä¸ªæ–¹æ³•æ— æ•ˆã€‚éœ€ç”¨ dism æ¥æ‰“å¼€ IIS çš„ç‰¹æ€§
         // parameters:
-        //      strTargetSite   Õ¾µãÂ·¾¶. ÀıÈç "/W3SVC/1"
-        //      strVDir ĞéÄâÄ¿Â¼Ãû ÀıÈç "dp2OPAC"
+        //      strTargetSite   ç«™ç‚¹è·¯å¾„. ä¾‹å¦‚ "/W3SVC/1"
+        //      strVDir è™šæ‹Ÿç›®å½•å ä¾‹å¦‚ "dp2OPAC"
         public static int SetVDirAspNet40(string strTargetSite,
             string strVDir,
             out string strError)
@@ -1066,7 +1066,7 @@ MessageBoxDefaultButton.Button1);
             // Process p = Process.Start(strExePath, strParameters);
             if (p == null)
             {
-                strError = "Æô¶¯ " + strExePath + " ·¢Éú´íÎó";
+                strError = "å¯åŠ¨ " + strExePath + " å‘ç”Ÿé”™è¯¯";
                 return -1;
             }
             p.WaitForExit();
@@ -1074,7 +1074,7 @@ MessageBoxDefaultButton.Button1);
 
             if (nExitCode != 0)
             {
-                // exit code 3 ÉĞÎ´×¢²áASP.NET
+                // exit code 3 å°šæœªæ³¨å†ŒASP.NET
 
                 string strText = "";
                 string line;
@@ -1086,17 +1086,17 @@ MessageBoxDefaultButton.Button1);
                 }
                 reader.Close();
 
-                strError = "ÔÚÉè¶¨ĞéÄâÄ¿Â¼ÎªASP.NET 4.0Ê±, Ö´ĞĞ³ÌĞò " + strExePath + strParameters + " Ê§°Ü, ·µ»ØÂëÎª " + nExitCode.ToString() + "\r\n\r\n³ÌĞòÌáÊ¾ĞÅÏ¢ÈçÏÂ:\r\n" + strText;
+                strError = "åœ¨è®¾å®šè™šæ‹Ÿç›®å½•ä¸ºASP.NET 4.0æ—¶, æ‰§è¡Œç¨‹åº " + strExePath + strParameters + " å¤±è´¥, è¿”å›ç ä¸º " + nExitCode.ToString() + "\r\n\r\nç¨‹åºæç¤ºä¿¡æ¯å¦‚ä¸‹:\r\n" + strText;
                 return -1;
             }
 
             return 0;
         }
 
-        // Ö´ĞĞaspnet_regiis.exe, ½«ĞéÄâÄ¿Â¼ÉèÖÃÎªASP.NET 2.0ÊôĞÔ
+        // æ‰§è¡Œaspnet_regiis.exe, å°†è™šæ‹Ÿç›®å½•è®¾ç½®ä¸ºASP.NET 2.0å±æ€§
         // parameters:
-        //      strTargetSite   Õ¾µãÂ·¾¶. ÀıÈç "/W3SVC/1"
-        //      strVDir ĞéÄâÄ¿Â¼Ãû ÀıÈç "dp2opac"
+        //      strTargetSite   ç«™ç‚¹è·¯å¾„. ä¾‹å¦‚ "/W3SVC/1"
+        //      strVDir è™šæ‹Ÿç›®å½•å ä¾‹å¦‚ "dp2opac"
         public static int SetVDirAspNet20(string strTargetSite,
             string strVDir,
             out string strError)
@@ -1119,7 +1119,7 @@ MessageBoxDefaultButton.Button1);
             // Process p = Process.Start(strExePath, strParameters);
             if (p == null)
             {
-                strError = "Æô¶¯ " + strExePath + " ·¢Éú´íÎó";
+                strError = "å¯åŠ¨ " + strExePath + " å‘ç”Ÿé”™è¯¯";
                 return -1;
             }
             p.WaitForExit();
@@ -1127,7 +1127,7 @@ MessageBoxDefaultButton.Button1);
 
             if (nExitCode != 0)
             {
-                // exit code 3 ÉĞÎ´×¢²áASP.NET
+                // exit code 3 å°šæœªæ³¨å†ŒASP.NET
 
                 string strText = "";
                 string line;
@@ -1139,36 +1139,36 @@ MessageBoxDefaultButton.Button1);
                 }
                 reader.Close();
 
-                strError = "ÔÚÉè¶¨ĞéÄâÄ¿Â¼ÎªASP.NET 2.0Ê±, Ö´ĞĞ³ÌĞò " + strExePath + strParameters + " Ê§°Ü, ·µ»ØÂëÎª " + nExitCode.ToString() + "\r\n\r\n³ÌĞòÌáÊ¾ĞÅÏ¢ÈçÏÂ:\r\n" + strText;
+                strError = "åœ¨è®¾å®šè™šæ‹Ÿç›®å½•ä¸ºASP.NET 2.0æ—¶, æ‰§è¡Œç¨‹åº " + strExePath + strParameters + " å¤±è´¥, è¿”å›ç ä¸º " + nExitCode.ToString() + "\r\n\r\nç¨‹åºæç¤ºä¿¡æ¯å¦‚ä¸‹:\r\n" + strText;
                 return -1;
             }
 
             return 0;
         }
 
-        // ÉèÖÃÎÄ¼şÎª²»¿É(ÄäÃû)¶Á
+        // è®¾ç½®æ–‡ä»¶ä¸ºä¸å¯(åŒ¿å)è¯»
         // parameters:
-        //      strTargetSite   ĞÎÌ¬Îª"/W3SVC/1"£¬×¢ÒâÃ»ÓĞÇ°ÃæµÄ"LM"²¿·Ö
-        //      strVDir ĞéÄâÄ¿Â¼Ãû
-        //      strFileName £¨´¿£©ÎÄ¼şÃû
+        //      strTargetSite   å½¢æ€ä¸º"/W3SVC/1"ï¼Œæ³¨æ„æ²¡æœ‰å‰é¢çš„"LM"éƒ¨åˆ†
+        //      strVDir è™šæ‹Ÿç›®å½•å
+        //      strFileName ï¼ˆçº¯ï¼‰æ–‡ä»¶å
         public static void RemoveFileReadProperty(string strTargetSite,
             string strVDir,
             string strFileName)
         {
-            // ²Î¿¼ http://geekswithblogs.net/mnf/articles/78888.aspx
+            // å‚è€ƒ http://geekswithblogs.net/mnf/articles/78888.aspx
             string strFolderPath = "IIS://localhost" + strTargetSite + "/ROOT/" + strVDir;
             string strFilePath = strFolderPath + "/" + strFileName;
 
             DirectoryEntry folderEntry = new DirectoryEntry(strFolderPath);
             DirectoryEntry fileEntry = null;
 
-            // Debug.Assert(false, "µ÷ÊÔ");
+            // Debug.Assert(false, "è°ƒè¯•");
 
             // string strText = GetAllChildrenNames(entry);
 
             if (DirectoryEntry.Exists(strFilePath) == false)
             {
-                // Èç¹ûÎÄ¼şÔÚmetabaseÖĞ²»´æÔÚ
+                // å¦‚æœæ–‡ä»¶åœ¨metabaseä¸­ä¸å­˜åœ¨
                 string SchemaClassName = "IIsObject";
 
                 // can't assign "IIsWebFile" directly, causes HRESULT: 0x8000500F exception. E_ADS_SCHEMA_VIOLATION - The attempted action violates the directory service schema rules". 
@@ -1176,7 +1176,7 @@ MessageBoxDefaultButton.Button1);
                 fileEntry = folderEntry.Children.Add(strFileName, SchemaClassName);
 
 
-                fileEntry.CommitChanges();  // ±ØĞëÏÈÌá½»Ò»´Î£¬·ñÔò£¨Èç¹ûÁ½´ÎĞŞ¸Ä²¢×÷Ò»´ÎÌá½»£©»áÅ×³öÒì³£
+                fileEntry.CommitChanges();  // å¿…é¡»å…ˆæäº¤ä¸€æ¬¡ï¼Œå¦åˆ™ï¼ˆå¦‚æœä¸¤æ¬¡ä¿®æ”¹å¹¶ä½œä¸€æ¬¡æäº¤ï¼‰ä¼šæŠ›å‡ºå¼‚å¸¸
                 folderEntry.CommitChanges();
 
                 fileEntry = new DirectoryEntry(strFilePath);
@@ -1281,7 +1281,7 @@ MessageBoxDefaultButton.Button1);
             fInfo.SetAccessControl(fileSecurity);
         }
 
-        // ±£´æ°²×°²ÎÊı£¬ÒÔ±ãĞŞ¸´Ê±Ê¹ÓÃ
+        // ä¿å­˜å®‰è£…å‚æ•°ï¼Œä»¥ä¾¿ä¿®å¤æ—¶ä½¿ç”¨
         public static void SetSetupParams(string strRootDir,
             string strVDir)
         {
@@ -1292,7 +1292,7 @@ MessageBoxDefaultButton.Button1);
             FileUtil.String2File(strXml, strSetupCfgFileName);
         }
 
-        // ´Ó±¾µØÎÄ¼şÖĞµÃµ½°²×°²ÎÊı
+        // ä»æœ¬åœ°æ–‡ä»¶ä¸­å¾—åˆ°å®‰è£…å‚æ•°
         public static int GetSetupParams(string strRootDir,
             out string strVDir,
             out string strError)
@@ -1311,14 +1311,14 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "¼ÓÔØ'SetupCfg.xml'ÎÄ¼şµ½dom³ö´í£º" + ex.Message;
+                strError = "åŠ è½½'SetupCfg.xml'æ–‡ä»¶åˆ°domå‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
 
             XmlNode node = dom.DocumentElement.SelectSingleNode("vdir");
             if (node == null)
             {
-                strError = "ÔÚ'SetupCfg.xml'ÎÄ¼şµÄ¸ùÏÂÎ´ÕÒµ½<vdir>½Úµã¡£";
+                strError = "åœ¨'SetupCfg.xml'æ–‡ä»¶çš„æ ¹ä¸‹æœªæ‰¾åˆ°<vdir>èŠ‚ç‚¹ã€‚";
                 return -1;
 
             }
@@ -1326,7 +1326,7 @@ MessageBoxDefaultButton.Button1);
             strVDir = node.InnerText.Trim();
             if (strVDir == "")
             {
-                strError = "ÔÚ'SetupCfg.xml'ÎÄ¼şµÄ¸ùÏÂµÄ<vdir>½ÚµãµÄÄÚÈİÎª¿Õ¡£";
+                strError = "åœ¨'SetupCfg.xml'æ–‡ä»¶çš„æ ¹ä¸‹çš„<vdir>èŠ‚ç‚¹çš„å†…å®¹ä¸ºç©ºã€‚";
                 return -1;
             }
 
@@ -1334,9 +1334,9 @@ MessageBoxDefaultButton.Button1);
         }
 
 #if NOOOOOOOOOOOOOOOOOOO
-        // ²éÕÒĞéÄâÄ¿Â¼Ëù´ÓÊôµÄÕ¾µã±àºÅ
+        // æŸ¥æ‰¾è™šæ‹Ÿç›®å½•æ‰€ä»å±çš„ç«™ç‚¹ç¼–å·
         // return
-        //      ·µ»ØÕÒµ½µÄÕ¾µãÊı×é
+        //      è¿”å›æ‰¾åˆ°çš„ç«™ç‚¹æ•°ç»„
         public static int FindVDirWebsite(string strVDir,
             string strPhysicalPath,
             out ArrayList aWebSite,
@@ -1352,19 +1352,19 @@ MessageBoxDefaultButton.Button1);
 
             DirectoryEntry entryRoot = new DirectoryEntry(strPath);
 
-            strDebugInfo += "½¨Á¢DirectoryEntry : " + strPath + "\r\n";
+            strDebugInfo += "å»ºç«‹DirectoryEntry : " + strPath + "\r\n";
 
-            strDebugInfo += "ËÑË÷ÆäÏÂ¼¶ÊÂÏî:\r\n";
+            strDebugInfo += "æœç´¢å…¶ä¸‹çº§äº‹é¡¹:\r\n";
 
 
             foreach (DirectoryEntry entry in entryRoot.Children)
             {
                 //MessageBox.Show(entry.Name);
-                strDebugInfo += "ÊÂÏîÃû : " + entry.Name + "\r\n";
+                strDebugInfo += "äº‹é¡¹å : " + entry.Name + "\r\n";
 
                 if (StringUtil.IsPureNumber(entry.Name) == true)
                 {
-                    strDebugInfo += "¸ÃÊÂÏîÎª´¿Êı×ÖÊÂÏî.\r\n";
+                    strDebugInfo += "è¯¥äº‹é¡¹ä¸ºçº¯æ•°å­—äº‹é¡¹.\r\n";
 
                     strPath = "IIS://" + strServerName + "/W3SVC/" + entry.Name + "/ROOT/" + strVDir;
 
@@ -1373,21 +1373,21 @@ MessageBoxDefaultButton.Button1);
                     DirectoryEntry tempentry = null;
                     try
                     {
-                        strDebugInfo += "½¨Á¢DirectoryEntry : " + strPath + " ";
+                        strDebugInfo += "å»ºç«‹DirectoryEntry : " + strPath + " ";
 
                         tempentry = new DirectoryEntry(strPath);
                     }
                     catch (Exception ex)
                     {
                         //MessageBox.Show("catch");
-                        strDebugInfo += "Å×³öÒì³£ : " + ex.Message + "\r\n";
+                        strDebugInfo += "æŠ›å‡ºå¼‚å¸¸ : " + ex.Message + "\r\n";
                         continue;
                     }
 
-                    strDebugInfo += "³É¹¦.\r\n";
+                    strDebugInfo += "æˆåŠŸ.\r\n";
 
 
-                    //MessageBox.Show("È¡µ½'" + strPath + "'");
+                    //MessageBox.Show("å–åˆ°'" + strPath + "'");
 
                     if (String.IsNullOrEmpty(strPhysicalPath) == false)
                     {
@@ -1396,22 +1396,22 @@ MessageBoxDefaultButton.Button1);
                         string strTempPath = "";
                         try
                         {
-                            strDebugInfo += "»ñÈ¡ÆäPathÊôĞÔ ";
+                            strDebugInfo += "è·å–å…¶Pathå±æ€§ ";
 
-                            object o = tempentry.Parent;    // ¹ÊÒâÓÃÀ´Òı·¢Òì³£
+                            object o = tempentry.Parent;    // æ•…æ„ç”¨æ¥å¼•å‘å¼‚å¸¸
                             bExist = true;
 
-                            strTempPath = (string)tempentry.Properties["Path"][0]; // ¿ÉÄÜÅ×³öÒì³£
+                            strTempPath = (string)tempentry.Properties["Path"][0]; // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
 
                         }
                         catch (Exception ex)
                         {
                             //MessageBox.Show(ex.Message + "\r\n type:" + ex.GetType().ToString());
-                            strDebugInfo += "Å×³öÒì³£ : " + ex.Message + " Òì³£ÀàĞÍ:" + ex.GetType().ToString() + "\r\n";
+                            strDebugInfo += "æŠ›å‡ºå¼‚å¸¸ : " + ex.Message + " å¼‚å¸¸ç±»å‹:" + ex.GetType().ToString() + "\r\n";
                             if (bExist == true)
                             {
-                                // ĞéÄâÄ¿Â¼´æÔÚ, µ«ÊÇÎŞ·¨»ñÈ¡ÎïÀíÄ¿Â¼
-                                strDebugInfo += "ĞéÄâÄ¿Â¼´æÔÚ, µ«ÊÇÎŞ·¨»ñÈ¡ÎïÀíÄ¿Â¼, ÓÚÊÇÊÂÏîÃû '" + entry.Name + "' ±»²İÂÊµØ¼ÓÈëÕ¾µãÁĞ±í.\r\n";
+                                // è™šæ‹Ÿç›®å½•å­˜åœ¨, ä½†æ˜¯æ— æ³•è·å–ç‰©ç†ç›®å½•
+                                strDebugInfo += "è™šæ‹Ÿç›®å½•å­˜åœ¨, ä½†æ˜¯æ— æ³•è·å–ç‰©ç†ç›®å½•, äºæ˜¯äº‹é¡¹å '" + entry.Name + "' è¢«è‰ç‡åœ°åŠ å…¥ç«™ç‚¹åˆ—è¡¨.\r\n";
 
                                 aWebSite.Add(entry.Name);
                                 continue;
@@ -1419,20 +1419,20 @@ MessageBoxDefaultButton.Button1);
                             }
                             continue;
                         }
-                        strDebugInfo += "³É¹¦. ÊôĞÔÖµÎª'"+strTempPath+"'\r\n";
+                        strDebugInfo += "æˆåŠŸ. å±æ€§å€¼ä¸º'"+strTempPath+"'\r\n";
 
                         //MessageBox.Show("strPhysicalPath='" + strPhysicalPath + "' strTempPath='" + strTempPath + "'");
 
                         if (PathUtil.IsEqualEx(strPhysicalPath, strTempPath) == true)
                         {
-                            strDebugInfo += "ÎïÀíÂ·¾¶ '" + strPhysicalPath + "' µÈÓÚÊôĞÔÖµ '" + strTempPath + "', ÓÚÊÇÊÂÏîÃû '"+entry.Name+"' ±»¼ÓÈëÕ¾µãÁĞ±í.\r\n";
+                            strDebugInfo += "ç‰©ç†è·¯å¾„ '" + strPhysicalPath + "' ç­‰äºå±æ€§å€¼ '" + strTempPath + "', äºæ˜¯äº‹é¡¹å '"+entry.Name+"' è¢«åŠ å…¥ç«™ç‚¹åˆ—è¡¨.\r\n";
 
                             aWebSite.Add(entry.Name);
                         }
                     }
                     else
                     {
-                        strDebugInfo += "ÎïÀíÂ·¾¶Îª¿Õ, ÊÂÏîÃû '"+entry.Name+"' ±»¼ÓÈëÕ¾µãÁĞ±í.\r\n";
+                        strDebugInfo += "ç‰©ç†è·¯å¾„ä¸ºç©º, äº‹é¡¹å '"+entry.Name+"' è¢«åŠ å…¥ç«™ç‚¹åˆ—è¡¨.\r\n";
 
                         aWebSite.Add(entry.Name);
                     }
@@ -1563,30 +1563,30 @@ MessageBoxDefaultButton.Button1);
     }
 
     /// <summary>
-    /// ¸´ÖÆÎÄ¼şÊÂ¼ş
+    /// å¤åˆ¶æ–‡ä»¶äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void CopyFilesEventHandler(object sender,
     CopyFilesEventArgs e);
 
     /// <summary>
-    /// ¸´ÖÆÎÄ¼şÊÂ¼şµÄ²ÎÊı
+    /// å¤åˆ¶æ–‡ä»¶äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class CopyFilesEventArgs : EventArgs
     {
         /// <summary>
-        /// ¶¯×÷ÀàĞÍ
+        /// åŠ¨ä½œç±»å‹
         /// </summary>
         public string Action = "";
 
         /// <summary>
-        /// Ä¿±êÄ¿Â¼
+        /// ç›®æ ‡ç›®å½•
         /// </summary>
         public string DataDir = "";
 
         /// <summary>
-        /// [out] ³ö´íĞÅÏ¢
+        /// [out] å‡ºé”™ä¿¡æ¯
         /// </summary>
         public string ErrorInfo = "";
     }
@@ -1596,8 +1596,8 @@ MessageBoxDefaultButton.Button1);
 
     public class VerifyEventArgs : EventArgs
     {
-        public string Value = "";   // [in] ÒªĞ£ÑéµÄÖµ
-        public string ErrorInfo = "";   // [out]³ö´íĞÅÏ¢
+        public string Value = "";   // [in] è¦æ ¡éªŒçš„å€¼
+        public string ErrorInfo = "";   // [out]å‡ºé”™ä¿¡æ¯
     }
 
     //
@@ -1606,9 +1606,9 @@ MessageBoxDefaultButton.Button1);
 
     public class LoadXmlFileInfoEventArgs : EventArgs
     {
-        public string DataDir = "";   // [in] Êı¾İÄ¿Â¼
+        public string DataDir = "";   // [in] æ•°æ®ç›®å½•
 
         public object LineInfo = null;    // out
-        public string ErrorInfo = "";   // [out]³ö´íĞÅÏ¢
+        public string ErrorInfo = "";   // [out]å‡ºé”™ä¿¡æ¯
     }
 }

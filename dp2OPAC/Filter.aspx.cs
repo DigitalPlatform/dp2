@@ -220,7 +220,7 @@ ref sessioninfo) == false)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 

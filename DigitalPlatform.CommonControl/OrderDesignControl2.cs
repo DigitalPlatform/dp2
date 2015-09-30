@@ -1242,7 +1242,7 @@ namespace DigitalPlatform.CommonControl
             catch (Exception ex)
             {
                 // 2008/12/18
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -2074,7 +2074,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 this.textBox_newlyArriveTotalCopy.Text = strOldValue;
             }
         }

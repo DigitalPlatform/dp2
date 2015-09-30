@@ -77,7 +77,7 @@ namespace DigitalPlatform.dp2.Statis
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

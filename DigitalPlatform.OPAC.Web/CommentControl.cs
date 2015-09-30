@@ -2173,7 +2173,7 @@ string strWrapperClass)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -2455,7 +2455,7 @@ string strWrapperClass)
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -2695,7 +2695,7 @@ string strWrapperClass)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

@@ -337,7 +337,7 @@ FormWindowState.Normal);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -358,7 +358,7 @@ FormWindowState.Normal);
                 else if (GetNativeErrorCode(ex) == 1056)
                     MessageBox.Show(this, "调用前已经启动了");
                 else
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 
@@ -382,7 +382,7 @@ FormWindowState.Normal);
                 else if (GetNativeErrorCode(ex) == 1062)
                     MessageBox.Show(this, "调用前已经停止了");
                 else
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 
@@ -534,7 +534,7 @@ FormWindowState.Normal);
                 }
                 else
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
             }
@@ -571,7 +571,7 @@ FormWindowState.Normal);
                 }
                 else
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
             }
@@ -740,7 +740,7 @@ FormWindowState.Normal);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -1117,7 +1117,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 
@@ -1326,7 +1326,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -1359,7 +1359,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -1371,7 +1371,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -1383,7 +1383,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -1901,7 +1901,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
             }
         }
@@ -1918,7 +1918,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
             }
             else
@@ -1939,7 +1939,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
             }
             else
@@ -1980,7 +1980,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
             }
             finally
@@ -3927,7 +3927,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     e.ErrorInfo = strError;
                     return;
                 }

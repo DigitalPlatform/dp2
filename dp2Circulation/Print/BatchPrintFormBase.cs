@@ -564,7 +564,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "BatchPrintFormBase LoadFromRecPathFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             finally
@@ -1278,7 +1278,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "BatchPrintFormBase ConvertBarcodeFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
             finally

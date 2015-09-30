@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +12,7 @@ using System.IO;
 using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
+using DigitalPlatform;
 
 namespace dp2Catalog
 {
@@ -40,7 +41,7 @@ namespace dp2Catalog
 
             try
             {
-                // ³õÊ¼»¯Öµ
+                // åˆå§‹åŒ–å€¼
                 textBox_dtlpDefaultUserName.Text = MainForm.AppInfo.GetString(
                     "preference",
                     "defaultUserName",
@@ -58,19 +59,19 @@ namespace dp2Catalog
 
 
 
-                // ²éÖØ
+                // æŸ¥é‡
 
-                // ±¸Ñ¡µÄÆğµãÂ·¾¶
+                // å¤‡é€‰çš„èµ·ç‚¹è·¯å¾„
                 this.textBox_dp2library_searchDup_defaultStartPath.Text = MainForm.AppInfo.GetString(
                     "searchdup",
                     "defaultStartPath",
                     "");
 
-                // dp2¼ìË÷´°
+                // dp2æ£€ç´¢çª—
                 this.comboBox_dp2SearchForm_layout.Text = MainForm.AppInfo.GetString(
                     "dp2searchform",
                     "layout",
-                    "×ÊÔ´Ê÷×î´ó");
+                    "èµ„æºæ ‘æœ€å¤§");
                 this.m_strOldDp2searchformLayout = this.comboBox_dp2SearchForm_layout.Text;
 
                 checkBox_dtlpSavePassword_CheckedChanged(null, null);
@@ -85,7 +86,7 @@ namespace dp2Catalog
     "search_max_count",
     1000);
 
-                // ÑÇÂíÑ·¼ìË÷´°
+                // äºšé©¬é€Šæ£€ç´¢çª—
                 this.checkBox_amazon_alwaysUseFullElementSet.Checked = MainForm.AppInfo.GetBoolean(
 "amazon_search_form",
 "always_use_full_elementset",
@@ -99,10 +100,10 @@ true);
                 this.tabComboBox_amazon_defaultServer.Text = MainForm.AppInfo.GetString(
 "amazon_search_form",
 "default_server",
-"ÖĞ¹ú\twebservices.amazon.cn");
+"ä¸­å›½\twebservices.amazon.cn");
 
                 // ui
-                // Í£¿¿
+                // åœé 
                 this.comboBox_ui_fixedPanelDock.Text = this.MainForm.panel_fixed.Dock.ToString();
 
                 this.checkBox_ui_hideFixedPanel.Checked = MainForm.AppInfo.GetBoolean(
@@ -121,7 +122,7 @@ true);
 "verify_data_when_saving",
 false);
 
-                // *** ·şÎñÆ÷
+                // *** æœåŠ¡å™¨
                 // author number GCAT serverurl
                 this.textBox_server_authorNumber_gcatUrl.Text =
                     MainForm.AppInfo.GetString("config",
@@ -135,8 +136,8 @@ false);
                     "http://dp2003.com/gcatserver/"); 
 
 
-                // *** È«¾Ö
-                // ¼ÓÆ´ÒôÊ±×Ô¶¯Ñ¡Ôñ¶àÒô×Ö
+                // *** å…¨å±€
+                // åŠ æ‹¼éŸ³æ—¶è‡ªåŠ¨é€‰æ‹©å¤šéŸ³å­—
                 this.checkBox_global_autoSelPinyin.Checked =
                     MainForm.AppInfo.GetBoolean(
                     "global",
@@ -149,7 +150,7 @@ false);
             }
         }
 
-        // ¿ÉÄÜ»áÅ×³öÒì³£
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public static List<string> ListAmazonServers(string strDataDir,
             string strLang)
         {
@@ -187,7 +188,7 @@ false);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
         }
@@ -213,7 +214,7 @@ false);
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ±£´æÖµ
+            // ä¿å­˜å€¼
             MainForm.AppInfo.SetString(
                 "preference",
                 "defaultUserName",
@@ -229,15 +230,15 @@ false);
                 );
 
 
-            // ²éÖØ
+            // æŸ¥é‡
 
-            // ±¸Ñ¡µÄÆğµãÂ·¾¶
+            // å¤‡é€‰çš„èµ·ç‚¹è·¯å¾„
             MainForm.AppInfo.SetString(
                 "searchdup",
                 "defaultStartPath",
                 this.textBox_dp2library_searchDup_defaultStartPath.Text);
 
-            // dp2¼ìË÷´°
+            // dp2æ£€ç´¢çª—
             MainForm.AppInfo.SetString(
                 "dp2searchform",
                 "layout",
@@ -253,7 +254,7 @@ this.checkBox_dp2SearchForm_useExistDetailWindow.Checked);
     "search_max_count",
     (int)this.numericUpDown_dp2library_searchMaxCount.Value);
 
-            // ÑÇÂíÑ·¼ìË÷´°
+            // äºšé©¬é€Šæ£€ç´¢çª—
             MainForm.AppInfo.SetBoolean(
 "amazon_search_form",
 "always_use_full_elementset",
@@ -281,7 +282,7 @@ this.tabComboBox_amazon_defaultServer.Text);
 "verify_data_when_saving",
 this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
 
-            // *** ·şÎñÆ÷
+            // *** æœåŠ¡å™¨
             // author number GCAT serverurl
             MainForm.AppInfo.SetString("config",
                 "gcat_server_url",
@@ -292,8 +293,8 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
                 "pinyin_server_url",
                 this.textBox_server_pinyin_gcatUrl.Text);
 
-            // *** È«¾Ö
-            // ¼ÓÆ´ÒôÊ±×Ô¶¯Ñ¡Ôñ¶àÒô×Ö
+            // *** å…¨å±€
+            // åŠ æ‹¼éŸ³æ—¶è‡ªåŠ¨é€‰æ‹©å¤šéŸ³å­—
             MainForm.AppInfo.SetBoolean(
                 "global",
                 "auto_select_pinyin",
@@ -305,7 +306,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-            // »¹Ô­ÖĞÍ¾Ôø¾­±»¸Ä¶¯¹ıµÄ
+            // è¿˜åŸä¸­é€”æ›¾ç»è¢«æ”¹åŠ¨è¿‡çš„
             if (this.comboBox_dp2SearchForm_layout.Text != this.m_strOldDp2searchformLayout)
                         this.FireParamChanged(
 "dp2searchform",
@@ -329,7 +330,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
 
             if (dlg.DialogResult == DialogResult.OK)
             {
-                MessageBox.Show(this, "·şÎñÆ÷µØÖ·ĞŞ¸Äºó£¬ĞèÒªÖØĞÂ´ò¿ªÏà¹Ø´°¿Ú£¬ĞÂµÄÅäÖÃ²ÅÄÜ·´Ó³ÔÚ×ÊÔ´Ê÷ÖĞ ...");
+                MessageBox.Show(this, "æœåŠ¡å™¨åœ°å€ä¿®æ”¹åï¼Œéœ€è¦é‡æ–°æ‰“å¼€ç›¸å…³çª—å£ï¼Œæ–°çš„é…ç½®æ‰èƒ½åæ˜ åœ¨èµ„æºæ ‘ä¸­ ...");
             }
 
         }
@@ -347,7 +348,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
 
             if (dtlp_searchform == null)
             {
-                strError = "ÎŞ·¨»ñµÃ´ò¿ªµÄDTLP¼ìË÷´°£¬ÎŞ·¨ÅäÖÃ²éÖØ";
+                strError = "æ— æ³•è·å¾—æ‰“å¼€çš„DTLPæ£€ç´¢çª—ï¼Œæ— æ³•é…ç½®æŸ¥é‡";
                 goto ERROR1;
             }
 
@@ -373,7 +374,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃÈ±Ê¡²éÖØÆğµãÂ·¾¶
+        // è·å¾—ç¼ºçœæŸ¥é‡èµ·ç‚¹è·¯å¾„
         private void button_dp2library_searchDup_findDefaultStartPath_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -382,17 +383,17 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
 
             if (dp2_searchform == null)
             {
-                strError = "ÎŞ·¨»ñµÃ´ò¿ªµÄ dp2¼ìË÷´°£¬ÎŞ·¨»ñµÃ dp2library Êı¾İ¿âÃû";
+                strError = "æ— æ³•è·å¾—æ‰“å¼€çš„ dp2æ£€ç´¢çª—ï¼Œæ— æ³•è·å¾— dp2library æ•°æ®åº“å";
                 goto ERROR1;
             }
 
             string strDefaultStartPath = Global.GetForwardStyleDp2Path(this.textBox_dp2library_searchDup_defaultStartPath.Text);
 
-            // ÁÙÊ±Ö¸¶¨Ò»¸ödp2library·şÎñÆ÷ºÍÊı¾İ¿â
+            // ä¸´æ—¶æŒ‡å®šä¸€ä¸ªdp2libraryæœåŠ¡å™¨å’Œæ•°æ®åº“
             GetDp2ResDlg dlg = new GetDp2ResDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
 
-            dlg.Text = "ÇëÖ¸¶¨Ò»¸ö dp2library Êı¾İ¿â£¬ÒÔ×÷ÎªÄ£ÄâµÄ²éÖØÆğµã";
+            dlg.Text = "è¯·æŒ‡å®šä¸€ä¸ª dp2library æ•°æ®åº“ï¼Œä»¥ä½œä¸ºæ¨¡æ‹Ÿçš„æŸ¥é‡èµ·ç‚¹";
             dlg.dp2Channels = dp2_searchform.Channels;
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
@@ -483,7 +484,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
             }
             else
             {
-                // È±Ê¡ÎªÓÒ
+                // ç¼ºçœä¸ºå³
                 this.MainForm.panel_fixed.Dock = DockStyle.Right;
                 this.MainForm.panel_fixed.Size = new Size(this.MainForm.Size.Width / 3,
                     this.MainForm.panel_fixed.Size.Height);
@@ -554,7 +555,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
 
     }
 
-    // µ÷ÓÃÊı¾İ¼Ó¹¤Ä£¿é
+    // è°ƒç”¨æ•°æ®åŠ å·¥æ¨¡å—
     public delegate void ParamChangedEventHandler(object sender,
         ParamChangedEventArgs e);
 

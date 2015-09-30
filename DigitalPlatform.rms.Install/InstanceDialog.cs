@@ -1708,7 +1708,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
             }
@@ -1750,7 +1750,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "加载文件 " + strFilename + " 到 XMLDOM 时出错：" + ex.Message;
+                strError = "加载文件 " + strFilename + " 到 XMLDOM 时出错：" + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -1808,7 +1808,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "加载文件 " + strFilename + " 到 XMLDOM 时出错：" + ex.Message;
+                strError = "加载文件 " + strFilename + " 到 XMLDOM 时出错：" + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

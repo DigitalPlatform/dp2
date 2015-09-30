@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Windows.Forms;
 using System.Drawing;
@@ -12,7 +12,7 @@ using System.Deployment.Application;
 namespace DigitalPlatform.Xml
 {
     /// <summary>
-    /// ÓÃ XML ÎÄ¼ş±£´æ³ÌĞòµÄ¸÷ÖÖÅäÖÃĞÅÏ¢
+    /// ç”¨ XML æ–‡ä»¶ä¿å­˜ç¨‹åºçš„å„ç§é…ç½®ä¿¡æ¯
     /// </summary>
 	public class ApplicationInfo
 	{
@@ -45,10 +45,10 @@ namespace DigitalPlatform.Xml
             }
         }*/
 
-		// ¹¹Ôìº¯Êı
-		// ±¾º¯Êı½«XMLÎÄ¼şÖĞµÄÄÚÈİ×°ÈëÄÚ´æ¡£
+		// æ„é€ å‡½æ•°
+		// æœ¬å‡½æ•°å°†XMLæ–‡ä»¶ä¸­çš„å†…å®¹è£…å…¥å†…å­˜ã€‚
 		// parameters:
-		//		strPureFileName	Òª´ò¿ªµÄXMLÎÄ¼şÃû£¬×¢ÒâÕâÊÇÒ»¸ö´¿ÎÄ¼şÃû£¬²»°üº¬Â·¾¶²¿·Ö¡£±¾º¯Êı×Ô¶¯´ÓÄ£¿éµÄµ±Ç°Ä¿Â¼ÖĞ×°ÔØ´ËÎÄ¼ş¡£
+		//		strPureFileName	è¦æ‰“å¼€çš„XMLæ–‡ä»¶åï¼Œæ³¨æ„è¿™æ˜¯ä¸€ä¸ªçº¯æ–‡ä»¶åï¼Œä¸åŒ…å«è·¯å¾„éƒ¨åˆ†ã€‚æœ¬å‡½æ•°è‡ªåŠ¨ä»æ¨¡å—çš„å½“å‰ç›®å½•ä¸­è£…è½½æ­¤æ–‡ä»¶ã€‚
 		public ApplicationInfo(string strPureFileName)
 		{
 			PrepareFileName(strPureFileName);
@@ -61,7 +61,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		// ½«ÄÚ´æÖĞµÄÄÚÈİ±£´æ»ØXMLÎÄ¼ş
+		// å°†å†…å­˜ä¸­çš„å†…å®¹ä¿å­˜å›XMLæ–‡ä»¶
 		public void Save()
 		{
 			if (FileName != "") 
@@ -72,7 +72,7 @@ namespace DigitalPlatform.Xml
 		}
 
         // parameters:
-        //      strFileName ÎÄ¼şÃû×Ö·û´®¡£Èç¹ûÊÇ´¿ÎÄ¼şÃû£¬Ôò×Ô¶¯°´ÕÕ ClickOnce °²×°ºÍÂÌÉ«°²×°»ñµÃÊı¾İÄ¿Â¼£»Èç¹ûÊÇÈ«Â·¾¶£¬ÔòÖ±½ÓÊ¹ÓÃÕâ¸öÂ·¾¶
+        //      strFileName æ–‡ä»¶åå­—ç¬¦ä¸²ã€‚å¦‚æœæ˜¯çº¯æ–‡ä»¶åï¼Œåˆ™è‡ªåŠ¨æŒ‰ç…§ ClickOnce å®‰è£…å’Œç»¿è‰²å®‰è£…è·å¾—æ•°æ®ç›®å½•ï¼›å¦‚æœæ˜¯å…¨è·¯å¾„ï¼Œåˆ™ç›´æ¥ä½¿ç”¨è¿™ä¸ªè·¯å¾„
         public void PrepareFileName(string strFileName)
         {
             string strPureName = Path.GetFileName(strFileName);
@@ -98,16 +98,16 @@ namespace DigitalPlatform.Xml
             }
 		}
 
-		// ´ÓÎÄ¼şÖĞ×°ÔØĞÅÏ¢
+		// ä»æ–‡ä»¶ä¸­è£…è½½ä¿¡æ¯
 		public int Load(out string strErrorInfo)
 		{
-			this.dom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+			this.dom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
 			strErrorInfo = "";
 
 			if (FileName == "") 
 			{
-				strErrorInfo = "FileNameÎª¿Õ...";
+				strErrorInfo = "FileNameä¸ºç©º...";
 				return -1;
 			}
 
@@ -117,12 +117,12 @@ namespace DigitalPlatform.Xml
 			}
 			catch (FileNotFoundException ex) 
 			{
-				strErrorInfo = "ÎÄ¼şÃ»ÓĞÕÒµ½: " + ex.Message;
+				strErrorInfo = "æ–‡ä»¶æ²¡æœ‰æ‰¾åˆ°: " + ex.Message;
 				return -2;
 			}
 			catch (XmlException ex)
 			{
-				strErrorInfo = "×°ÔØÎÄ¼ş " + FileName + "Ê±³ö´í:" + ex.Message;
+				strErrorInfo = "è£…è½½æ–‡ä»¶ " + FileName + "æ—¶å‡ºé”™:" + ex.Message;
 				return -1;
 			}	
 
@@ -142,7 +142,7 @@ namespace DigitalPlatform.Xml
 
 			if (FileName == "") 
 			{
-				strErrorInfo = "FileNameÎª¿Õ...";
+				strErrorInfo = "FileNameä¸ºç©º...";
 				return -1;
 			}
 
@@ -152,13 +152,13 @@ namespace DigitalPlatform.Xml
 		}
 
 
-        // »ñµÃÒ»¸ö²¼¶ûÖµ
+        // è·å¾—ä¸€ä¸ªå¸ƒå°”å€¼
         // parameters:
-        //		strPath	²ÎÊıÂ·¾¶
-        //		strName	²ÎÊıÃû
-        //		bDefault	È±Ê¡Öµ
+        //		strPath	å‚æ•°è·¯å¾„
+        //		strName	å‚æ•°å
+        //		bDefault	ç¼ºçœå€¼
         // return:
-        //		Ëù»ñµÃµÄ²¼¶ûÖµ
+        //		æ‰€è·å¾—çš„å¸ƒå°”å€¼
         public bool GetBoolean(string strPath,
             string strName,
             bool bDefault)
@@ -185,11 +185,11 @@ namespace DigitalPlatform.Xml
         }
 
 
-        // Ğ´ÈëÒ»¸ö²¼¶ûÖµ
+        // å†™å…¥ä¸€ä¸ªå¸ƒå°”å€¼
         // parameters:
-        //		strPath	²ÎÊıÂ·¾¶
-        //		strName	²ÎÊıÃû
-        //		bValue	ÒªĞ´ÈëµÄ²¼¶ûÖµ
+        //		strPath	å‚æ•°è·¯å¾„
+        //		strName	å‚æ•°å
+        //		bValue	è¦å†™å…¥çš„å¸ƒå°”å€¼
         public void SetBoolean(string strPath,
             string strName,
             bool bValue)
@@ -211,13 +211,13 @@ namespace DigitalPlatform.Xml
 
         //
 
-		// »ñµÃÒ»¸öÕûÊıÖµ
+		// è·å¾—ä¸€ä¸ªæ•´æ•°å€¼
 		// parameters:
-		//		strPath	²ÎÊıÂ·¾¶
-		//		strName	²ÎÊıÃû
-		//		nDefault	È±Ê¡Öµ
+		//		strPath	å‚æ•°è·¯å¾„
+		//		strName	å‚æ•°å
+		//		nDefault	ç¼ºçœå€¼
 		// return:
-		//		Ëù»ñµÃµÄÕûÊıÖµ
+		//		æ‰€è·å¾—çš„æ•´æ•°å€¼
 		public int GetInt(string strPath,
 			string strName,
 			int nDefault)
@@ -239,11 +239,11 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// Ğ´ÈëÒ»¸öÕûÊıÖµ
+		// å†™å…¥ä¸€ä¸ªæ•´æ•°å€¼
 		// parameters:
-		//		strPath	²ÎÊıÂ·¾¶
-		//		strName	²ÎÊıÃû
-		//		nValue	ÒªĞ´ÈëµÄÕûÊıÖµ
+		//		strPath	å‚æ•°è·¯å¾„
+		//		strName	å‚æ•°å
+		//		nValue	è¦å†™å…¥çš„æ•´æ•°å€¼
         public void SetInt(string strPath,
             string strName,
             int nValue)
@@ -263,13 +263,13 @@ namespace DigitalPlatform.Xml
                 Convert.ToString(nValue));
         }
 
-		// »ñµÃÒ»¸ö×Ö·û´®
+		// è·å¾—ä¸€ä¸ªå­—ç¬¦ä¸²
 		// parameters:
-		//		strPath	²ÎÊıÂ·¾¶
-		//		strName	²ÎÊıÃû
-		//		strDefalt	È±Ê¡Öµ
+		//		strPath	å‚æ•°è·¯å¾„
+		//		strName	å‚æ•°å
+		//		strDefalt	ç¼ºçœå€¼
 		// return:
-		//		Òª»ñµÃµÄ×Ö·û´®
+		//		è¦è·å¾—çš„å­—ç¬¦ä¸²
 		public string GetString(string strPath,
 			string strName,
 			string strDefault)
@@ -285,11 +285,11 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// ÉèÖÃÒ»¸ö×Ö·û´®
+		// è®¾ç½®ä¸€ä¸ªå­—ç¬¦ä¸²
 		// parameters:
-		//		strPath	²ÎÊıÂ·¾¶
-		//		strName	²ÎÊıÃû
-		//		strValue	ÒªÉèÖÃµÄ×Ö·û´®£¬Èç¹ûÎªnull£¬±íÊ¾É¾³ıÕâ¸öÊÂÏî
+		//		strPath	å‚æ•°è·¯å¾„
+		//		strName	å‚æ•°å
+		//		strValue	è¦è®¾ç½®çš„å­—ç¬¦ä¸²ï¼Œå¦‚æœä¸ºnullï¼Œè¡¨ç¤ºåˆ é™¤è¿™ä¸ªäº‹é¡¹
 		public void SetString(string strPath,
 			string strName,
 			string strValue)
@@ -311,13 +311,13 @@ namespace DigitalPlatform.Xml
 
 
         ////
-        // »ñµÃÒ»¸ö¸¡µãÊı
+        // è·å¾—ä¸€ä¸ªæµ®ç‚¹æ•°
         // parameters:
-        //		strPath	²ÎÊıÂ·¾¶
-        //		strName	²ÎÊıÃû
-        //		fDefault	È±Ê¡Öµ
+        //		strPath	å‚æ•°è·¯å¾„
+        //		strName	å‚æ•°å
+        //		fDefault	ç¼ºçœå€¼
         // return:
-        //		Òª»ñµÃµÄ×Ö·û´®
+        //		è¦è·å¾—çš„å­—ç¬¦ä¸²
         public float GetFloat(string strPath,
             string strName,
             float fDefault)
@@ -346,11 +346,11 @@ namespace DigitalPlatform.Xml
         }
 
 
-        // ÉèÖÃÒ»¸ö¸¡µãÊı
+        // è®¾ç½®ä¸€ä¸ªæµ®ç‚¹æ•°
         // parameters:
-        //		strPath	²ÎÊıÂ·¾¶
-        //		strName	²ÎÊıÃû
-        //		fValue	ÒªÉèÖÃµÄ×Ö·û´®
+        //		strPath	å‚æ•°è·¯å¾„
+        //		strName	å‚æ•°å
+        //		fValue	è¦è®¾ç½®çš„å­—ç¬¦ä¸²
         public void SetFloat(string strPath,
             string strName,
             float fValue)
@@ -370,22 +370,22 @@ namespace DigitalPlatform.Xml
                 fValue.ToString());
         }
 
-        // °ü×°ºóµÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public void LoadFormStates(Form form,
             string strCfgTitle)
         {
             LoadFormStates(form, strCfgTitle, FormWindowState.Normal);
         }
 
-		// ´ÓApplicationInfoÖĞ¶ÁÈ¡ĞÅÏ¢£¬ÉèÖÃform³ß´çÎ»ÖÃ×´Ì¬
+		// ä»ApplicationInfoä¸­è¯»å–ä¿¡æ¯ï¼Œè®¾ç½®formå°ºå¯¸ä½ç½®çŠ¶æ€
 		// parameters:
-		//		form	Form¶ÔÏó
-		//		strCfgTitle	ÅäÖÃĞÅÏ¢Â·¾¶¡£±¾º¯Êı½«ÓÃ´ËÖµ×÷ÎªGetString()»òGetInt()µÄstrPath²ÎÊıÊ¹ÓÃ
+		//		form	Formå¯¹è±¡
+		//		strCfgTitle	é…ç½®ä¿¡æ¯è·¯å¾„ã€‚æœ¬å‡½æ•°å°†ç”¨æ­¤å€¼ä½œä¸ºGetString()æˆ–GetInt()çš„strPathå‚æ•°ä½¿ç”¨
 		public void LoadFormStates(Form form,
 			string strCfgTitle,
             FormWindowState default_state)
 		{
-            // ÎªÁËÓÅ»¯ÊÓ¾õĞ§¹û
+            // ä¸ºäº†ä¼˜åŒ–è§†è§‰æ•ˆæœ
             bool bVisible = form.Visible;
 
             if (bVisible == true)
@@ -420,7 +420,7 @@ namespace DigitalPlatform.Xml
             /// form.Update();  // 2007/4/8
 		}
 
-        // ×°ÔØMDI×Ó´°¿ÚµÄ×î´ó»¯ÌØĞÔ¡£ĞèÒªÔÚÖÁÉÙÒ»¸öMDI×Ó´°¿Ú´ò¿ªºóµ÷ÓÃ
+        // è£…è½½MDIå­çª—å£çš„æœ€å¤§åŒ–ç‰¹æ€§ã€‚éœ€è¦åœ¨è‡³å°‘ä¸€ä¸ªMDIå­çª—å£æ‰“å¼€åè°ƒç”¨
         public void LoadFormMdiChildStates(Form form,
             string strCfgTitle)
         {
@@ -438,7 +438,7 @@ namespace DigitalPlatform.Xml
             }
         }
 
-        // °ü×°ºóµÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public void LoadMdiChildFormStates(Form form,
             string strCfgTitle)
         {
@@ -448,11 +448,11 @@ namespace DigitalPlatform.Xml
 
 
 
-		// ´ÓApplicationInfoÖĞ¶ÁÈ¡ĞÅÏ¢£¬ÉèÖÃMDI Child form³ß´çÎ»ÖÃ×´Ì¬
-		// ºÍÒ»°ãFormµÄÇø±ğÊÇ,²»ĞŞ¸Äx,yĞÅÏ¢
+		// ä»ApplicationInfoä¸­è¯»å–ä¿¡æ¯ï¼Œè®¾ç½®MDI Child formå°ºå¯¸ä½ç½®çŠ¶æ€
+		// å’Œä¸€èˆ¬Formçš„åŒºåˆ«æ˜¯,ä¸ä¿®æ”¹x,yä¿¡æ¯
 		// parameters:
-		//		form	Form¶ÔÏó
-		//		strCfgTitle	ÅäÖÃĞÅÏ¢Â·¾¶¡£±¾º¯Êı½«ÓÃ´ËÖµ×÷ÎªGetString()»òGetInt()µÄstrPath²ÎÊıÊ¹ÓÃ
+		//		form	Formå¯¹è±¡
+		//		strCfgTitle	é…ç½®ä¿¡æ¯è·¯å¾„ã€‚æœ¬å‡½æ•°å°†ç”¨æ­¤å€¼ä½œä¸ºGetString()æˆ–GetInt()çš„strPathå‚æ•°ä½¿ç”¨
 		public void LoadMdiChildFormStates(Form form,
 			string strCfgTitle,
             int nDefaultWidth,
@@ -500,10 +500,10 @@ namespace DigitalPlatform.Xml
 
 		}
 
-		// ±£´æMdi Child form³ß´çÎ»ÖÃ×´Ì¬µ½ApplicationInfoÖĞ
+		// ä¿å­˜Mdi Child formå°ºå¯¸ä½ç½®çŠ¶æ€åˆ°ApplicationInfoä¸­
 		// parameters:
-		//		form	Form¶ÔÏó
-		//		strCfgTitle	ÅäÖÃĞÅÏ¢Â·¾¶¡£±¾º¯Êı½«ÓÃ´ËÖµ×÷ÎªSetString()»òSetInt()µÄstrPath²ÎÊıÊ¹ÓÃ
+		//		form	Formå¯¹è±¡
+		//		strCfgTitle	é…ç½®ä¿¡æ¯è·¯å¾„ã€‚æœ¬å‡½æ•°å°†ç”¨æ­¤å€¼ä½œä¸ºSetString()æˆ–SetInt()çš„strPathå‚æ•°ä½¿ç”¨
 		public void SaveMdiChildFormStates(Form form,
 			string strCfgTitle)
 		{
@@ -520,7 +520,7 @@ namespace DigitalPlatform.Xml
 #endif
 
 #if NO
-			// form.WindowState = FormWindowState.Normal;	// ÊÇ·ñÏÈÒş²Ø´°¿Ú?
+			// form.WindowState = FormWindowState.Normal;	// æ˜¯å¦å…ˆéšè—çª—å£?
 			this.SetInt(
 				strCfgTitle, "width", form.Width);
 			this.SetInt(
@@ -551,14 +551,14 @@ namespace DigitalPlatform.Xml
 		}
 
 
-        // ±£´æform³ß´çÎ»ÖÃ×´Ì¬µ½ApplicationInfoÖĞ
+        // ä¿å­˜formå°ºå¯¸ä½ç½®çŠ¶æ€åˆ°ApplicationInfoä¸­
         // parameters:
-        //		form	Form¶ÔÏó
-        //		strCfgTitle	ÅäÖÃĞÅÏ¢Â·¾¶¡£±¾º¯Êı½«ÓÃ´ËÖµ×÷ÎªSetString()»òSetInt()µÄstrPath²ÎÊıÊ¹ÓÃ
+        //		form	Formå¯¹è±¡
+        //		strCfgTitle	é…ç½®ä¿¡æ¯è·¯å¾„ã€‚æœ¬å‡½æ•°å°†ç”¨æ­¤å€¼ä½œä¸ºSetString()æˆ–SetInt()çš„strPathå‚æ•°ä½¿ç”¨
         public void SaveFormStates(Form form,
             string strCfgTitle)
         {
-            // ±£´æ´°¿Ú×´Ì¬
+            // ä¿å­˜çª—å£çŠ¶æ€
             this.SetString(
                 strCfgTitle, "window_state",
                 Enum.GetName(typeof(FormWindowState),
@@ -574,8 +574,8 @@ namespace DigitalPlatform.Xml
             }
 
 #if NO
-            // ³ß´ç
-            form.WindowState = FormWindowState.Normal;	// ÊÇ·ñÏÈÒş²Ø´°¿Ú?
+            // å°ºå¯¸
+            form.WindowState = FormWindowState.Normal;	// æ˜¯å¦å…ˆéšè—çª—å£?
 #endif
 
             this.SetInt(
@@ -586,7 +586,7 @@ namespace DigitalPlatform.Xml
             this.SetInt(strCfgTitle, "x", location.X); // form.Location.X
             this.SetInt(strCfgTitle, "y", location.Y); // form.Location.Y
 
-            // ±£´æMDI´°¿Ú×´Ì¬ -- ÊÇ·ñ×î´ó»¯£¿
+            // ä¿å­˜MDIçª—å£çŠ¶æ€ -- æ˜¯å¦æœ€å¤§åŒ–ï¼Ÿ
             if (form.ActiveMdiChild != null)
             {
                 if (form.ActiveMdiChild.WindowState == FormWindowState.Minimized)
@@ -611,11 +611,11 @@ namespace DigitalPlatform.Xml
             }
         }
 
-		// ½«±¾¶ÔÏóºÍForm½¨Á¢ÁªÏµ£¬µ±Form LoadºÍClosed½×¶Î£¬»á×Ô¶¯´¥·¢±¾Àà
-		// µÄÏà¹ØÊÂ¼şº¯Êı£¬»Ö¸´ºÍ±£´æForm³ß´çÎ»ÖÃµÈ×´Ì¬¡£
+		// å°†æœ¬å¯¹è±¡å’ŒFormå»ºç«‹è”ç³»ï¼Œå½“Form Loadå’ŒClosedé˜¶æ®µï¼Œä¼šè‡ªåŠ¨è§¦å‘æœ¬ç±»
+		// çš„ç›¸å…³äº‹ä»¶å‡½æ•°ï¼Œæ¢å¤å’Œä¿å­˜Formå°ºå¯¸ä½ç½®ç­‰çŠ¶æ€ã€‚
 		// parameters:
-		//		form	Form¶ÔÏó
-		//		strCfgTitle	ÅäÖÃĞÅÏ¢Â·¾¶¡£±¾º¯Êı½«ÓÃ´ËÖµ×÷ÎªÏà¹ØGetString()»òGetInt()µÄstrPath²ÎÊıÊ¹ÓÃ
+		//		form	Formå¯¹è±¡
+		//		strCfgTitle	é…ç½®ä¿¡æ¯è·¯å¾„ã€‚æœ¬å‡½æ•°å°†ç”¨æ­¤å€¼ä½œä¸ºç›¸å…³GetString()æˆ–GetInt()çš„strPathå‚æ•°ä½¿ç”¨
 		public void LinkFormState(Form form, 
 			string strCfgTitle)
 		{
@@ -623,13 +623,13 @@ namespace DigitalPlatform.Xml
 				titleTable = new Hashtable();
 
 			// titleTable.Add(form, strCfgTitle);
-            titleTable[form] = strCfgTitle; // ÖØ¸´¼ÓÈë²»»áÅ×³öÒì³£
+            titleTable[form] = strCfgTitle; // é‡å¤åŠ å…¥ä¸ä¼šæŠ›å‡ºå¼‚å¸¸
 
 			form.Load += new System.EventHandler(this.FormLoad);
             form.Closed += new System.EventHandler(this.FormClosed);
 		}
 
-        // Ô­À´Íâ²¿Ö÷¶¯µ÷ÓÃÒ»´Î±¾º¯ÊıµÄ×ö·¨Ã»ÓĞ±ØÒªÁË¡£ÕıÈ·µÄ×ö·¨ÊÇ£¬µ÷ÓÃ LinkFormState() ¼´¿É£¬¶Ô»°¿ò¹Ø±ÕÊ±»á×Ô¶¯±£´æºÃ³ß´ç
+        // åŸæ¥å¤–éƒ¨ä¸»åŠ¨è°ƒç”¨ä¸€æ¬¡æœ¬å‡½æ•°çš„åšæ³•æ²¡æœ‰å¿…è¦äº†ã€‚æ­£ç¡®çš„åšæ³•æ˜¯ï¼Œè°ƒç”¨ LinkFormState() å³å¯ï¼Œå¯¹è¯æ¡†å…³é—­æ—¶ä¼šè‡ªåŠ¨ä¿å­˜å¥½å°ºå¯¸
 		public void UnlinkFormState(Form form)
 		{
 			if (titleTable == null)
@@ -646,29 +646,29 @@ namespace DigitalPlatform.Xml
 
 		private void FormLoad(object sender, System.EventArgs e)
 		{
-			Debug.Assert(sender != null, "sender²»ÄÜÎªnull");
-			Debug.Assert(sender is Form, "senderÓ¦ÎªForm¶ÔÏó");
+			Debug.Assert(sender != null, "senderä¸èƒ½ä¸ºnull");
+			Debug.Assert(sender is Form, "senderåº”ä¸ºFormå¯¹è±¡");
 
-			Debug.Assert(titleTable != null, "titleTableÓ¦µ±ÒÑ¾­±»LinkFromState()³õÊ¼»¯");
+			Debug.Assert(titleTable != null, "titleTableåº”å½“å·²ç»è¢«LinkFromState()åˆå§‹åŒ–");
 
 			string strCfgTitle = (string)titleTable[sender];
-			Debug.Assert(strCfgTitle != null , "strCfgTitle²»ÄÜÎªnull");
+			Debug.Assert(strCfgTitle != null , "strCfgTitleä¸èƒ½ä¸ºnull");
 
 			this.LoadFormStates((Form)sender, strCfgTitle);
 		}
 
 		private void FormClosed(object sender, System.EventArgs e)
 		{
-			Debug.Assert(sender != null, "sender²»ÄÜÎªnull");
-			Debug.Assert(sender is Form, "senderÓ¦ÎªForm¶ÔÏó");
+			Debug.Assert(sender != null, "senderä¸èƒ½ä¸ºnull");
+			Debug.Assert(sender is Form, "senderåº”ä¸ºFormå¯¹è±¡");
 
-			Debug.Assert(titleTable != null, "titleTableÓ¦µ±ÒÑ¾­±»LinkFromState()³õÊ¼»¯");
+			Debug.Assert(titleTable != null, "titleTableåº”å½“å·²ç»è¢«LinkFromState()åˆå§‹åŒ–");
 
 			string strCfgTitle = (string)titleTable[sender];
             if (string.IsNullOrEmpty(strCfgTitle) == true)
                 return;
 
-			Debug.Assert(strCfgTitle != null , "strCfgTitle²»ÄÜÎªnull");
+			Debug.Assert(strCfgTitle != null , "strCfgTitleä¸èƒ½ä¸ºnull");
 
 			this.SaveFormStates((Form)sender, strCfgTitle);
 

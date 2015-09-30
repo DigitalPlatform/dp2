@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Xml;
 
 using System.Reflection;
@@ -12,15 +12,15 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.rms.Client
 {
 	/// <summary>
-	/// C#½Å±¾ÓïÑÔÊµÓÃÄ£¿é
-    /// TODO: ¿ÉÒÔ¿¼ÂÇ·ÏÖ¹£¬ÓÃScriptManager´úÌæ
+	/// C#è„šæœ¬è¯­è¨€å®ç”¨æ¨¡å—
+    /// TODO: å¯ä»¥è€ƒè™‘åºŸæ­¢ï¼Œç”¨ScriptManagerä»£æ›¿
 	/// </summary>
 	public class Script
 	{
-		// ´Óreferences.xmlÎÄ¼şÖĞµÃµ½refs×Ö·û´®Êı×é
+		// ä»references.xmlæ–‡ä»¶ä¸­å¾—åˆ°refså­—ç¬¦ä¸²æ•°ç»„
 		// return:
 		//		-1	error
-		//		0	ÕıÈ·
+		//		0	æ­£ç¡®
 		public static int GetRefs(string strRef,
 			out string [] saRef,
 			out string strError)
@@ -35,11 +35,11 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
-			// ËùÓĞref½Úµã
+			// æ‰€æœ‰refèŠ‚ç‚¹
 			XmlNodeList nodes = dom.DocumentElement.SelectNodes("//ref");
 			saRef = new string [nodes.Count];
 			for(int i=0;i<nodes.Count;i++)
@@ -50,13 +50,13 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
-		// ´´½¨Assembly
+		// åˆ›å»ºAssembly
 		// parameters:
-		//	strCode:	½Å±¾´úÂë
-		//	refs:	Á¬½ÓµÄÍâ²¿assembly
-		// strResult:´¦ÀíĞÅÏ¢
-		// objDb:Êı¾İ¿â¶ÔÏó£¬ÔÚ³ö´íµ÷getErrorInfoÓÃµ½
-		// ·µ»ØÖµ:´´½¨ºÃµÄAssembly
+		//	strCode:	è„šæœ¬ä»£ç 
+		//	refs:	è¿æ¥çš„å¤–éƒ¨assembly
+		// strResult:å¤„ç†ä¿¡æ¯
+		// objDb:æ•°æ®åº“å¯¹è±¡ï¼Œåœ¨å‡ºé”™è°ƒgetErrorInfoç”¨åˆ°
+		// è¿”å›å€¼:åˆ›å»ºå¥½çš„Assembly
 		public static Assembly CreateAssembly(string strCode,
 			string[] refs,
 			string strLibPaths,
@@ -68,7 +68,7 @@ namespace DigitalPlatform.rms.Client
 			strErrorInfo = "";
 			strWarningInfo = "";
  
-			// CompilerParameters¶ÔÏó
+			// CompilerParameterså¯¹è±¡
 			System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 
@@ -88,7 +88,7 @@ namespace DigitalPlatform.rms.Client
 			compilerParams.TreatWarningsAsErrors = false;
 			compilerParams.WarningLevel = 4;
  
-			// Õı¹æ»¯Â·¾¶£¬È¥³ıÀïÃæµÄºê×Ö·û´®
+			// æ­£è§„åŒ–è·¯å¾„ï¼Œå»é™¤é‡Œé¢çš„å®å­—ç¬¦ä¸²
 			// RemoveRefsBinDirMacro(ref refs);
 
 			compilerParams.ReferencedAssemblies.AddRange(refs);
@@ -108,7 +108,7 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch (Exception ex) 
 			{
-				strErrorInfo = "³ö´í " + ex.Message;
+				strErrorInfo = "å‡ºé”™ " + ex.Message;
 				return null;
 			}
 
@@ -120,7 +120,7 @@ namespace DigitalPlatform.rms.Client
 				nErrorCount = getErrorInfo(results.Errors,
 					out strErrorString);
 
-				strErrorInfo = "ĞÅÏ¢ÌõÊı:" + Convert.ToString(results.Errors.Count) + "\r\n";
+				strErrorInfo = "ä¿¡æ¯æ¡æ•°:" + Convert.ToString(results.Errors.Count) + "\r\n";
 				strErrorInfo += strErrorString;
 
 				if (nErrorCount == 0 && results.Errors.Count != 0) 
@@ -138,7 +138,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 		// parameters:
-		//		refs	¸½¼ÓµÄrefsÎÄ¼şÂ·¾¶¡£Â·¾¶ÖĞ¿ÉÄÜ°üº¬ºê%installdir%
+		//		refs	é™„åŠ çš„refsæ–‡ä»¶è·¯å¾„ã€‚è·¯å¾„ä¸­å¯èƒ½åŒ…å«å®%installdir%
 		public static int CreateAssemblyFile(string strCode,
 			string[] refs,
 			string strLibPaths,
@@ -150,7 +150,7 @@ namespace DigitalPlatform.rms.Client
 			strErrorInfo = "";
 			strWarningInfo = "";
  
-			// CompilerParameters¶ÔÏó
+			// CompilerParameterså¯¹è±¡
 			System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 
@@ -170,7 +170,7 @@ namespace DigitalPlatform.rms.Client
 			compilerParams.TreatWarningsAsErrors = false;
 			compilerParams.WarningLevel = 4;
  
-			// Õı¹æ»¯Â·¾¶£¬È¥³ıÀïÃæµÄºê×Ö·û´®
+			// æ­£è§„åŒ–è·¯å¾„ï¼Œå»é™¤é‡Œé¢çš„å®å­—ç¬¦ä¸²
 			// RemoveRefsBinDirMacro(ref refs);
 
 			compilerParams.ReferencedAssemblies.AddRange(refs);
@@ -190,7 +190,7 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch (Exception ex) 
 			{
-				strErrorInfo = "³ö´í " + ex.Message;
+				strErrorInfo = "å‡ºé”™ " + ex.Message;
 				return -1;
 			}
 
@@ -202,7 +202,7 @@ namespace DigitalPlatform.rms.Client
 				nErrorCount = getErrorInfo(results.Errors,
 					out strErrorString);
 
-				strErrorInfo = "ĞÅÏ¢ÌõÊı:" + Convert.ToString(results.Errors.Count) + "\r\n";
+				strErrorInfo = "ä¿¡æ¯æ¡æ•°:" + Convert.ToString(results.Errors.Count) + "\r\n";
 				strErrorInfo += strErrorString;
 
 				if (nErrorCount == 0 && results.Errors.Count != 0) 
@@ -219,7 +219,7 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
-		// ¹¹Ôì³ö´íĞÅÏ¢×Ö·û´®
+		// æ„é€ å‡ºé”™ä¿¡æ¯å­—ç¬¦ä¸²
 		public static int getErrorInfo(CompilerErrorCollection errors,
 			out string strResult)
 		{
@@ -228,7 +228,7 @@ namespace DigitalPlatform.rms.Client
 
 			if (errors == null)
 			{
-				strResult = "error²ÎÊıÎªnull";
+				strResult = "errorå‚æ•°ä¸ºnull";
 				return 0;
 			}
    
@@ -267,7 +267,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ¹Û²ìtypeµÄ»ùÀàÖĞÊÇ·ñÓĞÀàÃûÎªstrBaseTypeFullNameµÄÀà¡£
+		// è§‚å¯Ÿtypeçš„åŸºç±»ä¸­æ˜¯å¦æœ‰ç±»åä¸ºstrBaseTypeFullNameçš„ç±»ã€‚
 		public static bool IsDeriverdFrom(Type type,
 			string strBaseTypeFullName)
 		{

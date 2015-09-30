@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -29,14 +29,14 @@ namespace DigitalPlatform.CommonControl
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ¼ì²éÕýÈ·ÐÔ
+            // æ£€æŸ¥æ­£ç¡®æ€§
             try
             {
                 string strText = this.w3cDtfControl1.ValueString;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 

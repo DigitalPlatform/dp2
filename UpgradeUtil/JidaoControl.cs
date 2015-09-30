@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,8 +20,8 @@ using DigitalPlatform.CommonControl;
 namespace UpgradeUtil
 {
     /// <summary>
-    /// dt1000¼Çµ½¿Ø¼ş
-    /// ÓÃÓÚÉı¼¶dt1000ÆÚ¿¯¼Çµ½Êı¾İ
+    /// dt1000è®°åˆ°æ§ä»¶
+    /// ç”¨äºå‡çº§dt1000æœŸåˆŠè®°åˆ°æ•°æ®
     /// </summary>
     public partial class JidaoControl : ScrollableControl
     {
@@ -50,8 +50,8 @@ namespace UpgradeUtil
             Point pt = AutoScrollPosition;
             pe.Graphics.TranslateTransform(pt.X, pt.Y);
 
-            Font fontSmall = new Font("Î¢ÈíÑÅºÚ", 12, GraphicsUnit.Pixel);
-            Font fontLarge = new Font("Î¢ÈíÑÅºÚ", 24, GraphicsUnit.Pixel);
+            Font fontSmall = new Font("å¾®è½¯é›…é»‘", 12, GraphicsUnit.Pixel);
+            Font fontLarge = new Font("å¾®è½¯é›…é»‘", 24, GraphicsUnit.Pixel);
             Brush brushText = new SolidBrush(Color.Black);
             Brush brushGray = new SolidBrush(Color.LightGray);
             Pen penBorder = new Pen(Color.Gray);
@@ -59,7 +59,7 @@ namespace UpgradeUtil
 
             int y = m_padding.Top;
             {
-                // ÈÕ¸ñ×ÓË®Æ½±êÌâ
+                // æ—¥æ ¼å­æ°´å¹³æ ‡é¢˜
                 int x = this.m_padding.Left + this.m_nLeftTextWidth;
                 for (int i = 0; i < 31; i++)
                 {
@@ -81,7 +81,7 @@ namespace UpgradeUtil
                 for (int j = 0; j < year.Months.Count; j++)
                 {
                     JidaoMonth month = year.Months[j];
-                    // Äê·İ£¬ÔÂ·İ
+                    // å¹´ä»½ï¼Œæœˆä»½
                     string strTitle = year.Year.ToString().PadLeft(4, '0') + "." + month.Month.ToString();
                     Rectangle rect = new Rectangle(this.m_padding.Left,
                         y,
@@ -89,7 +89,7 @@ namespace UpgradeUtil
                         this.m_nCellHeight);
                     pe.Graphics.DrawString(strTitle, fontSmall, brushText, rect);
 
-                    // ÈÕ¸ñ×Ó
+                    // æ—¥æ ¼å­
                     int x = this.m_padding.Left + this.m_nLeftTextWidth;
                     for (int k = 0; k < month.Cells.Count; k++)
                     {
@@ -144,7 +144,7 @@ namespace UpgradeUtil
             Font fontSmall,
             Font fontLarge)
         {
-            // ÈÕÆÚ µÚÒ»ÅÅ£¬ÓÒ¶ÔÆë
+            // æ—¥æœŸ ç¬¬ä¸€æ’ï¼Œå³å¯¹é½
             StringFormat stringFormat = new StringFormat();
             stringFormat.Alignment = StringAlignment.Far;
             stringFormat.LineAlignment = StringAlignment.Near;
@@ -158,11 +158,11 @@ namespace UpgradeUtil
                 rect,
                 stringFormat);
 
-            // ×ÜÆÚºÅ ¾íºÅ µÚ¶şÅÅ£¬×ó¶ÔÆë
+            // æ€»æœŸå· å·å· ç¬¬äºŒæ’ï¼Œå·¦å¯¹é½
             string strSecondLine = "";
             
             if (String.IsNullOrEmpty(cell.Zong) == false)
-                strSecondLine = "×Ü." + cell.Zong;
+                strSecondLine = "æ€»." + cell.Zong;
 
             if (String.IsNullOrEmpty(cell.Vol) == false)
             {
@@ -189,7 +189,7 @@ namespace UpgradeUtil
             }
 
 
-            // µ±ÄêÆÚºÅ ÓÒÏÂ½Ç
+            // å½“å¹´æœŸå· å³ä¸‹è§’
             stringFormat = new StringFormat();
             stringFormat.Alignment = StringAlignment.Far;
             stringFormat.LineAlignment = StringAlignment.Far;
@@ -201,7 +201,7 @@ namespace UpgradeUtil
                 rect,
                 stringFormat);
 
-            // ²Ù×÷ÈÕÆÚ ×óÏÂ½Ç
+            // æ“ä½œæ—¥æœŸ å·¦ä¸‹è§’
             stringFormat = new StringFormat();
             stringFormat.Alignment = StringAlignment.Near;
             stringFormat.LineAlignment = StringAlignment.Far;
@@ -218,11 +218,11 @@ namespace UpgradeUtil
         {
             List<string> results = new List<string>();
 
-            results.Add("920 ÓÊ·¢¿¯");
-            results.Add("921 ·ÇÓÊ·¢¿¯");
-            results.Add("922 Ö±¶©¿¯");
-            results.Add("923 ½»»»¿¯");
-            results.Add("924 ³Ê½É¿¯");
+            results.Add("920 é‚®å‘åˆŠ");
+            results.Add("921 éé‚®å‘åˆŠ");
+            results.Add("922 ç›´è®¢åˆŠ");
+            results.Add("923 äº¤æ¢åˆŠ");
+            results.Add("924 å‘ˆç¼´åˆŠ");
 
             string strField = "";
             string strNextFieldName = "";
@@ -236,7 +236,7 @@ namespace UpgradeUtil
                 if (nRet != -1)
                     strFieldName = strFieldName.Substring(0, nRet).Trim();
 
-                // ÓÊ·¢¿¯
+                // é‚®å‘åˆŠ
                 nRet = MarcUtil.GetField(strMARC,
                     strFieldName,
                     0,
@@ -252,7 +252,7 @@ namespace UpgradeUtil
             return results;
         }
 
-        // ³õÊ¼»¯Êı¾İ
+        // åˆå§‹åŒ–æ•°æ®
         public int SetData(
             string strFieldName,
             string strMARC,
@@ -267,7 +267,7 @@ namespace UpgradeUtil
                 && strFieldName != "923"
                 && strFieldName != "924")
             {
-                strError = "²»Ö§³ÖµÄ¼Çµ½×Ö¶ÎÃû '" + strFieldName + "'";
+                strError = "ä¸æ”¯æŒçš„è®°åˆ°å­—æ®µå '" + strFieldName + "'";
                 return -1;
             }
 
@@ -278,7 +278,7 @@ namespace UpgradeUtil
             string strField = "";
             string strNextFieldName = "";
 
-            // ÓÊ·¢¿¯
+            // é‚®å‘åˆŠ
             nRet = MarcUtil.GetField(strMARC,
                 strFieldName,
                 0,
@@ -293,7 +293,7 @@ namespace UpgradeUtil
                     return -1;
             }
 
-            // ÉèÖÃÄÚÈİÇøÓò³ß´ç
+            // è®¾ç½®å†…å®¹åŒºåŸŸå°ºå¯¸
             this.AutoScrollMinSize = new Size(this.m_padding.Horizontal + this.m_nLeftTextWidth + this.m_nCellWidth * 31
                 + SystemInformation.VerticalScrollBarWidth,
                             this.m_padding.Vertical + this.m_nDaysTitleHeight + this.m_nCellHeight * 12 * this.Years.Count
@@ -323,11 +323,11 @@ namespace UpgradeUtil
             }
         }
 
-        // Éı¼¶Ç°µÄ¼ì²é
+        // å‡çº§å‰çš„æ£€æŸ¥
         // return:
-        //      -1  ¼ì²é²Ù×÷Ê§°Ü
-        //      0   Êı¾İÃ»ÓĞ´í
-        //      1   Êı¾İÓĞ´í
+        //      -1  æ£€æŸ¥æ“ä½œå¤±è´¥
+        //      0   æ•°æ®æ²¡æœ‰é”™
+        //      1   æ•°æ®æœ‰é”™
         public int Check(string strMARC,
             out string strError)
         {
@@ -368,7 +368,7 @@ namespace UpgradeUtil
                 if (nRet == -1)
                     return -1;
 
-                // ºÏ²¢µ½ÈÕ×Ó´æ´¢
+                // åˆå¹¶åˆ°æ—¥å­å­˜å‚¨
                 nRet = MergeToDays(ref days,
                     out strError);
                 if (nRet == -1)
@@ -379,7 +379,7 @@ namespace UpgradeUtil
             out strError);
         }
 
-        // Éı¼¶MARCÆÚĞÅÏ¢µ½dp2 xml ÆÚ¼ÇÂ¼¸ñÊ½
+        // å‡çº§MARCæœŸä¿¡æ¯åˆ°dp2 xml æœŸè®°å½•æ ¼å¼
         public int Upgrade(string strMARC,
             string strOperator,
             out List<string> Xmls,
@@ -424,14 +424,14 @@ namespace UpgradeUtil
                 if (nRet == -1)
                     return -1;
 
-                // ºÏ²¢µ½ÈÕ×Ó´æ´¢
+                // åˆå¹¶åˆ°æ—¥å­å­˜å‚¨
                 nRet = MergeToDays(ref days,
                     out strError);
                 if (nRet == -1)
                     return -1;
             }
 
-            // ×ª»»ÎªÆÚ¼ÇÂ¼¸ñÊ½
+            // è½¬æ¢ä¸ºæœŸè®°å½•æ ¼å¼
             nRet = ConvertToIssueXmls(days,
                 strOperator,
                 out Xmls,
@@ -450,7 +450,7 @@ namespace UpgradeUtil
 
             if (strOldValue == strNewValue)
             {
-                if (String.IsNullOrEmpty(strOldValue) == true)  // ĞÂ¾É¾ùÎª¿Õ
+                if (String.IsNullOrEmpty(strOldValue) == true)  // æ–°æ—§å‡ä¸ºç©º
                     return "";
 
                 return strOldValue + "[=]";
@@ -460,7 +460,7 @@ namespace UpgradeUtil
         }
 
 
-        // ·ÖÀë "old[new]" ÄÚµÄÁ½¸öÖµ
+        // åˆ†ç¦» "old[new]" å†…çš„ä¸¤ä¸ªå€¼
         public static void ParseOldNewValue(string strValue,
             out string strOldValue,
             out string strNewValue)
@@ -478,7 +478,7 @@ namespace UpgradeUtil
             strOldValue = strValue.Substring(0, nRet).Trim();
             strNewValue = strValue.Substring(nRet + 1).Trim();
 
-            // È¥µôÄ©Î²µÄ']'
+            // å»æ‰æœ«å°¾çš„']'
             if (strNewValue.Length > 0 && strNewValue[strNewValue.Length - 1] == ']')
                 strNewValue = strNewValue.Substring(0, strNewValue.Length - 1);
 
@@ -486,7 +486,7 @@ namespace UpgradeUtil
                 strNewValue = strOldValue;
         }
 
-        // ×ª»»ÎªÆÚ¼ÇÂ¼¸ñÊ½
+        // è½¬æ¢ä¸ºæœŸè®°å½•æ ¼å¼
         int ConvertToIssueXmls(
             List<JidaoDay> days,
             string strOperator,
@@ -499,7 +499,7 @@ namespace UpgradeUtil
 
             string strOperTime = DateTimeUtil.Rfc1123DateTimeString(DateTime.Now.ToUniversalTime());
 
-            // ÅÅĞò
+            // æ’åº
             days.Sort(new JidaoDayCompare());
 
             for (int i = 0; i < days.Count; i++)
@@ -545,7 +545,7 @@ namespace UpgradeUtil
                     "refID",
                     Guid.NewGuid().ToString());
 
-                // ´´½¨<orderInfo>
+                // åˆ›å»º<orderInfo>
                 XmlNode nodeOrderInfo = dom.CreateElement("orderInfo");
                 dom.DocumentElement.AppendChild(nodeOrderInfo);
 
@@ -576,7 +576,7 @@ namespace UpgradeUtil
                         for (int k = 0; k < nMax; k++)
                         {
                             DigitalPlatform.Location location = new DigitalPlatform.Location();
-                            location.Name = "Î´Öª";
+                            location.Name = "æœªçŸ¥";
                             if (nCount < cell.ArrivedCopy)
                             {
                                 location.RefID = "*";
@@ -594,7 +594,7 @@ namespace UpgradeUtil
                         DateTime time = DateTimeUtil.Long8ToDateTime(cell.OperDate);
                         string strTime = DateTimeUtil.Rfc1123DateTimeString(time.ToUniversalTime());
 
-                        // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
+                        // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
                         nRet = SetOperation(
                             nodeOrderRoot,
                             "lastModified",
@@ -612,7 +612,7 @@ namespace UpgradeUtil
 
                 if (String.IsNullOrEmpty(strOperator) == false)
                 {
-                    // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
+                    // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
                     nRet = SetOperation(
                         dom.DocumentElement,
                         "create",
@@ -630,7 +630,7 @@ namespace UpgradeUtil
             return 0;
         }
 
-        // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
+        // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
         public static int SetOperation(
             XmlNode root,
             string strOperName,
@@ -670,7 +670,7 @@ namespace UpgradeUtil
             return 0;
         }
 
-        // ºÏ²¢µ½ÈÕ×Ó´æ´¢
+        // åˆå¹¶åˆ°æ—¥å­å­˜å‚¨
         int MergeToDays(ref List<JidaoDay> days,
             out string strError)
         {
@@ -717,19 +717,19 @@ namespace UpgradeUtil
 
             if (a.No != b.No)
             {
-                strError += "ÆÚºÅ²»Í¬('"+a.No+"'ºÍ'"+b.No+"')";
+                strError += "æœŸå·ä¸åŒ('"+a.No+"'å’Œ'"+b.No+"')";
             }
             if (a.Zong != b.Zong)
             {
                 if (String.IsNullOrEmpty(strError) == false)
                     strError += ",";
-                strError += "×ÜÆÚºÅ²»Í¬('" + a.Zong + "'ºÍ'" + b.Zong + "')";
+                strError += "æ€»æœŸå·ä¸åŒ('" + a.Zong + "'å’Œ'" + b.Zong + "')";
             }
             if (a.Vol != b.Vol)
             {
                 if (String.IsNullOrEmpty(strError) == false)
                     strError += ",";
-                strError += "¾íºÅ²»Í¬('" + a.Vol + "'ºÍ'" + b.Vol + "')";
+                strError += "å·å·ä¸åŒ('" + a.Vol + "'å’Œ'" + b.Vol + "')";
             }
 
             if (String.IsNullOrEmpty(strError) == false)
@@ -738,17 +738,17 @@ namespace UpgradeUtil
             return 0;
         }
 
-        // ½øĞĞ¼ì²é
+        // è¿›è¡Œæ£€æŸ¥
         // return:
-        //      -1  ¼ì²é²Ù×÷Ê§°Ü
-        //      0   Êı¾İÃ»ÓĞ´í
-        //      1   Êı¾İÓĞ´í
+        //      -1  æ£€æŸ¥æ“ä½œå¤±è´¥
+        //      0   æ•°æ®æ²¡æœ‰é”™
+        //      1   æ•°æ®æœ‰é”™
         int CheckDays(List<JidaoDay> days,
             out string strError)
         {
             strError = "";
 
-            // ÅÅĞò
+            // æ’åº
             days.Sort(new JidaoDayCompare());
 
             for (int i = 0; i < days.Count; i++)
@@ -776,14 +776,14 @@ namespace UpgradeUtil
                             {
                                 if (String.IsNullOrEmpty(strError) == false)
                                     strError += ";\r\n";
-                                strError += "ÈÕÆÚÎª '" + day.Date + "' À´×ÔÇşµÀ '" + cell.Source + "' µÄ¼Çµ½²Ù×÷Ê±¼ä '" + cell.OperDate + "' ÒÉËÆ²»¶Ô";
+                                strError += "æ—¥æœŸä¸º '" + day.Date + "' æ¥è‡ªæ¸ é“ '" + cell.Source + "' çš„è®°åˆ°æ“ä½œæ—¶é—´ '" + cell.OperDate + "' ç–‘ä¼¼ä¸å¯¹";
                             }
                         }
                         catch
                         {
                             if (String.IsNullOrEmpty(strError) == false)
                                 strError += ";\r\n";
-                            strError += "ÈÕÆÚÎª '" + day.Date + "' À´×ÔÇşµÀ '" + cell.Source + "' µÄ¼Çµ½²Ù×÷Ê±¼ä '"+cell.OperDate+"' ¸ñÊ½²»¶Ô»òÕß³öÏÖÁË²»´æÔÚµÄÈÕÆÚ" ;
+                            strError += "æ—¥æœŸä¸º '" + day.Date + "' æ¥è‡ªæ¸ é“ '" + cell.Source + "' çš„è®°åˆ°æ“ä½œæ—¶é—´ '"+cell.OperDate+"' æ ¼å¼ä¸å¯¹æˆ–è€…å‡ºç°äº†ä¸å­˜åœ¨çš„æ—¥æœŸ" ;
                         }
                     }
 
@@ -799,7 +799,7 @@ namespace UpgradeUtil
                             {
                                 if (String.IsNullOrEmpty(strError) == false)
                                     strError += ";\r\n";
-                                strError += "ÈÕÆÚÎª '" + day.Date + "' À´×ÔÇşµÀ '"+prev_cell.Source+"' ºÍ '"+cell.Source+"' µÄÆÚÓĞÈçÏÂ²»Í¬: " + strMessage;
+                                strError += "æ—¥æœŸä¸º '" + day.Date + "' æ¥è‡ªæ¸ é“ '"+prev_cell.Source+"' å’Œ '"+cell.Source+"' çš„æœŸæœ‰å¦‚ä¸‹ä¸åŒ: " + strMessage;
                             }
                         }
                     }
@@ -826,9 +826,9 @@ namespace UpgradeUtil
             {
                 string strGroup = "";
                 // return:
-                //		-1	³ö´í
-                //		0	ËùÖ¸¶¨µÄ×Ó×Ö¶Î×éÃ»ÓĞÕÒµ½
-                //		1	ÕÒµ½¡£ÕÒµ½µÄ×Ó×Ö¶Î×é·µ»ØÔÚstrGroup²ÎÊıÖĞ
+                //		-1	å‡ºé”™
+                //		0	æ‰€æŒ‡å®šçš„å­å­—æ®µç»„æ²¡æœ‰æ‰¾åˆ°
+                //		1	æ‰¾åˆ°ã€‚æ‰¾åˆ°çš„å­å­—æ®µç»„è¿”å›åœ¨strGroupå‚æ•°ä¸­
                 nRet = MarcUtil.GetGroup(strField,
                     i,
                     out strGroup);
@@ -838,12 +838,12 @@ namespace UpgradeUtil
                 string strSubfield = "";
                 string strNextSubfieldName = "";
                 // parameters:
-                //		textType	±íÊ¾strTextÖĞ°üº¬µÄÊÇ×Ö¶ÎÄÚÈİ»¹ÊÇ×éÄÚÈİ¡£ÈôÎªItemType.Field£¬±íÊ¾strText²ÎÊıÖĞÎª×Ö¶Î£»ÈôÎªItemType.Group£¬±íÊ¾strText²ÎÊıÖĞÎª×Ó×Ö¶Î×é¡£
-                //		strSubfield		[out]Êä³ö×Ó×Ö¶Î¡£×Ó×Ö¶ÎÃû(1×Ö·û)¡¢×Ó×Ö¶ÎÄÚÈİ¡£
+                //		textType	è¡¨ç¤ºstrTextä¸­åŒ…å«çš„æ˜¯å­—æ®µå†…å®¹è¿˜æ˜¯ç»„å†…å®¹ã€‚è‹¥ä¸ºItemType.Fieldï¼Œè¡¨ç¤ºstrTextå‚æ•°ä¸­ä¸ºå­—æ®µï¼›è‹¥ä¸ºItemType.Groupï¼Œè¡¨ç¤ºstrTextå‚æ•°ä¸­ä¸ºå­å­—æ®µç»„ã€‚
+                //		strSubfield		[out]è¾“å‡ºå­å­—æ®µã€‚å­å­—æ®µå(1å­—ç¬¦)ã€å­å­—æ®µå†…å®¹ã€‚
                 // return:
-                //		-1	³ö´í
-                //		0	ËùÖ¸¶¨µÄ×Ó×Ö¶ÎÃ»ÓĞÕÒµ½
-                //		1	ÕÒµ½¡£ÕÒµ½µÄ×Ó×Ö¶Î·µ»ØÔÚstrSubfield²ÎÊıÖĞ
+                //		-1	å‡ºé”™
+                //		0	æ‰€æŒ‡å®šçš„å­å­—æ®µæ²¡æœ‰æ‰¾åˆ°
+                //		1	æ‰¾åˆ°ã€‚æ‰¾åˆ°çš„å­å­—æ®µè¿”å›åœ¨strSubfieldå‚æ•°ä¸­
                 nRet = MarcUtil.GetSubfield(strGroup,
                     ItemType.Group,
                     "a",
@@ -861,7 +861,7 @@ namespace UpgradeUtil
                 string strStart = "";
                 string strEnd = "";
 
-                // Õ¹¿ªÊ±¼ä·¶Î§
+                // å±•å¼€æ—¶é—´èŒƒå›´
                 nRet = EnsureTimeRange(
                     strFieldName,
                     strTimeRange,
@@ -871,7 +871,7 @@ namespace UpgradeUtil
                 if (nRet == -1)
                     return -1;
 
-                // $b ¶©¹º·İÊı
+                // $b è®¢è´­ä»½æ•°
                 string strOrderCopy = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -885,7 +885,7 @@ namespace UpgradeUtil
                     strOrderCopy = strSubfield.Substring(1);
                 }
 
-                // $c Êµµ½»ùÊı
+                // $c å®åˆ°åŸºæ•°
                 string strArrivedCopy = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -899,7 +899,7 @@ namespace UpgradeUtil
                     strArrivedCopy = strSubfield.Substring(1);
                 }
 
-                // $Z ĞòºÅÑÚÂë
+                // $Z åºå·æ©ç 
                 string strBitMask = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -913,7 +913,7 @@ namespace UpgradeUtil
                     strBitMask = strSubfield.Substring(1);
                 }
 
-                // $Y Ô¤²âÑÚÂë
+                // $Y é¢„æµ‹æ©ç 
                 string strYuceMask = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -939,7 +939,7 @@ namespace UpgradeUtil
                         return -1;
                 }
 
-                // $w ÆÚºÅ
+                // $w æœŸå·
                 string strIssueNos = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -953,7 +953,7 @@ namespace UpgradeUtil
                     strIssueNos = strSubfield.Substring(1);
                 }
 
-                // $S ×ÜÆÚºÅ
+                // $S æ€»æœŸå·
                 string strZongs = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -967,7 +967,7 @@ namespace UpgradeUtil
                     strZongs = strSubfield.Substring(1);
                 }
 
-                // $V ¾íºÅ
+                // $V å·å·
                 string strVolumes = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -981,7 +981,7 @@ namespace UpgradeUtil
                     strVolumes = strSubfield.Substring(1);
                 }
 
-                // $t ²Ù×÷Ê±¼ä
+                // $t æ“ä½œæ—¶é—´
                 string strOperDates = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -995,7 +995,7 @@ namespace UpgradeUtil
                     strOperDates = strSubfield.Substring(1);
                 }
 
-                // $p ²Ù×÷Õß
+                // $p æ“ä½œè€…
                 string strOperator = "";
                 nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -1077,7 +1077,7 @@ namespace UpgradeUtil
                 }
                 catch
                 {
-                    strError = "¶©¹º¸´±¾Êı '" + strOrderCopy + "' ¸ñÊ½´íÎó";
+                    strError = "è®¢è´­å¤æœ¬æ•° '" + strOrderCopy + "' æ ¼å¼é”™è¯¯";
                     return -1;
                 }
             }
@@ -1104,7 +1104,7 @@ namespace UpgradeUtil
                 int nOffsetAnother = 0;
                 for (DateTime cur = start; cur <= end; )
                 {
-                    // »ñµÃÒ»¸ö¸ñ×ÓµÄJidaoCell¶ÔÏó
+                    // è·å¾—ä¸€ä¸ªæ ¼å­çš„JidaoCellå¯¹è±¡
                     JidaoCell cell = null;
                     nRet = GetOneCell(cur,
                        out cell,
@@ -1130,7 +1130,7 @@ namespace UpgradeUtil
                             }
                             catch
                             {
-                                strError = "¸´±¾Êı '" + strCopy + "' ¸ñÊ½´íÎó";
+                                strError = "å¤æœ¬æ•° '" + strCopy + "' æ ¼å¼é”™è¯¯";
                                 return -1;
                                 // cell.ArrivedCopy = 0;
                             }
@@ -1174,32 +1174,32 @@ namespace UpgradeUtil
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
             return 0;
         }
 
-        // ¿ÉÄÜ»áÅ×³öÒì³£
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         static string AddDelta(string strDate,
             string strDelta)
         {
             if (StringUtil.IsPureNumber(strDate) == false)
-                throw new Exception("Äê·İ '"+strDate+"' Ó¦¸ÃÎªÈ«²¿Êı×Ö");
+                throw new Exception("å¹´ä»½ '"+strDate+"' åº”è¯¥ä¸ºå…¨éƒ¨æ•°å­—");
 
             long date = Convert.ToInt64(strDate);
 
             if (StringUtil.IsNumber(strDelta) == false)
-                throw new Exception("ÔöÁ¿Öµ '" + strDelta + "' Ó¦¸ÃÕı¸ºÊı×Ö");
+                throw new Exception("å¢é‡å€¼ '" + strDelta + "' åº”è¯¥æ­£è´Ÿæ•°å­—");
 
             long delta = Convert.ToInt64(strDelta);
 
             return (date + delta).ToString().PadLeft(8, '0');
         }
 
-        // Õ¹¿ªÈÕÆÚ×Ö·û´®
-        // ¿ÉÄÜÅ×³öÒì³£
+        // å±•å¼€æ—¥æœŸå­—ç¬¦ä¸²
+        // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         static List<string> ExpandDateSequence(string strText)
         {
             try
@@ -1235,18 +1235,18 @@ namespace UpgradeUtil
                                 Debug.Assert(strValue != "00000000", "");
                             }
 
-                            if (strValue != "00000000")  // ·À·¶´íÎó
+                            if (strValue != "00000000")  // é˜²èŒƒé”™è¯¯
                                 strPrevValue = strValue;
                             Debug.Assert(strPrevValue != "00000000", "");
                         }
 
                         if (StringUtil.IsNumber(strCount) == false)
-                            throw new Exception("Êı×Ö '"+strCount+"' ¸ñÊ½²»ÕıÈ·");
+                            throw new Exception("æ•°å­— '"+strCount+"' æ ¼å¼ä¸æ­£ç¡®");
 
                         int count = Convert.ToInt32(strCount);
                         for (int j = 0; j < count; j++)
                         {
-                            // TODO: Ğ£ÑéÊ±¼ä×Ö·û´®ÊÇ·ñÕıÈ·
+                            // TODO: æ ¡éªŒæ—¶é—´å­—ç¬¦ä¸²æ˜¯å¦æ­£ç¡®
                             // DateTimeUtil.Long8ToDateTime()
                             results.Add(strValue);
                         }
@@ -1258,7 +1258,7 @@ namespace UpgradeUtil
                     if (strPart == "z")
                     {
                         strPart = "00000000";
-                        // ²»¼ÇÒä
+                        // ä¸è®°å¿†
                     }
                     else
                     {
@@ -1271,12 +1271,12 @@ namespace UpgradeUtil
                             strPart = strTemp;
                         }
 
-                        if (strPart != "00000000")  // ·À·¶´íÎó
+                        if (strPart != "00000000")  // é˜²èŒƒé”™è¯¯
                             strPrevValue = strPart;
                         Debug.Assert(strPrevValue != "00000000", "");
                     }
 
-                    // TODO: Ğ£ÑéÊ±¼ä×Ö·û´®ÊÇ·ñÕıÈ·
+                    // TODO: æ ¡éªŒæ—¶é—´å­—ç¬¦ä¸²æ˜¯å¦æ­£ç¡®
                     results.Add(strPart);
                 }
 
@@ -1284,7 +1284,7 @@ namespace UpgradeUtil
             }
             catch (Exception ex)
             {
-                throw new Exception("ÈÕÆÚĞòÁĞ '" + strText + "' ¸ñÊ½²»ÕıÈ·: " + ex.Message);
+                throw new Exception("æ—¥æœŸåºåˆ— '" + strText + "' æ ¼å¼ä¸æ­£ç¡®: " + ex.Message);
             }
         }
 
@@ -1322,9 +1322,9 @@ namespace UpgradeUtil
             }
         }
 
-        // Õ¹¿ªºÅÂë×Ö·û´®
+        // å±•å¼€å·ç å­—ç¬¦ä¸²
         // 1:20,2-11
-        // ¿ÉÄÜÅ×³öÒì³£
+        // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         static void ExpandNoSequence(string strText,
             out List<string> numbers,
             out List<string> comments,
@@ -1417,7 +1417,7 @@ namespace UpgradeUtil
                         else
                         {
                             if (StringUtil.IsPureNumber(strCount) == false)
-                                throw new Exception("ĞòÁĞ '" + strText + "' ¸ñÊ½²»ÕıÈ·: '" + strCount + "'Ó¦µ±Îª´¿Êı×Ö");
+                                throw new Exception("åºåˆ— '" + strText + "' æ ¼å¼ä¸æ­£ç¡®: '" + strCount + "'åº”å½“ä¸ºçº¯æ•°å­—");
 
                             count = Convert.ToInt32(strCount);
                         }
@@ -1451,12 +1451,12 @@ namespace UpgradeUtil
             }
             catch (Exception ex)
             {
-                throw new Exception("ĞòÁĞ '" + strText + "' ¸ñÊ½²»ÕıÈ·: " + ex.Message);
+                throw new Exception("åºåˆ— '" + strText + "' æ ¼å¼ä¸æ­£ç¡®: " + ex.Message);
             }
         }
 
-        // Õ¹¿ªºÅÂë×Ö·û´®
-        // ¿ÉÄÜÅ×³öÒì³£
+        // å±•å¼€å·ç å­—ç¬¦ä¸²
+        // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         static List<string> ExpandSequence(string strText)
         {
             try
@@ -1513,11 +1513,11 @@ namespace UpgradeUtil
             }
             catch (Exception ex)
             {
-                throw new Exception("ĞòÁĞ '"+strText+"' ¸ñÊ½²»ÕıÈ·: " + ex.Message);
+                throw new Exception("åºåˆ— '"+strText+"' æ ¼å¼ä¸æ­£ç¡®: " + ex.Message);
             }
         }
 
-        // »ñµÃÒ»¸ö¸ñ×ÓµÄJidaoCell¶ÔÏó
+        // è·å¾—ä¸€ä¸ªæ ¼å­çš„JidaoCellå¯¹è±¡
         int GetOneCell(DateTime day,
             out JidaoCell cell,
             out string strError)
@@ -1528,20 +1528,20 @@ namespace UpgradeUtil
             JidaoYear year = this.FindYear(day.Year);
             if (year == null)
             {
-                strError = "Äê '" + day.Year.ToString() + "' Ã»ÓĞÕÒµ½";
+                strError = "å¹´ '" + day.Year.ToString() + "' æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             JidaoMonth month = year.FindMonth(day.Month);
             if (month == null)
             {
-                strError = "Äê '" + day.Year.ToString() + "' µÄÔÂ '" + day.Month + "' Ã»ÓĞÕÒµ½";
+                strError = "å¹´ '" + day.Year.ToString() + "' çš„æœˆ '" + day.Month + "' æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             if (month.Cells.Count < (day.Day - 1))
             {
-                strError = "Äê '" + day.Year.ToString() + "' µÄÔÂ '" + day.Month + "' µÄÈÕ '" + day.Day + "' ³¬¹ıCells·¶Î§";
+                strError = "å¹´ '" + day.Year.ToString() + "' çš„æœˆ '" + day.Month + "' çš„æ—¥ '" + day.Day + "' è¶…è¿‡CellsèŒƒå›´";
                 return -1;
             }
 
@@ -1611,7 +1611,7 @@ namespace UpgradeUtil
             return 0;
         }
 
-        // °ÑÒ»¸ö¸ñ×ÓÉèÖÃÎª¿ÉÓÃµÄ×´Ì¬
+        // æŠŠä¸€ä¸ªæ ¼å­è®¾ç½®ä¸ºå¯ç”¨çš„çŠ¶æ€
         int OnOneCell(DateTime day, 
             bool bValue,
             out string strError)
@@ -1620,20 +1620,20 @@ namespace UpgradeUtil
             JidaoYear year = this.FindYear(day.Year);
             if (year == null)
             {
-                strError = "Äê '"+day.Year.ToString()+"' Ã»ÓĞÕÒµ½";
+                strError = "å¹´ '"+day.Year.ToString()+"' æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             JidaoMonth month = year.FindMonth(day.Month);
             if (month == null)
             {
-                strError = "Äê '" + day.Year.ToString() + "' µÄÔÂ '"+day.Month+"' Ã»ÓĞÕÒµ½";
+                strError = "å¹´ '" + day.Year.ToString() + "' çš„æœˆ '"+day.Month+"' æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             if (month.Cells.Count < (day.Day-1))
             {
-                strError = "Äê '" + day.Year.ToString() + "' µÄÔÂ '" + day.Month + "' µÄÈÕ '"+day.Day+"' ³¬¹ıCells·¶Î§";
+                strError = "å¹´ '" + day.Year.ToString() + "' çš„æœˆ '" + day.Month + "' çš„æ—¥ '"+day.Day+"' è¶…è¿‡CellsèŒƒå›´";
                 return -1;
             }
 
@@ -1642,7 +1642,7 @@ namespace UpgradeUtil
             return 0;
         }
 
-        // °ÑÒ»¸ö¸ñ×ÓÉèÖÃÎªÆÁ±ÎµÄ×´Ì¬
+        // æŠŠä¸€ä¸ªæ ¼å­è®¾ç½®ä¸ºå±è”½çš„çŠ¶æ€
         int DisableOneCell(DateTime day,
             bool bValue,
             out string strError)
@@ -1651,20 +1651,20 @@ namespace UpgradeUtil
             JidaoYear year = this.FindYear(day.Year);
             if (year == null)
             {
-                strError = "Äê '" + day.Year.ToString() + "' Ã»ÓĞÕÒµ½";
+                strError = "å¹´ '" + day.Year.ToString() + "' æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             JidaoMonth month = year.FindMonth(day.Month);
             if (month == null)
             {
-                strError = "Äê '" + day.Year.ToString() + "' µÄÔÂ '" + day.Month + "' Ã»ÓĞÕÒµ½";
+                strError = "å¹´ '" + day.Year.ToString() + "' çš„æœˆ '" + day.Month + "' æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             if (month.Cells.Count < (day.Day - 1))
             {
-                strError = "Äê '" + day.Year.ToString() + "' µÄÔÂ '" + day.Month + "' µÄÈÕ '" + day.Day + "' ³¬¹ıCells·¶Î§";
+                strError = "å¹´ '" + day.Year.ToString() + "' çš„æœˆ '" + day.Month + "' çš„æ—¥ '" + day.Day + "' è¶…è¿‡CellsèŒƒå›´";
                 return -1;
             }
 
@@ -1689,7 +1689,7 @@ namespace UpgradeUtil
             return false;
         }
 
-        // È·±£Ê±¼ä·¶Î§×ã¹»
+        // ç¡®ä¿æ—¶é—´èŒƒå›´è¶³å¤Ÿ
         int EnsureTimeRange(
             string strSource,
             string strTimeRange,
@@ -1700,7 +1700,7 @@ namespace UpgradeUtil
             strError = "";
             int nRet = 0;
 
-            // Èç¹ûÊÇÔÂ·İ·ç¸ñ£¬ÔòÖ»Ê¹ÓÃÃ¿¸öÔÂµÄµÚÒ»¸ö¸ñ×Ó
+            // å¦‚æœæ˜¯æœˆä»½é£æ ¼ï¼Œåˆ™åªä½¿ç”¨æ¯ä¸ªæœˆçš„ç¬¬ä¸€ä¸ªæ ¼å­
 
             strStart = "";
             strEnd = "";
@@ -1717,7 +1717,7 @@ namespace UpgradeUtil
                 {
                     if (this.TimeStyle != "month")
                     {
-                        strError = "ÉÔÇ°³õÊ¼»¯Ê±Ê¹ÓÃµÄÊ±¼ä·ç¸ñ '"+this.TimeStyle+"' ºÍÄ¿Ç°µÄ 'month'²»Í¬";
+                        strError = "ç¨å‰åˆå§‹åŒ–æ—¶ä½¿ç”¨çš„æ—¶é—´é£æ ¼ '"+this.TimeStyle+"' å’Œç›®å‰çš„ 'month'ä¸åŒ";
                         return -1;
                     }
                 }
@@ -1725,7 +1725,7 @@ namespace UpgradeUtil
                 this.TimeStyle = "month";
                 if (strEnd.Length != 6)
                 {
-                    strError = "Ê±¼ä·¶Î§×Ö·û´® '" + strTimeRange + "' ¸ñÊ½²»ÕıÈ·£ºÆğÊ¼ºÍ½áÊøÊ±¼äµÄ×Ö·ûÊı²»Ò»ÖÂ";
+                    strError = "æ—¶é—´èŒƒå›´å­—ç¬¦ä¸² '" + strTimeRange + "' æ ¼å¼ä¸æ­£ç¡®ï¼šèµ·å§‹å’Œç»“æŸæ—¶é—´çš„å­—ç¬¦æ•°ä¸ä¸€è‡´";
                     return -1;
                 }
             }
@@ -1735,7 +1735,7 @@ namespace UpgradeUtil
                 {
                     if (this.TimeStyle != "day")
                     {
-                        strError = "ÉÔÇ°³õÊ¼»¯Ê±Ê¹ÓÃµÄÊ±¼ä·ç¸ñ '" + this.TimeStyle + "' ºÍÄ¿Ç°µÄ 'day'²»Í¬";
+                        strError = "ç¨å‰åˆå§‹åŒ–æ—¶ä½¿ç”¨çš„æ—¶é—´é£æ ¼ '" + this.TimeStyle + "' å’Œç›®å‰çš„ 'day'ä¸åŒ";
                         return -1;
                     }
                 }
@@ -1743,17 +1743,17 @@ namespace UpgradeUtil
                 this.TimeStyle = "day";
                 if (strEnd.Length != 8)
                 {
-                    strError = "Ê±¼ä·¶Î§×Ö·û´® '" + strTimeRange + "' ¸ñÊ½²»ÕıÈ·£ºÆğÊ¼ºÍ½áÊøÊ±¼äµÄ×Ö·ûÊı²»Ò»ÖÂ";
+                    strError = "æ—¶é—´èŒƒå›´å­—ç¬¦ä¸² '" + strTimeRange + "' æ ¼å¼ä¸æ­£ç¡®ï¼šèµ·å§‹å’Œç»“æŸæ—¶é—´çš„å­—ç¬¦æ•°ä¸ä¸€è‡´";
                     return -1;
                 }
             }
             else
             {
-                strError = "Ê±¼ä·¶Î§×Ö·û´® '"+strTimeRange+"' ¸ñÊ½²»ÕıÈ·£º±íÊ¾ÆğÊ¼»òÕß½áÊøÊ±¼äµÄ×Ö·û´®×Ö·ûÊıÓ¦µ±Îª6»ò8×Ö·û";
+                strError = "æ—¶é—´èŒƒå›´å­—ç¬¦ä¸² '"+strTimeRange+"' æ ¼å¼ä¸æ­£ç¡®ï¼šè¡¨ç¤ºèµ·å§‹æˆ–è€…ç»“æŸæ—¶é—´çš„å­—ç¬¦ä¸²å­—ç¬¦æ•°åº”å½“ä¸º6æˆ–8å­—ç¬¦";
                 return -1;
             }
 
-            // Îª¼ò±ãÆğ¼û£¬À©Õ¹Ê±¼ä·¶Î§µÄÊ±ºòµ¥Î»ÎªÕûÄê
+            // ä¸ºç®€ä¾¿èµ·è§ï¼Œæ‰©å±•æ—¶é—´èŒƒå›´çš„æ—¶å€™å•ä½ä¸ºæ•´å¹´
             string strStartYear = strStart.Substring(0, 4);
             string strEndYear = strEnd.Substring(0, 4);
 
@@ -1766,7 +1766,7 @@ namespace UpgradeUtil
             }
             catch
             {
-                strError = "ÆğÊ¼Äê·İ '" + strStartYear + "' ¸ñÊ½²»ÕıÈ·";
+                strError = "èµ·å§‹å¹´ä»½ '" + strStartYear + "' æ ¼å¼ä¸æ­£ç¡®";
                 return -1;
             }
             try
@@ -1775,7 +1775,7 @@ namespace UpgradeUtil
             }
             catch
             {
-                strError = "½áÊøÄê·İ '" + strEndYear + "' ¸ñÊ½²»ÕıÈ·";
+                strError = "ç»“æŸå¹´ä»½ '" + strEndYear + "' æ ¼å¼ä¸æ­£ç¡®";
                 return -1;
             }
 
@@ -1804,7 +1804,7 @@ namespace UpgradeUtil
             return null;
         }
 
-        // ½«Äê¶ÔÏó²åÈëµ½ÊÊµ±µÄÎ»ÖÃ
+        // å°†å¹´å¯¹è±¡æ’å…¥åˆ°é€‚å½“çš„ä½ç½®
         void AddYear(JidaoYear year)
         {
             JidaoYear prev_year = null;
@@ -1829,15 +1829,15 @@ namespace UpgradeUtil
                 prev_year = cur_year;
             }
 
-            // Ö»ºÃ¼ÓÈëÔÚÄ©Î²
+            // åªå¥½åŠ å…¥åœ¨æœ«å°¾
             this.Years.Add(year);
         }
     }
 
-    // ´ú±íÒ»ÈÕÄÚÈ«²¿ĞÅÏ¢µÄÈİÆ÷
+    // ä»£è¡¨ä¸€æ—¥å†…å…¨éƒ¨ä¿¡æ¯çš„å®¹å™¨
     public class JidaoDay
     {
-        public string Date = "";    // 8×Ö·ûµÄÈÕÆÚ
+        public string Date = "";    // 8å­—ç¬¦çš„æ—¥æœŸ
 
         public List<JidaoCell> Cells = new List<JidaoCell>();
     }
@@ -1846,7 +1846,7 @@ namespace UpgradeUtil
     {
         public JidaoMonth Container = null;
 
-        public string Source = "";  // Êı¾İÀ´Ô´×Ö¶ÎÃû
+        public string Source = "";  // æ•°æ®æ¥æºå­—æ®µå
 
         public string No = "";
         public string Vol = "";
@@ -1888,7 +1888,7 @@ namespace UpgradeUtil
         {
             this.Year = nYear;
 
-            // ´´½¨Ã¿¸öÔÂ
+            // åˆ›å»ºæ¯ä¸ªæœˆ
             for (int nMonth = 1; nMonth < 13; nMonth++)
             {
                 JidaoMonth month = new JidaoMonth();
@@ -1896,7 +1896,7 @@ namespace UpgradeUtil
                 month.Month = nMonth;
                 this.Months.Add(month);
 
-                // Ô¤ÏÈÀ©Õ¹ºÃCellsÊı×é
+                // é¢„å…ˆæ‰©å±•å¥½Cellsæ•°ç»„
                 int nDays = DateTime.DaysInMonth(nYear, nMonth);
                 for (int i = 0; i < nDays; i++)
                 {
@@ -1908,11 +1908,11 @@ namespace UpgradeUtil
         public JidaoMonth FindMonth(int nMonth)
         {
             Debug.Assert(nMonth >= 1 && nMonth <= 12, "");
-            // ÔÂ·İ¶¼ÍêÕûµÄÇé¿öÏÂ£¬¿ìËÙÈ¡µÃ
+            // æœˆä»½éƒ½å®Œæ•´çš„æƒ…å†µä¸‹ï¼Œå¿«é€Ÿå–å¾—
             if (this.Months.Count == 12 && this.Months[0].Month == 1)
                 return this.Months[nMonth - 1];
 
-            // ÔÂ·İ²»ÍêÕûµÄÇé¿öÏÂ
+            // æœˆä»½ä¸å®Œæ•´çš„æƒ…å†µä¸‹
             for (int i = 0; i < this.Months.Count; i++)
             {
                 JidaoMonth month = this.Months[i];

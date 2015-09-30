@@ -813,7 +813,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintAcceptForm LoadFromItemRecPathFile() exception: " + ex.Message;
                 return -1;
             }
             finally
@@ -1008,7 +1008,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintAcceptForm dom.LoadXml() {F238B934-C67E-482A-84AC-E2810AF4875E} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -5055,7 +5055,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintAcceptForm dom.LoadXml() {D08724A8-33B0-4DC8-8CD0-F58082E5DA7B} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
@@ -7383,7 +7383,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "PrintAcceptForm ExcelDocument.Create() exception: " + ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 

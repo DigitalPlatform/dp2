@@ -970,7 +970,7 @@ Keys keyData)
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "BiblioSearchForm GetBiblioFromStyle() exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 
@@ -2688,7 +2688,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "BiblioSearchForm RefreshListViewLines() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally
@@ -3007,7 +3007,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 

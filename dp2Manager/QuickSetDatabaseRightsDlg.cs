@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +9,7 @@ using System.Xml;
 using System.Collections;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform;
 
 namespace dp2Manager
 {
@@ -16,11 +17,11 @@ namespace dp2Manager
     {
         XmlDocument cfgDom = new XmlDocument();
 
-        public string CfgFileName = "";	// ÅäÖÃÎÄ¼şÃû
+        public string CfgFileName = "";	// é…ç½®æ–‡ä»¶å
 
-        public QuickRights QuickRights = null;	// ·µ»ØÑ¡ÔñµÄÈ¨ÏŞ²ÎÊı
+        public QuickRights QuickRights = null;	// è¿”å›é€‰æ‹©çš„æƒé™å‚æ•°
 
-        public bool AllDatabases = false;	// ·µ»ØÊÇ·ñÑ¡ÔñÁËÕë¶ÔÈ«²¿Êı¾İ¿â
+        public bool AllDatabases = false;	// è¿”å›æ˜¯å¦é€‰æ‹©äº†é’ˆå¯¹å…¨éƒ¨æ•°æ®åº“
 
         public List<ObjectInfo> AllObjectNames = new List<ObjectInfo>();
         public List<ObjectInfo> SelectedObjectNames = new List<ObjectInfo>();
@@ -44,7 +45,7 @@ namespace dp2Manager
                 return;
             }
 
-            // Ñ¡ÔñµÚÒ»Ïî
+            // é€‰æ‹©ç¬¬ä¸€é¡¹
             if (this.listView_style.Items.Count >= 1)
                 this.listView_style.Items[0].Selected = true;
         }
@@ -58,7 +59,7 @@ namespace dp2Manager
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -124,13 +125,13 @@ namespace dp2Manager
 
             if (this.listView_style.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨·ç¸ñÃû";
+                strError = "å°šæœªé€‰å®šé£æ ¼å";
                 goto ERROR1;
             }
 
             if (this.listView_objectNames.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÕë¶ÔµÄÓÃ»§Ãû";
+                strError = "å°šæœªé€‰å®šè¦é’ˆå¯¹çš„ç”¨æˆ·å";
                 goto ERROR1;
             }
 
@@ -149,7 +150,7 @@ namespace dp2Manager
             XmlNode parent = this.cfgDom.DocumentElement.SelectSingleNode(strXPath);
             if (parent == null)
             {
-                MessageBox.Show(this, "dom³ö´í");
+                MessageBox.Show(this, "domå‡ºé”™");
                 return;
             }
 
@@ -179,7 +180,7 @@ namespace dp2Manager
              */
 
 
-            // ÊÕ¼¯ÒÑ¾­Ñ¡ÔñµÄÊı¾İ¿âÃû
+            // æ”¶é›†å·²ç»é€‰æ‹©çš„æ•°æ®åº“å
             this.SelectedObjectNames.Clear();
             for (int i = 0; i < this.listView_objectNames.SelectedItems.Count; i++)
             {
@@ -205,7 +206,7 @@ namespace dp2Manager
 
         private void listView_objectNames_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // ÊÇ·ñÈ«Ñ¡
+            // æ˜¯å¦å…¨é€‰
             if (this.listView_objectNames.SelectedItems.Count == this.listView_objectNames.Items.Count)
             {
                 if (this.radioButton_allObjects.Checked != true)
@@ -222,7 +223,7 @@ namespace dp2Manager
         {
             if (this.radioButton_allObjects.Checked == true)
             {
-                // È«Ñ¡
+                // å…¨é€‰
                 for (int i = 0; i < this.listView_objectNames.Items.Count; i++)
                 {
                     if (this.listView_objectNames.Items[i].Selected != true)

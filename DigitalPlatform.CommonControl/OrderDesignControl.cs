@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -19,11 +19,11 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// ¶©¹ºĞÅÏ¢½»²æ¹ØÏµ ¿Ø¼ş
+    /// è®¢è´­ä¿¡æ¯äº¤å‰å…³ç³» æ§ä»¶
     /// </summary>
     public partial class OrderDesignControl : UserControl
     {
-        public bool CheckDupItem = true;    // ÊÇ·ñÔÚ½áÊøµÄÊ±ºò¼ì²éÈıÔª×é¡¢ËÄÔª×é
+        public bool CheckDupItem = true;    // æ˜¯å¦åœ¨ç»“æŸçš„æ—¶å€™æ£€æŸ¥ä¸‰å…ƒç»„ã€å››å…ƒç»„
 
         internal bool m_bFocused = false;
 
@@ -33,9 +33,9 @@ namespace DigitalPlatform.CommonControl
 
         internal int DisableNewlyArriveTextChanged = 0;
 
-        public Item LastClickItem = null;   // ×î½üÒ»´ÎclickÑ¡Ôñ¹ıµÄItem¶ÔÏó
+        public Item LastClickItem = null;   // æœ€è¿‘ä¸€æ¬¡clické€‰æ‹©è¿‡çš„Itemå¯¹è±¡
 
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         string m_strBiblioDbName = "";
         public string BiblioDbName
         {
@@ -53,20 +53,20 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // »ñµÃÈ±Ê¡¼ÇÂ¼
+        // è·å¾—ç¼ºçœè®°å½•
         /// <summary>
-        /// »ñµÃÈ±Ê¡¼ÇÂ¼
+        /// è·å¾—ç¼ºçœè®°å½•
         /// </summary>
         public event GetDefaultRecordEventHandler GetDefaultRecord = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
         // 2012/10/4
         /// <summary>
-        /// ¼ì²é¹İ´úÂëÊÇ·ñÔÚ¹ÜÏ½·¶Î§ÄÚ
+        /// æ£€æŸ¥é¦†ä»£ç æ˜¯å¦åœ¨ç®¡è¾–èŒƒå›´å†…
         /// </summary>
         public event VerifyLibraryCodeEventHandler VerifyLibraryCode = null;
 
@@ -87,7 +87,7 @@ namespace DigitalPlatform.CommonControl
 
         bool m_bSeriesMode = false;
 
-        // ÊÇ·ñÎªÆÚ¿¯Ä£Ê½? true±íÊ¾ÎªÆÚ¿¯Ä£Ê½£¬false±íÊ¾ÎªÍ¼ÊéÄ£Ê½
+        // æ˜¯å¦ä¸ºæœŸåˆŠæ¨¡å¼? trueè¡¨ç¤ºä¸ºæœŸåˆŠæ¨¡å¼ï¼Œfalseè¡¨ç¤ºä¸ºå›¾ä¹¦æ¨¡å¼
         [Category("Appearance")]
         [DescriptionAttribute("SeriesMode")]
         [DefaultValue(false)]
@@ -122,14 +122,14 @@ namespace DigitalPlatform.CommonControl
             if (bSeriesMode == true)
             {
                 this.label_range.Visible = true;
-                this.label_range.Text = "Ê±¼ä·¶Î§";
+                this.label_range.Text = "æ—¶é—´èŒƒå›´";
                 this.label_issueCount.Visible = true;
             }
             else
             {
                 // this.label_range.Visible = false;
                 this.label_range.Visible = true;    // ????
-                this.label_range.Text = "Ô¤¼Æ³ö°æÊ±¼ä";
+                this.label_range.Text = "é¢„è®¡å‡ºç‰ˆæ—¶é—´";
                 this.label_issueCount.Visible = false;
             }
 
@@ -138,7 +138,7 @@ namespace DigitalPlatform.CommonControl
 
         bool m_bArriveMode = false;
 
-        // ÊÇ·ñÎªÑéÊÕÄ£Ê½? true±íÊ¾ÎªÑéÊÕÄ£Ê½£¬false±íÊ¾Îª¶©¹ºÄ£Ê½
+        // æ˜¯å¦ä¸ºéªŒæ”¶æ¨¡å¼? trueè¡¨ç¤ºä¸ºéªŒæ”¶æ¨¡å¼ï¼Œfalseè¡¨ç¤ºä¸ºè®¢è´­æ¨¡å¼
         [Category("Appearance")]
         [DescriptionAttribute("ArriveMode")]
         [DefaultValue(false)]
@@ -160,11 +160,11 @@ namespace DigitalPlatform.CommonControl
         {
             if (bArriveMode == true)
             {
-                // ÑéÊÕÌ¬
+                // éªŒæ”¶æ€
 
                 /*
-                this.label_orderedTotalCopy.Text = "ÒÑÑéÊÕ×Ü¸´±¾Êı(&O):";
-                this.label_newlyOrderTotalCopy.Text = "ĞÂÑéÊÕ×Ü¸´±¾Êı(&N):";
+                this.label_orderedTotalCopy.Text = "å·²éªŒæ”¶æ€»å¤æœ¬æ•°(&O):";
+                this.label_newlyOrderTotalCopy.Text = "æ–°éªŒæ”¶æ€»å¤æœ¬æ•°(&N):";
                  * */
                 this.label_copy.ForeColor = Color.Red;
                 this.label_price.ForeColor = Color.Red;
@@ -189,11 +189,11 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
-                // false ±íÊ¾¶©¹ºÌ¬
+                // false è¡¨ç¤ºè®¢è´­æ€
 
                 /*
-                this.label_orderedTotalCopy.Text = "ÒÑ¶©¹º×Ü¸´±¾Êı(&O):";
-                this.label_newlyOrderTotalCopy.Text = "ĞÂ¶©¹º×Ü¸´±¾Êı(&N):";
+                this.label_orderedTotalCopy.Text = "å·²è®¢è´­æ€»å¤æœ¬æ•°(&O):";
+                this.label_newlyOrderTotalCopy.Text = "æ–°è®¢è´­æ€»å¤æœ¬æ•°(&N):";
                  * */
 
                 this.label_copy.ForeColor = this.ForeColor;
@@ -239,7 +239,7 @@ namespace DigitalPlatform.CommonControl
 
         bool m_bOrderedTotalCopyVisible = false;
 
-        // ÒÑ¶©¹º·İÊı ÊÇ·ñ¿É¼û?
+        // å·²è®¢è´­ä»½æ•° æ˜¯å¦å¯è§?
         internal bool OrderedTotalCopyVisible
         {
             get
@@ -260,7 +260,7 @@ namespace DigitalPlatform.CommonControl
 
         bool m_bArrivedTotalCopyVisible = false;
 
-        // ÒÑÑéÊÕ·İÊı ÊÇ·ñ¿É¼û?
+        // å·²éªŒæ”¶ä»½æ•° æ˜¯å¦å¯è§?
         internal bool ArrivedTotalCopyVisible
         {
             get
@@ -279,7 +279,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ÑéÊÕÄ¿±ê¼ÇÂ¼Â·¾¶
+        // éªŒæ”¶ç›®æ ‡è®°å½•è·¯å¾„
         public string TargetRecPath
         {
             get
@@ -306,13 +306,13 @@ namespace DigitalPlatform.CommonControl
                 if (this.m_bHideSelection != value)
                 {
                     this.m_bHideSelection = value;
-                    this.RefreshLineColor(); // ÆÈÊ¹ÑÕÉ«¸Ä±ä
+                    this.RefreshLineColor(); // è¿«ä½¿é¢œè‰²æ”¹å˜
                 }
             }
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         [Category("Content")]
         [DescriptionAttribute("Changed")]
@@ -337,12 +337,12 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // ĞŞ¸Ä¸´±¾×Ö·û´®ÖĞµÄÌ×Êı²¿·Ö
+        // ä¿®æ”¹å¤æœ¬å­—ç¬¦ä¸²ä¸­çš„å¥—æ•°éƒ¨åˆ†
         // parameters:
-        //      strText     ´ıĞŞ¸ÄµÄÕû¸ö¸´±¾×Ö·û´®
-        //      strCopy     Òª¸Ä³ÉµÄÌ×Êı²¿·Ö
+        //      strText     å¾…ä¿®æ”¹çš„æ•´ä¸ªå¤æœ¬å­—ç¬¦ä¸²
+        //      strCopy     è¦æ”¹æˆçš„å¥—æ•°éƒ¨åˆ†
         // return:
-        //      ·µ»ØĞŞ¸ÄºóµÄÕû¸ö¸´±¾×Ö·û´®
+        //      è¿”å›ä¿®æ”¹åçš„æ•´ä¸ªå¤æœ¬å­—ç¬¦ä¸²
         public static string ModifyCopy(string strText, string strCopy)
         {
             int nRet = strText.IndexOf("*");
@@ -352,12 +352,12 @@ namespace DigitalPlatform.CommonControl
             return strCopy + "*" + strText.Substring(nRet + 1).Trim();
         }
 
-        // ĞŞ¸Ä¸´±¾×Ö·û´®ÖĞµÄÌ×ÄÚ²áÊı²¿·Ö
+        // ä¿®æ”¹å¤æœ¬å­—ç¬¦ä¸²ä¸­çš„å¥—å†…å†Œæ•°éƒ¨åˆ†
         // parameters:
-        //      strText     ´ıĞŞ¸ÄµÄÕû¸ö¸´±¾×Ö·û´®
-        //      strRightCopy     Òª¸Ä³ÉµÄÌ×ÄÚ²áÊı²¿·Ö
+        //      strText     å¾…ä¿®æ”¹çš„æ•´ä¸ªå¤æœ¬å­—ç¬¦ä¸²
+        //      strRightCopy     è¦æ”¹æˆçš„å¥—å†…å†Œæ•°éƒ¨åˆ†
         // return:
-        //      ·µ»ØĞŞ¸ÄºóµÄÕû¸ö¸´±¾×Ö·û´®
+        //      è¿”å›ä¿®æ”¹åçš„æ•´ä¸ªå¤æœ¬å­—ç¬¦ä¸²
         public static string ModifyRightCopy(string strText, string strRightCopy)
         {
             int nRet = strText.IndexOf("*");
@@ -367,8 +367,8 @@ namespace DigitalPlatform.CommonControl
             return strText.Substring(0, nRet).Trim() + "*" + strRightCopy;
         }
 
-        // ´Ó¸´±¾Êı×Ö·û´®ÖĞµÃµ½Ì×Êı²¿·Ö
-        // Ò²¾ÍÊÇ "3*5"·µ»Ø"3"²¿·Ö¡£Èç¹ûÖ»ÓĞÒ»¸öÊı×Ö£¬¾ÍÈ¡Ëü
+        // ä»å¤æœ¬æ•°å­—ç¬¦ä¸²ä¸­å¾—åˆ°å¥—æ•°éƒ¨åˆ†
+        // ä¹Ÿå°±æ˜¯ "3*5"è¿”å›"3"éƒ¨åˆ†ã€‚å¦‚æœåªæœ‰ä¸€ä¸ªæ•°å­—ï¼Œå°±å–å®ƒ
         public static string GetCopyFromCopyString(string strText)
         {
             int nRet = strText.IndexOf("*");
@@ -378,8 +378,8 @@ namespace DigitalPlatform.CommonControl
             return strText.Substring(0, nRet).Trim();
         }
 
-        // ´Ó¸´±¾Êı×Ö·û´®ÖĞµÃµ½Ì×ÄÚ²áÊı²¿·Ö
-        // Ò²¾ÍÊÇ "3*5"·µ»Ø"5"²¿·Ö¡£Èç¹ûÖ»ÓĞÒ»¸öÊı×Ö£¬¾Í·µ»Ø""
+        // ä»å¤æœ¬æ•°å­—ç¬¦ä¸²ä¸­å¾—åˆ°å¥—å†…å†Œæ•°éƒ¨åˆ†
+        // ä¹Ÿå°±æ˜¯ "3*5"è¿”å›"5"éƒ¨åˆ†ã€‚å¦‚æœåªæœ‰ä¸€ä¸ªæ•°å­—ï¼Œå°±è¿”å›""
         public static string GetRightFromCopyString(string strText)
         {
             int nRet = strText.IndexOf("*");
@@ -407,7 +407,7 @@ namespace DigitalPlatform.CommonControl
                 strStart = strValue;
                 if (strStart.Length != 8)
                 {
-                    strError = "Ê±¼ä·¶Î§ '" + strValue + "' ¸ñÊ½²»ÕıÈ·";
+                    strError = "æ—¶é—´èŒƒå›´ '" + strValue + "' æ ¼å¼ä¸æ­£ç¡®";
                     return -1;
                 }
 
@@ -419,7 +419,7 @@ namespace DigitalPlatform.CommonControl
 
                 if (strStart.Length != 8)
                 {
-                    strError = "Ê±¼ä·¶Î§ '" + strValue + "' ÄÚ '" + strStart + "' ¸ñÊ½²»ÕıÈ·";
+                    strError = "æ—¶é—´èŒƒå›´ '" + strValue + "' å†… '" + strStart + "' æ ¼å¼ä¸æ­£ç¡®";
                     return -1;
                 }
 
@@ -427,54 +427,54 @@ namespace DigitalPlatform.CommonControl
 
                 if (strStart.Length != 8)
                 {
-                    strError = "Ê±¼ä·¶Î§ '" + strValue + "' ÄÚ '" + strEnd + "' ¸ñÊ½²»ÕıÈ·";
+                    strError = "æ—¶é—´èŒƒå›´ '" + strValue + "' å†… '" + strEnd + "' æ ¼å¼ä¸æ­£ç¡®";
                     return -1;
                 }
             }
 
             if (String.Compare(strStart, strEnd) > 0)
             {
-                strError = "Ê±¼ä·¶Î§ÄÚµÄÆğÊ¼Ê±¼ä²»Ó¦´óÓÚ½áÊøÊ±¼ä";
+                strError = "æ—¶é—´èŒƒå›´å†…çš„èµ·å§‹æ—¶é—´ä¸åº”å¤§äºç»“æŸæ—¶é—´";
                 return -1;
             }
 
             return 0;
         }
 
-        // ½øĞĞ¼ì²é
+        // è¿›è¡Œæ£€æŸ¥
         // return:
-        //      -1  º¯ÊıÔËĞĞ³ö´í
-        //      0   ¼ì²éÃ»ÓĞ·¢ÏÖ´íÎó
-        //      1   ¼ì²é·¢ÏÖÁË´íÎó
+        //      -1  å‡½æ•°è¿è¡Œå‡ºé”™
+        //      0   æ£€æŸ¥æ²¡æœ‰å‘ç°é”™è¯¯
+        //      1   æ£€æŸ¥å‘ç°äº†é”™è¯¯
         public int Check(out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            bool bStrict = true;    // ÊÇ·ñÑÏ¸ñ¼ì²é
+            bool bStrict = true;    // æ˜¯å¦ä¸¥æ ¼æ£€æŸ¥
 
-            // ¼ì²éÊÇ·ñÃ¿ĞĞ¶¼ÊäÈëÁË¼Û¸ñ¡¢·İÊı
+            // æ£€æŸ¥æ˜¯å¦æ¯è¡Œéƒ½è¾“å…¥äº†ä»·æ ¼ã€ä»½æ•°
             for (int i = 0; i < this.Items.Count; i++)
             {
                 Item item = this.Items[i];
 
-                // Ö»¼ì²éĞÂ¹æ»®µÄÊÂÏî
+                // åªæ£€æŸ¥æ–°è§„åˆ’çš„äº‹é¡¹
                 if ((item.State & ItemState.ReadOnly) != 0)
                     continue;
-                // Ìø¹ıÎ´ÔøĞŞ¸Ä¹ıµÄÊÂÏî
+                // è·³è¿‡æœªæ›¾ä¿®æ”¹è¿‡çš„äº‹é¡¹
                 if ((item.State & ItemState.New) == 0
                     && (item.State & ItemState.Changed) == 0)
                     continue;
 
-                // ½øĞĞ¼ì²é
+                // è¿›è¡Œæ£€æŸ¥
                 // return:
-                //      -1  º¯ÊıÔËĞĞ³ö´í
-                //      0   ¼ì²éÃ»ÓĞ·¢ÏÖ´íÎó
-                //      1   ¼ì²é·¢ÏÖÁË´íÎó
+                //      -1  å‡½æ•°è¿è¡Œå‡ºé”™
+                //      0   æ£€æŸ¥æ²¡æœ‰å‘ç°é”™è¯¯
+                //      1   æ£€æŸ¥å‘ç°äº†é”™è¯¯
                 nRet = item.location.Check(out strError);
                 if (nRet != 0)
                 {
-                    strError = "µÚ " + (i + 1).ToString() + " ĞĞ: È¥Ïò ¸ñÊ½ÓĞÎÊÌâ: " + strError;
+                    strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å»å‘ æ ¼å¼æœ‰é—®é¢˜: " + strError;
                     return 1;
                 }
 
@@ -487,7 +487,7 @@ namespace DigitalPlatform.CommonControl
                 }
                 catch (Exception ex)
                 {
-                    strError = "»ñÈ¡item.TotalPriceÊ±³ö´í: " + ex.Message;
+                    strError = "è·å–item.TotalPriceæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
@@ -495,7 +495,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     if (String.IsNullOrEmpty(item.Price) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈë¼Û¸ñ";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥ä»·æ ¼";
                         return 1;
                     }
                 }
@@ -504,27 +504,27 @@ namespace DigitalPlatform.CommonControl
                     if (String.IsNullOrEmpty(item.StateString) == true
                         && String.IsNullOrEmpty(item.Price) == false)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: µ±ÊäÈëÁË¼Û¸ñ ('"+item.Price+"') Ê±£¬±ØĞë°Ñ×Ü¼Û¸ñÉèÖÃÎª¿Õ (µ«ÏÖÔÚÎª '"+strTotalPrice+"')";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å½“è¾“å…¥äº†ä»·æ ¼ ('"+item.Price+"') æ—¶ï¼Œå¿…é¡»æŠŠæ€»ä»·æ ¼è®¾ç½®ä¸ºç©º (ä½†ç°åœ¨ä¸º '"+strTotalPrice+"')";
                         return 1;
                     }
                 }
 
                 if (this.ArriveMode == false)   // 2009/2/4
                 {
-                    // ¶©¹ºÄ£Ê½
+                    // è®¢è´­æ¨¡å¼
                     if (String.IsNullOrEmpty(item.CopyString) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈë¸´±¾Êı";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥å¤æœ¬æ•°";
                         return 1;
                     }
                 }
                 else
                 {
-                    // ÑéÊÕÄ£Ê½
+                    // éªŒæ”¶æ¨¡å¼
 
-                    // ²»Ò»¶¨Ã¿Ò»ĞĞ¶¼ÒªÑéÊÕ
+                    // ä¸ä¸€å®šæ¯ä¸€è¡Œéƒ½è¦éªŒæ”¶
 
-                    // TODO: ÊÇ·ñ¼ì²éÒ»ÏÂÖÁÉÙÓĞÒ»ĞĞÑéÊÕÁË£¿²»Ì«ºÃ¼ì²é¡£
+                    // TODO: æ˜¯å¦æ£€æŸ¥ä¸€ä¸‹è‡³å°‘æœ‰ä¸€è¡ŒéªŒæ”¶äº†ï¼Ÿä¸å¤ªå¥½æ£€æŸ¥ã€‚
 
                 }
 
@@ -532,13 +532,13 @@ namespace DigitalPlatform.CommonControl
                 {
                     if (String.IsNullOrEmpty(item.RangeString) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈëÊ±¼ä·¶Î§";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥æ—¶é—´èŒƒå›´";
                         return 1;
                     }
 
                     if (item.RangeString.Length != (2*8 + 1))
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈëÍêÕûµÄÊ±¼ä·¶Î§";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥å®Œæ•´çš„æ—¶é—´èŒƒå›´";
                         return 1;
                     }
 
@@ -549,13 +549,13 @@ namespace DigitalPlatform.CommonControl
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: " + strError;
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: " + strError;
                         return 1;
                     }
 
                     if (String.IsNullOrEmpty(item.IssueCountString) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈëÆÚÊı";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥æœŸæ•°";
                         return 1;
                     }
 
@@ -566,37 +566,37 @@ namespace DigitalPlatform.CommonControl
                 if (bStrict == true)
                 {
                     if (String.IsNullOrEmpty(item.Source) == true
-                        && item.Seller != "½»»»" && item.Seller != "Ôù")
+                        && item.Seller != "äº¤æ¢" && item.Seller != "èµ ")
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈë¾­·ÑÀ´Ô´";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥ç»è´¹æ¥æº";
                         return 1;
                     }
 
                     // 2009/2/15
-                    if (item.Seller == "½»»»" || item.Seller == "Ôù")
+                    if (item.Seller == "äº¤æ¢" || item.Seller == "èµ ")
                     {
                         if (String.IsNullOrEmpty(item.Source) == false)
                         {
-                            strError = "µÚ " + (i + 1).ToString() + " ĞĞ: Èç¹ûÇşµÀÎª ½»»» »ò Ôù£¬Ôò¾­·ÑÀ´Ô´±ØĞëÎª¿Õ";
+                            strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å¦‚æœæ¸ é“ä¸º äº¤æ¢ æˆ– èµ ï¼Œåˆ™ç»è´¹æ¥æºå¿…é¡»ä¸ºç©º";
                             return 1;
                         }
                     }
 
                     if (String.IsNullOrEmpty(item.Seller) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈëÇşµÀ";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥æ¸ é“";
                         return 1;
                     }
                     /*
                     if (String.IsNullOrEmpty(item.CatalogNo) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈëÊéÄ¿ºÅ";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥ä¹¦ç›®å·";
                         return 1;
                     }
                      * */
                     if (String.IsNullOrEmpty(item.Class) == true)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: ÉĞÎ´ÊäÈëÀà±ğ";
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å°šæœªè¾“å…¥ç±»åˆ«";
                         return 1;
                     }
                 }
@@ -604,17 +604,17 @@ namespace DigitalPlatform.CommonControl
 
             if (bStrict == true)
             {
-                // ¼ì²é ÇşµÀ + ¾­·ÑÀ´Ô´ + ¼Û¸ñ 3Ôª×éÊÇ·ñÓĞÖØ¸´
+                // æ£€æŸ¥ æ¸ é“ + ç»è´¹æ¥æº + ä»·æ ¼ 3å…ƒç»„æ˜¯å¦æœ‰é‡å¤
                 for (int i = 0; i < this.Items.Count; i++)
                 {
                     Item item = this.Items[i];
 
-                    // Ö»¼ì²éĞÂ¹æ»®µÄÊÂÏî
+                    // åªæ£€æŸ¥æ–°è§„åˆ’çš„äº‹é¡¹
                     if ((item.State & ItemState.ReadOnly) != 0)
                         continue;
 
 
-                    // 2009/2/4 Ö»¼ì²éĞÂÊäÈëµÄ¶©¹ºÊÂÏî
+                    // 2009/2/4 åªæ£€æŸ¥æ–°è¾“å…¥çš„è®¢è´­äº‹é¡¹
                     if (String.IsNullOrEmpty(item.StateString) == false)
                         continue;
 
@@ -623,13 +623,13 @@ namespace DigitalPlatform.CommonControl
                     nRet = locations.Build(strLocationString, out strError);
                     if (nRet == -1)
                     {
-                        strError = "µÚ " + (i + 1).ToString() + " ĞĞ: È¥Ïò×Ö·û´® '"+strLocationString+"' ¸ñÊ½´íÎó: " + strError;
+                        strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å»å‘å­—ç¬¦ä¸² '"+strLocationString+"' æ ¼å¼é”™è¯¯: " + strError;
                         return -1;
                     }
                     string strUsedLibraryCodes = StringUtil.MakePathList(locations.GetUsedLibraryCodes());
 
-                    // ¼ì²é¹İ´úÂëÊÇ·ñÔÚ¹ÜÏ½·¶Î§ÄÚ
-                    // Ö»¼ì²éĞŞ¸Ä¹ıµÄÊÂÏî
+                    // æ£€æŸ¥é¦†ä»£ç æ˜¯å¦åœ¨ç®¡è¾–èŒƒå›´å†…
+                    // åªæ£€æŸ¥ä¿®æ”¹è¿‡çš„äº‹é¡¹
                     if (IsChangedItem(item) == true
                         && this.VerifyLibraryCode != null)
                     {
@@ -638,7 +638,7 @@ namespace DigitalPlatform.CommonControl
                         this.VerifyLibraryCode(this, e);
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                         {
-                            strError = "µÚ " + (i + 1).ToString() + " ĞĞ: È¥Ïò´íÎó: " + e.ErrorInfo;
+                            strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ: å»å‘é”™è¯¯: " + e.ErrorInfo;
                             return -1;
                         }
                     }
@@ -647,14 +647,14 @@ namespace DigitalPlatform.CommonControl
                     {
                         Item temp_item = this.Items[j];
 
-                        // Ö»¼ì²éĞÂ¹æ»®µÄÊÂÏî
+                        // åªæ£€æŸ¥æ–°è§„åˆ’çš„äº‹é¡¹
                         if ((temp_item.State & ItemState.ReadOnly) != 0)
                             continue;
-                        // Ìø¹ıÎ´ÔøĞŞ¸Ä¹ıµÄÊÂÏî
+                        // è·³è¿‡æœªæ›¾ä¿®æ”¹è¿‡çš„äº‹é¡¹
                         if (IsChangedItem(temp_item) == false)
                             continue;
 
-                        // 2009/2/4 Ö»¼ì²éĞÂÊäÈëµÄ¶©¹ºÊÂÏî
+                        // 2009/2/4 åªæ£€æŸ¥æ–°è¾“å…¥çš„è®¢è´­äº‹é¡¹
                         if (String.IsNullOrEmpty(temp_item.StateString) == false)
                             continue;
 
@@ -663,7 +663,7 @@ namespace DigitalPlatform.CommonControl
                         nRet = temp_locations.Build(strTempLocationString, out strError);
                         if (nRet == -1)
                         {
-                            strError = "µÚ " + (j + 1).ToString() + " ĞĞ: È¥Ïò×Ö·û´® '" + strTempLocationString + "' ¸ñÊ½´íÎó: " + strError;
+                            strError = "ç¬¬ " + (j + 1).ToString() + " è¡Œ: å»å‘å­—ç¬¦ä¸² '" + strTempLocationString + "' æ ¼å¼é”™è¯¯: " + strError;
                             return -1;
                         }
                         string strTempUsedLibraryCodes = StringUtil.MakePathList(temp_locations.GetUsedLibraryCodes());
@@ -672,26 +672,26 @@ namespace DigitalPlatform.CommonControl
                         {
                             if (this.SeriesMode == false)
                             {
-                                // ¶ÔÍ¼Êé¼ì²éËÄÔª×é
+                                // å¯¹å›¾ä¹¦æ£€æŸ¥å››å…ƒç»„
                                 if (item.Seller == temp_item.Seller
                                     && item.Source == temp_item.Source
                                     && item.Price == temp_item.Price
                                     && strUsedLibraryCodes == strTempUsedLibraryCodes)
                                 {
-                                    strError = "µÚ " + (i + 1).ToString() + " ĞĞ ºÍ µÚ " + (j + 1) + " ĞĞÖ®¼ä ÇşµÀ/¾­·ÑÀ´Ô´/¼Û¸ñ/È¥Ïò(ÖĞËùº¬µÄ¹İ´úÂë) ËÄÔª×éÖØ¸´£¬ĞèÒª½«ËüÃÇºÏ²¢ÎªÒ»ĞĞ";
+                                    strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ å’Œ ç¬¬ " + (j + 1) + " è¡Œä¹‹é—´ æ¸ é“/ç»è´¹æ¥æº/ä»·æ ¼/å»å‘(ä¸­æ‰€å«çš„é¦†ä»£ç ) å››å…ƒç»„é‡å¤ï¼Œéœ€è¦å°†å®ƒä»¬åˆå¹¶ä¸ºä¸€è¡Œ";
                                     return 1;
                                 }
                             }
                             else
                             {
-                                // ¶ÔÆÚ¿¯¼ì²éÎåÔª×é
+                                // å¯¹æœŸåˆŠæ£€æŸ¥äº”å…ƒç»„
                                 if (item.Seller == temp_item.Seller
                                     && item.Source == temp_item.Source
                                     && item.Price == temp_item.Price
                                     && item.RangeString == temp_item.RangeString
                                     && strUsedLibraryCodes == strTempUsedLibraryCodes)
                                 {
-                                    strError = "µÚ " + (i + 1).ToString() + " ĞĞ ºÍ µÚ " + (j + 1) + " ĞĞÖ®¼ä ÇşµÀ/¾­·ÑÀ´Ô´/Ê±¼ä·¶Î§/¼Û¸ñ/È¥Ïò(ÖĞËùº¬µÄ¹İ´úÂë) ÎåÔª×éÖØ¸´£¬ĞèÒª½«ËüÃÇºÏ²¢ÎªÒ»ĞĞ";
+                                    strError = "ç¬¬ " + (i + 1).ToString() + " è¡Œ å’Œ ç¬¬ " + (j + 1) + " è¡Œä¹‹é—´ æ¸ é“/ç»è´¹æ¥æº/æ—¶é—´èŒƒå›´/ä»·æ ¼/å»å‘(ä¸­æ‰€å«çš„é¦†ä»£ç ) äº”å…ƒç»„é‡å¤ï¼Œéœ€è¦å°†å®ƒä»¬åˆå¹¶ä¸ºä¸€è¡Œ";
                                     return 1;
                                 }
                             }
@@ -712,7 +712,7 @@ namespace DigitalPlatform.CommonControl
             return false;
         }
 
-        // »ñµÃ×Ü·İÊı¡£°üÀ¨ÁËËùÓĞĞÂ¹æ»®µÄºÍÒÑ¶©¹º(ÒÑÑéÊÕ)µÄÊÂÏî
+        // è·å¾—æ€»ä»½æ•°ã€‚åŒ…æ‹¬äº†æ‰€æœ‰æ–°è§„åˆ’çš„å’Œå·²è®¢è´­(å·²éªŒæ”¶)çš„äº‹é¡¹
         public int GetTotalCopy()
         {
             int value = 0;
@@ -725,10 +725,10 @@ namespace DigitalPlatform.CommonControl
             return value;
         }
 
-        // »ñµÃĞÂ¹æ»®µÄ×Ü·İÊı¡£²»°üÀ¨ÒÑ¶©¹º(ÒÑÑéÊÕ)µÄÊÂÏî
+        // è·å¾—æ–°è§„åˆ’çš„æ€»ä»½æ•°ã€‚ä¸åŒ…æ‹¬å·²è®¢è´­(å·²éªŒæ”¶)çš„äº‹é¡¹
         public int GetNewlyOrderTotalCopy()
         {
-            Debug.Assert(this.ArriveMode == false, "±¾º¯ÊıÖ»ÄÜÔÚ¶©¹º×´Ì¬ÏÂÊ¹ÓÃ");
+            Debug.Assert(this.ArriveMode == false, "æœ¬å‡½æ•°åªèƒ½åœ¨è®¢è´­çŠ¶æ€ä¸‹ä½¿ç”¨");
             int value = 0;
             for (int i = 0; i < this.Items.Count; i++)
             {
@@ -743,10 +743,10 @@ namespace DigitalPlatform.CommonControl
             return value;
         }
 
-        // »ñµÃĞÂÑéÊÕµÄ×Ü·İÊı¡£²»°üÀ¨Î´¶©¹ºµÄÊÂÏî¡£²»°üÀ¨(ÏÔÊ¾ÎªÖ»¶ÁµÄ)ÒÑÑéÊÕÊÂÏî
+        // è·å¾—æ–°éªŒæ”¶çš„æ€»ä»½æ•°ã€‚ä¸åŒ…æ‹¬æœªè®¢è´­çš„äº‹é¡¹ã€‚ä¸åŒ…æ‹¬(æ˜¾ç¤ºä¸ºåªè¯»çš„)å·²éªŒæ”¶äº‹é¡¹
         public int GetNewlyArriveTotalCopy()
         {
-            Debug.Assert(this.ArriveMode == true, "±¾º¯ÊıÖ»ÄÜÔÚÑéÊÕ×´Ì¬ÏÂÊ¹ÓÃ");
+            Debug.Assert(this.ArriveMode == true, "æœ¬å‡½æ•°åªèƒ½åœ¨éªŒæ”¶çŠ¶æ€ä¸‹ä½¿ç”¨");
             int value = 0;
             for (int i = 0; i < this.Items.Count; i++)
             {
@@ -758,12 +758,12 @@ namespace DigitalPlatform.CommonControl
             return value;
         }
 
-        // ¼ì²âÊÇ·ñÓĞÊÂÏîÉĞÎ´¶©¹º(×´Ì¬Îª¿Õ£¬±íÊ¾¸Õ¸ÕÊäÈëÁË²É¹ºÊı¾İ)
+        // æ£€æµ‹æ˜¯å¦æœ‰äº‹é¡¹å°šæœªè®¢è´­(çŠ¶æ€ä¸ºç©ºï¼Œè¡¨ç¤ºåˆšåˆšè¾“å…¥äº†é‡‡è´­æ•°æ®)
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ´¦ÓÚÎ´¶©¹º×´Ì¬µÄÊÂÏî
-        //      1   ÓĞ²¿·Ö´¦ÓÚÎ´¶©¹º×´Ì¬µÄÊÂÏî
-        //      2   È«²¿ÊÂÏî¶¼ÊÇÎ´¶©¹º×´Ì¬
+        //      0   æ²¡æœ‰å¤„äºæœªè®¢è´­çŠ¶æ€çš„äº‹é¡¹
+        //      1   æœ‰éƒ¨åˆ†å¤„äºæœªè®¢è´­çŠ¶æ€çš„äº‹é¡¹
+        //      2   å…¨éƒ¨äº‹é¡¹éƒ½æ˜¯æœªè®¢è´­çŠ¶æ€
         public int NotOrdering(out string strMessage)
         {
             strMessage = "";
@@ -781,30 +781,30 @@ namespace DigitalPlatform.CommonControl
 
             if (nNotOrderItemCount == this.Items.Count)
             {
-                strMessage = "È«²¿ " + this.Items.Count.ToString() + " ¸öÊÂÏî¶¼´¦ÔÚÎ´¶©¹º×´Ì¬";
+                strMessage = "å…¨éƒ¨ " + this.Items.Count.ToString() + " ä¸ªäº‹é¡¹éƒ½å¤„åœ¨æœªè®¢è´­çŠ¶æ€";
                 return 2;
             }
 
             if (nNotOrderItemCount > 0)
             {
-                strMessage = "È«²¿ " + this.Items.Count + " ¸öÊÂÏîÖĞÓĞ "+nNotOrderItemCount.ToString()+" ¸öÊÂÏî´¦ÔÚÎ´¶©¹º×´Ì¬";
+                strMessage = "å…¨éƒ¨ " + this.Items.Count + " ä¸ªäº‹é¡¹ä¸­æœ‰ "+nNotOrderItemCount.ToString()+" ä¸ªäº‹é¡¹å¤„åœ¨æœªè®¢è´­çŠ¶æ€";
                 return 1;
             }
 
-            strMessage = "Ã»ÓĞÊÂÏî´¦ÔÚÎ´¶©¹º×´Ì¬";
+            strMessage = "æ²¡æœ‰äº‹é¡¹å¤„åœ¨æœªè®¢è´­çŠ¶æ€";
             return 0;
         }
 
-        // »ñµÃ¿ÉĞÂÑéÊÕµÄ×î´ó×Ü·İÊı¡£°üº¬ÁË±¾º¯Êı²Ù×÷Ç°ÒÑ¾­ĞÂÑéÊÕµÄ·İÊı¡£
+        // è·å¾—å¯æ–°éªŒæ”¶çš„æœ€å¤§æ€»ä»½æ•°ã€‚åŒ…å«äº†æœ¬å‡½æ•°æ“ä½œå‰å·²ç»æ–°éªŒæ”¶çš„ä»½æ•°ã€‚
         public int GetNewlyArrivingTotalCopy()
         {
-            Debug.Assert(this.ArriveMode == true, "±¾º¯ÊıÖ»ÄÜÔÚÑéÊÕ×´Ì¬ÏÂÊ¹ÓÃ");
+            Debug.Assert(this.ArriveMode == true, "æœ¬å‡½æ•°åªèƒ½åœ¨éªŒæ”¶çŠ¶æ€ä¸‹ä½¿ç”¨");
             int value = 0;
             for (int i = 0; i < this.Items.Count; i++)
             {
                 Item cur_element = this.Items[i];
 
-                // Òª¿´¿´item±¾ÉíµÄ×´Ì¬ÊÇ²»ÊÇÍêÈ«²»ÔÊĞíÑéÊÕ 2008/11/12
+                // è¦çœ‹çœ‹itemæœ¬èº«çš„çŠ¶æ€æ˜¯ä¸æ˜¯å®Œå…¨ä¸å…è®¸éªŒæ”¶ 2008/11/12
                 if (cur_element.location.ReadOnly == true)
                     continue;
 
@@ -814,10 +814,10 @@ namespace DigitalPlatform.CommonControl
             return value;
         }
 
-        // »ñµÃÒÑ¶©¹º(ÒÑÑéÊÕ)µÄ×Ü·İÊı¡£²»°üÀ¨ĞÂ¹æ»®µÄÊÂÏî
+        // è·å¾—å·²è®¢è´­(å·²éªŒæ”¶)çš„æ€»ä»½æ•°ã€‚ä¸åŒ…æ‹¬æ–°è§„åˆ’çš„äº‹é¡¹
         public int GetOrderedTotalCopy()
         {
-            Debug.Assert(this.ArriveMode == false, "±¾º¯ÊıÖ»ÄÜÔÚ¶©¹º×´Ì¬ÏÂÊ¹ÓÃ");
+            Debug.Assert(this.ArriveMode == false, "æœ¬å‡½æ•°åªèƒ½åœ¨è®¢è´­çŠ¶æ€ä¸‹ä½¿ç”¨");
 
             int value = 0;
             for (int i = 0; i < this.Items.Count; i++)
@@ -833,10 +833,10 @@ namespace DigitalPlatform.CommonControl
             return value;
         }
 
-        // »ñµÃÒÑÑéÊÕµÄ×Ü·İÊı¡£²»°üÀ¨ĞÂ¹æ»®µÄÊÂÏî
+        // è·å¾—å·²éªŒæ”¶çš„æ€»ä»½æ•°ã€‚ä¸åŒ…æ‹¬æ–°è§„åˆ’çš„äº‹é¡¹
         public int GetArrivedTotalCopy()
         {
-            Debug.Assert(this.ArriveMode == true, "±¾º¯ÊıÖ»ÄÜÔÚÑéÊÕ×´Ì¬ÏÂÊ¹ÓÃ");
+            Debug.Assert(this.ArriveMode == true, "æœ¬å‡½æ•°åªèƒ½åœ¨éªŒæ”¶çŠ¶æ€ä¸‹ä½¿ç”¨");
             int value = 0;
             for (int i = 0; i < this.Items.Count; i++)
             {
@@ -877,7 +877,7 @@ namespace DigitalPlatform.CommonControl
                     Item cur_element = this.Items[i];
 
                     if (cur_element == element)
-                        continue;   // ÔİÊ±²»´¦Àíµ±Ç°ĞĞ
+                        continue;   // æš‚æ—¶ä¸å¤„ç†å½“å‰è¡Œ
 
                     if ((cur_element.State & ItemState.Selected) != 0)
                     {
@@ -888,7 +888,7 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 
-            // Ñ¡ÖĞµ±Ç°ĞĞ
+            // é€‰ä¸­å½“å‰è¡Œ
             if ((element.State & ItemState.Selected) == 0)
             {
                 element.State |= ItemState.Selected;
@@ -901,7 +901,7 @@ namespace DigitalPlatform.CommonControl
 
         public void ToggleSelectItem(Item element)
         {
-            // Ñ¡ÖĞµ±Ç°ĞĞ
+            // é€‰ä¸­å½“å‰è¡Œ
             if ((element.State & ItemState.Selected) == 0)
                 element.State |= ItemState.Selected;
             else
@@ -924,7 +924,7 @@ namespace DigitalPlatform.CommonControl
 
             if (nStart > nEnd)
             {
-                // ½»»»
+                // äº¤æ¢
                 int nTemp = nStart;
                 nStart = nEnd;
                 nEnd = nTemp;
@@ -942,7 +942,7 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 
-            // Çå³ıÆäÓàÎ»ÖÃ
+            // æ¸…é™¤å…¶ä½™ä½ç½®
             for (int i = 0; i < nStart; i++)
             {
                 Item cur_element = this.Items[i];
@@ -983,9 +983,9 @@ namespace DigitalPlatform.CommonControl
                 this.GetValueTable(sender, e);
         }
 
-        // »ñµÃÒ»¸öÎ´ÔøÊ¹ÓÃµÄindex×Ö·û´®
+        // è·å¾—ä¸€ä¸ªæœªæ›¾ä½¿ç”¨çš„indexå­—ç¬¦ä¸²
         // paremeters:
-        //      exclude ²éÔÄ¹ı³ÌÖĞ£¬ÅÅ³ı´ËÏî¡£Èç¹û²»ĞèÒª±¾²ÎÊı(¼´²»ÅÅ³ıÈÎºÎÊÂÏî)£¬ÓÃÊ¹ÓÃÖµnull
+        //      exclude æŸ¥é˜…è¿‡ç¨‹ä¸­ï¼Œæ’é™¤æ­¤é¡¹ã€‚å¦‚æœä¸éœ€è¦æœ¬å‚æ•°(å³ä¸æ’é™¤ä»»ä½•äº‹é¡¹)ï¼Œç”¨ä½¿ç”¨å€¼null
         string GetNewIndex(Item exclude)
         {
             for (int j = 1; ; j++)
@@ -1012,8 +1012,8 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ½«È«²¿ĞĞµÄ×´Ì¬»Ö¸´ÎªÆÕÍ¨×´Ì¬
-        // ²»¹ı£¬ÈÔ±£ÁôÁËOrdered×´Ì¬
+        // å°†å…¨éƒ¨è¡Œçš„çŠ¶æ€æ¢å¤ä¸ºæ™®é€šçŠ¶æ€
+        // ä¸è¿‡ï¼Œä»ä¿ç•™äº†OrderedçŠ¶æ€
         void ResetLineState()
         {
             for (int i = 0; i < this.Items.Count; i++)
@@ -1040,8 +1040,8 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ĞÂ¹æ»®¶©¹ºµÄ×Ü·İÊı
-        // »òÕß ĞÂÑéÊÕµÄ×Ü·İÊı
+        // æ–°è§„åˆ’è®¢è´­çš„æ€»ä»½æ•°
+        // æˆ–è€… æ–°éªŒæ”¶çš„æ€»ä»½æ•°
         public int NewlyOrderTotalCopy
         {
             get
@@ -1087,7 +1087,7 @@ namespace DigitalPlatform.CommonControl
                 // this.Items.Clear();
                 this.ClearItems();
 
-                this.tableLayoutPanel_content.RowCount = 2;    // ÎªÊ²Ã´ÊÇ2£¿
+                this.tableLayoutPanel_content.RowCount = 2;    // ä¸ºä»€ä¹ˆæ˜¯2ï¼Ÿ
                 for (; ; )
                 {
                     if (this.tableLayoutPanel_content.RowStyles.Count <= 2)
@@ -1108,7 +1108,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // Çå³ıÒ»¸öItem¶ÔÏó¶ÔÓ¦µÄControl
+        // æ¸…é™¤ä¸€ä¸ªItemå¯¹è±¡å¯¹åº”çš„Control
         public void ClearOneItemControls(
             TableLayoutPanel table,
             Item line)
@@ -1209,7 +1209,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // parameters:
-        //      bOldVisible Èç¹ûÎªtrue, ±íÊ¾ÕæµÄÒª½áÊø
+        //      bOldVisible å¦‚æœä¸ºtrue, è¡¨ç¤ºçœŸçš„è¦ç»“æŸ
         public void EnableUpdate()
         {
             this.m_nInSuspend--;
@@ -1230,7 +1230,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 #if NOOOOOOOOOOOOOOOOOOOOO
-        // ¸ù¾İXML¶©¹º¼ÇÂ¼½¨Á¢Ò»¸öĞÂµÄÊÂÏî
+        // æ ¹æ®XMLè®¢è´­è®°å½•å»ºç«‹ä¸€ä¸ªæ–°çš„äº‹é¡¹
         public Item AppendNewItem(string strDefaultRecord,
             out string strError)
         {
@@ -1243,7 +1243,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "XML¼ÇÂ¼×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè®°å½•è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return null;
             }
 
@@ -1266,10 +1266,10 @@ namespace DigitalPlatform.CommonControl
             item.Distribute = DomUtil.GetElementText(dom.DocumentElement,
                 "distribute");
 
-            // ÉèÖÃºÃ ÒÑ¶©¹º ×´Ì¬
+            // è®¾ç½®å¥½ å·²è®¢è´­ çŠ¶æ€
             string strState = DomUtil.GetElementText(dom.DocumentElement,
                 "state");
-            if (strState == "ÒÑ¶©¹º" || strState == "ÒÑÑéÊÕ")
+            if (strState == "å·²è®¢è´­" || strState == "å·²éªŒæ”¶")
                 item.State |= ItemState.Ordered;
 
             try
@@ -1287,7 +1287,7 @@ namespace DigitalPlatform.CommonControl
         }
 #endif
 
-        // ¸ù¾İXML¶©¹º¼ÇÂ¼½¨Á¢Ò»¸öĞÂµÄÊÂÏî
+        // æ ¹æ®XMLè®¢è´­è®°å½•å»ºç«‹ä¸€ä¸ªæ–°çš„äº‹é¡¹
         public Item AppendNewItem(string strDefaultRecord,
             out string strError)
         {
@@ -1297,7 +1297,7 @@ namespace DigitalPlatform.CommonControl
 
             int nRet = SetDefaultRecord(item,
                 strDefaultRecord,
-                false,  // ²»ĞŞÕıindexÖµ£¬±£³ÖÔ­À´µÄÖµ
+                false,  // ä¸ä¿®æ­£indexå€¼ï¼Œä¿æŒåŸæ¥çš„å€¼
                 out strError);
             if (nRet == -1)
             {
@@ -1308,7 +1308,7 @@ namespace DigitalPlatform.CommonControl
             return item;
         }
 
-        // TODO: ´úÂëÒÆ¶¯µ½OrderDesignControlÖĞ
+        // TODO: ä»£ç ç§»åŠ¨åˆ°OrderDesignControlä¸­
         public static string LinkOldNewValue(string strOldValue,
             string strNewValue)
         {
@@ -1317,7 +1317,7 @@ namespace DigitalPlatform.CommonControl
 
             if (strOldValue == strNewValue)
             {
-                if (String.IsNullOrEmpty(strOldValue) == true)  // ĞÂ¾É¾ùÎª¿Õ
+                if (String.IsNullOrEmpty(strOldValue) == true)  // æ–°æ—§å‡ä¸ºç©º
                     return "";
 
                 return strOldValue + "[=]";
@@ -1327,7 +1327,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // ·ÖÀë "old[new]" ÄÚµÄÁ½¸öÖµ
+        // åˆ†ç¦» "old[new]" å†…çš„ä¸¤ä¸ªå€¼
         public static void ParseOldNewValue(string strValue,
             out string strOldValue,
             out string strNewValue)
@@ -1345,7 +1345,7 @@ namespace DigitalPlatform.CommonControl
             strOldValue = strValue.Substring(0, nRet).Trim();
             strNewValue = strValue.Substring(nRet + 1).Trim();
 
-            // È¥µôÄ©Î²µÄ']'
+            // å»æ‰æœ«å°¾çš„']'
             if (strNewValue.Length > 0 && strNewValue[strNewValue.Length - 1] == ']')
                 strNewValue = strNewValue.Substring(0, strNewValue.Length - 1);
 
@@ -1353,7 +1353,7 @@ namespace DigitalPlatform.CommonControl
                 strNewValue = strOldValue;
         }
 
-        // ¸ù¾İÈ±Ê¡XML¶©¹º¼ÇÂ¼Ìî³ä±ØÒªµÄ×Ö¶Î
+        // æ ¹æ®ç¼ºçœXMLè®¢è´­è®°å½•å¡«å……å¿…è¦çš„å­—æ®µ
         int SetDefaultRecord(Item item,
             string strDefaultRecord,
             bool bResetIndexValue,
@@ -1371,7 +1371,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "XML¼ÇÂ¼×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè®°å½•è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -1392,7 +1392,7 @@ namespace DigitalPlatform.CommonControl
             catch (Exception ex)
             {
                 // 2008/12/18
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -1409,7 +1409,7 @@ namespace DigitalPlatform.CommonControl
                 out strOldSource,
                 out strNewSource);
 
-            if (String.IsNullOrEmpty(strNewSource) == true) // Ã»ÓĞĞÂÖµµÄÊ±ºòÓÃ¾ÉÖµ×÷Îª³õÊ¼Öµ
+            if (String.IsNullOrEmpty(strNewSource) == true) // æ²¡æœ‰æ–°å€¼çš„æ—¶å€™ç”¨æ—§å€¼ä½œä¸ºåˆå§‹å€¼
                 item.Source = strOldSource;
             else
                 item.Source = strNewSource;
@@ -1418,14 +1418,14 @@ namespace DigitalPlatform.CommonControl
 
 
             // distribute string
-            // ×¢Òâ£º±ØĞëÔÚcopyÇ°ÉèÖÃ£¬ÒòÎªcopy stringÖĞ¿ÉÄÜ°üº¬¹´Ñ¡location itemµÄĞÅÏ¢£¬Èç¹ûcopy stringÏÈÉèÖÃ£¬¹´Ñ¡ºÃµÄ×´Ì¬»á±»ºóÀ´ÖØÉèdistribute string¶ø³åµô
+            // æ³¨æ„ï¼šå¿…é¡»åœ¨copyå‰è®¾ç½®ï¼Œå› ä¸ºcopy stringä¸­å¯èƒ½åŒ…å«å‹¾é€‰location itemçš„ä¿¡æ¯ï¼Œå¦‚æœcopy stringå…ˆè®¾ç½®ï¼Œå‹¾é€‰å¥½çš„çŠ¶æ€ä¼šè¢«åæ¥é‡è®¾distribute stringè€Œå†²æ‰
             string strDistribute = DomUtil.GetElementText(dom.DocumentElement,
                 "distribute");
 
             item.Distribute = strDistribute;
 
             // copy
-            // ×¢£ºcopyÖµÊÇ°´ÕÕXML¼ÇÂ¼À´ÉèÖÃµÄ¡£Ò»°ãÉèÖÃÎª¿ÉÄÜµÄ×î´óÖµ
+            // æ³¨ï¼šcopyå€¼æ˜¯æŒ‰ç…§XMLè®°å½•æ¥è®¾ç½®çš„ã€‚ä¸€èˆ¬è®¾ç½®ä¸ºå¯èƒ½çš„æœ€å¤§å€¼
             string strCopy = DomUtil.GetElementText(dom.DocumentElement,
                     "copy");
 
@@ -1436,7 +1436,7 @@ namespace DigitalPlatform.CommonControl
                 out strNewCopy);
 
             /*
-            if (String.IsNullOrEmpty(strNewCopy) == true) // Ã»ÓĞĞÂÖµµÄÊ±ºòÓÃ¾ÉÖµ×÷Îª³õÊ¼Öµ
+            if (String.IsNullOrEmpty(strNewCopy) == true) // æ²¡æœ‰æ–°å€¼çš„æ—¶å€™ç”¨æ—§å€¼ä½œä¸ºåˆå§‹å€¼
                 item.CopyString = strOldCopy;
             else
                 item.CopyString = strNewCopy;
@@ -1447,14 +1447,14 @@ namespace DigitalPlatform.CommonControl
             // 2008/11/3 changed
             if (this.ArriveMode == false)
             {
-                // ¶©¹ºÊ±£¬ÓÃ¾É¼Û¸ñ
+                // è®¢è´­æ—¶ï¼Œç”¨æ—§ä»·æ ¼
                 item.CopyString = strOldCopy;
                 item.OldCopyString = strOldCopy;
             }
             else
             {
                 // 2008/10/19 changed
-                // ÑéÊÕÊ±£¬ĞÂ¾É¼Û¸ñ¶¼·ÖÃ÷
+                // éªŒæ”¶æ—¶ï¼Œæ–°æ—§ä»·æ ¼éƒ½åˆ†æ˜
                 if (String.IsNullOrEmpty(strNewCopy) == false)
                     item.CopyString = strNewCopy;
 
@@ -1463,14 +1463,14 @@ namespace DigitalPlatform.CommonControl
             }
 
 
-            // ÏŞÖÆ¹İ²ØµØµãÊÂÏîµÄ¸öÊı
+            // é™åˆ¶é¦†è—åœ°ç‚¹äº‹é¡¹çš„ä¸ªæ•°
             int nMaxCopyValue = Math.Max(item.CopyValue, item.OldCopyValue);
 
             if (nMaxCopyValue < item.DistributeCount)
                 item.DistributeCount = nMaxCopyValue;
 
             /*
-            // ÏŞÖÆ¹İ²ØµØµãÊÂÏîµÄ¸öÊı
+            // é™åˆ¶é¦†è—åœ°ç‚¹äº‹é¡¹çš„ä¸ªæ•°
             try
             {
                 strDistribute = LocationEditControl.CanonicalizeDistributeString(
@@ -1494,7 +1494,7 @@ namespace DigitalPlatform.CommonControl
                 out strOldPrice,
                 out strNewPrice);
 
-            if (String.IsNullOrEmpty(strNewPrice) == true) // Ã»ÓĞĞÂÖµµÄÊ±ºòÓÃ¾ÉÖµ×÷Îª³õÊ¼Öµ
+            if (String.IsNullOrEmpty(strNewPrice) == true) // æ²¡æœ‰æ–°å€¼çš„æ—¶å€™ç”¨æ—§å€¼ä½œä¸ºåˆå§‹å€¼
                 item.Price = strOldPrice;
             else
                 item.Price = strNewPrice;
@@ -1509,37 +1509,37 @@ namespace DigitalPlatform.CommonControl
                 "class");
 
 
-            // ÉèÖÃºÃ ÒÑ¶©¹º ×´Ì¬
+            // è®¾ç½®å¥½ å·²è®¢è´­ çŠ¶æ€
             string strState = DomUtil.GetElementText(dom.DocumentElement,
                 "state");
 
             if (this.ArriveMode == false)
             {
-                // ¶©¹ºÌ¬
+                // è®¢è´­æ€
 
-                // ×¢£ºÖ»ÓĞÎ´¶©¹ºµÄ¡¢²İ¸å×´Ì¬µÄÊÂÏî²ÅÔÊĞíĞŞ¸Ä¶©¹º
-                // ÒÑ¶©¹º(±ØÈ»ÊÇÈ«²¿·¢³ö£¬²»¿ÉÄÜ¾Ö²¿·¢³ö)£¬»òÕßÒÑÑéÊÕ(ÓĞ¿ÉÄÜÊÇ¾Ö²¿ÑéÊÕ£¬»òÕß(ËäÈ»ÒÑÑéÊÕÍêµ«ÊÇ)Ç±ÔÚ¿ÉÒÔ×·¼Ó)£¬ÕâÑùµÄÊÂÏî¶¼²»ÄÜÔÙ½øĞĞÈÎºÎ¶©¹º²Ù×÷£¬ËùÒÔÎªreadonly
+                // æ³¨ï¼šåªæœ‰æœªè®¢è´­çš„ã€è‰ç¨¿çŠ¶æ€çš„äº‹é¡¹æ‰å…è®¸ä¿®æ”¹è®¢è´­
+                // å·²è®¢è´­(å¿…ç„¶æ˜¯å…¨éƒ¨å‘å‡ºï¼Œä¸å¯èƒ½å±€éƒ¨å‘å‡º)ï¼Œæˆ–è€…å·²éªŒæ”¶(æœ‰å¯èƒ½æ˜¯å±€éƒ¨éªŒæ”¶ï¼Œæˆ–è€…(è™½ç„¶å·²éªŒæ”¶å®Œä½†æ˜¯)æ½œåœ¨å¯ä»¥è¿½åŠ )ï¼Œè¿™æ ·çš„äº‹é¡¹éƒ½ä¸èƒ½å†è¿›è¡Œä»»ä½•è®¢è´­æ“ä½œï¼Œæ‰€ä»¥ä¸ºreadonly
 
-                if (strState == "ÒÑ¶©¹º" || strState == "ÒÑÑéÊÕ")
+                if (strState == "å·²è®¢è´­" || strState == "å·²éªŒæ”¶")
                     item.State |= ItemState.ReadOnly;
             }
             else
             {
-                // ÑéÊÕÌ¬
-                if (strState == "ÒÑ¶©¹º" || strState == "ÒÑÑéÊÕ")
+                // éªŒæ”¶æ€
+                if (strState == "å·²è®¢è´­" || strState == "å·²éªŒæ”¶")
                 {
-                    // ×¢£º×´Ì¬Îª¡°ÒÑÑéÊÕ¡±Ê±£¬²»Ò»¶¨È«²¿¸´±¾¶¼ÒÑÑéÊÕ£¬ËùÒÔÕâÊ±Ó¦µ±ÔÊĞíÔÙ´ÎÑéÊÕ¡£
-                    // ¼´±ãËùÓĞ¸´±¾¶¼ÒÑÑéÊÕ£¬»¹¿ÉÒÔ×·¼Ó¡¢¶àÑéÊÕ¸´±¾£¬ËùÒÔÕâÑùµÄÊÂÏî²»ÄÜreadonly
+                    // æ³¨ï¼šçŠ¶æ€ä¸ºâ€œå·²éªŒæ”¶â€æ—¶ï¼Œä¸ä¸€å®šå…¨éƒ¨å¤æœ¬éƒ½å·²éªŒæ”¶ï¼Œæ‰€ä»¥è¿™æ—¶åº”å½“å…è®¸å†æ¬¡éªŒæ”¶ã€‚
+                    // å³ä¾¿æ‰€æœ‰å¤æœ¬éƒ½å·²éªŒæ”¶ï¼Œè¿˜å¯ä»¥è¿½åŠ ã€å¤šéªŒæ”¶å¤æœ¬ï¼Œæ‰€ä»¥è¿™æ ·çš„äº‹é¡¹ä¸èƒ½readonly
 
                     // item.State -= ItemState.ReadOnly;
 
-                    // ½«location itemÖĞÒÑ¾­¹´Ñ¡µÄÊÂÏîÉèÖÃÎªreadonlyÌ¬£¬±íÊ¾ÊÇÒÑ¾­ÑéÊÕµÄ(¹İ²ØµØµã¡¢²á)ÊÂÏî
+                    // å°†location itemä¸­å·²ç»å‹¾é€‰çš„äº‹é¡¹è®¾ç½®ä¸ºreadonlyæ€ï¼Œè¡¨ç¤ºæ˜¯å·²ç»éªŒæ”¶çš„(é¦†è—åœ°ç‚¹ã€å†Œ)äº‹é¡¹
                     item.location.SetAlreadyCheckedToReadOnly(false);
 
                 }
                 else
                 {
-                    // Ò»°ã¶øÑÔ¿ÉÄÜ³öÏÖÁË¿Õ°×µÄ×´Ì¬Öµ£¬Õâ±íÃ÷ÉĞÎ´¶©³ö£¬»¹ÊôÓÚ²İ¸å¼ÇÂ¼£¬×ÔÈ»Ò²¾ÍÎŞ´ÓÑéÊÕÁË
+                    // ä¸€èˆ¬è€Œè¨€å¯èƒ½å‡ºç°äº†ç©ºç™½çš„çŠ¶æ€å€¼ï¼Œè¿™è¡¨æ˜å°šæœªè®¢å‡ºï¼Œè¿˜å±äºè‰ç¨¿è®°å½•ï¼Œè‡ªç„¶ä¹Ÿå°±æ— ä»éªŒæ”¶äº†
 
                     item.State |= ItemState.ReadOnly;
                 }
@@ -1553,7 +1553,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "ÉèÖÃSellerAddressXmlÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è®¾ç½®SellerAddressXmlæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -1563,20 +1563,20 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "ÉèÖÃOtherXmlÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è®¾ç½®OtherXmlæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
             if (bResetIndexValue == true)
             {
-                // ĞŞÕıindex
+                // ä¿®æ­£index
                 item.Index = GetNewIndex(item);
             }
 
             return 0;
         }
 
-        // ÕûÀíÒ»ÏÂ£¬ÔÚÒÑ¾­ÓĞ0·İÒÔÍâÊÂÏîµÄÇ°ÌáÏÂ£¬Çå³ı¶àÓàµÄ·İÊıÎª0µÄÊÂÏî
+        // æ•´ç†ä¸€ä¸‹ï¼Œåœ¨å·²ç»æœ‰0ä»½ä»¥å¤–äº‹é¡¹çš„å‰æä¸‹ï¼Œæ¸…é™¤å¤šä½™çš„ä»½æ•°ä¸º0çš„äº‹é¡¹
         public void RemoveMultipleZeroCopyItem()
         {
             int nTotalCopies = 0;
@@ -1615,7 +1615,7 @@ namespace DigitalPlatform.CommonControl
 
         public Item AppendNewItem(bool bSetDefaultRecord)
         {
-            this.DisableUpdate();   // ·ÀÖ¹ÉÁ¶¯¡£³¹µ×½â¾öÎÊÌâ¡£2009/10/13 
+            this.DisableUpdate();   // é˜²æ­¢é—ªåŠ¨ã€‚å½»åº•è§£å†³é—®é¢˜ã€‚2009/10/13 
 
             try
             {
@@ -1640,7 +1640,7 @@ namespace DigitalPlatform.CommonControl
                         goto END1;
 
                     string strError = "";
-                    // ¸ù¾İÈ±Ê¡XML¶©¹º¼ÇÂ¼Ìî³ä±ØÒªµÄ×Ö¶Î
+                    // æ ¹æ®ç¼ºçœXMLè®¢è´­è®°å½•å¡«å……å¿…è¦çš„å­—æ®µ
                     int nRet = SetDefaultRecord(item,
                         strDefaultRecord,
                         true,
@@ -1663,7 +1663,7 @@ namespace DigitalPlatform.CommonControl
 
         public Item InsertNewItem(int index)
         {
-            this.DisableUpdate();   // ·ÀÖ¹ÉÁ¶¯¡£³¹µ×½â¾öÎÊÌâ¡£2009/10/13 
+            this.DisableUpdate();   // é˜²æ­¢é—ªåŠ¨ã€‚å½»åº•è§£å†³é—®é¢˜ã€‚2009/10/13 
 
             try
             {
@@ -1688,7 +1688,7 @@ namespace DigitalPlatform.CommonControl
                         goto END1;
 
                     string strError = "";
-                    // ¸ù¾İÈ±Ê¡XML¶©¹º¼ÇÂ¼Ìî³ä±ØÒªµÄ×Ö¶Î
+                    // æ ¹æ®ç¼ºçœXMLè®¢è´­è®°å½•å¡«å……å¿…è¦çš„å­—æ®µ
                     int nRet = SetDefaultRecord(item,
                         strDefaultRecord,
                         true,
@@ -1755,9 +1755,9 @@ namespace DigitalPlatform.CommonControl
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -1775,7 +1775,7 @@ namespace DigitalPlatform.CommonControl
 #if NOOOOOOOOOOOOOOOOOOOOOOOO
         private void textBox_totalCopy_TextChanged(object sender, EventArgs e)
         {
-            // ²»ÒªÏìÓ¦ÊÂ¼ş
+            // ä¸è¦å“åº”äº‹ä»¶
             if (this.DisableTextChanged > 0)
                 return;
 
@@ -1793,11 +1793,11 @@ namespace DigitalPlatform.CommonControl
             }
             catch
             {
-                MessageBox.Show(this, "×Ü²áÊı '" + this.textBox_totalCopy.Text + "' Ó¦µ±Îª´¿Êı×Ö";
+                MessageBox.Show(this, "æ€»å†Œæ•° '" + this.textBox_totalCopy.Text + "' åº”å½“ä¸ºçº¯æ•°å­—";
                 return;
             }
 
-            // Èç¹ûÁĞ±íÖĞÒ»¸öÊÂÏîÒ²Ã»ÓĞ£¬ÔòĞÂÔöÒ»¸öÊÂÏî
+            // å¦‚æœåˆ—è¡¨ä¸­ä¸€ä¸ªäº‹é¡¹ä¹Ÿæ²¡æœ‰ï¼Œåˆ™æ–°å¢ä¸€ä¸ªäº‹é¡¹
             if (this.Items.Count == 0)
             {
                 item = AppendNewItem();
@@ -1813,7 +1813,7 @@ namespace DigitalPlatform.CommonControl
             }
 
 
-            int nCurrent = 0;   // µ±Ç°Ì¨½×
+            int nCurrent = 0;   // å½“å‰å°é˜¶
             for (int i = 0; i < this.Items.Count; i++)
             {
                 item = this.Items[i];
@@ -1821,7 +1821,7 @@ namespace DigitalPlatform.CommonControl
                 if (nValue >= nCurrent
                     && nValue < nCurrent + item.Copy)
                 {
-                    // ÂäÈëÒ»¸öitemµÄ·¶Î§
+                    // è½å…¥ä¸€ä¸ªitemçš„èŒƒå›´
                     item.Copy = nValue - nCurrent;
 
                     // this.Items.RemoveRange(i + 1, this.Items.Count - i - 1);
@@ -1835,12 +1835,12 @@ namespace DigitalPlatform.CommonControl
                 nCurrent += item.Copy;
             }
 
-            // ĞŞ¸Ä×îºóÒ»Ïî
+            // ä¿®æ”¹æœ€åä¸€é¡¹
             item.Copy = nValue - nCurrent;
         }
 #endif
 
-        // ¼ÆËã³öÊ×¸ö±»ÔÊĞíµÄÖµ¡£ÔÚÓöµ½(Òò¡°ÒÑ¶©¹º¡±×´Ì¬¶øÆğµÄ)·Ç·¨ÖµµÄÊ±ºòÊ¹ÓÃ¡£
+        // è®¡ç®—å‡ºé¦–ä¸ªè¢«å…è®¸çš„å€¼ã€‚åœ¨é‡åˆ°(å› â€œå·²è®¢è´­â€çŠ¶æ€è€Œèµ·çš„)éæ³•å€¼çš„æ—¶å€™ä½¿ç”¨ã€‚
         int GetFirstValidCopyValue()
         {
             int nValue = 0;
@@ -1855,14 +1855,14 @@ namespace DigitalPlatform.CommonControl
             return nValue;
         }
 
-        // ĞÂ¶©¹º×Ü²áÊı textbox Öµ¸Ä±ä
+        // æ–°è®¢è´­æ€»å†Œæ•° textbox å€¼æ”¹å˜
         private void textBox_newlyOrderTotalCopy_TextChanged(object sender, EventArgs e)
         {
-            // Èç¹ûµ±Ç°ÎªÑéÊÕÄ£Ê½£¬Ôò²»ÏìÓ¦
+            // å¦‚æœå½“å‰ä¸ºéªŒæ”¶æ¨¡å¼ï¼Œåˆ™ä¸å“åº”
             if (this.ArriveMode == true)
                 return;
 
-            // ²»ÒªÏìÓ¦ÊÂ¼ş
+            // ä¸è¦å“åº”äº‹ä»¶
             if (this.DisableNewlyOrderTextChanged > 0)
                 return;
 
@@ -1885,14 +1885,14 @@ namespace DigitalPlatform.CommonControl
                 }
                 catch
                 {
-                    MessageBox.Show(this, "ĞÂ¹æ»®×Ü²áÊı '" + this.textBox_newlyOrderTotalCopy.Text + "' Ó¦µ±Îª´¿Êı×Ö");
+                    MessageBox.Show(this, "æ–°è§„åˆ’æ€»å†Œæ•° '" + this.textBox_newlyOrderTotalCopy.Text + "' åº”å½“ä¸ºçº¯æ•°å­—");
 
                     // 2008/9/16
-                    this.textBox_newlyOrderTotalCopy.Text = this.GetNewlyOrderTotalCopy().ToString();  // ¸Ä±ä»Ø¿ÉĞĞµÄÖµ
+                    this.textBox_newlyOrderTotalCopy.Text = this.GetNewlyOrderTotalCopy().ToString();  // æ”¹å˜å›å¯è¡Œçš„å€¼
                     return;
                 }
 
-                // Èç¹ûÁĞ±íÖĞÒ»¸öÊÂÏîÒ²Ã»ÓĞ£¬ÔòĞÂÔöÒ»¸öÊÂÏî
+                // å¦‚æœåˆ—è¡¨ä¸­ä¸€ä¸ªäº‹é¡¹ä¹Ÿæ²¡æœ‰ï¼Œåˆ™æ–°å¢ä¸€ä¸ªäº‹é¡¹
                 if (this.Items.Count == 0)
                 {
                     item = AppendNewItem(true);
@@ -1901,14 +1901,14 @@ namespace DigitalPlatform.CommonControl
                 }
 
 
-                Item lastChangeableItem = null; // ±éÀúÖĞ·¢ÏÖµÄ×îºóÒ»¸ö·Ç¡°ÒÑ¶©¹º×´Ì¬¡±µÄÊÂÏî¡£
+                Item lastChangeableItem = null; // éå†ä¸­å‘ç°çš„æœ€åä¸€ä¸ªéâ€œå·²è®¢è´­çŠ¶æ€â€çš„äº‹é¡¹ã€‚
 
-                int nCurrent = 0;   // µ±Ç°Ì¨½×
+                int nCurrent = 0;   // å½“å‰å°é˜¶
                 for (int i = 0; i < this.Items.Count; i++)
                 {
                     item = this.Items[i];
 
-                    // Ìø¹ıÒÑ¶©¹ºÊÂÏî
+                    // è·³è¿‡å·²è®¢è´­äº‹é¡¹
                     if ((item.State & ItemState.ReadOnly) != 0)
                         continue;
 
@@ -1917,14 +1917,14 @@ namespace DigitalPlatform.CommonControl
                     if (nValue >= nCurrent
                         && nValue < nCurrent + item.CopyValue)
                     {
-                        // ÂäÈëÒ»¸öitemµÄ·¶Î§
+                        // è½å…¥ä¸€ä¸ªitemçš„èŒƒå›´
                         item.CopyValue = nValue - nCurrent;
 
-                        // É¾³ıÕâ¸öitemºóÃæµÄËùÓĞ·ÇÒÑ¶©¹º×´Ì¬µÄÊÂÏî
+                        // åˆ é™¤è¿™ä¸ªitemåé¢çš„æ‰€æœ‰éå·²è®¢è´­çŠ¶æ€çš„äº‹é¡¹
                         for (int j = i + 1; j < this.Items.Count; j++)
                         {
                             Item temp = this.Items[j];
-                            // Ìø¹ıÒÑ¶©¹ºÊÂÏî
+                            // è·³è¿‡å·²è®¢è´­äº‹é¡¹
                             if ((temp.State & ItemState.ReadOnly) != 0)
                                 continue;
 
@@ -1935,13 +1935,13 @@ namespace DigitalPlatform.CommonControl
 
                     nCurrent += item.CopyValue;
                 }
-                // Ñ­»·½áÊøºó£¬itemÖĞ±£ÁôÁË±éÀúËùÓöµ½µÄ×îºóÒ»¸öÊÂÏî¡£
-                // lastChangeableItemÖĞÔòÎª×îºóÒ»¸ö·Ç¡°ÒÑ¶©¹º¡±ÊÂÏî¡£
+                // å¾ªç¯ç»“æŸåï¼Œitemä¸­ä¿ç•™äº†éå†æ‰€é‡åˆ°çš„æœ€åä¸€ä¸ªäº‹é¡¹ã€‚
+                // lastChangeableItemä¸­åˆ™ä¸ºæœ€åä¸€ä¸ªéâ€œå·²è®¢è´­â€äº‹é¡¹ã€‚
 
                 if (nValue - nCurrent == 0)
-                    return; // Ã»ÓĞ±ØÒªĞŞ¸ÄÊ²Ã´
+                    return; // æ²¡æœ‰å¿…è¦ä¿®æ”¹ä»€ä¹ˆ
 
-                // Èç¹û´æÔÚ×îºóÒ»¸ö¿É¸Ä±äÊÂÏî
+                // å¦‚æœå­˜åœ¨æœ€åä¸€ä¸ªå¯æ”¹å˜äº‹é¡¹
                 if (lastChangeableItem != null)
                 {
                     lastChangeableItem.CopyValue += nValue - nCurrent;
@@ -1949,7 +1949,7 @@ namespace DigitalPlatform.CommonControl
                 }
 
                 /*
-                // ĞŞ¸Ä×îºóÒ»Ïî£¬Èç¹û×îºóÒ»Ïî²»ÊÇÒÑ¶©¹ºÊÂÏî
+                // ä¿®æ”¹æœ€åä¸€é¡¹ï¼Œå¦‚æœæœ€åä¸€é¡¹ä¸æ˜¯å·²è®¢è´­äº‹é¡¹
                 if ((item.State & ItemState.Ordered) == 0)
                 {
                     item.Copy += nValue - nCurrent;
@@ -1958,7 +1958,7 @@ namespace DigitalPlatform.CommonControl
 
                 Debug.Assert(nValue > nCurrent, "");
 
-                // ·ñÔòÒªÔÚ×îºóÔö¼ÓÒ»¸öĞÂÊÂÏî
+                // å¦åˆ™è¦åœ¨æœ€åå¢åŠ ä¸€ä¸ªæ–°äº‹é¡¹
                 item = AppendNewItem(true);
                 item.CopyValue = nValue - nCurrent;
                 return;
@@ -1987,7 +1987,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch
             {
-                MessageBox.Show(this, "ËùÊäÈëµÄÊı×Ö '" + this.textBox_newlyOrderTotalCopy.Text + "' ¸ñÊ½²»ÕıÈ·");
+                MessageBox.Show(this, "æ‰€è¾“å…¥çš„æ•°å­— '" + this.textBox_newlyOrderTotalCopy.Text + "' æ ¼å¼ä¸æ­£ç¡®");
                 e.Cancel = true;
                 return;
             }
@@ -2012,7 +2012,7 @@ namespace DigitalPlatform.CommonControl
 
         }
 
-        // ÔÚÄ©Î²×·¼ÓÒ»¸öĞÂµÄÊÂÏî
+        // åœ¨æœ«å°¾è¿½åŠ ä¸€ä¸ªæ–°çš„äº‹é¡¹
         private void button_newItem_Click(object sender, EventArgs e)
         {
             int nPos = this.Items.Count;
@@ -2020,14 +2020,14 @@ namespace DigitalPlatform.CommonControl
             this.InsertNewItem(nPos).EnsureVisible();
         }
 
-        // ×îºó×î¿¿ºóµÄÒ»¸öÎ´±»ÍêÈ«·âËøµÄ¡¢¿É¸Ä±äcopyÖµµÄÊÂÏî
+        // æœ€åæœ€é åçš„ä¸€ä¸ªæœªè¢«å®Œå…¨å°é”çš„ã€å¯æ”¹å˜copyå€¼çš„äº‹é¡¹
         Item GetLastChangeableItem()
         {
             for (int i = this.Items.Count - 1; i >=0 ; i--)
             {
                 Item item = this.Items[i];
 
-                // Ìø¹ı(Õû¸ö)ÒÑ±ê¼ÇÎªÖ»¶ÁµÄ·âËøµÄÊÂÏî
+                // è·³è¿‡(æ•´ä¸ª)å·²æ ‡è®°ä¸ºåªè¯»çš„å°é”çš„äº‹é¡¹
                 if ((item.State & ItemState.ReadOnly) != 0)
                     continue;
 
@@ -2037,14 +2037,14 @@ namespace DigitalPlatform.CommonControl
             return null;
         }
 
-        // ĞÂÑéÊÕ×Ü²áÊı textbox Öµ¸Ä±ä
+        // æ–°éªŒæ”¶æ€»å†Œæ•° textbox å€¼æ”¹å˜
         private void textBox_newlyArriveTotalCopy_TextChanged(object sender, EventArgs e)
         {
-            // Èç¹ûµ±Ç°Îª¶©¹ºÄ£Ê½£¬Ôò²»ÏìÓ¦
+            // å¦‚æœå½“å‰ä¸ºè®¢è´­æ¨¡å¼ï¼Œåˆ™ä¸å“åº”
             if (this.ArriveMode == false)
                 return;
 
-            // ²»ÒªÏìÓ¦ÊÂ¼ş
+            // ä¸è¦å“åº”äº‹ä»¶
             if (this.DisableNewlyArriveTextChanged > 0)
                 return;
 
@@ -2052,9 +2052,9 @@ namespace DigitalPlatform.CommonControl
                 return;
 
             /*
-             * Ëã·¨Îª£º±éÀúËùÓĞÒÑÑéÊÕÊÂÏî£¬²âËãËüÃÇµÄ¹İ²ØÊÂÏîÖĞ´ò¹´µÄÓĞ¶àÉÙ¡£
-             * Èç¹û´ò¹´µÄ²»×ã£¬ÔòÔÚÊÊµ±Î»ÖÃÔö¼Ó´ò¹´¡£Èç¹û´ò¹´µÄÌ«¶à£¬Ôòoffºó·½µÄ¶àÓà´ò¹´ÊÂÏî¡£
-             * Èç¹ûÕûÌå¹İ²ØÊÂÏî²»×ã£¬Ò²¾ÍÊÇ¼´±ãÈ«²¿ÊÂÏî´ò¹´Ò²²»µ½ÒªÇóµÄÊıÄ¿£¬Ôò¿¼ÂÇÔö¼Ó¶©¹ºÊÂÏî£¬Ôö²¹³ö¹»ÓÃµÄ¹İ²ØÊÂÏî
+             * ç®—æ³•ä¸ºï¼šéå†æ‰€æœ‰å·²éªŒæ”¶äº‹é¡¹ï¼Œæµ‹ç®—å®ƒä»¬çš„é¦†è—äº‹é¡¹ä¸­æ‰“å‹¾çš„æœ‰å¤šå°‘ã€‚
+             * å¦‚æœæ‰“å‹¾çš„ä¸è¶³ï¼Œåˆ™åœ¨é€‚å½“ä½ç½®å¢åŠ æ‰“å‹¾ã€‚å¦‚æœæ‰“å‹¾çš„å¤ªå¤šï¼Œåˆ™offåæ–¹çš„å¤šä½™æ‰“å‹¾äº‹é¡¹ã€‚
+             * å¦‚æœæ•´ä½“é¦†è—äº‹é¡¹ä¸è¶³ï¼Œä¹Ÿå°±æ˜¯å³ä¾¿å…¨éƒ¨äº‹é¡¹æ‰“å‹¾ä¹Ÿä¸åˆ°è¦æ±‚çš„æ•°ç›®ï¼Œåˆ™è€ƒè™‘å¢åŠ è®¢è´­äº‹é¡¹ï¼Œå¢è¡¥å‡ºå¤Ÿç”¨çš„é¦†è—äº‹é¡¹
              * */
 
             Item item = null;
@@ -2067,31 +2067,31 @@ namespace DigitalPlatform.CommonControl
             }
             catch
             {
-                MessageBox.Show(this, "ĞÂÑéÊÕ×Ü²áÊı '" + this.textBox_newlyArriveTotalCopy.Text + "' Ó¦µ±Îª´¿Êı×Ö");
+                MessageBox.Show(this, "æ–°éªŒæ”¶æ€»å†Œæ•° '" + this.textBox_newlyArriveTotalCopy.Text + "' åº”å½“ä¸ºçº¯æ•°å­—");
 
                 // 2008/9/16
-                this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // ¸Ä±ä»Ø¿ÉĞĞµÄÖµ
+                this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // æ”¹å˜å›å¯è¡Œçš„å€¼
                 return;
             }
 
-            // Èç¹ûÁĞ±íÖĞÒ»¸öÊÂÏîÒ²Ã»ÓĞ£¬ÔòĞÂÔöÒ»¸öÊÂÏî
+            // å¦‚æœåˆ—è¡¨ä¸­ä¸€ä¸ªäº‹é¡¹ä¹Ÿæ²¡æœ‰ï¼Œåˆ™æ–°å¢ä¸€ä¸ªäº‹é¡¹
             if (this.Items.Count == 0)
             {
                 if (nValue == 0)
                     return;
 
-                // ¾¯¸æÌ«´óµÄÖµ
+                // è­¦å‘Šå¤ªå¤§çš„å€¼
                 if (nValue > 10)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "È·ÊµÒªÉèÖÃ " + nValue.ToString() + " ÕâÃ´´óµÄÖµ?",
+                        "ç¡®å®è¦è®¾ç½® " + nValue.ToString() + " è¿™ä¹ˆå¤§çš„å€¼?",
                         "OrderDesignControl",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
                     if (result != DialogResult.Yes)
                     {
-                        this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // ¸Ä±ä»Ø¿ÉĞĞµÄÖµ
+                        this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // æ”¹å˜å›å¯è¡Œçš„å€¼
                         return;
                     }
                 }
@@ -2101,9 +2101,9 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            // TODO: Ó¦ÏÈ¼ÆËã³ödeltaÖµ£¬È»ºó±éÀúÃ¿¸öitemÊ±£¬Ò»¸öItemÄÚÌíÒ»µã(ÔÚCopyValueºÍOldCopyValueÖ®¼ä)
+            // TODO: åº”å…ˆè®¡ç®—å‡ºdeltaå€¼ï¼Œç„¶åéå†æ¯ä¸ªitemæ—¶ï¼Œä¸€ä¸ªItemå†…æ·»ä¸€ç‚¹(åœ¨CopyValueå’ŒOldCopyValueä¹‹é—´)
 
-            // ¼ÆËãÒÑÓĞµÄarrived count(²»°üÀ¨readonly checked)
+            // è®¡ç®—å·²æœ‰çš„arrived count(ä¸åŒ…æ‹¬readonly checked)
             int nNewlyArrivedCount = GetNewlyArriveTotalCopy();
 
             /*
@@ -2118,23 +2118,23 @@ namespace DigitalPlatform.CommonControl
             int nDelta = nValue - nNewlyArrivedCount;
 
             if (nDelta == 0)
-                return; // ¼ÈÃ»ÓĞ±ØÒªÔö£¬Ò²Ã»ÓĞ±ØÒª¼õ
+                return; // æ—¢æ²¡æœ‰å¿…è¦å¢ï¼Œä¹Ÿæ²¡æœ‰å¿…è¦å‡
 
-            // ÔöĞèÒª´ÓÇ°·½¿ªÊ¼½øĞĞ¡£
+            // å¢éœ€è¦ä»å‰æ–¹å¼€å§‹è¿›è¡Œã€‚
             if (nDelta > 0)
             {
-                // ¾¯¸æÌ«´óµÄÖµ
+                // è­¦å‘Šå¤ªå¤§çš„å€¼
                 if (nDelta > 10)
                 {
                     DialogResult result = MessageBox.Show(ForegroundWindow.Instance,
-                        "È·ÊµÒªÔö´óµ½ " + nValue.ToString() + " ÕâÃ´´óµÄÖµ?",
+                        "ç¡®å®è¦å¢å¤§åˆ° " + nValue.ToString() + " è¿™ä¹ˆå¤§çš„å€¼?",
                         "OrderDesignControl",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
                     if (result != DialogResult.Yes)
                     {
-                        this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // ¸Ä±ä»Ø¿ÉĞĞµÄÖµ
+                        this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // æ”¹å˜å›å¯è¡Œçš„å€¼
                         return;
                     }
                 }
@@ -2158,12 +2158,12 @@ namespace DigitalPlatform.CommonControl
 
                 if (nDelta > 0)
                 {
-                    // ÔÚÒÑÓĞÊÂÏîµÄÔÊĞí·¶Î§ÄÚ£¬»¹Ã»ÓĞÔö×ã¹»£¬ĞèÒª¼ÌĞøÔö×îºóÒ»Ïî
+                    // åœ¨å·²æœ‰äº‹é¡¹çš„å…è®¸èŒƒå›´å†…ï¼Œè¿˜æ²¡æœ‰å¢è¶³å¤Ÿï¼Œéœ€è¦ç»§ç»­å¢æœ€åä¸€é¡¹
                     item = GetLastChangeableItem();
                     if (item == null)
                     {
-                        MessageBox.Show(this, "Ã»ÓĞ¿É¸Ä±äµÄÊÂÏî");
-                        textBox_newlyArriveTotalCopy.Text = (nValue - nDelta).ToString();   // ĞŞ¸Äµ½Ò»¸ö±£ÊØÖµ
+                        MessageBox.Show(this, "æ²¡æœ‰å¯æ”¹å˜çš„äº‹é¡¹");
+                        textBox_newlyArriveTotalCopy.Text = (nValue - nDelta).ToString();   // ä¿®æ”¹åˆ°ä¸€ä¸ªä¿å®ˆå€¼
                         return;
                     }
                     item.location.ArrivedCount += nDelta;
@@ -2173,10 +2173,10 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            // ¼õĞèÒª´Óºó·½¿ªÊ¼½øĞĞ¡£
+            // å‡éœ€è¦ä»åæ–¹å¼€å§‹è¿›è¡Œã€‚
             if (nDelta < 0)
             {
-                nDelta *= -1;   // ±äÎªÕıÊı
+                nDelta *= -1;   // å˜ä¸ºæ­£æ•°
 
                 for (int i = this.Items.Count - 1; i>= 0; i--)
                 {
@@ -2186,7 +2186,7 @@ namespace DigitalPlatform.CommonControl
                     if (nUnCheckable > 0)
                     {
                         int nThisCount = Math.Min(nDelta, nUnCheckable);
-                        item.location.ArrivedCount -= nThisCount;   // »á×Ô¶¯É¾³ıÒ»Ğ©¿Õ°×¹İ²ØµØµãµÄÊÂÏî
+                        item.location.ArrivedCount -= nThisCount;   // ä¼šè‡ªåŠ¨åˆ é™¤ä¸€äº›ç©ºç™½é¦†è—åœ°ç‚¹çš„äº‹é¡¹
                         item.UpdateCopyCount(); // 2008/12/18
                     }
 
@@ -2197,8 +2197,8 @@ namespace DigitalPlatform.CommonControl
 
                 if (nDelta > 0)
                 {
-                    MessageBox.Show(this, "ÎŞ·¨¼õĞ¡µ½ " + nValue.ToString());
-                    textBox_newlyArriveTotalCopy.Text = (nValue + nDelta).ToString();   // ĞŞ¸Äµ½Ò»¸ö±£ÊØÖµ
+                    MessageBox.Show(this, "æ— æ³•å‡å°åˆ° " + nValue.ToString());
+                    textBox_newlyArriveTotalCopy.Text = (nValue + nDelta).ToString();   // ä¿®æ”¹åˆ°ä¸€ä¸ªä¿å®ˆå€¼
                     return;
                 }
 
@@ -2206,7 +2206,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // °ÑÊ£ÏÂµÄÓà¶îÈ«²¿ÑéÊÕ
+        // æŠŠå‰©ä¸‹çš„ä½™é¢å…¨éƒ¨éªŒæ”¶
         private void button_fullyAccept_Click(object sender, EventArgs e)
         {
             int nValue = GetNewlyArrivingTotalCopy();
@@ -2215,9 +2215,9 @@ namespace DigitalPlatform.CommonControl
                 string strMessage = "";
                 int nRet = NotOrdering(out strMessage);
                 if (nRet == 2)
-                    MessageBox.Show(ForegroundWindow.Instance, "ÊÂÏîÉĞÎ´¾­¹ı´òÓ¡¶©µ¥»·½Ú£¬ÎŞ·¨½øĞĞÑéÊÕ");
+                    MessageBox.Show(ForegroundWindow.Instance, "äº‹é¡¹å°šæœªç»è¿‡æ‰“å°è®¢å•ç¯èŠ‚ï¼Œæ— æ³•è¿›è¡ŒéªŒæ”¶");
                 else
-                    MessageBox.Show(ForegroundWindow.Instance, "ÒÑ¾­ÊÕÂú");
+                    MessageBox.Show(ForegroundWindow.Instance, "å·²ç»æ”¶æ»¡");
                 return;
             }
 
@@ -2231,7 +2231,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 this.textBox_newlyArriveTotalCopy.Text = strOldValue;
             }
         }
@@ -2244,7 +2244,7 @@ namespace DigitalPlatform.CommonControl
             Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
             rect.Width = this.tableLayoutPanel_content.DisplayRectangle.Width;
             rect.Offset(-p.X, -p.Y);
-            rect.Height = (int)this.Font.GetHeight() + 8;   // ËõĞ¡Ë¢ĞÂ¸ß¶È
+            rect.Height = (int)this.Font.GetHeight() + 8;   // ç¼©å°åˆ·æ–°é«˜åº¦
 
             this.tableLayoutPanel_content.Invalidate(rect, false);
 
@@ -2312,7 +2312,7 @@ Color.FromArgb(50, Color.Gray)
                 e.Graphics.FillRectangle(brushGradient, rect);
 
 
-                // Ò»ĞĞÖĞÃ¿¸ö¸ñ×Ó
+                // ä¸€è¡Œä¸­æ¯ä¸ªæ ¼å­
                 float x = rect.X;    //  this.AutoScrollPosition.X + this.tableLayoutPanel_content.Location.X;
                 for (int j = 0; j < column_widths.Length; j++)
                 {
@@ -2357,7 +2357,7 @@ Color.FromArgb(50, Color.Gray)
 
             Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
 
-            // »­ºáÏß
+            // ç”»æ¨ªçº¿
             for (int i = 0; i < this.Items.Count; i++)
             {
                 Item item = this.Items[i];
@@ -2369,7 +2369,7 @@ Color.FromArgb(50, Color.Gray)
             }
 
             /*
-            // »­ºáÏß
+            // ç”»æ¨ªçº¿
             float y = 0;
             for (int i = 0; i < this.tableLayoutPanel_content.RowStyles.Count; i++)
             {
@@ -2382,7 +2382,7 @@ Color.FromArgb(50, Color.Gray)
             }
              * */
 
-            // »­ÊúÏß
+            // ç”»ç«–çº¿
             float x = 0;
             for(int i=0;i<this.tableLayoutPanel_content.ColumnStyles.Count;i++)
             {
@@ -2404,7 +2404,7 @@ Color.FromArgb(50, Color.Gray)
             e.Graphics.FillRectangle(brush, rect);
              * */
             if (this.m_nInSuspend > 0)
-                return; // ·ÀÖ¹ÉÁ¶¯
+                return; // é˜²æ­¢é—ªåŠ¨
 
             // Rectangle rect = Rectangle.Inflate(e.CellBounds, -1, -1);
             Rectangle rect = e.CellBounds;
@@ -2418,12 +2418,12 @@ Color.FromArgb(50, Color.Gray)
     [Flags]
     public enum ItemState
     {
-        Normal = 0x00,  // ÆÕÍ¨×´Ì¬
-        Changed = 0x01, // ÄÚÈİ±»ĞŞ¸Ä¹ı
-        New = 0x02, // ĞÂÔöµÄĞĞ
-        Selected = 0x04,    // ±»Ñ¡Ôñ
+        Normal = 0x00,  // æ™®é€šçŠ¶æ€
+        Changed = 0x01, // å†…å®¹è¢«ä¿®æ”¹è¿‡
+        New = 0x02, // æ–°å¢çš„è¡Œ
+        Selected = 0x04,    // è¢«é€‰æ‹©
 
-        ReadOnly = 0x10, // ×´Ì¬ÎªÖ»¶ÁµÄĞĞ¡£¶©¹ºÌ¬ÏÂ£¬ÒòÎª¡°ÒÑ¶©¹º¡±£¬¶©µ¥ÒÑ¾­·¢³ö£¬ÄÚÈİ²»ÄÜÔÙ¸ü¸ÄÁË£»ÑéÊÕÌ¬ÏÂ£¬ÒòÎªÉĞÎ´¶©¹º£¬ËùÒÔ²»ÄÜ½øĞĞÑéÊÕ£¬ÄÚÈİ²»ÄÜ¸ü¸Ä
+        ReadOnly = 0x10, // çŠ¶æ€ä¸ºåªè¯»çš„è¡Œã€‚è®¢è´­æ€ä¸‹ï¼Œå› ä¸ºâ€œå·²è®¢è´­â€ï¼Œè®¢å•å·²ç»å‘å‡ºï¼Œå†…å®¹ä¸èƒ½å†æ›´æ”¹äº†ï¼›éªŒæ”¶æ€ä¸‹ï¼Œå› ä¸ºå°šæœªè®¢è´­ï¼Œæ‰€ä»¥ä¸èƒ½è¿›è¡ŒéªŒæ”¶ï¼Œå†…å®¹ä¸èƒ½æ›´æ”¹
     }
 
     public class Item : IDisposable
@@ -2432,48 +2432,48 @@ Color.FromArgb(50, Color.Gray)
 
         public OrderDesignControl Container = null;
 
-        public object Tag = null;   // ÓÃÓÚ´æ·ÅĞèÒªÁ¬½ÓµÄÈÎÒâÀàĞÍ¶ÔÏó
+        public object Tag = null;   // ç”¨äºå­˜æ”¾éœ€è¦è¿æ¥çš„ä»»æ„ç±»å‹å¯¹è±¡
 
-        // ÑÕÉ«¡¢popupmenu
+        // é¢œè‰²ã€popupmenu
         public Label label_color = null;
 
-        // ÊéÄ¿ºÅ 2008/8/31
+        // ä¹¦ç›®å· 2008/8/31
         public TextBox textBox_catalogNo = null;
 
-        // ÇşµÀ
+        // æ¸ é“
         public ComboBox comboBox_seller = null;
 
-        // ¾­·ÑÀ´Ô´
+        // ç»è´¹æ¥æº
         public DoubleComboBox comboBox_source = null;
 
-        // Ê±¼ä·¶Î§
+        // æ—¶é—´èŒƒå›´
         public DateRangeControl dateRange_range = null;
 
-        // ÆÚÊı
+        // æœŸæ•°
         public ComboBox comboBox_issueCount = null;
 
-        // ¸´±¾Êı
+        // å¤æœ¬æ•°
         public DoubleComboBox comboBox_copy = null;
 
-        // µ¥¼Û
+        // å•ä»·
         public DoubleTextBox textBox_price = null;
 
-        // È¥Ïò
+        // å»å‘
         // public TextBox textBox_location = null;
         public LocationEditControl location = null;
 
-        // Àà±ğ 2008/8/31
+        // ç±»åˆ« 2008/8/31
         public ComboBox comboBox_class = null;
 
-        // ÇşµÀµØÖ·
+        // æ¸ é“åœ°å€
         public Label label_sellerAddress = null;
 
-        internal string m_sellerAddressXml = "";    // ±íÊ¾ÇşµÀµØÖ·µÄXML¼ÇÂ¼¡£¸ùÔªËØÎª<sellerAddress>
+        internal string m_sellerAddressXml = "";    // è¡¨ç¤ºæ¸ é“åœ°å€çš„XMLè®°å½•ã€‚æ ¹å…ƒç´ ä¸º<sellerAddress>
 
-        // ÆäËûĞÅÏ¢
+        // å…¶ä»–ä¿¡æ¯
         public Label label_other = null;
 
-        internal string m_otherXml = "";    // ±íÊ¾ÆäËûĞÅÏ¢µÄXML¼ÇÂ¼
+        internal string m_otherXml = "";    // è¡¨ç¤ºå…¶ä»–ä¿¡æ¯çš„XMLè®°å½•
 
         void DisposeChildControls()
         {
@@ -2494,10 +2494,10 @@ Color.FromArgb(50, Color.Gray)
 
         ItemState m_state = ItemState.Normal;
 
-        // Ö÷¶¯ĞŞ¸Älocation¿Ø¼şµÄArrivedCount£¬ĞèÒª±ÜÃâµİ¹é´¦ÀíÓÉ´ËÒıÆğµÄÊÂ¼ş
+        // ä¸»åŠ¨ä¿®æ”¹locationæ§ä»¶çš„ArrivedCountï¼Œéœ€è¦é¿å…é€’å½’å¤„ç†ç”±æ­¤å¼•èµ·çš„äº‹ä»¶
         int DisableLocationArrivedChanged = 0;
 
-        #region ÊÍ·Å×ÊÔ´
+        #region é‡Šæ”¾èµ„æº
 
         ~Item()
         {
@@ -2549,7 +2549,7 @@ Color.FromArgb(50, Color.Gray)
             label_color.Size = new Size(6, 28);
             label_color.Margin = new Padding(1, 0, 1, 0);
 
-            // ÊéÄ¿ºÅ
+            // ä¹¦ç›®å·
             this.textBox_catalogNo = new TextBox();
             textBox_catalogNo.BorderStyle = BorderStyle.None;
             textBox_catalogNo.Dock = DockStyle.Fill;
@@ -2559,7 +2559,7 @@ Color.FromArgb(50, Color.Gray)
             textBox_catalogNo.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
             // this.textBox_catalogNo.Visible = false;
 
-            // ÇşµÀ
+            // æ¸ é“
             comboBox_seller = new ComboBox();
             comboBox_seller.DropDownStyle = ComboBoxStyle.DropDown;
             comboBox_seller.FlatStyle = FlatStyle.Flat;
@@ -2574,7 +2574,7 @@ Color.FromArgb(50, Color.Gray)
             comboBox_seller.Margin = new Padding(6, nTopBlank + 6, 6, 0);
             // this.comboBox_seller.Visible = false;
 
-            // ¾­·ÑÀ´Ô´
+            // ç»è´¹æ¥æº
             comboBox_source = new DoubleComboBox();
 
             comboBox_source.ComboBox.DropDownStyle = ComboBoxStyle.DropDown;
@@ -2595,7 +2595,7 @@ Color.FromArgb(50, Color.Gray)
             comboBox_source.MinimumSize = new Size(50, 28);
 
 
-            // ·¶Î§
+            // èŒƒå›´
             dateRange_range = new DateRangeControl();
 
             if (container != null && container.SeriesMode == false)
@@ -2616,7 +2616,7 @@ Color.FromArgb(50, Color.Gray)
                 1, 0);
             // this.dateRange_range.Visible = false;
 
-            // ÆÚÊı
+            // æœŸæ•°
             /*
             textBox_issueCount = new TextBox();
             textBox_issueCount.BorderStyle = BorderStyle.None;
@@ -2649,7 +2649,7 @@ Color.FromArgb(50, Color.Gray)
                 6, 0);
             // this.comboBox_issueCount.Visible = false;
 
-            // ¸´±¾Êı
+            // å¤æœ¬æ•°
             /*
             comboBox_copy = new ComboBox();
             comboBox_copy.DropDownStyle = ComboBoxStyle.DropDown;
@@ -2682,7 +2682,7 @@ Color.FromArgb(50, Color.Gray)
             comboBox_copy.MinimumSize = new Size(30, 28*2);
             // this.comboBox_copy.Visible = false;
 
-            // µ¥¼Û
+            // å•ä»·
             textBox_price = new DoubleTextBox();
             textBox_price.TextBox.BorderStyle = BorderStyle.None;
             textBox_price.TextBox.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
@@ -2700,7 +2700,7 @@ Color.FromArgb(50, Color.Gray)
             // textBox_price.BorderStyle = BorderStyle.FixedSingle;
             // this.textBox_price.Visible = false;
 
-            // È¥Ïò
+            // å»å‘
             location = new LocationEditControl();
             location.ArriveMode = this.Container.ArriveMode;
             location.BorderStyle = BorderStyle.None;
@@ -2710,11 +2710,11 @@ Color.FromArgb(50, Color.Gray)
                 6, 0);
 
             location.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
-            location.AutoScaleMode = AutoScaleMode.None;    // ·ÀÖ¹ËüÄÚ²¿µÄ¿Ø¼ş·ÅÉÏÈ¥ºó±»ÖØĞÂÅ²¶¯Î»ÖÃ
+            location.AutoScaleMode = AutoScaleMode.None;    // é˜²æ­¢å®ƒå†…éƒ¨çš„æ§ä»¶æ”¾ä¸Šå»åè¢«é‡æ–°æŒªåŠ¨ä½ç½®
             // location.BorderStyle = BorderStyle.FixedSingle;
             location.DbName = container.BiblioDbName;
 
-            // Àà±ğ
+            // ç±»åˆ«
             comboBox_class = new ComboBox();
             comboBox_class.DropDownStyle = ComboBoxStyle.DropDown;
             comboBox_class.FlatStyle = FlatStyle.Flat;
@@ -2730,7 +2730,7 @@ Color.FromArgb(50, Color.Gray)
                 6, 0);
             // this.comboBox_class.Visible = false;
 
-            // ÇşµÀµØÖ·
+            // æ¸ é“åœ°å€
             this.label_sellerAddress = new Label();
             this.label_sellerAddress.BorderStyle = BorderStyle.None;
             this.label_sellerAddress.Dock = DockStyle.Fill;
@@ -2743,7 +2743,7 @@ Color.FromArgb(50, Color.Gray)
             this.label_sellerAddress.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
             // this.label_sellerAddress.Visible = false;
 
-            // ÆäËû
+            // å…¶ä»–
             this.label_other = new Label();
             this.label_other.BorderStyle = BorderStyle.None;
             this.label_other.Dock = DockStyle.Fill;
@@ -2800,42 +2800,42 @@ Color.FromArgb(50, Color.Gray)
                 {
                     this.m_bReadOnly = value;
 
-                    // ÊéÄ¿ºÅ
+                    // ä¹¦ç›®å·
                     this.textBox_catalogNo.ReadOnly = value;
 
-                    // ÇşµÀ
+                    // æ¸ é“
                     this.comboBox_seller.Enabled = !value;
 
-                    // ¾­·ÑÀ´Ô´
+                    // ç»è´¹æ¥æº
                     this.comboBox_source.Enabled = !value;
 
-                    // Ê±¼ä·¶Î§
+                    // æ—¶é—´èŒƒå›´
                     this.dateRange_range.Enabled = !value;
 
-                    // ÆÚÊı
+                    // æœŸæ•°
                     this.comboBox_issueCount.Enabled = !value;
 
-                    // ¸´±¾Êı
+                    // å¤æœ¬æ•°
                     this.comboBox_copy.Enabled = !value;
 
-                    // µ¥¼Û
+                    // å•ä»·
                     this.textBox_price.ReadOnly = value;
 
-                    // È¥Ïò
+                    // å»å‘
                     this.location.ReadOnly = value;
 
-                    // Àà±ğ
+                    // ç±»åˆ«
                     this.comboBox_class.Enabled = !value;
 
-                    // ÇşµÀµØÖ·
+                    // æ¸ é“åœ°å€
 
-                    // ÆäËû
+                    // å…¶ä»–
                     // this.label_other
                 }
             }
         }
 
-        // ÊÂÏî×´Ì¬
+        // äº‹é¡¹çŠ¶æ€
         public ItemState State
         {
             get
@@ -2860,13 +2860,13 @@ Color.FromArgb(50, Color.Gray)
                         this.ReadOnly = false;
                     }
 
-                    // ×´Ì¬±ä¶¯ºó£¬»¹»áÒıÆğ·İÊıÍ³¼ÆÖµµÄ±ä¶¯
+                    // çŠ¶æ€å˜åŠ¨åï¼Œè¿˜ä¼šå¼•èµ·ä»½æ•°ç»Ÿè®¡å€¼çš„å˜åŠ¨
                     if (bOldReadOnly != this.ReadOnly)
                     {
-                        // Èç¹ûµ±Ç°ÊÇ¶©¹ºÌ¬
+                        // å¦‚æœå½“å‰æ˜¯è®¢è´­æ€
                         if (this.Container.ArriveMode == false)
                         {
-                            this.Container.DisableNewlyOrderTextChanged++;    // ÓÅ»¯£¬±ÜÃâ¶àÓàµÄ¶¯×÷
+                            this.Container.DisableNewlyOrderTextChanged++;    // ä¼˜åŒ–ï¼Œé¿å…å¤šä½™çš„åŠ¨ä½œ
                             this.Container.textBox_newlyOrderTotalCopy.Text = this.Container.GetNewlyOrderTotalCopy().ToString();
                             this.Container.DisableNewlyOrderTextChanged--;
 
@@ -2880,9 +2880,9 @@ Color.FromArgb(50, Color.Gray)
                         }
                         else
                         {
-                            // Èç¹ûµ±Ç°ÊÇÑéÊÕÌ¬
+                            // å¦‚æœå½“å‰æ˜¯éªŒæ”¶æ€
 
-                            this.Container.DisableNewlyArriveTextChanged++;    // ÓÅ»¯£¬±ÜÃâ¶àÓàµÄ¶¯×÷
+                            this.Container.DisableNewlyArriveTextChanged++;    // ä¼˜åŒ–ï¼Œé¿å…å¤šä½™çš„åŠ¨ä½œ
                             this.Container.textBox_newlyArriveTotalCopy.Text = this.Container.GetNewlyArriveTotalCopy().ToString();
                             this.Container.DisableNewlyArriveTextChanged--;
 
@@ -2900,16 +2900,16 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ÉèÖÃÊÂÏî×ó¶ËlabelµÄÑÕÉ«
+        // è®¾ç½®äº‹é¡¹å·¦ç«¯labelçš„é¢œè‰²
         internal void SetLineColor()
         {
             if ((this.m_state & ItemState.Selected) != 0)
             {
-                // Ã»ÓĞ½¹µã£¬ÓÖĞèÒªÒş²ØselectionÇéĞÎ
+                // æ²¡æœ‰ç„¦ç‚¹ï¼Œåˆéœ€è¦éšè—selectionæƒ…å½¢
                 if (this.Container.HideSelection == true
                     && this.Container.m_bFocused == false)
                 {
-                    // ¼ÌĞøÏòºó×ß£¬ÏÔÊ¾ÆäËûÑÕÉ«
+                    // ç»§ç»­å‘åèµ°ï¼Œæ˜¾ç¤ºå…¶ä»–é¢œè‰²
                 }
                 else
                 {
@@ -2936,7 +2936,7 @@ Color.FromArgb(50, Color.Gray)
             this.label_color.BackColor = SystemColors.Window;
         }
 
-        // ½«¿Ø¼ş¼ÓÈëµ½tablelayoutpanelÖĞ
+        // å°†æ§ä»¶åŠ å…¥åˆ°tablelayoutpanelä¸­
         internal void AddToTable(TableLayoutPanel table,
             int nRow)
         {
@@ -2958,9 +2958,9 @@ Color.FromArgb(50, Color.Gray)
             AddEvents(true);
         }
 
-        // ´ÓtablelayoutpanelÖĞÒÆ³ı±¾ItemÉæ¼°µÄ¿Ø¼ş
+        // ä»tablelayoutpanelä¸­ç§»é™¤æœ¬Itemæ¶‰åŠçš„æ§ä»¶
         // parameters:
-        //      nRow    ´Ó0¿ªÊ¼¼ÆÊı
+        //      nRow    ä»0å¼€å§‹è®¡æ•°
         internal void RemoveFromTable(TableLayoutPanel table,
             int nRow)
         {
@@ -2969,7 +2969,7 @@ Color.FromArgb(50, Color.Gray)
             try
             {
 
-                // ÒÆ³ı±¾ĞĞÏà¹ØµÄ¿Ø¼ş
+                // ç§»é™¤æœ¬è¡Œç›¸å…³çš„æ§ä»¶
                 table.Controls.Remove(this.label_color);
                 table.Controls.Remove(this.textBox_catalogNo);
                 table.Controls.Remove(this.comboBox_seller);
@@ -2987,7 +2987,7 @@ Color.FromArgb(50, Color.Gray)
 
                 Debug.Assert(this.Container.Items.Count == table.RowCount - 2, "");
 
-                // È»ºóÑ¹Ëõºó·½µÄ
+                // ç„¶åå‹ç¼©åæ–¹çš„
                 for (int i = (table.RowCount - 2) - 1; i >= nRow + 1; i--)
                 {
                     Item line = this.Container.Items[i];
@@ -3065,9 +3065,9 @@ Color.FromArgb(50, Color.Gray)
 
         }
 
-        // ²åÈë±¾Lineµ½Ä³ĞĞ¡£µ÷ÓÃÇ°£¬table.RowCountÒÑ¾­ÔöÁ¿
+        // æ’å…¥æœ¬Lineåˆ°æŸè¡Œã€‚è°ƒç”¨å‰ï¼Œtable.RowCountå·²ç»å¢é‡
         // parameters:
-        //      nRow    ´Ó0¿ªÊ¼¼ÆÊı
+        //      nRow    ä»0å¼€å§‹è®¡æ•°
         internal void InsertToTable(TableLayoutPanel table,
             int nRow)
         {
@@ -3077,7 +3077,7 @@ Color.FromArgb(50, Color.Gray)
             {
                 Debug.Assert(table.RowCount == this.Container.Items.Count + 3, "");
 
-                // ÏÈÒÆ¶¯ºó·½µÄ
+                // å…ˆç§»åŠ¨åæ–¹çš„
                 for (int i = (table.RowCount - 1) - 3; i >= nRow; i--)
                 {
                     Item line = this.Container.Items[i];
@@ -3285,7 +3285,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         static string GetPureSeletedValue(string strText)
         {
             for (; ; )
@@ -3304,8 +3304,8 @@ Color.FromArgb(50, Color.Gray)
 
         delegate void Delegate_filterValue(Control control);
 
-        // ²»°²È«°æ±¾
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // ä¸å®‰å…¨ç‰ˆæœ¬
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         void __FilterValue(Control control)
         {
             if (control is DoubleComboBox)
@@ -3324,7 +3324,7 @@ Color.FromArgb(50, Color.Gray)
         }
 
 #if NO
-        // °²È«°æ±¾
+        // å®‰å…¨ç‰ˆæœ¬
         void FilterValue(Control control)
         {
             if (this.Container.InvokeRequired == true)
@@ -3338,7 +3338,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 #endif
-        // °²È«°æ±¾
+        // å®‰å…¨ç‰ˆæœ¬
         void FilterValue(Control control)
         {
             Delegate_filterValue d = new Delegate_filterValue(__FilterValue);
@@ -3384,7 +3384,7 @@ Color.FromArgb(50, Color.Gray)
         {
             if (this.Container.ArriveMode == false)
             {
-                this.Container.DisableNewlyOrderTextChanged++;    // ÓÅ»¯£¬±ÜÃâ¶àÓàµÄ¶¯×÷
+                this.Container.DisableNewlyOrderTextChanged++;    // ä¼˜åŒ–ï¼Œé¿å…å¤šä½™çš„åŠ¨ä½œ
                 this.Container.textBox_newlyOrderTotalCopy.Text = this.Container.GetNewlyOrderTotalCopy().ToString();
                 this.Container.DisableNewlyOrderTextChanged--;
 
@@ -3392,7 +3392,7 @@ Color.FromArgb(50, Color.Gray)
             }
             else
             {
-                this.Container.DisableNewlyArriveTextChanged++;    // ÓÅ»¯£¬±ÜÃâ¶àÓàµÄ¶¯×÷
+                this.Container.DisableNewlyArriveTextChanged++;    // ä¼˜åŒ–ï¼Œé¿å…å¤šä½™çš„åŠ¨ä½œ
                 this.Container.textBox_newlyArriveTotalCopy.Text = this.Container.GetNewlyArriveTotalCopy().ToString();
                 this.Container.DisableNewlyArriveTextChanged--;
 
@@ -3403,14 +3403,14 @@ Color.FromArgb(50, Color.Gray)
 
         void location_ArrivedChanged(object sender, EventArgs e)
         {
-            // ÊôÓÚÖ÷¶¯ĞŞ¸Ä£¬±ÜÃâ²»±ØÒªµØ´¦ÀíÕâ¸öÁ¬´øÊÂ¼ş
+            // å±äºä¸»åŠ¨ä¿®æ”¹ï¼Œé¿å…ä¸å¿…è¦åœ°å¤„ç†è¿™ä¸ªè¿å¸¦äº‹ä»¶
             if (this.DisableLocationArrivedChanged > 0)
                 return;
 
             UpdateCopyCount();
         }
 
-        // Ö÷¶¯´Ólocation checked×´Ì¬ÖĞ»ã×ÜÒÑµ½µÄ²áÊı
+        // ä¸»åŠ¨ä»location checkedçŠ¶æ€ä¸­æ±‡æ€»å·²åˆ°çš„å†Œæ•°
         public void UpdateCopyCount()
         {
             string strCount = this.location.ArrivedCount.ToString();
@@ -3420,7 +3420,7 @@ Color.FromArgb(50, Color.Gray)
 
             if (strCopy != strCount)
             {
-                // Èç¹ûµ½Êécopy×Ö·û´®Îª¿Õ£¬ÔòĞèÒª´Ó¶©¹ºcopy×Ö·û´®ÖĞÑ°ÕÒ¿ÉÄÜµÄÌ×ÄÚ²áÊı
+                // å¦‚æœåˆ°ä¹¦copyå­—ç¬¦ä¸²ä¸ºç©ºï¼Œåˆ™éœ€è¦ä»è®¢è´­copyå­—ç¬¦ä¸²ä¸­å¯»æ‰¾å¯èƒ½çš„å¥—å†…å†Œæ•°
                 if (String.IsNullOrEmpty(this.comboBox_copy.Text) == true)
                 {
                     string strRightCopy = OrderDesignControl.GetRightFromCopyString(this.comboBox_copy.OldText);
@@ -3455,7 +3455,7 @@ Color.FromArgb(50, Color.Gray)
         {
             if (this.Container.ArriveMode == false)
             {
-                // ÔÚ¶©¹º×´Ì¬ÏÂ£¬ĞÂ¾ÉÖµ±£³ÖÍ³Ò»£¬ÒÔ±ãÏÔÊ¾µ¥ĞĞ
+                // åœ¨è®¢è´­çŠ¶æ€ä¸‹ï¼Œæ–°æ—§å€¼ä¿æŒç»Ÿä¸€ï¼Œä»¥ä¾¿æ˜¾ç¤ºå•è¡Œ
                 this.comboBox_source.OldText = this.comboBox_source.Text;
             }
 
@@ -3465,9 +3465,9 @@ Color.FromArgb(50, Color.Gray)
             this.Container.Changed = true;
 
             // 2009/2/15
-            // Èç¹ûsellerºÍsourceÃ¬¶Ü£¬Ôò½«sellerÇåÎª¿Õ
-            if (this.comboBox_seller.Text == "½»»»"
-                || this.comboBox_seller.Text == "Ôù")
+            // å¦‚æœsellerå’ŒsourceçŸ›ç›¾ï¼Œåˆ™å°†selleræ¸…ä¸ºç©º
+            if (this.comboBox_seller.Text == "äº¤æ¢"
+                || this.comboBox_seller.Text == "èµ ")
             {
                 if (String.IsNullOrEmpty(this.comboBox_source.Text) == false)
                     this.comboBox_seller.Text = "";
@@ -3479,7 +3479,7 @@ Color.FromArgb(50, Color.Gray)
         {
             if (this.Container.ArriveMode == false)
             {
-                // ÔÚ¶©¹º×´Ì¬ÏÂ£¬ĞÂ¾ÉÖµ±£³ÖÍ³Ò»£¬ÒÔ±ãÏÔÊ¾µ¥ĞĞ
+                // åœ¨è®¢è´­çŠ¶æ€ä¸‹ï¼Œæ–°æ—§å€¼ä¿æŒç»Ÿä¸€ï¼Œä»¥ä¾¿æ˜¾ç¤ºå•è¡Œ
                 this.textBox_price.OldText = this.textBox_price.Text;
             }
 
@@ -3497,8 +3497,8 @@ Color.FromArgb(50, Color.Gray)
             this.Container.Changed = true;
 
             // 2009/2/15
-            if (this.comboBox_seller.Text == "½»»»"
-                || this.comboBox_seller.Text == "Ôù")
+            if (this.comboBox_seller.Text == "äº¤æ¢"
+                || this.comboBox_seller.Text == "èµ ")
                 this.comboBox_source.Text = "";
         }
 
@@ -3542,9 +3542,9 @@ Color.FromArgb(50, Color.Gray)
             }
             else if (e.Button == MouseButtons.Right)
             {
-                // Èç¹ûµ±Ç°ÓĞ¶àÖØÑ¡Ôñ£¬Ôò²»±Ø×÷Ê²Ã´l
-                // Èç¹ûµ±Ç°Îªµ¥¶ÀÒ»¸öÑ¡Ôñ»òÕß0¸öÑ¡Ôñ£¬ÔòÑ¡Ôñµ±Ç°¶ÔÏó
-                // ÕâÑù×öµÄÄ¿µÄÊÇ·½±ã²Ù×÷
+                // å¦‚æœå½“å‰æœ‰å¤šé‡é€‰æ‹©ï¼Œåˆ™ä¸å¿…ä½œä»€ä¹ˆl
+                // å¦‚æœå½“å‰ä¸ºå•ç‹¬ä¸€ä¸ªé€‰æ‹©æˆ–è€…0ä¸ªé€‰æ‹©ï¼Œåˆ™é€‰æ‹©å½“å‰å¯¹è±¡
+                // è¿™æ ·åšçš„ç›®çš„æ˜¯æ–¹ä¾¿æ“ä½œ
                 if (this.Container.SelectedIndices.Count < 2)
                 {
                     this.Container.SelectItem(this, true);
@@ -3557,30 +3557,30 @@ Color.FromArgb(50, Color.Gray)
             this.Container.OnGetValueTable(sender, e);
         }
 
-        // ¸´±¾Êı ÎÄ×Ö¸Ä±ä
+        // å¤æœ¬æ•° æ–‡å­—æ”¹å˜
         void comboBox_copy_TextChanged(object sender, EventArgs e)
         {
             if (this.Container.ArriveMode == false)
             {
-                // ÔÚ¶©¹º×´Ì¬ÏÂ£¬ĞÂ¾ÉÖµ±£³ÖÍ³Ò»£¬ÒÔ±ãÏÔÊ¾µ¥ĞĞ
+                // åœ¨è®¢è´­çŠ¶æ€ä¸‹ï¼Œæ–°æ—§å€¼ä¿æŒç»Ÿä¸€ï¼Œä»¥ä¾¿æ˜¾ç¤ºå•è¡Œ
                 this.comboBox_copy.OldText = this.comboBox_copy.Text;
             }
 
             try
             {
-                // location¿Ø¼şÁª¶¯
+                // locationæ§ä»¶è”åŠ¨
                 // 2010/12/1 changed
                 int nCopy = Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
 
-                // Èç¹ûµ±Ç°Îª¶©¹ºÄ£Ê½
+                // å¦‚æœå½“å‰ä¸ºè®¢è´­æ¨¡å¼
                 if (this.Container.ArriveMode == false)
                 {
                     this.location.Count = nCopy;
 
-                    // »ã×ÜÖµ·¢Éú±ä»¯
+                    // æ±‡æ€»å€¼å‘ç”Ÿå˜åŒ–
                     if ((this.State & ItemState.ReadOnly) == 0)
                     {
-                        this.Container.DisableNewlyOrderTextChanged++;    // ÓÅ»¯£¬±ÜÃâ¶àÓàµÄ¶¯×÷
+                        this.Container.DisableNewlyOrderTextChanged++;    // ä¼˜åŒ–ï¼Œé¿å…å¤šä½™çš„åŠ¨ä½œ
                         this.Container.textBox_newlyOrderTotalCopy.Text = this.Container.GetNewlyOrderTotalCopy().ToString();
                         this.Container.DisableNewlyOrderTextChanged--;
                     }
@@ -3591,16 +3591,16 @@ Color.FromArgb(50, Color.Gray)
                 }
                 else
                 {
-                    // Èç¹ûµ±Ç°ÎªÑéÊÕÄ£Ê½
+                    // å¦‚æœå½“å‰ä¸ºéªŒæ”¶æ¨¡å¼
 
 
-                    // ¾¯¸æÌ«´óµÄÖµ
+                    // è­¦å‘Šå¤ªå¤§çš„å€¼
                     // 2008/9/17
                     int nDelta = nCopy - this.location.ArrivedCount;
                     if (nDelta > 10)
                     {
                         DialogResult result = MessageBox.Show(ForegroundWindow.Instance,
-                            "È·ÊµÒªÔö´óµ½ " + nCopy.ToString() + " ÕâÃ´´óµÄÖµ?",
+                            "ç¡®å®è¦å¢å¤§åˆ° " + nCopy.ToString() + " è¿™ä¹ˆå¤§çš„å€¼?",
                             "OrderDesignControl",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
@@ -3608,15 +3608,15 @@ Color.FromArgb(50, Color.Gray)
                         if (result != DialogResult.Yes)
                         {
                             // 2010/12/1 changed
-                            // this.comboBox_copy.Text = this.location.ArrivedCount.ToString();    // »Ö¸´Ô­À´µÄÖµ»òÕß×î½ü¿ÉÓÃµÄÖµ
+                            // this.comboBox_copy.Text = this.location.ArrivedCount.ToString();    // æ¢å¤åŸæ¥çš„å€¼æˆ–è€…æœ€è¿‘å¯ç”¨çš„å€¼
                             this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
-                                this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // »Ö¸´Ô­À´µÄÖµ»òÕß×î½ü¿ÉÓÃµÄÖµ
+                                this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // æ¢å¤åŸæ¥çš„å€¼æˆ–è€…æœ€è¿‘å¯ç”¨çš„å€¼
                             return;
                         }
                     }
 
 
-                    // Ö÷¶¯ĞŞ¸Älocation¿Ø¼şµÄArrivedCount£¬ĞèÒª±ÜÃâµİ¹é´¦ÀíÓÉ´ËÒıÆğµÄÊÂ¼ş
+                    // ä¸»åŠ¨ä¿®æ”¹locationæ§ä»¶çš„ArrivedCountï¼Œéœ€è¦é¿å…é€’å½’å¤„ç†ç”±æ­¤å¼•èµ·çš„äº‹ä»¶
                     this.DisableLocationArrivedChanged++;
                     try
                     {
@@ -3628,10 +3628,10 @@ Color.FromArgb(50, Color.Gray)
 
                         // 2008/9/16
                         // this.comboBox_copy.Text = this.location.ArrivedCount.ToString(); 
-                        // »Ö¸´Ô­À´µÄÖµ»òÕß×î½ü¿ÉÓÃµÄÖµ
+                        // æ¢å¤åŸæ¥çš„å€¼æˆ–è€…æœ€è¿‘å¯ç”¨çš„å€¼
                         // 2010/12/1 changed
                         this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
-                            this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // »Ö¸´Ô­À´µÄÖµ»òÕß×î½ü¿ÉÓÃµÄÖµ
+                            this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // æ¢å¤åŸæ¥çš„å€¼æˆ–è€…æœ€è¿‘å¯ç”¨çš„å€¼
                         return;
                     }
                     finally
@@ -3639,10 +3639,10 @@ Color.FromArgb(50, Color.Gray)
                         this.DisableLocationArrivedChanged--;
                     }
 
-                    // »ã×ÜÖµ·¢Éú±ä»¯
+                    // æ±‡æ€»å€¼å‘ç”Ÿå˜åŒ–
                     if ((this.State & ItemState.ReadOnly) == 0)
                     {
-                        this.Container.DisableNewlyArriveTextChanged++;    // ÓÅ»¯£¬±ÜÃâ¶àÓàµÄ¶¯×÷
+                        this.Container.DisableNewlyArriveTextChanged++;    // ä¼˜åŒ–ï¼Œé¿å…å¤šä½™çš„åŠ¨ä½œ
                         this.Container.textBox_newlyArriveTotalCopy.Text = this.Container.GetNewlyArriveTotalCopy().ToString();
                         this.Container.DisableNewlyArriveTextChanged--;
                     }
@@ -3665,7 +3665,7 @@ Color.FromArgb(50, Color.Gray)
 
         void comboBox_seller_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/1/15
+            // é˜²æ­¢é‡å…¥ 2009/1/15
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -3698,7 +3698,7 @@ Color.FromArgb(50, Color.Gray)
                         e1.TableName = "orderCopy";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -3756,12 +3756,12 @@ Color.FromArgb(50, Color.Gray)
              * */
 
             //
-            menuItem = new MenuItem("Ç°²å(&I)");
+            menuItem = new MenuItem("å‰æ’(&I)");
             menuItem.Click += new System.EventHandler(this.menu_insertElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("ºó²å(&A)");
+            menuItem = new MenuItem("åæ’(&A)");
             menuItem.Click += new System.EventHandler(this.menu_appendElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -3771,7 +3771,7 @@ Color.FromArgb(50, Color.Gray)
 
             if (this.Container.ArriveMode == false)
             {
-                menuItem = new MenuItem("ÌØÊâÇşµÀ¶©¹º(&S)");
+                menuItem = new MenuItem("ç‰¹æ®Šæ¸ é“è®¢è´­(&S)");
                 menuItem.Click += new System.EventHandler(this.menu_specialOrder_Click);
                 contextMenu.MenuItems.Add(menuItem);
 
@@ -3781,7 +3781,7 @@ Color.FromArgb(50, Color.Gray)
             }
 
 
-            menuItem = new MenuItem("×Ü¼Û(&T)");
+            menuItem = new MenuItem("æ€»ä»·(&T)");
             menuItem.Click += new System.EventHandler(this.menu_totalPrice_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -3792,7 +3792,7 @@ Color.FromArgb(50, Color.Gray)
 
 
             //
-            menuItem = new MenuItem("É¾³ı(&D)");
+            menuItem = new MenuItem("åˆ é™¤(&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteElements_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -3817,7 +3817,7 @@ Color.FromArgb(50, Color.Gray)
         {
             if (String.IsNullOrEmpty(this.StateString) == false)
             {
-                MessageBox.Show(this.Container, "¶ÔÓÚ×´Ì¬Îª·Ç¿ÕµÄ¶©¹ºÊÂÏî£¬²»ÔÊĞíĞŞ¸ÄÆä×Ü¼Û¸ñ");
+                MessageBox.Show(this.Container, "å¯¹äºçŠ¶æ€ä¸ºéç©ºçš„è®¢è´­äº‹é¡¹ï¼Œä¸å…è®¸ä¿®æ”¹å…¶æ€»ä»·æ ¼");
                 return;
             }
 
@@ -3826,8 +3826,8 @@ Color.FromArgb(50, Color.Gray)
                 string strTotalPrice = this.TotalPrice;
                 string strNewTotalPrice = InputDlg.GetInput(
                     this.Container,
-                    "ÇëÊäÈë×Ü¼Û¸ñ",
-                    "×Ü¼Û¸ñ: ",
+                    "è¯·è¾“å…¥æ€»ä»·æ ¼",
+                    "æ€»ä»·æ ¼: ",
                     strTotalPrice,
                     this.Container.Font);
                 if (strNewTotalPrice == null)
@@ -3835,11 +3835,11 @@ Color.FromArgb(50, Color.Gray)
 
                 this.TotalPrice = strNewTotalPrice;
 
-                // Èç¹û¾ßÓĞÁË×Ü¼Û¸ñ£¬Ôò²á¼Û¸ñÎª¿Õ
+                // å¦‚æœå…·æœ‰äº†æ€»ä»·æ ¼ï¼Œåˆ™å†Œä»·æ ¼ä¸ºç©º
                 if (String.IsNullOrEmpty(strNewTotalPrice) == false)
                     this.Price = "";
 
-                // Ë¢ĞÂÏÔÊ¾
+                // åˆ·æ–°æ˜¾ç¤º
                 this.OtherXml = this.OtherXml;
 
                 if ((this.State & ItemState.New) == 0)
@@ -3853,22 +3853,22 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ÌØÊâÇşµÀ¶©¹º
+        // ç‰¹æ®Šæ¸ é“è®¢è´­
         void menu_specialOrder_Click(object sender, EventArgs e)
         {
             List<Item> selected_lines = this.Container.SelectedItems;
 
             if (selected_lines.Count == 0)
             {
-                MessageBox.Show(this.Container, "ÉĞÎ´Ñ¡¶¨Òª½øĞĞÌØÊâÇşµÀ¶©¹ºµÄÊÂÏî");
+                MessageBox.Show(this.Container, "å°šæœªé€‰å®šè¦è¿›è¡Œç‰¹æ®Šæ¸ é“è®¢è´­çš„äº‹é¡¹");
                 return;
             }
 
             if (selected_lines.Count > 1)
             {
-                // Èç¹ûÒªĞŞ¸ÄµÄ¶àÓÚÒ»¸öÊÂÏî£¬¾¯¸æ
+                // å¦‚æœè¦ä¿®æ”¹çš„å¤šäºä¸€ä¸ªäº‹é¡¹ï¼Œè­¦å‘Š
                 DialogResult result = MessageBox.Show(this.Container,
-                     "È·ÊµÒªÍ¬Ê±±à¼­ " + selected_lines.Count.ToString() + " ¸öĞĞµÄÌØÊâÇşµÀ¶©¹ºÌØĞÔ?",
+                     "ç¡®å®è¦åŒæ—¶ç¼–è¾‘ " + selected_lines.Count.ToString() + " ä¸ªè¡Œçš„ç‰¹æ®Šæ¸ é“è®¢è´­ç‰¹æ€§?",
                      "OrderDesignControl",
                      MessageBoxButtons.OKCancel,
                      MessageBoxIcon.Question,
@@ -3888,7 +3888,7 @@ Color.FromArgb(50, Color.Gray)
             dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
             dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
 
-            // TODO: ÈçºÎ±£´æ¶Ô»°¿òĞŞ¸ÄºóµÄ´óĞ¡ºÍÎ»ÖÃ?
+            // TODO: å¦‚ä½•ä¿å­˜å¯¹è¯æ¡†ä¿®æ”¹åçš„å¤§å°å’Œä½ç½®?
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this.Container);
 
@@ -3912,7 +3912,7 @@ Color.FromArgb(50, Color.Gray)
             }
 
             if (nNotChangeCount > 0)
-                MessageBox.Show(this.Container, "ÓĞ " + nNotChangeCount.ToString() + " ÏîÖ»¶Á×´Ì¬µÄĞĞÃ»ÓĞ±»ĞŞ¸Ä");
+                MessageBox.Show(this.Container, "æœ‰ " + nNotChangeCount.ToString() + " é¡¹åªè¯»çŠ¶æ€çš„è¡Œæ²¡æœ‰è¢«ä¿®æ”¹");
         }
 
         void dlg_GetValueTable(object sender, GetValueTableEventArgs e)
@@ -3941,22 +3941,22 @@ Color.FromArgb(50, Color.Gray)
             this.Container.InsertNewItem(nPos + 1).EnsureVisible();
         }
 
-        // É¾³ıµ±Ç°ÔªËØ
+        // åˆ é™¤å½“å‰å…ƒç´ 
         void menu_deleteElements_Click(object sender, EventArgs e)
         {
             List<Item> selected_lines = this.Container.SelectedItems;
 
             if (selected_lines.Count == 0)
             {
-                MessageBox.Show(this.Container, "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÊÂÏî");
+                MessageBox.Show(this.Container, "å°šæœªé€‰å®šè¦åˆ é™¤çš„äº‹é¡¹");
                 return;
             }
             string strText = "";
 
             if (selected_lines.Count == 1)
-                strText = "È·ÊµÒªÉ¾³ıÊÂÏî '" + selected_lines[0].ItemCaption + "'? ";
+                strText = "ç¡®å®è¦åˆ é™¤äº‹é¡¹ '" + selected_lines[0].ItemCaption + "'? ";
             else
-                strText = "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ " + selected_lines.Count.ToString() + " ¸öÊÂÏî?";
+                strText = "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ " + selected_lines.Count.ToString() + " ä¸ªäº‹é¡¹?";
 
             DialogResult result = MessageBox.Show(this.Container,
                 strText,
@@ -3990,12 +3990,12 @@ Color.FromArgb(50, Color.Gray)
             }
 
             if (nNotDeleteCount > 0)
-                MessageBox.Show(this.Container, "ÓĞ " + nNotDeleteCount.ToString() + " ÏîÒÑ¶©¹º×´Ì¬µÄÊÂÏîÎ´ÄÜÉ¾³ı");
+                MessageBox.Show(this.Container, "æœ‰ " + nNotDeleteCount.ToString() + " é¡¹å·²è®¢è´­çŠ¶æ€çš„äº‹é¡¹æœªèƒ½åˆ é™¤");
         }
 
-        #region Íâ²¿ĞèÒªÊ¹ÓÃµÄÊôĞÔ
+        #region å¤–éƒ¨éœ€è¦ä½¿ç”¨çš„å±æ€§
 
-        // ÊéÄ¿ºÅ
+        // ä¹¦ç›®å·
         public string CatalogNo
         {
             get
@@ -4008,7 +4008,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ÇşµÀ
+        // æ¸ é“
         public string Seller
         {
             get
@@ -4021,7 +4021,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ¾­·ÑÀ´Ô´
+        // ç»è´¹æ¥æº
         public string Source
         {
             get
@@ -4034,7 +4034,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // Ô­ÓĞµÄ¾­·ÑÀ´Ô´
+        // åŸæœ‰çš„ç»è´¹æ¥æº
         public string OldSource
         {
             get
@@ -4047,8 +4047,8 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ÈÕÆÚ·¶Î§
-        // Exception: setµÄÊ±ºò¿ÉÄÜ»áÅ×³öÒì³£
+        // æ—¥æœŸèŒƒå›´
+        // Exception: setçš„æ—¶å€™å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public string RangeString
         {
             get
@@ -4057,17 +4057,17 @@ Color.FromArgb(50, Color.Gray)
             }
             set
             {
-                // ¿ÉÄÜ»áÅ×³öÒì³£
+                // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
                 this.dateRange_range.Text = value;
             }
 
         }
 
-        // ¼ì²âÒ»¸ö³ö°æÊ±¼äÊÇ·ñ´¦ÔÚRangeStringµÄÊ±¼ä·¶Î§ÄÚ?
-        // Exception: ÓĞ¿ÉÄÜÅ×³öÒì³£
+        // æ£€æµ‹ä¸€ä¸ªå‡ºç‰ˆæ—¶é—´æ˜¯å¦å¤„åœ¨RangeStringçš„æ—¶é—´èŒƒå›´å†…?
+        // Exception: æœ‰å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //      strPublishTime  4/6/8×Ö·û
-        //      strRange    ¸ñÊ½Îª"20080101-20081231"
+        //      strPublishTime  4/6/8å­—ç¬¦
+        //      strRange    æ ¼å¼ä¸º"20080101-20081231"
         public bool InRange(string strPublishTime)
         {
             try
@@ -4088,10 +4088,10 @@ Color.FromArgb(50, Color.Gray)
                 string strEnd = strRange.Substring(nRet + 1).Trim();
 
                 if (strStart.Length != 8)
-                    throw new Exception("Ê±¼ä·¶Î§×Ö·û´® '" + strRange + "' µÄ×ó±ß²¿·Ö '" + strStart + "' ¸ñÊ½´íÎó£¬Ó¦Îª8×Ö·û");
+                    throw new Exception("æ—¶é—´èŒƒå›´å­—ç¬¦ä¸² '" + strRange + "' çš„å·¦è¾¹éƒ¨åˆ† '" + strStart + "' æ ¼å¼é”™è¯¯ï¼Œåº”ä¸º8å­—ç¬¦");
 
                 if (strEnd.Length != 8)
-                    throw new Exception("Ê±¼ä·¶Î§×Ö·û´® '" + strRange + "' µÄÓÒ±ß²¿·Ö '" + strEnd + "' ¸ñÊ½´íÎó£¬Ó¦Îª8×Ö·û");
+                    throw new Exception("æ—¶é—´èŒƒå›´å­—ç¬¦ä¸² '" + strRange + "' çš„å³è¾¹éƒ¨åˆ† '" + strEnd + "' æ ¼å¼é”™è¯¯ï¼Œåº”ä¸º8å­—ç¬¦");
 
                 if (String.Compare(strPublishTime, strStart) < 0)
                     return false;
@@ -4107,7 +4107,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ÆÚÊıÕûÊı
+        // æœŸæ•°æ•´æ•°
         public int IssueCountValue
         {
             get
@@ -4127,7 +4127,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ÆÚÊı×Ö·û´®
+        // æœŸæ•°å­—ç¬¦ä¸²
         public string IssueCountString
         {
             get
@@ -4140,7 +4140,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ¸´±¾ÊıÕûÊı
+        // å¤æœ¬æ•°æ•´æ•°
         public int CopyValue
         {
             get
@@ -4163,7 +4163,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ¸´±¾Êı×Ö·û´®
+        // å¤æœ¬æ•°å­—ç¬¦ä¸²
         public string CopyString
         {
             get
@@ -4176,7 +4176,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // Ô­ÓĞµÄ ¸´±¾ÊıÕûÊı
+        // åŸæœ‰çš„ å¤æœ¬æ•°æ•´æ•°
         // 2008/9/12
         public int OldCopyValue
         {
@@ -4200,7 +4200,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // Ô­ÓĞµÄ ¸´±¾Êı×Ö·û´®
+        // åŸæœ‰çš„ å¤æœ¬æ•°å­—ç¬¦ä¸²
         public string OldCopyString
         {
             get
@@ -4213,7 +4213,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // µ¥¼Û
+        // å•ä»·
         public string Price
         {
             get
@@ -4226,7 +4226,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // Ô­ÓĞµÄ µ¥¼Û
+        // åŸæœ‰çš„ å•ä»·
         public string OldPrice
         {
             get
@@ -4239,7 +4239,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // ¹İ²ØµØµãÊÂÏîµÄ¸öÊı 2008/9/12
+        // é¦†è—åœ°ç‚¹äº‹é¡¹çš„ä¸ªæ•° 2008/9/12
         public int DistributeCount
         {
             get
@@ -4252,7 +4252,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // È¥Ïò£¬¹İ²Ø·ÖÅä²ßÂÔ
+        // å»å‘ï¼Œé¦†è—åˆ†é…ç­–ç•¥
         public string Distribute
         {
             get
@@ -4261,7 +4261,7 @@ Color.FromArgb(50, Color.Gray)
             }
             set
             {
-                // ¹İ²Ø·ÖÅä×Ö·û´®µÄĞŞ¸Ä»áµ¼ÖÂÆäcount¸Ä±ä£¬½ø¶ø»áÓ°Ïìµ½Í¬Ò»ÊÂÏîµÄCopyÖµ
+                // é¦†è—åˆ†é…å­—ç¬¦ä¸²çš„ä¿®æ”¹ä¼šå¯¼è‡´å…¶countæ”¹å˜ï¼Œè¿›è€Œä¼šå½±å“åˆ°åŒä¸€äº‹é¡¹çš„Copyå€¼
                 this.location.Value = value;
             }
         }
@@ -4300,7 +4300,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // Àà±ğ
+        // ç±»åˆ«
         public string Class
         {
             get
@@ -4329,11 +4329,11 @@ Color.FromArgb(50, Color.Gray)
                 }
                 catch (Exception ex)
                 {
-                    strError = "XML¼ÇÂ¼×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                    strError = "XMLè®°å½•è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     throw new Exception(strError);
                 }
 
-                // ÌáÈ¡ËùĞèµÄÄÚÈİ£¬¹¹³ÉÎÄ±¾ÏÔÊ¾
+                // æå–æ‰€éœ€çš„å†…å®¹ï¼Œæ„æˆæ–‡æœ¬æ˜¾ç¤º
                 return DomUtil.GetElementText(dom.DocumentElement,
                     "index");
             }
@@ -4351,16 +4351,16 @@ Color.FromArgb(50, Color.Gray)
                 }
                 catch (Exception ex)
                 {
-                    strError = "XML¼ÇÂ¼×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                    strError = "XMLè®°å½•è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     throw new Exception(strError);
                 }
 
-                // ÌáÈ¡ËùĞèµÄÄÚÈİ£¬¹¹³ÉÎÄ±¾ÏÔÊ¾
+                // æå–æ‰€éœ€çš„å†…å®¹ï¼Œæ„æˆæ–‡æœ¬æ˜¾ç¤º
                 DomUtil.SetElementText(dom.DocumentElement,
                     "index", value);
 
                 this.OtherXml = dom.OuterXml;
-                // »á×Ô¶¯Ë¢ĞÂÏÔÊ¾
+                // ä¼šè‡ªåŠ¨åˆ·æ–°æ˜¾ç¤º
 
             }
         }
@@ -4394,7 +4394,7 @@ Color.FromArgb(50, Color.Gray)
             }
             catch (Exception ex)
             {
-                strError = "XML¼ÇÂ¼×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè®°å½•è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -4405,7 +4405,7 @@ Color.FromArgb(50, Color.Gray)
                 return 0;
             }
 
-            // ÌáÈ¡ËùĞèµÄÄÚÈİ£¬¹¹³ÉÎÄ±¾ÏÔÊ¾
+            // æå–æ‰€éœ€çš„å†…å®¹ï¼Œæ„æˆæ–‡æœ¬æ˜¾ç¤º
             string strZipcode = DomUtil.GetElementText(dom.DocumentElement,
                 "zipcode");
             string strAddress = DomUtil.GetElementText(dom.DocumentElement,
@@ -4427,16 +4427,16 @@ Color.FromArgb(50, Color.Gray)
             string strComment = DomUtil.GetElementText(dom.DocumentElement,
                 "comment");
 
-            this.label_sellerAddress.Text = "ÓÊÕş±àÂë: \t" + strZipcode + "\r\n"
-            + "µØÖ·: \t" + strAddress + "\r\n"
-            + "µ¥Î»Ãû: \t" + strDepartment + "\r\n"
-            + "ÁªÏµÈË: \t" + strName + "\r\n"
-            + "µç»°: \t" + strTel + "\r\n"
+            this.label_sellerAddress.Text = "é‚®æ”¿ç¼–ç : \t" + strZipcode + "\r\n"
+            + "åœ°å€: \t" + strAddress + "\r\n"
+            + "å•ä½å: \t" + strDepartment + "\r\n"
+            + "è”ç³»äºº: \t" + strName + "\r\n"
+            + "ç”µè¯: \t" + strTel + "\r\n"
             + "Email: \t" + strEmail + "\r\n"
-            + "¿ª»§ĞĞ: \t" + strBank + "\r\n"
-            + "ÒøĞĞÕËºÅ: \t" + strAccounts + "\r\n"
-            + "»ã¿î·½Ê½: \t" + strPayStyle + "\r\n"
-            + "×¢ÊÍ: \t" + strComment + "\r\n";
+            + "å¼€æˆ·è¡Œ: \t" + strBank + "\r\n"
+            + "é“¶è¡Œè´¦å·: \t" + strAccounts + "\r\n"
+            + "æ±‡æ¬¾æ–¹å¼: \t" + strPayStyle + "\r\n"
+            + "æ³¨é‡Š: \t" + strComment + "\r\n";
 
             return 0;
         }
@@ -4453,11 +4453,11 @@ Color.FromArgb(50, Color.Gray)
             }
             catch (Exception ex)
             {
-                strError = "XML¼ÇÂ¼×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè®°å½•è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // ÌáÈ¡ËùĞèµÄÄÚÈİ£¬¹¹³ÉÎÄ±¾ÏÔÊ¾
+            // æå–æ‰€éœ€çš„å†…å®¹ï¼Œæ„æˆæ–‡æœ¬æ˜¾ç¤º
             string strIndex = DomUtil.GetElementText(dom.DocumentElement,
                 "index");
             string strState = DomUtil.GetElementText(dom.DocumentElement,
@@ -4482,19 +4482,19 @@ Color.FromArgb(50, Color.Gray)
             string strTotalPrice = DomUtil.GetElementText(dom.DocumentElement,
                 "totalPrice");
 
-            this.label_other.Text = "±àºÅ: \t" + strIndex + "\r\n"
-            + "×´Ì¬: \t" + strState + "\r\n"
-                // + "Ê±¼ä·¶Î§:\t" + strRange + "\r\n"
-            + "¶©¹ºÊ±¼ä: \t" + strOrderTime + "\r\n"
-            + "¶©µ¥ºÅ: \t" + strOrderID + "\r\n"
-            + "×Ü¼Û¸ñ: \t" + strTotalPrice + "\r\n"
-            + "×¢ÊÍ: \t" + strComment + "\r\n"
-            + "Åú´ÎºÅ: \t" + strBatchNo + "\r\n";
+            this.label_other.Text = "ç¼–å·: \t" + strIndex + "\r\n"
+            + "çŠ¶æ€: \t" + strState + "\r\n"
+                // + "æ—¶é—´èŒƒå›´:\t" + strRange + "\r\n"
+            + "è®¢è´­æ—¶é—´: \t" + strOrderTime + "\r\n"
+            + "è®¢å•å·: \t" + strOrderID + "\r\n"
+            + "æ€»ä»·æ ¼: \t" + strTotalPrice + "\r\n"
+            + "æ³¨é‡Š: \t" + strComment + "\r\n"
+            + "æ‰¹æ¬¡å·: \t" + strBatchNo + "\r\n";
 
             return 0;
         }
 
-        // ¿ÉÄÜ»áÅ×³öÒì³£
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public string TotalPrice
         {
             get
@@ -4540,7 +4540,7 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
-        // »ñµÃ±íÊ¾ÊÂÏîÈ«²¿ÄÚÈİµÄXML¼ÇÂ¼
+        // è·å¾—è¡¨ç¤ºäº‹é¡¹å…¨éƒ¨å†…å®¹çš„XMLè®°å½•
         public int BuildXml(out string strXml,
             out string strError)
         {
@@ -4564,7 +4564,7 @@ Color.FromArgb(50, Color.Gray)
                 dom.LoadXml("<root />");
 
             /*
-             * other xmlÖĞÒÑ¾­°üº¬ÏÂÁĞÄÚÈİ:
+             * other xmlä¸­å·²ç»åŒ…å«ä¸‹åˆ—å†…å®¹:
                 "index"
                 "state"
                 "range"
@@ -4600,8 +4600,8 @@ Color.FromArgb(50, Color.Gray)
         }
 
 #if NO
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØÒ»°ãÊ±¼ä×Ö·û´®
-        // exception: ²»»áÅ×³öÒì³£
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°ä¸€èˆ¬æ—¶é—´å­—ç¬¦ä¸²
+        // exception: ä¸ä¼šæŠ›å‡ºå¼‚å¸¸
         public static string LocalTime(string strRfc1123Time)
         {
             try
@@ -4612,22 +4612,22 @@ Color.FromArgb(50, Color.Gray)
             }
             catch // (Exception ex)    // 2008/10/28
             {
-                return "Ê±¼ä×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¶é—´å­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
 #endif
 
-        // ÊÂÏî±êÌâ
+        // äº‹é¡¹æ ‡é¢˜
         public string ItemCaption
         {
             get
             {
-                // ¹éÄÉ»ã×ÜÒ»¸öĞĞµÄÌØÕ÷
+                // å½’çº³æ±‡æ€»ä¸€ä¸ªè¡Œçš„ç‰¹å¾
                 return this.comboBox_seller.Text + ":" + this.comboBox_source.Text + ":" + this.comboBox_copy.Text;
             }
         }
 
-        // ±¾´ÎĞÂÑéÊÕµÄÊıÁ¿
+        // æœ¬æ¬¡æ–°éªŒæ”¶çš„æ•°é‡
         public int NewlyAcceptedCount
         {
             get
@@ -4645,19 +4645,19 @@ Color.FromArgb(50, Color.Gray)
 
 
     /// <summary>
-    /// »ñµÃÈ±Ê¡¼ÇÂ¼
+    /// è·å¾—ç¼ºçœè®°å½•
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetDefaultRecordEventHandler(object sender,
     GetDefaultRecordEventArgs e);
 
     /// <summary>
-    /// »ñµÃÈ±Ê¡¼ÇÂ¼µÄ²ÎÊı
+    /// è·å¾—ç¼ºçœè®°å½•çš„å‚æ•°
     /// </summary>
     public class GetDefaultRecordEventArgs : EventArgs
     {
-        public string Xml = ""; // È±Ê¡¼ÇÂ¼
+        public string Xml = ""; // ç¼ºçœè®°å½•
     }
 
     public class MyTableLayoutPanel : TableLayoutPanel
@@ -4665,9 +4665,9 @@ Color.FromArgb(50, Color.Gray)
         public bool DisableUpdate = false;
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             if (this.DisableUpdate == true)
@@ -4682,27 +4682,27 @@ Color.FromArgb(50, Color.Gray)
         }
     }
 
-    // ¼ì²é¹İ´úÂëÊÇ·ñÔÚ¹ÜÏ½·¶Î§ÄÚ
+    // æ£€æŸ¥é¦†ä»£ç æ˜¯å¦åœ¨ç®¡è¾–èŒƒå›´å†…
     /// <summary>
-    /// ¼ì²é¹İ´úÂëÊÇ·ñÔÚ¹ÜÏ½·¶Î§ÄÚ ÊÂ¼ş
+    /// æ£€æŸ¥é¦†ä»£ç æ˜¯å¦åœ¨ç®¡è¾–èŒƒå›´å†… äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void VerifyLibraryCodeEventHandler(object sender,
 VerifyLibraryCodeEventArgs e);
 
     /// <summary>
-    /// ¼ì²é¹İ´úÂëÊÇ·ñÔÚ¹ÜÏ½·¶Î§ÄÚÊÂ¼şµÄ²ÎÊı
+    /// æ£€æŸ¥é¦†ä»£ç æ˜¯å¦åœ¨ç®¡è¾–èŒƒå›´å†…äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class VerifyLibraryCodeEventArgs : EventArgs
     {
         /// <summary>
-        /// [in] ´ı¼ì²éµÄ¹İ´úÂë¡£¿ÉÄÜÊÇÒ»¸ö×Ö·û´®ÁĞ±íĞÎÌ¬
+        /// [in] å¾…æ£€æŸ¥çš„é¦†ä»£ç ã€‚å¯èƒ½æ˜¯ä¸€ä¸ªå­—ç¬¦ä¸²åˆ—è¡¨å½¢æ€
         /// </summary>
-        public string LibraryCode = ""; // [in]´ı¼ì²éµÄ¹İ´úÂë¡£¿ÉÄÜÊÇÒ»¸ö×Ö·û´®ÁĞ±íĞÎÌ¬
+        public string LibraryCode = ""; // [in]å¾…æ£€æŸ¥çš„é¦†ä»£ç ã€‚å¯èƒ½æ˜¯ä¸€ä¸ªå­—ç¬¦ä¸²åˆ—è¡¨å½¢æ€
         /// <summary>
-        /// [out] ¼ì²é½á¹û¡£·Ç¿Õ±íÊ¾¼ì²é·¢ÏÖÁËÎÊÌâ
+        /// [out] æ£€æŸ¥ç»“æœã€‚éç©ºè¡¨ç¤ºæ£€æŸ¥å‘ç°äº†é—®é¢˜
         /// </summary>
-        public string ErrorInfo = "";   // [out]¼ì²é½á¹û¡£·Ç¿Õ±íÊ¾¼ì²é·¢ÏÖÁËÎÊÌâ
+        public string ErrorInfo = "";   // [out]æ£€æŸ¥ç»“æœã€‚éç©ºè¡¨ç¤ºæ£€æŸ¥å‘ç°äº†é—®é¢˜
     }
 }

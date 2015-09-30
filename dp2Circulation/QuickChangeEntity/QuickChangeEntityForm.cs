@@ -1036,18 +1036,8 @@ namespace dp2Circulation
                 this.textBox_outputBarcodes.Text = "";
 
                 // 打开文件
-                /*
-                try
-                {
-                 * */
+
                 sr = new StreamReader(strFilename);
-                /*
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ex.Message);
-                    return;
-                }*/
 
                 EnableControls(false);
 
@@ -1152,7 +1142,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "QuickChangeEntityForm ProcessFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally

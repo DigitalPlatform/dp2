@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Collections;   // Hashtable
 using System.ComponentModel;
@@ -18,18 +18,18 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// ¶ş½øÖÆ×ÊÔ´¹ÜÀí¿Ø¼ş
+    /// äºŒè¿›åˆ¶èµ„æºç®¡ç†æ§ä»¶
     /// </summary>
     public partial class BinaryResControl : UserControl
     {
-        // Ctrl+A×Ô¶¯´´½¨Êı¾İ
+        // Ctrl+Aè‡ªåŠ¨åˆ›å»ºæ•°æ®
         /// <summary>
-        /// ×Ô¶¯´´½¨Êı¾İ
+        /// è‡ªåŠ¨åˆ›å»ºæ•°æ®
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
 
         /// <summary>
-        /// ±ß¿ò·ç¸ñ
+        /// è¾¹æ¡†é£æ ¼
         /// </summary>
         [Category("Appearance")]
         [DescriptionAttribute("Border style of the control")]
@@ -49,7 +49,7 @@ namespace DigitalPlatform.CirculationClient
         bool m_bChanged = false;
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -63,7 +63,7 @@ namespace DigitalPlatform.CirculationClient
 
                 this.m_bChanged = value;
 
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (bOldValue != value && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
@@ -76,7 +76,7 @@ namespace DigitalPlatform.CirculationClient
 
 
         /// <summary>
-        /// È¨ÏŞÖµÅäÖÃÎÄ¼şÈ«Â·¾¶
+        /// æƒé™å€¼é…ç½®æ–‡ä»¶å…¨è·¯å¾„
         /// </summary>
         public string RightsCfgFileName
         {
@@ -84,11 +84,11 @@ namespace DigitalPlatform.CirculationClient
             set;
         }
 
-        public const string CaptionNormal = "ÒÑÉÏÔØ";
-        public const string CaptionNew = "ÉĞÎ´ÉÏÔØ(ĞÂÔö¶ÔÏó)";
-        public const string CaptionChanged = "ÉĞÎ´ÉÏÔØ(ĞŞ¸Ä¹ıµÄ¶ÔÏó)";
-        public const string CaptionDeleted = "±ê¼ÇÉ¾³ı";
-        public const string CaptionError = "´íÎó";
+        public const string CaptionNormal = "å·²ä¸Šè½½";
+        public const string CaptionNew = "å°šæœªä¸Šè½½(æ–°å¢å¯¹è±¡)";
+        public const string CaptionChanged = "å°šæœªä¸Šè½½(ä¿®æ”¹è¿‡çš„å¯¹è±¡)";
+        public const string CaptionDeleted = "æ ‡è®°åˆ é™¤";
+        public const string CaptionError = "é”™è¯¯";
 
         public const int COLUMN_ID = 0;
         public const int COLUMN_STATE = 1;
@@ -106,17 +106,17 @@ namespace DigitalPlatform.CirculationClient
          * */
 
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         public LibraryChannel Channel = null;
 
         /// <summary>
-        /// Í£Ö¹¿ØÖÆ
+        /// åœæ­¢æ§åˆ¶
         /// </summary>
         public DigitalPlatform.Stop Stop = null;
 
         /// <summary>
-        /// ÄÚÈİ·¢Éú¸Ä±ä
+        /// å†…å®¹å‘ç”Ÿæ”¹å˜
         /// </summary>
         public event ContentChangedEventHandler ContentChanged = null;
 
@@ -154,8 +154,8 @@ namespace DigitalPlatform.CirculationClient
 
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ×°ÔØ
-        //      1   ÒÑ¾­×°ÔØ
+        //      0   æ²¡æœ‰è£…è½½
+        //      1   å·²ç»è£…è½½
         public int LoadObject(string strBiblioRecPath,
             string strXml,
             out string strError)
@@ -180,7 +180,7 @@ namespace DigitalPlatform.CirculationClient
             }
             catch (Exception ex)
             {
-                strError = "XML¼ÇÂ¼×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè®°å½•è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -228,11 +228,11 @@ namespace DigitalPlatform.CirculationClient
         }
 #endif
 
-        // Ìî³äÁĞ±íÄÚÈİ
+        // å¡«å……åˆ—è¡¨å†…å®¹
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÌî³äÈÎºÎÄÚÈİ£¬ÁĞ±íÎª¿Õ
-        //      1   ÒÑ¾­Ìî³äÁËÄÚÈİ
+        //      0   æ²¡æœ‰å¡«å……ä»»ä½•å†…å®¹ï¼Œåˆ—è¡¨ä¸ºç©º
+        //      1   å·²ç»å¡«å……äº†å†…å®¹
         public int LoadObject(XmlNodeList nodes,
             out string strError)
         {
@@ -246,8 +246,8 @@ namespace DigitalPlatform.CirculationClient
                 this.ListView.Items.Clear();
 
                 List<ListViewItem> items = new List<ListViewItem>();
-                // µÚÒ»½×¶Î£¬°ÑÀ´×Ô XML ¼ÇÂ¼ÖĞµÄ <file> ÔªËØĞÅÏ¢ÌîÈë¡£
-                // ÕâÑù¾Í±£Ö¤ÁËÖÁÉÙ¿ÉÒÔÔÚ±£´æÊéÄ¿¼ÇÂ¼½×¶ÎÄÜ»¹Ô­ XML ¼ÇÂ¼ÖĞµÄÏà¹Ø²¿·Ö
+                // ç¬¬ä¸€é˜¶æ®µï¼ŒæŠŠæ¥è‡ª XML è®°å½•ä¸­çš„ <file> å…ƒç´ ä¿¡æ¯å¡«å…¥ã€‚
+                // è¿™æ ·å°±ä¿è¯äº†è‡³å°‘å¯ä»¥åœ¨ä¿å­˜ä¹¦ç›®è®°å½•é˜¶æ®µèƒ½è¿˜åŸ XML è®°å½•ä¸­çš„ç›¸å…³éƒ¨åˆ†
                 foreach(XmlElement node in nodes)
                 {
                     string strID = DomUtil.GetAttr(node, "id");
@@ -271,14 +271,14 @@ namespace DigitalPlatform.CirculationClient
                     items.Add(item);
                 }
 
-                // µÚ¶ş½×¶Î£¬´Ó dp2library ·şÎñÆ÷»ñÈ¡ metadata ĞÅÏ¢£¬Ìî³äÆäËû×Ö¶ÎÄÚÈİ
+                // ç¬¬äºŒé˜¶æ®µï¼Œä» dp2library æœåŠ¡å™¨è·å– metadata ä¿¡æ¯ï¼Œå¡«å……å…¶ä»–å­—æ®µå†…å®¹
                 foreach(ListViewItem item in items)
                 {
                     string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
 
                     string strMetadataXml = "";
                     byte[] baMetadataTimestamp = null;
-                    // »ñµÃÒ»¸ö¶ÔÏó×ÊÔ´µÄÔªÊı¾İ
+                    // è·å¾—ä¸€ä¸ªå¯¹è±¡èµ„æºçš„å…ƒæ•°æ®
                     int nRet = GetOneObjectMetadata(
                         this.BiblioRecPath,
                         strID,
@@ -297,7 +297,7 @@ namespace DigitalPlatform.CirculationClient
                         continue;
                     }
 
-                    // È¡metadataÖµ
+                    // å–metadataå€¼
                     Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
                         out strError);
                     if (values == null)
@@ -337,8 +337,8 @@ namespace DigitalPlatform.CirculationClient
 #if NO
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ×°ÔØ
-        //      1   ÒÑ¾­×°ÔØ
+        //      0   æ²¡æœ‰è£…è½½
+        //      1   å·²ç»è£…è½½
         public int LoadObject(XmlNodeList nodes,
             out string strError)
         {
@@ -367,7 +367,7 @@ namespace DigitalPlatform.CirculationClient
 
                     string strMetadataXml = "";
                     byte[] baMetadataTimestamp = null;
-                    // »ñµÃÒ»¸ö¶ÔÏó×ÊÔ´µÄÔªÊı¾İ
+                    // è·å¾—ä¸€ä¸ªå¯¹è±¡èµ„æºçš„å…ƒæ•°æ®
                     int nRet = GetOneObjectMetadata(
                         this.BiblioRecPath,
                         strID,
@@ -386,7 +386,7 @@ namespace DigitalPlatform.CirculationClient
                         continue;
                     }
 
-                    // È¡metadataÖµ
+                    // å–metadataå€¼
                     Hashtable values = ParseMedaDataXml(strMetadataXml,
                         out strError);
                     if (values == null)
@@ -446,7 +446,7 @@ namespace DigitalPlatform.CirculationClient
             if (info == null)
             {
                 return LineState.Error;
-                // throw new Exception("¿ÕµÄTag");
+                // throw new Exception("ç©ºçš„Tag");
             }
 
             return info.LineState;
@@ -458,7 +458,7 @@ namespace DigitalPlatform.CirculationClient
             if (info == null)
             {
                 return LineState.Error;
-                // throw new Exception("¿ÕµÄTag");
+                // throw new Exception("ç©ºçš„Tag");
             }
 
             return info.OldLineState;
@@ -549,9 +549,9 @@ bool bChanged)
         }
          * */
 
-        // ÉèÖÃ item µÄ Tag£¬²¢ÉèÖÃ item µÄÇ°¾°±³¾°ÑÕÉ«
+        // è®¾ç½® item çš„ Tagï¼Œå¹¶è®¾ç½® item çš„å‰æ™¯èƒŒæ™¯é¢œè‰²
         // parameters:
-        //      strInitialUsage Èç¹ûÎªnull£¬Ôò²»ÉèÖÃ´ËÏî
+        //      strInitialUsage å¦‚æœä¸ºnullï¼Œåˆ™ä¸è®¾ç½®æ­¤é¡¹
         void SetLineInfo(ListViewItem item,
             // string strInitialUsage,
             LineState state)
@@ -607,7 +607,7 @@ bool bChanged)
                 this.Channel.Abort();
         }
 
-        // »ñµÃÒ»¸ö¶ÔÏó×ÊÔ´µÄÔªÊı¾İ
+        // è·å¾—ä¸€ä¸ªå¯¹è±¡èµ„æºçš„å…ƒæ•°æ®
         int GetOneObjectMetadata(
             string strBiblioRecPath,
             string strID,
@@ -623,7 +623,7 @@ bool bChanged)
             strResPath = strResPath.Replace(":", "/");
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("ÕıÔÚÏÂÔØ¶ÔÏóµÄÔªÊı¾İ " + strResPath);
+            Stop.Initial("æ­£åœ¨ä¸‹è½½å¯¹è±¡çš„å…ƒæ•°æ® " + strResPath);
             Stop.BeginLoop();
 
             try
@@ -632,7 +632,7 @@ bool bChanged)
 
                 // EnableControlsInLoading(true);
                 string strResult = "";
-                // Ö»µÃµ½metadata
+                // åªå¾—åˆ°metadata
                 long lRet = this.Channel.GetRes(
                     Stop,
                     strResPath,
@@ -644,7 +644,7 @@ bool bChanged)
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "ÏÂÔØ¶ÔÏó " + strResPath + " ÔªÊı¾İÊ§°Ü£¬Ô­Òò: " + strError;
+                    strError = "ä¸‹è½½å¯¹è±¡ " + strResPath + " å…ƒæ•°æ®å¤±è´¥ï¼ŒåŸå› : " + strError;
                     return -1;
                 }
 
@@ -672,14 +672,14 @@ bool bChanged)
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("ĞŞ¸Ä(&M)");
+            menuItem = new MenuItem("ä¿®æ”¹(&M)");
             menuItem.Click += new System.EventHandler(this.menu_modify_Click);
             if (this.ListView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("ĞÂÔö(&N)");
+            menuItem = new MenuItem("æ–°å¢(&N)");
             menuItem.Click += new System.EventHandler(this.menu_new_Click);
             if (bHasBillioLoaded == false)
                 menuItem.Enabled = false;
@@ -687,14 +687,14 @@ bool bChanged)
 
 
             //
-            menuItem = new MenuItem("±ê¼ÇÉ¾³ı(&D)");
+            menuItem = new MenuItem("æ ‡è®°åˆ é™¤(&D)");
             menuItem.Click += new System.EventHandler(this.menu_delete_Click);
             if (this.ListView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("³·Ïú±ê¼ÇÉ¾³ı(&U)");
+            menuItem = new MenuItem("æ’¤é”€æ ‡è®°åˆ é™¤(&U)");
             menuItem.Click += new System.EventHandler(this.menu_undoDelete_Click);
             if (this.ListView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -705,7 +705,7 @@ bool bChanged)
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("µ¼³ö(&E)");
+            menuItem = new MenuItem("å¯¼å‡º(&E)");
             menuItem.Click += new System.EventHandler(this.menu_export_Click);
             if (this.ListView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -715,8 +715,8 @@ bool bChanged)
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            // ´´½¨Êı¾İ
-            menuItem = new MenuItem("´´½¨Êı¾İ[Ctrl+A](&G)");
+            // åˆ›å»ºæ•°æ®
+            menuItem = new MenuItem("åˆ›å»ºæ•°æ®[Ctrl+A](&G)");
             menuItem.Click += new System.EventHandler(this.menu_generateData_Click);
             /*
             if (this.ListView.SelectedItems.Count == 0)
@@ -724,8 +724,8 @@ bool bChanged)
              * */
             contextMenu.MenuItems.Add(menuItem);
 
-            // ´´½¨Î¬»¤856×Ö¶Î
-            menuItem = new MenuItem("´´½¨Î¬»¤856×Ö¶Î(&C)");
+            // åˆ›å»ºç»´æŠ¤856å­—æ®µ
+            menuItem = new MenuItem("åˆ›å»ºç»´æŠ¤856å­—æ®µ(&C)");
             menuItem.Click += new System.EventHandler(this.menu_manage856_Click);
             /*
             if (this.ListView.SelectedItems.Count == 0)
@@ -737,35 +737,35 @@ bool bChanged)
             contextMenu.Show(this.ListView, new Point(e.X, e.Y));	
         }
 
-        // ´´½¨Êı¾İ
+        // åˆ›å»ºæ•°æ®
         void menu_generateData_Click(object sender, EventArgs e)
         {
             if (this.GenerateData != null)
             {
                 GenerateDataEventArgs e1 = new GenerateDataEventArgs();
                 e1.FocusedControl = this.ListView;
-                e1.ScriptEntry = "";    // Æô¶¯Ctrl+A²Ëµ¥
+                e1.ScriptEntry = "";    // å¯åŠ¨Ctrl+Aèœå•
                 this.GenerateData(this, e1);
             }
             else
             {
-                MessageBox.Show(this, "EntityControlÃ»ÓĞ¹Ò½ÓGenerateDataÊÂ¼ş");
+                MessageBox.Show(this, "EntityControlæ²¡æœ‰æŒ‚æ¥GenerateDataäº‹ä»¶");
             }
         }
 
-        // ´´½¨Ë÷È¡ºÅ
+        // åˆ›å»ºç´¢å–å·
         void menu_manage856_Click(object sender, EventArgs e)
         {
             if (this.GenerateData != null)
             {
                 GenerateDataEventArgs e1 = new GenerateDataEventArgs();
                 e1.FocusedControl = this.ListView;
-                e1.ScriptEntry = "Manage856";    // Ö±½ÓÆô¶¯Manage856()º¯Êı
+                e1.ScriptEntry = "Manage856";    // ç›´æ¥å¯åŠ¨Manage856()å‡½æ•°
                 this.GenerateData(this, e1);
             }
             else
             {
-                MessageBox.Show(this, "EntityControlÃ»ÓĞ¹Ò½ÓGenerateDataÊÂ¼ş");
+                MessageBox.Show(this, "EntityControlæ²¡æœ‰æŒ‚æ¥GenerateDataäº‹ä»¶");
             }
         }
 
@@ -773,7 +773,7 @@ bool bChanged)
         {
             if (this.ListView.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªĞŞ¸ÄµÄĞĞ...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦ä¿®æ”¹çš„è¡Œ...");
                 return;
             }
 
@@ -782,7 +782,7 @@ bool bChanged)
 
             if (old_state == LineState.Deleted)
             {
-                MessageBox.Show(this, "¶ÔÒÑ¾­±ê¼ÇÉ¾³ıµÄĞĞ²»ÄÜ½øĞĞĞŞ¸Ä...");
+                MessageBox.Show(this, "å¯¹å·²ç»æ ‡è®°åˆ é™¤çš„è¡Œä¸èƒ½è¿›è¡Œä¿®æ”¹...");
                 return;
             }
 
@@ -887,7 +887,7 @@ bool bChanged)
             this.Changed = true;
         }
 
-        // °´ÕÕusage×Ö·û´®ËÑÑ°ÊÂÏî
+        // æŒ‰ç…§usageå­—ç¬¦ä¸²æœå¯»äº‹é¡¹
         public List<ListViewItem> FindItemByUsage(string strUsage)
         {
             List<ListViewItem> results = new List<ListViewItem>();
@@ -902,9 +902,9 @@ bool bChanged)
             return results;
         }
 
-        // TODO: findItemByRights ¿ÉÒÔÓÃÒ»¸ö»òÕß¶à¸ö right Öµ½øĞĞËÑÑ°
+        // TODO: findItemByRights å¯ä»¥ç”¨ä¸€ä¸ªæˆ–è€…å¤šä¸ª right å€¼è¿›è¡Œæœå¯»
 
-        // ·µ»ØÈ«²¿ÒÑ¾­±ê¼ÇÉ¾³ıµÄÊÂÏî
+        // è¿”å›å…¨éƒ¨å·²ç»æ ‡è®°åˆ é™¤çš„äº‹é¡¹
         public List<ListViewItem> FindAllMaskDeleteItem()
         {
             List<ListViewItem> results = new List<ListViewItem>();
@@ -920,7 +920,7 @@ bool bChanged)
             return results;
         }
 
-        // °´ÕÕid×Ö·û´®ËÑÑ°ÊÂÏî
+        // æŒ‰ç…§idå­—ç¬¦ä¸²æœå¯»äº‹é¡¹
         public List<ListViewItem> FindItemByID(string strID)
         {
             List<ListViewItem> results = new List<ListViewItem>();
@@ -935,12 +935,12 @@ bool bChanged)
             return results;
         }
 
-        // »ñµÃÒ»¸öÊÂÏîµÄÉĞÎ´ÉÏÔØµÄ±¾µØÎÄ¼şÃû
+        // è·å¾—ä¸€ä¸ªäº‹é¡¹çš„å°šæœªä¸Šè½½çš„æœ¬åœ°æ–‡ä»¶å
         // parameters:
         // return:
-        //      -1  ³ö´í
-        //      0   ²»ÊôÓÚĞŞ¸Ä»òÕß´´½¨ºóÉĞÎ´ÉÏÔØµÄÇé¿ö
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   ä¸å±äºä¿®æ”¹æˆ–è€…åˆ›å»ºåå°šæœªä¸Šè½½çš„æƒ…å†µ
+        //      1   æˆåŠŸ
         public int GetUnuploadFilePath(ListViewItem item,
             out string strLocalPath,
             out string strError)
@@ -950,7 +950,7 @@ bool bChanged)
 
             if (this.ListView.Items.IndexOf(item) == -1)
             {
-                strError = "item²»ÊÇµ±Ç°ListViewµÄÊÂÏîÖ®Ò»";
+                strError = "itemä¸æ˜¯å½“å‰ListViewçš„äº‹é¡¹ä¹‹ä¸€";
                 return -1;
             }
 
@@ -965,7 +965,7 @@ bool bChanged)
                     if (info != null
                         && info.ResChanged == false)
                     {
-                        return 0;   // ×ÊÔ´Ã»ÓĞĞŞ¸ÄµÄ
+                        return 0;   // èµ„æºæ²¡æœ‰ä¿®æ”¹çš„
                     }
                 }
                 strLocalPath = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
@@ -1011,14 +1011,14 @@ bool bChanged)
 
             if (this.ListView.Items.IndexOf(item) == -1)
             {
-                strError = "item²»ÊÇµ±Ç°ListViewµÄÊÂÏîÖ®Ò»";
+                strError = "itemä¸æ˜¯å½“å‰ListViewçš„äº‹é¡¹ä¹‹ä¸€";
                 return -1;
             }
 
             LineState old_state = GetLineState(item);
             if (old_state == LineState.Deleted)
             {
-                strError = "¶ÔÒÑ¾­±ê¼ÇÉ¾³ıµÄĞĞ²»ÄÜ½øĞĞĞŞ¸Ä...";
+                strError = "å¯¹å·²ç»æ ‡è®°åˆ é™¤çš„è¡Œä¸èƒ½è¿›è¡Œä¿®æ”¹...";
                 return -1;
             }
             ResObjectDlg dlg = new ResObjectDlg();
@@ -1067,7 +1067,7 @@ bool bChanged)
             return 0;
         }
 
-        // °ü×°ºóµÄ°æ±¾£¬¼æÈİÒÔÇ°µÄÓÃ·¨
+        // åŒ…è£…åçš„ç‰ˆæœ¬ï¼Œå…¼å®¹ä»¥å‰çš„ç”¨æ³•
         public int AppendNewItem(
             string strObjectFilePath,
             string strUsage,
@@ -1083,14 +1083,14 @@ bool bChanged)
         }
 
         /// <summary>
-        /// ×·¼ÓÒ»¸ö¶ÔÏó
+        /// è¿½åŠ ä¸€ä¸ªå¯¹è±¡
         /// </summary>
-        /// <param name="strObjectFilePath">¶ÔÏóÎÄ¼şÃûÈ«Â·¾¶</param>
-        /// <param name="strUsage">ÓÃÍ¾×Ö·û´®</param>
-        /// <param name="strRights">È¨ÏŞ</param>
-        /// <param name="item">·µ»Ø ListView ÖĞĞÄ´´½¨µÄ ListViewItem ¶ÔÏó</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strObjectFilePath">å¯¹è±¡æ–‡ä»¶åå…¨è·¯å¾„</param>
+        /// <param name="strUsage">ç”¨é€”å­—ç¬¦ä¸²</param>
+        /// <param name="strRights">æƒé™</param>
+        /// <param name="item">è¿”å› ListView ä¸­å¿ƒåˆ›å»ºçš„ ListViewItem å¯¹è±¡</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int AppendNewItem(
             string strObjectFilePath,
             string strUsage,
@@ -1135,10 +1135,10 @@ bool bChanged)
             return 0;
         }
 
-        // ±ê¼ÇÉ¾³ıÈô¸ÉÊÂÏî
+        // æ ‡è®°åˆ é™¤è‹¥å¹²äº‹é¡¹
         public int MaskDelete(List<ListViewItem> items)
         {
-            bool bRemoved = false;   // ÊÇ·ñ·¢Éú¹ıÎïÀíÉ¾³ılistview itemµÄÇé¿ö
+            bool bRemoved = false;   // æ˜¯å¦å‘ç”Ÿè¿‡ç‰©ç†åˆ é™¤listview itemçš„æƒ…å†µ
             int nMaskDeleteCount = 0;
             for (int i = 0; i < items.Count; i++)
             {
@@ -1146,12 +1146,12 @@ bool bChanged)
 
                 LineState state = GetLineState(item);
 
-                // Èç¹û±¾À´¾ÍÊÇÒÑ¾­±ê¼ÇÉ¾³ıµÄÊÂÏî
+                // å¦‚æœæœ¬æ¥å°±æ˜¯å·²ç»æ ‡è®°åˆ é™¤çš„äº‹é¡¹
                 if (state == LineState.Deleted)
                     continue;
 
 
-                // Èç¹û±¾À´¾ÍÊÇĞÂÔöÊÂÏî£¬ÄÇÃ´³¹µ×´ÓlistviewÖĞÒÆ³ı
+                // å¦‚æœæœ¬æ¥å°±æ˜¯æ–°å¢äº‹é¡¹ï¼Œé‚£ä¹ˆå½»åº•ä»listviewä¸­ç§»é™¤
                 if (state == LineState.New)
                 {
                     bRemoved = true;
@@ -1159,7 +1159,7 @@ bool bChanged)
                     continue;
                 }
 
-                // ±£´æ¾É×´Ì¬
+                // ä¿å­˜æ—§çŠ¶æ€
                 SetOldLineState(item, state);
 
                 SetLineInfo(item, 
@@ -1178,12 +1178,12 @@ bool bChanged)
         {
             if (this.ListView.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄĞĞ...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦åˆ é™¤çš„è¡Œ...");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒª±ê¼ÇÉ¾³ıÑ¡¶¨µÄ "+this.ListView.SelectedItems.Count.ToString()+" ¸ö¶ÔÏó? ",
+                "ç¡®å®è¦æ ‡è®°åˆ é™¤é€‰å®šçš„ "+this.ListView.SelectedItems.Count.ToString()+" ä¸ªå¯¹è±¡? ",
                 "BinaryResControl",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -1197,7 +1197,7 @@ bool bChanged)
                 items.Add(item);
             }
 
-            bool bRemoved = false;   // ÊÇ·ñ·¢Éú¹ıÎïÀíÉ¾³ılistview itemµÄÇé¿ö
+            bool bRemoved = false;   // æ˜¯å¦å‘ç”Ÿè¿‡ç‰©ç†åˆ é™¤listview itemçš„æƒ…å†µ
             int nMaskDeleteCount = 0;
             for (int i = 0; i < items.Count; i++)
             {
@@ -1205,11 +1205,11 @@ bool bChanged)
 
                 LineState state = GetLineState(item);
 
-                // Èç¹û±¾À´¾ÍÊÇÒÑ¾­±ê¼ÇÉ¾³ıµÄÊÂÏî
+                // å¦‚æœæœ¬æ¥å°±æ˜¯å·²ç»æ ‡è®°åˆ é™¤çš„äº‹é¡¹
                 if (state == LineState.Deleted)
                     continue;
 
-                // Èç¹û±¾À´¾ÍÊÇĞÂÔöÊÂÏî£¬ÄÇÃ´³¹µ×´ÓlistviewÖĞÒÆ³ı
+                // å¦‚æœæœ¬æ¥å°±æ˜¯æ–°å¢äº‹é¡¹ï¼Œé‚£ä¹ˆå½»åº•ä»listviewä¸­ç§»é™¤
                 if (state == LineState.New)
                 {
                     bRemoved = true;
@@ -1217,7 +1217,7 @@ bool bChanged)
                     continue;
                 }
 
-                // ±£´æ¾É×´Ì¬
+                // ä¿å­˜æ—§çŠ¶æ€
                 SetOldLineState(item, state);
 
                 SetLineInfo(item, 
@@ -1231,7 +1231,7 @@ bool bChanged)
 
             if (bRemoved == true)
             {
-                // ĞèÒª¿´¿´listviewÖĞÊÇ²»ÊÇÖÁÉÙÓĞÒ»¸öĞèÒª±£´æµÄÊÂÏî£¿·ñÔòChangedÉèÎªfalse
+                // éœ€è¦çœ‹çœ‹listviewä¸­æ˜¯ä¸æ˜¯è‡³å°‘æœ‰ä¸€ä¸ªéœ€è¦ä¿å­˜çš„äº‹é¡¹ï¼Ÿå¦åˆ™Changedè®¾ä¸ºfalse
                 if (IsChanged() == false)
                 {
                     this.Changed = false;
@@ -1240,7 +1240,7 @@ bool bChanged)
             }
 
             if (nMaskDeleteCount > 0)
-                MessageBox.Show(this, "×¢Òâ£º±ê¼ÇÉ¾³ıµÄÊÂÏîÖ±µ½Ìá½»/±£´æÊ±²Å»áÕæÕı´Ó·şÎñÆ÷É¾³ı¡£");
+                MessageBox.Show(this, "æ³¨æ„ï¼šæ ‡è®°åˆ é™¤çš„äº‹é¡¹ç›´åˆ°æäº¤/ä¿å­˜æ—¶æ‰ä¼šçœŸæ­£ä»æœåŠ¡å™¨åˆ é™¤ã€‚");
         }
 
 
@@ -1248,11 +1248,11 @@ bool bChanged)
         {
             if (this.ListView.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒª³·Ïú±ê¼ÇÉ¾³ıµÄĞĞ...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦æ’¤é”€æ ‡è®°åˆ é™¤çš„è¡Œ...");
                 return;
             }
 
-            int nNotDeleted = 0;    // ÓÃ»§Ñ¡ÔñÒª³·ÏúÉ¾³ıµÄÊÂÏîÖĞ£¬ÓĞ¶àÉÙÏî±¾À´¾Í²»ÊÇÒÑ¾­±ê¼ÇÉ¾³ıµÄÊÂÏî£¿
+            int nNotDeleted = 0;    // ç”¨æˆ·é€‰æ‹©è¦æ’¤é”€åˆ é™¤çš„äº‹é¡¹ä¸­ï¼Œæœ‰å¤šå°‘é¡¹æœ¬æ¥å°±ä¸æ˜¯å·²ç»æ ‡è®°åˆ é™¤çš„äº‹é¡¹ï¼Ÿ
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this.ListView.SelectedItems)
             {
@@ -1275,7 +1275,7 @@ bool bChanged)
 
                 Debug.Assert(old_state != LineState.Deleted, "");
 
-                // »Ö¸´±ê¼ÇÉ¾³ıÇ°µÄ¾É×´Ì¬
+                // æ¢å¤æ ‡è®°åˆ é™¤å‰çš„æ—§çŠ¶æ€
                 SetLineInfo(item,
                     // null, 
                     old_state);
@@ -1283,25 +1283,25 @@ bool bChanged)
                 this.Changed = true;
             }
 
-            // ĞèÒª¿´¿´listviewÖĞÊÇ²»ÊÇÖÁÉÙÓĞÒ»¸öĞèÒª±£´æµÄÊÂÏî£¿·ñÔòChangedÉèÎªfalse
+            // éœ€è¦çœ‹çœ‹listviewä¸­æ˜¯ä¸æ˜¯è‡³å°‘æœ‰ä¸€ä¸ªéœ€è¦ä¿å­˜çš„äº‹é¡¹ï¼Ÿå¦åˆ™Changedè®¾ä¸ºfalse
             if (IsChanged() == false)
                 this.Changed = false;
         }
 
-        // µ¼³ö¶ÔÏóµ½ÎÄ¼ş
+        // å¯¼å‡ºå¯¹è±¡åˆ°æ–‡ä»¶
         void menu_export_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (this.ListView.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªµ¼³öµÄĞĞ...");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦å¯¼å‡ºçš„è¡Œ...");
                 return;
             }
 
             if (this.ListView.SelectedItems.Count != 1)
             {
-                MessageBox.Show(this, "Ò»´ÎÖ»ÄÜÑ¡ÔñÒ»ĞĞµ¼³ö...");
+                MessageBox.Show(this, "ä¸€æ¬¡åªèƒ½é€‰æ‹©ä¸€è¡Œå¯¼å‡º...");
                 return;
             }
 
@@ -1311,13 +1311,13 @@ bool bChanged)
 
             if (state == LineState.New)
             {
-                strError = "ÉĞÎ´ÉÏÔØµÄ¶ÔÏó£¬±¾À´¾ÍÔÚ±¾µØ£¬ÎŞĞèµ¼³ö";
+                strError = "å°šæœªä¸Šè½½çš„å¯¹è±¡ï¼Œæœ¬æ¥å°±åœ¨æœ¬åœ°ï¼Œæ— éœ€å¯¼å‡º";
                 goto ERROR1;
             }
 
             if (state == LineState.Changed)
             {
-                strError = "ÒÑ¾­ĞŞ¸Ä¶øÎ´Ìá½»µÄ¶ÔÏó£¬±¾À´¾ÍÔÚ±¾µØ£¬ÎŞĞèµ¼³ö";
+                strError = "å·²ç»ä¿®æ”¹è€Œæœªæäº¤çš„å¯¹è±¡ï¼Œæœ¬æ¥å°±åœ¨æœ¬åœ°ï¼Œæ— éœ€å¯¼å‡º";
                 goto ERROR1;
             }
 
@@ -1331,7 +1331,7 @@ bool bChanged)
 
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ±¾µØÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æœ¬åœ°æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.FileName = strLocalPath == "" ? strID + ".res" : strLocalPath;
             dlg.InitialDirectory = Environment.CurrentDirectory;
@@ -1343,7 +1343,7 @@ bool bChanged)
                 return;
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("ÕıÔÚÏÂÔØ¶ÔÏó " + strResPath);
+            Stop.Initial("æ­£åœ¨ä¸‹è½½å¯¹è±¡ " + strResPath);
             Stop.BeginLoop();
 
             try
@@ -1366,7 +1366,7 @@ bool bChanged)
                 // EnableControlsInLoading(false);
                 if (lRet == -1)
                 {
-                    strError = "ÏÂÔØ×ÊÔ´ÎÄ¼şÊ§°Ü£¬Ô­Òò: " + strError;
+                    strError = "ä¸‹è½½èµ„æºæ–‡ä»¶å¤±è´¥ï¼ŒåŸå› : " + strError;
                     goto ERROR1;
                 }
             }
@@ -1381,8 +1381,8 @@ bool bChanged)
             MessageBox.Show(this, strError);
         }
 
-        // È·ÈÏÊÇ·ñ»¹ÓĞÔöÉ¾¸ÄµÄÊÂÏî
-        // ¶øthis.Changed²»ÊÇÄÇÃ´¾«È·µÄ
+        // ç¡®è®¤æ˜¯å¦è¿˜æœ‰å¢åˆ æ”¹çš„äº‹é¡¹
+        // è€Œthis.Changedä¸æ˜¯é‚£ä¹ˆç²¾ç¡®çš„
         bool IsChanged()
         {
             for (int i = 0; i < this.ListView.Items.Count; i++)
@@ -1402,9 +1402,9 @@ bool bChanged)
             menu_modify_Click(sender, e);
         }
 
-        // IDºÍusageÊÇ·ñ·¢Éú¸Ä±ä?
-        // ÓĞÔöÉ¾¶ÔÏóµÄ²Ù×÷£¬ID»á·¢Éú¸Ä±ä¡£µ¥´¿ĞŞ¸ÄÒ»ĞĞ£¬ID²»·¢Éú¸Ä±ä
-        // IDÓĞ¸Ä±ä£¬¾ÍĞèÒªÖØĞÂ¹¹Ôìbiblioxml±£´æµ½·şÎñÆ÷
+        // IDå’Œusageæ˜¯å¦å‘ç”Ÿæ”¹å˜?
+        // æœ‰å¢åˆ å¯¹è±¡çš„æ“ä½œï¼ŒIDä¼šå‘ç”Ÿæ”¹å˜ã€‚å•çº¯ä¿®æ”¹ä¸€è¡Œï¼ŒIDä¸å‘ç”Ÿæ”¹å˜
+        // IDæœ‰æ”¹å˜ï¼Œå°±éœ€è¦é‡æ–°æ„é€ biblioxmlä¿å­˜åˆ°æœåŠ¡å™¨
         public bool IsIdUsageChanged()
         {
             for (int i = 0; i < this.ListView.Items.Count; i++)
@@ -1417,7 +1417,7 @@ bool bChanged)
                     || state == LineState.Deleted)
                     return true;
 
-                // ¹Û²ìusageÊÇ·ñ¸Ä±ä
+                // è§‚å¯Ÿusageæ˜¯å¦æ”¹å˜
                 LineInfo info = (LineInfo)item.Tag;
                 if (info != null)
                 {
@@ -1434,7 +1434,7 @@ bool bChanged)
             return false;
         }
 
-        // ÔÚ XmlDocument ¶ÔÏóÖĞÌí¼Ó <file> ÔªËØ¡£ĞÂÔªËØ¼ÓÈëÔÚ¸ùÖ®ÏÂ
+        // åœ¨ XmlDocument å¯¹è±¡ä¸­æ·»åŠ  <file> å…ƒç´ ã€‚æ–°å…ƒç´ åŠ å…¥åœ¨æ ¹ä¹‹ä¸‹
         public int AddFileFragments(ref XmlDocument domRecord,
             out string strError)
         {
@@ -1465,7 +1465,7 @@ bool bChanged)
         }
 
 #if NO
-        // »ñµÃÈ«²¿ID
+        // è·å¾—å…¨éƒ¨ID
         public List<string> GetIds()
         {
             List<string> results = new List<string>();
@@ -1477,7 +1477,7 @@ bool bChanged)
                 LineState state = GetLineState(item);
 
                 if (state == LineState.Deleted)
-                    continue;   // ºöÂÔ±ê¼ÇÉ¾³ıµÄÊÂÏî
+                    continue;   // å¿½ç•¥æ ‡è®°åˆ é™¤çš„äº‹é¡¹
 
                 string strID = ListViewUtil.GetItemText(item ,COLUMN_ID);
 
@@ -1487,7 +1487,7 @@ bool bChanged)
             return results;
         }
 
-        // »ñµÃÈ«²¿usage
+        // è·å¾—å…¨éƒ¨usage
         public List<string> GetUsages()
         {
             List<string> results = new List<string>();
@@ -1499,7 +1499,7 @@ bool bChanged)
                 LineState state = GetLineState(item);
 
                 if (state == LineState.Deleted)
-                    continue;   // ºöÂÔ±ê¼ÇÉ¾³ıµÄÊÂÏî
+                    continue;   // å¿½ç•¥æ ‡è®°åˆ é™¤çš„äº‹é¡¹
 
                 string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
                 results.Add(strUsage);
@@ -1510,9 +1510,9 @@ bool bChanged)
 
 #endif
 
-        // ´ÓÂ·¾¶ÖĞÈ¡³ö¼ÇÂ¼ºÅ²¿·Ö
+        // ä»è·¯å¾„ä¸­å–å‡ºè®°å½•å·éƒ¨åˆ†
         // parammeters:
-        //      strPath Â·¾¶¡£ÀıÈç"ÖĞÎÄÍ¼Êé/3"
+        //      strPath è·¯å¾„ã€‚ä¾‹å¦‚"ä¸­æ–‡å›¾ä¹¦/3"
         public static string GetRecordID(string strPath)
         {
             int nRet = strPath.LastIndexOf("/");
@@ -1522,11 +1522,11 @@ bool bChanged)
             return strPath.Substring(nRet + 1).Trim();
         }
 
-        // ÊÇ·ñÎªĞÂÔö¼ÇÂ¼µÄÂ·¾¶
+        // æ˜¯å¦ä¸ºæ–°å¢è®°å½•çš„è·¯å¾„
         public static bool IsNewPath(string strPath)
         {
             if (String.IsNullOrEmpty(strPath) == true)
-                return true;    //???? ¿ÕÂ·¾¶µ±×÷ĞÂÂ·¾¶?
+                return true;    //???? ç©ºè·¯å¾„å½“ä½œæ–°è·¯å¾„?
 
             string strID = GetRecordID(strPath);
 
@@ -1537,10 +1537,10 @@ bool bChanged)
             return false;
         }
 
-        // ±£´æ×ÊÔ´µ½·şÎñÆ÷
+        // ä¿å­˜èµ„æºåˆ°æœåŠ¡å™¨
         // return:
         //		-1	error
-        //		>=0 Êµ¼ÊÉÏÔØµÄ×ÊÔ´¶ÔÏóÊı
+        //		>=0 å®é™…ä¸Šè½½çš„èµ„æºå¯¹è±¡æ•°
         public int Save(
             out string strError)
         {
@@ -1551,19 +1551,19 @@ bool bChanged)
 
             if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨BiblioRecPath";
+                strError = "å°šæœªæŒ‡å®šBiblioRecPath";
                 return -1;
             }
 
             if (IsNewPath(this.BiblioRecPath) == true)
             {
-                strError = "ÊéÄ¿¼ÇÂ¼Â·¾¶ '" + this.BiblioRecPath + "' ²»ÊÇÒÑ±£´æµÄ¼ÇÂ¼Â·¾¶£¬ÎŞ·¨ÓÃÓÚ¶ÔÏó×ÊÔ´ÉÏÔØ";
+                strError = "ä¹¦ç›®è®°å½•è·¯å¾„ '" + this.BiblioRecPath + "' ä¸æ˜¯å·²ä¿å­˜çš„è®°å½•è·¯å¾„ï¼Œæ— æ³•ç”¨äºå¯¹è±¡èµ„æºä¸Šè½½";
                 return -1;
             }
 
             if (this.Channel == null)
             {
-                strError = "BinaryResControlÉĞÎ´Ö¸¶¨Channel";
+                strError = "BinaryResControlå°šæœªæŒ‡å®šChannel";
                 return -1;
             }
 
@@ -1575,11 +1575,11 @@ bool bChanged)
                 Stop.Style = StopStyle.EnableHalfStop;
 
                 Stop.OnStop += new StopEventHandler(this.DoStop);
-                Stop.Initial("ÕıÔÚÉÏÔØ×ÊÔ´ ...");
+                Stop.Initial("æ­£åœ¨ä¸Šè½½èµ„æº ...");
                 Stop.BeginLoop();
             }
 
-            int nUploadCount = 0;   // Êµ¼ÊÉÏÔØµÄ×ÊÔ´¸öÊı
+            int nUploadCount = 0;   // å®é™…ä¸Šè½½çš„èµ„æºä¸ªæ•°
 
             try
             {
@@ -1606,15 +1606,15 @@ bool bChanged)
                                     LineState.Normal);
                                 SetXmlChanged(item, false);
                                 SetResChanged(item, false);
-                                continue;   // ×ÊÔ´Ã»ÓĞĞŞ¸ÄµÄ£¬ÔòÌø¹ıÉÏÔØ
+                                continue;   // èµ„æºæ²¡æœ‰ä¿®æ”¹çš„ï¼Œåˆ™è·³è¿‡ä¸Šè½½
                             }
                         }
                     }
                     else
                     {
-                        // ±ê¼ÇÉ¾³ıµÄÊÂÏî£¬Ö»ÒªÊéÄ¿XMLÖØĞÂ¹¹ÔìµÄÊ±ºò
-                        // ²»°üº¬ÆäID£¬ÊéÄ¿XML±£´æºó£¬¾ÍµÈÓÚÉ¾³ıÁË¸ÃÊÂÏî¡£
-                        // ËùÒÔ±¾º¯ÊıÖ»ÊÇ¼òµ¥RemoveÕâÑùµÄlistviewÊÂÏî¼´¿É
+                        // æ ‡è®°åˆ é™¤çš„äº‹é¡¹ï¼Œåªè¦ä¹¦ç›®XMLé‡æ–°æ„é€ çš„æ—¶å€™
+                        // ä¸åŒ…å«å…¶IDï¼Œä¹¦ç›®XMLä¿å­˜åï¼Œå°±ç­‰äºåˆ é™¤äº†è¯¥äº‹é¡¹ã€‚
+                        // æ‰€ä»¥æœ¬å‡½æ•°åªæ˜¯ç®€å•Removeè¿™æ ·çš„listviewäº‹é¡¹å³å¯
                         if (state == LineState.Deleted)
                         {
                             this.ListView.Items.Remove(item);
@@ -1632,12 +1632,12 @@ bool bChanged)
                     string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
                     string strTimestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
 
-                    // ¼ì²âÎÄ¼ş³ß´ç
+                    // æ£€æµ‹æ–‡ä»¶å°ºå¯¸
                     FileInfo fi = new FileInfo(strLocalFilename);
 
                     if (fi.Exists == false)
                     {
-                        strError = "ÎÄ¼ş '" + strLocalFilename + "' ²»´æÔÚ...";
+                        strError = "æ–‡ä»¶ '" + strLocalFilename + "' ä¸å­˜åœ¨...";
                         return -1;
                     }
 
@@ -1645,7 +1645,7 @@ bool bChanged)
 
                     if (fi.Length == 0)
                     {
-                        // ¿ÕÎÄ¼ş
+                        // ç©ºæ–‡ä»¶
                         ranges = new string[1];
                         ranges[0] = "";
                     }
@@ -1654,8 +1654,8 @@ bool bChanged)
                         string strRange = "";
                         strRange = "0-" + Convert.ToString(fi.Length - 1);
 
-                        // °´ÕÕ100K×÷ÎªÒ»¸öchunk
-                        // TODO: ÊµÏÖ»¬¶¯´°¿Ú£¬¸ù¾İËÙÂÊÀ´¾ö¶¨chunk³ß´ç
+                        // æŒ‰ç…§100Kä½œä¸ºä¸€ä¸ªchunk
+                        // TODO: å®ç°æ»‘åŠ¨çª—å£ï¼Œæ ¹æ®é€Ÿç‡æ¥å†³å®šchunkå°ºå¯¸
                         ranges = RangeList.ChunkRange(strRange,
                             500 * 1024);
                     }
@@ -1672,17 +1672,17 @@ bool bChanged)
                     {
                         // REDOSINGLESAVE:
 
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (Stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
 
                         string strWaiting = "";
                         if (j == ranges.Length - 1)
-                            strWaiting = " ÇëÄÍĞÄµÈ´ı...";
+                            strWaiting = " è¯·è€å¿ƒç­‰å¾…...";
 
                         string strPercent = "";
                         RangeList rl = new RangeList(ranges[j]);
@@ -1693,7 +1693,7 @@ bool bChanged)
                         }
 
                         if (Stop != null)
-                            Stop.SetMessage("ÕıÔÚÉÏÔØ " + ranges[j] + "/"
+                            Stop.SetMessage("æ­£åœ¨ä¸Šè½½ " + ranges[j] + "/"
                                 + Convert.ToString(fi.Length)
                                 + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
 
@@ -1704,7 +1704,7 @@ bool bChanged)
                             strLocalFilename,
                             strMime,
                             ranges[j],
-                            j == ranges.Length - 1 ? true : false,	// ×îÎ²Ò»´Î²Ù×÷£¬ÌáĞÑµ×²ã×¢ÒâÉèÖÃÌØÊâµÄWebService API³¬Ê±Ê±¼ä
+                            j == ranges.Length - 1 ? true : false,	// æœ€å°¾ä¸€æ¬¡æ“ä½œï¼Œæé†’åº•å±‚æ³¨æ„è®¾ç½®ç‰¹æ®Šçš„WebService APIè¶…æ—¶æ—¶é—´
                             timestamp,
                             out output_timestamp,
                             out strError);
@@ -1726,7 +1726,7 @@ bool bChanged)
                                 {
                                     timestamp = new byte[output_timestamp.Length];
                                     Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                    strWarning = " (Ê±¼ä´Á²»Æ¥Åä, ×Ô¶¯ÖØÊÔ)";
+                                    strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, è‡ªåŠ¨é‡è¯•)";
                                     if (ranges.Length == 1 || j == 0)
                                         goto REDOSINGLESAVE;
                                     goto REDOWHOLESAVE;
@@ -1734,9 +1734,9 @@ bool bChanged)
 
 
                                 DialogResult result = MessageDlg.Show(this,
-                                    "ÉÏÔØ '" + strLocalFilename + "' (Æ¬¶Ï:" + ranges[j] + "/×Ü³ß´ç:" + Convert.ToString(fi.Length)
-                                    + ") Ê±·¢ÏÖÊ±¼ä´Á²»Æ¥Åä¡£ÏêÏ¸Çé¿öÈçÏÂ£º\r\n---\r\n"
-                                    + strError + "\r\n---\r\n\r\nÊÇ·ñÒÔĞÂÊ±¼ä´ÁÇ¿ĞĞÉÏÔØ?\r\n×¢£º(ÊÇ)Ç¿ĞĞÉÏÔØ (·ñ)ºöÂÔµ±Ç°¼ÇÂ¼»ò×ÊÔ´ÉÏÔØ£¬µ«¼ÌĞøºóÃæµÄ´¦Àí (È¡Ïû)ÖĞ¶ÏÕû¸öÅú´¦Àí",
+                                    "ä¸Šè½½ '" + strLocalFilename + "' (ç‰‡æ–­:" + ranges[j] + "/æ€»å°ºå¯¸:" + Convert.ToString(fi.Length)
+                                    + ") æ—¶å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…ã€‚è¯¦ç»†æƒ…å†µå¦‚ä¸‹ï¼š\r\n---\r\n"
+                                    + strError + "\r\n---\r\n\r\næ˜¯å¦ä»¥æ–°æ—¶é—´æˆ³å¼ºè¡Œä¸Šè½½?\r\næ³¨ï¼š(æ˜¯)å¼ºè¡Œä¸Šè½½ (å¦)å¿½ç•¥å½“å‰è®°å½•æˆ–èµ„æºä¸Šè½½ï¼Œä½†ç»§ç»­åé¢çš„å¤„ç† (å–æ¶ˆ)ä¸­æ–­æ•´ä¸ªæ‰¹å¤„ç†",
                                     "dp2batch",
                                     MessageBoxButtons.YesNoCancel,
                                     MessageBoxDefaultButton.Button1,
@@ -1745,7 +1745,7 @@ bool bChanged)
                                 {
                                     timestamp = new byte[output_timestamp.Length];
                                     Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                    strWarning = " (Ê±¼ä´Á²»Æ¥Åä, Ó¦ÓÃ»§ÒªÇóÖØÊÔ)";
+                                    strWarning = " (æ—¶é—´æˆ³ä¸åŒ¹é…, åº”ç”¨æˆ·è¦æ±‚é‡è¯•)";
                                     if (ranges.Length == 1 || j == 0)
                                         goto REDOSINGLESAVE;
                                     goto REDOWHOLESAVE;
@@ -1753,13 +1753,13 @@ bool bChanged)
 
                                 if (result == DialogResult.No)
                                 {
-                                    goto END1;	// ¼ÌĞø×÷ºóÃæµÄ×ÊÔ´
+                                    goto END1;	// ç»§ç»­ä½œåé¢çš„èµ„æº
                                 }
 
                                 if (result == DialogResult.Cancel)
                                 {
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
-                                    goto ERROR1;	// ÖĞ¶ÏÕû¸ö´¦Àí
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
+                                    goto ERROR1;	// ä¸­æ–­æ•´ä¸ªå¤„ç†
                                 }
                             }
                              * */
@@ -1787,7 +1787,7 @@ bool bChanged)
                     Stop.EndLoop();
                     Stop.OnStop -= new StopEventHandler(this.DoStop);
                     if (nUploadCount > 0)
-                        Stop.Initial("ÉÏÔØ×ÊÔ´Íê³É");
+                        Stop.Initial("ä¸Šè½½èµ„æºå®Œæˆ");
                     else
                         Stop.Initial("");
                     Stop.Style = old_stop_style;
@@ -1827,7 +1827,7 @@ bool bChanged)
         {
             base.OnPaint(e);
 
-            // »æÖÆ´íÎóĞÅÏ¢×Ö·û´®
+            // ç»˜åˆ¶é”™è¯¯ä¿¡æ¯å­—ç¬¦ä¸²
             e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 #if NO
             Brush brush = new SolidBrush(Color.FromArgb(100, 0,0,255));
@@ -1867,22 +1867,22 @@ size.Height);
     {
         public LineState LineState = LineState.Normal;
 
-        // ±ê¼ÇÉ¾³ıÇ°µÄ×´Ì¬
+        // æ ‡è®°åˆ é™¤å‰çš„çŠ¶æ€
         public LineState OldLineState = LineState.Normal;
 
-        // public string InitialUsage = "";    // ×î³õµÄusageÖµ
+        // public string InitialUsage = "";    // æœ€åˆçš„usageå€¼
 
-        public bool ResChanged = false; // ×ÊÔ´ÊÇ·ñĞŞ¸Ä¹ı¡£Èç¹ûÒ»¸öÊÂÏîĞŞ¸Ä¹ı£¬µ«ÊÇ×ÊÔ´Ã»ÓĞĞŞ¸Ä¹ı£¬ÔòÎªusageĞŞ¸Ä¹ı
+        public bool ResChanged = false; // èµ„æºæ˜¯å¦ä¿®æ”¹è¿‡ã€‚å¦‚æœä¸€ä¸ªäº‹é¡¹ä¿®æ”¹è¿‡ï¼Œä½†æ˜¯èµ„æºæ²¡æœ‰ä¿®æ”¹è¿‡ï¼Œåˆ™ä¸ºusageä¿®æ”¹è¿‡
 
-        public bool XmlChanged = false; // ÃèÊö×ÊÔ´µÄ usage rights ÊÇ·ñĞŞ¸Ä¹ı¡£2015/7/11
+        public bool XmlChanged = false; // æè¿°èµ„æºçš„ usage rights æ˜¯å¦ä¿®æ”¹è¿‡ã€‚2015/7/11
     }
 
     enum LineState
     {
-        Normal = 0, // ÆÕÍ¨£¬ÒÑ¾­ÉÏÔØµÄÊÂÏî
-        New = 1,    // ĞÂÔöµÄ£¬ÉĞÎ´ÉÏÔØµÄÊ±ºò
-        Changed = 2,    // ĞŞ¸Ä¹ıµÄ£¬ĞÂÄÚÈİÉĞÎ´ÉÏÔØµÄÊÂÏî
-        Deleted = 3,    // ±ê¼ÇÉ¾³ıµÄ£¬ÉĞÎ´Ìá½»É¾³ıµÄÊÂÏî
-        Error = 4,  // »ñµÃmetadataÊ±³ö´íµÄÊÂÏî
+        Normal = 0, // æ™®é€šï¼Œå·²ç»ä¸Šè½½çš„äº‹é¡¹
+        New = 1,    // æ–°å¢çš„ï¼Œå°šæœªä¸Šè½½çš„æ—¶å€™
+        Changed = 2,    // ä¿®æ”¹è¿‡çš„ï¼Œæ–°å†…å®¹å°šæœªä¸Šè½½çš„äº‹é¡¹
+        Deleted = 3,    // æ ‡è®°åˆ é™¤çš„ï¼Œå°šæœªæäº¤åˆ é™¤çš„äº‹é¡¹
+        Error = 4,  // è·å¾—metadataæ—¶å‡ºé”™çš„äº‹é¡¹
     }
 }

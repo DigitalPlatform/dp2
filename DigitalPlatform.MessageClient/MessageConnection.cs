@@ -515,7 +515,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
 + "; return error=" + strError + " value="
 + -1);

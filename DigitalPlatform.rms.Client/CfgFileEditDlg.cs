@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -30,10 +30,10 @@ namespace DigitalPlatform.rms.Client
 		public ApplicationInfo applicationInfo = null;
 		public DigitalPlatform.StopManager stopManager = null;
 		RmsChannel channel = null;
-		public ServerCollection Servers = null;	// ÒıÓÃ
+		public ServerCollection Servers = null;	// å¼•ç”¨
 		public RmsChannelCollection Channels = null;
 
-		public string LocalPath = "";	// ±¾µØÎïÀíÂ·¾¶
+		public string LocalPath = "";	// æœ¬åœ°ç‰©ç†è·¯å¾„
 
 		byte [] TimeStamp = null;
 		MemoryStream Stream = null;
@@ -138,7 +138,7 @@ namespace DigitalPlatform.rms.Client
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 24);
             this.button_OK.TabIndex = 9;
-            this.button_OK.Text = "±£´æ";
+            this.button_OK.Text = "ä¿å­˜";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -149,7 +149,7 @@ namespace DigitalPlatform.rms.Client
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 10;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // textBox_path
@@ -169,7 +169,7 @@ namespace DigitalPlatform.rms.Client
             this.button_format.Name = "button_format";
             this.button_format.Size = new System.Drawing.Size(120, 23);
             this.button_format.TabIndex = 8;
-            this.button_format.Text = "ÕûÀíXML¸ñÊ½(&F)";
+            this.button_format.Text = "æ•´ç†XMLæ ¼å¼(&F)";
             this.button_format.Click += new System.EventHandler(this.button_format_Click);
             // 
             // label_message
@@ -188,7 +188,7 @@ namespace DigitalPlatform.rms.Client
             this.button_export.Name = "button_export";
             this.button_export.Size = new System.Drawing.Size(75, 23);
             this.button_export.TabIndex = 6;
-            this.button_export.Text = "µ¼³ö(&E)...";
+            this.button_export.Text = "å¯¼å‡º(&E)...";
             this.button_export.Click += new System.EventHandler(this.button_export_Click);
             // 
             // button_import
@@ -198,7 +198,7 @@ namespace DigitalPlatform.rms.Client
             this.button_import.Name = "button_import";
             this.button_import.Size = new System.Drawing.Size(75, 22);
             this.button_import.TabIndex = 7;
-            this.button_import.Text = "µ¼Èë(&I)...";
+            this.button_import.Text = "å¯¼å…¥(&I)...";
             this.button_import.Click += new System.EventHandler(this.button_import_Click);
             // 
             // label1
@@ -208,7 +208,7 @@ namespace DigitalPlatform.rms.Client
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Â·¾¶(&P):";
+            this.label1.Text = "è·¯å¾„(&P):";
             // 
             // label2
             // 
@@ -245,7 +245,7 @@ namespace DigitalPlatform.rms.Client
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 12);
             this.label3.TabIndex = 11;
-            this.label3.Text = "·şÎñÆ÷(&U):";
+            this.label3.Text = "æœåŠ¡å™¨(&U):";
             // 
             // checkBox_autoCreate
             // 
@@ -255,7 +255,7 @@ namespace DigitalPlatform.rms.Client
             this.checkBox_autoCreate.Name = "checkBox_autoCreate";
             this.checkBox_autoCreate.Size = new System.Drawing.Size(138, 16);
             this.checkBox_autoCreate.TabIndex = 13;
-            this.checkBox_autoCreate.Text = "×Ô¶¯´´½¨ÖĞ¼ä¶ÔÏó(&A)";
+            this.checkBox_autoCreate.Text = "è‡ªåŠ¨åˆ›å»ºä¸­é—´å¯¹è±¡(&A)";
             // 
             // CfgFileEditDlg
             // 
@@ -280,7 +280,7 @@ namespace DigitalPlatform.rms.Client
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CfgFileEditDlg";
             this.ShowInTaskbar = false;
-            this.Text = "±à¼­ÅäÖÃÎÄ¼ş";
+            this.Text = "ç¼–è¾‘é…ç½®æ–‡ä»¶";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.CfgFileEditDlg_Closing);
             this.Closed += new System.EventHandler(this.CfgFileEditDlg_Closed);
             this.Load += new System.EventHandler(this.CfgFileEditDlg_Load);
@@ -384,8 +384,8 @@ namespace DigitalPlatform.rms.Client
 
 				strMetaData = this.Obj.Metadata;
 
-				// ¹Û²ìmime
-				// È¡metadata
+				// è§‚å¯Ÿmime
+				// å–metadata
 				values = StringUtil.ParseMedaDataXml(strMetaData,
 					out strError);
 				if (values == null)
@@ -432,7 +432,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.channel = Channels.GetChannel(this.ServerUrl);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 			DigitalPlatform.Stop stop = null;
 
@@ -440,10 +440,10 @@ namespace DigitalPlatform.rms.Client
 			{
 				stop = new DigitalPlatform.Stop();
 
-                stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+                stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚÏÂÔØÅäÖÃÎÄ¼ş: " + this.Path);
+				stop.Initial("æ­£åœ¨ä¸‹è½½é…ç½®æ–‡ä»¶: " + this.Path);
 
 				stop.BeginLoop();
 
@@ -501,8 +501,8 @@ namespace DigitalPlatform.rms.Client
 
 			this.TimeStamp = baTimeStamp;
 
-			// ¹Û²ìmime
-			// È¡metadata
+			// è§‚å¯Ÿmime
+			// å–metadata
 			values = StringUtil.ParseMedaDataXml(strMetaData,
 				out strError);
 			if (values == null)
@@ -528,7 +528,7 @@ namespace DigitalPlatform.rms.Client
 			}
 			else 
 			{
-				//this.textBox_content.Text = "<¶ş½øÖÆÄÚÈİÎŞ·¨Ö±½Ó±à¼­>";
+				//this.textBox_content.Text = "<äºŒè¿›åˆ¶å†…å®¹æ— æ³•ç›´æ¥ç¼–è¾‘>";
 				//this.textBox_content.ReadOnly = true;
 				//this.button_format.Enabled = false;
 			}
@@ -541,7 +541,7 @@ namespace DigitalPlatform.rms.Client
 				if (stopManager != null && stop != null) 
 				{
 
-					stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+					stop.Unregister();	// å’Œå®¹å™¨å…³è”
 					stop = null;
 				}
 
@@ -552,7 +552,7 @@ namespace DigitalPlatform.rms.Client
 				
 		}
 
-		// mimeÊÇ·ñÎªtext¿ªÍ·
+		// mimeæ˜¯å¦ä¸ºtextå¼€å¤´
 		bool IsText
 		{
 			get 
@@ -566,7 +566,7 @@ namespace DigitalPlatform.rms.Client
 			}
 		}
 
-        // È¥µô×Ö·û´®ÖĞµÄµ¥¸ö0x0a(¶ø²»ÊÇ0x0d 0x0a)
+        // å»æ‰å­—ç¬¦ä¸²ä¸­çš„å•ä¸ª0x0a(è€Œä¸æ˜¯0x0d 0x0a)
         public static string RemoveSingle0a(string strText)
         {
             string strResult = strText.Replace("\n", "");
@@ -577,7 +577,7 @@ namespace DigitalPlatform.rms.Client
 		{
 			string strMetaData = "";
 
-            // TODO: Ò»µ©Óöµ½ÎÊÌâ£¬¿ÉÒÔ·Å¿ª×¢ÊÍÊÔÑé
+            // TODO: ä¸€æ—¦é‡åˆ°é—®é¢˜ï¼Œå¯ä»¥æ”¾å¼€æ³¨é‡Šè¯•éªŒ
             // this.textBox_content.Text = RemoveSingle0a(this.textBox_content.Text);
 
 
@@ -622,7 +622,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.channel = Channels.GetChannel(this.ServerUrl);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 			DigitalPlatform.Stop stop = null;
 
@@ -630,10 +630,10 @@ namespace DigitalPlatform.rms.Client
 			{
 				stop = new DigitalPlatform.Stop();
 
-                stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+                stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚ±£´æÅäÖÃÎÄ¼ş: " + this.Path);
+				stop.Initial("æ­£åœ¨ä¿å­˜é…ç½®æ–‡ä»¶: " + this.Path);
 
 				stop.BeginLoop();
 
@@ -641,7 +641,7 @@ namespace DigitalPlatform.rms.Client
 
 			if (this.IsText == true)
 			{
-				// ¸üĞÂstream¶ÔÏóÄÚÈİ
+				// æ›´æ–°streamå¯¹è±¡å†…å®¹
 				byte [] baContent = StringUtil.GetUtf8Bytes(this.textBox_content.Text, true);
 				this.Stream = new MemoryStream(baContent);
 				/*
@@ -654,7 +654,7 @@ namespace DigitalPlatform.rms.Client
 			if (this.Stream != null)
 				this.Stream.Seek(0, SeekOrigin.Begin);
 			
-			// ±£´æÅäÖÃÎÄ¼ş
+			// ä¿å­˜é…ç½®æ–‡ä»¶
 			string strError = "";
 			byte [] baOutputTimestamp = null;
 			string strOutputPath = "";
@@ -695,7 +695,7 @@ namespace DigitalPlatform.rms.Client
 				out strError);
 
 			/*
-			// ±£´æÅäÖÃÎÄ¼ş
+			// ä¿å­˜é…ç½®æ–‡ä»¶
 			byte[] baOutputTimeStamp = null;
 			string strOutputPath = "";
 			string strError = "";
@@ -726,7 +726,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.TimeStamp = baOutputTimestamp;
 
-			MessageBox.Show(this, "ÅäÖÃÎÄ¼ş '" + this.Path + "' ±£´æ³É¹¦");
+			MessageBox.Show(this, "é…ç½®æ–‡ä»¶ '" + this.Path + "' ä¿å­˜æˆåŠŸ");
 
 
 			/////////////
@@ -735,7 +735,7 @@ namespace DigitalPlatform.rms.Client
 				if (stopManager != null && stop != null) 
 				{
 
-					stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+					stop.Unregister();	// å’Œå®¹å™¨å…³è”
 					stop = null;
 				}
 
@@ -761,7 +761,7 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch (XmlException ex)
 			{
-				MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
 
 				textBox_content.Focus();
 				//textBox_content.DisableEmSetSelMsg = false;
@@ -775,7 +775,7 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
 				return;
 			}
 
@@ -797,7 +797,7 @@ namespace DigitalPlatform.rms.Client
 			w.Close();
 			//			m.Close();
 
-			MessageBox.Show(this, "ÕûÀíÍê±Ï¡£");
+			MessageBox.Show(this, "æ•´ç†å®Œæ¯•ã€‚");
 		}
 
 		private void textBox_content_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -829,7 +829,7 @@ namespace DigitalPlatform.rms.Client
 			{
 
 				DialogResult msgResult = MessageBox.Show(this,
-					"ÅäÖÃÎÄ¼şÄÚÈİÒÑ¾­±»ĞŞ¸Ä, ÉĞÎ´±£´æ¡£\r\nÊÇ·ñÒª¹Ø±Õ´°¿Ú²¢·ÅÆúĞŞ¸ÄÄÚÈİ?",
+					"é…ç½®æ–‡ä»¶å†…å®¹å·²ç»è¢«ä¿®æ”¹, å°šæœªä¿å­˜ã€‚\r\næ˜¯å¦è¦å…³é—­çª—å£å¹¶æ”¾å¼ƒä¿®æ”¹å†…å®¹?",
 					"CfgFileEditDlg",
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question,
@@ -854,7 +854,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ÈÃÕıÎÄ±à¼­Æ÷»ñµÃtab¼ü, µ±×÷ÄÚÈİÊäÈë
+		// è®©æ­£æ–‡ç¼–è¾‘å™¨è·å¾—tabé”®, å½“ä½œå†…å®¹è¾“å…¥
 		protected override bool ProcessTabKey(
 			bool forward)
 		{
@@ -870,11 +870,11 @@ namespace DigitalPlatform.rms.Client
 		{
 			if (this.Stream == null)
 			{
-				MessageBox.Show(this, "ÉĞÎ´×°ÔØÈÎºÎÄÚÈİ");
+				MessageBox.Show(this, "å°šæœªè£…è½½ä»»ä½•å†…å®¹");
 				return;
 			}
 
-			// Ñ¯ÎÊÎÄ¼şÈ«Â·¾¶
+			// è¯¢é—®æ–‡ä»¶å…¨è·¯å¾„
 			SaveFileDialog dlg = new SaveFileDialog();
 
 			dlg.CreatePrompt = false;
@@ -912,7 +912,7 @@ namespace DigitalPlatform.rms.Client
 			if (s.Length > 1024 * 1024)
 			{
 				s.Close();
-				MessageBox.Show(this, "ÅäÖÃÎÄ¼ş³ß´ç²»ÄÜ´óÓÚ1M");
+				MessageBox.Show(this, "é…ç½®æ–‡ä»¶å°ºå¯¸ä¸èƒ½å¤§äº1M");
 				return;
 			}
 
@@ -939,7 +939,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// »Øµ÷º¯Êı
+		// å›è°ƒå‡½æ•°
 		void DoStop(object sender, StopEventArgs e)
 		{
 			if (this.channel != null)
@@ -957,7 +957,7 @@ namespace DigitalPlatform.rms.Client
 			{
 				this.textBox_content.ReadOnly = true;
 				this.button_format.Enabled = false;
-				this.textBox_content.Text = "<¶ş½øÖÆÄÚÈİÎŞ·¨Ö±½Ó±à¼­>";
+				this.textBox_content.Text = "<äºŒè¿›åˆ¶å†…å®¹æ— æ³•ç›´æ¥ç¼–è¾‘>";
 			}
 		}
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -11,7 +11,7 @@ using DigitalPlatform.GUI;
 namespace DigitalPlatform.Script
 {
 	/// <summary>
-	/// ¹ÜÀíÒ»¸ö Project µÄ¶Ô»°¿ò
+	/// ç®¡ç†ä¸€ä¸ª Project çš„å¯¹è¯æ¡†
 	/// </summary>
 	public class OneProjectDialog : System.Windows.Forms.Form
 	{
@@ -114,7 +114,7 @@ namespace DigitalPlatform.Script
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "·½°¸Ãû:";
+            this.label1.Text = "æ–¹æ¡ˆå:";
             // 
             // textBox_projectName
             // 
@@ -133,7 +133,7 @@ namespace DigitalPlatform.Script
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
             this.label2.TabIndex = 10;
-            this.label2.Text = "¹¹³ÉÎÄ¼ş:";
+            this.label2.Text = "æ„æˆæ–‡ä»¶:";
             // 
             // button_Cancel
             // 
@@ -143,7 +143,7 @@ namespace DigitalPlatform.Script
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(74, 22);
             this.button_Cancel.TabIndex = 17;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_OK
@@ -154,7 +154,7 @@ namespace DigitalPlatform.Script
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
             this.button_OK.TabIndex = 16;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_projectPathOfName
@@ -174,7 +174,7 @@ namespace DigitalPlatform.Script
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(95, 12);
             this.label5.TabIndex = 3;
-            this.label5.Text = "·½°¸ÃûËùÔÚÎ»ÖÃ:";
+            this.label5.Text = "æ–¹æ¡ˆåæ‰€åœ¨ä½ç½®:";
             // 
             // listView_files
             // 
@@ -198,12 +198,12 @@ namespace DigitalPlatform.Script
             // 
             // columnHeader_fileName
             // 
-            this.columnHeader_fileName.Text = "ÎÄ¼şÃû";
+            this.columnHeader_fileName.Text = "æ–‡ä»¶å";
             this.columnHeader_fileName.Width = 204;
             // 
             // columnHeader_comment
             // 
-            this.columnHeader_comment.Text = "×¢ÊÍ";
+            this.columnHeader_comment.Text = "æ³¨é‡Š";
             this.columnHeader_comment.Width = 288;
             // 
             // textBox_projectLocate
@@ -224,7 +224,7 @@ namespace DigitalPlatform.Script
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(83, 12);
             this.label3.TabIndex = 5;
-            this.label3.Text = "·½°¸ÎÄ¼şÄ¿Â¼:";
+            this.label3.Text = "æ–¹æ¡ˆæ–‡ä»¶ç›®å½•:";
             // 
             // button_editFile
             // 
@@ -233,7 +233,7 @@ namespace DigitalPlatform.Script
             this.button_editFile.Name = "button_editFile";
             this.button_editFile.Size = new System.Drawing.Size(74, 21);
             this.button_editFile.TabIndex = 12;
-            this.button_editFile.Text = "±à¼­(&E)";
+            this.button_editFile.Text = "ç¼–è¾‘(&E)";
             this.button_editFile.Click += new System.EventHandler(this.button_editFile_Click);
             // 
             // button_newFile
@@ -243,7 +243,7 @@ namespace DigitalPlatform.Script
             this.button_newFile.Name = "button_newFile";
             this.button_newFile.Size = new System.Drawing.Size(74, 22);
             this.button_newFile.TabIndex = 13;
-            this.button_newFile.Text = "ĞÂÔö(&N)";
+            this.button_newFile.Text = "æ–°å¢(&N)";
             this.button_newFile.Click += new System.EventHandler(this.button_newFile_Click);
             // 
             // button_deleteFile
@@ -253,7 +253,7 @@ namespace DigitalPlatform.Script
             this.button_deleteFile.Name = "button_deleteFile";
             this.button_deleteFile.Size = new System.Drawing.Size(74, 22);
             this.button_deleteFile.TabIndex = 14;
-            this.button_deleteFile.Text = "É¾³ı(&D)";
+            this.button_deleteFile.Text = "åˆ é™¤(&D)";
             this.button_deleteFile.Click += new System.EventHandler(this.button_deleteFile_Click);
             // 
             // button_changeProjectLocation
@@ -263,7 +263,7 @@ namespace DigitalPlatform.Script
             this.button_changeProjectLocation.Name = "button_changeProjectLocation";
             this.button_changeProjectLocation.Size = new System.Drawing.Size(74, 21);
             this.button_changeProjectLocation.TabIndex = 9;
-            this.button_changeProjectLocation.Text = "¸ÄÃû(&R)";
+            this.button_changeProjectLocation.Text = "æ”¹å(&R)";
             this.button_changeProjectLocation.Click += new System.EventHandler(this.button_changeProjectLocation_Click);
             // 
             // button_changeProjectName
@@ -273,7 +273,7 @@ namespace DigitalPlatform.Script
             this.button_changeProjectName.Name = "button_changeProjectName";
             this.button_changeProjectName.Size = new System.Drawing.Size(74, 22);
             this.button_changeProjectName.TabIndex = 2;
-            this.button_changeProjectName.Text = "¸ÄÃû(&R)";
+            this.button_changeProjectName.Text = "æ”¹å(&R)";
             this.button_changeProjectName.Click += new System.EventHandler(this.button_changeProjectName_Click);
             // 
             // checkBox_displayTempFile
@@ -284,7 +284,7 @@ namespace DigitalPlatform.Script
             this.checkBox_displayTempFile.Name = "checkBox_displayTempFile";
             this.checkBox_displayTempFile.Size = new System.Drawing.Size(114, 16);
             this.checkBox_displayTempFile.TabIndex = 15;
-            this.checkBox_displayTempFile.Text = "ÏÔÊ¾ÁÙÊ±ÎÄ¼ş(&T)";
+            this.checkBox_displayTempFile.Text = "æ˜¾ç¤ºä¸´æ—¶æ–‡ä»¶(&T)";
             this.checkBox_displayTempFile.CheckedChanged += new System.EventHandler(this.checkBox_displayTempFile_CheckedChanged);
             // 
             // button_openProjectFolder
@@ -294,7 +294,7 @@ namespace DigitalPlatform.Script
             this.button_openProjectFolder.Name = "button_openProjectFolder";
             this.button_openProjectFolder.Size = new System.Drawing.Size(133, 21);
             this.button_openProjectFolder.TabIndex = 8;
-            this.button_openProjectFolder.Text = "´ò¿ªÎÄ¼ş¼Ğ(&F)...";
+            this.button_openProjectFolder.Text = "æ‰“å¼€æ–‡ä»¶å¤¹(&F)...";
             this.button_openProjectFolder.Click += new System.EventHandler(this.button_openProjectFolder_Click);
             // 
             // button_openInCode
@@ -304,7 +304,7 @@ namespace DigitalPlatform.Script
             this.button_openInCode.Name = "button_openInCode";
             this.button_openInCode.Size = new System.Drawing.Size(143, 21);
             this.button_openInCode.TabIndex = 7;
-            this.button_openInCode.Text = "ÔÚ Code ÖĞ´ò¿ª(&C)...";
+            this.button_openInCode.Text = "åœ¨ Code ä¸­æ‰“å¼€(&C)...";
             this.button_openInCode.Click += new System.EventHandler(this.button_openInCode_Click);
             // 
             // OneProjectDialog
@@ -335,7 +335,7 @@ namespace DigitalPlatform.Script
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "OneProjectDialog";
             this.ShowInTaskbar = false;
-            this.Text = "½Å±¾´úÂë¹ÜÀí";
+            this.Text = "è„šæœ¬ä»£ç ç®¡ç†";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.ScriptDlg_Closing);
             this.Closed += new System.EventHandler(this.ScriptDlg_Closed);
             this.Load += new System.EventHandler(this.ScriptDlg_Load);
@@ -356,11 +356,11 @@ namespace DigitalPlatform.Script
 		{
 			if (textBox_projectName.Text == "")
 			{
-				MessageBox.Show("ÉĞÎ´Ö¸¶¨·½°¸Ãû");
+				MessageBox.Show("å°šæœªæŒ‡å®šæ–¹æ¡ˆå");
 				return;
 			}
 
-			// ·½°¸Ãû + Â·¾¶
+			// æ–¹æ¡ˆå + è·¯å¾„
 			ResultProjectNamePath = textBox_projectPathOfName.Text;
 
 			if (ResultProjectNamePath != "")
@@ -369,19 +369,19 @@ namespace DigitalPlatform.Script
 			ResultProjectNamePath += textBox_projectName.Text;
 
 			ResultLocate = textBox_projectLocate.Text;
-			// ±ÜÃâÓĞÓÃÄ¿Â¼ºÍÎÄ¼ş±»OnClosed()×Ô¶¯É¾³ı
+			// é¿å…æœ‰ç”¨ç›®å½•å’Œæ–‡ä»¶è¢«OnClosed()è‡ªåŠ¨åˆ é™¤
 			this.strTempLocate = "";	
 
 			/*
-			// Ô´´úÂëÎÄ¼şÃû
+			// æºä»£ç æ–‡ä»¶å
 			ResultCodeFileName = textBox_codeFileName.Text;
 
 			// refs
 			string strTemp = textBox_refs.Text;
-			strTemp = strTemp.Replace("\r\n", ",");	// ×¢ÒâÈ¥µô¿ÕĞĞ?
+			strTemp = strTemp.Replace("\r\n", ",");	// æ³¨æ„å»æ‰ç©ºè¡Œ?
 			ResultRefs = strTemp.Split(new Char [] {','});
 
-			// ±ÜÃâÓĞÓÃÎÄ¼ş±»OnClosed()×Ô¶¯É¾³ı
+			// é¿å…æœ‰ç”¨æ–‡ä»¶è¢«OnClosed()è‡ªåŠ¨åˆ é™¤
 			this.strTempCodeFileName = "";	
 			*/
 
@@ -395,11 +395,11 @@ namespace DigitalPlatform.Script
 			this.DialogResult = DialogResult.Cancel;
 		}
 
-		// ³õÊ¼»¯²ÎÊı
+		// åˆå§‹åŒ–å‚æ•°
 		public void Initial(string strProjectNamePath,
 			string strLocate)
 		{
-			// Îö³öÂ·¾¶ºÍÃû
+			// æå‡ºè·¯å¾„å’Œå
 
 			/*
 			int nRet = strProjectNamePath.LastIndexOf("/");
@@ -423,7 +423,7 @@ namespace DigitalPlatform.Script
 			this.textBox_projectName.Text = strName;
 			this.textBox_projectPathOfName.Text = strPath;
 
-			// ÎÄ¼şÄ¿Â¼
+			// æ–‡ä»¶ç›®å½•
 			textBox_projectLocate.Text = strLocate;
 
 			LoadFileInfo();
@@ -431,7 +431,7 @@ namespace DigitalPlatform.Script
 			/*
 			// refs
 			//string[] aName = strList.Split(new Char [] {','});
-			// Ã¿ĞĞÒ»¸örefÊÂÏî
+			// æ¯è¡Œä¸€ä¸ªrefäº‹é¡¹
 			textBox_refs.Text = "";
 			for(int i=0;i<refs.Length;i++)
 			{
@@ -454,7 +454,7 @@ namespace DigitalPlatform.Script
 
 		}
 
-		// Ìî³äÎÄ¼şĞÅÏ¢
+		// å¡«å……æ–‡ä»¶ä¿¡æ¯
 		void LoadFileInfo()
 		{
 
@@ -468,7 +468,7 @@ namespace DigitalPlatform.Script
 			}
 			catch (Exception ex) 
 			{
-				MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
 				return;
 			}
 
@@ -493,7 +493,7 @@ namespace DigitalPlatform.Script
 					continue;
 				if (strName[0] == '~'
 					&& checkBox_displayTempFile.Checked == false)
-					continue;	// ²»ÏÔÊ¾ '~'´òÍ·µÄÁÙÊ±ÎÄ¼ş
+					continue;	// ä¸æ˜¾ç¤º '~'æ‰“å¤´çš„ä¸´æ—¶æ–‡ä»¶
 
 				ListViewItem item =
 					new ListViewItem(strName,
@@ -514,19 +514,19 @@ namespace DigitalPlatform.Script
 			if (String.Compare(strFileName, 
 				"main.cs",
 				true) == 0)
-				strResult = "Ö÷³ÌĞò";
+				strResult = "ä¸»ç¨‹åº";
 			else if (String.Compare(strFileName, 
 				"marcfilter.fltx",
 				true) == 0)
-				strResult = "MARC¼ÇÂ¼¹ıÂËÆ÷";
+				strResult = "MARCè®°å½•è¿‡æ»¤å™¨";
 			else if (String.Compare(strFileName, 
 				"references.xml",
 				true) == 0)
-				strResult = "referencesÅäÖÃ";
+				strResult = "referencesé…ç½®";
             else if (String.Compare(strFileName,
     "metadata.xml",
     true) == 0)
-                strResult = "ÔªÊı¾İ";
+                strResult = "å…ƒæ•°æ®";
 
 			return strResult;
 		}
@@ -535,7 +535,7 @@ namespace DigitalPlatform.Script
 		/*
 		void LoadCode()
 		{
-			// Ô´´úÂë±¾Éí
+			// æºä»£ç æœ¬èº«
 			try 
 			{
 				StreamReader sr = new StreamReader(textBox_codeFileName.Text, true);
@@ -549,7 +549,7 @@ namespace DigitalPlatform.Script
 		}
 		*/
 
-		// ÎªĞÂ½¨Ò»¸öScript×¼±¸²ÎÊı
+		// ä¸ºæ–°å»ºä¸€ä¸ªScriptå‡†å¤‡å‚æ•°
 		public void New(string strProjectPath,
 			string strTempName,
 			string strNewLocate)
@@ -576,7 +576,7 @@ namespace DigitalPlatform.Script
 				&& m_bNew == true) 
 			{
 				DialogResult msgResult = MessageBox.Show(this,
-					"È·ÊµÒª·ÅÆú±£´æĞÂ·½°¸ '" + textBox_projectName.Text + "' ?",
+					"ç¡®å®è¦æ”¾å¼ƒä¿å­˜æ–°æ–¹æ¡ˆ '" + textBox_projectName.Text + "' ?",
 					"script",
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question,
@@ -591,7 +591,7 @@ namespace DigitalPlatform.Script
 
 		private void ScriptDlg_Closed(object sender, System.EventArgs e)
 		{
-			// É¾³ıÁÙÊ±´úÂëÎÄ¼ş
+			// åˆ é™¤ä¸´æ—¶ä»£ç æ–‡ä»¶
 			if (this.strTempLocate != "") 
 			{
 				try 
@@ -616,7 +616,7 @@ namespace DigitalPlatform.Script
 			bool bSelected = listView_files.SelectedItems.Count > 0;
 
 			//
-			menuItem = new MenuItem("±à¼­(&E)");
+			menuItem = new MenuItem("ç¼–è¾‘(&E)");
 			menuItem.Click += new System.EventHandler(this.button_editFile_Click);
 			if (bSelected == false) 
 			{
@@ -625,7 +625,7 @@ namespace DigitalPlatform.Script
 			contextMenu.MenuItems.Add(menuItem);
 
 			//
-			menuItem = new MenuItem("ĞÂÔö(&N)");
+			menuItem = new MenuItem("æ–°å¢(&N)");
 			menuItem.Click += new System.EventHandler(this.button_newFile_Click);
 			contextMenu.MenuItems.Add(menuItem);
 
@@ -634,7 +634,7 @@ namespace DigitalPlatform.Script
 			contextMenu.MenuItems.Add(menuItem);
 
 			//
-			menuItem = new MenuItem("É¾³ı(&D)");
+			menuItem = new MenuItem("åˆ é™¤(&D)");
 			menuItem.Click += new System.EventHandler(this.button_deleteFile_Click);
 			if (bSelected == false) 
 			{
@@ -667,10 +667,10 @@ namespace DigitalPlatform.Script
 			if (dlg.DialogResult != DialogResult.OK)
 				return;
 
-			// ¿´¿´ÎÄ¼şÃûÊÇ·ñÖØ¸´´´½¨
+			// çœ‹çœ‹æ–‡ä»¶åæ˜¯å¦é‡å¤åˆ›å»º
 			if (GetFileNameItemIndex(dlg.textBox_fileName.Text) != -1) 
 			{
-				MessageBox.Show(this, "ÎÄ¼ş" + dlg.textBox_fileName.Text + "ÒÑ¾­´æÔÚ£¬²»ÄÜÖØ¸´´´½¨...");
+				MessageBox.Show(this, "æ–‡ä»¶" + dlg.textBox_fileName.Text + "å·²ç»å­˜åœ¨ï¼Œä¸èƒ½é‡å¤åˆ›å»º...");
 				return ;
 			}
 
@@ -692,14 +692,14 @@ namespace DigitalPlatform.Script
 			else if (String.Compare(dlg.textBox_fileName.Text,
 				"references.xml", true) == 0)
 			{
-                // TODO: Ó¦ĞŞ¸ÄÎªÊÂ¼şÇı¶¯
+                // TODO: åº”ä¿®æ”¹ä¸ºäº‹ä»¶é©±åŠ¨
 				ScriptManager.CreateDefaultReferenceXmlFile(strFileName);
 			}
             else if (String.Compare(dlg.textBox_fileName.Text,
                 "metadata.xml", true) == 0)
             {
                 Debug.Assert(string.IsNullOrEmpty(this.HostName) == false, "");
-                // TODO: Ó¦ĞŞ¸ÄÎªÊÂ¼şÇı¶¯
+                // TODO: åº”ä¿®æ”¹ä¸ºäº‹ä»¶é©±åŠ¨
                 ScriptManager.CreateDefaultMetadataXmlFile(strFileName, this.HostName);
             }
             else 
@@ -709,7 +709,7 @@ namespace DigitalPlatform.Script
 				sw.Close();
 			}
 
-			// ×°Èëlistview
+			// è£…å…¥listview
 			LoadFileInfo();
 
 			int nIndex = GetFileNameItemIndex(dlg.textBox_fileName.Text);
@@ -738,7 +738,7 @@ namespace DigitalPlatform.Script
 		{
 			if (listView_files.SelectedItems.Count == 0) 
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄÎÄ¼ş...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦åˆ é™¤çš„æ–‡ä»¶...");
 				return;
 			}
 
@@ -751,9 +751,9 @@ namespace DigitalPlatform.Script
 			}
              * */
 
-			// ¾¯¸æ
+			// è­¦å‘Š
 			DialogResult msgResult = MessageBox.Show(this,
-				"È·ÊµÒªÉ¾³ıÏÂÁĞÎÄ¼ş?\r\n---\r\n" + strFileNames + "---",
+				"ç¡®å®è¦åˆ é™¤ä¸‹åˆ—æ–‡ä»¶?\r\n---\r\n" + strFileNames + "---",
 				"script",
 				MessageBoxButtons.YesNo,
 				MessageBoxIcon.Question,
@@ -763,7 +763,7 @@ namespace DigitalPlatform.Script
 				return;
 			}
 
-			// É¾³ıÊµ¼ÊÎÄ¼ş
+			// åˆ é™¤å®é™…æ–‡ä»¶
 			foreach(ListViewItem item in listView_files.SelectedItems)
 			{
 				string strFileName = textBox_projectLocate.Text + "\\" 
@@ -775,11 +775,11 @@ namespace DigitalPlatform.Script
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
 				}
 			}
 
-			// É¾³ılistviewÖĞÊÂÏî
+			// åˆ é™¤listviewä¸­äº‹é¡¹
 			for(int i=listView_files.SelectedIndices.Count-1;i>=0;i--)
 			{
 				listView_files.Items.RemoveAt(listView_files.SelectedIndices[i]);
@@ -818,7 +818,7 @@ namespace DigitalPlatform.Script
 			if (dlg.DialogResult != DialogResult.OK)
 				return;
 
-			// ¸ÄÃû
+			// æ”¹å
 			string strNewLocation = di.Parent.FullName + "\\" + dlg.textBox_dirName.Text;
 
 			if (di.Exists == true) 
@@ -834,13 +834,13 @@ namespace DigitalPlatform.Script
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(this, ex.Message);
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
 					return;
 				}
 			}
 		
 
-			// ·½°¸Ãû + Â·¾¶
+			// æ–¹æ¡ˆå + è·¯å¾„
 			ResultProjectNamePath = textBox_projectPathOfName.Text;
 
 			if (ResultProjectNamePath != "")
@@ -850,7 +850,7 @@ namespace DigitalPlatform.Script
 
 			string strError;
 
-			Debug.Assert(scriptManager != null, "µ÷ÓÃ±¾¶Ô»°¿òÒÔÇ°£¬scriptManagerÖ¸ÕëÓ¦³õÊ¼»¯...");
+			Debug.Assert(scriptManager != null, "è°ƒç”¨æœ¬å¯¹è¯æ¡†ä»¥å‰ï¼ŒscriptManageræŒ‡é’ˆåº”åˆå§‹åŒ–...");
 
 			if (m_bNew == false) 
 			{
@@ -870,7 +870,7 @@ namespace DigitalPlatform.Script
 
 			textBox_projectLocate.Text = strNewLocation;
 
-			// ÖØĞÂ×°ÔØÎÄ¼şÃû?
+			// é‡æ–°è£…è½½æ–‡ä»¶å?
 			LoadFileInfo();
 
 		}
@@ -895,7 +895,7 @@ namespace DigitalPlatform.Script
 				return;
 
 			if (dlg.textBox_projectName.Text == textBox_projectName.Text)
-				return;	// Ã»ÓĞ±ØÒªĞŞ¸Ä
+				return;	// æ²¡æœ‰å¿…è¦ä¿®æ”¹
 
 			if (m_bNew == true) 
 			{
@@ -903,7 +903,7 @@ namespace DigitalPlatform.Script
 				return;
 			}
 
-			// ·½°¸Ãû + Â·¾¶
+			// æ–¹æ¡ˆå + è·¯å¾„
 			ResultProjectNamePath = textBox_projectPathOfName.Text;
 
 			if (ResultProjectNamePath != "")
@@ -923,7 +923,7 @@ namespace DigitalPlatform.Script
 			}
 			else 
 			{
-				// ¶ÒÏÖÏÔÊ¾ÒÅÁô¸ø¶Ô»°¿òÍË³öÒÔºóÔÙ×ö
+				// å…‘ç°æ˜¾ç¤ºé—ç•™ç»™å¯¹è¯æ¡†é€€å‡ºä»¥åå†åš
 				// node.Text = dlg.textBox_projectName.Text;
 				textBox_projectName.Text = dlg.textBox_projectName.Text;
 				scriptManager.Save();
@@ -940,7 +940,7 @@ namespace DigitalPlatform.Script
         {
             if (String.IsNullOrEmpty(this.textBox_projectLocate.Text) == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨·½°¸Ä¿Â¼");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ–¹æ¡ˆç›®å½•");
                 return;
             }
 
@@ -950,7 +950,7 @@ namespace DigitalPlatform.Script
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
 
         }
@@ -971,7 +971,7 @@ namespace DigitalPlatform.Script
             }
         }
 
-        // ÔÚ Visual Studio Code ÖĞ´ò¿ª
+        // åœ¨ Visual Studio Code ä¸­æ‰“å¼€
         private void button_openInCode_Click(object sender, EventArgs e)
         {
             try
@@ -986,7 +986,7 @@ namespace DigitalPlatform.Script
             }
             catch(Exception ex)
             {
-                MessageBox.Show(this, "Æô¶¯ Vusual Studio Code Ê±·¢ÉúÒì³£(¿ÉÄÜÊÇ Code ÉĞÎ´°²×°):" + ex.Message);
+                MessageBox.Show(this, "å¯åŠ¨ Vusual Studio Code æ—¶å‘ç”Ÿå¼‚å¸¸(å¯èƒ½æ˜¯ Code å°šæœªå®‰è£…):" + ex.Message);
             }
         }
 	}

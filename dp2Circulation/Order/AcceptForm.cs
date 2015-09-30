@@ -686,7 +686,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "AcceptForm GetBiblioFromStyle() exception: " + ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
 

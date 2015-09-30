@@ -4441,7 +4441,7 @@ out strFingerprint);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 
@@ -4862,7 +4862,7 @@ out strFingerprint);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "ReaderSearchForm new XLWorkbook() {39D0940F-33FF-4A10-8F61-1FFFEEBFF4D0} exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

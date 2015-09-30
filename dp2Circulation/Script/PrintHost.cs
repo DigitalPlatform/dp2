@@ -6,10 +6,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml;
 using Microsoft.Win32.SafeHandles;
-
-using DigitalPlatform.Xml;
 using System.Web;
 
+using DigitalPlatform.Xml;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -1087,7 +1087,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintHost BuildOverdueItems() fragment.InnerXml set exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

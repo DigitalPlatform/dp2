@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,14 +37,14 @@ namespace dp2Manager
 
 		public string Lang = "zh";
 
-		//±£´æ½çÃæĞÅÏ¢
+		//ä¿å­˜ç•Œé¢ä¿¡æ¯
 		public ApplicationInfo	AppInfo = new ApplicationInfo("dp2managers.xml");
 
-        RmsChannel channel = null;	// ÁÙÊ±Ê¹ÓÃµÄchannel¶ÔÏó
+        RmsChannel channel = null;	// ä¸´æ—¶ä½¿ç”¨çš„channelå¯¹è±¡
 
 	//	public AutoResetEvent eventClose = new AutoResetEvent(false);
 
-		public RmsChannelCollection	Channels = new RmsChannelCollection();	// ÓµÓĞ
+		public RmsChannelCollection	Channels = new RmsChannelCollection();	// æ‹¥æœ‰
 
 		private ResTree treeView_res;
 
@@ -143,18 +143,18 @@ namespace dp2Manager
             this.menuItem_cfgLinkInfo,
             this.menuItem3,
             this.menuItem_exit});
-            this.menuItem2.Text = "ÎÄ¼ş(&F)";
+            this.menuItem2.Text = "æ–‡ä»¶(&F)";
             // 
             // menuItem_serversCfg
             // 
             this.menuItem_serversCfg.Index = 0;
-            this.menuItem_serversCfg.Text = "È±Ê¡ÕÊ»§¹ÜÀí(&A)...";
+            this.menuItem_serversCfg.Text = "ç¼ºçœå¸æˆ·ç®¡ç†(&A)...";
             this.menuItem_serversCfg.Click += new System.EventHandler(this.menuItem_serversCfg_Click);
             // 
             // menuItem_cfgLinkInfo
             // 
             this.menuItem_cfgLinkInfo.Index = 1;
-            this.menuItem_cfgLinkInfo.Text = "ÅäÖÃ¹ØÁªÄ¿Â¼(&L)...";
+            this.menuItem_cfgLinkInfo.Text = "é…ç½®å…³è”ç›®å½•(&L)...";
             this.menuItem_cfgLinkInfo.Visible = false;
             this.menuItem_cfgLinkInfo.Click += new System.EventHandler(this.menuItem_cfgLinkInfo_Click);
             // 
@@ -166,7 +166,7 @@ namespace dp2Manager
             // menuItem_exit
             // 
             this.menuItem_exit.Index = 3;
-            this.menuItem_exit.Text = "ÍË³ö(&X)";
+            this.menuItem_exit.Text = "é€€å‡º(&X)";
             this.menuItem_exit.Click += new System.EventHandler(this.menuItem_exit_Click);
             // 
             // menuItem1
@@ -179,36 +179,36 @@ namespace dp2Manager
             this.menuItem_deleteDatabase,
             this.menuItem_refresh,
             this.menuItem_test});
-            this.menuItem1.Text = "¹¦ÄÜ(&U)";
+            this.menuItem1.Text = "åŠŸèƒ½(&U)";
             // 
             // menuItem_accountManagement
             // 
             this.menuItem_accountManagement.Index = 0;
-            this.menuItem_accountManagement.Text = "ÕÊ»§(&A)...";
+            this.menuItem_accountManagement.Text = "å¸æˆ·(&A)...";
             this.menuItem_accountManagement.Click += new System.EventHandler(this.menuItem_accountManagement_Click);
             // 
             // menuItem_databaseManagement
             // 
             this.menuItem_databaseManagement.Index = 1;
-            this.menuItem_databaseManagement.Text = "Êı¾İ¿â(&M)...";
+            this.menuItem_databaseManagement.Text = "æ•°æ®åº“(&M)...";
             this.menuItem_databaseManagement.Click += new System.EventHandler(this.menuItem_databaseManagement_Click);
             // 
             // menuItem_newDatabase
             // 
             this.menuItem_newDatabase.Index = 2;
-            this.menuItem_newDatabase.Text = "ĞÂ½¨Êı¾İ¿â(&N)...";
+            this.menuItem_newDatabase.Text = "æ–°å»ºæ•°æ®åº“(&N)...";
             this.menuItem_newDatabase.Click += new System.EventHandler(this.menuItem_newDatabase_Click);
             // 
             // menuItem_deleteDatabase
             // 
             this.menuItem_deleteDatabase.Index = 3;
-            this.menuItem_deleteDatabase.Text = "É¾³ıÊı¾İ¿â(&D)";
+            this.menuItem_deleteDatabase.Text = "åˆ é™¤æ•°æ®åº“(&D)";
             this.menuItem_deleteDatabase.Click += new System.EventHandler(this.menuItem_deleteObject_Click);
             // 
             // menuItem_refresh
             // 
             this.menuItem_refresh.Index = 4;
-            this.menuItem_refresh.Text = "Ë¢ĞÂ(&R)";
+            this.menuItem_refresh.Text = "åˆ·æ–°(&R)";
             this.menuItem_refresh.Click += new System.EventHandler(this.menuItem_refresh_Click);
             // 
             // menuItem_test
@@ -237,7 +237,7 @@ namespace dp2Manager
             this.toolBarButton_stop.Enabled = false;
             this.toolBarButton_stop.ImageIndex = 0;
             this.toolBarButton_stop.Name = "toolBarButton_stop";
-            this.toolBarButton_stop.ToolTipText = "Í£Ö¹";
+            this.toolBarButton_stop.ToolTipText = "åœæ­¢";
             // 
             // imageList_toolbar
             // 
@@ -294,7 +294,7 @@ namespace dp2Manager
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
-            this.Text = "dp2manager V2 -- ÄÚºË¹ÜÀí";
+            this.Text = "dp2manager V2 -- å†…æ ¸ç®¡ç†";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
             this.Closed += new System.EventHandler(this.Form1_Closed);
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -330,13 +330,13 @@ namespace dp2Manager
                 DataDir = Environment.CurrentDirectory;
             }
 
-			// ´ÓÎÄ¼şÖĞ×°ÔØ´´½¨Ò»¸öServerCollection¶ÔÏó
+			// ä»æ–‡ä»¶ä¸­è£…è½½åˆ›å»ºä¸€ä¸ªServerCollectionå¯¹è±¡
 			// parameters:
-			//		bIgnorFileNotFound	ÊÇ·ñ²»Å×³öFileNotFoundExceptionÒì³£¡£
-			//							Èç¹û==true£¬º¯ÊıÖ±½Ó·µ»ØÒ»¸öĞÂµÄ¿ÕServerCollection¶ÔÏó
+			//		bIgnorFileNotFound	æ˜¯å¦ä¸æŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸ã€‚
+			//							å¦‚æœ==trueï¼Œå‡½æ•°ç›´æ¥è¿”å›ä¸€ä¸ªæ–°çš„ç©ºServerCollectionå¯¹è±¡
 			// Exception:
-			//			FileNotFoundException	ÎÄ¼şÃ»ÕÒµ½
-			//			SerializationException	°æ±¾Ç¨ÒÆÊ±ÈİÒ×³öÏÖ
+			//			FileNotFoundException	æ–‡ä»¶æ²¡æ‰¾åˆ°
+			//			SerializationException	ç‰ˆæœ¬è¿ç§»æ—¶å®¹æ˜“å‡ºç°
 
 			try 
 			{
@@ -349,7 +349,7 @@ namespace dp2Manager
 			{
 				MessageBox.Show(this, ex.Message);
 				Servers = new ServerCollection();
-				// ÉèÖÃÎÄ¼şÃû£¬ÒÔ±ã±¾´ÎÔËĞĞ½áÊøÊ±¸²¸Ç¾ÉÎÄ¼ş
+				// è®¾ç½®æ–‡ä»¶åï¼Œä»¥ä¾¿æœ¬æ¬¡è¿è¡Œç»“æŸæ—¶è¦†ç›–æ—§æ–‡ä»¶
                 Servers.FileName = this.DataDir
 					+ "\\manager_servers.bin";
 
@@ -357,13 +357,13 @@ namespace dp2Manager
 
             this.Servers.ServerChanged += new ServerChangedEventHandle(Servers_ServerChanged);
 
-			// ´ÓÎÄ¼şÖĞ×°ÔØ´´½¨Ò»¸öLinkInfoCollection¶ÔÏó
+			// ä»æ–‡ä»¶ä¸­è£…è½½åˆ›å»ºä¸€ä¸ªLinkInfoCollectionå¯¹è±¡
 			// parameters:
-			//		bIgnorFileNotFound	ÊÇ·ñ²»Å×³öFileNotFoundExceptionÒì³£¡£
-			//							Èç¹û==true£¬º¯ÊıÖ±½Ó·µ»ØÒ»¸öĞÂµÄ¿ÕServerCollection¶ÔÏó
+			//		bIgnorFileNotFound	æ˜¯å¦ä¸æŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸ã€‚
+			//							å¦‚æœ==trueï¼Œå‡½æ•°ç›´æ¥è¿”å›ä¸€ä¸ªæ–°çš„ç©ºServerCollectionå¯¹è±¡
 			// Exception:
-			//			FileNotFoundException	ÎÄ¼şÃ»ÕÒµ½
-			//			SerializationException	°æ±¾Ç¨ÒÆÊ±ÈİÒ×³öÏÖ
+			//			FileNotFoundException	æ–‡ä»¶æ²¡æ‰¾åˆ°
+			//			SerializationException	ç‰ˆæœ¬è¿ç§»æ—¶å®¹æ˜“å‡ºç°
 			try 
 			{
                 LinkInfos = LinkInfoCollection.Load(this.DataDir
@@ -374,7 +374,7 @@ namespace dp2Manager
 			{
 				MessageBox.Show(this, ex.Message);
 				LinkInfos = new LinkInfoCollection();
-				// ÉèÖÃÎÄ¼şÃû£¬ÒÔ±ã±¾´ÎÔËĞĞ½áÊøÊ±¸²¸Ç¾ÉÎÄ¼ş
+				// è®¾ç½®æ–‡ä»¶åï¼Œä»¥ä¾¿æœ¬æ¬¡è¿è¡Œç»“æŸæ—¶è¦†ç›–æ—§æ–‡ä»¶
                 LinkInfos.FileName = this.DataDir
 					+ "\\manager_linkinfos.bin";
 
@@ -383,7 +383,7 @@ namespace dp2Manager
 
 
 
-			// ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+			// è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
 			if (AppInfo != null) 
 			{
                 SetFirstDefaultFont();
@@ -398,7 +398,7 @@ namespace dp2Manager
                 this.toolStripStatusLabel_main,
                 this.toolStripProgressBar_main);
 			stop = new DigitalPlatform.Stop();
-			stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+			stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             /*
 			this.Channels.procAskAccountInfo = 
@@ -408,14 +408,14 @@ namespace dp2Manager
 
 
 
-			// ¼òµ¥¼ìË÷½çÃæ×¼±¸¹¤×÷
-			treeView_res.AppInfo = this.AppInfo;	// ±ãÓÚtreeviewÖĞpopup²Ëµ¥ĞŞ¸ÄÅäÖÃÎÄ¼şÊ±±£´ædialog³ß´çÎ»ÖÃ
+			// ç®€å•æ£€ç´¢ç•Œé¢å‡†å¤‡å·¥ä½œ
+			treeView_res.AppInfo = this.AppInfo;	// ä¾¿äºtreeviewä¸­popupèœå•ä¿®æ”¹é…ç½®æ–‡ä»¶æ—¶ä¿å­˜dialogå°ºå¯¸ä½ç½®
 
 			treeView_res.stopManager = this.stopManager;
 
-			treeView_res.Servers = this.Servers;	// ÒıÓÃ
+			treeView_res.Servers = this.Servers;	// å¼•ç”¨
 
-			treeView_res.Channels = this.Channels;	// ÒıÓÃ
+			treeView_res.Channels = this.Channels;	// å¼•ç”¨
 		
 			treeView_res.Fill(null);
 
@@ -432,7 +432,7 @@ namespace dp2Manager
 
         void Servers_ServerChanged(object sender, ServerChangedEventArgs e)
         {
-            this.treeView_res.Refresh(ResTree.RefreshStyle.All);   // Ë¢ĞÂµÚÒ»¼¶
+            this.treeView_res.Refresh(ResTree.RefreshStyle.All);   // åˆ·æ–°ç¬¬ä¸€çº§
         }
 
 
@@ -440,19 +440,19 @@ namespace dp2Manager
 		{
             this.Channels.AskAccountInfo -= new AskAccountInfoEventHandle(this.Servers.OnAskAccountInfo);
 
-            // Èç¹ûÈ±ÁË´Ë¾ä£¬ÔòServers.Save»á³öÏÖÎÊÌâ
+            // å¦‚æœç¼ºäº†æ­¤å¥ï¼Œåˆ™Servers.Saveä¼šå‡ºç°é—®é¢˜
             this.Servers.ServerChanged -= new ServerChangedEventHandle(Servers_ServerChanged);
 
-			// ±£´æµ½ÎÄ¼ş
+			// ä¿å­˜åˆ°æ–‡ä»¶
 			// parameters:
-			//		strFileName	ÎÄ¼şÃû¡£Èç¹û==null,±íÊ¾Ê¹ÓÃ×°ÔØÊ±±£´æµÄÄÇ¸öÎÄ¼şÃû
+			//		strFileName	æ–‡ä»¶åã€‚å¦‚æœ==null,è¡¨ç¤ºä½¿ç”¨è£…è½½æ—¶ä¿å­˜çš„é‚£ä¸ªæ–‡ä»¶å
 			Servers.Save(null);
 			Servers = null;
 
 			LinkInfos.Save(null);
 			LinkInfos = null;
 
-			// ±£´æ´°¿Ú³ß´ç×´Ì¬
+			// ä¿å­˜çª—å£å°ºå¯¸çŠ¶æ€
 			if (AppInfo != null) 
 			{
 
@@ -460,9 +460,9 @@ namespace dp2Manager
 					"mainformstate");
 			}
 
-			//¼Ç×¡save,±£´æĞÅÏ¢XMLÎÄ¼ş
+			//è®°ä½save,ä¿å­˜ä¿¡æ¯XMLæ–‡ä»¶
 			AppInfo.Save();
-			AppInfo = null;	// ±ÜÃâºóÃæÔÙÓÃÕâ¸ö¶ÔÏó	
+			AppInfo = null;	// é¿å…åé¢å†ç”¨è¿™ä¸ªå¯¹è±¡	
 		}
 
 		private void menuItem_accountManagement_Click(object sender, System.EventArgs e)
@@ -470,7 +470,7 @@ namespace dp2Manager
 
 			if (treeView_res.SelectedNode == null)
 			{
-				MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö½Úµã");
+				MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªèŠ‚ç‚¹");
 				return;
 			}
 
@@ -515,21 +515,21 @@ namespace dp2Manager
 		{
 			if (treeView_res.SelectedNode == null)
 			{
-				MessageBox.Show("ÇëÑ¡ÔñÒ»¸öÊı¾İ¿â½Úµã");
+				MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæ•°æ®åº“èŠ‚ç‚¹");
 				return;
 			}
 
 			ResPath respath = new ResPath(treeView_res.SelectedNode);
 			if (respath.Path == "")
 			{
-				MessageBox.Show("ÇëÑ¡ÔñÒ»¸öÊı¾İ¿âÀàĞÍµÄ½Úµã");
+				MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæ•°æ®åº“ç±»å‹çš„èŠ‚ç‚¹");
 				return;
 			}
 			string strPath = respath.Path;
 			string strDbName = StringUtil.GetFirstPartPath(ref strPath);
 			if (strDbName == "")
 			{
-				MessageBox.Show("´íÎó: Êı¾İ¿âÃûÎª¿Õ");
+				MessageBox.Show("é”™è¯¯: æ•°æ®åº“åä¸ºç©º");
 				return;
 			}
 
@@ -545,12 +545,12 @@ namespace dp2Manager
 			this.AppInfo.UnlinkFormState(dlg);
 		}
 
-		// ´´½¨ĞÂÊı¾İ¿â
+		// åˆ›å»ºæ–°æ•°æ®åº“
 		private void menuItem_newDatabase_Click(object sender, System.EventArgs e)
 		{
 			if (treeView_res.SelectedNode == null)
 			{
-				MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö·şÎñÆ÷»òÊı¾İ¿â½Úµã");
+				MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæœåŠ¡å™¨æˆ–æ•°æ®åº“èŠ‚ç‚¹");
 				return;
 			}
 
@@ -570,7 +570,7 @@ namespace dp2Manager
 
 			DatabaseDlg dlg = new DatabaseDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
-            dlg.Text = "´´½¨ĞÂÊı¾İ¿â";
+            dlg.Text = "åˆ›å»ºæ–°æ•°æ®åº“";
 			dlg.IsCreate = true;
 			dlg.RefDbName = strRefDbName;
 			dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -583,11 +583,11 @@ namespace dp2Manager
 			this.AppInfo.UnlinkFormState(dlg);
 		}
 
-		// »ñµÃÓÃ»§¼ÇÂ¼
+		// è·å¾—ç”¨æˆ·è®°å½•
         // return:
         //      -1  error
         //      0   not found
-        //      >=1   ¼ìË÷ÃüÖĞµÄÌõÊı
+        //      >=1   æ£€ç´¢å‘½ä¸­çš„æ¡æ•°
 		public int GetUserRecord(
 			string strServerUrl,
 			string strUserName,
@@ -604,7 +604,7 @@ namespace dp2Manager
 
             if (strUserName == "")
             {
-                strError = "ÓÃ»§ÃûÎª¿Õ";
+                strError = "ç”¨æˆ·åä¸ºç©º";
                 return -1;
             }
 
@@ -615,7 +615,7 @@ namespace dp2Manager
             RmsChannel channel = this.Channels.GetChannel(strServerUrl);
 			if (channel == null)
 			{
-				strError = "Channels.GetChannel Òì³£";
+				strError = "Channels.GetChannel å¼‚å¸¸";
 				return -1;
 			}
 
@@ -624,7 +624,7 @@ namespace dp2Manager
                 out strError);
 			if (nRet == -1) 
 			{
-				strError = "¼ìË÷ÕÊ»§¿âÊ±³ö´í: " + strError;
+				strError = "æ£€ç´¢å¸æˆ·åº“æ—¶å‡ºé”™: " + strError;
 				return -1;
 			}
 
@@ -643,12 +643,12 @@ namespace dp2Manager
 				out strError);
 			if (nRet == -1) 
 			{
-				strError = "¼ìË÷×¢²áÓÃ»§¿â»ñÈ¡¼ìË÷½á¹ûÊ±³ö´í: " + strError;
+				strError = "æ£€ç´¢æ³¨å†Œç”¨æˆ·åº“è·å–æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
 				return -1;
 			}
 			if (aPath.Count == 0)
 			{
-				strError = "¼ìË÷×¢²áÓÃ»§¿â»ñÈ¡µÄ¼ìË÷½á¹ûÎª¿Õ";
+				strError = "æ£€ç´¢æ³¨å†Œç”¨æˆ·åº“è·å–çš„æ£€ç´¢ç»“æœä¸ºç©º";
 				return -1;
 			}
 
@@ -668,7 +668,7 @@ namespace dp2Manager
 				out strError);
 			if (nRet == -1) 
 			{
-				strError = "»ñÈ¡×¢²áÓÃ»§¿â¼ÇÂ¼ÌåÊ±³ö´í: " + strError;
+				strError = "è·å–æ³¨å†Œç”¨æˆ·åº“è®°å½•ä½“æ—¶å‡ºé”™: " + strError;
 				return -1;
 			}
 
@@ -676,11 +676,11 @@ namespace dp2Manager
 			return (int)nSearchCount;
 		}
 
-        // ¸ù¾İÂ·¾¶»ñµÃÓÃ»§¼ÇÂ¼
+        // æ ¹æ®è·¯å¾„è·å¾—ç”¨æˆ·è®°å½•
         // return:
         //      -1  error
         //      0   not found
-        //      >=1   ¼ìË÷ÃüÖĞµÄÌõÊı
+        //      >=1   æ£€ç´¢å‘½ä¸­çš„æ¡æ•°
         public int GetUserRecord(
             string strServerUrl,
             string strRecPath,
@@ -696,14 +696,14 @@ namespace dp2Manager
 
             if (strRecPath == "")
             {
-                strError = "Â·¾¶Îª¿Õ";
+                strError = "è·¯å¾„ä¸ºç©º";
                 return -1;
             }
 
             RmsChannel channel = this.Channels.GetChannel(strServerUrl);
             if (channel == null)
             {
-                strError = "Channels.GetChannel Òì³£";
+                strError = "Channels.GetChannel å¼‚å¸¸";
                 return -1;
             }
 
@@ -721,7 +721,7 @@ namespace dp2Manager
                 out strError);
             if (nRet == -1)
             {
-                strError = "»ñÈ¡×¢²áÓÃ»§¿â¼ÇÂ¼ÌåÊ±³ö´í: " + strError;
+                strError = "è·å–æ³¨å†Œç”¨æˆ·åº“è®°å½•ä½“æ—¶å‡ºé”™: " + strError;
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     return 0;
                 return -1;
@@ -740,7 +740,7 @@ namespace dp2Manager
 
                 if (treeView_res.SelectedNode == null)
                 {
-                    MessageBox.Show("ÇëÑ¡ÔñÒ»¸öÊı¾İ¿â¡¢Ä¿Â¼»òÎÄ¼ş½Úµã");
+                    MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæ•°æ®åº“ã€ç›®å½•æˆ–æ–‡ä»¶èŠ‚ç‚¹");
                     return;
                 }
 
@@ -755,16 +755,16 @@ namespace dp2Manager
                 else
                 {
                     // Debug.Assert(false, "");
-                    MessageBox.Show("ÇëÑ¡ÔñÒ»¸öÊı¾İ¿â¡¢Ä¿Â¼»òÎÄ¼ş½Úµã");
+                    MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæ•°æ®åº“ã€ç›®å½•æˆ–æ–‡ä»¶èŠ‚ç‚¹");
                     return;
                 }
 
                 string strText = "";
 
                 if (treeView_res.SelectedNode.ImageIndex == ResTree.RESTYPE_DB)
-                    strText = "È·ÊµÒªÉ¾³ıÎ»ÓÚ " + respath.Url + "\r\nµÄÊı¾İ¿â '" + strPath + "' ?\r\n\r\n***¾¯¸æ£ºÊı¾İ¿âÒ»µ©É¾³ı£¬¾ÍÎŞ·¨»Ö¸´¡£";
+                    strText = "ç¡®å®è¦åˆ é™¤ä½äº " + respath.Url + "\r\nçš„æ•°æ®åº“ '" + strPath + "' ?\r\n\r\n***è­¦å‘Šï¼šæ•°æ®åº“ä¸€æ—¦åˆ é™¤ï¼Œå°±æ— æ³•æ¢å¤ã€‚";
                 else
-                    strText = "È·ÊµÒªÉ¾³ıÎ»ÓÚ " + respath.Url + "\r\nµÄ¶ÔÏó '" + strPath + "' ?\r\n\r\n***¾¯¸æ£º¶ÔÏóÒ»µ©É¾³ı£¬¾ÍÎŞ·¨»Ö¸´¡£";
+                    strText = "ç¡®å®è¦åˆ é™¤ä½äº " + respath.Url + "\r\nçš„å¯¹è±¡ '" + strPath + "' ?\r\n\r\n***è­¦å‘Šï¼šå¯¹è±¡ä¸€æ—¦åˆ é™¤ï¼Œå°±æ— æ³•æ¢å¤ã€‚";
 
                 //
                 DialogResult result = MessageBox.Show(this,
@@ -779,7 +779,7 @@ namespace dp2Manager
                 RmsChannel channel = Channels.GetChannel(respath.Url);
                 if (channel == null)
                 {
-                    strError = "Channels.GetChannel Òì³£";
+                    strError = "Channels.GetChannel å¼‚å¸¸";
                     goto ERROR1;
                 }
 
@@ -787,7 +787,7 @@ namespace dp2Manager
 
                 if (treeView_res.SelectedNode.ImageIndex == ResTree.RESTYPE_DB)
                 {
-                    // É¾³ıÊı¾İ¿â
+                    // åˆ é™¤æ•°æ®åº“
                     lRet = channel.DoDeleteDB(strPath, out strError);
                 }
                 else
@@ -796,7 +796,7 @@ namespace dp2Manager
                     byte[] output_timestamp = null;
 
                 REDODELETE:
-                    // É¾³ıÆäËû×ÊÔ´
+                    // åˆ é™¤å…¶ä»–èµ„æº
                     lRet = channel.DoDeleteRes(strPath,
                         timestamp,
                         out output_timestamp,
@@ -812,9 +812,9 @@ namespace dp2Manager
                     goto ERROR1;
 
                 if (treeView_res.SelectedNode.ImageIndex == ResTree.RESTYPE_DB)
-                    MessageBox.Show(this, "Êı¾İ¿â '" + strPath + "' ÒÑ±»³É¹¦É¾³ı");
+                    MessageBox.Show(this, "æ•°æ®åº“ '" + strPath + "' å·²è¢«æˆåŠŸåˆ é™¤");
                 else
-                    MessageBox.Show(this, "¶ÔÏó '" + strPath + "' ÒÑ±»³É¹¦É¾³ı");
+                    MessageBox.Show(this, "å¯¹è±¡ '" + strPath + "' å·²è¢«æˆåŠŸåˆ é™¤");
 
 
 
@@ -827,7 +827,7 @@ namespace dp2Manager
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "menuItem_deleteObject_Click£¨) Å×³öÒì³£: " + ExceptionUtil.GetDebugText(ex));
+                MessageBox.Show(this, "menuItem_deleteObject_Clickï¼ˆ) æŠ›å‡ºå¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex));
             }
 		}
 
@@ -838,7 +838,7 @@ namespace dp2Manager
 
 		private void treeView_res_OnSetMenu(object sender, DigitalPlatform.GUI.GuiAppendMenuEventArgs e)
 		{
-			Debug.Assert(e.ContextMenu != null, "e²»ÄÜÎªnull");
+			Debug.Assert(e.ContextMenu != null, "eä¸èƒ½ä¸ºnull");
 
             int nNodeType = -1;
             TreeNode node = this.treeView_res.SelectedNode;
@@ -851,13 +851,13 @@ namespace dp2Manager
 			e.ContextMenu.MenuItems.Add(menuItem);
 
 
-			// ÕÊ»§¹ÜÀí
-			menuItem = new MenuItem("ÕÊ»§(&A)...");
+			// å¸æˆ·ç®¡ç†
+			menuItem = new MenuItem("å¸æˆ·(&A)...");
 			menuItem.Click += new System.EventHandler(this.menuItem_accountManagement_Click);
 			e.ContextMenu.MenuItems.Add(menuItem);
 
-            // ĞÂ½¨ÕÊ»§
-            menuItem = new MenuItem("ĞÂÕÊ»§(&N)...");
+            // æ–°å»ºå¸æˆ·
+            menuItem = new MenuItem("æ–°å¸æˆ·(&N)...");
             menuItem.Click += new System.EventHandler(this.menuItem_newAccount_Click);
             e.ContextMenu.MenuItems.Add(menuItem);
 
@@ -866,8 +866,8 @@ namespace dp2Manager
 			e.ContextMenu.MenuItems.Add(menuItem);
 
 
-			// ÅäÖÃÊı¾İ¿â
-			menuItem = new MenuItem("Êı¾İ¿â(&M)...");
+			// é…ç½®æ•°æ®åº“
+			menuItem = new MenuItem("æ•°æ®åº“(&M)...");
 			menuItem.Click += new System.EventHandler(this.menuItem_databaseManagement_Click);
             if (nNodeType != ResTree.RESTYPE_DB)
                 menuItem.Enabled = false;
@@ -875,31 +875,31 @@ namespace dp2Manager
 
 
 
-			// ĞÂ½¨Êı¾İ¿â
-			menuItem = new MenuItem("ĞÂ½¨Êı¾İ¿â(&N)...");
+			// æ–°å»ºæ•°æ®åº“
+			menuItem = new MenuItem("æ–°å»ºæ•°æ®åº“(&N)...");
 			menuItem.Click += new System.EventHandler(this.menuItem_newDatabase_Click);
 			e.ContextMenu.MenuItems.Add(menuItem);
 
 			menuItem = new MenuItem("-");
 			e.ContextMenu.MenuItems.Add(menuItem);
 
-			// É¾³ıÊı¾İ¿â
-			menuItem = new MenuItem("É¾³ıÊı¾İ¿â(&D)");
+			// åˆ é™¤æ•°æ®åº“
+			menuItem = new MenuItem("åˆ é™¤æ•°æ®åº“(&D)");
 			menuItem.Click += new System.EventHandler(this.menuItem_deleteObject_Click);
             if (nNodeType != ResTree.RESTYPE_DB 
                 && nNodeType != ResTree.RESTYPE_FILE
                 && nNodeType != ResTree.RESTYPE_FOLDER)
                 menuItem.Enabled = false;
             if (nNodeType != ResTree.RESTYPE_DB)
-                menuItem.Text = "É¾³ı¶ÔÏó(&D)";
+                menuItem.Text = "åˆ é™¤å¯¹è±¡(&D)";
 			e.ContextMenu.MenuItems.Add(menuItem);
 
 			menuItem = new MenuItem("-");
 			e.ContextMenu.MenuItems.Add(menuItem);
 
 #if NO
-			// ¹ØÁª±¾µØÄ¿Â¼
-			menuItem = new MenuItem("¹ØÁª±¾µØÄ¿Â¼(&L)...");
+			// å…³è”æœ¬åœ°ç›®å½•
+			menuItem = new MenuItem("å…³è”æœ¬åœ°ç›®å½•(&L)...");
 			menuItem.Click += new System.EventHandler(this.menuItem_linkLocalDir_Click);
 			e.ContextMenu.MenuItems.Add(menuItem);
 
@@ -907,32 +907,32 @@ namespace dp2Manager
             e.ContextMenu.MenuItems.Add(menuItem);
 #endif
 
-            // Êä³öÄ£°å
-            menuItem = new MenuItem("µ¼³öÄ£°å(&E)...");
+            // è¾“å‡ºæ¨¡æ¿
+            menuItem = new MenuItem("å¯¼å‡ºæ¨¡æ¿(&E)...");
             menuItem.Click += new System.EventHandler(this.menuItem_exportTemplate_Click);
             e.ContextMenu.MenuItems.Add(menuItem);
 
-            // µ¼ÈëÄ£°å
-            menuItem = new MenuItem("µ¼ÈëÄ£°å(&I)...");
+            // å¯¼å…¥æ¨¡æ¿
+            menuItem = new MenuItem("å¯¼å…¥æ¨¡æ¿(&I)...");
             menuItem.Click += new System.EventHandler(this.menuItem_importTemplate_Click);
             e.ContextMenu.MenuItems.Add(menuItem);
 
 
 		}
 
-        // µ¼³öÄ£°å
+        // å¯¼å‡ºæ¨¡æ¿
         void menuItem_exportTemplate_Click(object sender, System.EventArgs e)
         {
             if (treeView_res.SelectedNode == null)
             {
-                MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö½Úµã");
+                MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªèŠ‚ç‚¹");
                 return;
             }
 
             if (treeView_res.SelectedNode.ImageIndex != ResTree.RESTYPE_DB
                 && treeView_res.SelectedNode.ImageIndex != ResTree.RESTYPE_SERVER)
             {
-                MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö·şÎñÆ÷»òÊı¾İ¿âÀàĞÍ½Úµã");
+                MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæœåŠ¡å™¨æˆ–æ•°æ®åº“ç±»å‹èŠ‚ç‚¹");
                 return;
             }
 
@@ -973,18 +973,18 @@ namespace dp2Manager
             dlg.ShowDialog(this);
         }
 
-        // µ¼ÈëÄ£°å
+        // å¯¼å…¥æ¨¡æ¿
         void menuItem_importTemplate_Click(object sender, System.EventArgs e)
         {
             if (treeView_res.SelectedNode == null)
             {
-                MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö½Úµã");
+                MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªèŠ‚ç‚¹");
                 return;
             }
 
             if (treeView_res.SelectedNode.ImageIndex != ResTree.RESTYPE_SERVER)
             {
-                MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö·şÎñÆ÷ÀàĞÍ½Úµã");
+                MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªæœåŠ¡å™¨ç±»å‹èŠ‚ç‚¹");
                 return;
             }
 
@@ -1007,7 +1007,7 @@ namespace dp2Manager
 
             filedlg.FileName = "*.template";
 			// filedlg.InitialDirectory = Environment.CurrentDirectory;
-			filedlg.Filter = "Ä£°åÎÄ¼ş (*.template)|*.template|All files (*.*)|*.*" ;
+			filedlg.Filter = "æ¨¡æ¿æ–‡ä»¶ (*.template)|*.template|All files (*.*)|*.*" ;
 			filedlg.RestoreDirectory = true ;
 
 			if (filedlg.ShowDialog() != DialogResult.OK)
@@ -1025,13 +1025,13 @@ namespace dp2Manager
             dlg.ShowDialog(this);
         }
 
-        // ĞÂ½¨ÕÊ»§
+        // æ–°å»ºå¸æˆ·
         void menuItem_newAccount_Click(object sender, System.EventArgs e)
         {
 
             if (treeView_res.SelectedNode == null)
             {
-                MessageBox.Show("ÇëÑ¡ÔñÒ»¸ö½Úµã");
+                MessageBox.Show("è¯·é€‰æ‹©ä¸€ä¸ªèŠ‚ç‚¹");
                 return;
             }
 
@@ -1045,7 +1045,7 @@ namespace dp2Manager
             dlg.ShowDialog(this);
         }
 
-		// ¹ØÁª±¾µØÄ¿Â¼
+		// å…³è”æœ¬åœ°ç›®å½•
 		private void menuItem_linkLocalDir_Click(object sender, System.EventArgs e)
 		{
 			string strDefault = "";
@@ -1074,13 +1074,13 @@ namespace dp2Manager
 		{
 			if (treeView_res.SelectedNode == null)
 			{
-                this.toolStripStatusLabel_main.Text = "ÉĞÎ´Ñ¡ÔñÒ»¸ö½Úµã";
+                this.toolStripStatusLabel_main.Text = "å°šæœªé€‰æ‹©ä¸€ä¸ªèŠ‚ç‚¹";
 				return;
 			}
 
 			ResPath respath = new ResPath(treeView_res.SelectedNode);
 
-            this.toolStripStatusLabel_main.Text = "µ±Ç°½Úµã: " + respath.FullPath;
+            this.toolStripStatusLabel_main.Text = "å½“å‰èŠ‚ç‚¹: " + respath.FullPath;
 		
 		}
 
@@ -1164,7 +1164,7 @@ namespace dp2Manager
 			dlg.ShowDialog(this);
 		}
 
-        // ²âÊÔÊôĞÔÖµ¶Ô»°¿ò
+        // æµ‹è¯•å±æ€§å€¼å¯¹è¯æ¡†
         private void menuItem_test_Click(object sender, EventArgs e)
         {
             CategoryPropertyDlg dlg = new CategoryPropertyDlg();
@@ -1182,13 +1182,13 @@ namespace dp2Manager
 
             try
             {
-                FontFamily family = new FontFamily("Î¢ÈíÑÅºÚ");
+                FontFamily family = new FontFamily("å¾®è½¯é›…é»‘");
             }
             catch
             {
                 return;
             }
-            this.DefaultFontString = "Î¢ÈíÑÅºÚ, 9pt";
+            this.DefaultFontString = "å¾®è½¯é›…é»‘, 9pt";
         }
 
         public string DefaultFontString
@@ -1226,7 +1226,7 @@ namespace dp2Manager
         }
 
         // parameters:
-        //      bForce  ÊÇ·ñÇ¿ÖÆÉèÖÃ¡£Ç¿ÖÆÉèÖÃÊÇÖ¸DefaultFont == null µÄÊ±ºò£¬Ò²Òª°´ÕÕControl.DefaultFontÀ´ÉèÖÃ
+        //      bForce  æ˜¯å¦å¼ºåˆ¶è®¾ç½®ã€‚å¼ºåˆ¶è®¾ç½®æ˜¯æŒ‡DefaultFont == null çš„æ—¶å€™ï¼Œä¹Ÿè¦æŒ‰ç…§Control.DefaultFontæ¥è®¾ç½®
         public static void SetControlFont(Control control,
             Font font,
             bool bForce = false)
@@ -1250,7 +1250,7 @@ namespace dp2Manager
         static void ChangeDifferentFaceFont(Control parent,
             Font font)
         {
-            // ĞŞ¸ÄËùÓĞÏÂ¼¶¿Ø¼şµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰ä¸‹çº§æ§ä»¶çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             foreach (Control sub in parent.Controls)
             {
                 Font subfont = sub.Font;
@@ -1269,7 +1269,7 @@ namespace dp2Manager
                     ChangeDifferentFaceFont((ToolStrip)sub, font);
                 }
 
-                // µİ¹é
+                // é€’å½’
                 ChangeDifferentFaceFont(sub, font);
             }
         }
@@ -1277,7 +1277,7 @@ namespace dp2Manager
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
-            // ĞŞ¸ÄËùÓĞÊÂÏîµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰äº‹é¡¹çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             for (int i = 0; i < tool.Items.Count; i++)
             {
                 ToolStripItem item = tool.Items[i];

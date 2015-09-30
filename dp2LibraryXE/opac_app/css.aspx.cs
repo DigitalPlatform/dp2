@@ -13,6 +13,7 @@ using DigitalPlatform.Drawing;
 using System.Drawing.Imaging;
 using DigitalPlatform.OPAC.Server;
 using System.Drawing;
+using DigitalPlatform;
 
 public partial class css : MyWebPage
 {
@@ -391,7 +392,7 @@ ref sessioninfo) == false)
         }
         catch (Exception ex)
         {
-            strError = ex.Message;
+            strError = ExceptionUtil.GetAutoText(ex);
             return -1;
         }
 

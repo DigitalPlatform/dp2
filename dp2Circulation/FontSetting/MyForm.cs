@@ -1083,7 +1083,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "MyForm filter.Load() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

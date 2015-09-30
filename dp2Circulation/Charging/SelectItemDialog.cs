@@ -185,7 +185,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = ex.Message;
+                    strError = "GetBiblioFromStyle() exception: " + ExceptionUtil.GetAutoText(ex);
                     goto ERROR1;
                 }
 

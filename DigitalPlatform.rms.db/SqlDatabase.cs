@@ -345,7 +345,7 @@ namespace DigitalPlatform.rms
             }
             catch (Exception ex)
             {
-                string strError = ex.Message;
+                string strError = ExceptionUtil.GetAutoText(ex);
             }
         }
 

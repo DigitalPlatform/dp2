@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,6 +9,16 @@ namespace DigitalPlatform
 {
     public class ExceptionUtil
     {
+        // 2015/9/30
+        // 如果 Exceptoin 为 NullException 类型，则返回详细调用堆栈；否则只返回 e.Message 信息
+        public static string GetAutoText(Exception e)
+        {
+            if (e is NullReferenceException)
+                return GetDebugText(e);
+            return e.Message;
+        }
+
+        // 返回详细调用堆栈
         public static string GetDebugText(Exception e)
         {
             StringBuilder message = new StringBuilder();

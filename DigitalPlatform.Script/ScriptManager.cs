@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Xml;
 using System.Text;
@@ -29,7 +29,7 @@ namespace DigitalPlatform.Script
 {
 
 	/// <summary>
-	/// ½Å±¾¹ÜÀí
+	/// è„šæœ¬ç®¡ç†
 	/// </summary>
 	public class ScriptManager
 	{
@@ -37,17 +37,17 @@ namespace DigitalPlatform.Script
 
 		public ApplicationInfo	applicationInfo = null;
 
-		public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+		public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
-		public string CfgFilePath = "";	// ÅäÖÃÎÄ¼şÃû
+		public string CfgFilePath = "";	// é…ç½®æ–‡ä»¶å
 
 		XmlDocument	dom = new XmlDocument();
 
-		bool m_bChanged = false;	// DOMÊÇ·ñÓĞĞŞ¸Ä
+		bool m_bChanged = false;	// DOMæ˜¯å¦æœ‰ä¿®æ”¹
 
 		public string DefaultCodeFileDir = "";
 
-        public string DataDir = ""; // Êı¾İÄ¿Â¼
+        public string DataDir = ""; // æ•°æ®ç›®å½•
 
 		public ScriptManager()
 		{
@@ -56,7 +56,7 @@ namespace DigitalPlatform.Script
 			//
 		}
 
-		// ±£´æ
+		// ä¿å­˜
 		public void Save()
 		{
 			if (m_bChanged == true &&
@@ -68,9 +68,9 @@ namespace DigitalPlatform.Script
 
 		}
 
-		// ÄÚ´æÄÚÈİÊÇ·ñ·¢Éú¹ı¸Ä±ä
+		// å†…å­˜å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡æ”¹å˜
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
 		{
@@ -84,12 +84,12 @@ namespace DigitalPlatform.Script
 			}
 		}
 
-		// ´ÓxmlÎÄ¼şÖĞ×°ÔØÄÚÈİµ½ÄÚ´æ
+		// ä»xmlæ–‡ä»¶ä¸­è£…è½½å†…å®¹åˆ°å†…å­˜
 		public void Load(bool bAutoCreate = true)
 		{
 			if (CfgFilePath == "") 
 			{
-				throw(new Exception("CfgFilePath³ÉÔ±ÖµÎª¿Õ"));
+				throw(new Exception("CfgFilePathæˆå‘˜å€¼ä¸ºç©º"));
 			}
 
             try
@@ -98,12 +98,12 @@ namespace DigitalPlatform.Script
             }
             catch (FileNotFoundException)
             {
-                // 2011/11/13 ×Ô¶¯´´½¨
+                // 2011/11/13 è‡ªåŠ¨åˆ›å»º
                 if (bAutoCreate == false)
                     throw;
 
                 /*
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (this.CreateProjectXmlFile != null)
                 {
                     AutoCreateProjectXmlFileEventArgs e1 = new AutoCreateProjectXmlFileEventArgs();
@@ -122,14 +122,14 @@ namespace DigitalPlatform.Script
                 throw ex;
             }
 
-			// È±Ê¡´úÂëÄ¿Â¼
+			// ç¼ºçœä»£ç ç›®å½•
 			DefaultCodeFileDir = DomUtil.GetAttr(
 				dom.DocumentElement, 
 				".",
 				"defaultCodeFileDir");
 			if (DefaultCodeFileDir == "")
 			{
-				// ÉèÖÃÎªÖ´ĞĞ³ÌĞòÄ¿Â¼Ö®ÏÂclientcfgsÄ¿Â¼
+				// è®¾ç½®ä¸ºæ‰§è¡Œç¨‹åºç›®å½•ä¹‹ä¸‹clientcfgsç›®å½•
 				DefaultCodeFileDir = 
 					Environment.CurrentDirectory +"\\clientcfgs";
 
@@ -142,7 +142,7 @@ namespace DigitalPlatform.Script
                 else
                 {
                     if (String.IsNullOrEmpty(this.DataDir) == true)
-                        throw new Exception("µ±DefaultCodeFileDir="+DefaultCodeFileDir+"ÎªÏà¶ÔÂ·¾¶Ê±£¬ĞèÒª¶¨Òåthis.DataDir°ïÖúÈ·¶¨È«Â·¾¶¡£");
+                        throw new Exception("å½“DefaultCodeFileDir="+DefaultCodeFileDir+"ä¸ºç›¸å¯¹è·¯å¾„æ—¶ï¼Œéœ€è¦å®šä¹‰this.DataDirå¸®åŠ©ç¡®å®šå…¨è·¯å¾„ã€‚");
                     strPath = PathUtil.MergePath(this.DataDir, DefaultCodeFileDir);
                 }
 
@@ -157,7 +157,7 @@ namespace DigitalPlatform.Script
             if (String.IsNullOrEmpty(this.DefaultCodeFileDir) == true)
                 return strPath;
 
-            // ²âÊÔstrPath1ÊÇ·ñÎªstrPath2µÄÏÂ¼¶Ä¿Â¼»òÎÄ¼ş
+            // æµ‹è¯•strPath1æ˜¯å¦ä¸ºstrPath2çš„ä¸‹çº§ç›®å½•æˆ–æ–‡ä»¶
             if (PathUtil.IsChildOrEqual(strPath, this.DefaultCodeFileDir) == true)
             {
                 string strPart = strPath.Substring(this.DefaultCodeFileDir.Length);
@@ -175,13 +175,13 @@ namespace DigitalPlatform.Script
             return strPath.Replace("%default_code_file_dir%", this.DefaultCodeFileDir);
         }
 
-		// ½«ÅäÖÃÎÄ¼şµÄÄÚÈİÌîÈëTreeView
+		// å°†é…ç½®æ–‡ä»¶çš„å†…å®¹å¡«å…¥TreeView
 		public void FillTree(TreeView treeView)
 		{
 			/*
 			if (CfgFilePath == "") 
 			{
-				throw(new Exception("CfgFilePath³ÉÔ±ÖµÎª¿Õ"));
+				throw(new Exception("CfgFilePathæˆå‘˜å€¼ä¸ºç©º"));
 			}
 
 			dom.Load(CfgFilePath);
@@ -189,19 +189,19 @@ namespace DigitalPlatform.Script
             if (this.dom.DocumentElement == null)
 			    Load();
 
-			treeView.Nodes.Clear();// Çå³ıÒÔÇ°²ĞÓàµÄ
+			treeView.Nodes.Clear();// æ¸…é™¤ä»¥å‰æ®‹ä½™çš„
 
 			FillOneLevel(treeView, null, dom.DocumentElement);
 
 			/*
-			// È±Ê¡´úÂëÄ¿Â¼
+			// ç¼ºçœä»£ç ç›®å½•
 			DefaultCodeFileDir = DomUtil.GetAttr(
 				dom.DocumentElement, 
 				".",
 				"defaultCodeFileDir");
 			if (DefaultCodeFileDir == "")
 			{
-				// ÉèÖÃÎªÖ´ĞĞ³ÌĞòÄ¿Â¼Ö®ÏÂclientcfgsÄ¿Â¼
+				// è®¾ç½®ä¸ºæ‰§è¡Œç¨‹åºç›®å½•ä¹‹ä¸‹clientcfgsç›®å½•
 				DefaultCodeFileDir = 
 					Environment.CurrentDirectory +"\\clientcfgs";
 
@@ -215,20 +215,20 @@ namespace DigitalPlatform.Script
 			*/
 		}
 
-		// Ë¢ĞÂÈ«²¿ÏÔÊ¾
+		// åˆ·æ–°å…¨éƒ¨æ˜¾ç¤º
 		public void RefreshTree(TreeView treeView)
 		{
 			FillOneLevel(treeView, null, dom.DocumentElement);
 		}
 
-		// Ìî³ätreeviewÒ»¼¶(ÒÔ¼°ÒÔÏÂÈ«²¿¼¶)µÄÄÚÈİ
+		// å¡«å……treeviewä¸€çº§(ä»¥åŠä»¥ä¸‹å…¨éƒ¨çº§)çš„å†…å®¹
 		public void FillOneLevel(TreeView treeView,
 			TreeNode treeNode,
 			XmlNode node)
 		{
 			XmlNode nodeChild = null;
 
-			// Çå³ıÒÔÇ°²ĞÓàµÄ
+			// æ¸…é™¤ä»¥å‰æ®‹ä½™çš„
 			if (treeNode == null)
 				treeView.Nodes.Clear();
 			else
@@ -242,7 +242,7 @@ namespace DigitalPlatform.Script
 
 				if (nodeChild.Name == "dir") 
 				{
-					// ĞÂnode
+					// æ–°node
 					string strDirName = DomUtil.GetAttr(nodeChild, "name");
 
 					TreeNode nodeNew = new TreeNode(strDirName, 0, 0);
@@ -253,14 +253,14 @@ namespace DigitalPlatform.Script
 					else
 						treeNode.Nodes.Add(nodeNew);
 
-					// µİ¹é
+					// é€’å½’
 					FillOneLevel(treeView,
 						nodeNew,
 						nodeChild);
 				}
 				else if (nodeChild.Name == "project")
 				{
-					// ĞÂnode
+					// æ–°node
 					string strProjectName = DomUtil.GetAttr(nodeChild, "name");
 
 					TreeNode nodeNew = new TreeNode(strProjectName, 1, 1);
@@ -276,7 +276,7 @@ namespace DigitalPlatform.Script
 
 		}
 
-        // ÁĞ³öÈ«²¿ÒÑ¾­°²×°µÄURL
+        // åˆ—å‡ºå…¨éƒ¨å·²ç»å®‰è£…çš„URL
         public int GetInstalledUrls(out List<string> urls,
             out string strError)
         {
@@ -291,13 +291,13 @@ namespace DigitalPlatform.Script
                 strLocate = UnMacroPath(strLocate);
 
                 XmlDocument metadata_dom = null;
-                // »ñµÃ(Ò»¸öÒÑ¾­°²×°µÄ)·½°¸ÔªÊı¾İ
+                // è·å¾—(ä¸€ä¸ªå·²ç»å®‰è£…çš„)æ–¹æ¡ˆå…ƒæ•°æ®
                 // parameters:
-                //      dom ·µ»ØÔªÊı¾İXMLDOM
+                //      dom è¿”å›å…ƒæ•°æ®XMLDOM
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÕÒµ½ÔªÊı¾İÎÄ¼ş
-                //      1   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ‰¾åˆ°å…ƒæ•°æ®æ–‡ä»¶
+                //      1   æˆåŠŸ
                 int nRet = ScriptManager.GetProjectMetadata(strLocate,
                 out metadata_dom,
                 out strError);
@@ -330,14 +330,14 @@ namespace DigitalPlatform.Script
             return strPath;
         }
 
-        // ¼ì²é¸üĞÂÒ»¸öÈİÆ÷½ÚµãÏÂµÄÈ«²¿·½°¸
+        // æ£€æŸ¥æ›´æ–°ä¸€ä¸ªå®¹å™¨èŠ‚ç‚¹ä¸‹çš„å…¨éƒ¨æ–¹æ¡ˆ
         // parameters:
-        //      dir_node    ÈİÆ÷½Úµã¡£Èç¹û == null ¼ì²é¸üĞÂÈ«²¿·½°¸
-        //      strSource   "!url"»òÕß´ÅÅÌÄ¿Â¼¡£·Ö±ğ±íÊ¾´ÓÍøÂç¼ì²é¸üĞÂ£¬»òÕß´Ó´ÅÅÌ¼ì²é¸üĞÂ
+        //      dir_node    å®¹å™¨èŠ‚ç‚¹ã€‚å¦‚æœ == null æ£€æŸ¥æ›´æ–°å…¨éƒ¨æ–¹æ¡ˆ
+        //      strSource   "!url"æˆ–è€…ç£ç›˜ç›®å½•ã€‚åˆ†åˆ«è¡¨ç¤ºä»ç½‘ç»œæ£€æŸ¥æ›´æ–°ï¼Œæˆ–è€…ä»ç£ç›˜æ£€æŸ¥æ›´æ–°
         // return:
-        //      -2  È«²¿·ÅÆú
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -2  å…¨éƒ¨æ”¾å¼ƒ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int CheckUpdate(
             IWin32Window owner,
             XmlNode dir_node,
@@ -360,13 +360,13 @@ namespace DigitalPlatform.Script
 
             foreach (XmlNode node in nodes)
             {
-                // ·½°¸½Úµã
+                // æ–¹æ¡ˆèŠ‚ç‚¹
                 // return:
-                //      -2  ·ÅÆúËùÓĞµÄ¸üĞÂ
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞ¸üĞÂ
-                //      1   ÒÑ¾­¸üĞÂ
-                //      2   ÒòÎªÄ³Ğ©Ô­ÒòÎŞ·¨¼ì²é¸üĞÂ
+                //      -2  æ”¾å¼ƒæ‰€æœ‰çš„æ›´æ–°
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ›´æ–°
+                //      1   å·²ç»æ›´æ–°
+                //      2   å› ä¸ºæŸäº›åŸå› æ— æ³•æ£€æŸ¥æ›´æ–°
                 nRet = CheckUpdateOneProject(
                         owner,
                         node,
@@ -379,7 +379,7 @@ namespace DigitalPlatform.Script
                 if (nRet == -2)
                     return -2;
                 if (nRet == 2)
-                    strWarning += "·½°¸ " + DomUtil.GetAttr(node, "name") + " " + strError + ";\r\n";
+                    strWarning += "æ–¹æ¡ˆ " + DomUtil.GetAttr(node, "name") + " " + strError + ";\r\n";
 
                 if (nRet == 1)
                 {
@@ -391,7 +391,7 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
-        // ¸ù¾İÒ»¸öÄ¿Â¼ÖĞµÄÈ«²¿ .projpack ÎÄ¼ş´´½¨³ö projects.xml ÎÄ¼ş
+        // æ ¹æ®ä¸€ä¸ªç›®å½•ä¸­çš„å…¨éƒ¨ .projpack æ–‡ä»¶åˆ›å»ºå‡º projects.xml æ–‡ä»¶
         public static int BuildProjectsFile(string strDirectory,
             string strProjectsFilename,
             out string strError)
@@ -400,7 +400,7 @@ namespace DigitalPlatform.Script
 
             List<ProjectInstallInfo> infos = new List<ProjectInstallInfo>();
 
-            // ÁĞ³öËùÓĞÎÄ¼ş
+            // åˆ—å‡ºæ‰€æœ‰æ–‡ä»¶
             try
             {
                 DirectoryInfo di = new DirectoryInfo(strDirectory);
@@ -412,7 +412,7 @@ namespace DigitalPlatform.Script
                     string strFileName = fis[i].FullName;
 
                     List<ProjectInstallInfo> temp_infos = null;
-                    // »ñÈ¡projpackÎÄ¼şÖĞµÄ·½°¸µÄÃû×ÖºÍHostĞÅÏ¢
+                    // è·å–projpackæ–‡ä»¶ä¸­çš„æ–¹æ¡ˆçš„åå­—å’ŒHostä¿¡æ¯
                     int nRet = ScriptManager.GetInstallInfos(
                         strFileName,
                         out temp_infos,
@@ -421,7 +421,7 @@ namespace DigitalPlatform.Script
                         return -1;
 
                     // 2013/5/11
-                    // ÉèÖÃ ProjectPath 
+                    // è®¾ç½® ProjectPath 
                     foreach (ProjectInstallInfo info in temp_infos)
                     {
                         info.ProjectPath = strFileName;
@@ -430,7 +430,7 @@ namespace DigitalPlatform.Script
                     infos.AddRange(temp_infos);
                 }
 
-                // TODO: ¶ÔÁĞ±í½øĞĞÅÅĞò
+                // TODO: å¯¹åˆ—è¡¨è¿›è¡Œæ’åº
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
@@ -452,20 +452,20 @@ namespace DigitalPlatform.Script
             }
             catch (Exception ex)
             {
-                strError = "ÁĞ³öÎÄ¼şµÄ¹ı³ÌÖĞ³ö´í: " + ex.Message;
+                strError = "åˆ—å‡ºæ–‡ä»¶çš„è¿‡ç¨‹ä¸­å‡ºé”™: " + ex.Message;
                 return -1;
             }
         }
 
-        // ¼ì²é¸üĞÂÒ»¸ö·½°¸
+        // æ£€æŸ¥æ›´æ–°ä¸€ä¸ªæ–¹æ¡ˆ
         // parameters:
-        //      strSource   "!url"»òÕß´ÅÅÌÄ¿Â¼¡£·Ö±ğ±íÊ¾´ÓÍøÂç¼ì²é¸üĞÂ£¬»òÕß´Ó´ÅÅÌ¼ì²é¸üĞÂ
+        //      strSource   "!url"æˆ–è€…ç£ç›˜ç›®å½•ã€‚åˆ†åˆ«è¡¨ç¤ºä»ç½‘ç»œæ£€æŸ¥æ›´æ–°ï¼Œæˆ–è€…ä»ç£ç›˜æ£€æŸ¥æ›´æ–°
         // return:
-        //      -2  ·ÅÆúËùÓĞµÄ¸üĞÂ
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ¸üĞÂ
-        //      1   ÒÑ¾­¸üĞÂ
-        //      2   ÒòÎªÄ³Ğ©Ô­ÒòÎŞ·¨¼ì²é¸üĞÂ
+        //      -2  æ”¾å¼ƒæ‰€æœ‰çš„æ›´æ–°
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ›´æ–°
+        //      1   å·²ç»æ›´æ–°
+        //      2   å› ä¸ºæŸäº›åŸå› æ— æ³•æ£€æŸ¥æ›´æ–°
         public int CheckUpdateOneProject(
             IWin32Window owner,
             XmlNode node,
@@ -488,16 +488,16 @@ namespace DigitalPlatform.Script
 
             string strNamePath = GetNodePathName(node);
 
-            // »ñµÃÏÂÔØURL
+            // è·å¾—ä¸‹è½½URL
 
             XmlDocument metadata_dom = null;
-            // »ñµÃ(Ò»¸öÒÑ¾­°²×°µÄ)·½°¸ÔªÊı¾İ
+            // è·å¾—(ä¸€ä¸ªå·²ç»å®‰è£…çš„)æ–¹æ¡ˆå…ƒæ•°æ®
             // parameters:
-            //      dom ·µ»ØÔªÊı¾İXMLDOM
+            //      dom è¿”å›å…ƒæ•°æ®XMLDOM
             // return:
-            //      -1  ³ö´í
-            //      0   Ã»ÓĞÕÒµ½ÔªÊı¾İÎÄ¼ş
-            //      1   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æ²¡æœ‰æ‰¾åˆ°å…ƒæ•°æ®æ–‡ä»¶
+            //      1   æˆåŠŸ
             nRet = ScriptManager.GetProjectMetadata(strLocate,
             out metadata_dom,
             out strError);
@@ -507,13 +507,13 @@ namespace DigitalPlatform.Script
 
             if (nRet == 0)
             {
-                strError = "ÔªÊı¾İÎÄ¼ş²»´æÔÚ£¬Òò´ËÎŞ·¨¼ì²é¸üĞÂ";
-                return 2;   // Ã»ÓĞÔªÊı¾İÎÄ¼ş£¬ÎŞ·¨¸üĞÂ
+                strError = "å…ƒæ•°æ®æ–‡ä»¶ä¸å­˜åœ¨ï¼Œå› æ­¤æ— æ³•æ£€æŸ¥æ›´æ–°";
+                return 2;   // æ²¡æœ‰å…ƒæ•°æ®æ–‡ä»¶ï¼Œæ— æ³•æ›´æ–°
             }
 
             if (metadata_dom.DocumentElement == null)
             {
-                strError = "ÔªÊı¾İDOMµÄ¸ùÔªËØ²»´æÔÚ£¬Òò´ËÎŞ·¨¼ì²é¸üĞÂ";
+                strError = "å…ƒæ•°æ®DOMçš„æ ¹å…ƒç´ ä¸å­˜åœ¨ï¼Œå› æ­¤æ— æ³•æ£€æŸ¥æ›´æ–°";
                 return 2;
             }
 
@@ -521,7 +521,7 @@ namespace DigitalPlatform.Script
                 "updateUrl");
             if (string.IsNullOrEmpty(strUpdateUrl) == true)
             {
-                strError = "ÔªÊı¾İDÖĞÃ»ÓĞ¶¨ÒåupdateUrlÊôĞÔ£¬Òò´ËÎŞ·¨¼ì²é¸üĞÂ";
+                strError = "å…ƒæ•°æ®Dä¸­æ²¡æœ‰å®šä¹‰updateUrlå±æ€§ï¼Œå› æ­¤æ— æ³•æ£€æŸ¥æ›´æ–°";
                 return 2;
             }
 
@@ -535,7 +535,7 @@ namespace DigitalPlatform.Script
 
             string strLocalFileName = "";
             string strLastModified = "";
-            // ³¢ÊÔÏÂÔØÖ¸¶¨ÈÕÆÚºó¸üĞÂ¹ıµÄÎÄ¼ş
+            // å°è¯•ä¸‹è½½æŒ‡å®šæ—¥æœŸåæ›´æ–°è¿‡çš„æ–‡ä»¶
             if (strSource == "!url")
             {
 
@@ -577,7 +577,7 @@ namespace DigitalPlatform.Script
             }
             else
             {
-                // ´ÅÅÌÄ¿Â¼ÖĞµÄÎÄ¼ş
+                // ç£ç›˜ç›®å½•ä¸­çš„æ–‡ä»¶
 
                 string strPureFileName = GetFileNameFromUrl(strUpdateUrl);
                 strLocalFileName = PathUtil.MergePath(strSource, strPureFileName);
@@ -585,7 +585,7 @@ namespace DigitalPlatform.Script
                 FileInfo fi = new FileInfo(strLocalFileName);
                 if (fi.Exists == false)
                 {
-                    strError = "Ä¿Â¼ '" + strSource + "' ÖĞÃ»ÓĞÕÒµ½ÎÄ¼ş '" + strPureFileName + "'";
+                    strError = "ç›®å½• '" + strSource + "' ä¸­æ²¡æœ‰æ‰¾åˆ°æ–‡ä»¶ '" + strPureFileName + "'";
                     return 0;
                 }
                 strLastModified = DateTimeUtil.Rfc1123DateTimeString(fi.LastWriteTimeUtc);
@@ -600,18 +600,18 @@ namespace DigitalPlatform.Script
                     return 0;
             }
 
-            // Ñ¯ÎÊÊÇ·ñ¸üĞÂ
+            // è¯¢é—®æ˜¯å¦æ›´æ–°
             if (bHideMessageBox == false)
             {
                 DialogResult result = MessageDialog.Show(owner,
-                    "ÊÇ·ñÒª¸üĞÂÍ³¼Æ·½°¸ '" + strNamePath + "' ?\r\n\r\n(ÊÇ£º¸üĞÂ; ·ñ: ²»¸üĞÂ£¬µ«¼ÌĞø¼ì²éÆäËû·½°¸; È¡Ïû: ÖĞ¶Ï¸üĞÂ¼ì²é¹ı³Ì)",
+                    "æ˜¯å¦è¦æ›´æ–°ç»Ÿè®¡æ–¹æ¡ˆ '" + strNamePath + "' ?\r\n\r\n(æ˜¯ï¼šæ›´æ–°; å¦: ä¸æ›´æ–°ï¼Œä½†ç»§ç»­æ£€æŸ¥å…¶ä»–æ–¹æ¡ˆ; å–æ¶ˆ: ä¸­æ–­æ›´æ–°æ£€æŸ¥è¿‡ç¨‹)",
                     MessageBoxButtons.YesNoCancel,
                     bDontUpdate == true ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1,
-                    "ÒÔºó²»ÔÙÌáÊ¾£¬°´±¾´ÎµÄÑ¡Ôñ´¦Àí",
+                    "ä»¥åä¸å†æç¤ºï¼ŒæŒ‰æœ¬æ¬¡çš„é€‰æ‹©å¤„ç†",
                     ref bHideMessageBox);
                 if (result == DialogResult.Cancel)
                 {
-                    strError = "·ÅÆúÈ«²¿¸üĞÂ";
+                    strError = "æ”¾å¼ƒå…¨éƒ¨æ›´æ–°";
                     return -2;
                 }
                 if (result == DialogResult.No)
@@ -641,7 +641,7 @@ namespace DigitalPlatform.Script
             return 1;
         }
 
-        // »ñÈ¡projpackÎÄ¼şÖĞµÄ·½°¸µÄÃû×ÖºÍHostĞÅÏ¢
+        // è·å–projpackæ–‡ä»¶ä¸­çš„æ–¹æ¡ˆçš„åå­—å’ŒHostä¿¡æ¯
         public static int GetInstallInfos(
             string strFilename,
             out List<ProjectInstallInfo> infos,
@@ -657,7 +657,7 @@ namespace DigitalPlatform.Script
             }
             catch (FileNotFoundException)
             {
-                strError = "ÎÄ¼ş " + strFilename + "²»´æÔÚ...";
+                strError = "æ–‡ä»¶ " + strFilename + "ä¸å­˜åœ¨...";
                 return -1;
             }
 
@@ -671,7 +671,7 @@ namespace DigitalPlatform.Script
             }
             catch (SerializationException ex)
             {
-                strError = "×°ÔØ´ò°üÎÄ¼ş³ö´í£º" + ex.Message;
+                strError = "è£…è½½æ‰“åŒ…æ–‡ä»¶å‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
             finally
@@ -681,7 +681,7 @@ namespace DigitalPlatform.Script
 
             if (projects.Count == 0)
             {
-                strError = ".projpackÎÄ¼şÖĞÃ»ÓĞ°üº¬ÈÎºÎProject";
+                strError = ".projpackæ–‡ä»¶ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•Project";
                 return -1;
             }
 
@@ -711,11 +711,11 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
-        // °²×°Project
+        // å®‰è£…Project
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ°²×°·½°¸
-        //      >0  °²×°µÄ·½°¸Êı
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å®‰è£…æ–¹æ¡ˆ
+        //      >0  å®‰è£…çš„æ–¹æ¡ˆæ•°
         public int InstallProject(
             IWin32Window owner,
             string strStatisWindowName,
@@ -735,7 +735,7 @@ namespace DigitalPlatform.Script
             }
             catch (FileNotFoundException)
             {
-                strError = "ÎÄ¼ş " + strFilename + "²»´æÔÚ...";
+                strError = "æ–‡ä»¶ " + strFilename + "ä¸å­˜åœ¨...";
                 return -1;
             }
 
@@ -749,7 +749,7 @@ namespace DigitalPlatform.Script
             }
             catch (SerializationException ex)
             {
-                strError = "×°ÔØ´ò°üÎÄ¼ş³ö´í£º" + ex.Message;
+                strError = "è£…è½½æ‰“åŒ…æ–‡ä»¶å‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
             finally
@@ -759,14 +759,14 @@ namespace DigitalPlatform.Script
 
             if (projects.Count == 0)
             {
-                strError = ".projpackÎÄ¼şÖĞÃ»ÓĞ°üº¬ÈÎºÎProject";
+                strError = ".projpackæ–‡ä»¶ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•Project";
                 return -1;
             }
 
             /*
             if (projects.Count > 1)
             {
-                strError = ".projpackÎÄ¼şÖĞ°üº¬ÁË¶à¸ö·½°¸£¬Ä¿Ç°Ôİ²»Ö§³Ö´ÓÆäÖĞ»ñÈ¡²¢¸üĞÂ";
+                strError = ".projpackæ–‡ä»¶ä¸­åŒ…å«äº†å¤šä¸ªæ–¹æ¡ˆï¼Œç›®å‰æš‚ä¸æ”¯æŒä»å…¶ä¸­è·å–å¹¶æ›´æ–°";
                 return -1;
             }
              * */
@@ -781,7 +781,7 @@ namespace DigitalPlatform.Script
     out strPath,
     out strName);
 
-                // ´´½¨Ä¿Â¼
+                // åˆ›å»ºç›®å½•
                 if (string.IsNullOrEmpty(strPath) == false)
                 {
                     XmlNode xmlNode = this.LocateDirNode(
@@ -795,10 +795,10 @@ namespace DigitalPlatform.Script
 
             REDO_CHECKDUP:
 
-                // ²éÖØ
+                // æŸ¥é‡
                 string strExistLocate;
-                // »ñµÃ·½°¸²ÎÊı
-                // strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+                // è·å¾—æ–¹æ¡ˆå‚æ•°
+                // strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
                 // return:
                 //		-1	error
                 //		0	not found project
@@ -817,9 +817,9 @@ namespace DigitalPlatform.Script
                 {
                     string strDirName = "";
                     if (string.IsNullOrEmpty(strPath) == false)
-                        strDirName = "Ä¿Â¼ '"+strPath+"' ÏÂ";
+                        strDirName = "ç›®å½• '"+strPath+"' ä¸‹";
                     DialogResult result = MessageBox.Show(owner,
-    strStatisWindowName + " " + strDirName + "ÒÑ¾­ÓĞÃûÎª '"+strName+"' µÄ·½°¸¡£\r\n\r\nÇëÎÊÊÇ·ñÒª¸²¸ÇËü?\r\n\r\n(Yes: ¸²¸Ç  No: »»Ãûºó°²×°; Cancel: ·ÅÆú°²×°´Ë·½°¸£¬µ«¼ÌĞø°²×°ºóÃæµÄ·½°¸)",
+    strStatisWindowName + " " + strDirName + "å·²ç»æœ‰åä¸º '"+strName+"' çš„æ–¹æ¡ˆã€‚\r\n\r\nè¯·é—®æ˜¯å¦è¦è¦†ç›–å®ƒ?\r\n\r\n(Yes: è¦†ç›–  No: æ¢ååå®‰è£…; Cancel: æ”¾å¼ƒå®‰è£…æ­¤æ–¹æ¡ˆï¼Œä½†ç»§ç»­å®‰è£…åé¢çš„æ–¹æ¡ˆ)",
     "ScriptManager",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -827,8 +827,8 @@ namespace DigitalPlatform.Script
                     if (result == DialogResult.No)
                     {
                         strName = InputDlg.GetInput(owner,
-                            "ÇëÖ¸¶¨Ò»¸öĞÂµÄ·½°¸Ãû",
-                            "·½°¸Ãû",
+                            "è¯·æŒ‡å®šä¸€ä¸ªæ–°çš„æ–¹æ¡ˆå",
+                            "æ–¹æ¡ˆå",
                             strName,
                             null);
                         if (strName == null)
@@ -879,22 +879,22 @@ namespace DigitalPlatform.Script
 
                 try
                 {
-                    // Ö±½Ópaste
+                    // ç›´æ¥paste
                     project.WriteToLocate(strExistLocate, true);
                 }
                 catch (Exception ex)
                 {
-                    strError = "¿½±´ÎÄ¼ş½øÈë·½°¸Ä¿Â¼ '" + strExistLocate + "' Ê±³ö´í: " + ex.Message;
+                    strError = "æ‹·è´æ–‡ä»¶è¿›å…¥æ–¹æ¡ˆç›®å½• '" + strExistLocate + "' æ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
                 string strNamePath = ScriptManager.MakeProjectPathName(strPath, strName);
 
-                // Êµ¼Ê²åÈëproject²ÎÊı
+                // å®é™…æ’å…¥projectå‚æ•°
                 XmlNode projNode = this.NewProjectNode(
                     strNamePath,
                     strExistLocate,
-                    false);	// false±íÊ¾²»ĞèÒª´´½¨Ä¿Â¼ºÍÈ±Ê¡ÎÄ¼ş
+                    false);	// falseè¡¨ç¤ºä¸éœ€è¦åˆ›å»ºç›®å½•å’Œç¼ºçœæ–‡ä»¶
                 DomUtil.SetAttr(projNode, "lastModified",
     strLastModified);
 
@@ -910,9 +910,9 @@ namespace DigitalPlatform.Script
             return nCount;
         }
 
-        // ¸üĞÂProject
+        // æ›´æ–°Project
         // parameters:
-        //      reserve_filenames   ĞèÒª±£»¤µÄÎÄ¼şÃûÁĞ±í¡£Èç¹ûÄ¿Â¼ÖĞÒÑ¾­ÓĞÕâĞ©ÎÄ¼ş£¬Ôò²»Òª¸²¸Ç
+        //      reserve_filenames   éœ€è¦ä¿æŠ¤çš„æ–‡ä»¶ååˆ—è¡¨ã€‚å¦‚æœç›®å½•ä¸­å·²ç»æœ‰è¿™äº›æ–‡ä»¶ï¼Œåˆ™ä¸è¦è¦†ç›–
         private int UpdateProject(
             string strFilename,
             string strExistLocate,
@@ -929,7 +929,7 @@ namespace DigitalPlatform.Script
             }
             catch (FileNotFoundException)
             {
-                strError = "ÎÄ¼ş " + strFilename + "²»´æÔÚ...";
+                strError = "æ–‡ä»¶ " + strFilename + "ä¸å­˜åœ¨...";
                 return -1;
             }
 
@@ -942,7 +942,7 @@ namespace DigitalPlatform.Script
             }
             catch (SerializationException ex)
             {
-                strError = "×°ÔØ´ò°üÎÄ¼ş³ö´í£º" + ex.Message;
+                strError = "è£…è½½æ‰“åŒ…æ–‡ä»¶å‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
             finally
@@ -952,12 +952,12 @@ namespace DigitalPlatform.Script
 
             if (projects.Count == 0)
             {
-                strError = ".projpackÎÄ¼şÖĞÃ»ÓĞ°üº¬ÈÎºÎProject";
+                strError = ".projpackæ–‡ä»¶ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•Project";
                 return -1;
             }
             if (projects.Count > 1)
             {
-                strError = ".projpackÎÄ¼şÖĞ°üº¬ÁË¶à¸ö·½°¸£¬Ä¿Ç°Ôİ²»Ö§³Ö´ÓÆäÖĞ»ñÈ¡²¢¸üĞÂ";
+                strError = ".projpackæ–‡ä»¶ä¸­åŒ…å«äº†å¤šä¸ªæ–¹æ¡ˆï¼Œç›®å‰æš‚ä¸æ”¯æŒä»å…¶ä¸­è·å–å¹¶æ›´æ–°";
                 return -1;
             }
 
@@ -974,13 +974,13 @@ namespace DigitalPlatform.Script
 
             try
             {
-                // Ö±½Ópaste
+                // ç›´æ¥paste
                 project.WriteToLocate(strExistLocate,
                     false);
             }
             catch (Exception ex)
             {
-                strError = "¿½±´ÎÄ¼ş½øÈë·½°¸Ä¿Â¼ '"+strExistLocate+"' Ê±³ö´í: " + ex.Message;
+                strError = "æ‹·è´æ–‡ä»¶è¿›å…¥æ–¹æ¡ˆç›®å½• '"+strExistLocate+"' æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -988,24 +988,24 @@ namespace DigitalPlatform.Script
         }
 
         // parameters:
-        //      reserve_filenames   ĞèÒª±£»¤µÄÎÄ¼şÃûÁĞ±í¡£Èç¹ûÄ¿Â¼ÖĞÒÑ¾­ÓĞÕâĞ©ÎÄ¼ş£¬Ôò²»Òª¸²¸Ç¡£ÒªÇóÀïÃæµÄÎÄ¼şÃû¶¼ÊÇĞ¡Ğ´×Ö·û
+        //      reserve_filenames   éœ€è¦ä¿æŠ¤çš„æ–‡ä»¶ååˆ—è¡¨ã€‚å¦‚æœç›®å½•ä¸­å·²ç»æœ‰è¿™äº›æ–‡ä»¶ï¼Œåˆ™ä¸è¦è¦†ç›–ã€‚è¦æ±‚é‡Œé¢çš„æ–‡ä»¶åéƒ½æ˜¯å°å†™å­—ç¬¦
         static void RemoveExistFiles(string strExistLocate,
                     List<string> protect_filenames)
         {
             /*
-            // É¾³ıÏÖÓĞÄ¿Â¼ÖĞµÄÈ«²¿ÎÄ¼ş
+            // åˆ é™¤ç°æœ‰ç›®å½•ä¸­çš„å…¨éƒ¨æ–‡ä»¶
             try
             {
                 Directory.Delete(strExistLocate, true);
             }
             catch (Exception ex)
             {
-                strError = "É¾³ıÄ¿Â¼Ê±³ö´í: " + ex.Message;
+                strError = "åˆ é™¤ç›®å½•æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
             PathUtil.CreateDirIfNeed(strExistLocate);
             */
-            // ½«Ä¿Â¼ÖĞËùÓĞÎÄ¼şÖğ¸ö´ò°ü
+            // å°†ç›®å½•ä¸­æ‰€æœ‰æ–‡ä»¶é€ä¸ªæ‰“åŒ…
             DirectoryInfo di = new DirectoryInfo(strExistLocate);
 
             FileInfo[] afi = di.GetFiles();
@@ -1015,7 +1015,7 @@ namespace DigitalPlatform.Script
                 string strFileName = afi[i].Name;
                 if (strFileName.Length > 0
                     && strFileName[0] == '~')
-                    continue;	// ºöÂÔÁÙÊ±ÎÄ¼ş
+                    continue;	// å¿½ç•¥ä¸´æ—¶æ–‡ä»¶
 
                 if (protect_filenames != null
                     && protect_filenames.IndexOf(strFileName.ToLower()) != -1)
@@ -1032,7 +1032,7 @@ namespace DigitalPlatform.Script
         }
 
         // 2015/8/6
-        // ¸ù¾İÖ¸¶¨µÄÂ·¾¶½âÎö DLL Assembly
+        // æ ¹æ®æŒ‡å®šçš„è·¯å¾„è§£æ DLL Assembly
         public static Assembly ResolveAssembly(string strName, List<string> paths)
         {
             int nRet = strName.IndexOf(",");
@@ -1049,18 +1049,18 @@ namespace DigitalPlatform.Script
             return null;
         }
 
-		// ´´½¨Assembly
+		// åˆ›å»ºAssembly
 		// parameters:
-		//		saAddtionalRef	¸½¼ÓµÄrefsÎÄ¼şÂ·¾¶¡£Â·¾¶ÖĞ¿ÉÄÜ°üº¬ºê%installdir%
-		//		strLibPaths	¸½¼ÓµÄ¿âËÑË÷Â·¾¶ÃÇ£¬ÓÃ','·Ö¸ôµÄÂ·¾¶×Ö·û´®
+		//		saAddtionalRef	é™„åŠ çš„refsæ–‡ä»¶è·¯å¾„ã€‚è·¯å¾„ä¸­å¯èƒ½åŒ…å«å®%installdir%
+		//		strLibPaths	é™„åŠ çš„åº“æœç´¢è·¯å¾„ä»¬ï¼Œç”¨','åˆ†éš”çš„è·¯å¾„å­—ç¬¦ä¸²
 		// return:
-		//		-2	³ö´í£¬µ«ÊÇÒÑ¾­ÌáÊ¾¹ı´íÎóĞÅÏ¢ÁË¡£
-		//		-1	³ö´í
+		//		-2	å‡ºé”™ï¼Œä½†æ˜¯å·²ç»æç¤ºè¿‡é”™è¯¯ä¿¡æ¯äº†ã€‚
+		//		-1	å‡ºé”™
 		public int BuildAssembly(
             string strHostName,
 			string strProjectNamePath,
-			string strSourceFileName,	// ²»°üº¬Ä¿Â¼²¿·ÖµÄ´¿ÎÄ¼şÃû
-			string [] saAdditionalRef,	// ¸½¼ÓµÄrefs
+			string strSourceFileName,	// ä¸åŒ…å«ç›®å½•éƒ¨åˆ†çš„çº¯æ–‡ä»¶å
+			string [] saAdditionalRef,	// é™„åŠ çš„refs
 			string strLibPaths,	
 			string strOutputFileName,
 			out string strError,
@@ -1072,8 +1072,8 @@ namespace DigitalPlatform.Script
 			string strCodeFileName;
 			string [] saRef = null;
 
-			// »ñµÃ·½°¸²ÎÊı
-			// strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+			// è·å¾—æ–¹æ¡ˆå‚æ•°
+			// strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
 			// return:
 			//		-1	error
 			//		0	not found project
@@ -1087,7 +1087,7 @@ namespace DigitalPlatform.Script
 			}
 			if (nRet == 0) 
 			{
-                strError = "ËŞÖ÷ " + strHostName + " ·½°¸ '" + strProjectNamePath + "' Ã»ÓĞÕÒµ½ ...";
+                strError = "å®¿ä¸» " + strHostName + " æ–¹æ¡ˆ '" + strProjectNamePath + "' æ²¡æœ‰æ‰¾åˆ° ...";
 				return -1;
 			}
 
@@ -1113,7 +1113,7 @@ namespace DigitalPlatform.Script
 				saRef = saTemp;
 			}
 
-			// Ìæ»»%projectdir%ºê
+			// æ›¿æ¢%projectdir%å®
 			RemoveRefsProjectDirMacro(ref saRef, strLocate);
 
 			strCodeFileName = strLocate + "\\" + strSourceFileName;
@@ -1126,7 +1126,7 @@ namespace DigitalPlatform.Script
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 			string strCode = sr.ReadToEnd();
@@ -1143,8 +1143,8 @@ namespace DigitalPlatform.Script
 
 			if (strError != "") 
 			{
-				strError = "ËŞÖ÷ " +strHostName+ " ·½°¸ '"+strProjectNamePath
-					+"' ÖĞÎÄ¼ş '" + strSourceFileName + "' ±àÒë·¢ÏÖ´íÎó»ò¾¯¸æ:\r\n" + strError;
+				strError = "å®¿ä¸» " +strHostName+ " æ–¹æ¡ˆ '"+strProjectNamePath
+					+"' ä¸­æ–‡ä»¶ '" + strSourceFileName + "' ç¼–è¯‘å‘ç°é”™è¯¯æˆ–è­¦å‘Š:\r\n" + strError;
 				CompileErrorDlg dlg = new CompileErrorDlg();
                 GuiUtil.AutoSetDefaultFont(dlg);
                 dlg.applicationInfo = applicationInfo;
@@ -1156,24 +1156,24 @@ namespace DigitalPlatform.Script
 					dlg.IsFltx = true;
 			}
 				dlg.ShowDialog();
-				strError = "±àÒëÖ´ĞĞ±»ÖÕÖ¹¡£ÇëĞŞ¸ÄÔ´´úÂëºóÖØĞÂÖ´ĞĞ¡£";
+				strError = "ç¼–è¯‘æ‰§è¡Œè¢«ç»ˆæ­¢ã€‚è¯·ä¿®æ”¹æºä»£ç åé‡æ–°æ‰§è¡Œã€‚";
 				return -2;
 			}
 
 			if (strWarning != "") 
 			{
-                strWarning = "ËŞÖ÷ " + strHostName + " ·½°¸ '" + strProjectNamePath
-					+"' ÖĞÎÄ¼ş" + strSourceFileName + "' ±àÒë·¢ÏÖ¾¯¸æ:\r\n" + strWarning;
+                strWarning = "å®¿ä¸» " + strHostName + " æ–¹æ¡ˆ '" + strProjectNamePath
+					+"' ä¸­æ–‡ä»¶" + strSourceFileName + "' ç¼–è¯‘å‘ç°è­¦å‘Š:\r\n" + strWarning;
 			}
 
 
 			return nRet;
 		}
 
-        // ´Óxml×Ö·û´®ÖĞµÃµ½refs×Ö·û´®Êı×é
+        // ä»xmlå­—ç¬¦ä¸²ä¸­å¾—åˆ°refså­—ç¬¦ä¸²æ•°ç»„
         // return:
         //		-1	error
-        //		0	ÕıÈ·
+        //		0	æ­£ç¡®
         public static int GetRefsFromXml(string strRefXml,
             out string[] saRef,
             out string strError)
@@ -1188,11 +1188,11 @@ namespace DigitalPlatform.Script
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
-            // ËùÓĞref½Úµã
+            // æ‰€æœ‰refèŠ‚ç‚¹
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//ref");
             saRef = new string[nodes.Count];
             for (int i = 0; i < nodes.Count; i++)
@@ -1203,7 +1203,7 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
-		// ´Óreferences.xmlÎÄ¼şÖĞµÃµ½refs×Ö·û´®Êı×é
+		// ä»references.xmlæ–‡ä»¶ä¸­å¾—åˆ°refså­—ç¬¦ä¸²æ•°ç»„
 		// return:
 		//		-1	error
 		//		0	not found file
@@ -1227,12 +1227,12 @@ namespace DigitalPlatform.Script
 			}
 			catch (Exception ex)
 			{
-				strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
 				return -1;
 			}
 
 
-			// ËùÓĞref½Úµã
+			// æ‰€æœ‰refèŠ‚ç‚¹
 			XmlNodeList nodes = dom.DocumentElement.SelectNodes("//ref");
 			saRef = new string [nodes.Count];
 			for(int i=0;i<nodes.Count;i++)
@@ -1244,7 +1244,7 @@ namespace DigitalPlatform.Script
 			return 1;
 		}
 
-		// ½«refs×Ö·û´®Êı×éĞ´Èëreferences.xmlÎÄ¼şÖĞ
+		// å°†refså­—ç¬¦ä¸²æ•°ç»„å†™å…¥references.xmlæ–‡ä»¶ä¸­
 		// return:
 		//		-1	error
 		//		0	Suceed
@@ -1254,7 +1254,7 @@ namespace DigitalPlatform.Script
 		{
 			strError = "";
 
-			XmlTextWriter writer = null;   //XmlTextWriter¶ÔÏó
+			XmlTextWriter writer = null;   //XmlTextWriterå¯¹è±¡
 
 			writer = new XmlTextWriter(strXmlFileName, Encoding.UTF8);
 			writer.Formatting = Formatting.Indented;
@@ -1284,7 +1284,7 @@ namespace DigitalPlatform.Script
         {
             strError = "";
 
-            XmlTextWriter writer = null;   //XmlTextWriter¶ÔÏó
+            XmlTextWriter writer = null;   //XmlTextWriterå¯¹è±¡
 
             writer = new XmlTextWriter(strXmlFileName, Encoding.UTF8);
             writer.Formatting = Formatting.Indented;
@@ -1305,7 +1305,7 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
-		// ¶¨Î»Dir XmlNode½Úµã
+		// å®šä½Dir XmlNodeèŠ‚ç‚¹
 		public XmlNode LocateDirNode(string strDirNamePath)
 		{
 			string[] aName = strDirNamePath.Split(new Char [] {'/'});
@@ -1328,7 +1328,7 @@ namespace DigitalPlatform.Script
 			return dom.DocumentElement.SelectSingleNode(strXPath);
 		}
 
-		// ¶¨Î»Dir XmlNode½Úµã
+		// å®šä½Dir XmlNodeèŠ‚ç‚¹
 		public XmlNode LocateAnyNode(string strNamePath)
 		{
 			string[] aName = strNamePath.Split(new Char [] {'/'});
@@ -1352,7 +1352,7 @@ namespace DigitalPlatform.Script
 		}
 
 
-		// ½«Dir XmlNode¸ÄÃû
+		// å°†Dir XmlNodeæ”¹å
 		// return:
 		//	0	not found
 		//	1	found and changed
@@ -1369,7 +1369,7 @@ namespace DigitalPlatform.Script
 			return 1;
 		}
 
-		// É¾³ıDir XmlNode£¬°üÀ¨ÆäÏÂÈ«²¿½Úµã
+		// åˆ é™¤Dir XmlNodeï¼ŒåŒ…æ‹¬å…¶ä¸‹å…¨éƒ¨èŠ‚ç‚¹
 		// return:
 		//	-1	error
 		//	0	not found
@@ -1385,7 +1385,7 @@ namespace DigitalPlatform.Script
 			if (node == null)
 				return 0;
 
-			// ÁĞ³öËùÓĞÏÂ¼¶Project½Úµã²¢É¾³ı
+			// åˆ—å‡ºæ‰€æœ‰ä¸‹çº§ProjectèŠ‚ç‚¹å¹¶åˆ é™¤
 			//XmlNodeList nodes = node.SelectNodes("descendant::*");
 			XmlNodeList nodes = node.SelectNodes("descendant::project");
 			for(int i=0;i<nodes.Count;i++)
@@ -1412,7 +1412,7 @@ namespace DigitalPlatform.Script
 			return 1;
 		}
 
-		// ¶¨Î»Project XmlNode½Úµã
+		// å®šä½Project XmlNodeèŠ‚ç‚¹
 		public XmlNode LocateProjectNode(string strProjectNamePath)
 		{
             if (this.dom == null || this.dom.DocumentElement == null)
@@ -1438,7 +1438,7 @@ namespace DigitalPlatform.Script
 			return dom.DocumentElement.SelectSingleNode(strXPath);
 		}
 
-		// ĞŞ¸Äproject²ÎÊı
+		// ä¿®æ”¹projectå‚æ•°
 		public int ChangeProjectData(string strProjectNamePath,
 			string strProjectName,
 			string strLocate,
@@ -1449,7 +1449,7 @@ namespace DigitalPlatform.Script
 
 			if (node == null) 
 			{
-				strError = "·½°¸ '" + strProjectNamePath + "' ²»´æÔÚ...";
+				strError = "æ–¹æ¡ˆ '" + strProjectNamePath + "' ä¸å­˜åœ¨...";
 				return -1;
 			}
 
@@ -1471,7 +1471,7 @@ namespace DigitalPlatform.Script
 			return 0;
 		}
 
-		// ´ÓÍêÕûµÄ·½°¸"Ãû×ÖÂ·¾¶"ÖĞ,Îö³öÂ·¾¶ºÍÃû
+		// ä»å®Œæ•´çš„æ–¹æ¡ˆ"åå­—è·¯å¾„"ä¸­,æå‡ºè·¯å¾„å’Œå
 		public static void SplitProjectPathName(string strProjectNamePath,
 			out string strPath,
 			out string strName)
@@ -1490,7 +1490,7 @@ namespace DigitalPlatform.Script
 			}
 		}
 
-		// ¸ù¾İÂ·¾¶ºÍÃû×Ö²¿·Ö¹¹ÔìÍêÕûµÄ·½°¸Ãû×ÖÂ·¾¶
+		// æ ¹æ®è·¯å¾„å’Œåå­—éƒ¨åˆ†æ„é€ å®Œæ•´çš„æ–¹æ¡ˆåå­—è·¯å¾„
 		public static string MakeProjectPathName(string strPath,
 			string strName)
 		{
@@ -1499,11 +1499,11 @@ namespace DigitalPlatform.Script
 			return strPath + "/" + strName;
 		}
 
-        // °ü×°ºóµÄ°æ±¾
-        // »ñµÃ·½°¸²ÎÊı
+        // åŒ…è£…åçš„ç‰ˆæœ¬
+        // è·å¾—æ–¹æ¡ˆå‚æ•°
         // parameters:
-        //      strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
-        //      strLastModified     ·µ»Ø·½°¸×îºóĞŞ¸ÄÊ±¼ä¡£RFC1123¸ñÊ½
+        //      strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
+        //      strLastModified     è¿”å›æ–¹æ¡ˆæœ€åä¿®æ”¹æ—¶é—´ã€‚RFC1123æ ¼å¼
         // return:
         //		-1	error
         //		0	not found project
@@ -1517,10 +1517,10 @@ namespace DigitalPlatform.Script
                 out strLastModified);
         }
 
-		// »ñµÃ·½°¸²ÎÊı
+		// è·å¾—æ–¹æ¡ˆå‚æ•°
         // parameters:
-		//      strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
-        //      strLastModified     ·µ»Ø·½°¸×îºóĞŞ¸ÄÊ±¼ä¡£RFC1123¸ñÊ½
+		//      strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
+        //      strLastModified     è¿”å›æ–¹æ¡ˆæœ€åä¿®æ”¹æ—¶é—´ã€‚RFC1123æ ¼å¼
 		// return:
 		//		-1	error
 		//		0	not found project
@@ -1568,13 +1568,13 @@ namespace DigitalPlatform.Script
             return 1;
         }
 
-        // »ñµÃ(Ò»¸öÒÑ¾­°²×°µÄ)·½°¸ÔªÊı¾İ
+        // è·å¾—(ä¸€ä¸ªå·²ç»å®‰è£…çš„)æ–¹æ¡ˆå…ƒæ•°æ®
         // parameters:
-        //      dom ·µ»ØÔªÊı¾İXMLDOM
+        //      dom è¿”å›å…ƒæ•°æ®XMLDOM
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½ÔªÊı¾İÎÄ¼ş
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°å…ƒæ•°æ®æ–‡ä»¶
+        //      1   æˆåŠŸ
         public static int GetProjectMetadata(string strLocate,
             out XmlDocument dom,
             out string strError)
@@ -1591,12 +1591,12 @@ namespace DigitalPlatform.Script
             }
             catch (FileNotFoundException ex)
             {
-                strError = "ÔªÊı¾İÎÄ¼ş " + strFilePath + " ²»´æÔÚ";
+                strError = "å…ƒæ•°æ®æ–‡ä»¶ " + strFilePath + " ä¸å­˜åœ¨";
                 return 0;
             }
             catch (Exception ex)
             {
-                strError = "×°ÈëXMLÎÄ¼ş "+strFilePath+" µ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "è£…å…¥XMLæ–‡ä»¶ "+strFilePath+" åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -1604,8 +1604,8 @@ namespace DigitalPlatform.Script
         }
 
 		/*
-		// »ñµÃ·½°¸²ÎÊı
-		// strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+		// è·å¾—æ–¹æ¡ˆå‚æ•°
+		// strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
 		// return:
 		//		-1	error
 		//		0	not found project
@@ -1633,12 +1633,12 @@ namespace DigitalPlatform.Script
 		}
 		*/
 
-		// É¾³ıÒ»¸ö·½°¸
+		// åˆ é™¤ä¸€ä¸ªæ–¹æ¡ˆ
 		// return:
 		//	-1	error
 		//	0	not found
 		//	1	found and deleted
-		//	2	canceld	Òò´ËprojectÃ»ÓĞ±»É¾³ı
+		//	2	canceld	å› æ­¤projectæ²¡æœ‰è¢«åˆ é™¤
 		public int DeleteProject(string strProjectNamePath,
 			bool bWarning,
 			out XmlNode parentXmlNode,
@@ -1659,12 +1659,12 @@ namespace DigitalPlatform.Script
             strProjectLocate = UnMacroPath(strProjectLocate);
 
 
-			// ´ÓDomÉÏÉ¾³ı½Úµã
+			// ä»Domä¸Šåˆ é™¤èŠ‚ç‚¹
 			parentXmlNode = nodeThis.ParentNode;
 			parentXmlNode.RemoveChild(nodeThis);
 			m_bChanged = true;
 
-			if (strProjectLocate != "") // É¾³ıÄ¿Â¼
+			if (strProjectLocate != "") // åˆ é™¤ç›®å½•
 			{
 				try 
 				{
@@ -1672,8 +1672,8 @@ namespace DigitalPlatform.Script
 				}
 				catch (Exception ex) 
 				{
-					strError = ex.Message;
-					//return -1; // ³ÁÄ¬
+                    strError = ExceptionUtil.GetAutoText(ex);
+					//return -1; // æ²‰é»˜
 				}
 			}
 
@@ -1682,11 +1682,11 @@ namespace DigitalPlatform.Script
 
 
 		/*
-		// É¾³ıÒ»¸ö·½°¸
+		// åˆ é™¤ä¸€ä¸ªæ–¹æ¡ˆ
 		// return:
 		//	0	not found
 		//	1	found and deleted
-		//	2	canceld	Òò´ËprojectÃ»ÓĞ±»É¾³ı
+		//	2	canceld	å› æ­¤projectæ²¡æœ‰è¢«åˆ é™¤
 		public int DeleteProject(string strProjectNamePath,
 			bool bWarning,
 			out XmlNode parentXmlNode)
@@ -1705,7 +1705,7 @@ namespace DigitalPlatform.Script
 			if (strCodeFileName != "") 
 			{
 
-				// ¿´¿´Ô´ÎÄ¼şÊÇ·ñ±»¶à¸öprojectÒıÓÃ
+				// çœ‹çœ‹æºæ–‡ä»¶æ˜¯å¦è¢«å¤šä¸ªprojectå¼•ç”¨
 				ArrayList aFound = new ArrayList();
 				XmlNodeList nodes = dom.DocumentElement.SelectNodes("//project");
 				for(int i=0;i<nodes.Count;i++) 
@@ -1723,18 +1723,18 @@ namespace DigitalPlatform.Script
 				{
 					if (bWarning == true) 
 					{
-						string strText = "ÏµÍ³·¢ÏÖ£¬Ô´´úÂëÎÄ¼ş "
+						string strText = "ç³»ç»Ÿå‘ç°ï¼Œæºä»£ç æ–‡ä»¶ "
 							+ strCodeFileName 
-							+ " ³ıÁË±»Äú¼´½«É¾³ıµÄ·½°¸ "+
+							+ " é™¤äº†è¢«æ‚¨å³å°†åˆ é™¤çš„æ–¹æ¡ˆ "+
 							strProjectNamePath 
-							+" Ê¹ÓÃÍâ£¬»¹±»ÏÂÁĞ·½°¸ÒıÓÃ£º\r\n---\r\n";
+							+" ä½¿ç”¨å¤–ï¼Œè¿˜è¢«ä¸‹åˆ—æ–¹æ¡ˆå¼•ç”¨ï¼š\r\n---\r\n";
 
 						for(int i=0;i<aFound.Count;i++)
 						{
 							strText += GetNodePathName((XmlNode)aFound[i]) + "\r\n";
 						}
 
-						strText += "---\r\n\r\nÕâÒâÎ¶×Å£¬Èç¹ûÉ¾³ıÕâ¸öÔ´´úÂëÎÄ¼ş£¬ÉÏÊö·½°¸½«²»ÄÜÕı³£ÔËĞĞ¡£\r\n\r\nÇëÎÊ£¬ÔÚÉ¾³ı·½°¸" +strProjectNamePath+ "Ê±£¬ÊÇ·ñ±£ÁôÔ´´úÂëÎÄ¼ş " + strCodeFileName + "?";
+						strText += "---\r\n\r\nè¿™æ„å‘³ç€ï¼Œå¦‚æœåˆ é™¤è¿™ä¸ªæºä»£ç æ–‡ä»¶ï¼Œä¸Šè¿°æ–¹æ¡ˆå°†ä¸èƒ½æ­£å¸¸è¿è¡Œã€‚\r\n\r\nè¯·é—®ï¼Œåœ¨åˆ é™¤æ–¹æ¡ˆ" +strProjectNamePath+ "æ—¶ï¼Œæ˜¯å¦ä¿ç•™æºä»£ç æ–‡ä»¶ " + strCodeFileName + "?";
 
 						DialogResult msgResult = MessageBox.Show(//this,
 							strText,
@@ -1750,13 +1750,13 @@ namespace DigitalPlatform.Script
 					}
 					else 
 					{
-						bDeleteCodeFile = false;	// ×Ô¶¯²ÉÓÃ×î±£ÏÕµÄ·½Ê½
+						bDeleteCodeFile = false;	// è‡ªåŠ¨é‡‡ç”¨æœ€ä¿é™©çš„æ–¹å¼
 					}
 
 				}
 			}
 
-			// ´ÓDomÉÏÉ¾³ı½Úµã
+			// ä»Domä¸Šåˆ é™¤èŠ‚ç‚¹
 			parentXmlNode = nodeThis.ParentNode;
 			parentXmlNode.RemoveChild(nodeThis);
 
@@ -1771,7 +1771,7 @@ namespace DigitalPlatform.Script
 		*/
 
 
-		// ÉÏÏÂÒÆ¶¯½Úµã
+		// ä¸Šä¸‹ç§»åŠ¨èŠ‚ç‚¹
 		// return:
 		//	0	not found
 		//	1	found and moved
@@ -1803,11 +1803,11 @@ namespace DigitalPlatform.Script
 					return 2;
 			}
 
-			// ´ÓDomÉÏÉ¾³ı½Úµã
+			// ä»Domä¸Šåˆ é™¤èŠ‚ç‚¹
 			parentXmlNode = nodeThis.ParentNode;
 			parentXmlNode.RemoveChild(nodeThis);
 
-			// ²åÈëµ½ÌØ¶¨Î»ÖÃ
+			// æ’å…¥åˆ°ç‰¹å®šä½ç½®
 			if (bUp == true) 
 			{
 				parentXmlNode.InsertBefore(nodeThis, nodeInsert);
@@ -1822,7 +1822,7 @@ namespace DigitalPlatform.Script
 			return 1;
 		}
 
-		// ¸ù¾İproject»òdir XmlNodeµÃµ½Â·¾¶Ãû
+		// æ ¹æ®projectæˆ–dir XmlNodeå¾—åˆ°è·¯å¾„å
 		public string GetNodePathName(XmlNode nodeThis)
 		{
 			string strResult = "";
@@ -1843,7 +1843,7 @@ namespace DigitalPlatform.Script
 		}
 
 
-		#region ºÍAssemblyÓĞ¹ØµÄ¼¸¸öº¯Êı
+		#region å’ŒAssemblyæœ‰å…³çš„å‡ ä¸ªå‡½æ•°
 
 		/*
 		 *
@@ -1852,19 +1852,19 @@ namespace DigitalPlatform.Script
 											 @"bin\DigitalPlatform.UI.dll",
 											 @"bin\DigitalPlatform.Public.dll",
 											 @"bin\DigitalPlatform.Xml_r.dll",
-											 @"bin\DigitalPlatform.rms.db.dll"}; //¼ÓÒıÓÃµÄdll
+											 @"bin\DigitalPlatform.rms.db.dll"}; //åŠ å¼•ç”¨çš„dll
 		  
 		 * 
 		 */
 
 
-		// ´´½¨Assembly
+		// åˆ›å»ºAssembly
 		// parameters:
-		//	strCode:	½Å±¾´úÂë
-		//	refs:	Á¬½ÓµÄÍâ²¿assembly
-		// strResult:´¦ÀíĞÅÏ¢
-		// objDb:Êı¾İ¿â¶ÔÏó£¬ÔÚ³ö´íµ÷getErrorInfoÓÃµ½
-		// ·µ»ØÖµ:´´½¨ºÃµÄAssembly
+		//	strCode:	è„šæœ¬ä»£ç 
+		//	refs:	è¿æ¥çš„å¤–éƒ¨assembly
+		// strResult:å¤„ç†ä¿¡æ¯
+		// objDb:æ•°æ®åº“å¯¹è±¡ï¼Œåœ¨å‡ºé”™è°ƒgetErrorInfoç”¨åˆ°
+		// è¿”å›å€¼:åˆ›å»ºå¥½çš„Assembly
 		public static Assembly CreateAssembly(string strCode,
 			string[] refs,
 			string strLibPaths,
@@ -1876,7 +1876,7 @@ namespace DigitalPlatform.Script
 			strErrorInfo = "";
 			strWarningInfo = "";
  
-			// CompilerParameters¶ÔÏó
+			// CompilerParameterså¯¹è±¡
 			System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 
@@ -1896,7 +1896,7 @@ namespace DigitalPlatform.Script
 			compilerParams.TreatWarningsAsErrors = false;
 			compilerParams.WarningLevel = 4;
  
-			// Õı¹æ»¯Â·¾¶£¬È¥³ıÀïÃæµÄºê×Ö·û´®
+			// æ­£è§„åŒ–è·¯å¾„ï¼Œå»é™¤é‡Œé¢çš„å®å­—ç¬¦ä¸²
 			RemoveRefsBinDirMacro(ref refs);
 
 			compilerParams.ReferencedAssemblies.AddRange(refs);
@@ -1916,7 +1916,7 @@ namespace DigitalPlatform.Script
 			}
 			catch (Exception ex) 
 			{
-				strErrorInfo = "³ö´í " + ex.Message;
+				strErrorInfo = "å‡ºé”™ " + ex.Message;
 				return null;
 			}
 
@@ -1928,7 +1928,7 @@ namespace DigitalPlatform.Script
 				nErrorCount = getErrorInfo(results.Errors,
 					out strErrorString);
 
-				strErrorInfo = "ĞÅÏ¢ÌõÊı:" + Convert.ToString(results.Errors.Count) + "\r\n";
+				strErrorInfo = "ä¿¡æ¯æ¡æ•°:" + Convert.ToString(results.Errors.Count) + "\r\n";
 				strErrorInfo += strErrorString;
 
 				if (nErrorCount == 0 && results.Errors.Count != 0) 
@@ -1957,7 +1957,7 @@ namespace DigitalPlatform.Script
 			return nCount;
 		}
 
-		// È¥³ıÂ·¾¶ÖĞµÄºê%projectdir%
+		// å»é™¤è·¯å¾„ä¸­çš„å®%projectdir%
 		void RemoveRefsProjectDirMacro(ref string[] refs,
 			string strProjectDir)
 		{
@@ -1972,14 +1972,14 @@ namespace DigitalPlatform.Script
 			{
 				string strNew = PathUtil.UnMacroPath(macroTable,
 					refs[i], 
-					false);	// ²»ÒªÅ×³öÒì³££¬ÒòÎª¿ÉÄÜ»¹ÓĞ%binddir%ºêÏÖÔÚ»¹ÎŞ·¨Ìæ»»
+					false);	// ä¸è¦æŠ›å‡ºå¼‚å¸¸ï¼Œå› ä¸ºå¯èƒ½è¿˜æœ‰%binddir%å®ç°åœ¨è¿˜æ— æ³•æ›¿æ¢
 				refs[i] = strNew;
 			}
 
 		}
 
 	
-		// È¥³ıÂ·¾¶ÖĞµÄºê%bindir%
+		// å»é™¤è·¯å¾„ä¸­çš„å®%bindir%
 		public static void RemoveRefsBinDirMacro(ref string[] refs)
 		{
             if (refs == null)
@@ -2000,7 +2000,7 @@ namespace DigitalPlatform.Script
 		}
 
 		// parameters:
-		//		refs	¸½¼ÓµÄrefsÎÄ¼şÂ·¾¶¡£Â·¾¶ÖĞ¿ÉÄÜ°üº¬ºê%installdir%
+		//		refs	é™„åŠ çš„refsæ–‡ä»¶è·¯å¾„ã€‚è·¯å¾„ä¸­å¯èƒ½åŒ…å«å®%installdir%
 		public static int CreateAssemblyFile(string strCode,
 			string[] refs,
 			string strLibPaths,
@@ -2012,7 +2012,7 @@ namespace DigitalPlatform.Script
 			strErrorInfo = "";
 			strWarningInfo = "";
  
-			// CompilerParameters¶ÔÏó
+			// CompilerParameterså¯¹è±¡
 			System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 
@@ -2032,7 +2032,7 @@ namespace DigitalPlatform.Script
 			compilerParams.TreatWarningsAsErrors = false;
 			compilerParams.WarningLevel = 4;
  
-			// Õı¹æ»¯Â·¾¶£¬È¥³ıÀïÃæµÄºê×Ö·û´®
+			// æ­£è§„åŒ–è·¯å¾„ï¼Œå»é™¤é‡Œé¢çš„å®å­—ç¬¦ä¸²
 			RemoveRefsBinDirMacro(ref refs);
 
             if (refs != null)
@@ -2053,7 +2053,7 @@ namespace DigitalPlatform.Script
 			}
 			catch (Exception ex) 
 			{
-				strErrorInfo = "³ö´í " + ex.Message;
+				strErrorInfo = "å‡ºé”™ " + ex.Message;
 				return -1;
 			}
 
@@ -2065,7 +2065,7 @@ namespace DigitalPlatform.Script
 				nErrorCount = getErrorInfo(results.Errors,
 					out strErrorString);
 
-				strErrorInfo = "ĞÅÏ¢ÌõÊı:" + Convert.ToString(results.Errors.Count) + "\r\n";
+				strErrorInfo = "ä¿¡æ¯æ¡æ•°:" + Convert.ToString(results.Errors.Count) + "\r\n";
 				strErrorInfo += strErrorString;
 
 				if (nErrorCount == 0 && results.Errors.Count != 0) 
@@ -2082,7 +2082,7 @@ namespace DigitalPlatform.Script
 			return 0;
 		}
 
-        // ´Ó .ref »ñÈ¡¸½¼ÓµÄ¿âÎÄ¼şÂ·¾¶
+        // ä» .ref è·å–é™„åŠ çš„åº“æ–‡ä»¶è·¯å¾„
         public static int GetRef(string strCsFileName,
             ref string[] refs,
             out string strError)
@@ -2091,9 +2091,9 @@ namespace DigitalPlatform.Script
 
             string strRefFileName = strCsFileName + ".ref";
 
-            // .refÎÄ¼ş¿ÉÒÔÈ±Ê¡
+            // .refæ–‡ä»¶å¯ä»¥ç¼ºçœ
             if (File.Exists(strRefFileName) == false)
-                return 0;   // .ref ÎÄ¼ş²»´æÔÚ
+                return 0;   // .ref æ–‡ä»¶ä¸å­˜åœ¨
 
             string strRef = "";
             try
@@ -2105,22 +2105,22 @@ namespace DigitalPlatform.Script
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
-            // ÌáÇ°¼ì²é
+            // æå‰æ£€æŸ¥
             string[] add_refs = null;
             int nRet = ScriptManager.GetRefsFromXml(strRef,
                 out add_refs,
                 out strError);
             if (nRet == -1)
             {
-                strError = strRefFileName + " ÎÄ¼şÄÚÈİ(Ó¦ÎªXML¸ñÊ½)¸ñÊ½´íÎó: " + strError;
+                strError = strRefFileName + " æ–‡ä»¶å†…å®¹(åº”ä¸ºXMLæ ¼å¼)æ ¼å¼é”™è¯¯: " + strError;
                 return -1;
             }
 
-            // ¶ÒÏÖºê
+            // å…‘ç°å®
             if (add_refs != null)
             {
                 for (int i = 0; i < add_refs.Length; i++)
@@ -2133,10 +2133,10 @@ namespace DigitalPlatform.Script
             return 1;
         }
 
-        // (¶ÔrefsÖĞµÄºê²»¼ÓÒÔ´¦Àí)
-        // Ö±½Ó±àÒëµ½ÄÚ´æ
+        // (å¯¹refsä¸­çš„å®ä¸åŠ ä»¥å¤„ç†)
+        // ç›´æ¥ç¼–è¯‘åˆ°å†…å­˜
         // parameters:
-        //		refs	¸½¼ÓµÄrefsÎÄ¼şÂ·¾¶¡£±¾º¯Êı¶ÔÂ·¾¶ÖĞ¿ÉÄÜ°üº¬ºê%...%Î´¼ÓÒÔ´¦Àí£¬ĞèÒªÔÚº¯Êıµ÷ÓÃÇ°ÏÈ´¦ÀíºÃ
+        //		refs	é™„åŠ çš„refsæ–‡ä»¶è·¯å¾„ã€‚æœ¬å‡½æ•°å¯¹è·¯å¾„ä¸­å¯èƒ½åŒ…å«å®%...%æœªåŠ ä»¥å¤„ç†ï¼Œéœ€è¦åœ¨å‡½æ•°è°ƒç”¨å‰å…ˆå¤„ç†å¥½
         public static int CreateAssembly_1(string strCode,
             string[] refs,
             string strLibPaths,
@@ -2149,7 +2149,7 @@ namespace DigitalPlatform.Script
             strErrorInfo = "";
             strWarningInfo = "";
 
-            // CompilerParameters¶ÔÏó
+            // CompilerParameterså¯¹è±¡
             System.CodeDom.Compiler.CompilerParameters compilerParams;
             compilerParams = new CompilerParameters();
 
@@ -2164,8 +2164,8 @@ namespace DigitalPlatform.Script
 
 
             /*
-            // 2007/12/4 ·Å¿ª×¢ÊÍ
-            // Õı¹æ»¯Â·¾¶£¬È¥³ıÀïÃæµÄºê×Ö·û´®
+            // 2007/12/4 æ”¾å¼€æ³¨é‡Š
+            // æ­£è§„åŒ–è·¯å¾„ï¼Œå»é™¤é‡Œé¢çš„å®å­—ç¬¦ä¸²
             RemoveRefsBinDirMacro(ref refs);
              * */
 
@@ -2189,7 +2189,7 @@ namespace DigitalPlatform.Script
             }
             catch (Exception ex)
             {
-                strErrorInfo = "³ö´í " + ex.Message;
+                strErrorInfo = "å‡ºé”™ " + ex.Message;
                 return -1;
             }
 
@@ -2201,7 +2201,7 @@ namespace DigitalPlatform.Script
                 nErrorCount = getErrorInfo(results.Errors,
                     out strErrorString);
 
-                strErrorInfo = "ĞÅÏ¢ÌõÊı:" + Convert.ToString(results.Errors.Count) + "\r\n";
+                strErrorInfo = "ä¿¡æ¯æ¡æ•°:" + Convert.ToString(results.Errors.Count) + "\r\n";
                 strErrorInfo += strErrorString;
 
                 if (nErrorCount == 0 && results.Errors.Count != 0)
@@ -2219,7 +2219,7 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
-		// ¹¹Ôì³ö´íĞÅÏ¢×Ö·û´®
+		// æ„é€ å‡ºé”™ä¿¡æ¯å­—ç¬¦ä¸²
 		public static int getErrorInfo(CompilerErrorCollection errors,
 			out string strResult)
 		{
@@ -2228,7 +2228,7 @@ namespace DigitalPlatform.Script
 
 			if (errors == null)
 			{
-				strResult = "error²ÎÊıÎªnull";
+				strResult = "errorå‚æ•°ä¸ºnull";
 				return 0;
 			}
    
@@ -2247,7 +2247,7 @@ namespace DigitalPlatform.Script
 			return nCount;
 		}
 
-        // »ñµÃ´ÓÖ¸¶¨Àà»òÕß½Ó¿ÚÅÉÉúµÄÀà
+        // è·å¾—ä»æŒ‡å®šç±»æˆ–è€…æ¥å£æ´¾ç”Ÿçš„ç±»
 		public static Type GetDerivedClassType(Assembly assembly,
 			string strBaseTypeFullName)
 		{
@@ -2318,7 +2318,7 @@ namespace DigitalPlatform.Script
 		}
 
 
-		// ¹Û²ìtypeµÄ»ùÀàÖĞÊÇ·ñÓĞÀàÃûÎªstrBaseTypeFullNameµÄÀà¡£
+		// è§‚å¯Ÿtypeçš„åŸºç±»ä¸­æ˜¯å¦æœ‰ç±»åä¸ºstrBaseTypeFullNameçš„ç±»ã€‚
 		public static bool IsDerivedFrom(Type type,
 			string strBaseTypeFullName)
 		{
@@ -2340,17 +2340,17 @@ namespace DigitalPlatform.Script
 		#endregion
 
 
-		// *** Ëã·¨¿ÉÒÔ¸Ä½øÒ»ÏÂ:Èç¹û·¢ÏÖÔ­À´µÄÃû×Ö×îºó²¿·ÖÊÇÊı×Ö,¾ÍÏÈÀÛ¼ÓÕâ¸öÊı×Ö²¿·Ö
-		// »ñµÃÒ»¸öĞÂµÄProject´ÅÅÌÄ¿Â¼Ãû¡£
-		// ÒªÂú×ã£º1) ÔÚ´ÅÅÌÉÏ²»´æÔÚ
-		// Ò»µ©»ñµÃÕâ¸öÄ¿Â¼Ãû£¬¾ÍÏÈ´´½¨Ò»¸ö¿ÕÄ¿Â¼£¬ÒÔ±ãÕ¼¾İÕâ¸öÄ¿Â¼Ãû£¬
-		// ±ÜÃâ±»ºóÀ´ÖØ¸´»ñµÃ¡£µ«ÊÇ£¬ÒÔºóÈç¹û²»Ê¹ÓÃÕâ¸öÄ¿Â¼£¬¼ÇµÃÉ¾³ıËü£¬²»È»
-		// ³ÉÎªÎŞÈËÇåÀíµÄÀ¬»øÄ¿Â¼
+		// *** ç®—æ³•å¯ä»¥æ”¹è¿›ä¸€ä¸‹:å¦‚æœå‘ç°åŸæ¥çš„åå­—æœ€åéƒ¨åˆ†æ˜¯æ•°å­—,å°±å…ˆç´¯åŠ è¿™ä¸ªæ•°å­—éƒ¨åˆ†
+		// è·å¾—ä¸€ä¸ªæ–°çš„Projectç£ç›˜ç›®å½•åã€‚
+		// è¦æ»¡è¶³ï¼š1) åœ¨ç£ç›˜ä¸Šä¸å­˜åœ¨
+		// ä¸€æ—¦è·å¾—è¿™ä¸ªç›®å½•åï¼Œå°±å…ˆåˆ›å»ºä¸€ä¸ªç©ºç›®å½•ï¼Œä»¥ä¾¿å æ®è¿™ä¸ªç›®å½•åï¼Œ
+		// é¿å…è¢«åæ¥é‡å¤è·å¾—ã€‚ä½†æ˜¯ï¼Œä»¥åå¦‚æœä¸ä½¿ç”¨è¿™ä¸ªç›®å½•ï¼Œè®°å¾—åˆ é™¤å®ƒï¼Œä¸ç„¶
+		// æˆä¸ºæ— äººæ¸…ç†çš„åƒåœ¾ç›®å½•
 		public string NewProjectLocate(string strPrefix,
 			ref int nPrefixNumber)
 		{
 
-			// Ìæ»»strPrefixÖĞµÄÄ³Ğ©×Ö·û
+			// æ›¿æ¢strPrefixä¸­çš„æŸäº›å­—ç¬¦
 			strPrefix = strPrefix.Replace(" ", "_");
 
 
@@ -2363,7 +2363,7 @@ namespace DigitalPlatform.Script
 			bool bFound = false;
 
 
-			// ÊÔÌ½´ÅÅÌÄ¿Â¼ÖĞÍ¬ÃûÎÄ¼ş
+			// è¯•æ¢ç£ç›˜ç›®å½•ä¸­åŒåæ–‡ä»¶
 			PathUtil.CreateDirIfNeed(this.DefaultCodeFileDir);
 			DirectoryInfo di = new DirectoryInfo(this.DefaultCodeFileDir);
 
@@ -2416,18 +2416,18 @@ namespace DigitalPlatform.Script
 		}
 
 
-		// »ñµÃÒ»¸öĞÂµÄÔ´´úÂëÎÄ¼şÃû¡£
-		// ÒªÂú×ã£º1) ÔÚÏÖÓĞprojectÔªËØµÄcodeFileName²ÎÊıÖĞ²»ÖØ¸´
-		//		2) ÔÚ´ÅÅÌÉÏ²»´æÔÚ
-		// Ò»µ©»ñµÃÕâ¸öÎÄ¼şÃû£¬¾ÍÏÈ´´½¨Ò»¸ö0byteµÄĞÂÎÄ¼ş£¬ÒÔ±ãÕ¼¾İÕâ¸öÎÄ¼şÃû£¬
-		// ±ÜÃâ±»ºóÀ´ÖØ¸´»ñµÃ¡£µ«ÊÇ£¬ÒÔºóÈç¹û²»Ê¹ÓÃÕâ¸öÎÄ¼ş£¬¼ÇµÃÉ¾³ıËü£¬²»È»
-		// ³ÉÎªÎŞÈËÇåÀíµÄÀ¬»ø
+		// è·å¾—ä¸€ä¸ªæ–°çš„æºä»£ç æ–‡ä»¶åã€‚
+		// è¦æ»¡è¶³ï¼š1) åœ¨ç°æœ‰projectå…ƒç´ çš„codeFileNameå‚æ•°ä¸­ä¸é‡å¤
+		//		2) åœ¨ç£ç›˜ä¸Šä¸å­˜åœ¨
+		// ä¸€æ—¦è·å¾—è¿™ä¸ªæ–‡ä»¶åï¼Œå°±å…ˆåˆ›å»ºä¸€ä¸ª0byteçš„æ–°æ–‡ä»¶ï¼Œä»¥ä¾¿å æ®è¿™ä¸ªæ–‡ä»¶åï¼Œ
+		// é¿å…è¢«åæ¥é‡å¤è·å¾—ã€‚ä½†æ˜¯ï¼Œä»¥åå¦‚æœä¸ä½¿ç”¨è¿™ä¸ªæ–‡ä»¶ï¼Œè®°å¾—åˆ é™¤å®ƒï¼Œä¸ç„¶
+		// æˆä¸ºæ— äººæ¸…ç†çš„åƒåœ¾
 		public string NewCodeFileName(string strPrefix,
-			string strExt,	// ÎÄ¼şÀ©Õ¹Ãû£¬´ø'.'
+			string strExt,	// æ–‡ä»¶æ‰©å±•åï¼Œå¸¦'.'
 			ref int nPrefixNumber)
 		{
 
-			// Ìæ»»strPrefixÖĞµÄÄ³Ğ©×Ö·û
+			// æ›¿æ¢strPrefixä¸­çš„æŸäº›å­—ç¬¦
 			strPrefix = strPrefix.Replace(" ", "_");
 
 
@@ -2437,7 +2437,7 @@ namespace DigitalPlatform.Script
 			int i;
 			bool bFound = false;
 
-			// ÊÔÌ½ËùÓĞcodeFileName²ÎÊı
+			// è¯•æ¢æ‰€æœ‰codeFileNameå‚æ•°
 			XmlNodeList nodes = dom.DocumentElement.SelectNodes("//project");
 
 			for(;;nPrefixNumber ++) 
@@ -2466,7 +2466,7 @@ namespace DigitalPlatform.Script
 			}
 
 
-			// ÊÔÌ½´ÅÅÌÄ¿Â¼ÖĞÍ¬ÃûÎÄ¼ş
+			// è¯•æ¢ç£ç›˜ç›®å½•ä¸­åŒåæ–‡ä»¶
 			PathUtil.CreateDirIfNeed(this.DefaultCodeFileDir);
 			DirectoryInfo di = new DirectoryInfo(this.DefaultCodeFileDir);
 
@@ -2495,10 +2495,10 @@ namespace DigitalPlatform.Script
 			return strNewPath;
 		}
 
-		// ´´½¨Ò»¸öĞÂµÄProject XmlNode
+		// åˆ›å»ºä¸€ä¸ªæ–°çš„Project XmlNode
         // parameters:
-        //      bCreateDefault  ÊÇ·ñÒª´´½¨È±Ê¡µÄÎÄ¼ş
-        //      strHostName     ËŞÖ÷Ãû¡£µ±bCreateDefault == trueÊ±²ÅÓĞÒâÒå
+        //      bCreateDefault  æ˜¯å¦è¦åˆ›å»ºç¼ºçœçš„æ–‡ä»¶
+        //      strHostName     å®¿ä¸»åã€‚å½“bCreateDefault == trueæ—¶æ‰æœ‰æ„ä¹‰
 		public XmlNode NewProjectNode(string strProjectNamePath,
 			string strLocate,
 			bool bCreateDefault,
@@ -2508,7 +2508,7 @@ namespace DigitalPlatform.Script
             if (bCreateDefault == true
                 && string.IsNullOrEmpty(strHostName) == true)
             {
-                Debug.Assert(false, "µ±²ÎÊı bCreateDefault ÎªtrueµÄÊ±ºò£¬ strHostName²»ÄÜÎª¿Õ");
+                Debug.Assert(false, "å½“å‚æ•° bCreateDefault ä¸ºtrueçš„æ—¶å€™ï¼Œ strHostNameä¸èƒ½ä¸ºç©º");
             }
 #endif
 
@@ -2530,7 +2530,7 @@ namespace DigitalPlatform.Script
 
 					XmlNode node = nodeCurrent.SelectSingleNode(strXPath);
 
-					if (node == null) // ´´½¨ĞÂÏÂ¼¶Ä¿Â¼
+					if (node == null) // åˆ›å»ºæ–°ä¸‹çº§ç›®å½•
 					{
 						node = dom.CreateElement("dir");
 						nodeCurrent.AppendChild(node);
@@ -2545,7 +2545,7 @@ namespace DigitalPlatform.Script
 
 					XmlNode node = nodeCurrent.SelectSingleNode(strXPath);
 
-					if (node == null) // ´´½¨ĞÂÏÂ¼¶Ä¿Â¼
+					if (node == null) // åˆ›å»ºæ–°ä¸‹çº§ç›®å½•
 					{
 						node = dom.CreateElement("project");
 						nodeCurrent.AppendChild(node);
@@ -2557,7 +2557,7 @@ namespace DigitalPlatform.Script
 						DomUtil.SetAttr(node, "locate", strLocate);
 
 						
-						// ´´½¨ÎïÀíÄ¿Â¼ 
+						// åˆ›å»ºç‰©ç†ç›®å½• 
 						if (string.IsNullOrEmpty(strLocate) == false
                             && bCreateDefault == true) 
 						{
@@ -2566,7 +2566,7 @@ namespace DigitalPlatform.Script
 							/*
 							Directory.CreateDirectory(strLocate);
 
-							// ´´½¨È±Ê¡ÎÄ¼ş
+							// åˆ›å»ºç¼ºçœæ–‡ä»¶
 
 							// main.cs
 							string strFileName = strLocate + "\\main.cs";
@@ -2595,7 +2595,7 @@ namespace DigitalPlatform.Script
 
 		public void OnCreateDefaultContent(string strFileName)
 		{
-			// ´´½¨È±Ê¡ÎÄ¼ş
+			// åˆ›å»ºç¼ºçœæ–‡ä»¶
 			if (this.CreateDefaultContent != null)
 			{
 				CreateDefaultContentEventArgs e = new CreateDefaultContentEventArgs();
@@ -2606,22 +2606,22 @@ namespace DigitalPlatform.Script
 			}
 			else 
 			{
-				// ´´½¨Ò»¸ö¿ÕÎÄ¼ş
+				// åˆ›å»ºä¸€ä¸ªç©ºæ–‡ä»¶
 				CreateBlankContent(strFileName);
 			}
 		}
 
-		// ´´½¨Ò»¸ö·½°¸Ä¿Â¼ÖĞµÄÈô¸ÉÈ±Ê¡ÎÄ¼ş
+		// åˆ›å»ºä¸€ä¸ªæ–¹æ¡ˆç›®å½•ä¸­çš„è‹¥å¹²ç¼ºçœæ–‡ä»¶
 		public int CreateDefault(string strLocate,
             string strHostName)
 		{
-			// ´´½¨ÎïÀíÄ¿Â¼ 
+			// åˆ›å»ºç‰©ç†ç›®å½• 
 			if (strLocate == "")
 				return -1;
 
 			Directory.CreateDirectory(strLocate);
 
-			// ´´½¨È±Ê¡ÎÄ¼ş
+			// åˆ›å»ºç¼ºçœæ–‡ä»¶
 			if (this.CreateDefaultContent != null)
 			{
 
@@ -2657,8 +2657,8 @@ namespace DigitalPlatform.Script
 		}
 	
 
-		// ´´½¨È±Ê¡µÄreferences.xmlÎÄ¼ş
-        // TODO: Ó¦ĞŞ¸ÄÎªÊÂ¼şÇı¶¯
+		// åˆ›å»ºç¼ºçœçš„references.xmlæ–‡ä»¶
+        // TODO: åº”ä¿®æ”¹ä¸ºäº‹ä»¶é©±åŠ¨
 		public static int CreateDefaultReferenceXmlFile(string strFileName)
 		{
 			string strError = "";
@@ -2670,8 +2670,8 @@ namespace DigitalPlatform.Script
 			return 0;
 		}
 
-        // ´´½¨È±Ê¡µÄmetadata.xmlÎÄ¼ş
-        // TODO: Ó¦ĞŞ¸ÄÎªÊÂ¼şÇı¶¯
+        // åˆ›å»ºç¼ºçœçš„metadata.xmlæ–‡ä»¶
+        // TODO: åº”ä¿®æ”¹ä¸ºäº‹ä»¶é©±åŠ¨
         public static int CreateDefaultMetadataXmlFile(string strFileName,
             string strHostName)
         {
@@ -2684,8 +2684,8 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
-		// ÊÇ·ñÎªÈ±Ê¡ÎÄ¼şÃû?
-		// strFileName	´¿ÎÄ¼şÃû
+		// æ˜¯å¦ä¸ºç¼ºçœæ–‡ä»¶å?
+		// strFileName	çº¯æ–‡ä»¶å
 		public static bool IsReservedFileName(string strFileName)
 		{
 			if (String.Compare(strFileName,
@@ -2724,7 +2724,7 @@ namespace DigitalPlatform.Script
 
 					XmlNode node = nodeCurrent.SelectSingleNode(strXPath);
 
-					if (node == null) // ´´½¨ĞÂÏÂ¼¶Ä¿Â¼
+					if (node == null) // åˆ›å»ºæ–°ä¸‹çº§ç›®å½•
 					{
 						node = dom.CreateElement("dir");
 						nodeCurrent.AppendChild(node);
@@ -2740,7 +2740,7 @@ namespace DigitalPlatform.Script
 
 					XmlNode node = nodeCurrent.SelectSingleNode(strXPath);
 
-					if (node == null) // ´´½¨ĞÂÏÂ¼¶Ä¿Â¼
+					if (node == null) // åˆ›å»ºæ–°ä¸‹çº§ç›®å½•
 					{
 						node = dom.CreateElement("project");
 						nodeCurrent.AppendChild(node);
@@ -2765,7 +2765,7 @@ namespace DigitalPlatform.Script
 		}
 		*/
 
-		// ´´½¨Ò»¸öĞÂµÄDir xml½Úµã
+		// åˆ›å»ºä¸€ä¸ªæ–°çš„Dir xmlèŠ‚ç‚¹
 		public XmlNode NewDirNode(string strDirNamePath)
 		{
 			string[] aName = strDirNamePath.Split(new Char [] {'/'});
@@ -2784,7 +2784,7 @@ namespace DigitalPlatform.Script
 
 					XmlNode node = nodeCurrent.SelectSingleNode(strXPath);
 
-					if (node == null) // ´´½¨ĞÂÏÂ¼¶Ä¿Â¼
+					if (node == null) // åˆ›å»ºæ–°ä¸‹çº§ç›®å½•
 					{
 						node = dom.CreateElement("dir");
 						nodeCurrent.AppendChild(node);
@@ -2800,7 +2800,7 @@ namespace DigitalPlatform.Script
 
 					XmlNode node = nodeCurrent.SelectSingleNode(strXPath);
 
-					if (node == null) // ´´½¨ĞÂÏÂ¼¶Ä¿Â¼
+					if (node == null) // åˆ›å»ºæ–°ä¸‹çº§ç›®å½•
 					{
 						node = dom.CreateElement("dir");
 						nodeCurrent.AppendChild(node);
@@ -2820,9 +2820,9 @@ namespace DigitalPlatform.Script
 			return dirNode;
 		}
 
-		// ´´½¨Ò»¸öÈ±Ê¡µÄprojects.xmlÎÄ¼ş
+		// åˆ›å»ºä¸€ä¸ªç¼ºçœçš„projects.xmlæ–‡ä»¶
 		// parameters:
-		//		strDefaultCodeFileSubDir	È±Ê¡µÄ´úÂë×ÓÄ¿Â¼¡£Ò»°ãÎªclientcfgs
+		//		strDefaultCodeFileSubDir	ç¼ºçœçš„ä»£ç å­ç›®å½•ã€‚ä¸€èˆ¬ä¸ºclientcfgs
 		public static int CreateDefaultProjectsXmlFile(string strFileName,
 			string strDefaultCodeFileSubDir)
 		{
@@ -2837,7 +2837,7 @@ namespace DigitalPlatform.Script
 		}
 	}
 
-	// ´´½¨ÎÄ¼şÈ±Ê¡ÄÚÈİ
+	// åˆ›å»ºæ–‡ä»¶ç¼ºçœå†…å®¹
 	public delegate void CreateDefaultContentEventHandler(object sender,
 	CreateDefaultContentEventArgs e);
 
@@ -2849,9 +2849,9 @@ namespace DigitalPlatform.Script
 
     public class ProjectInstallInfo
     {
-        public string ProjectPath = ""; // projpack ÎÄ¼şÈ«Â·¾¶
+        public string ProjectPath = ""; // projpack æ–‡ä»¶å…¨è·¯å¾„
         public string ProjectName = "";
-        public int IndexInPack = -1;    // ÔÚprojpackÎÄ¼şÖĞµÄÏÂ±ê
+        public int IndexInPack = -1;    // åœ¨projpackæ–‡ä»¶ä¸­çš„ä¸‹æ ‡
         public string Host = "";
         public string UpdateUrl = "";
 

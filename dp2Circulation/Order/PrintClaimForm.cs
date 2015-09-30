@@ -1006,7 +1006,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrintClaimForm GetOrderTimeDelta() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

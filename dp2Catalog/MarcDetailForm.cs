@@ -5467,7 +5467,7 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = ex.Message;
+                            strError = ExceptionUtil.GetAutoText(ex);
                             goto ERROR1;
                         }
                     }
@@ -7463,7 +7463,7 @@ Keys keyData)
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 

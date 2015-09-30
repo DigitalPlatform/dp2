@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -20,9 +20,9 @@ namespace DigitalPlatform.CommonControl
 
 		public string PropertyString = "";
 
-		List<string> _propertyNameList = null;	// ÅäÖÃÖĞ³öÏÖ¹ıµÄÊôĞÔÃû
+		List<string> _propertyNameList = null;	// é…ç½®ä¸­å‡ºç°è¿‡çš„å±æ€§å
 
-		List<string> _langNameList = null;	// ÅäÖÃÖĞ³öÏÖ¹ıµÄÓïÑÔÀàĞÍ
+		List<string> _langNameList = null;	// é…ç½®ä¸­å‡ºç°è¿‡çš„è¯­è¨€ç±»å‹
 
         ListViewItem tipsItem = null;
 
@@ -101,7 +101,7 @@ namespace DigitalPlatform.CommonControl
             this.label_property.Name = "label_property";
             this.label_property.Size = new System.Drawing.Size(41, 12);
             this.label_property.TabIndex = 1;
-            this.label_property.Text = "Öµ(&V):";
+            this.label_property.Text = "å€¼(&V):";
             this.label_property.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_property
@@ -126,7 +126,7 @@ namespace DigitalPlatform.CommonControl
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(60, 22);
             this.button_Cancel.TabIndex = 4;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_OK
@@ -137,7 +137,7 @@ namespace DigitalPlatform.CommonControl
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(60, 22);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // listView_property
@@ -177,7 +177,7 @@ namespace DigitalPlatform.CommonControl
             this.button_checkAll.Name = "button_checkAll";
             this.button_checkAll.Size = new System.Drawing.Size(68, 22);
             this.button_checkAll.TabIndex = 5;
-            this.button_checkAll.Text = "È«Ñ¡(&A)";
+            this.button_checkAll.Text = "å…¨é€‰(&A)";
             this.button_checkAll.Click += new System.EventHandler(this.button_checkAll_Click);
             // 
             // button_uncheckAll
@@ -188,7 +188,7 @@ namespace DigitalPlatform.CommonControl
             this.button_uncheckAll.Name = "button_uncheckAll";
             this.button_uncheckAll.Size = new System.Drawing.Size(66, 22);
             this.button_uncheckAll.TabIndex = 6;
-            this.button_uncheckAll.Text = "Çå³ı(&C)";
+            this.button_uncheckAll.Text = "æ¸…é™¤(&C)";
             this.button_uncheckAll.Click += new System.EventHandler(this.button_uncheckAll_Click);
             // 
             // splitContainer_main
@@ -272,11 +272,11 @@ namespace DigitalPlatform.CommonControl
 
 		public void SetListViewTitle(ListView listView)
 		{
-			listView.Columns.Add("ÊôĞÔÖµ", 200, HorizontalAlignment.Left);
-			listView.Columns.Add("ËµÃ÷", 900, HorizontalAlignment.Left);
+			listView.Columns.Add("å±æ€§å€¼", 200, HorizontalAlignment.Left);
+			listView.Columns.Add("è¯´æ˜", 900, HorizontalAlignment.Left);
 		}
 
-        // ×°ÔØÒ»¸ö XML ÎÄ¼ş
+        // è£…è½½ä¸€ä¸ª XML æ–‡ä»¶
         int LoadOneXml(string strFileName,
             out string strError)
         {
@@ -290,7 +290,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
@@ -299,13 +299,13 @@ namespace DigitalPlatform.CommonControl
             int i, j;
             for (i = 0; i < propertyList.Count; i++)
             {
-                // ÕÒµ½ÊÂÏîÃû×Ö
+                // æ‰¾åˆ°äº‹é¡¹åå­—
                 string strName = DomUtil.GetAttr(propertyList[i], "name");
 
                 if (strName == "")
                     continue;
 
-                // °´ÕÕÓïÑÔÕÒµ½comment×Ö·û´®
+                // æŒ‰ç…§è¯­è¨€æ‰¾åˆ°commentå­—ç¬¦ä¸²
                 XmlNode nodeComment = null;
 
                 if (Lang == "")
@@ -313,7 +313,7 @@ namespace DigitalPlatform.CommonControl
                 else
                 {
                     nodeComment = propertyList[i].SelectSingleNode("comment[@lang='" + Lang + "']");
-                    if (nodeComment == null)	// °´ÕÕÖ¸¶¨µÄÓïÑÔÕÒ£¬µ«ÊÇÃ»ÓĞÕÒµ½
+                    if (nodeComment == null)	// æŒ‰ç…§æŒ‡å®šçš„è¯­è¨€æ‰¾ï¼Œä½†æ˜¯æ²¡æœ‰æ‰¾åˆ°
                         nodeComment = propertyList[i].SelectSingleNode("comment");
                 }
 
@@ -334,14 +334,14 @@ namespace DigitalPlatform.CommonControl
 
             }
 
-            // ´´½¨ÓïÑÔÊı×é
+            // åˆ›å»ºè¯­è¨€æ•°ç»„
             XmlNodeList commentList = dom.SelectNodes("//property/comment");
 
             _langNameList = new List<string>(); // = new ArrayList();
 
             for (i = 0; i < propertyList.Count; i++)
             {
-                // ÕÒµ½ÊÂÏîÃû×Ö
+                // æ‰¾åˆ°äº‹é¡¹åå­—
                 string strLang = DomUtil.GetAttr(commentList[i], "lang");
 
                 if (strLang == "")
@@ -382,7 +382,7 @@ namespace DigitalPlatform.CommonControl
 
             foreach(string filename in filenames)
             {
-                        // ×°ÔØÒ»¸ö XML ÎÄ¼ş
+                        // è£…è½½ä¸€ä¸ª XML æ–‡ä»¶
                 int nRet = LoadOneXml(filename,
             out strError);
                 if (nRet == -1)
@@ -408,13 +408,13 @@ namespace DigitalPlatform.CommonControl
 			int i,j;
 			for(i=0;i<propertyList.Count;i++) 
 			{
-				// ÕÒµ½ÊÂÏîÃû×Ö
+				// æ‰¾åˆ°äº‹é¡¹åå­—
 				string strName = DomUtil.GetAttr(propertyList[i], "name");
 
 				if (strName == "")
 					continue;
 
-				// °´ÕÕÓïÑÔÕÒµ½comment×Ö·û´®
+				// æŒ‰ç…§è¯­è¨€æ‰¾åˆ°commentå­—ç¬¦ä¸²
 				XmlNode nodeComment = null;
 
 				if (Lang == "") 
@@ -422,7 +422,7 @@ namespace DigitalPlatform.CommonControl
 				else 
 				{
 					nodeComment = propertyList[i].SelectSingleNode("comment[@lang='"+Lang+"']");
-					if (nodeComment == null)	// °´ÕÕÖ¸¶¨µÄÓïÑÔÕÒ£¬µ«ÊÇÃ»ÓĞÕÒµ½
+					if (nodeComment == null)	// æŒ‰ç…§æŒ‡å®šçš„è¯­è¨€æ‰¾ï¼Œä½†æ˜¯æ²¡æœ‰æ‰¾åˆ°
 						nodeComment = propertyList[i].SelectSingleNode("comment");
 				}
 
@@ -444,7 +444,7 @@ namespace DigitalPlatform.CommonControl
 			}
 #endif
 
-			// ´´½¨×Ö·û´®Êı×é£¬±ãÓÚËæÊ±²éÖØ
+			// åˆ›å»ºå­—ç¬¦ä¸²æ•°ç»„ï¼Œä¾¿äºéšæ—¶æŸ¥é‡
 			foreach(ListViewItem item in listView_property.Items) 
 			{
 				// _propertyNameList[j] = listView_property.Items[j].Text;
@@ -453,14 +453,14 @@ namespace DigitalPlatform.CommonControl
 
 
 #if NO
-			// ´´½¨ÓïÑÔÊı×é
+			// åˆ›å»ºè¯­è¨€æ•°ç»„
 			XmlNodeList commentList = dom.SelectNodes("//property/comment");
 
 			aLangName = new ArrayList();
 
 			for(i=0;i<propertyList.Count;i++) 
 			{
-				// ÕÒµ½ÊÂÏîÃû×Ö
+				// æ‰¾åˆ°äº‹é¡¹åå­—
 				string strLang = DomUtil.GetAttr(commentList[i], "lang");
 
 				if (strLang == "")
@@ -487,7 +487,7 @@ namespace DigitalPlatform.CommonControl
             MessageBox.Show(strError);
         }
 
-        // ÊÇ·ñÎªÒÑ¾­¶¨ÒåµÄÊôĞÔÃû
+        // æ˜¯å¦ä¸ºå·²ç»å®šä¹‰çš„å±æ€§å
         bool IsDefinedPropertyName(string strName)
         {
             if (this._propertyNameList == null)
@@ -502,7 +502,7 @@ namespace DigitalPlatform.CommonControl
             return false;
         }
 
-		// »ñµÃÒ»¸öÁĞ±íÖĞÊôÓÚµ±Ç°Ã»ÓĞ¶¨ÒåµÄÊôĞÔÃû
+		// è·å¾—ä¸€ä¸ªåˆ—è¡¨ä¸­å±äºå½“å‰æ²¡æœ‰å®šä¹‰çš„å±æ€§å
 		ArrayList GetNoDefinedPropertyNames(string strList)
 		{
 			ArrayList aResult = new ArrayList();
@@ -525,7 +525,7 @@ namespace DigitalPlatform.CommonControl
 			return aResult;
 		}
 
-		// »ñµÃÒ»¸öÁĞ±íÖĞÊôÓÚµ±Ç°¶¨ÒåµÄÊôĞÔÃû
+		// è·å¾—ä¸€ä¸ªåˆ—è¡¨ä¸­å±äºå½“å‰å®šä¹‰çš„å±æ€§å
 		ArrayList GetDefinedPropertyNames(string strList)
 		{
 			ArrayList aResult = new ArrayList();
@@ -549,16 +549,16 @@ namespace DigitalPlatform.CommonControl
 
 		private void listView_property_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)
 		{
-			// µÃµ½checkedÊÂÏî
+			// å¾—åˆ°checkedäº‹é¡¹
 			ArrayList checkedItems = GetCheckedItems(listView_property, e);
 
 
-			// »ñµÃeditÖĞÊôÓÚÃ»ÓĞ¶¨ÒåµÄ²¿·Ö
+			// è·å¾—editä¸­å±äºæ²¡æœ‰å®šä¹‰çš„éƒ¨åˆ†
 			ArrayList aNotDefined = GetNoDefinedPropertyNames(textBox_property.Text);
 
 			string strText = "";
 
-			// checked×éºÏÎª×Ö·û´®
+			// checkedç»„åˆä¸ºå­—ç¬¦ä¸²
 			for(int i=0; i<checkedItems.Count;i++) 
 			{
 				if (strText != "")
@@ -566,7 +566,7 @@ namespace DigitalPlatform.CommonControl
 				strText += ((ListViewItem)checkedItems[i]).Text;
 			}
 
-			// Ã»ÓĞ¶¨Òå²¿·Ö×éºÏÎª×Ö·û´®
+			// æ²¡æœ‰å®šä¹‰éƒ¨åˆ†ç»„åˆä¸ºå­—ç¬¦ä¸²
 			for(int j=0; j<aNotDefined.Count;j++) 
 			{
 				if (strText != "")
@@ -614,7 +614,7 @@ namespace DigitalPlatform.CommonControl
 		private void textBox_property_TextChanged(object sender, System.EventArgs e)
 		{
 			bool bChanged = false;
-			// ÌáÈ¡ÒÑ¶¨ÒåµÄ²¿·Ö
+			// æå–å·²å®šä¹‰çš„éƒ¨åˆ†
 			ArrayList aDefined = GetDefinedPropertyNames(textBox_property.Text);
 
 			// check
@@ -637,12 +637,12 @@ namespace DigitalPlatform.CommonControl
 				{
 					if (String.Compare(strItemName, (string)aDefined[k], true) == 0) 
 					{
-						bFound = true;	// ÊôÓÚĞèÒªonµÄÊÂÏî
+						bFound = true;	// å±äºéœ€è¦onçš„äº‹é¡¹
 						break;
 					}
 				}
 
-				// ÊôÓÚĞèÒªoffµÄÊÂÏî
+				// å±äºéœ€è¦offçš„äº‹é¡¹
 				if (bFound == false) 
 				{
 					if (listView_property.Items[j].Checked == false)
@@ -662,22 +662,22 @@ namespace DigitalPlatform.CommonControl
 				if (String.Compare(strName, listView_property.Items[i].Text, true) ==0) 
 				{
 					if (listView_property.Items[i].Checked == bChecked)
-						return false;	// Ã»ÓĞ¸Ä±ä×´Ì¬
+						return false;	// æ²¡æœ‰æ”¹å˜çŠ¶æ€
 					else
 					{
 						listView_property.Items[i].Checked = bChecked;
-						return true;	// ¸Ä±äÁË×´Ì¬
+						return true;	// æ”¹å˜äº†çŠ¶æ€
 					}
 
 				}
 			}
 
-			return false;	// Ã»ÓĞÕÒµ½ÊÂÏî
+			return false;	// æ²¡æœ‰æ‰¾åˆ°äº‹é¡¹
 		}
 
-		// µÃµ½ËùÓĞchecked Item
-		// ÊÇµ±Ç°µÄËùÓĞchecked item¼ÓÉÏ¿¼ÂÇe²ÎÊıÖĞ¿ÉÄÜÔö¼ÓºÍ¼õ³ıµÄitem£¬ºÏ²¢¶ø³É
-		// e¿ÉÒÔÎªnull£¬±íÊ¾²»¹ØĞÄÕâ¸öÌØÊâÇé¿ö
+		// å¾—åˆ°æ‰€æœ‰checked Item
+		// æ˜¯å½“å‰çš„æ‰€æœ‰checked itemåŠ ä¸Šè€ƒè™‘eå‚æ•°ä¸­å¯èƒ½å¢åŠ å’Œå‡é™¤çš„itemï¼Œåˆå¹¶è€Œæˆ
+		// eå¯ä»¥ä¸ºnullï¼Œè¡¨ç¤ºä¸å…³å¿ƒè¿™ä¸ªç‰¹æ®Šæƒ…å†µ
 		ArrayList GetCheckedItems(System.Windows.Forms.ListView listview,
 			System.Windows.Forms.ItemCheckEventArgs e)
 		{
@@ -741,10 +741,10 @@ namespace DigitalPlatform.CommonControl
 			ContextMenu contextMenu = new ContextMenu();
 			MenuItem menuItem = null;
 
-			menuItem = new MenuItem("Ñ¡ÔñÓïÑÔ(&L)");
+			menuItem = new MenuItem("é€‰æ‹©è¯­è¨€(&L)");
 			contextMenu.MenuItems.Add(menuItem);
 
-			// ×Ó²Ëµ¥
+			// å­èœå•
 			for(int i=0;i<_langNameList.Count;i++) 
 			{
 
@@ -764,7 +764,7 @@ namespace DigitalPlatform.CommonControl
 			contextMenu.Show(listView_property, new Point(e.X, e.Y) );		
 		}
 
-		// Ñ¡ÔñÁËÓïÑÔ
+		// é€‰æ‹©äº†è¯­è¨€
 		private void menu_selectLanguage_Click(object sender, System.EventArgs e)
 		{
 
@@ -808,7 +808,7 @@ namespace DigitalPlatform.CommonControl
             this.SortColumns.SetFirstColumn(nClickColumn,
                 this.listView_property.Columns);
 
-            // ÅÅĞò
+            // æ’åº
             this.listView_property.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_property.ListViewItemSorter = null;

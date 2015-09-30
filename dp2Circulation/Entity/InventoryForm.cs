@@ -751,7 +751,7 @@ this.UiState);
                 }
                 catch (ChannelException ex)
                 {
-                    strError = ex.Message;
+                    strError = "enumerator.MoveNext() exception: " + ExceptionUtil.GetAutoText(ex);
                     if (ex.ErrorCode == ErrorCode.AccessDenied)
                         return -2;
                     return -1;
@@ -2099,7 +2099,7 @@ null);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 

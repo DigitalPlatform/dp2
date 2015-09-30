@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -194,7 +195,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 return;
             }
 

@@ -1066,7 +1066,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
             finally
@@ -1197,7 +1197,7 @@ this.CurrentServer);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 this.m_bError = true;
                 return -1;
             }
@@ -1356,7 +1356,7 @@ this.CurrentServer);
             catch (Exception ex)
             {
                 EndLoop();
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 this.m_bError = true;
                 return -1;
             }
@@ -1630,7 +1630,7 @@ this.CurrentServer);
                 catch (Exception ex)
                 {
                     this.EndLoop();
-                    strError = ex.Message;
+                    strError = ExceptionUtil.GetAutoText(ex);
                     this.m_bError = true;
                     return -1;
                 }
@@ -1713,7 +1713,7 @@ this.CurrentServer);
             catch (Exception ex)
             {
                 this.EndLoop();
-                strError = ex.Message;
+                strError = ExceptionUtil.GetAutoText(ex);
                 this.m_bError = true;
                 return -1;
             }
