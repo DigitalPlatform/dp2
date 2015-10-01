@@ -503,6 +503,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 this.InitialLoginCache();
+                this.InitialBiblioSummaryCache();
 
                 if (bReload == false)
                 {

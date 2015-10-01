@@ -1153,6 +1153,7 @@ namespace DigitalPlatform.LibraryServer
         // 权限:   需要具有getbibliosummary权限
         // parameters:
         //      strBiblioRecPathExclude   除开列表中的这些种路径, 才返回摘要内容, 否则仅仅返回种路径即可
+        //                                  如果包含 "coverimage"，表示要在 strSummary 头部包含封面图像的 <img ... /> 片段
         public LibraryServerResult GetBiblioSummary(
             SessionInfo sessioninfo,
             RmsChannel channel,
@@ -1165,8 +1166,26 @@ namespace DigitalPlatform.LibraryServer
             strBiblioRecPath = "";
             strSummary = "";
             string strError = "";
-
             LibraryServerResult result = new LibraryServerResult();
+
+            string strCacheKey = strItemBarcode + "|" + strConfirmItemRecPath + "|" + strBiblioRecPathExclude;
+            if (this.BiblioSummaryCache != null)
+            {
+                strSummary = this.BiblioSummaryCache.Get(strCacheKey) as string;
+                if (string.IsNullOrEmpty(strSummary) == false)
+                {
+                    // 从 cache 中命中
+                    if (this.Statis != null)
+                        this.Statis.IncreaseEntryValue(
+                        sessioninfo.LibraryCodeList,
+                        "获取书目摘要",
+                        "缓存命中次",
+                        1);
+
+                    result.Value = 1;
+                    return result;
+                }
+            }
 
             // 权限判断
             // 权限字符串
@@ -1220,8 +1239,9 @@ namespace DigitalPlatform.LibraryServer
                 goto LOADBIBLIO;
             }
 
-
             bool bByRecPath = false;    // 是否经过记录路径来获取的？
+
+            // TODO: 在获取册记录的时候，可以要求 dp2kernel 只返回 parent 元素
 
             if (string.IsNullOrEmpty(strItemBarcode) == false)
             {
@@ -1418,8 +1438,6 @@ return result;
                 bFltx = true;
             }
 
-
-
             // 取得种记录
             byte[] timestamp = null;
             lRet = channel.GetRes(strBiblioRecPath,
@@ -1434,8 +1452,8 @@ return result;
                 goto ERROR1;
             }
 
-                string strMarc = "";
-                string strMarcSyntax = "";
+            string strMarc = "";
+            string strMarcSyntax = "";
             {
                 // 转换为MARC格式
 
@@ -1506,6 +1524,19 @@ return result;
 
             strSummary = strFragment + strSummary;
 
+            if (this.BiblioSummaryCache != null)
+            {
+                DateTimeOffset offset = DateTimeOffset.Now.AddDays(1);
+                this.BiblioSummaryCache.Set(strCacheKey, strSummary, offset);
+            }
+
+            if (this.Statis != null)
+                this.Statis.IncreaseEntryValue(
+                sessioninfo.LibraryCodeList,
+                "获取书目摘要",
+                "构造次",
+                1);
+
             result.Value = 1;
             return result;
         ERROR1:
@@ -1514,7 +1545,6 @@ return result;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
-
 
         // 探测MARC格式
         // return:

@@ -77,6 +77,41 @@ namespace DigitalPlatform.OPAC.Server
 
             string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
+            try
+            {
+                lock (this.m_lock)
+                {
+                    using (StreamReader sr = new StreamReader(strFileName, Encoding.UTF8))
+                    {
+                        strLastTime = sr.ReadLine();  // 读入时间行
+                    }
+                }
+
+                return 1;
+            }
+            catch (FileNotFoundException /*ex*/)
+            {
+                return 0;   // file not found
+            }
+            catch (Exception ex)
+            {
+                strError = "open file '" + strFileName + "' error : " + ex.Message;
+                return -1;
+            }
+        }
+
+#if NO
+        // 读取上次最后处理的时间
+        public int ReadLastTime(
+            string strMonitorName,
+            out string strLastTime,
+            out string strError)
+        {
+            strError = "";
+            strLastTime = "";
+
+            string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
+
             StreamReader sr = null;
 
             try
@@ -103,19 +138,26 @@ namespace DigitalPlatform.OPAC.Server
 
             return 1;
         }
+#endif
 
         // 写入断点记忆文件
         public void WriteLastTime(string strMonitorName,
             string strLastTime)
         {
-            string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
+            lock (this.m_lock)
+            {
+                string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
-            // 删除原来的文件
-            File.Delete(strFileName);
+                // 删除原来的文件
+                File.Delete(strFileName);
 
-            // 写入新内容
-            StreamUtil.WriteText(strFileName,
-                strLastTime);
+                if (string.IsNullOrEmpty(strLastTime) == false)
+                {
+                    // 写入新内容
+                    StreamUtil.WriteText(strFileName,
+                        strLastTime);
+                }
+            }
         }
 
         // 本轮是不是逢上了每日启动时间(以后)?
@@ -123,7 +165,8 @@ namespace DigitalPlatform.OPAC.Server
         //      strLastTime 最后一次执行过的时间 RFC1123格式
         //      strStartTimeDef 返回定义的每日启动时间
         // return:
-        //      -1  error
+        //      -2  strLastTime 格式错误
+        //      -1  一般错误
         //      0   没有找到startTime配置参数
         //      1   找到了startTime配置参数
         public int IsNowAfterPerDayStart(
@@ -202,8 +245,8 @@ namespace DigitalPlatform.OPAC.Server
                 catch
                 {
                     bRet = false;
-                    strError = "strLastTime " + strLastTime + " 格式错误";
-                    return -1;
+                    strError = "strLastTime '" + strLastTime + "' 格式错误";
+                    return -2;
                 }
             }
 

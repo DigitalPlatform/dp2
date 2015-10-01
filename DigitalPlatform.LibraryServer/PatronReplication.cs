@@ -252,7 +252,8 @@ namespace DigitalPlatform.LibraryServer
                 bool bRet = false;
                 string strOldLastTime = strLastTime;
                 // return:
-                //      -1  error
+                //      -2  strLastTime 格式错误
+                //      -1  一般错误
                 //      0   没有找到startTime配置参数
                 //      1   找到了startTime配置参数
                 nRet = IsNowAfterPerDayStart(
@@ -261,11 +262,15 @@ namespace DigitalPlatform.LibraryServer
                     out bRet,
                     out strStartTimeDef,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == -2)
                 {
                     string strErrorText = "获取 " + strMonitorName + " 每日启动时间时发生错误: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
                     this.App.WriteErrorLog(strErrorText);
+                    if (nRet == -2)
+                    {
+                        WriteLastTime(strMonitorName, "");
+                    }
                     return;
                 }
 

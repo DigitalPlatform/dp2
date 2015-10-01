@@ -162,6 +162,7 @@ namespace DigitalPlatform.LibraryServer
             return dom.OuterXml;
         }
 
+#if NO
         // 本轮是不是逢上了每日启动时间(以后)?
         // parameters:
         //      strLastTime 最后一次执行过的时间 RFC1123格式
@@ -257,7 +258,7 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
+#endif
 
         public override void Worker()
         {
@@ -381,6 +382,8 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            string strMonitorName = "zhengyuanReplication";
+
             if (bAutoDumpDay == true || bForceDumpDay == true)
             {
 
@@ -390,7 +393,9 @@ namespace DigitalPlatform.LibraryServer
                 if (bForceDumpDay == false)
                 {
                     Debug.Assert(bAutoDumpDay == true, ""); // 二者必有一个==true
-                    nRet = ReadLastTime(out strLastTime,
+                    nRet = ReadLastTime(
+                        strMonitorName,
+                        out strLastTime,
                         out strError);
                     if (nRet == -1)
                     {
@@ -400,17 +405,28 @@ namespace DigitalPlatform.LibraryServer
                         return;
                     }
 
-
+                    string strStartTimeDef = "";
                     bool bRet = false;
+                    // return:
+                    //      -2  strLastTime 格式错误
+                    //      -1  一般错误
+                    //      0   没有找到startTime配置参数
+                    //      1   找到了startTime配置参数
                     nRet = IsNowAfterPerDayStart(
-                        strLastTime,
+                        strMonitorName,
+                        ref strLastTime,
                         out bRet,
+                        out strStartTimeDef,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                     {
                         string strErrorText = "获取每日启动时间时发生错误: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
+                        if (nRet == -2)
+                        {
+                            WriteLastTime(strMonitorName, "");
+                        }
                         return;
                     }
 
@@ -475,7 +491,7 @@ namespace DigitalPlatform.LibraryServer
 
                         // 写入文件，记忆已经做过的当日时间
                         strLastTime = DateTimeUtil.Rfc1123DateTimeStringEx(this.App.Clock.UtcNow.ToLocalTime()); // 2007/12/17 changed // DateTime.UtcNow
-                        WriteLastTime(strLastTime);
+                        WriteLastTime(strMonitorName, strLastTime);
 
                         if (bForceDumpDay == true)
                         {
@@ -501,6 +517,7 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
+#if NO
         // 读取上次最后处理的时间
         int ReadLastTime(out string strLastTime,
             out string strError)
@@ -549,6 +566,7 @@ namespace DigitalPlatform.LibraryServer
             StreamUtil.WriteText(strFileName,
                 strLastTime);
         }
+#endif
 
         // 将更新卡户信息完整表(AccountsCompleteInfo_yyyymmdd.xml)写入读者库
         // return:

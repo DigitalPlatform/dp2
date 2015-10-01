@@ -85,11 +85,17 @@ namespace DigitalPlatform.LibraryServer
 
             string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
-            StreamReader sr = null;
-
             try
             {
-                sr = new StreamReader(strFileName, Encoding.UTF8);
+                lock (this.m_lock)
+                {
+                    using (StreamReader sr = new StreamReader(strFileName, Encoding.UTF8))
+                    {
+                        strLastTime = sr.ReadLine();  // 读入时间行
+                    }
+                }
+
+                return 1;
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -100,30 +106,26 @@ namespace DigitalPlatform.LibraryServer
                 strError = "open file '" + strFileName + "' error : " + ex.Message;
                 return -1;
             }
-            try
-            {
-                strLastTime = sr.ReadLine();  // 读入时间行
-            }
-            finally
-            {
-                sr.Close();
-            }
-
-            return 1;
         }
 
         // 写入断点记忆文件
         public void WriteLastTime(string strMonitorName,
             string strLastTime)
         {
-            string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
+            lock (this.m_lock)
+            {
+                string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
-            // 删除原来的文件
-            File.Delete(strFileName);
+                // 删除原来的文件
+                File.Delete(strFileName);
 
-            // 写入新内容
-            StreamUtil.WriteText(strFileName,
-                strLastTime);
+                if (string.IsNullOrEmpty(strLastTime) == false)
+                {
+                    // 写入新内容
+                    StreamUtil.WriteText(strFileName,
+                        strLastTime);
+                }
+            }
         }
 
         // 本轮是不是逢上了每日启动时间(以后)?
@@ -133,7 +135,8 @@ namespace DigitalPlatform.LibraryServer
         //      strStartTimeDef 返回定义的每日启动时间
         //      bRet    是否到了每日启动时间
         // return:
-        //      -1  error
+        //      -2  strLastTime 格式错误
+        //      -1  一般错误
         //      0   没有找到startTime配置参数
         //      1   找到了startTime配置参数
         public int IsNowAfterPerDayStart(
@@ -215,8 +218,8 @@ namespace DigitalPlatform.LibraryServer
                 catch
                 {
                     bRet = false;
-                    strError = "strLastTime " + strLastTime + " 格式错误";
-                    return -1;
+                    strError = "strLastTime '" + strLastTime + "' 格式错误";
+                    return -2;
                 }
 
                 // 2014/3/22

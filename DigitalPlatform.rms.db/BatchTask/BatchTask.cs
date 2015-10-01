@@ -173,6 +173,41 @@ namespace DigitalPlatform.rms
 
             string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
+            try
+            {
+                lock (this.m_lock)
+                {
+                    using (StreamReader sr = new StreamReader(strFileName, Encoding.UTF8))
+                    {
+                        strLastTime = sr.ReadLine();  // 读入时间行
+                    }
+                }
+
+                return 1;
+            }
+            catch (FileNotFoundException /*ex*/)
+            {
+                return 0;   // file not found
+            }
+            catch (Exception ex)
+            {
+                strError = "open file '" + strFileName + "' error : " + ex.Message;
+                return -1;
+            }
+        }
+
+#if NO
+        // 读取上次最后处理的时间
+        public int ReadLastTime(
+            string strMonitorName,
+            out string strLastTime,
+            out string strError)
+        {
+            strError = "";
+            strLastTime = "";
+
+            string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
+
             StreamReader sr = null;
 
             try
@@ -199,19 +234,26 @@ namespace DigitalPlatform.rms
 
             return 1;
         }
+#endif
 
         // 写入断点记忆文件
         public void WriteLastTime(string strMonitorName,
             string strLastTime)
         {
-            string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
+            lock (this.m_lock)
+            {
+                string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
-            // 删除原来的文件
-            File.Delete(strFileName);
+                // 删除原来的文件
+                File.Delete(strFileName);
 
-            // 写入新内容
-            StreamUtil.WriteText(strFileName,
-                strLastTime);
+                if (string.IsNullOrEmpty(strLastTime) == false)
+                {
+                    // 写入新内容
+                    StreamUtil.WriteText(strFileName,
+                        strLastTime);
+                }
+            }
         }
 
         // 本轮是不是逢上了每日启动时间(以后)?
@@ -274,7 +316,7 @@ namespace DigitalPlatform.rms
             catch
             {
                 bRet = false;
-                strError = "时间值 " + strStartTime + " 格式不正确。应为 hh:mm";
+                strError = "时间值 '" + strStartTime + "' 格式不正确。应为 hh:mm";
                 return -1;   // 格式不正确
             }
 
@@ -298,7 +340,7 @@ namespace DigitalPlatform.rms
                 catch
                 {
                     bRet = false;
-                    strError = "strLastTime " + strLastTime + " 格式错误";
+                    strError = "strLastTime '" + strLastTime + "' 格式错误";
                     return -1;
                 }
             }

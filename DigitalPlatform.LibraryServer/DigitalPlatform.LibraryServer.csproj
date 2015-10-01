@@ -86,6 +86,7 @@
     <Compile Include="AppFileSystem.cs" />
     <Compile Include="AppLoginCache.cs" />
     <Compile Include="AppScriptFilter.cs" />
+    <Compile Include="BiblioSummaryCache.cs" />
     <Compile Include="deleted\AppColumn.cs" />
     <Compile Include="AppDatabase.cs" />
     <Compile Include="AppDup.cs" />
