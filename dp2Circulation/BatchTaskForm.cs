@@ -355,6 +355,10 @@ namespace dp2Circulation
 #endif
                 startinfo.Start = "activate";   // 表示立即启动，忽略服务器原有定时启动参数
             }
+            else if (strTaskName == "超期通知")
+            {
+                startinfo.Start = "activate";   // 表示立即启动，忽略服务器原有定时启动参数
+            }
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
 

@@ -8,6 +8,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.Collections;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -45,6 +46,10 @@ namespace DigitalPlatform.LibraryServer
 
             string strError = "";
             int nRet = 0;
+
+            BatchTaskStartInfo startinfo = this.StartInfo;
+            if (startinfo == null)
+                startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
             bool bPerDayStart = false;  // 是否为每日一次启动模式
             string strMonitorName = "readersMonitor";
@@ -95,6 +100,12 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == 0)
                 {
 
+                }
+                else if (nRet == 1 && startinfo.Start == "activate")
+                {
+                    // 2015/10/3
+                    // 虽然 library.xml 中定义了每日定时启动，但被前端要求立即启动
+                    this.AppendResultText("任务 '" + this.Name + "' 被立即启动\r\n");
                 }
                 else if (nRet == 1)
                 {
@@ -640,6 +651,21 @@ namespace DigitalPlatform.LibraryServer
                     bChanged = true;
             }
 
+            // 给借阅信息和借阅历史中增加 biblioRecPath 属性
+            // return:
+            //      -1  出错
+            //      0   读者记录没有改变
+            //      1   读者记录发生改变
+            nRet = AddBiblioRecPath(readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "在为读者记录添加 biblioRecPath 属性时发生错误: " + strError;
+                this.AppendResultText(strError + "\r\n");
+            }
+            if (nRet == 1)
+                bChanged = true;
+
             // 修改读者记录后存回
             if (bChanged == true)
             {
@@ -690,6 +716,102 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        // 给借阅信息和借阅历史中增加 biblioRecPath 属性
+        // return:
+        //      -1  出错
+        //      0   读者记录没有改变
+        //      1   读者记录发生改变
+        int AddBiblioRecPath(XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+
+            Hashtable table = new Hashtable();  // 册记录路径 --> 书目记录路径 对照表
+            bool bChanged = false;
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow | borrowHistory/borrow");
+            foreach (XmlElement borrow in nodes)
+            {
+                string strItemRecPath = borrow.GetAttribute("recPath");
+                string strBiblioRecPath = borrow.GetAttribute("biblioRecPath");
+                if (string.IsNullOrEmpty(strBiblioRecPath) == true
+                    && string.IsNullOrEmpty(strItemRecPath) == false)
+                {
+                    strBiblioRecPath = (string)table[strItemRecPath];
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                    {
+                        strBiblioRecPath = GetBiblioRecPath(strItemRecPath);
+                        if (string.IsNullOrEmpty(strBiblioRecPath) == false)
+                            table[strItemRecPath] = strBiblioRecPath;
+                    }
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == false)
+                    {
+                        borrow.SetAttribute("biblioRecPath", strBiblioRecPath);
+                        bChanged = true;
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == false
+                        && string.IsNullOrEmpty(strItemRecPath) == false)
+                        table[strItemRecPath] = strBiblioRecPath;
+                }
+            }
+
+            if (bChanged == true)
+                return 1;
+            return 0;
+        }
+
+        // 获得一个册记录从属的书目记录路径
+        string GetBiblioRecPath(string strItemRecPath)
+        {
+            string strError = "";
+
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+                return null;
+            string strItemXml = "";
+            string strMetaData = "";
+            string strOutputItemPath = "";
+            byte[] item_timestamp = null;
+
+            long lRet = channel.GetRes(strItemRecPath,
+                out strItemXml,
+                out strMetaData,
+                out item_timestamp,
+                out strOutputItemPath,
+                out strError);
+            if (lRet == -1)
+                return null;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch
+            {
+                return null;
+            }
+
+            string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent"); //
+            if (String.IsNullOrEmpty(strParentID) == true)
+                return null;
+
+            string strBiblioRecPath = "";
+            // return:
+            //      -1  error
+            //      1   找到
+            int nRet = this.App.GetBiblioRecPathByItemRecPath(
+                strItemRecPath,
+                strParentID,
+                out strBiblioRecPath,
+                out strError);
+            if (nRet == -1)
+                return null;
+            return strBiblioRecPath;
         }
 
 #if NO
