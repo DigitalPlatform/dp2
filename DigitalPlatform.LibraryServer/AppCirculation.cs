@@ -13293,8 +13293,28 @@ out string strError)
 
             // 记载册记录路径
             if (String.IsNullOrEmpty(strItemRecPath) == false)
+            {
                 DomUtil.SetAttr(nodeBorrow, "recPath", strItemRecPath); // 2006/12/24
+                string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
 
+                string strBiblioRecPath = "";
+                // 通过册记录路径和parentid得知从属的种记录路径
+                // parameters:
+                // return:
+                //      -1  error
+                //      1   找到
+                nRet = GetBiblioRecPathByItemRecPath(
+                    strItemRecPath,
+                    strParentID,
+                    out strBiblioRecPath,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "根据册记录路径 '" + strItemRecPath + "' 和 parent_id '" + strParentID + "' 获得书目库路径时出错: " + strError;
+                    return -1;
+                }
+                DomUtil.SetAttr(nodeBorrow, "biblioRecPath", strBiblioRecPath); // 2015/10/2
+            }
 
             // 加入借期字段
             // 读者记录中的借期字段，目的是为了查询方便，但注意没有法律效力。

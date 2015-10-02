@@ -284,6 +284,7 @@ namespace DigitalPlatform.rms.Client
                     }
                     finally
                     {
+                        // TODO: 移动指针的动作可以优化
                         this.Stream.Seek(lSave, SeekOrigin.Begin);
                     }
                 }
@@ -840,7 +841,6 @@ namespace DigitalPlatform.rms.Client
                 if (this.Stream.Position - lStart >= lLength + 8)
                     break;
 
-
                 long lBodyStart = 0;
                 long lBodyLength = 0;
 
@@ -965,7 +965,6 @@ namespace DigitalPlatform.rms.Client
 
             // 将文件指针移动到末尾
             inputfile.Seek(lBodyLength, SeekOrigin.Current);
-
             return 0;
         }
 

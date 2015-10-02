@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -42,7 +43,10 @@ namespace DigitalPlatform.IO
 			long lTotalLength = outputfile.Position - lStart - 8;	// 净长度
 
 			// 最后写开始的总长度
-			outputfile.Seek(lStart, SeekOrigin.Begin);
+            outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
+            Debug.Assert(outputfile.Position == lStart, "");
+
+            // outputfile.Seek(lStart, SeekOrigin.Begin);     // 文件大了以后这句话的性能会很差
 			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
@@ -94,7 +98,10 @@ namespace DigitalPlatform.IO
 			long lTotalLength = outputfile.Position - lStart - 8;	// 净长度
 
 			// 最后写开始的总长度
-			outputfile.Seek(lStart, SeekOrigin.Begin);
+            outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
+            Debug.Assert(outputfile.Position == lStart, "");
+
+			// outputfile.Seek(lStart, SeekOrigin.Begin);   // 性能
 			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
@@ -102,7 +109,6 @@ namespace DigitalPlatform.IO
 
 			return lTotalLength + 8;	// 返回毛长度
 		}
-
 
 		// 写res的头。
 		// 如果不能预先确知整个res的长度，可以用随便一个lTotalLength值调用本函数，
@@ -125,7 +131,10 @@ namespace DigitalPlatform.IO
 			long lStart)
 		{
 			// 最后写开始的总长度
-			outputfile.Seek(lStart, SeekOrigin.Begin);
+            outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
+            Debug.Assert(outputfile.Position == lStart, "");
+
+			// outputfile.Seek(lStart, SeekOrigin.Begin);   // 性能
 			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
@@ -163,7 +172,6 @@ namespace DigitalPlatform.IO
 			lBodyStart = outputfile.Position;
 
 			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
-
 			return 0;
 		}
 
@@ -174,7 +182,10 @@ namespace DigitalPlatform.IO
 			long lBodyStart)
 		{
 			// 最后写开始的总长度
-			outputfile.Seek(lBodyStart, SeekOrigin.Begin);
+            outputfile.Seek(lBodyStart - outputfile.Position, SeekOrigin.Current);
+            Debug.Assert(outputfile.Position == lBodyStart, "");
+
+			// outputfile.Seek(lBodyStart, SeekOrigin.Begin);  // 性能
 			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
@@ -189,8 +200,5 @@ namespace DigitalPlatform.IO
 			// TODO: Add constructor logic here
 			//
 		}
-
-
-
 	}
 }

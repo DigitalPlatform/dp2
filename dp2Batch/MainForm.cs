@@ -5070,93 +5070,98 @@ this.checkBox_import_fastMode.Checked);
 			*/
 		}
 
-		// 将主记录和相关资源写入备份文件
-		int WriteRecordToBackupFile(
-			Stream outputfile,
-			string strDbName,
-			string strID,
-			string strMetaData,
-			string strXmlBody,
-			byte [] body_timestamp,
-			out string strError)
-		{
+        // 将主记录和相关资源写入备份文件
+        int WriteRecordToBackupFile(
+            Stream outputfile,
+            string strDbName,
+            string strID,
+            string strMetaData,
+            string strXmlBody,
+            byte[] body_timestamp,
+            out string strError)
+        {
 
             Debug.Assert(String.IsNullOrEmpty(strXmlBody) == false, "strXmlBody不能为空");
 
-			string strPath = strDbName + "/" + strID;
+            string strPath = strDbName + "/" + strID;
 
-			long lStart = outputfile.Position;	// 记忆起始位置
+            long lStart = outputfile.Position;	// 记忆起始位置
 
-			byte [] length = new byte[8];
+            byte[] length = new byte[8];
 
-			outputfile.Write(length, 0, 8);	// 临时写点数据,占据记录总长度位置
+            outputfile.Write(length, 0, 8);	// 临时写点数据,占据记录总长度位置
 
-			ResPath respath = new ResPath();
-			respath.Url = channel.Url;
-			respath.Path = strPath;
+            ResPath respath = new ResPath();
+            respath.Url = channel.Url;
+            respath.Path = strPath;
 
-			// 加工元数据
+            // 加工元数据
             ExportUtil.ChangeMetaData(ref strMetaData,
-				null,
-				null,
-				null,
-				null,
-				respath.FullPath,
-				ByteArray.GetHexTimeStampString(body_timestamp));   // 2005/6/11
+                null,
+                null,
+                null,
+                null,
+                respath.FullPath,
+                ByteArray.GetHexTimeStampString(body_timestamp));   // 2005/6/11
 
-			// 向backup文件中保存第一个 res
-			long lRet = Backup.WriteFirstResToBackupFile(
-				outputfile,
-				strMetaData,
-				strXmlBody);
+            // 向backup文件中保存第一个 res
+            long lRet = Backup.WriteFirstResToBackupFile(
+                outputfile,
+                strMetaData,
+                strXmlBody);
 
-			// 其余
+            // 其余
 
-			string [] ids = null;
+            string[] ids = null;
 
-			// 得到Xml记录中所有<file>元素的id属性值
-			int nRet = ExportUtil.GetFileIds(strXmlBody,
-				out ids,
-				out strError);
-			if (nRet == -1) 
-			{
-				outputfile.SetLength(lStart);	// 把本次追加写入的全部去掉
-				strError = "GetFileIds()出错，无法获得 XML 记录中的 <dprms:file>元素的 id 属性， 因此保存记录失败，原因: "+ strError;
-				goto ERROR1;
-			}
-
-
-			nRet = WriteResToBackupFile(
-				this,
-				outputfile,
-				respath.Path,
-				ids,
-				channel,
-				stop,
-				out strError);
-			if (nRet == -1) 
-			{
-				outputfile.SetLength(lStart);	// 把本次追加写入的全部去掉
-				strError = "WriteResToBackupFile()出错，因此保存记录失败，原因: "+ strError;
-				goto ERROR1;
-			}
-
-			///
+            // 得到Xml记录中所有<file>元素的id属性值
+            int nRet = ExportUtil.GetFileIds(strXmlBody,
+                out ids,
+                out strError);
+            if (nRet == -1)
+            {
+                outputfile.SetLength(lStart);	// 把本次追加写入的全部去掉
+                strError = "GetFileIds()出错，无法获得 XML 记录中的 <dprms:file>元素的 id 属性， 因此保存记录失败，原因: " + strError;
+                goto ERROR1;
+            }
 
 
-			// 写入总长度
-			long lTotalLength = outputfile.Position - lStart - 8;
-			byte[] data = BitConverter.GetBytes(lTotalLength);
+            nRet = WriteResToBackupFile(
+                this,
+                outputfile,
+                respath.Path,
+                ids,
+                channel,
+                stop,
+                out strError);
+            if (nRet == -1)
+            {
+                outputfile.SetLength(lStart);	// 把本次追加写入的全部去掉
+                strError = "WriteResToBackupFile()出错，因此保存记录失败，原因: " + strError;
+                goto ERROR1;
+            }
 
-			outputfile.Seek(lStart, SeekOrigin.Begin);
-			outputfile.Write(data, 0, 8);
-			outputfile.Seek(lTotalLength, SeekOrigin.Current);
+            ///
 
-			return 0;
 
-			ERROR1:
-				return -1;
-		}
+            // 写入总长度
+            long lTotalLength = outputfile.Position - lStart - 8;
+            byte[] data = BitConverter.GetBytes(lTotalLength);
+
+            // 返回记录最开头位置
+            outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
+            Debug.Assert(outputfile.Position == lStart, "");
+
+            // outputfile.Seek(lStart, SeekOrigin.Begin);  // 文件大了以后这句话的性能会很差
+
+            outputfile.Write(data, 0, 8);
+            outputfile.Seek(lTotalLength, SeekOrigin.Current);
+
+            return 0;
+
+        ERROR1:
+            return -1;
+        }
 
 		// 下载资源，保存到备份文件
 		public static int WriteResToBackupFile(

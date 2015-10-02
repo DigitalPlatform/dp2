@@ -1168,6 +1168,7 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
             LibraryServerResult result = new LibraryServerResult();
 
+#if NO
             string strCacheKey = strItemBarcode + "|" + strConfirmItemRecPath + "|" + strBiblioRecPathExclude;
             if (this.BiblioSummaryCache != null)
             {
@@ -1186,6 +1187,7 @@ namespace DigitalPlatform.LibraryServer
                     return result;
                 }
             }
+#endif
 
             // 权限判断
             // 权限字符串
@@ -1212,16 +1214,6 @@ namespace DigitalPlatform.LibraryServer
             string strOutputItemPath = "";
             string strMetaData = "";
 
-            /*
-            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
-            if (channel == null)
-            {
-                strError = "channel == null";
-                goto ERROR1;
-            }
-             * */
-
-
             // 特殊情况，通过种路径
             string strHead = "@bibliorecpath:";
             if (strItemBarcode.Length > strHead.Length
@@ -1237,6 +1229,19 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
                 goto LOADBIBLIO;
+            }
+
+            // 如果 strComfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
+            {
+                string strLeft = "";
+                string strRight = "";
+
+                StringUtil.ParseTwoPart(strConfirmItemRecPath, "|", out strLeft, out strRight);
+                if (string.IsNullOrEmpty(strRight) == false)
+                {
+                    strBiblioRecPath = strRight;
+                    goto LOADBIBLIO;
+                }
             }
 
             bool bByRecPath = false;    // 是否经过记录路径来获取的？
@@ -1375,6 +1380,29 @@ namespace DigitalPlatform.LibraryServer
                 return result;
             }
 
+            SummaryItem summary = GetBiblioSummary(strBiblioRecPath);
+            if (summary != null)
+            {
+                if (StringUtil.IsInList("coverimage", strBiblioRecPathExclude) == true
+                    && string.IsNullOrEmpty(summary.ImageFragment) == false)
+                    strSummary = summary.ImageFragment + summary.Summary;
+                else
+                    strSummary = summary.Summary;
+                if (string.IsNullOrEmpty(strSummary) == false)
+                {
+                    // 从存储中命中
+                    if (this.Statis != null)
+                        this.Statis.IncreaseEntryValue(
+                        sessioninfo.LibraryCodeList,
+                        "获取书目摘要",
+                        "存储命中次",
+                        1);
+
+                    result.Value = 1;
+                    return result;
+                }
+            }
+
             /*
 strSummary = "";
 result.Value = 1;
@@ -1472,8 +1500,8 @@ return result;
                     goto ERROR1;
             }
 
+            // fragment 总是要产生，只是最后是否返回给前端需要判断一下
             string strFragment = "";
-            if (StringUtil.IsInList("coverimage", strBiblioRecPathExclude) == true)
             {
                 // 获得封面图像 URL
                 string strImageUrl = ScriptUtil.GetCoverImageUrl(strMarc, "SmallImage");
@@ -1522,13 +1550,18 @@ return result;
             else
                 strSummary = "";
 
-            strSummary = strFragment + strSummary;
+            this.SetBiblioSummary(strBiblioRecPath, strSummary, strFragment);
 
+            if (StringUtil.IsInList("coverimage", strBiblioRecPathExclude) == true)
+                strSummary = strFragment + strSummary;
+
+#if NO
             if (this.BiblioSummaryCache != null)
             {
                 DateTimeOffset offset = DateTimeOffset.Now.AddDays(1);
                 this.BiblioSummaryCache.Set(strCacheKey, strSummary, offset);
             }
+#endif
 
             if (this.Statis != null)
                 this.Statis.IncreaseEntryValue(
@@ -3856,6 +3889,8 @@ out strError);
                     {
                         this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
                     }
+
+                    this.DeleteBiblioSummary(strBiblioRecPath);
                 }
             }
             else if (strAction == "delete"
@@ -4079,6 +4114,8 @@ out strError);
                     {
                         this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
                     }
+
+                    this.DeleteBiblioSummary(strBiblioRecPath);
                 }
             }
             else
@@ -4361,7 +4398,6 @@ out strError);
                     }
                 }
 
-
                 baOutputTimestamp = null;
 
                 if (strAction == "delete")
@@ -4383,6 +4419,8 @@ out strError);
                         else
                             goto ERROR1;
                     }
+
+                    this.DeleteBiblioSummary(strBiblioRecPath);
                 }
 
                 strBiblio = ""; // 以免后面把残余信息写入操作日志的 <record>元素 2013/3/11

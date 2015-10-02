@@ -6,12 +6,24 @@ using System.Text;
 
 namespace DigitalPlatform.IO
 {
-
     /// <remarks>
     /// StreamUtil类，Stream功能扩展函数
     /// </remarks>
     public class StreamUtil
     {
+        // 快速移动文件指针到相对于文件头部的 lOffset 位置
+        // 根据要 seek 到的位置距离当前位置和文件头的远近，选择近的起点来进行移动
+        public static void FastSeek(Stream stream, long lOffset)
+        {
+            long delta1 = lOffset - stream.Position;
+            if (delta1 < 0)
+                delta1 = -delta1;
+            if (delta1 < lOffset)
+                stream.Seek(delta1, SeekOrigin.Current);
+            else
+                stream.Seek(lOffset, SeekOrigin.Begin);
+        }
+
         public static long DumpStream(Stream streamSource, Stream streamTarget)
         {
             return DumpStream(streamSource, streamTarget, false);

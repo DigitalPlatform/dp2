@@ -9,6 +9,9 @@ using System.Windows.Forms;
 
 namespace DigitalPlatform.rms.Client
 {
+    /// <summary>
+    /// 导出数据的对话框
+    /// </summary>
     public partial class ExportDataDialog : Form
     {
         public ExportDataDialog()
@@ -50,6 +53,22 @@ namespace DigitalPlatform.rms.Client
             this.Close();
         }
 
+        public bool StartEndEnabled
+        {
+            get
+            {
+                return this.radioButton_startEnd.Enabled;
+            }
+            set
+            {
+                this.radioButton_startEnd.Enabled = value;
+                this.textBox_startNo.Enabled = value;
+                this.textBox_endNo.Enabled = value;
+                this.button_setEndIdMax.Enabled = value;
+                this.button_setStartIdMin.Enabled = value;
+            }
+        }
+
         public string StartID
         {
             get
@@ -84,7 +103,6 @@ namespace DigitalPlatform.rms.Client
             {
                 this.textBox_dbPath.Text = value;
             }
-
         }
 
         public bool AllRecords
@@ -109,7 +127,6 @@ namespace DigitalPlatform.rms.Client
                         this.radioButton_all.Checked = false;
                         this.radioButton_startEnd.Checked = true;
                     }
-
                 }
                 finally
                 {

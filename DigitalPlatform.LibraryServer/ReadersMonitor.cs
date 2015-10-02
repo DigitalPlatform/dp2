@@ -31,8 +31,6 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-
-
         // 一次操作循环
         // TODO: 是否需要对读者记录加锁？
         public override void Worker()

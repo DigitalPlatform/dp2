@@ -2271,9 +2271,6 @@ namespace dp2rms
 			return 0;
 		}
 
-
-	
-
 		// 保存到备份格式
 		public void SaveToBackup(string strOutputFileName)
 		{
@@ -2391,7 +2388,6 @@ namespace dp2rms
 
 					EnableControlsInLoading(true);
 
-
 					nRet = this.listView_resFiles.DoSaveResToBackupFile(
 						fileTarget,
 						respath.Path,
@@ -2421,7 +2417,10 @@ namespace dp2rms
 				long lTotalLength = fileTarget.Position - lStart - 8;
 				byte[] data = BitConverter.GetBytes(lTotalLength);
 
-				fileTarget.Seek(lStart, SeekOrigin.Begin);
+                fileTarget.Seek(lStart - fileTarget.Position, SeekOrigin.Current);
+                Debug.Assert(fileTarget.Position == lStart, "");
+
+				// fileTarget.Seek(lStart, SeekOrigin.Begin);   // 性能
 				fileTarget.Write(data, 0, 8);
 			}
 			finally 

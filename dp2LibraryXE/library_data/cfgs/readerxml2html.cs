@@ -19,6 +19,7 @@
 // 2013/12/25   this.App.MaxPatronHistoryItems
 // 2014/11/8    读者照片加入 img 元素加入 pending class 
 // 2014/12/27	BC:xxxxx 借阅信息列表中摘要包含图书封面
+// 2015/10/2    借阅列表和借阅历史表格中，BC:xxxx 中增加了第三段 | 书目记录路径
 
 using System;
 using System.Xml;
@@ -356,6 +357,7 @@ public class MyConverter : ReaderConverter
                 string strRenewComment = DomUtil.GetAttr(node, "renewComment");
 
                 string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
+                string strBiblioRecPath = DomUtil.GetAttr(node, "biblioRecPath");
                 string strPrice = DomUtil.GetAttr(node, "price");
                 string strTimeReturning = DomUtil.GetAttr(node, "timeReturning");
 
@@ -442,7 +444,8 @@ public class MyConverter : ReaderConverter
                 else
                     strResult.Append( "<tr class='content'>");
                 strResult.Append( "<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
-                strResult.Append( "<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath + "</td>");
+                strResult.Append( "<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath 
+                    + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
 
                 strResult.Append( "<td class='price' nowrap align='right'>" + strPrice + "</td>");
                 strResult.Append( "<td class='no' nowrap align='right'>" + strNo + "</td>");
@@ -453,15 +456,12 @@ public class MyConverter : ReaderConverter
                 strResult.Append( "<td class='renewcomment' width='30%'>" + strRenewComment.Replace(";", "<br/>") + "</td>");
                 strResult.Append( "</tr>");
             }
-
         }
-
 
         strResult.Append( "</table>");
 
         if (nOverdueCount > 0)
             strWarningText += "<div class='warning overdue'><div class='number'>" + nOverdueCount.ToString() + "</div><div class='text'>已超期</div></div>";
-
 
         // ***
         // 预约请求
@@ -512,7 +512,6 @@ public class MyConverter : ReaderConverter
 
                     nArriveCount++;
                 }
-
 
                 strResult.Append( "<tr class='" + strClass + "'>");
                 strResult.Append( "<td class='barcode'>"
@@ -572,6 +571,7 @@ public class MyConverter : ReaderConverter
                     string strRenewComment = DomUtil.GetAttr(node, "renewComment");
                     // string strSummary = "";
                     string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
+                    string strBiblioRecPath = DomUtil.GetAttr(node, "biblioRecPath");
                     string strReturnDate = DomUtil.GetAttr(node, "returnDate");
 
                     // string strBarcodeLink = "<a href='" + App.OpacServerUrl + "/book.aspx?barcode=" + strBarcode + "&borrower=" + strReaderBarcode + "&forcelogin=userid' target='_blank'>" + strBarcode + "</a>";
@@ -580,7 +580,8 @@ public class MyConverter : ReaderConverter
                     strResult.Append("<tr class='content'>");
                     strResult.Append("<td class='index' nowrap>" + (i + 1).ToString() + "</td>");
                     strResult.Append("<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
-                    strResult.Append("<td class='summary pending'>BC:" + strBarcode + "|" + strConfirmItemRecPath + "</td>");
+                    strResult.Append("<td class='summary pending'>BC:" + strBarcode + "|" + strConfirmItemRecPath 
+                        + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
 
                     strResult.Append("<td class='no' nowrap align='right'>" + strNo + "</td>");
                     strResult.Append("<td class='borrowdate' >" + LocalDateOrTime(strBorrowDate, strPeriod) + "</td>");
@@ -684,5 +685,4 @@ public class MyConverter : ReaderConverter
         string strResPath = strRecPath + "/object/" + strID;
         return strResPath.Replace(":", "/");
     }
-
 }

@@ -562,6 +562,10 @@ namespace DigitalPlatform.rms.Client
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("全选下级节点(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_checkAllSubNodes);
+            menuItem.Enabled = this.CheckBoxes;
+            contextMenu.MenuItems.Add(menuItem);
 
             // ---
             menuItem = new MenuItem("-");
@@ -615,6 +619,19 @@ namespace DigitalPlatform.rms.Client
 
             if (contextMenu != null)
                 contextMenu.Show(this, new Point(e.X, e.Y));
+        }
+
+        // 全选下级节点
+        void menu_checkAllSubNodes(object sender, EventArgs e)
+        {
+            TreeNode node = this.SelectedNode;
+            if (node == null)
+                return;
+
+            foreach(TreeNode current in node.Nodes)
+            {
+                current.Checked = true;
+            }
         }
 
         // 测试超时
@@ -1396,7 +1413,6 @@ namespace DigitalPlatform.rms.Client
                             }
                         }
 
-
                         if (bNeedPush == true)
                         {
                             // 准备 Channel
@@ -1605,6 +1621,7 @@ namespace DigitalPlatform.rms.Client
             }
 
             strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
+            // TODO: 对话框可能超高
             MessageBox.Show(this, "文件 " + dlg.FileName + " 内的数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
             return 0;
         ERROR0:
@@ -1714,18 +1731,33 @@ namespace DigitalPlatform.rms.Client
                 goto ERROR1;
             }
 
-            if (this.SelectedNode.ImageIndex != RESTYPE_DB)
+            List<string> paths = null;
+            if (this.CheckBoxes == false)
             {
-                strError = "所选择的节点不是数据库类型。请选择要导出数据的数据库节点。";
-                goto ERROR1;
+                if (this.SelectedNode.ImageIndex != RESTYPE_DB)
+                {
+                    strError = "所选择的节点不是数据库类型。请选择要导出数据的数据库节点。";
+                    goto ERROR1;
+                }
+                ResPath respath = new ResPath(this.SelectedNode);
+                paths.Add(respath.FullPath);   // respath.Path;
             }
-
-            ResPath respath = new ResPath(this.SelectedNode);
+            else
+            {
+                paths = GetCheckedDatabaseList();
+                if (paths.Count == 0)
+                {
+                    strError = "请选择至少一个要导出数据的数据库节点。";
+                    goto ERROR1;
+                }
+            }
 
             // 询问导出数据的范围
             ExportDataDialog data_range_dlg = new ExportDataDialog();
-            data_range_dlg.DbPath = respath.Path;
+            data_range_dlg.DbPath = StringUtil.MakePathList(paths); ;
             data_range_dlg.AllRecords = true;
+            if (paths.Count > 1)
+                data_range_dlg.StartEndEnabled = false;
             data_range_dlg.StartPosition = FormStartPosition.CenterScreen;
             data_range_dlg.ShowDialog(this);
 
@@ -1754,259 +1786,250 @@ namespace DigitalPlatform.rms.Client
 
             ExportUtil export_util = new ExportUtil();
 
+            int nRet = export_util.Begin(this,
+dlg.FileName,
+out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
-            string strQueryXml = "<target list='" + respath.Path
-    + ":" + "__id'><item><word>"+strRange+"</word><match>exact</match><relation>range</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-
-
-            RmsChannel cur_channel = Channels.CreateTempChannel(respath.Url);
-            Debug.Assert(cur_channel != null, "Channels.GetChannel() 异常");
-
-#if NO
-            DigitalPlatform.Stop stop = null;
-
-            if (stopManager != null)
-            {
-                stop = new DigitalPlatform.Stop();
-
-                stop.Register(this.stopManager, true);	// 和容器关联
-
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在导出数据 " + respath.FullPath);
-                stop.BeginLoop();
-            }
-#endif
-            DigitalPlatform.Stop stop = PrepareStop("正在导出数据 " + respath.FullPath);
+            RmsChannel cur_channel = null;
+            DigitalPlatform.Stop stop = PrepareStop("正在导出数据");
 
             stop.OnStop -= new StopEventHandler(this.DoStop);   // 去掉缺省的回调函数
             stop.OnStop += (sender1, e1) =>
             {
-                    if (cur_channel != null)
-                        cur_channel.Abort();
-                };
+                if (cur_channel != null)
+                    cur_channel.Abort();
+            };
+            ProgressEstimate estimate = new ProgressEstimate();
 
             try
             {
-                long lRet = cur_channel.DoSearch(strQueryXml,
-    "default",
-    out strError);
-                if (lRet == -1)
+                int i_path = 0;
+                foreach (string path in paths)
                 {
-                    strError = "检索数据库 '"+respath.Path+"' 时出错: " + strError;
-                    goto ERROR1;
-                }
+                    ResPath respath = new ResPath(path);
 
-                if (lRet == 0)
-                {
-                    strError = "数据库 '" + respath.Path + "' 中没有任何数据记录";
-                    goto ERROR1;	// not found
-                }
+                    string strQueryXml = "<target list='" + respath.Path
+            + ":" + "__id'><item><word>" + strRange + "</word><match>exact</match><relation>range</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
-                stop.Style = StopStyle.EnableHalfStop;  // API的间隙才让中断。避免获取结果集的中途，因为中断而导致 Session 失效，结果集丢失，进而无法 Retry 获取
+                    cur_channel = Channels.CreateTempChannel(respath.Url);
+                    Debug.Assert(cur_channel != null, "Channels.GetChannel() 异常");
 
-                lTotalCount = lRet;	// 总命中数
-                long lThisCount = lTotalCount;
-                long lStart = 0;
-
-                ProgressEstimate estimate = new ProgressEstimate();
-
-                estimate.SetRange(0, lTotalCount);
-                estimate.StartEstimate();
-
-                stop.SetProgressRange(0, lTotalCount);
-
-                int nRet = export_util.Begin(this,
-    dlg.FileName,
-    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                DialogResult last_one_result = DialogResult.Yes;    // 前一次对话框选择的方式
-                bool bDontAskOne = false;
-                int nRedoOneCount = 0;
-                DialogResult last_get_result = DialogResult.Retry;    // 前一次对话框选择的方式
-                bool bDontAskGet = false;
-                int nRedoGetCount = 0;
-
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop.State != 0)
+                    try
                     {
-                        DialogResult result = MessageBox.Show(this,
-                            "确实要中断当前批处理操作?",
-                            "导出数据",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result == DialogResult.Yes)
+                        long lRet = cur_channel.DoSearch(strQueryXml,
+            "default",
+            out strError);
+                        if (lRet == -1)
                         {
-                            strError = "用户中断";
+                            strError = "检索数据库 '" + respath.Path + "' 时出错: " + strError;
                             goto ERROR1;
                         }
-                        else
+
+                        if (lRet == 0)
                         {
-                            stop.Continue();
-                        }
-                    }
-
-                    string strStyle = "id,xml,timestamp";
-                    if (export_util.FileType == ExportFileType.BackupFile)
-                        strStyle = "id,xml,timestamp,metadata";
-
-                    nRedoGetCount = 0;
-                REDO_GET:
-                    Record[] searchresults = null;
-                    lRet = cur_channel.DoGetSearchResult(
-                        "default",
-                        lStart,
-                        lThisCount,
-                        strStyle,
-                        this.Lang,
-                        stop,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (stop.State != 0)    // 已经中断
-                            goto ERROR1;
-
-                        // 自动重试有次数限制，避免进入死循环
-                        if (bDontAskGet == true && last_get_result == DialogResult.Retry
-                            && nRedoGetCount < 3)
-                        {
-                            nRedoGetCount++;
-                            goto REDO_GET;
+                            strError = "数据库 '" + respath.Path + "' 中没有任何数据记录";
+                            // goto ERROR1;	// not found
+                            continue;
                         }
 
-                        DialogResult result = MessageDlg.Show(this,
-    "获取检索结果时 (偏移量 " + lStart + ") 出错：\r\n---\r\n"
-    + strError + "\r\n---\r\n\r\n是否重试获取操作?\r\n\r\n注：\r\n[重试] 重新获取\r\n[中断] 中断整个批处理",
-    "导出数据",
-    MessageBoxButtons.RetryCancel,
-    MessageBoxDefaultButton.Button1,
-    ref bDontAskOne,
-    new string[] { "重试", "中断" });
-                        last_get_result = result;
+                        stop.Style = StopStyle.EnableHalfStop;  // API的间隙才让中断。避免获取结果集的中途，因为中断而导致 Session 失效，结果集丢失，进而无法 Retry 获取
 
-                        if (result == DialogResult.Retry)
+                        lTotalCount += lRet;	// 总命中数
+                        long lRestCount = lRet; // 余下的数量
+                        long lResultSetCount = lRet;    // 本次结果集内的总数
+                        long lStart = 0;
+
+                        estimate.SetRange(0, lTotalCount);
+                        if (i_path == 0)
+                            estimate.StartEstimate();
+
+                        stop.SetProgressRange(0, lTotalCount);
+
+                        DialogResult last_one_result = DialogResult.Yes;    // 前一次对话框选择的方式
+                        bool bDontAskOne = false;
+                        int nRedoOneCount = 0;
+                        DialogResult last_get_result = DialogResult.Retry;    // 前一次对话框选择的方式
+                        bool bDontAskGet = false;
+                        int nRedoGetCount = 0;
+
+                        for (; ; )
                         {
+                            Application.DoEvents();	// 出让界面控制权
+
+                            if (stop.State != 0)
+                            {
+                                DialogResult result = MessageBox.Show(this,
+                                    "确实要中断当前批处理操作?",
+                                    "导出数据",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Question,
+                                    MessageBoxDefaultButton.Button2);
+                                if (result == DialogResult.Yes)
+                                {
+                                    strError = "用户中断";
+                                    goto ERROR1;
+                                }
+                                else
+                                {
+                                    stop.Continue();
+                                }
+                            }
+
+                            string strStyle = "id,xml,timestamp";
+                            if (export_util.FileType == ExportFileType.BackupFile)
+                                strStyle = "id,xml,timestamp,metadata";
+
                             nRedoGetCount = 0;
-                            goto REDO_GET;
-                        }
+                        REDO_GET:
+                            Record[] searchresults = null;
+                            lRet = cur_channel.DoGetSearchResult(
+                                "default",
+                                lStart,
+                                lRestCount,
+                                strStyle,
+                                this.Lang,
+                                stop,
+                                out searchresults,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                if (stop.State != 0)    // 已经中断
+                                    goto ERROR1;
 
-                        Debug.Assert(result == DialogResult.Cancel, ""); 
+                                // 自动重试有次数限制，避免进入死循环
+                                if (bDontAskGet == true && last_get_result == DialogResult.Retry
+                                    && nRedoGetCount < 3)
+                                {
+                                    nRedoGetCount++;
+                                    goto REDO_GET;
+                                }
 
-                        strError = "获取检索结果时出错: " + strError;
-                        goto ERROR1;
-                    }
+                                DialogResult result = MessageDlg.Show(this,
+            "获取检索结果时 (偏移量 " + lStart + ") 出错：\r\n---\r\n"
+            + strError + "\r\n---\r\n\r\n是否重试获取操作?\r\n\r\n注：\r\n[重试] 重新获取\r\n[中断] 中断整个批处理",
+            "导出数据",
+            MessageBoxButtons.RetryCancel,
+            MessageBoxDefaultButton.Button1,
+            ref bDontAskOne,
+            new string[] { "重试", "中断" });
+                                last_get_result = result;
 
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        Record record = searchresults[i];
+                                if (result == DialogResult.Retry)
+                                {
+                                    nRedoGetCount = 0;
+                                    goto REDO_GET;
+                                }
 
-                        if (i == 0)
-                        {
-                            stop.SetMessage("正在输出记录 " + record.Path + "，已输出 " + lExportCount.ToString() + " 条。"
-        + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lExportCount)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
-                        }
-                        nRedoOneCount = 0;
+                                Debug.Assert(result == DialogResult.Cancel, "");
 
-                    REDO_ONE:
-                        nRet = export_util.ExportOneRecord(
-                            cur_channel,
-                            stop,
-                            respath.Url,
-                            record.Path,
-                            record.RecordBody.Xml,
-                            record.RecordBody.Metadata,
-                            record.RecordBody.Timestamp,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            if (stop.State != 0)    // 已经中断
+                                strError = "获取检索结果时出错: " + strError;
                                 goto ERROR1;
-
-                            // 重试、跳过、中断?
-                            // 重试的时候，注意保持文件最后位置，不要留下残余的尾部
-                            // MessageBoxButtons.AbortRetryIgnore  YesNoCancel
-                            if (bDontAskOne == true && last_one_result == DialogResult.No)
-                                continue;   // TODO: 最好在日志文件中记载跳过的记录。或者批处理结束后显示出来
-
-                            // 自动重试有次数限制，避免进入死循环
-                            if (bDontAskOne == true && last_one_result == DialogResult.Yes
-                                && nRedoOneCount < 3)
-                            {
-                                nRedoOneCount++;
-                                goto REDO_ONE;
                             }
 
-                            DialogResult result = MessageDlg.Show(this,
-                                "导出记录 '" + record.Path + "' 时出错：\r\n---\r\n"
-                                + strError + "\r\n---\r\n\r\n是否重试导出操作?\r\n\r\n注：\r\n[重试] 重新导出这条记录\r\n[跳过] 忽略导出这条记录，但继续后面的处理\r\n[中断] 中断整个批处理",
-                                "导出数据",
-                                MessageBoxButtons.YesNoCancel,
-                                MessageBoxDefaultButton.Button1,
-                                ref bDontAskOne,
-                                new string [] {"重试","跳过","中断"});
-                            last_one_result = result;
-
-                            if (result == DialogResult.Yes)
+                            for (int i = 0; i < searchresults.Length; i++)
                             {
+                                Application.DoEvents();
+
+                                Record record = searchresults[i];
+
+                                if (i == 0)
+                                {
+                                    stop.SetMessage("正在输出记录 " + record.Path + "，已输出 " + lExportCount.ToString() + " 条。"
+                + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lExportCount)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
+                                }
                                 nRedoOneCount = 0;
-                                goto REDO_ONE;
+
+                            REDO_ONE:
+                                nRet = export_util.ExportOneRecord(
+                                    cur_channel,
+                                    stop,
+                                    respath.Url,
+                                    record.Path,
+                                    record.RecordBody.Xml,
+                                    record.RecordBody.Metadata,
+                                    record.RecordBody.Timestamp,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    if (stop.State != 0)    // 已经中断
+                                        goto ERROR1;
+
+                                    // 重试、跳过、中断?
+                                    // 重试的时候，注意保持文件最后位置，不要留下残余的尾部
+                                    // MessageBoxButtons.AbortRetryIgnore  YesNoCancel
+                                    if (bDontAskOne == true && last_one_result == DialogResult.No)
+                                        continue;   // TODO: 最好在日志文件中记载跳过的记录。或者批处理结束后显示出来
+
+                                    // 自动重试有次数限制，避免进入死循环
+                                    if (bDontAskOne == true && last_one_result == DialogResult.Yes
+                                        && nRedoOneCount < 3)
+                                    {
+                                        nRedoOneCount++;
+                                        goto REDO_ONE;
+                                    }
+
+                                    DialogResult result = MessageDlg.Show(this,
+                                        "导出记录 '" + record.Path + "' 时出错：\r\n---\r\n"
+                                        + strError + "\r\n---\r\n\r\n是否重试导出操作?\r\n\r\n注：\r\n[重试] 重新导出这条记录\r\n[跳过] 忽略导出这条记录，但继续后面的处理\r\n[中断] 中断整个批处理",
+                                        "导出数据",
+                                        MessageBoxButtons.YesNoCancel,
+                                        MessageBoxDefaultButton.Button1,
+                                        ref bDontAskOne,
+                                        new string[] { "重试", "跳过", "中断" });
+                                    last_one_result = result;
+
+                                    if (result == DialogResult.Yes)
+                                    {
+                                        nRedoOneCount = 0;
+                                        goto REDO_ONE;
+                                    }
+
+                                    if (result == DialogResult.No)
+                                        continue;
+
+                                    Debug.Assert(result == DialogResult.Cancel, "");
+
+                                    goto ERROR1;
+                                }
+
+                                stop.SetProgressValue(lExportCount + 1);
+                                lExportCount++;
                             }
 
-                            if (result == DialogResult.No)
-                                continue;
+                            if (lStart + searchresults.Length >= lResultSetCount)
+                                break;
 
-                            Debug.Assert(result == DialogResult.Cancel, ""); 
-
-                            goto ERROR1;
+                            lStart += searchresults.Length;
+                            lRestCount -= searchresults.Length;
                         }
 
-                        stop.SetProgressValue(lExportCount + 1);
-                        lExportCount++;
+                        strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
                     }
+                    finally
+                    {
+                        cur_channel.Close();
+                        cur_channel = null;
+                    }
+                    // MessageBox.Show(this, "位于服务器 '" + respath.Url + "' 上的数据库 '" + respath.Path + "' 内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条。" + strTimeMessage);
 
-                    if (lStart + searchresults.Length >= lTotalCount)
-                        break;
-
-                    lStart += searchresults.Length;
-                    lThisCount -= searchresults.Length;
+                    i_path++;
                 }
-
-                strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
             }
             finally
             {
-                EndStop(stop);
-#if NO
-                if (stopManager != null)
-                {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-
-                    stop.Unregister();	// 和容器脱离关联
-                }
-#endif
-                cur_channel.Close();
-                cur_channel = null;
-
                 export_util.End();
-            }
 
-            MessageBox.Show(this, "位于服务器 '" + respath.Url + "' 上的数据库 '" + respath.Path + "' 内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条。" + strTimeMessage);
+                EndStop(stop);
+            }
+            MessageBox.Show(this, "数据库 '" + StringUtil.MakePathList(paths) + "' 内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条。" + strTimeMessage);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
             if (lExportCount > 0)
                 MessageBox.Show(this, "数据库内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条");
         }
-
-
 
         DigitalPlatform.Stop PrepareStop(string strText)
         {
@@ -2313,15 +2336,10 @@ namespace DigitalPlatform.rms.Client
 
 		void menu_toggleCheckBoxes(object sender, System.EventArgs e)
 		{
-			//ResPath OldPath = new ResPath(this.SelectedNode);
-
-
 			if (this.CheckBoxes == true)
 				this.CheckBoxes = false;
 			else
 				this.CheckBoxes = true;
-
-			//ExpandPath(OldPath);
 		}
 
 		delegate int Delegate_Fill(TreeNode node);
@@ -2582,7 +2600,6 @@ namespace DigitalPlatform.rms.Client
 		// 不同的服务器中的字符串分开放
 		public TargetItemCollection GetSearchTarget()
 		{
-
 			string strDb = "";
 
 			TargetItemCollection aText = new TargetItemCollection();
@@ -2615,13 +2632,11 @@ namespace DigitalPlatform.rms.Client
 					goto END1;
 
 				item.Target = ((TreeNode)aNode[1]).Text;
-
 				
 				if (aNode.Count == 2)
 					goto END1;
 
 				item.Target += ":" + ((TreeNode)aNode[2]).Text;
-
 
 				END1:
 				return aText;
@@ -2713,8 +2728,6 @@ namespace DigitalPlatform.rms.Client
 
                     result.Add(respath.FullPath);
                 }
-
-
             }
 
             return result;

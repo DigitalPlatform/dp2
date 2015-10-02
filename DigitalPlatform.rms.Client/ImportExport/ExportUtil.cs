@@ -107,8 +107,6 @@ namespace DigitalPlatform.rms.Client
                             return -1;
                         }
                     }
-
-
                 }
 
                 // 打开文件
@@ -151,7 +149,6 @@ namespace DigitalPlatform.rms.Client
                 //writer.WriteStartElement("collection");
                 //writer.WriteAttributeString("xmlns:marc",
                 //	"http://www.loc.gov/MARC21/slim");
-
             }
 
             return 0;
@@ -230,8 +227,6 @@ namespace DigitalPlatform.rms.Client
                     out strError);
                 if (nRet == -1)
                     return -1;
-
-
             }
             return 0;
         }
@@ -358,7 +353,6 @@ string strTimestamp)
                     strXmlBody);
 
                 // 其余
-
                 string[] ids = null;
 
                 // 得到Xml记录中所有<file>元素的id属性值
@@ -371,7 +365,6 @@ string strTimestamp)
                     strError = "GetFileIds()出错，无法获得 XML 记录 (" + strPath + ") 中的 <dprms:file>元素的 id 属性， 因此保存记录失败，原因: " + strError;
                     goto ERROR1;
                 }
-
 
                 nRet = WriteResToBackupFile(
                     owner,
@@ -395,8 +388,14 @@ string strTimestamp)
                 long lTotalLength = outputfile.Position - lStart - 8;
                 byte[] data = BitConverter.GetBytes(lTotalLength);
 
-                outputfile.Seek(lStart, SeekOrigin.Begin);
+                // 返回记录最开头位置
+                outputfile.Seek(lStart - outputfile.Position,SeekOrigin.Current);
+                Debug.Assert(outputfile.Position == lStart, "");
+
+                // outputfile.Seek(lStart, SeekOrigin.Begin);   // 文件大了以后这句话的性能会很差
                 outputfile.Write(data, 0, 8);
+
+                // 跳到记录末尾位置
                 outputfile.Seek(lTotalLength, SeekOrigin.Current);
                 bDone = true;
             }

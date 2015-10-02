@@ -591,7 +591,7 @@ namespace DigitalPlatform.LibraryServer
                 // 内核参数
                 // 元素<rmsserver>
                 // 属性url/username/password
-                XmlNode node = dom.DocumentElement.SelectSingleNode("//rmsserver");
+                XmlElement node = dom.DocumentElement.SelectSingleNode("rmsserver") as XmlElement;
                 if (node != null)
                 {
                     app.WsUrl = DomUtil.GetAttr(node, "url");
@@ -624,10 +624,19 @@ namespace DigitalPlatform.LibraryServer
                     CfgsMap.Clear();
                 }
 
+                // 元素 <mongoDB>
+                // 属性 connectionString / instancePrefix
+                node = dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
+                if (node != null)
+                {
+                    this.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
+                    this.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
+                }
+
                 // 预约到书
                 // 元素<arrived>
                 // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
-                node = dom.DocumentElement.SelectSingleNode("//arrived");
+                node = dom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
                 if (node != null)
                 {
                     app.ArrivedDbName = DomUtil.GetAttr(node, "dbname");
@@ -689,16 +698,15 @@ namespace DigitalPlatform.LibraryServer
                 // 借期提醒通知定义
                 // 元素 <monitors/readersMonitor>
                 // 属性 notifyDef
-                node = dom.DocumentElement.SelectSingleNode("monitors/readersMonitor");
+                node = dom.DocumentElement.SelectSingleNode("monitors/readersMonitor") as XmlElement;
                 if (node != null)
                 {
                     // 提醒通知的定义
                     app.NotifyDef = DomUtil.GetAttr(node, "notifyDef");
                 }
 
-
                 // <circulation>
-                node = dom.DocumentElement.SelectSingleNode("circulation");
+                node = dom.DocumentElement.SelectSingleNode("circulation") as XmlElement;
                 if (node != null)
                 {
                     {
@@ -748,7 +756,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // <channel>
-                node = dom.DocumentElement.SelectSingleNode("channel");
+                node = dom.DocumentElement.SelectSingleNode("channel") as XmlElement;
                 if (node != null)
                 {
                     int v = 0;
@@ -774,7 +782,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // <cataloging>
-                node = dom.DocumentElement.SelectSingleNode("cataloging");
+                node = dom.DocumentElement.SelectSingleNode("cataloging") as XmlElement;
                 if (node != null)
                 {
                     // 是否允许删除带有下级记录的书目记录
@@ -792,7 +800,7 @@ namespace DigitalPlatform.LibraryServer
                 // 入馆登记
                 // 元素<passgate>
                 // 属性writeOperLog
-                node = dom.DocumentElement.SelectSingleNode("//passgate");
+                node = dom.DocumentElement.SelectSingleNode("passgate") as XmlElement;
                 if (node != null)
                 {
                     string strWriteOperLog = DomUtil.GetAttr(node, "writeOperLog");
@@ -804,7 +812,7 @@ namespace DigitalPlatform.LibraryServer
                 // 对象管理
                 // 元素<object>
                 // 属性 writeOperLog
-                node = dom.DocumentElement.SelectSingleNode("//object");
+                node = dom.DocumentElement.SelectSingleNode("object") as XmlElement;
                 if (node != null)
                 {
                     string strWriteOperLog = DomUtil.GetAttr(node, "writeGetResOperLog");
@@ -815,7 +823,7 @@ namespace DigitalPlatform.LibraryServer
                 // 消息
                 // 元素<message>
                 // 属性dbname/reserveTimeSpan
-                node = dom.DocumentElement.SelectSingleNode("//message");
+                node = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
                 if (node != null)
                 {
                     app.MessageDbName = DomUtil.GetAttr(node, "dbname");
@@ -825,7 +833,6 @@ namespace DigitalPlatform.LibraryServer
                     if (String.IsNullOrEmpty(app.MessageReserveTimeSpan) == true)
                         app.MessageReserveTimeSpan = "365day";
                 }
-
 
                 /*
                 // 图书馆业务服务器
@@ -841,7 +848,7 @@ namespace DigitalPlatform.LibraryServer
                 // OPAC服务器
                 // 元素<opacServer>
                 // 属性url
-                node = dom.DocumentElement.SelectSingleNode("//opacServer");
+                node = dom.DocumentElement.SelectSingleNode("opacServer") as XmlElement;
                 if (node != null)
                 {
                     app.OpacServerUrl = DomUtil.GetAttr(node, "url");
@@ -851,7 +858,7 @@ namespace DigitalPlatform.LibraryServer
                 // 违约金
                 // 元素<amerce>
                 // 属性dbname/overdueStyle
-                node = dom.DocumentElement.SelectSingleNode("//amerce");
+                node = dom.DocumentElement.SelectSingleNode("amerce") as XmlElement;
                 if (node != null)
                 {
                     app.AmerceDbName = DomUtil.GetAttr(node, "dbname");
@@ -861,7 +868,7 @@ namespace DigitalPlatform.LibraryServer
                 // 发票
                 // 元素<invoice>
                 // 属性dbname
-                node = dom.DocumentElement.SelectSingleNode("invoice");
+                node = dom.DocumentElement.SelectSingleNode("invoice") as XmlElement;
                 if (node != null)
                 {
                     app.InvoiceDbName = DomUtil.GetAttr(node, "dbname");
@@ -1047,6 +1054,19 @@ namespace DigitalPlatform.LibraryServer
                     // goto ERROR1;
                 }
 
+                if (string.IsNullOrEmpty(this.MongoDbConnStr) == false)
+                {
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: OpenSummaryStorage");
+#endif
+                    nRet = OpenSummaryStorage(out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "初始化书目摘要库时出错: " + strError;
+                        app.WriteErrorLog(strError);
+                    }
+                }
+
                 // 启动批处理任务
                 // TODO: 这一段考虑分离到一个函数中
                 if (bReload == false)
@@ -1149,7 +1169,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 启动DkywReplication
                     // <dkyw>
-                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//dkyw");
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dkyw") as XmlElement;
                     if (node != null)
                     {
 #if LOG_INFO
@@ -1214,7 +1234,7 @@ namespace DigitalPlatform.LibraryServer
                     // <patronReplication>
                     // 读者库数据同步 批处理任务
                     // 从卡中心同步读者数据
-                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//patronReplication");
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("patronReplication") as XmlElement;
                     if (node != null)
                     {
 #if LOG_INFO
@@ -2596,6 +2616,16 @@ namespace DigitalPlatform.LibraryServer
                         Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
                         );
                     writer.WriteEndElement();
+
+                    //2015/10/2
+                    // <mongoDB>
+                    {
+                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("mongoDB");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                    }
 
                     //2013/11/18
                     // <center>
