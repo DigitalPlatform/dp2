@@ -80,7 +80,7 @@ public class MyConverter : ReaderConverter
 
         strResult.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
 
-        strResult.Append( "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n\t<head>" + strLink + "</head>\t\n\t<body"
+        strResult.Append( "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n\t<head>" + strLink + "</head>\r\n\t<body"
             + (string.IsNullOrEmpty(strBodyClass) == false ? " class='" + strBodyClass + "'" : "")
             + ">");
 

@@ -69,6 +69,7 @@
     <Content Include="App_Data\aspnetdb_log.ldf">
       <DependentUpon>ASPNETDB.MDF</DependentUpon>
     </Content>
+    <Content Include="Circulation.aspx" />
     <Content Include="Old_App_WebReferences\dp2libraryws\gcat_ws\gcat.disco" />
     <Content Include="BatchTaskMonitor.aspx" />
     <Content Include="bin\AForge.dll" />
@@ -697,6 +698,7 @@
     <Content Include="style\0\browseaspx.css" />
     <Content Include="style\0\changepassword.css" />
     <Content Include="style\0\chatroom.css" />
+    <Content Include="style\0\circulation.css" />
     <Content Include="style\0\column.css" />
     <Content Include="style\0\columnbar_active.gif" />
     <Content Include="style\0\columnbar_back.gif" />
@@ -985,6 +987,13 @@
     </Compile>
     <Compile Include="Chat.aspx.designer.cs">
       <DependentUpon>Chat.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Circulation.aspx.cs">
+      <DependentUpon>Circulation.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Circulation.aspx.designer.cs">
+      <DependentUpon>Circulation.aspx</DependentUpon>
     </Compile>
     <Compile Include="Column.aspx.designer.cs">
       <DependentUpon>Column.aspx</DependentUpon>

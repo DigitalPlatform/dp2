@@ -133,6 +133,8 @@ namespace DigitalPlatform.LibraryServer
 
             this.AppendResultText("开始新一轮循环\r\n");
 
+            recpath_table.Clear();
+
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
             int nTotalRecCount = 0;
@@ -277,6 +279,9 @@ namespace DigitalPlatform.LibraryServer
                 AppendResultText("针对读者库 " + strReaderDbName + " 的循环结束。共处理 " + nOnePassRecCount.ToString() + " 条记录。\r\n");
 
             }
+
+            recpath_table.Clear();
+
             AppendResultText("循环结束。共处理 " + nTotalRecCount.ToString() + " 条记录。\r\n");
             SetProgressText("循环结束。共处理 " + nTotalRecCount.ToString() + " 条记录。");
 
@@ -718,6 +723,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        Hashtable recpath_table = new Hashtable();  // 册记录路径 --> 书目记录路径 对照表
+
         // 给借阅信息和借阅历史中增加 biblioRecPath 属性
         // return:
         //      -1  出错
@@ -728,7 +735,10 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            Hashtable table = new Hashtable();  // 册记录路径 --> 书目记录路径 对照表
+            // 极限是一万个事项
+            if (recpath_table.Count > 10000)
+                recpath_table.Clear();
+
             bool bChanged = false;
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow | borrowHistory/borrow");
             foreach (XmlElement borrow in nodes)
@@ -738,12 +748,12 @@ namespace DigitalPlatform.LibraryServer
                 if (string.IsNullOrEmpty(strBiblioRecPath) == true
                     && string.IsNullOrEmpty(strItemRecPath) == false)
                 {
-                    strBiblioRecPath = (string)table[strItemRecPath];
+                    strBiblioRecPath = (string)recpath_table[strItemRecPath];
                     if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                     {
                         strBiblioRecPath = GetBiblioRecPath(strItemRecPath);
                         if (string.IsNullOrEmpty(strBiblioRecPath) == false)
-                            table[strItemRecPath] = strBiblioRecPath;
+                            recpath_table[strItemRecPath] = strBiblioRecPath;
                     }
                     if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                     {
@@ -755,7 +765,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (string.IsNullOrEmpty(strBiblioRecPath) == false
                         && string.IsNullOrEmpty(strItemRecPath) == false)
-                        table[strItemRecPath] = strBiblioRecPath;
+                        recpath_table[strItemRecPath] = strBiblioRecPath;
                 }
             }
 
