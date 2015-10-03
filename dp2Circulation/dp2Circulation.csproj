@@ -444,6 +444,7 @@
     <Compile Include="MainForm\FontExtension.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm\GreenProgram.cs" />
     <Compile Include="MainForm\InitialExtension.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -101,7 +101,6 @@ namespace DigitalPlatform.IO
 
             try
             {
-
                 DirectoryInfo di = new DirectoryInfo(strSourceDir);
 
                 if (di.Exists == false)
@@ -117,7 +116,6 @@ namespace DigitalPlatform.IO
                 }
 
                 CreateDirIfNeed(strTargetDir);
-
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
@@ -137,14 +135,12 @@ namespace DigitalPlatform.IO
                     // 复制文件
                     File.Copy(subs[i].FullName, strTargetDir + "\\" + subs[i].Name, true);
                 }
-
             }
             catch (Exception ex)
             {
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
-
 
             return 0;
         }
@@ -313,8 +309,8 @@ namespace DigitalPlatform.IO
 
             // 截取路径1中前面一段进行比较
             string strPart = strNewPath1.Substring(0, strNewPath2.Length);
-            strPart.ToUpper();
-            strNewPath2.ToUpper();
+            strPart = strPart.ToUpper();
+            strNewPath2 = strNewPath2.ToUpper();
 
             if (strPart != strNewPath2)
                 return false;
@@ -341,8 +337,8 @@ namespace DigitalPlatform.IO
             FileSystemInfo fi1 = new DirectoryInfo(strPath1);
             FileSystemInfo fi2 = new DirectoryInfo(strPath2);
 
-            string strNewPath1 = fi1.FullName;
-            string strNewPath2 = fi2.FullName;
+            string strNewPath1 = fi1.FullName.ToUpper();
+            string strNewPath2 = fi2.FullName.ToUpper();
 
             if (strNewPath1.Length != 0)
             {
@@ -357,9 +353,6 @@ namespace DigitalPlatform.IO
 
             if (strNewPath1.Length != strNewPath2.Length)
                 return false;
-
-            strNewPath1.ToUpper();
-            strNewPath2.ToUpper();
 
             if (strNewPath1 == strNewPath2)
                 return true;
@@ -387,8 +380,8 @@ namespace DigitalPlatform.IO
             if (strNewPath1.Length != strNewPath2.Length)
                 return false;
 
-            strNewPath1.ToUpper();
-            strNewPath2.ToUpper();
+            strNewPath1 = strNewPath1.ToUpper();
+            strNewPath2 = strNewPath2.ToUpper();
 
             if (strNewPath1 == strNewPath2)
                 return true;
@@ -471,8 +464,8 @@ namespace DigitalPlatform.IO
 
             // 截取路径1中前面一段进行比较
             string strPart = strNewPathChild.Substring(0, strNewPathParent.Length);
-            strPart.ToUpper();
-            strNewPathParent.ToUpper();
+            strPart = strPart.ToUpper();
+            strNewPathParent = strNewPathParent.ToUpper();
 
             if (strPart != strNewPathParent)
                 return false;

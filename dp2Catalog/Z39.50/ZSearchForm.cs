@@ -3356,7 +3356,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
         {
             int nIndex = -1;
 
-
             // TODO: 如果记录为SUTRS格式，则只能装入XML详窗；
             // 如果记录为MARCXML，则两种窗口都可以装，优选装入MARC详窗
 
@@ -3367,6 +3366,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 if (this.listView_browse.FocusedItem == null)
                     return;
                 nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
+                if (nIndex == -1)
+                {
+                    MessageBox.Show(this, "尚未选定要装入记录窗的事项");
+                    return;
+                }
             }
 
             LoadDetail(nIndex);
@@ -3539,6 +3543,9 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
         // 自动根据情况，装载到MARC或者XML记录窗
         void LoadDetail(int index)
         {
+            if (index < 0)
+                throw new ArgumentException("index 值不应该小于 0","index");
+
             ZConnection connection = this.GetCurrentZConnection();
             if (connection == null)
             {
@@ -3582,7 +3589,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 form.LoadRecord(this, index);
                 return;
             }
-
 
             {
                 MarcDetailForm form = new MarcDetailForm();

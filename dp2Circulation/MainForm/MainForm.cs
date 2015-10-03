@@ -440,6 +440,13 @@ namespace dp2Circulation
             this.DefaultFontString = "微软雅黑, 9pt";
         }
 
+        void RemoveBarcodeFont()
+        {
+            GlobalVars.PrivateFonts.Dispose();
+
+            string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
+            API.RemoveFontResourceA(strFontFilePath);
+        }
 
         void InstallBarcodeFont()
         {
@@ -460,7 +467,7 @@ namespace dp2Circulation
             }
 
             // 
-            string strFontFilePath = PathUtil.MergePath(this.DataDir, "b3901.ttf");
+            string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
             int nRet = API.AddFontResourceA(strFontFilePath);
             if (nRet == 0)
             {
@@ -706,6 +713,8 @@ namespace dp2Circulation
                 // Debug.WriteLine("EnvironmentReport");
                 TryReportPromptLines();
             }
+
+            RemoveBarcodeFont();
 
             if (this.MessageHub != null)
                 this.MessageHub.Destroy();

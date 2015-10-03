@@ -22,6 +22,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using System.ComponentModel;
 using System.Web;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -227,6 +229,10 @@ namespace dp2Circulation
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
         void FirstInitial()
         {
+            string strError = "";
+            int nRet = 0;
+
+
 #if NO
             if (DetectIE() == false)
             {
@@ -288,9 +294,6 @@ namespace dp2Circulation
 
             OpenBackgroundForm();
 
-            string strError = "";
-            int nRet = 0;
-
             {
                 // 2013/6/16
                 this.UserDir = Path.Combine(
@@ -307,7 +310,7 @@ namespace dp2Circulation
 
                 // 启动时在日志中记载当前 dp2circulation 版本号
                 this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
-                
+
 #if NO
                 // 检查 KB????
                 /*
@@ -417,6 +420,19 @@ namespace dp2Circulation
                         MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
                     }
                 }
+                // 2015/10/3
+                strDir = PathUtil.MergePath(this.DataDir, "cfgcache");
+                if (Directory.Exists(strDir) == true)
+                {
+                    nRet = Global.DeleteDataDir(
+                    this,
+                    strDir,
+                    out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
+                    }
+                }
             }
 
 #if NO
@@ -468,7 +484,9 @@ namespace dp2Circulation
             LinkStopToBackgroundForm(true);
 
             // cfgcache
-            nRet = cfgCache.Load(Path.Combine(this.DataDir, "cfgcache.xml"),
+            Debug.Assert(string.IsNullOrEmpty(this.UserDir) == false, "");
+            // 2015/10/3 改在 UserDir 下
+            nRet = cfgCache.Load(Path.Combine(this.UserDir, "cfgcache.xml"),    // this.DataDir
                 out strError);
             if (nRet == -1)
             {
@@ -476,7 +494,7 @@ namespace dp2Circulation
                     MessageBox.Show(strError);
             }
 
-            cfgCache.TempDir = Path.Combine(this.DataDir, "cfgcache");
+            cfgCache.TempDir = Path.Combine(this.UserDir, "cfgcache");  // this.DataDir
             cfgCache.InstantSave = true;
 
             // 2013/4/12
@@ -500,6 +518,9 @@ namespace dp2Circulation
                         "");
                 }
             }
+
+            // this.BeginInvoke(new Action(CopyGreen));
+            Task.Factory.StartNew(() => CopyGreen());
 
             StartPrepareNames(true, true);
 
@@ -575,6 +596,74 @@ namespace dp2Circulation
                 return;
             }
 
+        }
+
+        // 复制出一个绿色安装包
+        void CopyGreen()
+        {
+            int nRet = 0;
+            string strError = "";
+
+            // 本身如果是绿色安装包，没有必要再次复制出绿色安装包
+            if (ApplicationDeployment.IsNetworkDeployed == false)
+                return;
+
+            string strProgramDir = Environment.CurrentDirectory;
+            string strTargetDir = "c:\\dp2circulation";
+
+            if (PathUtil.IsEqual(strProgramDir, strTargetDir) == true)
+                return;
+
+            this.DisplayBackgroundText("正在创建绿色安装包 ...\r\n");
+
+            nRet = GreenProgram.CopyGreen(strProgramDir,
+                this.DataDir,
+                strTargetDir,
+                out strError);
+            if (nRet == -1)
+            {
+                ShowMessageBox("创建备用绿色安装包时出错: " + strError);
+                this.DisplayBackgroundText(strError + "\r\n");
+                // 发送给 dp2003.com
+                string strText = strError;
+                if (string.IsNullOrEmpty(strText) == true)
+                    return;
+
+                strText += "\r\n\r\n===\r\n" + PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
+
+                try
+                {
+                    // 发送报告
+                    nRet = LibraryChannel.CrashReport(
+                        this.GetCurrentUserName() + "@" + this.ServerUID,
+                        "dp2circulation 创建备用绿色安装包时出错",
+                        strText,
+                        out strError);
+                }
+                catch (Exception ex)
+                {
+                    strError = "CrashReport() (创建备用绿色安装包时出错) 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.WriteErrorLog(strError);
+                }
+            }
+            else
+            {
+                GreenProgram.CreateShortcutToDesktop(
+                   "内务绿色",
+                   Path.Combine(strTargetDir, "dp2circulation.exe"),
+                   false);
+                this.DisplayBackgroundText("绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
+            }
+        }
+
+        void ShowMessageBox(string strText)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string>(ShowMessageBox), strText);
+                return;
+            }
+            MessageBox.Show(this, strText);
         }
 
         #region Background Form
@@ -1418,6 +1507,7 @@ Culture=neutral, PublicKeyToken=null
                 // 启动自动更新。m_backgroundForm 延迟关闭。但取消和 stop 的关联
 
                 ClearBackground();
+
                 UpdateApplication();    // 自动探测更新 dp2circulation
             }
             finally

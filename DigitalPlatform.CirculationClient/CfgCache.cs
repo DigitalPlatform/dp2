@@ -105,8 +105,8 @@ namespace DigitalPlatform.CirculationClient
             }
             catch (Exception ex)
             {
-                strError = ExceptionUtil.GetAutoText(ex);
                 _dom.LoadXml("<root/>");	// 虽然返回出错,但是dom是正确初始化了的
+                strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
 
