@@ -401,7 +401,7 @@ namespace DigitalPlatform.Script
                     {
                         strError = "著者字符串 '"+strAuthor+"' 比 '"+strCurrentText+"' 要小，缺乏号码定义";
                         return 0;
-                        result_node = FirstChild(group);
+                        // result_node = FirstChild(group);
                     }
                     break;
                 }

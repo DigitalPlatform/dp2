@@ -1138,7 +1138,7 @@ bool bChanged)
         // 标记删除若干事项
         public int MaskDelete(List<ListViewItem> items)
         {
-            bool bRemoved = false;   // 是否发生过物理删除listview item的情况
+            //bool bRemoved = false;   // 是否发生过物理删除listview item的情况
             int nMaskDeleteCount = 0;
             for (int i = 0; i < items.Count; i++)
             {
@@ -1150,11 +1150,10 @@ bool bChanged)
                 if (state == LineState.Deleted)
                     continue;
 
-
                 // 如果本来就是新增事项，那么彻底从listview中移除
                 if (state == LineState.New)
                 {
-                    bRemoved = true;
+                    //bRemoved = true;
                     this.ListView.Items.Remove(item);
                     continue;
                 }

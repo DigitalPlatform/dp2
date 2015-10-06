@@ -54,7 +54,7 @@ namespace dp2Circulation
         {
             label_param = null;
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             XmlDocument dom = new XmlDocument();
 

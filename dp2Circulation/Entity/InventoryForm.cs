@@ -665,7 +665,7 @@ this.UiState);
                 else
                     strBiblioRecPath = strText;
 #endif
-                int nCol = -1;
+                //int nCol = -1;
                 string strBiblioRecPath = "";
                 // 获得事项所从属的书目记录的路径
                 // return:

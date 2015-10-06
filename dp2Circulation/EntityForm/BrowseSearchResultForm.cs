@@ -260,7 +260,7 @@ namespace dp2Circulation
             // string[] paths = new string[this.listView_records.SelectedItems.Count];
             List<string> path_list = new List<string>();
             List<BiblioInfo> biblioInfo_list = new List<BiblioInfo>();
-            int i = 0;
+            //int i = 0;
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
                 string strPath = item.Text;

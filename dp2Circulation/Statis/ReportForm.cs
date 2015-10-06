@@ -5395,7 +5395,7 @@ out strError);
         void menu_modifyConfig_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             if (this.listView_libraryConfig.SelectedItems.Count == 0)
             {
@@ -7135,7 +7135,7 @@ out strError);
     out string strError)
         {
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             if (this._deleteBiblios.Count == 0)
                 return 0;
@@ -7601,7 +7601,7 @@ out string strError)
         {
             strError = "";
 
-            long lRet = 0;
+            //long lRet = 0;
             int nRet = 0;
 
             string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
@@ -7670,7 +7670,7 @@ out string strError)
         {
             strError = "";
 
-            long lRet = 0;
+            //long lRet = 0;
             int nRet = 0;
 
             string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
@@ -7764,7 +7764,7 @@ out string strError)
         {
             strError = "";
 
-            long lRet = 0;
+            //long lRet = 0;
             int nRet = 0;
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
@@ -7907,7 +7907,7 @@ out strError);
         {
             strError = "";
 
-            long lRet = 0;
+            //long lRet = 0;
             int nRet = 0;
 
             if (String.IsNullOrEmpty(strItemBarcode) == true)
@@ -7960,7 +7960,7 @@ out strError);
         {
             strError = "";
 
-            long lRet = 0;
+            //long lRet = 0;
             int nRet = 0;
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
@@ -8109,7 +8109,7 @@ out strError);
         {
             strError = "";
 
-            long lRet = 0;
+            //long lRet = 0;
             int nRet = 0;
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
@@ -12005,8 +12005,10 @@ MessageBoxDefaultButton.Button1);
     strLastDate);
             SetDailyReportButtonState();
             return;
+#if NO
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         // 根据最大尺寸，一次取得一部分文件名

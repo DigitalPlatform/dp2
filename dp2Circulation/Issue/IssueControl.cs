@@ -1975,11 +1975,10 @@ namespace dp2Circulation
 
             Debug.Assert(this.Items != null, "");
             bool bOldChanged = this.Items.Changed;
-            bool bChanged = false;
+            //bool bChanged = false;
 
             try
             {
-
                 BindingForm dlg = new BindingForm();
 
                 dlg.Text = strTitle;
@@ -2204,8 +2203,8 @@ namespace dp2Circulation
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        if (nRet == 1)
-                            bChanged = true;
+                        //if (nRet == 1)
+                        //    bChanged = true;
 
                         if (String.IsNullOrEmpty(strWarning) == false)
                             MessageBox.Show(this, strWarning);
@@ -2218,17 +2217,9 @@ namespace dp2Circulation
                                 out deleted_ids,
                                 out strError);
                             if (nRet == -1)
-                            {
-                                /*
-                                this.issueitems.Clear();
-                                this.issueitems.AddRange(save_items);
-                                // 刷新显示
-                                this.issueitems.AddToListView(this.ListView);
-                                 * */
                                 goto ERROR1;
-                            }
-                            if (deleted_ids.Count > 0)
-                                bChanged = true;
+                            //if (deleted_ids.Count > 0)
+                            //    bChanged = true;
 
                         }
                     }
@@ -2278,15 +2269,15 @@ namespace dp2Circulation
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        if (deleted_ids.Count > 0)
-                            bChanged = true;
+                        //if (deleted_ids.Count > 0)
+                        //    bChanged = true;
                     }
                 }
             }
             finally
             {
-                if (this.Items.Changed == true)
-                    bChanged = true;
+                //if (this.Items.Changed == true)
+                //    bChanged = true;
 
 #if NO
                 if (this.ContentChanged != null
@@ -2300,7 +2291,6 @@ namespace dp2Circulation
 #endif
                 TriggerContentChanged(bOldChanged, true);
             }
-
 
             return;
         ERROR1:

@@ -26,7 +26,7 @@ namespace dp2Circulation
     {
         // bool Running = false;   // 正在执行运算
 
-        string m_strMainCsDllName = "";
+        //string m_strMainCsDllName = "";
 
 #if NO
         public LibraryChannel Channel = new LibraryChannel();

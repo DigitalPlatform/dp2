@@ -4836,7 +4836,7 @@ out strFingerprint);
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
@@ -4890,7 +4890,7 @@ out strFingerprint);
                 // TODO: 表的标题，创建时间
 
                 int nRowIndex = 3;  // 空出前两行
-                int nColIndex = 1;
+                //int nColIndex = 1;
 
                 int nReaderIndex = 0;
                 foreach (string strBarcode in reader_barcodes)

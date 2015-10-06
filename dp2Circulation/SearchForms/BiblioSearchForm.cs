@@ -5699,7 +5699,7 @@ MessageBoxDefaultButton.Button2);
         void menu_saveToXmlFile_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             if (this.listView_records.SelectedItems.Count == 0)
             {

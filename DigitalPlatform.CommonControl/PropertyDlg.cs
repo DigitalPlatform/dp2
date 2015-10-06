@@ -613,7 +613,7 @@ namespace DigitalPlatform.CommonControl
 
 		private void textBox_property_TextChanged(object sender, System.EventArgs e)
 		{
-			bool bChanged = false;
+			//bool bChanged = false;
 			// 提取已定义的部分
 			ArrayList aDefined = GetDefinedPropertyNames(textBox_property.Text);
 
@@ -622,9 +622,10 @@ namespace DigitalPlatform.CommonControl
 			{
 				string strName = (string)aDefined[i];
 
-				bool bRet = CheckItem(strName, true);
-				if (bRet == true)
-					bChanged = true;
+				//bool bRet = 
+                    CheckItem(strName, true);
+				//if (bRet == true)
+				//	bChanged = true;
 			}
 
 			// uncheck
@@ -648,7 +649,7 @@ namespace DigitalPlatform.CommonControl
 					if (listView_property.Items[j].Checked == false)
 						continue;
 					listView_property.Items[j].Checked = false;
-					bChanged = true;
+					//bChanged = true;
 				}
 
 			}

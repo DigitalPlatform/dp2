@@ -109,7 +109,7 @@ this.BarcodeFilePath);
         private void button_load_loadFromBarcodeFile_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             bool bClearBefore = true;
             if (Control.ModifierKeys == Keys.Control)

@@ -8477,8 +8477,10 @@ namespace dp2Circulation
             m_nCalendarVersion++;
 
             return;
+#if NO
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void toolStripButton_calendar_delete_Click(object sender, EventArgs e)

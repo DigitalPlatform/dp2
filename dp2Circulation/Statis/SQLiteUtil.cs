@@ -2884,7 +2884,7 @@ out string strError)
             strError = "";
 
             StringBuilder text = new StringBuilder(4096);
-            int i = 0;
+            //int i = 0;
             using (SQLiteCommand command = new SQLiteCommand("",
 connection))
             {

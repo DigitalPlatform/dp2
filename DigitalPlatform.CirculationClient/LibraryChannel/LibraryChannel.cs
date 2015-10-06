@@ -7525,7 +7525,7 @@ out strError);
 
             // string strOutputPath = "";
 
-            int nOldTimeout = -1;
+            //int nOldTimeout = -1;
             if (bTailHint == true)
             {
                 /*

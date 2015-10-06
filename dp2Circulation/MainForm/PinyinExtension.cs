@@ -202,7 +202,7 @@ out string strError)
                 m_gcatClient = GcatNew.CreateChannel(this.PinyinServerUrl);
 
             REDO_GETPINYIN:
-                int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
+                //int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
                 string strPinyinXml = "";
                 // return:
                 //      -2  strID验证失败
@@ -270,7 +270,7 @@ out string strError)
                     if (nodeWord.NodeType == XmlNodeType.Text)
                     {
                         SelPinyinDlg.AppendText(ref strPinyin, nodeWord.InnerText);
-                        nStatus = 0;
+                        //nStatus = 0;
                         continue;
                     }
 
@@ -294,7 +294,7 @@ out string strError)
                         if (nodeChar.NodeType == XmlNodeType.Text)
                         {
                             SelPinyinDlg.AppendText(ref strPinyin, nodeChar.InnerText);
-                            nStatus = 0;
+                            //nStatus = 0;
                             continue;
                         }
 
@@ -304,7 +304,7 @@ out string strError)
                         if (String.IsNullOrEmpty(strCharPinyins) == true)
                         {
                             strPinyin += strHanzi;
-                            nStatus = 0;
+                            //nStatus = 0;
                             index++;
                             continue;
                         }
@@ -317,7 +317,7 @@ out string strError)
                                     strCharPinyins,
                                     style)
                                     );
-                            nStatus = 2;
+                            //nStatus = 2;
                             index++;
                             continue;
                         }
@@ -409,7 +409,7 @@ out string strError)
                             if (dlg.DialogResult == DialogResult.Cancel)
                             {
                                 SelPinyinDlg.AppendText(ref strPinyin, strHanzi);
-                                nStatus = 2;
+                                //nStatus = 2;
                                 bNotFoundPinyin = true;
                             }
                             else if (dlg.DialogResult == DialogResult.OK)
@@ -419,7 +419,7 @@ out string strError)
                                     dlg.ResultPinyin,
                                     style)
                                     );
-                                nStatus = 2;
+                                //nStatus = 2;
                             }
                             else
                             {

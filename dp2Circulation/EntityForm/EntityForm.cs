@@ -11633,7 +11633,7 @@ value);
                     out strError);
                 if (nRet == 1)
                 {
-                    bool bOverwrite = false;
+                    //bool bOverwrite = false;
                     if (dlg.RecPath != strTargetRecPath)    // 移动回998$t情况就不询问是否覆盖了，直接选用归并方式
                     {
 #if NO

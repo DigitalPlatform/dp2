@@ -90,8 +90,8 @@ namespace dp2Circulation
             if (this.document != null && bPrinter == true)
                 nHeight = Math.Max(nHeight, this.document.DefaultPageSettings.Bounds.Height);    // this.document.DefaultPageSettings.PaperSize.Height
 
-            bool bLandscape = false;
 #if NO
+            bool bLandscape = false;
             if (label_param != null)
                 bLandscape = label_param.Landscape;
             else 
@@ -106,7 +106,7 @@ namespace dp2Circulation
                 this.AutoScrollMinSize = new Size((int)nHeight, (int)nWidth);
 #endif
 
-                this.AutoScrollMinSize = new Size((int)nWidth, (int)nHeight);
+            this.AutoScrollMinSize = new Size((int)nWidth, (int)nHeight);
         }
 
         /// <summary>

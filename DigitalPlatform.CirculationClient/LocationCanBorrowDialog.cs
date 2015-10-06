@@ -265,7 +265,7 @@ namespace DigitalPlatform.CirculationClient
 
             Debug.Assert(index >= 0 && index <= this.listView_location_list.Items.Count - 1, "");
 
-            bool bChanged = false;
+            //bool bChanged = false;
 
             if (bUp == true)
             {
@@ -280,7 +280,7 @@ namespace DigitalPlatform.CirculationClient
                 this.listView_location_list.Items.Insert(index, item);
                 this.listView_location_list.FocusedItem = item;
 
-                bChanged = true;
+                //bChanged = true;
             }
 
             if (bUp == false)
@@ -295,7 +295,7 @@ namespace DigitalPlatform.CirculationClient
                 this.listView_location_list.Items.Insert(index, item);
                 this.listView_location_list.FocusedItem = item;
 
-                bChanged = true;
+                //bChanged = true;
             }
 
             return;

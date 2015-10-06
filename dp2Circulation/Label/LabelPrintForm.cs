@@ -2096,8 +2096,6 @@ namespace dp2Circulation
                  * */
                 DoPasteTabbedText(strWhole,
                     bInsertBefore);
-
-
                 return;
             }
             else
@@ -3228,8 +3226,10 @@ MessageBoxDefaultButton.Button1);
                 textBox_labelDefFilename_TextChanged(this, new EventArgs());
             }
             return;
+#if NO
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         // TODO: delay

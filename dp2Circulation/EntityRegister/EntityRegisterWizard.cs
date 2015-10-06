@@ -770,7 +770,18 @@ MessageBoxDefaultButton.Button1);
                 XmlNodeList servers = _base.ServersDom.DocumentElement.SelectNodes("server");
                 foreach (XmlElement server in servers)
                 {
+                    Application.DoEvents();
+                    if (this.Progress != null && this.Progress.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
                     AccountInfo account = EntityRegisterBase.GetAccountInfo(server);
+                    if (account == null)
+                    {
+                        strError = "GetAccountInfo() error. server='"+server.OuterXml+"'";
+                        goto ERROR1;
+                    }
                     Debug.Assert(account != null, "");
                     _base.CurrentAccount = account;
 
@@ -1294,7 +1305,28 @@ out strError);
 
         #region 针对 dp2library 服务器的检索
 
-        LibraryChannel _channel = null;
+        // LibraryChannel _channel = null;
+
+        // 正在使用中的 LibraryChannel。当正在进行检索的时候，双击浏览列表装入详细记录，可能会新开 Channel，同时使用的 Channel 多于一个
+        List<LibraryChannel> _channels = new List<LibraryChannel>();
+
+        new void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.Channel != null)
+                this.Channel.Abort();
+
+            if (this._channels != null)
+            {
+                lock (this._channels)
+                {
+                    foreach (LibraryChannel channel in this._channels)
+                    {
+                        if (channel != null)
+                            channel.Abort();
+                    }
+                }
+            }
+        }
 
         // 针对 dp2library 服务器进行检索
         // parameters:
@@ -1347,9 +1379,14 @@ out strError);
                 }
             }
 
-            _channel = _base.GetChannel(account.ServerUrl, account.UserName);
-            _channel.Timeout = new TimeSpan(0, 0, 5);   // 超时值为 5 秒
-            _channel.Idle += _channel_Idle;
+            LibraryChannel current_channel = _base.GetChannel(account.ServerUrl, account.UserName);
+            current_channel.Timeout = new TimeSpan(0, 0, 5);   // 超时值为 5 秒
+            current_channel.Idle += _channel_Idle;
+            lock (this._channels)
+            {
+                this._channels.Add(current_channel);
+            }
+
             try
             {
                 string strMatchStyle = "left";  // BiblioSearchForm.GetCurrentMatchStyle(this.comboBox_matchStyle.Text);
@@ -1386,7 +1423,7 @@ out strError);
 
                 // 准备服务器信息
                 nRet = _base.GetServerInfo(
-                    _channel,
+                    current_channel,
                     account,
                     out server_info,
                     out strError);
@@ -1397,7 +1434,7 @@ out strError);
                     "progress", false);
 
                 string strQueryXml = "";
-                long lRet = _channel.SearchBiblio(Progress,
+                long lRet = current_channel.SearchBiblio(Progress,
                     server_info == null ? "<全部>" : server_info.GetBiblioDbNames(),    // "<全部>",
                     strQueryWord,   // this.textBox_queryWord.Text,
                     1000,
@@ -1438,7 +1475,7 @@ out strError);
                         break;
                     }
 
-                    lRet = _channel.GetSearchResult(
+                    lRet = current_channel.GetSearchResult(
                         this.Progress,
                         null,   // strResultSetName
                         lStart,
@@ -1466,7 +1503,7 @@ out strError);
                     {
                         // 获得书目记录
                         BiblioLoader loader = new BiblioLoader();
-                        loader.Channel = _channel;
+                        loader.Channel = current_channel;
                         loader.Stop = this.Progress;
                         loader.Format = "xml";
                         loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
@@ -1568,9 +1605,14 @@ out strError);
             }
             finally
             {
-                _channel.Idle -= _channel_Idle;
-                _base.ReturnChannel(_channel);
-                _channel = null;
+                lock(this._channels)
+                {
+                    this._channels.Remove(current_channel);
+                }
+
+                current_channel.Idle -= _channel_Idle;
+                _base.ReturnChannel(current_channel);
+                current_channel = null;
                 this.ClearMessage();
             }
 
@@ -2358,8 +2400,7 @@ MessageBoxDefaultButton.Button1);
                 if (string.IsNullOrEmpty(this._biblio.BiblioRecPath) == true
                     && string.IsNullOrEmpty(this._biblio.ServerName) == true)
                 {
-                    // e.Path = e.Path + "@!unknown";
-                    e.Path = e.Path;
+                    // e.Path = e.Path;
                 }
                 else
                 {
@@ -2650,7 +2691,16 @@ MessageBoxDefaultButton.Button1);
                 return 0;
             }
 
-            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            LibraryChannel current_channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            if (current_channel == null)
+            {
+                strError = "GetChannel() error";
+                return -1;
+            }
+            lock(this._channels)
+            {
+                this._channels.Add(current_channel);
+            }
 
             this.Progress.OnStop += new StopEventHandler(this.DoStop);
             //this.Progress.Initial("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
@@ -2673,7 +2723,7 @@ MessageBoxDefaultButton.Button1);
 
                     EntityInfo[] entities = null;
 
-                    long lRet = _channel.GetEntities(
+                    long lRet = current_channel.GetEntities(
              Progress,
              strBiblioRecPath,
              lStart,
@@ -2742,8 +2792,13 @@ MessageBoxDefaultButton.Button1);
                 this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
 
-                _base.ReturnChannel(_channel);
-                _channel = null;
+                lock(this._channels)
+                {
+                    this._channels.Remove(current_channel);
+                }
+
+                _base.ReturnChannel(current_channel);
+                current_channel = null;
                 _currentAccount = null;
             }
         }
@@ -2817,7 +2872,7 @@ MessageBoxDefaultButton.Button1);
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             bool bWarning = false;
             EntityInfo[] errorinfos = null;
@@ -2831,7 +2886,16 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            LibraryChannel current_channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            if (current_channel == null)
+            {
+                strError = "GetChannel() error";
+                return -1;
+            }
+            lock (this._channels)
+            {
+                this._channels.Add(current_channel);
+            }
             try
             {
 
@@ -2843,7 +2907,7 @@ MessageBoxDefaultButton.Button1);
                     int nCurrentCount = Math.Min(nBatch, entities.Length - i * nBatch);
                     EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
 
-                    long lRet = _channel.SetEntities(
+                    long lRet = current_channel.SetEntities(
          Progress,
          strBiblioRecPath,
          entities,
@@ -2875,8 +2939,13 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
-                _base.ReturnChannel(_channel);
-                _channel = null;
+                lock (this._channels)
+                {
+                    this._channels.Remove(current_channel);
+                }
+
+                _base.ReturnChannel(current_channel);
+                current_channel = null;
                 _currentAccount = null;
             }
         }
@@ -3261,7 +3330,16 @@ int nCount)
                 strError = "服务器名 '" + strServerName + "' 没有配置";
                 return -1;
             }
-            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            LibraryChannel current_channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            if (current_channel == null)
+            {
+                strError = "GetChannel() error";
+                return -1;
+            }
+            lock (this._channels)
+            {
+                this._channels.Add(current_channel);
+            }
 
             try
             {
@@ -3271,7 +3349,7 @@ int nCount)
                     strAction = "new";
 
             REDO:
-                long lRet = _channel.SetBiblioInfo(
+                long lRet = current_channel.SetBiblioInfo(
                     Progress,
                     strAction,
                     strPath,
@@ -3287,7 +3365,7 @@ int nCount)
                     strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
                     goto ERROR1;
                 }
-                if (_channel.ErrorCode == ErrorCode.PartialDenied)
+                if (current_channel.ErrorCode == ErrorCode.PartialDenied)
                 {
                     strWarning = "书目记录 '" + strPath + "' 保存成功，但所提交的字段部分被拒绝 (" + strError + ")。请留意刷新窗口，检查实际保存的效果";
                     return 0;
@@ -3299,8 +3377,13 @@ int nCount)
             }
             finally
             {
-                _base.ReturnChannel(_channel);
-                this._channel = null;
+                lock (this._channels)
+                {
+                    this._channels.Remove(current_channel);
+                }
+
+                _base.ReturnChannel(current_channel);
+                current_channel = null;
                 // _currentAccount = null;
             }
         }
@@ -3562,7 +3645,16 @@ int nCount)
                 strError = "服务器名 '" + strServerName + "' 没有配置";
                 return -1;
             }
-            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            LibraryChannel current_channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+            if (current_channel == null)
+            {
+                strError = "GetChannel() error";
+                return -1;
+            }
+            lock (this._channels)
+            {
+                this._channels.Add(current_channel);
+            }
 
             try
             {
@@ -3576,7 +3668,7 @@ int nCount)
 
                 string strOutputPath = "";
             REDO:
-                long lRet = _channel.SetBiblioInfo(
+                long lRet = current_channel.SetBiblioInfo(
                     Progress,
                     strAction,
                     strPath,
@@ -3599,8 +3691,13 @@ int nCount)
             }
             finally
             {
-                _base.ReturnChannel(_channel);
-                this._channel = null;
+                lock (this._channels)
+                {
+                    this._channels.Remove(current_channel);
+                }
+
+                _base.ReturnChannel(current_channel);
+                current_channel = null;
                 // _currentAccount = null;
             }
         }

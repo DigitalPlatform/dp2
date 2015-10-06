@@ -379,7 +379,7 @@ MessageBoxDefaultButton.Button1);
                 e.UserName = this.textBox_server_userName.Text;
                 e.Password = this.textBox_server_password.Text;
 
-                bool bIsReader = false;
+                //bool bIsReader = false;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录

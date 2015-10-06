@@ -101,7 +101,7 @@ namespace DigitalPlatform.dp2.Statis
 
         public int CompareObject(object o1, object o2)
         {
-            int nRet = 0;
+            //int nRet = 0;
             Int64 n1 = 0;
             Int64 n2 = 0;
             string s1 = null;

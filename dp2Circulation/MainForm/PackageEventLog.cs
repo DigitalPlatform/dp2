@@ -217,7 +217,7 @@ namespace dp2Circulation
         // 获得环境描述字符串
         public static string GetEnvironmentDescription()
         {
-            string strError = "";
+            //string strError = "";
 
             StringBuilder text = new StringBuilder();
             text.Append("信息创建时间:\t" + DateTime.Now.ToString() + "\r\n");

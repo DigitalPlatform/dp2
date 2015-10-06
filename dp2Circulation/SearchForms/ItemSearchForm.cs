@@ -1150,7 +1150,6 @@ this.dp2QueryControl1.GetSaveString());
 
             bool bPushFillingBrowse = this.PushFillingBrowse;
 
-
             // 装入浏览格式
             for (; ; )
             {
@@ -7481,8 +7480,8 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
-        long m_lLoaded = 0; // 本次已经装入浏览框的条数
-        long m_lHitCount = 0;   // 检索命中结果条数
+        //long m_lLoaded = 0; // 本次已经装入浏览框的条数
+        //long m_lHitCount = 0;   // 检索命中结果条数
 
 
         /// <summary>
@@ -7546,8 +7545,8 @@ Keys keyData)
                 ListViewUtil.ClearSortColumns(this.listView_records);
             }
 
-            this.m_lHitCount = 0;
-            this.m_lLoaded = 0;
+            //this.m_lHitCount = 0;
+            //this.m_lLoaded = 0;
             stop.HideProgress();
 
             this.label_message.Text = "";
@@ -7560,7 +7559,6 @@ Keys keyData)
             this.EnableControls(false);
             try
             {
-
                 // string strBrowseStyle = "id,cols";
                 string strOutputStyle = "";
                 if (bOutputKeyCount == true)
@@ -7616,7 +7614,6 @@ Keys keyData)
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
-
 
                 this.EnableControls(true);
             }

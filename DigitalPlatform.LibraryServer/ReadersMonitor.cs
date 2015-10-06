@@ -284,6 +284,11 @@ namespace DigitalPlatform.LibraryServer
 
             AppendResultText("循环结束。共处理 " + nTotalRecCount.ToString() + " 条记录。\r\n");
             SetProgressText("循环结束。共处理 " + nTotalRecCount.ToString() + " 条记录。");
+            
+            // 2015/10/3
+            // 让前端激活的任务，只执行一次。如果配置了每日激活时间，后面要再执行，除非是每日激活时间已到
+            if (startinfo.Start == "activate")
+                startinfo.Start = "";
 
             {
                 Debug.Assert(this.App != null, "");
@@ -294,7 +299,6 @@ namespace DigitalPlatform.LibraryServer
                     strLastTime);
                 string strErrorText = (bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + "结束。共处理记录 " + nTotalRecCount.ToString() + " 个。";
                 this.App.WriteErrorLog(strErrorText);
-
             }
 
             return;

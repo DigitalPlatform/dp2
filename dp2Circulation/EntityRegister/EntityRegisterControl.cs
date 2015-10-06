@@ -1218,7 +1218,7 @@ int nCount)
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             bool bWarning = false;
             EntityInfo[] errorinfos = null;
@@ -1617,7 +1617,7 @@ int nCount)
                 return;
             }
 
-            int nWaitingCount = 0;
+            //int nWaitingCount = 0;
             StringBuilder text = new StringBuilder(256);
             foreach (RegisterLine line in this.Items)
             {
@@ -2337,8 +2337,8 @@ MessageBoxDefaultButton.Button1);
             // 工作线程每一轮循环的实质性工作
             public override void Worker()
             {
-                string strError = "";
-                int nRet = 0;
+                //string strError = "";
+                //int nRet = 0;
 
                 this.m_lock.AcquireWriterLock(m_nLockTimeout);
                 try

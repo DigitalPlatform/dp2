@@ -915,7 +915,7 @@ namespace dp2Circulation
             ContextMenuStrip contextMenu = new ContextMenuStrip();
 
             ToolStripMenuItem menuItem = null;
-            ToolStripMenuItem subMenuItem = null;
+            //ToolStripMenuItem subMenuItem = null;
             ToolStripSeparator menuSepItem = null;
 
             DpRow selected_row = null;

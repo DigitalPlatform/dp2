@@ -970,7 +970,6 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                         return;
                     }
                     break;
-
                 case (char)Keys.Enter:
                     {
                         if (this.MarcEditor.EnterAsAutoGenerate == true)

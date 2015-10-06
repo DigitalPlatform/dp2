@@ -1632,7 +1632,7 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
             errors = new List<BiblioError>();
-            int nRet = 0;
+            //int nRet = 0;
 
             MarcRecord record = new MarcRecord(this.GetMarc());
 

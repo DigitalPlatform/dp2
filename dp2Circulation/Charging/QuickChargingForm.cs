@@ -2168,7 +2168,7 @@ false);
             ContextMenuStrip contextMenu = new ContextMenuStrip();
 
             ToolStripMenuItem menuItem = null;
-            ToolStripMenuItem subMenuItem = null;
+            //ToolStripMenuItem subMenuItem = null;
             ToolStripSeparator menuSepItem = null;
 
             DpRow selected_row = null;
@@ -3303,15 +3303,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 }
             }
 
-            bool bChanged = false;
+            //bool bChanged = false;
             if (remove_tasks.Count > 0)
             {
                 if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                     throw new LockException("锁定尝试中超时");
                 try
                 {
-                    if (this._tasks.Count != nOldCount)
-                        bChanged = true;
+                    //if (this._tasks.Count != nOldCount)
+                    //    bChanged = true;
 
                     foreach (ChargingTask task in remove_tasks)
                     {

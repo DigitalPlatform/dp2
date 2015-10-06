@@ -131,7 +131,7 @@ namespace DigitalPlatform.LibraryServer
             if (collection == null)
                 return;
 
-            var query = Query.Matches("BiblioRecPath", BsonRegularExpression.Create("^" + strBiblioDbName + "/\\d+"));
+            var query = Query.Matches("BiblioRecPath", new BsonRegularExpression("^" + strBiblioDbName + "/\\d+"));
             collection.Remove(query);
         }
 

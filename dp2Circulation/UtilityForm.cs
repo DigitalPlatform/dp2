@@ -611,7 +611,7 @@ namespace dp2Circulation
         private void button_health_speedTest_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = 0;
+            //int nRet = 0;
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);

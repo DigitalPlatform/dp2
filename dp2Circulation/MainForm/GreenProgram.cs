@@ -156,7 +156,8 @@ namespace dp2Circulation
             }
         }
 #endif
-
+        // http://stackoverflow.com/questions/234231/creating-application-shortcut-in-a-directory
+        // 在桌面上创建快捷方式
         public static void CreateShortcutToDesktop(
             string linkName,
             string strAppPath,

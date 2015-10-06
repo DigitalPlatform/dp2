@@ -6591,7 +6591,7 @@ MessageBoxDefaultButton.Button2);
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             if (items.Count == 0)
             {

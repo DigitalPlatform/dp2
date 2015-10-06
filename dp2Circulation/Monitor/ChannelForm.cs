@@ -96,7 +96,7 @@ namespace dp2Circulation
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             bool bIpCount = (strStyle == "ip-count");
 

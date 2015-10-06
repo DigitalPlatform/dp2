@@ -713,8 +713,8 @@ namespace dp2Circulation
             if (this.m_nInDropDown > 0)
                 return;
 
-            string strTableName = "";
 #if NO
+            string strTableName = "";
             if (_stateActionCfg != null)
                 strTableName = _stateActionCfg.List;
 #endif

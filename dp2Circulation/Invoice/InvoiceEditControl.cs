@@ -20,11 +20,11 @@ namespace dp2Circulation.Invoice
     /// </summary>
     internal partial class InvoiceEditControl : UserControl
     {
-        XmlDocument RecordDom = null;
+        //XmlDocument RecordDom = null;
 
-        bool m_bChanged = false;
+        //bool m_bChanged = false;
 
-        bool m_bInInitial = true;   // 是否正在初始化过程之中
+        //bool m_bInInitial = true;   // 是否正在初始化过程之中
 
         Color ColorChanged = Color.Yellow; // 表示内容改变过的颜色
         Color ColorDifference = Color.Blue; // 表示内容有差异的颜色

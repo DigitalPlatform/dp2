@@ -681,6 +681,20 @@ out string strError)
             return -1;
         }
 
+        public static bool TryParseRfc1123DateTimeString(string strTime, out DateTime time)
+        {
+            try
+            {
+                time = FromRfc1123DateTimeString(strTime);
+                return true;
+            }
+            catch
+            {
+                time = new DateTime(0);
+                return false;
+            }
+        }
+
         // 把字符串转换为DateTime对象
         // 注意返回的是GMT时间
         // 注意可能抛出异常

@@ -749,7 +749,7 @@ namespace dp2Circulation
         void menu_modifyFormat_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             if (this.listView_lineFormats.SelectedItems.Count == 0)
             {

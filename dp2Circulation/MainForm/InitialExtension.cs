@@ -3314,7 +3314,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             string strError = "";
-            int nRet = 0;
+            //int nRet = 0;
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在初始化预约到书库属性列表 ...");
@@ -3689,7 +3689,7 @@ Culture=neutral, PublicKeyToken=null
 
             // this.Update();
 
-            string strError = "";
+            //string strError = "";
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在初始化实用库属性列表 ...");
