@@ -24,6 +24,8 @@ using System.ComponentModel;
 using System.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
+using Ionic.Zip;
 
 namespace dp2Circulation
 {
@@ -32,7 +34,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
-        #region 自动更新
+        #region ClickOnce 自动更新
 
         enum UpdateState
         {
@@ -44,7 +46,7 @@ namespace dp2Circulation
 
         UpdateState _updateState = UpdateState.None;
 
-        void CancelUpdateApplication()
+        void CancelUpdateClickOnceApplication()
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
@@ -56,7 +58,7 @@ namespace dp2Circulation
             }
         }
 
-        private void UpdateApplication()
+        private void BeginUpdateClickOnceApplication()
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
@@ -181,6 +183,299 @@ namespace dp2Circulation
             }
 #endif
             this.DisplayBackgroundText("dp2circulation 已经成功更新。重启可立即使用新版本。\r\n");
+        }
+
+        #endregion
+
+        #region 绿色安装包 自动更新
+
+        void ReportError(string strTitle,
+            string strError)
+        {
+            // 发送给 dp2003.com
+            string strText = strError;
+            if (string.IsNullOrEmpty(strText) == true)
+                return;
+
+            strText += "\r\n\r\n===\r\n" + PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
+
+            try
+            {
+                // 发送报告
+                int nRet = LibraryChannel.CrashReport(
+                    this.GetCurrentUserName() + "@" + this.ServerUID,
+                    strTitle,
+                    strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "CrashReport() (" + strTitle + ") 出错: " + strError;
+                    this.WriteErrorLog(strError);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() (" + strTitle + ") 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strError);
+            }
+        }
+
+        MyWebClient _webClient = null;
+        System.Net.WebRequest _webRequest = null;
+
+        // TODO: 可以精确指定哪些 .zip 文件更新了
+        void StartGreenUtility()
+        {
+#if NO
+            string strError = "";
+
+            // 将 greenutility.zip 展开到 c:\dp2circulation_temp
+            string strZipFileName = "c:\\dp2circulation\\greenutility.zip";
+            string strTargetDir = "c:\\~dp2circulation_greenutility";
+            try
+            {
+                using (ZipFile zip = ZipFile.Read(strZipFileName))
+                {
+                    foreach (ZipEntry e in zip)
+                    {
+                        e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "展开文件 '"+strZipFileName+"' 到目录 '"+strTargetDir+"' 时出现异常" + ex.Message;
+                ReportError("dp2circulation 展开 greenutility.zip 时出错", strError);
+                return;
+            }
+#endif
+
+            string strExePath = "c:\\~dp2circulation_greenutility\\greenutility.exe";
+            string strParameters = "-action:install -source:"
+                + "c:\\dp2circulation"  // source 是指存储了 .zip 文件的目录
+                + " -target:c:\\dp2circulation" // target 是指最终要安装的目录 
+                + " -wait:dp2circulation.exe";
+            System.Diagnostics.Process.Start(strExePath, strParameters);
+        }
+
+        void BeginUpdateGreenApplication()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed == false)
+                Task.Factory.StartNew(() => GreenUpdate());
+        }
+
+        void CancelUpdateGreenApplication()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed == false)
+            {
+                WebClient temp_webclient = this._webClient;
+                if (temp_webclient != null)
+                    temp_webclient.CancelAsync();
+
+                WebRequest temp_webrequest = this._webRequest;
+                if (temp_webrequest != null)
+                    temp_webrequest.Abort();
+            }
+        }
+
+        void GreenUpdate()
+        {
+            int nRet = 0;
+            string strError = "";
+
+            // 希望下载的文件
+            List<string> filenames = new List<string>() {
+                "greenutility.zip",
+                "app.zip",
+                "data.zip"};
+            // 发现更新了并下载的文件
+            List<string> updated_filenames = new List<string>();
+
+            foreach(string filename in filenames)
+            {
+                string strUrl = "http://dp2003.com/dp2circulation/v2/" + filename;
+                string strLocalFileName = "c:\\dp2circulation\\" + filename;
+
+                if (File.Exists(strLocalFileName) == true)
+                {
+                    // 判断 http 服务器上一个文件是否已经更新
+                    // return:
+                    //      -1  出错
+                    //      0   没有更新
+                    //      1   已经更新
+                    nRet = IsServerFileUpdated(strUrl,
+                        File.GetLastWriteTimeUtc(strLocalFileName),
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        updated_filenames.Add(filename);
+                }
+                else
+                    updated_filenames.Add(filename);
+
+                if (updated_filenames.IndexOf(filename) != -1)
+                {
+                    nRet = DownloadFile(strUrl,
+                        strLocalFileName,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        goto ERROR1;
+                    }
+                }
+            }
+
+            if (updated_filenames.IndexOf("greenutility.zip") != -1)
+            {
+                // 将 greenutility.zip 展开到 c:\dp2circulation_temp
+                string strZipFileName = "c:\\dp2circulation\\greenutility.zip";
+                string strTargetDir = "c:\\~dp2circulation_greenutility";
+                try
+                {
+                    using (ZipFile zip = ZipFile.Read(strZipFileName))
+                    {
+                        foreach (ZipEntry e in zip)
+                        {
+                            e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "展开文件 '" + strZipFileName + "' 到目录 '" + strTargetDir + "' 时出现异常" + ex.Message;
+                    // 删除文件，以便下次能重新下载和展开
+                    try
+                    {
+                        File.Delete(Path.Combine(strTargetDir, "greenutility.zip"));
+                    }
+                    catch
+                    {
+
+                    }
+                    ReportError("dp2circulation 展开 greenutility.zip 时出错", strError);
+                    return;
+                }
+            }
+
+            // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
+            _updatedGreenZipFileNames = updated_filenames;
+            return;
+        ERROR1:
+            ShowMessageBox(strError);
+            ReportError("dp2circulation GreenUpdate() 出错", strError);
+        }
+
+        // 已经完成更新的纯 .zip 文件名
+        List<string> _updatedGreenZipFileNames = null;
+
+        // 判断 http 服务器上一个文件是否已经更新
+        // return:
+        //      -1  出错
+        //      0   没有更新
+        //      1   已经更新
+        int IsServerFileUpdated(string strUrl,
+            DateTime local_lastmodify,
+            out string strError)
+        {
+            strError = "";
+            _webRequest = System.Net.WebRequest.Create(strUrl);
+            _webRequest.Method = "HEAD";
+            _webRequest.Timeout = 5000;
+            try
+            {
+                var response = _webRequest.GetResponse() as HttpWebResponse;
+                string strLastModified = response.GetResponseHeader("Last-Modified");
+                if (string.IsNullOrEmpty(strLastModified) == true)
+                {
+                    strError = "header 中无法获得 Last-Modified 值";
+                    return -1;
+                }
+                DateTime time;
+                if (DateTimeUtil.TryParseRfc1123DateTimeString(strLastModified, out time) == false)
+                {
+                    strError = "从响应中取出的 Last-Modified 字段值 '"+strLastModified+"' 格式不合法";
+                    return -1;
+                }
+                if (time > local_lastmodify)
+                    return 1;
+                return 0;
+            }
+            catch (WebException ex)
+            {
+                var response = ex.Response as HttpWebResponse;
+                if (response != null)
+                {
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        strError = ex.Message;
+                        return -1;
+                    }
+                }
+                strError = ex.Message;
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+            finally
+            {
+                _webRequest = null;
+            }
+            return 0;
+        }
+
+        // 从 http 服务器下载一个文件
+        // 阻塞式
+        int DownloadFile(string strUrl,
+    string strLocalFileName,
+    out string strError)
+        {
+            strError = "";
+
+            if (_webClient == null)
+            {
+                _webClient = new MyWebClient();
+                _webClient.Timeout = 5000;
+                _webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+            }
+
+            // TODO: 先下载到临时文件，然后复制到目标文件
+            try
+            {
+                _webClient.DownloadFile(new Uri(strUrl, UriKind.Absolute), strLocalFileName);
+            }
+            catch (WebException ex)
+            {
+                if (ex.Status == WebExceptionStatus.ProtocolError)
+                {
+                    var response = ex.Response as HttpWebResponse;
+                    if (response != null)
+                    {
+                        if (response.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            strError = ex.Message;
+                            return -1;
+                        }
+                    }
+                }
+
+                strError = ex.Message;
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+            finally
+            {
+                _webClient = null;
+            }
+
+            return 0;
         }
 
         #endregion
@@ -625,6 +920,8 @@ namespace dp2Circulation
                 ShowMessageBox("创建备用绿色安装包时出错: " + strError);
                 this.DisplayBackgroundText(strError + "\r\n");
                 // 发送给 dp2003.com
+                ReportError("dp2circulation 创建备用绿色安装包时出错", strError);
+#if NO
                 string strText = strError;
                 if (string.IsNullOrEmpty(strText) == true)
                     return;
@@ -645,6 +942,7 @@ namespace dp2Circulation
                     strError = "CrashReport() (创建备用绿色安装包时出错) 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
                     this.WriteErrorLog(strError);
                 }
+#endif
             }
             else
             {
@@ -1508,7 +1806,9 @@ Culture=neutral, PublicKeyToken=null
 
                 ClearBackground();
 
-                UpdateApplication();    // 自动探测更新 dp2circulation
+                BeginUpdateClickOnceApplication();    // 自动探测更新 dp2circulation
+
+                BeginUpdateGreenApplication(); // 自动进行绿色更新
             }
             finally
             {

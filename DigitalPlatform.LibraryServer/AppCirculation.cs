@@ -17995,12 +17995,10 @@ Value data: HEX 0x1
                 Page.Response.AddHeader("Content-Length", strSize);
             }
 
-
             if (Page.Response.IsClientConnected == false)
                 return -1;
 
             // 传输数据
-
             lRet = channel.GetRes(
                 strPath,
                 Page.Response.OutputStream,
@@ -18018,11 +18016,8 @@ Value data: HEX 0x1
                 return -1;
             }
 
-
             return 1;
         }
-
-
     }
 
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]

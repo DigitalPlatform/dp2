@@ -674,7 +674,8 @@ namespace dp2Circulation
                 }
             }
 
-            CancelUpdateApplication();
+            CancelUpdateClickOnceApplication();
+            CancelUpdateGreenApplication();
         }
 
         void TryReportPromptLines()
@@ -797,6 +798,9 @@ namespace dp2Circulation
 
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
+
+            if (this._updatedGreenZipFileNames != null && this._updatedGreenZipFileNames.Count > 0)
+                StartGreenUtility();
         }
 
 #if NO
@@ -7898,7 +7902,7 @@ Keys keyData)
 
         private void menuItem_updateDp2circulation_Click(object sender, EventArgs e)
         {
-            UpdateApplication();
+            BeginUpdateClickOnceApplication();
         }
     }
 

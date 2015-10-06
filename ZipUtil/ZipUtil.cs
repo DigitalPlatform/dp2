@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 
 using Ionic.Zip;
+using System.Diagnostics;
 
 namespace ZipUtil
 {
@@ -15,6 +16,8 @@ namespace ZipUtil
     ///    这种用法压缩目录成为一个 .zip 文件
     /// ZipUtil directory zipfilename -t
     ///    这种用法要先检测目录中的文件相对于已经存在的 .zip 文件内容是否有变化，如果没有变化就不进行重新压缩了。这种特性，对于 dp2Installer 项目使用批处理命令创建和更新 .zip 文件非常有用，因为如果内容实质上没有变化但 .zip 文件也重新压缩的话，会让 dp2Installer 频繁进行不必要的升级提示。dp2Installer 是根据 .zip 文件的修改时间和尺寸来感知变化的
+    ///    
+    /// -b 参数表示 .zip 文件内的路径不包含目录名这一级
     /// </summary>
     class ZipUtil
     {
@@ -50,11 +53,17 @@ namespace ZipUtil
             string strZipFileName = filenames[1];
 
             bool bDetect = options.IndexOf("-t") != -1; // 是否需要预先探测 .zip 内容变化
+            bool bBase = options.IndexOf("-b") != -1; //  .zip 中文件路径将会少了目录名这一级
 
             int nCount = 0;
 
             string strError = "";
             int nRet = 0;
+
+            nRet = GetFullPath(ref strDirectory, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
             if (bDetect == true && File.Exists(strZipFileName) == true)
             {
                 string strTempFileName = Path.GetTempFileName();
@@ -62,6 +71,7 @@ namespace ZipUtil
                 {
                     // 先压缩为一个临时文件
                     nRet = CompressDirectory(strDirectory,
+                        bBase ? strDirectory : Path.GetDirectoryName(strDirectory),
         strTempFileName,
         Encoding.UTF8,
         out strError);
@@ -99,6 +109,7 @@ namespace ZipUtil
             else
             {
                 nRet = CompressDirectory(strDirectory,
+                    bBase ? strDirectory : Path.GetDirectoryName(strDirectory),
                     strZipFileName,
                     Encoding.UTF8,
                     out strError);
@@ -232,8 +243,34 @@ namespace ZipUtil
             }
         }
 
+        static int GetFullPath(ref string strDirectory, out string strError)
+        {
+            strError = "";
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
+                if (di.Exists == false)
+                {
+                    strError = "directory '" + strDirectory + "' not exist";
+                    return -1;
+                }
+                strDirectory = di.FullName;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 压缩一个目录到 .zip 文件
+        // parameters:
+        //      strBase 在 .zip 文件中的文件名要从全路径中去掉的前面部分
         static int CompressDirectory(
             string strDirectory,
+            string strBase,
             string strZipFileName,
             Encoding encoding,
             out string strError)
@@ -273,14 +310,15 @@ namespace ZipUtil
             if (filenames.Count == 0)
                 return 0;
 
-            string strHead = Path.GetDirectoryName(strDirectory);
+            // string strHead = Path.GetDirectoryName(strDirectory);
             // Console.WriteLine("head=["+strHead+"]");
 
             using (ZipFile zip = new ZipFile(encoding))
             {
                 foreach (string filename in filenames)
                 {
-                    string strShortFileName = filename.Substring(strHead.Length + 1);
+                    // string strShortFileName = filename.Substring(strHead.Length + 1);
+                    string strShortFileName = filename.Substring(strBase.Length + 1);
                     string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);
                     zip.AddFile(filename, directoryPathInArchive);
                 }
