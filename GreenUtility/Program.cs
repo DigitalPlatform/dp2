@@ -4,16 +4,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using System.Xml;
 
 /*
  * 制作和解压绿色更新安装包的实用工具程序
- * 用法： greenutility -action:xxx -source:xxxxx -target:xxxxx -wait:xxxx
+ * 用法： greenutility -action:xxx -source:xxxxx -target:xxxxx -wait:xxxx -files:xxxx
  * 源目录内应该有 *.csproj 文件；打包后形成的 .zip 文件会被放到目标目录内
  * action 可用值有 build install
  * wait 是一个 .exe 的纯文件名，例如 dp2circulation.exe
+ * files 要安装的 .zip 文件名。纯文件名，逗号间隔的字符串
  * */
 namespace GreenUtility
 {
@@ -26,12 +31,13 @@ namespace GreenUtility
             string strError = "";
             int nRet = 0;
 
-            Debug.Assert(false, "");
+            // Debug.Assert(false, "");
 
             string strAction = "";
             string strSourceDir = "";
             string strTargetDir = "";
             string strWaitExe = ""; // 要等待这个 .exe 进程退出才能进行安装操作
+            string strFiles = "";   // 安装那些 .zip 文件。纯文件名列表
 
             foreach(string arg in args)
             {
@@ -43,6 +49,8 @@ namespace GreenUtility
                     strAction = arg.Substring("-action:".Length).ToLower();
                 if (arg.StartsWith("-wait:") == true)
                     strWaitExe = arg.Substring("-wait:".Length).ToLower();
+                if (arg.StartsWith("-files:") == true)
+                    strFiles = arg.Substring("-files:".Length).ToLower();
             }
 
             if (string.IsNullOrEmpty(strSourceDir) == true)
@@ -56,6 +64,9 @@ namespace GreenUtility
                 strError = "缺乏 -target:xxxx 参数";
                 goto ERROR1;
             }
+
+            if (string.IsNullOrEmpty(strFiles) == true)
+                strFiles = "app.zip,data.zip";  // 缺省值
 
             string strTempDir = "c:\\~dp2circulation_temp_file";
             CreateDirIfNeed(strTempDir);
@@ -80,18 +91,38 @@ namespace GreenUtility
                 return;
             }
 
+            var wi = WindowsIdentity.GetCurrent();
+            var wp = new WindowsPrincipal(wi);
+
+            bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
+
+
             if (strAction == "install")
             {
+                Console.WriteLine("*** GreenUtility.exe 绿色安装工具 ***");
+
                 if (string.IsNullOrEmpty(strWaitExe) == false)
                 {
+                    Console.WriteLine("等待 " + strWaitExe + " 结束 ...");
 
                     bool bRet = WaitProcessEnd(strWaitExe, new TimeSpan(0, 0, 10));
                     if (bRet == false)
                     {
-                        strError = "等待 10 秒后进程 "+strWaitExe+" 依然没有退出。放弃 install";
-                        goto ERROR1;
+                        if (runAsAdmin == false)
+                        {
+                            //strError = "等待 10 秒后进程 " + strWaitExe + " 依然没有退出。放弃 install";
+                            //goto ERROR1;
+
+                            // 如果此法失败，则尝试用管理员权限进行安装
+                            if (RestartAsAdministrator() == false)
+                                goto ERROR1;
+                            return;
+                        }
                     }
                 }
+
+#if NO
+
                 // strTargetDir 一般为 c:\dp2circulation
 
                 string strNewDir = strTargetDir + "_new";
@@ -100,6 +131,8 @@ namespace GreenUtility
                 // *** 将 c:\dp2circulation 目录中的全部文件，复制到 c:\dp2circulation_new 中
                 if (Directory.Exists(strTargetDir) == true)
                 {
+                    Console.WriteLine("复制 "+strTargetDir+" 到 "+strNewDir+" ...");
+
                     // app.zip 和 data.zip 不要复制
                     // return:
                     //      -1  出错
@@ -114,6 +147,7 @@ namespace GreenUtility
 
                 // *** 将 app.zip 和 data.zip 展开覆盖到 c:\dp2circulation_new 目录
                 string strZipFileName = Path.Combine(strSourceDir, "app.zip");
+                Console.WriteLine("展开 " + strZipFileName + " 到 " + strNewDir + " ...");
                 nRet = ExtractFile(strZipFileName,
                     strNewDir,
                     out strError);
@@ -121,6 +155,7 @@ namespace GreenUtility
                     goto ERROR1;
 
                 strZipFileName = Path.Combine(strSourceDir, "data.zip");
+                Console.WriteLine("展开 " + strZipFileName + " 到 " + strNewDir + " ...");
                 nRet = ExtractFile(strZipFileName,
                     strNewDir,
                     out strError);
@@ -133,6 +168,8 @@ namespace GreenUtility
                 // 如果改名失败，则终止
                 try
                 {
+                    Console.WriteLine("将目录 " + strTargetDir + " 改名为 " + strOldDir + " ...");
+
                     Directory.Move(strTargetDir, strOldDir);
                 }
                 catch (Exception ex)
@@ -145,6 +182,8 @@ namespace GreenUtility
                 // 如果改名失败，需将上一步 Undo，然后终止
                 try
                 {
+                    Console.WriteLine("将目录 " + strNewDir + " 改名为 " + strTargetDir + " ...");
+
                     Directory.Move(strNewDir, strTargetDir);
                 }
                 catch (Exception ex)
@@ -153,8 +192,43 @@ namespace GreenUtility
                     strError = "将目录 " + strNewDir + " 改名为 " + strTargetDir + " 时出错: " + ex.Message;
                     goto ERROR1;
                 }
+#endif
+                if (runAsAdmin == false)
+                {
+                    // 安装软件。用目录改名法
+                    nRet = Install_1(
+                        strSourceDir,
+                        strTargetDir,
+                        strFiles,
+                        strWaitExe,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // 如果此法失败，则尝试用管理员权限进行安装
+                        if (RestartAsAdministrator() == false)
+                            goto ERROR1;
+                    }
+                }
+                else
+                {
+                    // 安装软件。用 MoveFileEx 法
+                    // return:
+                    //      -1  出错
+                    //      0   成功。不需要 reboot
+                    //      1   成功。需要 reboot
+                    nRet = Install_2(
+            strSourceDir,
+            strTargetDir,
+            strFiles,
+            strWaitExe,
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        MessageBox.Show("dp2circulation 安装复制文件已经完成。请重启 Windows，以完成安装");
+                }
 
-                Console.WriteLine("安装成功");
+                Console.WriteLine("升级安装成功");
                 return;
             }
             return;
@@ -162,12 +236,269 @@ namespace GreenUtility
             Console.WriteLine(strError);
         }
 
+        static bool RestartAsAdministrator()
+        {
+            var wi = WindowsIdentity.GetCurrent();
+            var wp = new WindowsPrincipal(wi);
+
+            bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
+
+            if (!runAsAdmin)
+            {
+                // It is not possible to launch a ClickOnce app as administrator directly,
+                // so instead we launch the app as administrator in a new process.
+                var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
+
+                // The following properties run the new process as administrator
+                processInfo.UseShellExecute = true;
+                processInfo.Verb = "runas";
+                string [] args = Environment.GetCommandLineArgs();
+                if (args.Length > 1)
+                {
+                    string[] parameters = new string[args.Length - 1];
+                    Array.Copy(args, 1, parameters, 0, parameters.Length);
+                    processInfo.Arguments = string.Join(" ", parameters);
+                }
+
+                // Start the new process
+                try
+                {
+                    Process.Start(processInfo);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("GreenUtility 无法运行。\r\n\r\n因为安装复制文件的需要，必须在 Administrator 权限下才能运行");
+                    return false;
+                }
+
+                // Shut down the current process
+                // Application.Exit();
+            }
+
+            return true;
+        }
+
+        // 将目录路径变为临时形态。例如，将 c:\dp2circulation_old 变为 c:\~dp2circulation_old
+        static void MakeTempStyle(ref string strPath)
+        {
+            strPath = Path.Combine(Path.GetDirectoryName(strPath),
+                "~" + Path.GetFileName(strPath));
+        }
+
+        // 安装软件。用目录改名法
+        static int Install_1(
+            string strSourceDir,
+            string strTargetDir,
+            string strFiles,
+            string strWaitExe,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // strTargetDir 一般为 c:\dp2circulation
+
+            string strNewDir = strTargetDir + "_new";
+            string strOldDir = strTargetDir + "_old";
+
+            MakeTempStyle(ref strNewDir);
+            MakeTempStyle(ref strOldDir);
+
+            // *** 将 c:\dp2circulation 目录中的全部文件，复制到 c:\dp2circulation_new 中
+            if (Directory.Exists(strTargetDir) == true)
+            {
+                Console.WriteLine("复制 " + strTargetDir + " 到 " + strNewDir + " ...");
+
+                // app.zip 和 data.zip 不要复制
+                // return:
+                //      -1  出错
+                //      >=0 复制的文件总数
+                nRet = CopyDirectory(strTargetDir,
+                    strNewDir,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // *** 将 app.zip 和 data.zip 展开覆盖到 c:\dp2circulation_new 目录
+            string[] files = strFiles.Split(new char[] { ',' });
+            foreach (string file in files)
+            {
+                string strZipFileName = Path.Combine(strSourceDir, file);
+                Console.WriteLine("展开 " + strZipFileName + " 到 " + strNewDir + " ...");
+                // return:
+                //      -1  出错
+                //      0   成功。不需要 reboot
+                //      1   成功。需要 reboot
+                nRet = ExtractFile(strZipFileName,
+                    strNewDir,
+                    false,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+#if NO
+            strZipFileName = Path.Combine(strSourceDir, "data.zip");
+            Console.WriteLine("展开 " + strZipFileName + " 到 " + strNewDir + " ...");
+            // return:
+            //      -1  出错
+            //      0   成功。不需要 reboot
+            //      1   成功。需要 reboot
+            nRet = ExtractFile(strZipFileName,
+                strNewDir,
+                false,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+#endif
+
+            // (准备工作) 将以前遗留的 c:\dp2circulation_old 目录删除
+            try
+            {
+                Directory.Delete(strOldDir, true);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // 不存在就算了
+            } 
+            catch(Exception ex)
+            {
+                strError = "删除目录 " + strOldDir + " 时出错: " + ex.Message;
+                goto ERROR1;
+            }
+            
+            // *** 将 c:\dp2circulation 目录改名为 c:\dp2circulation_old 目录
+            // 如果改名失败，则终止
+            try
+            {
+                Console.WriteLine("将目录 " + strTargetDir + " 改名为 " + strOldDir + " ...");
+
+                Directory.Move(strTargetDir, strOldDir);
+            }
+            catch (Exception ex)
+            {
+                strError = "将目录 " + strTargetDir + " 改名为 " + strOldDir + " 时出错: " + ex.Message;
+                goto ERROR1;
+            }
+
+            // *** 将 c:\dp2circulation_new 目录改名为 c:\dp2circulation 目录
+            // 如果改名失败，需将上一步 Undo，然后终止
+            try
+            {
+                Console.WriteLine("将目录 " + strNewDir + " 改名为 " + strTargetDir + " ...");
+
+                Directory.Move(strNewDir, strTargetDir);
+            }
+            catch (Exception ex)
+            {
+                Directory.Move(strOldDir, strTargetDir);
+                strError = "将目录 " + strNewDir + " 改名为 " + strTargetDir + " 时出错: " + ex.Message;
+                goto ERROR1;
+            }
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        // 安装软件。用 MoveFileEx 法
+        // return:
+        //      -1  出错
+        //      0   成功。不需要 reboot
+        //      1   成功。需要 reboot
+        static int Install_2(
+            string strSourceDir,
+            string strTargetDir,
+            string strFiles,
+            string strWaitExe,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // strTargetDir 一般为 c:\dp2circulation
+
+#if NO
+            string strNewDir = strTargetDir + "_new";
+            string strOldDir = strTargetDir + "_old";
+
+            // *** 将 c:\dp2circulation 目录中的全部文件，复制到 c:\dp2circulation_new 中
+            if (Directory.Exists(strTargetDir) == true)
+            {
+                Console.WriteLine("复制 " + strTargetDir + " 到 " + strNewDir + " ...");
+
+                // app.zip 和 data.zip 不要复制
+                // return:
+                //      -1  出错
+                //      >=0 复制的文件总数
+                nRet = CopyDirectory(strTargetDir,
+                    strNewDir,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+#endif
+
+            // *** 将 app.zip 和 data.zip 展开覆盖到 c:\dp2circulation_new 目录
+            bool bNeedReboot = false;
+            string[] files = strFiles.Split(new char[] { ',' });
+            foreach (string file in files)
+            {
+                string strZipFileName = Path.Combine(strSourceDir, file);
+                Console.WriteLine("展开 " + strZipFileName + " 到 " + strTargetDir + " ...");
+                // return:
+                //      -1  出错
+                //      0   成功。不需要 reboot
+                //      1   成功。需要 reboot
+                nRet = ExtractFile(strZipFileName,
+                    strTargetDir,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                    bNeedReboot = true;
+            }
+
+#if NO
+            strZipFileName = Path.Combine(strSourceDir, "data.zip");
+            Console.WriteLine("展开 " + strZipFileName + " 到 " + strTargetDir + " ...");
+            // return:
+            //      -1  出错
+            //      0   成功。不需要 reboot
+            //      1   成功。需要 reboot
+            nRet = ExtractFile(strZipFileName,
+                strTargetDir,
+                true,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
+                bNeedReboot = true;
+#endif
+
+            if (bNeedReboot)
+                return 1;
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   成功。不需要 reboot
+        //      1   成功。需要 reboot
         static int ExtractFile(string strZipFileName, 
             string strTargetDir,
+            bool bAllowDelayOverwrite,
             out string strError)
         {
             strError = "";
 
+            bool bNeedReboot = false;
             try
             {
                 using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -175,10 +506,11 @@ namespace GreenUtility
                     foreach (ZipEntry e in zip)
                     {
                         // e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
-
                         if ((e.Attributes & FileAttributes.Directory) == 0)
                         {
-                            ExtractFile(e, strTargetDir);
+                            if (ExtractFile(e, strTargetDir, bAllowDelayOverwrite) == true)
+                                bNeedReboot = true;
+
                         }
                         else
                             e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
@@ -192,10 +524,19 @@ namespace GreenUtility
                 return -1;
             }
 
+            if (bNeedReboot == true)
+                return 1;
             return 0;
         }
 
-        static void ExtractFile(ZipEntry e, string strTargetDir)
+        // parameters:
+        //      bAllowDelayOverwrite    是否允许延迟到 reboot 后的覆盖
+        // return:
+        //      false   正常结束
+        //      true    发生了 MoveFileEx，需要 reboot 才会发生作用
+        static bool ExtractFile(ZipEntry e, 
+            string strTargetDir,
+            bool bAllowDelayOverwrite)
         {
             string strTempDir = TempDir;
 
@@ -216,12 +557,27 @@ namespace GreenUtility
                     CreateDirIfNeed(Path.GetDirectoryName(strTargetPath));
 
                     File.Copy(strTempPath, strTargetPath, true);
+                    File.SetLastWriteTime(strTargetPath, e.LastModified);
+
+                    Console.WriteLine("展开文件 " + strTargetPath);
                 }
                 catch (Exception ex)
                 {
-                    if (nErrorCount > 10)
+                    if (nErrorCount > 10 || bAllowDelayOverwrite)
                     {
-                        throw new Exception("复制文件 " + strTargetPath + " 到 " + strTargetPath + " 的过程中出现错误: " + ex.Message);
+                        if (bAllowDelayOverwrite == false)
+                            throw new Exception("复制文件 " + strTempPath + " 到 " + strTargetPath + " 的过程中出现错误: " + ex.Message);
+                        else
+                        {
+                            string strLastFileName = Path.Combine(strTempDir, Guid.NewGuid().ToString());
+                            File.Move(strTempPath, strLastFileName);
+                            strTempPath = "";
+                            if (MoveFileEx(strLastFileName, strTargetPath, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
+                                throw new Exception("MoveFileEx() '"+strLastFileName+"' '"+strTargetPath+"' 失败");
+                            File.SetLastWriteTime(strLastFileName, e.LastModified);
+                            Console.WriteLine("延迟展开文件 " + strTargetPath);
+                            return true;
+                        }
                     }
 
                     nErrorCount++;
@@ -230,8 +586,33 @@ namespace GreenUtility
                 }
                 break;
             }
-            File.Delete(strTempPath);
+            if (string.IsNullOrEmpty(strTempPath) == false)
+                File.Delete(strTempPath);
+
+            return false;
         }
+
+#region MoveFileEx
+
+        [Flags]
+        internal enum MoveFileFlags
+        {
+            None = 0,
+            ReplaceExisting = 1,
+            CopyAllowed = 2,
+            DelayUntilReboot = 4,
+            WriteThrough = 8,
+            CreateHardlink = 16,
+            FailIfNotTrackable = 32,
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool MoveFileEx(
+            string lpExistingFileName,
+            string lpNewFileName,
+            MoveFileFlags dwFlags);
+
+#endregion
 
 
         // 在指定目录中找到第一个 *.csproj 文件名
@@ -492,6 +873,8 @@ namespace GreenUtility
                     if (File.Exists(target) == true && File.GetLastWriteTimeUtc(source) == File.GetLastWriteTimeUtc(target))
                         continue;
                     File.Copy(source, target, true);
+                    // 把最后修改时间设置为和 source 一样
+                    File.SetLastWriteTimeUtc(target, File.GetLastWriteTimeUtc(source));
                     nCount++;
                 }
             }

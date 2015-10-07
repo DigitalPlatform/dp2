@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define TEST
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Deployment.Application;
@@ -62,7 +64,7 @@ namespace dp2Circulation
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                this.DisplayBackgroundText("开始自动更新\r\n");
+                this.DisplayBackgroundText("开始自动更新(ClickOnce安装)\r\n");
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
                 deployment.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
                 deployment.CheckForUpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
@@ -163,12 +165,12 @@ namespace dp2Circulation
 
             if (e.Cancelled)
             {
-                this.DisplayBackgroundText("The update of the application's latest version was cancelled.");
+                this.DisplayBackgroundText("The update of the application's latest version was cancelled.\r\n");
                 return;
             }
             else if (e.Error != null)
             {
-                this.DisplayBackgroundText("ERROR: Could not install the latest version of the application. Reason: \n" + e.Error.Message + "\nPlease report this error to the system administrator.");
+                this.DisplayBackgroundText("ERROR: Could not install the latest version of the application. Reason: \r\n" + e.Error.Message + "\r\nPlease report this error to the system administrator.\r\n");
                 return;
             }
 
@@ -249,18 +251,23 @@ namespace dp2Circulation
                 return;
             }
 #endif
+            string strBinDir = GetBinDir();
+            string strUtilDir = GetUtilDir();
 
-            string strExePath = "c:\\~dp2circulation_greenutility\\greenutility.exe";
+            string strExePath = Path.Combine(strUtilDir, "greenutility.exe");
             string strParameters = "-action:install -source:"
-                + "c:\\dp2circulation"  // source 是指存储了 .zip 文件的目录
-                + " -target:c:\\dp2circulation" // target 是指最终要安装的目录 
-                + " -wait:dp2circulation.exe";
+                + strBinDir  // source 是指存储了 .zip 文件的目录
+                + " -target:" + strBinDir // target 是指最终要安装的目录 
+                + " -wait:dp2circulation.exe"
+                + " -files:" + StringUtil.MakePathList(this._updatedGreenZipFileNames);
             System.Diagnostics.Process.Start(strExePath, strParameters);
         }
 
         void BeginUpdateGreenApplication()
         {
-            if (ApplicationDeployment.IsNetworkDeployed == false)
+            if (ApplicationDeployment.IsNetworkDeployed == false
+                && Program.IsDevelopMode() == false
+                )
                 Task.Factory.StartNew(() => GreenUpdate());
         }
 
@@ -278,88 +285,154 @@ namespace dp2Circulation
             }
         }
 
+        string GetBinDir()
+        {
+            if (Program.IsDevelopMode() == false)
+                return Environment.CurrentDirectory;
+            else
+                return "c:\\dp2circulation";    // 开发用的版本，用这个恒定的目录进行测试，避免弄乱开发目录
+        }
+
+        string GetUtilDir()
+        {
+            string strBinDir = GetBinDir();
+            return Path.Combine(Path.GetDirectoryName(strBinDir), "~" + Path.GetFileName(strBinDir) + "_greenutility");
+        }
+
         void GreenUpdate()
         {
             int nRet = 0;
             string strError = "";
 
-            // 希望下载的文件
+            string strBinDir = GetBinDir();
+            string strUtilDir = GetUtilDir();
+
+            this.DisplayBackgroundText("开始自动更新(绿色安装)\r\n");
+
+            // 希望下载的文件。纯文件名
             List<string> filenames = new List<string>() {
-                "greenutility.zip",
+                "greenutility.zip", // 这是工具软件，不算在 dp2circulation 范围内
                 "app.zip",
                 "data.zip"};
-            // 发现更新了并下载的文件
+
+            // 发现更新了并下载的文件。纯文件名
             List<string> updated_filenames = new List<string>();
 
-            foreach(string filename in filenames)
-            {
-                string strUrl = "http://dp2003.com/dp2circulation/v2/" + filename;
-                string strLocalFileName = "c:\\dp2circulation\\" + filename;
+            // 需要确保最后被展开的文件。如果下载了而未展开，则下次下载的时候会发现文件已经是最新了，从而不会下载，也不会展开。这就有漏洞了
+            // 那么就要在下载和展开这个全过程中断的时候，记住删除已经下载的文件。这样可以迫使下次一定要下载和展开
+            List<string> temp_filepaths = new List<string>();
 
-                if (File.Exists(strLocalFileName) == true)
+            try
+            {
+                foreach (string filename in filenames)
                 {
-                    // 判断 http 服务器上一个文件是否已经更新
-                    // return:
-                    //      -1  出错
-                    //      0   没有更新
-                    //      1   已经更新
-                    nRet = IsServerFileUpdated(strUrl,
-                        File.GetLastWriteTimeUtc(strLocalFileName),
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == 1)
+                    string strUrl = "http://dp2003.com/dp2circulation/v2/" + filename;
+                    string strLocalFileName = Path.Combine(strBinDir, filename).ToLower();
+
+                    if (File.Exists(strLocalFileName) == true)
+                    {
+                        // this.DisplayBackgroundText("检查文件版本 " + strUrl + " ...\r\n");
+
+                        // 判断 http 服务器上一个文件是否已经更新
+                        // return:
+                        //      -1  出错
+                        //      0   没有更新
+                        //      1   已经更新
+                        nRet = IsServerFileUpdated(strUrl,
+                            File.GetLastWriteTimeUtc(strLocalFileName),
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                            updated_filenames.Add(filename);
+#if NO
+                        else
+                            this.DisplayBackgroundText("没有更新。\r\n");
+#endif
+                    }
+                    else
                         updated_filenames.Add(filename);
-                }
-                else
-                    updated_filenames.Add(filename);
 
-                if (updated_filenames.IndexOf(filename) != -1)
-                {
-                    nRet = DownloadFile(strUrl,
-                        strLocalFileName,
-                        out strError);
-                    if (nRet == -1)
+                    if (updated_filenames.IndexOf(filename) != -1)
                     {
-                        goto ERROR1;
-                    }
-                }
-            }
+                        this.DisplayBackgroundText("下载 " + strUrl + " 到 " + strLocalFileName + " ...\r\n");
 
-            if (updated_filenames.IndexOf("greenutility.zip") != -1)
-            {
-                // 将 greenutility.zip 展开到 c:\dp2circulation_temp
-                string strZipFileName = "c:\\dp2circulation\\greenutility.zip";
-                string strTargetDir = "c:\\~dp2circulation_greenutility";
-                try
-                {
-                    using (ZipFile zip = ZipFile.Read(strZipFileName))
-                    {
-                        foreach (ZipEntry e in zip)
+                        nRet = DownloadFile(strUrl,
+                            strLocalFileName,
+                            out strError);
+                        if (nRet == -1)
                         {
-                            e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                            goto ERROR1;
                         }
+
+                        // 下载成功的本地文件，随时可能被删除，如果整个流程没有完成的话
+                        temp_filepaths.Add(strLocalFileName);
                     }
                 }
-                catch (Exception ex)
+
+                string strGreenUtilityExe = Path.Combine(strUtilDir, "greenutility.exe");
+
+                if (updated_filenames.IndexOf("greenutility.zip") != -1
+                    || File.Exists(strGreenUtilityExe) == false)
                 {
-                    strError = "展开文件 '" + strZipFileName + "' 到目录 '" + strTargetDir + "' 时出现异常" + ex.Message;
-                    // 删除文件，以便下次能重新下载和展开
+                    // 将 greenutility.zip 展开到 c:\dp2circulation_temp
+                    string strZipFileName = Path.Combine(strBinDir, "greenutility.zip").ToLower();
+                    string strTargetDir = strUtilDir;
+
+                    this.DisplayBackgroundText("展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...\r\n");
                     try
                     {
-                        File.Delete(Path.Combine(strTargetDir, "greenutility.zip"));
+                        using (ZipFile zip = ZipFile.Read(strZipFileName))
+                        {
+                            foreach (ZipEntry e in zip)
+                            {
+                                e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                            }
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        strError = "展开文件 '" + strZipFileName + "' 到目录 '" + strTargetDir + "' 时出现异常" + ex.Message;
+                        // 删除文件，以便下次能重新下载和展开
+                        try
+                        {
+                            File.Delete(Path.Combine(strTargetDir, "greenutility.zip"));
+                        }
+                        catch
+                        {
 
+                        }
+                        ReportError("dp2circulation 展开 greenutility.zip 时出错", strError);
+                        return;
                     }
-                    ReportError("dp2circulation 展开 greenutility.zip 时出错", strError);
-                    return;
+
+                    updated_filenames.Remove("greenutility.zip");
+                    temp_filepaths.Remove(strZipFileName);
+                }
+
+#if TEST
+            // 测试
+            this._updatedGreenZipFileNames = new List<string>();
+            this._updatedGreenZipFileNames.Add("app.zip");
+#else
+                // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
+                this._updatedGreenZipFileNames = updated_filenames;
+#endif
+                if (this._updatedGreenZipFileNames.Count > 0)
+                    this.DisplayBackgroundText("dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
+                else
+                    this.DisplayBackgroundText("没有发现更新。\r\n");
+
+                temp_filepaths.Clear(); // 这样 finally 块就不会删除这些文件了
+            }
+            finally
+            {
+                foreach (string filepath in temp_filepaths)
+                {
+                    File.Delete(filepath);
                 }
             }
 
-            // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
-            _updatedGreenZipFileNames = updated_filenames;
             return;
         ERROR1:
             ShowMessageBox(strError);
@@ -384,22 +457,24 @@ namespace dp2Circulation
             _webRequest.Timeout = 5000;
             try
             {
-                var response = _webRequest.GetResponse() as HttpWebResponse;
-                string strLastModified = response.GetResponseHeader("Last-Modified");
-                if (string.IsNullOrEmpty(strLastModified) == true)
+                using (var response = _webRequest.GetResponse() as HttpWebResponse)
                 {
-                    strError = "header 中无法获得 Last-Modified 值";
-                    return -1;
+                    string strLastModified = response.GetResponseHeader("Last-Modified");
+                    if (string.IsNullOrEmpty(strLastModified) == true)
+                    {
+                        strError = "header 中无法获得 Last-Modified 值";
+                        return -1;
+                    }
+                    DateTime time;
+                    if (DateTimeUtil.TryParseRfc1123DateTimeString(strLastModified, out time) == false)
+                    {
+                        strError = "从响应中取出的 Last-Modified 字段值 '" + strLastModified + "' 格式不合法";
+                        return -1;
+                    }
+                    if (time > local_lastmodify)
+                        return 1;
+                    return 0;
                 }
-                DateTime time;
-                if (DateTimeUtil.TryParseRfc1123DateTimeString(strLastModified, out time) == false)
-                {
-                    strError = "从响应中取出的 Last-Modified 字段值 '"+strLastModified+"' 格式不合法";
-                    return -1;
-                }
-                if (time > local_lastmodify)
-                    return 1;
-                return 0;
             }
             catch (WebException ex)
             {
@@ -442,10 +517,16 @@ namespace dp2Circulation
                 _webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
             }
 
+            string strTempFileName = strLocalFileName + ".temp";
             // TODO: 先下载到临时文件，然后复制到目标文件
             try
             {
-                _webClient.DownloadFile(new Uri(strUrl, UriKind.Absolute), strLocalFileName);
+                _webClient.DownloadFile(new Uri(strUrl, UriKind.Absolute), strTempFileName);
+
+                File.Delete(strLocalFileName);
+                File.Move(strTempFileName, strLocalFileName);
+
+                return 0;
             }
             catch (WebException ex)
             {
@@ -474,8 +555,6 @@ namespace dp2Circulation
             {
                 _webClient = null;
             }
-
-            return 0;
         }
 
         #endregion
