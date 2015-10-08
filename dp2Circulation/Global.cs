@@ -2449,7 +2449,7 @@ namespace dp2Circulation
             strHtml = strHtml.Replace("%datadir%", strDataDir);
             strHtml = strHtml.Replace("%mappeddir%",  PathUtil.MergePath(strDataDir, "servermapped"));
 
-            string strTempFilename = strDataDir + "\\temp_"+strTempFileType+".html";
+            string strTempFilename = Path.Combine(strDataDir, "~temp_"+strTempFileType+".html");
             using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
             {
                 sw.Write(strHtml);
@@ -2501,7 +2501,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
             strHtml = strHtml.Replace("%datadir%", strDataDir);
             strHtml = strHtml.Replace("%mappeddir%", PathUtil.MergePath(strDataDir, "servermapped"));
 
-            string strTempFilename = strDataDir + "\\temp_" + strTempFileType + ".xml";
+            string strTempFilename = Path.Combine(strDataDir, "~temp_" + strTempFileType + ".xml");
 
             // TODO: 要能适应"<root ... />"这样的没有prolog的XML内容
             using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
@@ -2606,14 +2606,6 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
             string strImageUrl = PathUtil.MergePath(strDataDir, "page_blank_128.png");
             string strHtml = "<html><body><img src='"+strImageUrl+"' width='64' height='64' alt='空'></body></html>";
             webBrowser.DocumentText = strHtml;
-            /*
-            string strTempFilename = strDataDir + "\\temp_blank_page.html";
-            using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
-            {
-                sw.Write(strHtml);
-            }
-            webBrowser.Navigate(strTempFilename);
-             * */
         }
 
         /// <summary>

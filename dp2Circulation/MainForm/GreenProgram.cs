@@ -9,6 +9,7 @@ using DigitalPlatform.IO;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -62,11 +63,27 @@ namespace dp2Circulation
         static bool FileNameFilter(FileSystemInfo fi)
         {
             // Application.DoEvents();
+
+            // ClickOnce 特殊文件不要复制
+            if (Path.GetExtension(fi.Name).ToLower() == "cdf-ms")
+                return false;
+            // 临时文件不要复制
+            if (string.IsNullOrEmpty(fi.Name) == false && fi.Name[0] == '~')
+                return false;
             return true;
         }
 
         public delegate bool FileNameFilterProc(FileSystemInfo fi);
 
+        /*
+Type: System.IO.IOException
+Message: 文件“c:\dp2circulation\DigitalPlatform.CirculationClient.dll”正由另一进程使用，因此该进程无法访问此文件。
+Stack:
+在 System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+在 System.IO.File.InternalCopy(String sourceFileName, String destFileName, Boolean overwrite)
+在 System.IO.File.Copy(String sourceFileName, String destFileName, Boolean overwrite)
+在 dp2Circulation.GreenProgram.CopyDirectory(String strSourceDir, String strTargetDir, FileNameFilterProc filter_proc, String& strError)
+         * */
         // 拷贝目录
         // return:
         //      -1  出错
@@ -124,13 +141,31 @@ namespace dp2Circulation
                     // 如果目标文件已经存在，并且修后修改时间相同，则不复制了
                     if (File.Exists(target) == true && File.GetLastWriteTimeUtc(source) == File.GetLastWriteTimeUtc(target))
                         continue;
-                    File.Copy(source, target, true);
+                    // 拷贝文件，最多重试 10 次
+                    for (int nRedoCount = 0; ; nRedoCount++)
+                    {
+                        try
+                        {
+                            File.Copy(source, target, true);
+                        }
+                        catch
+                        {
+                            if (nRedoCount < 10)
+                            {
+                                Thread.Sleep(100);
+                                continue;
+                            }
+                            else
+                                throw;
+                        }
+                        break;
+                    }
                     nCount++;
                 }
             }
             catch (Exception ex)
             {
-                strError = ExceptionUtil.GetAutoText(ex);
+                strError = ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 

@@ -53,6 +53,14 @@ namespace dp2Circulation
             if (ApplicationDeployment.IsNetworkDeployed)
             {
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+
+                // 2015/10/8
+                deployment.CheckForUpdateCompleted -= new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
+                deployment.CheckForUpdateProgressChanged -= new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
+
+                deployment.UpdateCompleted -= new AsyncCompletedEventHandler(ad_UpdateCompleted);
+                deployment.UpdateProgressChanged -= new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
+
                 if (_updateState == UpdateState.CheckForUpdate)
                     deployment.CheckForUpdateAsyncCancel();
                 else if (_updateState == UpdateState.Update)
@@ -66,7 +74,9 @@ namespace dp2Circulation
             {
                 this.DisplayBackgroundText("开始自动更新(ClickOnce安装)\r\n");
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+                deployment.CheckForUpdateCompleted -= new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
                 deployment.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
+                deployment.CheckForUpdateProgressChanged -= new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
                 deployment.CheckForUpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
 
                 _updateState = UpdateState.CheckForUpdate;
@@ -142,9 +152,9 @@ namespace dp2Circulation
         private void BeginUpdate()
         {
             ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+            deployment.UpdateCompleted -= new AsyncCompletedEventHandler(ad_UpdateCompleted);
             deployment.UpdateCompleted += new AsyncCompletedEventHandler(ad_UpdateCompleted);
-
-            // Indicate progress in the application's status bar.
+            deployment.UpdateProgressChanged -= new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
             deployment.UpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
 
             _updateState = UpdateState.Update;
@@ -1858,10 +1868,11 @@ Culture=neutral, PublicKeyToken=null
                         this.webBrowser_history,
                         out strError);
                     if (nRet == -1)
-                        MessageBox.Show(this, strError);
-
+                    {
+                        this.ReportError("dp2circulation 创建 OperHistory 时出错", strError);
+                        MessageBox.Show(this, "初始化 OperHistory 时出错: " + strError);
+                    }
                     // this.timer_operHistory.Start();
-
                 }
 
                 if (Global.IsKbInstalled("KB2468871") == true)

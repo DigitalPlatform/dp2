@@ -6873,7 +6873,8 @@ out strError);
         {
             if (this.tabControl_panelFixed.SelectedTab == this.tabPage_history)
             {
-                this.OperHistory.ClearHtml();
+                if (this.OperHistory != null)
+                    this.OperHistory.ClearHtml();
             }
             else if (this.tabControl_panelFixed.SelectedTab == this.tabPage_camera)
             {

@@ -347,6 +347,8 @@ namespace DigitalPlatform.Marc
 
         private void button_OK_Click(object sender, System.EventArgs e)
         {
+            string strError = "";
+
             if (String.IsNullOrEmpty(this.FileName) == true)
             {
                 MessageBox.Show(this, "尚未指定 MARC 文件名");
@@ -359,8 +361,23 @@ namespace DigitalPlatform.Marc
                 return;
             }
 
+            // 2015/10/8
+            // 验证输入的编码方式名称是否合法
+            try
+            {
+                Encoding encoding = this.Encoding;
+            }
+            catch(Exception ex)
+            {
+                strError = "您输入的编码方式名称不合法: " + ex.Message;
+                goto ERROR1;
+            }
+
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, System.EventArgs e)
@@ -481,6 +498,7 @@ namespace DigitalPlatform.Marc
 
         /// <summary>
         /// 获得编码方式
+        /// 可能会抛出异常
         /// </summary>
         public Encoding Encoding
         {
@@ -965,7 +983,14 @@ TABLE.marc SPAN.fieldend
         private void comboBox_encoding_TextChanged(object sender, EventArgs e)
         {
             // 自动显示文件的第一条
-            DisplayFirstRecord(this.FileName, this.Encoding);
+            try
+            {
+                DisplayFirstRecord(this.FileName, this.Encoding);
+            }
+            catch
+            {
+                // TODO: 最好把 combobox 显示为特殊颜色，表示输入的编码方式名称不合法
+            }
         }
 
         private void comboBox_marcSyntax_TextChanged(object sender, EventArgs e)

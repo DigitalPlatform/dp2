@@ -43,6 +43,9 @@ namespace dp2Circulation
         public void ShowProgressMessage(string strID,
             string strText)
         {
+            if (this.webBrowser1 == null || this.webBrowser1.IsDisposed == true)
+                return;
+
             if (this.webBrowser1.InvokeRequired)
             {
                 this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
