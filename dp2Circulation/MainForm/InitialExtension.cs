@@ -36,6 +36,37 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        void ReportError(string strTitle,
+    string strError)
+        {
+            // 发送给 dp2003.com
+            string strText = strError;
+            if (string.IsNullOrEmpty(strText) == true)
+                return;
+
+            strText += "\r\n\r\n===\r\n" + PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
+
+            try
+            {
+                // 发送报告
+                int nRet = LibraryChannel.CrashReport(
+                    this.GetCurrentUserName() + "@" + this.ServerUID,
+                    strTitle,
+                    strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "CrashReport() (" + strTitle + ") 出错: " + strError;
+                    this.WriteErrorLog(strError);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() (" + strTitle + ") 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strError);
+            }
+        }
+
         #region ClickOnce 自动更新
 
         enum UpdateState
@@ -201,41 +232,10 @@ namespace dp2Circulation
 
         #region 绿色安装包 自动更新
 
-        void ReportError(string strTitle,
-            string strError)
-        {
-            // 发送给 dp2003.com
-            string strText = strError;
-            if (string.IsNullOrEmpty(strText) == true)
-                return;
-
-            strText += "\r\n\r\n===\r\n" + PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
-
-            try
-            {
-                // 发送报告
-                int nRet = LibraryChannel.CrashReport(
-                    this.GetCurrentUserName() + "@" + this.ServerUID,
-                    strTitle,
-                    strText,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "CrashReport() (" + strTitle + ") 出错: " + strError;
-                    this.WriteErrorLog(strError);
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "CrashReport() (" + strTitle + ") 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.WriteErrorLog(strError);
-            }
-        }
-
         MyWebClient _webClient = null;
         System.Net.WebRequest _webRequest = null;
 
-        // TODO: 可以精确指定哪些 .zip 文件更新了
+        // 启动绿色安装小工具。因为 dp2circulation 正在运行时无法覆盖替换文件，所以需要另外启动一个小程序来完成这个任务
         void StartGreenUtility()
         {
 #if NO
@@ -261,6 +261,9 @@ namespace dp2Circulation
                 return;
             }
 #endif
+            if (this._updatedGreenZipFileNames.Count == 0)
+                throw new ArgumentException("调用 StartGreenUtility() 前应该准备好 _updatedGreenZipFileNames 内容");
+
             string strBinDir = GetBinDir();
             string strUtilDir = GetUtilDir();
 
@@ -271,6 +274,8 @@ namespace dp2Circulation
                 + " -wait:dp2circulation.exe"
                 + " -files:" + StringUtil.MakePathList(this._updatedGreenZipFileNames);
             System.Diagnostics.Process.Start(strExePath, strParameters);
+
+            this._updatedGreenZipFileNames.Clear(); // 避免后面再次调用本函数
         }
 
         void BeginUpdateGreenApplication()
@@ -447,6 +452,163 @@ namespace dp2Circulation
         ERROR1:
             ShowMessageBox(strError);
             ReportError("dp2circulation GreenUpdate() 出错", strError);
+        }
+
+        // 从磁盘进行绿色安装包的升级。一般用于没有网络的环境
+        // 本函数会要求操作者选择一个目录，这个目录里面应该存在一个 app.zip 文件，一个 data.zip 文件，可能还有 greenutility.zip 文件。第一次使用这个功能，必须要有 greenutility.zip 文件
+        void UpgradeGreenFromDisk()
+        {
+            string strError = "";
+
+            FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+
+            dir_dlg.Description = "请指定升级文件所在目录:";
+            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+            dir_dlg.ShowNewFolderButton = false;
+            // dir_dlg.SelectedPath = this.textBox_outputFolder.Text;
+
+            if (dir_dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strBinDir = GetBinDir();
+            string strUtilDir = GetUtilDir();
+
+            // 需要确保最后被展开的文件。如果下载了而未展开，则下次下载的时候会发现文件已经是最新了，从而不会下载，也不会展开。这就有漏洞了
+            // 那么就要在下载和展开这个全过程中断的时候，记住删除已经下载的文件。这样可以迫使下次一定要下载和展开
+            List<string> temp_filepaths = new List<string>();
+
+            try
+            {
+
+                string[] filenames = new string[] { "app.zip", "data.zip", "greenutility.zip" };
+                // 发现更新了并下载的文件。纯文件名
+                List<string> updated_filenames = new List<string>();
+
+                // 检查所指定的目录中是否有特征性的文件
+                List<string> found_filenames = new List<string>();
+                foreach (string filename in filenames)
+                {
+                    string strSourcePath = Path.Combine(dir_dlg.SelectedPath, filename);
+                    string strLocalFileName = Path.Combine(strBinDir, filename).ToLower();
+                    if (File.Exists(strSourcePath) == false)
+                        continue;
+
+                    found_filenames.Add(filename);
+
+                    if (File.Exists(strLocalFileName) == true &&
+                        File.GetLastWriteTimeUtc(strSourcePath) <= File.GetLastWriteTimeUtc(strLocalFileName))
+                        continue;
+
+                    try
+                    {
+                        File.Copy(strSourcePath, strLocalFileName, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "文件 '" + strSourcePath + "' 复制到 '" + strLocalFileName + "' 时出错: " + ex.Message;
+                        goto ERROR1;
+                    }
+                    updated_filenames.Add(filename);
+                    temp_filepaths.Add(strLocalFileName);
+                }
+
+                if (found_filenames.Count == 0)
+                {
+                    strError = "您所选择的目录 '" + dir_dlg.SelectedPath + "' 中没有包含任何名为 app.zip data.zip greenutility.zip 的文件";
+                    goto ERROR1;
+                }
+
+                if (updated_filenames.Count == 0)
+                {
+                    strError = "您所选择的目录 '" + dir_dlg.SelectedPath + "' 中所包含的 " + StringUtil.MakePathList(found_filenames) + " 文件，相对于上次已经安装的文件，没有变化更新。升级操作因此被放弃";
+                    goto ERROR1;
+                }
+
+                string strGreenUtilityExe = Path.Combine(strUtilDir, "greenutility.exe");
+
+                if (updated_filenames.IndexOf("greenutility.zip") != -1
+                    || File.Exists(strGreenUtilityExe) == false)
+                {
+                    // 将 greenutility.zip 展开到 c:\dp2circulation_temp
+                    string strZipFileName = Path.Combine(strBinDir, "greenutility.zip").ToLower();
+                    string strTargetDir = strUtilDir;
+
+                    this.DisplayBackgroundText("展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...\r\n");
+                    try
+                    {
+                        using (ZipFile zip = ZipFile.Read(strZipFileName))
+                        {
+                            foreach (ZipEntry e in zip)
+                            {
+                                e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "展开文件 '" + strZipFileName + "' 到目录 '" + strTargetDir + "' 时出现异常" + ex.Message;
+                        // 删除文件，以便下次能重新下载和展开
+                        try
+                        {
+                            File.Delete(Path.Combine(strTargetDir, "greenutility.zip"));
+                        }
+                        catch
+                        {
+
+                        }
+                        ReportError("dp2circulation 展开 greenutility.zip 时出错", strError);
+                        return;
+                    }
+
+                    updated_filenames.Remove("greenutility.zip");
+                    temp_filepaths.Remove(strZipFileName);
+                }
+
+                string strExePath = Path.Combine(strUtilDir, "greenutility.exe");
+                if (File.Exists(strExePath) == false)
+                {
+                    strError = "您指定的源目录 '" + dir_dlg.SelectedPath + "' 中必须包含 greenutility.zip 文件";
+                    goto ERROR1;
+                }
+
+                // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
+                this._updatedGreenZipFileNames = updated_filenames;
+
+                if (this._updatedGreenZipFileNames.Count > 0)
+                {
+                    DialogResult result = MessageBox.Show(this,
+"为完成 dp2Circulation 升级安装，现在需要退出 dp2Circulation。请确认当前所有修改已经保存，可以重新启动了。\r\n\r\n是否立即重新启动?",
+"dp2Circulation",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        MessageBox.Show(this, "升级安装被放弃");
+                        return;
+                    }
+
+                    temp_filepaths.Clear(); // 这样 finally 块就不会删除这些文件了
+
+                    StartGreenUtility();
+                    Application.Exit();
+                }
+                else
+                {
+                    strError = "没有发现更新";
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                foreach (string filepath in temp_filepaths)
+                {
+                    File.Delete(filepath);
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 已经完成更新的纯 .zip 文件名
@@ -675,6 +837,8 @@ namespace dp2Circulation
                 // 2015/8/5
                 this.DataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
+
+            this.MenuItem_upgradeFromDisk.Visible = !ApplicationDeployment.IsNetworkDeployed;
 
             OpenBackgroundForm();
 

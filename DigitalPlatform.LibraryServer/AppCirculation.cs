@@ -1451,7 +1451,6 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         goto ERROR1;
 
-
                     WriteTimeUsed(
                         time_lines,
                         start_time_process,
@@ -1600,12 +1599,12 @@ namespace DigitalPlatform.LibraryServer
         "idcardNumber", strIdcardNumber);
                     }
 
-                    // 写入读者记录
+                    // 记载读者记录
                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "readerRecord", readerdom.OuterXml);
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
 
-                    // 写入册记录
+                    // 记载册记录
                     node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "itemRecord", itemdom.OuterXml);
                     DomUtil.SetAttr(node, "recPath", strOutputItemRecPath);
@@ -13367,7 +13366,6 @@ out string strError)
                 return -1;
             }
 
-
             if (bRenew == true)
             {
                 nNo++;
@@ -13398,9 +13396,7 @@ out string strError)
                     return -1;
                 }
                 strThisBorrowPeriod = aPeriod[nNo].Trim();
-
                 strLastBorrowPeriod = aPeriod[nNo-1].Trim();
-
 
                 if (String.IsNullOrEmpty(strThisBorrowPeriod) == true)
                 {
@@ -13497,7 +13493,6 @@ out string strError)
                     strError = "测算这次还书时间过程发生错误: " + strError;
                     return -1;
                 }
-
             }
 
             // 如果是续借，检查不续借的应还最后日期和续借后的应还最后日期哪个靠后。
@@ -13518,7 +13513,6 @@ out string strError)
                 {
                     goto SKIP_CHECK_RENEW_PERIOD;
                 }
-
 
                 long lLastPeriodValue = 0;
                 string strLastPeriodUnit = "";
@@ -13551,7 +13545,6 @@ out string strError)
                     strError = "测算上次还书时间过程发生错误: " + strError;
                     goto SKIP_CHECK_RENEW_PERIOD;
                 }
-
 
                 // 正规化时间
                 nRet = RoundTime(strLastPeriodUnit,
@@ -13717,6 +13710,16 @@ out string strError)
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "operator",
                 strOperator);
+            // 注：虽然是借书操作本来不操作 borrowHistory 元素，但有这样一种情况，以前的极限数量较大，后来极限数量改小了，由于目前并没有专门批处理册记录的模块，所以希望借书时候顺便把元素数量删减，这样后面创建日志记录的时候，在日志记录里面记载的也就是尺寸减小后的册记录内容了
+            // 删除超过极限数量的 BorrowHistory/borrower 元素
+            // return:
+            //      -1  出错
+            //      0   册记录没有改变
+            //      1   册记录发生改变
+            nRet = RemoveItemHistoryItems(itemdom,
+                out strError);
+            if (nRet == -1)
+                return -1;
 
             // 创建日志记录
             DomUtil.SetElementText(domOperLog.DocumentElement, "readerBarcode",
@@ -13764,6 +13767,31 @@ strBookPrice);    // 图书价格
                 "location");
             borrow_info.Location = strLocation;
              * */
+
+            return 0;
+        }
+
+        // 2015/10/9
+        // 删除超过极限数量的 BorrowHistory/borrower 元素
+        // return:
+        //      -1  出错
+        //      0   册记录没有改变
+        //      1   册记录发生改变
+        int RemoveItemHistoryItems(XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+
+            XmlNodeList nodes = itemdom.DocumentElement.SelectNodes("borrowHistory/borrower");
+            if (nodes.Count > this.MaxItemHistoryItems)
+            {
+                for (int i = this.MaxItemHistoryItems; i < nodes.Count; i++)
+                {
+                    XmlNode node = nodes[i];
+                    node.ParentNode.RemoveChild(node);
+                }
+                return 1;
+            }
 
             return 0;
         }

@@ -3160,14 +3160,12 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
                     stop,
                     items,
                     this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
-
 
                 int i = 0;
                 foreach (LoaderItem item in loader)
@@ -3760,9 +3758,25 @@ MessageBoxDefaultButton.Button1);
             {
                 if (stop != null)
                     stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (LoaderItem item in loader)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
@@ -3773,6 +3787,7 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
+#if NO
                     string strRecPath = item.Text;
 
                     if (string.IsNullOrEmpty(strRecPath) == true)
@@ -3807,6 +3822,16 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     string strXml = results[0];
+#endif
+                    BiblioInfo info = item.BiblioInfo;
+
+                    string strXml = "";
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
 
                     string strMARC = "";
                     string strMarcSyntax = "";
@@ -3835,7 +3860,7 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    this.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(strRecPath) + "</p>");
+                    this.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(item.BiblioInfo.RecPath) + "</p>");    // strRecPath
                     foreach(string key in filter.Host.ColumnTable.Keys)
                     {
                         string strHtml = "<p>" + HttpUtility.HtmlEncode(key + "=" + (string)filter.Host.ColumnTable[key]) + "</p>";
@@ -5751,8 +5776,6 @@ MessageBoxDefaultButton.Button2);
             }
 
 #endif
-
-
             this.EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -5788,8 +5811,24 @@ MessageBoxDefaultButton.Button2);
                 writer.WriteAttributeString("xmlns", "marc21", null, DigitalPlatform.Xml.Ns.usmarcxml);
 #endif
 
-                int i = 0;
+                List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
@@ -5799,6 +5838,7 @@ MessageBoxDefaultButton.Button2);
                         goto ERROR1;
                     }
 
+#if NO
                     string strRecPath = item.Text;
 
                     if (string.IsNullOrEmpty(strRecPath) == true)
@@ -5829,6 +5869,16 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     string strXml = results[0];
+#endif
+                    BiblioInfo info = item.BiblioInfo;
+
+                    string strXml = "";
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
 
                     if (string.IsNullOrEmpty(strXml) == false)
                     {
@@ -5846,8 +5896,8 @@ MessageBoxDefaultButton.Button2);
                         if (dom.DocumentElement != null)
                         {
                             // 给根元素设置几个参数
-                            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, this.MainForm.LibraryServerUrl + "?" + strRecPath);
-                            DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(baTimestamp));
+                            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                            DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
 
                             dom.DocumentElement.WriteTo(writer);
                         }
@@ -5884,7 +5934,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-
+#if NO
         // 2012/2/14
         // 保存到 MARC 文件
         void menu_saveToMarcFile_Click(object sender, EventArgs e)
@@ -6148,6 +6198,309 @@ MessageBoxDefaultButton.Button2);
                         if (nRet == -1)
                             goto ERROR1;
                     }*/
+
+                    s.Write(baTarget, 0,
+                        baTarget.Length);
+
+                    if (dlg.CrLf == true)
+                    {
+                        byte[] baCrLf = targetEncoding.GetBytes("\r\n");
+                        s.Write(baCrLf, 0,
+                            baCrLf.Length);
+                    }
+
+                    stop.SetProgressValue(++i);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                s.Close();
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+            }
+
+            // 
+            if (bAppend == true)
+                MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+                    + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
+            else
+                MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+                    + "条记录成功保存到新文件 " + this.LastIso2709FileName;
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+#endif
+
+        // 2015/10/10
+        // 保存到 MARC 文件
+        void menu_saveToMarcFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            Encoding preferredEncoding = this.CurrentEncoding;
+
+            {
+                // 观察要保存的第一条记录的marc syntax
+            }
+
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            MainForm.SetControlFont(dlg, this.Font);
+            dlg.IsOutput = true;
+            dlg.AddG01Visible = false;
+            dlg.RuleVisible = true;
+            dlg.Rule = this.LastCatalogingRule;
+            dlg.FileName = this.LastIso2709FileName;
+            dlg.CrLf = this.LastCrLfIso2709;
+            dlg.RemoveField998 = this.LastRemoveField998;
+            dlg.EncodingListItems = Global.GetEncodingList(false);
+            dlg.EncodingName =
+                (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
+            dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
+            dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+            dlg.EnableMarcSyntax = false;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            string strCatalogingRule = dlg.Rule;
+            if (strCatalogingRule == "<无限制>")
+                strCatalogingRule = null;
+
+            Encoding targetEncoding = null;
+
+            nRet = Global.GetEncoding(dlg.EncodingName,
+                out targetEncoding,
+                out strError);
+            if (nRet == -1)
+            {
+                goto ERROR1;
+            }
+
+            string strLastFileName = this.LastIso2709FileName;
+            string strLastEncodingName = this.LastEncodingName;
+
+            bool bExist = File.Exists(dlg.FileName);
+            bool bAppend = false;
+
+            if (bExist == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+        "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
+        "BiblioSearchForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    bAppend = true;
+
+                if (result == DialogResult.No)
+                    bAppend = false;
+
+                if (result == DialogResult.Cancel)
+                {
+                    strError = "放弃处理...";
+                    goto ERROR1;
+                }
+            }
+
+            // 检查同一个文件连续存时候的编码方式一致性
+            if (strLastFileName == dlg.FileName
+                && bAppend == true)
+            {
+                if (strLastEncodingName != ""
+                    && strLastEncodingName != dlg.EncodingName)
+                {
+                    DialogResult result = MessageBox.Show(this,
+                        "文件 '" + dlg.FileName + "' 已在先前已经用 " + strLastEncodingName + " 编码方式存储了记录，现在又以不同的编码方式 " + dlg.EncodingName + " 追加记录，这样会造成同一文件中存在不同编码方式的记录，可能会令它无法被正确读取。\r\n\r\n是否继续? (是)追加  (否)放弃操作",
+                        "BiblioSearchForm",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                    {
+                        strError = "放弃处理...";
+                        goto ERROR1;
+                    }
+
+                }
+            }
+
+            this.LastIso2709FileName = dlg.FileName;
+            this.LastCrLfIso2709 = dlg.CrLf;
+            this.LastEncodingName = dlg.EncodingName;
+            this.LastCatalogingRule = dlg.Rule;
+            this.LastRemoveField998 = dlg.RemoveField998;
+
+            this.EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出到 MARC 文件 ...");
+            stop.BeginLoop();
+
+            Stream s = null;
+
+            try
+            {
+                s = File.Open(this.LastIso2709FileName,
+                     FileMode.OpenOrCreate);
+                if (bAppend == false)
+                    s.SetLength(0);
+                else
+                    s.Seek(0, SeekOrigin.End);
+            }
+            catch (Exception ex)
+            {
+                strError = "打开或创建文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+#if NO
+                    string[] results = null;
+                    byte[] baTimestamp = null;
+
+                    stop.SetMessage("正在获取书目记录 " + strRecPath);
+
+                    long lRet = Channel.GetBiblioInfos(
+                        stop,
+                        strRecPath,
+                        "",
+                        new string[] { "xml" },   // formats
+                        out results,
+                        out baTimestamp,
+                        out strError);
+                    if (lRet == 0)
+                        goto ERROR1;
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    if (results == null || results.Length == 0)
+                    {
+                        strError = "results error";
+                        goto ERROR1;
+                    }
+
+                    string strXml = results[0];
+#endif
+                    BiblioInfo info = item.BiblioInfo;
+
+                    string strXml = "";
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
+
+                    string strMARC = "";
+                    string strMarcSyntax = "";
+                    // 将XML格式转换为MARC格式
+                    // 自动从数据记录中获得MARC语法
+                    nRet = MarcUtil.Xml2Marc(strXml,
+                        true,
+                        null,
+                        out strMarcSyntax,
+                        out strMARC,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "XML转换到MARC记录时出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    byte[] baTarget = null;
+
+                    Debug.Assert(strMarcSyntax != "", "");
+
+                    // 按照编目规则过滤
+                    // 获得一个特定风格的 MARC 记录
+                    // parameters:
+                    //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
+                    // return:
+                    //      0   没有实质性修改
+                    //      1   有实质性修改
+                    nRet = MarcUtil.GetMappedRecord(ref strMARC,
+                        strCatalogingRule);
+
+                    if (dlg.RemoveField998 == true)
+                    {
+                        MarcRecord record = new MarcRecord(strMARC);
+                        record.select("field[@name='998']").detach();
+                        strMARC = record.Text;
+                    }
+                    if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
+                    {
+                        MarcRecord record = new MarcRecord(strMARC);
+                        MarcQuery.To880(record);
+                        strMARC = record.Text;
+                    }
+
+                    // 将MARC机内格式转换为ISO2709格式
+                    // parameters:
+                    //      strSourceMARC   [in]机内格式MARC记录。
+                    //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                    //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                    //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    nRet = MarcUtil.CvtJineiToISO2709(
+                        strMARC,
+                        strMarcSyntax,
+                        targetEncoding,
+                        out baTarget,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
                     s.Write(baTarget, 0,
                         baTarget.Length);

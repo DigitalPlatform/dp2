@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
 
@@ -229,7 +230,7 @@ namespace dp2Circulation
             // "KB2468871" 关系到 SignalR 运行是否会出现装载 System.Core 失败的故障
             text.Append("是否安装了 KB2468871:\t" + Global.IsKbInstalled("KB2468871") + "\r\n");
             text.Append("系统进程:\r\n" + ListSystemProcess());
-
+            text.Append("当前程序版本:\t" + Assembly.GetCallingAssembly().FullName + "\r\n");
             return text.ToString();
         }
 

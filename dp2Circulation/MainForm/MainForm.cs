@@ -7905,6 +7905,12 @@ Keys keyData)
         {
             BeginUpdateClickOnceApplication();
         }
+
+        // 从磁盘升级
+        private void MenuItem_upgradeFromDisk_Click(object sender, EventArgs e)
+        {
+            UpgradeGreenFromDisk();
+        }
     }
 
     /// <summary>

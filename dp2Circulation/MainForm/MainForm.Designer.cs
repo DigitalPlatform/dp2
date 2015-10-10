@@ -203,6 +203,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
+            this.MenuItem_upgradeFromDisk = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1128,6 +1129,7 @@ namespace dp2Circulation
             this.toolStripSeparator20,
             this.menuItem_packageErrorLog,
             this.menuItem_updateDp2circulation,
+            this.MenuItem_upgradeFromDisk,
             this.toolStripSeparator31,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
@@ -1652,6 +1654,13 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_upgradeFromDisk
+            // 
+            this.MenuItem_upgradeFromDisk.Name = "MenuItem_upgradeFromDisk";
+            this.MenuItem_upgradeFromDisk.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_upgradeFromDisk.Text = "¥”¥≈≈Ã…˝º∂(&U) ...";
+            this.MenuItem_upgradeFromDisk.Click += new System.EventHandler(this.MenuItem_upgradeFromDisk_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1868,6 +1877,7 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_share;
         private System.Windows.Forms.WebBrowser webBrowser_messageHub;
         private System.Windows.Forms.ToolStripMenuItem menuItem_updateDp2circulation;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_upgradeFromDisk;
     }
 }
 

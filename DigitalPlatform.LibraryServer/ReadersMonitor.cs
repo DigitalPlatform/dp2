@@ -675,6 +675,21 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
                 bChanged = true;
 
+            // 删除超过极限数量的 BorrowHistory 下级元素
+            // return:
+            //      -1  出错
+            //      0   读者记录没有改变
+            //      1   读者记录发生改变
+            nRet = RemovePatronHistoryItems(readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "在为读者记录删除多余的 borrowHistoryborrow 元素时发生错误: " + strError;
+                this.AppendResultText(strError + "\r\n");
+            }
+            if (nRet == 1)
+                bChanged = true;
+
             // 修改读者记录后存回
             if (bChanged == true)
             {
@@ -722,6 +737,31 @@ namespace DigitalPlatform.LibraryServer
                     strError = "写回读者库记录 '" + strPath + "' 时发生错误: " + strError;
                     return -1;
                 }
+            }
+
+            return 0;
+        }
+
+        // 2015/10/9
+        // 删除超过极限数量的 BorrowHistory/borrow 元素
+        // return:
+        //      -1  出错
+        //      0   读者记录没有改变
+        //      1   读者记录发生改变
+        int RemovePatronHistoryItems(XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrowHistory/borrow");
+            if (nodes.Count > this.App.MaxPatronHistoryItems)
+            {
+                for(int i=this.App.MaxPatronHistoryItems;i<nodes.Count;i++)
+                {
+                    XmlNode node = nodes[i];
+                    node.ParentNode.RemoveChild(node);
+                }
+                return 1;
             }
 
             return 0;
