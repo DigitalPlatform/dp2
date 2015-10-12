@@ -99,10 +99,10 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strXml = "";
-            int nRet = MarcUtil.Marc2Xml(strMARC,
+            string strXml = this.Xml;
+            int nRet = MarcUtil.Marc2XmlEx(strMARC,
                 this.CurrentDbSyntax,
-                out strXml,
+                ref strXml, // 2015/10/12
                 out strError);
             if (nRet == -1)
                 return -1;

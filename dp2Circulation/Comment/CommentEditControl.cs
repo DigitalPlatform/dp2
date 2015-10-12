@@ -398,33 +398,33 @@ namespace dp2Circulation
 #endif
         internal override void DomToMember(string strRecPath)
         {
-            this.Index = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Index = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "index");
-            this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.State = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "state");
-            this.TypeString = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.TypeString = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "type");
-            this.OrderSuggestion = GetOrderSuggestionCaption(DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.OrderSuggestion = GetOrderSuggestionCaption(DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "orderSuggestion"));
-            this.Title = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Title = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "title");
-            this.Creator = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Creator = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "creator");
-            this.Subject = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Subject = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "subject");
-            this.Summary = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Summary = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "summary");
-            this.Content = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Content = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "content").Replace("\\r", "\r\n");
-            this.CreateTime = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.CreateTime = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "createTime");
-            this.LastModified = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.LastModified = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "lastModified");
-            this.ParentId = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.ParentId = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "parent");
-            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "refID");
-            this.Operations = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement,
+            this.Operations = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement,
                 "operations");
 
             this.RecPath = strRecPath;
@@ -473,37 +473,37 @@ namespace dp2Circulation
 
         internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "parent", this.ParentId);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "refID", this.RefID);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "index", this.Index);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "state", this.State);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "type", this.TypeString);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "orderSuggestion", GetOrderSuggestionValue(this.OrderSuggestion));
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "title", this.Title);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "creator", this.Creator);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "subject", this.Subject);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "summary", this.Summary);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "content", this.Content.Replace("\r\n", "\\r"));
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "createTime", this.CreateTime);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "lastModified", this.LastModified);
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "operations",
                     this.Operations);
             }

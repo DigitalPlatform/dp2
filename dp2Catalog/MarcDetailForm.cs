@@ -2887,9 +2887,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             MessageBox.Show(this, strError);
         }
 
-
-
-
         // 查重
         // parameters:
         //      strSender   触发命令的来源 "toolbar" "ctrl_d"
@@ -2937,9 +2934,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
                 strProtocol = protocol_dlg.SelectedProtocol;
             }
-
-
-
 
             this.EnableControls(false);
             try
@@ -3121,7 +3115,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     if (nRet == -1)
                         goto ERROR1;
 
-
                     // 打开查重窗口
                     dp2DupForm form = new dp2DupForm();
 
@@ -3154,7 +3147,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     strError = "无法识别的协议名 '" + strProtocol + "'";
                     goto ERROR1;
                 }
-
             }
             finally
             {
@@ -3790,7 +3782,6 @@ out strError1);
 
                     this.MarcEditor.ClearMarcDefDom();
                     this.MarcEditor.RefreshNameCaption();
-
 
                     // 是否刷新MARC记录？
                     // MessageBox.Show(this, "保存成功");

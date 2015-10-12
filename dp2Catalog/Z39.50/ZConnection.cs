@@ -1470,8 +1470,6 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 goto ERROR1;
             }
 
-
-
 #if DUMPTOFILE
 	DeleteFile("initresponse.bin");
 	DumpPackage("initresponse.bin",

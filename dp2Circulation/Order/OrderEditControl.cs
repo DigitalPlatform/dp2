@@ -492,48 +492,48 @@ namespace dp2Circulation
 #endif
         internal override void DomToMember(string strRecPath)
         {
-            this.Index = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Index = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "index");
-            this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.State = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "state");
-            this.CatalogNo = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.CatalogNo = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "catalogNo");
-            this.Seller = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Seller = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "seller");
-            this.Source = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Source = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "source");
-            this.Range = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Range = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "range");
-            this.IssueCount = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.IssueCount = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "issueCount");
-            this.Copy = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Copy = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "copy");
-            this.Price = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Price = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "price");
-            this.TotalPrice = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.TotalPrice = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "totalPrice");
-            this.OrderTime = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.OrderTime = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "orderTime");
-            this.OrderID = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.OrderID = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "orderID");
-            this.Distribute = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Distribute = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "distribute");
-            this.Class = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Class = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "class");
-            this.SellerAddress = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement,
+            this.SellerAddress = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement,
                 "sellerAddress");
 
-            this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Comment = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "comment");
-            this.BatchNo = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.BatchNo = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "batchNo");
 
-            this.ParentId = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.ParentId = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "parent");
 
-            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "refID");
-            this.Operations = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement,
+            this.Operations = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement,
                 "operations");
 
             this.RecPath = strRecPath;
@@ -591,43 +591,43 @@ namespace dp2Circulation
 
         internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement, 
                 "parent", this.ParentId);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "refID", this.RefID);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement, 
                 "index", this.Index);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "state", this.State);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "catalogNo", this.CatalogNo);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "seller", this.Seller);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "source", this.Source);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement, 
                 "range", this.Range);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "issueCount", this.IssueCount);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "copy", this.Copy);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "price", this.Price);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "totalPrice", this.TotalPrice);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "orderTime", this.OrderTime);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "orderID", this.OrderID);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "distribute", this.Distribute);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "class", this.Class);
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "sellerAddress",
                     this.SellerAddress);
             }
@@ -639,7 +639,7 @@ namespace dp2Circulation
 
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "operations",
                     this.Operations);
             }
@@ -649,9 +649,9 @@ namespace dp2Circulation
                 throw new Exception(strError);
             }
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement, 
                 "comment", this.Comment);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "batchNo", this.BatchNo);
         }
 

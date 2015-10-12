@@ -123,26 +123,26 @@ namespace dp2Circulation
         {
             get
             {
-                if (this.RecordDom == null)
+                if (this._dataDom == null)
                 {
-                    this.RecordDom = new XmlDocument();
-                    this.RecordDom.LoadXml("<root />");
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
                 }
-                return DomUtil.GetElementText(this.RecordDom.DocumentElement, "fingerprint");
+                return DomUtil.GetElementText(this._dataDom.DocumentElement, "fingerprint");
             }
             set 
             {
-                if (this.RecordDom == null)
+                if (this._dataDom == null)
                 {
-                    this.RecordDom = new XmlDocument();
-                    this.RecordDom.LoadXml("<root />");
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
                 }
-                DomUtil.SetElementText(this.RecordDom.DocumentElement, "fingerprint", value);
+                DomUtil.SetElementText(this._dataDom.DocumentElement, "fingerprint", value);
 
                 // 清除<fingerprint>元素
                 if (string.IsNullOrEmpty(value) == true)
                 {
-                    XmlNode node = this.RecordDom.DocumentElement.SelectSingleNode("fingerprint");
+                    XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("fingerprint");
                     if (node != null)
                     {
                         node.ParentNode.RemoveChild(node);
@@ -159,30 +159,30 @@ namespace dp2Circulation
         {
             get
             {
-                if (this.RecordDom == null)
+                if (this._dataDom == null)
                 {
-                    this.RecordDom = new XmlDocument();
-                    this.RecordDom.LoadXml("<root />");
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
                 }
-                XmlNode node = this.RecordDom.DocumentElement.SelectSingleNode("fingerprint");
+                XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("fingerprint");
                 if (node == null)
                     return "";
                 return DomUtil.GetAttr(node, "version");
             }
             set
             {
-                if (this.RecordDom == null)
+                if (this._dataDom == null)
                 {
-                    this.RecordDom = new XmlDocument();
-                    this.RecordDom.LoadXml("<root />");
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
                 }
-                XmlNode node = this.RecordDom.DocumentElement.SelectSingleNode("fingerprint");
+                XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("fingerprint");
                 if (node == null)
                 {
                     if (string.IsNullOrEmpty(value) == true)
                         return; // 正好,既然元素不存在, 就不用删除了
-                    node = this.RecordDom.CreateElement("fingerprint");
-                    this.RecordDom.DocumentElement.AppendChild(node);
+                    node = this._dataDom.CreateElement("fingerprint");
+                    this._dataDom.DocumentElement.AppendChild(node);
                 }
 
                 DomUtil.SetAttr(node, "version", value);
@@ -671,29 +671,29 @@ namespace dp2Circulation
 
         internal override void DomToMember(string strRecPath)
         {
-            this.Barcode = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Barcode = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "barcode");
-            this.CardNumber = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.CardNumber = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "cardNumber");
 
-            this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.State = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "state");
 
-            this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Comment = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "comment");
 
-            this.ReaderType = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.ReaderType = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "readerType");
 
-            this.CreateDate = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.CreateDate = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "createDate");
 
-            this.ExpireDate = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.ExpireDate = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "expireDate");
 
             // 2007/6/15
             // 租金
-            XmlNode nodeHire = this.RecordDom.DocumentElement.SelectSingleNode("hire");
+            XmlNode nodeHire = this._dataDom.DocumentElement.SelectSingleNode("hire");
             if (nodeHire != null)
             {
                 this.HireExpireDate = DomUtil.GetAttr(nodeHire, "expireDate");
@@ -707,57 +707,59 @@ namespace dp2Circulation
 
             // 2008/11/11
             // 押金
-            this.Foregift = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Foregift = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "foregift");
 
-            this.NameString = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.NameString = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "name");
 
-            this.NamePinyin = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.NamePinyin = DomUtil.GetElementText(this._dataDom.DocumentElement,
     "namePinyin");
 
-            this.Gender = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Gender = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "gender");
 
-            this.DateOfBirth = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.DateOfBirth = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "dateOfBirth");
             if (string.IsNullOrEmpty(this.DateOfBirth) == true)
             {
                 // 兼容旧习惯
-                this.DateOfBirth = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+                this.DateOfBirth = DomUtil.GetElementText(this._dataDom.DocumentElement,
                     "birthday");
             }
 
-            this.IdCardNumber = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.IdCardNumber = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "idCardNumber");
 
-            this.Department = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Department = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "department");
 
-            this.Post = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Post = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "post");
 
-            this.Address = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Address = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "address");
 
-            this.Tel = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Tel = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "tel");
 
-            this.Email = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Email = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "email");
 
-            this.Rights = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Rights = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "rights");
-            this.PersonalLibrary = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.PersonalLibrary = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "personalLibrary");
-            this.Access = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Access = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "access"); 
-            this.Friends = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.Friends = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "friends");
-            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+            this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "refID");
 
             this.RecPath = strRecPath;
+
+            base.DomToMember(strRecPath);
         }
 
         /// <summary>
@@ -849,10 +851,10 @@ namespace dp2Circulation
         /// <returns>读者记录是否发生了修改</returns>
         public bool ClearOutofReservationCount()
         {
-            if (this.RecordDom == null)
+            if (this._dataDom == null)
                 return false;
 
-            XmlNode root = this.RecordDom.DocumentElement.SelectSingleNode("outofReservations");
+            XmlNode root = this._dataDom.DocumentElement.SelectSingleNode("outofReservations");
             if (root == null)
                 return false;
 
@@ -878,90 +880,89 @@ namespace dp2Circulation
 
         internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "barcode", this.Barcode);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "cardNumber", this.CardNumber);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "state", this.State);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "comment", this.Comment);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "readerType", this.ReaderType);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "createDate", this.CreateDate);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "expireDate", this.ExpireDate);
 
             // 2007/6/15
             XmlNode nodeHire = null;
-            nodeHire = this.RecordDom.DocumentElement.SelectSingleNode("hire");
+            nodeHire = this._dataDom.DocumentElement.SelectSingleNode("hire");
             if (nodeHire == null)
             {
-                nodeHire = this.RecordDom.CreateElement("hire");
-                this.RecordDom.DocumentElement.AppendChild(nodeHire);
+                nodeHire = this._dataDom.CreateElement("hire");
+                this._dataDom.DocumentElement.AppendChild(nodeHire);
             }
             DomUtil.SetAttr(nodeHire, "expireDate", this.HireExpireDate);
             DomUtil.SetAttr(nodeHire, "period", this.HirePeriod);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "foregift", this.Foregift);
 
-
-
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "name", this.NameString);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
     "namePinyin", this.NamePinyin);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "gender", this.Gender);
 
             // 2012/4/11
             // 根据记录中是否已经有<dateOfBirth>元素来决定是否使用这个元素，以免对旧的dp2Library版本写记录过程中丢失<dateOfBirth>元素
-            XmlNode nodeExistBirthdate = this.RecordDom.DocumentElement.SelectSingleNode("dateOfBirth");    // BUG 2012/5/3 原先少了.DocumentElement
+            XmlNode nodeExistBirthdate = this._dataDom.DocumentElement.SelectSingleNode("dateOfBirth");    // BUG 2012/5/3 原先少了.DocumentElement
             if (nodeExistBirthdate == null)
-                DomUtil.SetElementText(this.RecordDom.DocumentElement,
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
                     "birthday", this.DateOfBirth);
             else
-                DomUtil.SetElementText(this.RecordDom.DocumentElement,
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
                     "dateOfBirth", this.DateOfBirth);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "idCardNumber", this.IdCardNumber);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "department", this.Department);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "post", this.Post);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "address", this.Address);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "tel", this.Tel);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "email", this.Email);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "rights", this.Rights);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "personalLibrary", this.PersonalLibrary);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "access", this.Access);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "friends", this.Friends);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
     "refID", this.RefID);
 
+            base.RefreshDom();
         }
 
         /// <summary>
@@ -977,10 +978,10 @@ namespace dp2Circulation
             strError = "";
             strXml = "";
 
-            if (this.RecordDom == null)
+            if (this._dataDom == null)
             {
-                this.RecordDom = new XmlDocument();
-                this.RecordDom.LoadXml("<root />");
+                this._dataDom = new XmlDocument();
+                this._dataDom.LoadXml("<root />");
             }
 
 
@@ -994,10 +995,10 @@ namespace dp2Circulation
             this.RefreshDom();
 
             // 删除空元素
-            if (RemoveEmptyElement(ref this.RecordDom, out strError) == -1)
+            if (RemoveEmptyElement(ref this._dataDom, out strError) == -1)
                 return -1;
 
-            strXml = this.RecordDom.OuterXml;
+            strXml = this._dataDom.OuterXml;
             return 0;
         }
 

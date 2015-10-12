@@ -155,7 +155,6 @@ namespace DigitalPlatform.Script
 
             // FillList();
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
-
         }
 
         void FillList()
@@ -220,11 +219,15 @@ namespace DigitalPlatform.Script
             this.ActionTable.EndUpdate();
         }
 
+        // TODO: 可否通过一个事件，在事件中让 EntityForm 通过 FloatingMessage 显示报错信息
+        // 或者用 WebBrowser 控件显示报错信息
         public void DisplayError(string strError)
         {
             this.ActionTable.Rows.Clear();
+            this.ActionTable.MaxTextHeight = 500;
 
             DpRow item = new DpRow();
+
             DpCell cell = new DpCell("");
             item.Add(cell);
 
@@ -566,7 +569,7 @@ Keys keyData)
             switch (m.Msg)
             {
                 case WM_SET_FOCUS:
-            this.ActionTable.Focus();
+                    this.ActionTable.Focus();
                     return;
             }
             base.DefWndProc(ref m);
@@ -635,7 +638,6 @@ Keys keyData)
                         this.TriggerAction(this, e1);
                     }
                 }
-
             }
             finally
             {
@@ -672,6 +674,4 @@ RefreshMenuEventArgs e);
         public object sender = null;
         public GenerateDataEventArgs e = null;
     }
-
-
 }

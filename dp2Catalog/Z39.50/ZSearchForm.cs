@@ -796,7 +796,6 @@ this.splitContainer_queryAndResultInfo,
                 }
             }
 
-
             return 0;
         ERROR1:
             // 这里的报错，是在界面线程的报错

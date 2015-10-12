@@ -331,11 +331,11 @@ namespace dp2Circulation
 
         internal override void DomToMember(string strRecPath)
         {
-            this.PublishTime = DomUtil.GetElementText(this.RecordDom.DocumentElement, "publishTime");
-            this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement, "state");
-            this.Issue = DomUtil.GetElementText(this.RecordDom.DocumentElement, "issue");
-            this.Zong = DomUtil.GetElementText(this.RecordDom.DocumentElement, "zong");
-            this.Volume = DomUtil.GetElementText(this.RecordDom.DocumentElement, "volume");
+            this.PublishTime = DomUtil.GetElementText(this._dataDom.DocumentElement, "publishTime");
+            this.State = DomUtil.GetElementText(this._dataDom.DocumentElement, "state");
+            this.Issue = DomUtil.GetElementText(this._dataDom.DocumentElement, "issue");
+            this.Zong = DomUtil.GetElementText(this._dataDom.DocumentElement, "zong");
+            this.Volume = DomUtil.GetElementText(this._dataDom.DocumentElement, "volume");
 
             // 2008/12/23 changed
             /*
@@ -345,15 +345,15 @@ namespace dp2Circulation
             else
                 this.OrderInfo = "";
              * */
-            this.OrderInfo = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement, "orderInfo");
+            this.OrderInfo = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement, "orderInfo");
 
 
-            this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement, "comment");
-            this.BatchNo = DomUtil.GetElementText(this.RecordDom.DocumentElement, "batchNo");
+            this.Comment = DomUtil.GetElementText(this._dataDom.DocumentElement, "comment");
+            this.BatchNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "batchNo");
 
-            this.ParentId = DomUtil.GetElementText(this.RecordDom.DocumentElement, "parent");
-            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement, "refID");
-            this.Operations = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement, "operations");
+            this.ParentId = DomUtil.GetElementText(this._dataDom.DocumentElement, "parent");
+            this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement, "refID");
+            this.Operations = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement, "operations");
 
             this.RecPath = strRecPath;
         }
@@ -401,14 +401,14 @@ namespace dp2Circulation
 
         internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "parent", this.ParentId);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "refID", this.RefID);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "parent", this.ParentId);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "refID", this.RefID);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "publishTime", this.PublishTime);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "state", this.State);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "issue", this.Issue);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "zong", this.Zong);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "volume", this.Volume);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "publishTime", this.PublishTime);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "state", this.State);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "issue", this.Issue);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "zong", this.Zong);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "volume", this.Volume);
 
             // 2008/12/23 changed
             /*
@@ -432,7 +432,7 @@ namespace dp2Circulation
              * */
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "orderInfo", 
                     this.OrderInfo);
             }
@@ -444,7 +444,7 @@ namespace dp2Circulation
 
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "operations",
                     this.Operations);
             }
@@ -454,9 +454,9 @@ namespace dp2Circulation
                 throw new Exception(strError);
             }
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "comment", this.Comment);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "comment", this.Comment);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "batchNo", this.BatchNo);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "batchNo", this.BatchNo);
         }
 
 #if NO

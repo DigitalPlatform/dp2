@@ -477,7 +477,6 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             EnableControls(false);
-
             try
             {
                 string strMatchStyle = GetCurrentMatchStyle();
@@ -537,16 +536,12 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条读者记录，已装入 " + lStart.ToString() + " 条，用户中断...";
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条读者记录，已装入 " + lStart.ToString() + " 条，用户中断...";
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
-
 
                     lRet = Channel.GetSearchResult(
                         stop,
@@ -595,7 +590,6 @@ namespace dp2Circulation
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                     stop.SetProgressValue(lStart);
-
                 }
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
@@ -1183,7 +1177,6 @@ out strError);
             if (this.LoadToExistDetailWindow == true)
                 strOpenStyle = "已打开的";
 
-
             menuItem = new MenuItem("打开 [根据证条码号 '" + strBarcode + "' 装入" + strOpenStyle + "读者窗] (&O)");
             menuItem.DefaultItem = true;
             menuItem.Click += new System.EventHandler(this.listView_records_DoubleClick);
@@ -1336,6 +1329,7 @@ out strError);
             // 正在检索的时候，不允许进行批处理操作。因为stop.BeginLoop()嵌套后的Min Max Value之间的保存恢复问题还没有解决
             {
                 menuItem = new MenuItem("批处理(&B)");
+                menuItem.Enabled = this.textBox_queryWord.Enabled;  // 在检索阶段，不允许使用批处理菜单
                 contextMenu.MenuItems.Add(menuItem);
 
                 subMenuItem = new MenuItem("快速修改读者记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
@@ -1418,22 +1412,26 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            bool bSearching = !this.textBox_queryWord.Enabled;
 
             menuItem = new MenuItem("导出到条码号文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)");
             menuItem.Click += new System.EventHandler(this.menu_exportBarcodeFile_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || bSearching == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出到记录路径文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&P)");
             menuItem.Click += new System.EventHandler(this.menu_exportRecPathFile_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || bSearching == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出读者详情到 Excel 文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_exportReaderInfoToExcelFile_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || bSearching == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1444,6 +1442,8 @@ out strError);
 
             menuItem = new MenuItem("从记录路径文件中导入(&I)...");
             menuItem.Click += new System.EventHandler(this.menu_importFromRecPathFile_Click);
+            if (bSearching == true)
+                menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             // ---
@@ -1452,6 +1452,8 @@ out strError);
 
             menuItem = new MenuItem("从条码号文件中导入(&R)...");
             menuItem.Click += new System.EventHandler(this.menu_importFromBarcodeFile_Click);
+            if (bSearching == true)
+                menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             // ---
@@ -1460,7 +1462,8 @@ out strError);
 
             menuItem = new MenuItem("刷新 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || bSearching == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1650,7 +1653,6 @@ out strError);
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_records);
-
 
                 if (this.listView_records.Items.Count > 0)
                 {

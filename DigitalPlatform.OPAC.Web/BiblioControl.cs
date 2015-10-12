@@ -462,7 +462,6 @@ namespace DigitalPlatform.OPAC.Web
                 goto ERROR1;
             }
 
-
             string strOutMarcSyntax = "";
             string strMarc = "";
             // 将MARCXML格式的xml记录转换为marc机内格式字符串
@@ -503,11 +502,12 @@ namespace DigitalPlatform.OPAC.Web
 
             // 保存
             // 将MARC格式转换为XML格式
-            string strXml = "";
-            nRet = MarcUtil.Marc2Xml(
+            // 2015/10/12 从 Marc2Xml() 修改为 Marc2XmlEx()
+            string strXml = strBiblioXml;
+            nRet = MarcUtil.Marc2XmlEx(
 strMarc,
 strOutMarcSyntax,
-out strXml,
+ref strXml,
 out strError);
             if (nRet == -1)
                 goto ERROR1;

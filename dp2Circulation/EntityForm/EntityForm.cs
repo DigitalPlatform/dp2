@@ -4306,6 +4306,23 @@ true);
             if (strMacroName == "@accessNo")
                 return strMacroName;
 
+            // 2015/10/10
+            if (strMacroName.IndexOf("%") != -1)
+            {
+                ParseOneMacroEventArgs e1 = new ParseOneMacroEventArgs();
+                e1.Macro = strMacroName;
+                e1.Simulate = false;
+                m_macroutil_ParseOneMacro(this, e1);
+                if (e1.Canceled == true)
+                    goto CONTINUE;
+                if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                {
+                    return strMacroName + ":error:" + e1.ErrorInfo;
+                }
+                return e1.Value;
+            }
+
+         CONTINUE:
             // 书目记录XML格式
             string strXmlBody = "";
 
@@ -4837,6 +4854,12 @@ true);
                 }
                 else
                 {
+                    if (Progress != null && Progress.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
                     if (lHitCount > 1)
                         this.ShowBrowseWindow(-1);
 
@@ -5204,6 +5227,10 @@ out strError);
             try
             {
 #endif
+            // 2015/10/10
+            if (browseWindow == null || browseWindow.IsDisposed == true)
+                return;
+
                 if (this.browseWindow.Visible == false)
                     this.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
 
@@ -5246,7 +5273,6 @@ out strError);
                     this.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
                     this.browseWindow.Show();
                 }
-
 
                 this.browseWindow.OpenDetail -= new OpenDetailEventHandler(browseWindow_OpenDetail);
                 this.browseWindow.OpenDetail += new OpenDetailEventHandler(browseWindow_OpenDetail);
@@ -5305,7 +5331,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
          * */
         void browseWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (stop.State == 0 && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
+            if (stop != null && stop.State == 0 && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
             {
                 // 如果是在检索中途关闭小窗口，则需要先设置 stop 为停止状态，不能直接关闭小窗口
                 stop.DoStop();
@@ -6811,7 +6837,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     return -1;
             }
 
-
             // 合成其它XML片断
             if (domXmlFragment != null
                 && string.IsNullOrEmpty(domXmlFragment.DocumentElement.InnerXml) == false)
@@ -6829,7 +6854,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
                 domMarc.DocumentElement.AppendChild(fragment);
             }
-
 
             strXml = domMarc.OuterXml;
             return 0;

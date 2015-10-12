@@ -3989,7 +3989,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     strTotal += strTemp + new string((char)30, 1);
                 }
                 else
-                    strTotal += s + s.Remove(3, 1).Remove(5, 1) + new string((char)30, 1);
+                {
+                    string strTemp = s.PadRight(7, ' ');
+                    strTotal += strTemp.Remove(3, 1).Remove(5, 1) + new string((char)30, 1);
+                    // strTotal += s + s.Remove(3, 1).Remove(5, 1) + new string((char)30, 1);
+                }
             }
 
             strResult = strTotal.Replace("■", new string((char)31, 1)).Replace("|", new string((char)31, 1));

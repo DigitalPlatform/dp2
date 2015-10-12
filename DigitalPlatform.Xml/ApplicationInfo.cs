@@ -446,8 +446,29 @@ namespace DigitalPlatform.Xml
                 600, 400);
         }
 
+        // http://blogs.msdn.com/b/rprabhu/archive/2005/11/28/497792.aspx
+        // 2015/10/12 优化
+        // 从ApplicationInfo中读取信息，设置MDI Child form尺寸位置状态
+        // 和一般Form的区别是,不修改x,y信息
+        // parameters:
+        //		form	Form对象
+        //		strCfgTitle	配置信息路径。本函数将用此值作为GetString()或GetInt()的strPath参数使用
+        public void LoadMdiChildFormStates(Form form,
+            string strCfgTitle,
+            int nDefaultWidth,
+            int nDefaultHeight)
+        {
+            // 2009/11/9
+            form.Size = new Size(this.GetInt(
+                strCfgTitle, "width", nDefaultWidth),
+                this.GetInt(
+                strCfgTitle, "height", nDefaultHeight));
 
+            if (this.LoadMdiSize != null)
+                this.LoadMdiSize(form, null);
+        }
 
+#if NO
 		// 从ApplicationInfo中读取信息，设置MDI Child form尺寸位置状态
 		// 和一般Form的区别是,不修改x,y信息
 		// parameters:
@@ -466,7 +487,6 @@ namespace DigitalPlatform.Xml
                 form.WindowState = FormWindowState.Normal;
                 bStateChanged = true;
             }
-
 			form.Width = this.GetInt(
                 strCfgTitle, "width", nDefaultWidth);
 			form.Height = this.GetInt(
@@ -478,27 +498,8 @@ namespace DigitalPlatform.Xml
             // 2009/11/9
             if (bStateChanged == true)
                 form.WindowState = savestate;
-
-			/*
-			form.Location = new Point(
-				this.GetInt(strCfgTitle, "x", 0),
-				this.GetInt(strCfgTitle, "y", 0));
-			*/
-
-            /*
-			if (m_bFirstMdiOpened == false) 
-			{
-                string strState = this.GetString(
-					strCfgTitle,
-                    "window_state",
-                    "Normal");
-				form.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState),
-                    strState);
-				m_bFirstMdiOpened = true;
-			}
-             * */
-
 		}
+#endif
 
 		// 保存Mdi Child form尺寸位置状态到ApplicationInfo中
 		// parameters:

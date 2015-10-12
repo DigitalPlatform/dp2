@@ -61,6 +61,33 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.IO.IOException
+Message: 文件“C:\Documents and Settings\Administrator\dp2Circulation_v2\cfgcache\21.file”正由另一进程使用，因此该进程无法访问此文件。
+Stack:
+在 System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+在 System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath)
+在 System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+在 System.IO.File.Create(String path)
+在 DigitalPlatform.CirculationClient.CfgCache.NewTempFileName(Boolean bUseMacro)
+在 DigitalPlatform.CirculationClient.CfgCache.PrepareLocalFile(String strCfgPath, String& strLocalName)
+在 DigitalPlatform.CirculationClient.LibraryChannel.GetRes(Stop stop, CfgCache cache, String strPath, String strStyle, Byte[] remote_timestamp, String& strResult, String& strMetaData, Byte[]& baOutputTimeStamp, String& strOutputResPath, String& strError)
+在 dp2Circulation.MainForm.GetCfgFile(LibraryChannel Channel, Stop stop, String strDbName, String strCfgFileName, Byte[] remote_timestamp, String& strContent, Byte[]& baOutputTimestamp, String& strError)
+在 dp2Circulation.MainForm.InitialNormalDbProperties(Boolean bPrepareSearch)
+在 dp2Circulation.MainForm.InitialProperties(Boolean bFullInitial, Boolean bRestoreLastOpenedWindow)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.5.5759.36671, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3
+本机 MAC 地址: 00016C4E0ACA 
+操作时间 2015/10/10 9:53:43 (Sat, 10 Oct 2015 09:53:43 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         // 获得一个临时文件名
         // 临时文件创建在 m_strTempDir目录中
         string NewTempFileName(bool bUseMacro = true)
@@ -81,9 +108,19 @@ namespace DigitalPlatform.CirculationClient
                 FileInfo fi = new FileInfo(strFileName);
                 if (fi.Exists == false)
                 {
-                    // 创建一个0 byte的文件
-                    FileStream f = File.Create(strFileName);
-                    f.Close();
+                    try
+                    {
+                        // 创建一个0 byte的文件
+                        using (FileStream f = File.Create(strFileName))
+                        {
+
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
                     if (bUseMacro == true)
                         return "%cfgcachedir%/" + PathUtil.PureName(strFileName);
                     return strFileName;

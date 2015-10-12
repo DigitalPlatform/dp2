@@ -746,7 +746,6 @@ namespace dp2Circulation
                 MessageBox.Show(this, strWarning);
             }
 
-
             this.AssemblyMain = Assembly.LoadFrom(strMainCsDllName);
             if (this.AssemblyMain == null)
             {
@@ -1192,7 +1191,6 @@ namespace dp2Circulation
 
                             objStatis.MarcRecord = strMarc;
 
-
                             if (this.MarcFilter != null)
                             {
                                 // 触发Script中PreFilter()代码
@@ -1240,7 +1238,6 @@ namespace dp2Circulation
                             }
                         }
 
-
                         // 触发Script中OnRecord()代码
                         if (objStatis != null)
                         {
@@ -1286,7 +1283,6 @@ namespace dp2Circulation
             {
                 File.Delete(strTempRecPathFilename);
             }
-
 
             return 0;
         }
@@ -1476,8 +1472,6 @@ namespace dp2Circulation
 
             if (this.tabControl_main.SelectedTab == this.tabPage_filter)
             {
-
-
                 // 切换到执行选择方案名page
                 this.tabControl_main.SelectedTab = this.tabPage_selectProject;
                 return;
@@ -1569,7 +1563,6 @@ namespace dp2Circulation
             }
 
             this.button_next.Enabled = true;
-
         }
 
         private void button_print_Click(object sender, EventArgs e)
@@ -1614,7 +1607,6 @@ namespace dp2Circulation
                 return;
 
             this.textBox_projectName.Text = dlg.ProjectName;
-
         }
 
         private void radioButton_inputStyle_recPathFile_CheckedChanged(object sender, EventArgs e)
@@ -1700,7 +1692,6 @@ namespace dp2Circulation
                 return;
 
             this.textBox_inputRecPathFilename.Text = dlg.FileName;
-
         }
 
         private void comboBox_inputBiblioDbName_DropDown(object sender, EventArgs e)
@@ -1719,7 +1710,6 @@ namespace dp2Circulation
                     this.comboBox_inputBiblioDbName.Items.Add(prop.DbName);
                 }
             }
-
         }
 
 #if NO

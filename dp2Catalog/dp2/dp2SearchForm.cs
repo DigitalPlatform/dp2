@@ -2769,6 +2769,7 @@ false);
                         XmlDocument domMarc = new XmlDocument();
                         domMarc.LoadXml(strXml);
 
+                        // TODO: 需要测试。看看是否可以保留以前的 file 元素
                         nRet = MarcUtil.Marc2Xml(strMARC,
                             strSyntax,
                             out domMarc,
@@ -8051,7 +8052,6 @@ out string strError)
 
             ConvertPastedLines();
         }
-
 
         // 将刚刚 paste 进入的新行，进行处理，以便达到功能完满的水平
         // TODO: 其实当前浏览列表中是应该允许 UNIMARC 和 USMARC 两类记录并存的

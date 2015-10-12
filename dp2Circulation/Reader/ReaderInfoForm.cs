@@ -151,8 +151,6 @@ namespace dp2Circulation
             this.binaryResControl1.Channel = this.Channel;
             this.binaryResControl1.Stop = this.stop;
 
-
-
             // webbrowser
             this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_readerInfo);
             this.m_webExternalHost.GetLocalPath -= new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
@@ -172,7 +170,23 @@ namespace dp2Circulation
                 selected_templates.Build(strSelectedTemplates);
             }
 
+            LoadExternalFields();
+
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
+        }
+
+        void LoadExternalFields()
+        {
+            string strError = "";
+            // 从配置文件装载字段配置，初始化这些字段
+            string strFileName = Path.Combine(this.MainForm.UserDir, "patron_extend.xml");
+            if (File.Exists(strFileName) == true)
+            {
+                int nRet = this.readerEditControl1.LoadConfig(strFileName,
+                    out strError);
+                if (nRet == -1)
+                    this.ShowMessage(strError, "red", true);
+            }
         }
 
         void m_webExternalHost_GetLocalPath(object sender, GetLocalFilePathEventArgs e)
@@ -210,6 +224,22 @@ namespace dp2Circulation
         {
         }
 
+        public bool Changed
+        {
+            get
+            {
+                if (this.ReaderXmlChanged)
+                    return true;
+                if (this.ObjectChanged)
+                    return true;
+                return false;
+            }
+            set
+            {
+                this.ReaderXmlChanged = value;
+                this.ObjectChanged = value;
+            }
+        }
 
         // 
         /// <summary>
@@ -1763,7 +1793,7 @@ strNewDefault);
             string strError = "";
             int nRet = 0;
 
-            if (this.readerEditControl1.Barcode == "")
+            if (string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
             {
                 strError = "尚未输入证条码号";
                 goto ERROR1;
@@ -1809,7 +1839,6 @@ strNewDefault);
             }
 
             // TODO: 保存时候的选项
-
 
             // 当 this.readerEditControl1.RecPath 为空的时候，需要出现对话框，让用户可以选择目标库
             string strTargetRecPath = this.readerEditControl1.RecPath;

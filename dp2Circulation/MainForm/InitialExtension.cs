@@ -715,12 +715,12 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-                strError = ex.Message;
+                strError = ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             catch (Exception ex)
             {
-                strError = ExceptionUtil.GetAutoText(ex);
+                strError = ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally
@@ -1599,7 +1599,7 @@ MessageBoxDefaultButton.Button1);
                     filenames.Remove(fi.Name.ToLower());
 
                 string strTargetFileName = Path.Combine(this.UserDir, fi.Name);
-                if (File.Exists(strTargetFileName) == false)
+                if (File.Exists(strTargetFileName) == false)    // 偶尔会出现判断错误
                 {
                     string strSourceFileName = fi.FullName;
 #if DEBUG
@@ -1609,8 +1609,21 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 #endif
-
-                    File.Copy(strSourceFileName, strTargetFileName, false);
+                    try
+                    {
+                        File.Copy(strSourceFileName, strTargetFileName, false);
+                    }
+                    catch(IOException)
+                    {
+                        // https://msdn.microsoft.com/en-us/library/ms681382(v=vs.85).aspx
+                        // ERROR_FILE_EXISTS
+                        // 80 (0x50)
+                        // The file exists.
+                        int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                        if (error == 80)
+                            continue;
+                        throw;
+                    }
                 }
             }
 
@@ -3753,6 +3766,9 @@ Culture=neutral, PublicKeyToken=null
             {
                 if (this.m_readerDbNames == null)
                 {
+                    if (this.ReaderDbProperties == null)
+                        return null;
+
                     this.m_readerDbNames = new string[this.ReaderDbProperties.Count];
                     int i = 0;
                     foreach (ReaderDbProperty prop in this.ReaderDbProperties)

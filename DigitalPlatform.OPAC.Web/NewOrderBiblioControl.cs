@@ -565,7 +565,6 @@ strField);
 
             string strCreator = sessioninfo.UserID;
 
-
             // 先创建一条书目记录
             TextBox biblio_title = (TextBox)this.FindControl("edit_biblio_title");
             TextBox biblio_author = (TextBox)this.FindControl("edit_biblio_author");

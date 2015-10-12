@@ -825,7 +825,8 @@ namespace dp2Circulation
             for (int i = 0; i < nodes.Count; i++)
             {
                 string strText = nodes[i].InnerText;
-                if (strText.Length > 0 && strText[0] == '@')
+                if (strText.Length > 0 
+                    && (strText[0] == '@' || strText.IndexOf("%") != -1))
                 {
                     // 兑现宏
                     nodes[i].InnerText = DoGetMacroValue(strText);

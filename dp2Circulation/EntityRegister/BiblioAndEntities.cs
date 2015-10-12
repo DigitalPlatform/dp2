@@ -1502,7 +1502,8 @@ MessageBoxDefaultButton.Button2);
             for (int i = 0; i < nodes.Count; i++)
             {
                 string strText = nodes[i].InnerText;
-                if (strText.Length > 0 && strText[0] == '@')
+                if (strText.Length > 0 
+                    && (strText[0] == '@' ||  strText.IndexOf("%") != -1))
                 {
                     // 兑现宏
                     string strResult = DoGetMacroValue(strText);
@@ -1569,6 +1570,7 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
+        // TODO: 增加解析 %macroname% 的功能。特别是自增宏
         // 兑现 @... 宏值。
         // 如果无法解释宏，则原样返回宏名
         string DoGetMacroValue(string strMacroName)

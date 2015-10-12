@@ -1617,7 +1617,6 @@ this.checkBox_import_fastMode.Checked);
             return -1;
 		}
 
-
 		// 导入ISO2709数据
 		// parameter: 
 		//		strFileName: 要导入的源ISO2709文件
@@ -1678,9 +1677,6 @@ this.checkBox_import_fastMode.Checked);
 
 			try
 			{
-
-
-
 				// bool bRet = false;
 
 				this.m_nRecordCount = 0;
@@ -1691,9 +1687,7 @@ this.checkBox_import_fastMode.Checked);
 					bool bSkip = false;
 					nReadRet = 0;
 
-
 					Application.DoEvents();	// 出让界面控制权
-
 
 					if (stop.State != 0)
 					{
@@ -1715,7 +1709,6 @@ this.checkBox_import_fastMode.Checked);
 						}
 					}
 
-
 					//检索当前记录是否在处理范围内
 					if (rl != null) 
 					{
@@ -1730,7 +1723,6 @@ this.checkBox_import_fastMode.Checked);
 						}
 					}
 
-
 					// progressBar_main.Value = (int)((file.Position)/ProgressRatio);
                     stop.SetProgressValue(file.Position);
 
@@ -1740,7 +1732,6 @@ this.checkBox_import_fastMode.Checked);
 						stop.SetMessage( ((bSkip == true) ? "正在跳过 " : "正在处理" )
 							+ Convert.ToString(lCount+1) );
 					}
-
 
 					/*
 					// 防止一条记录也没有的情况,所以把这个句写到前面
@@ -1820,13 +1811,11 @@ this.checkBox_import_fastMode.Checked);
 						+ "　/ 跳过数 " 
 						+ Convert.ToString(lSkipCount);
 
-
 					if (bSkip)
 						lSkipCount ++;
 
 					if (nReadRet == 1 || nReadRet == 2)  //判断大文件结束
 						break;
-
 				}
 			}
 			finally

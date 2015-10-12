@@ -1088,42 +1088,42 @@ namespace dp2Circulation
 
         internal override void DomToMember(string strRecPath)
         {
-            this.Barcode = DomUtil.GetElementText(this.RecordDom.DocumentElement, "barcode");
-            this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement, "state");
-            this.PublishTime = DomUtil.GetElementText(this.RecordDom.DocumentElement, "publishTime");
-            this.LocationString = DomUtil.GetElementText(this.RecordDom.DocumentElement, "location");
-            this.Seller = DomUtil.GetElementText(this.RecordDom.DocumentElement, "seller");
+            this.Barcode = DomUtil.GetElementText(this._dataDom.DocumentElement, "barcode");
+            this.State = DomUtil.GetElementText(this._dataDom.DocumentElement, "state");
+            this.PublishTime = DomUtil.GetElementText(this._dataDom.DocumentElement, "publishTime");
+            this.LocationString = DomUtil.GetElementText(this._dataDom.DocumentElement, "location");
+            this.Seller = DomUtil.GetElementText(this._dataDom.DocumentElement, "seller");
 
-            this.Source = DomUtil.GetElementText(this.RecordDom.DocumentElement, "source");
+            this.Source = DomUtil.GetElementText(this._dataDom.DocumentElement, "source");
 
-            this.Price = DomUtil.GetElementText(this.RecordDom.DocumentElement, "price");
-            this.BindingCost = DomUtil.GetElementText(this.RecordDom.DocumentElement, "bindingCost");
-            this.BookType = DomUtil.GetElementText(this.RecordDom.DocumentElement, "bookType");
+            this.Price = DomUtil.GetElementText(this._dataDom.DocumentElement, "price");
+            this.BindingCost = DomUtil.GetElementText(this._dataDom.DocumentElement, "bindingCost");
+            this.BookType = DomUtil.GetElementText(this._dataDom.DocumentElement, "bookType");
 
-            this.RegisterNo = DomUtil.GetElementText(this.RecordDom.DocumentElement, "registerNo");
+            this.RegisterNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "registerNo");
 
-            this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement, "comment");
-            this.MergeComment = DomUtil.GetElementText(this.RecordDom.DocumentElement, "mergeComment");
-            this.BatchNo = DomUtil.GetElementText(this.RecordDom.DocumentElement, "batchNo");
-            this.Volume = DomUtil.GetElementText(this.RecordDom.DocumentElement, "volume");
-            this.AccessNo = DomUtil.GetElementText(this.RecordDom.DocumentElement, "accessNo");
+            this.Comment = DomUtil.GetElementText(this._dataDom.DocumentElement, "comment");
+            this.MergeComment = DomUtil.GetElementText(this._dataDom.DocumentElement, "mergeComment");
+            this.BatchNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "batchNo");
+            this.Volume = DomUtil.GetElementText(this._dataDom.DocumentElement, "volume");
+            this.AccessNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "accessNo");
 
 
-            this.Borrower = DomUtil.GetElementText(this.RecordDom.DocumentElement, "borrower");
-            this.BorrowDate = DomUtil.GetElementText(this.RecordDom.DocumentElement, "borrowDate");
-            this.BorrowPeriod = DomUtil.GetElementText(this.RecordDom.DocumentElement, "borrowPeriod");
+            this.Borrower = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrower");
+            this.BorrowDate = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrowDate");
+            this.BorrowPeriod = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrowPeriod");
 
-            this.Intact = DomUtil.GetElementText(this.RecordDom.DocumentElement, "intact");
+            this.Intact = DomUtil.GetElementText(this._dataDom.DocumentElement, "intact");
 
             //this.Binding = DomUtil.GetElementText(this.RecordDom.DocumentElement, "binding");
-            this.Binding = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement, "binding");
+            this.Binding = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement, "binding");
 
             // this.Operations = DomUtil.GetElementText(this.RecordDom.DocumentElement, "operations");
-            this.Operations = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement, "operations");
+            this.Operations = DomUtil.GetElementInnerXml(this._dataDom.DocumentElement, "operations");
 
-            this.ParentId = DomUtil.GetElementText(this.RecordDom.DocumentElement, "parent");
+            this.ParentId = DomUtil.GetElementText(this._dataDom.DocumentElement, "parent");
 
-            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement, "refID");
+            this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement, "refID");
 
             this.RecPath = strRecPath;
 
@@ -1177,39 +1177,39 @@ namespace dp2Circulation
         /// </summary>
         /*public*/ internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "parent", this.ParentId);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "parent", this.ParentId);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "refID", this.RefID);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "refID", this.RefID);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "barcode", this.Barcode);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "state", this.State);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "publishTime", this.PublishTime);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "location", this.LocationString);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "seller", this.Seller);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "source", this.Source);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "price", this.Price);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "bindingCost", this.BindingCost);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "bookType", this.BookType);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "barcode", this.Barcode);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "state", this.State);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "publishTime", this.PublishTime);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "location", this.LocationString);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "seller", this.Seller);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "source", this.Source);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "price", this.Price);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "bindingCost", this.BindingCost);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "bookType", this.BookType);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "registerNo", this.RegisterNo);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "registerNo", this.RegisterNo);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "comment", this.Comment);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "mergeComment", this.MergeComment);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "comment", this.Comment);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "mergeComment", this.MergeComment);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "batchNo", this.BatchNo);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "volume", this.Volume);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "accessNo", this.AccessNo);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "batchNo", this.BatchNo);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "volume", this.Volume);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "accessNo", this.AccessNo);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "borrower", this.Borrower);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "borrowDate", this.BorrowDate);
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "borrowPeriod", this.BorrowPeriod);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "borrower", this.Borrower);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "borrowDate", this.BorrowDate);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "borrowPeriod", this.BorrowPeriod);
 
-            DomUtil.SetElementText(this.RecordDom.DocumentElement, "intact", this.Intact);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "intact", this.Intact);
 
             // DomUtil.SetElementText(this.RecordDom.DocumentElement, "binding", this.Binding);
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "binding",
                     this.Binding);
             }
@@ -1222,7 +1222,7 @@ namespace dp2Circulation
             // DomUtil.SetElementText(this.RecordDom.DocumentElement, "operations", this.Operations);
             try
             {
-                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
+                DomUtil.SetElementInnerXml(this._dataDom.DocumentElement,
                     "operations",
                     this.Operations);
             }

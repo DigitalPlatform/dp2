@@ -4802,7 +4802,6 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             }
 
-
             // 转换为MARC格式
             string strTargetSyntax = this.MainForm.GetBiblioSyntax(strTargetBiblioDbName);
             string strTargetMarc = "";
@@ -4854,7 +4853,6 @@ MessageBoxDefaultButton.Button2);
                 0,
                 out strField998,
                 out strNextFieldName);
-
 
             TwoBiblioDialog dlg = new TwoBiblioDialog();
             MainForm.SetControlFont(dlg, this.Font, false);

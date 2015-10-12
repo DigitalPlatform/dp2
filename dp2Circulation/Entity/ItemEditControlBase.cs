@@ -10,11 +10,12 @@ using System.ComponentModel;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// 册/订购/期/评注 编辑控件的基础类
+    /// 册/订购/期/评注/读者 编辑控件的基础类
     /// </summary>
     public class ItemEditControlBase : UserControl
     {
@@ -49,7 +50,7 @@ namespace dp2Circulation
         /// </summary>
         public string BiblioDbName = "";
 
-        internal XmlDocument RecordDom = null;
+        internal XmlDocument _dataDom = null;
 
         internal bool m_bChanged = false;
 
@@ -105,7 +106,6 @@ namespace dp2Circulation
 
             base.Dispose(disposing);
         }
-
 
         /// <summary>
         /// 是否正在执行初始化
@@ -190,9 +190,7 @@ namespace dp2Circulation
         }
 
         // 将所有 changed color 清除
-        internal 
-            // virtual 
-            void ResetColor()
+        internal void ResetColor()
         {
             // throw new Exception("尚未实现 ResetColor()");
 
@@ -211,7 +209,6 @@ namespace dp2Circulation
                 else
                     color.BackColor = this._tableLayoutPanel_main.BackColor;
             }
-
         }
 
 #if NO
@@ -273,14 +270,14 @@ namespace dp2Circulation
             this.OldRecord = strXml;
             this.Timestamp = timestamp;
 
-            this.RecordDom = new XmlDocument();
+            this._dataDom = new XmlDocument();
 
             try
             {
                 if (String.IsNullOrEmpty(strXml) == true)
-                    this.RecordDom.LoadXml("<root />");
+                    this._dataDom.LoadXml("<root />");
                 else
-                    this.RecordDom.LoadXml(strXml);
+                    this._dataDom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
@@ -304,7 +301,21 @@ namespace dp2Circulation
 
         internal virtual void DomToMember(string strRecPath)
         {
-            throw new Exception("尚未实现 DomToMember()");
+            // throw new Exception("尚未实现 DomToMember()");
+
+            for (int i = this._tableLayoutPanel_main.RowStyles.Count - 1; i >= 0; i--)
+            {
+                Control caption = this._tableLayoutPanel_main.GetControlFromPosition(0, i);
+                if (caption == null || caption.Tag == null)
+                    continue;
+                FieldDef def = caption.Tag as FieldDef;
+
+                Control edit = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (edit == null)
+                    continue;
+
+                edit.Text = DomUtil.GetElementText(this.DataDom.DocumentElement, def.Element);
+            }
         }
 
         /// <summary>
@@ -324,20 +335,46 @@ namespace dp2Circulation
             get
             {
                 // 2012/12/28
-                if (this.RecordDom == null)
+                if (this._dataDom == null)
                 {
-                    this.RecordDom = new XmlDocument();
-                    this.RecordDom.LoadXml("<root />");
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
                 }
-                this.RefreshDom();
-                return this.RecordDom;
+                if (this.m_bInInitial == false) // 2015/10/11
+                    this.RefreshDom();
+                return this._dataDom;
             }
         }
 
+        int _inRefreshDom = 0;
         // member --> dom
         internal virtual void RefreshDom()
         {
-            throw new Exception("尚未实现 RefreshDom()");
+            // throw new Exception("尚未实现 RefreshDom()");
+            // 防止递归
+            if (this._inRefreshDom > 0)
+                return;
+            this._inRefreshDom++;
+            try
+            {
+                for (int i = this._tableLayoutPanel_main.RowStyles.Count - 1; i >= 0; i--)
+                {
+                    Control caption = this._tableLayoutPanel_main.GetControlFromPosition(0, i);
+                    if (caption == null || caption.Tag == null)
+                        continue;
+                    FieldDef def = caption.Tag as FieldDef;
+
+                    Control edit = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                    if (edit == null)
+                        continue;
+
+                    DomUtil.SetElementText(this.DataDom.DocumentElement, def.Element, edit.Text);
+                }
+            }
+            finally
+            {
+                this._inRefreshDom --;
+            }
         }
 
         /// <summary>
@@ -355,10 +392,10 @@ namespace dp2Circulation
             strError = "";
             strXml = "";
 
-            if (this.RecordDom == null)
+            if (this._dataDom == null)
             {
-                this.RecordDom = new XmlDocument();
-                this.RecordDom.LoadXml("<root />");
+                this._dataDom = new XmlDocument();
+                this._dataDom.LoadXml("<root />");
             }
 
             if (this.ParentId == ""
@@ -385,8 +422,7 @@ namespace dp2Circulation
                 return -1;
             }
 
-            strXml = this.RecordDom.OuterXml;
-
+            strXml = this._dataDom.OuterXml;
             return 0;
         }
 
@@ -409,6 +445,8 @@ namespace dp2Circulation
                 this._tableLayoutPanel_main.MouseDown -= tableLayoutPanel_main_MouseDown;
             }
 
+            AddEvents(0, this._tableLayoutPanel_main.RowStyles.Count, bAdd);
+#if NO
             for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
             {
                 // 第一列
@@ -480,6 +518,88 @@ namespace dp2Circulation
                     }
                 }
             }
+#endif
+        }
+
+        // parameters:
+        //      nStart  包含 nStart
+        //      nEnd    不包含 nEnd
+        void AddEvents(int nStart,
+            int nEnd,
+            bool bAdd)
+        {
+            for (int i = nStart; i < nEnd; i++)
+            {
+                // 第一列
+                Label label_control = this._tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                if (label_control != null)
+                {
+                    if (bAdd)
+                    {
+                        label_control.Click += label_control_Click;
+                    }
+                    else
+                    {
+                        label_control.Click -= label_control_Click;
+                    }
+                }
+
+                // 第二列
+                Label color_control = this._tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
+                if (color_control != null)
+                {
+                    if (bAdd)
+                    {
+                        color_control.Click += color_control_Click;
+                    }
+                    else
+                    {
+                        color_control.Click -= color_control_Click;
+                    }
+                }
+
+                // 第三列
+                Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (edit_control != null)
+                {
+                    if (bAdd)
+                    {
+                        edit_control.Enter += control_Enter;
+                        edit_control.Leave += control_Leave;
+                        if (edit_control is DateControl)
+                            (edit_control as DateControl).DateTextChanged += control_TextChanged;
+                        else if (edit_control is DateTimePicker)
+                            (edit_control as DateTimePicker).ValueChanged += control_TextChanged;
+                        else
+                            edit_control.TextChanged += control_TextChanged;
+
+                        if (edit_control is ComboBox)
+                            edit_control.SizeChanged += control_SizeChanged;
+
+                        edit_control.PreviewKeyDown += edit_control_PreviewKeyDown;
+                        edit_control.KeyDown += edit_control_KeyDown;
+                    }
+                    else
+                    {
+                        edit_control.Enter -= control_Enter;
+                        edit_control.Leave -= control_Leave;
+                        if (edit_control is DateControl)
+                            (edit_control as DateControl).DateTextChanged -= control_TextChanged;
+                        else if (edit_control is DateTimePicker)
+                            (edit_control as DateTimePicker).ValueChanged -= control_TextChanged;
+                        else
+                            edit_control.TextChanged -= control_TextChanged;
+
+                        if (edit_control is ComboBox)
+                            edit_control.SizeChanged += control_SizeChanged;
+
+                        edit_control.PreviewKeyDown -= edit_control_PreviewKeyDown;
+                        edit_control.KeyDown -= edit_control_KeyDown;
+
+                    }
+                }
+            }
+
         }
 
         public void OnSelectionChanged(EventArgs e)
@@ -737,7 +857,6 @@ namespace dp2Circulation
 
                 if (bSelectionChanged)
                     this.OnSelectionChanged(new EventArgs());
-
             }
         }
 
@@ -951,7 +1070,7 @@ namespace dp2Circulation
                 this.GetValueTable(this, e);  // sender
         }
 
-                // 比较自己和refControl的数据差异，用特殊颜色显示差异字段
+        // 比较自己和refControl的数据差异，用特殊颜色显示差异字段
         /// <summary>
         /// 比较自己和refControl的数据差异，用特殊颜色显示差异字段
         /// </summary>
@@ -959,16 +1078,14 @@ namespace dp2Circulation
         public virtual void HighlightDifferences(ItemEditControlBase r)
         {
             throw new Exception("尚未实现 HighlightDifferences()");
-
         }
 
-                /// <summary>
+        /// <summary>
         /// 设置为可修改状态
         /// </summary>
         public virtual void SetChangeable()
         {
             throw new Exception("尚未实现 SetChangeable()");
-
         }
 
         /// <summary>
@@ -1040,7 +1157,100 @@ namespace dp2Circulation
             this.RefreshLineColor();
         }
 #endif
+        XmlDocument _configDom = null;
 
+        // 从配置文件装载字段配置，初始化这些字段
+        public int LoadConfig(string strFileName, 
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "装入配置文件 '" + strFileName + "' 到 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            this._configDom = dom;
+
+            // 找到当前最后一行有内容的 index
+            int nStart = FindInsertLinePos();
+            if (nStart == -1)
+            {
+                strError = "FindInsertLinePos() error";
+                return -1;
+            }
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("field");
+            if (nodes.Count == 0)
+                return 0;
+
+            this.DisableUpdate();
+            try
+            {
+                this._tableLayoutPanel_main.RowCount += nodes.Count;
+                int nRow = nStart;
+                foreach (XmlElement field in nodes)
+                {
+                    string strElement = field.GetAttribute("element");
+                    string strCaption = DomUtil.GetCaption("zh", field);
+                    if (string.IsNullOrEmpty(strCaption) == true)
+                        strCaption = strElement;
+
+                    this._tableLayoutPanel_main.RowStyles.Insert(nRow, new System.Windows.Forms.RowStyle());
+
+                    Label caption = new Label();
+                    caption.Text = strCaption;
+                    caption.TextAlign = ContentAlignment.MiddleLeft;
+                    caption.Dock = DockStyle.Fill;
+
+                    Label color = new Label();
+                    color.Dock = DockStyle.Fill;
+
+                    TextBox edit = new TextBox();
+                    edit.Dock = DockStyle.Fill;
+
+                    this._tableLayoutPanel_main.Controls.Add(caption, 0, nRow);
+                    this._tableLayoutPanel_main.Controls.Add(color, 1, nRow);
+                    this._tableLayoutPanel_main.Controls.Add(edit, 2, nRow);
+
+                    FieldDef def = new FieldDef();
+                    def.Element = strElement;
+                    caption.Tag = def;
+
+                    nRow++;
+                }
+            AddEvents(nStart, nRow, true);
+            }
+            finally
+            {
+                this.EnableUpdate();
+            }
+            return 1;
+        }
+
+        class FieldDef
+        {
+            public string Element = ""; // 字段对应的元素名
+        }
+
+        // 寻找可以插入新行的位置
+        int FindInsertLinePos()
+        {
+            for (int i = this._tableLayoutPanel_main.RowStyles.Count - 1; i >= 0; i--)
+            {
+                Control control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (control != null)
+                    return i + 1;
+            }
+
+            return -1;
+        }
     }
 
     public class EditLine
