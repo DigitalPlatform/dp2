@@ -115,6 +115,8 @@ namespace DigitalPlatform.OPAC.Server
 
         public string OpacServerUrl = "";
 
+        public bool UseTransfer = false;    // 是否用 Server.Transfer() 代替 Response.Redirect()
+
         public BoxesInfo BoxesInfo = new BoxesInfo();
 
         // 为了兼容以前的脚本程序。过一段时间后删除这个
@@ -470,6 +472,9 @@ namespace DigitalPlatform.OPAC.Server
                 if (node != null)
                 {
                     app.OpacServerUrl = DomUtil.GetAttr(node, "url");
+
+                    // 2015/10/14
+                    app.UseTransfer = DomUtil.GetBooleanParam(node, "useTransfer", false);
                 }
 
                 node = dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
@@ -1774,6 +1779,7 @@ System.Text.Encoding.UTF8))
                 // 属性url
                 writer.WriteStartElement("opacServer");
                 writer.WriteAttributeString("url", this.OpacServerUrl);
+                writer.WriteAttributeString("useTransfer", this.UseTransfer ? "true" : "false" );
                 writer.WriteEndElement();
 
                 // mongoDB 服务器

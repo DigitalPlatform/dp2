@@ -602,6 +602,9 @@ namespace dp2Circulation
             this.entityControl1.GenerateAccessNo += new GenerateDataEventHandler(entityControl1_GenerateAccessNo); 
              * */
 
+            this.entityControl1.ShowMessage -= entityControl1_ShowMessage;
+            this.entityControl1.ShowMessage += entityControl1_ShowMessage;
+
             this.entityControl1.Channel = this.Channel;
             this.entityControl1.Stop = this.Progress;
             this.entityControl1.MainForm = this.MainForm;
@@ -815,6 +818,14 @@ true);
                 selected_templates.Build(strSelectedTemplates);
             }
 
+        }
+
+        void entityControl1_ShowMessage(object sender, ShowMessageEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Message) == false)
+                this.ShowMessage(e.Message, e.Color, e.ClickClose);
+            else
+                this.ClearMessage();
         }
 
         void _genData_SynchronizeMarcEvent(object sender, EventArgs e)

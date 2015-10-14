@@ -40,8 +40,8 @@ namespace dp2Circulation
 
             _label_editing = this.label_editing;
             _button_editing_undoMaskDelete = this.button_editing_undoMaskDelete;
-            _button_editing_nextRecord = this.button_editing_nextRecord;
-            _button_editing_prevRecord = this.button_editing_prevRecord;
+            _button_editing_nextRecord = this.toolStripButton_next; //  this.button_editing_nextRecord;
+            _button_editing_prevRecord = this.toolStripButton_prev; //  this.button_editing_prevRecord;
 
             _checkBox_autoSearchDup = this.checkBox_autoSearchDup;
 
@@ -398,6 +398,7 @@ namespace dp2Circulation
             }
         }
 
+#if NO
         private void button_editing_prevRecord_Click(object sender, EventArgs e)
         {
             this.EnableControls(false);
@@ -417,6 +418,7 @@ namespace dp2Circulation
 
             this.EnableControls(true);
         }
+#endif
 
         private void entityEditControl_editing_ContentChanged(object sender, ContentChangedEventArgs e)
         {
@@ -490,12 +492,14 @@ namespace dp2Circulation
             }
             else if (e.e.KeyCode == Keys.PageDown && e.e.Control == true)
             {
-                this.button_editing_nextRecord_Click(null, null);
+                // this.button_editing_nextRecord_Click(null, null);
+                this.toolStripButton_next_Click(null, null);
                 return;
             }
             else if (e.e.KeyCode == Keys.PageUp && e.e.Control == true)
             {
-                this.button_editing_prevRecord_Click(null, null);
+                // this.button_editing_prevRecord_Click(null, null);
+                this.toolStripButton_prev_Click(null, null);
                 return;
             }
             else if (e.e.KeyCode == Keys.OemOpenBrackets && e.e.Control == true)
@@ -633,6 +637,50 @@ namespace dp2Circulation
         private void entityEditControl_editing_ControlKeyPress(object sender, ControlKeyPressEventArgs e)
         {
 
+        }
+
+        private void toolStripButton_prev_Click(object sender, EventArgs e)
+        {
+            this.EnableControls(false);
+
+            LoadPrevOrNextItem(true);
+            EnablePrevNextRecordButtons();
+
+            this.EnableControls(true);
+        }
+
+        private void toolStripButton_next_Click(object sender, EventArgs e)
+        {
+            this.EnableControls(false);
+
+            LoadPrevOrNextItem(false);
+            EnablePrevNextRecordButtons();
+
+            this.EnableControls(true);
+        }
+
+        private void toolStripButton_option_Click(object sender, EventArgs e)
+        {
+            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.MainForm = this.MainForm;
+            dlg.DisplayStyle = "normal_entity";
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+        }
+
+        public string NextAction
+        {
+            get;
+            set;
+        }
+
+        private void toolStripButton_new_Click(object sender, EventArgs e)
+        {
+            // 关闭窗口，并促使后继调用新增功能
+            this.NextAction = "new";
+            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Close();
         }
     }
 

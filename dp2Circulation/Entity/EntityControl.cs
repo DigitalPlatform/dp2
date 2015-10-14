@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -24,6 +25,8 @@ namespace dp2Circulation
     /// </summary>
     public partial class EntityControl : EntityControlBase
     {
+        public event ShowMessageEventHandler ShowMessage = null;
+
         /*
         // 创建索取号
         public event GenerateDataEventHandler GenerateAccessNo = null;
@@ -1330,13 +1333,13 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             if (edit.DialogResult != DialogResult.OK)
                 return;
 
-            // BookItem对象已经被修改
+            if (edit.NextAction == "new")
+                this.ParentShowMessage("请稍候 ...", "green", false);
 
+            // BookItem对象已经被修改
             this.EnableControls(false);
             try
             {
-
-
                 if (strOldBarcode != bookitem.Barcode // 条码改变了的情况下才查重
                     && String.IsNullOrEmpty(bookitem.Barcode) == false)   // 2008/11/3 不检查空的条码号是否重复
                 {
@@ -1389,6 +1392,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     }
                 }
 
+                if (edit.NextAction == "new")
+                {
+                    // 要新增记录
+                    this.BeginInvoke(new Action<string>(DoNewEntity), "");
+                    return;
+                }
             }
             finally
             {
@@ -1780,7 +1789,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             bookitem.Changed = true;    // 因为是新增的事项，无论如何都算修改过。这样可以避免集合中只有一个新增事项的时候，集合的changed值不对
 
-
             EntityEditForm edit = new EntityEditForm();
 
             // 2009/2/24 
@@ -1806,10 +1814,15 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             if (nRet == -1)
                 goto ERROR1;
 
+            this.ParentShowMessage("", "", false);
+
             //REDO:
             this.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
             edit.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(edit);
+
+            if (edit.NextAction == "new")
+                this.ParentShowMessage("请稍候 ...", "green", false);
 
             if (edit.DialogResult != DialogResult.OK
                 && edit.Item == bookitem    // 表明尚未前后移动，或者移动回到起点，然后Cancel
@@ -1830,6 +1843,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                  * */
                 this.Changed = this.Changed;
 
+                if (edit.NextAction == "new")
+                    this.ParentShowMessage("", "", false);
                 return;
             }
 
@@ -1846,54 +1861,21 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
              * */
             this.Changed = this.Changed;
 
-
-#if NOOOOOOOOOOOOOO
-            this.EnableControls(false);
-            try
-            {
-                // 对所有实体记录进行条码查重
-                if (edit.AutoSearchDup == true)
-                {
-                    string strItemText = "";
-                    string strBiblioText = "";
-                    nRet = SearchEntityBarcode(bookitem.Barcode,
-                        out strItemText,
-                        out strBiblioText,
-                        out strError);
-                    if (nRet == -1)
-                        MessageBox.Show(ForegroundWindow.Instance, "对册条码号 '" + bookitem.Barcode + "' 进行查重的过程中发生错误: " + strError);
-                    else if (nRet == 1) // 发生重复
-                    {
-                        EntityBarcodeFoundDupDlg dlg = new EntityBarcodeFoundDupDlg();
-                        dlg.MainForm = this.MainForm;
-                        dlg.BiblioText = strBiblioText;
-                        dlg.ItemText = strItemText;
-                        dlg.MessageText = "拟新增的册信息中，条码 '" + bookitem.Barcode + "' 在数据库中发现已经存在。按“确定”按钮重新输入。";
-                        this.MainForm.AppInfo.LinkFormState(dlg, "EntityBarcodeFoundDupDlg_state");
-                        dlg.ShowDialog(this);
-                        goto REDO;
-                    }
-                }
-
-                /*
-                this.bookitems.Add(bookitem);
-                bookitem.ItemDisplayState = ItemDisplayState.New;
-                bookitem.AddToListView(this.listView_items);
-                bookitem.HilightListViewItem();
-                 * */
-            }
-            finally
-            {
-                this.EnableControls(true);
-            }
-#endif
             // TODO: 2007/10/23
             // 要对本种和所有相关实体库进行条码查重。
             // 如果重了，要保持窗口，以便修改。不过从这个角度，查重最好在对话框关闭前作？
             // 或者重新打开对话框
+
+            if (edit.NextAction == "new")
+            {
+                // 要新增记录
+                this.BeginInvoke(new Action<string>(DoNewEntity), "");
+                return;
+            }
             return;
 
         ERROR1:
+            this.ParentShowMessage("", "", false);
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -3513,6 +3495,18 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             out string strError)
         {
             return this.AppendItem(item, out strError);
+        }
+
+        public void ParentShowMessage(string strMessage, string strColor, bool bClickClose)
+        {
+            if (this.ShowMessage != null)
+            {
+                ShowMessageEventArgs e = new ShowMessageEventArgs();
+                e.Message = strMessage;
+                e.Color = strColor;
+                e.ClickClose = bClickClose;
+                this.ShowMessage(this, e);
+            }
         }
     }
 

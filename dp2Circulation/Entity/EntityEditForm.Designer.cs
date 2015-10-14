@@ -41,8 +41,11 @@ namespace dp2Circulation
             this.button_editing_undoMaskDelete = new System.Windows.Forms.Button();
             this.label_editing = new System.Windows.Forms.Label();
             this.panel_editing = new System.Windows.Forms.Panel();
-            this.button_editing_nextRecord = new System.Windows.Forms.Button();
-            this.button_editing_prevRecord = new System.Windows.Forms.Button();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_next = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_prev = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_new = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_option = new System.Windows.Forms.ToolStripButton();
             this.entityEditControl_editing = new dp2Circulation.EntityEditControl();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
             this.textBox_message = new System.Windows.Forms.TextBox();
@@ -53,6 +56,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_existing.SuspendLayout();
             this.tableLayoutPanel_editing.SuspendLayout();
             this.panel_editing.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -147,6 +151,7 @@ namespace dp2Circulation
             // 
             this.entityEditControl_existing.AccessNo = "";
             this.entityEditControl_existing.AutoScroll = true;
+            this.entityEditControl_existing.BackColor = System.Drawing.SystemColors.Control;
             this.entityEditControl_existing.Barcode = "";
             this.entityEditControl_existing.BatchNo = "";
             this.entityEditControl_existing.Binding = "";
@@ -157,7 +162,11 @@ namespace dp2Circulation
             this.entityEditControl_existing.BorrowPeriod = "";
             this.entityEditControl_existing.Changed = false;
             this.entityEditControl_existing.Comment = "";
+            this.entityEditControl_existing.CreateState = dp2Circulation.ItemDisplayState.Normal;
+            this.entityEditControl_existing.DisplayMode = "full";
             this.entityEditControl_existing.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.entityEditControl_existing.ErrorInfo = "";
+            this.entityEditControl_existing.ForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl_existing.Initializing = true;
             this.entityEditControl_existing.Intact = "";
             this.entityEditControl_existing.Location = new System.Drawing.Point(2, 14);
@@ -180,6 +189,8 @@ namespace dp2Circulation
             this.entityEditControl_existing.Source = "";
             this.entityEditControl_existing.State = "";
             this.entityEditControl_existing.TabIndex = 1;
+            this.entityEditControl_existing.TableMargin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.entityEditControl_existing.TablePadding = new System.Windows.Forms.Padding(12, 13, 12, 13);
             this.entityEditControl_existing.Volume = "";
             // 
             // button_existing_undoMaskDelete
@@ -234,8 +245,7 @@ namespace dp2Circulation
             // 
             // panel_editing
             // 
-            this.panel_editing.Controls.Add(this.button_editing_nextRecord);
-            this.panel_editing.Controls.Add(this.button_editing_prevRecord);
+            this.panel_editing.Controls.Add(this.toolStrip1);
             this.panel_editing.Controls.Add(this.entityEditControl_editing);
             this.panel_editing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_editing.Location = new System.Drawing.Point(2, 14);
@@ -244,31 +254,63 @@ namespace dp2Circulation
             this.panel_editing.Size = new System.Drawing.Size(206, 167);
             this.panel_editing.TabIndex = 8;
             // 
-            // button_editing_nextRecord
+            // toolStrip1
             // 
-            this.button_editing_nextRecord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_editing_nextRecord.Enabled = false;
-            this.button_editing_nextRecord.Image = ((System.Drawing.Image)(resources.GetObject("button_editing_nextRecord.Image")));
-            this.button_editing_nextRecord.Location = new System.Drawing.Point(184, 144);
-            this.button_editing_nextRecord.Margin = new System.Windows.Forms.Padding(2);
-            this.button_editing_nextRecord.Name = "button_editing_nextRecord";
-            this.button_editing_nextRecord.Size = new System.Drawing.Size(22, 22);
-            this.button_editing_nextRecord.TabIndex = 2;
-            this.button_editing_nextRecord.UseVisualStyleBackColor = true;
-            this.button_editing_nextRecord.Click += new System.EventHandler(this.button_editing_nextRecord_Click);
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_next,
+            this.toolStripButton_prev,
+            this.toolStripButton_new,
+            this.toolStripButton_option});
+            this.toolStrip1.Location = new System.Drawing.Point(174, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.toolStrip1.Size = new System.Drawing.Size(32, 167);
+            this.toolStrip1.TabIndex = 3;
+            this.toolStrip1.Text = "toolStrip1";
             // 
-            // button_editing_prevRecord
+            // toolStripButton_next
             // 
-            this.button_editing_prevRecord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_editing_prevRecord.Enabled = false;
-            this.button_editing_prevRecord.Image = ((System.Drawing.Image)(resources.GetObject("button_editing_prevRecord.Image")));
-            this.button_editing_prevRecord.Location = new System.Drawing.Point(184, 117);
-            this.button_editing_prevRecord.Margin = new System.Windows.Forms.Padding(2);
-            this.button_editing_prevRecord.Name = "button_editing_prevRecord";
-            this.button_editing_prevRecord.Size = new System.Drawing.Size(22, 22);
-            this.button_editing_prevRecord.TabIndex = 1;
-            this.button_editing_prevRecord.UseVisualStyleBackColor = true;
-            this.button_editing_prevRecord.Click += new System.EventHandler(this.button_editing_prevRecord_Click);
+            this.toolStripButton_next.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButton_next.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_next.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_next.Image")));
+            this.toolStripButton_next.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_next.Name = "toolStripButton_next";
+            this.toolStripButton_next.Size = new System.Drawing.Size(29, 20);
+            this.toolStripButton_next.Text = "下一记录";
+            this.toolStripButton_next.Click += new System.EventHandler(this.toolStripButton_next_Click);
+            // 
+            // toolStripButton_prev
+            // 
+            this.toolStripButton_prev.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButton_prev.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_prev.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prev.Image")));
+            this.toolStripButton_prev.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_prev.Name = "toolStripButton_prev";
+            this.toolStripButton_prev.Size = new System.Drawing.Size(29, 20);
+            this.toolStripButton_prev.Text = "上一记录";
+            this.toolStripButton_prev.Click += new System.EventHandler(this.toolStripButton_prev_Click);
+            // 
+            // toolStripButton_new
+            // 
+            this.toolStripButton_new.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_new.Image")));
+            this.toolStripButton_new.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_new.Name = "toolStripButton_new";
+            this.toolStripButton_new.Size = new System.Drawing.Size(29, 20);
+            this.toolStripButton_new.Text = "新建册记录";
+            this.toolStripButton_new.Click += new System.EventHandler(this.toolStripButton_new_Click);
+            // 
+            // toolStripButton_option
+            // 
+            this.toolStripButton_option.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
+            this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_option.Name = "toolStripButton_option";
+            this.toolStripButton_option.Size = new System.Drawing.Size(29, 20);
+            this.toolStripButton_option.Text = "选项";
+            this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
             // entityEditControl_editing
             // 
@@ -277,6 +319,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.entityEditControl_editing.AutoScroll = true;
+            this.entityEditControl_editing.BackColor = System.Drawing.SystemColors.Control;
             this.entityEditControl_editing.Barcode = "";
             this.entityEditControl_editing.BatchNo = "";
             this.entityEditControl_editing.Binding = "";
@@ -287,6 +330,10 @@ namespace dp2Circulation
             this.entityEditControl_editing.BorrowPeriod = "";
             this.entityEditControl_editing.Changed = false;
             this.entityEditControl_editing.Comment = "";
+            this.entityEditControl_editing.CreateState = dp2Circulation.ItemDisplayState.Normal;
+            this.entityEditControl_editing.DisplayMode = "full";
+            this.entityEditControl_editing.ErrorInfo = "";
+            this.entityEditControl_editing.ForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl_editing.Initializing = true;
             this.entityEditControl_editing.Intact = "";
             this.entityEditControl_editing.Location = new System.Drawing.Point(0, 0);
@@ -309,6 +356,8 @@ namespace dp2Circulation
             this.entityEditControl_editing.Source = "";
             this.entityEditControl_editing.State = "";
             this.entityEditControl_editing.TabIndex = 0;
+            this.entityEditControl_editing.TableMargin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.entityEditControl_editing.TablePadding = new System.Windows.Forms.Padding(12, 13, 12, 13);
             this.entityEditControl_editing.Volume = "";
             this.entityEditControl_editing.ContentChanged += new DigitalPlatform.ContentChangedEventHandler(this.entityEditControl_editing_ContentChanged);
             this.entityEditControl_editing.ControlKeyDown += new DigitalPlatform.ControlKeyEventHandler(this.entityEditControl_editing_ControlKeyDown);
@@ -375,6 +424,9 @@ namespace dp2Circulation
             this.tableLayoutPanel_editing.ResumeLayout(false);
             this.tableLayoutPanel_editing.PerformLayout();
             this.panel_editing.ResumeLayout(false);
+            this.panel_editing.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
             this.ResumeLayout(false);
@@ -399,7 +451,10 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_existing_undoMaskDelete;
         private System.Windows.Forms.Button button_editing_undoMaskDelete;
         private System.Windows.Forms.Panel panel_editing;
-        private System.Windows.Forms.Button button_editing_nextRecord;
-        private System.Windows.Forms.Button button_editing_prevRecord;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_prev;
+        private System.Windows.Forms.ToolStripButton toolStripButton_next;
+        private System.Windows.Forms.ToolStripButton toolStripButton_new;
+        private System.Windows.Forms.ToolStripButton toolStripButton_option;
     }
 }

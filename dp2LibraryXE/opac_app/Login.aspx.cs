@@ -520,6 +520,12 @@ ref this.sessioninfo) == false)
 
     void Redirect(string strRedirect)
     {
+        if (app.UseTransfer == true)
+        {
+            Server.Transfer(strRedirect);
+            return;
+        }
+
         string serverName =
             HttpUtility.UrlEncode(Request.ServerVariables["SERVER_NAME"]);
 
@@ -574,7 +580,6 @@ ref this.sessioninfo) == false)
         Response.End();
          * */
     }
-
 
     protected void LoginControl1_Login(object sender, LoginEventArgs e)
     {

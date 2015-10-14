@@ -86,8 +86,8 @@ namespace dp2Circulation
 
         internal Label _label_editing = null;
         internal Button _button_editing_undoMaskDelete = null;
-        internal Button _button_editing_nextRecord = null;
-        internal Button _button_editing_prevRecord = null;
+        internal object _button_editing_nextRecord = null;  // 2015/10/14 以前为 Button
+        internal object _button_editing_prevRecord = null;
 
         internal CheckBox _checkBox_autoSearchDup = null;
 
@@ -392,11 +392,24 @@ namespace dp2Circulation
 
             if (bEnable == false)
             {
-                this._button_editing_nextRecord.Enabled = bEnable;
-                this._button_editing_prevRecord.Enabled = bEnable;
+                // this._button_editing_nextRecord.Enabled = bEnable;
+                // this._button_editing_prevRecord.Enabled = bEnable;
+                OnButtonEnabledChanged(this._button_editing_nextRecord, bEnable);
+                OnButtonEnabledChanged(this._button_editing_prevRecord, bEnable);
             }
             else
                 this.EnablePrevNextRecordButtons();
+        }
+
+        // 如果 button 对象不是 已知 类型，则派生类需要重载这个函数，实现按钮 Enabled 状态的变化
+        public virtual void OnButtonEnabledChanged(object button, bool bEnabled)
+        {
+            if (button is Button)
+                ((Button)button).Enabled = bEnabled;
+            else if (button is ToolStripButton)
+                ((ToolStripButton)button).Enabled = bEnabled;
+            else
+                throw new Exception("需要重载函数 OnButtonEnabledChanged()，处理类型 " + button.GetType().ToString());
         }
 
         // 根据当前bookitem事项在容器中的位置，设置PrevRecord和NextRecord按钮的Enabled状态
@@ -427,23 +440,29 @@ namespace dp2Circulation
                 goto DISABLE_TWO_BUTTON;
             }
 
-            this._button_editing_prevRecord.Enabled = true;
-            this._button_editing_nextRecord.Enabled = true;
+            //this._button_editing_prevRecord.Enabled = true;
+            //this._button_editing_nextRecord.Enabled = true;
+            OnButtonEnabledChanged(this._button_editing_prevRecord, true);
+            OnButtonEnabledChanged(this._button_editing_nextRecord, true);
 
             if (nIndex == 0)
             {
-                this._button_editing_prevRecord.Enabled = false;
+                // this._button_editing_prevRecord.Enabled = false;
+                OnButtonEnabledChanged(this._button_editing_prevRecord, false);
             }
 
             if (nIndex >= this.ItemControl.CountOfVisibleItems() - 1)
             {
-                this._button_editing_nextRecord.Enabled = false;
+                //this._button_editing_nextRecord.Enabled = false;
+                OnButtonEnabledChanged(this._button_editing_nextRecord, false);
             }
 
             return;
         DISABLE_TWO_BUTTON:
-            this._button_editing_prevRecord.Enabled = false;
-            this._button_editing_nextRecord.Enabled = false;
+            //this._button_editing_prevRecord.Enabled = false;
+            //this._button_editing_nextRecord.Enabled = false;
+            OnButtonEnabledChanged(this._button_editing_prevRecord, false);
+            OnButtonEnabledChanged(this._button_editing_nextRecord, false);
             return;
         }
 

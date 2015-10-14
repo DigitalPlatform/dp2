@@ -462,4 +462,24 @@ size.Height);
             this._clearTime = new DateTime(0);
         }
     }
+
+        /// <summary>
+    /// 显示浮动信息
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void ShowMessageEventHandler(object sender,
+    ShowMessageEventArgs e);
+
+    /// <summary>
+    /// 显示浮动信息事件的参数
+    /// </summary>
+    public class ShowMessageEventArgs : EventArgs
+    {
+        public string Message = "";
+        public string Color = "";
+        public bool ClickClose = false;
+    }
+
+    
 }
