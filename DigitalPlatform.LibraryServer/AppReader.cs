@@ -237,6 +237,7 @@ namespace DigitalPlatform.LibraryServer
             return bChanged;
         }
 
+        // TODO: 需要硬编码禁止覆盖一些流通专用的字段 borrows 等
         // <DoReaderChange()的下级函数>
         // 合并新旧记录
         static int MergeTwoReaderXml(
@@ -351,7 +352,6 @@ namespace DigitalPlatform.LibraryServer
                 // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
                 MergeDprmsFile(ref domExist,
                     domNew);
-
             }
             else if (strAction == "changestate")
             {
@@ -367,7 +367,6 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetElementOuterXml(domExist.DocumentElement,
                         element_names_onlystate[i],
                         strTextNew);
-
                 }
 
                 // 不修改<dprms:file>
@@ -387,7 +386,6 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetElementOuterXml(domExist.DocumentElement,
                         element_names_onlyforegift[i],
                         strTextNew);
-
                 }
 
                 // 不修改<dprms:file>

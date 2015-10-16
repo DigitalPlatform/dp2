@@ -94,6 +94,7 @@ namespace DigitalPlatform.LibraryServer
         //      2.52 (2015/9/17) SetReaderInfo() API 允许使用用户定义的扩充字段。扩充字段在 library.xml 的 circulation 元素 patronAdditionalFields 属性中定义
         //      2.53 (2015/9/26) Borrow() 和 Return() 增加了对总操作时间超过一秒的情况 memo 日志记录的功能。
         //      2.54 (2015/9/28) ManageDatabase() 中刷新检索点定义功能，增加了对读者库选择刷新 keys 为普通状态和适合日志恢复状态的功能
+        //      2.55 (2015/10/16) SetReaderInfo() API 允许使用用户定义的读者同步扩充字段。扩充字段在 library.xml 的 circulation 元素 patronReplicationFields 属性中定义
         public static string Version = "2.54";
 #if NO
         int m_nRefCount = 0;
@@ -337,6 +338,10 @@ namespace DigitalPlatform.LibraryServer
         // 读者记录中的扩展字段
         // 不要试图在运行中途修改它。它不会回写到 library.xml 中
         public List<string> PatronAdditionalFields = new List<string>();
+
+        // 2015/10/16
+        // 用于读者同步的字段列表。如果第一个元素为 空，表示替换原有列表；否则是追加补充字段定义的意思
+        public List<string> PatronReplicationFields = new List<string>();
 
         // 构造函数
         public LibraryApplication()
@@ -722,6 +727,14 @@ namespace DigitalPlatform.LibraryServer
                         if (string.IsNullOrEmpty(strList) == false)
                         {
                             this.PatronAdditionalFields = StringUtil.SplitList(strList);
+                        }
+                    }
+
+                    {
+                        string strList = DomUtil.GetAttr(node, "patronReplicationFields");
+                        if (string.IsNullOrEmpty(strList) == false)
+                        {
+                            this.PatronReplicationFields = StringUtil.SplitList(strList);
                         }
                     }
 

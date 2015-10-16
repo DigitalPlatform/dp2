@@ -1291,7 +1291,7 @@ out kernel_errorcode);
         }
 
         // 读者记录中 需要从卡中心同步的 元素名列表
-        static string[] patron_rep_element_names = new string[] {
+        static string[] _patron_rep_element_names = new string[] {
                 "barcode",
                 "state",
                 "readerType",
@@ -1355,9 +1355,7 @@ out kernel_errorcode);
         StringUtil.MakePathList(result_list));
             }
 
-
             strOutputXml = domNew.DocumentElement.OuterXml;
-
             return 0;
         }
 
@@ -1399,6 +1397,8 @@ out kernel_errorcode);
             return results;
         }
 
+        // TODO: 需要硬编码禁止覆盖一些流通专用的字段 borrows 等
+        // TODO: <fprms:file> 元素应该不让覆盖
         // 检查记录有无修改
         // return:
         //      -1  出错
@@ -1413,14 +1413,27 @@ out kernel_errorcode);
             strError = "";
             strMergedXml = "";
 
+            string[] element_names = null;
+
+            // 字段的定义，如果第一个元素为空，表示全部用定义的值；如果第一个元素不是空，则增补缺省的定义
+            if (this.App.PatronReplicationFields == null
+                || this.App.PatronReplicationFields.Count == 0)
+                element_names = _patron_rep_element_names;
+            else if (string.IsNullOrEmpty(this.App.PatronReplicationFields[0]) == false)
+                element_names = StringUtil.Append(_patron_rep_element_names, this.App.PatronReplicationFields.ToArray());
+            else
+                element_names = this.App.PatronReplicationFields.ToArray();
+
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
             bool bChanged = false;
 
-            for (int i = 0; i < patron_rep_element_names.Length; i++)
+            for (int i = 0; i < element_names.Length; i++)
             {
-                string strElementName = patron_rep_element_names[i];
+                string strElementName = element_names[i];
+                if (string.IsNullOrEmpty(strElementName) == true)
+                    continue;
 
                 XmlNode node = domNew.DocumentElement.SelectSingleNode(strElementName); // 2012/12/12 加入 DocumentElement
                 if (node != null)
