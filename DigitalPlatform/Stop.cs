@@ -276,7 +276,7 @@ namespace DigitalPlatform
         // locks: 写锁定
         // parameters:
         //      bHalfStop   是否为一半中断。所谓一般中断，就是不触发Stop事件，而只修改Stop状态。
-        public void DoStop()
+        public void DoStop(object sender = null)
         {
             this.m_stoplock.AcquireWriterLock(Stop.m_nLockTimeout);
             try
@@ -295,7 +295,7 @@ namespace DigitalPlatform
                     {
                         // OnStop()是在已经锁定的情况下调用的
                         StopEventArgs e = new StopEventArgs();
-                        this.OnStop(this, e);
+                        this.OnStop(sender == null ? this : sender, e);
                     }
                 }
 

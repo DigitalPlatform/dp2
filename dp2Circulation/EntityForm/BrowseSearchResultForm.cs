@@ -18,6 +18,13 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BrowseSearchResultForm : Form
     {
+#if NO
+        /// <summary>
+        /// 窗口关闭前，停止通道前触发的事件
+        /// </summary>
+        public event EventHandler BoforeStop = null;
+#endif
+
         // 2015/8/14
         Hashtable m_biblioTable = new Hashtable(); // 书目记录路径 --> 书目信息
 
@@ -128,7 +135,6 @@ namespace dp2Circulation
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
@@ -253,8 +259,7 @@ namespace dp2Circulation
             if (this.listView_records.SelectedItems.Count == 0)
                 return;
 
-            if (this.stop != null)
-                stop.DoStop();
+            DoStop();
 
             string strError = "";
             // string[] paths = new string[this.listView_records.SelectedItems.Count];
@@ -296,10 +301,12 @@ namespace dp2Circulation
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
         {
+#if NO
             this.DialogResult = DialogResult.OK;
             this.Close();
-
             OnLoadDetail();
+#endif
+            button_OK_Click(sender, e);
         }
 
         private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
@@ -317,8 +324,22 @@ namespace dp2Circulation
 
         private void BrowseSearchResultForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            DoStop();
+        }
+
+        void DoStop()
+        {
             if (this.stop != null)
-                this.stop.DoStop();
+            {
+#if NO
+                if (this.BoforeStop != null)
+                {
+                    this.BoforeStop(this, new EventArgs());
+                }
+#endif
+                stop.DoStop(this);
+                this.stop = null;
+            }
         }
 
         private void listView_records_ColumnClick(object sender, ColumnClickEventArgs e)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define TEST
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,6 +30,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GcatClient;
 using DigitalPlatform.GcatClient.gcat_new_ws;
+using System.Threading;
 
 namespace dp2Catalog
 {
@@ -248,16 +251,16 @@ namespace dp2Catalog
 #endif
         }
 
+        int _processing = 0;    // 长操作嵌套计数器。如果大于0，表示正在处理，不希望窗口关闭
+
         private void MarcDetailForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (stop != null)
+            if ((stop != null && stop.State == 0)    // 0 表示正在处理
+                || _processing > 0)
             {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
+                MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。或等待长时操作完成");
+                e.Cancel = true;
+                return;
             }
 
             if (/*this.EntitiesChanged == true
@@ -959,151 +962,150 @@ namespace dp2Catalog
                 goto ERROR1;
             }
 
-            DigitalPlatform.Z3950.Record record = null;
-            Encoding currentEncoding = null;
-
-            this.CurrentRecord = null;
-
-            byte[] baTimestamp = null;
-            string strOutStyle = "";
-
-            string strSavePath = "";
-            string strMARC;
-
-            long lVersion = 0;
-            LoginInfo logininfo = null; 
-            string strXmlFragment = "";
-
-            int nRet = dp2_searchform.GetOneRecord(
-                //true,
-                "marc",
-                //strPath,
-                //strDirection,
-                0,  // test
-                "path:" + strPath + ",direction:" + strDirection,
-                bReload == true ? "reload" : "",
-                out strSavePath,
-                out strMARC,
-                out strXmlFragment,
-                out strOutStyle,
-                out baTimestamp,
-                out lVersion,
-                out record,
-                out currentEncoding,
-                out logininfo,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            nRet = this.LoadXmlFragment(strXmlFragment,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            this.CurrentTimestamp = baTimestamp;
-            // this.SavePath = dp2_searchform.CurrentProtocol + ":" + strOutputPath;
-            this.SavePath = strSavePath;
-            this.CurrentEncoding = currentEncoding;
-
-
-            /*
-            // 接着装入对象资源
-            if (bLoadResObject == true)
+            _processing ++;
+            try
             {
-                this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
-                nRet = this.binaryResControl1.LoadObject(strLocalPath,
-                    strRecordXml,
+
+                DigitalPlatform.Z3950.Record record = null;
+                Encoding currentEncoding = null;
+
+                this.CurrentRecord = null;
+
+                byte[] baTimestamp = null;
+                string strOutStyle = "";
+
+                string strSavePath = "";
+                string strMARC;
+
+                long lVersion = 0;
+                LoginInfo logininfo = null;
+                string strXmlFragment = "";
+
+                int nRet = dp2_searchform.GetOneRecord(
+                    //true,
+                    "marc",
+                    //strPath,
+                    //strDirection,
+                    0,  // test
+                    "path:" + strPath + ",direction:" + strDirection,
+                    bReload == true ? "reload" : "",
+                    out strSavePath,
+                    out strMARC,
+                    out strXmlFragment,
+                    out strOutStyle,
+                    out baTimestamp,
+                    out lVersion,
+                    out record,
+                    out currentEncoding,
+                    out logininfo,
                     out strError);
                 if (nRet == -1)
-                {
-                    MessageBox.Show(this, strError);
-                    return -1;
-                }
-            }*/
-            // 装入MARC编辑器
-            this.MarcEditor.Marc = strMARC;
+                    goto ERROR1;
 
-
-            this.m_nDisableInitialAssembly++; 
-            this.CurrentRecord = record;
-            this.m_nDisableInitialAssembly--; 
-
-            if (this.m_currentRecord != null)
-            {
-                // 装入二进制编辑器
-                this.binaryEditor_originData.SetData(
-                    this.m_currentRecord.m_baRecord);
-
-                // 装入ISO2709文本
-                nRet = this.Set2709OriginText(this.m_currentRecord.m_baRecord,
-                    this.CurrentEncoding,
+                nRet = this.LoadXmlFragment(strXmlFragment,
                     out strError);
                 if (nRet == -1)
+                    goto ERROR1;
+
+                this.CurrentTimestamp = baTimestamp;
+                // this.SavePath = dp2_searchform.CurrentProtocol + ":" + strOutputPath;
+                this.SavePath = strSavePath;
+                this.CurrentEncoding = currentEncoding;
+
+#if TEST
+                // 测试：休眠一段时间，然后出让控制权
+                Thread.Sleep(3000);
+                Application.DoEvents();
+#endif
+
+                // 装入MARC编辑器
+                this.MarcEditor.Marc = strMARC;
+
+                this.m_nDisableInitialAssembly++;
+                this.CurrentRecord = record;
+                this.m_nDisableInitialAssembly--;
+
+                if (this.m_currentRecord != null)
                 {
-                    this.textBox_originData.Text = strError;
-                }
+                    // 装入二进制编辑器
+                    this.binaryEditor_originData.SetData(
+                        this.m_currentRecord.m_baRecord);
 
-                // 数据库名
-                this.textBox_originDatabaseName.Text = this.m_currentRecord.m_strDBName;
+                    // 装入ISO2709文本
+                    nRet = this.Set2709OriginText(this.m_currentRecord.m_baRecord,
+                        this.CurrentEncoding,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.textBox_originData.Text = strError;
+                    }
 
-                // Marc syntax OID
-                this.textBox_originMarcSyntaxOID.Text = this.m_currentRecord.m_strSyntaxOID;
+                    // 数据库名
+                    this.textBox_originDatabaseName.Text = this.m_currentRecord.m_strDBName;
 
-                // 2014/5/18
-                if (this.UseAutoDetectedMarcSyntaxOID == true)
-                {
-                    this.AutoDetectedMarcSyntaxOID = this.m_currentRecord.AutoDetectedSyntaxOID;
-                    if (string.IsNullOrEmpty(this.AutoDetectedMarcSyntaxOID) == false)
-                        this.textBox_originMarcSyntaxOID.Text = this.AutoDetectedMarcSyntaxOID;
-                }
+                    // Marc syntax OID
+                    this.textBox_originMarcSyntaxOID.Text = this.m_currentRecord.m_strSyntaxOID;
+
+                    // 2014/5/18
+                    if (this.UseAutoDetectedMarcSyntaxOID == true)
+                    {
+                        this.AutoDetectedMarcSyntaxOID = this.m_currentRecord.AutoDetectedSyntaxOID;
+                        if (string.IsNullOrEmpty(this.AutoDetectedMarcSyntaxOID) == false)
+                            this.textBox_originMarcSyntaxOID.Text = this.AutoDetectedMarcSyntaxOID;
+                    }
 
 #if NO
                 // 让确定的OID起作用 2008/3/25
                 if (String.IsNullOrEmpty(this.m_currentRecord.m_strSyntaxOID) == false)
                     this.AutoDetectedMarcSyntaxOID = "";
 #endif
-            }
-            else
-            {
-                byte[] baMARC = this.CurrentEncoding.GetBytes(strMARC);
-                // 装入二进制编辑器
-                this.binaryEditor_originData.SetData(
-                    baMARC);
-
-                // 装入ISO2709文本
-                nRet = this.Set2709OriginText(baMARC,
-                    this.CurrentEncoding,
-                    out strError);
-                if (nRet == -1)
-                {
-                    this.textBox_originData.Text = strError;
                 }
+                else
+                {
+                    byte[] baMARC = this.CurrentEncoding.GetBytes(strMARC);
+                    // 装入二进制编辑器
+                    this.binaryEditor_originData.SetData(
+                        baMARC);
+
+                    // 装入ISO2709文本
+                    nRet = this.Set2709OriginText(baMARC,
+                        this.CurrentEncoding,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.textBox_originData.Text = strError;
+                    }
+                }
+
+                DisplayHtml(strMARC, this.textBox_originMarcSyntaxOID.Text);
+
+                // 构造路径
+                /*
+                string strPath = searchform.CurrentProtocol + ":"
+                    + searchform.CurrentResultsetPath
+                    + "/" + (index + 1).ToString();
+
+                this.textBox_tempRecPath.Text = strPath;
+                 * */
+                if (strDirection != "current")  // 2013/9/18
+                    this.textBox_tempRecPath.Text = "";
+
+
+                this.MarcEditor.MarcDefDom = null; // 强制刷新字段名提示
+                this.MarcEditor.RefreshNameCaption();
+
+                this.BiblioChanged = false;
+
+                if (this.MarcEditor.FocusedFieldIndex == -1)
+                    this.MarcEditor.FocusedFieldIndex = 0;
+
+                this.MarcEditor.Focus();
+                return 0;
             }
-
-            DisplayHtml(strMARC, this.textBox_originMarcSyntaxOID.Text);
-
-            // 构造路径
-            /*
-            string strPath = searchform.CurrentProtocol + ":"
-                + searchform.CurrentResultsetPath
-                + "/" + (index + 1).ToString();
-
-            this.textBox_tempRecPath.Text = strPath;
-             * */
-            if (strDirection != "current")  // 2013/9/18
-                this.textBox_tempRecPath.Text = "";
-
-
-            this.MarcEditor.MarcDefDom = null; // 强制刷新字段名提示
-            this.MarcEditor.RefreshNameCaption();
-
-            this.BiblioChanged = false;
-
-            if (this.MarcEditor.FocusedFieldIndex == -1)
-                this.MarcEditor.FocusedFieldIndex = 0;
-
-            this.MarcEditor.Focus();
-            return 0;
+            finally
+            {
+                _processing--;
+            }
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -3222,139 +3224,148 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             string strError = "";
             int nRet = 0;
 
-            string strLastSavePath = MainForm.LastSavePath;
-            if (String.IsNullOrEmpty(strLastSavePath) == false)
-            {
-                string strOutputPath = "";
-                nRet = ChangePathToAppendStyle(strLastSavePath,
-                    out strOutputPath,
-                    out strError);
-                if (nRet == -1)
-                {
-                    MainForm.LastSavePath = ""; // 避免下次继续出错 2011/3/4
-                    goto ERROR1;
-                }
-                strLastSavePath = strOutputPath;
-            }
-
-            string strCurrentUserName = "";
-            string strSavePath = this.SavePath == "" ? strLastSavePath : this.SavePath;
-
-            if (strStyle == "save"
-                && string.IsNullOrEmpty(this.SavePath) == false
-                && (Control.ModifierKeys & Keys.Control) == 0)
-            {
-                // 2011/8/8
-                // 保存时如果已经有了路径，就不用打开对话框了
-            }
-            else
-            {
-                SaveRecordDlg dlg = new SaveRecordDlg();
-                GuiUtil.SetControlFont(dlg, this.Font);
-
-                dlg.MainForm = this.MainForm;
-                dlg.GetDtlpSearchParam += new GetDtlpSearchParamEventHandle(dlg_GetDtlpSearchParam);
-                dlg.GetDp2SearchParam += new GetDp2SearchParamEventHandle(dlg_GetDp2SearchParam);
-                if (strStyle == "save")
-                    dlg.RecPath = this.SavePath == "" ? strLastSavePath : this.SavePath;
-                else
-                {
-                    dlg.RecPath = strLastSavePath;  // 2011/6/19
-                    dlg.Text = "另存记录";
-                }
-
-                // dlg.StartPosition = FormStartPosition.CenterScreen;
-                this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
-                dlg.UiState = this.MainForm.AppInfo.GetString("MarcDetailForm", "SaveRecordDlg_uiState", "");
-                dlg.ShowDialog(this);
-                this.MainForm.AppInfo.SetString("MarcDetailForm", "SaveRecordDlg_uiState", dlg.UiState);
-
-                if (dlg.DialogResult != DialogResult.OK)
-                    return 0;
-
-                MainForm.LastSavePath = dlg.RecPath;
-
-                strSavePath = dlg.RecPath;
-                strCurrentUserName = dlg.CurrentUserName;
-            }
-
-
-            /*
-            if (String.IsNullOrEmpty(this.SavePath) == true)
-            {
-                strError = "缺乏保存路径";
-                goto ERROR1;
-            }
-             * */
-
-            string strProtocol = "";
-            string strPath = "";
-            nRet = Global.ParsePath(strSavePath,
-                out strProtocol,
-                out strPath,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            this.stop.BeginLoop();
-
-            this.EnableControls(false);
+            _processing++;
             try
             {
-                // dtlp协议的记录保存
-                if (strProtocol.ToLower() == "dtlp")
+#if TEST
+                // 测试：休眠一段时间，然后出让控制权
+                Thread.Sleep(3000);
+                Application.DoEvents();
+#endif
+
+                string strLastSavePath = MainForm.LastSavePath;
+                if (String.IsNullOrEmpty(strLastSavePath) == false)
                 {
-                    DtlpSearchForm dtlp_searchform = this.GetDtlpSearchForm();
-
-                    if (dtlp_searchform == null)
-                    {
-                        strError = "没有连接的或者打开的DTLP检索窗，无法保存记录";
-                        goto ERROR1;
-                    }
-
-                    /*
-                    string strOutPath = "";
-                    nRet = DtlpChannel.CanonicalizeWritePath(strPath,
-                        out strOutPath,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    strPath = strOutPath;
-                     * */
                     string strOutputPath = "";
-                    byte[] baOutputTimestamp = null;
-                    nRet = dtlp_searchform.SaveMarcRecord(
-                        strPath,
-                        this.MarcEditor.Marc,
-                        this.CurrentTimestamp,
+                    nRet = ChangePathToAppendStyle(strLastSavePath,
                         out strOutputPath,
-                        out baOutputTimestamp,
                         out strError);
                     if (nRet == -1)
-                        goto ERROR1;
-
-                    // TODO: 时间戳冲突?
-
-                    this.SavePath = strProtocol + ":" + strOutputPath;
-                    this.CurrentTimestamp = baOutputTimestamp;
-
-                    this.BiblioChanged = false;
-
-                    // 是否刷新MARC记录？
-                    //AutoCloseMessageBox.Show(this, "保存成功");
-                    // MessageBox.Show(this, "保存成功");
-                    return 0;
-                }
-                else if (strProtocol.ToLower() == "dp2library")
-                {
-                    dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
-
-                    if (dp2_searchform == null)
                     {
-                        strError = "没有连接的或者打开的dp2检索窗，无法保存记录";
+                        MainForm.LastSavePath = ""; // 避免下次继续出错 2011/3/4
                         goto ERROR1;
                     }
+                    strLastSavePath = strOutputPath;
+                }
+
+                string strCurrentUserName = "";
+                string strSavePath = this.SavePath == "" ? strLastSavePath : this.SavePath;
+
+                if (strStyle == "save"
+                    && string.IsNullOrEmpty(this.SavePath) == false
+                    && (Control.ModifierKeys & Keys.Control) == 0)
+                {
+                    // 2011/8/8
+                    // 保存时如果已经有了路径，就不用打开对话框了
+                }
+                else
+                {
+                    SaveRecordDlg dlg = new SaveRecordDlg();
+                    GuiUtil.SetControlFont(dlg, this.Font);
+
+                    dlg.MainForm = this.MainForm;
+                    dlg.GetDtlpSearchParam += new GetDtlpSearchParamEventHandle(dlg_GetDtlpSearchParam);
+                    dlg.GetDp2SearchParam += new GetDp2SearchParamEventHandle(dlg_GetDp2SearchParam);
+                    if (strStyle == "save")
+                        dlg.RecPath = this.SavePath == "" ? strLastSavePath : this.SavePath;
+                    else
+                    {
+                        dlg.RecPath = strLastSavePath;  // 2011/6/19
+                        dlg.Text = "另存记录";
+                    }
+
+                    // dlg.StartPosition = FormStartPosition.CenterScreen;
+                    this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+                    dlg.UiState = this.MainForm.AppInfo.GetString("MarcDetailForm", "SaveRecordDlg_uiState", "");
+                    dlg.ShowDialog(this);
+                    this.MainForm.AppInfo.SetString("MarcDetailForm", "SaveRecordDlg_uiState", dlg.UiState);
+
+                    if (dlg.DialogResult != DialogResult.OK)
+                        return 0;
+
+                    MainForm.LastSavePath = dlg.RecPath;
+
+                    strSavePath = dlg.RecPath;
+                    strCurrentUserName = dlg.CurrentUserName;
+                }
+
+
+                /*
+                if (String.IsNullOrEmpty(this.SavePath) == true)
+                {
+                    strError = "缺乏保存路径";
+                    goto ERROR1;
+                }
+                 * */
+
+                string strProtocol = "";
+                string strPath = "";
+                nRet = Global.ParsePath(strSavePath,
+                    out strProtocol,
+                    out strPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.stop.BeginLoop();
+
+                this.EnableControls(false);
+                try
+                {
+                    // dtlp协议的记录保存
+                    if (strProtocol.ToLower() == "dtlp")
+                    {
+                        DtlpSearchForm dtlp_searchform = this.GetDtlpSearchForm();
+
+                        if (dtlp_searchform == null)
+                        {
+                            strError = "没有连接的或者打开的DTLP检索窗，无法保存记录";
+                            goto ERROR1;
+                        }
+
+                        /*
+                        string strOutPath = "";
+                        nRet = DtlpChannel.CanonicalizeWritePath(strPath,
+                            out strOutPath,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        strPath = strOutPath;
+                         * */
+                        string strOutputPath = "";
+                        byte[] baOutputTimestamp = null;
+                        nRet = dtlp_searchform.SaveMarcRecord(
+                            strPath,
+                            this.MarcEditor.Marc,
+                            this.CurrentTimestamp,
+                            out strOutputPath,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        // TODO: 时间戳冲突?
+
+                        this.SavePath = strProtocol + ":" + strOutputPath;
+                        this.CurrentTimestamp = baOutputTimestamp;
+
+                        this.BiblioChanged = false;
+
+                        // 是否刷新MARC记录？
+                        //AutoCloseMessageBox.Show(this, "保存成功");
+                        // MessageBox.Show(this, "保存成功");
+                        return 0;
+                    }
+                    else if (strProtocol.ToLower() == "dp2library")
+                    {
+                        dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
+
+                        if (dp2_searchform == null)
+                        {
+                            strError = "没有连接的或者打开的dp2检索窗，无法保存记录";
+                            goto ERROR1;
+                        }
 
 #if NO
                     // 迫使登录一次
@@ -3381,448 +3392,449 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     }
 #endif
 
-                    // 保存前的准备工作
-                    {
-                        // 初始化 dp2catalog_marc_autogen.cs 的 Assembly，并new MarcDetailHost对象
-                        // return:
-                        //      -2  清除了Assembly
-                        //      -1  error
-                        //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly (可能本来就是空)
-                        //      1   重新(或者首次)初始化了Assembly
-                        nRet = InitialAutogenAssembly(out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (this.m_detailHostObj != null)
+                        // 保存前的准备工作
                         {
-                            // 模拟出this.SavePath 2011/11/22
-                            string strOldSavePath = this.textBox_savePath.Text;
-                            this.textBox_savePath.Text = strSavePath;
-                            try
+                            // 初始化 dp2catalog_marc_autogen.cs 的 Assembly，并new MarcDetailHost对象
+                            // return:
+                            //      -2  清除了Assembly
+                            //      -1  error
+                            //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly (可能本来就是空)
+                            //      1   重新(或者首次)初始化了Assembly
+                            nRet = InitialAutogenAssembly(out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (this.m_detailHostObj != null)
                             {
-                                BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                                e.CurrentUserName = strCurrentUserName;
-                                this.m_detailHostObj.BeforeSaveRecord(this.MarcEditor, e);
-                                if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                                // 模拟出this.SavePath 2011/11/22
+                                string strOldSavePath = this.textBox_savePath.Text;
+                                this.textBox_savePath.Text = strSavePath;
+                                try
                                 {
-                                    MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                                    BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                                    e.CurrentUserName = strCurrentUserName;
+                                    this.m_detailHostObj.BeforeSaveRecord(this.MarcEditor, e);
+                                    if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                                    {
+                                        MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                                    }
+                                }
+                                finally
+                                {
+                                    // 恢复this.SavePath
+                                    this.textBox_savePath.Text = strOldSavePath;
                                 }
                             }
-                            finally
+                        }
+
+                        byte[] baTimestamp = this.CurrentTimestamp;
+                        string strMARC = this.MarcEditor.Marc;
+                        string strFragment = "";
+                        if (this.domXmlFragment != null
+                            && this.domXmlFragment.DocumentElement != null)
+                            strFragment = this.domXmlFragment.DocumentElement.InnerXml;
+
+                        // 2014/5/12
+                        string strMarcSyntax = "";
+                        if (this.CurrentRecord != null)
+                            strMarcSyntax = GetMarcSyntax(this.CurrentRecord.m_strSyntaxOID);
+
+                        // 2014/5/18
+                        if (string.IsNullOrEmpty(this.AutoDetectedMarcSyntaxOID) == false)
+                            strMarcSyntax = GetMarcSyntax(this.AutoDetectedMarcSyntaxOID);
+
+                        string strComment = "";
+                        bool bOverwrite = false;
+
+                        if (string.IsNullOrEmpty(this.SavePath) == false)
+                        {
+                            string strTempProtocol = "";
+                            string strTempPath = "";
+                            nRet = Global.ParsePath(this.SavePath,
+                                out strTempProtocol,
+                                out strTempPath,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            string strServerName = "";
+                            string strPurePath = "";
+
+                            dp2SearchForm.ParseRecPath(strTempPath,
+    out strServerName,
+    out strPurePath);
+
+                            if (dp2SearchForm.IsAppendRecPath(strPurePath) == false)
                             {
-                                // 恢复this.SavePath
-                                this.textBox_savePath.Text = strOldSavePath;
+                                string strServerUrl = dp2_searchform.GetServerUrl(strServerName);
+                                strComment = "copy from " + strPurePath + "@" + strServerUrl;
                             }
                         }
-                    }
-
-                    byte[] baTimestamp = this.CurrentTimestamp;
-                    string strMARC = this.MarcEditor.Marc;
-                    string strFragment = "";
-                    if (this.domXmlFragment != null
-                        && this.domXmlFragment.DocumentElement != null)
-                        strFragment = this.domXmlFragment.DocumentElement.InnerXml;
-
-                    // 2014/5/12
-                    string strMarcSyntax = "";
-                    if (this.CurrentRecord != null)
-                        strMarcSyntax = GetMarcSyntax(this.CurrentRecord.m_strSyntaxOID);
-
-                    // 2014/5/18
-                    if (string.IsNullOrEmpty(this.AutoDetectedMarcSyntaxOID) == false)
-                        strMarcSyntax = GetMarcSyntax(this.AutoDetectedMarcSyntaxOID);
-
-                    string strComment = "";
-                    bool bOverwrite = false;
-
-                    if (string.IsNullOrEmpty(this.SavePath) == false)
-                    {
-                        string strTempProtocol = "";
-                        string strTempPath = "";
-                        nRet = Global.ParsePath(this.SavePath,
-                            out strTempProtocol,
-                            out strTempPath,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
-                        string strServerName = "";
-                        string strPurePath = "";
-
-                        dp2SearchForm.ParseRecPath(strTempPath,
-out strServerName,
-out strPurePath);
-
-                        if (dp2SearchForm.IsAppendRecPath(strPurePath) == false)
+                        else if (string.IsNullOrEmpty(this.textBox_tempRecPath.Text) == false)
                         {
-                            string strServerUrl = dp2_searchform.GetServerUrl(strServerName);
-                            strComment = "copy from " + strPurePath + "@" + strServerUrl;
-                        }
-                    }
-                    else if (string.IsNullOrEmpty(this.textBox_tempRecPath.Text) == false)
-                    {
-                        strComment = "copy from " + this.textBox_tempRecPath.Text;
-                    }
-
-                    string strRights = "";
-                    // 判断是否追加
-                    {
-                        string strServerName = "";
-                        string strPurePath = "";
-
-                        dp2SearchForm.ParseRecPath(strPath,
-out strServerName,
-out strPurePath);
-                        if (dp2SearchForm.IsAppendRecPath(strPurePath) == false)
-                            bOverwrite = true;
-
-                        nRet = dp2_searchform.GetChannelRights(
-                                strServerName,
-                                out strRights,
-                                out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
-                    }
-
-                    bool bForceWverifyData = StringUtil.IsInList("client_forceverifydata", strRights);
-
-                    bool bVerifyed = false;
-                    if (bForceWverifyData == true)
-                    {
-                        GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                        e1.FocusedControl = this.MarcEditor;
-
-                        // 0: 没有发现校验错误; 1: 发现校验警告; 2: 发现校验错误
-                        nRet = this.VerifyData(this, e1, strSavePath, true);
-                        if (nRet == 2)
-                        {
-                            strError = "MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存";
-                            goto ERROR1;
-                        }
-                        bVerifyed = true;
-                    }
-
-                REDO_SAVE_DP2:
-                    string strOutputPath = "";
-                    byte[] baOutputTimestamp = null;
-                    // return:
-                    //      -2  timestamp mismatch
-                    //      -1  error
-                    //      0   succeed
-                    nRet = dp2_searchform.SaveMarcRecord(
-                        true,
-                        strPath,
-                        strMARC,
-                        strMarcSyntax,
-                        baTimestamp,
-                        strFragment,
-                        strComment,
-                        out strOutputPath,
-                        out baOutputTimestamp,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == -2)
-                    {
-                        // 时间戳冲突了
-
-                        // 装载目标记录
-                        DigitalPlatform.Z3950.Record record = null;
-                        Encoding currentEncoding = null;
-                        byte[] baTargetTimestamp = null;
-                        string strOutStyle = "";
-                        string strTargetMARC = "";
-                        string strError1 = "";
-
-                        string strOutputSavePath = "";
-                        long lVersion = 0;
-                        LoginInfo logininfo = null;
-                        string strXmlFragment = "";
-
-                        nRet = dp2_searchform.GetOneRecord(
-                            // true,
-                            "marc",
-                            //strPath,    // 不能有问号?
-                            //"", // strDirection,
-                            0,
-                            "path:" + strPath,
-                            "",
-                            out strOutputSavePath,
-                            out strTargetMARC,
-                            out strXmlFragment,
-                            out strOutStyle,
-                            out baTargetTimestamp,
-                            out lVersion,
-                            out record,
-                            out currentEncoding,
-                            out logininfo,
-                            out strError1);
-                        if (nRet == -1)
-                        {
-                            strError = "保存记录时发生错误: " + strError + "，在重装入目标记录的时候又发生错误: " + strError1;
-                            goto ERROR1;
+                            strComment = "copy from " + this.textBox_tempRecPath.Text;
                         }
 
-                        nRet = this.LoadXmlFragment(strXmlFragment,
-out strError1);
-                        if (nRet == -1)
+                        string strRights = "";
+                        // 判断是否追加
                         {
-                            strError1 = "保存记录时发生错误: " + strError + "，在重装入目标记录的时候又发生错误: " + strError1;
-                            goto ERROR1;
+                            string strServerName = "";
+                            string strPurePath = "";
+
+                            dp2SearchForm.ParseRecPath(strPath,
+    out strServerName,
+    out strPurePath);
+                            if (dp2SearchForm.IsAppendRecPath(strPurePath) == false)
+                                bOverwrite = true;
+
+                            nRet = dp2_searchform.GetChannelRights(
+                                    strServerName,
+                                    out strRights,
+                                    out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
                         }
 
-                        // TODO: 检查源和目标的MARC格式是否一致？是否前面检查过了？
-                        TwoBiblioDialog two_biblio_dlg = new TwoBiblioDialog();
-                        GuiUtil.SetControlFont(two_biblio_dlg, this.Font);
+                        bool bForceWverifyData = StringUtil.IsInList("client_forceverifydata", strRights);
 
-                        two_biblio_dlg.Text = "覆盖书目记录";
-                        two_biblio_dlg.MessageText = "即将被覆盖的目标记录和源内容不同。\r\n\r\n请问是否确定要用源内容覆盖目标记录?";
-                        two_biblio_dlg.LabelSourceText = "源";
-                        two_biblio_dlg.LabelTargetText = "目标 " + strPath;
-                        two_biblio_dlg.MarcSource = strMARC;
-                        two_biblio_dlg.MarcTarget = strTargetMARC;
-                        two_biblio_dlg.ReadOnlyTarget = true;   // 初始时目标MARC编辑器不让进行修改
-
-                        this.MainForm.AppInfo.LinkFormState(two_biblio_dlg, "TwoBiblioDialog_state");
-                        two_biblio_dlg.ShowDialog(this);
-                        this.MainForm.AppInfo.UnlinkFormState(two_biblio_dlg);
-
-                        if (two_biblio_dlg.DialogResult == DialogResult.Cancel)
+                        bool bVerifyed = false;
+                        if (bForceWverifyData == true)
                         {
-                            strError = "放弃保存";
-                            goto ERROR1;
-                            // return 0;   // 全部放弃
+                            GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                            e1.FocusedControl = this.MarcEditor;
+
+                            // 0: 没有发现校验错误; 1: 发现校验警告; 2: 发现校验错误
+                            nRet = this.VerifyData(this, e1, strSavePath, true);
+                            if (nRet == 2)
+                            {
+                                strError = "MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存";
+                                goto ERROR1;
+                            }
+                            bVerifyed = true;
                         }
 
-                        if (two_biblio_dlg.DialogResult == DialogResult.No)
-                        {
-                            strError = "放弃保存";
-                            goto ERROR1;
-                        }
-
-                        if (two_biblio_dlg.EditTarget == false)
-                            strMARC = two_biblio_dlg.MarcSource;
-                        else
-                            strMARC = two_biblio_dlg.MarcTarget;
-
-                        baTimestamp = baTargetTimestamp;
-                        goto REDO_SAVE_DP2;
-                    }
-
-                    this.SavePath = dp2_searchform.CurrentProtocol + ":" + strOutputPath;
-                    this.CurrentTimestamp = baOutputTimestamp;
-
-                    this.BiblioChanged = false;
-
-                    this.MarcEditor.ClearMarcDefDom();
-                    this.MarcEditor.RefreshNameCaption();
-
-                    // 是否刷新MARC记录？
-                    // MessageBox.Show(this, "保存成功");
-
-                    if (bOverwrite == true
-                        && this.LinkedSearchForm != null)
-                    {
+                    REDO_SAVE_DP2:
+                        string strOutputPath = "";
+                        byte[] baOutputTimestamp = null;
                         // return:
-                        //      -2  不支持
+                        //      -2  timestamp mismatch
                         //      -1  error
-                        //      0   相关窗口已经销毁，没有必要刷新
-                        //      1   已经刷新
-                        //      2   在结果集中没有找到要刷新的记录
-                        nRet = RefreshCachedRecord("refresh",
+                        //      0   succeed
+                        nRet = dp2_searchform.SaveMarcRecord(
+                            true,
+                            strPath,
+                            strMARC,
+                            strMarcSyntax,
+                            baTimestamp,
+                            strFragment,
+                            strComment,
+                            out strOutputPath,
+                            out baOutputTimestamp,
                             out strError);
                         if (nRet == -1)
-                            MessageBox.Show(this, "记录保存已经成功，但刷新相关结果集内记录时出错: " + strError);
-                    }
-
-                    if (this.AutoVerifyData == true
-                        && bVerifyed == false)
-                    {
-                        // API.PostMessage(this.Handle, WM_VERIFY_DATA, 0, 0);
-
-                        GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                        e1.FocusedControl = this.MarcEditor;
-
-                        // 0: 没有发现校验错误; 1: 发现校验警告; 2: 发现校验错误
-                        nRet = this.VerifyData(this, e1, strSavePath, true);
-                        if (nRet == 2)
+                            goto ERROR1;
+                        if (nRet == -2)
                         {
-                            strError = "MARC 记录经校验发现有错。记录已经保存。请修改 MARC 记录后重新保存";
-                            MessageBox.Show(this, strError);
+                            // 时间戳冲突了
+
+                            // 装载目标记录
+                            DigitalPlatform.Z3950.Record record = null;
+                            Encoding currentEncoding = null;
+                            byte[] baTargetTimestamp = null;
+                            string strOutStyle = "";
+                            string strTargetMARC = "";
+                            string strError1 = "";
+
+                            string strOutputSavePath = "";
+                            long lVersion = 0;
+                            LoginInfo logininfo = null;
+                            string strXmlFragment = "";
+
+                            nRet = dp2_searchform.GetOneRecord(
+                                // true,
+                                "marc",
+                                //strPath,    // 不能有问号?
+                                //"", // strDirection,
+                                0,
+                                "path:" + strPath,
+                                "",
+                                out strOutputSavePath,
+                                out strTargetMARC,
+                                out strXmlFragment,
+                                out strOutStyle,
+                                out baTargetTimestamp,
+                                out lVersion,
+                                out record,
+                                out currentEncoding,
+                                out logininfo,
+                                out strError1);
+                            if (nRet == -1)
+                            {
+                                strError = "保存记录时发生错误: " + strError + "，在重装入目标记录的时候又发生错误: " + strError1;
+                                goto ERROR1;
+                            }
+
+                            nRet = this.LoadXmlFragment(strXmlFragment,
+    out strError1);
+                            if (nRet == -1)
+                            {
+                                strError1 = "保存记录时发生错误: " + strError + "，在重装入目标记录的时候又发生错误: " + strError1;
+                                goto ERROR1;
+                            }
+
+                            // TODO: 检查源和目标的MARC格式是否一致？是否前面检查过了？
+                            TwoBiblioDialog two_biblio_dlg = new TwoBiblioDialog();
+                            GuiUtil.SetControlFont(two_biblio_dlg, this.Font);
+
+                            two_biblio_dlg.Text = "覆盖书目记录";
+                            two_biblio_dlg.MessageText = "即将被覆盖的目标记录和源内容不同。\r\n\r\n请问是否确定要用源内容覆盖目标记录?";
+                            two_biblio_dlg.LabelSourceText = "源";
+                            two_biblio_dlg.LabelTargetText = "目标 " + strPath;
+                            two_biblio_dlg.MarcSource = strMARC;
+                            two_biblio_dlg.MarcTarget = strTargetMARC;
+                            two_biblio_dlg.ReadOnlyTarget = true;   // 初始时目标MARC编辑器不让进行修改
+
+                            this.MainForm.AppInfo.LinkFormState(two_biblio_dlg, "TwoBiblioDialog_state");
+                            two_biblio_dlg.ShowDialog(this);
+                            this.MainForm.AppInfo.UnlinkFormState(two_biblio_dlg);
+
+                            if (two_biblio_dlg.DialogResult == DialogResult.Cancel)
+                            {
+                                strError = "放弃保存";
+                                goto ERROR1;
+                                // return 0;   // 全部放弃
+                            }
+
+                            if (two_biblio_dlg.DialogResult == DialogResult.No)
+                            {
+                                strError = "放弃保存";
+                                goto ERROR1;
+                            }
+
+                            if (two_biblio_dlg.EditTarget == false)
+                                strMARC = two_biblio_dlg.MarcSource;
+                            else
+                                strMARC = two_biblio_dlg.MarcTarget;
+
+                            baTimestamp = baTargetTimestamp;
+                            goto REDO_SAVE_DP2;
                         }
-                    }
 
-                    return 0;
-                }
-                else if (strProtocol.ToLower() == "unioncatalog")
-                {
-                    string strServerName = "";
-                    string strPurePath = "";
-                    dp2SearchForm.ParseRecPath(strPath,
-                        out strServerName,
-                        out strPurePath);
-                    if (String.IsNullOrEmpty(strServerName) == true)
-                    {
-                        strError = "路径不合法: 缺乏服务器名部分";
-                        goto ERROR1;
-                    }
-                    if (String.IsNullOrEmpty(strPurePath) == true)
-                    {
-                        strError = "路径不合法：缺乏纯路径部分";
-                        goto ERROR1;
-                    }
+                        this.SavePath = dp2_searchform.CurrentProtocol + ":" + strOutputPath;
+                        this.CurrentTimestamp = baOutputTimestamp;
 
-                    byte[] baTimestamp = this.CurrentTimestamp;
-                    string strMARC = this.MarcEditor.Marc;
-                    string strMarcSyntax = "";
+                        this.BiblioChanged = false;
 
-                    string strMarcSyntaxOID = this.GetCurrentMarcSyntaxOID(out strError);
-                    if (String.IsNullOrEmpty(strMarcSyntaxOID) == true)
-                    {
-                        strError = "当前MARC syntax OID为空，无法判断MARC具体格式";
-                        goto ERROR1;
-                    }
+                        this.MarcEditor.ClearMarcDefDom();
+                        this.MarcEditor.RefreshNameCaption();
 
-                    if (strMarcSyntaxOID == "1.2.840.10003.5.1")
-                        strMarcSyntax = "unimarc";
-                    if (strMarcSyntaxOID == "1.2.840.10003.5.10")
-                        strMarcSyntax = "usmarc";
+                        // 是否刷新MARC记录？
+                        // MessageBox.Show(this, "保存成功");
 
-                    string strXml = "";
-
-                    nRet = MarcUtil.Marc2Xml(
-                        strMARC,
-                        strMarcSyntax,
-                        out strXml,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    string strXml1 = "";
-                    // 将机内使用的marcxml格式转化为marcxchange格式
-                    nRet = MarcUtil.MarcXmlToXChange(strXml,
-                        null,
-                        out strXml1,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    // TODO: 是否可以直接使用Z39.50属性对话框中的用户名和密码? 登录失败后才出现登录对话框
-                    if (this.LoginInfo == null)
-                        this.LoginInfo = new dp2Catalog.LoginInfo();
-
-                    bool bRedo = false;
-                    REDO_LOGIN:
-                    if (string.IsNullOrEmpty(this.LoginInfo.UserName) == true
-                        || bRedo == true)
-                    {
-                        LoginDlg login_dlg = new LoginDlg();
-                        GuiUtil.SetControlFont(login_dlg, this.Font);
-
-                        if (bRedo == true)
-                            login_dlg.Comment = strError + "\r\n\r\n请重新登录";
-                        else
-                            login_dlg.Comment = "请指定用户名和密码";
-                        login_dlg.UserName = this.LoginInfo.UserName;
-                        login_dlg.Password = this.LoginInfo.Password;
-                        login_dlg.SavePassword = true;
-                        login_dlg.ServerUrl = strServerName;
-                        login_dlg.StartPosition = FormStartPosition.CenterScreen;
-                        login_dlg.ShowDialog(this);
-
-                        if (login_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        if (bOverwrite == true
+                            && this.LinkedSearchForm != null)
                         {
-                            strError = "放弃保存";
+                            // return:
+                            //      -2  不支持
+                            //      -1  error
+                            //      0   相关窗口已经销毁，没有必要刷新
+                            //      1   已经刷新
+                            //      2   在结果集中没有找到要刷新的记录
+                            nRet = RefreshCachedRecord("refresh",
+                                out strError);
+                            if (nRet == -1)
+                                MessageBox.Show(this, "记录保存已经成功，但刷新相关结果集内记录时出错: " + strError);
+                        }
+
+                        if (this.AutoVerifyData == true
+                            && bVerifyed == false)
+                        {
+                            // API.PostMessage(this.Handle, WM_VERIFY_DATA, 0, 0);
+
+                            GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                            e1.FocusedControl = this.MarcEditor;
+
+                            // 0: 没有发现校验错误; 1: 发现校验警告; 2: 发现校验错误
+                            nRet = this.VerifyData(this, e1, strSavePath, true);
+                            if (nRet == 2)
+                            {
+                                strError = "MARC 记录经校验发现有错。记录已经保存。请修改 MARC 记录后重新保存";
+                                MessageBox.Show(this, strError);
+                            }
+                        }
+
+                        return 0;
+                    }
+                    else if (strProtocol.ToLower() == "unioncatalog")
+                    {
+                        string strServerName = "";
+                        string strPurePath = "";
+                        dp2SearchForm.ParseRecPath(strPath,
+                            out strServerName,
+                            out strPurePath);
+                        if (String.IsNullOrEmpty(strServerName) == true)
+                        {
+                            strError = "路径不合法: 缺乏服务器名部分";
+                            goto ERROR1;
+                        }
+                        if (String.IsNullOrEmpty(strPurePath) == true)
+                        {
+                            strError = "路径不合法：缺乏纯路径部分";
                             goto ERROR1;
                         }
 
-                        this.LoginInfo.UserName = login_dlg.UserName;
-                        this.LoginInfo.Password = login_dlg.Password;
-                        strServerName = login_dlg.ServerUrl;
-                    }
+                        byte[] baTimestamp = this.CurrentTimestamp;
+                        string strMARC = this.MarcEditor.Marc;
+                        string strMarcSyntax = "";
 
-                    if (this.LoginInfo.UserName.IndexOf("/") != -1)
-                    {
-                        strError = "用户名中不能出现字符 '/'";
-                        goto ERROR1;
-                    }
+                        string strMarcSyntaxOID = this.GetCurrentMarcSyntaxOID(out strError);
+                        if (String.IsNullOrEmpty(strMarcSyntaxOID) == true)
+                        {
+                            strError = "当前MARC syntax OID为空，无法判断MARC具体格式";
+                            goto ERROR1;
+                        }
 
-                    string strOutputTimestamp = "";
-                    string strOutputRecPath = "";
-                    // parameters:
-                    //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
-                    // return:
-                    //      -2  登录不成功
-                    //      -1  出错
-                    //      0   成功
-                    nRet = UnionCatalog.UpdateRecord(
-                        null,
-                        strServerName,
-                        this.LoginInfo.UserName + "/" + this.LoginInfo.Password,
-                        dp2SearchForm.IsAppendRecPath(strPurePath) == true ? "new": "change",
-                        strPurePath,
-                        "marcxchange",
-                        strXml1,
-                        ByteArray.GetHexTimeStampString(baTimestamp),
-                        out strOutputRecPath,
-                        out strOutputTimestamp,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == -2)
-                    {
-                        bRedo = true;
-                        goto REDO_LOGIN;
-                    }
+                        if (strMarcSyntaxOID == "1.2.840.10003.5.1")
+                            strMarcSyntax = "unimarc";
+                        if (strMarcSyntaxOID == "1.2.840.10003.5.10")
+                            strMarcSyntax = "usmarc";
 
-                    this.CurrentTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);
-                    this.SavePath = strProtocol + ":" + strOutputRecPath + "@" + strServerName;
+                        string strXml = "";
 
-                    this.BiblioChanged = false;
-
-                    this.MarcEditor.ClearMarcDefDom();
-                    this.MarcEditor.RefreshNameCaption();
-
-                    // 是否刷新MARC记录？
-                    // MessageBox.Show(this, "保存成功");
-
-                    if (dp2SearchForm.IsAppendRecPath(strPurePath) == false
-                        && this.LinkedSearchForm != null
-                        && this.LinkedSearchForm is ZSearchForm)
-                    {
-                        nRet = RefreshCachedRecord("refresh",
+                        nRet = MarcUtil.Marc2Xml(
+                            strMARC,
+                            strMarcSyntax,
+                            out strXml,
                             out strError);
                         if (nRet == -1)
-                            MessageBox.Show(this, "记录保存已经成功，但刷新相关结果集内记录时出错: " + strError);
+                            goto ERROR1;
+
+                        string strXml1 = "";
+                        // 将机内使用的marcxml格式转化为marcxchange格式
+                        nRet = MarcUtil.MarcXmlToXChange(strXml,
+                            null,
+                            out strXml1,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        // TODO: 是否可以直接使用Z39.50属性对话框中的用户名和密码? 登录失败后才出现登录对话框
+                        if (this.LoginInfo == null)
+                            this.LoginInfo = new dp2Catalog.LoginInfo();
+
+                        bool bRedo = false;
+                    REDO_LOGIN:
+                        if (string.IsNullOrEmpty(this.LoginInfo.UserName) == true
+                            || bRedo == true)
+                        {
+                            LoginDlg login_dlg = new LoginDlg();
+                            GuiUtil.SetControlFont(login_dlg, this.Font);
+
+                            if (bRedo == true)
+                                login_dlg.Comment = strError + "\r\n\r\n请重新登录";
+                            else
+                                login_dlg.Comment = "请指定用户名和密码";
+                            login_dlg.UserName = this.LoginInfo.UserName;
+                            login_dlg.Password = this.LoginInfo.Password;
+                            login_dlg.SavePassword = true;
+                            login_dlg.ServerUrl = strServerName;
+                            login_dlg.StartPosition = FormStartPosition.CenterScreen;
+                            login_dlg.ShowDialog(this);
+
+                            if (login_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            {
+                                strError = "放弃保存";
+                                goto ERROR1;
+                            }
+
+                            this.LoginInfo.UserName = login_dlg.UserName;
+                            this.LoginInfo.Password = login_dlg.Password;
+                            strServerName = login_dlg.ServerUrl;
+                        }
+
+                        if (this.LoginInfo.UserName.IndexOf("/") != -1)
+                        {
+                            strError = "用户名中不能出现字符 '/'";
+                            goto ERROR1;
+                        }
+
+                        string strOutputTimestamp = "";
+                        string strOutputRecPath = "";
+                        // parameters:
+                        //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
+                        // return:
+                        //      -2  登录不成功
+                        //      -1  出错
+                        //      0   成功
+                        nRet = UnionCatalog.UpdateRecord(
+                            null,
+                            strServerName,
+                            this.LoginInfo.UserName + "/" + this.LoginInfo.Password,
+                            dp2SearchForm.IsAppendRecPath(strPurePath) == true ? "new" : "change",
+                            strPurePath,
+                            "marcxchange",
+                            strXml1,
+                            ByteArray.GetHexTimeStampString(baTimestamp),
+                            out strOutputRecPath,
+                            out strOutputTimestamp,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == -2)
+                        {
+                            bRedo = true;
+                            goto REDO_LOGIN;
+                        }
+
+                        this.CurrentTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);
+                        this.SavePath = strProtocol + ":" + strOutputRecPath + "@" + strServerName;
+
+                        this.BiblioChanged = false;
+
+                        this.MarcEditor.ClearMarcDefDom();
+                        this.MarcEditor.RefreshNameCaption();
+
+                        // 是否刷新MARC记录？
+                        // MessageBox.Show(this, "保存成功");
+
+                        if (dp2SearchForm.IsAppendRecPath(strPurePath) == false
+                            && this.LinkedSearchForm != null
+                            && this.LinkedSearchForm is ZSearchForm)
+                        {
+                            nRet = RefreshCachedRecord("refresh",
+                                out strError);
+                            if (nRet == -1)
+                                MessageBox.Show(this, "记录保存已经成功，但刷新相关结果集内记录时出错: " + strError);
+                        }
+
+                        return 0;
                     }
+                    else if (strProtocol.ToLower() == "z3950")
+                    {
+                        strError = "目前暂不支持 Z39.50 协议的保存操作";
+                        goto ERROR1;
+                    }
+                    else if (strProtocol.ToLower() == "amazon")
+                    {
+                        strError = "目前暂不支持 amazon 协议的保存操作";
+                        goto ERROR1;
+                    }
+                    else
+                    {
+                        strError = "无法识别的协议名 '" + strProtocol + "'";
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    this.stop.EndLoop();
 
-                    return 0;
+                    this.EnableControls(true);
                 }
-                else if (strProtocol.ToLower() == "z3950")
-                {
-                    strError = "目前暂不支持 Z39.50 协议的保存操作";
-                    goto ERROR1;
-                }
-                else if (strProtocol.ToLower() == "amazon")
-                {
-                    strError = "目前暂不支持 amazon 协议的保存操作";
-                    goto ERROR1;
-                }
-                else
-                {
-                    strError = "无法识别的协议名 '" + strProtocol + "'";
-                    goto ERROR1;
-                }
-
             }
             finally
             {
-                this.stop.EndLoop();
-
-                this.EnableControls(true);
+                _processing--;
             }
-
-            // return 0;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;

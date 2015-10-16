@@ -235,6 +235,26 @@ namespace dp2Circulation
         MyWebClient _webClient = null;
         System.Net.WebRequest _webRequest = null;
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ComponentModel.Win32Exception
+Message: 拒绝访问。
+Stack:
+在 System.Diagnostics.Process.StartWithShellExecuteEx(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start()
+在 System.Diagnostics.Process.Start(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start(String fileName, String arguments)
+在 dp2Circulation.MainForm.StartGreenUtility()
+在 dp2Circulation.MainForm.MainForm_FormClosed(Object sender, FormClosedEventArgs e)
+在 System.Windows.Forms.Form.OnFormClosed(FormClosedEventArgs e)
+在 System.Windows.Forms.Form.WmClose(Message& m)
+在 System.Windows.Forms.Form.WndProc(Message& m)
+在 dp2Circulation.MainForm.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+         * */
         // 启动绿色安装小工具。因为 dp2circulation 正在运行时无法覆盖替换文件，所以需要另外启动一个小程序来完成这个任务
         void StartGreenUtility()
         {
@@ -273,7 +293,20 @@ namespace dp2Circulation
                 + " -target:" + strBinDir // target 是指最终要安装的目录 
                 + " -wait:dp2circulation.exe"
                 + " -files:" + StringUtil.MakePathList(this._updatedGreenZipFileNames);
-            System.Diagnostics.Process.Start(strExePath, strParameters);
+            try
+            {
+                System.Diagnostics.Process.Start(strExePath, strParameters);
+            }
+            catch(Win32Exception ex)
+            {
+                // 改为抛出包含 Win32 错误码的异常
+                // https://msdn.microsoft.com/en-us/library/ms681382(v=vs.85).aspx
+                // ERROR_ACCESS_DENIED
+                // 5 (0x5)
+                // Access is denied.
+                int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                throw new Exception("GetLastWin32Error ["+error.ToString()+"], ex.NativeErrorCode = "+ex.NativeErrorCode+", ex.ErrorCode=" +ex.ErrorCode, ex);
+            }
 
             this._updatedGreenZipFileNames.Clear(); // 避免后面再次调用本函数
         }

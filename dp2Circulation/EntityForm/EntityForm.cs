@@ -2456,6 +2456,19 @@ true);
                 }
             }
 #endif
+            if (this.browseWindow != null)
+            {
+            // 避免用 MyForm 的警告机制导致 MessageBox 被 TopMost 状态的小浏览窗遮住无法操作
+                if (Progress != null && Progress.State == 0)    // 0 表示正在处理
+                {
+                    Progress.DoStop();
+                    e.Cancel = true;
+                    return;
+                }
+                CloseBrowseWindow();
+                e.Cancel = true;
+                return;
+            }
 
             if (this.EntitiesChanged == true
                 || this.IssuesChanged == true
@@ -4730,6 +4743,17 @@ true);
             }
         }
 
+        internal new void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.Channel != null)
+                this.Channel.Abort();
+#if NO
+            if (sender == this.browseWindow)
+                this._browseWindowSelected = true;
+#endif
+        }
+
+        // bool _browseWindowSelected = false;     // 小浏览窗口是否被确定选择记录而关闭的
         bool _willCloseBrowseWindow = false;    // 是否要在检索结束后自动关闭浏览窗口(一般是因为中途 X 按钮被触发过了)
         // 进行检索
         private void button_search_Click(object sender, EventArgs e)
@@ -4739,11 +4763,13 @@ true);
             bool bDisplayClickableError = false;
 
             _willCloseBrowseWindow = false;
+            // _browseWindowSelected = false;
 
             ActivateBrowseWindow(false);
 
             this.browseWindow.RecordsList.Items.Clear();
 
+            Progress.Style = StopStyle.EnableHalfStop;
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在检索 ...");
             Progress.BeginLoop();
@@ -4874,6 +4900,8 @@ true);
                     if (lHitCount > 1)
                         this.ShowBrowseWindow(-1);
 
+                    // 从此位置以后，_willCloseBrowseWindow 如果变为 true 则表示要立即终止循环和处理
+
                     long lStart = 0;
                     long lPerCount = Math.Min(50, lHitCount);
                     DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
@@ -4883,7 +4911,8 @@ true);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (Progress != null && Progress.State != 0)
+                        if ((Progress != null && Progress.State != 0)
+                            || _willCloseBrowseWindow)
                         {
                             // MessageBox.Show(this, "用户中断");
                             break;  // 已经装入的还在
@@ -4902,7 +4931,9 @@ true);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (Progress.State != 0)
+                            if (this.browseWindow == null
+                                || (Progress != null && Progress.State != 0)
+                                || _willCloseBrowseWindow)
                             {
                                 // MessageBox.Show(this, "用户中断");
                                 break;
@@ -4920,6 +4951,8 @@ true);
                         // 处理浏览结果
                         for (int i = 0; i < searchresults.Length; i++)
                         {
+                            if (this.browseWindow == null)
+                                break;
                             Global.AppendNewLine(
                                 this.browseWindow.RecordsList,
                                 searchresults[i].Path,
@@ -4961,6 +4994,25 @@ true);
                     lHitCount += _searchParam._searchCount;
                 }
 
+                if (this.browseWindow == null)
+                    goto END1;
+
+#if NO
+                if ((Progress != null && Progress.State != 0)
+    && _browseWindowSelected == false)
+                {
+                    // 双击后会走到这里
+                    strError = "用户中断";
+                    goto ERROR1;
+                }
+
+                if (_browseWindowSelected)
+                {
+                    this.SwitchFocus(MARC_EDITOR);
+                    return;
+                }
+#endif
+
                 if (lHitCount > 1)
                     this.ShowBrowseWindow(lHitCount);
 
@@ -4996,6 +5048,7 @@ true);
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+                Progress.Style = StopStyle.None;
 
                 // this.button_search.Enabled = true;
                 this.EnableControls(true);
@@ -5006,6 +5059,7 @@ true);
             if (_willCloseBrowseWindow == true)
                 CloseBrowseWindow();
 
+            END1:
             this.textBox_queryWord.SelectAll();
 
             // 焦点切换到条码textbox
@@ -5357,7 +5411,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             if (browseWindow != null)
             {
                 this.MainForm.AppInfo.UnlinkFormState(browseWindow);
-                // this.browseWindow = null;
+                this.browseWindow = null;
             }
         }
 

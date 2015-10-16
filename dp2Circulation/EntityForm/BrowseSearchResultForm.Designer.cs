@@ -32,18 +32,17 @@ namespace dp2Circulation
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
-            this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(446, 304);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
+            this.button_Cancel.Location = new System.Drawing.Point(334, 243);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(100, 28);
+            this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 5;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -53,10 +52,9 @@ namespace dp2Circulation
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Enabled = false;
-            this.button_OK.Location = new System.Drawing.Point(338, 304);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
+            this.button_OK.Location = new System.Drawing.Point(254, 243);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(100, 28);
+            this.button_OK.Size = new System.Drawing.Size(75, 22);
             this.button_OK.TabIndex = 4;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -64,24 +62,23 @@ namespace dp2Circulation
             // 
             // listView_records
             // 
-            this.listView_records.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listView_records.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_records.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
             this.listView_records.FullRowSelect = true;
             this.listView_records.HideSelection = false;
-            this.listView_records.Location = new System.Drawing.Point(13, 13);
-            this.listView_records.Margin = new System.Windows.Forms.Padding(4);
+            this.listView_records.Location = new System.Drawing.Point(10, 10);
             this.listView_records.Name = "listView_records";
-            this.listView_records.Size = new System.Drawing.Size(533, 283);
+            this.listView_records.Size = new System.Drawing.Size(401, 227);
             this.listView_records.TabIndex = 3;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
+            this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
             this.listView_records.DoubleClick += new System.EventHandler(this.listView_records_DoubleClick);
-            this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             // 
             // columnHeader1
             // 
@@ -96,14 +93,15 @@ namespace dp2Circulation
             // BrowseSearchResultForm
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(559, 345);
+            this.ClientSize = new System.Drawing.Size(419, 276);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.listView_records);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "BrowseSearchResultForm";
             this.ShowInTaskbar = false;
             this.Text = "BrowseSearchResultForm";
