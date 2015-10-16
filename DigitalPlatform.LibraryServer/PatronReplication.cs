@@ -23,7 +23,6 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 
-
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
@@ -942,7 +941,6 @@ idElementName="barcode"
                     }
 
                     ids.Add(strID);
-
 
                     // 进入范围才处理
                     if (i <= nStart)

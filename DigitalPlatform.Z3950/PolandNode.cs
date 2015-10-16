@@ -718,11 +718,18 @@ namespace DigitalPlatform.Z3950
                 strAttrType,
                 strAttrValue);
             */
-            HandleQuery(param,
-                subparam,
-                strTerm,
-                strAttrType,
-                strAttrValue);
+            try
+            {
+                HandleQuery(param,
+                    subparam,
+                    strTerm,
+                    strAttrType,
+                    strAttrValue);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("BldAttributesPlusTerm() 处理 token '" + strToken + "' 过程中出现异常", ex);
+            }
 
             if (strToken.IndexOf('/', 0) == -1)
             {
@@ -914,14 +921,50 @@ int DivideToken(LPSTR &pszQuery,
             return true;
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.FormatException
+Message: 輸入字串格式不正確。
+Stack:
+於 System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+於 System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+於 System.Int16.Parse(String s, NumberStyles style, NumberFormatInfo info)
+於 System.Convert.ToInt16(String value)
+於 DigitalPlatform.Z3950.PolandNode.HandleQuery(BerNode param, BerNode subparam, String strTerm, String strAttrType, String strAttrValue)
+於 DigitalPlatform.Z3950.PolandNode.BldAttributesPlusTerm(BerNode param, String strToken)
+於 DigitalPlatform.Z3950.PolandNode.BuildOperand(BerNode param, String strToken)
+於 DigitalPlatform.Z3950.PolandNode.HandleOperand(String strToken)
+於 DigitalPlatform.Z3950.PolandNode.ChangeRPNToTree()
+於 DigitalPlatform.Z3950.PolandNode.ChangeOrgToRPN()
+於 DigitalPlatform.Z3950.BerTree.make_type_1(String strQuery, Encoding queryTermEncoding, BerNode subroot)
+於 DigitalPlatform.Z3950.BerTree.SearchRequest(SEARCH_REQUEST struSearch_request, Byte[]& baPackage)
+於 dp2Catalog.ZConnection.DoSearchAsync()
+於 dp2Catalog.ZConnection.ZConnection_InitialComplete(Object sender, EventArgs e)
+於 dp2Catalog.ZConnection.BeginCommands(List`1 commands)
+於 dp2Catalog.ZSearchForm.DoSearchOneServer(TreeNode nodeServerOrDatabase, String& strError)
+於 dp2Catalog.ZSearchForm.DoSearch()
+於 dp2Catalog.ZSearchForm.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.TextBoxBase.ProcessDialogKey(Keys keyData)
+於 System.Windows.Forms.Control.PreProcessMessage(Message& msg)
+於 System.Windows.Forms.Control.PreProcessControlMessageInternal(Control target, Message& msg)
+於 System.Windows.Forms.Application.ThreadContext.PreTranslateMessage(MSG& msg)
 
+         * */
         // new version
         // 处理term或AttributesList
         // parameters:
-        // return:
-        //		NULL
-        //		其他
-        int HandleQuery(BerNode param,
+        void HandleQuery(BerNode param,
             BerNode subparam,
             string strTerm,
             string strAttrType,
@@ -936,23 +979,31 @@ int DivideToken(LPSTR &pszQuery,
             // 处理term、attributeType或attributeValue
 
             //    处理attributeType
+            try
             {
                 Int16 i = Convert.ToInt16(strAttrType);
+
                 seq.NewChildIntegerNode(BerTree.z3950_AttributeType,
                     ASN1_CONTEXT,
                     BitConverter.GetBytes(i));
-
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("strAttrType = '"+strAttrType+"' 应为数字。", ex);
             }
 
             //		处理attributeValue 
+            try
             {
                 Int16 i = Convert.ToInt16(strAttrValue);
                 seq.NewChildIntegerNode(BerTree.z3950_AttributeValue,
                     ASN1_CONTEXT,
                     BitConverter.GetBytes(i));
-
             }
-
+            catch (Exception ex)
+            {
+                throw new Exception("strAttrValue = '" + strAttrValue + "' 应为数字。", ex);
+            }
             // TODO: 为何这里被调用了两次?
 
             // term
@@ -964,7 +1015,7 @@ int DivideToken(LPSTR &pszQuery,
                 tempnode.m_strDebugInfo = "term [" + strTerm + "]";
             }
 
-            return 0;
+            // return 0;
         }
 
         int PushToArray(BerNode param)
@@ -972,7 +1023,6 @@ int DivideToken(LPSTR &pszQuery,
             this.m_StackArray.Add(param);
             return 0;
         }
-
 
         int PopFromArray(out BerNode subparam)
         {

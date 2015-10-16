@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <col title="册条码号" type="item_barcode">
+    <xpath>*/itemBarcode</xpath>
+  </col>
+  <col title="盘点批次号" type="batch_no">
+    <xpath>*/batchNo</xpath>
+  </col>
+  <col title="馆代码" type="library_code">
+    <xpath>*/libraryCode</xpath>
+  </col>
+  <col title="馆藏地" type="location">
+    <xpath>*/location</xpath>
+  </col>
+  <col title="状态" type="state">
+    <xpath>*/state</xpath>
+  </col>
+  <col title="盘点操作者" type="operator">
+    <xpath>*/operator</xpath>
+  </col>
+  <col title="盘点操作时间" convert="rfc1123tolocaltimes" type="oper_time">
+    <xpath>*/operTime</xpath>
+  </col>
+  <col title="盘点记录参考ID" type="ref_id">
+    <xpath>*/refID</xpath>
+  </col>
+  <col title="册参考ID" type="item_ref_id">
+    <xpath>*/itemRefID</xpath>
+  </col>
+  <col title="册记录路径" type="item_recpath">
+    <xpath>*/itemRecPath</xpath>
+  </col>
+</root>

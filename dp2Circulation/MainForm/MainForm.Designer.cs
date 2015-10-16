@@ -157,6 +157,7 @@ namespace dp2Circulation
             this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.menuItem_packageErrorLog = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem_updateDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_upgradeFromDisk = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
@@ -203,7 +204,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_upgradeFromDisk = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openMarc856SearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -286,6 +287,7 @@ namespace dp2Circulation
             this.MenuItem_openCommentSearchForm,
             this.MenuItem_openInvoiceSearchForm,
             this.MenuItem_openArrivedSearchForm,
+            this.MenuItem_openMarc856SearchForm,
             this.toolStripSeparator1,
             this.MenuItem_openReaderInfoForm,
             this.MenuItem_openItemInfoForm,
@@ -1208,6 +1210,13 @@ namespace dp2Circulation
             this.menuItem_updateDp2circulation.Visible = false;
             this.menuItem_updateDp2circulation.Click += new System.EventHandler(this.menuItem_updateDp2circulation_Click);
             // 
+            // MenuItem_upgradeFromDisk
+            // 
+            this.MenuItem_upgradeFromDisk.Name = "MenuItem_upgradeFromDisk";
+            this.MenuItem_upgradeFromDisk.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_upgradeFromDisk.Text = "¥”¥≈≈Ã…˝º∂(&U) ...";
+            this.MenuItem_upgradeFromDisk.Click += new System.EventHandler(this.MenuItem_upgradeFromDisk_Click);
+            // 
             // toolStripSeparator31
             // 
             this.toolStripSeparator31.Name = "toolStripSeparator31";
@@ -1654,12 +1663,12 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_upgradeFromDisk
+            // MenuItem_openMarc856SearchForm
             // 
-            this.MenuItem_upgradeFromDisk.Name = "MenuItem_upgradeFromDisk";
-            this.MenuItem_upgradeFromDisk.Size = new System.Drawing.Size(188, 22);
-            this.MenuItem_upgradeFromDisk.Text = "¥”¥≈≈Ã…˝º∂(&U) ...";
-            this.MenuItem_upgradeFromDisk.Click += new System.EventHandler(this.MenuItem_upgradeFromDisk_Click);
+            this.MenuItem_openMarc856SearchForm.Name = "MenuItem_openMarc856SearchForm";
+            this.MenuItem_openMarc856SearchForm.Size = new System.Drawing.Size(195, 22);
+            this.MenuItem_openMarc856SearchForm.Text = "856 ◊÷∂Œ≤È—Ø¥∞(&8)";
+            this.MenuItem_openMarc856SearchForm.Click += new System.EventHandler(this.MenuItem_openMarc856SearchForm_Click);
             // 
             // MainForm
             // 
@@ -1878,6 +1887,7 @@ namespace dp2Circulation
         private System.Windows.Forms.WebBrowser webBrowser_messageHub;
         private System.Windows.Forms.ToolStripMenuItem menuItem_updateDp2circulation;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_upgradeFromDisk;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openMarc856SearchForm;
     }
 }
 

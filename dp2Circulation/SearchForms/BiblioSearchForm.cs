@@ -2044,7 +2044,6 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
-
                 subMenuItem = new MenuItem("导出书目记录下属的册记录路径到(实体库)记录路径文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&E)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToEntityRecordPathFile_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
@@ -2122,6 +2121,12 @@ out strError);
 
                 subMenuItem = new MenuItem("评注查询窗");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportToCommentSearchForm_Click);
+                if (this.listView_records.SelectedItems.Count == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("856 字段查询窗");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportTo856SearchForm_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
@@ -4505,6 +4510,19 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
+        void menu_exportTo856SearchForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            int nRet = ExportTo856SearchForm(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         // 将所选择的 ? 个书目记录下属的册记录路径导出到(实体库)记录路径文件
         void menu_saveToEntityRecordPathFile_Click(object sender, EventArgs e)
         {
@@ -4593,6 +4611,116 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             return 0;
         }
+
+        int ExportTo856SearchForm(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                return -1;
+            }
+
+            Marc856SearchForm form = new Marc856SearchForm();
+            form.MdiParent = this;
+            form.Show();
+
+            this.EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出到 MARC 文件 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    string strXml = "";
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
+
+                    string strMARC = "";
+                    string strMarcSyntax = "";
+                    // 将XML格式转换为MARC格式
+                    // 自动从数据记录中获得MARC语法
+                    nRet = MarcUtil.Xml2Marc(strXml,
+                        true,
+                        null,
+                        out strMarcSyntax,
+                        out strMARC,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "XML转换到MARC记录时出错: " + strError;
+                        return -1;
+                    }
+
+                    MarcRecord record = new MarcRecord(strMARC);
+                    MarcNodeList fields = record.select("field[@name='856']");
+                    if (fields.count == 0)
+                        goto CONTINUE;
+
+                    foreach(MarcField field in fields)
+                    {
+                        form.AddLine(field);
+                    }
+
+                CONTINUE:
+                    stop.SetProgressValue(++i);
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "导出 856 字段的过程出现异常: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+            }
+
+        }
+
 
         int SaveToEntityRecordPathFile(
             string strDbType,

@@ -7307,7 +7307,6 @@ Keys keyData)
 
             this.AppInfo.SetString("sn", "sn", dlg.SerialCode);
             this.AppInfo.Save();
-
             return 1;
         }
 
@@ -7910,6 +7909,11 @@ Keys keyData)
         private void MenuItem_upgradeFromDisk_Click(object sender, EventArgs e)
         {
             UpgradeGreenFromDisk();
+        }
+
+        private void MenuItem_openMarc856SearchForm_Click(object sender, EventArgs e)
+        {
+            OpenWindow<Marc856SearchForm>();
         }
     }
 

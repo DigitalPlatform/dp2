@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationRevision>20</ApplicationRevision>
     <ApplicationVersion>2.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1508,6 +1508,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\InventoryBatchNoControl.resx">
       <DependentUpon>InventoryBatchNoControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\InventoryForm.resx">
       <DependentUpon>InventoryForm.cs</DependentUpon>
@@ -2099,6 +2100,9 @@
     <EmbeddedResource Include="Reader\SetReaderBarcodeNumberDialog.resx">
       <DependentUpon>SetReaderBarcodeNumberDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\Marc856SearchForm.resx">
+      <DependentUpon>Marc856SearchForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\OneActionDialog.resx">
       <DependentUpon>OneActionDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -2267,6 +2271,12 @@
     <Compile Include="Script\WebExternalHost.cs" />
     <Compile Include="SearchForms\ItemSearchFormBase.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\Marc856SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\Marc856SearchForm.Designer.cs">
+      <DependentUpon>Marc856SearchForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\MdiWindow.cs" />
     <Compile Include="SearchForms\OneActionDialog.cs">

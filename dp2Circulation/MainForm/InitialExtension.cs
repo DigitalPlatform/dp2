@@ -2281,7 +2281,8 @@ Culture=neutral, PublicKeyToken=null
                     // strError = "当前 dp2Circulation 版本需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + strVersion + " )。\r\n\r\n请尽快升级 dp2Library 到最新版本。";
                     // return 0;
                     strError = "当前 dp2Circulation 版本必须和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + strVersion + " )。\r\n\r\n请立即升级 dp2Library 到最新版本。";
-                    this.AppInfo.Save();
+                    if (this.AppInfo != null)
+                        this.AppInfo.Save();
                     return -2;
                 }
 
@@ -2289,7 +2290,8 @@ Culture=neutral, PublicKeyToken=null
                 if (this.TestMode == true && this.ServerVersion < 2.34)
                 {
                     strError = "dp2Circulation 的评估模式只能在所连接的 dp2library 版本为 2.34 以上时才能使用 (当前 dp2library 版本为 " + this.ServerVersion.ToString() + ")";
-                    this.AppInfo.Save();
+                    if (this.AppInfo != null)
+                        this.AppInfo.Save();
                     MessageBox.Show(this, strError);
                     DialogResult result = MessageBox.Show(this,
     "重设序列号可以脱离评估模式。\r\n\r\n是否要在退出前重设序列号?",

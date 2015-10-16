@@ -50,12 +50,15 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
-            nRet = CopyDirectory(strDataDir,
-    strTargetDir,
-    FileNameFilter,
-    out strError);
-            if (nRet == -1)
-                return -1;
+            if (PathUtil.IsEqual(strProgramDir, strDataDir) == false)
+            {
+                nRet = CopyDirectory(strDataDir,
+        strTargetDir,
+        FileNameFilter,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
             return 0;
         }
@@ -148,7 +151,7 @@ Stack:
                         {
                             File.Copy(source, target, true);
                         }
-                        catch
+                        catch(Exception ex)
                         {
                             if (nRedoCount < 10)
                             {
@@ -156,8 +159,13 @@ Stack:
                                 continue;
                             }
                             else
-                                throw;
+                            {
+                                string strText = "source '" + source + "' lastmodified = '" + File.GetLastWriteTimeUtc(source) .ToString()+ "'; "
+                                    + "target '" + target + "' lastmodified = '" + File.GetLastWriteTimeUtc(target).ToString() + "'";
+                                throw new Exception(strText, ex);
+                            }
                         }
+                        Debug.Assert(File.GetLastWriteTimeUtc(source) == File.GetLastWriteTimeUtc(target), "源文件和目标文件复制完成后，最后修改时间不同");
                         break;
                     }
                     nCount++;
@@ -191,6 +199,21 @@ Stack:
             }
         }
 #endif
+        /*
+Type: System.IO.FileNotFoundException
+Message: 无法保存快捷方式“C:\Users\Administrator\Desktop\????.lnk”。
+Stack:
+在 System.Dynamic.ComRuntimeHelpers.CheckThrowException(Int32 hresult, ExcepInfo& excepInfo, UInt32 argErr, String message)
+在 CallSite.Target(Closure , CallSite , ComObject )
+在 System.Dynamic.UpdateDelegates.UpdateAndExecute1[T0,TRet](CallSite site, T0 arg0)
+在 CallSite.Target(Closure , CallSite , Object )
+在 System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid1[T0](CallSite site, T0 arg0)
+在 dp2Circulation.GreenProgram.CreateShortcutToDesktop(String linkName, String strAppPath, Boolean bOverwriteExist)
+在 dp2Circulation.MainForm.CopyGreen()
+在 dp2Circulation.MainForm.<FirstInitial>b__2()
+在 System.Threading.Tasks.Task.InnerInvoke()
+在 System.Threading.Tasks.Task.Execute()
+         * */
         // http://stackoverflow.com/questions/234231/creating-application-shortcut-in-a-directory
         // 在桌面上创建快捷方式
         public static void CreateShortcutToDesktop(
