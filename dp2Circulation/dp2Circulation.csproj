@@ -183,16 +183,14 @@
     <Compile Include="ActivateForm.Designer.cs">
       <DependentUpon>ActivateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Charging\ChargingTask.cs" />
     <Compile Include="Charging\ColorSummaryControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Charging\ColorSummaryControl.Designer.cs">
       <DependentUpon>ColorSummaryControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Charging\FloatingMessageForm.cs" />
-    <Compile Include="Charging\FloatingMessageForm.Designer.cs">
-      <DependentUpon>FloatingMessageForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Charging\ExternalChannel.cs" />
     <Compile Include="Charging\IChargingForm.cs" />
     <Compile Include="Charging\InventoryFromFileDialog.cs">
       <SubType>Form</SubType>
@@ -1446,9 +1444,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\ColorSummaryControl.resx">
       <DependentUpon>ColorSummaryControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Charging\FloatingMessageForm.resx">
-      <DependentUpon>FloatingMessageForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\InventoryFromFileDialog.resx">
       <DependentUpon>InventoryFromFileDialog.cs</DependentUpon>

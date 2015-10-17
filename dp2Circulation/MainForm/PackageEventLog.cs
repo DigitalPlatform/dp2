@@ -262,7 +262,7 @@ namespace dp2Circulation
                     {
                         ModuleName = process.MainModule.ModuleName;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         continue;
                     }

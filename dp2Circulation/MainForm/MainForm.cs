@@ -7670,7 +7670,7 @@ Keys keyData)
             {
                 dom.Load(strCfgFileName);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return 0;
             }

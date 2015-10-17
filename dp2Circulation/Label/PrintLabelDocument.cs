@@ -870,7 +870,7 @@ namespace dp2Circulation
                     x += (float)label_param.LabelWidth;
                 }
 
-            CONTINUE_LINE:
+            //CONTINUE_LINE:
                 y += (float)label_param.LabelHeight;
             }
 

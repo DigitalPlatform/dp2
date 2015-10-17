@@ -862,7 +862,7 @@ namespace dp2Circulation
             {
                 strOrderTime = DateTimeUtil.Rfc1123DateTimeStringToLocal(this.OrderTime, "s");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strOrderTime = "订购时间字符串 '"+this.OrderTime+"' 格式不合法";
             }

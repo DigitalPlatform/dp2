@@ -704,7 +704,7 @@ MessageBoxDefaultButton.Button1);
             {
                 _webRequest = null;
             }
-            return 0;
+            //return 0;
         }
 
         // 从 http 服务器下载一个文件
@@ -795,7 +795,7 @@ MessageBoxDefaultButton.Button1);
             {
                 process.Start();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -1588,7 +1588,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     ModuleName = process.MainModule.ModuleName;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     continue;
                 }
@@ -3445,7 +3445,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int InitialBiblioDbProperties(bool bPrepareSearch = true)
         {
-        REDO:
+        //REDO:
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
@@ -3828,7 +3828,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int InitialReaderDbProperties(bool bPrepareSearch = true)
         {
-        REDO:
+        //REDO:
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
@@ -4285,7 +4285,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetUtilDbProperties(bool bPrepareSearch = true)
         {
-        REDO:
+        //REDO:
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)

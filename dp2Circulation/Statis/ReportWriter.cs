@@ -1099,7 +1099,7 @@ object o2)
         public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
             throw new Exception("尚未实现");
-            return 0;
+            // return 0;
         }
 
         //

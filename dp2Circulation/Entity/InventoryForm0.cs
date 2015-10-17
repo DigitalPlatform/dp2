@@ -1667,8 +1667,10 @@ this.splitContainer_inAndOutof,
             PrintList("已验证清单", in_items, outof_items);
 
             return;
+#if NO
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         void PrintList(

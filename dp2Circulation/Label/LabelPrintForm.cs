@@ -692,7 +692,7 @@ namespace dp2Circulation
 
                     nLabelCount++;
 
-                    CONTINUE:
+                    //CONTINUE:
                     stop.SetProgressValue(i);
                 } // end of for
             }
@@ -2104,7 +2104,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            return;
+            //return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -3170,7 +3170,7 @@ namespace dp2Circulation
 
         private void button_editDefFile_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
 
 #if NO
             if (string.IsNullOrEmpty(this.textBox_labelDefFilename.Text) == true)

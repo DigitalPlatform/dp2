@@ -169,7 +169,7 @@ namespace dp2Circulation
                     {
                         DateTimeUtil.FromRfc1123DateTimeString(this.comboBox_fieldValue.Text);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         strError = "时间字符串 '" + this.comboBox_fieldValue.Text + "' 格式不正确，应为 RFC1123 格式";
                         return 1;

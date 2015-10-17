@@ -3215,7 +3215,7 @@ out strError);
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -3998,7 +3998,7 @@ out string strError)
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -4194,7 +4194,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -4365,7 +4365,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -4734,7 +4734,7 @@ out strError);
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -5037,7 +5037,7 @@ from operlogamerce
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -10189,7 +10189,7 @@ MessageBoxDefaultButton.Button1);
                 if (string.IsNullOrEmpty(strEndDate) == true)
                     strEndDate = strStartDate;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
                 return -1;
@@ -11974,7 +11974,7 @@ MessageBoxDefaultButton.Button1);
 
         private void toolStripButton_setReportEndDay_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
             string strLastDate = this.MainForm.AppInfo.GetString(GetReportSection(),

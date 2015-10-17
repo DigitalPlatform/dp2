@@ -501,9 +501,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.QuickChargingForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.QuickChargingForm_FormClosed);
             this.Load += new System.EventHandler(this.QuickChargingForm_Load);
-            this.SizeChanged += new System.EventHandler(this.QuickChargingForm_SizeChanged);
             this.Enter += new System.EventHandler(this.QuickChargingForm_Enter);
-            this.Move += new System.EventHandler(this.QuickChargingForm_Move);
             this.contextMenuStrip_selectFunc.ResumeLayout(false);
             this.splitContainer_main.Panel1.ResumeLayout(false);
             this.splitContainer_main.Panel2.ResumeLayout(false);

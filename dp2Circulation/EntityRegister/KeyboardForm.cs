@@ -876,7 +876,7 @@ namespace dp2Circulation
                     this.BeginInvoke(new Action<object, EventArgs>(button_scan_Click), this, new EventArgs());
                     return;
                 }
-                return;
+                //return;
             }
 
             if (this._step == Step.EditBiblio)

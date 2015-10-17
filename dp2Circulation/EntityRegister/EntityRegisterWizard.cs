@@ -3348,7 +3348,7 @@ int nCount)
                 if (Global.IsAppendRecPath(strPath) == true)
                     strAction = "new";
 
-            REDO:
+            //REDO:
                 long lRet = current_channel.SetBiblioInfo(
                     Progress,
                     strAction,
@@ -3667,7 +3667,7 @@ int nCount)
                 }
 
                 string strOutputPath = "";
-            REDO:
+            //REDO:
                 long lRet = current_channel.SetBiblioInfo(
                     Progress,
                     strAction,
@@ -4506,7 +4506,7 @@ MessageBoxDefaultButton.Button2);
                             image.Dispose();
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // throw new Exception("read image error:" + ex.Message);
                         if (cell_info.RetryCount < 5)
@@ -4554,7 +4554,7 @@ MessageBoxDefaultButton.Button2);
                             image.Dispose();
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // throw new Exception("read image error:" + ex.Message);
                         if (cell_info.RetryCount < 5)

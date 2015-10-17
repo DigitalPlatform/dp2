@@ -59,9 +59,11 @@ namespace dp2Circulation
                 this.m_lock.ReleaseWriterLock();
             }
 
+#if NO
         ERROR1:
             // Safe_setError(this.Container.listView_in, strError);
             return;
+#endif
         }
 
         public void ClearList()

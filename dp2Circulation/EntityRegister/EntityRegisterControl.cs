@@ -46,7 +46,7 @@ namespace dp2Circulation
 
         internal ImageManager _imageManager = null;
 
-        MainForm _mainForm = null;
+        //MainForm _mainForm = null;
         public MainForm MainForm
         {
             get
@@ -65,10 +65,7 @@ namespace dp2Circulation
             }
         }
 
-
-
         // public LibraryChannel Channel = null;
-
 
         List<LineTask> _loadEntityTasks = new List<LineTask>();
 
@@ -1375,7 +1372,7 @@ int nCount)
                 if (Global.IsAppendRecPath(strPath) == true)
                     strAction = "new";
 
-            REDO:
+            //REDO:
                 long lRet = _channel.SetBiblioInfo(
                     Progress,
                     strAction,
@@ -2365,8 +2362,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     this.m_lock.ReleaseWriterLock();
                 }
-
-            ERROR1:
+            //ERROR1:
                 // Safe_setError(this.Container.listView_in, strError);
                 return;
             }

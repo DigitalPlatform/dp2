@@ -1339,8 +1339,8 @@ MessageBoxDefaultButton.Button1);
                 dlg.DbType = this.DbType;
                 dlg.Text = "快速修改" + this.DbTypeCaption + "记录 -- 请指定动作参数";
                 dlg.MainForm = this.MainForm;
-                dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
-                dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
+                //dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
+                //dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
 
                 dlg.UiState = this.MainForm.AppInfo.GetString(
 this.DbType + "search_form",
@@ -1530,6 +1530,7 @@ dlg.UiState);
             return 1;
         }
 
+#if NO
         void dlg_GetValueTable(object sender, GetValueTableEventArgs e)
         {
             string strError = "";
@@ -1542,6 +1543,7 @@ dlg.UiState);
                 MessageBox.Show(this, strError);
             e.values = values;
         }
+#endif
 
         // 修改一个事项记录 XmlDocument
         // return:

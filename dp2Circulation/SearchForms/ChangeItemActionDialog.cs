@@ -33,7 +33,7 @@ namespace dp2Circulation
         /// <summary>
         /// 获得值列表
         /// </summary>
-        public event GetValueTableEventHandler GetValueTable = null;
+        // public event GetValueTableEventHandler GetValueTable = null;
         public string RefDbName = "";
 
         public XmlDocument CfgDom = null;

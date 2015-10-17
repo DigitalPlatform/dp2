@@ -8428,7 +8428,7 @@ namespace dp2Circulation
 
         private void toolStripButton_calendar_new_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
 
             CalendarDialog dlg = new CalendarDialog();
             MainForm.SetControlFont(dlg, this.Font, false);

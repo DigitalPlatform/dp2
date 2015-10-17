@@ -4743,6 +4743,7 @@ true);
             }
         }
 
+#if NO
         internal new void DoStop(object sender, StopEventArgs e)
         {
             if (this.Channel != null)
@@ -4752,6 +4753,7 @@ true);
                 this._browseWindowSelected = true;
 #endif
         }
+#endif
 
         // bool _browseWindowSelected = false;     // 小浏览窗口是否被确定选择记录而关闭的
         bool _willCloseBrowseWindow = false;    // 是否要在检索结束后自动关闭浏览窗口(一般是因为中途 X 按钮被触发过了)
@@ -12424,7 +12426,7 @@ strMARC);
                 {
                     image = Image.FromFile(files[0]);
                 }
-                catch (OutOfMemoryException ex)
+                catch (OutOfMemoryException)
                 {
                     strError = "当前 Windows 剪贴板中的第一个文件不是图像文件。无法创建封面图像";
                     goto ERROR1;

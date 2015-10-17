@@ -2447,7 +2447,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
             }
-            return 0;
+            //return 0;
         ERROR1:
             return -1;
         }

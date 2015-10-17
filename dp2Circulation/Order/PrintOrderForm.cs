@@ -2356,7 +2356,7 @@ namespace dp2Circulation
                 // MainForm.ShowProgress(false);
             }
 
-            END1:
+            //END1:
             if (doc != null)
             {
                 // Close the document.
