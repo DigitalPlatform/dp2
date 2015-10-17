@@ -9322,7 +9322,10 @@ Stack:
             }
         }
 
-        void AbortIt()
+        /// <summary>
+        /// 立即放弃通讯。而 Abort() 要文雅一些
+        /// </summary>
+        public void AbortIt()
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try

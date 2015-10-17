@@ -206,7 +206,10 @@ namespace dp2Circulation
             if (this.Channel != null)
             {
                 if (this.Channel.IsInSearching > 0)
-                    this.Channel.Abort();
+                {
+                    // this.Channel.Abort();
+                    this.Channel.AbortIt(); // 能立即切断通讯 2015/10/17
+                }
             }
 #else
             CloseAllChannels();
@@ -428,6 +431,7 @@ namespace dp2Circulation
 
                         byte[] item_timestamp = null;
 
+                        this.Channel.Timeout = new TimeSpan(0, 0, 5);
                         long lRet = this.Channel.GetItemInfo(
                             stop,
                             strItemBarcode,
@@ -448,6 +452,7 @@ namespace dp2Circulation
                             goto ERROR1;
 
                         string strXml = "";
+                        this.Channel.Timeout = new TimeSpan(0, 0, 5);
                         lRet = this.Channel.GetItemInfo(
         stop,
         strItemBarcode,
@@ -739,6 +744,7 @@ namespace dp2Circulation
                             string[] results = null;
                             byte[] baTimestamp = null;
 
+                            this.Channel.Timeout = new TimeSpan(0, 0, 5);
                             lRet = Channel.GetReaderInfo(stop,
                                 strPatronBarcode,
                                 "xml",
@@ -816,6 +822,7 @@ namespace dp2Circulation
                     string strMetaData = "";
                     string strTempOutputPath = "";
 
+                    this.Channel.Timeout = new TimeSpan(0, 0, 60);
                     lRet = this.Channel.GetRes(
                         stop,
                         strResPath,
@@ -964,6 +971,7 @@ namespace dp2Circulation
                     {
                         string strXml = "";
                         string[] results = null;
+                        this.Channel.Timeout = new TimeSpan(0, 0, 5);
                         long lRet = Channel.GetReaderInfo(stop,
                             strPatronBarcode,
                             "xml",
@@ -1161,7 +1169,7 @@ namespace dp2Circulation
                 this.m_inSearch++;
                 try
                 {
-
+                    this.Channel.Timeout = new TimeSpan(0, 0, 5);
                     long lRet = this.Channel.GetBiblioSummary(
                         stop,
                         strItemBarcode,
@@ -1275,6 +1283,7 @@ namespace dp2Circulation
 
         void AddCall(AsyncCall call)
         {
+            // TODO: 这里可能会抛出异常
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
@@ -1364,6 +1373,7 @@ namespace dp2Circulation
                         string strResult = "";
                         try
                         {
+                            // 此调用可能耗费时间好几秒
                             strResult = GetObjectFilePath((string)call.InputParameters[0], (string)call.InputParameters[1]);
                         }
                         catch (Exception ex)

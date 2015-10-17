@@ -723,6 +723,7 @@ namespace dp2Circulation
                         Delegate_Borrow d = (Delegate_Borrow)call.func;
                         this.MainForm.Invoke(d, call.parameters);
                          * */
+                        // 此调用可能因为网络原因，耗时好几秒
                         Borrow((IChargingForm)call.parameters[0],
                             (bool)call.parameters[1],
                             (string)call.parameters[2],
@@ -779,7 +780,6 @@ namespace dp2Circulation
                 + " <div class='clear'></div>"
     + "</div>";
                 AppendHtml(strText);
-
             }
         }
 
@@ -1027,7 +1027,7 @@ out strError);
                 return nRet;
 
             Debug.Assert(nRet == 0, "");
-
+            Channel.Timeout = new TimeSpan(0, 0, 5);
             long lRet = Channel.GetBiblioSummary(
                 null,
                 strItemBarcode,
@@ -1131,7 +1131,6 @@ out strError);
 
             AppendHtml(strText);
             m_nCount++;
-
 
             // 运行Script代码
             if (this.PrintAssembly != null)
@@ -1388,10 +1387,10 @@ out strError);
         /// <param name="strText">HTML 内容</param>
         public void AppendHtml(string strText)
         {
-            if (this.MainForm.InvokeRequired)
+            if (this.WebBrowser.InvokeRequired)
             {
                 Delegate_AppendHtml d = new Delegate_AppendHtml(AppendHtml);
-                this.MainForm.BeginInvoke(d, new object[] { strText });
+                this.WebBrowser.BeginInvoke(d, new object[] { strText });
                 return;
             }
 

@@ -4667,6 +4667,8 @@ namespace dp2Library
 
             try
             {
+                // Thread.Sleep(10000); // test
+
                 // parameters:
                 //      strBiblioRecPathExclude   除开列表中的这些种路径, 才返回摘要内容, 否则仅仅返回种路径即可
                 return app.GetBiblioSummary(

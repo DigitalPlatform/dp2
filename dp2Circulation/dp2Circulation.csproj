@@ -224,6 +224,7 @@
     <Compile Include="Charging\SelectItemDialog.Designer.cs">
       <DependentUpon>SelectItemDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Charging\SummaryList.cs" />
     <Compile Include="Dictionary\SelectDictionaryItemDialog.cs">
       <SubType>Form</SubType>
     </Compile>

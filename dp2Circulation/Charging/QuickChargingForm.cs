@@ -49,7 +49,10 @@ namespace dp2Circulation
 
         WebExternalHost m_webExternalHost_readerInfo = new WebExternalHost();
 
+        // 借书、还书等主要业务的任务队列
         TaskList _taskList = new TaskList();
+
+        SummaryList _summaryList = new SummaryList();
 
         internal ExternalChannel _summaryChannel = new ExternalChannel();
         internal ExternalChannel _barcodeChannel = new ExternalChannel();
@@ -124,6 +127,10 @@ namespace dp2Circulation
             this._taskList.Container = this;
             this._taskList.BeginThread();
 
+            // this._summaryList.Channel = this._summaryChannel;
+            this._summaryList.stop = this.stop;
+            this._summaryList.Container = this;
+            this._summaryList.BeginThread();
 #if NO
             {
                 _floatingMessage = new FloatingMessageForm(this);
@@ -174,7 +181,10 @@ namespace dp2Circulation
 
         private void QuickChargingForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+#if NO
+            this.ShowMessage("正在关闭窗口 ...", "green", false);
+            Application.DoEvents();
+#endif
         }
 
         private void QuickChargingForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -193,6 +203,8 @@ namespace dp2Circulation
             }
 
             this._taskList.Close();
+
+            this._summaryList.Close();
 
             this._summaryChannel.Close();
             this._barcodeChannel.Close();
@@ -449,6 +461,19 @@ dlg.UiState);
             return 1;
         }
 
+        internal void AddItemSummaryTask(string strItemBarcode,
+            string strConfirmItemRecPath,
+            ChargingTask charging_task)
+        {
+            SummaryTask task = new SummaryTask();
+            task.Action = "get_item_summary";
+            task.ItemBarcode = strItemBarcode;
+            task.ConfirmItemRecPath = strConfirmItemRecPath;
+            task.ChargingTask = charging_task;
+
+            this._summaryList.AddTask(task);
+        }
+#if NO
         delegate void Delegate_FillItemSummary(string strItemBarcode,
             string strConfirmItemRecPath,
             ChargingTask task);
@@ -456,6 +481,7 @@ dlg.UiState);
             string strConfirmItemRecPath,
             ChargingTask task)
         {
+            // 这里被做事的线程调用，希望启动任务后尽快返回。但不应把长时任务交给界面线程
             if (this.InvokeRequired)
             {
                 Delegate_FillItemSummary d = new Delegate_FillItemSummary(AsynFillItemSummary);
@@ -489,6 +515,38 @@ dlg.UiState);
             {
                 string strTitle = "";
                 nRet = strSummary.IndexOf("/");
+                if (nRet != -1)
+                    strTitle = strSummary.Substring(0, nRet).Trim();
+                else
+                    strTitle = strSummary.Trim();
+
+                this.MainForm.Speak(strTitle);
+            }
+        }
+#endif
+        // 把摘要显示到任务列表中，并朗读出来
+        internal void AsyncFillItemSummary(ChargingTask task, string strSummary)
+        {
+            // 这里被做事的线程调用，希望启动任务后尽快返回。但不应把长时任务交给界面线程
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<ChargingTask, string>(AsyncFillItemSummary), task, strSummary);
+                return;
+            }
+
+            DpRow row = FindTaskLine(task);
+            if (row == null)
+                return;
+
+            task.ItemSummary = strSummary;
+            DisplayTask("refresh", task);
+
+            // 把摘要的书名部分朗读出来
+            if (this.SpeakBookTitle == true 
+                && string.IsNullOrEmpty(strSummary) == false)
+            {
+                string strTitle = "";
+                int nRet = strSummary.IndexOf("/");
                 if (nRet != -1)
                     strTitle = strSummary.Substring(0, nRet).Trim();
                 else
@@ -557,7 +615,6 @@ dlg.UiState);
             }
         }
 
-
         /// <summary>
         /// 获得书目摘要
         /// </summary>
@@ -584,6 +641,7 @@ out strError);
             this._summaryChannel.PrepareSearch("正在获取书目摘要 ...");
             try
             {
+                // TODO: 这里要避免出让控制权
                 long lRet = this._summaryChannel.Channel.GetBiblioSummary(
                     this._summaryChannel.stop,
                     strItemBarcode,
@@ -1202,10 +1260,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 return;
             }
 
-            // 中国中间(温和)停止过，则需要重新启动线程
+            // 如果中间(温和)停止过，则需要重新启动线程
             if (this._taskList.Stopped == true)
                 this._taskList.BeginThread();
 
+            if (this._summaryList.Stopped == true)
+                this._summaryList.BeginThread();
             // m_webExternalHost_readerInfo.StopPrevious();
 
             if ((this.UseIsbnBorrow == true && IsISBN(ref strText) == true)
@@ -1802,6 +1862,7 @@ false);
             {
                 this.dpTable_tasks.Rows.Remove(row);
             }
+            this._summaryList.ClearRelativeTasks(tasks);
 
             // this._taskList.Clear();
             // this.dpTable_tasks.Rows.Clear();
@@ -2009,19 +2070,41 @@ false);
             bool bClearInfoWindow,
             bool bDupAsClear)
         {
+            //Stopwatch watch = new Stopwatch();
+            //watch.Start();
+
             this.webBrowser_reader.Stop();
+
+            //watch.Stop();
+            //Debug.WriteLine("this.webBrowser_reader.Stop() elapsed " + watch.Elapsed.TotalSeconds);
+            //watch.Restart();
+
             this.m_webExternalHost_readerInfo.StopPrevious();
+
+            //watch.Stop();
+            //Debug.WriteLine("this.m_webExternalHost_readerInfo.StopPrevious() elapsed " + watch.Elapsed.TotalSeconds);
+            //watch.Restart();
 
             // 清除 webbrowser 和任务列表
             if (bClearInfoWindow == true)
             {
+            //watch.Stop();
+            //Debug.WriteLine("---1  elapsed " + watch.Elapsed.TotalSeconds);
+            //watch.Restart();
+
                 if (ClearTaskByRows(null, true) == false)
                     return;
+
+            //watch.Stop();
+            //Debug.WriteLine("---2  elapsed " + watch.Elapsed.TotalSeconds);
+            //watch.Restart();
+
                 if (this.IsCardMode == true)
                     SetReaderCardString("");
                 else
                     SetReaderHtmlString("(空)");
             }
+
 
             FuncState old_funcstate = this._funcstate;
 
@@ -2041,7 +2124,6 @@ false);
             // 切换为不同的功能的时候，定位焦点
             if (old_funcstate != this._funcstate)
             {
-
                 if (this.AutoClearTextbox == true)
                 {
                     this.textBox_input.Text = "";
@@ -2058,7 +2140,6 @@ false);
             }
             else // 重复设置为同样功能，当作清除功能
             {
-
                 if (this.AutoClearTextbox == true)
                 {
                     this.textBox_input.Text = "";
@@ -2074,6 +2155,10 @@ false);
                 // focus input 
                 this.textBox_input.Focus();
             }
+
+            //watch.Stop();
+            //Debug.WriteLine("SmartSetFuncState elapsed " + watch.Elapsed.TotalSeconds);
+            //watch.Restart();
         }
 
         private void QuickChargingForm_Move(object sender, EventArgs e)
@@ -2178,7 +2263,6 @@ false);
                 selected_row = this.dpTable_tasks.SelectedRows[0];
                 selected_task = (ChargingTask)selected_row.Tag;
             }
-
 
             // 
             menuItem = new ToolStripMenuItem("打开到 读者窗(&R)");
@@ -3329,8 +3413,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
              * */
         }
 
-
-
         // 获得可以发送给服务器的证条码号字符串
         // 去掉前面的 ~
         static string GetRequestPatronBarcode(string strText)
@@ -3757,7 +3839,12 @@ out strError);
 
             task.ReaderName = strReaderSummary;
             // task.ItemSummary = strBiblioSummary;
+#if NO
             this.Container.AsynFillItemSummary(task.ItemBarcode,
+                strConfirmItemRecPath,
+                task);
+#endif
+            this.Container.AddItemSummaryTask(task.ItemBarcode,
                 strConfirmItemRecPath,
                 task);
 
@@ -4084,9 +4171,14 @@ end_time);
 
             task.ReaderName = strReaderSummary;
             // task.ItemSummary = strBiblioSummary;
+#if NO
             this.Container.AsynFillItemSummary(task.ItemBarcode,
                 strConfirmItemRecPath,
                 task);
+#endif
+            this.Container.AddItemSummaryTask(task.ItemBarcode,
+    strConfirmItemRecPath,
+    task);
 
             if (string.IsNullOrEmpty(task.ReaderBarcode) == true)
                 task.ReaderBarcode = strOutputReaderBarcode;
