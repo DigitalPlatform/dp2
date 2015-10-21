@@ -25,7 +25,7 @@ namespace dp2LibraryXE
 {
     public class LibraryHost : HostBase
     {
-        public static string default_miniserver_urls = "http://localhost:8001/dp2library/xe;net.pipe://localhost/dp2library/xe";
+        public static string default_miniserver_urls = "http://localhost:8001/dp2library/xe;net.pipe://localhost/dp2library/xe;rest.http://localhost/dp2library/xe/rest";
         public static string default_single_url = "net.pipe://localhost/dp2library/xe";
 
         // ServiceHost _host = null;
@@ -154,6 +154,21 @@ namespace dp2LibraryXE
     CreateWsHttpBinding1(),
     strUrl);
                     bHasWsHttp = true;
+                }
+                else if (uri.Scheme.ToLower() == "rest.http")
+                {
+                    ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
+CreateWebHttpBinding1(),
+strUrl.Substring(5));   // rest. 这几个字符要去掉
+                    if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
+                    {
+                        WebHttpBehavior behavior = new WebHttpBehavior();
+                        behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
+                        behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
+                        behavior.AutomaticFormatSelectionEnabled = true;
+                        behavior.HelpEnabled = true;
+                        endpoint.Behaviors.Add(behavior);
+                    }
                 }
                 else
                 {
@@ -390,6 +405,26 @@ namespace dp2LibraryXE
             // binding.ReliableSession.Enabled = false;
 
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
+
+            return binding;
+        }
+
+        System.ServiceModel.Channels.Binding CreateWebHttpBinding1()
+        {
+            WebHttpBinding binding = new WebHttpBinding();
+            binding.Namespace = "http://dp2003.com/dp2library/";
+            binding.Security.Mode = WebHttpSecurityMode.None;
+            // binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+            binding.MaxReceivedMessageSize = 1024 * 1024;
+            // binding.MessageEncoding = WSMessageEncoding.Mtom;
+            XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
+            quotas.MaxArrayLength = 1024 * 1024;
+            quotas.MaxStringContentLength = 1024 * 1024;
+            binding.ReaderQuotas = quotas;
+            SetTimeout(binding);
+
+            // binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
+            // binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
 
             return binding;
         }

@@ -668,7 +668,6 @@ namespace DigitalPlatform.Z3950
             return BldAttributesPlusTerm(param, strToken);
         }
 
-
         // 当算子为ResultSetId时
         // parameters:
         int BldResultSetId(BerNode param,
@@ -680,7 +679,6 @@ namespace DigitalPlatform.Z3950
 
             return 0;
         }
-
 
         // 当算子为AttributesPlusTerm时
         // parameters:

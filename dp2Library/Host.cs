@@ -512,8 +512,6 @@ EventLogEntryType.Error);
                     host.Description.Behaviors.Add(behavior);
                 }
 
-
-
                 if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
                 {
                     ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
