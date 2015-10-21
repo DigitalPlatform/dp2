@@ -3705,7 +3705,6 @@ out strError);
                     goto ERROR1;
                 }
 
-
                 // 对读者身份的附加判断
                 if (sessioninfo.UserType == "reader"
                     && string.IsNullOrEmpty(strPersonalLibrary) == true)
@@ -3866,7 +3865,6 @@ out strError);
                 // else if (String.Compare(strResultType, "html", true) == 0)
                 else if (IsResultType(strResultType, "html") == true)
                 {
-
                     string strReaderRecord = "";
                     // 将读者记录数据从XML格式转换为HTML格式
                     nRet = this.ConvertReaderXmlToHtml(

@@ -251,6 +251,7 @@ namespace dp2Circulation
             if (_floatingMessage != null)
             {
                 _floatingMessage.Close();
+                _floatingMessage.Dispose();
                 _floatingMessage = null;
             }
         }
@@ -306,7 +307,6 @@ namespace dp2Circulation
                     this._floatingMessage.Text = value;
             }
         }
-
 
         /// <summary>
         /// 通讯通道登录前被触发

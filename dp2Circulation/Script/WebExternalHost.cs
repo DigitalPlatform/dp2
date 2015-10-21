@@ -17,6 +17,8 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using System.Web;
 using System.IO;
+using System.Drawing;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -640,7 +642,7 @@ namespace dp2Circulation
              * */
             long lRet = 0;
 
-            string strNoneFilePath = Path.Combine(this.MainForm.DataDir, "nonephoto.png");
+            string strNoneFilePath = Path.Combine(this.MainForm.UserDir, "nonephoto.png");
 
             // 2012/1/6
             if (string.IsNullOrEmpty(strPatronBarcode) == true)
@@ -1169,21 +1171,31 @@ namespace dp2Circulation
                 this.m_inSearch++;
                 try
                 {
-                    this.Channel.Timeout = new TimeSpan(0, 0, 5);
-                    long lRet = this.Channel.GetBiblioSummary(
-                        stop,
-                        strItemBarcode,
-                        strConfirmItemRecPath,
-                        bContainCover == false ? null : "coverimage",
-                        out strBiblioRecPath,
-                        out strSummary,
-                        out strError);
-                    if (lRet == -1)
+                    // TODO: 这里可以累计失败的次数，作为通讯状况是否良好的一个指标。
+                    // 通讯状态或可在界面上有所显示
+                    long lRet = 0;
+                    // 最多重试 n 次
+                    for (int i = 0; i < 1; i++)
                     {
-                        return strError;    // 2009/10/20 changed
-                        // return -1;
+                        if (stop != null && stop.State != 0)
+                        {
+                            lRet = -1;
+                            strError = "中断";
+                            break;
+                        }
+                        lRet = this.Channel.GetBiblioSummary(
+                            stop,
+                            strItemBarcode,
+                            strConfirmItemRecPath,
+                            bContainCover == false ? null : "coverimage",
+                            out strBiblioRecPath,
+                            out strSummary,
+                            out strError);
+                        if (lRet == -1)
+                            continue;
                     }
-
+                    if (lRet == -1)
+                        return strError;
                 }
                 catch (Exception ex)
                 {
@@ -1474,15 +1486,20 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strTempFileType) == true)
                 strTempFileType = "temp_text";
 
+            string body_backcolor = "#999999";
+            string div_backcolor = "#ffff99";
+
+            body_backcolor = ColorUtil.Color2String(this.BackColor);
+
             // TODO: 大字居中显示
             string strHtml = @"<html>
 <head>
 <style type='text/css'>
 body {
-background-color: #999999;
+background-color: "+body_backcolor+@";
 }
 div {
-background-color: #ffff99;
+background-color: "+div_backcolor+@";
 margin: 32px;
 padding: 32px;
 border-style: solid;
@@ -1512,7 +1529,21 @@ text-align: center;
         public void ClearHtmlPage()
         {
             Global.ClearHtmlPage(this.WebBrowser,
-                this.MainForm.DataDir);
+                this.MainForm.DataDir,
+                this.BackColor);
+        }
+
+        Color _backColor = SystemColors.Window;
+        public Color BackColor
+        {
+            get
+            {
+                return _backColor;
+            }
+            set
+            {
+                _backColor = value;
+            }
         }
     }
 

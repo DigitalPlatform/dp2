@@ -16,6 +16,20 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 在列表中寻找指定前缀的元素
+        public static List<string> FindPrefixInList(List<string> list,
+            string strPrefix)
+        {
+            List<string> results = new List<string>();
+            foreach(string s in list)
+            {
+                if (s.StartsWith(strPrefix) == true)
+                    results.Add(s);
+            }
+
+            return results;
+        }
+
         public static Hashtable ParseMedaDataXml(string strXml,
     out string strError)
         {

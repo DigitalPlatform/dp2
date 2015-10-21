@@ -683,10 +683,13 @@ out strError);
                             color = GetColor(strColorString);
                         }
 
-                        g.DrawString(box.Text,
-                            font,
-                            new SolidBrush(color),
-                            new PointF(x, y + (line.Height * line.BaseRatio) - box.Base));
+                        using (Brush brush = new SolidBrush(color))
+                        {
+                            g.DrawString(box.Text,
+                                font,
+                                brush,
+                                new PointF(x, y + (line.Height * line.BaseRatio) - box.Base));
+                        }
                         x += box.Width + box.LeftBlank + per_sep;
                     }
                 }

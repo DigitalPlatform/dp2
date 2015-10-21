@@ -130,7 +130,6 @@ namespace dp2Catalog
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
 
-
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
@@ -149,8 +148,6 @@ namespace dp2Catalog
                 int nRet = strFrom.IndexOf("-");
                 if (nRet != -1)
                     strFrom = strFrom.Substring(0, nRet).Trim();
-
-
 
                 string strValue = Froms.GetValue(strFrom);
                 if (strValue == null)
@@ -195,7 +192,8 @@ namespace dp2Catalog
                     {
                         if (j > 0)
                             strQueryString += " OR ";
-                        string strIsbn = isbn.Replace("\"", "\\\"");
+                        // string strIsbn = isbn.Replace("\"", "\\\"");    // ×Ö·û " Ìæ»»Îª \"
+                        string strIsbn = StringUtil.EscapeString(isbn, "\"/=");    // eacape ÌØÊâ×Ö·û
                         strQueryString += "\""
                             + strIsbn + "\"" + "/1="
                             + strValue;
@@ -204,7 +202,8 @@ namespace dp2Catalog
                     continue;
                 }
 
-                strWord = strWord.Replace("\"", "\\\"");
+                // strWord = strWord.Replace("\"", "\\\""); // ×Ö·û " Ìæ»»Îª \"
+                strWord = StringUtil.EscapeString(strWord, "\"/=");    // eacape ÌØÊâ×Ö·û
                 strQueryString += "\""
                     + strWord + "\"" + "/1="
                     + strValue;

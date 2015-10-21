@@ -626,9 +626,7 @@ out strError);
 
 
                 this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout;
-
                 this.WcfException = null;
-
                 return m_ws;
             }
         }
@@ -3819,57 +3817,70 @@ out strError);
             strSummary = "test";
             return 0;
 #endif
-
-        REDO:
-            this.BeginSearch();
+            TimeSpan old_timeout = this.Timeout;
+            this.Timeout = new TimeSpan(0, 0, 5);
             try
             {
-                IAsyncResult soapresult = this.ws.BeginGetBiblioSummary(
-                    strItemBarcode,
-                    strConfirmItemRecPath,
-                    strBiblioRecPathExclude,
-                    null,
-                    null);
-
-                for (; ; )
+                while (true)
                 {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                    this.WcfException = null;
+                    this.BeginSearch();
+                    try
+                    {
+                        IAsyncResult soapresult = this.ws.BeginGetBiblioSummary(
+                            strItemBarcode,
+                            strConfirmItemRecPath,
+                            strBiblioRecPathExclude,
+                            null,
+                            null);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
-                if (this.m_ws == null)
-                {
-                    strError = "用户中断";
-                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
-                    return -1;
-                }
+                        for (; ; )
+                        {
+                            DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                LibraryServerResult result = this.ws.EndGetBiblioSummary(
-                    out strBiblioRecPath,
-                    out strSummary,
-                    soapresult);
-                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
-                {
-                    if (DoNotLogin(ref strError) == 1)
-                        goto REDO;
-                    return -1;
+                            if (soapresult.IsCompleted)
+                                break;
+                        }
+                        if (this.m_ws == null)
+                        {
+                            strError = "用户中断";
+                            this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                            return -1;
+                        }
+
+                        LibraryServerResult result = this.ws.EndGetBiblioSummary(
+                            out strBiblioRecPath,
+                            out strSummary,
+                            soapresult);
+                        if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                        {
+                            if (DoNotLogin(ref strError) == 1)
+                                continue;   // goto REDO;
+                            return -1;
+                        }
+                        strError = result.ErrorInfo;
+                        this.ErrorCode = result.ErrorCode;
+                        this.ClearRedoCount();
+                        return result.Value;
+                    }
+                    catch (Exception ex)
+                    {
+                        int nRet = ConvertWebError(ex, out strError);
+                        if (nRet == 0)
+                            return -1;
+                        continue;   // goto REDO;
+                    }
+                    finally
+                    {
+                        this.EndSearch();
+                        if (this.WcfException is TimeoutException)
+                            strError = "通讯超时。";
+                    }
                 }
-                strError = result.ErrorInfo;
-                this.ErrorCode = result.ErrorCode;
-                this.ClearRedoCount();
-                return result.Value;
-            }
-            catch (Exception ex)
-            {
-                int nRet = ConvertWebError(ex, out strError);
-                if (nRet == 0)
-                    return -1;
-                goto REDO;
             }
             finally
             {
-                this.EndSearch();
+                this.Timeout = old_timeout;
             }
         }
 

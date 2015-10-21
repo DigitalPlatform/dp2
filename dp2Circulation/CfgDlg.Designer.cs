@@ -82,6 +82,9 @@ namespace dp2Circulation
             this.numericUpDown_charging_infoDlgOpacity = new System.Windows.Forms.NumericUpDown();
             this.checkBox_charging_force = new System.Windows.Forms.CheckBox();
             this.tabPage_quickCharging = new System.Windows.Forms.TabPage();
+            this.comboBox_quickCharging_displayStyle = new System.Windows.Forms.ComboBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.checkBox_quickCharging_logOperTime = new System.Windows.Forms.CheckBox();
             this.checkBox_quickCharging_isbnBorrow = new System.Windows.Forms.CheckBox();
             this.groupBox_quickCharging_selectItemDialog = new System.Windows.Forms.GroupBox();
             this.checkBox_quickCharging_autoOperItemDialogSingleItem = new System.Windows.Forms.CheckBox();
@@ -204,7 +207,6 @@ namespace dp2Circulation
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_quickCharging_logOperTime = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -852,6 +854,8 @@ namespace dp2Circulation
             // tabPage_quickCharging
             // 
             this.tabPage_quickCharging.AutoScroll = true;
+            this.tabPage_quickCharging.Controls.Add(this.comboBox_quickCharging_displayStyle);
+            this.tabPage_quickCharging.Controls.Add(this.label30);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_logOperTime);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_isbnBorrow);
             this.tabPage_quickCharging.Controls.Add(this.groupBox_quickCharging_selectItemDialog);
@@ -867,6 +871,39 @@ namespace dp2Circulation
             this.tabPage_quickCharging.TabIndex = 17;
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
+            // 
+            // comboBox_quickCharging_displayStyle
+            // 
+            this.comboBox_quickCharging_displayStyle.FormattingEnabled = true;
+            this.comboBox_quickCharging_displayStyle.Items.AddRange(new object[] {
+            "dark",
+            "light"});
+            this.comboBox_quickCharging_displayStyle.Location = new System.Drawing.Point(91, 38);
+            this.comboBox_quickCharging_displayStyle.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_quickCharging_displayStyle.Name = "comboBox_quickCharging_displayStyle";
+            this.comboBox_quickCharging_displayStyle.Size = new System.Drawing.Size(148, 20);
+            this.comboBox_quickCharging_displayStyle.TabIndex = 23;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(10, 41);
+            this.label30.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(77, 12);
+            this.label30.TabIndex = 22;
+            this.label30.Text = "显示风格(&S):";
+            // 
+            // checkBox_quickCharging_logOperTime
+            // 
+            this.checkBox_quickCharging_logOperTime.AutoSize = true;
+            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(12, 305);
+            this.checkBox_quickCharging_logOperTime.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_quickCharging_logOperTime.Name = "checkBox_quickCharging_logOperTime";
+            this.checkBox_quickCharging_logOperTime.Size = new System.Drawing.Size(162, 16);
+            this.checkBox_quickCharging_logOperTime.TabIndex = 21;
+            this.checkBox_quickCharging_logOperTime.Text = "在日志中记载操作耗时(&L)";
+            this.checkBox_quickCharging_logOperTime.UseVisualStyleBackColor = true;
             // 
             // checkBox_quickCharging_isbnBorrow
             // 
@@ -946,7 +983,7 @@ namespace dp2Circulation
             // checkBox_quickCharging_noBorrowHistory
             // 
             this.checkBox_quickCharging_noBorrowHistory.AutoSize = true;
-            this.checkBox_quickCharging_noBorrowHistory.Location = new System.Drawing.Point(12, 66);
+            this.checkBox_quickCharging_noBorrowHistory.Location = new System.Drawing.Point(12, 91);
             this.checkBox_quickCharging_noBorrowHistory.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_quickCharging_noBorrowHistory.Name = "checkBox_quickCharging_noBorrowHistory";
             this.checkBox_quickCharging_noBorrowHistory.Size = new System.Drawing.Size(186, 16);
@@ -957,7 +994,7 @@ namespace dp2Circulation
             // checkBox_quickCharging_verifyBarcode
             // 
             this.checkBox_quickCharging_verifyBarcode.AutoSize = true;
-            this.checkBox_quickCharging_verifyBarcode.Location = new System.Drawing.Point(12, 46);
+            this.checkBox_quickCharging_verifyBarcode.Location = new System.Drawing.Point(12, 71);
             this.checkBox_quickCharging_verifyBarcode.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_quickCharging_verifyBarcode.Name = "checkBox_quickCharging_verifyBarcode";
             this.checkBox_quickCharging_verifyBarcode.Size = new System.Drawing.Size(138, 16);
@@ -2152,7 +2189,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(348, 84);
+            this.groupBox7.Size = new System.Drawing.Size(314, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2160,7 +2197,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(237, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(203, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2174,7 +2211,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(336, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(302, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2296,17 +2333,6 @@ namespace dp2Circulation
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // checkBox_quickCharging_logOperTime
-            // 
-            this.checkBox_quickCharging_logOperTime.AutoSize = true;
-            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(12, 305);
-            this.checkBox_quickCharging_logOperTime.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox_quickCharging_logOperTime.Name = "checkBox_quickCharging_logOperTime";
-            this.checkBox_quickCharging_logOperTime.Size = new System.Drawing.Size(162, 16);
-            this.checkBox_quickCharging_logOperTime.TabIndex = 21;
-            this.checkBox_quickCharging_logOperTime.Text = "在日志中记载操作耗时(&L)";
-            this.checkBox_quickCharging_logOperTime.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -2578,5 +2604,7 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_server_dp2MServerUrl;
         private System.Windows.Forms.Label label29;
         private System.Windows.Forms.CheckBox checkBox_quickCharging_logOperTime;
+        private System.Windows.Forms.ComboBox comboBox_quickCharging_displayStyle;
+        private System.Windows.Forms.Label label30;
     }
 }

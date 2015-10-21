@@ -166,21 +166,22 @@ namespace DigitalPlatform.Xml
 
 		public override int GetHeight(int nWidth)
 		{
-			Item item = this.GetItem ();
-			Graphics g = Graphics.FromHwnd(item.m_document.Handle);
 			if (this.Text == null)
-			{
 				return 0;
-			}
-			SizeF size = g.MeasureString(this.Text,
-				GetFont(), 
-				nWidth, 
-				new StringFormat());
-			int nTempHeight = (int)size.Height ;
-			if (nTempHeight < 0)
-				nTempHeight = 0;
 
-			return nTempHeight + this.TotalRestHeight;
+			Item item = this.GetItem ();
+            using (Graphics g = Graphics.FromHwnd(item.m_document.Handle))
+            {
+                SizeF size = g.MeasureString(this.Text,
+                    GetFont(),
+                    nWidth,
+                    new StringFormat());
+                int nTempHeight = (int)size.Height;
+                if (nTempHeight < 0)
+                    nTempHeight = 0;
+
+                return nTempHeight + this.TotalRestHeight;
+            }
 		}
 
 		public override void Paint(PaintEventArgs pe,

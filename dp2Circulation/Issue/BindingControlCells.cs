@@ -366,6 +366,7 @@ namespace dp2Circulation
             return info;
         }
 
+        // TODO: 释放 Brush
         public void PaintBorder(long start_x,
             long start_y,
             int nWidth,

@@ -234,6 +234,9 @@
     <Compile Include="MARC\TwoBiblioDialog.designer.cs">
       <DependentUpon>TwoBiblioDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MdiForm\MyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OAI\OaiSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>

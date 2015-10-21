@@ -1027,15 +1027,22 @@ out strError);
                 return nRet;
 
             Debug.Assert(nRet == 0, "");
-            Channel.Timeout = new TimeSpan(0, 0, 5);
-            long lRet = Channel.GetBiblioSummary(
-                null,
-                strItemBarcode,
-                strConfirmItemRecPath,
-                null,
-                out strBiblioRecPath,
-                out strSummary,
-                out strError);
+            long lRet = 0;
+            // 最多重试 n 次
+            for (int i = 0; i < 2; i++)
+            {
+                lRet = Channel.GetBiblioSummary(
+                    null,
+                    strItemBarcode,
+                    strConfirmItemRecPath,
+                    null,
+                    out strBiblioRecPath,
+                    out strSummary,
+                    out strError);
+                if (lRet != -1)
+                    break;
+            }
+
             if (lRet == -1)
             {
                 return -1;
@@ -1079,13 +1086,12 @@ out strError);
 
             string strError = "";
             string strSummary = "";
-
             nRet = this.GetBiblioSummary(strItemBarcode,
                     strConfirmItemRecPath,
                     out strSummary,
                     out strError);
             if (nRet == -1)
-                strSummary = strError;
+                strSummary = "获取书目摘要时出错: " + strError;
 
             string strOperClass = "even";
             if ((this.m_nCount % 2) == 1)
@@ -1272,7 +1278,7 @@ out strError);
                     out strSummary,
                     out strError);
             if (nRet == -1)
-                strSummary = strError;
+                strSummary = "获取书目摘要时出错: " + strError;
 
             string strOperClass = "even";
             if ((this.m_nCount % 2) == 1)
@@ -1475,7 +1481,7 @@ out strError);
     out strSummary,
     out strError);
                     if (nRet == -1)
-                        strSummary = strError;
+                        strSummary = "获取书目摘要时出错: " + strError;
 
                     strItemLink += " <div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>";
                 }

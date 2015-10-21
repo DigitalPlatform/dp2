@@ -242,6 +242,10 @@ namespace dp2Circulation
 ap.GetString("quickcharging_form",
 "display_format",
 "HTML");
+            this.comboBox_quickCharging_displayStyle.Text =
+ap.GetString("quickcharging_form",
+"display_style",
+"light");
 
             // 验证条码号
             this.checkBox_quickCharging_verifyBarcode.Checked = ap.GetBoolean(
@@ -816,6 +820,10 @@ this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
             ap.SetString("quickcharging_form",
                 "display_format",
                 this.comboBox_quickCharging_displayFormat.Text);
+
+            ap.SetString("quickcharging_form",
+    "display_style",
+    this.comboBox_quickCharging_displayStyle.Text);
 
             // 验证条码号
             ap.SetBoolean(

@@ -20,8 +20,10 @@
 // 2014/11/8    读者照片加入 img 元素加入 pending class 
 // 2014/12/27	BC:xxxxx 借阅信息列表中摘要包含图书封面
 // 2015/10/2    借阅列表和借阅历史表格中，BC:xxxx 中增加了第三段 | 书目记录路径
+// 2015/1018    this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
 
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using System.Web;
 using System.Text;
@@ -48,7 +50,13 @@ public class MyConverter : ReaderConverter
         {
             return ex.Message;
         }
-        string strLink = "<link href='%mappeddir%\\styles\\readerhtml.css' type='text/css' rel='stylesheet' />"
+        
+        string strStyle = "";   // 页面风格名称 例如"_dark"
+        List<string> formats = StringUtil.FindPrefixInList(StringUtil.SplitList(this.Formats, ','), "style_");
+        if (formats.Count > 0)
+            strStyle = formats[0].Substring("style".Length);
+            
+        string strLink = "<link href='%mappeddir%\\styles\\readerhtml"+strStyle+".css' type='text/css' rel='stylesheet' />"
             + "<link href=\"%mappeddir%/jquery-ui-1.8.7/css/jquery-ui-1.8.7.css\" rel=\"stylesheet\" type=\"text/css\" />"
             + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-1.4.4.min.js\"></script>"
             + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-ui-1.8.7.min.js\"></script>"

@@ -4624,7 +4624,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             Marc856SearchForm form = new Marc856SearchForm();
-            form.MdiParent = this;
+            form.MdiParent = this.MainForm;
             form.Show();
 
             this.EnableControls(false);
@@ -4651,6 +4651,8 @@ MessageBoxDefaultButton.Button1);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
+                List<ListViewItem> new_items = new List<ListViewItem>();
+
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -4661,6 +4663,8 @@ MessageBoxDefaultButton.Button1);
                         strError = "用户中断";
                         return -1;
                     }
+
+                    string strBiblioSummary = ListViewUtil.GetItemText(item.ListViewItem, 1);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -4695,13 +4699,23 @@ MessageBoxDefaultButton.Button1);
 
                     foreach(MarcField field in fields)
                     {
-                        form.AddLine(field);
+                        ListViewItem new_item = form.AddLine(info.RecPath, 
+                            info,
+                            field);
+                        new_items.Add(new_item);
                     }
 
                 CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
+                nRet = form.FillBiblioSummaryColumn(new_items,
+                    0,
+                    true,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
                 return 0;
             }
             catch (Exception ex)

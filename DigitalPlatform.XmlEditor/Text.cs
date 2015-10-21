@@ -26,21 +26,22 @@ namespace DigitalPlatform.Xml
         public override int GetHeight(int nWidth)
         {
             Item item = this.GetItem();
-            Graphics g = Graphics.FromHwnd(item.m_document.Handle);
+            using (Graphics g = Graphics.FromHwnd(item.m_document.Handle))
+            {
+                StringFormat sf = new StringFormat();
+                sf.Trimming = StringTrimming.None;
+                SizeF size = g.MeasureString(Text + "\r\n",   //给最后加一个'\r\n'以保证算出最后空行的高度
+                    GetFont(),
+                    nWidth,
+                    sf);
 
-            StringFormat sf = new StringFormat();
-            sf.Trimming = StringTrimming.None;
-            SizeF size = g.MeasureString(Text + "\r\n",   //给最后加一个'\r\n'以保证算出最后空行的高度
-                GetFont(),
-                nWidth,
-                sf);
+                int nTempHeight = (int)size.Height;
 
-            int nTempHeight = (int)size.Height;
-
-            //？注意这里是否有疑问
-            if (nTempHeight <= 0)
-                nTempHeight = 20;
-            return nTempHeight + this.TotalRestHeight;
+                //？注意这里是否有疑问
+                if (nTempHeight <= 0)
+                    nTempHeight = 20;
+                return nTempHeight + this.TotalRestHeight;
+            }
         }
     }
 }

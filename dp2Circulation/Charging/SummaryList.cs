@@ -77,82 +77,92 @@ namespace dp2Circulation
         // 工作线程每一轮循环的实质性工作
         public override void Worker()
         {
-            int nOldCount = 0;
-            List<SummaryTask> tasks = new List<SummaryTask>();
-            List<SummaryTask> remove_tasks = new List<SummaryTask>();
-            if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new LockException("锁定尝试中超时");
             try
             {
-                nOldCount = this._tasks.Count;
-                foreach (SummaryTask task in this._tasks)
-                {
-                        tasks.Add(task);
-                }
-            }
-            finally
-            {
-                this.m_lock.ExitReadLock();
-            }
-
-            if (tasks.Count > 0)
-            {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("进行一轮任务处理...");
-                stop.BeginLoop();
-                try
-                {
-
-                    foreach (SummaryTask task in tasks)
-                    {
-                        if (this.Stopped == true)
-                        {
-                            // this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
-                            return;
-                        }
-
-                        if (stop != null && stop.State != 0)
-                        {
-                            this.Stopped = true;
-                            // this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
-                            return;
-                        }
-
-                        if (task.State == "finish")
-                            continue;
-
-                        // bool bStop = false;
-                        // 执行任务
-                        if (task.Action == "get_item_summary")
-                        {
-                            LoadItemSummary(task);
-                        }
-                    }
-                }
-                finally
-                {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                }
-            }
-
-            //bool bChanged = false;
-            if (remove_tasks.Count > 0)
-            {
-                if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                int nOldCount = 0;
+                List<SummaryTask> tasks = new List<SummaryTask>();
+                // List<SummaryTask> remove_tasks = new List<SummaryTask>();
+                if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
                     throw new LockException("锁定尝试中超时");
                 try
                 {
-                    foreach (SummaryTask task in remove_tasks)
+                    nOldCount = this._tasks.Count;
+                    foreach (SummaryTask task in this._tasks)
                     {
-                        RemoveTask(task, false);
+                        tasks.Add(task);
                     }
                 }
                 finally
                 {
-                    this.m_lock.ExitWriteLock();
+                    this.m_lock.ExitReadLock();
                 }
+
+                if (tasks.Count > 0)
+                {
+                    stop.OnStop += new StopEventHandler(this.DoStop);
+                    stop.Initial("进行一轮获取摘要的处理...");
+                    stop.BeginLoop();
+                    try
+                    {
+                        foreach (SummaryTask task in tasks)
+                        {
+                            if (this.Stopped == true)
+                            {
+                                // this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
+                                return;
+                            }
+
+                            if (stop != null && stop.State != 0)
+                            {
+                                this.Stopped = true;
+                                // this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
+                                return;
+                            }
+
+                            if (task.State == "finish")
+                                continue;
+
+                            // bool bStop = false;
+                            // 执行任务
+                            if (task.Action == "get_item_summary")
+                            {
+                                LoadItemSummary(task);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        stop.EndLoop();
+                        stop.OnStop -= new StopEventHandler(this.DoStop);
+                        stop.Initial("");
+                    }
+                }
+
+                //bool bChanged = false;
+                if (tasks.Count > 0)
+                {
+                    if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                        throw new LockException("锁定尝试中超时");
+                    try
+                    {
+                        foreach (SummaryTask task in tasks)
+                        {
+                            RemoveTask(task, false);
+                        }
+                    }
+                    finally
+                    {
+                        this.m_lock.ExitWriteLock();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string strText = "SummaryList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                if (this.Container != null && this.Container.MainForm != null)
+                    this.Container.MainForm.WriteErrorLog(strText);
+                if (this.Container != null)
+                    this.Container.ShowMessage(strText, "red", true);
             }
         }
 
@@ -170,6 +180,9 @@ namespace dp2Circulation
             {
                 this.m_lock.ExitWriteLock();
             }
+
+            if (this.Stopped == true)
+                this.BeginThread();
 
             // 触发任务开始执行
             this.Activate();
@@ -195,21 +208,30 @@ namespace dp2Circulation
 
         void LoadItemSummary(SummaryTask task)
         {
-            string strError = "";
-            string strSummary = "";
-            int nRet = this.Container.GetBiblioSummary(task.ItemBarcode,
-                task.ConfirmItemRecPath,
-                out strSummary,
-                out strError);
-            if (nRet == -1)
+            // 最多重试两次
+            for (int i = 0; i < 2; i++)
             {
-                strSummary = strError;
-                task.State = "error";
-            }
-            else
-                task.State = "finish";
+                string strError = "";
+                string strSummary = "";
+                int nRet = this.Container.GetBiblioSummary(task.ItemBarcode,
+                    task.ConfirmItemRecPath,
+                    out strSummary,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strSummary = "获取书目摘要时出错: " + strError;
+                    task.State = "error";
+                }
+                else
+                    task.State = "finish";
 
-            this.Container.AsyncFillItemSummary(task.ChargingTask, strSummary);
+                this.Container.AsyncFillItemSummary(task.ChargingTask,
+                    strSummary,
+                    task.State != "error");
+
+                if (task.State == "finish")
+                    break;
+            }
         }
 
         public void Close()

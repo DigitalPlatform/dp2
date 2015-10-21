@@ -1256,23 +1256,25 @@ namespace DigitalPlatform.CommonControl
         // 重新初始化所有行的文字高度，并更新m_lContentHeight
         internal void RefreshAllTextHeight()
         {
-            Graphics g = Graphics.FromHwnd(this.Handle);
-            long height = this.ColumnHeight;
-
-            int i = 0;
-            foreach (DpRow row in this.Rows)
+            using (Graphics g = Graphics.FromHwnd(this.Handle))
             {
-                row.TextHeight = row.GetTextHeight(g);
-                height += (long)row.TextHeight + (long)this.m_cellPadding.Vertical;
+                long height = this.ColumnHeight;
 
-                // 行间距
-                if (i > 0)  // 少加一次
-                    height += this.m_nLineDistance;
+                int i = 0;
+                foreach (DpRow row in this.Rows)
+                {
+                    row.TextHeight = row.GetTextHeight(g);
+                    height += (long)row.TextHeight + (long)this.m_cellPadding.Vertical;
 
-                i++;
+                    // 行间距
+                    if (i > 0)  // 少加一次
+                        height += this.m_nLineDistance;
+
+                    i++;
+                }
+
+                this.m_lContentHeight = height;
             }
-
-            this.m_lContentHeight = height;
 
             LayoutAllRows(false);
         }
@@ -3402,8 +3404,9 @@ nHeight);
             this.TextHeight = GetTextHeight(g);
         }
 
-        public int GetTextHeight(Graphics g = null)
+        public int GetTextHeight(Graphics g_param = null)
         {
+            Graphics g = g_param;
             if (g == null)
             {
                 if (this.Control == null)
@@ -3411,22 +3414,30 @@ nHeight);
                 g = Graphics.FromHwnd(this.Control.Handle);
             }
 
-            int nHeight = 0;
-            for (int i = 0; i < this.Count; i++)
+            try
             {
-                DpColumn cell = this[i];
-                int nWidth = cell.m_nWidth;
-                if (nWidth <= 0 || cell.Visible == false)
-                    continue;
-                int nTempHeight = cell.GetTextHeight(g, nWidth);
-                if (nTempHeight > nHeight)
-                    nHeight = nTempHeight;
+                int nHeight = 0;
+                for (int i = 0; i < this.Count; i++)
+                {
+                    DpColumn cell = this[i];
+                    int nWidth = cell.m_nWidth;
+                    if (nWidth <= 0 || cell.Visible == false)
+                        continue;
+                    int nTempHeight = cell.GetTextHeight(g, nWidth);
+                    if (nTempHeight > nHeight)
+                        nHeight = nTempHeight;
+                }
+
+                if (this.m_nMaxTextHeight == -1)
+                    return nHeight;
+
+                return Math.Min(this.m_nMaxTextHeight, nHeight);
             }
-
-            if (this.m_nMaxTextHeight == -1)
-                return nHeight;
-
-            return Math.Min(this.m_nMaxTextHeight, nHeight);
+            finally
+            {
+                if (g_param == null)
+                    g.Dispose();
+            }
         }
 
         // 获得左边的开始位置
@@ -3632,41 +3643,42 @@ nHeight);
         {
             ScrollBarMember scrollbar = ScrollBarMember.Horz;
 
-            Graphics g = Graphics.FromHwnd(this.Control.Handle);
-
-            // 初始化高度
-            int nOldTextHeight = this.TextHeight;
-            this.TextHeight = this.GetTextHeight(g);
-            if (nOldTextHeight != this.TextHeight)
+            using (Graphics g = Graphics.FromHwnd(this.Control.Handle))
             {
-                this.Control.m_lContentHeight += this.TextHeight - nOldTextHeight;   // 优化
-                scrollbar |= ScrollBarMember.Vert;
-            }
-
-            // 初始化宽度
-            long lOldContentWidth = this.Control.m_lContentWidth;
-            this.Control.m_lContentWidth = this.Control.GetContentWidth();
-            if (lOldContentWidth != this.Control.m_lContentWidth)
-            {
-                scrollbar |= ScrollBarMember.Horz;
-            }
-
-            if (bRefreshAllLineHeight == true)
-            {
-                long lOldContentHeight = this.Control.m_lContentHeight;
-                this.Control.RefreshAllTextHeight();
-                if (lOldContentHeight != this.Control.m_lContentHeight)
+                // 初始化高度
+                int nOldTextHeight = this.TextHeight;
+                this.TextHeight = this.GetTextHeight(g);
+                if (nOldTextHeight != this.TextHeight)
                 {
+                    this.Control.m_lContentHeight += this.TextHeight - nOldTextHeight;   // 优化
                     scrollbar |= ScrollBarMember.Vert;
                 }
+
+                // 初始化宽度
+                long lOldContentWidth = this.Control.m_lContentWidth;
+                this.Control.m_lContentWidth = this.Control.GetContentWidth();
+                if (lOldContentWidth != this.Control.m_lContentWidth)
+                {
+                    scrollbar |= ScrollBarMember.Horz;
+                }
+
+                if (bRefreshAllLineHeight == true)
+                {
+                    long lOldContentHeight = this.Control.m_lContentHeight;
+                    this.Control.RefreshAllTextHeight();
+                    if (lOldContentHeight != this.Control.m_lContentHeight)
+                    {
+                        scrollbar |= ScrollBarMember.Vert;
+                    }
+                }
+
+                this.Control.SetScrollBars(scrollbar);
+
+                // 布局子控件位置
+
+                // TODO: 精确失效新增的列
+                this.Control.Invalidate();
             }
-
-            this.Control.SetScrollBars(scrollbar);
-
-            // 布局子控件位置
-
-            // TODO: 精确失效新增的列
-            this.Control.Invalidate();
         }
 
         // 找到连续的0宽度列标题的最后一个
@@ -5302,43 +5314,44 @@ this.TextHeight + cell_padding.Vertical);
 
             // bool bColumnChanged = this.Control.EnsureColumnWidths(row);
 
-			Graphics g = Graphics.FromHwnd(this.Control.Handle);
-
-            // 初始化高度
-            row.TextHeight = row.GetTextHeight(g, this.Control.m_columns);
-
-            ScrollBarMember scrollbar = ScrollBarMember.Vert;
-            /*
-            if (this.Count == 1 || bColumnChanged == true)
+            using (Graphics g = Graphics.FromHwnd(this.Control.Handle))
             {
-                this.Control.m_lContentWidth = this.Control.GetContentWidth();
-                scrollbar |= ScrollBarMember.Horz;
-            }
-             * */
+                // 初始化高度
+                row.TextHeight = row.GetTextHeight(g, this.Control.m_columns);
 
-            Padding cell_padding = this.Control.m_cellPadding;
-            this.Control.m_lContentHeight += row.TextHeight + cell_padding.Vertical;   // 优化
-            
-            // 行间距
-            if (this.Count > 1)
-                this.Control.m_lContentHeight += this.Control.m_nLineDistance;
+                ScrollBarMember scrollbar = ScrollBarMember.Vert;
+                /*
+                if (this.Count == 1 || bColumnChanged == true)
+                {
+                    this.Control.m_lContentWidth = this.Control.GetContentWidth();
+                    scrollbar |= ScrollBarMember.Horz;
+                }
+                 * */
 
-            // 加入控件
-            foreach (DpCell cell in row)
-            {
-                if (cell.m_innerControl != null)
-                    this.Control.Controls.Add(cell.m_innerControl);
-            }
+                Padding cell_padding = this.Control.m_cellPadding;
+                this.Control.m_lContentHeight += row.TextHeight + cell_padding.Vertical;   // 优化
 
-            if (this.Control.m_bDelayUpdate == false)
-            {
-                this.Control.SetScrollBars(scrollbar);
+                // 行间距
+                if (this.Count > 1)
+                    this.Control.m_lContentHeight += this.Control.m_nLineDistance;
 
-                // 精确失效新增的行
-                if (this.Count > 1) 
-                    this.Control.InvalidateLineAndBlow(row, true, true);
-                else
-                    this.Control.InvalidateLineAndBlow(row, true);
+                // 加入控件
+                foreach (DpCell cell in row)
+                {
+                    if (cell.m_innerControl != null)
+                        this.Control.Controls.Add(cell.m_innerControl);
+                }
+
+                if (this.Control.m_bDelayUpdate == false)
+                {
+                    this.Control.SetScrollBars(scrollbar);
+
+                    // 精确失效新增的行
+                    if (this.Count > 1)
+                        this.Control.InvalidateLineAndBlow(row, true, true);
+                    else
+                        this.Control.InvalidateLineAndBlow(row, true);
+                }
             }
         }
 
@@ -5347,11 +5360,11 @@ this.TextHeight + cell_padding.Vertical);
             // 2013/12/11
             if (this.Control.m_bDelayUpdate == false)
             {
-                Graphics g = Graphics.FromHwnd(this.Control.Handle);
-
-                // 初始化高度
-                row.TextHeight = row.GetTextHeight(g, this.Control.m_columns);
-
+                using (Graphics g = Graphics.FromHwnd(this.Control.Handle))
+                {
+                    // 初始化高度
+                    row.TextHeight = row.GetTextHeight(g, this.Control.m_columns);
+                }
                 ScrollBarMember scrollbar = ScrollBarMember.Vert;
 
                 Padding cell_padding = this.Control.m_cellPadding;
@@ -5404,10 +5417,11 @@ this.TextHeight + cell_padding.Vertical);
 
             // bool bColumnChanged = this.Control.EnsureColumnWidths(row);
 
-            Graphics g = Graphics.FromHwnd(this.Control.Handle);
-
-            // 初始化高度
-            row.TextHeight = row.GetTextHeight(g, this.Control.m_columns);
+            using (Graphics g = Graphics.FromHwnd(this.Control.Handle))
+            {
+                // 初始化高度
+                row.TextHeight = row.GetTextHeight(g, this.Control.m_columns);
+            }
 
             ScrollBarMember scrollbar = ScrollBarMember.Vert;
 

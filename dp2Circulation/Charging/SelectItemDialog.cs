@@ -800,9 +800,10 @@ namespace dp2Circulation
 
                     if (cell.BackColor != Color.Transparent)
                     {
-                        e.pe.Graphics.FillRectangle(new SolidBrush(
-                            cell.BackColor
-                            ), e.Rect);
+                        using (Brush brush = new SolidBrush(cell.BackColor))
+                        {
+                            e.pe.Graphics.FillRectangle(brush, e.Rect);
+                        }
                     }
                 }
                 return;
@@ -816,27 +817,34 @@ namespace dp2Circulation
             {
                 if (row.Control.Focused == true)
                 {
-
-                    e.pe.Graphics.FillRectangle(new SolidBrush(
-                        bGray ? Color.FromArgb(240,240,240) : row.Control.HighlightBackColor
-                        ), e.Rect);
+                    using (Brush brush = new SolidBrush(
+                        bGray ? Color.FromArgb(240, 240, 240) : row.Control.HighlightBackColor
+                        ))
+                    {
+                        e.pe.Graphics.FillRectangle(brush, e.Rect);
+                    }
                 }
                 else
                 {
                     // textColor = SystemColors.InactiveCaptionText;
-
-                    e.pe.Graphics.FillRectangle(new SolidBrush(
+                    using (Brush brush = new SolidBrush(
                         bGray ? Color.FromArgb(240, 240, 240) : row.Control.InactiveHighlightBackColor
-                        ), e.Rect);
+                        ))
+                    {
+                        e.pe.Graphics.FillRectangle(brush, e.Rect);
+                    }
                 }
             }
             else
             {
                 if (row.BackColor != Color.Transparent)
                 {
-                    e.pe.Graphics.FillRectangle(new SolidBrush(
+                    using (Brush brush = new SolidBrush(
                         row.Control.BackColor
-                        ), e.Rect);
+                        ))
+                    {
+                        e.pe.Graphics.FillRectangle(brush, e.Rect);
+                    }
                 }
             }
         }

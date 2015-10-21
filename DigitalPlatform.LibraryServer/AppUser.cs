@@ -820,7 +820,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-
                 // 查重
                 nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
                 if (nodeAccount == null)
@@ -865,10 +864,19 @@ namespace DigitalPlatform.LibraryServer
             {
                 XmlDocument domOperLog = PrepareOperlogDom("resetpassword", strOperator);
 
+                // 2015/10/17 新增加的元素。此前缺这个元素。建议日志恢复的时候，忽略没有 userName 元素的日志记录
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "userName",
+                    strUserName);
+#if NO
                 XmlNode node = domOperLog.CreateElement("newPassword");
                 domOperLog.DocumentElement.AppendChild(node);
 
                 node.InnerText = strHashedPassword;
+#endif
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "newPassword",
+                    strHashedPassword);
 
                 // 写入日志
                 nRet = this.OperLog.WriteOperLog(domOperLog,
@@ -883,7 +891,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
 
         // 删除用户
         public int DeleteUser(
@@ -907,7 +914,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-
                 // 查重
                 nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
                 if (nodeAccount == null)
@@ -930,7 +936,6 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
                 }
-
 
                 nodeAccount.ParentNode.RemoveChild(nodeAccount);
 

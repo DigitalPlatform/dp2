@@ -437,107 +437,114 @@ namespace DigitalPlatform.Marc
 		// 计算行的高度
 		//		g	Graphics对象，如果为null，则自动找
 		//		bIgnoreEdit	是否忽略小edit控件 false不忽略
-		internal void CalculateHeight(Graphics g, bool bIgnoreEdit)
+		internal void CalculateHeight(Graphics g_param, bool bIgnoreEdit)
 		{
+            Graphics g = g_param;
 			if (g == null)
 				g = Graphics.FromHwnd(this.container.MarcEditor.Handle);
 
-			Font font = this.container.MarcEditor.Font;//.DefaultTextFont;
+            try
+            {
+                Font font = this.container.MarcEditor.Font;//.DefaultTextFont;
 
-            Font fixedfont = this.container.MarcEditor.FixedSizeFont;
+                Font fixedfont = this.container.MarcEditor.FixedSizeFont;
 
-			//IntPtr hFontOld = IntPtr.Zero;
+                //IntPtr hFontOld = IntPtr.Zero;
 
-			// 计算Name
-            /*
-			SizeF size = g.MeasureString(this.m_strName,
-				font, 
-				this.container.record.NamePureWidth, 
-				new StringFormat());
-             */
-            SizeF size = TextRenderer.MeasureText(g,
-                this.m_strName,
-                fixedfont,
-                new Size(container.record.NamePureWidth, -1),
-                MarcEditor.editflags);
-
-
-			int h1 = (int)size.Height;
-
-			// 计算Indicator1
-            /*
-			size = g.MeasureString(this.m_strIndicator,
-				font, 
-				container.record.IndicatorPureWidth,
-				new StringFormat());
-             */
-            size = TextRenderer.MeasureText(g,
-                this.m_strIndicator,
-                fixedfont,
-                new Size(container.record.IndicatorPureWidth, -1),
-                MarcEditor.editflags);
-
-			int h2 = (int)size.Height;
-
-			if (h1 < h2)
-				h1 = h2;
+                // 计算Name
+                /*
+                SizeF size = g.MeasureString(this.m_strName,
+                    font, 
+                    this.container.record.NamePureWidth, 
+                    new StringFormat());
+                 */
+                SizeF size = TextRenderer.MeasureText(g,
+                    this.m_strName,
+                    fixedfont,
+                    new Size(container.record.NamePureWidth, -1),
+                    MarcEditor.editflags);
 
 
-			// 计算m_strValue
-            /*
-			size = g.MeasureString(this.m_strValue,
-				font, 
-				container.record.ValuePureWidth,
-				new StringFormat());
-             */
+                int h1 = (int)size.Height;
+
+                // 计算Indicator1
+                /*
+                size = g.MeasureString(this.m_strIndicator,
+                    font, 
+                    container.record.IndicatorPureWidth,
+                    new StringFormat());
+                 */
+                size = TextRenderer.MeasureText(g,
+                    this.m_strIndicator,
+                    fixedfont,
+                    new Size(container.record.IndicatorPureWidth, -1),
+                    MarcEditor.editflags);
+
+                int h2 = (int)size.Height;
+
+                if (h1 < h2)
+                    h1 = h2;
+
+
+                // 计算m_strValue
+                /*
+                size = g.MeasureString(this.m_strValue,
+                    font, 
+                    container.record.ValuePureWidth,
+                    new StringFormat());
+                 */
 #if BIDI_SUPPORT
-            string strValue = this.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                string strValue = this.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
 #endif
-            size = TextRenderer.MeasureText(g,
+                size = TextRenderer.MeasureText(g,
 #if BIDI_SUPPORT
-                strValue == "" ? "lg" : strValue,
+ strValue == "" ? "lg" : strValue,
 #else
                 this.m_strValue == "" ? "lg" : this.m_strValue,
 #endif
-                font,
-                new Size(container.record.ValuePureWidth, -1),
-                MarcEditor.editflags);
+ font,
+                    new Size(container.record.ValuePureWidth, -1),
+                    MarcEditor.editflags);
 
-			int h3 = (int)size.Height;
+                int h3 = (int)size.Height;
 
-			if (h1 < h3)
-				h1 = h3;
+                if (h1 < h3)
+                    h1 = h3;
 
-			// 注意这里故意没算NameCaption的高度
-			/*
-			// 计算NameCaption
-			size = g.MeasureString(this.strNameCaption,
-				font, 
-				container.NameCaptionPureWidth,
-				new StringFormat());
-			int h4 = (int)size.Height;
+                // 注意这里故意没算NameCaption的高度
+                /*
+                // 计算NameCaption
+                size = g.MeasureString(this.strNameCaption,
+                    font, 
+                    container.NameCaptionPureWidth,
+                    new StringFormat());
+                int h4 = (int)size.Height;
 
-			if (h1 < h4)
-				h1 = h4;
-			*/
+                if (h1 < h4)
+                    h1 = h4;
+                */
 
-			if (this.container.MarcEditor.SelectedFieldIndices.Count == 1)
-			{
-				Field FocusedField = this.container.MarcEditor.FocusedField;
-				// 如果 bIgnoreEdit == true，不考虑当前行edit控件的既有高度
-				if (bIgnoreEdit == false
-					&& FocusedField != null
-					&& this == FocusedField) 
-				{
-					int h5 = this.container.MarcEditor.curEdit.Height;
-					if (h1 < h5)
-						h1 = h5;
-				}
-			}
+                if (this.container.MarcEditor.SelectedFieldIndices.Count == 1)
+                {
+                    Field FocusedField = this.container.MarcEditor.FocusedField;
+                    // 如果 bIgnoreEdit == true，不考虑当前行edit控件的既有高度
+                    if (bIgnoreEdit == false
+                        && FocusedField != null
+                        && this == FocusedField)
+                    {
+                        int h5 = this.container.MarcEditor.curEdit.Height;
+                        if (h1 < h5)
+                            h1 = h5;
+                    }
+                }
 
-			
-
-			this.PureHeight = h1;
+                this.PureHeight = h1;
+            }
+            finally
+            {
+                if (g_param == null)
+                    g.Dispose();
+            }
 		}
 
 		// 把本行绘制出来
@@ -551,7 +558,6 @@ namespace DigitalPlatform.Marc
 			int nBaseX, 
 			int nBaseY)
 		{
-
 			// -----------------------------------------
 			// 计算出本行的总共区域
 			// 每行区域中包括左上的线，不包括右下的线
@@ -564,7 +570,6 @@ namespace DigitalPlatform.Marc
             // 优化
 			if (totalRect.IntersectsWith(pe.ClipRectangle )== false)
 				return;
-
 
 			// -----------------------------------------
 			// 每个单元格包括左上的线，不包括右下的线
@@ -734,7 +739,6 @@ namespace DigitalPlatform.Marc
 
 //               new Point(-this.container.MarcEditor.DocumentOrgX + 0, -this.container.MarcEditor.DocumentOrgY + this.container.MarcEditor.DocumentHeight),
    //new Point(-this.container.MarcEditor.DocumentOrgX + this.container.MarcEditor.DocumentWidth, - this.container.MarcEditor.DocumentOrgY + 0),
-
             
             LinearGradientBrush linGrBrush = new LinearGradientBrush(
    new Point(0, 0),
@@ -745,8 +749,6 @@ namespace DigitalPlatform.Marc
 
             linGrBrush.GammaCorrection = true;
 
-
-
 			// --------画背景----------------------------
 
             if ((nCol == 1 || nCol == 2 || nCol == 3)
@@ -756,7 +758,6 @@ namespace DigitalPlatform.Marc
             }
             else
                 g.FillRectangle(brush, rect);
-
 
 			// --------画线条----------------------------
 
@@ -799,7 +800,6 @@ namespace DigitalPlatform.Marc
             }
 
 			// --------画文字----------------------------
-
 			if (nWidth > 0)
 			{
 				Rectangle textRect = new Rectangle(
@@ -808,6 +808,7 @@ namespace DigitalPlatform.Marc
 					nWidth,
 					this.PureHeight);
 
+                // 这里的 font 是引用，因此不需要释放
                 Font font = null;
                 if (nCol == 0)
                 {
@@ -887,38 +888,14 @@ namespace DigitalPlatform.Marc
                         textRect,
                         this.container.MarcEditor.m_contentTextColor,
                         MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-
-                    /*
-                    // 用原始API绘制
-                    DigitalPlatform.RECT rect0 = new RECT();
-                    rect0.left = textRect.Left;
-                    rect0.right = textRect.Right;
-                    rect0.top = textRect.Top;
-                    rect0.bottom = textRect.Bottom;
-                    IntPtr hdc = g.GetHdc();
-
-                    int oldbkmode = API.SetBkMode(hdc, API.TRANSPARENT);
-
-                    // 还需要选择字体，笔，刷子等？
-                    IntPtr oldfont = API.SelectObject(hdc, font.ToHfont());
-                    API.DrawTextW(hdc,
-                        strText,
-                        strText.Length,
-                        ref rect0,
-                        API.DT_EDITCONTROL | API.DT_WORDBREAK);
-                    API.SelectObject(hdc, oldfont);
-
-                    API.SetBkMode(hdc, oldbkmode);
-
-                    g.ReleaseHdc(hdc);
-                     */
                 }
-
-                // g.TextRenderingHint = oldrenderhint;
 			}
 
-			//font.Dispose();
 			brush.Dispose();
+
+            // 2015/10/19
+            if (linGrBrush != null)
+                linGrBrush.Dispose();
 		}
 
         // 获得反相颜色
@@ -940,204 +917,201 @@ namespace DigitalPlatform.Marc
 				|| nBottomBorderHeight < 0
 				|| nLeftBorderWidth < 0
 				|| nRightBorderWidth < 0)
-			{
 				return;
-			}
 
 			if (nTopBorderHeight > myRect.Height 
 				|| nBottomBorderHeight > myRect.Height)
-			{
 				return;
-			}
 
 			if (nLeftBorderWidth > myRect.Width
 				|| nRightBorderWidth > myRect.Width)
-			{
 				return;
-			}
-
 
 			//左边垂直钢笔
-			Pen penLeft = new Pen(color,nLeftBorderWidth);
+			using(Pen penLeft = new Pen(color,nLeftBorderWidth))
 			//右边垂直钢笔
-			Pen penRight = new Pen(color,nRightBorderWidth);
+			using(Pen penRight = new Pen(color,nRightBorderWidth))
 			//上方的水平钢笔
-			Pen penTop = new Pen(color,nTopBorderHeight);
+			using(Pen penTop = new Pen(color,nTopBorderHeight))
 			//下方的水平钢笔
-			Pen penBottom = new Pen(color,nBottomBorderHeight);
+            using (Pen penBottom = new Pen(color, nBottomBorderHeight))
+            {
+                int nLeftDelta = nLeftBorderWidth / 2;
+                int nRightDelta = nRightBorderWidth / 2;
+                int nTopDelta = nTopBorderHeight / 2;
+                int nBottomDelta = nBottomBorderHeight / 2;
 
-			int nLeftDelta = nLeftBorderWidth / 2;
-			int nRightDelta = nRightBorderWidth / 2;
-			int nTopDelta = nTopBorderHeight / 2;
-			int nBottomDelta = nBottomBorderHeight / 2 ;
+                int nLeftMode = nLeftBorderWidth % 2;
+                int nRightMode = nRightBorderWidth % 2;
+                int nTopMode = nTopBorderHeight % 2;
+                int nBottomMode = nBottomBorderHeight % 2;
 
-			int nLeftMode = nLeftBorderWidth % 2;
-			int nRightMode = nRightBorderWidth % 2;
-			int nTopMode = nTopBorderHeight % 2;
-			int nBottomMode = nBottomBorderHeight % 2;
+                Rectangle rectMiddle = new Rectangle(0, 0, 0, 0);
+                if (nTopBorderHeight == 0
+                    && nBottomBorderHeight == 0
+                    && nLeftBorderWidth == 0)
+                {
+                    rectMiddle = new Rectangle(
+                        myRect.X,
+                        myRect.Y,
+                        myRect.Width - nRightDelta,
+                        myRect.Height);
+                }
+                else if (nLeftBorderWidth == 0
+                    && nRightBorderWidth == 0
+                    && nTopBorderHeight == 0)
+                {
+                    rectMiddle = new Rectangle(
+                        myRect.X,
+                        myRect.Y,
+                        myRect.Width,
+                        myRect.Height - nBottomDelta);
+                }
+                else
+                {
+                    rectMiddle = new Rectangle(
+                        myRect.X + nLeftDelta,
+                        myRect.Y + nTopDelta,
+                        myRect.Width - nLeftDelta - nRightDelta,
+                        myRect.Height - nTopDelta - nBottomDelta);
 
-			Rectangle rectMiddle = new Rectangle(0,0,0,0);
-			if (nTopBorderHeight == 0
-				&& nBottomBorderHeight == 0
-				&& nLeftBorderWidth == 0)
-			{
-				rectMiddle = new Rectangle(
-					myRect.X,
-					myRect.Y,
-					myRect.Width - nRightDelta,
-					myRect.Height);
-			}
-			else if (nLeftBorderWidth == 0
-				&& nRightBorderWidth == 0
-				&& nTopBorderHeight == 0)
-			{
-				rectMiddle = new Rectangle(
-					myRect.X,
-					myRect.Y,
-					myRect.Width,
-					myRect.Height - nBottomDelta);
-			}
-			else
-			{
-				rectMiddle = new Rectangle(
-					myRect.X + nLeftDelta,
-					myRect.Y + nTopDelta,
-					myRect.Width  - nLeftDelta - nRightDelta,
-					myRect.Height  - nTopDelta - nBottomDelta);
+                }
 
-			}
-		
-			//上方
-			if (nTopBorderHeight > 0)
-			{
-				if (nLeftBorderWidth == 0
-					&& nRightBorderWidth == 0
-					&& nBottomBorderHeight == 0)
-				{
-					if (nTopBorderHeight == 1)
-					{
-						g.DrawLine(penTop,
-							rectMiddle.Left ,rectMiddle.Top,
-							rectMiddle.Right ,rectMiddle.Top);
-					}
-					else
-					{
-						g.DrawLine(penTop,
-							rectMiddle.Left ,rectMiddle.Top ,
-							rectMiddle.Right + 1,rectMiddle.Top );
-					}
-				}
-				else
-				{
-					g.DrawLine(penTop,
-						rectMiddle.Left ,rectMiddle.Top ,
-						rectMiddle.Right ,rectMiddle.Top );
-				}
-			}
+                //上方
+                if (nTopBorderHeight > 0)
+                {
+                    if (nLeftBorderWidth == 0
+                        && nRightBorderWidth == 0
+                        && nBottomBorderHeight == 0)
+                    {
+                        if (nTopBorderHeight == 1)
+                        {
+                            g.DrawLine(penTop,
+                                rectMiddle.Left, rectMiddle.Top,
+                                rectMiddle.Right, rectMiddle.Top);
+                        }
+                        else
+                        {
+                            g.DrawLine(penTop,
+                                rectMiddle.Left, rectMiddle.Top,
+                                rectMiddle.Right + 1, rectMiddle.Top);
+                        }
+                    }
+                    else
+                    {
+                        g.DrawLine(penTop,
+                            rectMiddle.Left, rectMiddle.Top,
+                            rectMiddle.Right, rectMiddle.Top);
+                    }
+                }
 
-			//下方
-			if (nBottomBorderHeight > 0)
-			{
-				if (nLeftBorderWidth == 0
-					&& nRightBorderWidth == 0
-					&& nTopBorderHeight == 0)
-				{
-					if (nBottomBorderHeight == 1)
-					{
-						g.DrawLine(penBottom,
-							rectMiddle.Left,rectMiddle.Bottom ,
-							rectMiddle.Right -1,rectMiddle.Bottom);
-					}
-					else
-					{
-						g.DrawLine(penBottom,
-							rectMiddle.Left,rectMiddle.Bottom - nBottomMode,
-							rectMiddle.Right,rectMiddle.Bottom - nBottomMode);
-					}
-				}
-				else
-				{
-					g.DrawLine(penBottom,
-						rectMiddle.Left,rectMiddle.Bottom ,
-						rectMiddle.Right,rectMiddle.Bottom);
-				}
-			}
+                //下方
+                if (nBottomBorderHeight > 0)
+                {
+                    if (nLeftBorderWidth == 0
+                        && nRightBorderWidth == 0
+                        && nTopBorderHeight == 0)
+                    {
+                        if (nBottomBorderHeight == 1)
+                        {
+                            g.DrawLine(penBottom,
+                                rectMiddle.Left, rectMiddle.Bottom,
+                                rectMiddle.Right - 1, rectMiddle.Bottom);
+                        }
+                        else
+                        {
+                            g.DrawLine(penBottom,
+                                rectMiddle.Left, rectMiddle.Bottom - nBottomMode,
+                                rectMiddle.Right, rectMiddle.Bottom - nBottomMode);
+                        }
+                    }
+                    else
+                    {
+                        g.DrawLine(penBottom,
+                            rectMiddle.Left, rectMiddle.Bottom,
+                            rectMiddle.Right, rectMiddle.Bottom);
+                    }
+                }
 
-			int nLeftTemp = nLeftDelta + nLeftMode;
-			if (nLeftBorderWidth == 1)
-			{
-				if (nLeftMode == 0)
-					nLeftTemp = nLeftDelta -1;
-				else
-					nLeftTemp = nLeftDelta;
-			}
-			//左方
-			if (nLeftBorderWidth > 0)
-			{
-				if (nTopBorderHeight == 0
-					&& nBottomBorderHeight == 0
-					&& nRightBorderWidth == 0)
-				{
-					if (nLeftBorderWidth == 1)
-					{
-						g.DrawLine (penRight,
-							rectMiddle.Left ,rectMiddle.Top - nLeftDelta,
-							rectMiddle.Left ,rectMiddle.Bottom);					}
-					else
-					{
-						g.DrawLine (penLeft,
-							rectMiddle.Left,rectMiddle.Top,
-							rectMiddle.Left,rectMiddle.Bottom + 1);
-					}
-				}
-				else
-				{
-					g.DrawLine (penLeft,
-						rectMiddle.Left ,rectMiddle.Top,
-						rectMiddle.Left ,rectMiddle.Bottom);
-				}
-			}
+                int nLeftTemp = nLeftDelta + nLeftMode;
+                if (nLeftBorderWidth == 1)
+                {
+                    if (nLeftMode == 0)
+                        nLeftTemp = nLeftDelta - 1;
+                    else
+                        nLeftTemp = nLeftDelta;
+                }
+                //左方
+                if (nLeftBorderWidth > 0)
+                {
+                    if (nTopBorderHeight == 0
+                        && nBottomBorderHeight == 0
+                        && nRightBorderWidth == 0)
+                    {
+                        if (nLeftBorderWidth == 1)
+                        {
+                            g.DrawLine(penRight,
+                                rectMiddle.Left, rectMiddle.Top - nLeftDelta,
+                                rectMiddle.Left, rectMiddle.Bottom);
+                        }
+                        else
+                        {
+                            g.DrawLine(penLeft,
+                                rectMiddle.Left, rectMiddle.Top,
+                                rectMiddle.Left, rectMiddle.Bottom + 1);
+                        }
+                    }
+                    else
+                    {
+                        g.DrawLine(penLeft,
+                            rectMiddle.Left, rectMiddle.Top,
+                            rectMiddle.Left, rectMiddle.Bottom);
+                    }
+                }
 
-			int nRightTemp = nRightDelta + nRightMode;
-			if (nRightBorderWidth == 1)
-			{
-				if (nRightMode == 0)
-					nRightTemp = nRightDelta -1;
-				else
-					nRightTemp = nRightDelta;
-			}
-			//右方
-			if (nRightBorderWidth > 0)
-			{
-				if (nTopBorderHeight == 0
-					&& nBottomBorderHeight == 0
-					&& nLeftBorderWidth == 0)
-				{
-					if (nRightBorderWidth == 1)
-					{
-						g.DrawLine (penRight,
-							rectMiddle.Right ,rectMiddle.Top - nRightDelta,
-							rectMiddle.Right ,rectMiddle.Bottom - 1);	
-					}
-					else
-					{
-						g.DrawLine(penRight,
-							rectMiddle.Right -nRightMode ,rectMiddle.Top,
-							rectMiddle.Right -nRightMode ,rectMiddle.Bottom);
-					}
-				}
-				else
-				{
-					g.DrawLine (penRight,
-						rectMiddle.Right ,rectMiddle.Top - nRightDelta,
-						rectMiddle.Right ,rectMiddle.Bottom + nRightTemp);
-				}
-			}
+                int nRightTemp = nRightDelta + nRightMode;
+                if (nRightBorderWidth == 1)
+                {
+                    if (nRightMode == 0)
+                        nRightTemp = nRightDelta - 1;
+                    else
+                        nRightTemp = nRightDelta;
+                }
+                //右方
+                if (nRightBorderWidth > 0)
+                {
+                    if (nTopBorderHeight == 0
+                        && nBottomBorderHeight == 0
+                        && nLeftBorderWidth == 0)
+                    {
+                        if (nRightBorderWidth == 1)
+                        {
+                            g.DrawLine(penRight,
+                                rectMiddle.Right, rectMiddle.Top - nRightDelta,
+                                rectMiddle.Right, rectMiddle.Bottom - 1);
+                        }
+                        else
+                        {
+                            g.DrawLine(penRight,
+                                rectMiddle.Right - nRightMode, rectMiddle.Top,
+                                rectMiddle.Right - nRightMode, rectMiddle.Bottom);
+                        }
+                    }
+                    else
+                    {
+                        g.DrawLine(penRight,
+                            rectMiddle.Right, rectMiddle.Top - nRightDelta,
+                            rectMiddle.Right, rectMiddle.Bottom + nRightTemp);
+                    }
+                }
 
+            }
+#if NO
 			penLeft.Dispose ();
 			penRight.Dispose ();
 			penTop.Dispose ();
 			penBottom.Dispose ();
+#endif
 		}
 
         // 子字段集合

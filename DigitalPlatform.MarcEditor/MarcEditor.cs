@@ -640,6 +640,7 @@ namespace DigitalPlatform.Marc
 				if( components != null )
 					components.Dispose();
 			}
+            FreeFonts();
 			base.Dispose( disposing );
 		}
 		#endregion
@@ -772,6 +773,9 @@ namespace DigitalPlatform.Marc
             }
             set
             {
+                if (this.m_fixedSizeFont != null)
+                    this.m_fixedSizeFont.Dispose();
+
                 this.m_fixedSizeFont = value;
             }
         }
@@ -782,6 +786,12 @@ namespace DigitalPlatform.Marc
             return new Font("Courier New", this.Font.Size, FontStyle.Bold);
         }
 #endif
+
+        void FreeFonts()
+        {
+            this.FixedSizeFont = null;
+            this.CaptionFont = null;
+        }
 
         /// <summary>
         /// 当前提示区字体
@@ -803,6 +813,9 @@ namespace DigitalPlatform.Marc
             }
             set
             {
+                if (this.m_captionFont != null)
+                    this.m_captionFont.Dispose();
+
                 this.m_captionFont = value;
             }
         }
@@ -1614,28 +1627,10 @@ namespace DigitalPlatform.Marc
         /// <param name="pe">包含事件数据的 System.Windows.Forms.PaintEventArgs。</param>
         protected override void OnPaint(PaintEventArgs pe)
 		{
-			/*
-			if (this.record == null)
-			{
-				Brush brush = null;
-			
-				brush = new SolidBrush(Color.Red);
-
-				pe.Graphics.FillRectangle(brush, pe.ClipRectangle);
-
-				brush.Dispose();
-
-				base.OnPaint(pe);
-				return;
-			}
-			*/
-
             /*
             pe.Graphics.SmoothingMode =
 System.Drawing.Drawing2D.SmoothingMode.HighQuality;
              */
-
-
 
 			int x= this.LeftBlank + this.DocumentOrgX;
 			int y = this.TopBlank + this.DocumentOrgY;

@@ -15014,32 +15014,34 @@ lower_height - 1);
             int nLargeCircleWidth = 16; // 第一个大圈圈的直径
             int nCircleWidth = 10;  // 其他小圈圈的直径
 
-            Pen pen = new Pen(colorBorder);
-            Brush brush = new SolidBrush(Color.White);
-            for (int i = 0; i < points.Length; i++)
+            using(Pen pen = new Pen(colorBorder))
+            using (Brush brush = new SolidBrush(Color.White))
             {
-                PointF point = points[i];
-                RectangleF rect;
-                if (i == 0)
+                for (int i = 0; i < points.Length; i++)
                 {
-                    rect = new RectangleF(point.X - nLargeCircleWidth / 2,
-                      point.Y - nLargeCircleWidth / 2,
-                      nLargeCircleWidth,
-                      nLargeCircleWidth);
-                }
-                else
-                {
-                    rect = new RectangleF(point.X - nCircleWidth / 2,
-                       point.Y - nCircleWidth / 2,
-                       nCircleWidth,
-                       nCircleWidth);
-                }
+                    PointF point = points[i];
+                    RectangleF rect;
+                    if (i == 0)
+                    {
+                        rect = new RectangleF(point.X - nLargeCircleWidth / 2,
+                          point.Y - nLargeCircleWidth / 2,
+                          nLargeCircleWidth,
+                          nLargeCircleWidth);
+                    }
+                    else
+                    {
+                        rect = new RectangleF(point.X - nCircleWidth / 2,
+                           point.Y - nCircleWidth / 2,
+                           nCircleWidth,
+                           nCircleWidth);
+                    }
 
-                // 优化
-                if (rect.IntersectsWith(e.ClipRectangle) == false)
-                    continue;
+                    // 优化
+                    if (rect.IntersectsWith(e.ClipRectangle) == false)
+                        continue;
 
-                Circle(e.Graphics, pen, brush, rect);
+                    Circle(e.Graphics, pen, brush, rect);
+                }
             }
         }
 

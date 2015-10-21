@@ -3798,79 +3798,30 @@ MessageBoxDefaultButton.Button2);
             {
                 image = (Image)obj1.GetData(typeof(Bitmap));
             }
-            else 
+            else if (obj1.GetDataPresent(DataFormats.FileDrop))
             {
-                strError = "当前Windows剪贴板中没有图形对象";
-                goto ERROR1;
-            }
+                string[] files = (string[])obj1.GetData(DataFormats.FileDrop);
 
-                string strShrinkComment = "";
-            using (image)
-            {
-
-                // 自动缩小图像
-
-#if NO
-            string strMaxWidth = this.MainForm.AppInfo.GetString(
-    "readerinfoform_optiondlg",
-    "cardphoto_maxwidth",
-    "120");
-            int nMaxWidth = -1;
-            Int32.TryParse(strMaxWidth,
-                out nMaxWidth);
-            if (nMaxWidth != -1)
-            {
-                int nOldWidth = image.Width;
-                // 缩小图像
-                // parameters:
-                //		nNewWidth0	宽度(0表示不变化)
-                //		nNewHeight0	高度
-                //      bRatio  是否保持纵横比例
-                // return:
-                //      -1  出错
-                //      0   没有必要缩放(objBitmap未处理)
-                //      1   已经缩放
-                nRet = GraphicsUtil.ShrinkPic(ref image,
-                    nMaxWidth,
-                    0,
-                    true,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                if (nOldWidth != image.Width)
+                try
                 {
-                    strShrinkComment = "图像宽度被从 "+nOldWidth.ToString()+" 像素缩小到 "+image.Width.ToString()+" 像素";
+                    image = Image.FromFile(files[0]);
                 }
-            }
-
-            string strTempFilePath = FileUtil.NewTempFileName(this.MainForm.DataDir,
-                "~temp_make_cardphoto_",
-                ".png");
-
-            image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
-            image.Dispose();
-            image = null;
-            
-            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage("cardphoto");
-            if (items.Count == 0)
-            {
-                nRet = this.binaryResControl1.AppendNewItem(
-    strTempFilePath,
-    "cardphoto",
-    out strError);
-
+                catch (OutOfMemoryException)
+                {
+                    strError = "当前 Windows 剪贴板中的第一个文件不是图像文件。无法创建证件照片";
+                    goto ERROR1;
+                }
             }
             else
             {
-                nRet = this.binaryResControl1.ChangeObjectFile(items[0],
-     strTempFilePath,
-     "cardphoto",
-             out strError);
-            }
-            if (nRet == -1)
+                strError = "当前 Windows 剪贴板中没有图形对象。无法创建证件照片";
                 goto ERROR1;
-#endif
+            }
+
+            string strShrinkComment = "";
+            using (image)
+            {
+                // 自动缩小图像
                 nRet = SetCardPhoto(image,
                 out strShrinkComment,
                 out strError);
@@ -3882,8 +3833,8 @@ MessageBoxDefaultButton.Button2);
             this.tabControl_readerInfo.SelectedTab = this.tabPage_objects;
 
             MessageBox.Show(this, "证件照片已经成功创建。\r\n"
-                +strShrinkComment
-                +"\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
+                + strShrinkComment
+                + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
         ERROR1:
             MessageBox.Show(this, strError);

@@ -30,7 +30,10 @@ namespace DigitalPlatform.dp2.Statis
 
             // Now pass printableChars into MeasureString
             SizeF stringSize = new SizeF();
-            stringSize = Graphics.FromHwnd(control.Handle).MeasureString(printableChars, stringFont);
+            using (Graphics g = Graphics.FromHwnd(control.Handle))
+            {
+                stringSize = g.MeasureString(printableChars, stringFont);
+            }
 
             // Work out average width of printable characters
             return stringSize.Width / (double)printableChars.Length;

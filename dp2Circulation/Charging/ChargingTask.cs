@@ -141,8 +141,9 @@ namespace dp2Circulation
 
             row[2].Text = strText;
 
-            row.BackColor = SystemColors.Window;
-            row.ForeColor = SystemColors.WindowText;
+            // 缺省为透明色，即使用 row 的前景背景色 2015/10/18
+            ////row.BackColor = SystemColors.Window;
+            ////row.ForeColor = SystemColors.WindowText;
 
             DpCell color_cell = row[0];
             // row.BackColor = System.Drawing.Color.Transparent;
@@ -173,8 +174,10 @@ namespace dp2Circulation
             else if (this.Color == "black")
             {
                 color_cell.BackColor = System.Drawing.Color.Purple;
+#if NO
                 row.BackColor = System.Drawing.Color.Black;
                 row.ForeColor = System.Drawing.Color.LightGray;
+#endif
             }
             else
             {
@@ -439,9 +442,11 @@ namespace dp2Circulation
             string strStyle = this.Container.PatronRenderFormat;
             if (this.Container.SpeakPatronName == true)
                 strStyle += ",summary";
-            strStyle += ",xml";
-            if (this.Container.MainForm.ServerVersion >= 2.25)
-                strStyle += ":noborrowhistory";
+            {
+                strStyle += ",xml";
+                if (this.Container.MainForm.ServerVersion >= 2.25)
+                    strStyle += ":noborrowhistory";
+            }
 #if NO
             if (this.VoiceName == true)
                 strStyle += ",summary";
@@ -582,8 +587,6 @@ out strError);
                 string strName = results[1];
                 this.Container.MainForm.Speak(strName);
             }
-
-
 
             // this.m_strCurrentBarcode = strBarcode;
             task.State = "finish";

@@ -160,6 +160,7 @@ size.Height);
             float delta = Math.Min(this.Size.Width, this.Size.Height) / 20;
             backRect = RectangleF.Inflate(textRect, delta, delta);
 
+            using (Brush brush = new SolidBrush(this.RectColor))
             using (Pen pen = new Pen(Color.Gray))
             {
                 if (this.Closeable == false)
@@ -167,7 +168,7 @@ size.Height);
                     // 圆角表示不可点击
                     RoundRectangle(e.Graphics,
                     pen,
-                    new SolidBrush(this.RectColor),
+                    brush,
                     backRect,
                     backRect.Height / 3);   // / 4 6
                 }
@@ -176,7 +177,7 @@ size.Height);
                     // 方角表示可点击消失
                     RoundRectangle(e.Graphics,
     pen,
-    new SolidBrush(this.RectColor),
+    brush,
     backRect,
     0);
                 }
@@ -224,25 +225,26 @@ size.Height);
             float height,
             float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(x + radius, y, x + width - (radius * 2), y);
-            if (radius != 0)
-                path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
-            path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
-            if (radius != 0)
-                path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
-            path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
-            if (radius != 0)
-                path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
-            path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            if (radius != 0)
-                path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
-            path.CloseFigure();
-            if (brush != null)
-                graphics.FillPath(brush, path);
-            if (pen != null)
-                graphics.DrawPath(pen, path);
-            path.Dispose();
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(x + radius, y, x + width - (radius * 2), y);
+                if (radius != 0)
+                    path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
+                path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
+                if (radius != 0)
+                    path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
+                path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
+                if (radius != 0)
+                    path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
+                path.AddLine(x, y + height - (radius * 2), x, y + radius);
+                if (radius != 0)
+                    path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
+                path.CloseFigure();
+                if (brush != null)
+                    graphics.FillPath(brush, path);
+                if (pen != null)
+                    graphics.DrawPath(pen, path);
+            }
         }
 
         //

@@ -1151,6 +1151,7 @@ this.UiState);
                     return -1;
             }
 
+            string strUserName = DomUtil.GetElementText(dom.DocumentElement, "userName");
             string strNewPassword = DomUtil.GetElementText(dom.DocumentElement, "newPassword");
 
             string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
@@ -1161,6 +1162,7 @@ this.UiState);
                 "<table class='operlog'>" +
                 BuildHtmlLine("操作类型", strOperation + " -- 用户操作") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+                (string.IsNullOrEmpty(strUserName) == false ? BuildHtmlLine("用户名", strUserName) : "") +
                 (string.IsNullOrEmpty(strNewPassword) == false ? BuildHtmlLine("新密码", strNewPassword) : "") +
                 BuildHtmlEncodedLine("操作前的用户记录", strOldAccountRecordHtml) +
                 BuildHtmlEncodedLine("操作后的用户记录", strAccountRecordHtml) +

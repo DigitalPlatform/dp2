@@ -115,11 +115,6 @@ namespace dp2Circulation
             this._summaryChannel.Initial(this.MainForm);
             this._barcodeChannel.Initial(this.MainForm);
 
-            if (this.DisplayFormat == "HTML")
-            {
-                SetReaderHtmlString("(空)");
-            }
-
             this.FuncState = this.FuncState;
 
             this._taskList.Channel = this.Channel;
@@ -155,6 +150,12 @@ namespace dp2Circulation
                 "quickchargingform",
                 "upper_input",
                 true);
+
+            this.SetControlsColor(this.DisplayStyle);
+            if (this.DisplayFormat == "HTML")
+            {
+                SetReaderHtmlString("(空)");
+            }
         }
 
         void m_webExternalHost_readerInfo_OutputDebugInfo(object sender, OutputDebugInfoEventArgs e)
@@ -230,6 +231,78 @@ namespace dp2Circulation
                     "upper_input",
                     this.toolStripButton_upperInput.Checked);
             }
+        }
+
+        // 任务单元的背景色
+        Color TaskBackColor
+        {
+            get;
+            set;
+        }
+
+        // 任务单元的前景色
+        Color TaskForeColor
+        {
+            get;
+            set;
+        }
+
+        void SetControlsColor(string strStyle)
+        {
+            if (strStyle == "dark")
+            {
+                this.BackColor = Color.FromArgb(40, 40, 40);    //  Color.DimGray;
+                this.ForeColor = Color.White;
+
+                this.toolStrip_main.BackColor = Color.FromArgb(70, 70, 70); // 50
+
+                this.textBox_input.BackColor = Color.Black;
+                this.textBox_input.ForeColor = Color.White;
+
+                this.ActionTextColor = Color.LightGray;
+
+                this.dpTable_tasks.BackColor = this.BackColor;
+                this.dpTable_tasks.ColumnsBackColor = this.BackColor;
+                this.dpTable_tasks.ColumnsForeColor = this.ForeColor;
+
+                this.TaskBackColor = Color.FromArgb(255, 10,10,10);
+                this.TaskForeColor = Color.FromArgb(255, 230, 230, 230);
+
+                this._cardStyle.BarcodeTextColor = Color.FromArgb(255, 10, 200, 10);
+                this._cardStyle.NameTextColor = this.TaskForeColor;
+                this._cardStyle.DepartmentTextColor = Color.FromArgb(255, 150,150,150);
+
+            }
+            else if (strStyle == "light")
+            {
+                this.BackColor = SystemColors.Window;
+                this.ForeColor = SystemColors.WindowText;
+
+                this.toolStrip_main.BackColor = this.BackColor;
+
+                this.textBox_input.BackColor = this.BackColor;
+                this.textBox_input.ForeColor = this.ForeColor;
+
+                this.ActionTextColor = this.ForeColor;
+
+                this.dpTable_tasks.BackColor = Color.FromArgb(255, 230, 230, 230); // this.BackColor;  // SystemColors.ControlDarkDark;
+                this.dpTable_tasks.ColumnsBackColor = SystemColors.Control;
+                this.dpTable_tasks.ColumnsForeColor = this.ForeColor;
+
+                this.TaskBackColor = this.BackColor;
+                this.TaskForeColor = this.ForeColor;
+
+                this._cardStyle.BarcodeTextColor = Color.DarkGreen;
+                this._cardStyle.NameTextColor = this.TaskForeColor;
+                this._cardStyle.DepartmentTextColor = SystemColors.ControlDark;
+            }
+
+            this.m_webExternalHost_readerInfo.BackColor = this.BackColor;
+
+            this.panel_input.BackColor = this.BackColor;
+            this.panel_input.ForeColor = this.ForeColor;
+            this.pictureBox_action.BackColor = this.BackColor;
+
         }
 
         void commander_IsBusy(object sender, IsBusyEventArgs e)
@@ -463,8 +536,16 @@ dlg.UiState);
 
         internal void AddItemSummaryTask(string strItemBarcode,
             string strConfirmItemRecPath,
-            ChargingTask charging_task)
+            ChargingTask charging_task,
+            bool bClearBofore = true)
         {
+            if (bClearBofore)
+            {
+                // 如果以前有摘要，要先清除。这样操作者在等待过程中能清楚当前处在什么状态
+                charging_task.ItemSummary = "正在获取书目摘要 ...";
+                DisplayTask("refresh", charging_task);
+            }
+
             SummaryTask task = new SummaryTask();
             task.Action = "get_item_summary";
             task.ItemBarcode = strItemBarcode;
@@ -525,12 +606,17 @@ dlg.UiState);
         }
 #endif
         // 把摘要显示到任务列表中，并朗读出来
-        internal void AsyncFillItemSummary(ChargingTask task, string strSummary)
+        // parameters:
+        //      bSpeak  是否要把 strSummary 朗读出来？注意，当此参数为 true 时，依然要看当前系统参数配置，允许朗读才真正朗读
+        internal void AsyncFillItemSummary(ChargingTask task,
+            string strSummary,
+            bool bSpeak)
         {
             // 这里被做事的线程调用，希望启动任务后尽快返回。但不应把长时任务交给界面线程
             if (this.InvokeRequired)
             {
-                this.BeginInvoke(new Action<ChargingTask, string>(AsyncFillItemSummary), task, strSummary);
+                // 原来是 BeginInvoke。可能和清除文本的动作发生顺序交错
+                this.Invoke(new Action<ChargingTask, string, bool>(AsyncFillItemSummary), task, strSummary, bSpeak);
                 return;
             }
 
@@ -542,7 +628,8 @@ dlg.UiState);
             DisplayTask("refresh", task);
 
             // 把摘要的书名部分朗读出来
-            if (this.SpeakBookTitle == true 
+            if (bSpeak
+                && this.SpeakBookTitle == true 
                 && string.IsNullOrEmpty(strSummary) == false)
             {
                 string strTitle = "";
@@ -641,7 +728,6 @@ out strError);
             this._summaryChannel.PrepareSearch("正在获取书目摘要 ...");
             try
             {
-                // TODO: 这里要避免出让控制权
                 long lRet = this._summaryChannel.Channel.GetBiblioSummary(
                     this._summaryChannel.stop,
                     strItemBarcode,
@@ -996,7 +1082,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 DpRow line = new DpRow();
                 line.Style = DpRowStyle.HorzGrid;
-                line.BackColor = SystemColors.Window;   //  Color.FromArgb(254, 254, 254);
+                line.BackColor = this.TaskBackColor;    // SystemColors.Window;
+                line.ForeColor = this.TaskForeColor;
                 task.RefreshDisplay(line);
 
                 line.Tag = task;
@@ -1264,8 +1351,10 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             if (this._taskList.Stopped == true)
                 this._taskList.BeginThread();
 
+#if NO
             if (this._summaryList.Stopped == true)
                 this._summaryList.BeginThread();
+#endif
             // m_webExternalHost_readerInfo.StopPrevious();
 
             if ((this.UseIsbnBorrow == true && IsISBN(ref strText) == true)
@@ -1596,6 +1685,16 @@ false);
             }
         }
 
+        public string DisplayStyle
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("quickcharging_form",
+                    "display_style",
+                    "light");
+            }
+        }
+
         /// <summary>
         /// 显示读者信息的格式。为 text html 之一
         /// </summary>
@@ -1603,18 +1702,34 @@ false);
         {
             get
             {
+                List<string> styles = new List<string>();
+                string strDisplayStyle = this.DisplayStyle;
+                if (strDisplayStyle != "light")
+                    styles.Add("style_" + strDisplayStyle);
+
+                string strFormat = "";
                 if (_cardControl != null)
                 {
                     if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.25)
-                        return "xml:noborrowhistory";
-
-                    return "xml";
+                    {
+                        styles.Add("noborrowhistory");
+                        // return "xml:noborrowhistory";
+                    }
+                    strFormat = "xml";
                 }
-                if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
-                    return "html:noborrowhistory";
+                else
+                {
+                    if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
+                    {
+                        styles.Add("noborrowhistory");
+                        // return "html:noborrowhistory";
+                    }
+                    strFormat = "html";
+                }
 
-                return "html";
-
+                if (styles.Count == 0)
+                    return strFormat;
+                return strFormat + ":" + StringUtil.MakePathList(styles, "|");
             }
         }
 
@@ -2329,6 +2444,20 @@ false);
             contextMenu.Items.Add(menuSepItem);
 
             // 
+            menuItem = new ToolStripMenuItem("刷新摘要(&R)");
+            if (this.dpTable_tasks.SelectedRows.Count > 0
+                && selected_task != null && String.IsNullOrEmpty(selected_task.ItemBarcode) == false)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+            menuItem.Click += new EventHandler(menuItem_refreshSummary_Click);
+            contextMenu.Items.Add(menuItem);
+
+            // ---
+            menuSepItem = new ToolStripSeparator();
+            contextMenu.Items.Add(menuSepItem);
+
+            // 
             menuItem = new ToolStripMenuItem("删除任务 [" + this.dpTable_tasks.SelectedRows.Count.ToString() + "] (&D)");
             if (this.dpTable_tasks.SelectedRows.Count > 0)
                 menuItem.Enabled = true;
@@ -2337,6 +2466,9 @@ false);
             menuItem.Click += new EventHandler(menuItem_deleteTask_Click);
             contextMenu.Items.Add(menuItem);
 
+            // 
+            if (Program.IsDevelopMode() == true)
+            {
 #if NO
             // 
             menuItem = new ToolStripMenuItem("test");
@@ -2344,13 +2476,13 @@ false);
             contextMenu.Items.Add(menuItem);
 
 #endif
-            // 
-            menuItem = new ToolStripMenuItem("test change state");
-            menuItem.Click += new EventHandler(menuItem_test_change_state_Click);
-            contextMenu.Items.Add(menuItem);
+
+                menuItem = new ToolStripMenuItem("test change state");
+                menuItem.Click += new EventHandler(menuItem_test_change_state_Click);
+                contextMenu.Items.Add(menuItem);
+            }
 
             contextMenu.Show(this.dpTable_tasks, e.Location);
-
         }
 
         // 获得一个 DpRow 行的用于 Copy 的文本
@@ -2652,6 +2784,31 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
+        // 刷新摘要
+        void menuItem_refreshSummary_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.dpTable_tasks.SelectedRows.Count == 0)
+            {
+                strError = "尚未选定要操作的任务事项";
+                goto ERROR1;
+            }
+
+            foreach(DpRow row in this.dpTable_tasks.SelectedRows)
+            {
+                ChargingTask charging_task = (ChargingTask)row.Tag;
+                if (string.IsNullOrEmpty(charging_task.ItemBarcode) == true)
+                    continue;
+                this.AddItemSummaryTask(charging_task.ItemBarcode,
+                    null,
+                    charging_task);
+            }
+
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "error", true);
+        }
+
         // 打开到 种册窗
         void menuItem_loadToEntityForm_Click(object sender, EventArgs e)
         {
@@ -2751,7 +2908,6 @@ MessageBoxDefaultButton.Button2);
             this._bScrollBarTouched = true;
         }
 
-
         private void dpTable_tasks_PaintRegion(object sender, PaintRegionArgs e)
         {
             if (e.Action == "query")
@@ -2771,10 +2927,13 @@ MessageBoxDefaultButton.Button2);
                     e.Height = 0;
                     return;
                 }
-                info.Layout(Graphics.FromHwnd(this.dpTable_tasks.Handle),
-_cardStyle,
-e.Width,
-e.Height);
+                using (Graphics g = Graphics.FromHwnd(this.dpTable_tasks.Handle))
+                {
+                    info.Layout(g,
+    _cardStyle,
+    e.Width,
+    e.Height);
+                }
                 cell.Tag = info;
                 return;
             }
@@ -2985,6 +3144,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
         }
 
+        public Color ActionTextColor
+        {
+            get;
+            set;
+        }
+
         private void pictureBox_action_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -3034,7 +3199,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
     (this.pictureBox_action.Size.Height - size.Height) / 2,
     size.Width,
     size.Height);
-                using (Brush brush = new SolidBrush(Color.Black))
+                using (Brush brush = new SolidBrush(this.ActionTextColor))
                 {
                     e.Graphics.DrawString(
                         strText,

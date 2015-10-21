@@ -404,6 +404,7 @@
             // 
             // toolStrip_main
             // 
+            this.toolStrip_main.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel_currentPatron,
             this.toolStripButton_openPatronSummaryWindow,
@@ -413,6 +414,7 @@
             this.toolStripDropDownButton1});
             this.toolStrip_main.Location = new System.Drawing.Point(0, 276);
             this.toolStrip_main.Name = "toolStrip_main";
+            this.toolStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_main.Size = new System.Drawing.Size(233, 20);
             this.toolStrip_main.TabIndex = 2;
             this.toolStrip_main.Text = "toolStrip1";

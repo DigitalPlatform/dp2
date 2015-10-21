@@ -23,6 +23,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 using System.Web;
 using Microsoft.Win32;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -2588,13 +2589,21 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
             return false;
         }
 
+        // 包装后的版本
+        public static void ClearHtmlPage(WebBrowser webBrowser,
+    string strDataDir)
+        {
+            ClearHtmlPage(webBrowser, strDataDir, SystemColors.Window);
+        }
+
         /// <summary>
         /// 清空浏览器控件内容
         /// </summary>
         /// <param name="webBrowser">浏览器控件</param>
         /// <param name="strDataDir">数据目录。本函数将在其中创建一个临时文件</param>
         public static void ClearHtmlPage(WebBrowser webBrowser,
-            string strDataDir)
+            string strDataDir,
+            Color backColor)
         {
             StopWebBrowser(webBrowser);
 
@@ -2604,7 +2613,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
                 return;
             }
             string strImageUrl = PathUtil.MergePath(strDataDir, "page_blank_128.png");
-            string strHtml = "<html><body><img src='"+strImageUrl+"' width='64' height='64' alt='空'></body></html>";
+            string strHtml = "<html><body style='background-color:" + ColorUtil.Color2String(backColor)+ ";'><img src='" + strImageUrl + "' width='64' height='64' alt='空'></body></html>";
             webBrowser.DocumentText = strHtml;
         }
 

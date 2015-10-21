@@ -588,64 +588,66 @@ namespace DigitalPlatform.Xml
 				Debug.Assert (false,"DrawLine找到的xmleditor 为null");
 				return;
 			}
-			
-			Graphics g = Graphics.FromHwnd(editor.Handle);
-		
-			//上方
-			if (nTopBorderHeight > 0)
-			{
-				g.DrawLine (penTop,
-					rectMiddle.Left ,rectMiddle.Top ,
-					rectMiddle.Right ,rectMiddle.Top );
-			}
 
-			//下方
-			if (nBottomBorderHeight > 0)
-			{
-				g.DrawLine (penBottom,
-					rectMiddle.Left,rectMiddle.Bottom ,
-					rectMiddle.Right,rectMiddle.Bottom );
-			}
+            using (Graphics g = Graphics.FromHwnd(editor.Handle))
+            {
 
-			int nLeftTemp = nLeftDelta + nLeftMode;
-			if (nLeftBorderWidth == 1)
-			{
-				if (nLeftMode == 0)
-					nLeftTemp = nLeftDelta -1;
-				else
-					nLeftTemp = nLeftDelta;
-			}
-			//左方
-			if (nLeftBorderWidth > 0)
-			{
-				g.DrawLine (penLeft,
-					rectMiddle.Left ,rectMiddle.Top/* - nLeftDelta*/,
-					rectMiddle.Left ,rectMiddle.Bottom/* + nLeftTemp*/);
-			}
+                //上方
+                if (nTopBorderHeight > 0)
+                {
+                    g.DrawLine(penTop,
+                        rectMiddle.Left, rectMiddle.Top,
+                        rectMiddle.Right, rectMiddle.Top);
+                }
 
-			int nRightTemp = nRightDelta + nRightMode;
-			if (nRightBorderWidth == 1)
-			{
-				if (nRightMode == 0)
-					nRightTemp = nRightDelta -1;
-				else
-					nRightTemp = nRightDelta;
-			}
-			//右方
-			if (nRightBorderWidth > 0)
-			{
-				g.DrawLine (penRight,
-					rectMiddle.Right ,rectMiddle.Top - nRightDelta,
-					rectMiddle.Right ,rectMiddle.Bottom + nRightTemp);
-			}
-			if (penLeft != null)
-				penLeft.Dispose ();
-			if (penRight != null)
-				penRight.Dispose ();
-			if (penTop != null)
-				penTop.Dispose ();
-			if (penBottom != null)
-				penBottom.Dispose ();
+                //下方
+                if (nBottomBorderHeight > 0)
+                {
+                    g.DrawLine(penBottom,
+                        rectMiddle.Left, rectMiddle.Bottom,
+                        rectMiddle.Right, rectMiddle.Bottom);
+                }
+
+                int nLeftTemp = nLeftDelta + nLeftMode;
+                if (nLeftBorderWidth == 1)
+                {
+                    if (nLeftMode == 0)
+                        nLeftTemp = nLeftDelta - 1;
+                    else
+                        nLeftTemp = nLeftDelta;
+                }
+                //左方
+                if (nLeftBorderWidth > 0)
+                {
+                    g.DrawLine(penLeft,
+                        rectMiddle.Left, rectMiddle.Top/* - nLeftDelta*/,
+                        rectMiddle.Left, rectMiddle.Bottom/* + nLeftTemp*/);
+                }
+
+                int nRightTemp = nRightDelta + nRightMode;
+                if (nRightBorderWidth == 1)
+                {
+                    if (nRightMode == 0)
+                        nRightTemp = nRightDelta - 1;
+                    else
+                        nRightTemp = nRightDelta;
+                }
+                //右方
+                if (nRightBorderWidth > 0)
+                {
+                    g.DrawLine(penRight,
+                        rectMiddle.Right, rectMiddle.Top - nRightDelta,
+                        rectMiddle.Right, rectMiddle.Bottom + nRightTemp);
+                }
+                if (penLeft != null)
+                    penLeft.Dispose();
+                if (penRight != null)
+                    penRight.Dispose();
+                if (penTop != null)
+                    penTop.Dispose();
+                if (penBottom != null)
+                    penBottom.Dispose();
+            }
 		}
 	
 		#endregion

@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
 using DigitalPlatform.GUI;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.EasyMarc
 {
@@ -1104,26 +1105,36 @@ namespace DigitalPlatform.EasyMarc
                 this.FireTextChanged();
         }
 
-        void ClearItems()
+        // parameters:
+        //      bDispose    是否立即 Dispose 若干 Control 对象。如果为 false，则不 Dispose，而是返回给调用者
+        public List<Control> ClearItems(bool bDispose = true)
         {
+            List<Control> results = new List<Control>();
             if (this.Items != null)
             {
                 foreach (EasyLine item in this.Items)
                 {
                     if (item != null)
-                        item.Dispose();
+                    {
+                        if (bDispose)
+                            item.Dispose();
+                        else
+                            results.AddRange(item.RemoveControls());
+                    }
                 }
 
                 this.Items.Clear();
             }
+
+            return results;
         }
         /// <summary>
         /// 清除全部行
         /// </summary>
-        public void Clear()
+        public List<Control> Clear(bool bDispose = true)
         {
+            List<Control> results = new List<Control>();
             this.DisableUpdate();
-
             try
             {
                 for (int i = 0; i < this.tableLayoutPanel_content.RowStyles.Count; i++)
@@ -1148,7 +1159,7 @@ namespace DigitalPlatform.EasyMarc
                 Debug.Assert(this.tableLayoutPanel_content.Controls.Count == 0, "");
 
                 // this.Items.Clear();
-                this.ClearItems();
+                results = this.ClearItems(false);
 
                 this.tableLayoutPanel_content.RowCount = 2;    // 为什么是2？
 
@@ -1163,6 +1174,18 @@ namespace DigitalPlatform.EasyMarc
             {
                 this.EnableUpdate();
             }
+
+            // 留在最后统一 Dispose()，速度较快
+            if (bDispose)
+            {
+                foreach(Control control in results)
+                {
+                    if (control != null)
+                        control.Dispose();
+                }
+                results.Clear();
+            }
+            return results;
         }
 
 #if NO
@@ -2114,91 +2137,93 @@ namespace DigitalPlatform.EasyMarc
 
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
-            // 字段背景颜色
-            Brush brush = new SolidBrush(this.FieldBackColor); // Color.FromArgb(230, 230, 230)
-            // 子字段背景颜色
-            Brush brushSubfield = new SolidBrush(this.SubfieldBackColor); // Color.FromArgb(240, 240, 240)
-
             LinearGradientBrush brushGradient = null;
+            try
+            {
 #if NO
             int nLineLength = (int)(this.tableLayoutPanel_content.ColumnStyles[0].Width
                 + this.tableLayoutPanel_content.ColumnStyles[1].Width);
 #endif
-            int nLineLength = 0;
+                int nLineLength = 0;
 
-            using (Pen pen = new Pen(this.LeftBackColor)) // Color.FromArgb(225, 225, 225)
-            {
-
-                Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
-
-                // float y = row_heights[0];   // +this.AutoScrollPosition.Y + this.tableLayoutPanel_content.Location.Y;
-                for (int i = 0; i < this.Items.Count; i++)
+                // 字段背景颜色
+                using(Brush brush = new SolidBrush(this.FieldBackColor)) // Color.FromArgb(230, 230, 230)
+                // 子字段背景颜色
+                using(Brush brushSubfield = new SolidBrush(this.SubfieldBackColor)) // Color.FromArgb(240, 240, 240)
+                using (Pen pen = new Pen(this.LeftBackColor)) // Color.FromArgb(225, 225, 225)
                 {
-                    EasyLine item = this.Items[i];
 
-                    if (item.Visible == true)
+                    Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
+
+                    // float y = row_heights[0];   // +this.AutoScrollPosition.Y + this.tableLayoutPanel_content.Location.Y;
+                    for (int i = 0; i < this.Items.Count; i++)
                     {
+                        EasyLine item = this.Items[i];
+
+                        if (item.Visible == true)
+                        {
 #if NO
                         // textbox 有时候是隐藏状态 X 为 0
                         if (nLineLength == 0)
                             nLineLength = item.textBox_content.Location.X - item.textBox_content.Margin.Left;
 #endif
-                        if (nLineLength == 0)
-                            nLineLength = item.splitter.Location.X;
+                            if (nLineLength == 0)
+                                nLineLength = item.splitter.Location.X;
 
-                        Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
-                        rect.Width = nLineLength;   //  this.tableLayoutPanel_content.DisplayRectangle.Width;
-                        rect.Offset(-p.X, -p.Y);
-                        // rect.Height = (int)this.Font.GetHeight() + 8;
+                            Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
+                            rect.Width = nLineLength;   //  this.tableLayoutPanel_content.DisplayRectangle.Width;
+                            rect.Offset(-p.X, -p.Y);
+                            // rect.Height = (int)this.Font.GetHeight() + 8;
 
-                        if (e.ClipRectangle.IntersectsWith(rect) == false)
-                            continue;
+                            if (e.ClipRectangle.IntersectsWith(rect) == false)
+                                continue;
 
-                        if (item is FieldLine)
-                        {
-                            if (item.ExpandState != ExpandState.None)
+                            if (item is FieldLine)
                             {
-                                if (brushGradient == null)
-                                    brushGradient = new LinearGradientBrush(
-                new PointF(0, 0),
-                new PointF(nLineLength, 0),
-                this.ExpandBackColor1,  // Color.FromArgb(230, 230, 230)
-                this.ExpandBackColor2  // Color.FromArgb(255, 255, 255)
-                );
-                                e.Graphics.FillRectangle(brushGradient, rect);
+                                if (item.ExpandState != ExpandState.None)
+                                {
+                                    if (brushGradient == null)
+                                        brushGradient = new LinearGradientBrush(
+                    new PointF(0, 0),
+                    new PointF(nLineLength, 0),
+                    this.ExpandBackColor1,  // Color.FromArgb(230, 230, 230)
+                    this.ExpandBackColor2  // Color.FromArgb(255, 255, 255)
+                    );
+                                    e.Graphics.FillRectangle(brushGradient, rect);
+                                }
+                                else
+                                    e.Graphics.FillRectangle(brush, rect);
+
+                                {
+                                    Point pt1 = new Point(rect.X, rect.Y);
+                                    Point pt2 = new Point(rect.X + rect.Width, rect.Y);
+
+                                    e.Graphics.DrawLine(pen, pt1, pt2);
+                                }
                             }
                             else
-                                e.Graphics.FillRectangle(brush, rect);
-
                             {
-                                Point pt1 = new Point(rect.X, rect.Y);
-                                Point pt2 = new Point(rect.X + rect.Width, rect.Y);
+                                // 子字段
+                                e.Graphics.FillRectangle(brushSubfield, rect);
 
-                                e.Graphics.DrawLine(pen, pt1, pt2);
-                            }
+                                // 编辑区的横线
+                                {
+                                    Point pt1 = new Point(rect.Right + 10, rect.Y);
+                                    Point pt2 = new Point(this.ClientSize.Width, rect.Y);
 
-
-
-                        }
-                        else
-                        {
-                            // 子字段
-                            e.Graphics.FillRectangle(brushSubfield, rect);
-
-                            // 编辑区的横线
-                            {
-                                Point pt1 = new Point(rect.Right + 10, rect.Y);
-                                Point pt2 = new Point(this.ClientSize.Width, rect.Y);
-
-                                e.Graphics.DrawLine(pen, pt1, pt2);
+                                    e.Graphics.DrawLine(pen, pt1, pt2);
+                                }
                             }
                         }
-
+                        // y += height;
                     }
-                    // y += height;
                 }
             }
-
+            finally
+            {
+                if (brushGradient != null)
+                    brushGradient.Dispose();
+            }
         }
 
         internal bool m_bFocused = false;
@@ -2651,7 +2676,6 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
-
         bool _isControlField = false;
         public bool IsControlField
         {
@@ -2861,13 +2885,45 @@ namespace DigitalPlatform.EasyMarc
 
         ItemState m_state = ItemState.Normal;
 
+        static void DisposeControl(ref Control control)
+        {
+            if (control != null)
+            {
+                control.Dispose();
+                control = null;
+            }
+        }
+
         void DisposeChildControls()
         {
-            label_color.Dispose();
-            label_caption.Dispose();
-            splitter.Dispose();
-            textBox_content.Dispose();
+            List<Control> controls = RemoveControls();
+            foreach(Control control in controls)
+            {
+                if (control != null)
+                    control.Dispose();
+            }
             Container = null;
+        }
+
+        internal List<Control> RemoveControls()
+        {
+            AddEvents(false);
+
+            List<Control> controls = new List<Control>();
+
+            controls.Add(this.label_color);
+            this.label_color = null;
+
+            controls.Add(label_caption);
+            label_caption = null;
+
+            controls.Add(splitter);
+            splitter = null;
+
+            controls.Add(textBox_content);
+            textBox_content = null;
+
+            return controls;
         }
 
         #region 释放资源
@@ -2894,7 +2950,7 @@ namespace DigitalPlatform.EasyMarc
                 if (disposing)
                 {
                     // release managed resources if any
-                    AddEvents(false);
+                    // AddEvents(false);
                     DisposeChildControls();
                 }
 
@@ -3173,9 +3229,12 @@ namespace DigitalPlatform.EasyMarc
             AddEvents(true);
         }
 
-
         void AddEvents(bool bAdd)
         {
+            // 防止在控件成员变量为空的时候调用
+            if (this.label_caption == null)
+                return;
+
             if (bAdd)
             {
                 this.label_caption.MouseUp += new MouseEventHandler(label_color_MouseUp);

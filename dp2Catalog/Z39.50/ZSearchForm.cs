@@ -894,7 +894,6 @@ this.splitContainer_queryAndResultInfo,
             connection.QueryString = strQueryString;
             connection.QueryXml = strQueryXml;
 
-
             if (strQueryString == "")
             {
                 strError = "尚未输入检索词";

@@ -33,7 +33,7 @@ using DigitalPlatform.dp2.Statis;
 
 namespace dp2Catalog
 {
-    public partial class dp2SearchForm : Form, ISearchForm
+    public partial class dp2SearchForm : MyForm, ISearchForm
     {
         public string ExportRecPathFilename = "";
         // 最近使用过的记录路径文件名
@@ -53,9 +53,9 @@ namespace dp2Catalog
 
         bool m_bInSearching = false;
 
-        public MainForm MainForm = null;
+        //public MainForm MainForm = null;
 
-        DigitalPlatform.Stop stop = null;
+        //DigitalPlatform.Stop stop = null;
 
         public LibraryChannelCollection Channels = null;
         internal LibraryChannel Channel = null;
@@ -227,8 +227,10 @@ namespace dp2Catalog
             this.Channels.BeforeLogin += new BeforeLoginEventHandle(Channels_BeforeLogin);
             this.Channels.AfterLogin += new AfterLoginEventHandle(Channels_AfterLogin);
 
+#if NO
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
+#endif
 
             //
             this.dp2ResTree1.TestMode = this.MainForm.TestMode;
@@ -760,15 +762,14 @@ namespace dp2Catalog
 
         private void dp2SearchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
+#if NO
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
                 {
                     MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
                     e.Cancel = true;
                     return;
                 }
-            }
+#endif
 
             if (this.m_nChangedCount > 0)
             {
@@ -797,6 +798,7 @@ namespace dp2Catalog
             if (this.dp2ResTree1 != null)
                 this.dp2ResTree1.Stop();
 
+#if NO
             if (stop != null) // 脱离关联
             {
                 stop.Style = StopStyle.None;    // 需要强制中断
@@ -805,6 +807,7 @@ namespace dp2Catalog
                 stop.Unregister();	// 和容器关联
                 stop = null;
             }
+#endif
 
             // 保存前恢复简单检索面板，便于保存分割条的位置
             this.tabControl_query.SelectedTab = this.tabPage_simple;
@@ -820,7 +823,6 @@ namespace dp2Catalog
     "matchstyle",
     this.comboBox_simple_matchStyle.Text);
 
-
                 this.MainForm.AppInfo.SetString(
                     "dp2_search_muline_query",
                     "content",
@@ -831,7 +833,6 @@ namespace dp2Catalog
     "dp2_search_muline_query",
     "matchstyle",
     this.comboBox_multiline_matchStyle.Text);
-
 
                 // 保存resdircontrol最后的选择
                 ResPath respath = new ResPath(this.dp2ResTree1.SelectedNode);
@@ -854,7 +855,6 @@ namespace dp2Catalog
        "enable_checkboxes",
        this.dp2ResTree1.CheckBoxes);
 
-
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
                 this.MainForm.AppInfo.SetString(
                     "dp2searchform",
@@ -866,12 +866,10 @@ namespace dp2Catalog
     "query_lines",
     this.dp2QueryControl1.GetSaveString());
 
-
                 SaveSize();
 
                 this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
                 this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
-
             }
 
             if (this.Channels != null)
@@ -1092,60 +1090,63 @@ namespace dp2Catalog
             string strError = "";
             int nRet = 0;
 
-            bool bOutputKeyID = false;
-            long lTotalCount = 0;	// 命中记录总数
-
-            string strMatchStyle = GetMatchStyle(this.comboBox_multiline_matchStyle.Text);
-            TargetItemCollection targets = null;
-
-            // 第一阶段
-            // return:
-            //      -1  出错
-            //      0   尚未选定检索目标
-            //      1   成功
-            nRet = this.dp2ResTree1.GetSearchTarget(out targets,
-                out strError);
-            if (nRet == -1 || nRet == 0)
-                goto ERROR1;
-
-            Debug.Assert(targets != null, "GetSearchTarget() 异常");
-            if (targets.Count == 0)
+            this._processing++;
+            try
             {
-                Debug.Assert(false, "");
-                strError = "尚未选定检索目标";
-                goto ERROR1;
-            }
+                bool bOutputKeyID = false;
+                long lTotalCount = 0;	// 命中记录总数
+
+                string strMatchStyle = GetMatchStyle(this.comboBox_multiline_matchStyle.Text);
+                TargetItemCollection targets = null;
+
+                // 第一阶段
+                // return:
+                //      -1  出错
+                //      0   尚未选定检索目标
+                //      1   成功
+                nRet = this.dp2ResTree1.GetSearchTarget(out targets,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                    goto ERROR1;
+
+                Debug.Assert(targets != null, "GetSearchTarget() 异常");
+                if (targets.Count == 0)
+                {
+                    Debug.Assert(false, "");
+                    strError = "尚未选定检索目标";
+                    goto ERROR1;
+                }
 
 
-            // 第二阶段
-            for (int i = 0; i < targets.Count; i++)
-            {
-                TargetItem item = (TargetItem)targets[i];
-                item.Words = this.textBox_simple_queryWord.Text;
-            }
-            targets.MakeWordPhrases(
-                strMatchStyle,
-                false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_split_words", 1)),
-                false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_range", 0)),
-                false    // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_relation", 0))
-                );
+                // 第二阶段
+                for (int i = 0; i < targets.Count; i++)
+                {
+                    TargetItem item = (TargetItem)targets[i];
+                    item.Words = this.textBox_simple_queryWord.Text;
+                }
+                targets.MakeWordPhrases(
+                    strMatchStyle,
+                    false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_split_words", 1)),
+                    false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_range", 0)),
+                    false    // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_relation", 0))
+                    );
 
 
-            // 参数
-            for (int i = 0; i < targets.Count; i++)
-            {
-                TargetItem item = (TargetItem)targets[i];
-                item.MaxCount = this.SearchMaxCount;
-            }
+                // 参数
+                for (int i = 0; i < targets.Count; i++)
+                {
+                    TargetItem item = (TargetItem)targets[i];
+                    item.MaxCount = this.SearchMaxCount;
+                }
 
-            // 第三阶段
-            targets.MakeXml();
+                // 第三阶段
+                targets.MakeXml();
 
-            // 正式检索
+                // 正式检索
 
-            // 修改窗口标题
-            this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
-            ClearListViewPropertyCache();
+                // 修改窗口标题
+                this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
+                ClearListViewPropertyCache();
 
 #if NO
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
@@ -1158,90 +1159,28 @@ namespace dp2Catalog
             }
 #endif
 
-            bool bFillBrowseLine = true;
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-            {
-                bFillBrowseLine = false;
-            }
-
-            this.textBox_resultInfo.Clear();
-
-            this.EnableControlsInSearching(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 ...");
-            stop.BeginLoop();
-
-            this.m_bInSearching = true;
-
-            long lFillCount = 0;    // 已经装入的部分
-
-            this.listView_browse.BeginUpdate();
-            try
-            {
-                for (int i = 0; i < targets.Count; i++)
+                bool bFillBrowseLine = true;
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    bFillBrowseLine = false;
+                }
 
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
+                this.textBox_resultInfo.Clear();
 
+                this.EnableControlsInSearching(false);
 
-                    TargetItem item = (TargetItem)targets[i];
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在检索 ...");
+                stop.BeginLoop();
 
-                    this.Channel = this.Channels.GetChannel(item.Url);
-                    Debug.Assert(this.Channel != null, "Channels.GetChannel 异常");
+                this.m_bInSearching = true;
 
-                    // textBox_simpleQuery_comment.Text += "检索式XML:\r\n" + item.Xml + "\r\n";
+                long lFillCount = 0;    // 已经装入的部分
 
-                    // 2010/5/18
-                    string strBrowseStyle = "id,cols";
-                    string strOutputStyle = "";
-                    if (bOutputKeyID == true)
-                    {
-                        strOutputStyle = "keyid";
-                        strBrowseStyle = "keyid,id,key,cols";
-                    }
-
-                    if (bFillBrowseLine == false)
-                        StringUtil.SetInList(ref strBrowseStyle, "cols", false);
-
-                    // MessageBox.Show(this, item.Xml);
-                    long lRet = this.Channel.Search(
-                        stop,
-                        item.Xml,
-                        "default",
-                        strOutputStyle,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        // textBox_simpleQuery_comment.Text += "出错: " + strError + "\r\n";
-                        MessageBox.Show(this, strError);
-                        continue;
-                    }
-                    long lHitCount = lRet;
-                    lTotalCount += lRet;
-
-                    stop.SetProgressRange(0, lTotalCount);
-
-                    // textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
-                    this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 命中 " + lTotalCount.ToString() + " 条记录\r\n";
-
-                    if (lHitCount == 0)
-                        continue;
-
-                    long lStart = 0;
-                    long lPerCount = Math.Min(50, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-
-                    // 装入浏览格式
-                    for (; ; )
+                this.listView_browse.BeginUpdate();
+                try
+                {
+                    for (int i = 0; i < targets.Count; i++)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
@@ -1254,76 +1193,142 @@ namespace dp2Catalog
                             }
                         }
 
-                        stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                        lRet = Channel.GetSearchResult(
+                        TargetItem item = (TargetItem)targets[i];
+
+                        this.Channel = this.Channels.GetChannel(item.Url);
+                        Debug.Assert(this.Channel != null, "Channels.GetChannel 异常");
+
+                        // textBox_simpleQuery_comment.Text += "检索式XML:\r\n" + item.Xml + "\r\n";
+
+                        // 2010/5/18
+                        string strBrowseStyle = "id,cols";
+                        string strOutputStyle = "";
+                        if (bOutputKeyID == true)
+                        {
+                            strOutputStyle = "keyid";
+                            strBrowseStyle = "keyid,id,key,cols";
+                        }
+
+                        if (bFillBrowseLine == false)
+                            StringUtil.SetInList(ref strBrowseStyle, "cols", false);
+
+                        // MessageBox.Show(this, item.Xml);
+                        long lRet = this.Channel.Search(
                             stop,
-                            null,   // strResultSetName
-                            lStart,
-                            lPerCount,
-                            strBrowseStyle,
-                            this.Lang,
-                            out searchresults,
+                            item.Xml,
+                            "default",
+                            strOutputStyle,
                             out strError);
                         if (lRet == -1)
-                            goto ERROR1;
-
-                        if (lRet == 0)
                         {
-                            strError = "未命中";
-                            goto ERROR1;
+                            // textBox_simpleQuery_comment.Text += "出错: " + strError + "\r\n";
+                            MessageBox.Show(this, strError);
+                            continue;
                         }
+                        long lHitCount = lRet;
+                        lTotalCount += lRet;
 
-                        // 处理浏览结果
-                        for (int j = 0; j < searchresults.Length; j++)
+                        stop.SetProgressRange(0, lTotalCount);
+
+                        // textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                        this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 命中 " + lTotalCount.ToString() + " 条记录\r\n";
+
+                        if (lHitCount == 0)
+                            continue;
+
+                        long lStart = 0;
+                        long lPerCount = Math.Min(50, lHitCount);
+                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                        // 装入浏览格式
+                        for (; ; )
                         {
+                            Application.DoEvents();	// 出让界面控制权
 
-                            NewLine(
-                                this.listView_browse,
-                                searchresults[j].Path + "@" + item.ServerName,
-                                searchresults[j].Cols);
+                            if (stop != null)
+                            {
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断";
+                                    goto ERROR1;
+                                }
+                            }
+
+                            stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+
+                            lRet = Channel.GetSearchResult(
+                                stop,
+                                null,   // strResultSetName
+                                lStart,
+                                lPerCount,
+                                strBrowseStyle,
+                                this.Lang,
+                                out searchresults,
+                                out strError);
+                            if (lRet == -1)
+                                goto ERROR1;
+
+                            if (lRet == 0)
+                            {
+                                strError = "未命中";
+                                goto ERROR1;
+                            }
+
+                            // 处理浏览结果
+                            for (int j = 0; j < searchresults.Length; j++)
+                            {
+
+                                NewLine(
+                                    this.listView_browse,
+                                    searchresults[j].Path + "@" + item.ServerName,
+                                    searchresults[j].Cols);
+                            }
+
+                            lStart += searchresults.Length;
+                            lFillCount += searchresults.Length;
+                            // lCount -= searchresults.Length;
+                            if (lStart >= lHitCount || lPerCount <= 0)
+                                break;
+
+                            stop.SetProgressValue(lFillCount);
                         }
-
-                        lStart += searchresults.Length;
-                        lFillCount += searchresults.Length;
-                        // lCount -= searchresults.Length;
-                        if (lStart >= lHitCount || lPerCount <= 0)
-                            break;
-
-                        stop.SetProgressValue(lFillCount);
                     }
+
+                    /*
+                if (targets.Count > 1)
+                {
+                    textBox_simpleQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
+                }
+                     * */
+
+                }
+                finally
+                {
+                    this.listView_browse.EndUpdate();
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+
+
+                    this.EnableControlsInSearching(true);
+
+                    this.m_bInSearching = false;
                 }
 
-                /*
-            if (targets.Count > 1)
-            {
-                textBox_simpleQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
-            }
-                 * */
+                if (lTotalCount > 0)
+                    this.listView_browse.Focus();
+                else
+                    this.textBox_simple_queryWord.Focus();
 
+                return 0;
             }
             finally
             {
-                this.listView_browse.EndUpdate();
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-
-                this.EnableControlsInSearching(true);
-
-                this.m_bInSearching = false;
+                this._processing--;
             }
-
-            if (lTotalCount > 0)
-                this.listView_browse.Focus();
-            else
-                this.textBox_simple_queryWord.Focus();
-
-            return 0;
-
         ERROR1:
             MessageBox.Show(this, strError);
             this.textBox_simple_queryWord.Focus();
@@ -1337,22 +1342,25 @@ namespace dp2Catalog
             string strError = "";
             int nRet = 0;
 
-            long lHitCount = 0;
-            long lLoaded = 0;
+            this._processing++;
+            try
+            {
+                long lHitCount = 0;
+                long lLoaded = 0;
 
-            List<QueryItem> items = null;
+                List<QueryItem> items = null;
 
-            nRet = this.dp2QueryControl1.BuildQueryXml(
-            this.SearchMaxCount,
-            "zh",
-            out items,
-            out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                nRet = this.dp2QueryControl1.BuildQueryXml(
+                this.SearchMaxCount,
+                "zh",
+                out items,
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
 
-            // 修改窗口标题
-            this.Text = "dp2检索窗 逻辑检索";
+                // 修改窗口标题
+                this.Text = "dp2检索窗 逻辑检索";
 
 #if NO
             ClearListViewPropertyCache();
@@ -1368,80 +1376,312 @@ namespace dp2Catalog
             }
 #endif
 
-            bool bFillBrowseLine = true;
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                bool bFillBrowseLine = true;
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                {
+                    bFillBrowseLine = false;
+                }
+
+                this.textBox_resultInfo.Clear();
+
+                this.EnableControlsInSearching(false);
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在检索 ...");
+                stop.BeginLoop();
+
+                this.m_bInSearching = true;
+
+                long lTotalHitCount = 0;
+                int nErrorCount = 0;
+
+                this.listView_browse.BeginUpdate();
+                try
+                {
+                    for (int j = 0; j < items.Count; j++)
+                    {
+                        if (stop != null)
+                        {
+                            if (stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                goto ERROR1;
+                            }
+                        }
+                        QueryItem item = items[j];
+
+                        string strServerName = item.ServerName;
+
+                        dp2Server server = this.dp2ResTree1.Servers.GetServerByName(strServerName);
+                        if (server == null)
+                        {
+                            strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
+                            goto ERROR1;
+                        }
+
+                        string strServerUrl = server.Url;
+                        this.Channel = this.Channels.GetChannel(strServerUrl);
+
+                        string strOutputStyle = "id";
+
+                        long lRet = Channel.Search(stop,
+                            item.QueryXml,
+                            "default",
+                            strOutputStyle,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            this.textBox_resultInfo.Text += "检索式 '" + item.QueryXml + "' 检索时发生错误：" + strError + "\r\n";
+                            nErrorCount++;
+                            continue;
+                        }
+
+                        lHitCount = lRet;
+
+                        lTotalHitCount += lHitCount;
+
+                        stop.SetProgressRange(0, lTotalHitCount);
+
+                        this.textBox_resultInfo.Text += "已命中 " + lTotalHitCount.ToString() + " 条，检索尚未结束...\r\n";
+
+                        if (lHitCount == 0)
+                            continue;
+
+                        long lStart = 0;
+                        long lPerCount = Math.Min(50, lHitCount);
+                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                        // 装入浏览格式
+                        for (; ; )
+                        {
+                            Application.DoEvents();	// 出让界面控制权
+
+                            if (stop != null)
+                            {
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断";
+                                    goto ERROR1;
+                                }
+                            }
+
+                            stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+
+                            lRet = Channel.GetSearchResult(
+                                stop,
+                                null,   // strResultSetName
+                                lStart,
+                                lPerCount,
+                                bFillBrowseLine == true ? "id,cols" : "id",
+                                this.Lang,
+                                out searchresults,
+                                out strError);
+                            if (lRet == -1)
+                                goto ERROR1;
+
+                            if (lRet == 0)
+                            {
+                                strError = "未命中";
+                                goto ERROR1;
+                            }
+
+                            // 处理浏览结果
+                            for (int i = 0; i < searchresults.Length; i++)
+                            {
+                                NewLine(
+                                    this.listView_browse,
+                                    searchresults[i].Path + "@" + strServerName,
+                                    searchresults[i].Cols);
+
+                                lLoaded++;
+                                stop.SetProgressValue(lLoaded);
+                            }
+
+                            lStart += searchresults.Length;
+                            // lCount -= searchresults.Length;
+                            if (lStart >= lHitCount || lPerCount <= 0)
+                                break;
+
+                        }
+                    } // end of items
+
+                    if (nErrorCount == 0)
+                        this.textBox_resultInfo.Text = "共命中 " + lTotalHitCount.ToString() + " 条";
+                    else
+                        this.textBox_resultInfo.Text += "检索完成。共命中 " + lTotalHitCount.ToString() + " 条";
+                }
+                finally
+                {
+                    this.listView_browse.EndUpdate();
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+
+                    this.EnableControlsInSearching(true);
+
+                    this.m_bInSearching = false;
+                }
+
+                if (lTotalHitCount > 0)
+                    this.listView_browse.Focus();
+                else
+                    this.dp2QueryControl1.Focus();
+
+                return 0;
+            }
+            finally
             {
-                bFillBrowseLine = false;
+                this._processing--;
             }
 
-            this.textBox_resultInfo.Clear();
+        ERROR1:
+            this.textBox_resultInfo.Text += strError;
+            MessageBox.Show(this, strError);
+            this.dp2QueryControl1.Focus();
+            return -1;
+        }
 
-            this.EnableControlsInSearching(false);
+        // 单行检索。树为非CheckBox状态
+        // 本函数不负责清除浏览列表中的已有内容
+        int DoSimpleSearch()
+        {
+            string strError = "";
+            int nRet = 0;
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 ...");
-            stop.BeginLoop();
-
-            this.m_bInSearching = true;
-
-            long lTotalHitCount = 0;
-            int nErrorCount = 0;
-
-            this.listView_browse.BeginUpdate();
+            this._processing++;
             try
             {
-                for (int j = 0; j < items.Count; j++)
+                long lHitCount = 0;
+
+                string strServerName = "";
+                string strServerUrl = "";
+                string strDbName = "";
+                string strFrom = "";
+                string strFromStyle = "";
+
+                nRet = dp2ResTree.GetNodeInfo(this.dp2ResTree1.SelectedNode,
+                    out strServerName,
+                    out strServerUrl,
+                    out strDbName,
+                    out strFrom,
+                    out strFromStyle,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                strFromStyle = dp2ResTree.GetDisplayFromStyle(strFromStyle, true, false);   // 注意，去掉 __ 开头的那些，应该还剩下至少一个 style。_ 开头的不要滤出
+
+                this.Channel = this.Channels.GetChannel(strServerUrl);
+
+                // 修改窗口标题
+                this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
+
+
+#if NO
+            ClearListViewPropertyCache();
+
+            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                // 按住Ctrl键的时候，不清除listview中的原有内容
+            }
+            else
+            {
+                // this.listView_browse.Items.Clear();
+                ClearListViewItems();
+            }
+#endif
+
+                bool bFillBrowseLine = true;
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
-                    if (stop != null)
+                    bFillBrowseLine = false;
+                }
+
+                this.textBox_resultInfo.Clear();
+
+                this.EnableControlsInSearching(false);
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在检索 ...");
+                stop.BeginLoop();
+
+                this.m_bInSearching = true;
+
+                this.listView_browse.BeginUpdate();
+                try
+                {
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                        strDbName = "<all>";
+
+                    if (String.IsNullOrEmpty(strFrom) == true)
                     {
-                        if (stop.State != 0)
+                        strFrom = "<all>";
+                    }
+
+                    if (String.IsNullOrEmpty(strFromStyle) == true)
+                    {
+                        strFromStyle = "<all>";
+                    }
+
+                    // 注："null"只能在前端短暂存在，而内核是不认这个所谓的matchstyle的
+                    string strMatchStyle = GetMatchStyle(this.comboBox_simple_matchStyle.Text);
+
+                    if (this.textBox_simple_queryWord.Text == "")
+                    {
+                        if (strMatchStyle == "null")
                         {
-                            strError = "用户中断";
+                            this.textBox_simple_queryWord.Text = "";
+
+                            // 专门检索空值
+                            strMatchStyle = "exact";
+                        }
+                        else
+                        {
+                            // 为了在检索词为空的时候，检索出全部的记录
+                            strMatchStyle = "left";
+                        }
+                    }
+                    else
+                    {
+                        if (strMatchStyle == "null")
+                        {
+                            strError = "检索空值的时候，请保持检索词为空";
                             goto ERROR1;
                         }
                     }
-                    QueryItem item = items[j];
 
-                    string strServerName = item.ServerName;
-
-                    dp2Server server = this.dp2ResTree1.Servers.GetServerByName(strServerName);
-                    if (server == null)
-                    {
-                        strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
-                        goto ERROR1;
-                    }
-
-                    string strServerUrl = server.Url;
-                    this.Channel = this.Channels.GetChannel(strServerUrl);
-
-                    string strOutputStyle = "id";
-
-                    long lRet = Channel.Search(stop,
-                        item.QueryXml,
-                        "default",
-                        strOutputStyle,
+                    string strQueryXml = "";
+                    long lRet = Channel.SearchBiblio(stop,
+                        strDbName,
+                        this.textBox_simple_queryWord.Text,
+                        this.SearchMaxCount,    // 1000,
+                        strFromStyle,
+                        strMatchStyle,
+                        this.Lang,
+                        null,   // strResultSetName
+                        "", // strSearchStyle
+                        "", // strOutputStyle
+                        out strQueryXml,
                         out strError);
                     if (lRet == -1)
                     {
-                        this.textBox_resultInfo.Text += "检索式 '" + item.QueryXml + "' 检索时发生错误：" + strError + "\r\n";
-                        nErrorCount++;
-                        continue;
+                        this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 检索时发生错误：" + strError + "\r\n";
+                        goto ERROR1;
                     }
 
                     lHitCount = lRet;
 
-                    lTotalHitCount += lHitCount;
+                    this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 命中 " + lHitCount.ToString() + " 条记录\r\n";
 
-                    stop.SetProgressRange(0, lTotalHitCount);
-
-                    this.textBox_resultInfo.Text += "已命中 " + lTotalHitCount.ToString() + " 条，检索尚未结束...\r\n";
-
-                    if (lHitCount == 0)
-                        continue;
+                    stop.SetProgressRange(0, lHitCount);
 
                     long lStart = 0;
                     long lPerCount = Math.Min(50, lHitCount);
                     DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                    this.listView_browse.Focus();
 
                     // 装入浏览格式
                     for (; ; )
@@ -1484,9 +1724,6 @@ namespace dp2Catalog
                                 this.listView_browse,
                                 searchresults[i].Path + "@" + strServerName,
                                 searchresults[i].Cols);
-
-                            lLoaded++;
-                            stop.SetProgressValue(lLoaded);
                         }
 
                         lStart += searchresults.Length;
@@ -1494,254 +1731,36 @@ namespace dp2Catalog
                         if (lStart >= lHitCount || lPerCount <= 0)
                             break;
 
+                        stop.SetProgressValue(lStart);
                     }
-                } // end of items
 
-                if (nErrorCount == 0)
-                    this.textBox_resultInfo.Text = "共命中 " + lTotalHitCount.ToString() + " 条";
+                    // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
+                }
+                finally
+                {
+                    this.listView_browse.EndUpdate();
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+
+                    this.EnableControlsInSearching(true);
+
+                    this.m_bInSearching = false;
+                }
+
+                if (lHitCount > 0)
+                    this.listView_browse.Focus();
                 else
-                    this.textBox_resultInfo.Text += "检索完成。共命中 " + lTotalHitCount.ToString() + " 条";
+                    this.textBox_simple_queryWord.Focus();
+
+                return 0;
             }
             finally
             {
-                this.listView_browse.EndUpdate();
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-                this.EnableControlsInSearching(true);
-
-                this.m_bInSearching = false;
+                this._processing--;
             }
-
-            if (lTotalHitCount > 0)
-                this.listView_browse.Focus();
-            else
-                this.dp2QueryControl1.Focus();
-
-            return 0;
-
-        ERROR1:
-            this.textBox_resultInfo.Text += strError;
-            MessageBox.Show(this, strError);
-            this.dp2QueryControl1.Focus();
-            return -1;
-        }
-
-        // 单行检索。树为非CheckBox状态
-        // 本函数不负责清除浏览列表中的已有内容
-        int DoSimpleSearch()
-        {
-            string strError = "";
-            int nRet = 0;
-
-            long lHitCount = 0;
-
-            string strServerName = "";
-            string strServerUrl = "";
-            string strDbName = "";
-            string strFrom = "";
-            string strFromStyle = "";
-
-            nRet = dp2ResTree.GetNodeInfo(this.dp2ResTree1.SelectedNode,
-                out strServerName,
-                out strServerUrl,
-                out strDbName,
-                out strFrom,
-                out strFromStyle,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            strFromStyle = dp2ResTree.GetDisplayFromStyle(strFromStyle, true, false);   // 注意，去掉 __ 开头的那些，应该还剩下至少一个 style。_ 开头的不要滤出
-
-            this.Channel = this.Channels.GetChannel(strServerUrl);
-
-            // 修改窗口标题
-            this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
-
-
-#if NO
-            ClearListViewPropertyCache();
-
-            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
-            {
-                // 按住Ctrl键的时候，不清除listview中的原有内容
-            }
-            else
-            {
-                // this.listView_browse.Items.Clear();
-                ClearListViewItems();
-            }
-#endif
-
-            bool bFillBrowseLine = true;
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-            {
-                bFillBrowseLine = false;
-            }
-
-            this.textBox_resultInfo.Clear();
-
-            this.EnableControlsInSearching(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 ...");
-            stop.BeginLoop();
-
-            this.m_bInSearching = true;
-
-            this.listView_browse.BeginUpdate();
-            try
-            {
-                if (String.IsNullOrEmpty(strDbName) == true)
-                    strDbName = "<all>";
-
-                if (String.IsNullOrEmpty(strFrom) == true)
-                {
-                    strFrom = "<all>";
-                }
-
-                if (String.IsNullOrEmpty(strFromStyle) == true)
-                {
-                    strFromStyle = "<all>";
-                }
-
-                // 注："null"只能在前端短暂存在，而内核是不认这个所谓的matchstyle的
-                string strMatchStyle = GetMatchStyle(this.comboBox_simple_matchStyle.Text);
-
-                if (this.textBox_simple_queryWord.Text == "")
-                {
-                    if (strMatchStyle == "null")
-                    {
-                        this.textBox_simple_queryWord.Text = "";
-
-                        // 专门检索空值
-                        strMatchStyle = "exact";
-                    }
-                    else
-                    {
-                        // 为了在检索词为空的时候，检索出全部的记录
-                        strMatchStyle = "left";
-                    }
-                }
-                else
-                {
-                    if (strMatchStyle == "null")
-                    {
-                        strError = "检索空值的时候，请保持检索词为空";
-                        goto ERROR1;
-                    }
-                }
-
-                string strQueryXml = "";
-                long lRet = Channel.SearchBiblio(stop,
-                    strDbName,
-                    this.textBox_simple_queryWord.Text,
-                    this.SearchMaxCount,    // 1000,
-                    strFromStyle,
-                    strMatchStyle,
-                    this.Lang,
-                    null,   // strResultSetName
-                    "", // strSearchStyle
-                    "", // strOutputStyle
-                    out strQueryXml,
-                    out strError);
-                if (lRet == -1)
-                {
-                    this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 检索时发生错误：" + strError + "\r\n";
-                    goto ERROR1;
-                }
-
-                lHitCount = lRet;
-
-                this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 命中 " + lHitCount.ToString() + " 条记录\r\n";
-
-                stop.SetProgressRange(0, lHitCount);
-
-                long lStart = 0;
-                long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-
-                this.listView_browse.Focus();
-
-                // 装入浏览格式
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
-
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
-
-                    lRet = Channel.GetSearchResult(
-                        stop,
-                        null,   // strResultSetName
-                        lStart,
-                        lPerCount,
-                        bFillBrowseLine == true ? "id,cols" : "id",
-                        this.Lang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (lRet == 0)
-                    {
-                        strError = "未命中";
-                        goto ERROR1;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-
-                        NewLine(
-                            this.listView_browse,
-                            searchresults[i].Path + "@" + strServerName,
-                            searchresults[i].Cols);
-                    }
-
-                    lStart += searchresults.Length;
-                    // lCount -= searchresults.Length;
-                    if (lStart >= lHitCount || lPerCount <= 0)
-                        break;
-
-                    stop.SetProgressValue(lStart);
-
-                }
-
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-            }
-            finally
-            {
-                this.listView_browse.EndUpdate();
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-                this.EnableControlsInSearching(true);
-
-                this.m_bInSearching = false;
-            }
-
-            if (lHitCount > 0)
-                this.listView_browse.Focus();
-            else
-                this.textBox_simple_queryWord.Focus();
-
-            return 0;
 
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1756,84 +1775,88 @@ namespace dp2Catalog
             string strError = "";
             int nRet = 0;
 
-            long lTotalCount = 0;	// 命中记录总数
-            long lFillCount = 0;
-            long lHitCount = 0;
-            int nLineCount = 0;
-
-            List<string> hited_lines = new List<string>(4096);
-            List<string> nothited_lines = new List<string>(4096);
-
-            string strMatchStyle = GetMatchStyle(this.comboBox_multiline_matchStyle.Text);
-
-            TargetItemCollection targets = null;
-
-            // 第一阶段
-            // return:
-            //      -1  出错
-            //      0   尚未选定检索目标
-            //      1   成功
-            nRet = this.dp2ResTree1.GetSearchTarget(out targets,
-                out strError);
-            if (nRet == -1 || nRet == 0)
-                goto ERROR1;
-
-            Debug.Assert(targets != null, "GetSearchTarget() 异常");
-            if (targets.Count == 0)
+            this._processing ++;
+            try
             {
-                Debug.Assert(false, "");
-                strError = "尚未选定检索目标";
-                goto ERROR1;
-            }
 
-            bool bDontAsk = this.MainForm.AppInfo.GetBoolean(
-                "dp2_search_muline_query",
-                "matchstyle_middle_dontask",
-                false);
-            if (strMatchStyle == "middle" && bDontAsk == false)
-            {
-                MessageDialog.Show(this,
-                    "您选择了 中间一致 匹配方式进行检索，这种匹配方式检索速度稍慢。如果可能，最好采用其他匹配方式，以便提高检索速度。",
-                    "下次不再出现此对话框",
-                    ref bDontAsk);
-                if (bDontAsk == true)
+                long lTotalCount = 0;	// 命中记录总数
+                long lFillCount = 0;
+                long lHitCount = 0;
+                int nLineCount = 0;
+
+                List<string> hited_lines = new List<string>(4096);
+                List<string> nothited_lines = new List<string>(4096);
+
+                string strMatchStyle = GetMatchStyle(this.comboBox_multiline_matchStyle.Text);
+
+                TargetItemCollection targets = null;
+
+                // 第一阶段
+                // return:
+                //      -1  出错
+                //      0   尚未选定检索目标
+                //      1   成功
+                nRet = this.dp2ResTree1.GetSearchTarget(out targets,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                    goto ERROR1;
+
+                Debug.Assert(targets != null, "GetSearchTarget() 异常");
+                if (targets.Count == 0)
                 {
-                    this.MainForm.AppInfo.SetBoolean(
-                        "dp2_search_muline_query",
-                        "matchstyle_middle_dontask",
-                        bDontAsk);
+                    Debug.Assert(false, "");
+                    strError = "尚未选定检索目标";
+                    goto ERROR1;
                 }
-            }
 
-            List<string> dbnames = new List<string>();
-            nRet = targets.GetDbNameList(out dbnames, out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                bool bDontAsk = this.MainForm.AppInfo.GetBoolean(
+                    "dp2_search_muline_query",
+                    "matchstyle_middle_dontask",
+                    false);
+                if (strMatchStyle == "middle" && bDontAsk == false)
+                {
+                    MessageDialog.Show(this,
+                        "您选择了 中间一致 匹配方式进行检索，这种匹配方式检索速度稍慢。如果可能，最好采用其他匹配方式，以便提高检索速度。",
+                        "下次不再出现此对话框",
+                        ref bDontAsk);
+                    if (bDontAsk == true)
+                    {
+                        this.MainForm.AppInfo.SetBoolean(
+                            "dp2_search_muline_query",
+                            "matchstyle_middle_dontask",
+                            bDontAsk);
+                    }
+                }
 
-            if (dbnames.Count > 1)
-            {
-                DbSelectListDialog select_dlg = new DbSelectListDialog();
-                GuiUtil.SetControlFont(select_dlg, this.Font);
-                select_dlg.DbNames = dbnames;
-                select_dlg.SelectAllDb = this.SelectAllDb;
-                this.MainForm.AppInfo.LinkFormState(select_dlg, "dp2searchform_DbSelectListDialog_state");
-                select_dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(select_dlg);
-                if (select_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                    return 0;
+                List<string> dbnames = new List<string>();
+                nRet = targets.GetDbNameList(out dbnames, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-                this.SelectAllDb = select_dlg.SelectAllDb;
+                if (dbnames.Count > 1)
+                {
+                    DbSelectListDialog select_dlg = new DbSelectListDialog();
+                    GuiUtil.SetControlFont(select_dlg, this.Font);
+                    select_dlg.DbNames = dbnames;
+                    select_dlg.SelectAllDb = this.SelectAllDb;
+                    this.MainForm.AppInfo.LinkFormState(select_dlg, "dp2searchform_DbSelectListDialog_state");
+                    select_dlg.ShowDialog(this);
+                    this.MainForm.AppInfo.UnlinkFormState(select_dlg);
+                    if (select_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        return 0;
 
-                if (select_dlg.SelectAllDb == true)
-                    dbnames = null; // 全部命中都要
+                    this.SelectAllDb = select_dlg.SelectAllDb;
+
+                    if (select_dlg.SelectAllDb == true)
+                        dbnames = null; // 全部命中都要
+                    else
+                        dbnames = select_dlg.DbNames;   // 顺序选择
+                }
                 else
-                    dbnames = select_dlg.DbNames;   // 顺序选择
-            }
-            else
-                dbnames = null;
+                    dbnames = null;
 
-            // 修改窗口标题
-            this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
+                // 修改窗口标题
+                this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
 
 #if NO
             ClearListViewPropertyCache();
@@ -1849,81 +1872,32 @@ namespace dp2Catalog
             }
 #endif
 
-            bool bFillBrowseLine = true;
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-            {
-                bFillBrowseLine = false;
-            }
-
-            this.textBox_resultInfo.Clear();
-
-            this.EnableControlsInSearching(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 ...");
-            stop.BeginLoop();
-
-            this.m_bInSearching = true;
-
-            // long lTotalHitCount = 0;
-
-            this.listView_browse.BeginUpdate();
-            try
-            {
-                DateTime start_time = DateTime.Now;
-                stop.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
-
-                for (int j = 0; j < this.textBox_mutiline_queryContent.Lines.Length; j++)
+                bool bFillBrowseLine = true;
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
-                    if (stop != null)
+                    bFillBrowseLine = false;
+                }
+
+                this.textBox_resultInfo.Clear();
+
+                this.EnableControlsInSearching(false);
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在检索 ...");
+                stop.BeginLoop();
+
+                this.m_bInSearching = true;
+
+                // long lTotalHitCount = 0;
+
+                this.listView_browse.BeginUpdate();
+                try
+                {
+                    DateTime start_time = DateTime.Now;
+                    stop.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
+
+                    for (int j = 0; j < this.textBox_mutiline_queryContent.Lines.Length; j++)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
-
-                    string strLine = this.textBox_mutiline_queryContent.Lines[j].Trim();
-
-                    stop.SetProgressValue(j);
-
-                    if (String.IsNullOrEmpty(strLine) == true)
-                        continue;
-
-                    nLineCount++;
-
-                    // 第二阶段
-                    for (int i = 0; i < targets.Count; i++)
-                    {
-                        TargetItem item = (TargetItem)targets[i];
-                        item.Words = strLine;
-                    }
-                    targets.MakeWordPhrases(
-                        strMatchStyle,
-                        false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_split_words", 1)),
-                        false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_range", 0)),
-                        false    // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_relation", 0))
-                        );
-
-                    // 参数
-                    for (int i = 0; i < targets.Count; i++)
-                    {
-                        TargetItem item = (TargetItem)targets[i];
-                        item.MaxCount = this.SearchMaxCount;
-                    }
-
-                    // 第三阶段
-                    targets.MakeXml();
-
-                    long lPerLineHitCount = 0;
-
-                    List<ListViewItem> new_items = new List<ListViewItem>();
-
-                    for (int i = 0; i < targets.Count; i++)
-                    {
-                        Application.DoEvents();	// 出让界面控制权
-
                         if (stop != null)
                         {
                             if (stop.State != 0)
@@ -1933,41 +1907,43 @@ namespace dp2Catalog
                             }
                         }
 
+                        string strLine = this.textBox_mutiline_queryContent.Lines[j].Trim();
 
-                        TargetItem item = (TargetItem)targets[i];
+                        stop.SetProgressValue(j);
 
-                        this.Channel = this.Channels.GetChannel(item.Url);
-                        Debug.Assert(this.Channel != null, "Channels.GetChannel 异常");
-
-                        long lRet = this.Channel.Search(
-            stop,
-            item.Xml,
-            "default",
-            "", // strOutputStyle,
-            out strError);
-                        if (lRet == -1)
-                        {
-                            this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 检索时发生错误：" + strError + "\r\n";
+                        if (String.IsNullOrEmpty(strLine) == true)
                             continue;
+
+                        nLineCount++;
+
+                        // 第二阶段
+                        for (int i = 0; i < targets.Count; i++)
+                        {
+                            TargetItem item = (TargetItem)targets[i];
+                            item.Words = strLine;
+                        }
+                        targets.MakeWordPhrases(
+                            strMatchStyle,
+                            false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_split_words", 1)),
+                            false,   // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_range", 0)),
+                            false    // Convert.ToBoolean(MainForm.applicationInfo.GetInt("simple_query_property", "auto_detect_relation", 0))
+                            );
+
+                        // 参数
+                        for (int i = 0; i < targets.Count; i++)
+                        {
+                            TargetItem item = (TargetItem)targets[i];
+                            item.MaxCount = this.SearchMaxCount;
                         }
 
-                        lHitCount = lRet;
-                        lTotalCount += lHitCount;
-                        lPerLineHitCount += lHitCount;
+                        // 第三阶段
+                        targets.MakeXml();
 
-                        if (lHitCount == 0)
-                            continue;
+                        long lPerLineHitCount = 0;
 
-                        // stop.SetProgressRange(0, lTotalCount);
+                        List<ListViewItem> new_items = new List<ListViewItem>();
 
-                        long lStart = 0;
-                        long lPerCount = Math.Min(50, lHitCount);
-                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-
-                        // this.listView_browse.Focus();
-
-                        // 装入浏览格式
-                        for (; ; )
+                        for (int i = 0; i < targets.Count; i++)
                         {
                             Application.DoEvents();	// 出让界面控制权
 
@@ -1980,108 +1956,160 @@ namespace dp2Catalog
                                 }
                             }
 
-                            stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                            lRet = Channel.GetSearchResult(
-                                stop,
-                                "default",   // strResultSetName
-                                lStart,
-                                lPerCount,
-                                bFillBrowseLine == true ? "id,cols" : "id",
-                                this.Lang,
-                                out searchresults,
-                                out strError);
+                            TargetItem item = (TargetItem)targets[i];
+
+                            this.Channel = this.Channels.GetChannel(item.Url);
+                            Debug.Assert(this.Channel != null, "Channels.GetChannel 异常");
+
+                            long lRet = this.Channel.Search(
+                stop,
+                item.Xml,
+                "default",
+                "", // strOutputStyle,
+                out strError);
                             if (lRet == -1)
-                                goto ERROR1;
-
-                            if (lRet == 0)
                             {
-                                strError = "未命中";
-                                goto ERROR1;
+                                this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 检索时发生错误：" + strError + "\r\n";
+                                continue;
                             }
 
-                            // 处理浏览结果
-                            for (int k = 0; k < searchresults.Length; k++)
+                            lHitCount = lRet;
+                            lTotalCount += lHitCount;
+                            lPerLineHitCount += lHitCount;
+
+                            if (lHitCount == 0)
+                                continue;
+
+                            // stop.SetProgressRange(0, lTotalCount);
+
+                            long lStart = 0;
+                            long lPerCount = Math.Min(50, lHitCount);
+                            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                            // this.listView_browse.Focus();
+
+                            // 装入浏览格式
+                            for (; ; )
                             {
-                                ListViewItem new_item = NewLine(
-                                    this.listView_browse,
-                                    searchresults[k].Path + "@" + item.ServerName,
-                                    searchresults[k].Cols);
-                                new_items.Add(new_item);
+                                Application.DoEvents();	// 出让界面控制权
+
+                                if (stop != null)
+                                {
+                                    if (stop.State != 0)
+                                    {
+                                        strError = "用户中断";
+                                        goto ERROR1;
+                                    }
+                                }
+
+                                stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
+
+                                lRet = Channel.GetSearchResult(
+                                    stop,
+                                    "default",   // strResultSetName
+                                    lStart,
+                                    lPerCount,
+                                    bFillBrowseLine == true ? "id,cols" : "id",
+                                    this.Lang,
+                                    out searchresults,
+                                    out strError);
+                                if (lRet == -1)
+                                    goto ERROR1;
+
+                                if (lRet == 0)
+                                {
+                                    strError = "未命中";
+                                    goto ERROR1;
+                                }
+
+                                // 处理浏览结果
+                                for (int k = 0; k < searchresults.Length; k++)
+                                {
+                                    ListViewItem new_item = NewLine(
+                                        this.listView_browse,
+                                        searchresults[k].Path + "@" + item.ServerName,
+                                        searchresults[k].Cols);
+                                    new_items.Add(new_item);
+                                }
+
+                                lStart += searchresults.Length;
+                                lFillCount += searchresults.Length;
+                                // stop.SetProgressValue(lFillCount);
+                                // lCount -= searchresults.Length;
+                                if (lStart >= lHitCount || lPerCount <= 0)
+                                    break;
+
                             }
+                        }
 
-                            lStart += searchresults.Length;
-                            lFillCount += searchresults.Length;
-                            // stop.SetProgressValue(lFillCount);
-                            // lCount -= searchresults.Length;
-                            if (lStart >= lHitCount || lPerCount <= 0)
-                                break;
+                        int nEndLine = this.listView_browse.Items.Count;
 
+                        // 需要筛选
+                        if (dbnames != null && new_items.Count > 1)
+                        {
+                            int nRemoved = RemoveMultipleItems(dbnames, new_items);
+                            lPerLineHitCount -= nRemoved;
+                            lTotalCount -= nRemoved;
+                        }
+
+
+                        // this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 命中 " + lPerLineHitCount.ToString() + " 条记录\r\n";
+                        if (lPerLineHitCount == 0)
+                            nothited_lines.Add(strLine);
+                        else
+                            hited_lines.Add(strLine + "\t" + lPerLineHitCount.ToString());
+
+                    } // end of lines
+
+                    TimeSpan delta = DateTime.Now - start_time;
+
+                    // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
+                    // 最后显示整理过的注释
+                    string strComment = "检索 " + nLineCount.ToString() + " 行用时 " + delta.ToString() + "\r\n";
+                    if (hited_lines.Count > 0)
+                    {
+                        strComment += "*** 以下检索词共命中 " + lTotalCount.ToString() + " 条:\r\n";
+                        foreach (string strLine in hited_lines)
+                        {
+                            strComment += strLine + "\r\n";
                         }
                     }
-
-                    int nEndLine = this.listView_browse.Items.Count;
-
-                    // 需要筛选
-                    if (dbnames != null && new_items.Count > 1)
+                    if (nothited_lines.Count > 0)
                     {
-                        int nRemoved = RemoveMultipleItems(dbnames, new_items);
-                        lPerLineHitCount -= nRemoved;
-                        lTotalCount -= nRemoved;
+                        strComment += "*** 以下检索词没有命中:\r\n";
+                        foreach (string strLine in nothited_lines)
+                        {
+                            strComment += strLine + "\r\n";
+                        }
                     }
-
-
-                    // this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 命中 " + lPerLineHitCount.ToString() + " 条记录\r\n";
-                    if (lPerLineHitCount == 0)
-                        nothited_lines.Add(strLine);
-                    else
-                        hited_lines.Add(strLine + "\t" + lPerLineHitCount.ToString());
-
-                } // end of lines
-
-                TimeSpan delta = DateTime.Now - start_time;
-
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                // 最后显示整理过的注释
-                string strComment = "检索 " + nLineCount.ToString() + " 行用时 " + delta.ToString() + "\r\n";
-                if (hited_lines.Count > 0)
-                {
-                    strComment += "*** 以下检索词共命中 " + lTotalCount.ToString() + " 条:\r\n";
-                    foreach (string strLine in hited_lines)
-                    {
-                        strComment += strLine + "\r\n";
-                    }
+                    this.textBox_resultInfo.Text = strComment;
                 }
-                if (nothited_lines.Count > 0)
+                finally
                 {
-                    strComment += "*** 以下检索词没有命中:\r\n";
-                    foreach (string strLine in nothited_lines)
-                    {
-                        strComment += strLine + "\r\n";
-                    }
+                    this.listView_browse.EndUpdate();
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+
+                    this.EnableControlsInSearching(true);
+
+                    this.m_bInSearching = false;
                 }
-                this.textBox_resultInfo.Text = strComment;
+
+                if (lTotalCount > 0)
+                    this.listView_browse.Focus();
+                else
+                    this.textBox_mutiline_queryContent.Focus();
+
+                return 0;
             }
             finally
             {
-                this.listView_browse.EndUpdate();
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-                this.EnableControlsInSearching(true);
-
-                this.m_bInSearching = false;
+                this._processing--;
             }
-
-            if (lTotalCount > 0)
-                this.listView_browse.Focus();
-            else
-                this.textBox_mutiline_queryContent.Focus();
-
-            return 0;
 
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2154,31 +2182,34 @@ namespace dp2Catalog
             string strError = "";
             int nRet = 0;
 
-            long lHitCount = 0;
+            this._processing++;
+            try
+            {
+                long lHitCount = 0;
 
-            List<string> hited_lines = new List<string>(4096);
-            List<string> nothited_lines = new List<string>(4096);
+                List<string> hited_lines = new List<string>(4096);
+                List<string> nothited_lines = new List<string>(4096);
 
-            string strServerName = "";
-            string strServerUrl = "";
-            string strDbName = "";
-            string strFrom = "";
-            string strFromStyle = "";
+                string strServerName = "";
+                string strServerUrl = "";
+                string strDbName = "";
+                string strFrom = "";
+                string strFromStyle = "";
 
-            nRet = dp2ResTree.GetNodeInfo(this.dp2ResTree1.SelectedNode,
-                out strServerName,
-                out strServerUrl,
-                out strDbName,
-                out strFrom,
-                out strFromStyle,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                nRet = dp2ResTree.GetNodeInfo(this.dp2ResTree1.SelectedNode,
+                    out strServerName,
+                    out strServerUrl,
+                    out strDbName,
+                    out strFrom,
+                    out strFromStyle,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-            this.Channel = this.Channels.GetChannel(strServerUrl);
+                this.Channel = this.Channels.GetChannel(strServerUrl);
 
-            // 修改窗口标题
-            this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
+                // 修改窗口标题
+                this.Text = "dp2检索窗 " + this.textBox_simple_queryWord.Text;
 
 #if NO
             ClearListViewPropertyCache();
@@ -2194,126 +2225,68 @@ namespace dp2Catalog
             }
 #endif
 
-            bool bFillBrowseLine = true;
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-            {
-                bFillBrowseLine = false;
-            }
-            
-            this.textBox_resultInfo.Clear();
-
-            this.EnableControlsInSearching(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 ...");
-            stop.BeginLoop();
-
-            this.m_bInSearching = true;
-
-            long lTotalHitCount = 0;
-            int nLineCount = 0;
-
-            this.listView_browse.BeginUpdate();
-            try
-            {
-                if (String.IsNullOrEmpty(strDbName) == true)
-                    strDbName = "<all>";
-
-                if (String.IsNullOrEmpty(strFrom) == true)
+                bool bFillBrowseLine = true;
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
-                    strFrom = "<all>";
+                    bFillBrowseLine = false;
                 }
 
-                if (String.IsNullOrEmpty(strFromStyle) == true)
-                {
-                    strFromStyle = "<all>";
-                }
+                this.textBox_resultInfo.Clear();
 
-                string strMatchStyle = GetMatchStyle(this.comboBox_multiline_matchStyle.Text);
+                this.EnableControlsInSearching(false);
 
-                bool bDontAsk = this.MainForm.AppInfo.GetBoolean(
-"dp2_search_muline_query",
-"matchstyle_middle_dontask",
-false);
-                if (strMatchStyle == "middle" && bDontAsk == false)
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在检索 ...");
+                stop.BeginLoop();
+
+                this.m_bInSearching = true;
+
+                long lTotalHitCount = 0;
+                int nLineCount = 0;
+
+                this.listView_browse.BeginUpdate();
+                try
                 {
-                    MessageDialog.Show(this,
-                        "您选择了 中间一致 匹配方式进行检索，这种匹配方式检索速度稍慢。如果可能，最好采用其他匹配方式，以便提高检索速度。",
-                        "下次不再出现此对话框",
-                        ref bDontAsk);
-                    if (bDontAsk == true)
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                        strDbName = "<all>";
+
+                    if (String.IsNullOrEmpty(strFrom) == true)
                     {
-                        this.MainForm.AppInfo.SetBoolean(
-                            "dp2_search_muline_query",
-                            "matchstyle_middle_dontask",
-                            bDontAsk);
+                        strFrom = "<all>";
                     }
-                }
 
-                DateTime start_time = DateTime.Now;
-
-                stop.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
-
-                for (int j = 0; j < this.textBox_mutiline_queryContent.Lines.Length; j++)
-                {
-                    if (stop != null)
+                    if (String.IsNullOrEmpty(strFromStyle) == true)
                     {
-                        if (stop.State != 0)
+                        strFromStyle = "<all>";
+                    }
+
+                    string strMatchStyle = GetMatchStyle(this.comboBox_multiline_matchStyle.Text);
+
+                    bool bDontAsk = this.MainForm.AppInfo.GetBoolean(
+    "dp2_search_muline_query",
+    "matchstyle_middle_dontask",
+    false);
+                    if (strMatchStyle == "middle" && bDontAsk == false)
+                    {
+                        MessageDialog.Show(this,
+                            "您选择了 中间一致 匹配方式进行检索，这种匹配方式检索速度稍慢。如果可能，最好采用其他匹配方式，以便提高检索速度。",
+                            "下次不再出现此对话框",
+                            ref bDontAsk);
+                        if (bDontAsk == true)
                         {
-                            strError = "用户中断";
-                            goto ERROR1;
+                            this.MainForm.AppInfo.SetBoolean(
+                                "dp2_search_muline_query",
+                                "matchstyle_middle_dontask",
+                                bDontAsk);
                         }
                     }
 
-                    string strLine = this.textBox_mutiline_queryContent.Lines[j].Trim();
+                    DateTime start_time = DateTime.Now;
 
-                    stop.SetProgressValue(j);
+                    stop.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
 
-                    if (String.IsNullOrEmpty(strLine) == true)
-                        continue;
-
-                    string strQueryXml = "";
-                    long lRet = Channel.SearchBiblio(stop,
-                        strDbName,
-                        strLine,
-                        this.SearchMaxCount,    // 1000,
-                        strFromStyle,
-                        strMatchStyle,
-                        this.Lang,
-                        null,   // strResultSetName
-                        "",    // strSearchStyle
-                        "", // strOutputStyle
-                        out strQueryXml,
-                        out strError);
-                    if (lRet == -1)
+                    for (int j = 0; j < this.textBox_mutiline_queryContent.Lines.Length; j++)
                     {
-                        this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 检索时发生错误：" + strError + "\r\n";
-                        continue;
-                    }
-
-                    lHitCount = lRet;
-
-                    nLineCount++;
-
-                    lTotalHitCount += lHitCount;
-                    // this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录\r\n";
-                    if (lHitCount == 0)
-                        nothited_lines.Add(strLine);
-                    else
-                        hited_lines.Add(strLine + "\t" + lHitCount.ToString());
-
-                    if (lHitCount == 0)
-                        continue;
-
-                    long lStart = 0;
-                    long lPerCount = Math.Min(50, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-
-                    // 装入浏览格式
-                    for (; ; )
-                    {
-                        Application.DoEvents();	// 出让界面控制权
-
                         if (stop != null)
                         {
                             if (stop.State != 0)
@@ -2323,87 +2296,150 @@ false);
                             }
                         }
 
-                        stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
+                        string strLine = this.textBox_mutiline_queryContent.Lines[j].Trim();
 
-                        lRet = Channel.GetSearchResult(
-                            stop,
-                            null,   // strResultSetName
-                            lStart,
-                            lPerCount,
-                            bFillBrowseLine == true ? "id,cols" : "id",
+                        stop.SetProgressValue(j);
+
+                        if (String.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        string strQueryXml = "";
+                        long lRet = Channel.SearchBiblio(stop,
+                            strDbName,
+                            strLine,
+                            this.SearchMaxCount,    // 1000,
+                            strFromStyle,
+                            strMatchStyle,
                             this.Lang,
-                            out searchresults,
+                            null,   // strResultSetName
+                            "",    // strSearchStyle
+                            "", // strOutputStyle
+                            out strQueryXml,
                             out strError);
                         if (lRet == -1)
-                            goto ERROR1;
-
-                        if (lRet == 0)
                         {
-                            strError = "未命中";
-                            goto ERROR1;
+                            this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 检索时发生错误：" + strError + "\r\n";
+                            continue;
                         }
 
-                        // 处理浏览结果
-                        for (int i = 0; i < searchresults.Length; i++)
+                        lHitCount = lRet;
+
+                        nLineCount++;
+
+                        lTotalHitCount += lHitCount;
+                        // this.textBox_resultInfo.Text += "检索词 '" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录\r\n";
+                        if (lHitCount == 0)
+                            nothited_lines.Add(strLine);
+                        else
+                            hited_lines.Add(strLine + "\t" + lHitCount.ToString());
+
+                        if (lHitCount == 0)
+                            continue;
+
+                        long lStart = 0;
+                        long lPerCount = Math.Min(50, lHitCount);
+                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                        // 装入浏览格式
+                        for (; ; )
                         {
-                            NewLine(
-                                this.listView_browse,
-                                searchresults[i].Path + "@" + strServerName,
-                                searchresults[i].Cols);
+                            Application.DoEvents();	// 出让界面控制权
+
+                            if (stop != null)
+                            {
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断";
+                                    goto ERROR1;
+                                }
+                            }
+
+                            stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
+
+                            lRet = Channel.GetSearchResult(
+                                stop,
+                                null,   // strResultSetName
+                                lStart,
+                                lPerCount,
+                                bFillBrowseLine == true ? "id,cols" : "id",
+                                this.Lang,
+                                out searchresults,
+                                out strError);
+                            if (lRet == -1)
+                                goto ERROR1;
+
+                            if (lRet == 0)
+                            {
+                                strError = "未命中";
+                                goto ERROR1;
+                            }
+
+                            // 处理浏览结果
+                            for (int i = 0; i < searchresults.Length; i++)
+                            {
+                                NewLine(
+                                    this.listView_browse,
+                                    searchresults[i].Path + "@" + strServerName,
+                                    searchresults[i].Cols);
+                            }
+
+                            lStart += searchresults.Length;
+                            // lCount -= searchresults.Length;
+                            if (lStart >= lHitCount || lPerCount <= 0)
+                                break;
+
                         }
+                    } // end of lines
 
-                        lStart += searchresults.Length;
-                        // lCount -= searchresults.Length;
-                        if (lStart >= lHitCount || lPerCount <= 0)
-                            break;
+                    // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
 
-                    }
-                } // end of lines
+                    TimeSpan delta = DateTime.Now - start_time;
 
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-
-                TimeSpan delta = DateTime.Now - start_time;
-
-                // 最后显示整理过的注释
-                string strComment = "检索 "+nLineCount.ToString()+" 行用时 " + delta.ToString() + "\r\n";
-                if (hited_lines.Count > 0)
-                {
-                    strComment += "*** 以下检索词共命中 " + lTotalHitCount.ToString() + " 条:\r\n";
-                    foreach (string strLine in hited_lines)
+                    // 最后显示整理过的注释
+                    string strComment = "检索 " + nLineCount.ToString() + " 行用时 " + delta.ToString() + "\r\n";
+                    if (hited_lines.Count > 0)
                     {
-                        strComment += strLine + "\r\n";
+                        strComment += "*** 以下检索词共命中 " + lTotalHitCount.ToString() + " 条:\r\n";
+                        foreach (string strLine in hited_lines)
+                        {
+                            strComment += strLine + "\r\n";
+                        }
                     }
-                }
-                if (nothited_lines.Count > 0)
-                {
-                    strComment += "*** 以下检索词没有命中:\r\n";
-                    foreach (string strLine in nothited_lines)
+                    if (nothited_lines.Count > 0)
                     {
-                        strComment += strLine + "\r\n";
+                        strComment += "*** 以下检索词没有命中:\r\n";
+                        foreach (string strLine in nothited_lines)
+                        {
+                            strComment += strLine + "\r\n";
+                        }
                     }
+                    this.textBox_resultInfo.Text = strComment;
                 }
-                this.textBox_resultInfo.Text = strComment;
+                finally
+                {
+                    this.listView_browse.EndUpdate();
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+
+                    this.EnableControlsInSearching(true);
+
+                    this.m_bInSearching = false;
+                }
+
+                if (lTotalHitCount > 0)
+                    this.listView_browse.Focus();
+                else
+                    this.textBox_mutiline_queryContent.Focus();
+
+                return 0;
             }
             finally
             {
-                this.listView_browse.EndUpdate();
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-                this.EnableControlsInSearching(true);
-
-                this.m_bInSearching = false;
+                this._processing--;
             }
-
-            if (lTotalHitCount > 0)
-                this.listView_browse.Focus();
-            else
-                this.textBox_mutiline_queryContent.Focus();
-
-            return 0;
 
         ERROR1:
             MessageBox.Show(this, strError);
@@ -6741,8 +6777,6 @@ MessageBoxDefaultButton.Button2);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
-
 
             _linkMarcFile.Encoding = dlg.Encoding;
             _linkMarcFile.MarcSyntax = dlg.MarcSyntax;

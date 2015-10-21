@@ -420,9 +420,37 @@ namespace dp2Circulation
             this.BeginInvoke(new Action(FirstInitial));
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“Icon”。
+Stack:
+在 System.Drawing.Icon.get_Handle()
+在 System.Drawing.Icon.get_Size()
+在 System.Drawing.Icon.ToBitmap()
+在 System.Windows.Forms.MdiControlStrip.GetTargetWindowIcon()
+在 System.Windows.Forms.MdiControlStrip..ctor(IWin32Window target)
+在 System.Windows.Forms.Form.UpdateMdiControlStrip(Boolean maximized)
+在 System.Windows.Forms.Form.UpdateToolStrip()
+在 System.Windows.Forms.Form.OnMdiChildActivate(EventArgs e)
+在 System.Windows.Forms.Form.WmMdiActivate(Message& m)
+在 System.Windows.Forms.Form.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+         * */
+        protected override void OnMdiChildActivate(EventArgs e)
+        {
+            try
+            {
+                base.OnMdiChildActivate(e);
+            }
+            catch(System.ObjectDisposedException)
+            {
+
+            }
+        }
+
         string m_strPrevMessageText = "";
-
-
 
         void SetFirstDefaultFont()
         {
@@ -4946,7 +4974,6 @@ out strError);
                 this.m_lockChannel.AcquireWriterLock(m_nLockTimeout);
                 try
                 {
-
                     long lRet = Channel.GetBiblioSummary(
                         Stop,
                         strItemBarcode,

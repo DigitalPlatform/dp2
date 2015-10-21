@@ -34,7 +34,7 @@ using System.Threading;
 
 namespace dp2Catalog
 {
-    public partial class MarcDetailForm : Form
+    public partial class MarcDetailForm : MyForm
     {
         SelectedTemplateCollection selected_templates = new SelectedTemplateCollection();
 
@@ -53,9 +53,9 @@ namespace dp2Catalog
         const int WM_VERIFY_DATA = API.WM_USER + 204;
         const int WM_FILL_MARCEDITOR_SCRIPT_MENU = API.WM_USER + 205;
 
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
-        public DigitalPlatform.Stop stop = null;
+        // public DigitalPlatform.Stop stop = null;
 
         public ISearchForm LinkedSearchForm = null;
 
@@ -218,8 +218,10 @@ namespace dp2Catalog
 
         private void MarcDetailForm_Load(object sender, EventArgs e)
         {
+#if NO
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
+#endif
 
             Global.FillEncodingList(this.comboBox_originDataEncoding,
                 true);
@@ -251,10 +253,10 @@ namespace dp2Catalog
 #endif
         }
 
-        int _processing = 0;    // 长操作嵌套计数器。如果大于0，表示正在处理，不希望窗口关闭
 
         private void MarcDetailForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+#if NO
             if ((stop != null && stop.State == 0)    // 0 表示正在处理
                 || _processing > 0)
             {
@@ -262,6 +264,7 @@ namespace dp2Catalog
                 e.Cancel = true;
                 return;
             }
+#endif
 
             if (/*this.EntitiesChanged == true
                 || this.IssuesChanged == true
@@ -375,11 +378,13 @@ namespace dp2Catalog
 
         private void MarcDetailForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if NO
             if (stop != null) // 脱离关联
             {
                 stop.Unregister();	// 和容器关联
                 stop = null;
             }
+#endif
 
             SaveSize();
 

@@ -841,6 +841,7 @@ MessageBoxDefaultButton.Button1);
                 this.MenuItem_messageForm.Visible = false;
                 this.MenuItem_openReservationListForm.Visible = false;
                 // this.MenuItem_inventory.Visible = false;
+                this.MenuItem_openMarc856SearchForm.Visible = false;
             }
 
 #if NO
@@ -1624,6 +1625,7 @@ MessageBoxDefaultButton.Button1);
             filenames.Add("objectrights.xml");
             filenames.Add("inventory_item_browse.xml");
             filenames.Add("inventory.css");
+            filenames.Add("nonephoto.png");
 
             FileInfo[] fis = di.GetFiles("*.*");
             foreach(FileInfo fi in fis)

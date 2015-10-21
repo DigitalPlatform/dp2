@@ -711,28 +711,31 @@ bool bChanged)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            // -----
-            menuItem = new MenuItem("-");
-            contextMenu.MenuItems.Add(menuItem);
+            // TODO: 这两个菜单项其实可以由 EntityForm 负责追加，处理函数也写在 EntityForm 中
+            if (this.GenerateData != null)
+            {
+                // -----
+                menuItem = new MenuItem("-");
+                contextMenu.MenuItems.Add(menuItem);
 
-            // 创建数据
-            menuItem = new MenuItem("创建数据[Ctrl+A](&G)");
-            menuItem.Click += new System.EventHandler(this.menu_generateData_Click);
-            /*
-            if (this.ListView.SelectedItems.Count == 0)
-                menuItem.Enabled = false;
-             * */
-            contextMenu.MenuItems.Add(menuItem);
+                // 创建数据
+                menuItem = new MenuItem("创建数据[Ctrl+A](&G)");
+                menuItem.Click += new System.EventHandler(this.menu_generateData_Click);
+                /*
+                if (this.ListView.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                 * */
+                contextMenu.MenuItems.Add(menuItem);
 
-            // 创建维护856字段
-            menuItem = new MenuItem("创建维护856字段(&C)");
-            menuItem.Click += new System.EventHandler(this.menu_manage856_Click);
-            /*
-            if (this.ListView.SelectedItems.Count == 0)
-                menuItem.Enabled = false;
-             * */
-            contextMenu.MenuItems.Add(menuItem);
-
+                // 创建维护856字段
+                menuItem = new MenuItem("创建维护856字段(&C)");
+                menuItem.Click += new System.EventHandler(this.menu_manage856_Click);
+                /*
+                if (this.ListView.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                 * */
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
             contextMenu.Show(this.ListView, new Point(e.X, e.Y));	
         }

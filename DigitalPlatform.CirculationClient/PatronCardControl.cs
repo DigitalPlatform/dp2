@@ -103,10 +103,13 @@ namespace DigitalPlatform.CirculationClient
 
         public void Relayout()
         {
-            this._info.Layout(Graphics.FromHwnd(this.Handle),
-    this.PatronCardStyle,
-    this.Size.Width,
-    this.Size.Height);
+            using (Graphics g = Graphics.FromHwnd(this.Handle))
+            {
+                this._info.Layout(g,
+        this.PatronCardStyle,
+        this.Size.Width,
+        this.Size.Height);
+            }
             this.Invalidate();
         }
     }
@@ -188,21 +191,24 @@ namespace DigitalPlatform.CirculationClient
             int nWidth,
             int nHeight)
         {
+#if NO
             // 如果宽度大于高度，则照片在最左边
             _nPhotoWidth = (int)((float)nHeight * style.PhotoRatio);
             if (_nPhotoWidth >= 100)
                 _nPhotoWidth = 100;
             if (_nPhotoWidth > style.PhtoMaxWidth)
                 _nPhotoWidth = style.PhtoMaxWidth;
+#endif
+            _nPhotoWidth = 0;   // 暂时不显示照片
 
             _nTextWidth = nWidth - _nPhotoWidth;
 
             // 证号
-            _nBarcodeHeight = Math.Min(50, nHeight / 4);
+            _nBarcodeHeight = Math.Min(50, nHeight / 5);    // 4
             // 姓名
             _nNameHeight = Math.Min(100, nHeight / 2);
             // 单位
-            _nDepartmentHeight = Math.Min(50, nHeight / 4);
+            _nDepartmentHeight = Math.Min(50, nHeight / 5); // 4
 
             // TODO: 单位可以最多是两行
 
@@ -227,14 +233,16 @@ namespace DigitalPlatform.CirculationClient
     _nTextWidth,
     _nBarcodeHeight);
 
-                Font font = new Font("微软雅黑", GetHeight(_nBarcodeHeight), FontStyle.Regular, GraphicsUnit.Pixel);
-
-                g.DrawString(
-                    this.Barcode,
-                    font,
-                    new SolidBrush(style.BarcodeTextColor),
-                    textRect,
-                    format);
+                using (Brush brush = new SolidBrush(style.BarcodeTextColor))
+                using (Font font = new Font("微软雅黑", GetHeight(_nBarcodeHeight), FontStyle.Regular, GraphicsUnit.Pixel))
+                {
+                    g.DrawString(
+                        this.Barcode,
+                        font,
+                        brush,
+                        textRect,
+                        format);
+                }
             }
 
             // 姓名
@@ -244,16 +252,18 @@ namespace DigitalPlatform.CirculationClient
     _nTextWidth,
     _nNameHeight);
 
-                Font font = new Font("微软雅黑", 
-                    GetHeight(_nNameHeight), 
-                    style.NameFontStyle, GraphicsUnit.Pixel);
-
-                g.DrawString(
-                    this.Name,
-                    font,
-                    new SolidBrush(style.NameTextColor),
-                    textRect,
-                    format);
+                using (Brush brush = new SolidBrush(style.NameTextColor))
+                using (Font font = new Font("微软雅黑",
+                    GetHeight(_nNameHeight),
+                    style.NameFontStyle, GraphicsUnit.Pixel))
+                {
+                    g.DrawString(
+                        this.Name,
+                        font,
+                        brush,
+                        textRect,
+                        format);
+                }
             }
 
             // 单位
@@ -263,14 +273,16 @@ namespace DigitalPlatform.CirculationClient
     _nTextWidth,
     _nDepartmentHeight);
 
-                Font font = new Font("微软雅黑", GetHeight(_nDepartmentHeight), FontStyle.Regular, GraphicsUnit.Pixel);
-
-                g.DrawString(
-                    this.Department,
-                    font,
-                    new SolidBrush(style.DepartmentTextColor),
-                    textRect,
-                    format);
+                using(Brush brush = new SolidBrush(style.DepartmentTextColor))
+                using (Font font = new Font("微软雅黑", GetHeight(_nDepartmentHeight), FontStyle.Regular, GraphicsUnit.Pixel))
+                {
+                    g.DrawString(
+                        this.Department,
+                        font,
+                        brush,
+                        textRect,
+                        format);
+                }
             }
         }
 
@@ -377,6 +389,8 @@ namespace DigitalPlatform.CirculationClient
                     // 更新高度参数
                     Graphics g = this.GetGraphics();
                     this.Relayout(g);
+                    if (g!=null)
+                        g.Dispose();
 
                     // 导致父对象重新布局
 

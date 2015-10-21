@@ -419,22 +419,24 @@ namespace DigitalPlatform.CommonControl
             this.m_nLineHeight = (int)(font.SizeInPoints + (font.SizeInPoints / 2));   // 额外加上字体高度一半的行间距
 
             // 两个字符一个单元的宽度
-            Graphics graphicsTemp = Graphics.FromHwnd(this.Handle);
+            using (Graphics graphicsTemp = Graphics.FromHwnd(this.Handle))
+            {
 
-            string strTextTemp = "MM";
-            SizeF size = graphicsTemp.MeasureString(
-                strTextTemp,
-                font);
+                string strTextTemp = "MM";
+                SizeF size = graphicsTemp.MeasureString(
+                    strTextTemp,
+                    font);
 
-            this.m_nCellWidth = (int)(size.Width + (size.Width / 2));
+                this.m_nCellWidth = (int)(size.Width + (size.Width / 2));
 
-            strTextTemp = "MMMMMMMM";   // 8
-            size = graphicsTemp.MeasureString(
-                strTextTemp,
-                font);
-            this.m_nLineTitleWidth = (int)(size.Width + (size.Width / 8));
+                strTextTemp = "MMMMMMMM";   // 8
+                size = graphicsTemp.MeasureString(
+                    strTextTemp,
+                    font);
+                this.m_nLineTitleWidth = (int)(size.Width + (size.Width / 8));
 
-            this.m_nCommentWidth = (int)(size.Width*2 + (size.Width / 8));
+                this.m_nCommentWidth = (int)(size.Width * 2 + (size.Width / 8));
+            }
         }
 
         // 设置数据

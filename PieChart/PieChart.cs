@@ -482,23 +482,22 @@ namespace System.Drawing.PieChart {
             drawFormat.Alignment = StringAlignment.Center;
             drawFormat.LineAlignment = StringAlignment.Center;
             using (Pen pen = new Pen(Reverse(this.m_foreColor), 4.0F))
+            using (Brush fontBrush = new SolidBrush(m_foreColor))
             {
-                using (Brush fontBrush = new SolidBrush(m_foreColor))
+                foreach (PieSlice slice in m_pieSlices)
                 {
-                    foreach (PieSlice slice in m_pieSlices)
+                    if (slice.Text != null && slice.Text.Length > 0)
                     {
-                        if (slice.Text != null && slice.Text.Length > 0)
+                        PointF point = slice.GetTextPosition();
+                        // graphics.DrawString(slice.Text, m_font, fontBrush, point, drawFormat);
+                        using (GraphicsPath path = new GraphicsPath())
                         {
-                            PointF point = slice.GetTextPosition();
-                            // graphics.DrawString(slice.Text, m_font, fontBrush, point, drawFormat);
-                            GraphicsPath path = new GraphicsPath();
                             path.AddString(slice.Text, m_font.FontFamily, (int)m_font.Style,
                                 graphics.DpiY * m_font.SizeInPoints / 72,
                                 point, drawFormat);
                             // graphics.FillPath(fontBrush, path);
                             graphics.DrawPath(pen, path);
                             graphics.FillPath(fontBrush, path);
-
                         }
                     }
                 }

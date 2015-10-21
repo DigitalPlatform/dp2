@@ -165,7 +165,7 @@ namespace dp2Circulation
 
         //      strStyle    left right 向哪边弯曲
         static void PaintCurve(Graphics g,
-            int x1, int y1, 
+            int x1, int y1,
             int x2, int y2,
             string strStyle)
         {
@@ -180,14 +180,13 @@ namespace dp2Circulation
 
             points[2] = new Point(x2, y2);
 
+            using (Pen pen = new Pen(lineColor, 2.0F))
             {
-                Pen pen = new Pen(lineColor, 2.0F);
-
                 g.DrawCurve(pen, points);
             }
 
+            using (Pen pen = new Pen(lineColor, 2.0F))
             {
-                Pen pen = new Pen(lineColor, 2.0F);
                 Rectangle rect = new Rectangle(points[0], new Size(6, 6));
                 rect.Offset(-3, -3);
                 g.DrawArc(pen, rect, 0, 360);
@@ -232,33 +231,38 @@ namespace dp2Circulation
                 ;
 
             // 画线条
-            Pen pen = new Pen(lineColor, 1.0F);
+            using (Pen pen = new Pen(lineColor, 1.0F))
             {
-                Point pt1 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT);
-                Point pt2 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * nSubRecordCount + SEP * nSubRecordCount - SUBREC_HEIGHT / 2);
-                g.DrawLine(pen, pt1, pt2);
-            }
+                {
+                    Point pt1 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT);
+                    Point pt2 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * nSubRecordCount + SEP * nSubRecordCount - SUBREC_HEIGHT / 2);
+                    g.DrawLine(pen, pt1, pt2);
+                }
 
-            for (int i = 0; i < nSubRecordCount; i++)
-            {
-                Point pt1 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP * i + SEP + SUBREC_HEIGHT / 2);
-                Point pt2 = new Point(x0 + SEP + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP * i + SEP + SUBREC_HEIGHT / 2);
-                g.DrawLine(pen, pt1, pt2);
+                for (int i = 0; i < nSubRecordCount; i++)
+                {
+                    Point pt1 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP * i + SEP + SUBREC_HEIGHT / 2);
+                    Point pt2 = new Point(x0 + SEP + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP * i + SEP + SUBREC_HEIGHT / 2);
+                    g.DrawLine(pen, pt1, pt2);
+                }
             }
-
             return size;
         }
 
         // 绘制一个子记录的图像
         static void PaintSubRecord(Graphics g, int x, int y, Color body_color)
         {
-            Pen pen = new Pen(lineColor, 2.0F);
             Point location = new Point(x, y);
             Size size = new Size(SUBREC_WIDTH, SUBREC_HEIGHT);
             Rectangle rect = new Rectangle(location, size);
-            g.FillRectangle(new SolidBrush(body_color), rect);
-            g.DrawRectangle(pen, rect);
-
+            using (Brush brush = new SolidBrush(body_color))
+            {
+                g.FillRectangle(brush, rect);
+            }
+            using (Pen pen = new Pen(lineColor, 2.0F))
+            {
+                g.DrawRectangle(pen, rect);
+            }
         }
 
         // 绘制一个书目记录的图像
@@ -268,17 +272,23 @@ namespace dp2Circulation
             string strTitle,
             Color body_color)
         {
-            Pen pen = new Pen(lineColor, 2.0F);
+            using (Pen pen = new Pen(lineColor, 2.0F))
+            {
+                // 顶部文字
+                using (Brush brush = new SolidBrush(lineColor))
+                {
+                    g.DrawString(strTitle, font, brush, new Point(x, y));
+                }
 
-            // 顶部文字
-            g.DrawString(strTitle, font, new SolidBrush(lineColor), new Point(x, y));
-
-            Point location = new Point(x, y+ font.Height);
-            Size size = new Size(BIBLIO_WIDTH, BIBLIO_HEIGHT - font.Height);
-            Rectangle rect = new Rectangle(location, size);
-            g.FillRectangle(new SolidBrush(body_color), rect);
-            g.DrawRectangle(pen, rect);
-
+                Point location = new Point(x, y + font.Height);
+                Size size = new Size(BIBLIO_WIDTH, BIBLIO_HEIGHT - font.Height);
+                Rectangle rect = new Rectangle(location, size);
+                using (Brush brush = new SolidBrush(body_color))
+                {
+                    g.FillRectangle(brush, rect);
+                }
+                g.DrawRectangle(pen, rect);
+            }
         }
 
     }

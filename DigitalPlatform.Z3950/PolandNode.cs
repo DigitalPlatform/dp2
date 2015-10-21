@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Z3950
 {
@@ -847,7 +848,6 @@ int DivideToken(LPSTR &pszQuery,
             strAttrType = "";
             strAttrValue = "";
 
-
             bool bInQuote;
             int nLen;
             //LPTSTR pszQuery;
@@ -855,7 +855,6 @@ int DivideToken(LPSTR &pszQuery,
             int nRet;
 
             int nOffs = 0;
-
 
             // ²éÕÒtermÄ©Î²
             bInQuote = false;
@@ -882,6 +881,7 @@ int DivideToken(LPSTR &pszQuery,
             nLen = nOffs;
             strTerm = strToken.Substring(0, nLen);
             UnQuoteString(ref strTerm);
+            strTerm = StringUtil.UnescapeString(strTerm);   // 2015/10/21
 
             if (nLen >= strToken.Length)
                 return 0;   // 2006/11/2 add
@@ -892,7 +892,6 @@ int DivideToken(LPSTR &pszQuery,
 
             strAttrType = strToken.Substring(nLen + 1, nRet - (nLen + 1));
             strAttrValue = strToken.Substring(nRet + 1);
-
             return 0;
         }
 

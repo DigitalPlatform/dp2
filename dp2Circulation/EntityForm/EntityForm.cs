@@ -30,6 +30,7 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -2618,8 +2619,23 @@ true);
 
             this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
-        }
 
+            if (this.easyMarcControl1 != null)
+            {
+#if NO
+                // 放在一起 Dispose 速度就快了！
+                List<Control> controls = this.easyMarcControl1.Clear(false);
+                foreach (Control control in controls)
+                {
+                    if (control != null)
+                        control.Dispose();
+                }
+#endif
+                //this.easyMarcControl1.Clear(true);
+                //GC.Collect();
+                //GC.WaitForPendingFinalizers();
+            }
+        }
 
         void __Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
@@ -3068,6 +3084,7 @@ true);
             string strError = "";
             strTotalError = "";
 
+            this.ShowMessage("正在装载书目记录 " + strBiblioRecPath + " " + strPrevNextStyle + " ...");
             this.m_nChannelInUse++;
             try
             {
@@ -3501,6 +3518,7 @@ true);
             finally
             {
                 this.m_nChannelInUse--;
+                this.ClearMessage();
             }
         }
 
