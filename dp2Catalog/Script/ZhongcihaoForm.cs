@@ -19,7 +19,7 @@ using DigitalPlatform.CirculationClient.localhost;
 
 namespace dp2Catalog
 {
-    public partial class ZhongcihaoForm : Form
+    public partial class ZhongcihaoForm : MyForm
     {
         // string EncryptKey = "dp2catalog_client_password_key";
 
@@ -33,8 +33,8 @@ namespace dp2Catalog
 
         public string Lang = "zh";
 
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
+        //public MainForm MainForm = null;
+        //DigitalPlatform.Stop stop = null;
 
         /// <summary>
         /// 检索结束信号
@@ -163,16 +163,10 @@ namespace dp2Catalog
             this.Channels = new LibraryChannelCollection();
             this.Channels.BeforeLogin += new BeforeLoginEventHandle(Channels_BeforeLogin);
 
-
-            /*
-            // this.Channel.Url = this.MainForm.LibraryServerUrl;
-            this.Channel.Url = this.LibraryServerUrl;
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-             * */
-
+#if NO
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
+#endif
 
             // 服务器名
             if (string.IsNullOrEmpty(this.textBox_serverName.Text) == true)
@@ -206,7 +200,6 @@ namespace dp2Catalog
                     "zhongcihao_form",
                     "return_browse_cols",
                     true);
-
 
             string strWidths = this.MainForm.AppInfo.GetString(
 "zhongcihao_form",
@@ -275,7 +268,6 @@ namespace dp2Catalog
                 return;
             }
 
-
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
             e.SavePasswordShort = false;
@@ -310,7 +302,6 @@ namespace dp2Catalog
 
             if (owner == null)
                 owner = this;
-
 
             if (String.IsNullOrEmpty(strTitle) == false)
                 dlg.Text = strTitle;
@@ -576,17 +567,17 @@ namespace dp2Catalog
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
         "mdi_form_state");
             }
-
         }
 
         private void ZhongcihaoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if NO
             if (stop != null) // 脱离关联
             {
                 stop.Unregister();	// 和容器关联
                 stop = null;
             }
-
+#endif
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
                 // 服务器名
@@ -669,7 +660,6 @@ namespace dp2Catalog
             }
         }
 
-
         /// <summary>
         /// 最大号
         /// </summary>
@@ -697,7 +687,6 @@ namespace dp2Catalog
                 m_strMaxNumber = value;
             }
         }
-
  
         /// <summary>
         /// 尾号
@@ -738,7 +727,6 @@ namespace dp2Catalog
                     m_strTailNumber = strOutputNumber;	// 刷新记忆
             }
         }
- 
 
         // 检索
         private void button_search_Click(object sender, EventArgs e)
@@ -1120,52 +1108,66 @@ namespace dp2Catalog
         {
             strOutputNumber = "";
 
-            // 获得server url
-            if (String.IsNullOrEmpty(this.LibraryServerName) == true)
-            {
-                strError = "尚未指定服务器名";
-                goto ERROR1;
-            }
-            dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
-            if (server == null)
-            {
-                strError = "服务器名为 '" + this.LibraryServerName + "' 的服务器不存在...";
-                goto ERROR1;
-            }
-
-            string strServerUrl = server.Url;
-            this.Channel = this.Channels.GetChannel(strServerUrl);
-
-
-            EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在推动尾号 ...");
-            stop.BeginLoop();
-
+            this._processing++;
             try
             {
-                long lRet = Channel.SetZhongcihaoTailNumber(
-                    stop,
-                    "conditionalpush",
-                    GetZhongcihaoDbGroupName(this.BiblioDbName),
-                    // "!" + this.BiblioDbName,
-                    this.ClassNumber,
-                    strTestNumber,
-                    out strOutputNumber,
-                    out strError);
-                if (lRet == -1)
+                // 获得server url
+                if (String.IsNullOrEmpty(this.LibraryServerName) == true)
+                {
+                    strError = "尚未指定服务器名";
                     goto ERROR1;
+                }
+                if (this.MainForm == null
+                    || this.MainForm.Servers == null)
+                {
+                    strError = "this.MainForm == null || this.MainForm.Servers == null";
+                    goto ERROR1;
+                }
 
-                return (int)lRet;
+                dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
+                if (server == null)
+                {
+                    strError = "服务器名为 '" + this.LibraryServerName + "' 的服务器不存在...";
+                    goto ERROR1;
+                }
+
+                string strServerUrl = server.Url;
+                this.Channel = this.Channels.GetChannel(strServerUrl);
+
+                EnableControls(false);
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在推动尾号 ...");
+                stop.BeginLoop();
+
+                try
+                {
+                    long lRet = Channel.SetZhongcihaoTailNumber(
+                        stop,
+                        "conditionalpush",
+                        GetZhongcihaoDbGroupName(this.BiblioDbName),
+                        // "!" + this.BiblioDbName,
+                        this.ClassNumber,
+                        strTestNumber,
+                        out strOutputNumber,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    return (int)lRet;
+                }
+                finally
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+
+                    EnableControls(true);
+                }
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-
-                EnableControls(true);
+                this._processing--;
             }
 
             // return 0;

@@ -3349,18 +3349,26 @@ namespace dp2Catalog
 
         private void listView_browse_DoubleClick(object sender, EventArgs e)
         {
-            int nIndex = -1;
-            if (this.listView_browse.SelectedIndices.Count > 0)
-                nIndex = this.listView_browse.SelectedIndices[0];
-            else
+            this._processing ++;
+            try
             {
-                if (this.listView_browse.FocusedItem == null)
-                    return;
-                nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
-            }
+                int nIndex = -1;
+                if (this.listView_browse.SelectedIndices.Count > 0)
+                    nIndex = this.listView_browse.SelectedIndices[0];
+                else
+                {
+                    if (this.listView_browse.FocusedItem == null)
+                        return;
+                    nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
+                }
 
-            LoadDetail(nIndex,
-                LoadToExistDetailWindow == true? false : true);
+                LoadDetail(nIndex,
+                    LoadToExistDetailWindow == true ? false : true);
+            }
+            finally
+            {
+                this._processing--;
+            }
         }
 
         // return:

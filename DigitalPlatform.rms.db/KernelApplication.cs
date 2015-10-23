@@ -425,7 +425,7 @@ namespace DigitalPlatform.rms
 
         void CleanResultSetDir(string strResultSetDir)
         {
-            if (PathUtil.ClearDir(strResultSetDir) == false)
+            if (PathUtil.TryClearDir(strResultSetDir) == false)
                 this.WriteErrorLog("清除 结果集目录 "+strResultSetDir+" 时出错");
         }
 

@@ -129,6 +129,10 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334e1b2b-5373-4c80-a971-bff213ff304b}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.CommonDialog\DigitalPlatform.CommonDialog.csproj">
       <Name>DigitalPlatform.CommonDialog</Name>
       <Project>{3DCFCA4D-0205-4684-A9A6-1DB8640CD579}</Project>
@@ -207,11 +211,17 @@
     <Compile Include="DbNameMap\OriginNotFoundDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ExportDataDialog.cs">
+    <Compile Include="ImportExport\ExportDataDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ExportDataDialog.Designer.cs">
+    <Compile Include="ImportExport\ExportDataDialog.Designer.cs">
       <DependentUpon>ExportDataDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImportExport\ImportDataDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImportExport\ImportDataDialog.Designer.cs">
+      <DependentUpon>ImportDataDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="ImportExport\ExportUtil.cs" />
     <Compile Include="ImportExport\ImportUtil.cs" />
@@ -319,12 +329,15 @@
     <EmbeddedResource Include="DbNameMap\OriginNotFoundDlg.resx">
       <DependentUpon>OriginNotFoundDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ExportDataDialog.resx">
+    <EmbeddedResource Include="ImportExport\ExportDataDialog.resx">
       <DependentUpon>ExportDataDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GetUserNameDlg.resx">
       <DependentUpon>GetUserNameDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImportExport\ImportDataDialog.resx">
+      <DependentUpon>ImportDataDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NewObjectDlg.resx">
       <DependentUpon>NewObjectDlg.cs</DependentUpon>

@@ -6848,7 +6848,7 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "6: " + ex.Message;
+                        strError = "6: " + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
                     finally // 连接
@@ -7685,6 +7685,8 @@ namespace DigitalPlatform.rms
                                     }
                                 }
 
+                                // 注意，row_info 有可能为空
+
                                 // 3.timestamp
                                 if (StringUtil.IsInList("timestamp", strStyle) == true)
                                 {
@@ -7745,7 +7747,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null 
+                            || string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -7762,7 +7765,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null
+                            || string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -9370,7 +9374,6 @@ namespace DigitalPlatform.rms
                             return -1;
                         info.record.Metadata = strResultMetadata;
 
-
                         // 创建 timestamp
                         string strOutputTimestamp = "";
                         if (bForceTimestamp == true)
@@ -9513,7 +9516,6 @@ SqlDbType.NVarChar);
                             }
 
                             // info.row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
-
 
                             SqlParameter metadataParam =
                                 command.Parameters.Add("@metadata" + i,
@@ -10853,6 +10855,8 @@ out strError);
         }
 
         // 写入一批 XML 记录；或者刷新一批记录的检索点
+        // parameters:
+        //      strStyle    rebuildkeys/deletekeys/fastmode/ifnotexist
         // return:
         //      -1  出错。注意，即便没有返回 -1，但 outputs 数组中也有可能有元素具有返回的错误信息
         //      >=0 如果是 rebuildkeys，则返回总共处理的 keys 行数
@@ -10955,7 +10959,6 @@ out strError);
                     continue;
                 }
 
-
                 bool bPushTailNo = false;
                 // 对 ？ 创建尾记录号
                 bPushTailNo = this.EnsureID(ref strRecordID);
@@ -11019,6 +11022,7 @@ out strError);
             }
 
             bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
+            bool bIfNotExist =  StringUtil.IsInList("ifnotexist", strStyle);
 
             //*********对数据库加读锁*************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
@@ -11035,7 +11039,6 @@ out strError);
 #endif
                 try // 记录锁
                 {
-
                     Connection connection = GetConnection(
         this.m_strConnString,
         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
@@ -11056,8 +11059,27 @@ out strError);
                         // 把 row_infos 中的值 匹配 id 放到 infos的属性row_info中
                         WriteInfo.set_rowinfos(ref records, row_infos);
 
+                        List<WriteInfo> passed = new List<WriteInfo>();
+                        // 只创建那些原先在数据库中不存在的记录
+                        if (bIfNotExist)
+                        {
+                            List<WriteInfo> temp = new List<WriteInfo>();
+                            // 把 row_info 不为 null 的清除。不过追加方式的写入动作依然保留
+                            foreach(WriteInfo info in records)
+                            {
+                                // TODO 也可以看 info.ID
+                                if (info.row_info == null
+                                    && info.record != null
+                                    && IsAppend(info.record.Path) == false)
+                                    temp.Add(info);
+                                else
+                                    passed.Add(info);
+                            }
+                            records = temp;
+                        }
+
                         // 仅重建检索点
-                        if (bRebuildKeys == true)
+                        if (bRebuildKeys == true && records.Count > 0)
                         {
                             if (bFastMode == false && bDeleteKeys == false)
                             {
@@ -11134,6 +11156,22 @@ out strError);
                             }
                         }
 
+                        // 把跳过的记录放入返回数组
+                        foreach (WriteInfo info in passed)
+                        {
+                            string strPath = info.record.Path;   // 包括数据库名的路径
+                            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+                            if (strDbName == ".")
+                                strDbName = this.GetCaption("zh-CN");
+                            string strRecordID = DbPath.GetCompressedID(info.ID);
+                            if (string.IsNullOrEmpty(info.XPath) == true)
+                                info.record.Path = strDbName + "/" + strRecordID;
+                            else
+                                info.record.Path = strDbName + "/" + strRecordID + "/xpath/" + info.XPath;
+                            info.record.Result = new Result("记录已经存在，忽略本次写入", ErrorCodeValue.Canceled, -1);
+                            outputs.Add(info.record);
+                        }
+
                         // records中(报错时)没有来得及被处理的部分就不进入了
                         outputs.AddRange(error_records);
                         if (nRet == -1)
@@ -11169,7 +11207,6 @@ out strError);
                     {
                         connection.Close();
                     }
-
                 }
                 finally  // 记录锁
                 {
@@ -11190,6 +11227,59 @@ out strError);
 #endif
             }
             return 0;
+        }
+
+        // 是否为追加方式的路径?
+        static bool IsAppend(string strPath)
+        {
+            bool bObject = false;
+            string strObjectID = "";
+            string strXPath = "";
+
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+            string strRecordID = strFirstPart;
+            // 只到记录号层的路径
+            if (strPath == "")
+            {
+                bObject = false;
+            }
+            else
+            {
+                strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+                //***********吃掉第2层*************
+                // 到此为止，strPath不含object或xpath层 strFirstPart可能是object 或 xpath
+
+                if (strFirstPart != "object"
+    && strFirstPart != "xpath")
+                {
+                    //record.Result.SetValue("资源路径 '" + record.Path + "' 不合法, 第3级必须是 'object' 或 'xpath' ",
+                    //    ErrorCodeValue.PathError); // -7;
+                    return false;
+                }
+                if (string.IsNullOrEmpty(strPath) == true)  //object或xpath下级必须有值
+                {
+                    //record.Result.SetValue("资源路径 '" + record.Path + "' 不合法,当第3级是 'object' 或 'xpath' 时，第4级必须有内容",
+                    //    ErrorCodeValue.PathError); // -7;
+                    return false;
+                }
+
+                if (strFirstPart == "object")
+                {
+                    strObjectID = strPath;
+                    bObject = true;
+                }
+                else
+                {
+                    strXPath = strPath;
+                    bObject = false;
+                }
+            }
+
+            if (string.IsNullOrEmpty(strRecordID) == true || strRecordID == "?" || strRecordID == "-1")
+                return true;
+            return false;
         }
 
         class WriteInfo
@@ -11249,8 +11339,6 @@ out strError);
                     info.row_info = (RecordRowInfo)id_table[info.ID];
                 }
             }
-
-
         }
 
         // 上次完整写入时的时间戳

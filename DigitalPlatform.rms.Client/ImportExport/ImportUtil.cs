@@ -14,6 +14,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -356,6 +357,7 @@ namespace DigitalPlatform.rms.Client
             Stop stop,
             RmsChannel channel,
             bool bQuickMode,
+            bool bIfNotExist,
             List<UploadRecord> records,
             // List<RecordBody> records,
             ref bool bDontPromptTimestampMismatchWhenOverwrite,
@@ -377,11 +379,18 @@ namespace DigitalPlatform.rms.Client
                 Debug.Assert(record.RecordBody != null, "");
             }
 
+            List<string> styles = new List<string>();
+            if (bQuickMode)
+                styles.Add("fastmode");
+            if (bIfNotExist)
+                styles.Add("ifnotexist");   // 记录不存在才决定写入
+            string strStyle = StringUtil.MakePathList(styles);
+
         REDO:
             RecordBody[] results = null;
             long lRet = channel.DoWriteRecords(stop,
                 inputs,
-                bQuickMode == true ? "fastmode" : "", // strStyle,
+                strStyle, // bQuickMode == true ? "fastmode" : "", // strStyle,
                 out results,
                 out strError);
             if (lRet == -1)
@@ -406,6 +415,12 @@ namespace DigitalPlatform.rms.Client
                 RecordBody result = results[i];
                 if (result.Result != null && result.Result.ErrorCode != ErrorCodeValue.NoError)
                 {
+                    if (bIfNotExist && result.Result.ErrorCode == ErrorCodeValue.Canceled)
+                    {
+                        // ifnotexist 情况下不要报错
+                        nProcessCount++;
+                        continue;
+                    }
                     if (result.Result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         strMessageTimestamp += "记录 " + result.Path + " 在覆盖保存过程中出错: " + result.Result.ErrorString + "\r\n";
@@ -551,8 +566,12 @@ namespace DigitalPlatform.rms.Client
                         "", //  strCount,
                         ref bDontPromptTimestampMismatchWhenOverwrite,
                         out strError);
-                    if (nRet == -1)
-                        return -1;
+                if (nRet == -1)
+                {
+                    // 如果 channel.ErrorCode == ChannelErrorCode.NotFound
+                    // 表示元数据记录不存在，或者其中对应 id 的 <dprms:file> 元素不存在
+                    return -1;
+                }
                     if (nRet == -2)
                     {
                         // TODO: 防止死循环

@@ -1390,30 +1390,111 @@ namespace dp2Catalog
                 }
             }
 
-            // 当处于连接MARC文件状态时
-            if (this.linkMarcFile != null)
+            this._processing++;
+            try
             {
-                string strMarc = "";
-                byte[] baRecord = null;
-
-                if (strDirection == "next")
+                // 当处于连接MARC文件状态时
+                if (this.linkMarcFile != null)
                 {
-                    //	    2	结束(当前返回的记录无效)
-                    nRet = this.linkMarcFile.NextRecord(out strMarc,
-                        out baRecord,
-                        out strError);
-                    if (nRet == 2)
+                    string strMarc = "";
+                    byte[] baRecord = null;
+
+                    if (strDirection == "next")
                     {
-                        strError = "到尾";
+                        //	    2	结束(当前返回的记录无效)
+                        nRet = this.linkMarcFile.NextRecord(out strMarc,
+                            out baRecord,
+                            out strError);
+                        if (nRet == 2)
+                        {
+                            strError = "到尾";
+                            goto ERROR1;
+                        }
+                    }
+                    else if (strDirection == "prev")
+                    {
+                        nRet = this.linkMarcFile.PrevRecord(out strMarc,
+                            out baRecord,
+                            out strError);
+                        if (nRet == 1)
+                        {
+                            strError = "到头";
+                            goto ERROR1;
+                        }
+                    }
+                    else if (strDirection == "current")
+                    {
+                        nRet = this.linkMarcFile.CurrentRecord(out strMarc,
+                            out baRecord,
+                            out strError);
+                        if (nRet == 1)
+                        {
+                            strError = "??";
+                            goto ERROR1;
+                        }
+                    }
+                    else
+                    {
+                        strError = "不能识别的strDirection参数值 '" + strDirection + "'";
                         goto ERROR1;
                     }
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    LoadLinkedMarcRecord(strMarc, baRecord);
+                    return 0;
                 }
-                else if (strDirection == "prev")
+
+                if (this.LinkedSearchForm == null)
                 {
-                    nRet = this.linkMarcFile.PrevRecord(out strMarc,
-                        out baRecord,
-                        out strError);
-                    if (nRet == 1)
+                    strError = "没有关联的检索窗";
+                    goto ERROR1;
+                }
+
+                string strPath = this.textBox_tempRecPath.Text;
+                if (String.IsNullOrEmpty(strPath) == true)
+                {
+                    strError = "路径为空";
+                    goto ERROR1;
+                }
+
+                // 分离出各个部分
+                string strProtocol = "";
+                string strResultsetName = "";
+                string strIndex = "";
+
+                nRet = ParsePath(strPath,
+                    out strProtocol,
+                    out strResultsetName,
+                    out strIndex,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "解析路径 '" + strPath + "' 字符串过程中发生错误: " + strError;
+                    goto ERROR1;
+                }
+
+                if (strProtocol != this.LinkedSearchForm.CurrentProtocol)
+                {
+                    strError = "检索窗的协议已经发生改变";
+                    goto ERROR1;
+                }
+
+                if (strResultsetName != this.LinkedSearchForm.CurrentResultsetPath)
+                {
+                    strError = "结果集已经发生改变";
+                    goto ERROR1;
+                }
+
+                int index = 0;
+
+                index = Convert.ToInt32(strIndex) - 1;
+
+            REDO:
+                if (strDirection == "prev")
+                {
+                    index--;
+                    if (index < 0)
                     {
                         strError = "到头";
                         goto ERROR1;
@@ -1421,116 +1502,43 @@ namespace dp2Catalog
                 }
                 else if (strDirection == "current")
                 {
-                    nRet = this.linkMarcFile.CurrentRecord(out strMarc,
-                        out baRecord,
-                        out strError);
-                    if (nRet == 1)
-                    {
-                        strError = "??";
-                        goto ERROR1;
-                    }
+                }
+                else if (strDirection == "next")
+                {
+                    index++;
                 }
                 else
                 {
                     strError = "不能识别的strDirection参数值 '" + strDirection + "'";
                     goto ERROR1;
                 }
-                if (nRet == -1)
-                    goto ERROR1;
 
-                LoadLinkedMarcRecord(strMarc, baRecord);
-                return 0;
-            }
-
-            if (this.LinkedSearchForm == null)
-            {
-                strError = "没有关联的检索窗";
-                goto ERROR1;
-            }
-
-            string strPath = this.textBox_tempRecPath.Text;
-            if (String.IsNullOrEmpty(strPath) == true)
-            {
-                strError = "路径为空";
-                goto ERROR1;
-            }
-
-            // 分离出各个部分
-            string strProtocol = "";
-            string strResultsetName = "";
-            string strIndex = "";
-
-            nRet = ParsePath(strPath,
-                out strProtocol,
-                out strResultsetName,
-                out strIndex,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "解析路径 '" +strPath+ "' 字符串过程中发生错误: " + strError;
-                goto ERROR1;
-            }
-
-            if (strProtocol != this.LinkedSearchForm.CurrentProtocol)
-            {
-                strError = "检索窗的协议已经发生改变";
-                goto ERROR1;
-            }
-
-            if (strResultsetName != this.LinkedSearchForm.CurrentResultsetPath)
-            {
-                strError = "结果集已经发生改变";
-                goto ERROR1;
-            }
-
-            int index = 0;
-
-            index = Convert.ToInt32(strIndex) - 1;
-
-            REDO:
-            if (strDirection == "prev")
-            {
-                index--;
-                if (index < 0)
+                if (this.LinkedSearchForm.IsValid() == false)
                 {
-                    strError = "到头";
+                    strError = "连接的检索窗已经失效，无法载入记录 " + strPath;
                     goto ERROR1;
                 }
-            }
-            else if (strDirection == "current")
-            {
-            }
-            else if (strDirection == "next")
-            {
-                index++;
-            }
-            else
-            {
-                strError = "不能识别的strDirection参数值 '" + strDirection + "'";
-                goto ERROR1;
-            }
 
-            if (this.LinkedSearchForm.IsValid() == false)
-            {
-                strError = "连接的检索窗已经失效，无法载入记录 " + strPath;
-                goto ERROR1;
-            }
-
-            // return:
-            //      -1  出错
-            //      0   成功
-            //      2   需要跳过
-            nRet = LoadRecord(this.LinkedSearchForm, index, bForceFullElementSet, bReload);  // 
-            if (nRet == 2)
-            {
-                if (strDirection == "current")
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      2   需要跳过
+                nRet = LoadRecord(this.LinkedSearchForm, index, bForceFullElementSet, bReload);  // 
+                if (nRet == 2)
                 {
-                    strError = "当前位置 " + index.ToString() + " 是需要跳过的位置";
-                    goto ERROR1;
+                    if (strDirection == "current")
+                    {
+                        strError = "当前位置 " + index.ToString() + " 是需要跳过的位置";
+                        goto ERROR1;
+                    }
+                    goto REDO;
                 }
-                goto REDO;
+                return nRet;
             }
-            return nRet;
+            finally
+            {
+                this._processing--;
+            }
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -1616,10 +1624,17 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             if (searchform == null)
                 throw new ArgumentException("searchform 参数不应为 null", "searchform");
 
+
+            this._processing++;
             this.stop.BeginLoop();  // 在这里启用 stop，可以防止在装载的中途 Form 被关闭、造成 MarcEditor 设置 MARC 字符串过程抛出异常
             this.EnableControls(false);
             try
             {
+#if TEST
+                // 测试：休眠一段时间，然后出让控制权
+                Thread.Sleep(3000);
+                Application.DoEvents();
+#endif
                 string strMARC = "";
 
                 this.LinkedSearchForm = searchform;
@@ -1777,6 +1792,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             {
                 this.stop.EndLoop();
                 this.EnableControls(true);
+                this._processing--;
             }
         ERROR1:
             MessageBox.Show(this, strError);

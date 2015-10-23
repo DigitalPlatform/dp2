@@ -504,8 +504,18 @@ namespace DigitalPlatform.LibraryServer
                     }
 #endif
 
-                    if (PathUtil.ClearDir(app.TempDir) == false)
+#if NO
+                    if (PathUtil.TryClearDir(app.TempDir) == false)
                         app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
+#endif
+                    try
+                    {
+                        PathUtil.ClearDir(app.TempDir);
+                    }
+                    catch(Exception ex)
+                    {
+                        app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出现异常: " + ExceptionUtil.GetDebugText(ex));
+                    }
                 }
 
                 this.InitialLoginCache();

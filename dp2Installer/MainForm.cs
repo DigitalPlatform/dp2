@@ -2104,7 +2104,7 @@ MessageBoxDefaultButton.Button1);
 #endif
                 string strTempDir = this.TempDir;
 
-                PathUtil.ClearDir(strTempDir);
+                PathUtil.TryClearDir(strTempDir);
 
                 List<string> filenames = new List<string>();
 

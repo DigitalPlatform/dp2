@@ -39,7 +39,7 @@ namespace dp2Circulation
             strError = "";
             int nRet = 0;
 
-            PathUtil.ClearDir(strTempDir);
+            PathUtil.TryClearDir(strTempDir);
 
             List<string> filenames = new List<string>();
 

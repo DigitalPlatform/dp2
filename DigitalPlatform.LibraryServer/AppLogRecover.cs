@@ -3764,7 +3764,6 @@ strElementName);
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
                     }
 
-
                     // 读出数据库中原有的记录
                     string strExistXml = "";
                     string strMetaData = "";
@@ -3833,7 +3832,7 @@ strElementName);
                     }
                     catch (Exception ex)
                     {
-                        strError = "strRecord装载进入DOM时发生错误: " + ex.Message;
+                        strError = "strRecord 装载进入 DOM 时发生错误: " + ex.Message;
                         goto ERROR1;
                     }
 

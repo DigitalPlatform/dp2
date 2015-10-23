@@ -162,7 +162,31 @@ namespace DigitalPlatform.IO
         }
 
         // 删除一个目录内的所有文件和目录
-        public static bool ClearDir(string strDir)
+        // 可能会抛出异常
+        public static void ClearDir(string strDir)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDir);
+            if (di.Exists == false)
+                return;
+
+            // 删除所有的下级目录
+            DirectoryInfo[] dirs = di.GetDirectories();
+            foreach (DirectoryInfo childDir in dirs)
+            {
+                Directory.Delete(childDir.FullName, true);
+            }
+
+            // 删除所有文件
+            FileInfo[] fis = di.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                File.Delete(fi.FullName);
+            }
+        }
+
+        // 删除一个目录内的所有文件和目录
+        // 不会抛出异常
+        public static bool TryClearDir(string strDir)
         {
             try
             {

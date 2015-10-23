@@ -224,7 +224,7 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-            if (PathUtil.ClearDir(strTempDir) == false)
+            if (PathUtil.TryClearDir(strTempDir) == false)
                 this.KernelApplication.WriteErrorLog("清除临时文件目录 " + strTempDir + " 时出错");
 
             this.TempDir = strTempDir;
@@ -3015,6 +3015,7 @@ namespace DigitalPlatform.rms
             results = new List<RecordBody>();
 
             int nRet = 0;
+            // bool bIfNotExist = StringUtil.IsInList("ifnotexist", strStyle);
 
             if (StringUtil.IsInList("flushkeys", strStyle) == true)
             {

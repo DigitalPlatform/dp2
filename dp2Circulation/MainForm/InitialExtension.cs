@@ -237,6 +237,31 @@ namespace dp2Circulation
 
         /*
 发生未捕获的界面线程异常: 
+Type: System.Exception
+Message: GetLastWin32Error [0], ex.NativeErrorCode = 14001, ex.ErrorCode=-2147467259
+Stack:
+在 dp2Circulation.MainForm.StartGreenUtility()
+在 dp2Circulation.MainForm.MainForm_FormClosed(Object sender, FormClosedEventArgs e)
+在 System.Windows.Forms.Form.OnFormClosed(FormClosedEventArgs e)
+在 System.Windows.Forms.Form.WmClose(Message& m)
+在 System.Windows.Forms.Form.WndProc(Message& m)
+在 dp2Circulation.MainForm.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+Type: System.ComponentModel.Win32Exception
+Message: 应用程序无法启动，因为应用程序的并行配置不正确。有关详细信息，请参阅应用程序事件日志，或使用命令行 sxstrace.exe 工具。
+Stack:
+在 System.Diagnostics.Process.StartWithShellExecuteEx(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start()
+在 System.Diagnostics.Process.Start(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start(String fileName, String arguments)
+在 dp2Circulation.MainForm.StartGreenUtility()
+         * */
+
+        /*
+发生未捕获的界面线程异常: 
 Type: System.ComponentModel.Win32Exception
 Message: 拒绝访问。
 Stack:

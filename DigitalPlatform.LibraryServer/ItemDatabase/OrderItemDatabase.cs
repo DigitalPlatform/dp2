@@ -80,7 +80,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
             /*
@@ -141,7 +140,6 @@ namespace DigitalPlatform.LibraryServer
                         bControlled = false;
                 }
             }
-
 
             if (bControlled == true // 控制了全部用到的馆藏地点的情形
     || sessioninfo.GlobalUser == true) // 全局用户

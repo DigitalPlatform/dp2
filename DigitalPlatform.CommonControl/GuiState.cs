@@ -62,7 +62,6 @@ namespace DigitalPlatform.CommonControl
             return table.GetType().ToString() + ":" + DpTable.GetColumnWidthListString(table);
         }
 
-
         static void SetSavePasswordState(SavePassword container, string strText)
         {
             string strState = "";
@@ -112,10 +111,7 @@ namespace DigitalPlatform.CommonControl
         {
             return radio.GetType().ToString() + ":" + (radio.Checked == true ? "1" : "0");
         }
-
-
         //
-
         static void SetTextBoxState(TextBox textbox, string strText, object default_value)
         {
             if (string.IsNullOrEmpty(strText) == true
