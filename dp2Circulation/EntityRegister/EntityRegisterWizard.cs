@@ -574,6 +574,9 @@ MessageBoxDefaultButton.Button1);
 
         void LoadServerXml()
         {
+            string strError = "";
+            // _base.ServersDom = null;    // test
+
             // TODO: 目录名和当前用户相关
             // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
             string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
@@ -583,15 +586,12 @@ MessageBoxDefaultButton.Button1);
             if (File.Exists(strFileName) == false
                 || MainForm.GetServersCfgFileVersion(strFileName) < MainForm.SERVERSXML_VERSION)
             {
-                string strError = "";
                 // 创建 servers.xml 配置文件
                 int nRet = this.MainForm.BuildServersCfgFile(strFileName,
                     out strError);
                 if (nRet == -1)
-                {
-                    MessageBox.Show(this, strError);
-                    return;
-                }
+                    goto ERROR1;
+
                 this.ShowMessage("配置文件 " + strFileName + " 创建成功", "green", true);
             }
 
@@ -602,14 +602,16 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message);
-                return;
+                strError = "文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message;
+                goto ERROR1;
             }
 
             // TODO: 是否在文件不存在的情况下，给出缺省的几个 server ?
 
             _base.ServersDom = dom;
-
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
         }
 
         string _originTitle = "";
@@ -2204,7 +2206,8 @@ out strError);
                 strStartServerName,
                 strStartRecPath,
                 out strServerName,
-                out strBiblioRecPath);
+                out strBiblioRecPath,
+                out strError);
             if (nRet == -1)
                 return -1;
             if (nRet == 0)
@@ -3138,7 +3141,8 @@ int nCount)
                         this._biblio.ServerName,
                         this._biblio.BiblioRecPath,
                         out strServerName,
-                        out strBiblioRecPath);
+                        out strBiblioRecPath,
+                        out strError);
 #if NO
                     if (nRet != 1)
                     {
@@ -3455,8 +3459,10 @@ int nCount)
             string strEditServerName,
             string strEditBiblioRecPath,
             out string strServerName,
-            out string strBiblioRecPath)
+            out string strBiblioRecPath,
+            out string strError)
         {
+            strError = "";
             strServerName = "";
             strBiblioRecPath = "";
 
@@ -3481,6 +3487,12 @@ int nCount)
                     if (bAllowCopyTo == false)
                         return 0;
                 }
+            }
+
+            if (_base.ServersDom == null || _base.ServersDom.DocumentElement == null)
+            {
+                strError = "_base.ServersDom == null || _base.ServersDom.DocumentElement == null";
+                return -1;
             }
 
             // 此后都是寻找可以追加写入的
@@ -3509,7 +3521,6 @@ int nCount)
 
             return 0;
         }
-
 
         #endregion
 
@@ -3864,6 +3875,12 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
             this.ClearMessage();
+
+            if (_base.ServersDom == null || _base.ServersDom.DocumentElement == null)
+            {
+                strError = "servers.xml 配置文件尚未初始化";
+                goto ERROR1;
+            }
 
             string strRecord = "";
             strRecord = this.UnimarcBiblioDefault;
@@ -4864,6 +4881,9 @@ out strError);
 
         private void button_setting_reCreateServersXml_Click(object sender, EventArgs e)
         {
+            // _base.ServersDom = null;    // test
+
+            this.ClearMessage();
             this.EnableControls(false);
             try
             {
@@ -4878,9 +4898,12 @@ out strError);
                     out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, strError);
+                    // MessageBox.Show(this, strError);
+                    this.ShowMessage(strError, "red", true);
                     return;
                 }
+
+                this.ShowMessage("配置文件 " + strFileName + " 创建成功", "green", true);
 
                 // 重新加载
                 LoadServerXml();

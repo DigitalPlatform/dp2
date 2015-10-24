@@ -754,7 +754,6 @@ namespace DigitalPlatform.CirculationClient
                     return -1;
                 }
 
-
                 string strValue = "";
                 long lRet = this.channel.GetSystemParameter(stop,
                     "system",
@@ -808,7 +807,6 @@ namespace DigitalPlatform.CirculationClient
                         out strError);
                     prop.InCirculation = bValue;
                 }
-
 
                 if (properties.Count > 0)
                 {

@@ -177,6 +177,8 @@ false);
         {
             if (IsDot(strServerName) == true)
             {
+                if (this._servers_dom == null || this._servers_dom.DocumentElement == null)
+                    return "";
                 XmlElement server = (XmlElement)this._servers_dom.DocumentElement.SelectSingleNode("server[@url='.'] | server[@url='']");
                 if (server == null)
                     return "";
@@ -195,6 +197,10 @@ false);
                 if (string.IsNullOrEmpty(strServerName) == true)
                     return null;
             }
+
+            if (this._servers_dom == null || this._servers_dom.DocumentElement == null)
+                return null;
+
             XmlNode server = this._servers_dom.DocumentElement.SelectSingleNode("server[@name='" + strServerName + "']");
             if (server == null)
                 return null;

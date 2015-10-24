@@ -2037,7 +2037,6 @@ MessageBoxDefaultButton.Button2);
             return edit.GetData(true, out strXml, out strError);
         }
 
-
         // 把报错信息中的成功事项的状态修改兑现
         // 并且彻底去除没有报错的“删除”册事项（内存和视觉上）
         // return:
@@ -2057,7 +2056,6 @@ MessageBoxDefaultButton.Button2);
 
             foreach (EntityInfo info in errorinfos)
             {
-
                 string strError = "";
 
                 if (String.IsNullOrEmpty(info.RefID) == true)
@@ -2067,7 +2065,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 EntityEditControl control = GetEditControl(info.RefID);
-                if (String.IsNullOrEmpty(info.RefID) == true)
+                if (control == null)
                 {
                     // strWarning += " 定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError;
                     strWarning += " 服务器返回的EntityInfo结构中RefID '" + info.RefID + "' 找不到匹配的控件";
@@ -2102,7 +2100,6 @@ MessageBoxDefaultButton.Button2);
                         }
 
                         // bookitem.ItemDisplayState = ItemDisplayState.Normal;
-
                     }
 
 #if NO
@@ -2138,7 +2135,6 @@ MessageBoxDefaultButton.Button2);
 
                     control.Changed = false;
                     control.CreateState = ItemDisplayState.Normal;
-
                     continue;
                 }
 
