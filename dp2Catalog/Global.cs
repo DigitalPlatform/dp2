@@ -652,7 +652,7 @@ namespace dp2Catalog
             int nRet = strFullPath.IndexOf(":");
             if (nRet == -1)
             {
-                strError = "È±·¦':'";
+                strError = "È«Â·¾¶ '"+strFullPath+"' ÖÐÈ±·¦×Ö·û ':'";
                 return -1;
             }
 

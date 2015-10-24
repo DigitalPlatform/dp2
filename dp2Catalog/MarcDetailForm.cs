@@ -134,7 +134,10 @@ namespace dp2Catalog
                     out strPath,
                     out strError);
                 if (nRet == -1)
-                    throw new Exception(strError);
+                {
+                    // throw new Exception(strError);
+                    return "";
+                }
 
                 // TODO: 要区分不同的protocol进行正确处理
 
@@ -164,7 +167,10 @@ namespace dp2Catalog
                     out strPath,
                     out strError);
                 if (nRet == -1)
-                    throw new Exception(strError);
+                {
+                    // throw new Exception(strError);
+                    return "";
+                }
 
                 string strServerName = "";
                 string strLocalPath = "";
@@ -192,7 +198,10 @@ namespace dp2Catalog
                     out strPath,
                     out strError);
                 if (nRet == -1)
-                    throw new Exception(strError);
+                {
+                    // throw new Exception(strError);
+                    return "";
+                }
 
                 string strServerName = "";
                 string strLocalPath = "";
