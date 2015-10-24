@@ -12,6 +12,8 @@ namespace dp2Circulation
 {
     static class Program
     {
+        static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
+
         static bool bExiting = false;
 
         static MainForm _mainForm = null;
@@ -25,13 +27,59 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
-            if (IsDevelopMode() == false)
-                PrepareCatchException();
+            List<string> args = StringUtil.SplitList(Environment.CommandLine, ' ');
+            // string[] args = Environment.GetCommandLineArgs();
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            _mainForm = new MainForm();
-            Application.Run(_mainForm);
+            if (mutex.WaitOne(TimeSpan.Zero, true)
+                || args.IndexOf("newinstance") != -1)
+            {
+                if (StringUtil.IsDevelopMode() == false)
+                    PrepareCatchException();
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                _mainForm = new MainForm();
+                Application.Run(_mainForm);
+
+                mutex.ReleaseMutex();
+            }
+            else
+            {
+                // MessageBox.Show("only one instance at a time");
+
+#if NO
+                // send our Win32 message to make the currently running instance
+                // jump on top of all the other windows
+                API.PostMessage(
+                    (IntPtr)API.HWND_BROADCAST,
+                    API.WM_SHOWME,
+                    IntPtr.Zero,
+                    IntPtr.Zero);
+#endif
+                string procName = Process.GetCurrentProcess().ProcessName;
+                Process[] processes = Process.GetProcessesByName(procName);
+                foreach (Process process in processes)
+                {
+                    if (process != null)
+                    {
+                        // Debug.Assert(false, "");
+#if NO
+                        int style = API.GetWindowLong(process.MainWindowHandle, API.GWL_STYLE);
+                        if ((style & API.WS_MINIMIZE) == API.WS_MINIMIZE)
+                        {
+                            API.ShowWindow(process.MainWindowHandle, API.SW_SHOWMAXIMIZED);
+                        }
+#endif
+                        API.SetForegroundWindow(process.MainWindowHandle);
+                        if (API.IsIconic(process.MainWindowHandle))
+                        {
+                            // API.ShowWindowAsync(process.MainWindowHandle, API.SW_RESTORE);
+                            API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
+                            API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
+                        }
+                    }
+                }
+            }
         }
 
         static List<string> _promptStrings = new List<string>();
@@ -55,20 +103,6 @@ namespace dp2Circulation
                 MessageBox.Show(owner, strText);
             Program.MemoPromptString(strText);
             Application.Exit();
-        }
-
-        public static bool IsDevelopMode()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            int i = 0;
-            foreach(string arg in args)
-            {
-                if (i > 0 && arg == "develop")
-                    return true;
-                i++;
-            }
-
-            return false;
         }
 
         // 准备接管未捕获的异常

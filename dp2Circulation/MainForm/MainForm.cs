@@ -736,7 +736,8 @@ Stack:
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (Program.IsDevelopMode() == false)
+            if (StringUtil.IsDevelopMode() == false
+                && StringUtil.IsNewInstance() == false)
             {
                 // PackageEventLog.EnvironmentReport(this);
                 // Debug.WriteLine("EnvironmentReport");
@@ -934,6 +935,9 @@ Stack:
         /// <param name="m">消息</param>
         protected override void WndProc(ref Message m)
         {
+            if (m.Msg == API.WM_SHOWME)
+                ShowMe();
+
             if (m.Msg == API.WM_DEVICECHANGE)
             {
                 if (m.WParam.ToInt32() == API.DBT_DEVNODES_CHANGED)
@@ -945,6 +949,19 @@ Stack:
             base.WndProc(ref m);
         }
 
+        private void ShowMe()
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                WindowState = FormWindowState.Normal;
+            }
+            // get our current "TopMost" value (ours will always be false though)
+            bool top = TopMost;
+            // make our form jump to the top of everything
+            TopMost = true;
+            // set it back to whatever it was
+            TopMost = top;
+        }
 #if SN
         void WriteSerialNumberStatusFile()
         {
@@ -4698,8 +4715,6 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-
-
         internal string DecryptPasssword(string strEncryptedText)
         {
             if (String.IsNullOrEmpty(strEncryptedText) == false)
@@ -7941,6 +7956,48 @@ Keys keyData)
         private void MenuItem_openMarc856SearchForm_Click(object sender, EventArgs e)
         {
             OpenWindow<Marc856SearchForm>();
+        }
+
+        private void MenuItem_startAnotherDp2circulation_Click(object sender, EventArgs e)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                StartClickOnceDp2circulation();
+                return;
+            }
+
+            string strFileName = Assembly.GetExecutingAssembly().CodeBase;
+            var processInfo = new ProcessStartInfo(strFileName);
+
+            List<string> args = StringUtil.GetCommandLineArgs();
+            args.Add("newinstance");
+
+            processInfo.UseShellExecute = true;
+            processInfo.Verb = "runas";
+            processInfo.Arguments = StringUtil.MakePathList(args, " ");
+            processInfo.WorkingDirectory = Path.GetDirectoryName(strFileName);
+
+            try
+            {
+                Process.Start(processInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "dp2circulation 新实例启动失败: " + ex.Message);
+            }
+        }
+
+        void StartClickOnceDp2circulation()
+        {
+            string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
+            if (File.Exists(strShortcutFilePath) == false)
+            {
+                return;
+            }
+            else
+            {
+                Process.Start(strShortcutFilePath);
+            }
         }
     }
 

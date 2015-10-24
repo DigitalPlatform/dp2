@@ -16,6 +16,43 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static bool IsDevelopMode()
+        {
+#if NO
+            string[] args = Environment.GetCommandLineArgs();
+            int i = 0;
+            foreach(string arg in args)
+            {
+                if (i > 0 && arg == "develop")
+                    return true;
+                i++;
+            }
+
+            return false;
+#endif
+            List<string> args = GetCommandLineArgs();
+            return args.IndexOf("develop") != -1;
+        }
+
+        public static bool IsNewInstance()
+        {
+            List<string> args = GetCommandLineArgs();
+            return args.IndexOf("newinstance") != -1;
+        }
+
+        // 取得命令行参数
+        // 丢掉第一个元素
+        public static List<string> GetCommandLineArgs()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+
+            List<string> list = new List<string>(args);
+            if (list.Count == 0)
+                return new List<string>();
+            list.RemoveAt(0);
+            return list;
+        }
+
         // 在列表中寻找指定前缀的元素
         public static List<string> FindPrefixInList(List<string> list,
             string strPrefix)

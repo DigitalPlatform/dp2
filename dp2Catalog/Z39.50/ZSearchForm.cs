@@ -333,7 +333,6 @@ this.splitContainer_queryAndResultInfo,
                         }
                         e.Cancel = true;
                         return;
-
                     }
                 }
             }
@@ -353,7 +352,6 @@ this.splitContainer_queryAndResultInfo,
                 if (result == DialogResult.Yes)
                 {
                     StopDirSearchStops(true);
-
                 }
                 e.Cancel = true;
                 return;
@@ -366,9 +364,8 @@ this.splitContainer_queryAndResultInfo,
 
             //// this.ZChannel.CloseSocket();
             this.ZConnections.CloseAllSocket();
+            // TODO: 应该等待最终结束
         }
-
-
 
         private void ZSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -2116,6 +2113,32 @@ this.splitContainer_queryAndResultInfo,
         }
 
         /*
+发生未捕获的异常: 
+Type: System.ObjectDisposedException
+Message: 無法存取已處置的物件。
+物件名稱: 'ZSearchForm'。
+Stack:
+於 System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+於 System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+於 dp2Catalog.ZSearchForm.ShowQueryResultInfo(ZConnection connection, String strText)
+於 dp2Catalog.ZConnection.ShowQueryResultInfo(String strText)
+於 dp2Catalog.ZConnection.ZConnection_CommandsComplete(Object sender, EventArgs e)
+於 dp2Catalog.ZConnection.ZConnection_PresentComplete(Object sender, EventArgs e)
+於 dp2Catalog.ZConnection.ZChannel_present_SendRecvComplete(Object sender, EventArgs e)
+於 DigitalPlatform.Z3950.ZChannel.RecvCallback(IAsyncResult ar)
+於 System.Net.LazyAsyncResult.Complete(IntPtr userToken)
+於 System.Net.ContextAwareResult.CompleteCallback(Object state)
+於 System.Threading.ExecutionContext.runTryCode(Object userData)
+於 System.Runtime.CompilerServices.RuntimeHelpers.ExecuteCodeWithGuaranteedCleanup(TryCode code, CleanupCode backoutCode, Object userData)
+於 System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+於 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean ignoreSyncCtx)
+於 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+於 System.Net.ContextAwareResult.Complete(IntPtr userToken)
+於 System.Net.LazyAsyncResult.ProtectedInvokeCallback(Object result, IntPtr userToken)
+於 System.Net.Sockets.BaseOverlappedAsyncResult.CompletionPortCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* nativeOverlapped)
+於 System.Threading._IOCompletionCallback.PerformIOCompletionCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* pOVERLAP)
+         * */
+        /*
 操作类型 crashReport -- 异常报告 
 主题 dp2catalog 
 发送者 xxx 
@@ -2163,9 +2186,18 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 || this.IsHandleCreated == false)   // 2015/8/21
                 return false;
 
-            object[] pList = { connection, strText };
-            return (bool)this.Invoke(
-                new ZSearchForm.Delegate_ShowQueryResultInfo(__ShowQueryResultInfo), pList);
+            try
+            {
+                object[] pList = { connection, strText };
+                return (bool)this.Invoke(
+                    new ZSearchForm.Delegate_ShowQueryResultInfo(__ShowQueryResultInfo), pList);
+            }
+            catch
+            {
+                // 2015/10/24
+                // TODO: 这是没办法的应急方法。最好还是重新设计窗口 closing 时的停止检索机制，然后把这里的 catch 放开
+                return false;
+            }
         }
 
         // 根据不同格式自动创建浏览格式

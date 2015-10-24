@@ -1063,12 +1063,9 @@ namespace dp2Catalog
                 strPath = strDefaultStartPath;
             }
 
-
-
             this.EnableControls(false);
             try
             {
-
                 // dtlp协议的记录保存
                 if (strProtocol.ToLower() == "dtlp")
                 {
@@ -1094,7 +1091,6 @@ namespace dp2Catalog
 
                     string strDbName = dp2SearchForm.GetDbName(strPurePath);
                     string strSyntax = "";
-
 
                     // 获得一个数据库的数据syntax
                     // parameters:
@@ -1128,7 +1124,6 @@ namespace dp2Catalog
                         goto ERROR1;
                     }
 
-
                     // 打开查重窗口
                     dp2DupForm form = new dp2DupForm();
 
@@ -1143,7 +1138,6 @@ namespace dp2Catalog
                     form.AutoBeginSearch = true;
 
                     form.Show();
-
                     return 0;
                 }
                 else if (strProtocol.ToLower() == "z3950")
@@ -1156,8 +1150,6 @@ namespace dp2Catalog
                     strError = "无法识别的协议名 '" + strProtocol + "'";
                     goto ERROR1;
                 }
-
-
             }
             finally
             {
@@ -1167,7 +1159,6 @@ namespace dp2Catalog
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
-
         }
 
         // 保存记录
@@ -1212,7 +1203,6 @@ namespace dp2Catalog
 
             MainForm.LastSavePath = dlg.RecPath;
 
-
             string strProtocol = "";
             string strPath = "";
             nRet = Global.ParsePath(dlg.RecPath,
@@ -1225,7 +1215,6 @@ namespace dp2Catalog
             this.EnableControls(false);
             try
             {
-
                 // dp2library协议的记录保存
                 if (strProtocol.ToLower() == "dp2library")
                 {
@@ -1373,7 +1362,6 @@ namespace dp2Catalog
                     strError = "无法识别的协议名 '" + strProtocol + "'";
                     goto ERROR1;
                 }
-
             }
             finally
             {

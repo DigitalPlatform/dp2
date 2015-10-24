@@ -51,6 +51,7 @@ namespace dp2Circulation
             this.MenuItem_openCommentSearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openInvoiceSearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openArrivedSearchForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openMarc856SearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openReaderInfoForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openItemInfoForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -204,7 +205,8 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_openMarc856SearchForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_startAnotherDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -239,6 +241,8 @@ namespace dp2Circulation
             this.toolStripMenuItem_runProject,
             this.ToolStripMenuItem_projectManage,
             this.toolStripSeparator6,
+            this.MenuItem_startAnotherDp2circulation,
+            this.toolStripSeparator14,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
             this.MenuItem_file.Size = new System.Drawing.Size(58, 21);
@@ -247,26 +251,26 @@ namespace dp2Circulation
             // toolStripMenuItem_runProject
             // 
             this.toolStripMenuItem_runProject.Name = "toolStripMenuItem_runProject";
-            this.toolStripMenuItem_runProject.Size = new System.Drawing.Size(219, 22);
+            this.toolStripMenuItem_runProject.Size = new System.Drawing.Size(255, 22);
             this.toolStripMenuItem_runProject.Text = "执行统计方案(&R)...";
             this.toolStripMenuItem_runProject.Click += new System.EventHandler(this.toolStripMenuItem_runProject_Click);
             // 
             // ToolStripMenuItem_projectManage
             // 
             this.ToolStripMenuItem_projectManage.Name = "ToolStripMenuItem_projectManage";
-            this.ToolStripMenuItem_projectManage.Size = new System.Drawing.Size(219, 22);
+            this.ToolStripMenuItem_projectManage.Size = new System.Drawing.Size(255, 22);
             this.ToolStripMenuItem_projectManage.Text = "统计方案管理[框架窗口](&P)";
             this.ToolStripMenuItem_projectManage.Click += new System.EventHandler(this.ToolStripMenuItem_projectManage_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(216, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(252, 6);
             // 
             // MenuItem_exit
             // 
             this.MenuItem_exit.Name = "MenuItem_exit";
-            this.MenuItem_exit.Size = new System.Drawing.Size(219, 22);
+            this.MenuItem_exit.Size = new System.Drawing.Size(255, 22);
             this.MenuItem_exit.Text = "退出(&X)";
             this.MenuItem_exit.Click += new System.EventHandler(this.MenuItem_exit_Click);
             // 
@@ -404,6 +408,13 @@ namespace dp2Circulation
             this.MenuItem_openArrivedSearchForm.Size = new System.Drawing.Size(195, 22);
             this.MenuItem_openArrivedSearchForm.Text = "预约到书查询窗(&A)";
             this.MenuItem_openArrivedSearchForm.Click += new System.EventHandler(this.MenuItem_openArrivedSearchForm_Click);
+            // 
+            // MenuItem_openMarc856SearchForm
+            // 
+            this.MenuItem_openMarc856SearchForm.Name = "MenuItem_openMarc856SearchForm";
+            this.MenuItem_openMarc856SearchForm.Size = new System.Drawing.Size(195, 22);
+            this.MenuItem_openMarc856SearchForm.Text = "856 字段查询窗(&8)";
+            this.MenuItem_openMarc856SearchForm.Click += new System.EventHandler(this.MenuItem_openMarc856SearchForm_Click);
             // 
             // toolStripSeparator1
             // 
@@ -1663,12 +1674,17 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_openMarc856SearchForm
+            // MenuItem_startAnotherDp2circulation
             // 
-            this.MenuItem_openMarc856SearchForm.Name = "MenuItem_openMarc856SearchForm";
-            this.MenuItem_openMarc856SearchForm.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_openMarc856SearchForm.Text = "856 字段查询窗(&8)";
-            this.MenuItem_openMarc856SearchForm.Click += new System.EventHandler(this.MenuItem_openMarc856SearchForm_Click);
+            this.MenuItem_startAnotherDp2circulation.Name = "MenuItem_startAnotherDp2circulation";
+            this.MenuItem_startAnotherDp2circulation.Size = new System.Drawing.Size(255, 22);
+            this.MenuItem_startAnotherDp2circulation.Text = "启动新的 dp2Circulation 实例(&S)";
+            this.MenuItem_startAnotherDp2circulation.Click += new System.EventHandler(this.MenuItem_startAnotherDp2circulation_Click);
+            // 
+            // toolStripSeparator14
+            // 
+            this.toolStripSeparator14.Name = "toolStripSeparator14";
+            this.toolStripSeparator14.Size = new System.Drawing.Size(252, 6);
             // 
             // MainForm
             // 
@@ -1888,6 +1904,8 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem menuItem_updateDp2circulation;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_upgradeFromDisk;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openMarc856SearchForm;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_startAnotherDp2circulation;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
     }
 }
 

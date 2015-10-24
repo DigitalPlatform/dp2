@@ -164,7 +164,6 @@ namespace DigitalPlatform.CirculationClient
             {
                 return 0;
             }
-
         }
 
         // ตÝน้
@@ -532,7 +531,6 @@ namespace DigitalPlatform.CirculationClient
                 out strServerName,
                 out strPath);
 
-
             string[] aName = strPath.Split(new Char[] { '/' });
 
             TreeNode node = null;
@@ -683,11 +681,22 @@ namespace DigitalPlatform.CirculationClient
             out List<NormalDbProperty> properties,
             out string strError)
         {
-            properties = new List<NormalDbProperty>();
             strError = "";
             int nRet = 0;
+            properties = new List<NormalDbProperty>();
+
+            if (this.Channels == null)
+            {
+                strError = "this.Channels == null";
+                return -1;
+            }
 
             this.channel = this.Channels.GetChannel(strServerUrl);
+            if (this.channel == null)
+            {
+                strError = "GetChannel() error. strServerUrl '"+strServerUrl+"'";
+                return -1;
+            }
 
             DigitalPlatform.Stop stop = null;
             if (this.stopManager != null)
@@ -768,7 +777,6 @@ namespace DigitalPlatform.CirculationClient
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
-
                 try
                 {
                     dom.DocumentElement.InnerXml = strValue;
@@ -837,7 +845,6 @@ namespace DigitalPlatform.CirculationClient
             }
 
             // this.channel = null;
-
             return 0;
         }
 

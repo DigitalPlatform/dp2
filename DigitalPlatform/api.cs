@@ -35,8 +35,26 @@ namespace DigitalPlatform
 
     public delegate bool CtrlEventHandler(CtrlType sig);
 
+    // this class just wraps some Win32 stuff that we're going to use
+    internal class NativeMethods
+    {
+    }
+
+
     public class API
     {
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool IsIconic(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int cmdShow);
+
+        public const int HWND_BROADCAST = 0xffff;
+        public static readonly int WM_SHOWME = RegisterWindowMessage("WM_SHOWME");
+
+        [DllImport("user32")]
+        public static extern int RegisterWindowMessage(string message);
 
         [DllImport("Kernel32")]
         public static extern bool SetConsoleCtrlHandler(CtrlEventHandler handler, bool add);
@@ -306,6 +324,11 @@ namespace DigitalPlatform
     PostMessage(IntPtr hWnd, uint Msg,
     UIntPtr wParam, IntPtr lParam);
 
+        [DllImport("user32")]
+        public static extern bool PostMessage(IntPtr hwnd,
+            int msg,
+            IntPtr wparam,
+            IntPtr lparam);
 
 		#region EM_?? 消息定义 和 Windows Edit 控件相关功能
 
@@ -483,6 +506,9 @@ namespace DigitalPlatform
 
 		public const int WS_EX_CLIENTEDGE = 0x00000200;
 		public const int WS_EX_TOOLWINDOW = 0x00000080;
+
+        public const UInt32 WS_MINIMIZE = 0x20000000;
+        public const UInt32 WS_MAXIMIZE = 0x1000000;
 
 		/*
 		[DllImport("user32.dll")]

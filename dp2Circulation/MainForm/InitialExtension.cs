@@ -81,7 +81,8 @@ namespace dp2Circulation
 
         void CancelUpdateClickOnceApplication()
         {
-            if (ApplicationDeployment.IsNetworkDeployed)
+            if (ApplicationDeployment.IsNetworkDeployed
+                && StringUtil.IsNewInstance() == false)
             {
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
 
@@ -339,7 +340,8 @@ Stack:
         void BeginUpdateGreenApplication()
         {
             if (ApplicationDeployment.IsNetworkDeployed == false
-                && Program.IsDevelopMode() == false
+                && StringUtil.IsDevelopMode() == false
+                && StringUtil.IsNewInstance() == false
                 )
                 Task.Factory.StartNew(() => GreenUpdate());
         }
@@ -360,7 +362,7 @@ Stack:
 
         string GetBinDir()
         {
-            if (Program.IsDevelopMode() == false)
+            if (StringUtil.IsDevelopMode() == false)
                 return Environment.CurrentDirectory;
             else
                 return "c:\\dp2circulation";    // 开发用的版本，用这个恒定的目录进行测试，避免弄乱开发目录
@@ -859,7 +861,7 @@ MessageBoxDefaultButton.Button1);
             }
 #endif
 
-            if (Program.IsDevelopMode() == false)
+            if (StringUtil.IsDevelopMode() == false)
             {
                 this.MenuItem_separator_function2.Visible = false;
                 this.MenuItem_chatForm.Visible = false;

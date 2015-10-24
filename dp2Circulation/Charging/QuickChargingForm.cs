@@ -2467,7 +2467,7 @@ false);
             contextMenu.Items.Add(menuItem);
 
             // 
-            if (Program.IsDevelopMode() == true)
+            if (StringUtil.IsDevelopMode() == true)
             {
 #if NO
             // 

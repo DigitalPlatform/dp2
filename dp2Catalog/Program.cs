@@ -205,7 +205,6 @@ namespace dp2Catalog
             }
         }
 
-
         // 写入Windows系统日志
         public static void WriteWindowsLog(string strText,
             EventLogEntryType type)
