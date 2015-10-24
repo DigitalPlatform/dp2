@@ -7960,8 +7960,9 @@ Keys keyData)
 
         private void MenuItem_startAnotherDp2circulation_Click(object sender, EventArgs e)
         {
-            if (ApplicationDeployment.IsNetworkDeployed)
+            if (ApplicationDeployment.IsNetworkDeployed == false)
             {
+                Program.ReleaseMutex();
                 StartClickOnceDp2circulation();
                 return;
             }
@@ -7973,7 +7974,7 @@ Keys keyData)
             args.Add("newinstance");
 
             processInfo.UseShellExecute = true;
-            processInfo.Verb = "runas";
+            // processInfo.Verb = "runas";
             processInfo.Arguments = StringUtil.MakePathList(args, " ");
             processInfo.WorkingDirectory = Path.GetDirectoryName(strFileName);
 
@@ -7989,14 +7990,25 @@ Keys keyData)
 
         void StartClickOnceDp2circulation()
         {
-            string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
-            if (File.Exists(strShortcutFilePath) == false)
+            try
             {
-                return;
+#if NO
+                string strUrl = "http://dp2003.com/dp2circulation/v2/dp2circulation.application?newinstance";
+                Process.Start(strUrl);
+#endif
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
+                if (File.Exists(strShortcutFilePath) == false)
+                {
+                    return;
+                }
+                else
+                {
+                    Process.Start(strShortcutFilePath);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Process.Start(strShortcutFilePath);
+                MessageBox.Show(this, "dp2circulation 启动失败" + ex.Message);
             }
         }
     }

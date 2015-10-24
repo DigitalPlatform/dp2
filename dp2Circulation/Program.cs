@@ -3,6 +3,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
+using System.Deployment.Application;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
@@ -27,8 +28,24 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
-            List<string> args = StringUtil.SplitList(Environment.CommandLine, ' ');
-            // string[] args = Environment.GetCommandLineArgs();
+            List<string> args = StringUtil.GetCommandLineArgs();
+#if NO
+            if (ApplicationDeployment.IsNetworkDeployed &&
+        ApplicationDeployment.CurrentDeployment.ActivationUri != null)
+            {
+                // string startupUrl = ApplicationDeployment.CurrentDeployment.ActivationUri.ToString();
+                MessageBox.Show("first=" + ApplicationDeployment.CurrentDeployment.ActivationUri.Query);
+                args = StringUtil.GetClickOnceCommandLineArgs(ApplicationDeployment.CurrentDeployment.ActivationUri.Query);
+            }
+
+            // Also tack on any activation args at the back
+            var activationArgs = AppDomain.CurrentDomain.SetupInformation.ActivationArguments;
+            if (activationArgs != null && activationArgs.ActivationData != null)
+            {
+                args.AddRange(activationArgs.ActivationData);
+                MessageBox.Show("second=" + StringUtil.MakePathList(args));
+            }
+#endif
 
             if (mutex.WaitOne(TimeSpan.Zero, true)
                 || args.IndexOf("newinstance") != -1)
@@ -41,21 +58,11 @@ namespace dp2Circulation
                 _mainForm = new MainForm();
                 Application.Run(_mainForm);
 
-                mutex.ReleaseMutex();
+                ReleaseMutex();
             }
             else
             {
-                // MessageBox.Show("only one instance at a time");
 
-#if NO
-                // send our Win32 message to make the currently running instance
-                // jump on top of all the other windows
-                API.PostMessage(
-                    (IntPtr)API.HWND_BROADCAST,
-                    API.WM_SHOWME,
-                    IntPtr.Zero,
-                    IntPtr.Zero);
-#endif
                 string procName = Process.GetCurrentProcess().ProcessName;
                 Process[] processes = Process.GetProcessesByName(procName);
                 foreach (Process process in processes)
@@ -63,13 +70,7 @@ namespace dp2Circulation
                     if (process != null)
                     {
                         // Debug.Assert(false, "");
-#if NO
-                        int style = API.GetWindowLong(process.MainWindowHandle, API.GWL_STYLE);
-                        if ((style & API.WS_MINIMIZE) == API.WS_MINIMIZE)
-                        {
-                            API.ShowWindow(process.MainWindowHandle, API.SW_SHOWMAXIMIZED);
-                        }
-#endif
+
                         API.SetForegroundWindow(process.MainWindowHandle);
                         if (API.IsIconic(process.MainWindowHandle))
                         {
@@ -79,6 +80,16 @@ namespace dp2Circulation
                         }
                     }
                 }
+            }
+        }
+
+        public static void ReleaseMutex()
+        {
+            if (mutex != null)
+            {
+                mutex.ReleaseMutex();
+                mutex.Dispose();
+                mutex = null;
             }
         }
 
@@ -92,6 +103,7 @@ namespace dp2Circulation
         {
             return StringUtil.MakePathList(_promptStrings, "\r\n\r\n");
         }
+
         public static void ClearPromptStringLines()
         {
             _promptStrings.Clear();

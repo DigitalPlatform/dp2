@@ -53,6 +53,21 @@ namespace DigitalPlatform.Text
             return list;
         }
 
+        public static List<string> GetClickOnceCommandLineArgs(string query)
+        {
+            List<string> args = new List<string>();
+            if (!string.IsNullOrEmpty(query) && query.StartsWith("?"))
+            {
+                args = StringUtil.SplitList(query.Substring(1), '&');
+                for (int i = 0; i < args.Count; i++)
+                {
+                    args[i] = HttpUtility.UrlDecode(args[i]);
+                }
+            }
+
+            return args;
+        }
+
         // 在列表中寻找指定前缀的元素
         public static List<string> FindPrefixInList(List<string> list,
             string strPrefix)

@@ -6740,3 +6740,26 @@ namespace DigitalPlatform
         }
     }
 }
+
+
+~~~
+
+                // MessageBox.Show("only one instance at a time");
+
+#if NO
+                // send our Win32 message to make the currently running instance
+                // jump on top of all the other windows
+                API.PostMessage(
+                    (IntPtr)API.HWND_BROADCAST,
+                    API.WM_SHOWME,
+                    IntPtr.Zero,
+                    IntPtr.Zero);
+#endif
+
+#if NO
+                        int style = API.GetWindowLong(process.MainWindowHandle, API.GWL_STYLE);
+                        if ((style & API.WS_MINIMIZE) == API.WS_MINIMIZE)
+                        {
+                            API.ShowWindow(process.MainWindowHandle, API.SW_SHOWMAXIMIZED);
+                        }
+#endif
