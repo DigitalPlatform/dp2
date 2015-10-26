@@ -177,19 +177,20 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 输入的条码号文件名
+                this.MainForm.AppInfo.SetString(
+                    "xmlstatisform",
+                    "input_xml_filename",
+                    this.textBox_inputXmlFilename.Text);
 
-            // 输入的条码号文件名
-            this.MainForm.AppInfo.SetString(
-                "xmlstatisform",
-                "input_xml_filename",
-                this.textBox_inputXmlFilename.Text);
-
-            // 方案名
-            this.MainForm.AppInfo.SetString(
-                "xmlstatisform",
-                "projectname",
-                this.textBox_projectName.Text);
-
+                // 方案名
+                this.MainForm.AppInfo.SetString(
+                    "xmlstatisform",
+                    "projectname",
+                    this.textBox_projectName.Text);
+            }
 #if NO
             if (this.ErrorInfoForm != null)
             {

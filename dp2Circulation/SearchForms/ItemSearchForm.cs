@@ -515,20 +515,22 @@ this.DbType + "_search_form",
                 stop = null;
             }*/
 
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "_search_form",
-                "from",
-                this.comboBox_from.Text);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "_search_form",
+                    "from",
+                    this.comboBox_from.Text);
 
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "_search_form",
-                "entity_db_name",
-                this.comboBox_entityDbName.Text);
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "_search_form",
+                    "entity_db_name",
+                    this.comboBox_entityDbName.Text);
 
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "_search_form",
-                "match_style",
-                this.comboBox_matchStyle.Text);
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "_search_form",
+                    "match_style",
+                    this.comboBox_matchStyle.Text);
 
 #if NO
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
@@ -537,14 +539,16 @@ this.DbType + "_search_form",
                 "record_list_column_width",
                 strWidths);
 #endif
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "_search_form",
-                "ui_state",
-                this.UiState);
-            this.MainForm.AppInfo.SetString(
-this.DbType + "_search_form",
-"query_lines",
-this.dp2QueryControl1.GetSaveString());
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "_search_form",
+                    "ui_state",
+                    this.UiState);
+
+                this.MainForm.AppInfo.SetString(
+    this.DbType + "_search_form",
+    "query_lines",
+    this.dp2QueryControl1.GetSaveString());
+            }
         }
 
         /// <summary>

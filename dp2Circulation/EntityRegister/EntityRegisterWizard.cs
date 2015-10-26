@@ -508,9 +508,12 @@ MessageBoxDefaultButton.Button1);
                 this._genData.Close();
             }
 
-            if (this.MainForm != null)
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString("entityRegisterWizard", "uistate", this.UiState);
+                this.MainForm.AppInfo.SetString(
+                    "entityRegisterWizard", 
+                    "uistate",
+                    this.UiState);
 
                 // this.MainForm.MessageFilter -= MainForm_MessageFilter;
 #if NO

@@ -350,7 +350,6 @@ namespace dp2Circulation
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-
                 this.MainForm.AppInfo.SetBoolean(
                     "bibliostatisform",
                     "inputstyle_recpathfile",
@@ -391,7 +390,6 @@ namespace dp2Circulation
                     "recpaths",
                     this.textBox_inputStyle_recPaths.Text.Replace("\r\n", ","));
             }
-
         }
 
         internal override void CreateDefaultContent(CreateDefaultContentEventArgs e)

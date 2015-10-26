@@ -359,35 +359,29 @@ namespace dp2Circulation
 
         private void ReaderSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            /*
-            if (stop != null) // 脱离关联
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }*/
+                this.MainForm.AppInfo.SetString(
+                    "readersearchform",
+                    "readerdbname",
+                    this.comboBox_readerDbName.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "readersearchform",
-                "readerdbname",
-                this.comboBox_readerDbName.Text);
+                this.MainForm.AppInfo.SetString(
+                    "readersearchform",
+                    "from",
+                    this.comboBox_from.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "readersearchform",
-                "from",
-                this.comboBox_from.Text);
+                this.MainForm.AppInfo.SetString(
+                    "readersearchform",
+                    "match_style",
+                    this.comboBox_matchStyle.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "readersearchform",
-                "match_style",
-                this.comboBox_matchStyle.Text);
-
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-            this.MainForm.AppInfo.SetString(
-                "readersearchform",
-                "record_list_column_width",
-                strWidths);
-
-
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
+                this.MainForm.AppInfo.SetString(
+                    "readersearchform",
+                    "record_list_column_width",
+                    strWidths);
+            }
         }
 
         /// <summary>

@@ -278,31 +278,33 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "printbindingform",
+                    "barcode_filepath",
+                    this.BarcodeFilePath);
 
-            this.MainForm.AppInfo.SetString(
-                "printbindingform",
-                "barcode_filepath",
-                this.BarcodeFilePath);
+                this.MainForm.AppInfo.SetString(
+                    "printbindingform",
+                    "batchno",
+                    this.BatchNo);
 
-            this.MainForm.AppInfo.SetString(
-                "printbindingform",
-                "batchno",
-                this.BatchNo);
+                this.MainForm.AppInfo.SetString(
+                    "printbindingform",
+                    "location_string",
+                    this.LocationString);
 
-            this.MainForm.AppInfo.SetString(
-                "printbindingform",
-                "location_string",
-                this.LocationString);
+                this.MainForm.AppInfo.SetString(
+        "printbindingform",
+        "sort_style",
+        this.comboBox_sort_sortStyle.Text);
 
-            this.MainForm.AppInfo.SetString(
-    "printbindingform",
-    "sort_style",
-    this.comboBox_sort_sortStyle.Text);
-
-            this.MainForm.AppInfo.SetBoolean(
-    "printbindingform",
-    "barcode_fix",
-    this.checkBox_print_barcodeFix.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+        "printbindingform",
+        "barcode_fix",
+        this.checkBox_print_barcodeFix.Checked);
+            }
 
             SaveSize();
 

@@ -494,10 +494,13 @@ this.splitContainer_lists,
 
         private void AmerceForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.MainForm.AppInfo.SetBoolean(
-    "amerce_form",
-    "fill_summary",
-    this.checkBox_fillSummary.Checked);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetBoolean(
+        "amerce_form",
+        "fill_summary",
+        this.checkBox_fillSummary.Checked);
+            }
 
             this.commander.Destroy();
 

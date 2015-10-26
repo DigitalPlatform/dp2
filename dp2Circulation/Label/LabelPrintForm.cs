@@ -265,49 +265,51 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-
-            this.MainForm.AppInfo.SetString(
-                "label_print_form",
-                "label_file_name",
-                this.textBox_labelFile_labelFilename.Text);
-
-            this.MainForm.AppInfo.SetString(
-                "label_print_form",
-                "label_def_file_name",
-                this.textBox_labelDefFilename.Text);
-
-            this.MainForm.AppInfo.SetBoolean(
-                "label_print_form",
-                "print_testing_grid",
-                this.checkBox_testingGrid.Checked);
-
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-            this.MainForm.AppInfo.SetString(
-                "label_print_form",
-                "record_list_column_width",
-                strWidths);
-
-            // 当前活动的property page
-            string strActivePage = "";
-
-            if (this.tabControl_main.SelectedTab == this.tabPage_labelFile)
-                strActivePage = "labelfile";
-            else if (this.tabControl_main.SelectedTab == this.tabPage_itemRecords)
-                strActivePage = "itemrecords";
-
-            this.MainForm.AppInfo.SetString(
-                "label_print_form",
-                "active_page",
-                strActivePage);
-
-            if (this.PrinterInfo != null)
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                string strType = this.PrinterInfo.Type;
-                if (string.IsNullOrEmpty(strType) == true)
-                    strType = "缺省标签";
+                this.MainForm.AppInfo.SetString(
+                    "label_print_form",
+                    "label_file_name",
+                    this.textBox_labelFile_labelFilename.Text);
 
-                this.MainForm.SavePrinterInfo(strType,
-                    this.PrinterInfo);
+                this.MainForm.AppInfo.SetString(
+                    "label_print_form",
+                    "label_def_file_name",
+                    this.textBox_labelDefFilename.Text);
+
+                this.MainForm.AppInfo.SetBoolean(
+                    "label_print_form",
+                    "print_testing_grid",
+                    this.checkBox_testingGrid.Checked);
+
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
+                this.MainForm.AppInfo.SetString(
+                    "label_print_form",
+                    "record_list_column_width",
+                    strWidths);
+
+                // 当前活动的property page
+                string strActivePage = "";
+
+                if (this.tabControl_main.SelectedTab == this.tabPage_labelFile)
+                    strActivePage = "labelfile";
+                else if (this.tabControl_main.SelectedTab == this.tabPage_itemRecords)
+                    strActivePage = "itemrecords";
+
+                this.MainForm.AppInfo.SetString(
+                    "label_print_form",
+                    "active_page",
+                    strActivePage);
+
+                if (this.PrinterInfo != null)
+                {
+                    string strType = this.PrinterInfo.Type;
+                    if (string.IsNullOrEmpty(strType) == true)
+                        strType = "缺省标签";
+
+                    this.MainForm.SavePrinterInfo(strType,
+                        this.PrinterInfo);
+                }
             }
         }
 

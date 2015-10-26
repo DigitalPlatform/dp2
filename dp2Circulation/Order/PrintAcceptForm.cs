@@ -359,11 +359,13 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-
-            this.MainForm.AppInfo.SetString(
-                "printaccept_form",
-                "publication_type",
-                this.comboBox_load_type.Text);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "printaccept_form",
+                    "publication_type",
+                    this.comboBox_load_type.Text);
+            }
 
             SaveSize();
         }

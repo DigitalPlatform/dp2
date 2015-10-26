@@ -332,71 +332,73 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetBoolean(
+                    this.DbType + "statisform",
+                    "inputstyle_barcodefile",
+                    this.radioButton_inputStyle_barcodeFile.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                this.DbType + "statisform",
-                "inputstyle_barcodefile",
-                this.radioButton_inputStyle_barcodeFile.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    this.DbType + "statisform",
+                    "inputstyle_recpathfile",
+                    this.radioButton_inputStyle_recPathFile.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                this.DbType + "statisform",
-                "inputstyle_recpathfile",
-                this.radioButton_inputStyle_recPathFile.Checked);
+                /*
+                this.MainForm.AppInfo.SetBoolean(
+                    "itemstatisform",
+                    "inputstyle_batchno",
+                    this.radioButton_inputStyle_batchNo.Checked);
+                 * */
 
-            /*
-            this.MainForm.AppInfo.SetBoolean(
-                "itemstatisform",
-                "inputstyle_batchno",
-                this.radioButton_inputStyle_batchNo.Checked);
-             * */
-
-            this.MainForm.AppInfo.SetBoolean(
-                this.DbType + "statisform",
-                "inputstyle_itemdatabase",
-                this.radioButton_inputStyle_readerDatabase.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    this.DbType + "statisform",
+                    "inputstyle_itemdatabase",
+                    this.radioButton_inputStyle_readerDatabase.Checked);
 
 
-            // 输入的条码号文件名
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "statisform",
-                "input_barcode_filename",
-                this.textBox_inputBarcodeFilename.Text);
+                // 输入的条码号文件名
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "statisform",
+                    "input_barcode_filename",
+                    this.textBox_inputBarcodeFilename.Text);
 
-            // 输入的记录路径文件名
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "statisform",
-                "input_recpath_filename",
-                this.textBox_inputRecPathFilename.Text);
+                // 输入的记录路径文件名
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "statisform",
+                    "input_recpath_filename",
+                    this.textBox_inputRecPathFilename.Text);
 
-            // 批次号
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "statisform",
-                "input_batchno",
-                this.tabComboBox_inputBatchNo.Text);
+                // 批次号
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "statisform",
+                    "input_batchno",
+                    this.tabComboBox_inputBatchNo.Text);
 
-            // 输入的实体库名
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "statisform",
-                "input_itemdbname",
-                this.comboBox_inputItemDbName.Text);
+                // 输入的实体库名
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "statisform",
+                    "input_itemdbname",
+                    this.comboBox_inputItemDbName.Text);
 
-            // 方案名
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "statisform",
-                "projectname",
-                this.textBox_projectName.Text);
+                // 方案名
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "statisform",
+                    "projectname",
+                    this.textBox_projectName.Text);
 
-            // 馆藏地点列表
-            this.MainForm.AppInfo.SetString(
-                 this.DbType + "statisform",
-                 "locations",
-                 this.textBox_locationNames.Text);
+                // 馆藏地点列表
+                this.MainForm.AppInfo.SetString(
+                     this.DbType + "statisform",
+                     "locations",
+                     this.textBox_locationNames.Text);
 
-            // 册类型列表
-            this.MainForm.AppInfo.SetString(
-                 this.DbType + "statisform",
-                 "itemtypes",
-                 this.textBox_itemTypes.Text);
+                // 册类型列表
+                this.MainForm.AppInfo.SetString(
+                     this.DbType + "statisform",
+                     "itemtypes",
+                     this.textBox_itemTypes.Text);
+            }
 
 #if NO
             if (this.ErrorInfoForm != null)

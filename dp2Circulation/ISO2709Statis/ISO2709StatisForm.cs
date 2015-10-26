@@ -207,35 +207,37 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 输入的ISO2709文件名
+                this.MainForm.AppInfo.SetString(
+                    "iso2709statisform",
+                    "input_iso2709_filename",
+                    this._openMarcFileDialog.FileName);
 
-            // 输入的ISO2709文件名
-            this.MainForm.AppInfo.SetString(
-                "iso2709statisform",
-                "input_iso2709_filename",
-                this._openMarcFileDialog.FileName);
+                // 编码方式
+                this.MainForm.AppInfo.SetString(
+        "iso2709statisform",
+        "input_iso2709_file_encoding",
+        this._openMarcFileDialog.EncodingName);
 
-            // 编码方式
-            this.MainForm.AppInfo.SetString(
+                this.MainForm.AppInfo.SetString(
     "iso2709statisform",
-    "input_iso2709_file_encoding",
-    this._openMarcFileDialog.EncodingName);
+    "input_marc_syntax",
+    this._openMarcFileDialog.MarcSyntax);
 
-            this.MainForm.AppInfo.SetString(
-"iso2709statisform",
-"input_marc_syntax",
-this._openMarcFileDialog.MarcSyntax);
+                this.MainForm.AppInfo.SetBoolean(
+    "iso2709statisform",
+    "input_mode880",
+    this._openMarcFileDialog.Mode880);
 
-            this.MainForm.AppInfo.SetBoolean(
-"iso2709statisform",
-"input_mode880",
-this._openMarcFileDialog.Mode880);
-
-            // 方案名
-            this.MainForm.AppInfo.SetString(
-                "iso2709statisform",
-                "projectname",
-                this.textBox_projectName.Text);
-
+                // 方案名
+                this.MainForm.AppInfo.SetString(
+                    "iso2709statisform",
+                    "projectname",
+                    this.textBox_projectName.Text);
+            }
+            
 #if NO
             if (this.ErrorInfoForm != null)
             {

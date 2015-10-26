@@ -223,10 +223,12 @@ namespace dp2Circulation
 
             ClearAllTempFiles();
 
-            this.MainForm.AppInfo.SetString(
-"operlog_form",
-"ui_state",
-this.UiState);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+    "operlog_form",
+    "ui_state",
+    this.UiState);
 
 #if NO
             MainForm.AppInfo.SetString(
@@ -252,6 +254,7 @@ this.UiState);
             MainForm.AppInfo.SaveMdiChildFormStates(this,
     "mdi_form_state");
 #endif
+            }
 
         }
 

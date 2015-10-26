@@ -243,78 +243,77 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetBoolean(
+                    "readerstatisform",
+                    "inputstyle_barcodefile",
+                    this.radioButton_inputStyle_barcodeFile.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "readerstatisform",
-                "inputstyle_barcodefile",
-                this.radioButton_inputStyle_barcodeFile.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "readerstatisform",
+                    "inputstyle_recpathfile",
+                    this.radioButton_inputStyle_recPathFile.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "readerstatisform",
-                "inputstyle_recpathfile",
-                this.radioButton_inputStyle_recPathFile.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "readerstatisform",
+                    "inputstyle_readerdatabase",
+                    this.radioButton_inputStyle_readerDatabase.Checked);
 
+                // 输入的条码号文件名
+                this.MainForm.AppInfo.SetString(
+                    "readerstatisform",
+                    "input_barcode_filename",
+                    this.textBox_inputBarcodeFilename.Text);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "readerstatisform",
-                "inputstyle_readerdatabase",
-                this.radioButton_inputStyle_readerDatabase.Checked);
+                // 输入的记录路径文件名
+                this.MainForm.AppInfo.SetString(
+                    "readerstatisform",
+                    "input_recpath_filename",
+                    this.textBox_inputRecPathFilename.Text);
 
+                // 输入的读者库名
+                this.MainForm.AppInfo.SetString(
+                    "readerstatisform",
+                    "input_readerdbname",
+                    this.comboBox_inputReaderDbName.Text);
 
-            // 输入的条码号文件名
-            this.MainForm.AppInfo.SetString(
-                "readerstatisform",
-                "input_barcode_filename",
-                this.textBox_inputBarcodeFilename.Text);
+                // 方案名
+                this.MainForm.AppInfo.SetString(
+                    "readerstatisform",
+                    "projectname",
+                    this.textBox_projectName.Text);
 
-            // 输入的记录路径文件名
-            this.MainForm.AppInfo.SetString(
-                "readerstatisform",
-                "input_recpath_filename",
-                this.textBox_inputRecPathFilename.Text);
+                // 部门名称列表
+                this.MainForm.AppInfo.SetString(
+                     "readerstatisform",
+                     "departments",
+                     this.textBox_departmentNames.Text);
 
-            // 输入的读者库名
-            this.MainForm.AppInfo.SetString(
-                "readerstatisform",
-                "input_readerdbname",
-                this.comboBox_inputReaderDbName.Text);
+                // 读者类型列表
+                this.MainForm.AppInfo.SetString(
+                     "readerstatisform",
+                     "readertypes",
+                     this.textBox_readerTypes.Text);
 
-            // 方案名
-            this.MainForm.AppInfo.SetString(
-                "readerstatisform",
-                "projectname",
-                this.textBox_projectName.Text);
+                // 办证日期范围
+                this.MainForm.AppInfo.SetString(
+                     "readerstatisform",
+                     "create_timerange",
+                     this.textBox_createTimeRange.Text);
 
-            // 部门名称列表
-            this.MainForm.AppInfo.SetString(
-                 "readerstatisform",
-                 "departments",
-                 this.textBox_departmentNames.Text);
+                // 失效日期范围
+                this.MainForm.AppInfo.GetString(
+                    "readerstatisform",
+                    "expire_timerange",
+                    this.textBox_expireTimeRange.Text);
 
-            // 读者类型列表
-            this.MainForm.AppInfo.SetString(
-                 "readerstatisform",
-                 "readertypes",
-                 this.textBox_readerTypes.Text);
-
-            // 办证日期范围
-            this.MainForm.AppInfo.SetString(
-                 "readerstatisform",
-                 "create_timerange",
-                 this.textBox_createTimeRange.Text);
-
-
-            // 失效日期范围
-            this.MainForm.AppInfo.GetString(
-                "readerstatisform",
-                "expire_timerange",
-                this.textBox_expireTimeRange.Text);
-
-            // 如何输出表格
-            this.MainForm.AppInfo.SetBoolean(
-                "readerstatisform",
-                "departmentTable",
-                this.checkBox_departmentTable.Checked);
+                // 如何输出表格
+                this.MainForm.AppInfo.SetBoolean(
+                    "readerstatisform",
+                    "departmentTable",
+                    this.checkBox_departmentTable.Checked);
+            }
 
 #if NO
             if (this.ErrorInfoForm != null)

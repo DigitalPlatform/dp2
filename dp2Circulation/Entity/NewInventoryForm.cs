@@ -57,15 +57,18 @@ namespace dp2Circulation
 
         private void NewInventoryForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.MainForm.AppInfo.SetString(
-"inventory_form",
-"barcode_filepath",
-this.BarcodeFilePath);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+    "inventory_form",
+    "barcode_filepath",
+    this.BarcodeFilePath);
 
-            this.MainForm.AppInfo.SetString(
-                "inventory_form",
-                "recpath_filepath",
-                this.RecPathFilePath);
+                this.MainForm.AppInfo.SetString(
+                    "inventory_form",
+                    "recpath_filepath",
+                    this.RecPathFilePath);
+            }
         }
 
         public override void ClearBefore()

@@ -252,12 +252,17 @@ namespace dp2Circulation
         {
             this._chargingForm.Close();
 
-            this.MainForm.AppInfo.SetString(
-"inventory_form",
-"ui_state",
-this.UiState);
-            this.MainForm.AppInfo.SetString("inventory_form", "batch_no", this.inventoryBatchNoControl_start_batchNo.Text);
-
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+    "inventory_form",
+    "ui_state",
+    this.UiState);
+                this.MainForm.AppInfo.SetString(
+                    "inventory_form", 
+                    "batch_no", 
+                    this.inventoryBatchNoControl_start_batchNo.Text);
+            }
         }
 
         /// <summary>

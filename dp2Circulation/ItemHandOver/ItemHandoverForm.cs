@@ -297,37 +297,39 @@ namespace dp2Circulation
             if (this._scanBarcodeForm != null)
                 this._scanBarcodeForm.Close();
 
-            // 2009/2/2
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "publication_type",
-                this.comboBox_load_type.Text);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 2009/2/2
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "publication_type",
+                    this.comboBox_load_type.Text);
 
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "barcode_filepath",
+                    this.BarcodeFilePath);
 
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "barcode_filepath",
-                this.BarcodeFilePath);
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "recpath_filepath",
+                    this.RecPathFilePath);
 
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "recpath_filepath",
-                this.RecPathFilePath);
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "batchno",
+                    this.BatchNo);
 
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "batchno",
-                this.BatchNo);
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "location_string",
+                    this.LocationString);
 
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "location_string",
-                this.LocationString);
-
-            this.MainForm.AppInfo.SetBoolean(
-                "itemhandoverform",
-                "auto_uppercase_barcode",
-                this.checkBox_verify_autoUppercaseBarcode.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "itemhandoverform",
+                    "auto_uppercase_barcode",
+                    this.checkBox_verify_autoUppercaseBarcode.Checked);
+            }
 
             SaveSize();
         }

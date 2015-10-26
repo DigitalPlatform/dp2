@@ -267,26 +267,28 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetBoolean(
+        "dup_form",
+        "include_low_cols",
+        this.checkBox_includeLowCols.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+        "dup_form",
+        "return_all_records",
+        this.checkBox_returnAllRecords.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-    "dup_form",
-    "include_low_cols",
-    this.checkBox_includeLowCols.Checked);
-            this.MainForm.AppInfo.SetBoolean(
-    "dup_form",
-    "return_all_records",
-    this.checkBox_returnAllRecords.Checked);
+                this.MainForm.AppInfo.SetString(
+                    "dup_form",
+                    "projectname",
+                    this.comboBox_projectName.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "dup_form",
-                "projectname",
-                this.comboBox_projectName.Text);
-
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
-            this.MainForm.AppInfo.SetString(
-                "dup_form",
-                "browse_list_column_width",
-                strWidths);
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
+                this.MainForm.AppInfo.SetString(
+                    "dup_form",
+                    "browse_list_column_width",
+                    strWidths);
+            }
 
             EventFinish.Set();
         }

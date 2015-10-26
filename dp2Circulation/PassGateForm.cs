@@ -133,25 +133,26 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "passgate_form",
+                    "gate_name",
+                    this.textBox_gateName.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "passgate_form",
-                "gate_name",
-                this.textBox_gateName.Text);
-
-            this.MainForm.AppInfo.SetBoolean(
-                "passgate_form",
-                "display_reader_detail_info",
-                this.checkBox_displayReaderDetailInfo.Checked);
-            this.MainForm.AppInfo.SetBoolean(
-                "passgate_form",
-                "hide_barcode",
-                this.checkBox_hideBarcode.Checked);
-            this.MainForm.AppInfo.SetBoolean(
-                "passgate_form",
-                "hide_readername",
-                this.checkBox_hideReaderName.Checked); 
-
+                this.MainForm.AppInfo.SetBoolean(
+                    "passgate_form",
+                    "display_reader_detail_info",
+                    this.checkBox_displayReaderDetailInfo.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "passgate_form",
+                    "hide_barcode",
+                    this.checkBox_hideBarcode.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "passgate_form",
+                    "hide_readername",
+                    this.checkBox_hideReaderName.Checked);
+            }
         }
 
 #if NO

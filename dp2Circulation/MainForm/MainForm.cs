@@ -1946,7 +1946,8 @@ Stack:
         {
             if (_acceptForm != null)
             {
-                this.AppInfo.UnlinkFormState(_acceptForm);
+                if (this.AppInfo != null)
+                    this.AppInfo.UnlinkFormState(_acceptForm);
                 this._acceptForm = null;
             }
         }

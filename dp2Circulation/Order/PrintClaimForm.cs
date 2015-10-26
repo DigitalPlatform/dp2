@@ -204,93 +204,90 @@ false);
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "printclaimform",
+                    "publication_type",
+                    this.comboBox_source_type.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "printclaimform",
-                "publication_type",
-                this.comboBox_source_type.Text);
+                this.MainForm.AppInfo.SetBoolean(
+                    "printclaimform",
+                    "guess",
+                    this.checkBox_source_guess.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "printclaimform",
-                "guess",
-                this.checkBox_source_guess.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "printclaimform",
+                    "inputstyle_bibliorecpathfile",
+                    this.radioButton_inputStyle_biblioRecPathFile.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "printclaimform",
-                "inputstyle_bibliorecpathfile",
-                this.radioButton_inputStyle_biblioRecPathFile.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "printclaimform",
+                    "inputstyle_bibliodatabase",
+                    this.radioButton_inputStyle_biblioDatabase.Checked);
 
+                // 输入的记录路径文件名
+                this.MainForm.AppInfo.SetString(
+                    "printclaimform",
+                    "input_recpath_filename",
+                    this.textBox_inputBiblioRecPathFilename.Text);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "printclaimform",
-                "inputstyle_bibliodatabase",
-                this.radioButton_inputStyle_biblioDatabase.Checked);
-
-
-
-            // 输入的记录路径文件名
-            this.MainForm.AppInfo.SetString(
-                "printclaimform",
-                "input_recpath_filename",
-                this.textBox_inputBiblioRecPathFilename.Text);
-
-            // 输入的书目库名
-            this.MainForm.AppInfo.SetString(
-                "printclaimform",
-                "input_bibliodbname",
-                this.comboBox_inputBiblioDbName.Text);
-
-            // 
-            this.MainForm.AppInfo.SetBoolean(
-"printclaimform",
-"inputstyle_orderrecpathfile",
-this.radioButton_inputStyle_orderRecPathFile.Checked);
-
-
-            this.MainForm.AppInfo.SetBoolean(
-                "printclaimform",
-                "inputstyle_orderdatabase",
-                this.radioButton_inputStyle_orderDatabase.Checked);
-
-            // 输入的订购库记录路径文件名
-            this.MainForm.AppInfo.SetString(
-                "printclaimform",
-                "input_orderrecpath_filename",
-                this.textBox_inputOrderRecPathFilename.Text);
-
-            // 输入的订购库名
-            this.MainForm.AppInfo.SetString(
-                "printclaimform",
-                "input_orderdbname",
-                this.comboBox_inputOrderDbName.Text);
-
-            // *** 时间范围页
-
-            this.MainForm.AppInfo.SetBoolean(
-                "printclaimform",
-                "time_range_userPublishTime",
-                this.checkBox_timeRange_usePublishTime.Checked);
-
-            this.MainForm.AppInfo.SetBoolean(
+                // 输入的书目库名
+                this.MainForm.AppInfo.SetString(
+                    "printclaimform",
+                    "input_bibliodbname",
+                    this.comboBox_inputBiblioDbName.Text);
+                // 
+                this.MainForm.AppInfo.SetBoolean(
     "printclaimform",
-    "time_range_userOrderTime",
-    this.checkBox_timeRange_useOrderTime.Checked);
+    "inputstyle_orderrecpathfile",
+    this.radioButton_inputStyle_orderRecPathFile.Checked);
 
-            this.MainForm.AppInfo.SetString(
-    "printclaimform",
-    "time_range_afterOrder",
-    this.comboBox_timeRange_afterOrder.Text);
+                this.MainForm.AppInfo.SetBoolean(
+                    "printclaimform",
+                    "inputstyle_orderdatabase",
+                    this.radioButton_inputStyle_orderDatabase.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-    "printclaimform",
-    "time_range_none",
-    this.checkBox_timeRange_none.Checked);
+                // 输入的订购库记录路径文件名
+                this.MainForm.AppInfo.SetString(
+                    "printclaimform",
+                    "input_orderrecpath_filename",
+                    this.textBox_inputOrderRecPathFilename.Text);
 
-            // 时间范围
-            this.MainForm.AppInfo.SetString(
-                "printclaimform",
-                "time_range",
-                this.textBox_timeRange.Text);
+                // 输入的订购库名
+                this.MainForm.AppInfo.SetString(
+                    "printclaimform",
+                    "input_orderdbname",
+                    this.comboBox_inputOrderDbName.Text);
+
+                // *** 时间范围页
+
+                this.MainForm.AppInfo.SetBoolean(
+                    "printclaimform",
+                    "time_range_userPublishTime",
+                    this.checkBox_timeRange_usePublishTime.Checked);
+
+                this.MainForm.AppInfo.SetBoolean(
+        "printclaimform",
+        "time_range_userOrderTime",
+        this.checkBox_timeRange_useOrderTime.Checked);
+
+                this.MainForm.AppInfo.SetString(
+        "printclaimform",
+        "time_range_afterOrder",
+        this.comboBox_timeRange_afterOrder.Text);
+
+                this.MainForm.AppInfo.SetBoolean(
+        "printclaimform",
+        "time_range_none",
+        this.checkBox_timeRange_none.Checked);
+
+                // 时间范围
+                this.MainForm.AppInfo.SetString(
+                    "printclaimform",
+                    "time_range",
+                    this.textBox_timeRange.Text);
+            }
 
             SaveSize();
         }

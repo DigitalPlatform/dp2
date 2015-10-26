@@ -372,16 +372,18 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "printorder_form",
+                    "publication_type",
+                    this.comboBox_load_type.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "printorder_form",
-                "publication_type",
-                this.comboBox_load_type.Text);
-
-            this.MainForm.AppInfo.SetBoolean(
-    "printorder_form",
-    "print_accepted",
-    this.checkBox_print_accepted.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+        "printorder_form",
+        "print_accepted",
+        this.checkBox_print_accepted.Checked);
+            }
 
             SaveSize();
         }

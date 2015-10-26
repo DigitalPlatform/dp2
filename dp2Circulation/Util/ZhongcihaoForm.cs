@@ -187,31 +187,32 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 类号
+                this.MainForm.AppInfo.SetString(
+                    "zhongcihao_form",
+                    "classnumber",
+                    this.textBox_classNumber.Text);
 
-            // 类号
-            this.MainForm.AppInfo.SetString(
-                "zhongcihao_form",
-                "classnumber",
-                this.textBox_classNumber.Text);
+                // 线索书目库名
+                this.MainForm.AppInfo.SetString(
+                    "zhongcihao_form",
+                    "biblio_dbname",
+                    this.comboBox_biblioDbName.Text);
 
-            // 线索书目库名
-            this.MainForm.AppInfo.SetString(
-                "zhongcihao_form",
-                "biblio_dbname",
-                this.comboBox_biblioDbName.Text);
+                // 是否要返回浏览列
+                this.MainForm.AppInfo.SetBoolean(
+            "zhongcihao_form",
+            "return_browse_cols",
+            this.checkBox_returnBrowseCols.Checked);
 
-            // 是否要返回浏览列
-            this.MainForm.AppInfo.SetBoolean(
-        "zhongcihao_form",
-        "return_browse_cols",
-        this.checkBox_returnBrowseCols.Checked);
-
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_number);
-            this.MainForm.AppInfo.SetString(
-                "zhongcihao_form",
-                "record_list_column_width",
-                strWidths);
-
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_number);
+                this.MainForm.AppInfo.SetString(
+                    "zhongcihao_form",
+                    "record_list_column_width",
+                    strWidths);
+            }
 
             EventFinish.Set();
         }

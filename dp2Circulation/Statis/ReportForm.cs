@@ -138,7 +138,10 @@ namespace dp2Circulation
             }
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
-                this.MainForm.AppInfo.SetString(GetReportSection(), "ui_state", this.UiState);
+                this.MainForm.AppInfo.SetString(
+                    GetReportSection(), 
+                    "ui_state", 
+                    this.UiState);
 
             // 删除所有输出文件
             if (this.OutputFileNames != null)

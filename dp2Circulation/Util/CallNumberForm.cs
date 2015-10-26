@@ -300,31 +300,32 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-
-            // 类号
-            this.MainForm.AppInfo.SetString(
-                "callnumberform",
-                "classnumber",
-                this.textBox_classNumber.Text);
-
-            // 线索馆藏地点
-            this.MainForm.AppInfo.SetString(
-                "callnumberform",
-                "location",
-                this.comboBox_location.Text);
-
-            // 是否要返回浏览列
-            this.MainForm.AppInfo.SetBoolean(
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 类号
+                this.MainForm.AppInfo.SetString(
                     "callnumberform",
-                    "return_browse_cols",
-                    this.checkBox_returnBrowseCols.Checked);
+                    "classnumber",
+                    this.textBox_classNumber.Text);
 
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_number);
-            this.MainForm.AppInfo.SetString(
-                "callnumberform",
-                "record_list_column_width",
-                strWidths);
+                // 线索馆藏地点
+                this.MainForm.AppInfo.SetString(
+                    "callnumberform",
+                    "location",
+                    this.comboBox_location.Text);
 
+                // 是否要返回浏览列
+                this.MainForm.AppInfo.SetBoolean(
+                        "callnumberform",
+                        "return_browse_cols",
+                        this.checkBox_returnBrowseCols.Checked);
+
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_number);
+                this.MainForm.AppInfo.SetString(
+                    "callnumberform",
+                    "record_list_column_width",
+                    strWidths);
+            }
 
             EventFinish.Set();
         }

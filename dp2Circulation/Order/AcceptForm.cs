@@ -321,11 +321,12 @@ namespace dp2Circulation
             }
 
             //
-
-            this.MainForm.AppInfo.SetInt(
-                "AcceptForm",
-                "accept_window_height",
-                this.Size.Height);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetInt(
+                    "AcceptForm",
+                    "accept_window_height",
+                    this.Size.Height);
 
 #if NO
             this.MainForm.AppInfo.SetString(
@@ -374,10 +375,11 @@ this.checkBox_prepare_createCallNumber.Checked);
                 "match_style",
                 this.comboBox_accept_matchStyle.Text);
 #endif
-            this.MainForm.AppInfo.SetString(
-    "accept_form",
-    "ui_state",
-    this.UiState);
+                this.MainForm.AppInfo.SetString(
+        "accept_form",
+        "ui_state",
+        this.UiState);
+            }
         }
 
         /// <summary>

@@ -168,51 +168,53 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 起始日期
+                this.MainForm.AppInfo.SetString(
+                    "settlementform",
+                    "start_date",
+                    this.dateControl_start.Text);
+                // 结束日期
+                this.MainForm.AppInfo.SetString(
+                    "settlementform",
+                    "end_date",
+                    this.dateControl_end.Text);
 
-            // 起始日期
-            this.MainForm.AppInfo.SetString(
-                "settlementform",
-                "start_date",
-                this.dateControl_start.Text);
-            // 结束日期
-            this.MainForm.AppInfo.SetString(
-                "settlementform",
-                "end_date",
-                this.dateControl_end.Text);
+                // 起始索引号
+                this.MainForm.AppInfo.SetString(
+                    "settlementform",
+                    "start_ctlno",
+                    this.textBox_range_startCtlno.Text);
 
-            // 起始索引号
-            this.MainForm.AppInfo.SetString(
-                "settlementform",
-                "start_ctlno",
-                this.textBox_range_startCtlno.Text);
+                // 结束索引号
+                this.MainForm.AppInfo.SetString(
+                    "settlementform",
+                    "end_ctlno",
+                    this.textBox_range_endCtlno.Text);
 
-            // 结束索引号
-            this.MainForm.AppInfo.SetString(
-                "settlementform",
-                "end_ctlno",
-                this.textBox_range_endCtlno.Text);
+                this.MainForm.AppInfo.SetBoolean(
+                    "settlementform",
+                    "range_amerceopertime",
+                    this.radioButton_range_amerceOperTime.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "settlementform",
-                "range_amerceopertime",
-                this.radioButton_range_amerceOperTime.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "settlementform",
+                    "range_ctlno",
+                    this.radioButton_range_ctlno.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
-                "settlementform",
-                "range_ctlno",
-                this.radioButton_range_ctlno.Checked);
+                // 状态
+                this.MainForm.AppInfo.SetString(
+                    "settlementform",
+                    "range_state",
+                    this.comboBox_range_state.Text);
 
-            // 状态
-            this.MainForm.AppInfo.SetString(
-                "settlementform",
-                "range_state",
-                this.comboBox_range_state.Text);
-
-            // 按照收费者小计
-            this.MainForm.AppInfo.SetBoolean(
-                "settlementform",
-                "sumby_amerceoperator",
-                this.checkBox_sumByAmerceOperator.Checked);
+                // 按照收费者小计
+                this.MainForm.AppInfo.SetBoolean(
+                    "settlementform",
+                    "sumby_amerceoperator",
+                    this.checkBox_sumByAmerceOperator.Checked);
+            }
 
             SaveSize();
         }

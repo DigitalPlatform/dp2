@@ -84,10 +84,13 @@ namespace dp2Circulation
     "client_file_path",
     this.textBox_clientFilePath.Text);
 #endif
-            this.MainForm.AppInfo.SetString(
-    "utilityform",
-    "ui_state",
-    this.UiState);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+        "utilityform",
+        "ui_state",
+        this.UiState);
+            }
         }
 
         private void button_sjhm_getOriginInfo_Click(object sender, EventArgs e)

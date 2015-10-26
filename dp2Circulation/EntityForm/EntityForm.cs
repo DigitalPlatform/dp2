@@ -2537,88 +2537,91 @@ true);
                 this._genData.Close();
             }
 
-            // 保存检索途径
-            this.MainForm.AppInfo.SetString(
-                "entityform",
-                "search_from",
-                this.comboBox_from.Text);
-
-            this.MainForm.AppInfo.SetString(
-                "entityform",
-                "search_dbnames",
-                this.checkedComboBox_biblioDbNames.Text);
-
-            this.MainForm.AppInfo.SetString(
-                "entityform",
-                "search_matchstyle",
-                this.comboBox_matchStyle.Text);
-
-            /*
-            // 2008/6/25 
-            this.MainForm.AppInfo.SetBoolean(
-                "entityform",
-                "auto_detect_query_barcode",
-                this.checkBox_autoDetectQueryBarcode.Checked);
-             * */
-
-            this.MainForm.AppInfo.SetBoolean(
-                "entityform",
-                "auto_save_prev",
-                this.checkBox_autoSavePrev.Checked);
-
-            // 2008/11/2 
-            // RegisterType
-            this.MainForm.AppInfo.SetString("entity_form",
-                "register_type",
-                this.RegisterType.ToString());
-
-            string strSelectedTemplates = selected_templates.Export();
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "selected_templates",
-                strSelectedTemplates);
-
-            // 2010/4/27
-            this.MainForm.AppInfo.SetBoolean("entity_form",
-                "issueControl_input_item_barcode",
-                this.issueControl1.InputItemsBarcode);
-            this.MainForm.AppInfo.SetBoolean(
-    "entity_form",
-    "issueControl_set_processing_state",
-    this.issueControl1.SetProcessingState);
-            // 2012/5/7
-            this.MainForm.AppInfo.SetBoolean(
-                "entity_form",
-                "create_callnumber",
-                this.issueControl1.CreateCallNumber);
-
-            // SaveLayout();
-            if (this.AcceptMode == false)
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
+                // 保存检索途径
+                this.MainForm.AppInfo.SetString(
+                    "entityform",
+                    "search_from",
+                    this.comboBox_from.Text);
+
+                this.MainForm.AppInfo.SetString(
+                    "entityform",
+                    "search_dbnames",
+                    this.checkedComboBox_biblioDbNames.Text);
+
+                this.MainForm.AppInfo.SetString(
+                    "entityform",
+                    "search_matchstyle",
+                    this.comboBox_matchStyle.Text);
+
+                /*
+                // 2008/6/25 
+                this.MainForm.AppInfo.SetBoolean(
+                    "entityform",
+                    "auto_detect_query_barcode",
+                    this.checkBox_autoDetectQueryBarcode.Checked);
+                 * */
+
+                this.MainForm.AppInfo.SetBoolean(
+                    "entityform",
+                    "auto_save_prev",
+                    this.checkBox_autoSavePrev.Checked);
+
+                // 2008/11/2 
+                // RegisterType
+                this.MainForm.AppInfo.SetString("entity_form",
+                    "register_type",
+                    this.RegisterType.ToString());
+
+                string strSelectedTemplates = selected_templates.Export();
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "selected_templates",
+                    strSelectedTemplates);
+
+                // 2010/4/27
+                this.MainForm.AppInfo.SetBoolean("entity_form",
+                    "issueControl_input_item_barcode",
+                    this.issueControl1.InputItemsBarcode);
+                this.MainForm.AppInfo.SetBoolean(
+        "entity_form",
+        "issueControl_set_processing_state",
+        this.issueControl1.SetProcessingState);
+                // 2012/5/7
+                this.MainForm.AppInfo.SetBoolean(
+                    "entity_form",
+                    "create_callnumber",
+                    this.issueControl1.CreateCallNumber);
+
+                // SaveLayout();
+                if (this.AcceptMode == false)
+                {
 #if NO
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
                     "mdi_form_state");
 #endif
-            }
-            else
-            {
-                Form form = this;
-                FormWindowState savestate = form.WindowState;
-                bool bStateChanged = false;
-                if (form.WindowState != FormWindowState.Normal)
+                }
+                else
                 {
-                    form.WindowState = FormWindowState.Normal;
-                    bStateChanged = true;
+                    Form form = this;
+                    FormWindowState savestate = form.WindowState;
+                    bool bStateChanged = false;
+                    if (form.WindowState != FormWindowState.Normal)
+                    {
+                        form.WindowState = FormWindowState.Normal;
+                        bStateChanged = true;
+                    }
+
+                    AppInfo_SaveMdiSize(this, null);
+
+                    if (bStateChanged == true)
+                        form.WindowState = savestate;
                 }
 
-                AppInfo_SaveMdiSize(this, null);
-
-                if (bStateChanged == true)
-                    form.WindowState = savestate;
+                this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
+                this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
             }
-
-            this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
 
             if (this.easyMarcControl1 != null)
             {

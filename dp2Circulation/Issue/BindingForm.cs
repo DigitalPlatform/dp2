@@ -377,12 +377,12 @@ MessageBoxDefaultButton.Button2);
                 this.AppInfo.SetBoolean("bindingform",
                     "edit_area_visible",
                     this.m_bEditAreaVisible);
-            }
 
-            this.AppInfo.SetString(
-                "binding_form",
-                "accept_batchno",
-                this.AcceptBatchNo);
+                this.AppInfo.SetString(
+                    "binding_form",
+                    "accept_batchno",
+                    this.AcceptBatchNo);
+            }
         }
 
         void orderDesignControl1_GetValueTable(object sender, GetValueTableEventArgs e)

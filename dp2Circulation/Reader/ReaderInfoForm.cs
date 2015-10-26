@@ -371,12 +371,14 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-
-            string strSelectedTemplates = selected_templates.Export();
-            this.MainForm.AppInfo.SetString(
-                "readerinfo_form",
-                "selected_templates",
-                strSelectedTemplates);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                string strSelectedTemplates = selected_templates.Export();
+                this.MainForm.AppInfo.SetString(
+                    "readerinfo_form",
+                    "selected_templates",
+                    strSelectedTemplates);
+            }
 
             this.readerEditControl1.GetValueTable -= new GetValueTableEventHandler(readerEditControl1_GetValueTable);
 

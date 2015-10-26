@@ -107,7 +107,6 @@ namespace dp2Circulation
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-
                 this.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "display_price_string",
@@ -122,7 +121,6 @@ namespace dp2Circulation
                     "check_borrowinfo_form",
                     "overwrite_exist_price",
                     this.checkBox_overwriteExistPrice.Checked);
-
             }
         }
 

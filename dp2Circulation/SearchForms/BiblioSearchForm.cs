@@ -290,43 +290,47 @@ this.splitContainer_main,
 
         private void BiblioSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.commander.Destroy();
+            if (this.commander != null)
+                this.commander.Destroy();
 
-            this.MainForm.AppInfo.SetString(
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+        "bibliosearchform",
+        "usedMarcQueryFilename",
+        this.m_strUsedMarcQueryFilename);
+
+                // 保存检索途径
+                this.MainForm.AppInfo.SetString(
+                    "bibliosearchform",
+                    "search_from",
+                    this.comboBox_from.Text);
+
+                this.MainForm.AppInfo.SetString(
+                    "bibliosearchform",
+                    "biblio_db_name",
+                    this.checkedComboBox_biblioDbNames.Text);
+
+                this.MainForm.AppInfo.SetString(
+                    "bibliosearchform",
+                    "match_style",
+                    this.comboBox_matchStyle.Text);
+
+                this.MainForm.AppInfo.SetString(
     "bibliosearchform",
-    "usedMarcQueryFilename",
-    this.m_strUsedMarcQueryFilename);
-
-            // 保存检索途径
-            this.MainForm.AppInfo.SetString(
-                "bibliosearchform",
-                "search_from",
-                this.comboBox_from.Text);
-
-            this.MainForm.AppInfo.SetString(
-                "bibliosearchform",
-                "biblio_db_name",
-                this.checkedComboBox_biblioDbNames.Text);
-
-            this.MainForm.AppInfo.SetString(
-                "bibliosearchform",
-                "match_style",
-                this.comboBox_matchStyle.Text);
+    "query_lines",
+    this.dp2QueryControl1.GetSaveString());
 
 
-
-            this.MainForm.AppInfo.SetString(
-"bibliosearchform",
-"query_lines",
-this.dp2QueryControl1.GetSaveString());
+                this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
+                this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
+            }
 
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Close();
 
-            this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
-
-            this.MainForm.FixedSelectedPageChanged -= new EventHandler(MainForm_FixedSelectedPageChanged);
+            if (this.MainForm != null)
+                this.MainForm.FixedSelectedPageChanged -= new EventHandler(MainForm_FixedSelectedPageChanged);
         }
 
 

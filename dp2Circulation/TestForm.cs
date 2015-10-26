@@ -93,34 +93,37 @@ namespace dp2Circulation
 
         private void TestForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.MainForm.AppInfo.SetString(
-                "TestForm",
-                "diskspace_tempfilename",
-                this.textBox_diskSpace_tempFileName.Text);
-            this.MainForm.AppInfo.SetString(
-                "TestForm",
-                "diskspace_size",
-                this.textBox_diskSpace_size.Text);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "TestForm",
+                    "diskspace_tempfilename",
+                    this.textBox_diskSpace_tempFileName.Text);
+                this.MainForm.AppInfo.SetString(
+                    "TestForm",
+                    "diskspace_size",
+                    this.textBox_diskSpace_size.Text);
 
-            // CheckedComboBox page
-            this.MainForm.AppInfo.SetString(
-                "TestForm",
-                "checkedcombobox_listvalues",
-                this.textBox_checkedComboBox_listValues.Text);
+                // CheckedComboBox page
+                this.MainForm.AppInfo.SetString(
+                    "TestForm",
+                    "checkedcombobox_listvalues",
+                    this.textBox_checkedComboBox_listValues.Text);
 
-            this.MainForm.AppInfo.SetString(
-    "TestForm",
-    "ftp_server_path",
-    this.textBox_serverFilePath.Text);
-            this.MainForm.AppInfo.SetString(
-                "TestForm",
-                "ftp_client_path",
-                this.textBox_clientFilePath.Text);
+                this.MainForm.AppInfo.SetString(
+        "TestForm",
+        "ftp_server_path",
+        this.textBox_serverFilePath.Text);
+                this.MainForm.AppInfo.SetString(
+                    "TestForm",
+                    "ftp_client_path",
+                    this.textBox_clientFilePath.Text);
 
-            this.MainForm.AppInfo.SetString(
-    "TestForm",
-    "ui_state",
-    this.UiState);
+                this.MainForm.AppInfo.SetString(
+        "TestForm",
+        "ui_state",
+        this.UiState);
+            }
         }
 
         // 可增加显示磁盘空间的功能

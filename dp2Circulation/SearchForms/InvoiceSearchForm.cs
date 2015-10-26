@@ -79,21 +79,24 @@ namespace dp2Circulation
 
         private void InvoiceSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.MainForm.AppInfo.SetString(
-    this.DbType + "_search_form",
-    "from",
-    this.comboBox_from.Text);
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+        this.DbType + "_search_form",
+        "from",
+        this.comboBox_from.Text);
 
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "_search_form",
-                "match_style",
-                this.comboBox_matchStyle.Text);
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "_search_form",
+                    "match_style",
+                    this.comboBox_matchStyle.Text);
 
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-            this.MainForm.AppInfo.SetString(
-                this.DbType + "_search_form",
-                "record_list_column_width",
-                strWidths);
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
+                this.MainForm.AppInfo.SetString(
+                    this.DbType + "_search_form",
+                    "record_list_column_width",
+                    strWidths);
+            }
         }
 
         void FillFromList()

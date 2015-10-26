@@ -74,25 +74,26 @@ namespace dp2Circulation
 
         private void TestSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                this.MainForm.AppInfo.SetString(
+                    "testsearchform",
+                    "queryfilename",
+                    this.textBox_biblioSearch_queryFilename.Text);
 
-            this.MainForm.AppInfo.SetString(
-                "testsearchform",
-                "queryfilename",
-                this.textBox_biblioSearch_queryFilename.Text);
+                this.MainForm.AppInfo.SetString(
+        "testsearchform",
+        "beforeabort",
+        this.textBox_searchBiblio_beforeAbort.Text);
 
-            this.MainForm.AppInfo.SetString(
-    "testsearchform",
-    "beforeabort",
-    this.textBox_searchBiblio_beforeAbort.Text);
+                this.MainForm.AppInfo.SetString(
+        "testsearchform",
+        "looptimes",
+        this.textBox_searchBiblio_loopTimes.Text);
 
-            this.MainForm.AppInfo.SetString(
-    "testsearchform",
-    "looptimes",
-    this.textBox_searchBiblio_loopTimes.Text);
-
-            this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
-
+                this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
+                this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
+            }
         }
 
         void AppInfo_SaveMdiSize(object sender, EventArgs e)

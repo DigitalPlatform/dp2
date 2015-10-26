@@ -64,7 +64,6 @@ namespace dp2Circulation
 
         private void Marc856SearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-
             if (this.m_commentViewer != null)
             {
                 this.m_commentViewer.ExitWebBrowser();  // 虽然 CommentViwerForm 的 Dispose() 里面也作了释放，但为了保险起见，这里也释放一次
