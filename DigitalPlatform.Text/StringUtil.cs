@@ -16,6 +16,8 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        #region 和 Application 有关的功能
+
         public static bool IsDevelopMode()
         {
 #if NO
@@ -67,6 +69,7 @@ namespace DigitalPlatform.Text
 
             return args;
         }
+        #endregion
 
         // 在列表中寻找指定前缀的元素
         public static List<string> FindPrefixInList(List<string> list,

@@ -110,6 +110,10 @@ namespace dp2Circulation
             {
                 this.comboBox_fieldValue.Items.Add("<不改变>");
                 this.comboBox_fieldValue.Items.Add("<增、减>");
+
+                if (StringUtil.IsInList("removable", this._actionCfg.Style) == true)
+                    this.comboBox_fieldValue.Items.Add("<删除>");
+
                 this.label_add.Visible = true;
                 this.checkedComboBox_stateAdd.Visible = true;
                 this.label_remove.Visible = true;
@@ -137,6 +141,7 @@ namespace dp2Circulation
             {
                 this.ToolStripMenuItem_rfc1123Single.Enabled = true;
                 this.ToolStripMenuItem_readerRights.Enabled = true;
+                this.ToolStripMenuItem_objectRights.Enabled = true;
                 return;
             }
 
@@ -149,6 +154,11 @@ namespace dp2Circulation
                 this.ToolStripMenuItem_readerRights.Enabled = true;
             else
                 this.ToolStripMenuItem_readerRights.Enabled = false;
+
+            if (StringUtil.IsInList("objectRights", cfg.List) == true)
+                this.ToolStripMenuItem_objectRights.Enabled = true;
+            else
+                this.ToolStripMenuItem_objectRights.Enabled = false;
         }
 
         // 校验数据的正确性
@@ -175,8 +185,30 @@ namespace dp2Circulation
                         return 1;
                     }
                 }
+
+                if (string.IsNullOrEmpty(this._actionCfg.Length) == false)
+                {
+                    strError = VerifyValueLength(this._actionCfg.Length);
+                    if (string.IsNullOrEmpty(strError) == false)
+                        return 1;
+                }
             }
             return 0;
+        }
+
+        // return:
+        //      空       没错
+        //      其他      有错
+        string VerifyValueLength(string strLength)
+        {
+            int nLength = 0;
+            if (int.TryParse(strLength, out nLength) == true)
+            {
+                if (this.comboBox_fieldValue.Text.Length != nLength)
+                    return "值 '"+this.comboBox_fieldValue.Text+"' 的字符数应为 " + nLength;
+            }
+
+            return null;
         }
 
         private void OneActionDialog_Load(object sender, EventArgs e)
@@ -312,12 +344,12 @@ namespace dp2Circulation
                 return -1;
             }
 
-            XmlNode cfg_node = null;
+            XmlElement cfg_node = null;
 
             if (strFieldName[0] == '{' || strFieldName[0] == '<')
             {
                 string strElement = Unquote(strFieldName);
-                cfg_node = cfg_dom.DocumentElement.SelectSingleNode("action[@element='"+strElement+"']");
+                cfg_node = cfg_dom.DocumentElement.SelectSingleNode("action[@element='"+strElement+"']") as XmlElement;
                 if (cfg_node == null)
                 {
                     strError = "元素名 '" + strFieldName + "' 在配置文件中没有定义";
@@ -333,14 +365,16 @@ namespace dp2Circulation
                     strError = "字段名 '" + strFieldName + "' 在配置文件中没有定义";
                     return 0;
                 }
-                cfg_node = node.ParentNode;
+                cfg_node = node.ParentNode as XmlElement;
             }
 
             cfg = new OneActionCfg();
-            cfg.Element = DomUtil.GetAttr(cfg_node, "element");
-            cfg.Type = DomUtil.GetAttr(cfg_node, "type");
-            cfg.List = DomUtil.GetAttr(cfg_node, "list");
-            cfg.Additional = DomUtil.GetAttr(cfg_node, "additional");
+            cfg.Element = cfg_node.GetAttribute("element");
+            cfg.Type = cfg_node.GetAttribute("type");
+            cfg.List = cfg_node.GetAttribute("list");
+            cfg.Additional = cfg_node.GetAttribute("additional");
+            cfg.Length = cfg_node.GetAttribute("length");
+            cfg.Style = cfg_node.GetAttribute("style");
 
             return 1;
         }
@@ -543,10 +577,14 @@ namespace dp2Circulation
         private void comboBox_fieldValue_DropDown(object sender, EventArgs e)
         {
             ComboBox combobox = (ComboBox)sender;
-            if (combobox.Items.Count == 0 
-                && this._actionCfg != null
-                && string.IsNullOrEmpty(this._actionCfg.List) == false)
-                FillDropDown(combobox);
+            if (combobox.Items.Count == 0
+                && this._actionCfg != null)
+            {
+                if (string.IsNullOrEmpty(this._actionCfg.List) == false)
+                    FillDropDown(combobox);
+                if (StringUtil.IsInList("removable", this._actionCfg.Style) == true)
+                    this.comboBox_fieldValue.Items.Add("<删除>");
+            }
         }
 
         int m_nInDropDown = 0;
@@ -641,7 +679,13 @@ namespace dp2Circulation
 
             if (StringUtil.IsInList("readerRights", this._actionCfg.List) == true)
             {
-                OpenRightsDialog(combobox);
+                OpenRightsDialog(combobox, "patron,object");
+                return;
+            }
+
+            if (StringUtil.IsInList("objectRights", this._actionCfg.List) == true)
+            {
+                OpenRightsDialog(combobox, "object");
                 return;
             }
 
@@ -663,7 +707,13 @@ namespace dp2Circulation
 
             if (StringUtil.IsInList("readerRights", this._actionCfg.List) == true)
             {
-                OpenRightsDialog(combobox);
+                OpenRightsDialog(combobox, "patron,object");
+                return;
+            }
+
+            if (StringUtil.IsInList("objectRights", this._actionCfg.List) == true)
+            {
+                OpenRightsDialog(combobox, "object");
                 return;
             }
 
@@ -682,23 +732,41 @@ namespace dp2Circulation
             set;
         }
 
-        void OpenRightsDialog(Control combobox)
+        // parameters:
+        //      strStyle    包含哪些配置文件。patron/object 之一
+        void OpenRightsDialog(Control combobox, string strStyle)
         {
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            string strRightsCfgFileName = Path.Combine(this.UserDir, "objectrights.xml");
+            List<string> filenames = new List<string>();
+
+            if (StringUtil.IsInList("object", strStyle) == true)
+            {
+                string strRightsCfgFileName = Path.Combine(this.UserDir, "objectrights.xml");
+                if (File.Exists(strRightsCfgFileName) == true)
+                    filenames.Add(strRightsCfgFileName);
+            }
+
+            if (StringUtil.IsInList("patron", strStyle) == true)
+                filenames.Add(Path.Combine(this.DataDir, "userrightsdef.xml"));
 
             string strInput = combobox.Text;
             StringUtil.RemoveFromInList("<增、减>", true, ref strInput);
             StringUtil.RemoveFromInList("<不改变>", true, ref strInput);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.Text = "读者权限";
+            if (StringUtil.IsInList("patron", strStyle) == true)
+                dlg.Text = "读者权限";
+            else
+                dlg.Text = "对象权限";
             dlg.PropertyString = strInput;
+            dlg.CfgFileName = StringUtil.MakePathList(filenames);
+#if NO
             dlg.CfgFileName = Path.Combine(this.DataDir, "userrightsdef.xml");
             if (File.Exists(strRightsCfgFileName) == true)
                 dlg.CfgFileName += "," + strRightsCfgFileName;
+#endif
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -779,7 +847,12 @@ namespace dp2Circulation
 
         private void ToolStripMenuItem_readerRights_Click(object sender, EventArgs e)
         {
-            OpenRightsDialog(this.comboBox_fieldValue);
+            OpenRightsDialog(this.comboBox_fieldValue, "patron,object");
+        }
+
+        private void ToolStripMenuItem_objectRights_Click(object sender, EventArgs e)
+        {
+            OpenRightsDialog(this.comboBox_fieldValue, "object");
         }
 
     }

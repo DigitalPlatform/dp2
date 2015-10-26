@@ -115,7 +115,6 @@ namespace dp2Circulation
             }
         }
 
-
         void commander_IsBusy(object sender, IsBusyEventArgs e)
         {
             e.IsBusy = this.m_nInViewing > 0;
@@ -1311,7 +1310,7 @@ MessageBoxDefaultButton.Button1);
 
         // 快速修改记录
         // return:
-        //      -1  呼错
+        //      -1  出错
         //      0   放弃
         //      1   成功
         internal int QuickChangeItemRecords(out string strError)

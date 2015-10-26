@@ -1653,6 +1653,14 @@ MessageBoxDefaultButton.Button1);
             filenames.Add("inventory_item_browse.xml");
             filenames.Add("inventory.css");
             filenames.Add("nonephoto.png");
+#if NO
+            filenames.Add("comment_change_actions.xml");
+            filenames.Add("issue_change_actions.xml");
+            filenames.Add("item_change_actions.xml");
+            filenames.Add("order_change_actions.xml");
+            filenames.Add("patron_change_actions.xml");
+            filenames.Add("856_change_actions.xml");
+#endif
 
             FileInfo[] fis = di.GetFiles("*.*");
             foreach(FileInfo fi in fis)

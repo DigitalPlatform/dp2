@@ -35,6 +35,7 @@
             this.toolStripDropDownButton_inputTimeString = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_rfc1123Single = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_readerRights = new System.Windows.Forms.ToolStripMenuItem();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -44,7 +45,7 @@
             this.label_remove = new System.Windows.Forms.Label();
             this.checkedComboBox_stateAdd = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label_add = new System.Windows.Forms.Label();
-            this.ToolStripMenuItem_readerRights = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_objectRights = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -93,7 +94,8 @@
             this.toolStripDropDownButton_inputTimeString.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_rfc1123Single,
             this.toolStripSeparator1,
-            this.ToolStripMenuItem_readerRights});
+            this.ToolStripMenuItem_readerRights,
+            this.ToolStripMenuItem_objectRights});
             this.toolStripDropDownButton_inputTimeString.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_inputTimeString.Image")));
             this.toolStripDropDownButton_inputTimeString.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_inputTimeString.Name = "toolStripDropDownButton_inputTimeString";
@@ -111,6 +113,13 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(168, 6);
+            // 
+            // ToolStripMenuItem_readerRights
+            // 
+            this.ToolStripMenuItem_readerRights.Name = "ToolStripMenuItem_readerRights";
+            this.ToolStripMenuItem_readerRights.Size = new System.Drawing.Size(171, 22);
+            this.ToolStripMenuItem_readerRights.Text = "读者权限值...";
+            this.ToolStripMenuItem_readerRights.Click += new System.EventHandler(this.ToolStripMenuItem_readerRights_Click);
             // 
             // button_Cancel
             // 
@@ -220,12 +229,12 @@
             this.label_add.TabIndex = 14;
             this.label_add.Text = "增(&A):";
             // 
-            // ToolStripMenuItem_readerRights
+            // ToolStripMenuItem_objectRights
             // 
-            this.ToolStripMenuItem_readerRights.Name = "ToolStripMenuItem_readerRights";
-            this.ToolStripMenuItem_readerRights.Size = new System.Drawing.Size(171, 22);
-            this.ToolStripMenuItem_readerRights.Text = "读者权限值...";
-            this.ToolStripMenuItem_readerRights.Click += new System.EventHandler(this.ToolStripMenuItem_readerRights_Click);
+            this.ToolStripMenuItem_objectRights.Name = "ToolStripMenuItem_objectRights";
+            this.ToolStripMenuItem_objectRights.Size = new System.Drawing.Size(171, 22);
+            this.ToolStripMenuItem_objectRights.Text = "对象权限值...";
+            this.ToolStripMenuItem_objectRights.Click += new System.EventHandler(this.ToolStripMenuItem_objectRights_Click);
             // 
             // OneActionDialog
             // 
@@ -276,5 +285,6 @@
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_stateAdd;
         private System.Windows.Forms.Label label_add;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_readerRights;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_objectRights;
     }
 }

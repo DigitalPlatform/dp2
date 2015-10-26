@@ -3,90 +3,6 @@ BODY {
 	FONT-SIZE: 8pt;
 }
 
-TABLE.operlog
-{
-    font-size: 10pt;
-    width: 100%;
-	border-color: lightgrey;
-	border-width: 0px; 
-	border-style: solid;
-	border-collapse:collapse;
-}
-
-/* TD padding */
-TABLE.operlog TD
-{
-    padding: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-TABLE.operlog TR.content
-{
-	background-color: white;
-}
-
-TABLE.operlog TD.name
-{
-	text-align: right;
-	background-color: #eeeeee;
-	color: #777777;
-	width: 10%;
-	
-	border: 0px;
-	border-right: 1px;
-	border-color: #999999;
-	border-style: solid;
-	
-	text-align: right;
-	vertical-align: top;
-	white-space:nowrap;
-}
-
-TABLE.accountinfo TD.content.rights
-{
-    font-family: Courier New;
-}
-
-TABLE.readerinfo, TABLE.iteminfo, TABLE.amerceinfo, TABLE.orderinfo, TABLE.issueinfo, TABLE.commentinfo, TABLE.overdueinfo, TABLE.accountinfo
-{
-    font-size: 8pt;
-    width: 100%;
-	border-color: lightgrey;
-	border-width: 0px; 
-	border-style: solid;
-	border-collapse:collapse;
-}
-
-TABLE.readerinfo TD.name
-{
-	text-align: right;
-	background-color: #ffffff;
-	color: #777777;
-	width: 10%;
-	
-	border: 0px;
-	border-right: 1px;
-	border-color: #999999;
-	border-style: solid;
-	
-	text-align: right;
-	vertical-align: top;
-	white-space:nowrap;
-}
-
-p.xmlline
-{
-    margin: 4px;
-    background-color: #eeeeee;
-}
-
-.summary
-{
-    font-size: 8pt;
-	color: #777777;
-}
-
 TABLE.marc
 {
     font-size: 8pt;
@@ -132,9 +48,9 @@ TABLE.marc TR.datafield
 
 TABLE.marc TD.fieldname
 {
-    width: 2.6em;
+    width: 6.6em; 
     white-space: nowrap;
-    text-align: center;
+    text-align: left;
     margin: 0px;
     padding-left: 0px;
     padding-right: 0px;
@@ -192,6 +108,7 @@ TABLE.marc TD.fieldname, TABLE.marc TD.indicator, TABLE.marc TR.header TD.conten
      font-weight: bold;
 }
 
+/*
 TABLE.marc TD.indicator
 {
     width: 2em;
@@ -206,10 +123,19 @@ TABLE.marc TD.indicator
     border-style: dotted;
     border-color: #eeeeee;
 }
+    */
 
 TABLE.marc TD.content
 {
     word-break:break-all;
+
+    padding-left: 4px;
+    padding-right: 4px;
+    
+    border: 0px;
+    border-left: 1px;
+    border-style: dotted;
+    border-color: #eeeeee;
 }
 
 TABLE.marc SPAN.subfield

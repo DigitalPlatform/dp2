@@ -7988,6 +7988,7 @@ Keys keyData)
             }
         }
 
+        // 启动 ClickOnce 方式安装的 dp2circulation
         void StartClickOnceDp2circulation()
         {
             try

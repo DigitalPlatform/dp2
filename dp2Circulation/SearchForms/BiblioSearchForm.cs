@@ -2287,7 +2287,6 @@ out strError);
             RefreshPropertyView(false);
         }
 
-
         // 丢弃全部修改
         void menu_clearAllChangedRecords_Click(object sender, EventArgs e)
         {
@@ -2335,12 +2334,9 @@ out strError);
             RefreshPropertyView(false);
         }
 
-
         // 保存选定事项的修改
         void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
-            // TODO: 确实要?
-
             if (this.m_nChangedCount == 0)
             {
                 MessageBox.Show(this, "当前没有任何修改过的事项需要保存");
@@ -4625,6 +4621,7 @@ MessageBoxDefaultButton.Button1);
 
             Marc856SearchForm form = new Marc856SearchForm();
             form.MdiParent = this.MainForm;
+            form.MainForm = this.MainForm;
             form.Show();
 
             this.EnableControls(false);
@@ -4697,12 +4694,15 @@ MessageBoxDefaultButton.Button1);
                     if (fields.count == 0)
                         goto CONTINUE;
 
+                    int index = 0;
                     foreach(MarcField field in fields)
                     {
                         ListViewItem new_item = form.AddLine(info.RecPath, 
                             info,
-                            field);
+                            field,
+                            index);
                         new_items.Add(new_item);
+                        index++;
                     }
 
                 CONTINUE:

@@ -1328,7 +1328,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="bondfingerprintscanfc0.gif" />
-    <Content Include="comment_change_actions.xml">
+    <Content Include="default\comment_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
@@ -1336,7 +1336,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="default\patron_editor.xml" />
+    <Content Include="default\856_change_actions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="default\nonePhoto.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="default\fieldhtml.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Docs\deleted.txt" />
@@ -1351,10 +1357,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="issue_change_actions.xml">
+    <Content Include="default\issue_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="item_change_actions.xml">
+    <Content Include="default\item_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="nei.ico" />
@@ -1421,10 +1427,10 @@
     <Content Include="operloghtml.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="order_change_actions.xml">
+    <Content Include="default\order_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="patron_change_actions.xml">
+    <Content Include="default\patron_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="printslice.css">

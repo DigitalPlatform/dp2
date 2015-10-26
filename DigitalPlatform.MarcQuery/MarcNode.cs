@@ -253,7 +253,12 @@ namespace DigitalPlatform.Marc
                     node = node.Parent;
                 }
 
-                Debug.Assert(node.NodeType == Marc.NodeType.Record || node.NodeType == Marc.NodeType.None, "");
+#if DEBUG
+                if (node != this)
+                {
+                    Debug.Assert(node.NodeType == Marc.NodeType.Record || node.NodeType == Marc.NodeType.None, "");
+                }
+#endif
                 return node;
             }
         }

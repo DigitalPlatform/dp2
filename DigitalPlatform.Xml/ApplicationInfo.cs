@@ -163,7 +163,7 @@ namespace DigitalPlatform.Xml
             string strName,
             bool bDefault)
         {
-            strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
             XmlNode node = dom.SelectSingleNode(strPath);
             string strText = null;
@@ -194,7 +194,7 @@ namespace DigitalPlatform.Xml
             string strName,
             bool bValue)
         {
-            strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
             string[] aPath = strPath.Split(new char[] { '/' });
             XmlNode node = DomUtil.CreateNode(dom, aPath);
@@ -210,6 +210,14 @@ namespace DigitalPlatform.Xml
         }
 
         //
+        static string GetSectionPath(string strPath)
+        {
+            if (string.IsNullOrEmpty(strPath) == true)
+                throw new ArgumentException("strPath 参数值不应为空");
+            if (char.IsDigit(strPath[0]) == true)
+                return "/root/n_" + strPath;
+            return "/root/" + strPath;
+        }
 
 		// 获得一个整数值
 		// parameters:
@@ -222,10 +230,17 @@ namespace DigitalPlatform.Xml
 			string strName,
 			int nDefault)
 		{
+			strPath = GetSectionPath(strPath);
 
-			strPath = "/root/" + strPath;
-
-			XmlNode node = dom.SelectSingleNode(strPath);
+            XmlNode node = null;
+            try
+            {
+                node = dom.SelectSingleNode(strPath);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("strPath 名称 '"+strPath+"' 不合法。应符合 XML 元素命名规则", ex);
+            }
 			string strText = null;
 
 			if (node == null)
@@ -238,7 +253,6 @@ namespace DigitalPlatform.Xml
 			return Convert.ToInt32(strText);
 		}
 
-
 		// 写入一个整数值
 		// parameters:
 		//		strPath	参数路径
@@ -248,7 +262,7 @@ namespace DigitalPlatform.Xml
             string strName,
             int nValue)
         {
-            strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
             string[] aPath = strPath.Split(new char[] { '/' });
             XmlNode node = DomUtil.CreateNode(dom, aPath);
@@ -274,7 +288,7 @@ namespace DigitalPlatform.Xml
 			string strName,
 			string strDefault)
 		{
-			strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
 			XmlNode node = dom.SelectSingleNode(strPath);
 
@@ -294,7 +308,7 @@ namespace DigitalPlatform.Xml
 			string strName,
 			string strValue)
 		{
-			strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
 			string[] aPath = strPath.Split(new char[]{'/'});
 			XmlNode node = DomUtil.CreateNode(dom, aPath);
@@ -322,7 +336,7 @@ namespace DigitalPlatform.Xml
             string strName,
             float fDefault)
         {
-            strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
             XmlNode node = dom.SelectSingleNode(strPath);
 
@@ -355,7 +369,7 @@ namespace DigitalPlatform.Xml
             string strName,
             float fValue)
         {
-            strPath = "/root/" + strPath;
+            strPath = GetSectionPath(strPath);
 
             string[] aPath = strPath.Split(new char[] { '/' });
             XmlNode node = DomUtil.CreateNode(dom, aPath);

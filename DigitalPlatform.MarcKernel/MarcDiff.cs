@@ -1137,6 +1137,8 @@ namespace DigitalPlatform.Marc
         #region 比较 OPAC 字段差异的
 
         // 创建展示两个 OPAC 记录差异的 HTML 字符串
+        // parameters:
+        //      strNewText  如果为 ""，表示内容全部被删除，依然会输出对照格式；如果为 null，表示只输出左边的部分
         // return:
         //      -1  出错
         //      0   成功。两边相等
@@ -1155,7 +1157,8 @@ namespace DigitalPlatform.Marc
 
             var marc_differ = new Differ();
             var marc_builder = new SideBySideDiffBuilder(marc_differ);
-            var marc_diff_result = marc_builder.BuildDiffModel(strOldText, strNewText);
+            var marc_diff_result = marc_builder.BuildDiffModel(strOldText, 
+                strNewText == null? "" : strNewText);
 
             Debug.Assert(marc_diff_result.OldText.Lines.Count == marc_diff_result.NewText.Lines.Count, "");
 
@@ -1188,6 +1191,15 @@ namespace DigitalPlatform.Marc
                     bChanged = true;
 
                 string strLineClass = "datafield";
+                if (strNewText == null)
+                {
+                    strResult.Append("\r\n<tr class='" + strLineClass + "'>");
+                    // 创建一个字段的 HTML 局部 三个 <td>
+                    strResult.Append(BuildOpacFieldHtml(ChangeType.Unchanged, oldline.Text));
+                    strResult.Append("\r\n</tr>");
+                    continue;
+                }
+
                 strResult.Append("\r\n<tr class='" + strLineClass + "'>");
                 // 创建一个字段的 HTML 局部 三个 <td>
                 strResult.Append(BuildOpacFieldHtml(oldline.Type, oldline.Text));
@@ -1231,7 +1243,7 @@ namespace DigitalPlatform.Marc
 
             //    strLineClass = "datafield";
 
-            string strTypeClass = "datafield";
+            string strTypeClass = " datafield";
             if (type == ChangeType.Modified)
                 strTypeClass += " modified";
             else if (type == ChangeType.Inserted)

@@ -66,7 +66,8 @@ namespace dp2Circulation
 
             // 恢复 listview 中的内容
 
-            string strCfgFileName = Path.Combine( this.MainForm.DataDir, this.DbType + "_change_actions.xml");
+            // string strCfgFileName = Path.Combine( this.MainForm.UserDir, this.DbType + "_change_actions.xml");
+            string strCfgFileName = Path.Combine(this.MainForm.DataDir, "default\\" + this.DbType + "_change_actions.xml");
             string strError = "";
             int nRet = LoadCfgDom(strCfgFileName,
                 out strError);
@@ -307,7 +308,6 @@ namespace dp2Circulation
             this.MainForm.AppInfo.UnlinkFormState(dlg);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
-
         }
 
         // 获得当前 ListView 中(和外面)已经用过的字段名
@@ -388,6 +388,14 @@ namespace dp2Circulation
                 if (strFieldValue == "<不改变>")
                 {
                 }
+                else if (strFieldValue == "<删除>")
+                {
+                    OneAction action = new OneAction();
+                    action.FieldName = strFieldName;
+                    action.Action = "delete";
+                    action.FieldValue = "";
+                    results.Add(action);
+                }
                 else if (strFieldValue == "<增、减>")
                 {
                     if (string.IsNullOrEmpty(strAdd) == false)
@@ -414,7 +422,6 @@ namespace dp2Circulation
                     action.FieldValue = strFieldValue;
                     results.Add(action);
                 }
-
             }
 
             return results;
@@ -656,5 +663,12 @@ namespace dp2Circulation
         /// 附加的信息
         /// </summary>
         public string Additional = "";
+
+        public string Style = "";   // removable
+
+        /// <summary>
+        /// 值的长度
+        /// </summary>
+        public string Length = "";  // 如果为空，表示无所谓。如果为 "1"，表示长度恒定为 1 字符
     }
 }
