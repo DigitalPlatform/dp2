@@ -460,7 +460,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 if (string.IsNullOrEmpty(strBirthDate) == false)
-                    strNewPassword = DateTimeUtil.DateTimeToString8(DateTimeUtil.FromRfc1123DateTimeString(strBirthDate));
+                    strNewPassword = DateTimeUtil.DateTimeToString8(DateTimeUtil.FromRfc1123DateTimeString(strBirthDate).ToLocalTime());    // 2015/10/27 修改 bug。原来缺 ToLocalTime()，造成产生的字符串是前一天的日期
             }
             catch (Exception ex)
             {

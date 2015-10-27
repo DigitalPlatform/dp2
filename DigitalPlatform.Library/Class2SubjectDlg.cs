@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-using SHDocVw;
+// using SHDocVw;
 
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
@@ -15,7 +15,7 @@ using System.Web;
 using System.Threading;
 using System.Xml;
 
-using mshtml;
+// using mshtml;
 
 using DigitalPlatform;
 using DigitalPlatform.rms.Client;
@@ -29,7 +29,7 @@ namespace DigitalPlatform.Library
     /// <summary>
     /// Summary description for Class2SubjectDlg.
     /// </summary>
-    public class Class2SubjectDlg : System.Windows.Forms.Form, DWebBrowserEvents
+    public class Class2SubjectDlg : System.Windows.Forms.Form// , DWebBrowserEvents
     {
         SearchPanel SearchPanel = null;
         string ActionPrefix = "http://dp2003.com/";
@@ -81,8 +81,6 @@ namespace DigitalPlatform.Library
         /// 窗口关闭
         /// </summary>
         public AutoResetEvent eventWindowClose = new AutoResetEvent(false);
-
-        private AxSHDocVw.AxWebBrowser axWebBrowser;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_queryWord;
         private System.Windows.Forms.Label label2;
@@ -93,7 +91,7 @@ namespace DigitalPlatform.Library
         private System.Windows.Forms.Button button_findServerUrl;
         private System.Windows.Forms.TextBox textBox_serverUrl;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Panel panel_html;
+        private System.Windows.Forms.WebBrowser webBrowser1;
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -109,6 +107,7 @@ namespace DigitalPlatform.Library
             //
             InitializeComponent();
 
+#if NO
             // UCOMIConnectionPointContainer
             // System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
             System.Runtime.InteropServices.ComTypes.IConnectionPointContainer icpc = (System.Runtime.InteropServices.ComTypes.IConnectionPointContainer)axWebBrowser.GetOcx(); // ADDed
@@ -116,7 +115,7 @@ namespace DigitalPlatform.Library
             Guid g = typeof(DWebBrowserEvents).GUID;
             icpc.FindConnectionPoint(ref g, out icp);
             icp.Advise(this, out cookie);
-
+#endif
         }
 
         /// <summary>
@@ -256,7 +255,6 @@ namespace DigitalPlatform.Library
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Class2SubjectDlg));
-            this.axWebBrowser = new AxSHDocVw.AxWebBrowser();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_queryWord = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -267,44 +265,33 @@ namespace DigitalPlatform.Library
             this.button_findServerUrl = new System.Windows.Forms.Button();
             this.textBox_serverUrl = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.panel_html = new System.Windows.Forms.Panel();
-            ((System.ComponentModel.ISupportInitialize)(this.axWebBrowser)).BeginInit();
-            this.panel_html.SuspendLayout();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.SuspendLayout();
-            // 
-            // axWebBrowser
-            // 
-            this.axWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.axWebBrowser.Enabled = true;
-            this.axWebBrowser.Location = new System.Drawing.Point(0, 0);
-            this.axWebBrowser.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axWebBrowser.OcxState")));
-            this.axWebBrowser.Size = new System.Drawing.Size(584, 189);
-            this.axWebBrowser.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 54);
+            this.label1.Location = new System.Drawing.Point(12, 42);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(84, 15);
+            this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 1;
             this.label1.Text = "检索词(&Q):";
             // 
             // textBox_queryWord
             // 
-            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_queryWord.Location = new System.Drawing.Point(149, 50);
+            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_queryWord.Location = new System.Drawing.Point(112, 39);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(192, 25);
+            this.textBox_queryWord.Size = new System.Drawing.Size(291, 21);
             this.textBox_queryWord.TabIndex = 2;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(16, 89);
+            this.label2.Location = new System.Drawing.Point(12, 69);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(69, 15);
+            this.label2.Size = new System.Drawing.Size(53, 12);
             this.label2.TabIndex = 3;
             this.label2.Text = "途径(&F):";
             // 
@@ -314,18 +301,18 @@ namespace DigitalPlatform.Library
             "类号",
             "类名",
             "主题词"});
-            this.comboBox_from.Location = new System.Drawing.Point(149, 85);
+            this.comboBox_from.Location = new System.Drawing.Point(112, 66);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(192, 23);
+            this.comboBox_from.Size = new System.Drawing.Size(144, 20);
             this.comboBox_from.TabIndex = 4;
             this.comboBox_from.Text = "类号";
             // 
             // button_search
             // 
             this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_search.Location = new System.Drawing.Point(351, 48);
+            this.button_search.Location = new System.Drawing.Point(410, 37);
             this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(100, 29);
+            this.button_search.Size = new System.Drawing.Size(75, 23);
             this.button_search.TabIndex = 5;
             this.button_search.Text = "检索(&S)";
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
@@ -333,67 +320,67 @@ namespace DigitalPlatform.Library
             // button_stop
             // 
             this.button_stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_stop.Location = new System.Drawing.Point(459, 48);
+            this.button_stop.Location = new System.Drawing.Point(491, 37);
             this.button_stop.Name = "button_stop";
-            this.button_stop.Size = new System.Drawing.Size(100, 29);
+            this.button_stop.Size = new System.Drawing.Size(75, 23);
             this.button_stop.TabIndex = 6;
             this.button_stop.Text = "停止(&S)";
             this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
             // 
             // label_message
             // 
-            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_message.Location = new System.Drawing.Point(16, 344);
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_message.Location = new System.Drawing.Point(12, 353);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(592, 29);
+            this.label_message.Size = new System.Drawing.Size(591, 22);
             this.label_message.TabIndex = 7;
             // 
             // button_findServerUrl
             // 
             this.button_findServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_findServerUrl.Location = new System.Drawing.Point(560, 13);
+            this.button_findServerUrl.Location = new System.Drawing.Point(567, 10);
             this.button_findServerUrl.Name = "button_findServerUrl";
-            this.button_findServerUrl.Size = new System.Drawing.Size(43, 29);
+            this.button_findServerUrl.Size = new System.Drawing.Size(32, 23);
             this.button_findServerUrl.TabIndex = 11;
             this.button_findServerUrl.Text = "...";
             this.button_findServerUrl.Click += new System.EventHandler(this.button_findServerUrl_Click);
             // 
             // textBox_serverUrl
             // 
-            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_serverUrl.Location = new System.Drawing.Point(149, 15);
+            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_serverUrl.Location = new System.Drawing.Point(112, 12);
             this.textBox_serverUrl.Name = "textBox_serverUrl";
-            this.textBox_serverUrl.Size = new System.Drawing.Size(406, 25);
+            this.textBox_serverUrl.Size = new System.Drawing.Size(451, 21);
             this.textBox_serverUrl.TabIndex = 10;
             this.textBox_serverUrl.TextChanged += new System.EventHandler(this.textBox_serverUrl_TextChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 19);
+            this.label3.Location = new System.Drawing.Point(12, 15);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(84, 15);
+            this.label3.Size = new System.Drawing.Size(65, 12);
             this.label3.TabIndex = 9;
             this.label3.Text = "服务器(&S):";
             // 
-            // panel_html
+            // webBrowser1
             // 
-            this.panel_html.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel_html.Controls.Add(this.axWebBrowser);
-            this.panel_html.Location = new System.Drawing.Point(19, 134);
-            this.panel_html.Name = "panel_html";
-            this.panel_html.Size = new System.Drawing.Size(584, 189);
-            this.panel_html.TabIndex = 12;
+            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.webBrowser1.Location = new System.Drawing.Point(14, 92);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(585, 258);
+            this.webBrowser1.TabIndex = 12;
             // 
             // Class2SubjectDlg
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(8, 18);
-            this.ClientSize = new System.Drawing.Size(619, 385);
-            this.Controls.Add(this.panel_html);
+            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
+            this.ClientSize = new System.Drawing.Size(611, 384);
+            this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.button_findServerUrl);
             this.Controls.Add(this.textBox_serverUrl);
             this.Controls.Add(this.textBox_queryWord);
@@ -407,10 +394,8 @@ namespace DigitalPlatform.Library
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Class2SubjectDlg";
             this.Text = "分类主题对照";
-            this.Load += new System.EventHandler(this.Class2SubjectDlg_Load);
             this.Closed += new System.EventHandler(this.Class2SubjectDlg_Closed);
-            ((System.ComponentModel.ISupportInitialize)(this.axWebBrowser)).EndInit();
-            this.panel_html.ResumeLayout(false);
+            this.Load += new System.EventHandler(this.Class2SubjectDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -425,6 +410,7 @@ namespace DigitalPlatform.Library
         {
             get
             {
+#if NO
                 IHTMLDocument2 doc = (IHTMLDocument2)this.axWebBrowser.Document;
 
                 if (doc == null)
@@ -436,19 +422,12 @@ namespace DigitalPlatform.Library
                     return "";
 
                 return item.outerHTML;
-
-                /*
-
-                if (doc.body == null)
-                    return "";
-
-                IHTMLElement html = (IHTMLElement)doc.body.parentElement;
-                return html.outerHTML;
-                */
+#endif
+                return this.webBrowser1.DocumentText;
             }
             set
             {
-
+#if NO
                 IHTMLDocument2 doc = this.DocStream;
 
                 Debug.Assert(doc != null, "DocStream应返回非null");
@@ -456,10 +435,12 @@ namespace DigitalPlatform.Library
                 doc.clear();
                 doc.write(new object[] { value });
                 doc.close();
-
+#endif
+                this.webBrowser1.DocumentText = value;
             }
         }
 
+#if NO
         /// <summary>
         /// 得到Document对象，可以用write()写入
         /// </summary>
@@ -484,6 +465,7 @@ namespace DigitalPlatform.Library
                 return doc;
             }
         }
+#endif
 
         /// <summary>
         /// 服务器URL

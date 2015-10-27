@@ -1,10 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +12,14 @@ using System.Text;
 using System.Web;
 using System.Windows.Forms;
 using System.Xml;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -286,6 +288,16 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            menuItem = new MenuItem("删除 856 字段 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteSelectedItems_Click);
+            if (this.listView_records.SelectedIndices.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("快速修改 856 字段 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
             menuItem.Click += new System.EventHandler(this.menu_quickChange_Click);
             if (this.listView_records.SelectedItems.Count == 0)
@@ -319,6 +331,70 @@ namespace dp2Circulation
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
+        // 删除所选择的 856 字段
+        void menu_deleteSelectedItems_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            nRet = DeleteItems(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (nRet != 0)
+                this.ShowMessage(strError, "green", true);
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
+        }
+
+        int DeleteItems(out string strError)
+        {
+            strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要删除的 856 字段事项";
+                return -1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+    "确实要删除所选定 "+this.listView_records.SelectedItems.Count+" 个 856 字段?",
+    "Marc856SearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result == System.Windows.Forms.DialogResult.No)
+                return 0;
+
+            int nDeleteCount = 0;
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                LineInfo line_info = (LineInfo)item.Tag;
+                if (line_info == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+
+                if (IsItemChanged(item) == false)
+                    this.m_nChangedCount++;
+
+                line_info.State = "delete";
+                line_info.NewField = "";    // 如果删除之前有内容修改，需要丢弃这些修改
+
+                // 刷新显示
+                item.BackColor = SystemColors.Info;
+                item.ForeColor = SystemColors.GrayText;
+
+                nDeleteCount++;
+            }
+
+            DoViewComment(false);
+            strError = "已标记删除 "+nDeleteCount+" 个事项，但并未兑现到书目库。\r\n当保存修改时才会真正从书目库中删除。";
+            return 1;
+        }
+
         // 丢弃选定的修改
         void menu_clearSelectedChangedRecords_Click(object sender, EventArgs e)
         {
@@ -327,6 +403,8 @@ namespace dp2Circulation
                 this.ShowMessage("当前没有任何修改过的事项可丢弃", "error", true);
                 return;
             }
+
+            this.ClearMessage();
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
@@ -353,6 +431,8 @@ namespace dp2Circulation
                 this.ShowMessage("当前没有任何修改过的事项可丢弃", "error", true);
                 return;
             }
+
+            this.ClearMessage();
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
@@ -482,16 +562,29 @@ namespace dp2Circulation
                         // goto CONTINUE;
                     }
 
-                    // 把字段修改兑现到书目记录中
-                    if (changed_biblio_recpaths.IndexOf(strBiblioRecPath) == -1)
-                        changed_biblio_recpaths.Add(strBiblioRecPath);
 
                     // 把对字段的修改合并到书目记录中
+                    // return:
+                    //      -1  出错
+                    //      0   书目记录没有发生修改
+                    //      1   书目记录发生了修改
                     nRet = MergeChange(line_info,
                         biblio_info,
                         out strError);
                     if (nRet == -1)
                         return -1;
+
+                    if (line_info.State == "delete")
+                    {
+                        // 把同一书目记录的删除位置以后的 856 字段的 index 都减去 1
+                    }
+
+                    // 记载发生过修改的书目记录路径
+                    if (nRet == 1)
+                    {
+                        if (changed_biblio_recpaths.IndexOf(strBiblioRecPath) == -1)
+                            changed_biblio_recpaths.Add(strBiblioRecPath);
+                    }
 
                     item.BackColor = SystemColors.Window;
                     item.ForeColor = SystemColors.WindowText;
@@ -693,6 +786,10 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 把对字段的修改合并到书目记录中
+        // return:
+        //      -1  出错
+        //      0   书目记录没有发生修改
+        //      1   书目记录发生了修改
         int MergeChange(LineInfo line_info, 
             BiblioInfo biblio_info,
             out string strError)
@@ -730,14 +827,20 @@ MessageBoxDefaultButton.Button1);
             MarcNodeList fields = record.select("field[@name='856']");
             if (fields.count > line_info.Index)
             {
-                fields[line_info.Index].Text = line_info.NewField;
+                if (line_info.State == "delete")
+                    fields[line_info.Index].detach();
+                else
+                    fields[line_info.Index].Text = line_info.NewField;
             }
             else
             {
+                if (line_info.State == "delete")
+                    return 0;
+
                 Debug.Assert(false, "除非插入情况，否则走不到这里");
                 // 添加足够的 856 字段
                 MarcField tail = null;
-                for(int i=fields.count;i<line_info.Index + 1; i++)
+                for (int i = fields.count; i < line_info.Index + 1; i++)
                 {
                     tail = new MarcField("856", "  ");
                     record.ChildNodes.insertSequence(tail, InsertSequenceStyle.PreferTail);
@@ -759,7 +862,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             biblio_info.NewXml = strXml;
-            return 0;
+            return 1;
         }
 
         void menu_quickChange_Click(object sender, EventArgs e)
@@ -798,8 +901,24 @@ MessageBoxDefaultButton.Button1);
         void ClearOneChange(ListViewItem item)
         {
             LineInfo info = (LineInfo)item.Tag;
+            if (info == null)
+                return;
 
-            if (info != null && String.IsNullOrEmpty(info.NewField) == false)
+            if (string.IsNullOrEmpty(info.State) == false)
+            {
+                info.State = "";
+
+                Debug.Assert(String.IsNullOrEmpty(info.NewField) == true, "在 State 有值的情况下 NewField 应该为空");
+
+                item.BackColor = SystemColors.Window;
+                item.ForeColor = SystemColors.WindowText;
+
+                this.m_nChangedCount--;
+                Debug.Assert(this.m_nChangedCount >= 0, "");
+                return;
+            }
+
+            if (String.IsNullOrEmpty(info.NewField) == false)
             {
                 info.NewField = "";
                 // 刷新除了记录路径和书目摘要的其余列的显示
@@ -824,6 +943,9 @@ MessageBoxDefaultButton.Button1);
                 return false;
 
             if (string.IsNullOrEmpty(info.NewField) == false)
+                return true;
+
+            if (string.IsNullOrEmpty(info.State) == false)
                 return true;
 
             return false;
@@ -958,14 +1080,33 @@ dlg.UiState);
                     {
                         strField = info.OldField;
                         // 放弃上一次的修改
-                        if (string.IsNullOrEmpty(info.NewField) == false)
+                        if (string.IsNullOrEmpty(info.State) == false)
                         {
-                            info.NewField = "";
+                            info.State = "";
                             this.m_nChangedCount--;
+
+                            if (string.IsNullOrEmpty(info.NewField) == false)
+                                strField = info.NewField;
+                            else
+                                strField = info.OldField;
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(info.NewField) == false)
+                            {
+                                info.NewField = "";
+                                this.m_nChangedCount--;
+                            }
                         }
                     }
                     else
                     {
+                        if (string.IsNullOrEmpty(info.State) == false)
+                        {
+                            // 在删除的基础上继续修改 --- 等于承认删除状态，并无法修改，只好跳过
+                            i++;
+                            continue;
+                        }
                         if (string.IsNullOrEmpty(info.NewField) == false)
                             strField = info.NewField;
                         else
@@ -1372,7 +1513,8 @@ out string strError)
             strHtml2 = "";
 
             if (string.IsNullOrEmpty(info.NewField) == false
-                && string.IsNullOrEmpty(info.OldField) == false)
+                && string.IsNullOrEmpty(info.OldField) == false
+                && string.IsNullOrEmpty(info.State) == true)
             {
                 // 创建展示两个 OPAC 记录差异的 HTML 字符串
                 // return:
@@ -1391,7 +1533,7 @@ out string strError)
 
             nRet = MarcDiff.DiffOpacHtml(
     BuildOpacText(info.OldField),
-    null,
+    string.IsNullOrEmpty(info.State) == false? "" : null,
     out strHtml2,
     out strError);
             if (nRet == -1)
@@ -1592,6 +1734,11 @@ out string strError)
         /// 新的 856 字段文本
         /// </summary>
         public string NewField = "";
+
+        /// <summary>
+        /// 状态。如果为 "delete" 表示事项即将被删除
+        /// </summary>
+        public string State = "";
 
     }
 }
