@@ -1852,7 +1852,6 @@ out strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("复制(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copyToClipboard_Click);
             if (this.listView_records.SelectedIndices.Count == 0)

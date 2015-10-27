@@ -46,10 +46,8 @@ namespace DigitalPlatform.Drawing
             camDevices = new CameraDevices();
 
             decodingThread = new Thread(DecodeBarcode);
-
             // pictureBox1.Paint += pictureBox1_Paint;
             resultRectPen = new Pen(Color.Green, 10);
-
 
             motionDetector = GetDefaultMotionDetector();
         }

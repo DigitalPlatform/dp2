@@ -33,6 +33,18 @@ namespace dp2Circulation
         public Marc856SearchForm()
         {
             InitializeComponent();
+
+            ListViewProperty prop = new ListViewProperty();
+            this.listView_records.Tag = prop;
+            // 第一列特殊，记录路径
+            prop.SetSortStyle(COLUMN_RECPATH, ColumnSortStyle.RecPath);
+            prop.SetSortStyle(COLUMN_FIELDINDEX, ColumnSortStyle.RightAlign);
+        }
+
+        void ClearListViewPropertyCache()
+        {
+            ListViewProperty prop = (ListViewProperty)this.listView_records.Tag;
+            prop.ClearCache();
         }
 
         private void Marc856SearchForm_Load(object sender, EventArgs e)
@@ -385,7 +397,7 @@ namespace dp2Circulation
 
                 // 刷新显示
                 item.BackColor = SystemColors.Info;
-                item.ForeColor = SystemColors.GrayText;
+                item.ForeColor = Color.Red;
 
                 nDeleteCount++;
             }
@@ -522,6 +534,7 @@ namespace dp2Circulation
             int nSavedCount = 0;
 
             List<string> changed_biblio_recpaths = new List<string>();
+            Hashtable relation_table = new Hashtable(); // 书目记录路径 --> List<ListViewItem>
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -532,6 +545,30 @@ namespace dp2Circulation
             this.listView_records.Enabled = false;
             try
             {
+                // 创建书目记录和册事项的对照关系。注意这是针对全部行的，不仅仅是已经选择的行。因为删除操作可能会涉及到没有选择的行的 index 列内容刷新显示
+                foreach (ListViewItem item in this.listView_records.Items)
+                {
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "已中断";
+                        return -1;
+                    }
+                    string strBiblioRecPath = item.Text;
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                        continue;
+
+                    {
+                        // 记载关系
+                        List<ListViewItem> array = (List<ListViewItem>)relation_table[strBiblioRecPath];
+                        if (array == null)
+                        {
+                            array = new List<ListViewItem>();
+                            relation_table[strBiblioRecPath] = array;
+                        }
+                        array.Add(item);
+                    }
+                }
+
                 foreach (ListViewItem item in items)
                 {
                     if (stop != null && stop.State != 0)
@@ -557,33 +594,44 @@ namespace dp2Circulation
                     BiblioInfo biblio_info = (BiblioInfo)this.m_biblioTable[strBiblioRecPath];
                     if (biblio_info == null)
                     {
-                        strError = "1 在 m_biblioTable 中没有找到路径为 '"+strBiblioRecPath+"' 的书目记录信息";
+                        strError = "1 在 m_biblioTable 中没有找到路径为 '" + strBiblioRecPath + "' 的书目记录信息";
                         return -1;
                         // goto CONTINUE;
                     }
 
-
-                    // 把对字段的修改合并到书目记录中
-                    // return:
-                    //      -1  出错
-                    //      0   书目记录没有发生修改
-                    //      1   书目记录发生了修改
-                    nRet = MergeChange(line_info,
-                        biblio_info,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
+                    {
+                        // 把对字段的修改合并到书目记录中
+                        // return:
+                        //      -1  出错
+                        //      0   书目记录没有发生修改
+                        //      1   书目记录发生了修改
+                        nRet = MergeChange(line_info,
+                            biblio_info,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        // 记载发生过修改的书目记录路径
+                        if (nRet == 1)
+                        {
+                            if (changed_biblio_recpaths.IndexOf(strBiblioRecPath) == -1)
+                                changed_biblio_recpaths.Add(strBiblioRecPath);
+                        }
+                    }
 
                     if (line_info.State == "delete")
                     {
                         // 把同一书目记录的删除位置以后的 856 字段的 index 都减去 1
-                    }
-
-                    // 记载发生过修改的书目记录路径
-                    if (nRet == 1)
-                    {
-                        if (changed_biblio_recpaths.IndexOf(strBiblioRecPath) == -1)
-                            changed_biblio_recpaths.Add(strBiblioRecPath);
+                        nRet = ChangeFieldIndex(
+                            relation_table,
+                            item,
+                            -1,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        this.listView_records.Items.Remove(item);
+                        this.m_nChangedCount--;
+                        Debug.Assert(this.m_nChangedCount >= 0, "");
+                        continue;
                     }
 
                     item.BackColor = SystemColors.Window;
@@ -599,9 +647,11 @@ namespace dp2Circulation
                         line_info.NewField = "";
                     }
 
-                    // 刷新浏览行的显示
-                    MarcField field = new MarcField(line_info.OldField);
-                    SetItemColumns(item, null, field, line_info.Index);
+                    {
+                        // 刷新浏览行的显示
+                        MarcField field = new MarcField(line_info.OldField);
+                        SetItemColumns(item, null, field, line_info.Index);
+                    }
                 }
 
                 // TODO: 如果要优化算法的话，可以建立书目记录和浏览行之间的联系，在书目记录保存成功后才修改 line_info.NewField 和刷新浏览行显示。这样的好处是，一旦中途出错，还有干净重新保存的可能
@@ -785,6 +835,40 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+        // 同一书目记录下，修改比 item 位置靠后的事项的 Index
+        static int ChangeFieldIndex(
+            Hashtable relation_table,
+            ListViewItem item, 
+            int nDelta,
+            out string strError)
+        {
+            strError = "";
+
+            string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
+            List<ListViewItem> array = (List<ListViewItem>)relation_table[strBiblioRecPath];
+            if (array == null)
+            {
+                strError = "strBiblioRecPath '"+strBiblioRecPath+"' 的 array 在 relation_table 中没有找到";
+                return -1;
+            }
+
+            LineInfo info = (LineInfo)item.Tag;
+
+            foreach(ListViewItem current_item in array)
+            {
+                if (current_item == item)
+                    continue;
+                LineInfo current_info = (LineInfo)current_item.Tag;
+                if (current_info.Index > info.Index)
+                {
+                    current_info.Index += nDelta;
+                    ListViewUtil.ChangeItemText(current_item, COLUMN_FIELDINDEX, current_info.Index.ToString());
+                }
+            }
+
+            return 0;
+        }
+
         // 把对字段的修改合并到书目记录中
         // return:
         //      -1  出错
@@ -817,9 +901,10 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            if (string.IsNullOrEmpty(line_info.NewField) == true)
+            if (string.IsNullOrEmpty(line_info.State) == true
+                && string.IsNullOrEmpty(line_info.NewField) == true)
             {
-                strError = "line_info.NewField 不应该为空";
+                strError = "一般修改情况下的 line_info.NewField 不应该为空";
                 return -1;
             }
 
@@ -1709,6 +1794,11 @@ out string strError)
                 controls.Add(this.listView_records);
                 GuiState.SetUiState(controls, value);
             }
+        }
+
+        private void listView_records_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            ListViewUtil.OnColumnClick(this.listView_records, e);
         }
     }
 
