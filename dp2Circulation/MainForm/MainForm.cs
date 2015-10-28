@@ -7961,7 +7961,7 @@ Keys keyData)
 
         private void MenuItem_startAnotherDp2circulation_Click(object sender, EventArgs e)
         {
-            if (ApplicationDeployment.IsNetworkDeployed == false)
+            if (ApplicationDeployment.IsNetworkDeployed)
             {
                 Program.ReleaseMutex();
                 StartClickOnceDp2circulation();
@@ -7995,9 +7995,10 @@ Keys keyData)
             try
             {
 #if NO
-                string strUrl = "http://dp2003.com/dp2circulation/v2/dp2circulation.application?newinstance";
+                string strUrl = "http://dp2003.com/dp2circulation/v2/dp2circulation.application";
                 Process.Start(strUrl);
 #endif
+
                 string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
                 if (File.Exists(strShortcutFilePath) == false)
                 {

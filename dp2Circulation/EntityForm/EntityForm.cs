@@ -6862,7 +6862,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             strError = "";
             strXml = "";
 
-
             string strMarcSyntax = "";
 
             // 获得库名，根据库名得到marc syntax
@@ -6871,7 +6870,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
             if (String.IsNullOrEmpty(strBiblioDbName) == false)
                 strMarcSyntax = MainForm.GetBiblioSyntax(strBiblioDbName);
-            
 
             // 在当前没有定义MARC语法的情况下，默认unimarc
             if (String.IsNullOrEmpty(strMarcSyntax) == true)

@@ -9317,7 +9317,7 @@ Stack:
                     try
                     {
                         if (this.m_ws.State != CommunicationState.Faulted)
-                            this.m_ws.Close();
+                            this.m_ws.Close();  // 如果长时间不返回怎么办？
                     }
                     catch
                     {

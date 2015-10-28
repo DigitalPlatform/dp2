@@ -29,35 +29,24 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OneActionDialog));
-            this.label_fieldName = new System.Windows.Forms.Label();
             this.comboBox_fieldName = new System.Windows.Forms.ComboBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_inputTimeString = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_rfc1123Single = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_readerRights = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_objectRights = new System.Windows.Forms.ToolStripMenuItem();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label_fieldValue = new System.Windows.Forms.Label();
+            this.label_fieldName = new System.Windows.Forms.Label();
             this.comboBox_fieldValue = new System.Windows.Forms.ComboBox();
             this.checkedComboBox_stateRemove = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label_remove = new System.Windows.Forms.Label();
             this.checkedComboBox_stateAdd = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label_add = new System.Windows.Forms.Label();
-            this.ToolStripMenuItem_objectRights = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // label_fieldName
-            // 
-            this.label_fieldName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_fieldName.Location = new System.Drawing.Point(107, 36);
-            this.label_fieldName.Margin = new System.Windows.Forms.Padding(0);
-            this.label_fieldName.Name = "label_fieldName";
-            this.label_fieldName.Size = new System.Drawing.Size(10, 20);
-            this.label_fieldName.TabIndex = 3;
             // 
             // comboBox_fieldName
             // 
@@ -81,10 +70,10 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_inputTimeString});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.toolStrip1.Location = new System.Drawing.Point(278, 36);
+            this.toolStrip1.Location = new System.Drawing.Point(309, 36);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.toolStrip1.Size = new System.Drawing.Size(61, 23);
+            this.toolStrip1.Size = new System.Drawing.Size(30, 23);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -121,6 +110,13 @@
             this.ToolStripMenuItem_readerRights.Text = "读者权限值...";
             this.ToolStripMenuItem_readerRights.Click += new System.EventHandler(this.ToolStripMenuItem_readerRights_Click);
             // 
+            // ToolStripMenuItem_objectRights
+            // 
+            this.ToolStripMenuItem_objectRights.Name = "ToolStripMenuItem_objectRights";
+            this.ToolStripMenuItem_objectRights.Size = new System.Drawing.Size(171, 22);
+            this.ToolStripMenuItem_objectRights.Text = "对象权限值...";
+            this.ToolStripMenuItem_objectRights.Click += new System.EventHandler(this.ToolStripMenuItem_objectRights_Click);
+            // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -146,23 +142,23 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
-            // label1
+            // label_fieldValue
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 39);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 12);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "字段值(&V):";
+            this.label_fieldValue.AutoSize = true;
+            this.label_fieldValue.Location = new System.Drawing.Point(7, 39);
+            this.label_fieldValue.Name = "label_fieldValue";
+            this.label_fieldValue.Size = new System.Drawing.Size(65, 12);
+            this.label_fieldValue.TabIndex = 2;
+            this.label_fieldValue.Text = "字段值(&V):";
             // 
-            // label2
+            // label_fieldName
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 14);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 12);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "字段名(&N):";
+            this.label_fieldName.AutoSize = true;
+            this.label_fieldName.Location = new System.Drawing.Point(7, 14);
+            this.label_fieldName.Name = "label_fieldName";
+            this.label_fieldName.Size = new System.Drawing.Size(65, 12);
+            this.label_fieldName.TabIndex = 0;
+            this.label_fieldName.Text = "字段名(&N):";
             // 
             // comboBox_fieldValue
             // 
@@ -229,13 +225,6 @@
             this.label_add.TabIndex = 14;
             this.label_add.Text = "增(&A):";
             // 
-            // ToolStripMenuItem_objectRights
-            // 
-            this.ToolStripMenuItem_objectRights.Name = "ToolStripMenuItem_objectRights";
-            this.ToolStripMenuItem_objectRights.Size = new System.Drawing.Size(171, 22);
-            this.ToolStripMenuItem_objectRights.Text = "对象权限值...";
-            this.ToolStripMenuItem_objectRights.Click += new System.EventHandler(this.ToolStripMenuItem_objectRights_Click);
-            // 
             // OneActionDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -248,11 +237,10 @@
             this.Controls.Add(this.checkedComboBox_stateAdd);
             this.Controls.Add(this.label_add);
             this.Controls.Add(this.comboBox_fieldValue);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.label_fieldName);
+            this.Controls.Add(this.label_fieldValue);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
-            this.Controls.Add(this.label_fieldName);
             this.Controls.Add(this.comboBox_fieldName);
             this.Controls.Add(this.toolStrip1);
             this.Name = "OneActionDialog";
@@ -269,7 +257,6 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label_fieldName;
         private System.Windows.Forms.ComboBox comboBox_fieldName;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_inputTimeString;
@@ -277,8 +264,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_fieldValue;
+        private System.Windows.Forms.Label label_fieldName;
         private System.Windows.Forms.ComboBox comboBox_fieldValue;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_stateRemove;
         private System.Windows.Forms.Label label_remove;

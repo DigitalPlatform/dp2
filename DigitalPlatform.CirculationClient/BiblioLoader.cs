@@ -97,6 +97,7 @@ namespace DigitalPlatform.CirculationClient
                     string[] results = null;
                     byte[] timestamp = null;
                     string strError = "";
+                    Channel.Timeout = new TimeSpan(0, 0, 5);
                     long lRet = Channel.GetBiblioInfos(
                         this.Stop,
                         strCommand,

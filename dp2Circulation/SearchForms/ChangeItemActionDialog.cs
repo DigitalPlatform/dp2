@@ -20,6 +20,8 @@ namespace dp2Circulation
     /// </summary>
     internal partial class ChangeItemActionDialog : Form
     {
+        public string ElementCaption = "字段";    // 字段/元素/子字段
+
         /// <summary>
         /// 数据库类型
         /// </summary>
@@ -63,6 +65,8 @@ namespace dp2Circulation
                 "state_remove",
                 "");
 #endif
+            // 设置第一栏的标题
+            this.listView_actions.Columns[0].Text = this.ElementCaption + "名";
 
             // 恢复 listview 中的内容
 
@@ -440,6 +444,7 @@ namespace dp2Circulation
             OneActionDialog dlg = new OneActionDialog();
 
             MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.ElementCaption = this.ElementCaption;
             dlg.UserDir = this.MainForm.UserDir;
             dlg.DataDir = this.MainForm.DataDir;
             dlg.CfgDom = this.CfgDom;
@@ -506,6 +511,7 @@ namespace dp2Circulation
             OneActionDialog dlg = new OneActionDialog();
 
             MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.ElementCaption = this.ElementCaption;
             dlg.UserDir = this.MainForm.UserDir;
             dlg.DataDir = this.MainForm.DataDir;
             dlg.CfgDom = this.CfgDom;

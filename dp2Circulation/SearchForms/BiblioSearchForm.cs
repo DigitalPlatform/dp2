@@ -78,7 +78,6 @@ namespace dp2Circulation
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
-
         }
 
         void prop_GetColumnTitles(object sender, GetColumnTitlesEventArgs e)
@@ -1055,6 +1054,7 @@ Keys keyData)
                 }
 
                 string strQueryXml = "";
+                Channel.Timeout = new TimeSpan(0, 5, 0);
                 long lRet = Channel.SearchBiblio(stop,
                     this.checkedComboBox_biblioDbNames.Text,
                     this.textBox_queryWord.Text,

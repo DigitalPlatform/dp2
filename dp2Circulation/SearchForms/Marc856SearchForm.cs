@@ -134,33 +134,85 @@ namespace dp2Circulation
                 ListViewUtil.ChangeItemText(item, COLUMN_RECPATH, strBiblioRecPath);
 
             ListViewUtil.ChangeItemText(item, COLUMN_FIELDINDEX, index.ToString());
+
+            ListViewUtil.ChangeItemText(item, COLUMN_INDICATOR1, field.Indicator1.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_INDICATOR2, field.Indicator2.ToString());
+
             ListViewUtil.ChangeItemText(item, COLUMN_URL, u);
-            ListViewUtil.ChangeItemText(item, COLUMN_TYPE, strType);
-            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, strSize);
-            ListViewUtil.ChangeItemText(item, COLUMN_SOURCE, strSource);
+            ListViewUtil.ChangeItemText(item, COLUMN_F,
+                field.select("subfield[@name='f']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_Q,
+    field.select("subfield[@name='q']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_S,
+    field.select("subfield[@name='s']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_Y,
+    field.select("subfield[@name='y']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_Z,
+    field.select("subfield[@name='z']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_X,
+    x);
 
             ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, strRights);
+            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, strSize);
+            ListViewUtil.ChangeItemText(item, COLUMN_SOURCE, strSource);
+            ListViewUtil.ChangeItemText(item, COLUMN_TYPE, strType);
+
+            ListViewUtil.ChangeItemText(item, COLUMN_2,
+    field.select("subfield[@name='2']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_3,
+    field.select("subfield[@name='3']").FirstContent);
+            ListViewUtil.ChangeItemText(item, COLUMN_8,
+    field.select("subfield[@name='8']").FirstContent);
         }
 
-        const int COLUMN_RECPATH = 0;
-        const int COLUMN_SUMMARY = 1;
-        const int COLUMN_FIELDINDEX = 2;
-        const int COLUMN_URL = 3;
-        const int COLUMN_TYPE = 4;
-        const int COLUMN_SIZE = 5;
-        const int COLUMN_SOURCE = 6;
-        const int COLUMN_RIGHTS = 7;
+        const int COLUMN_RECPATH = 0;   // 书目记录路径
+        const int COLUMN_SUMMARY = 1;   // 书目摘要
+        const int COLUMN_FIELDINDEX = 2;    // 字段序号
+        const int COLUMN_INDICATOR1 = 3;    // 指示符1
+        const int COLUMN_INDICATOR2 = 4;    // 指示符2
+
+        const int COLUMN_URL = 5;       // $u URL
+
+        const int COLUMN_F = 6;         // $f 电子文件名
+        const int COLUMN_Q = 7;         // $q 电子格式类型
+        const int COLUMN_S = 8;         // $s 文件大小
+        const int COLUMN_Y = 9;         // $y 链接文字
+        const int COLUMN_Z = 10;         // $z 公开注释
+
+        const int COLUMN_X = 11;         // $x 内部注释
+
+        const int COLUMN_RIGHTS = 12;    // $x.rights
+        const int COLUMN_SIZE = 13;      // $x.size
+        const int COLUMN_SOURCE = 14;    // $x.source
+        const int COLUMN_TYPE = 15;      // $x.type
+
+        const int COLUMN_2 = 16;         // $2 其它接入方式
+        const int COLUMN_3 = 17;         // $3 特定部分说明
+        const int COLUMN_8 = 18;         // $8 字段关联或序号
+
 
         void CreateColumns()
         {
             string[] titles = new string[] {
                 "书目摘要",
                 "字段序号",
-                "$uURL",
-                "$x type 类型",
+                "指示符1",
+                "指示符2",
+                "$u URL",
+        "$f 电子文件名",
+        "$q 电子格式类型",
+        "$s 文件大小",
+        "$y 链接文字",
+        "$z 公开注释",
+        "$x 内部注释",
+                "$x rights 权限",
                 "$x size 尺寸",
                 "$x source 来源",
-                "$x rights 权限",
+        "$x type 类型",
+        "$2 其它接入方式",
+        "$3 特定部分说明",
+        "$8 字段关联或序号",
+
             };
             int i = 1;
             foreach (string title in titles)
@@ -1058,6 +1110,7 @@ MessageBoxDefaultButton.Button1);
             {
                 ChangeItemActionDialog dlg = new ChangeItemActionDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.ElementCaption = "子字段";
                 dlg.DbType = "856";
                 dlg.Text = "快速修改 856 字段 -- 请指定动作参数";
                 dlg.MainForm = this.MainForm;

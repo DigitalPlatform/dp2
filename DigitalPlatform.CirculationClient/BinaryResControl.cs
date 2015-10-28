@@ -1448,6 +1448,11 @@ bool bChanged)
                 if (String.IsNullOrEmpty(strID) == true)
                     continue;
 
+                LineState state = GetLineState(item);
+                // 如果是已经标记删除的事项
+                if (state == LineState.Deleted)
+                    continue;
+
                 string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
                 string strRights = ListViewUtil.GetItemText(item, COLUMN_RIGHTS);
 

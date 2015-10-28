@@ -22,6 +22,8 @@ namespace dp2Circulation
     /// </summary>
     internal partial class OneActionDialog : Form
     {
+        public string ElementCaption = "字段";    // 字段/元素/子字段
+
 #if NO
         /// <summary>
         /// 增、减 List DropDown 事件
@@ -213,6 +215,10 @@ namespace dp2Circulation
 
         private void OneActionDialog_Load(object sender, EventArgs e)
         {
+            // 设置连个 label 的内容
+            this.label_fieldName.Text = this.ElementCaption + "名";
+            this.label_fieldValue.Text = this.ElementCaption + "值";
+
             if (this.CfgDom != null)
             {
                 FillFieldNameList(this.Lang, 

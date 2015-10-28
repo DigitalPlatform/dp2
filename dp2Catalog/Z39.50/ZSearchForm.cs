@@ -2712,6 +2712,28 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
             }
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 dp2Catalog.ZSearchForm.RefreshOneRecord(String strPathParam, String strAction, String& strError)
+在 dp2Catalog.MarcDetailForm.RefreshCachedRecord(String strAction, String& strError)
+在 dp2Catalog.MarcDetailForm.SaveRecord(String strStyle)
+在 dp2Catalog.MarcDetailForm.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.TextBoxBase.ProcessDialogKey(Keys keyData)
+在 DigitalPlatform.Marc.MyEdit.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.Control.PreProcessMessage(Message& msg)
+在 System.Windows.Forms.Control.PreProcessControlMessageInternal(Control target, Message& msg)
+在 System.Windows.Forms.Application.ThreadContext.PreTranslateMessage(MSG& msg)
+
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKeyToken=null
+
+         * */
         // 刷新一条MARC记录
         // parameters:
         //      strAction   refresh / delete
@@ -2768,7 +2790,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
 
             if (strAction == "refresh")
             {
-
                 // 新装入一批记录
                 int nCount = 1;
 
@@ -2793,6 +2814,14 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                         strElementSetName = "F";
 
                     RecordCollection records = null;
+
+                    // 2015/10/28
+                    if (connection.TargetInfo == null)
+                    {
+                        // TODO: 最好能输出 connection 成员信息
+                        throw new Exception("connection.TargetInfo 为空");
+                        // return -1;
+                    }
 
                     // TODO: 这里要的不是追加效果，而是替换一个已经存在的事项
                     nRet = connection.DoPresent(
