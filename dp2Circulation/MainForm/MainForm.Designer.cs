@@ -160,7 +160,7 @@ namespace dp2Circulation
             this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.menuItem_packageErrorLog = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem_updateDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_updateGreenApplication = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_createGreenApplication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_upgradeFromDisk = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
@@ -1155,7 +1155,7 @@ namespace dp2Circulation
             this.toolStripSeparator20,
             this.menuItem_packageErrorLog,
             this.menuItem_updateDp2circulation,
-            this.MenuItem_updateGreenApplication,
+            this.MenuItem_createGreenApplication,
             this.MenuItem_upgradeFromDisk,
             this.toolStripSeparator31,
             this.MenuItem_copyright});
@@ -1235,13 +1235,12 @@ namespace dp2Circulation
             this.menuItem_updateDp2circulation.Visible = false;
             this.menuItem_updateDp2circulation.Click += new System.EventHandler(this.menuItem_updateDp2circulation_Click);
             // 
-            // MenuItem_updateGreenApplication
+            // MenuItem_createGreenApplication
             // 
-            this.MenuItem_updateGreenApplication.Name = "MenuItem_updateGreenApplication";
-            this.MenuItem_updateGreenApplication.Size = new System.Drawing.Size(196, 22);
-            this.MenuItem_updateGreenApplication.Text = "创建备用绿色安装目录";
-            this.MenuItem_updateGreenApplication.Visible = false;
-            this.MenuItem_updateGreenApplication.Click += new System.EventHandler(this.MenuItem_updateGreenApplication_Click);
+            this.MenuItem_createGreenApplication.Name = "MenuItem_createGreenApplication";
+            this.MenuItem_createGreenApplication.Size = new System.Drawing.Size(196, 22);
+            this.MenuItem_createGreenApplication.Text = "创建备用绿色安装目录";
+            this.MenuItem_createGreenApplication.Click += new System.EventHandler(this.MenuItem_createGreenApplication_Click);
             // 
             // MenuItem_upgradeFromDisk
             // 
@@ -1916,7 +1915,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openMarc856SearchForm;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_startAnotherDp2circulation;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_updateGreenApplication;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_createGreenApplication;
     }
 }
 

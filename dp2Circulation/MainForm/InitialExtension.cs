@@ -873,6 +873,7 @@ MessageBoxDefaultButton.Button1);
                 this.MenuItem_openReservationListForm.Visible = false;
                 // this.MenuItem_inventory.Visible = false;
                 this.MenuItem_openMarc856SearchForm.Visible = false;
+                this.MenuItem_createGreenApplication.Visible = false;
             }
 
 #if NO

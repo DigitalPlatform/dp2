@@ -8017,7 +8017,7 @@ Keys keyData)
             }
         }
 
-        private void MenuItem_updateGreenApplication_Click(object sender, EventArgs e)
+        private void MenuItem_createGreenApplication_Click(object sender, EventArgs e)
         {
             // TODO: 需要加入判断，如果当前已经是绿色位置启动的，就隐藏此菜单
             Task.Factory.StartNew(() => CopyGreen(true));

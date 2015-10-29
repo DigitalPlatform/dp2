@@ -13,9 +13,9 @@ namespace dp2Circulation
 {
     static class Program
     {
-        static ExecutionContext context = ExecutionContext.Capture();
+        static ExecutionContext context = null; //ExecutionContext.Capture();
 
-        static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
+        static Mutex mutex = null;  // new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
 
         static bool bExiting = false;
 
@@ -30,6 +30,9 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
+            context = ExecutionContext.Capture();
+            mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
+
             List<string> args = StringUtil.GetCommandLineArgs();
 #if NO
             if (ApplicationDeployment.IsNetworkDeployed &&
