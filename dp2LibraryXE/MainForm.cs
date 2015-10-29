@@ -18,22 +18,21 @@ using Ionic.Zip;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Web;
+using System.Reflection;
+using Microsoft.Win32;
 
+using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform;
 using DigitalPlatform.CirculationClient.localhost;
-
-using dp2LibraryXE.Properties;
 using DigitalPlatform.CommonControl;
-using System.Reflection;
-using Microsoft.Win32;
 using DigitalPlatform.Install;
 using DigitalPlatform.LibraryServer;
+
+using dp2LibraryXE.Properties;
 
 namespace dp2LibraryXE
 {

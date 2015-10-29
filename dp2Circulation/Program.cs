@@ -13,10 +13,11 @@ namespace dp2Circulation
 {
     static class Program
     {
-        static ExecutionContext context = null; //ExecutionContext.Capture();
-
-        static Mutex mutex = null;  // new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
-
+#if NO
+        static ExecutionContext context = ExecutionContext.Capture();
+        static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
+#endif
+        static bool _suppressMutex = false;   // 是否越过 Mutex 机制？ true 表示要越过
         static bool bExiting = false;
 
         static MainForm _mainForm = null;
@@ -30,9 +31,6 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
-            context = ExecutionContext.Capture();
-            mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
-
             List<string> args = StringUtil.GetCommandLineArgs();
 #if NO
             if (ApplicationDeployment.IsNetworkDeployed &&
@@ -52,42 +50,44 @@ namespace dp2Circulation
             }
 #endif
 
-            if (mutex.WaitOne(TimeSpan.Zero, true)
-                || args.IndexOf("newinstance") != -1)
-            {
-                if (StringUtil.IsDevelopMode() == false)
-                    PrepareCatchException();
-
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                _mainForm = new MainForm();
-                Application.Run(_mainForm);
-
-                ReleaseMutex();
-            }
-            else
-            {
-
-                string procName = Process.GetCurrentProcess().ProcessName;
-                Process[] processes = Process.GetProcessesByName(procName);
-                foreach (Process process in processes)
+                // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
+                bool createdNew = true;
+                // mutex name need contains windows account name. or us programes file path, hashed
+                using (Mutex mutex = new Mutex(true, 
+                    "{A810CFB4-D932-4821-91D4-4090C84C5C68}", 
+                    out createdNew))
                 {
-                    if (process != null)
+                    if (createdNew || _suppressMutex || args.IndexOf("newinstance") != -1)
                     {
-                        // Debug.Assert(false, "");
+                        if (StringUtil.IsDevelopMode() == false)
+                            PrepareCatchException();
 
-                        API.SetForegroundWindow(process.MainWindowHandle);
-                        if (API.IsIconic(process.MainWindowHandle))
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        _mainForm = new MainForm();
+                        Application.Run(_mainForm);
+                    }
+                    else
+                    {
+                        Process current = Process.GetCurrentProcess();
+                        foreach (Process process in Process.GetProcessesByName(current.ProcessName))
                         {
-                            // API.ShowWindowAsync(process.MainWindowHandle, API.SW_RESTORE);
-                            API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
-                            API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
+                            if (process.Id != current.Id)
+                            {
+                                API.SetForegroundWindow(process.MainWindowHandle);
+                                break;
+                            }
                         }
                     }
                 }
-            }
         }
 
+        public static void SuppressMutex()
+        {
+            _suppressMutex = true;
+        }
+
+#if NO
         public static void ReleaseMutex()
         {
             ExecutionContext.Run(context, (state) => {
@@ -99,6 +99,7 @@ namespace dp2Circulation
                 }
             }, null);
         }
+#endif
 
         static List<string> _promptStrings = new List<string>();
         public static void MemoPromptString(string strText)

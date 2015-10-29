@@ -7965,7 +7965,7 @@ Keys keyData)
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                Program.ReleaseMutex();
+                Program.SuppressMutex();
                 StartClickOnceDp2circulation();
                 return;
             }

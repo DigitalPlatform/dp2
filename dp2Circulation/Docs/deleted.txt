@@ -6763,3 +6763,40 @@ namespace DigitalPlatform
                             API.ShowWindow(process.MainWindowHandle, API.SW_SHOWMAXIMIZED);
                         }
 #endif
+
+
+~~~
+
+            if (mutex.WaitOne(TimeSpan.Zero, true)
+                || args.IndexOf("newinstance") != -1)
+            {
+                if (StringUtil.IsDevelopMode() == false)
+                    PrepareCatchException();
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                _mainForm = new MainForm();
+                Application.Run(_mainForm);
+
+            }
+            else
+            {
+
+                string procName = Process.GetCurrentProcess().ProcessName;
+                Process[] processes = Process.GetProcessesByName(procName);
+                foreach (Process process in processes)
+                {
+                    if (process != null)
+                    {
+                        // Debug.Assert(false, "");
+
+                        API.SetForegroundWindow(process.MainWindowHandle);
+                        if (API.IsIconic(process.MainWindowHandle))
+                        {
+                            // API.ShowWindowAsync(process.MainWindowHandle, API.SW_RESTORE);
+                            API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
+                            API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
+                        }
+                    }
+                }
+            }
