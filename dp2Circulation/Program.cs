@@ -13,6 +13,8 @@ namespace dp2Circulation
 {
     static class Program
     {
+        static ExecutionContext context = ExecutionContext.Capture();
+
         static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
 
         static bool bExiting = false;
@@ -85,12 +87,14 @@ namespace dp2Circulation
 
         public static void ReleaseMutex()
         {
-            if (mutex != null)
-            {
-                mutex.ReleaseMutex();
-                mutex.Dispose();
-                mutex = null;
-            }
+            ExecutionContext.Run(context, (state) => {
+                if (mutex != null)
+                {
+                    mutex.ReleaseMutex();
+                    mutex.Dispose();
+                    mutex = null;
+                }
+            }, null);
         }
 
         static List<string> _promptStrings = new List<string>();

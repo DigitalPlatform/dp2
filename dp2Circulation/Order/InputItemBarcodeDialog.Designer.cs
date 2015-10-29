@@ -70,6 +70,7 @@ namespace dp2Circulation
             this.textBox_itemBarcode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_itemBarcode.HideSelection = false;
+            this.textBox_itemBarcode.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_itemBarcode.Location = new System.Drawing.Point(92, 205);
             this.textBox_itemBarcode.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_itemBarcode.Name = "textBox_itemBarcode";

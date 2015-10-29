@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MARC 856 字段修改动作定义 -->
+<root>
+  <action element="indicator1" type="" list="" length="1">
+    <caption lang="zh">字段指示符1</caption>
+  </action>
+  <action element="indicator2" type="" list="" length="1">
+    <caption lang="zh">字段指示符2</caption>
+  </action>
+  <action element="f" type="" style="removable">
+    <caption lang="zh">f 电子文件名</caption>
+  </action>
+  <action element="q" type="" list="mime" style="removable" >
+    <caption lang="zh">q 电子格式类型</caption>
+  </action>
+  <action element="s" type=""  style="removable" >
+    <caption lang="zh">s 文件大小</caption>
+  </action>
+  <action element="u" type="" style="removable" >
+    <caption lang="zh">u URL</caption>
+  </action>
+  <action element="y" type="" style="removable" >
+    <caption lang="zh">y 链接文字</caption>
+  </action>
+  <action element="z" type="" style="removable" >
+    <caption lang="zh">z 公开注释</caption>
+  </action>
+  <action element="2" type="" style="removable" >
+    <caption lang="zh">2 其它接入方式</caption>
+  </action>
+  <action element="3" type="" style="removable" >
+    <caption lang="zh">3 特定部分说明</caption>
+  </action>
+  <action element="8" type="" style="removable" >
+    <caption lang="zh">8 字段关联或序号</caption>
+  </action>
+  <action element="x" type=""  style="removable" >
+    <caption lang="zh">x 内部注释</caption>
+  </action>
+  <action element="x.rights" type="" list="objectRights" additional="combine" style="removable" >
+    <caption lang="zh">权限 x.rights</caption>
+  </action>
+  <action element="x.size" type="" list="856Types" style="removable" >
+    <caption lang="zh">尺寸 x.size</caption>
+  </action>
+  <action element="x.source" type="" style="removable" >
+    <caption lang="zh">来源 x.source</caption>
+  </action>
+  <action element="x.type" type="" list="856Types" style="removable" >
+    <caption lang="zh">类型 x.type</caption>
+  </action>
+</root>

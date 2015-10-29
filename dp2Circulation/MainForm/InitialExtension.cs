@@ -337,13 +337,17 @@ Stack:
             this._updatedGreenZipFileNames.Clear(); // 避免后面再次调用本函数
         }
 
-        void BeginUpdateGreenApplication()
+        bool BeginUpdateGreenApplication()
         {
             if (ApplicationDeployment.IsNetworkDeployed == false
                 && StringUtil.IsDevelopMode() == false
                 && StringUtil.IsNewInstance() == false
                 )
+            {
                 Task.Factory.StartNew(() => GreenUpdate());
+                return true;
+            }
+            return false;
         }
 
         void CancelUpdateGreenApplication()
@@ -1208,20 +1212,23 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 复制出一个绿色安装包
-        void CopyGreen()
+        // return:
+        //      false   没有启动
+        //      true    启动了。注意，有可能会启动了但后来出错了。
+        bool CopyGreen(bool bForce = false)
         {
             int nRet = 0;
             string strError = "";
 
             // 本身如果是绿色安装包，没有必要再次复制出绿色安装包
-            if (ApplicationDeployment.IsNetworkDeployed == false)
-                return;
+            if (bForce == false && ApplicationDeployment.IsNetworkDeployed == false)
+                return false;
 
             string strProgramDir = Environment.CurrentDirectory;
             string strTargetDir = "c:\\dp2circulation";
 
             if (PathUtil.IsEqual(strProgramDir, strTargetDir) == true)
-                return;
+                return false;
 
             this.DisplayBackgroundText("正在创建绿色安装包 ...\r\n");
 
@@ -1266,6 +1273,8 @@ MessageBoxDefaultButton.Button1);
                    false);
                 this.DisplayBackgroundText("绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
             }
+
+            return true;
         }
 
         void ShowMessageBox(string strText)

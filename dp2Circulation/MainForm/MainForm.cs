@@ -23,6 +23,9 @@ using System.Reflection;
 
 using System.Drawing.Text;
 using System.Speech.Synthesis;
+using System.Security.Permissions;
+using System.Threading.Tasks;
+
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -39,7 +42,6 @@ using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
-using System.Security.Permissions;
 
 namespace dp2Circulation
 {
@@ -8013,6 +8015,12 @@ Keys keyData)
             {
                 MessageBox.Show(this, "dp2circulation 启动失败" + ex.Message);
             }
+        }
+
+        private void MenuItem_updateGreenApplication_Click(object sender, EventArgs e)
+        {
+            // TODO: 需要加入判断，如果当前已经是绿色位置启动的，就隐藏此菜单
+            Task.Factory.StartNew(() => CopyGreen(true));
         }
     }
 

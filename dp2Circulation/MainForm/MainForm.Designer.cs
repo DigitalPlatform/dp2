@@ -35,6 +35,8 @@ namespace dp2Circulation
             this.toolStripMenuItem_runProject = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_projectManage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_startAnotherDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_functionWindows = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openQuickChargingForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -158,6 +160,7 @@ namespace dp2Circulation
             this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.menuItem_packageErrorLog = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem_updateDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_updateGreenApplication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_upgradeFromDisk = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
@@ -205,8 +208,6 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_startAnotherDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -266,6 +267,18 @@ namespace dp2Circulation
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(252, 6);
+            // 
+            // MenuItem_startAnotherDp2circulation
+            // 
+            this.MenuItem_startAnotherDp2circulation.Name = "MenuItem_startAnotherDp2circulation";
+            this.MenuItem_startAnotherDp2circulation.Size = new System.Drawing.Size(255, 22);
+            this.MenuItem_startAnotherDp2circulation.Text = "启动新的 dp2Circulation 实例(&S)";
+            this.MenuItem_startAnotherDp2circulation.Click += new System.EventHandler(this.MenuItem_startAnotherDp2circulation_Click);
+            // 
+            // toolStripSeparator14
+            // 
+            this.toolStripSeparator14.Name = "toolStripSeparator14";
+            this.toolStripSeparator14.Size = new System.Drawing.Size(252, 6);
             // 
             // MenuItem_exit
             // 
@@ -1142,6 +1155,7 @@ namespace dp2Circulation
             this.toolStripSeparator20,
             this.menuItem_packageErrorLog,
             this.menuItem_updateDp2circulation,
+            this.MenuItem_updateGreenApplication,
             this.MenuItem_upgradeFromDisk,
             this.toolStripSeparator31,
             this.MenuItem_copyright});
@@ -1152,91 +1166,99 @@ namespace dp2Circulation
             // MenuItem_configuration
             // 
             this.MenuItem_configuration.Name = "MenuItem_configuration";
-            this.MenuItem_configuration.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_configuration.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_configuration.Text = "参数配置(&C)...";
             this.MenuItem_configuration.Click += new System.EventHandler(this.MenuItem_configuration_Click);
             // 
             // toolStripSeparator15
             // 
             this.toolStripSeparator15.Name = "toolStripSeparator15";
-            this.toolStripSeparator15.Size = new System.Drawing.Size(185, 6);
+            this.toolStripSeparator15.Size = new System.Drawing.Size(193, 6);
             // 
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(185, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(193, 6);
             // 
             // MenuItem_resetSerialCode
             // 
             this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
-            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
             this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
             // 
             // MenuItem_utility
             // 
             this.MenuItem_utility.Name = "MenuItem_utility";
-            this.MenuItem_utility.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_utility.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_utility.Text = "实用工具(&U)...";
             this.MenuItem_utility.Click += new System.EventHandler(this.MenuItem_utility_Click);
             // 
             // toolStripSeparator20
             // 
             this.toolStripSeparator20.Name = "toolStripSeparator20";
-            this.toolStripSeparator20.Size = new System.Drawing.Size(185, 6);
+            this.toolStripSeparator20.Size = new System.Drawing.Size(193, 6);
             // 
             // menuItem_packageErrorLog
             // 
             this.menuItem_packageErrorLog.Name = "menuItem_packageErrorLog";
-            this.menuItem_packageErrorLog.Size = new System.Drawing.Size(188, 22);
+            this.menuItem_packageErrorLog.Size = new System.Drawing.Size(196, 22);
             this.menuItem_packageErrorLog.Text = "打包错误日志(&L)...";
             this.menuItem_packageErrorLog.Click += new System.EventHandler(this.menuItem_packageErrorLog_Click);
             // 
             // menuItem_updateDp2circulation
             // 
             this.menuItem_updateDp2circulation.Name = "menuItem_updateDp2circulation";
-            this.menuItem_updateDp2circulation.Size = new System.Drawing.Size(188, 22);
+            this.menuItem_updateDp2circulation.Size = new System.Drawing.Size(196, 22);
             this.menuItem_updateDp2circulation.Text = "更新 dp2Circulation";
             this.menuItem_updateDp2circulation.Visible = false;
             this.menuItem_updateDp2circulation.Click += new System.EventHandler(this.menuItem_updateDp2circulation_Click);
             // 
+            // MenuItem_updateGreenApplication
+            // 
+            this.MenuItem_updateGreenApplication.Name = "MenuItem_updateGreenApplication";
+            this.MenuItem_updateGreenApplication.Size = new System.Drawing.Size(196, 22);
+            this.MenuItem_updateGreenApplication.Text = "创建备用绿色安装目录";
+            this.MenuItem_updateGreenApplication.Visible = false;
+            this.MenuItem_updateGreenApplication.Click += new System.EventHandler(this.MenuItem_updateGreenApplication_Click);
+            // 
             // MenuItem_upgradeFromDisk
             // 
             this.MenuItem_upgradeFromDisk.Name = "MenuItem_upgradeFromDisk";
-            this.MenuItem_upgradeFromDisk.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_upgradeFromDisk.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_upgradeFromDisk.Text = "从磁盘升级(&U) ...";
             this.MenuItem_upgradeFromDisk.Click += new System.EventHandler(this.MenuItem_upgradeFromDisk_Click);
             // 
             // toolStripSeparator31
             // 
             this.toolStripSeparator31.Name = "toolStripSeparator31";
-            this.toolStripSeparator31.Size = new System.Drawing.Size(185, 6);
+            this.toolStripSeparator31.Size = new System.Drawing.Size(193, 6);
             // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
-            this.MenuItem_copyright.Size = new System.Drawing.Size(188, 22);
+            this.MenuItem_copyright.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_copyright.Text = "版权(&C)...";
             this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
             // 
@@ -1674,18 +1696,6 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_startAnotherDp2circulation
-            // 
-            this.MenuItem_startAnotherDp2circulation.Name = "MenuItem_startAnotherDp2circulation";
-            this.MenuItem_startAnotherDp2circulation.Size = new System.Drawing.Size(255, 22);
-            this.MenuItem_startAnotherDp2circulation.Text = "启动新的 dp2Circulation 实例(&S)";
-            this.MenuItem_startAnotherDp2circulation.Click += new System.EventHandler(this.MenuItem_startAnotherDp2circulation_Click);
-            // 
-            // toolStripSeparator14
-            // 
-            this.toolStripSeparator14.Name = "toolStripSeparator14";
-            this.toolStripSeparator14.Size = new System.Drawing.Size(252, 6);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1906,6 +1916,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openMarc856SearchForm;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_startAnotherDp2circulation;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_updateGreenApplication;
     }
 }
 
