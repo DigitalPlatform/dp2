@@ -19,6 +19,28 @@ namespace DigitalPlatform
     /// </summary>
     public partial class SerialCodeForm : Form
     {
+        // 当前选定的社区版序列号
+        public string CommunityVersionCode
+        {
+            get;
+            set;
+        }
+
+        // 预置的序列号。常用于可以切换的社区版的序列号。每个字符串的格式为：序列号|版本名称
+        List<string> _defaultCodes = new List<string>();
+
+        public List<string> DefaultCodes
+        {
+            get
+            {
+                return _defaultCodes;
+            }
+            set
+            {
+                SetDefaultCodes(value);
+            }
+        }
+
         public SerialCodeForm()
         {
             InitializeComponent();
@@ -344,6 +366,90 @@ namespace DigitalPlatform
         void threadAction()
         {
             Clipboard.SetDataObject(this._content, true);
+        }
+
+#if NO
+        private void toolStripSplitButton_useCommunityVersion_ButtonClick(object sender, EventArgs e)
+        {
+            this.textBox_serialCode.Text = "community";
+            this.CommunityVersionCode = this.textBox_serialCode.Text;
+
+            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Close();
+        }
+#endif
+
+        private void toolStripButton_copyNicInfomation_Click(object sender, EventArgs e)
+        {
+            string strContent = GetNicInformation();
+            CopyToClipboard(strContent);
+        }
+
+        // 设置社区版列表
+        void SetDefaultCodes(List<string> list)
+        {
+            this._defaultCodes = list;
+
+            if (list.Count == 0)
+            {
+                this.toolStripSplitButton_useCommunityVersion.Visible = false;
+                return;
+            }
+
+            this.toolStripSplitButton_useCommunityVersion.Visible = true;
+
+            this.toolStripSplitButton_useCommunityVersion.DropDownItems.Clear();
+            int i = 0;
+            foreach(string line in list)
+            {
+                string[] parts = line.Split(new char[] { '|' });
+                string strValue = "";
+                string strCaption = "";
+                if (parts.Length > 0)
+                    strValue = parts[0];
+                if (parts.Length > 1)
+                    strCaption = parts[1];
+
+                ToolStripItem item = null;
+                if (i == 0)
+                {
+                    item = this.toolStripSplitButton_useCommunityVersion;
+                    if (string.IsNullOrEmpty(strCaption) == false)
+                    {
+                        item.Text = "切换为" + strCaption;
+                        item.ToolTipText = item.Text;
+                    }
+                    this.toolStripSplitButton_useCommunityVersion.ButtonClick += item_Click;
+                }
+                else
+                {
+                    item = new ToolStripButton("切换为" + (string.IsNullOrEmpty(strCaption) == false ? strCaption : strValue));
+                    this.toolStripSplitButton_useCommunityVersion.DropDownItems.Add(item);
+                    item.Click += item_Click;
+                    item.ToolTipText = item.Text;
+                }
+
+                {
+                    item.Tag = strValue;
+                }
+
+
+                i++;
+            }
+
+#if NO
+            if (this.toolStripSplitButton_useCommunityVersion.DropDownItems.Count == 0)
+                this.toolStripSplitButton_useCommunityVersion.HideDropDown();
+#endif
+        }
+
+        void item_Click(object sender, EventArgs e)
+        {
+            this.textBox_serialCode.Text = (string)((ToolStripItem)sender).Tag;
+            this.CommunityVersionCode = this.textBox_serialCode.Text;
+
+            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Close();
         }
     }
 }

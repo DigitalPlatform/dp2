@@ -18,14 +18,11 @@ using System.Diagnostics;
 using System.Net;   // for WebClient class
 using System.IO;
 using System.Web;
-
 using System.Reflection;
-
 using System.Drawing.Text;
 using System.Speech.Synthesis;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -4272,7 +4269,7 @@ Stack:
                     {
                         DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
 
-                        results.Add(record.RecordBody.Xml);
+                        results.Add(record.Path + "|" + record.RecordBody.Xml);
                     }
 
                     lStart += searchresults.Length;
@@ -7319,6 +7316,7 @@ Keys keyData)
                     this.CopyrightKey);
             SerialCodeForm dlg = new SerialCodeForm();
             dlg.Font = this.Font;
+            dlg.DefaultCodes = new List<string>(new string[] {"community|社区版"});
             dlg.SerialCode = strOldSerialCode;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
@@ -8022,6 +8020,27 @@ Keys keyData)
             // TODO: 需要加入判断，如果当前已经是绿色位置启动的，就隐藏此菜单
             Task.Factory.StartNew(() => CopyGreen(true));
         }
+
+        // 获得 MARC HTML 对照显示的头部字符串
+        public string GetMarcHtmlHeadString(bool bAjax = true)
+        {
+            string strCssFilePath = PathUtil.MergePath(this.DataDir, "operloghtml.css");
+
+            if (bAjax == true)
+                return
+                    "<head>" +
+                    "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
+                    "<link href=\"%mappeddir%/jquery-ui-1.8.7/css/jquery-ui-1.8.7.css\" rel=\"stylesheet\" type=\"text/css\" />" +
+                    "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-1.4.4.min.js\"></script>" +
+                    "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-ui-1.8.7.min.js\"></script>" +
+                    "<script type='text/javascript' charset='UTF-8' src='%datadir%\\getsummary.js" + "'></script>" +
+                    "</head>";
+            return
+    "<head>" +
+    "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
+    "</head>";
+        }
+
     }
 
     /// <summary>

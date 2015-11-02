@@ -25,16 +25,18 @@ using DigitalPlatform.GUI;
 
 namespace dp2Catalog
 {
-    public partial class DtlpSearchForm : Form, ISearchForm
+    public partial class DtlpSearchForm : MyForm, ISearchForm
     {
         // 参与排序的列号数组
         SortColumns SortColumns = new SortColumns();
 
         public string BinDir = "";
 
+#if NO
         public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
+#endif
 
         public DtlpChannelArray DtlpChannels = new DtlpChannelArray();
         public DtlpChannel DtlpChannel = null;	// 尽量使用一个通道
@@ -69,7 +71,6 @@ namespace dp2Catalog
         }
 
         #region ISearchForm 接口函数
-
 
         // 对象、窗口是否还有效?
         public bool IsValid()
@@ -579,9 +580,10 @@ namespace dp2Catalog
 
             this.BinDir = Environment.CurrentDirectory;
 
+#if NO
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
-
+#endif
 
             // 初始化ChannelArray
             DtlpChannels.appInfo = MainForm.AppInfo;
@@ -645,7 +647,6 @@ namespace dp2Catalog
 
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
         }
-
 
         /// <summary>
         /// 等待装载结束
@@ -748,7 +749,6 @@ namespace dp2Catalog
             return;
         }
 
-
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -801,11 +801,9 @@ namespace dp2Catalog
                 }
             }
 
-
             // 2008/3/24
             if (this.dtlpResDirControl1.SelectedNode != null)
                 this.dtlpResDirControl1.SelectedNode.EnsureVisible();
-
         }
 
         public void SaveSize()
@@ -828,9 +826,9 @@ namespace dp2Catalog
             }
         }
 
-
         private void DtlpSearchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+#if NO
             if (stop != null)
             {
                 if (stop.State == 0)    // 0 表示正在处理
@@ -840,10 +838,12 @@ namespace dp2Catalog
                     return;
                 }
             }
+#endif
         }
 
         private void DtlpSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if NO
             if (stop != null) // 脱离关联
             {
                 stop.Style = StopStyle.None;    // 需要强制中断
@@ -852,6 +852,7 @@ namespace dp2Catalog
                 stop.Unregister();	// 和容器脱离关联
                 stop = null;
             }
+#endif
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
@@ -874,15 +875,11 @@ namespace dp2Catalog
             SaveSize();
         }
 
-
-
         void DoStop(object sender, StopEventArgs e)
         {
             if (this.DtlpChannel != null)
                 this.DtlpChannel.Cancel();
         }
-
-
 
         // 获得浏览记录内容
         // 注：使用现有的this.DplpChannel
@@ -932,168 +929,198 @@ namespace dp2Catalog
 
         int m_nInSearching = 0; // 表示this.DtlpChannel是否被占用
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“System.Net.Sockets.NetworkStream”。
+Stack:
+在 System.Net.Sockets.NetworkStream.EndRead(IAsyncResult asyncResult)
+在 DigitalPlatform.DTLP.HostEntry.RecvTcpPackage(Byte[]& baPackage, Int32& nLen, Int32& nErrorNo)
+在 DigitalPlatform.DTLP.DtlpChannel.API_Search(String strPath, Int32 lStyle, Byte[]& baResult)
+在 DigitalPlatform.DTLP.DtlpChannel.Search(String strPath, Int32 lStyle, Byte[]& baResult)
+在 dp2Catalog.DtlpSearchForm.GetOneBrowseRecord(String strPath, String[]& cols, String& strError)
+在 dp2Catalog.DtlpSearchForm.FillBrowseList(Package package, String& strError)
+在 dp2Catalog.DtlpSearchForm.DoSearch()
+在 dp2Catalog.MainForm.toolButton_search_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+         * */
         // 检索
         public int DoSearch()
         {
             string strError = "";
             int nRet = 0;
 
-            byte[] baNext = null;
-            int nStyle = DtlpChannel.CTRLNO_STYLE;
-
-            // nStyle |=  Channel.JH_STYLE;    // 获得简化记录
-
-
-            string strPath = "";
-
-            if ((this.dtlpResDirControl1.SelectedMask & DtlpChannel.TypeStdbase) != 0)
-            {
-                this.strCurrentTargetPath = this.textBox_resPath.Text + "//";
-            }
-            else
-            {
-                this.strCurrentTargetPath = this.textBox_resPath.Text + "/";
-            }
-            this.strCurrentQueryWord = this.textBox_queryWord.Text;
-
-            strPath = this.strCurrentTargetPath + this.strCurrentQueryWord;
-
-            this.listView_browse.Items.Clear();
-            EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("开始检索 ...");
-            stop.BeginLoop();
-
-            this.Update();
-            this.MainForm.Update();
-
-            this.m_nInSearching++;
-            /*
-            this.listView_browse.ListViewItemSorter = null; // 暂时屏蔽排序能力
-             * */
-
+            this._processing++;
             try
             {
-                int nDupCount = 0;
-                this.listView_browse.Focus();   // 便于Excape中断
+                byte[] baNext = null;
+                int nStyle = DtlpChannel.CTRLNO_STYLE;
 
-                bool bFirst = true;       // 第一次检索
-                while (true)
+                // nStyle |=  Channel.JH_STYLE;    // 获得简化记录
+
+                string strPath = "";
+
+                if ((this.dtlpResDirControl1.SelectedMask & DtlpChannel.TypeStdbase) != 0)
                 {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
-
-                    Encoding encoding = this.DtlpChannel.GetPathEncoding(strPath);
-
-                    this.CurrentEncoding = encoding;    // 记忆下来
-
-                    byte[] baPackage;
-                    if (bFirst == true)
-                    {
-                        stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath );
-                        nRet = this.DtlpChannel.Search(strPath,
-                            nStyle,
-                            out baPackage);
-                    }
-                    else
-                    {
-                        stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath + " " + encoding.GetString(baNext));
-                        nRet = this.DtlpChannel.Search(strPath,
-                            baNext,
-                            nStyle,
-                            out baPackage);
-                    }
-                    if (nRet == -1)
-                    {
-                        int errorcode = this.DtlpChannel.GetLastErrno();
-                        if (errorcode == DtlpChannel.GL_NOTEXIST)
-                        {
-                            /*
-                            if (bFirst == true)
-                                break;
-                             * */
-                            break;
-                        }
-                        strError = "检索出错:\r\n"
-                            + "检索式: " + strPath + "\r\n"
-                            + "错误码: " + errorcode + "\r\n"
-                            + "错误信息: " + this.DtlpChannel.GetErrorString(errorcode) + "\r\n";
-                        goto ERROR1;
-                    }
-
-                    bFirst = false;
-
-                    Package package = new Package();
-                    package.LoadPackage(baPackage,
-                        encoding/*this.Channel.GetPathEncoding(strPath)*/);
-                    // nRet = package.Parse(PackageFormat.String);
-
-                    nRet = package.Parse(PackageFormat.String);
-                    if (nRet == -1)
-                    {
-                        strError = "Package::Parse() error";
-                        goto ERROR1;
-                    }
-
-                    ///
-                    nRet = FillBrowseList(package,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    nDupCount += nRet;
-
-                    if (package.ContinueString != "")
-                    {
-                        nStyle |= DtlpChannel.CONT_RECORD;
-                        baNext = package.ContinueBytes;
-                    }
-                    else
-                    {
-                        break;
-                    }
-
+                    this.strCurrentTargetPath = this.textBox_resPath.Text + "//";
                 }
+                else
+                {
+                    this.strCurrentTargetPath = this.textBox_resPath.Text + "/";
+                }
+                this.strCurrentQueryWord = this.textBox_queryWord.Text;
 
-                this.textBox_resultInfo.Text = "命中记录 "+this.listView_browse.Items.Count.ToString()+" 条";
-            }
+                strPath = this.strCurrentTargetPath + this.strCurrentQueryWord;
 
-            finally
-            {
-                this.m_nInSearching--;
+                this.listView_browse.Items.Clear();
+                EnableControls(false);
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.SetMessage("开始检索 ...");
+                stop.BeginLoop();
+
+                this.Update();
+                this.MainForm.Update();
+
+                this.m_nInSearching++;
+                /*
+                this.listView_browse.ListViewItemSorter = null; // 暂时屏蔽排序能力
+                 * */
+
                 try
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    int nDupCount = 0;
+                    this.listView_browse.Focus();   // 便于Excape中断
 
-                    EnableControls(true);
+                    bool bFirst = true;       // 第一次检索
+                    while (true)
+                    {
+                        Application.DoEvents();	// 出让界面控制权
 
-                    /*
-                    // 提供排序能力
-                    this.listView_browse.ListViewItemSorter = new ListViewBrowseItemComparer();
-                     * */
+                        if (stop != null)
+                        {
+                            if (stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                goto ERROR1;
+                            }
+                        }
+
+                        Encoding encoding = this.DtlpChannel.GetPathEncoding(strPath);
+
+                        this.CurrentEncoding = encoding;    // 记忆下来
+
+                        byte[] baPackage;
+                        if (bFirst == true)
+                        {
+                            stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath);
+                            nRet = this.DtlpChannel.Search(strPath,
+                                nStyle,
+                                out baPackage);
+                        }
+                        else
+                        {
+                            stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath + " " + encoding.GetString(baNext));
+                            nRet = this.DtlpChannel.Search(strPath,
+                                baNext,
+                                nStyle,
+                                out baPackage);
+                        }
+                        if (nRet == -1)
+                        {
+                            int errorcode = this.DtlpChannel.GetLastErrno();
+                            if (errorcode == DtlpChannel.GL_NOTEXIST)
+                            {
+                                /*
+                                if (bFirst == true)
+                                    break;
+                                 * */
+                                break;
+                            }
+                            strError = "检索出错:\r\n"
+                                + "检索式: " + strPath + "\r\n"
+                                + "错误码: " + errorcode + "\r\n"
+                                + "错误信息: " + this.DtlpChannel.GetErrorString(errorcode) + "\r\n";
+                            goto ERROR1;
+                        }
+
+                        bFirst = false;
+
+                        Package package = new Package();
+                        package.LoadPackage(baPackage,
+                            encoding/*this.Channel.GetPathEncoding(strPath)*/);
+                        // nRet = package.Parse(PackageFormat.String);
+
+                        nRet = package.Parse(PackageFormat.String);
+                        if (nRet == -1)
+                        {
+                            strError = "Package::Parse() error";
+                            goto ERROR1;
+                        }
+
+                        ///
+                        nRet = FillBrowseList(package,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        nDupCount += nRet;
+
+                        if (package.ContinueString != "")
+                        {
+                            nStyle |= DtlpChannel.CONT_RECORD;
+                            baNext = package.ContinueBytes;
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                    }
+
+                    this.textBox_resultInfo.Text = "命中记录 " + this.listView_browse.Items.Count.ToString() + " 条";
+                }
+
+                finally
+                {
+                    this.m_nInSearching--;
+                    try
+                    {
+                        stop.EndLoop();
+                        stop.OnStop -= new StopEventHandler(this.DoStop);
+                        stop.Initial("");
+
+                        EnableControls(true);
+
+                        /*
+                        // 提供排序能力
+                        this.listView_browse.ListViewItemSorter = new ListViewBrowseItemComparer();
+                         * */
+
+                    }
+                    catch { }
 
                 }
-                catch { }
 
+                if (this.listView_browse.Items.Count > 0)
+                    this.listView_browse.Focus();
+                else
+                    this.textBox_queryWord.Focus();
+
+                return 0;
             }
-
-            if (this.listView_browse.Items.Count > 0)
-                this.listView_browse.Focus();
-            else
-                this.textBox_queryWord.Focus();
-
-            return 0;
+            finally
+            {
+                this._processing--;
+            }
         ERROR1:
             try // 防止最后退出时报错
             {

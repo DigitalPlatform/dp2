@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>34</ApplicationRevision>
+    <ApplicationRevision>35</ApplicationRevision>
     <ApplicationVersion>2.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -223,6 +223,19 @@
       <DependentUpon>SelectItemDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Charging\SummaryList.cs" />
+    <Compile Include="Dictionary\RelationCollection.cs" />
+    <Compile Include="Dictionary\RelationControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dictionary\RelationControl.Designer.cs">
+      <DependentUpon>RelationControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dictionary\RelationDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dictionary\RelationDialog.Designer.cs">
+      <DependentUpon>RelationDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dictionary\SelectDictionaryItemDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1468,6 +1481,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\SelectItemDialog.resx">
       <DependentUpon>SelectItemDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dictionary\RelationControl.resx">
+      <DependentUpon>RelationControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dictionary\RelationDialog.resx">
+      <DependentUpon>RelationDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dictionary\SelectDictionaryItemDialog.resx">
       <DependentUpon>SelectDictionaryItemDialog.cs</DependentUpon>

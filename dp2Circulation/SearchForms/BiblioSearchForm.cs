@@ -7417,7 +7417,6 @@ out strError);
                 return;
 
             this.textBox_queryWord.Text = dlg.uString;
-
         }
 
         private void toolStripMenuItem_searchKeys_Click(object sender, EventArgs e)
@@ -7996,6 +7995,8 @@ strNewMARC);
 
         string GetHeadString(bool bAjax = true)
         {
+            return this.MainForm.GetMarcHtmlHeadString(bAjax);
+#if NO
             string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "operloghtml.css");
 
             if (bAjax == true)
@@ -8011,6 +8012,7 @@ strNewMARC);
     "<head>" +
     "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
     "</head>";
+#endif
         }
 
         public string QueryWord

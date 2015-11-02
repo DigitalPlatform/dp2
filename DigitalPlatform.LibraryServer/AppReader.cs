@@ -2141,7 +2141,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     // 2008/5/29 
                     // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
-                    strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已发生过修改";
+                    strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
                     errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
                     return -1;  // timestamp mismatch
                 }
@@ -2167,7 +2167,7 @@ strLibraryCode);    // 读者所在的馆代码
                     if (bExist == false)
                         strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已被删除。";
                     else
-                        strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已发生过修改";
+                        strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
 
                     errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
                     return -1;  // timestamp mismatch

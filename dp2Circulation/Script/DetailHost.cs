@@ -4256,7 +4256,91 @@ chi	中文	如果是中文，则为空。
             this.DetailForm.GetResInfo(sender, e);
         }
 
+        int SearchDictionary(
+    Stop stop,
+    string strDbName,
+    string strKey,
+    string strMatchStyle,
+    int nMaxCount,
+    ref List<string> results,
+    out string strError)
+        {
+            return this.DetailForm.MainForm.SearchDictionary(
+            stop,
+            strDbName,
+            strKey,
+            strMatchStyle,
+            nMaxCount,
+            ref results,
+            out strError);
+        }
+
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.DetailForm.MainForm.Channel != null)
+                this.DetailForm.MainForm.Channel.Abort();
+        }
+
+        // 通过词典库对照关系创建新字段
+        public void RelationGenerate(string strDef)
+        {
+            string strError = "";
+
+            RelationCollection relations = new RelationCollection();
+            int nRet = relations.Build(this.DetailForm.MarcEditor.Marc, strDef, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            RelationDialog dlg = new RelationDialog();
+            MainForm.SetControlFont(dlg, this.DetailForm.Font, false);
+            dlg.ProcSearchDictionary = SearchDictionary;
+            dlg.ProcDoStop = DoStop;
+            dlg.TempDir = this.DetailForm.MainForm.UserTempDir;
+            dlg.MarcHtmlHead = this.DetailForm.MainForm.GetMarcHtmlHeadString();
+            dlg.RelationCollection = relations;
+            dlg.UiState = this.DetailForm.MainForm.AppInfo.GetString(
+                "RelationDialog",
+                "ui_state",
+                "");
+            this.DetailForm.MainForm.AppInfo.LinkFormState(dlg, "SelectDictionaryItemDialog_state");
+            dlg.ShowDialog(this.DetailForm);
+            this.DetailForm.MainForm.AppInfo.SetString(
+                "RelationDialog",
+                "ui_state",
+                dlg.UiState);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+#if NO
+            foreach (string s in dlg.ResultRelations)
+            {
+                Field target_field = null;
+
+                // target_field = this.DetailForm.MarcEditor.Record.Fields.GetOneField(strTargetFieldName, 0);
+
+                if (target_field == null)
+                {
+                    target_field = this.DetailForm.MarcEditor.Record.Fields.Add(strTargetFieldName, "  ", "", true);
+                }
+
+                Subfield target_subfield = target_field.Subfields[strTargetSubfieldName];
+                if (target_subfield == null)
+                {
+                    target_subfield = new Subfield();
+                    target_subfield.Name = strTargetSubfieldName;
+                }
+
+                target_subfield.Value = s;
+                target_field.Subfields[strTargetSubfieldName] = target_subfield;
+            }
+#endif
+            this.DetailForm.MarcEditor.EnsureVisible();
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+        }
     }
+
 
     /// <summary>
     /// 拼音配置事项

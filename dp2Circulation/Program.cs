@@ -1,13 +1,14 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -18,7 +19,8 @@ namespace dp2Circulation
         static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
 #endif
         static bool _suppressMutex = false;   // 是否越过 Mutex 机制？ true 表示要越过
-        static bool bExiting = false;
+        
+        static bool _bExiting = false;   // 是否处在 正在退出 的状态
 
         static MainForm _mainForm = null;
         // 这里用 _mainForm 存储窗口对象，不采取 Form.ActiveForm 获取的方式。原因如下
@@ -75,7 +77,12 @@ namespace dp2Circulation
                             if (process.Id != current.Id)
                             {
                                 API.SetForegroundWindow(process.MainWindowHandle);
-                                break;
+                                if (API.IsIconic(process.MainWindowHandle))
+                                {
+                                    // API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
+                                    API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
+                                }
+                                // break;
                             }
                         }
                     }
@@ -144,7 +151,7 @@ namespace dp2Circulation
         static void CurrentDomain_UnhandledException(object sender,
             UnhandledExceptionEventArgs e)
         {
-            if (bExiting == true)
+            if (_bExiting == true)
                 return;
 
             Exception ex = (Exception)e.ExceptionObject;
@@ -214,7 +221,7 @@ namespace dp2Circulation
         static void Application_ThreadException(object sender, 
             ThreadExceptionEventArgs e)
         {
-            if (bExiting == true)
+            if (_bExiting == true)
                 return;
 
             Exception ex = (Exception)e.Exception;
@@ -247,7 +254,7 @@ namespace dp2Circulation
             if (result == DialogResult.Yes)
             {
                 //End();
-                bExiting = true;
+                _bExiting = true;
                 Application.Exit();
             }
         }
@@ -305,7 +312,7 @@ namespace dp2Circulation
             }
         }
 
-        // 写入Windows系统日志
+        // 写入 Windows 系统日志
         public static void WriteWindowsLog(string strText,
             EventLogEntryType type)
         {

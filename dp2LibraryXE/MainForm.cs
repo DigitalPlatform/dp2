@@ -829,6 +829,11 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 this.CopyrightKey);
             SerialCodeForm dlg = new SerialCodeForm();
             dlg.Font = this.Font;
+            dlg.DefaultCodes = new List<string>(new string[] {
+                "community|社区版",
+                "singleCommunity|单机版的社区版",
+                "miniCommunity|小型版的社区版",
+            });
             dlg.SerialCode = strOldSerialCode;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
@@ -4128,6 +4133,35 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             MessageBox.Show(this, strError);
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ComponentModel.Win32Exception
+Message: 找不到应用程序
+Stack:
+在 System.Diagnostics.Process.StartWithShellExecuteEx(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start()
+在 System.Diagnostics.Process.Start(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start(String fileName)
+在 dp2LibraryXE.MainForm.MenuItem_installDp2Opac_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripMenuItem.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStripItem.FireEventInteractive(EventArgs e, ToolStripItemEventType met)
+在 System.Windows.Forms.ToolStripItem.FireEvent(EventArgs e, ToolStripItemEventType met)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.ToolStripDropDown.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ScrollableControl.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.ToolStripDropDown.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+         * */
         // 安装 dp2OPAC
         private void MenuItem_installDp2Opac_Click(object sender, EventArgs e)
         {
@@ -4177,7 +4211,15 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     this.AppInfo.Save();
 
                     MessageBox.Show(this, strError);
-                    Process.Start("http://www.microsoft.com/zh-cn/download/details.aspx?id=34679");
+                    string install_url = "http://www.microsoft.com/zh-cn/download/details.aspx?id=34679";
+                    try
+                    {
+                        Process.Start(install_url);
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(this, "打开 URL '" + install_url + "' 失败: " + ex.Message);
+                    }
                     return;
                 }
             }
@@ -4216,7 +4258,6 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
                 this.AppInfo.SetBoolean("OPAC", "installed", true);
                 this.AppInfo.Save();
-
             }
             finally
             {
@@ -4259,7 +4300,14 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 if (nRet != 1)
                     goto ERROR1;
                 MessageBox.Show(this, strInformation);
-                Process.Start(localhost_opac_url);
+                try
+                {
+                    Process.Start(localhost_opac_url);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(this, "打开 URL '" + localhost_opac_url + "' 失败: " + ex.Message);
+                }
             }
 
             AppendSectionTitle("结束安装 dp2OPAC");
@@ -4486,13 +4534,51 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             }
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ComponentModel.Win32Exception
+Message: 找不到应用程序
+Stack:
+在 System.Diagnostics.Process.StartWithShellExecuteEx(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start()
+在 System.Diagnostics.Process.Start(ProcessStartInfo startInfo)
+在 System.Diagnostics.Process.Start(String fileName)
+在 dp2LibraryXE.MainForm.MenuItem_openDp2OPACHomePage_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripMenuItem.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStripItem.FireEventInteractive(EventArgs e, ToolStripItemEventType met)
+在 System.Windows.Forms.ToolStripItem.FireEvent(EventArgs e, ToolStripItemEventType met)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.ToolStripDropDown.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ScrollableControl.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.ToolStripDropDown.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+         * */
         private void MenuItem_openDp2OPACHomePage_Click(object sender, EventArgs e)
         {
             bool bInstalled = this.AppInfo.GetBoolean("OPAC", "installed", false);
             if (bInstalled == false)
                 MessageBox.Show(this, "dp2OPAC 尚未安装");
             else
-                Process.Start(localhost_opac_url);
+            {
+                try
+                {
+                    Process.Start(localhost_opac_url);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(this, "打开 URL '" + localhost_opac_url + "' 失败: " + ex.Message);
+                }
+            }
         }
 
         private void MenuItem_updateDp2Opac_Click(object sender, EventArgs e)

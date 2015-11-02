@@ -1617,7 +1617,6 @@ select_temp_dlg.SelectedRecordXml);
             }
         }
 
-
         // 装载一条空白记录[从本地]
         // return:
         //      -1  error
@@ -1888,8 +1887,15 @@ strNewDefault);
                 string strSavedXml = "";
                 string strSavedPath = "";
 
-                bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
                 string strAction = this.m_strSetAction;
+
+                // 如果特意选定过要保存的位置
+                if (string.IsNullOrEmpty(strTargetRecPath) == false
+                    && strAction == "new")
+                    strAction = "change";
+
+                // 是否强制修改册条码号
+                bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
                     if (this.MainForm.ServerVersion < 2.51)
@@ -2128,7 +2134,7 @@ strSavedXml);
             this.commander.AddMessage(WM_SAVETO);
         }
 
-        // 获得书目记录的XML格式
+        // 获得读者记录的XML格式
         // parameters:
         //      bIncludeFileID  是否要根据当前rescontrol内容合成<dprms:file>元素?
         //      bClearFileID    是否要清除以前的<dprms:file>元素
@@ -2312,10 +2318,18 @@ strSavedXml);
             if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
+            bool bIdChanged = false;    // 目标路径是否发生了变化
+
             if (saveto_dlg.RecID == "?")
                 this.m_strSetAction = "new";
             else
+            {
                 this.m_strSetAction = "change";
+
+                // 检查目标记录路径是否发生了变化
+                if (saveto_dlg.RecPath != this.readerEditControl1.RecPath)
+                    bIdChanged = true;
+            }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
@@ -2370,8 +2384,8 @@ strSavedXml);
                     this.m_strSetAction,
                     saveto_dlg.RecPath, // this.readerEditControl1.RecPath,
                     strNewXml,
-                    this.m_strSetAction != "new" ? this.readerEditControl1.OldRecord : null,
-                    this.m_strSetAction != "new" ? this.readerEditControl1.Timestamp : null,
+                    this.m_strSetAction != "new" && bIdChanged == false ? this.readerEditControl1.OldRecord : null,
+                    this.m_strSetAction != "new" && bIdChanged == false ? this.readerEditControl1.Timestamp : null,
                     out strExistingXml,
                     out strSavedXml,
                     out strSavedPath,

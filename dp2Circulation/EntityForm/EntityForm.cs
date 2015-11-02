@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -30,7 +31,6 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -2468,6 +2468,7 @@ true);
                 }
                 CloseBrowseWindow();
                 e.Cancel = true;
+                this.ShowMessage("浏览小窗已经关闭。再关闭一次可关闭种册窗", "yellow", true);
                 return;
             }
 
@@ -5040,7 +5041,10 @@ true);
                     this.ShowBrowseWindow(lHitCount);
 
                 if (lHitCount == 1)
-                    this.browseWindow.LoadFirstDetail(true);
+                {
+                    this.browseWindow.LoadFirstDetail(true);    // 不会触发 closed 事件
+                    this.CloseBrowseWindow();
+                }
                 else
                 {
                     if (lHitCount == 0)

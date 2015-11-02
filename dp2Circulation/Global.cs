@@ -2601,6 +2601,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
         /// </summary>
         /// <param name="webBrowser">浏览器控件</param>
         /// <param name="strDataDir">数据目录。本函数将在其中创建一个临时文件</param>
+        /// <param name="backColor">背景色</param>
         public static void ClearHtmlPage(WebBrowser webBrowser,
             string strDataDir,
             Color backColor)

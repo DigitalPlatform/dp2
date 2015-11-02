@@ -604,18 +604,22 @@ namespace DigitalPlatform.CommonControl
         // return:
         //      返回高度
         internal int QueryExtHeight(object item,
+            Graphics g,
             int nIconWidth,
-            int nTextWidth)
+            int nTextWidth,
+            float nExistingHeight)
         {
             if (this.PaintRegion == null)
                 return 0;
             PaintRegionArgs e = new PaintRegionArgs();
+            e.pe = new PaintEventArgs(g, new Rectangle());
             e.Action = "query";
             e.Item = item;
             e.X = nIconWidth;
             e.Width = nTextWidth;
+            e.Height = (int)nExistingHeight; // dpTable 已经测算好的一个高度 
             this.PaintRegion(this, e);
-            return e.Height;
+            return e.Height;    // 应当返回和 e.Height[in] 相比增量的值
         }
 
         internal void PaintExtRegion(
@@ -624,7 +628,8 @@ namespace DigitalPlatform.CommonControl
             long x,
             long y,
             int width,
-            int height)
+            int height,
+            int nYOffset)
         {
             if (this.PaintRegion == null)
                 return;
@@ -636,6 +641,7 @@ namespace DigitalPlatform.CommonControl
             e.Y = y;
             e.Width = width;
             e.Height = height;
+            e.YOffset = nYOffset;
             this.PaintRegion(this, e);
         }
 
@@ -665,8 +671,8 @@ namespace DigitalPlatform.CommonControl
             pe.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality; 
 #if NO
             pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 #endif
+            pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             long xOffset = m_lWindowOrgX + this.Padding.Left + this.m_nHorzDelta;
             long yOffset = m_lWindowOrgY + this.Padding.Top
@@ -711,6 +717,7 @@ namespace DigitalPlatform.CommonControl
                         4);
                 }
             }
+
             // 边框
             if (this.m_documentBorderColor != Color.Transparent)
             {
@@ -1377,7 +1384,7 @@ namespace DigitalPlatform.CommonControl
 
         }
 
-        public LinearGradientBrush GetHoverBrush(Rectangle rectBack)
+        public LinearGradientBrush GetHoverBrush(RectangleF rectBack)
         {
             LinearGradientBrush linGrBrush = new LinearGradientBrush(
 new PointF(0, rectBack.Y - 1),
@@ -3173,7 +3180,10 @@ Color.FromArgb(100, this.m_hoverBackColor)
    (int)y_offs,
    nWidth,
    nHeight);
-                pe.Graphics.FillRectangle(new SolidBrush(this.m_backColor), rectBack);
+                using (Brush brush = new SolidBrush(this.m_backColor))
+                {
+                    pe.Graphics.FillRectangle(brush, rectBack);
+                }
             }
 
             // 叠加
@@ -3184,7 +3194,10 @@ Color.FromArgb(100, this.m_hoverBackColor)
 (int)y_offs,
 nWidth,
 nHeight);
-                pe.Graphics.FillRectangle(control.GetHoverBrush(rectBack), rectBack);
+                using (Brush brush = control.GetHoverBrush(rectBack))
+                {
+                    pe.Graphics.FillRectangle(brush, rectBack);
+                }
             }
 
 
@@ -3199,18 +3212,24 @@ nHeight);
             format.Alignment = this.Alignment;
             format.LineAlignment = this.LineAlignment;
 
-            pe.Graphics.DrawString(
-                this.m_strText,
-                this.DisplayFont,
-                new SolidBrush(this.DisplayForeColor),
-                textRect,
-                format);
+            using (Brush brush = new SolidBrush(this.DisplayForeColor))
+            {
+                pe.Graphics.DrawString(
+                    this.m_strText,
+                    this.DisplayFont,
+                    brush,
+                    textRect,
+                    format);
+            }
 
             // 竖线
             // TODO: 颜色做成可定义的
-            pe.Graphics.DrawLine(new Pen(SystemColors.ControlDark, (float)1),
-    x_offs + nWidth - 1, y_offs,
-    x_offs + nWidth - 1, y_offs + nHeight);
+            using (Pen pen = new Pen(SystemColors.ControlDark, (float)1))
+            {
+                pe.Graphics.DrawLine(pen,
+        x_offs + nWidth - 1, y_offs,
+        x_offs + nWidth - 1, y_offs + nHeight);
+            }
 
         }
 
@@ -3477,7 +3496,10 @@ nHeight);
     nColumnHeight);
                 Color textColor = this.Control.ForeColor;
 
-                pe.Graphics.FillRectangle(new SolidBrush(this.DisplayBackColor), rectBack);
+                using (Brush brush = new SolidBrush(this.DisplayBackColor))
+                {
+                    pe.Graphics.FillRectangle(brush, rectBack);
+                }
             }
 
             x_offs += padding.Left + this.Control.m_nHorzDelta;
@@ -4221,12 +4243,15 @@ nHeight);
             g.IntersectClip(clip);
 
             // 普通色
-            g.DrawString(
-                strText,
-                font,
-                new SolidBrush(textColor),
-                textRect,
-                format);
+            using (Brush brush = new SolidBrush(textColor))
+            {
+                g.DrawString(
+                    strText,
+                    font,
+                    brush,
+                    textRect,
+                    format);
+            }
 
             g.Clip = old_clip;
 
@@ -4259,7 +4284,7 @@ Color.FromArgb(0, textColor)
             int nHeight,
             // Color textColor,
             bool bLineSeleted,
-    PaintEventArgs pe)
+            PaintEventArgs pe)
         {
             bool bClip = (this.Container.TextHeight < this.TextHeight);
 
@@ -4284,7 +4309,7 @@ Color.FromArgb(0, textColor)
                 textColor = this.DisplayForeColor;
             }
 
-            Rectangle rectBack = new Rectangle(
+            RectangleF rectBack = new RectangleF(
 (int)x_offs,
 (int)y_offs,
 nWidthParam,
@@ -4299,7 +4324,11 @@ nHeight);
             }
             else
             {
-
+                PaintBackground(pe.Graphics, 
+                    rectBack,
+                    bLineSeleted);
+#if NO
+                // TODO: 把常规绘制背景的部分抠出来做成一个函数，便于自绘过程必要时调用
                 if (bLineSeleted == true || this.Selected == true)
                 {
                     // 如果行没有绘制背景，则这里绘制
@@ -4308,13 +4337,23 @@ nHeight);
                         //textColor = control.m_highlightForeColor;
 
                         if (this.Selected == true)
-                            pe.Graphics.FillRectangle(new SolidBrush(control.m_highlightBackColor), rectBack);
+                        {
+                            using(Brush brush = new SolidBrush(control.m_highlightBackColor))
+                            {
+                                pe.Graphics.FillRectangle(brush, rectBack);
+                            }
+                        }
                     }
                     else
                     {
                         //textColor = control.InactiveHightlightForeColor;
                         if (this.Selected == true)
-                            pe.Graphics.FillRectangle(new SolidBrush(control.m_inactiveHighlightBackColor), rectBack);
+                        {
+                            using (Brush brush = new SolidBrush(control.m_inactiveHighlightBackColor))
+                            {
+                                pe.Graphics.FillRectangle(brush, rectBack);
+                            }
+                        }
                     }
                 }
                 else
@@ -4323,16 +4362,26 @@ nHeight);
 
                     if (this.m_backColor != Color.Transparent)
                     {
-                        pe.Graphics.FillRectangle(new SolidBrush(this.m_backColor), rectBack);
+                        using (Brush brush = new SolidBrush(this.m_backColor))
+                        {
+                            pe.Graphics.FillRectangle(brush, rectBack);
+                        }
                     }
                 }
+#endif
             }
 
+#if NO
             // 叠加
             if (this.m_bHover == true)
             {
-                pe.Graphics.FillRectangle(control.GetHoverBrush(rectBack), rectBack);
+                using (Brush brush = control.GetHoverBrush(rectBack))
+                {
+                    pe.Graphics.FillRectangle(brush, rectBack);
+                }
             }
+#endif
+            PaintHoverBackground(pe.Graphics, rectBack);
 
             int nWidth = nWidthParam;
 
@@ -4402,7 +4451,6 @@ nHeight - cell_padding.Vertical);
 
             if (textRect.Width > 0)
             {
-
                 StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
                 format.FormatFlags |= StringFormatFlags.FitBlackBox;
                 format.Alignment = this.DisplayAlignment;
@@ -4410,12 +4458,15 @@ nHeight - cell_padding.Vertical);
 
                 if (bClip == false)
                 {
-                    pe.Graphics.DrawString(
-                        this.m_strText,
-                        this.DisplayFont,
-                        new SolidBrush(textColor),
-                        textRect,
-                        format);
+                    using (Brush brush = new SolidBrush(textColor))
+                    {
+                        pe.Graphics.DrawString(
+                            this.m_strText,
+                            this.DisplayFont,
+                            brush,
+                            textRect,
+                            format);
+                    }
                 }
                 else
                 {
@@ -4454,7 +4505,8 @@ nHeight - cell_padding.Vertical);
                     textRect.X,
                     textRect.Y + this.TextHeight - this.ExtHeight,
                     textRect.Width,
-                    this.ExtHeight);
+                    this.ExtHeight,
+                    this.TextHeight);
 
                 pe.Graphics.Clip = old_clip;
             }
@@ -4472,10 +4524,9 @@ nHeight - cell_padding.Vertical);
 
             if (control.m_focusObj == this)
             {
-
                 rectBack.Inflate(-2, -2);
                 ControlPaint.DrawFocusRectangle(pe.Graphics,
-                    rectBack);
+                    Rectangle.Round(rectBack));
             }
             /*
             TextRenderer.DrawText(
@@ -4486,6 +4537,69 @@ nHeight - cell_padding.Vertical);
     Color.Black,
     editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
             */
+        }
+
+        // 绘制单元对象的背景
+        public void PaintBackground(Graphics g, 
+            RectangleF rectBack,
+            bool bLineSeleted)
+        {
+            DpTable control = this.Container.Control;
+
+            if (bLineSeleted == true || this.Selected == true)
+            {
+                // 如果行没有绘制背景，则这里绘制
+                if (control.Focused == true)
+                {
+                    //textColor = control.m_highlightForeColor;
+
+                    if (this.Selected == true)
+                    {
+                        using (Brush brush = new SolidBrush(control.m_highlightBackColor))
+                        {
+                            g.FillRectangle(brush, rectBack);
+                        }
+                    }
+                }
+                else
+                {
+                    //textColor = control.InactiveHightlightForeColor;
+                    if (this.Selected == true)
+                    {
+                        using (Brush brush = new SolidBrush(control.m_inactiveHighlightBackColor))
+                        {
+                            g.FillRectangle(brush, rectBack);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //textColor = this.DisplayForeColor;
+
+                if (this.m_backColor != Color.Transparent)
+                {
+                    using (Brush brush = new SolidBrush(this.m_backColor))
+                    {
+                        g.FillRectangle(brush, rectBack);
+                    }
+                }
+            }
+        }
+
+        // 绘制单元对象的 hover 状态时的背景
+        public void PaintHoverBackground(Graphics g, RectangleF rectBack)
+        {
+            DpTable control = this.Container.Control;
+
+            // 叠加
+            if (this.m_bHover == true)
+            {
+                using (Brush brush = control.GetHoverBrush(rectBack))
+                {
+                    g.FillRectangle(brush, rectBack);
+                }
+            }
         }
 
         public int GetTextHeight(Graphics g, int nWidthParam)
@@ -4540,8 +4654,10 @@ nHeight - cell_padding.Vertical);
             if (this.OwnerDraw == true)
             {
                 this.ExtHeight = this.Container.Control.QueryExtHeight(this,
+                    g,
                     nIconWidth,
-                    nWidth);
+                    nWidth,
+                    size.Height);
             }
             else
                 this.ExtHeight = 0;
@@ -5055,17 +5171,21 @@ this.TextHeight + cell_padding.Vertical);
             {
                 if (this.m_backColor != Color.Transparent)
                 {
-                    pe.Graphics.FillRectangle(new SolidBrush(this.m_backColor), rectBack);
+                    using (Brush brush = new SolidBrush(this.m_backColor))
+                    {
+                        pe.Graphics.FillRectangle(brush, rectBack);
+                    }
                 }
 
                 Color textColor = this.ForeColor;
-                pe.Graphics.DrawLine(new Pen(textColor, (float)1),
-                    x_offs + cell_padding.Left, y_offs + cell_padding.Top,
-                    x_offs + this.Control.m_lContentWidth - cell_padding.Right, y_offs + cell_padding.Top);
+                using (Pen pen = new Pen(textColor, (float)1))
+                {
+                    pe.Graphics.DrawLine(pen,
+                        x_offs + cell_padding.Left, y_offs + cell_padding.Top,
+                        x_offs + this.Control.m_lContentWidth - cell_padding.Right, y_offs + cell_padding.Top);
+                }
 
                 Debug.Assert(this.Control.m_focusObj != this, "");
-
-
                 return;
             }
 
@@ -5079,19 +5199,25 @@ this.TextHeight + cell_padding.Vertical);
             }
             else
             {
+                PaintBackground(pe.Graphics, rectBack);
+#if NO
                 if (this.m_bSelected == true)
                 {
-
                     if (this.Control.Focused == true)
                     {
                         // textColor = SystemColors.HighlightText;
-                        pe.Graphics.FillRectangle(new SolidBrush(this.Control.m_highlightBackColor), rectBack);
+                        using (Brush brush = new SolidBrush(this.Control.m_highlightBackColor))
+                        {
+                            pe.Graphics.FillRectangle(brush, rectBack);
+                        }
                     }
                     else
                     {
                         // textColor = SystemColors.InactiveCaptionText;
-
-                        pe.Graphics.FillRectangle(new SolidBrush(this.Control.m_inactiveHighlightBackColor), rectBack);
+                        using (Brush brush = new SolidBrush(this.Control.m_inactiveHighlightBackColor))
+                        {
+                            pe.Graphics.FillRectangle(brush, rectBack);
+                        }
                     }
                 }
                 else
@@ -5103,23 +5229,37 @@ this.TextHeight + cell_padding.Vertical);
 
                     if (this.m_backColor != Color.Transparent)
                     {
-                        pe.Graphics.FillRectangle(new SolidBrush(this.m_backColor), rectBack);
+                        using (Brush brush = new SolidBrush(this.m_backColor))
+                        {
+                            pe.Graphics.FillRectangle(brush, rectBack);
+                        }
                     }
 
                 }
+#endif
             }
 
             if (this.IsHorzGrid == true)
             {
-                pe.Graphics.DrawLine(new Pen(SystemColors.ControlDark, (float)1),
-    rectBack.X, rectBack.Y + rectBack.Height - 1,
-    rectBack.X + rectBack.Width, rectBack.Y + rectBack.Height - 1);
+                using (Pen pen = new Pen(SystemColors.ControlDark, (float)1))
+                {
+                    pe.Graphics.DrawLine(pen,
+        rectBack.X, rectBack.Y + rectBack.Height - 1,
+        rectBack.X + rectBack.Width, rectBack.Y + rectBack.Height - 1);
+                }
             }
 
+#if NO
             // 叠加到原来背景之上
             if (this.m_bHover == true)
-                pe.Graphics.FillRectangle(this.Control.GetHoverBrush(Rectangle.Ceiling(rectBack)), rectBack);
-
+            {
+                using (Brush brush = this.Control.GetHoverBrush(Rectangle.Ceiling(rectBack)))
+                {
+                    pe.Graphics.FillRectangle(brush, rectBack);
+                }
+            }
+#endif
+            PaintHoverBackground(pe.Graphics, rectBack);
 
             int nCount = Math.Min(this.Count, this.Control.Columns.Count);
             for (int i = 0; i < nCount; i++)
@@ -5150,6 +5290,58 @@ this.TextHeight + cell_padding.Vertical);
                 rectBack.Inflate(-2, -2);
                 ControlPaint.DrawFocusRectangle(pe.Graphics,
                     Rectangle.Round(rectBack));
+            }
+        }
+
+        // 绘制行对象的背景
+        public void PaintBackground(Graphics g, RectangleF rectBack)
+        {
+            if (this.m_bSelected == true)
+            {
+                if (this.Control.Focused == true)
+                {
+                    // textColor = SystemColors.HighlightText;
+                    using (Brush brush = new SolidBrush(this.Control.m_highlightBackColor))
+                    {
+                        g.FillRectangle(brush, rectBack);
+                    }
+                }
+                else
+                {
+                    // textColor = SystemColors.InactiveCaptionText;
+                    using (Brush brush = new SolidBrush(this.Control.m_inactiveHighlightBackColor))
+                    {
+                        g.FillRectangle(brush, rectBack);
+                    }
+                }
+            }
+            else
+            {
+                /*
+                textColor = this.Control.ForeColor;
+                pe.Graphics.FillRectangle(new SolidBrush(this.Control.BackColor), rectBack);
+                 * */
+
+                if (this.m_backColor != Color.Transparent)
+                {
+                    using (Brush brush = new SolidBrush(this.m_backColor))
+                    {
+                        g.FillRectangle(brush, rectBack);
+                    }
+                }
+            }
+        }
+
+        // 绘制行对象的 hover 状态时的背景
+        public void PaintHoverBackground(Graphics g, RectangleF rectBack)
+        {
+            // 叠加到原来背景之上
+            if (this.m_bHover == true)
+            {
+                using (Brush brush = this.Control.GetHoverBrush(Rectangle.Ceiling(rectBack)))
+                {
+                    g.FillRectangle(brush, rectBack);
+                }
             }
         }
 
@@ -5504,8 +5696,33 @@ this.TextHeight + cell_padding.Vertical);
                 this.Control.TriggerSelectionChanged();  // 2014/11/11
         }
 
+        public new void Sort()
+        {
+            base.Sort();
+            if (this.Control != null)
+                this.Control.Invalidate();
+        }
 
+        public new void Sort(Comparison<DpRow> comparison)
+        {
+            base.Sort(comparison);
+            if (this.Control != null)
+                this.Control.Invalidate();
+        }
 
+        public new void Sort(IComparer<DpRow> comparer)
+        {
+            base.Sort(comparer);
+            if (this.Control != null)
+                this.Control.Invalidate();
+        }
+
+        public new void Sort(int index, int count, IComparer<DpRow> comparer)
+        {
+            base.Sort(index, count, comparer);
+            if (this.Control != null)
+                this.Control.Invalidate();
+        }
     }
 
     public class CellXY
@@ -5600,6 +5817,8 @@ this.TextHeight + cell_padding.Vertical);
 
         public int Width = 0;  // 区域的宽度
         public int Height = 0;
+
+        public int YOffset = 0; // 绘制时，dpTable 已经绘制过的部分的高度。Y 是越过了这部分高度开始计算的
     }
 
     /// <summary>

@@ -1726,5 +1726,33 @@ dlg.UiState);
             WindowsUpdateDialog dlg = new WindowsUpdateDialog();
             dlg.ShowDialog(this);
         }
+
+        private void button_testRelationDialog_Click(object sender, EventArgs e)
+        {
+            RelationDialog dlg = new RelationDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.ProcSearchDictionary = SearchDictionary;
+            dlg.Show(this);
+        }
+
+        int SearchDictionary(
+            Stop stop,
+            string strDbName,
+            string strKey,
+            string strMatchStyle,
+            int nMaxCount,
+            ref List<string> results,
+            out string strError)
+        {
+            return this.MainForm.SearchDictionary(
+            stop,
+            strDbName,
+            strKey,
+            strMatchStyle,
+            nMaxCount,
+            ref results,
+            out strError);
+        }
+       
     }
 }

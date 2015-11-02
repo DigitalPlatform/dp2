@@ -238,7 +238,6 @@ namespace dp2Circulation
                 this.listView_records.Enabled = false;
                 this.OpenDetail(this, args);
                 this.listView_records.Enabled = true;
-
             }
 
             if (bCloseWindow == true)

@@ -201,9 +201,10 @@ namespace dp2Circulation
             this.tabPage_amazonSearch = new System.Windows.Forms.TabPage();
             this.button_amazonSearch_openDialog = new System.Windows.Forms.Button();
             this.tabPage_test = new System.Windows.Forms.TabPage();
+            this.button_openWindowsUpdateDialog = new System.Windows.Forms.Button();
             this.button_testGetMergeStyleDialog = new System.Windows.Forms.Button();
             this.button_test_detectInstallation = new System.Windows.Forms.Button();
-            this.button_openWindowsUpdateDialog = new System.Windows.Forms.Button();
+            this.button_testRelationDialog = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -2197,6 +2198,7 @@ namespace dp2Circulation
             // 
             // tabPage_test
             // 
+            this.tabPage_test.Controls.Add(this.button_testRelationDialog);
             this.tabPage_test.Controls.Add(this.button_openWindowsUpdateDialog);
             this.tabPage_test.Controls.Add(this.button_testGetMergeStyleDialog);
             this.tabPage_test.Controls.Add(this.button_test_detectInstallation);
@@ -2206,6 +2208,16 @@ namespace dp2Circulation
             this.tabPage_test.TabIndex = 28;
             this.tabPage_test.Text = "‘”œÓ";
             this.tabPage_test.UseVisualStyleBackColor = true;
+            // 
+            // button_openWindowsUpdateDialog
+            // 
+            this.button_openWindowsUpdateDialog.Location = new System.Drawing.Point(4, 84);
+            this.button_openWindowsUpdateDialog.Name = "button_openWindowsUpdateDialog";
+            this.button_openWindowsUpdateDialog.Size = new System.Drawing.Size(220, 23);
+            this.button_openWindowsUpdateDialog.TabIndex = 2;
+            this.button_openWindowsUpdateDialog.Text = "Windows Update Dialog";
+            this.button_openWindowsUpdateDialog.UseVisualStyleBackColor = true;
+            this.button_openWindowsUpdateDialog.Click += new System.EventHandler(this.button_openWindowsUpdateDialog_Click);
             // 
             // button_testGetMergeStyleDialog
             // 
@@ -2227,15 +2239,15 @@ namespace dp2Circulation
             this.button_test_detectInstallation.UseVisualStyleBackColor = true;
             this.button_test_detectInstallation.Click += new System.EventHandler(this.button_test_detectInstallation_Click);
             // 
-            // button_openWindowsUpdateDialog
+            // button_testRelationDialog
             // 
-            this.button_openWindowsUpdateDialog.Location = new System.Drawing.Point(4, 84);
-            this.button_openWindowsUpdateDialog.Name = "button_openWindowsUpdateDialog";
-            this.button_openWindowsUpdateDialog.Size = new System.Drawing.Size(220, 23);
-            this.button_openWindowsUpdateDialog.TabIndex = 2;
-            this.button_openWindowsUpdateDialog.Text = "Windows Update Dialog";
-            this.button_openWindowsUpdateDialog.UseVisualStyleBackColor = true;
-            this.button_openWindowsUpdateDialog.Click += new System.EventHandler(this.button_openWindowsUpdateDialog_Click);
+            this.button_testRelationDialog.Location = new System.Drawing.Point(4, 123);
+            this.button_testRelationDialog.Name = "button_testRelationDialog";
+            this.button_testRelationDialog.Size = new System.Drawing.Size(220, 23);
+            this.button_testRelationDialog.TabIndex = 3;
+            this.button_testRelationDialog.Text = "≤‚ ‘ Relation Dialog ...";
+            this.button_testRelationDialog.UseVisualStyleBackColor = true;
+            this.button_testRelationDialog.Click += new System.EventHandler(this.button_testRelationDialog_Click);
             // 
             // TestForm
             // 
@@ -2480,5 +2492,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_test_loginAttack;
         private System.Windows.Forms.Button button_testThrow;
         private System.Windows.Forms.Button button_openWindowsUpdateDialog;
+        private System.Windows.Forms.Button button_testRelationDialog;
     }
 }

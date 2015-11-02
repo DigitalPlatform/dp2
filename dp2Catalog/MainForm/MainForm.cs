@@ -4111,6 +4111,7 @@ out string strError)
             SerialCodeForm dlg = new SerialCodeForm();
             dlg.Text = strTitle;
             dlg.Font = this.Font;
+            dlg.DefaultCodes = new List<string>(new string[] { "community|社区版" });
             dlg.SerialCode = strOldSerialCode;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;

@@ -5052,7 +5052,7 @@ out strFingerprint);
             string strEmail = DomUtil.GetElementText(dom.DocumentElement,
 "email");
             string strAddress = DomUtil.GetElementText(dom.DocumentElement,
-"email");
+"address");
             List<string> list = new List<string>();
             if (string.IsNullOrEmpty(strTel) == false)
                 list.Add(strTel);

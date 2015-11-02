@@ -477,8 +477,10 @@ namespace DigitalPlatform
                 // ((StatusStrip)m_messageBar).Text = strMessage;
                 Safe_SetStatusStripText(((StatusStrip)m_messageBar), strMessage);
             }
+#if NO
             else if (m_messageBar is StatusBar)
             {
+                // StatusBar 派生自 Control
                 StatusBar statusbar = ((StatusBar)m_messageBar);
 
                 Safe_SetStatusBarText(statusbar, strMessage);
@@ -488,15 +490,23 @@ namespace DigitalPlatform
                 // ((Label)m_messageBar).Text = strMessage;
                 Safe_SetLabelText(((Label)m_messageBar), strMessage);
             }
-            else if (m_messageBar is TextBox)
+#endif
+            else if (m_messageBar is Control)
             {
                 // ((TextBox)m_messageBar).Text = strMessage;
-                Safe_SetTextBoxText(((TextBox)m_messageBar), strMessage);
+                Safe_SetTextBoxText(((Control)m_messageBar), strMessage);
             }
             else if (m_messageBar is ToolStripStatusLabel)
             {
+                // TODO: ToolStripStatusLabel 也是继承自 ToolStripItem。此处代码可以删除了
+
                 // ((ToolStripStatusLabel)m_messageBar).Text = strMessage;
                 Safe_SetToolStripStatusLabelText((ToolStripStatusLabel)m_messageBar,
+                    strMessage);
+            }
+            else if (m_messageBar is ToolStripItem)
+            {
+                Safe_SetToolStripItemText((ToolStripItem)m_messageBar,
                     strMessage);
             }
 
@@ -567,6 +577,28 @@ namespace DigitalPlatform
 
         #endregion
 
+        // 2015/11/2
+        string Safe_SetToolStripItemText(ToolStripItem status_strip,
+string strText)
+        {
+            if (status_strip.Owner == null
+                || status_strip.Owner.Parent == null)
+                return null;
+
+            if (status_strip.Owner != null
+                && status_strip.Owner.Parent != null
+                && status_strip.Owner.Parent.InvokeRequired)
+            {
+                return (string)status_strip.Owner.Parent.Invoke(new Func<ToolStripItem, string, string>(Safe_SetToolStripItemText), status_strip, strText);
+            }
+            else
+            {
+                string strOldText = status_strip.Text;
+                status_strip.Text = strText;
+                return strOldText;
+            }
+        }
+
         #region ToolStripStatusLabel
 
         // 线程安全版本
@@ -613,7 +645,7 @@ namespace DigitalPlatform
         #region TextBox
 
         // 线程安全版本
-        string Safe_SetTextBoxText(TextBox textbox,
+        string Safe_SetTextBoxText(Control textbox,
             string strText)
         {
             if (textbox.Parent != null && textbox.Parent.InvokeRequired)
@@ -633,10 +665,10 @@ namespace DigitalPlatform
             }
         }
 
-        delegate string Delegate_SetTextBoxText(TextBox textbox,
+        delegate string Delegate_SetTextBoxText(Control textbox,
             string strText);
 
-        string SetTextBoxText(TextBox textbox,
+        string SetTextBoxText(Control textbox,
             string strText)
         {
             string strOldText = textbox.Text;
@@ -649,6 +681,7 @@ namespace DigitalPlatform
 
         #endregion
 
+#if NO
         #region Label
 
         // 线程安全版本
@@ -686,6 +719,7 @@ namespace DigitalPlatform
         }
 
         #endregion
+#endif
 
         #region ProgressBar
 
@@ -848,6 +882,7 @@ namespace DigitalPlatform
 
         #endregion
 
+#if NO
         #region StatusBar
 
         // 线程安全版本
@@ -885,6 +920,7 @@ namespace DigitalPlatform
         }
 
         #endregion
+#endif
 
         // 改变stop按钮Enabled状态。不记忆以前的状态
         void EnableStopButtons(bool bEnabled)
