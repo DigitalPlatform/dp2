@@ -1,5 +1,6 @@
 ﻿using DigitalPlatform;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Drawing;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using System;
@@ -35,6 +36,12 @@ namespace dp2Circulation
             }
         }
 
+        // 修改后的结果 MARC 字符串。本对话框 DialogResult.OK 返回后，这里存储的是修改结果
+        public string OutputMARC
+        {
+            get;
+            set;
+        }
 
         public delegate_SearchDictionary ProcSearchDictionary = null;
         public delegate_DoStop ProcDoStop = null;
@@ -62,14 +69,6 @@ namespace dp2Circulation
 
         private void RelationDialog_Load(object sender, EventArgs e)
         {
-#if NO
-            RelationControl relation = new RelationControl();
-            relation.HitCounts = new List<string>(new string [] {"30","20","10","5","1"});
-            relation.SourceText = "I247.5";
-            relation.TargetText = "TEST1234";
-            relation.BackColor = SystemColors.Window;
-            this.flowLayoutPanel_relationList.Controls.Add(relation);
-#endif
             _stopManager.Initial(this.toolStripButton_stop,
 (object)this.toolStripLabel_message,
 (object)null);
@@ -216,12 +215,16 @@ bool bClickClose = false)
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            // 针对 TargetText 内列举值进行查重。警告。
 
+            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Close();
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-
+            this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.Close();
         }
 
         void ClearRelationList()
@@ -274,13 +277,18 @@ bool bClickClose = false)
             {
                 foreach (string key in relation.Keys)
                 {
+                    ControlInfo info = new ControlInfo();
+                    info.Relation = relation;
+
                     RelationControl control = new RelationControl();
-                    control.Tag = relation;
-                    // control.HitCounts = new List<string>(new string[] { "30", "20", "10", "5", "1" });
+                    control.Tag = info;
+                    control.TitleText = relation.DbName;
+                    if (string.IsNullOrEmpty(relation.Color) == false)
+                        control.TitleBackColor = ColorUtil.String2Color(relation.Color);
                     control.SourceText = key;
-                    //control.TargetText = "TEST1234";
                     control.BackColor = SystemColors.Window;
                     AddEvents(control, true);
+
                     this.flowLayoutPanel_relationList.Controls.Add(control);
                 }
             }
@@ -311,12 +319,13 @@ bool bClickClose = false)
             this.dpTable1.Rows.Clear();
             _disableSelectionChanged--;
 
-            List<ResultItem> items = (List<ResultItem>)_table[control];
+            ControlInfo info = (ControlInfo)control.Tag;
+
+            List<ResultItem> items = info.ResultItems;
             if (items == null || items.Count == 0)
                 return;
 
             string strControlKey = control.SourceText;
-            // Relation relation = (Relation)control.Tag;
 
             foreach (ResultItem item in items)
             {
@@ -382,12 +391,11 @@ bool bClickClose = false)
                 control.HitCounts = BuildHitCountList(strControlKey);
 
             // 选定特定行
-            if (string.IsNullOrEmpty(control.TargetText) == false)
+            if (info.SelectedLines != null && info.SelectedLines.Count > 0)
             {
-                List<string> numbers = StringUtil.SplitList(control.TargetText);
-                foreach(string number in numbers)
+                foreach (string line in info.SelectedLines)
                 {
-                    SelectRowByRel(number);
+                    SelectRowByKey(line);
                 }
             }
 
@@ -396,11 +404,16 @@ bool bClickClose = false)
             MessageBox.Show(this, strError);
         }
 
-        bool SelectRowByRel(string strRel)
+        // 根据 key + "|" + rel 字符串选定一个行
+        bool SelectRowByKey(string strText)
         {
+            string strKey = "";
+            string strRel = "";
+            StringUtil.ParseTwoPart(strText, "|", out strKey, out strRel);
             foreach(DpRow row in this.dpTable1.Rows)
             {
-                if (row[COLUMN_REL].Text == strRel)
+                if (row[COLUMN_KEY].Text == strKey
+                    && row[COLUMN_REL].Text == strRel)
                 {
                     row.Selected = true;
                     return true;
@@ -475,39 +488,53 @@ bool bClickClose = false)
             return nDelta;  // 升序
         }
 
-        Hashtable _table = new Hashtable(); // RelationControl --> List<ResultItem>
+        // Hashtable _table = new Hashtable(); // RelationControl --> List<ResultItem>
 
         // 针对所有关系，检索出事项，并存储起来备用
         int SearchAll(out string strError)
         {
             strError = "";
 
-            this._table.Clear();
+            // this._table.Clear();
 
             foreach(RelationControl control in this.flowLayoutPanel_relationList.Controls)
             {
                 string key = control.SourceText;
-                Relation relation = (Relation)control.Tag;
+                ControlInfo info = (ControlInfo)control.Tag;
 
                 List<ResultItem> results = null;
                 // 针对一个 key 字符串进行检索
                 int nRet = SearchOneKey(
-            relation,
+            info.Relation,
             key,
             out results,
             out strError);
                 if (nRet == -1)
                     return -1;
-                _table.Add(control, results);
+                info.ResultItems = results;
             }
 
             return 0;
         }
 
+        // 一个命中结果事项
         class ResultItem
         {
             public string RecPath = "";
             public string Xml = "";
+        }
+
+        // RelationControl 所携带的附加信息
+        class ControlInfo
+        {
+            // 对照关系定义
+            public Relation Relation = null;
+
+            // 检索命中结果集
+            public List<ResultItem> ResultItems = null;
+
+            // 选中状态的行
+            public List<string> SelectedLines = null;
         }
 
         // 针对一个 key 字符串进行检索
@@ -705,13 +732,22 @@ bool bClickClose = false)
             if (_disableSelectionChanged == 0
                 && this._currentControl != null)
             {
-                List<string> rel_numbers = new List<string>();
+                List<string> rel_numbers = new List<string>();  // rel 栏字符串的集合
+                List<string> keys = new List<string>(); // key + "|" + rel 栏字符串的集合
                 foreach (DpRow row in this.dpTable1.SelectedRows)
                 {
-                    rel_numbers.Add(row[COLUMN_REL].Text);
+                    string strRel = row[COLUMN_REL].Text;
+                    string strKey = row[COLUMN_KEY].Text;
+                    rel_numbers.Add(strRel);
+                    keys.Add(strKey + "|" + strRel);
                 }
 
                 this._currentControl.TargetText = StringUtil.MakePathList(rel_numbers);
+
+                // 记忆全部处于选择状态的行
+                ControlInfo info = (ControlInfo)this._currentControl.Tag;
+                Debug.Assert(info != null, "");
+                info.SelectedLines = keys;
 
                 SimulateAddClassNumber();
             }
@@ -787,9 +823,9 @@ strHtml2 +
                 string strNewClass = control.TargetText;
                 if (string.IsNullOrEmpty(strNewClass) == true)
                     continue;
-                Relation relation = (Relation)control.Tag;
-                string strTargetFieldName = relation.TargetDef.Substring(0, 3);
-                string strTargetSubfieldName = relation.TargetDef.Substring(3);
+                ControlInfo info = (ControlInfo)control.Tag;
+                string strTargetFieldName = info.Relation.TargetDef.Substring(0, 3);
+                string strTargetSubfieldName = info.Relation.TargetDef.Substring(3);
 
                 List<string> class_list = StringUtil.SplitList(strNewClass);
                 foreach(string text in class_list)
@@ -800,8 +836,13 @@ strHtml2 +
                 }
             }
 
+            if (bChanged)
+                this.OutputMARC = record.Text;
+            else
+                this.OutputMARC = "";
+
             DisplayMarc(this.RelationCollection.MARC, 
-                bChanged ? record.Text : null);
+                bChanged ? this.OutputMARC : null);
         }
 
         public string UiState

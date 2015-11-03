@@ -14,6 +14,36 @@ namespace dp2Circulation
     /// </summary>
     public partial class RelationControl : UserControl
     {
+        Color _titleBackColor = Color.LightGray;
+        public Color TitleBackColor
+        {
+            get
+            {
+                return this._titleBackColor;
+            }
+            set
+            {
+                this._titleBackColor = value;
+                this.Invalidate();
+            }
+        }
+
+        // 标题字符串。用于指出变换方向
+        string _titleText = "";
+        public string TitleText
+        {
+            get
+            {
+                return this._titleText;
+            }
+            set
+            {
+                this._titleText = value;
+                SetSize();
+                this.Invalidate();
+            }
+        }
+
         bool _selected = false;
         public bool Selected
         {
@@ -130,90 +160,142 @@ this.ClientSize.Height);
                     100,
                     format);
 #endif
+            // 绘制标题行
+            if (string.IsNullOrEmpty(this._titleText) == false)
+            {
+                using (Font font = GetTitleFont())
+                {
+                    StringFormat format = new StringFormat();
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                    format.Alignment = StringAlignment.Near;
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+
+                    SizeF text_size = e.Graphics.MeasureString(this._titleText, font);
+
+                    float x = this.Padding.Left;
+                    float y = this.Padding.Top;
+                    RectangleF textRect = new RectangleF(
+    x,
+    y,
+    text_size.Width,
+    text_size.Height);
+
+                    using (Brush brush = new SolidBrush(this.TitleBackColor))
+                    {
+                        e.Graphics.FillRectangle(brush, textRect);
+                    }
+                    using (Brush brush = new SolidBrush(Color.White))
+                    {
+                        e.Graphics.DrawString(
+                            this._titleText,
+                            font,
+                            brush,
+                            textRect,
+                            format);
+                    }
+                }
+            }
+
             SizeF size = GetSourceFontSize(e.Graphics);
 
             // 绘制命中数行
-            using (Font font = GetHitCountFont())
-            using (Brush brush = new SolidBrush(Color.Gray))
+            if (this._hitCounts != null && this._hitCounts.Count > 0)
             {
-                StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
-                format.Alignment = StringAlignment.Center;
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
-
-                float x = this.Padding.Left;
-                float y = this.Padding.Top;
-                foreach(string strText in this._hitCounts)
+                using (Font font = GetHitCountFont())
+                using (Brush brush = new SolidBrush(Color.Gray))
                 {
-                    RectangleF textRect = new RectangleF(
-x,
-y,
-size.Width,
-size.Height);
-                    e.Graphics.DrawString(
-                        strText,
-                        font,
-                        brush,
-                        textRect,
-                        format);
-                    x += size.Width;
+                    StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                    format.Alignment = StringAlignment.Center;
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+
+                    float x = this.Padding.Left;
+                    float y = this.Padding.Top + size.Height / 2;
+                    foreach (string strText in this._hitCounts)
+                    {
+                        RectangleF textRect = new RectangleF(
+    x,
+    y,
+    size.Width,
+    size.Height);
+                        e.Graphics.DrawString(
+                            strText,
+                            font,
+                            brush,
+                            textRect,
+                            format);
+                        x += size.Width;
+                    }
                 }
             }
 
             // 绘制源行
-            using (Font font = GetSourceFont())
-            using (Brush brush = new SolidBrush(Color.Black))
+            if (string.IsNullOrEmpty(this._sourceText) == false)
             {
-                StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
-                format.Alignment = StringAlignment.Center;
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
-
-                int i = 0;
-                float x = this.Padding.Left;
-                float y = this.Padding.Top + size.Height / 2;
-                foreach (char ch in this._sourceText)
+                using (Font font = GetSourceFont())
+                using (Brush brush = new SolidBrush(Color.Black))
                 {
-                    RectangleF textRect = new RectangleF(
-x,
-y,
-size.Width,
-size.Height);
-                    e.Graphics.DrawString(
-                        ch.ToString(),
-                        font,
-                        brush,
-                        textRect,
-                        format);
-                    i++;
-                    x += size.Width;
+                    StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                    format.Alignment = StringAlignment.Center;
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+
+                    int i = 0;
+                    float x = this.Padding.Left;
+                    float y = this.Padding.Top + size.Height / 2 + size.Height / 2;
+                    foreach (char ch in this._sourceText)
+                    {
+                        RectangleF textRect = new RectangleF(
+    x,
+    y,
+    size.Width,
+    size.Height);
+                        e.Graphics.DrawString(
+                            ch.ToString(),
+                            font,
+                            brush,
+                            textRect,
+                            format);
+                        i++;
+                        x += size.Width;
+                    }
                 }
             }
 
             // 绘制目标行
-            using (Font font = GetTargetFont())
-            using (Brush brush = new SolidBrush(Color.DarkRed))  // Color.DarkBlue
+            if (string.IsNullOrEmpty(this._targetText) == false)
             {
-                StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
-                format.Alignment = StringAlignment.Far;
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                using (Font font = GetTargetFont())
+                using (Brush brush = new SolidBrush(Color.DarkRed))  // Color.DarkBlue
+                {
+                    StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                    format.Alignment = StringAlignment.Far;
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
 
-                float x = this.Padding.Left;
-                float y = this.Padding.Top + size.Height / 2 + size.Height;
-                RectangleF textRect = new RectangleF(
-x,
-y,
-this.Width,
-size.Height);
-                e.Graphics.DrawString(
-                    this._targetText,
-                    font,
-                    brush,
-                    textRect,
-                    format);
+                    float x = this.Padding.Left;
+                    float y = this.Padding.Top + size.Height / 2 + size.Height / 2 + size.Height;
+                    RectangleF textRect = new RectangleF(
+    x,
+    y,
+    this.Width,
+    size.Height);
+                    e.Graphics.DrawString(
+                        this._targetText,
+                        font,
+                        brush,
+                        textRect,
+                        format);
+                }
             }
+        }
 
+        Font GetTitleFont()
+        {
+            return new System.Drawing.Font(this.Font.FontFamily,
+                (float)this.SourceFontSize / 2,
+                FontStyle.Bold,
+                GraphicsUnit.Pixel);
         }
 
         Font GetSourceFont()
@@ -282,7 +364,8 @@ size.Height);
 
                 int nWidth = (int)(Math.Max(fSourceTextWidth, fTargetTextWidth))
                     + this.Padding.Horizontal;
-                int nHeight = (int)(size.Height / 2) // hitcount line
+                int nHeight = (int)(size.Height / 2) // title line
+                    + (int)(size.Height / 2) // hitcount line
                     + (int)size.Height  // source line
                     // + (int)(size.Height / 2)    // blank
                     + (int)size.Height// target line

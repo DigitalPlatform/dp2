@@ -4311,6 +4311,8 @@ chi	中文	如果是中文，则为空。
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            this.DetailForm.MarcEditor.Marc = dlg.OutputMARC;
+
 #if NO
             foreach (string s in dlg.ResultRelations)
             {

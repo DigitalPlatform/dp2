@@ -16,16 +16,19 @@ namespace dp2Circulation
         public string SourceDef = "";   // 源定义。格式为 字段名+子字段名 一共四个字符
         public string TargetDef = "";   // 目标定义。格式为 字段名+子字段名 一共四个字符
         public List<string> Keys = null;
+        public string Color = "";
 
         public Relation(string strDbName,
             string strSourceDef,
             string strTargetDef,
-            List<string> keys)
+            List<string> keys,
+            string strColor)
         {
             this.DbName = strDbName;
             this.SourceDef = strSourceDef;
             this.TargetDef = strTargetDef;
             this.Keys = keys;
+            this.Color = strColor;
         }
 
     }
@@ -49,7 +52,7 @@ namespace dp2Circulation
         // 构建集合对象
         // parameters:
         //      strDef  定义字符串。分为若干行，每行定义一个对照关系。行之间用分号间隔。
-        //              行格式为 dbname=数据库名,source=源字段名子字段名,target=目标字段名子字段名
+        //              行格式为 dbname=数据库名,source=源字段名子字段名,target=目标字段名子字段名,color=#000000
         public int Build(string strMARC,
             string strDef,
             out string strError)
@@ -67,6 +70,7 @@ namespace dp2Circulation
                 string strDbName = (string)table["dbname"];
                 string strSource = (string)table["source"];
                 string strTarget = (string)table["target"];
+                string strColor = (string)table["color"];
 
                 if (string.IsNullOrEmpty(strSource) == true
                     || strSource.Length != 4)
@@ -99,7 +103,11 @@ namespace dp2Circulation
                 if (keys.Count == 0)
                     continue;
 
-                Relation relation = new Relation(strDbName, strSource, strTarget, keys);
+                Relation relation = new Relation(strDbName, 
+                    strSource, 
+                    strTarget,
+                    keys,
+                    strColor);
                 this._collection.Add(relation);
             }
 

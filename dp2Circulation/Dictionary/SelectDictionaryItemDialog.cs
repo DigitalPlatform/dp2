@@ -260,8 +260,12 @@ true);
 
             this.listView_list.ListViewItemSorter = new ItemComparer();
 
-            foreach (string strXml in results)
+            foreach (string line in results)
             {
+                string strRecPath = "";
+                string strXml = "";
+                StringUtil.ParseTwoPart(line, "|", out strRecPath, out strXml);
+
                 XmlDocument dom = new XmlDocument();
                 try
                 {
@@ -294,7 +298,6 @@ true);
 
                     this.listView_list.Items.Add(item);
                 }
-
             }
 
             // 按照 weight 排序
