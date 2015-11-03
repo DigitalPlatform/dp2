@@ -85,7 +85,7 @@ namespace dp2Circulation
                 _floatingMessage.Show(this);
             }
 
-            this.BeginInvoke(new Action(Begin));
+            this.BeginInvoke(new Action<string>(Process), "auto_select,remove_dup");
         }
 
         private void RelationDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -160,15 +160,15 @@ bool bClickClose = false)
             }
         }
 
-
-        void Begin()
+        // parameters:
+        //      strStyle auto_select/remove_dup/select_top_weight
+        public void Process(string strStyle = "auto_select,remove_dup")
         {
             string strError = "";
 
             this.ShowMessage("正在检索 ...");
             try
             {
-
                 DisplayMarc(this.RelationCollection.MARC,
                     null);
 
@@ -188,6 +188,11 @@ bool bClickClose = false)
                     RelationControl control = (RelationControl)this.flowLayoutPanel_relationList.Controls[0];
                     SelectControl(control);
                 }
+
+                if (StringUtil.IsInList("auto_select", strStyle) == true)
+                {
+                    AutoSelect(strStyle);
+                }
             }
             finally
             {
@@ -196,6 +201,157 @@ bool bClickClose = false)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 自动选择事项
+        // parameters:
+        //      strStyle remove_dup/select_top_weight
+        // return:
+        //      被选中的事项个数
+        public int AutoSelect(string strStyle)
+        {
+            int nSelectedCount = 0;
+            List<SelectedItem> items = new List<SelectedItem>();
+            int i = 0;
+            foreach(RelationControl control in this.flowLayoutPanel_relationList.Controls)
+            {
+                SelectControl(control);
+                if (this.dpTable1.Rows.Count == 0)
+                    continue;
+                int index = 0;
+#if NO
+                if (i == 0)
+                    index = 1;
+#endif
+                SelectedItem item = SelectItem(control, index, true);
+                items.Add(item);
+                i++;
+            }
+
+            nSelectedCount = items.Count;
+
+            // 按照目标分类号类型聚集
+            Hashtable table = new Hashtable();  // 目标分类号类型 --> List<SelectedItem>
+            foreach(SelectedItem item in items)
+            {
+                ControlInfo info = (ControlInfo)item.Control.Tag;
+                string strDbName = info.Relation.DbName;
+
+                string strSourceType = "";
+                string strTargetType = "";
+                StringUtil.ParseTwoPart(strDbName, "-", out strSourceType, out strTargetType);
+
+                List<SelectedItem> array = (List<SelectedItem>)table[strTargetType];
+                if (array == null)
+                {
+                    array = new List<SelectedItem>();
+                    table[strTargetType] = array;
+                }
+                array.Add(item);
+            }
+
+            // 对每一种类型，进行去重处理
+            foreach(string type in table.Keys)
+            {
+                List<SelectedItem> array = (List<SelectedItem>)table[type];
+                List<SelectedItem> removed = RemoveDup(array, strStyle);
+                foreach (SelectedItem item in removed)
+                {
+                    SelectControl(item.Control);
+                    SelectItem(item.Control,
+                        item.Index,
+                        false);
+                    nSelectedCount--;
+                }
+            }
+
+            return nSelectedCount;
+        }
+
+        // 去掉重复的 key
+        // TODO: 可以增加输出调试信息的功能，便于测试和排错
+        List<SelectedItem> RemoveDup(List<SelectedItem> items, string strStyle)
+        {
+            List<SelectedItem> results = new List<SelectedItem>();
+
+            if (StringUtil.IsInList("remove_dup", strStyle) == true)
+            {
+                // 按照 rel 字符串排序
+                items.Sort((x, y) =>
+                {
+                    return string.CompareOrdinal(x.Rel, y.Rel);
+                });
+                for (int i = 0; i < items.Count; i++)
+                {
+                    string strRel1 = items[i].Rel;
+                    for (int j = i + 1; j < items.Count; j++)
+                    {
+                        string strRel2 = items[j].Rel;
+                        if (strRel1 == strRel2)
+                        {
+                            results.Add(items[j]);
+                            items.RemoveAt(j);
+                            j--;
+                        }
+                        else
+                        {
+                            i = j - 1;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (StringUtil.IsInList("select_top_weight", strStyle) == true)
+            {
+                // 按照 weight 字符串排序
+                items.Sort((x, y) =>
+                {
+                    // weight
+                    return -1*(x.Weight - y.Weight);  // 大在前
+                });
+                // 删除第一个以后的所有元素
+                for (int i = 1; i < items.Count; i++)
+                {
+                    results.Add(items[i]);
+                    items.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            return results;
+        }
+
+        // 在 dpTable 中选择一行，然后返回这行的信息。或者去掉对一行的选择
+        SelectedItem SelectItem(RelationControl control,
+            int index,
+            bool bSelect)
+        {
+            DpRow row = this.dpTable1.Rows[index];
+            if (bSelect == false)
+            {
+                row.Selected = false;
+                return null;
+            }
+            SelectedItem item = new SelectedItem();
+            item.Control = control;
+            item.Index = index;
+            item.Key = row[COLUMN_KEY].Text;
+            item.Rel = row[COLUMN_REL].Text;
+            item.Level = Int32.Parse(row[COLUMN_LEVEL].Text);
+            item.Weight = Int32.Parse(row[COLUMN_WEIGHT].Text);
+            row.Selected = true;
+            return item;
+        }
+
+        class SelectedItem
+        {
+            public RelationControl Control = null;
+            public int Index = -1;
+            public string Key = "";
+            public string Rel = "";
+            public int Level = 0;
+            public int Weight = 0;
         }
 
         void SelectControl(RelationControl control)
@@ -296,19 +452,21 @@ bool bClickClose = false)
             return 0;
         }
 
-        // 计算 strLongKey 和 strKey 的匹配级次。级次越高，表示匹配的字符越多。
-        static int GetLevel(string strKey, string strLongKey)
+        // 计算 strKey1 和 strKey2 的左端一致的匹配字符数，也就是级次。级次越高，表示匹配的字符越多。
+        static int GetLevel(string strKey1, string strKey2)
         {
-            if (string.IsNullOrEmpty(strKey) == true
-                || string.IsNullOrEmpty(strLongKey) == true)
+            if (string.IsNullOrEmpty(strKey1) == true
+                || string.IsNullOrEmpty(strKey2) == true)
                 return 0;
-            for(int i=1;i<strKey.Length;i++)
+
+            int nLength = Math.Min(strKey1.Length, strKey2.Length);   // 较小的那个长度
+            for(int i=1;i<nLength;i++)
             {
-                if (strLongKey.StartsWith(strKey.Substring(0, i)) == false)
+                if (strKey2.StartsWith(strKey1.Substring(0, i)) == false)
                     return i - 1;
             }
 
-            return strKey.Length;
+            return nLength;
         }
 
         void FillEntryList(RelationControl control)
@@ -375,12 +533,13 @@ bool bClickClose = false)
                     // level
                     {
                         DpCell cell = new DpCell();
-                        cell.Text = GetLevel(strControlKey, strKey).ToString();
+                        int nLevel = GetLevel(strControlKey, strKey);
+                        Debug.Assert(nLevel <= strControlKey.Length && nLevel <= strKey.Length, "");
+                        cell.Text = nLevel.ToString();
                         row.Add(cell);
                     }
 
                     this.dpTable1.Rows.Add(row);
-
                 }
             }
 
@@ -537,6 +696,8 @@ bool bClickClose = false)
             public List<string> SelectedLines = null;
         }
 
+        public int MaxHitCount = 500;
+
         // 针对一个 key 字符串进行检索
         int SearchOneKey(
             Relation relation,
@@ -564,7 +725,7 @@ bool bClickClose = false)
                 int nRet = Search(relation.DbName,
                     strPartKey,
                     "left",
-                    1001,
+                    MaxHitCount + 1,
                     ref temp,
                     out strError);
                 if (nRet == -1)
@@ -584,7 +745,7 @@ bool bClickClose = false)
                     results.Add(item);
                 }
 
-                if (nRet < 1001)
+                if (nRet < MaxHitCount + 1)
                     break;
                 if (i >= strKey.Length)
                     break;

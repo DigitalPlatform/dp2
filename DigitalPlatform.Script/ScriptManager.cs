@@ -1589,7 +1589,7 @@ namespace DigitalPlatform.Script
             {
                 dom.Load(strFilePath);
             }
-            catch (FileNotFoundException ex)
+            catch (FileNotFoundException /*ex*/)
             {
                 strError = "元数据文件 " + strFilePath + " 不存在";
                 return 0;

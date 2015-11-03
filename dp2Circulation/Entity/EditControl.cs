@@ -28,7 +28,7 @@ namespace dp2Circulation
         // 过滤掉 {} 包围的部分
         void __FilterValue(Control control)
         {
-            string strText = Global.GetPureSeletedValue(control.Text);
+            string strText = StringUtil.GetPureSelectedValue(control.Text);
             if (control.Text != strText)
                 control.Text = strText;
         }
@@ -52,7 +52,7 @@ namespace dp2Circulation
         // 还有列表值去重的功能
         void __FilterValueList(Control control)
         {
-            List<string> results = StringUtil.FromListString(Global.GetPureSeletedValue(control.Text));
+            List<string> results = StringUtil.FromListString(StringUtil.GetPureSelectedValue(control.Text));
             StringUtil.RemoveDupNoSort(ref results);
             string strText = StringUtil.MakePathList(results);
             if (control.Text != strText)

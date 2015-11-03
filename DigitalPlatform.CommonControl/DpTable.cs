@@ -166,7 +166,7 @@ namespace DigitalPlatform.CommonControl
         internal List<DpRow> m_seletecLines = null;     // 选定的行对象
         internal List<int> m_selectedLineIndices = null; // 选定的行的行号
 
-        internal List<CellXY> m_seletedCellXY = null;    // 选定的格子坐标
+        internal List<CellXY> m_selectedCellXY = null;    // 选定的格子坐标
 
         internal object m_focusObj = null;
         internal object m_shiftStartObj = null;
@@ -1723,11 +1723,11 @@ Color.FromArgb(100, this.m_hoverBackColor)
                 if (bFoundExclude == true)
                 {
                     // 可能还剩下一个有选择状态的对象
-                    this.m_seletedCellXY = null;
+                    this.m_selectedCellXY = null;
                 }
                 else
                 {
-                    this.m_seletedCellXY = new List<CellXY>();
+                    this.m_selectedCellXY = new List<CellXY>();
                 }
             }
 
@@ -2265,18 +2265,18 @@ Color.FromArgb(100, this.m_hoverBackColor)
 
         internal void ExpireSelectedXYs()
         {
-            this.m_seletedCellXY = null;
+            this.m_selectedCellXY = null;
         }
 
         void PrepareSelectedXYs()
         {
-            if (this.m_seletedCellXY != null)
+            if (this.m_selectedCellXY != null)
                 return; // 优化
 
-            if (this.m_seletedCellXY != null)
-                this.m_seletedCellXY.Clear();
+            if (this.m_selectedCellXY != null)
+                this.m_selectedCellXY.Clear();
             else
-                this.m_seletedCellXY = new List<CellXY>();
+                this.m_selectedCellXY = new List<CellXY>();
 
             int i = 0;
             foreach (DpRow line in this.Rows)
@@ -2288,7 +2288,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
                     // DpCell cell = line[j];
                     if (cell.Selected == true)
                     {
-                        this.m_seletedCellXY.Add(new CellXY(j, i));
+                        this.m_selectedCellXY.Add(new CellXY(j, i));
                         if (this.m_bSingleSelection == true)
                             break;
                     }
@@ -2305,7 +2305,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
             {
                 PrepareSelectedXYs();
 
-                return this.m_seletedCellXY;
+                return this.m_selectedCellXY;
             }
         }
 
@@ -3988,7 +3988,7 @@ nHeight);
                         && this.Container.Control != null)
                     {
                         // 迫使将来重新获取
-                        this.Container.Control.m_seletedCellXY = null;
+                        this.Container.Control.m_selectedCellXY = null;
 
                         this.Container.Control.InvalidateCell(this);
 

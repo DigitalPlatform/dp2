@@ -266,7 +266,7 @@ namespace DigitalPlatform.GUI
         // 响应选择标记发生变化的动作，修改栏目标题文字
         // parameters:
         //      protect_column_numbers  需要保护的列的列号数组。列号从0开始计算。所谓保护就是不破坏这样的列的标题，设置标题从它们以外的列开始算起。nRecPathColumn表示的列号不必纳入本数组，也会自动受到保护。如果不需要本参数，可以用null
-        public static void OnSeletedIndexChanged(ListView list,
+        public static void OnSelectedIndexChanged(ListView list,
             int nRecPathColumn,
             List<int> protect_column_numbers)
         {
@@ -409,7 +409,7 @@ namespace DigitalPlatform.GUI
             if (list.SelectedItems.Count == 0 && list.Items.Count > 0)
             {
                 list.Items[0].Selected = true;
-                OnSeletedIndexChanged(list,
+                OnSelectedIndexChanged(list,
                     0,
                     null);
                 list.Items[0].Selected = false;

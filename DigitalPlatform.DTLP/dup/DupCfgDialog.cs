@@ -422,7 +422,7 @@ namespace DigitalPlatform.DTLP
 
         private void button_deleteDefault_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
 
             if (this.listView_defaults.SelectedItems.Count == 0)
             {

@@ -315,7 +315,7 @@ namespace dp2Circulation
             else
                 this.button_OK.Enabled = false;
 
-            ListViewUtil.OnSeletedIndexChanged(this.listView_records,
+            ListViewUtil.OnSelectedIndexChanged(this.listView_records,
                 0,
                 null);
 

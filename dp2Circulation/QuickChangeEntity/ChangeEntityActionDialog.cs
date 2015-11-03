@@ -401,29 +401,6 @@ namespace dp2Circulation
                 this.label_batchNo.BackColor = Color.Green;
         }
 
-#if NO
-        delegate void Delegate_filterValue(Control control);
-
-        // 过滤掉 {} 包围的部分
-        void FileterValue(Control control)
-        {
-            string strText = Global.GetPureSeletedValue(control.Text);
-            if (control.Text != strText)
-                control.Text = strText;
-        }
-
-        // 过滤掉 {} 包围的部分
-        // 还有列表值去重的功能
-        void FileterValueList(Control control)
-        {
-            List<string> results = StringUtil.FromListString(Global.GetPureSeletedValue(control.Text));
-            StringUtil.RemoveDupNoSort(ref results);
-            string strText = StringUtil.MakePathList(results);
-            if (control.Text != strText)
-                control.Text = strText;
-        }
-#endif
-
         private void checkedComboBox_stateAdd_TextChanged(object sender, EventArgs e)
         {
             Global.FilterValueList(this, (Control)sender);

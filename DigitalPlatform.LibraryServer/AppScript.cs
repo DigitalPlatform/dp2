@@ -1341,7 +1341,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             string strPersonalLibrary = DomUtil.GetElementText(readerdom.DocumentElement, "personalLibrary");
 
@@ -1604,7 +1604,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             return 0;
         }
@@ -1618,7 +1618,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             return 0;
         }

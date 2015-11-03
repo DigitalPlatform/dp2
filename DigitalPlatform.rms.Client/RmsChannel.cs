@@ -5947,7 +5947,7 @@ ref strNewStyle);	// 不要数据体和metadata
                 {
                     return this.ws.EndDoTest(soapresult);
                 }
-                catch (WebException ex)
+                catch //  (WebException ex)
                 {
                     return -1;
                 }

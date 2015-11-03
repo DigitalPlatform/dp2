@@ -1443,7 +1443,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             List<int> protect_column_numbers = new List<int>();
             protect_column_numbers.Add(COLUMN_ROLE);  // 保护“角色”列
             protect_column_numbers.Add(COLUMN_TARGETRECPATH);  // 保护“目标路径”列
-            ListViewUtil.OnSeletedIndexChanged(this.listView_accept_records, 0, protect_column_numbers);
+            ListViewUtil.OnSelectedIndexChanged(this.listView_accept_records, 0, protect_column_numbers);
 
             if (this.SingleClickLoadDetail == false)
                 return;

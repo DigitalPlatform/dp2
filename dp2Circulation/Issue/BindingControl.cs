@@ -7132,7 +7132,7 @@ issue.Volume);
 
             // 从选择范围中挑出期对象。
 
-            // TODO: 警告在this.SeletedCells中的选择?
+            // TODO: 警告在this.SelectedCells中的选择?
 
             List<IssueBindingItem> ref_issues = this.SelectedIssues;
             /*

@@ -2485,7 +2485,7 @@ namespace dp2rms
 
         private void listView_browse_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListViewUtil.OnSeletedIndexChanged(this.listView_browse,
+            ListViewUtil.OnSelectedIndexChanged(this.listView_browse,
 0,
 null);
             if (this.listView_browse.SelectedIndices.Count == 0)

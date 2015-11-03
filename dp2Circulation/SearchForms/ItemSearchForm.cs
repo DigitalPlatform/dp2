@@ -1889,10 +1889,10 @@ out strError);
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            int nSeletedItemCount = this.listView_records.SelectedItems.Count;
+            int nSelectedItemCount = this.listView_records.SelectedItems.Count;
             bool bSelected = false;
             string strFirstColumn = "";
-            if (nSeletedItemCount > 0)
+            if (nSelectedItemCount > 0)
             {
                 bSelected = true;
                 strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
@@ -2079,8 +2079,8 @@ out strError);
             GetSelectedItemCount(out nPathItemCount,
                 out nKeyItemCount);
              * */
-            int nPathItemCount = nSeletedItemCount;
-            if (nSeletedItemCount > 0 && String.IsNullOrEmpty(strFirstColumn) == true)
+            int nPathItemCount = nSelectedItemCount;
+            if (nSelectedItemCount > 0 && String.IsNullOrEmpty(strFirstColumn) == true)
                 nPathItemCount = -1;    // 表示不清楚
 
             if (contextMenu.MenuItems.Count > 0)
@@ -2092,14 +2092,14 @@ out strError);
 
             menuItem = new MenuItem("剪切(&T)");
             menuItem.Click += new System.EventHandler(this.menu_cutToClipboard_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
             menuItem = new MenuItem("复制(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copyToClipboard_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2326,15 +2326,15 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("到文本文件 [" + nSeletedItemCount.ToString() + "] (&T)...");
+                subMenuItem = new MenuItem("到文本文件 [" + nSelectedItemCount.ToString() + "] (&T)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportTextFile_Click);
-                if (nSeletedItemCount == 0)
+                if (nSelectedItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("到 Excel 文件 [" + nSeletedItemCount.ToString() + "] (&E)...");
+                subMenuItem = new MenuItem("到 Excel 文件 [" + nSelectedItemCount.ToString() + "] (&E)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportExcelFile_Click);
-                if (nSeletedItemCount == 0)
+                if (nSelectedItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
@@ -2418,27 +2418,27 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("移除 [" + nSeletedItemCount.ToString() + "] (&D)");
+            menuItem = new MenuItem("移除 [" + nSelectedItemCount.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("清除命中列表(&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearList_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("刷新 [" + nSeletedItemCount.ToString() + "] (&R)");
+            menuItem = new MenuItem("刷新 [" + nSelectedItemCount.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("刷新书目摘要 [" + nSeletedItemCount.ToString() + "] (&R)");
+            menuItem = new MenuItem("刷新书目摘要 [" + nSelectedItemCount.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItemsBiblioSummary_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -6524,41 +6524,6 @@ out strError);
             else
                 this.Text = this.DbTypeCaption + "查询 " + this.textBox_queryWord.Text;
         }
-
-#if NO
-        /// <summary>
-        /// 缺省窗口过程
-        /// </summary>
-        /// <param name="m">消息</param>
-        protected override void DefWndProc(ref Message m)
-        {
-            switch (m.Msg)
-            {
-                case WM_SELECT_INDEX_CHANGED:
-                    {
-                        if (this.listView_records.SelectedIndices.Count == 0)
-                            this.label_message.Text = "";
-                        else
-                        {
-                            if (this.listView_records.SelectedIndices.Count == 1)
-                            {
-                                this.label_message.Text = "第 " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " 行";
-                            }
-                            else
-                            {
-                                this.label_message.Text = "从 " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " 行开始，共选中 " + this.listView_records.SelectedIndices.Count.ToString() + " 个事项";
-                            }
-                        }
-
-                        ListViewUtil.OnSeletedIndexChanged(this.listView_records,
-                            0,
-                            null);
-                    }
-                    return;
-            }
-            base.DefWndProc(ref m);
-        }
-#endif
 
         // int m_nInSelectedIndexChanged = 0;
 

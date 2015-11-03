@@ -100,7 +100,7 @@ namespace DigitalPlatform.LibraryServer
             if (db == null)
                 return null;
 
-            string strResult = "";
+            // string strResult = "";
 
             // 2007/9/13
             if (String.IsNullOrEmpty(strFromStyles) == true

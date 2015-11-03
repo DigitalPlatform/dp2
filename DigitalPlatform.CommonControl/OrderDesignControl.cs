@@ -3285,8 +3285,9 @@ Color.FromArgb(50, Color.Gray)
             }
         }
 
+#if NO
         // 过滤掉 {} 包围的部分
-        static string GetPureSeletedValue(string strText)
+        static string GetPureSelectedValue(string strText)
         {
             for (; ; )
             {
@@ -3301,6 +3302,7 @@ Color.FromArgb(50, Color.Gray)
                 strText = strText.Remove(nStart, nEnd - nStart + 1).Trim();
             }
         }
+#endif
 
         delegate void Delegate_filterValue(Control control);
 
@@ -3311,13 +3313,13 @@ Color.FromArgb(50, Color.Gray)
             if (control is DoubleComboBox)
             {
                 DoubleComboBox combox = (DoubleComboBox)control;
-                string strText = GetPureSeletedValue(combox.Text);
+                string strText = StringUtil.GetPureSelectedValue(combox.Text);
                 if (combox.Text != strText)
                     combox.Text = strText;
             }
             else
             {
-                string strText = GetPureSeletedValue(control.Text);
+                string strText = StringUtil.GetPureSelectedValue(control.Text);
                 if (control.Text != strText)
                     control.Text = strText;
             }

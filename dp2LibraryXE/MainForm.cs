@@ -2736,11 +2736,21 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
         private void MenuItem_openLibraryWsdl_Click(object sender, EventArgs e)
         {
+            if (library_host == null)
+            {
+                MessageBox.Show(this, "library_host 尚未安装或启动");
+                return;
+            }
             Process.Start("IExplore.exe", library_host.MetadataUrl);
         }
 
         private void MenuItem_openKernelWsdl_Click(object sender, EventArgs e)
         {
+            if (kernel_host == null)
+            {
+                MessageBox.Show(this, "kernel_host 尚未安装或启动");
+                return;
+            }
             Process.Start("IExplore.exe", kernel_host.MetadataUrl);
         }
 

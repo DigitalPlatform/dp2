@@ -1797,9 +1797,9 @@ out strError);
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            int nSeletedItemCount = this.listView_records.SelectedItems.Count;
+            int nSelectedItemCount = this.listView_records.SelectedItems.Count;
             string strFirstColumn = "";
-            if (nSeletedItemCount > 0)
+            if (nSelectedItemCount > 0)
             {
                 strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
             }
@@ -1827,7 +1827,7 @@ out strError);
 
 
             if (String.IsNullOrEmpty(strFirstColumn) == true
-    && nSeletedItemCount > 0)
+    && nSelectedItemCount > 0)
             {
                 string strKey = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
 
@@ -2188,9 +2188,9 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
              * */
 
-            menuItem = new MenuItem("刷新浏览行 [" + nSeletedItemCount.ToString() + "] (&R)");
+            menuItem = new MenuItem("刷新浏览行 [" + nSelectedItemCount.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
-            if (nSeletedItemCount == 0)
+            if (nSelectedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -6802,7 +6802,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            ListViewUtil.OnSeletedIndexChanged(this.listView_records,
+            ListViewUtil.OnSelectedIndexChanged(this.listView_records,
                 0,
                 null);
 
@@ -6837,7 +6837,7 @@ MessageBoxDefaultButton.Button2);
                             }
                         }
 
-                        ListViewUtil.OnSeletedIndexChanged(this.listView_records,
+                        ListViewUtil.OnSelectedIndexChanged(this.listView_records,
                             0,
                             null);
 

@@ -453,6 +453,9 @@ this.ClientSize.Height);
             string strText,
             int nLevel)
         {
+            if (nLevel < 0 || nLevel > strText.Length)
+                throw new ArgumentException("nLevel 值 "+nLevel.ToString()+" 不应越过 strText '"+strText+"' 内容字符数");
+
             SizeF size = g.MeasureString(strText.Substring(0, nLevel), font);
 
             float fPenWidth = 3.0F;

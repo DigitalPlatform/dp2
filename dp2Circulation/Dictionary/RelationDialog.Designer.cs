@@ -33,6 +33,11 @@
             this.button_OK = new System.Windows.Forms.Button();
             this.splitContainer_relation = new System.Windows.Forms.SplitContainer();
             this.flowLayoutPanel_relationList = new System.Windows.Forms.FlowLayoutPanel();
+            this.dpTable1 = new DigitalPlatform.CommonControl.DpTable();
+            this.dpColumn_key = new DigitalPlatform.CommonControl.DpColumn();
+            this.dpColumn_related = new DigitalPlatform.CommonControl.DpColumn();
+            this.dpColumn_weight = new DigitalPlatform.CommonControl.DpColumn();
+            this.dpColumn_level = new DigitalPlatform.CommonControl.DpColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_upLevel = new System.Windows.Forms.ToolStripButton();
@@ -40,11 +45,6 @@
             this.toolStripLabel_currentKey = new System.Windows.Forms.ToolStripLabel();
             this.toolStripButton_wild = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
-            this.dpTable1 = new DigitalPlatform.CommonControl.DpTable();
-            this.dpColumn_key = new DigitalPlatform.CommonControl.DpColumn();
-            this.dpColumn_related = new DigitalPlatform.CommonControl.DpColumn();
-            this.dpColumn_weight = new DigitalPlatform.CommonControl.DpColumn();
-            this.dpColumn_level = new DigitalPlatform.CommonControl.DpColumn();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_relation)).BeginInit();
@@ -109,75 +109,6 @@
             this.flowLayoutPanel_relationList.Name = "flowLayoutPanel_relationList";
             this.flowLayoutPanel_relationList.Size = new System.Drawing.Size(155, 172);
             this.flowLayoutPanel_relationList.TabIndex = 0;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.toolStrip1.AutoSize = false;
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_stop,
-            this.toolStripButton_upLevel,
-            this.toolStripButton_downLevel,
-            this.toolStripLabel_currentKey,
-            this.toolStripButton_wild,
-            this.toolStripLabel_message});
-            this.toolStrip1.Location = new System.Drawing.Point(9, 336);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(305, 25);
-            this.toolStrip1.TabIndex = 5;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripButton_stop
-            // 
-            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
-            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
-            this.toolStripButton_stop.Name = "toolStripButton_stop";
-            this.toolStripButton_stop.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_stop.Text = "停止";
-            // 
-            // toolStripButton_upLevel
-            // 
-            this.toolStripButton_upLevel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_upLevel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_upLevel.Image")));
-            this.toolStripButton_upLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_upLevel.Name = "toolStripButton_upLevel";
-            this.toolStripButton_upLevel.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_upLevel.Text = "上级";
-            // 
-            // toolStripButton_downLevel
-            // 
-            this.toolStripButton_downLevel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_downLevel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_downLevel.Image")));
-            this.toolStripButton_downLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_downLevel.Name = "toolStripButton_downLevel";
-            this.toolStripButton_downLevel.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_downLevel.Text = "下级";
-            // 
-            // toolStripLabel_currentKey
-            // 
-            this.toolStripLabel_currentKey.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel_currentKey.Name = "toolStripLabel_currentKey";
-            this.toolStripLabel_currentKey.Size = new System.Drawing.Size(0, 22);
-            // 
-            // toolStripButton_wild
-            // 
-            this.toolStripButton_wild.CheckOnClick = true;
-            this.toolStripButton_wild.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_wild.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_wild.Image")));
-            this.toolStripButton_wild.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_wild.Name = "toolStripButton_wild";
-            this.toolStripButton_wild.Size = new System.Drawing.Size(60, 22);
-            this.toolStripButton_wild.Text = "前方一致";
-            // 
-            // toolStripLabel_message
-            // 
-            this.toolStripLabel_message.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel_message.Name = "toolStripLabel_message";
-            this.toolStripLabel_message.Size = new System.Drawing.Size(17, 22);
-            this.toolStripLabel_message.Text = "...";
             // 
             // dpTable1
             // 
@@ -251,6 +182,75 @@
             this.dpColumn_level.Text = "级次";
             this.dpColumn_level.Width = 50;
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.toolStrip1.AutoSize = false;
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_stop,
+            this.toolStripButton_upLevel,
+            this.toolStripButton_downLevel,
+            this.toolStripLabel_currentKey,
+            this.toolStripButton_wild,
+            this.toolStripLabel_message});
+            this.toolStrip1.Location = new System.Drawing.Point(9, 336);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(305, 25);
+            this.toolStrip1.TabIndex = 5;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_stop
+            // 
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_stop.Text = "停止";
+            // 
+            // toolStripButton_upLevel
+            // 
+            this.toolStripButton_upLevel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_upLevel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_upLevel.Image")));
+            this.toolStripButton_upLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_upLevel.Name = "toolStripButton_upLevel";
+            this.toolStripButton_upLevel.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_upLevel.Text = "上级";
+            // 
+            // toolStripButton_downLevel
+            // 
+            this.toolStripButton_downLevel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_downLevel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_downLevel.Image")));
+            this.toolStripButton_downLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_downLevel.Name = "toolStripButton_downLevel";
+            this.toolStripButton_downLevel.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_downLevel.Text = "下级";
+            // 
+            // toolStripLabel_currentKey
+            // 
+            this.toolStripLabel_currentKey.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel_currentKey.Name = "toolStripLabel_currentKey";
+            this.toolStripLabel_currentKey.Size = new System.Drawing.Size(0, 22);
+            // 
+            // toolStripButton_wild
+            // 
+            this.toolStripButton_wild.CheckOnClick = true;
+            this.toolStripButton_wild.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_wild.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_wild.Image")));
+            this.toolStripButton_wild.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_wild.Name = "toolStripButton_wild";
+            this.toolStripButton_wild.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_wild.Text = "前方一致";
+            // 
+            // toolStripLabel_message
+            // 
+            this.toolStripLabel_message.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel_message.Name = "toolStripLabel_message";
+            this.toolStripLabel_message.Size = new System.Drawing.Size(17, 22);
+            this.toolStripLabel_message.Text = "...";
+            // 
             // splitContainer_main
             // 
             this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -294,7 +294,7 @@
             this.Name = "RelationDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "RelationDialog";
+            this.Text = "分类号对照";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RelationDialog_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.RelationDialog_FormClosed);
             this.Load += new System.EventHandler(this.RelationDialog_Load);

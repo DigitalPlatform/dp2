@@ -1872,7 +1872,7 @@ namespace dp2Catalog
 
         private void listView_number_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListViewUtil.OnSeletedIndexChanged(this.listView_number,
+            ListViewUtil.OnSelectedIndexChanged(this.listView_number,
     0,
     new List<int> { 1 });
         }

@@ -1650,18 +1650,6 @@ namespace dp2Circulation
         }
 #endif
 
-#if NO
-        delegate void Delegate_filterValue(ComboBox combobox);
-
-        // 过滤掉 {} 包围的部分
-        void FileterValue(ComboBox combobox)
-        {
-            string strText = Global.GetPureSeletedValue(combobox.Text);
-            if (combobox.Text != strText)
-                combobox.Text = strText;
-        }
-#endif
-
         private void comboBox_readerType_SelectedIndexChanged(object sender, EventArgs e)
         {
             Global.FilterValue(this, (Control)sender);

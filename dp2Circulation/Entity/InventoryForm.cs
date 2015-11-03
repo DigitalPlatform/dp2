@@ -905,7 +905,7 @@ namespace dp2Circulation
         // TODO: 如果被调用太密集，可在需要的时候解挂事件
         private void listView_inventoryList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListViewUtil.OnSeletedIndexChanged(this.listView_inventoryList_records,
+            ListViewUtil.OnSelectedIndexChanged(this.listView_inventoryList_records,
     0,
     null);
         }
@@ -1370,7 +1370,7 @@ namespace dp2Circulation
 
         private void listView_baseList_records_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListViewUtil.OnSeletedIndexChanged(this.listView_baseList_records,
+            ListViewUtil.OnSelectedIndexChanged(this.listView_baseList_records,
 0,
 null);
 

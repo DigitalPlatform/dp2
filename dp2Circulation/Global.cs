@@ -437,7 +437,7 @@ namespace dp2Circulation
         // 过滤掉 {} 包围的部分
         static void __FilterValue(Control control)
         {
-            string strText = Global.GetPureSeletedValue(control.Text);
+            string strText = StringUtil.GetPureSelectedValue(control.Text);
             if (control.Text != strText)
                 control.Text = strText;
         }
@@ -480,7 +480,7 @@ namespace dp2Circulation
         // 还有列表值去重的功能
         static void __FilterValueList(Control control)
         {
-            List<string> results = StringUtil.FromListString(Global.GetPureSeletedValue(control.Text));
+            List<string> results = StringUtil.FromListString(StringUtil.GetPureSelectedValue(control.Text));
             StringUtil.RemoveDupNoSort(ref results);
             string strText = StringUtil.MakePathList(results);
             if (control.Text != strText)
@@ -944,28 +944,6 @@ namespace dp2Circulation
             }
 
             return results;
-        }
-
-        // 
-        /// <summary>
-        /// 过滤掉最外面的 {} 字符
-        /// </summary>
-        /// <param name="strText">待过滤的字符串</param>
-        /// <returns>过滤后的字符串</returns>
-        public static string GetPureSeletedValue(string strText)
-        {
-            for (; ; )
-            {
-                int nRet = strText.IndexOf("{");
-                if (nRet == -1)
-                    return strText;
-                int nStart = nRet;
-                nRet = strText.IndexOf("}", nStart + 1);
-                if (nRet == -1)
-                    return strText;
-                int nEnd = nRet;
-                strText = strText.Remove(nStart, nEnd - nStart + 1).Trim();
-            }
         }
 
         // 解析一个来自dp2library的列表值字符串

@@ -145,7 +145,7 @@ namespace dp2Circulation
                             }
                         }
 
-                        ListViewUtil.OnSeletedIndexChanged(this._listviewRecords,
+                        ListViewUtil.OnSelectedIndexChanged(this._listviewRecords,
                             0,
                             null);
 

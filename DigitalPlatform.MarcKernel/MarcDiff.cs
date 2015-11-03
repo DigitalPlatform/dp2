@@ -482,7 +482,7 @@ namespace DigitalPlatform.Marc
         {
             strError = "";
             strHtml = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             if (string.IsNullOrEmpty(strOldMarc) == true && string.IsNullOrEmpty(strNewMarc) == true)
                 return 0;
@@ -659,7 +659,7 @@ namespace DigitalPlatform.Marc
             {
                 dom.LoadXml(strXml);
             }
-            catch (Exception ex)
+            catch // (Exception ex)
             {
                 return strXml;
             }
@@ -674,7 +674,7 @@ namespace DigitalPlatform.Marc
             {
                 dom.LoadXml(strXml);
             }
-            catch (Exception ex)
+            catch // (Exception ex)
             {
                 return strXml;
             }

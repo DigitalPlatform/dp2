@@ -16,6 +16,28 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 
+        /// <summary>
+        /// 过滤掉最外面的 {} 字符
+        /// </summary>
+        /// <param name="strText">待过滤的字符串</param>
+        /// <returns>过滤后的字符串</returns>
+        public static string GetPureSelectedValue(string strText)
+        {
+            for (; ; )
+            {
+                int nRet = strText.IndexOf("{");
+                if (nRet == -1)
+                    return strText;
+                int nStart = nRet;
+                nRet = strText.IndexOf("}", nStart + 1);
+                if (nRet == -1)
+                    return strText;
+                int nEnd = nRet;
+                strText = strText.Remove(nStart, nEnd - nStart + 1).Trim();
+            }
+        }
+
         #region 和 Application 有关的功能
 
         public static bool IsDevelopMode()

@@ -75,7 +75,7 @@ namespace DigitalPlatform.Message
                     return strID;
                 return s;
             }
-            catch (Exception ex)
+            catch // (Exception ex)
             {
                 return strID + " 在 " + Thread.CurrentThread.CurrentUICulture.Name + " 中没有找到对应的资源。";
             }

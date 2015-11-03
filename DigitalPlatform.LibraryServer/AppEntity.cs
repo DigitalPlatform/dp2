@@ -3185,7 +3185,7 @@ namespace DigitalPlatform.LibraryServer
                 string strText = values[i].Trim();
                 if (string.IsNullOrEmpty(strText) == true)
                     continue;
-                values[i] = GetPureSeletedValue(strText);
+                values[i] = StringUtil.GetPureSelectedValue(strText);
             }
         }
 
@@ -3196,7 +3196,7 @@ namespace DigitalPlatform.LibraryServer
                 string strText = strValue.Trim();
                 if (string.IsNullOrEmpty(strText) == true)
                     continue;
-                strText = GetPureSeletedValue(strText);
+                strText = StringUtil.GetPureSelectedValue(strText);
                 if (string.IsNullOrEmpty(strText) == true)
                     continue;
                 if (strBookType == strText)
@@ -3207,34 +3207,12 @@ namespace DigitalPlatform.LibraryServer
         }
 
 #if NO
-        static bool IsInList(string strBookType, List<string> values)
-        {
-            foreach (string strValue in values)
-            {
-                string[] parts = strValue.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
-                foreach(string s in parts)
-                {
-                    string strText = s.Trim();
-                    if (string.IsNullOrEmpty(strText) == true)
-                        continue;
-                    strText = GetPureSeletedValue(strText);
-                    if (string.IsNullOrEmpty(strText) == true)
-                        continue;
-                    if (strBookType == strText)
-                        return true;
-                }
-            }
-
-            return false;
-        }
-#endif
-
         /// <summary>
         /// 过滤掉最外面的 {} 字符
         /// </summary>
         /// <param name="strText">待过滤的字符串</param>
         /// <returns>过滤后的字符串</returns>
-        static string GetPureSeletedValue(string strText)
+        static string GetPureSelectedValue(string strText)
         {
             for (; ; )
             {
@@ -3249,6 +3227,7 @@ namespace DigitalPlatform.LibraryServer
                 strText = strText.Remove(nStart, nEnd - nStart + 1).Trim();
             }
         }
+#endif
 
         /*
          * 被CompareTwoBarcode所替代

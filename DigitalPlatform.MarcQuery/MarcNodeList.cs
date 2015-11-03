@@ -1184,6 +1184,11 @@ namespace DigitalPlatform.Marc
             return false;
         }
 
+        /// <summary>
+        /// 针对当前集合中的全部元素进行 XPath 选择
+        /// </summary>
+        /// <param name="strXPath">XPath字符串</param>
+        /// <returns>选中的元素所构成的新集合</returns>
         public MarcNodeList select(string strXPath)
         {
             return select(strXPath, -1);

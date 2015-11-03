@@ -265,7 +265,7 @@ namespace DigitalPlatform.CommonControl
                 serviceController.Start();
                 serviceController.WaitForStatus(ServiceControllerStatus.Running, timeout);
             }
-            catch(Exception ex)
+            catch // (Exception ex)
             {
 
             }

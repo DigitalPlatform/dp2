@@ -2603,7 +2603,7 @@ start_time_1,
         {
             strError = "";
             strResultXml = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             if (string.IsNullOrEmpty(strItemXml) == true)
                 return 0;

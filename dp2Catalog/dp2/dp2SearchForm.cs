@@ -575,7 +575,7 @@ namespace dp2Catalog
                             }
                         }
 
-                            ListViewUtil.OnSeletedIndexChanged(this.listView_browse,
+                            ListViewUtil.OnSelectedIndexChanged(this.listView_browse,
                                 0,
                                 null);
 
@@ -4910,43 +4910,7 @@ namespace dp2Catalog
 
         private void listView_browse_SelectedIndexChanged(object sender, EventArgs e)
         {
-#if NO
-            // 菜单动态变化
-            if (this.listView_browse.SelectedItems.Count == 0)
-            {
-                MainForm.toolButton_saveTo.Enabled = false;
-                MainForm.toolButton_delete.Enabled = false;
-
-                MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = false;
-                MainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = false;
-
-                MainForm.StatusBarMessage = "";
-            }
-            else
-            {
-                MainForm.toolButton_saveTo.Enabled = true;
-                MainForm.toolButton_delete.Enabled = true;
-
-                MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = true;
-                MainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = true;
-
-                if (this.listView_browse.SelectedItems.Count == 1)
-                {
-                    MainForm.StatusBarMessage = "第 " + (this.listView_browse.SelectedIndices[0] + 1).ToString() + " 行";
-                }
-                else
-                {
-                    MainForm.StatusBarMessage = "从 " + (this.listView_browse.SelectedIndices[0] + 1).ToString() + " 行开始，共选中 " + this.listView_browse.SelectedItems.Count.ToString() + " 个事项";
-                }
-            }
-
-            ListViewUtil.OnSeletedIndexChanged(this.listView_browse,
-    0,
-    null);
-#endif
-
             this.commander.AddMessage(WM_SELECT_INDEX_CHANGED);
-
         }
 
         public void SaveOriginRecordToWorksheet()

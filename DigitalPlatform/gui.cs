@@ -84,7 +84,7 @@ namespace DigitalPlatform.GUI
                 // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_BROWSER_EMULATION
                 key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", true);
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 return false;
             }

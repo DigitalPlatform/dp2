@@ -2156,25 +2156,6 @@ namespace dp2Circulation
 
         private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
         {
-#if NO
-            if (this.listView_records.SelectedIndices.Count == 0)
-                this.label_message.Text = "";
-            else
-            {
-                if (this.listView_records.SelectedIndices.Count == 1)
-                {
-                    this.label_message.Text = "第 " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " 行";
-                }
-                else
-                {
-                    this.label_message.Text = "从 " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " 行开始，共选中 " + this.listView_records.SelectedIndices.Count.ToString() + " 个事项";
-                }
-            }
-
-            ListViewUtil.OnSeletedIndexChanged(this.listView_records,
-                0,
-                null);
-#endif
             OnListViewSelectedIndexChanged(sender, e);
         }
 
