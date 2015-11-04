@@ -47,6 +47,8 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm : Form
     {
+        public LibraryChannelPool _channelPool = new LibraryChannelPool();
+
         // 2014/10/3
         // MarcFilter对象缓冲池
         public FilterCollection Filters = new FilterCollection();
@@ -273,10 +275,12 @@ namespace dp2Circulation
         internal ReaderWriterLock m_lockChannel = new ReaderWriterLock();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
 
+#if NO
         /// <summary>
         /// 通讯通道。MainForm 自己使用
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
+#endif
 
         /// <summary>
         /// 停止控制
@@ -415,6 +419,8 @@ namespace dp2Circulation
             this.BackColor = Color.Transparent;
             this.toolStrip_main.BackColor = Color.Transparent;
              * */
+
+            this._channelPool.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
             this.BeginInvoke(new Action(FirstInitial));
         }
@@ -824,8 +830,16 @@ Stack:
                 AppInfo = null;	// 避免后面再用这个对象
             }
 
+            if (Stop != null) // 脱离关联
+            {
+                Stop.Unregister(true);
+                Stop = null;
+            }
+            this._channelPool.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+#if NO
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
+#endif
 
             if (this._updatedGreenZipFileNames != null && this._updatedGreenZipFileNames.Count > 0)
                 StartGreenUtility();
@@ -2518,11 +2532,18 @@ Stack:
             }
         }
 
+        string _currentUserName = "";
+        string _currentUserRights = "";
+        string _currentLibraryCodeList = "";
 
         internal void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
 #if SN
             LibraryChannel channel = sender as LibraryChannel;
+            _currentUserName = channel.UserName;
+            _currentUserRights = channel.Rights;
+            _currentLibraryCodeList = channel.LibraryCodeList;
+
             if (_verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
             {
                 string strError = "";
@@ -2575,6 +2596,27 @@ Stack:
             }
         }
 
+        public LibraryChannel GetChannel(string strServerUrl = ".",
+string strUserName = ".")
+        {
+            if (EntityRegisterBase.IsDot(strServerUrl) == true)
+                strServerUrl = this.LibraryServerUrl;
+            if (EntityRegisterBase.IsDot(strUserName) == true)
+                strUserName = this.DefaultUserName;
+
+            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            _channelList.Add(channel);
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            this._channelPool.ReturnChannel(channel);
+            _channelList.Remove(channel);
+        }
+
+#if NO
         int _inPrepareSearch = 0;   // 进入的次数，用以防止嵌套调用
 
         // return:
@@ -2629,6 +2671,7 @@ Stack:
 
             return 0;
         }
+#endif
 
         // 登出
         /// <summary>
@@ -2636,11 +2679,14 @@ Stack:
         /// </summary>
         public void Logout()
         {
+#if NO
             int nRet = PrepareSearch();
             if (nRet == 0)
             {
                 return;  // 2009/2/11
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
@@ -2653,10 +2699,10 @@ Stack:
             try
             {
                 // string strValue = "";
-                long lRet = Channel.Logout(out strError);
+                long lRet = channel.Logout(out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 登出时发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 登出时发生错误：" + strError;
                     goto ERROR1;
                 }
             }
@@ -2666,7 +2712,8 @@ Stack:
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
-                EndSearch();
+                this.ReturnChannel(channel);
+                // EndSearch();
             }
             return;
         ERROR1:
@@ -3023,10 +3070,21 @@ Stack:
             return null;    // not found
         }
 
+#if NO
         void DoStop(object sender, StopEventArgs e)
         {
             if (this.Channel != null)
                 this.Channel.Abort();
+        }
+#endif
+        List<LibraryChannel> _channelList = new List<LibraryChannel>();
+        void DoStop(object sender, StopEventArgs e)
+        {
+            foreach(LibraryChannel channel in _channelList)
+            {
+                if (channel != null)
+                    channel.Abort();
+            }
         }
 
         /// <summary>
@@ -3392,12 +3450,16 @@ Stack:
             if (values != null)
                 return 0;
 
+#if NO
             int nRet = PrepareSearch();
             if (nRet == 0)
             {
                 strError = "PrepareSearch() error";
                 return -1;  // 2009/2/11
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
+
 
             // this.Update();
 
@@ -3407,7 +3469,7 @@ Stack:
 
             try
             {
-                long lRet = Channel.GetValueTable(
+                long lRet = channel.GetValueTable(
                     Stop,
                     strTableName,
                     strDbName,
@@ -3427,7 +3489,8 @@ Stack:
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
-                EndSearch();
+                this.ReturnChannel(channel);
+                // EndSearch();
             }
 
             return 0;
@@ -3988,7 +4051,7 @@ Stack:
             //      1   是合法的读者证条码号
             //      2   是合法的册条码号
             int nRet = VerifyBarcode(
-                this.Channel.LibraryCodeList,
+                this._currentLibraryCodeList,    // this.Channel.LibraryCodeList,
                 this.toolStripTextBox_barcode.Text,
                 out strError);
             if (nRet == -1)
@@ -4055,12 +4118,15 @@ Stack:
 + StringUtil.GetXmlStringSimple(strKey)
 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + strLang + "</lang></target>";
 
+#if NO
             int nRet = PrepareSearch();
             if (nRet == 0)
             {
                 strError = "PrepareSearch() error";
                 return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在检索词条 '" + strKey + "' ...");
@@ -4069,7 +4135,7 @@ Stack:
             EnableControls(false);
             try
             {
-                long lRet = Channel.Search(
+                long lRet = channel.Search(
                     Stop,
                     strQueryXml,
                     "default",
@@ -4085,7 +4151,7 @@ Stack:
                 if (lRet >= 1)
                 {
                     DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         Stop,
                         "default",
                         0,
@@ -4163,7 +4229,7 @@ Stack:
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
                 // 保存Xml记录。包装版本。用于保存文本类型的资源。
-                lRet = Channel.WriteRes(
+                lRet = channel.WriteRes(
                     Stop,
                     strRecPath,
                     dom.DocumentElement.OuterXml,
@@ -4186,7 +4252,8 @@ Stack:
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
-                EndSearch();
+                this.ReturnChannel(channel);
+                // EndSearch();
             }
         ERROR1:
             return -1;
@@ -4196,6 +4263,7 @@ Stack:
         // parameters:
         //      results [in,out] 如果需要返回结果，需要在调用前 new List<string>()。如果不需要返回结果，传入 null 即可
         public int SearchDictionary(
+            LibraryChannel channel,
             Stop stop,
             string strDbName,
             string strKey,
@@ -4211,12 +4279,15 @@ Stack:
 + StringUtil.GetXmlStringSimple(strKey)
 + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMaxCount.ToString()+"</maxCount></item><lang>" + strLang + "</lang></target>";
 
+#if NO
             int nRet = PrepareSearch();
             if (nRet == 0)
             {
                 strError = "PrepareSearch() error";
                 return -1;
             }
+#endif
+            // LibraryChannel channel = this.GetChannel();
 
             if (stop == null)
             {
@@ -4231,7 +4302,7 @@ Stack:
 
             try
             {
-                long lRet = Channel.Search(
+                long lRet = channel.Search(
                     stop,
                     strQueryXml,
                     "default",
@@ -4252,7 +4323,7 @@ Stack:
 
                 for (; ; )
                 {
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         Stop,
                         "default",
                         lStart,
@@ -4281,7 +4352,6 @@ Stack:
             }
             finally
             {
-
                 if (stop == Stop)
                 {
                     EnableControls(true);
@@ -4291,7 +4361,8 @@ Stack:
                     stop.Initial("");
                 }
 
-                EndSearch();
+                // this.ReturnChannel(channel);
+                // EndSearch();
             }
         ERROR1:
             return -1;
@@ -4374,12 +4445,15 @@ Stack:
         {
             strError = "";
 
+#if NO
             int nRet = PrepareSearch();
             if (nRet == 0)
             {
                 strError = "PrepareSearch() error";
                 return -1;  // 2009/2/11
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在验证条码号 "+strBarcode+"...");
@@ -4391,7 +4465,7 @@ Stack:
             {
                 return VerifyBarcode(
                     Stop,
-                    Channel,
+                    channel,
                     strLibraryCodeList,
                     strBarcode,
                     EnableControls,
@@ -4405,7 +4479,8 @@ Stack:
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
-                EndSearch();
+                this.ReturnChannel(channel);
+                // EndSearch();
             }
         }
 
@@ -4832,9 +4907,12 @@ out strError);
 
             if (nRet == 0)
             {
+#if NO
                 nRet = PrepareSearch(bDisplayProgress);
                 if (nRet == 0)
                     return "PrepareSearch() error";
+#endif
+                LibraryChannel channel = this.GetChannel();
 
                 Stop.OnStop += new StopEventHandler(this.DoStop);
                 if (bDisplayProgress == true)
@@ -4848,7 +4926,7 @@ out strError);
                     string[] results = null;
                     byte[] baTimestamp = null;
 
-                    long lRet = Channel.GetReaderInfo(Stop,
+                    long lRet = channel.GetReaderInfo(Stop,
                         strPatronBarcode,
                         "xml",
                         out results,
@@ -4870,17 +4948,14 @@ out strError);
                         return strError;
                     }
 
-
                         Debug.Assert(results.Length > 0, "");
                         strXml = results[0];
-
 
                     // 加入到缓存
                     this.SetReaderXmlCache(strPatronBarcode,
                         "",
                         strXml,
                         strOutputPath);
-
                 }
                 finally
                 {
@@ -4891,7 +4966,8 @@ out strError);
                     }
                     Stop.OnStop -= new StopEventHandler(this.DoStop);
 
-                    this.EndSearch();
+                    this.ReturnChannel(channel);
+                    // this.EndSearch();
                 }
             }
 
@@ -4966,6 +5042,7 @@ out strError);
                 return 0;
             }
 
+#if NO
             int nRet = PrepareSearch(bDisplayProgress);
             if (nRet == 0)
             {
@@ -4973,6 +5050,8 @@ out strError);
                 strSummary = strError;
                 return -1;  // 2009/2/11
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             if (bDisplayProgress == true)
@@ -4989,7 +5068,7 @@ out strError);
                 this.m_lockChannel.AcquireWriterLock(m_nLockTimeout);
                 try
                 {
-                    long lRet = Channel.GetBiblioSummary(
+                    long lRet = channel.GetBiblioSummary(
                         Stop,
                         strItemBarcode,
                         strConfirmItemRecPath,
@@ -5028,7 +5107,8 @@ out strError);
                 }
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
 
-                this.EndSearch(bDisplayProgress);   // BUG !!! 2012/3/28前少这一句
+                this.ReturnChannel(channel);
+                // this.EndSearch(bDisplayProgress);   // BUG !!! 2012/3/28前少这一句
             }
 
             return 0;
@@ -5646,7 +5726,7 @@ out strError);
             this.MenuItem_clearDatabaseInfoCatch.Enabled = false;
             try
             {
-                this.Channel.Close();   // 迫使通信通道重新登录
+                //// this.Channel.Close();   // 迫使通信通道重新登录
 
                 // 重新获得各种库名、列表
                 this.StartPrepareNames(false, false);
@@ -7541,15 +7621,19 @@ Keys keyData)
                             string strBiblioAccess = "";
                             string strEntityAccess = "";
 
+#if NO
                             nRet = this.PrepareSearch(true);
                             if (nRet == 0)
                             {
                                 strError = "PrepareSearch() error";
                                 return -1;
                             }
+#endif
+                            LibraryChannel channel = this.GetChannel();
+
                             try
                             {
-                                nRet = EntityRegisterWizard.DetectAccess(this.Channel,
+                                nRet = EntityRegisterWizard.DetectAccess(channel,
                     this.Stop,
                     prop.DbName,
                     prop.Syntax,
@@ -7564,7 +7648,8 @@ Keys keyData)
                             }
                             finally
                             {
-                                this.EndSearch();
+                                this.ReturnChannel(channel);
+                                // this.EndSearch();
                             }
 
                             database.SetAttribute("name", prop.DbName);
@@ -7735,8 +7820,12 @@ Keys keyData)
         // 获得当前用户的用户名
         public string GetCurrentUserName()
         {
+#if NO
             if (this.Channel != null && string.IsNullOrEmpty(this.Channel.UserName) == false)
                 return this.Channel.UserName;
+#endif
+            if (string.IsNullOrEmpty(this._currentUserName) == false)
+                return this._currentUserName;
 
             // TODO: 或者迫使登录一次
             if (this.AppInfo != null)
@@ -7746,6 +7835,12 @@ Keys keyData)
                     "");
 
             return "";
+        }
+
+        // 最近登录过的用户的权限
+        public string GetCurrentUserRights()
+        {
+            return this._currentUserRights;
         }
 
         #endregion // servers.xml
@@ -7872,7 +7967,7 @@ Keys keyData)
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            Stop = new DigitalPlatform.Stop();
+            Stop Stop = new DigitalPlatform.Stop();
             Stop.Register(stopManager, true);	// 和容器关联
 
             Stop.OnStop += new StopEventHandler(this.DoStop);

@@ -1093,6 +1093,11 @@ MessageBoxDefaultButton.Button1);
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
             // stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
+
+            // 公用的 Stop 对象
+            this.Stop = new DigitalPlatform.Stop();
+            this.Stop.Register(stopManager, true);
+
             this.SetMenuItemState();
 
             LinkStopToBackgroundForm(true);
@@ -1909,9 +1914,11 @@ AppInfo.GetString("config",
                     }
                 }
 
+#if NO
                 nRet = PrepareSearch();
                 if (nRet == 1)
                 {
+#endif
                     try
                     {
                         // 2013/6/18
@@ -2032,15 +2039,20 @@ AppInfo.GetString("config",
                     }
                     finally
                     {
-                        EndSearch();
+                        // EndSearch();
                     }
+#if NO
                 }
+#endif
 
                 // 安装条码字体
                 InstallBarcodeFont();
             END1:
+#if NO
                 Stop = new DigitalPlatform.Stop();
                 Stop.Register(stopManager, true);	// 和容器关联
+#endif
+                // TODO: 这里有一定问题。最好临时申请一个 stop， 然后用后释放
                 Stop.SetMessage("正在删除以前遗留的临时文件...");
 
                 /*
@@ -2107,11 +2119,13 @@ Culture=neutral, PublicKeyToken=null
                     MessageBox.Show(this, strError);
 
                 Stop.SetMessage("");
+#if NO
                 if (Stop != null) // 脱离关联
                 {
                     Stop.Unregister();	// 和容器关联
                     Stop = null;
                 }
+#endif
 
                 // 2013/12/4
                 if (InitialClientScript(out strError) == -1)
@@ -2209,27 +2223,30 @@ Culture=neutral, PublicKeyToken=null
         public int TouchServer(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             string strError = "";
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在连接服务器 " + Channel.Url + " ...");
+            Stop.Initial("正在连接服务器 " + channel.Url + " ...");
             Stop.BeginLoop();
 
             try
             {
                 string strTime = "";
-                long lRet = Channel.GetClock(Stop,
+                long lRet = channel.GetClock(Stop,
                     out strTime,
                     out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
+                    if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                     {
                         // 通讯安全性问题，时钟问题
                         strError = strError + "\r\n\r\n有可能是前端机器时钟和服务器时钟差异过大造成的";
@@ -2243,8 +2260,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -2291,6 +2311,7 @@ Culture=neutral, PublicKeyToken=null
         {
             strError = "";
 
+#if NO
             if (bPrepareSearch == true)
             {
                 int nRet = PrepareSearch();
@@ -2300,9 +2321,11 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
                 }
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在检查服务器 " + this.Channel.Url + " 的版本号, 请稍候 ...");
+            Stop.Initial("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
             Stop.BeginLoop();
 
             try
@@ -2315,13 +2338,13 @@ Culture=neutral, PublicKeyToken=null
                 return -2;
 #endif
 
-                long lRet = Channel.GetVersion(Stop,
+                long lRet = channel.GetVersion(Stop,
     out strVersion,
     out strUID,
     out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
+                    if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                     {
                         // 原来的dp2Library不具备GetVersion() API，会走到这里
                         this.ServerVersion = 0;
@@ -2330,7 +2353,7 @@ Culture=neutral, PublicKeyToken=null
                         return 0;
                     }
 
-                    strError = "针对服务器 " + Channel.Url + " 获得版本号的过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得版本号的过程发生错误：" + strError;
                     return -1;
                 }
 
@@ -2399,8 +2422,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 1;
@@ -2419,11 +2445,14 @@ Culture=neutral, PublicKeyToken=null
         public int GetDbFromInfos(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // TODO: 在函数因为无法获得Channel而返回前，是否要清空相关的检索途径数据结构?
             // this.Update();
@@ -2438,14 +2467,14 @@ Culture=neutral, PublicKeyToken=null
                 // 获得书目库的检索途径
                 BiblioDbFromInfo[] infos = null;
 
-                long lRet = Channel.ListDbFroms(Stop,
+                long lRet = channel.ListDbFroms(Stop,
                     "biblio",
                     this.Lang,
                     out infos,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 列出书目库检索途径过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 列出书目库检索途径过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -2453,14 +2482,14 @@ Culture=neutral, PublicKeyToken=null
 
                 // 获得读者库的检索途径
                 infos = null;
-                lRet = Channel.ListDbFroms(Stop,
+                lRet = channel.ListDbFroms(Stop,
     "reader",
     this.Lang,
     out infos,
     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 列出读者库检索途径过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 列出读者库检索途径过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -2480,56 +2509,56 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 获得实体库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "item",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出实体库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出实体库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
                     this.ItemDbFromInfos = infos;
 
                     // 获得期库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "issue",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出期库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出期库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
                     this.IssueDbFromInfos = infos;
 
                     // 获得订购库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "order",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出订购库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出订购库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
                     this.OrderDbFromInfos = infos;
 
                     // 获得评注库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "comment",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出评注库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出评注库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
                     this.CommentDbFromInfos = infos;
@@ -2539,14 +2568,14 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 获得发票库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "invoice",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出发票库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出发票库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
 
@@ -2554,14 +2583,14 @@ Culture=neutral, PublicKeyToken=null
 
                     // 获得违约金库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "amerce",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出违约金库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出违约金库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
 
@@ -2573,14 +2602,14 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 获得预约到书库的检索途径
                     infos = null;
-                    lRet = Channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(Stop,
         "arrived",
         this.Lang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 列出预约到书库检索途径过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 列出预约到书库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
 
@@ -2598,8 +2627,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -2623,7 +2655,9 @@ Culture=neutral, PublicKeyToken=null
         //      -1  出错
         //      0   本地已经有文件，并且最后修改时间和服务器的一致，因此不必重新获得了
         //      1   获得了文件内容
-        int GetSystemFile(string strFileNameParam,
+        int GetSystemFile(
+            LibraryChannel channel,
+            string strFileNameParam,
             out string strError)
         {
             strError = "";
@@ -2653,7 +2687,7 @@ Culture=neutral, PublicKeyToken=null
                         Stop.SetMessage("正在获取系统文件 " + strFileName + " 的最后修改时间 ...");
 
                         byte[] baContent = null;
-                        long lRet = Channel.GetFile(
+                        long lRet = channel.GetFile(
         Stop,
         "cfgs",
         strFileName,
@@ -2697,7 +2731,7 @@ Culture=neutral, PublicKeyToken=null
                     //      需要 getsystemparameter 权限
                     // return:
                     //      result.Value    -1 错误；其他 文件的总长度
-                    long lRet = Channel.GetFile(
+                    long lRet = channel.GetFile(
                         Stop,
                         "cfgs",
                         strFileName,
@@ -2834,11 +2868,14 @@ Culture=neutral, PublicKeyToken=null
         public int GetServerMappedFile(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
@@ -2855,14 +2892,14 @@ Culture=neutral, PublicKeyToken=null
                 List<string> fullnames = new List<string>();
 
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(Stop,
                     "cfgs",
                     this.ServerVersion >= 2.23 ? "listFileNamesEx" : "listFileNames",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得映射配置文件名过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得映射配置文件名过程发生错误：" + strError;
                     goto ERROR1;
                 }
                 if (lRet == 0)
@@ -2879,7 +2916,9 @@ Culture=neutral, PublicKeyToken=null
                     if (string.IsNullOrEmpty(filename) == true)
                         continue;
 
-                    nRet = GetSystemFile(filename,
+                    nRet = GetSystemFile(
+                        channel,
+                        filename,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2900,7 +2939,6 @@ Culture=neutral, PublicKeyToken=null
                     out strError);
                 if (nRet == -1)
                     return -1;
-
             }
             finally
             {
@@ -2908,8 +2946,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -2940,11 +2981,14 @@ Culture=neutral, PublicKeyToken=null
         public int GetLibraryInfo(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
@@ -2957,14 +3001,14 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(Stop,
                     "library",
                     "name",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得图书馆一般信息library/name过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得图书馆一般信息library/name过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -2991,8 +3035,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -3026,11 +3073,14 @@ Culture=neutral, PublicKeyToken=null
         public int InitialNormalDbProperties(bool bPrepareSearch)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
@@ -3182,14 +3232,14 @@ Culture=neutral, PublicKeyToken=null
                     // 先获得时间戳
                     // TODO: 如果文件太多可以分批获取
                     string strValue = "";
-                    long lRet = Channel.GetSystemParameter(Stop,
+                    long lRet = channel.GetSystemParameter(Stop,
                         "cfgs/get_res_timestamps",
                         StringUtil.MakePathList(filenames),
                         out strValue,
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 获得 browse 配置文件时间戳的过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 获得 browse 配置文件时间戳的过程发生错误：" + strError;
                         goto ERROR1;
                     }
 
@@ -3236,7 +3286,7 @@ Culture=neutral, PublicKeyToken=null
                             string strContent = "";
                             byte[] baCfgOutputTimestamp = null;
                             nRet = GetCfgFile(
-                                Channel,
+                                channel,
                                 Stop,
                                 normal.DbName,
                                 "browse",
@@ -3290,7 +3340,7 @@ Culture=neutral, PublicKeyToken=null
                         string strContent = "";
                         byte[] baCfgOutputTimestamp = null;
                         nRet = GetCfgFile(
-                            Channel,
+                            channel,
                             Stop,
                             normal.DbName,
                             "browse",
@@ -3335,8 +3385,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -3400,11 +3453,14 @@ Culture=neutral, PublicKeyToken=null
         public int GetAllDatabaseInfo(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             string strError = "";
 
@@ -3419,7 +3475,7 @@ Culture=neutral, PublicKeyToken=null
 
                 this.AllDatabaseDom = null;
 
-                lRet = Channel.ManageDatabase(
+                lRet = channel.ManageDatabase(
     Stop,
     "getinfo",
     "",
@@ -3428,11 +3484,11 @@ Culture=neutral, PublicKeyToken=null
     out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.ErrorCode == ErrorCode.AccessDenied)
+                    if (channel.ErrorCode == ErrorCode.AccessDenied)
                     {
                     }
 
-                    strError = "针对服务器 " + Channel.Url + " 获得全部数据库定义过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得全部数据库定义过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -3460,8 +3516,11 @@ Culture=neutral, PublicKeyToken=null
                     Stop.Initial("");
                 }
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -3493,11 +3552,14 @@ Culture=neutral, PublicKeyToken=null
         public int InitialBiblioDbProperties(bool bPrepareSearch = true)
         {
         //REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
@@ -3550,8 +3612,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -3876,11 +3941,14 @@ Culture=neutral, PublicKeyToken=null
         public int InitialReaderDbProperties(bool bPrepareSearch = true)
         {
         //REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             string strError = "";
             int nRet = 0;
@@ -3923,8 +3991,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -3959,11 +4030,14 @@ Culture=neutral, PublicKeyToken=null
         public int InitialArrivedDbProperties(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             string strError = "";
             //int nRet = 0;
@@ -3980,14 +4054,14 @@ Culture=neutral, PublicKeyToken=null
                     return 0;
 
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(Stop,
                     "arrived",
                     "dbname",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得预约到书库名过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得预约到书库名过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -3999,8 +4073,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
             return 0;
         ERROR1:
@@ -4163,11 +4240,14 @@ Culture=neutral, PublicKeyToken=null
         public int GetClientFineInterfaceInfo(bool bPrepareSearch = true)
         {
         REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();   // 优化
 
@@ -4180,14 +4260,14 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(Stop,
                     "circulation",
                     "clientFineInterface",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得前端交费接口配置信息过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得前端交费接口配置信息过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -4217,8 +4297,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -4250,11 +4333,14 @@ Culture=neutral, PublicKeyToken=null
             this.CallNumberInfo = "";
             this.CallNumberCfgDom = null;
 
+#if NO
             if (bPreareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();   // 优化
 
@@ -4267,14 +4353,14 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(Stop,
                     "circulation",
                     "callNumber",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得索取号配置信息过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得索取号配置信息过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -4299,8 +4385,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPreareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -4333,11 +4422,13 @@ Culture=neutral, PublicKeyToken=null
         public int GetUtilDbProperties(bool bPrepareSearch = true)
         {
         //REDO:
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return -1;
             }
+#endif
 
             // this.Update();
 
@@ -4448,8 +4539,10 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;
@@ -4480,11 +4573,14 @@ Culture=neutral, PublicKeyToken=null
         {
             strError = "";
 
+#if NO
             if (bPrepareSearch == true)
             {
                 if (PrepareSearch() == 0)
                     return 0;
             }
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
@@ -4495,7 +4591,7 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 string strTime = "";
-                long lRet = Channel.GetClock(
+                long lRet = channel.GetClock(
                     Stop,
                     out strTime,
                     out strError);
@@ -4529,8 +4625,11 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                this.ReturnChannel(channel);
+#if NO
                 if (bPrepareSearch == true)
                     EndSearch();
+#endif
             }
 
             return 0;

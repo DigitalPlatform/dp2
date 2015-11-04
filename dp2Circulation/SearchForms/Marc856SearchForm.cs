@@ -240,7 +240,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   用户中断
         //      1   完成
-        public int FillBiblioSummaryColumn(List<ListViewItem> items,
+        public int FillBiblioSummaryColumn(
+            LibraryChannel channel,
+            List<ListViewItem> items,
             long lStartIndex,
             bool bDisplayMessage,
             bool bPrepareLoop,
@@ -269,7 +271,7 @@ namespace dp2Circulation
                 }
 
                 CacheableBiblioLoader loader = new CacheableBiblioLoader();
-                loader.Channel = this.Channel;
+                loader.Channel = channel;   //  this.Channel;
                 loader.Stop = this.stop;
                 loader.Format = "summary";
                 loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;

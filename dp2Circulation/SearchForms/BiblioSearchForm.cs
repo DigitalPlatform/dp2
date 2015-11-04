@@ -10,6 +10,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+using System.Web;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -21,10 +23,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Script;
-using System.Web;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
-using System.Threading;
 
 namespace dp2Circulation
 {
@@ -546,6 +546,8 @@ Keys keyData)
 
             this.label_message.Text = "";
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -572,7 +574,7 @@ Keys keyData)
                 if (nRet == -1)
                     goto ERROR1;
 
-                long lRet = Channel.Search(stop,
+                long lRet = channel.Search(stop,
                     strQueryXml,
                     "default",
                     strOutputStyle,
@@ -635,7 +637,7 @@ Keys keyData)
                             strBrowseStyle = "id,cols";
                     }
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
                         lStart,
@@ -730,6 +732,7 @@ Keys keyData)
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
             }
@@ -952,6 +955,8 @@ Keys keyData)
 
             this.label_message.Text = "";
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 '" + this.textBox_queryWord.Text + "' ...");
@@ -1057,8 +1062,8 @@ Keys keyData)
                 }
 
                 string strQueryXml = "";
-                Channel.Timeout = new TimeSpan(0, 5, 0);
-                long lRet = Channel.SearchBiblio(stop,
+                channel.Timeout = new TimeSpan(0, 5, 0);
+                long lRet = channel.SearchBiblio(stop,
                     this.checkedComboBox_biblioDbNames.Text,
                     this.textBox_queryWord.Text,
                     this.MaxSearchResultCount,  // 1000
@@ -1129,7 +1134,7 @@ Keys keyData)
                         }
                     }
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
                         lStart,
@@ -1206,7 +1211,6 @@ Keys keyData)
                                 {
                                     cols = searchresult.Cols;
                                 }
-
 
                                 if (bPushFillingBrowse == true)
                                 {
@@ -1312,6 +1316,8 @@ Keys keyData)
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
             }
@@ -2408,6 +2414,8 @@ out strError);
             int nReloadCount = 0;
             int nSavedCount = 0;
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存书目记录 ...");
@@ -2452,7 +2460,7 @@ out strError);
 
                     byte[] baNewTimestamp = null;
 
-                    long lRet = Channel.SetBiblioInfo(
+                    long lRet = channel.SetBiblioInfo(
                         stop,
                         "change",
                         strRecPath,
@@ -2465,7 +2473,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (Channel.ErrorCode == ErrorCode.TimestampMismatch)
+                        if (channel.ErrorCode == ErrorCode.TimestampMismatch)
                         {
                             DialogResult result = MessageBox.Show(this,
     "保存书目记录 "+strRecPath+" 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
@@ -2481,7 +2489,7 @@ out strError);
                             // 重新装载书目记录到 OldXml
                             string[] results = null;
                             // byte[] baTimestamp = null;
-                            lRet = Channel.GetBiblioInfos(
+                            lRet = channel.GetBiblioInfos(
                                 stop,
                                 strRecPath,
                                 "",
@@ -2511,7 +2519,7 @@ out strError);
                     }
 
                     // 检查是否有部分字段被拒绝
-                    if (Channel.ErrorCode == ErrorCode.PartialDenied)
+                    if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         DialogResult result = MessageBox.Show(this,
 "保存书目记录 " + strRecPath + " 时部分字段被拒绝。\r\n\r\n此记录已部分保存成功。\r\n\r\n请问现在是否要顺便重新装载此记录以便观察? \r\n\r\n(Yes 重新装载(到旧记录部分)；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
@@ -2526,7 +2534,7 @@ MessageBoxDefaultButton.Button1);
                         // 重新装载书目记录到 OldXml
                         string[] results = null;
                         // byte[] baTimestamp = null;
-                        lRet = Channel.GetBiblioInfos(
+                        lRet = channel.GetBiblioInfos(
                             stop,
                             strRecPath,
                             "",
@@ -2576,6 +2584,8 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                this.ReturnChannel(channel);
+
                 this.EnableControlsInSearching(true);
                 this.listView_records.Enabled = true;
             }
@@ -2615,6 +2625,8 @@ MessageBoxDefaultButton.Button1);
             if (items_param.Count == 0)
                 return 0;
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在刷新浏览行 ...");
@@ -2639,7 +2651,7 @@ MessageBoxDefaultButton.Button1);
                     stop.SetProgressRange(0, items.Count);
 
                 BrowseLoader loader = new BrowseLoader();
-                loader.Channel = Channel;
+                loader.Channel = channel;
                 loader.Stop = stop;
                 loader.RecPaths = recpaths;
                 loader.Format = "id,cols";
@@ -2705,6 +2717,8 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControls(true);
             }
@@ -3102,6 +3116,8 @@ MessageBoxDefaultButton.Button1);
 
             this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在针对书目记录执行 MarcQuery 脚本 ...");
@@ -3167,7 +3183,7 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
                     this.m_biblioTable);
@@ -3303,6 +3319,8 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControls(true);
 
@@ -3753,6 +3771,8 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在针对书目记录执行 .fltx 脚本 ...");
@@ -3775,7 +3795,7 @@ MessageBoxDefaultButton.Button1);
                     items.Add(item);
                 }
 
-                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
                     this.m_biblioTable);
@@ -3900,6 +3920,8 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                this.ReturnChannel(channel);
+
                 this.EnableControls(true);
             }
 
@@ -4018,6 +4040,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在修改书目记录 ...");
@@ -4093,8 +4117,10 @@ MessageBoxDefaultButton.Button1);
                         stop.SetMessage("正在刷新浏览行 " + item.Text + " ...");
                         stop.SetProgressValue(i++);
                     }
-                    nRet = RefreshBrowseLine(item,
-    out strError);
+                    nRet = RefreshBrowseLine(
+                        channel,
+                        item,
+                        out strError);
                     if (nRet == -1)
                     {
                         DialogResult result = MessageBox.Show(this,
@@ -4117,6 +4143,8 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControls(true);
             }
@@ -4203,6 +4231,8 @@ MessageBoxDefaultButton.Button1);
                     strAction = "move";
             }
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在"+strActionName+"书目记录到数据库 ...");
@@ -4245,7 +4275,7 @@ MessageBoxDefaultButton.Button1);
                     //      -1  出错
                     //      0   成功，没有警告信息。
                     //      1   成功，有警告信息。警告信息在 result.ErrorInfo 中
-                    long lRet = this.Channel.CopyBiblioInfo(
+                    long lRet = channel.CopyBiblioInfo(
                         this.stop,
                         strAction,
                         strRecPath,
@@ -4280,6 +4310,8 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
                 this.listView_records.Enabled = true;
@@ -4632,6 +4664,8 @@ MessageBoxDefaultButton.Button1);
 
             this.EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出到 MARC 文件 ...");
             stop.BeginLoop();
@@ -4647,7 +4681,7 @@ MessageBoxDefaultButton.Button1);
                     items.Add(item);
                 }
 
-                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
     stop,
     items,
     this.m_biblioTable);
@@ -4715,7 +4749,9 @@ MessageBoxDefaultButton.Button1);
                     stop.SetProgressValue(++i);
                 }
 
-                nRet = form.FillBiblioSummaryColumn(new_items,
+                nRet = form.FillBiblioSummaryColumn(
+                    channel,
+                    new_items,
                     0,
                     true,
                     true,
@@ -4736,11 +4772,11 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
 
+                this.ReturnChannel(channel);
+
                 this.EnableControls(true);
             }
-
         }
-
 
         int SaveToEntityRecordPathFile(
             string strDbType,
@@ -4811,7 +4847,7 @@ MessageBoxDefaultButton.Button1);
                 bAppend = false;
             }
 
-
+            LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4859,7 +4895,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = EntityControl.GetEntityRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -4874,7 +4910,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = OrderControl.GetOrderRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -4889,7 +4925,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = IssueControl.GetIssueRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -4904,7 +4940,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = CommentControl.GetCommentRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -4929,6 +4965,8 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
                 this.listView_records.Enabled = true;
@@ -4967,6 +5005,8 @@ MessageBoxDefaultButton.Button1);
                 strDbTypeName = "期";
             else if (strDbType == "comment")
                 strDbTypeName = "评注";
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -5010,7 +5050,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = EntityControl.GetEntityRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -5025,7 +5065,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = OrderControl.GetOrderRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -5040,7 +5080,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = IssueControl.GetIssueRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -5055,7 +5095,7 @@ MessageBoxDefaultButton.Button1);
                         //      1   已经装载
                         nRet = CommentControl.GetCommentRecPaths(
                             stop,
-                            this.Channel,
+                            channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
                             out strError);
@@ -5079,6 +5119,8 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
                 this.listView_records.Enabled = true;
@@ -5459,10 +5501,13 @@ MessageBoxDefaultButton.Button1);
         /// <summary>
         /// 刷新一个浏览行。调用前，记录路径列已经有值
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="item">浏览行 ListViewItem 对象</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
-        public int RefreshBrowseLine(ListViewItem item,
+        public int RefreshBrowseLine(
+            LibraryChannel channel,
+            ListViewItem item,
             out string strError)
         {
             strError = "";
@@ -5472,7 +5517,7 @@ MessageBoxDefaultButton.Button1);
             paths[0] = strRecPath;
             DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
 
-            long lRet = this.Channel.GetBrowseRecords(
+            long lRet = channel.GetBrowseRecords(
                 this.stop,
                 paths,
                 "id,cols",
@@ -5601,7 +5646,12 @@ MessageBoxDefaultButton.Button1);
             int nDeleteCount = 0;
 
             // 检查前端权限
-            bool bDeleteSub = StringUtil.IsInList("client_deletebibliosubrecords", this.Channel.Rights);
+            bool bDeleteSub = StringUtil.IsInList("client_deletebibliosubrecords", 
+                // this.Channel.Rights
+                this.MainForm.GetCurrentUserRights()
+                );
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -5639,7 +5689,7 @@ MessageBoxDefaultButton.Button1);
 
                     stop.SetMessage("正在删除书目记录 " + strRecPath);
 
-                    long lRet = Channel.GetBiblioInfos(
+                    long lRet = channel.GetBiblioInfos(
                         stop,
                         strRecPath,
                         "",
@@ -5691,7 +5741,7 @@ MessageBoxDefaultButton.Button2);
 
                     byte[] baNewTimestamp = null;
 
-                    lRet = Channel.SetBiblioInfo(
+                    lRet = channel.SetBiblioInfo(
                         stop,
                         "delete",
                         strRecPath,
@@ -5720,6 +5770,7 @@ MessageBoxDefaultButton.Button2);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
                 this.listView_records.Enabled = true;
@@ -5926,6 +5977,8 @@ MessageBoxDefaultButton.Button2);
 #endif
             this.EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出到 XML 文件 ...");
             stop.BeginLoop();
@@ -5968,7 +6021,7 @@ MessageBoxDefaultButton.Button2);
                     items.Add(item);
                 }
 
-                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
                     this.m_biblioTable);
@@ -6070,6 +6123,8 @@ MessageBoxDefaultButton.Button2);
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                this.ReturnChannel(channel);
 
                 this.EnableControls(true);
             }
@@ -6498,12 +6553,6 @@ MessageBoxDefaultButton.Button2);
             this.LastCatalogingRule = dlg.Rule;
             this.LastRemoveField998 = dlg.RemoveField998;
 
-            this.EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导出到 MARC 文件 ...");
-            stop.BeginLoop();
-
             Stream s = null;
 
             try
@@ -6521,6 +6570,14 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            LibraryChannel channel = this.GetChannel();
+
+            this.EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出到 MARC 文件 ...");
+            stop.BeginLoop();
+
             try
             {
                 stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
@@ -6534,7 +6591,7 @@ MessageBoxDefaultButton.Button2);
                     items.Add(item);
                 }
 
-                ListViewBiblioLoader loader = new ListViewBiblioLoader(this.Channel,
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
                     this.m_biblioTable);
@@ -6676,6 +6733,8 @@ MessageBoxDefaultButton.Button2);
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                this.ReturnChannel(channel);
 
                 this.EnableControls(true);
             }
@@ -7041,6 +7100,8 @@ MessageBoxDefaultButton.Button2);
             if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 bQuickLoad = true;
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -7104,7 +7165,7 @@ MessageBoxDefaultButton.Button2);
                             strStyle = "id,cols";
                     }
 
-                    long lRet = Channel.GetSearchResult(
+                    long lRet = channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
                         lStart,
@@ -7197,6 +7258,8 @@ MessageBoxDefaultButton.Button2);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
             }
@@ -7527,32 +7590,40 @@ out strError);
                         return 0;
                 }
 
-                string[] results = null;
-                byte[] baTimestamp = null;
-                // 获得书目记录
-                long lRet = Channel.GetBiblioInfos(
-                    stop,
-                    strRecPath,
-                    "",
-                    new string[] { "xml" },   // formats
-                    out results,
-                    out baTimestamp,
-                    out strError);
-                if (lRet == 0)
-                    return -1;  // 是否设定为特殊状态?
-                if (lRet == -1)
-                    return -1;
-
-                if (results == null || results.Length == 0)
+                LibraryChannel channel = this.GetChannel();
+                try
                 {
-                    strError = "results error";
-                    return -1;
-                }
+                    string[] results = null;
+                    byte[] baTimestamp = null;
+                    // 获得书目记录
+                    long lRet = channel.GetBiblioInfos(
+                        stop,
+                        strRecPath,
+                        "",
+                        new string[] { "xml" },   // formats
+                        out results,
+                        out baTimestamp,
+                        out strError);
+                    if (lRet == 0)
+                        return -1;  // 是否设定为特殊状态?
+                    if (lRet == -1)
+                        return -1;
 
-                string strXml = results[0];
-                info.OldXml = strXml;
-                info.Timestamp = baTimestamp;
-                info.RecPath = strRecPath;
+                    if (results == null || results.Length == 0)
+                    {
+                        strError = "results error";
+                        return -1;
+                    }
+
+                    string strXml = results[0];
+                    info.OldXml = strXml;
+                    info.Timestamp = baTimestamp;
+                    info.RecPath = strRecPath;
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
             }
 
             return 1;

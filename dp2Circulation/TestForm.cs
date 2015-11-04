@@ -1736,6 +1736,7 @@ dlg.UiState);
         }
 
         int SearchDictionary(
+            LibraryChannel channel,
             Stop stop,
             string strDbName,
             string strKey,
@@ -1745,6 +1746,7 @@ dlg.UiState);
             out string strError)
         {
             return this.MainForm.SearchDictionary(
+                channel,
             stop,
             strDbName,
             strKey,

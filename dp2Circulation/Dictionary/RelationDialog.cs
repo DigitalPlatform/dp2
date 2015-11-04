@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Marc;
@@ -22,6 +23,25 @@ namespace dp2Circulation
     /// </summary>
     public partial class RelationDialog : Form
     {
+        bool _batchMode = false;
+        public bool BatchMode
+        {
+            get
+            {
+                return this._batchMode;
+            }
+            set
+            {
+                this._batchMode = value;
+                this.button_OK.Enabled = !value;
+                this.button_Cancel.Enabled = !value;
+            }
+        }
+
+        // 是否需要停止批处理
+        // 在 Process() 中途关闭窗口，此成员会被设置为 true
+        public bool Stopped = false;
+
         internal FloatingMessageForm _floatingMessage = null;
 
         public FloatingMessageForm FloatingMessageForm
@@ -43,8 +63,9 @@ namespace dp2Circulation
             set;
         }
 
+        public LibraryChannel Channel = null;   // 外部提供
         public delegate_SearchDictionary ProcSearchDictionary = null;
-        public delegate_DoStop ProcDoStop = null;
+        // public delegate_DoStop ProcDoStop = null;
 
         RelationCollection _relationCollection = new RelationCollection();
         public RelationCollection RelationCollection
@@ -90,7 +111,11 @@ namespace dp2Circulation
 
         private void RelationDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            if (this._processing > 0)
+            {
+                this.Stopped = true;
+                e.Cancel = true;
+            }
         }
 
         private void RelationDialog_FormClosed(object sender, FormClosedEventArgs e)
@@ -160,12 +185,15 @@ bool bClickClose = false)
             }
         }
 
+        int _processing = 0;
+
         // parameters:
         //      strStyle auto_select/remove_dup/select_top_weight
         public void Process(string strStyle = "auto_select,remove_dup")
         {
             string strError = "";
 
+            this._processing++;
             this.ShowMessage("正在检索 ...");
             try
             {
@@ -197,6 +225,7 @@ bool bClickClose = false)
             finally
             {
                 this.ClearMessage();
+                this._processing--;
             }
             return;
         ERROR1:
@@ -647,6 +676,11 @@ bool bClickClose = false)
             return nDelta;  // 升序
         }
 
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.Channel != null)
+                this.Channel.Abort();
+        }
         // Hashtable _table = new Hashtable(); // RelationControl --> List<ResultItem>
 
         // 针对所有关系，检索出事项，并存储起来备用
@@ -655,25 +689,51 @@ bool bClickClose = false)
             strError = "";
 
             // this._table.Clear();
-
-            foreach(RelationControl control in this.flowLayoutPanel_relationList.Controls)
+            lock (this._stop)
             {
-                string key = control.SourceText;
-                ControlInfo info = (ControlInfo)control.Tag;
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在检索词条 ...");
+                _stop.BeginLoop();
+                try
+                {
+                    foreach (RelationControl control in this.flowLayoutPanel_relationList.Controls)
+                    {
+                        if (_stop.State != 0)
+                        {
+                            this.Stopped = true;
+                            strError = "中断";
+                            return -1;
+                        }
 
-                List<ResultItem> results = null;
-                // 针对一个 key 字符串进行检索
-                int nRet = SearchOneKey(
-            info.Relation,
-            key,
-            out results,
-            out strError);
-                if (nRet == -1)
-                    return -1;
-                info.ResultItems = results;
+                        string key = control.SourceText;
+                        ControlInfo info = (ControlInfo)control.Tag;
+
+                        List<ResultItem> results = null;
+                        // 针对一个 key 字符串进行检索
+                        // return:
+                        //      -2  中断
+                        //      -1  出错
+                        //      0   成功
+                        int nRet = SearchOneKey(
+                    info.Relation,
+                    key,
+                    out results,
+                    out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        info.ResultItems = results;
+                    }
+
+                    return 0;
+                }
+                finally
+                {
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                }
             }
-
-            return 0;
         }
 
         // 一个命中结果事项
@@ -699,6 +759,9 @@ bool bClickClose = false)
         public int MaxHitCount = 500;
 
         // 针对一个 key 字符串进行检索
+        // return:
+        //      -1  出错
+        //      0   成功
         int SearchOneKey(
             Relation relation,
             string strKey,
@@ -714,6 +777,7 @@ bool bClickClose = false)
                 return -1;
             }
 
+
             // 用于去重
             Hashtable recpath_table = new Hashtable();
 
@@ -722,6 +786,10 @@ bool bClickClose = false)
             {
                 string strPartKey = strKey.Substring(0, i);
                 List<string> temp = new List<string>();
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      >0  命中的条数
                 int nRet = Search(relation.DbName,
                     strPartKey,
                     "left",
@@ -730,6 +798,7 @@ bool bClickClose = false)
                     out strError);
                 if (nRet == -1)
                     return -1;
+
                 // 去重并加入最后集合
                 foreach(string s in temp)
                 {
@@ -755,6 +824,7 @@ bool bClickClose = false)
         }
 
         public delegate int delegate_SearchDictionary(
+            LibraryChannel channel,
             Stop stop,
             string strDbName,
             string strKey,
@@ -763,7 +833,7 @@ bool bClickClose = false)
             ref List<string> results,
             out string strError);
 
-        public delegate void delegate_DoStop(object sender, StopEventArgs e);
+        // public delegate void delegate_DoStop(object sender, StopEventArgs e);
 
         // 检索
         // return:
@@ -780,40 +850,30 @@ bool bClickClose = false)
         {
             strError = "";
 
-            this.ShowMessage("正在针对数据库 "+strDbName+" 检索词条 '" + strKey + "' ...");
+            string strMessage = "正在针对数据库 " + strDbName + " 检索词条 '" + strKey + "' ...";
+            this.ShowMessage(strMessage);
+            _stop.SetMessage(strMessage);
 
-            lock (this._stop)
+            // Application.DoEvents();
+
+            int nRet = this.ProcSearchDictionary(
+                this.Channel,
+                this._stop,
+                strDbName,
+                strKey,
+                strMatchStyle,
+                nMax,
+                ref results,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
             {
-                _stop.OnStop += new StopEventHandler(this.ProcDoStop);
-                _stop.Initial("正在检索词条 '" + strKey + "' ...");
-                _stop.BeginLoop();
-                try
-                {
-                    int nRet = this.ProcSearchDictionary(
-                        this._stop,
-                        strDbName,
-                        strKey,
-                        strMatchStyle,
-                        nMax,
-                        ref results,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                    if (nRet == 0)
-                    {
-                        strError = "词条 '" + strKey + "' 在 " + strDbName + "库中没有找到";
-                        return 0;
-                    }
-
-                    return nRet;
-                }
-                finally
-                {
-                    _stop.EndLoop();
-                    _stop.OnStop -= new StopEventHandler(this.ProcDoStop);
-                    _stop.Initial("");
-                }
+                strError = "词条 '" + strKey + "' 在 " + strDbName + "库中没有找到";
+                return 0;
             }
+
+            return nRet;
         }
 
         private void dpTable1_PaintRegion(object sender, PaintRegionArgs e)

@@ -977,7 +977,8 @@ namespace dp2Circulation
                     {
                         if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                         {
-                            this.MainForm.PrepareSearch();
+                            // this.MainForm.PrepareSearch();
+                            LibraryChannel channel = this.MainForm.GetChannel();
                             try
                             {
                                 ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
@@ -987,7 +988,7 @@ namespace dp2Circulation
                                     this.MainForm,
                                     aDupPath,
                                     "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
-                                    this.MainForm.Channel,
+                                    channel,    // this.MainForm.Channel,
                                     this.MainForm.Stop,
                                     out strErrorNew);
                                 if (nRet == -1)
@@ -1010,7 +1011,8 @@ namespace dp2Circulation
                             }
                             finally
                             {
-                                this.MainForm.EndSearch();
+                                this.MainForm.ReturnChannel(channel);
+                                // this.MainForm.EndSearch();
                             }
                         }
 

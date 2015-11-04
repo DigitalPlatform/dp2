@@ -13,6 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -115,6 +116,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获得服务器通道信息 ...");
             stop.BeginLoop();
@@ -130,7 +133,7 @@ namespace dp2Circulation
                 {
                     ChannelInfo[] contents = null;
 
-                    long lRet = this.Channel.GetChannelInfo(
+                    long lRet = channel.GetChannelInfo(
                         this.stop,
                         strQuery,
                         strStyle,
@@ -149,10 +152,8 @@ namespace dp2Circulation
 
                     Debug.Assert(contents != null, "");
 
-
                     foreach (ChannelInfo info in contents)
                     {
-
                         ListViewItem item = new ListViewItem();
                         ListViewUtil.ChangeItemText(item, COLUMN_IP, AlignIpString(info.ClientIP));
                         ListViewUtil.ChangeItemText(item, COLUMN_VIA, info.Via);
@@ -206,6 +207,8 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
@@ -230,6 +233,8 @@ namespace dp2Circulation
 
             int nCount = 0;
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在关闭指定的通道 ...");
@@ -275,7 +280,7 @@ namespace dp2Circulation
                     }
 
                     ChannelInfo[] results = null;
-                    long lRet = this.Channel.ManageChannel(
+                    long lRet = channel.ManageChannel(
 this.stop,
 "close",
 "",
@@ -292,6 +297,8 @@ out strError);
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }

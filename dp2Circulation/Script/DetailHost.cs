@@ -4257,6 +4257,7 @@ chi	中文	如果是中文，则为空。
         }
 
         int SearchDictionary(
+            LibraryChannel channel,
     Stop stop,
     string strDbName,
     string strKey,
@@ -4266,6 +4267,7 @@ chi	中文	如果是中文，则为空。
     out string strError)
         {
             return this.DetailForm.MainForm.SearchDictionary(
+                channel,
             stop,
             strDbName,
             strKey,
@@ -4275,11 +4277,13 @@ chi	中文	如果是中文，则为空。
             out strError);
         }
 
+#if NO
         void DoStop(object sender, StopEventArgs e)
         {
             if (this.DetailForm.MainForm.Channel != null)
                 this.DetailForm.MainForm.Channel.Abort();
         }
+#endif
 
         // 通过词典库对照关系创建新字段
         public void RelationGenerate(string strDef)
@@ -4291,28 +4295,42 @@ chi	中文	如果是中文，则为空。
             if (nRet == -1)
                 goto ERROR1;
 
-            RelationDialog dlg = new RelationDialog();
-            MainForm.SetControlFont(dlg, this.DetailForm.Font, false);
-            dlg.ProcSearchDictionary = SearchDictionary;
-            dlg.ProcDoStop = DoStop;
-            dlg.TempDir = this.DetailForm.MainForm.UserTempDir;
-            dlg.MarcHtmlHead = this.DetailForm.MainForm.GetMarcHtmlHeadString();
-            dlg.RelationCollection = relations;
-            dlg.UiState = this.DetailForm.MainForm.AppInfo.GetString(
-                "RelationDialog",
-                "ui_state",
-                "");
-            this.DetailForm.MainForm.AppInfo.LinkFormState(dlg, "SelectDictionaryItemDialog_state");
-            dlg.ShowDialog(this.DetailForm);
-            this.DetailForm.MainForm.AppInfo.SetString(
-                "RelationDialog",
-                "ui_state",
-                dlg.UiState);
-            if (dlg.DialogResult != DialogResult.OK)
-                return;
+            LibraryChannel channel = this.DetailForm.MainForm.GetChannel();
 
-            this.DetailForm.MarcEditor.Marc = dlg.OutputMARC;
+            try
+            {
+                RelationDialog dlg = new RelationDialog();
+                MainForm.SetControlFont(dlg, this.DetailForm.Font, false);
+                dlg.Channel = channel;
+                dlg.ProcSearchDictionary = SearchDictionary;
+#if NO
+            dlg.ProcDoStop = (sender, e) => {
+                channel.Abort();
+            };
+#endif
+                dlg.TempDir = this.DetailForm.MainForm.UserTempDir;
+                dlg.MarcHtmlHead = this.DetailForm.MainForm.GetMarcHtmlHeadString();
+                dlg.RelationCollection = relations;
+                dlg.UiState = this.DetailForm.MainForm.AppInfo.GetString(
+                    "RelationDialog",
+                    "ui_state",
+                    "");
+                this.DetailForm.MainForm.AppInfo.LinkFormState(dlg, "SelectDictionaryItemDialog_state");
+                dlg.ShowDialog(this.DetailForm);
+                this.DetailForm.MainForm.AppInfo.SetString(
+                    "RelationDialog",
+                    "ui_state",
+                    dlg.UiState);
+                if (dlg.DialogResult != DialogResult.OK)
+                    return;
 
+                this.DetailForm.MarcEditor.Marc = dlg.OutputMARC;
+
+            }
+            finally
+            {
+                this.DetailForm.MainForm.ReturnChannel(channel);
+            }
 #if NO
             foreach (string s in dlg.ResultRelations)
             {

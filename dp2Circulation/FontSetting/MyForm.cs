@@ -65,10 +65,6 @@ namespace dp2Circulation
             get;
             set;
         }
-        /// <summary>
-        /// 通讯通道
-        /// </summary>
-        public LibraryChannel Channel = new LibraryChannel();
 
         /// <summary>
         /// 界面语言
@@ -308,6 +304,47 @@ namespace dp2Circulation
             }
         }
 
+        #region 新风格的 ChannelPool
+
+        public LibraryChannel GetChannel(string strServerUrl = ".",
+string strUserName = ".")
+        {
+            LibraryChannel channel = this.MainForm.GetChannel(strServerUrl, strUserName);
+            _channelList.Add(channel);
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            this.MainForm.ReturnChannel(channel);
+            _channelList.Remove(channel);
+        }
+
+        List<LibraryChannel> _channelList = new List<LibraryChannel>();
+
+        internal void DoStop(object sender, StopEventArgs e)
+        {
+            // 兼容旧风格
+            if (this.Channel != null)
+                this.Channel.Abort();
+
+            foreach (LibraryChannel channel in _channelList)
+            {
+                if (channel != null)
+                    channel.Abort();
+            }
+        }
+
+        #endregion
+
+        #region 旧风格的 Channel
+
+        /// <summary>
+        /// 通讯通道
+        /// </summary>
+        public LibraryChannel Channel = new LibraryChannel();
+
         /// <summary>
         /// 通讯通道登录前被触发
         /// </summary>
@@ -315,19 +352,15 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         public virtual void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(this, e);
+            this.MainForm.Channel_BeforeLogin(sender, e); // 2015/11/4 原来是 this
         }
 
         public virtual void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(this, e);
+            this.MainForm.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
         }
 
-        internal void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
+        #endregion
 
         /// <summary>
         /// 开始一个循环

@@ -13,6 +13,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -193,8 +194,10 @@ true);
 
         void DoStop(object sender, StopEventArgs e)
         {
+#if NO
             if (this.MainForm.Channel != null)
                 this.MainForm.Channel.Abort();
+#endif
         }
 
         // 检索
@@ -214,6 +217,8 @@ true);
 
             lock (this._stop)
             {
+                LibraryChannel channel = this.MainForm.GetChannel();
+
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在检索词条 '" + strKey + "' ...");
                 _stop.BeginLoop();
@@ -221,6 +226,7 @@ true);
                 {
 
                     int nRet = this.MainForm.SearchDictionary(
+                        channel,
                         this._stop,
                         strDbName,
                         strKey,
@@ -243,6 +249,8 @@ true);
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
+
+                    this.MainForm.ReturnChannel(channel);
                 }
 
             }
