@@ -523,31 +523,20 @@ namespace dp2Circulation
             if (sender != this)
                 return;
 
-            /*
-            // 保存splitContainer_main的状态
-            MainForm.AppInfo.SetInt(
-                "chargingform_state",
-                "splitContainer_main",
-                this.splitContainer_main.SplitterDistance);
-            // 保存splitContainer_biblioAndItem的状态
-            MainForm.AppInfo.SetInt(
-                "chargingform_state",
-                "splitContainer_biblioAndItem",
-                this.splitContainer_biblioAndItem.SplitterDistance);
-             * */
-
-            // 分割条位置
-            // 保存splitContainer_main的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "chargingform_state",
-                "splitContainer_main");
-            // 保存splitContainer_biblioAndItem的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_biblioAndItem,
-                "chargingform_state",
-                "splitContainer_biblioAndItem");
-
+            if (this.MainForm != null)
+            {
+                // 分割条位置
+                // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "chargingform_state",
+                    "splitContainer_main");
+                // 保存splitContainer_biblioAndItem的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_biblioAndItem,
+                    "chargingform_state",
+                    "splitContainer_biblioAndItem");
+            }
         }
 
         void AppInfo_LoadMdiSize(object sender, EventArgs e)

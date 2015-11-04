@@ -693,43 +693,26 @@ namespace dp2Catalog
             if (sender != this)
                 return;
 
-#if NO
-            // 保存splitContainer_main的状态
-            MainForm.AppInfo.SetInt(
-                "dp2searchform",
-                "splitContainer_main",
-                this.splitContainer_main.SplitterDistance);
-            // 保存splitContainer_up的状态
-            MainForm.AppInfo.SetInt(
-                "dp2searchform",
-                "splitContainer_up",
-                this.splitContainer_up.SplitterDistance);
-            /*
-            // 保存splitContainer_queryAndResultInfo的状态
-            MainForm.AppInfo.SetInt(
-                "dp2searchform",
-                "splitContainer_queryAndResultInfo",
-                this.splitContainer_queryAndResultInfo.SplitterDistance);
-             * */
-#endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
 
-            // 分割条位置
-            // 保存splitContainer_main的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "dp2searchform",
-                "splitContainer_main");
-            // 保存splitContainer_up的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_up,
-                "dp2searchform",
-                "splitContainer_up");
-            // 保存splitContainer_queryAndResultInfo的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_queryAndResultInfo,
-                "dp2searchform",
-                "splitContainer_queryAndResultInfo");
-
+                // 分割条位置
+                // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "dp2searchform",
+                    "splitContainer_main");
+                // 保存splitContainer_up的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_up,
+                    "dp2searchform",
+                    "splitContainer_up");
+                // 保存splitContainer_queryAndResultInfo的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_queryAndResultInfo,
+                    "dp2searchform",
+                    "splitContainer_queryAndResultInfo");
+            }
         }
 
         public void LoadSize()

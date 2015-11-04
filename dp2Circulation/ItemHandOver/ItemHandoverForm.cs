@@ -377,37 +377,31 @@ this.splitContainer_inAndOutof,
 
         /*public*/ void SaveSize()
         {
-#if NO
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-                "mdi_form_state");
-#endif
-            /*
-            // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
-             * */
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
 
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_in);
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "list_in_width",
-                strWidths);
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_in);
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "list_in_width",
+                    strWidths);
 
-            strWidths = ListViewUtil.GetColumnWidthListString(this.listView_outof);
-            this.MainForm.AppInfo.SetString(
-                "itemhandoverform",
-                "list_outof_width",
-                strWidths);
+                strWidths = ListViewUtil.GetColumnWidthListString(this.listView_outof);
+                this.MainForm.AppInfo.SetString(
+                    "itemhandoverform",
+                    "list_outof_width",
+                    strWidths);
 
-            this.MainForm.SaveSplitterPos(
-this.splitContainer_main,
-"itemhandoverform",
-"splitContainer_main_ratio");
+                this.MainForm.SaveSplitterPos(
+    this.splitContainer_main,
+    "itemhandoverform",
+    "splitContainer_main_ratio");
 
-            this.MainForm.SaveSplitterPos(
-this.splitContainer_inAndOutof,
-"itemhandoverform",
-"splitContainer_inandoutof_ratio");
+                this.MainForm.SaveSplitterPos(
+    this.splitContainer_inAndOutof,
+    "itemhandoverform",
+    "splitContainer_inandoutof_ratio");
+            }
         }
 
         /// <summary>

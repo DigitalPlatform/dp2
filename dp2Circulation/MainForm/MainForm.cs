@@ -5441,6 +5441,9 @@ out strError);
             string strSection,
             string strEntry)
         {
+            if (this.AppInfo == null)
+                return;
+
             if (container.ParentForm != null
                 && container.ParentForm.WindowState == FormWindowState.Minimized)
             {

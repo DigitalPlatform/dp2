@@ -735,12 +735,15 @@ namespace dp2rms
             if (sender != this)
                 return;
 
-            // 分割条位置
-            // 保存splitContainer_main的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "detailform",
-                "splitContainer_main");
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 分割条位置
+                // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "detailform",
+                    "splitContainer_main");
+            }
         }
 
 

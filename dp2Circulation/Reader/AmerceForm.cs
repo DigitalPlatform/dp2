@@ -322,51 +322,31 @@ this.splitContainer_lists,
 
         /*public*/ void SaveSize()
         {
-#if NO
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-                "mdi_form_state");
-#endif
+            if (this.MainForm != null)
+            {
+                // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "amerceform_state",
+                    "splitContainer_main_ratio");
+                // 保存splitContainer_upper的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_lists,
+                    "amerceform_state",
+                    "splitContainer_lists_ratio");
 
-            /*
-            // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
-             * */
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_amerced);
+                this.MainForm.AppInfo.SetString(
+                    "amerce_form",
+                    "amerced_list_column_width",
+                    strWidths);
 
-            /*
-            // 保存splitContainer_main的状态
-            MainForm.AppInfo.SetInt(
-                "amerceform_state",
-                "splitContainer_main",
-                this.splitContainer_main.SplitterDistance);
-            // 保存splitContainer_upper的状态
-            MainForm.AppInfo.SetInt(
-                "amerceform_state",
-                "splitContainer_upper",
-                this.splitContainer_upper.SplitterDistance);
-             * */
-            // 保存splitContainer_main的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "amerceform_state",
-                "splitContainer_main_ratio");
-            // 保存splitContainer_upper的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_lists,
-                "amerceform_state",
-                "splitContainer_lists_ratio");
-
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_amerced);
-            this.MainForm.AppInfo.SetString(
-                "amerce_form",
-                "amerced_list_column_width",
-                strWidths);
-
-            strWidths = ListViewUtil.GetColumnWidthListString(this.listView_overdues);
-            this.MainForm.AppInfo.SetString(
-                "amerce_form",
-                "overdues_list_column_width",
-                strWidths);
+                strWidths = ListViewUtil.GetColumnWidthListString(this.listView_overdues);
+                this.MainForm.AppInfo.SetString(
+                    "amerce_form",
+                    "overdues_list_column_width",
+                    strWidths);
+            }
         }
 
         // 
@@ -502,7 +482,8 @@ this.splitContainer_lists,
         this.checkBox_fillSummary.Checked);
             }
 
-            this.commander.Destroy();
+            if (this.commander != null)
+                this.commander.Destroy();
 
             if (this.m_webExternalHost != null)
                 this.m_webExternalHost.Destroy();

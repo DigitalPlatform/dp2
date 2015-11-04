@@ -337,36 +337,26 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            /*
-            FormWindowState old_state = this.WindowState;
-            if (this.WindowState == FormWindowState.Maximized)
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                this.Visible = false;
-                this.WindowState = FormWindowState.Normal;
-            }
-             * */
-            // 分割条位置
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "bindingform",
-                "main_splitter_pos");
-            /*
-            if (this.WindowState != old_state)
-            {
-                this.WindowState = old_state;
-            }
-             * */
-            // 显示订购信息坐标值
-            this.MainForm.AppInfo.SetBoolean(
-                "binding_form",
-                "display_orderinfoxy",
-                this.bindingControl1.DisplayOrderInfoXY);
+                // 分割条位置
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "bindingform",
+                    "main_splitter_pos");
 
-            // 显示分馆外订购组
-            this.MainForm.AppInfo.SetBoolean(
-                "binding_form",
-                "display_lockedOrderGroup",
-                !this.bindingControl1.HideLockedOrderGroup);
+                // 显示订购信息坐标值
+                this.MainForm.AppInfo.SetBoolean(
+                    "binding_form",
+                    "display_orderinfoxy",
+                    this.bindingControl1.DisplayOrderInfoXY);
+
+                // 显示分馆外订购组
+                this.MainForm.AppInfo.SetBoolean(
+                    "binding_form",
+                    "display_lockedOrderGroup",
+                    !this.bindingControl1.HideLockedOrderGroup);
+            }
 
         }
 

@@ -221,17 +221,20 @@ namespace dp2Circulation
         {
             if (sender != this)
                 return;
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
 
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-            this.MainForm.AppInfo.SetString(
-                "bibliosearchform",
-                "record_list_column_width",
-                strWidths);
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
+                this.MainForm.AppInfo.SetString(
+                    "bibliosearchform",
+                    "record_list_column_width",
+                    strWidths);
 
-            this.MainForm.SaveSplitterPos(
-this.splitContainer_main,
-"bibliosearchform",
-"splitContainer_main_ratio");
+                this.MainForm.SaveSplitterPos(
+    this.splitContainer_main,
+    "bibliosearchform",
+    "splitContainer_main_ratio");
+            }
         }
 
         void AppInfo_LoadMdiSize(object sender, EventArgs e)

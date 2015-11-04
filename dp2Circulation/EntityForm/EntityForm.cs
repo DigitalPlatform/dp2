@@ -948,67 +948,69 @@ true);
             if (sender != this)
                 return;
 
-            // 分割条位置
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_recordAndItems,
-                "entity_form",
-                "main_splitter_pos");
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 分割条位置
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_recordAndItems,
+                    "entity_form",
+                    "main_splitter_pos");
 
+                // 当前活动的HTML/MARC page
+                string strActivePage = "";
 
-            // 当前活动的HTML/MARC page
-            string strActivePage = "";
+                if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_marc)
+                    strActivePage = "marc";
+                else if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_html)
+                    strActivePage = "html";
+                else if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
+                    strActivePage = "template";
 
-            if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_marc)
-                strActivePage = "marc";
-            else if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_html)
-                strActivePage = "html";
-            else if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
-                strActivePage = "template";
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "active_page",
+                    strActivePage);
 
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "active_page",
-                strActivePage);
+                // 当前活动的册/期/采购/对象 page
+                string strActiveItemIssuePage = GetActiveItemPageName();
 
-            // 当前活动的册/期/采购/对象 page
-            string strActiveItemIssuePage = GetActiveItemPageName();
+                // 
 
-            // 
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "active_item_issue_page",
+                    strActiveItemIssuePage);
 
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "active_item_issue_page",
-                strActiveItemIssuePage);
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.entityControl1.ListView);
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "item_list_column_width",
+                    strWidths);
 
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.entityControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "item_list_column_width",
-                strWidths);
+                strWidths = ListViewUtil.GetColumnWidthListString(this.orderControl1.ListView);
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "order_list_column_width",
+                    strWidths);
 
-            strWidths = ListViewUtil.GetColumnWidthListString(this.orderControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "order_list_column_width",
-                strWidths);
+                strWidths = ListViewUtil.GetColumnWidthListString(this.commentControl1.ListView);
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "comment_list_column_width",
+                    strWidths);
 
-            strWidths = ListViewUtil.GetColumnWidthListString(this.commentControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "comment_list_column_width",
-                strWidths);
+                strWidths = ListViewUtil.GetColumnWidthListString(this.issueControl1.ListView);
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "issue_list_column_width",
+                    strWidths);
 
-            strWidths = ListViewUtil.GetColumnWidthListString(this.issueControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "issue_list_column_width",
-                strWidths);
-
-            strWidths = ListViewUtil.GetColumnWidthListString(this.binaryResControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "object_list_column_width",
-                strWidths);
+                strWidths = ListViewUtil.GetColumnWidthListString(this.binaryResControl1.ListView);
+                this.MainForm.AppInfo.SetString(
+                    "entity_form",
+                    "object_list_column_width",
+                    strWidths);
+            }
         }
 
         string GetActiveItemPageName()
@@ -2254,149 +2256,6 @@ true);
 
             return false;
         }
-
-#if NOOOOOOOOOOOOOOOOOO
-        // 装载布局。需要异步的部分
-        void LoadLayout()
-        {
-            // 2009/1/15 
-            if (this.AcceptMode == true)
-            {
-                if (this.WindowState == FormWindowState.Maximized)
-                {
-                    this.WindowState = FormWindowState.Normal;
-                }
-            }
-
-            this.MainForm.LoadSplitterPos(
-                this.splitContainer_recordAndItems,
-                "entity_form",
-                "main_splitter_pos");
-
-            string strWidths = this.MainForm.AppInfo.GetString(
-                "entity_form",
-                "item_list_column_width",
-                "");
-            if (String.IsNullOrEmpty(strWidths) == false)
-            {
-                ListViewUtil.SetColumnHeaderWidth(this.entityControl1.ListView,
-                    strWidths,
-                    true);
-            }
-
-            strWidths = this.MainForm.AppInfo.GetString(
-                "entity_form",
-                "order_list_column_width",
-                "");
-            if (String.IsNullOrEmpty(strWidths) == false)
-            {
-                ListViewUtil.SetColumnHeaderWidth(this.orderControl1.ListView,
-                    strWidths,
-                    true);
-            }
-
-            strWidths = this.MainForm.AppInfo.GetString(
-                "entity_form",
-                "issue_list_column_width",
-                "");
-            if (String.IsNullOrEmpty(strWidths) == false)
-            {
-                ListViewUtil.SetColumnHeaderWidth(this.issueControl1.ListView,
-                    strWidths,
-                    true);
-            }
-
-            strWidths = this.MainForm.AppInfo.GetString(
-                "entity_form",
-                "object_list_column_width",
-                "");
-            if (String.IsNullOrEmpty(strWidths) == false)
-            {
-                ListViewUtil.SetColumnHeaderWidth(this.binaryResControl1.ListView,
-                    strWidths,
-                    true);
-            }
-
-        }
-
-        // 保存布局
-        void SaveLayout()
-        {
-            if (this.AcceptMode == false)
-            {
-                MainForm.AppInfo.SaveMdiChildFormStates(this,
-                    "mdi_form_state");
-
-                /*
-                // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-                if (this.WindowState != this.MainForm.MdiWindowState)
-                    this.WindowState = this.MainForm.MdiWindowState;
-                 * */
-            }
-
-
-            // 分割条位置
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_recordAndItems,
-                "entity_form",
-                "main_splitter_pos");
-
-
-            // 当前活动的HTML/MARC page
-            string strActivePage = "";
-
-            if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_marc)
-                strActivePage = "marc";
-            else if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_html)
-                strActivePage = "html";
-
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "active_page",
-                strActivePage);
-
-            // 当前活动的册/期/采购/对象 page
-            string strActiveItemIssuePage = "";
-
-            if (this.tabControl_itemAndIssue.SelectedTab == this.tabPage_item)
-                strActiveItemIssuePage = "item";
-            else if (this.tabControl_itemAndIssue.SelectedTab == this.tabPage_issue)
-                strActiveItemIssuePage = "issue";
-            else if (this.tabControl_itemAndIssue.SelectedTab == this.tabPage_object)
-                strActiveItemIssuePage = "object";
-            else if (this.tabControl_itemAndIssue.SelectedTab == this.tabPage_order)
-                strActiveItemIssuePage = "order";
-
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "active_item_issue_page",
-                strActiveItemIssuePage);
-
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.entityControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "item_list_column_width",
-                strWidths);
-
-            strWidths = ListViewUtil.GetColumnWidthListString(this.orderControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "order_list_column_width",
-                strWidths);
-
-            strWidths = ListViewUtil.GetColumnWidthListString(this.issueControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "issue_list_column_width",
-                strWidths);
-
-            strWidths = ListViewUtil.GetColumnWidthListString(this.binaryResControl1.ListView);
-            this.MainForm.AppInfo.SetString(
-                "entity_form",
-                "object_list_column_width",
-                strWidths);
-        }
-#endif
 
         // 获得当前有修改标志的部分的名称
         string GetCurrentChangedPartName()

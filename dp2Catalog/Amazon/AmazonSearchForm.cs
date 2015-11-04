@@ -644,25 +644,15 @@ MessageBoxDefaultButton.Button1);
             if (sender != this)
                 return;
 
-            // 分割条位置
-            // 保存splitContainer_main的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "amazonsearchform",
-                "splitContainer_main");
-
-#if NO
-            // 保存splitContainer_up的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_up,
-                "amazonsearchform",
-                "splitContainer_up");
-            // 保存splitContainer_queryAndResultInfo的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_queryAndResultInfo,
-                "amazonsearchform",
-                "splitContainer_queryAndResultInfo");
-#endif
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 分割条位置
+                // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "amazonsearchform",
+                    "splitContainer_main");
+            }
         }
 
         public void LoadSize()

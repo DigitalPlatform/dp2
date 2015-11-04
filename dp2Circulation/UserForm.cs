@@ -101,17 +101,21 @@ namespace dp2Circulation
 
         void SaveSize()
         {
-            // 保存splitContainer_main的状态
-            this.MainForm.SaveSplitterPos(
-                this.splitContainer_main,
-                "userform_state",
-                "splitContainer_main_ratio");
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
 
-            string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_users);
-            this.MainForm.AppInfo.SetString(
-                "user_form",
-                "amerced_list_column_width",
-                strWidths);
+                // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "userform_state",
+                    "splitContainer_main_ratio");
+
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_users);
+                this.MainForm.AppInfo.SetString(
+                    "user_form",
+                    "amerced_list_column_width",
+                    strWidths);
+            }
         }
 
         void LoadSize()

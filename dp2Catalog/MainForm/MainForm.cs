@@ -767,6 +767,9 @@ namespace dp2Catalog
             string strSection,
             string strEntry)
         {
+            if (this.AppInfo == null)
+                return;
+
             float fValue = (float)container.SplitterDistance /
                 (
                 container.Orientation == Orientation.Horizontal ?
