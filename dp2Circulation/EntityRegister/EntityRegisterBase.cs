@@ -20,6 +20,7 @@ namespace dp2Circulation
     /// </summary>
     public class EntityRegisterBase
     {
+        // TODO: 要改为使用 MainForm 的公共 ChannelPool
         internal LibraryChannelPool _channelPool = new LibraryChannelPool();
 
         public Stop Progress = null;

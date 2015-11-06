@@ -88,6 +88,22 @@ namespace dp2Circulation
             }
         }
 
+        // 加工以前的原始的 源分类号字符串
+        string _sourceTextOrigin = "";
+        public string SourceTextOrigin
+        {
+            get
+            {
+                return this._sourceTextOrigin;
+            }
+            set
+            {
+                this._sourceTextOrigin = value;
+                SetSize();
+                this.Invalidate();
+            }
+        }
+
         // 源分类号字符串
         string _sourceText = "";
         public string SourceText
@@ -168,7 +184,6 @@ this.ClientSize.Height);
                     StringFormat format = new StringFormat();
                     format.FormatFlags |= StringFormatFlags.FitBlackBox;
                     format.Alignment = StringAlignment.Near;
-                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
 
                     SizeF text_size = e.Graphics.MeasureString(this._titleText, font);
 
@@ -207,7 +222,6 @@ this.ClientSize.Height);
                     StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
                     format.FormatFlags |= StringFormatFlags.FitBlackBox;
                     format.Alignment = StringAlignment.Center;
-                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
 
                     float x = this.Padding.Left;
                     float y = this.Padding.Top + size.Height / 2;
@@ -238,18 +252,22 @@ this.ClientSize.Height);
                     StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
                     format.FormatFlags |= StringFormatFlags.FitBlackBox;
                     format.Alignment = StringAlignment.Center;
-                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+
+                    string strSourceText = this.SourceText;
+                    if (this._sourceTextOrigin.Length > strSourceText.Length)
+                        strSourceText = this._sourceTextOrigin;
 
                     int i = 0;
                     float x = this.Padding.Left;
                     float y = this.Padding.Top + size.Height / 2 + size.Height / 2;
-                    foreach (char ch in this._sourceText)
+                    foreach (char ch in strSourceText)
                     {
                         RectangleF textRect = new RectangleF(
     x,
     y,
     size.Width,
     size.Height);
+                        // TODO: 超过 sourcetext 的后面几个字符颜色要有所区别
                         e.Graphics.DrawString(
                             ch.ToString(),
                             font,
@@ -269,16 +287,15 @@ this.ClientSize.Height);
                 using (Brush brush = new SolidBrush(Color.DarkRed))  // Color.DarkBlue
                 {
                     StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
-                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox | StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
                     format.Alignment = StringAlignment.Far;
-                    format.FormatFlags |= StringFormatFlags.FitBlackBox;
 
                     float x = this.Padding.Left;
                     float y = this.Padding.Top + size.Height / 2 + size.Height / 2 + size.Height;
                     RectangleF textRect = new RectangleF(
     x,
     y,
-    this.Width,
+    this.Width - this.Padding.Horizontal,
     size.Height);
                     e.Graphics.DrawString(
                         this._targetText,
@@ -355,15 +372,23 @@ this.ClientSize.Height);
                 float fTargetTextWidth = 0;
                 using (Font font = GetTargetFont())
                 {
+                    StringFormat format = new StringFormat();
+                    format.FormatFlags |= StringFormatFlags.FitBlackBox | StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
+                    format.Alignment = StringAlignment.Far;
+
                     fTargetTextWidth = g.MeasureString(this.TargetText,
-                    font).Width;
+                    font, 1000, format).Width;
                 }
 
                 // 源文字像素宽度
-                float fSourceTextWidth = size.Width * Math.Max(1, this.SourceText.Length);
+                string strSourceText = this.SourceText;
+                if (this._sourceTextOrigin.Length > strSourceText.Length)
+                    strSourceText = this._sourceTextOrigin;
+
+                float fSourceTextWidth = size.Width * Math.Max(1, strSourceText.Length);
 
                 int nWidth = (int)(Math.Max(fSourceTextWidth, fTargetTextWidth))
-                    + this.Padding.Horizontal;
+                    + this.Padding.Horizontal + 2;
                 int nHeight = (int)(size.Height / 2) // title line
                     + (int)(size.Height / 2) // hitcount line
                     + (int)size.Height  // source line
@@ -405,7 +430,6 @@ this.ClientSize.Height);
                 StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
                 format.FormatFlags |= StringFormatFlags.FitBlackBox;
                 format.Alignment = StringAlignment.Near;
-                format.FormatFlags |= StringFormatFlags.FitBlackBox;
 
                 {
                     SizeF size = g.MeasureString(strText.Substring(0, nLevel), font);

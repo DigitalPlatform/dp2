@@ -16,6 +16,11 @@ namespace DigitalPlatform.CirculationClient
         public event BeforeLoginEventHandle BeforeLogin;
 
         /// <summary>
+        /// 登录后事件
+        /// </summary>
+        public event AfterLoginEventHandle AfterLogin;
+
+        /// <summary>
         /// 最多通道数
         /// </summary>
         public int MaxCount = 50;
@@ -63,6 +68,9 @@ namespace DigitalPlatform.CirculationClient
                 inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                 inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
+                inner_channel.AfterLogin -= inner_channel_AfterLogin;
+                inner_channel.AfterLogin += inner_channel_AfterLogin;
+
                 wrapper = new LibraryChannelWrapper();
                 wrapper.Channel = inner_channel;
                 wrapper.InUsing = true;
@@ -75,6 +83,12 @@ namespace DigitalPlatform.CirculationClient
                 this.m_lock.ExitWriteLock();
             }
 
+        }
+
+        void inner_channel_AfterLogin(object sender, AfterLoginEventArgs e)
+        {
+            if (this.AfterLogin != null)
+                this.AfterLogin(sender, e);
         }
 
         void channel_BeforeLogin(object sender,
@@ -174,6 +188,7 @@ namespace DigitalPlatform.CirculationClient
             foreach (LibraryChannelWrapper wrapper in deletes)
             {
                 wrapper.Channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                wrapper.Channel.AfterLogin -= inner_channel_AfterLogin;
                 wrapper.Channel.Close();
             }
 

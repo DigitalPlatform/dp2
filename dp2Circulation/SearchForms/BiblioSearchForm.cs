@@ -3304,6 +3304,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
+                
                 strError = "执行 MarcQuery 脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }

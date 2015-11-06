@@ -1,10 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Drawing;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +10,13 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
+
 namespace dp2Circulation
 {
     /// <summary>
@@ -23,6 +24,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class RelationDialog : Form
     {
+        // 是否为批处理模式。在批处理模式下，OK和Cancel按钮都被禁用了
         bool _batchMode = false;
         public bool BatchMode
         {
@@ -85,6 +87,23 @@ namespace dp2Circulation
             InitializeComponent();
         }
 
+        // 作为模式对话框打开的时候，传递给 Process() 函数的 strStyle 值
+        string _defaultStyle = "auto_select,shangtu,exact_match"; 
+        //                  shangtu 表示使用上图专用的算法
+        //                  expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
+        //                  exact_match 表示精确一致检索。当 exact_match 结合上 expand_all_search 时，中途都是前方一致的，最后一次才会精确一致
+        public string DefaultStyle
+        {
+            get
+            {
+                return this._defaultStyle;
+            }
+            set
+            {
+                this._defaultStyle = value;
+            }
+        }
+
         DigitalPlatform.StopManager _stopManager = new DigitalPlatform.StopManager();
         DigitalPlatform.Stop _stop = null;
 
@@ -99,20 +118,22 @@ namespace dp2Circulation
 
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
-                // _floatingMessage.AutoHide = false;
+                _floatingMessage.AutoHide = false;
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.RectColor = Color.Green;
                 _floatingMessage.Show(this);
             }
 
-            this.BeginInvoke(new Action<string>(Process), "auto_select,remove_dup");
+            this.BeginInvoke(new Action<string>(Process), this._defaultStyle);
         }
 
         private void RelationDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (this._processing > 0)
             {
+                if (this._stopManager != null)
+                    this._stopManager.DoStopAll(null);
                 this.Stopped = true;
                 e.Cancel = true;
             }
@@ -185,16 +206,31 @@ bool bClickClose = false)
             }
         }
 
+        void EnableControls(bool bEnable)
+        {
+            foreach(ToolStripItem item in this.toolStrip1.Items)
+            {
+                if (item != this.toolStripButton_stop
+                    && item != this.toolStripLabel_message)
+                    item.Enabled = bEnable;
+            }
+        }
+
         int _processing = 0;
 
         // parameters:
         //      strStyle auto_select/remove_dup/select_top_weight
-        public void Process(string strStyle = "auto_select,remove_dup")
+        public void Process(string strStyle 
+            // = "auto_select,expand_all_search"
+            )
         {
             string strError = "";
 
+            this.OutputMARC = "";
+
             this._processing++;
             this.ShowMessage("正在检索 ...");
+            this.EnableControls(false);
             try
             {
                 DisplayMarc(this.RelationCollection.MARC,
@@ -206,7 +242,7 @@ bool bClickClose = false)
                     goto ERROR1;
 
                 // 针对所有关系，检索出事项，并存储起来备用
-                nRet = SearchAll(out strError);
+                nRet = SearchAll(strStyle, out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -224,15 +260,182 @@ bool bClickClose = false)
             }
             finally
             {
+                this.EnableControls(true);
                 this.ClearMessage();
                 this._processing--;
             }
+            this.dpTable1.BackColor = SystemColors.Window;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.dpTable1.BackColor = Color.Red;
+            this.ShowMessage(strError, "red", true);
         }
 
+        class RowWrapper
+        {
+            public RelationControl Control = null;
+            public DpRow Row = null;
+        }
+
+        class Merged
+        {
+            public string Rel = "";
+            public int Weight = 0;   // 权值之和
+            public List<string> SourceClassTypes = new List<string>(); // 源分类号类型。例如 "DDC"
+            public List<RowWrapper> Wrappers = new List<RowWrapper>();
+        }
+
+        /*
+谢老师，下午与庄老师和张老师确定了这样一个实现方案：
+         * LC类号和DDC类号都是全号精确匹配获得CLC，结果取两者对应LCC类号内容相同，并且权值和最大的项。
+         * 如果权值和最大的有多项，则取LC（以后也有可能是DDC）权值最大的，如果这还有多项，则任选一项。
+         * 降级取号的事情稍后再做。
+         * * */
         // 自动选择事项
+        // TODO: 可以只管选择 row 而不管当前的 RelationControl，等全部选择完成后，再统一刷新一次每个 Control 的 TargetText
+        // parameters:
+        //      strStyle shangtu
+        // return:
+        //      被选中的事项个数
+        public int AutoSelect(string strStyle)
+        {
+            _disableSelectionChanged++; // 防止 control 的 TargetText 被清掉
+            try
+            {
+                if (StringUtil.IsInList("shangtu", strStyle) == true)
+                {
+                    List<RowWrapper> result_rows = new List<RowWrapper>();
+                    // *** 第一步，将每个列表中级次最高的加入待处理列表
+                    foreach (RelationControl control in this.flowLayoutPanel_relationList.Controls)
+                    {
+                        ControlInfo info = (ControlInfo)control.Tag;
+                        Debug.Assert(info != null, "");
+
+                        int nFirstItemLevel = -1;
+                        foreach (DpRow row in info.Rows)
+                        {
+                            int nCurrentLevel = Int32.Parse(row[COLUMN_LEVEL].Text);
+                            if (nFirstItemLevel == -1)
+                                nFirstItemLevel = nCurrentLevel;
+                            else
+                            {
+                                // 小于最大级次的事项被舍弃
+                                if (nCurrentLevel < nFirstItemLevel)
+                                    break;
+                            }
+
+                            row.Selected = false;   // 先清除全部已有的选择
+                            RowWrapper wrapper = new RowWrapper();
+                            wrapper.Control = control;
+                            wrapper.Row = row;
+                            result_rows.Add(wrapper);
+                        }
+                    }
+
+                    // *** 第二步，合并一些 rel 相同的事项，但要保留原始 row 便于细节分析
+                    // 可能需要另一种 Item Class 来描述合并后的对象
+
+                    // 按照 rel 列排序
+                    result_rows.Sort((x, y) =>
+                    {
+                        return string.Compare(x.Row[COLUMN_REL].Text, y.Row[COLUMN_REL].Text);
+                    });
+
+                    // 按照 rel 列合并
+                    List<Merged> merged_list = new List<Merged>();
+                    Merged current = null;
+                    foreach (RowWrapper wrapper in result_rows)
+                    {
+                        if (current != null
+                            && wrapper.Row[COLUMN_REL].Text == current.Rel)
+                        {
+                        }
+                        else
+                        {
+                            current = new Merged();
+                            merged_list.Add(current);
+                        }
+
+                        current.Weight += Int32.Parse(wrapper.Row[COLUMN_WEIGHT].Text);
+                        current.Wrappers.Add(wrapper);
+
+                        ControlInfo info = (ControlInfo)wrapper.Control.Tag;
+                        string strType = GetSourceClassType(info.Relation.DbName);
+                        if (current.SourceClassTypes.IndexOf(strType) == -1)
+                            current.SourceClassTypes.Add(strType);
+                    }
+
+#if DEBUG
+                    foreach(Merged item in merged_list)
+                    {
+                        Debug.Assert(item != null, "");
+                    }
+#endif
+
+                    // merged_list 按照 weight 排序。大在前
+                    merged_list.Sort((x, y) =>
+                    {
+                        int nRet = x.Weight - y.Weight;
+                        if (nRet != 0)
+                            return -1*nRet; // 大在前
+                        // 来源于 LCC 的靠前
+                        bool bRet1 = x.SourceClassTypes.IndexOf("LCC") != -1;
+                        bool bRet2 = y.SourceClassTypes.IndexOf("LCC") != -1;
+                        if (bRet1 == true && bRet2 == true)
+                            return 0;
+                        if (bRet1 == true)
+                            return -1;
+                        if (bRet2 == true)
+                            return 1;
+                        return 0;
+                    });
+
+                    // 选定第一个
+                    if (merged_list.Count > 0)
+                        merged_list[0].Wrappers[0].Row.Selected = true;
+                }
+            }
+            finally
+            {
+                _disableSelectionChanged--;
+            }
+
+            RefreshAllTargetText();
+            return 0;
+        }
+
+        static string GetSourceClassType(string strDbName)
+        {
+            string strLeft = "";
+            string strRight = "";
+            StringUtil.ParseTwoPart(strDbName, "-", out strLeft, out strRight);
+            return strLeft;
+        }
+
+        // 根据urow 的 Selected 状态刷新全部 RelationControl 的 TargetText
+        bool RefreshAllTargetText()
+        {
+            bool bChanged = false;
+            foreach (RelationControl control in this.flowLayoutPanel_relationList.Controls)
+            {
+                ControlInfo info = (ControlInfo)control.Tag;
+                Debug.Assert(info != null, "");
+                string strTargetText = BuildTargetText(info.Rows);
+                if (strTargetText != control.TargetText)
+                {
+                    control.TargetText = strTargetText;
+                    bChanged = true;
+                }
+            }
+
+            if (bChanged == true)
+                SimulateAddClassNumber();
+
+            return bChanged;
+        }
+#if NO
+        // 自动选择事项
+        // TODO: 可以只管选择 row 而不管当前的 RelationControl，等全部选择完成后，再统一刷新一次每个 Control 的 TargetText
         // parameters:
         //      strStyle remove_dup/select_top_weight
         // return:
@@ -296,6 +499,7 @@ bool bClickClose = false)
 
             return nSelectedCount;
         }
+#endif
 
         // 去掉重复的 key
         // TODO: 可以增加输出调试信息的功能，便于测试和排错
@@ -420,6 +624,8 @@ bool bClickClose = false)
                 control.Dispose();
             }
             this.flowLayoutPanel_relationList.Controls.Clear();
+            this._currentControl = null;
+            this.dpTable1.Rows.Clear();
         }
 
         void AddEvents(RelationControl control, bool bAdd)
@@ -465,12 +671,16 @@ bool bClickClose = false)
                     ControlInfo info = new ControlInfo();
                     info.Relation = relation;
 
+                    string strKey = key;
+                    if (relation.DbName.StartsWith("DDC") == true)
+                        strKey = strKey.Replace("/", "");
+
                     RelationControl control = new RelationControl();
                     control.Tag = info;
                     control.TitleText = relation.DbName;
                     if (string.IsNullOrEmpty(relation.Color) == false)
                         control.TitleBackColor = ColorUtil.String2Color(relation.Color);
-                    control.SourceText = key;
+                    control.SourceText = strKey;
                     control.BackColor = SystemColors.Window;
                     AddEvents(control, true);
 
@@ -488,8 +698,10 @@ bool bClickClose = false)
                 || string.IsNullOrEmpty(strKey2) == true)
                 return 0;
 
+            // Debug.Assert(strKey2 != "621.3675", "");
+
             int nLength = Math.Min(strKey1.Length, strKey2.Length);   // 较小的那个长度
-            for(int i=1;i<nLength;i++)
+            for(int i=1;i<=nLength;i++)
             {
                 if (strKey2.StartsWith(strKey1.Substring(0, i)) == false)
                     return i - 1;
@@ -498,6 +710,125 @@ bool bClickClose = false)
             return nLength;
         }
 
+        // 准备 dpTable Rows 事项。但不急于填充
+        static int PrepareRows(RelationControl control,
+            List<ResultItem> items,
+            out List<DpRow> rows,
+            out string strError)
+        {
+            strError = "";
+            rows = new List<DpRow>();
+
+            ControlInfo info = (ControlInfo)control.Tag;
+
+            // List<ResultItem> items = info.ResultItems;
+            if (items == null || items.Count == 0)
+                return 0;
+
+            string strControlKey = control.SourceText;
+
+            foreach (ResultItem item in items)
+            {
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(item.Xml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "XML 装入 DOM 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                XmlElement node = dom.DocumentElement.SelectSingleNode("key") as XmlElement;
+
+                string strKey = node.GetAttribute("name");
+                // string strKeyCaption = DomUtil.GetCaption(this.Lang, node);
+
+                if (info.Relation.DbName.StartsWith("DDC") == true)
+                    strKey = strKey.Replace("/", "");
+
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("rel");
+                foreach (XmlElement rel_node in nodes)
+                {
+                    string strRel = rel_node.GetAttribute("name");
+                    // string strRelCaption = DomUtil.GetCaption(this.Lang, rel_node);
+                    string strWeight = rel_node.GetAttribute("weight");
+
+                    DpRow row = new DpRow();
+                    // key
+                    {
+                        DpCell cell = new DpCell();
+                        cell.Text = strKey;
+                        cell.OwnerDraw = true;
+                        row.Add(cell);
+                    }
+                    // rel
+                    {
+                        DpCell cell = new DpCell();
+                        cell.Text = strRel;
+                        row.Add(cell);
+                    }
+                    // weight
+                    {
+                        DpCell cell = new DpCell();
+                        cell.Text = strWeight;
+                        row.Add(cell);
+                    }
+                    // level
+                    {
+                        DpCell cell = new DpCell();
+                        int nLevel = GetLevel(strControlKey, strKey);
+                        Debug.Assert(nLevel <= strControlKey.Length && nLevel <= strKey.Length, "");
+                        cell.Text = nLevel.ToString();
+                        row.Add(cell);
+                    }
+
+                    rows.Add(row);
+                }
+            }
+
+            rows.Sort(CompareEntrys);
+
+            // 如果 control 还没有初始化过 hitcounts，则初始化一次
+            if (control.HitCounts.Count == 0)
+                control.HitCounts = BuildHitCountList(rows, strControlKey);
+
+#if NO
+            // 选定特定行
+            if (info.SelectedLines != null && info.SelectedLines.Count > 0)
+            {
+                foreach (string line in info.SelectedLines)
+                {
+                    SelectRowByKey(line);
+                }
+            }
+#endif
+            return 0;
+        }
+
+        // 为当前选定的 RelationControl 填充 dpTable Rows 事项
+        void FillEntryList(RelationControl control)
+        {
+            // string strError = "";
+
+            _disableSelectionChanged++; // 防止 control 的 TargetText 被清掉
+            this.dpTable1.Rows.Clear();
+            _disableSelectionChanged--;
+
+            ControlInfo info = (ControlInfo)control.Tag;
+
+            List<DpRow> rows = info.Rows;
+            if (rows == null || rows.Count == 0)
+                return;
+
+            foreach(DpRow row in rows)
+            {
+                this.dpTable1.Rows.Add(row);
+            }
+        }
+
+#if NO
         void FillEntryList(RelationControl control)
         {
             string strError = "";
@@ -592,6 +923,8 @@ bool bClickClose = false)
             MessageBox.Show(this, strError);
         }
 
+#endif
+
         // 根据 key + "|" + rel 字符串选定一个行
         bool SelectRowByKey(string strText)
         {
@@ -611,11 +944,11 @@ bool bClickClose = false)
             return false;
         }
 
-        List<string> BuildHitCountList(string strSourceKey)
+        static List<string> BuildHitCountList(List<DpRow> rows, string strSourceKey)
         {
             List<string> list = new List<string>();
             Hashtable table = new Hashtable();  // strKey --> int
-            foreach(DpRow row in this.dpTable1.Rows)
+            foreach(DpRow row in rows)
             {
                 string strLevel = row[COLUMN_LEVEL].Text;
                 int value = 0;
@@ -649,7 +982,7 @@ bool bClickClose = false)
         public const int COLUMN_WEIGHT = 2;
         public const int COLUMN_LEVEL = 3;
 
-        int CompareEntrys(DpRow x, DpRow y)
+        static int CompareEntrys(DpRow x, DpRow y)
         {
             // level
             int level1 = Int32.Parse(x[COLUMN_LEVEL].Text);
@@ -658,8 +991,18 @@ bool bClickClose = false)
             if (nDelta != 0)
                 return -1 * nDelta; // 降序
 
+            // 级次一样的，还要看是否精确命中。
+            string strKey1 = x[COLUMN_KEY].Text;
+            string strKey2 = y[COLUMN_KEY].Text;
+
+            int nRestLength1 = strKey1.Length - level1;
+            int nRestLength2 = strKey2.Length - level2;
+            nDelta = nRestLength1 - nRestLength2;
+            if (nDelta != 0)
+                return nDelta; // 升序
+
             // key
-            nDelta = string.CompareOrdinal(x[COLUMN_KEY].Text,y[COLUMN_KEY].Text);
+            nDelta = string.CompareOrdinal(strKey1, strKey2);
             if (nDelta != 0)
                 return nDelta;  // 升序
 
@@ -684,7 +1027,10 @@ bool bClickClose = false)
         // Hashtable _table = new Hashtable(); // RelationControl --> List<ResultItem>
 
         // 针对所有关系，检索出事项，并存储起来备用
-        int SearchAll(out string strError)
+        // parameters:
+        //      strStyle    expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
+        int SearchAll(string strStyle,
+            out string strError)
         {
             strError = "";
 
@@ -694,10 +1040,13 @@ bool bClickClose = false)
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在检索词条 ...");
                 _stop.BeginLoop();
+
+                this.Channel.Timeout = new TimeSpan(0, 5, 0);   // 5 分钟
                 try
                 {
                     foreach (RelationControl control in this.flowLayoutPanel_relationList.Controls)
                     {
+                        Application.DoEvents();
                         if (_stop.State != 0)
                         {
                             this.Stopped = true;
@@ -708,6 +1057,7 @@ bool bClickClose = false)
                         string key = control.SourceText;
                         ControlInfo info = (ControlInfo)control.Tag;
 
+                        string strOutputKey = "";
                         List<ResultItem> results = null;
                         // 针对一个 key 字符串进行检索
                         // return:
@@ -717,12 +1067,25 @@ bool bClickClose = false)
                         int nRet = SearchOneKey(
                     info.Relation,
                     key,
+                    strStyle,
+                    out strOutputKey,
                     out results,
                     out strError);
                         if (nRet == -1)
                             return -1;
 
-                        info.ResultItems = results;
+                        control.SourceTextOrigin = control.SourceText;
+                        control.SourceText = strOutputKey;
+
+                        List<DpRow> rows = null;
+                        nRet = PrepareRows(control,
+                            results,
+                            out rows,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        info.Rows = rows;
                     }
 
                     return 0;
@@ -749,27 +1112,47 @@ bool bClickClose = false)
             // 对照关系定义
             public Relation Relation = null;
 
+#if NO
             // 检索命中结果集
             public List<ResultItem> ResultItems = null;
+#endif
+            public List<DpRow> Rows = null;
 
+#if NO
             // 选中状态的行
             public List<string> SelectedLines = null;
+#endif
         }
 
         public int MaxHitCount = 500;
 
+        // 一个检索事项
+        class SearchItem
+        {
+            public string Key = ""; // 检索 key
+            public string MatchStyle = "exact"; // 匹配方式
+            public string Style = "";   // stop 若命中后就停止检索。否则还要继续检索
+        }
+
         // 针对一个 key 字符串进行检索
+        // parameters:
+        //      strStyle    expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
+        //                  exact_match 表示精确一致检索。当 exact_match 结合上 expand_all_search 时，中途都是前方一致的，最后一次才会精确一致
+        //      strOutputKey    [out]经过加工后的 key。可能和 strKey 内容不同
         // return:
         //      -1  出错
         //      0   成功
         int SearchOneKey(
             Relation relation,
             string strKey,
+            string strStyle,
+            out string strOutputKey,
             out List<ResultItem> results,
             out string strError)
         {
             strError = "";
             results = new List<ResultItem>();
+            strOutputKey = strKey;
 
             if (string.IsNullOrEmpty(strKey) == true)
             {
@@ -777,49 +1160,161 @@ bool bClickClose = false)
                 return -1;
             }
 
+#if NO
+                    //                  remove_slash 先移除 key 中的斜杠再进行检索
+
+            if (StringUtil.IsInList("remove_slash", strStyle) == true)
+            {
+                string strLeft = "";
+                string strRight = "";
+                StringUtil.ParseTwoPart(strKey, "/", out strLeft, out strRight);
+                strKey = strLeft.Trim();
+                if (string.IsNullOrEmpty(strKey) == true)
+                    return 0;
+                strOutputKey = strKey;
+            }
+#endif
+
+            bool bExpandAllSearch = StringUtil.IsInList("expand_all_search", strStyle);
+            bool bExpandSearch = StringUtil.IsInList("expand_search", strStyle);
+            bool bExactMatch = StringUtil.IsInList("exact_match", strStyle);
+
+            if (bExpandAllSearch == true && bExpandSearch == true)
+            {
+                strError = "strStyle 参数中 expand_all_search 和 expand_search 只能使用其中一个";
+                return -1;
+            }
+
+            // 需要执行检索的 key 的数组
+            // List<string> keys = new List<string>();
+            List<SearchItem> keys = new List<SearchItem>();
+            if (bExpandAllSearch == true)
+            {
+#if NO
+                // 如要实现扩展检索，则先把全部可能的级次的 key 都准备好
+                for (int i = 1; i < strKey.Length; i++)
+                {
+                    keys.Add(strKey.Substring(0, i));
+                }
+#endif
+                for (int i = strKey.Length; i > 0; i--)
+                {
+                    if (i == strKey.Length)
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey;
+                        key.MatchStyle = "exact";
+                        keys.Add(key);
+                    }
+
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey.Substring(0, i);
+                        key.MatchStyle = "left";
+                        keys.Add(key);
+                    }
+
+                }
+            }
+            else if (bExpandSearch == true)
+            {
+                // 先检索较长的 key
+                for (int i = strKey.Length; i > 0; i--)
+                {
+                    if (i == strKey.Length)
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey;
+                        key.MatchStyle = "exact";
+                        key.Style = "stop";
+                        keys.Add(key);
+                    }
+
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey.Substring(0, i);
+
+                        key.MatchStyle = "left";
+                        if (i < strKey.Length)
+                            key.Style = "stop"; // 命中则停止探索
+                        else
+                            key.Style = ""; // 如果是最长的 key，则不精确检索即便命中也不停止后面的继续探索
+                        keys.Add(key);
+                    }
+
+                }
+            }
+            else
+            {
+                {
+                    SearchItem key = new SearchItem();
+                    key.Key = strKey;
+                    key.MatchStyle = "exact";
+                    key.Style = "stop";
+                    keys.Add(key);
+                }
+            }
 
             // 用于去重
             Hashtable recpath_table = new Hashtable();
 
-            int i = 1;
-            while (true)
             {
-                string strPartKey = strKey.Substring(0, i);
-                List<string> temp = new List<string>();
-                // return:
-                //      -1  出错
-                //      0   没有找到
-                //      >0  命中的条数
-                int nRet = Search(relation.DbName,
-                    strPartKey,
-                    "left",
-                    MaxHitCount + 1,
-                    ref temp,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                // 去重并加入最后集合
-                foreach(string s in temp)
+                int i = 0;
+                foreach (SearchItem key in keys)
                 {
-                    string strRecPath = "";
-                    string strXml = "";
-                    StringUtil.ParseTwoPart(s, "|", out strRecPath, out strXml);
-                    if (recpath_table.ContainsKey(strRecPath) == true)
-                        continue;
-                    recpath_table.Add(strRecPath, 1);
-                    ResultItem item = new ResultItem();
-                    item.RecPath = strRecPath;
-                    item.Xml = strXml;
-                    results.Add(item);
-                }
+                    Application.DoEvents();
+                    if (_stop.State != 0)
+                    {
+                        this.Stopped = true;
+                        strError = "中断";
+                        return -1;
+                    }
 
-                if (nRet < MaxHitCount + 1)
-                    break;
-                if (i >= strKey.Length)
-                    break;
-                i++;
+                    string strMatchStyle = key.MatchStyle;
+
+                    // string strPartKey = strKey.Substring(0, i);
+                    List<string> temp = new List<string>();
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      >0  命中的条数
+                    int nRet = Search(relation.DbName,
+                        key.Key,
+                        strMatchStyle,  // "left",
+                        MaxHitCount + 1,
+                        ref temp,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 去重并加入最后集合
+                    foreach (string s in temp)
+                    {
+                        string strRecPath = "";
+                        string strXml = "";
+                        StringUtil.ParseTwoPart(s, "|", out strRecPath, out strXml);
+                        if (recpath_table.ContainsKey(strRecPath) == true)
+                            continue;
+                        recpath_table.Add(strRecPath, 1);
+                        ResultItem item = new ResultItem();
+                        item.RecPath = strRecPath;
+                        item.Xml = strXml;
+                        results.Add(item);
+                    }
+
+                    if (key.Style == "stop" && nRet > 0)
+                        break;
+
+#if NO
+                    // 在扩展检索情形下，如果一次检索命中结果超过极限，说明还需要继续检索下一个 key(这是担心结果集不足以概括更下级的类目)。继续检索下去直到一次检索的结果数量小于极限
+                    if (bExpandAllSearch == true && nRet < MaxHitCount + 1)
+                        break;
+#endif
+
+                    i++;
+                }
             }
+
             return 0;
         }
 
@@ -953,25 +1448,48 @@ bool bClickClose = false)
             if (_disableSelectionChanged == 0
                 && this._currentControl != null)
             {
+#if NO
                 List<string> rel_numbers = new List<string>();  // rel 栏字符串的集合
-                List<string> keys = new List<string>(); // key + "|" + rel 栏字符串的集合
+                // List<string> keys = new List<string>(); // key + "|" + rel 栏字符串的集合
                 foreach (DpRow row in this.dpTable1.SelectedRows)
                 {
                     string strRel = row[COLUMN_REL].Text;
-                    string strKey = row[COLUMN_KEY].Text;
+                    // string strKey = row[COLUMN_KEY].Text;
                     rel_numbers.Add(strRel);
-                    keys.Add(strKey + "|" + strRel);
+                    // keys.Add(strKey + "|" + strRel);
                 }
 
                 this._currentControl.TargetText = StringUtil.MakePathList(rel_numbers);
+#endif
+                this._currentControl.TargetText = BuildTargetText(this.dpTable1.SelectedRows);
 
+#if NO
                 // 记忆全部处于选择状态的行
                 ControlInfo info = (ControlInfo)this._currentControl.Tag;
                 Debug.Assert(info != null, "");
-                info.SelectedLines = keys;
+                // info.SelectedLines = keys;
+#endif
 
                 SimulateAddClassNumber();
             }
+        }
+
+        // 根据 Selected == true 状态构造 target text 字符串
+        static string BuildTargetText(List<DpRow> rows)
+        {
+            if (rows == null || rows.Count == 0)
+                return "";
+
+            List<string> rel_numbers = new List<string>();  // rel 栏字符串的集合
+            foreach (DpRow row in rows)
+            {
+                if (row.Selected == false)
+                    continue;
+                string strRel = row[COLUMN_REL].Text;
+                rel_numbers.Add(strRel);
+            }
+
+            return StringUtil.MakePathList(rel_numbers);
         }
 
         void DisplayMarc(string strOldMARC, 
@@ -1084,6 +1602,36 @@ strHtml2 +
                 controls.Add(this.dpTable1);
                 GuiState.SetUiState(controls, value);
             }
+        }
+
+        private void toolStripButton_expandAll_Click(object sender, EventArgs e)
+        {
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_search", true, ref strStyle);
+            StringUtil.SetInList(ref strStyle, "expand_all_search", true);
+            this.Process(strStyle);
+        }
+
+        private void toolStripButton_exact_Click(object sender, EventArgs e)
+        {
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_all_search", true, ref strStyle);
+            StringUtil.RemoveFromInList("expand_search", true, ref strStyle);
+            this.Process(strStyle);
+        }
+
+        private void toolStripButton_expand_search_Click(object sender, EventArgs e)
+        {
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_all_search", true, ref strStyle);
+            StringUtil.SetInList(ref strStyle, "expand_search", true);
+            this.Process(strStyle);
+        }
+
+        private void toolStripButton_stop_Click(object sender, EventArgs e)
+        {
+            if (this._stopManager != null)
+                this._stopManager.DoStopAll(null);
         }
 
     }

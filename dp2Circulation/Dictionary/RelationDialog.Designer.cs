@@ -42,11 +42,12 @@
             this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_upLevel = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_downLevel = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel_currentKey = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripButton_wild = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_expandAll = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripButton_exact = new System.Windows.Forms.ToolStripButton();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.toolStripButton_expand_search = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_relation)).BeginInit();
             this.splitContainer_relation.Panel1.SuspendLayout();
             this.splitContainer_relation.Panel2.SuspendLayout();
@@ -192,9 +193,10 @@
             this.toolStripButton_stop,
             this.toolStripButton_upLevel,
             this.toolStripButton_downLevel,
-            this.toolStripLabel_currentKey,
-            this.toolStripButton_wild,
-            this.toolStripLabel_message});
+            this.toolStripButton_expandAll,
+            this.toolStripLabel_message,
+            this.toolStripButton_expand_search,
+            this.toolStripButton_exact});
             this.toolStrip1.Location = new System.Drawing.Point(9, 336);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(305, 25);
@@ -209,6 +211,7 @@
             this.toolStripButton_stop.Name = "toolStripButton_stop";
             this.toolStripButton_stop.Size = new System.Drawing.Size(23, 22);
             this.toolStripButton_stop.Text = "停止";
+            this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
             // 
             // toolStripButton_upLevel
             // 
@@ -228,21 +231,17 @@
             this.toolStripButton_downLevel.Size = new System.Drawing.Size(23, 22);
             this.toolStripButton_downLevel.Text = "下级";
             // 
-            // toolStripLabel_currentKey
+            // toolStripButton_expandAll
             // 
-            this.toolStripLabel_currentKey.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel_currentKey.Name = "toolStripLabel_currentKey";
-            this.toolStripLabel_currentKey.Size = new System.Drawing.Size(0, 22);
-            // 
-            // toolStripButton_wild
-            // 
-            this.toolStripButton_wild.CheckOnClick = true;
-            this.toolStripButton_wild.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_wild.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_wild.Image")));
-            this.toolStripButton_wild.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_wild.Name = "toolStripButton_wild";
-            this.toolStripButton_wild.Size = new System.Drawing.Size(60, 22);
-            this.toolStripButton_wild.Text = "前方一致";
+            this.toolStripButton_expandAll.CheckOnClick = true;
+            this.toolStripButton_expandAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_expandAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_expandAll.Image")));
+            this.toolStripButton_expandAll.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_expandAll.Name = "toolStripButton_expandAll";
+            this.toolStripButton_expandAll.Size = new System.Drawing.Size(48, 22);
+            this.toolStripButton_expandAll.Text = "大扩检";
+            this.toolStripButton_expandAll.ToolTipText = "最大限度扩大范围检索";
+            this.toolStripButton_expandAll.Click += new System.EventHandler(this.toolStripButton_expandAll_Click);
             // 
             // toolStripLabel_message
             // 
@@ -250,6 +249,17 @@
             this.toolStripLabel_message.Name = "toolStripLabel_message";
             this.toolStripLabel_message.Size = new System.Drawing.Size(17, 22);
             this.toolStripLabel_message.Text = "...";
+            // 
+            // toolStripButton_exact
+            // 
+            this.toolStripButton_exact.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_exact.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_exact.Image")));
+            this.toolStripButton_exact.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_exact.Name = "toolStripButton_exact";
+            this.toolStripButton_exact.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_exact.Text = "精确检索";
+            this.toolStripButton_exact.ToolTipText = "尽量精确检索";
+            this.toolStripButton_exact.Click += new System.EventHandler(this.toolStripButton_exact_Click);
             // 
             // splitContainer_main
             // 
@@ -281,6 +291,17 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(470, 143);
             this.webBrowser1.TabIndex = 0;
+            // 
+            // toolStripButton_expand_search
+            // 
+            this.toolStripButton_expand_search.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_expand_search.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_expand_search.Image")));
+            this.toolStripButton_expand_search.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_expand_search.Name = "toolStripButton_expand_search";
+            this.toolStripButton_expand_search.Size = new System.Drawing.Size(48, 22);
+            this.toolStripButton_expand_search.Text = "小扩检";
+            this.toolStripButton_expand_search.ToolTipText = "扩展检索直到有命中结果";
+            this.toolStripButton_expand_search.Click += new System.EventHandler(this.toolStripButton_expand_search_Click);
             // 
             // RelationDialog
             // 
@@ -326,11 +347,12 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_stop;
         private System.Windows.Forms.ToolStripButton toolStripButton_upLevel;
         private System.Windows.Forms.ToolStripButton toolStripButton_downLevel;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel_currentKey;
-        private System.Windows.Forms.ToolStripButton toolStripButton_wild;
+        private System.Windows.Forms.ToolStripButton toolStripButton_expandAll;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_level;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_message;
         private System.Windows.Forms.SplitContainer splitContainer_main;
         private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_exact;
+        private System.Windows.Forms.ToolStripButton toolStripButton_expand_search;
     }
 }

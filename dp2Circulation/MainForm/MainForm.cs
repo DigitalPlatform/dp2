@@ -421,7 +421,7 @@ namespace dp2Circulation
              * */
 
             this._channelPool.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-
+            this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
             this.BeginInvoke(new Action(FirstInitial));
         }
 
@@ -835,7 +835,13 @@ Stack:
                 Stop.Unregister(true);
                 Stop = null;
             }
-            this._channelPool.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+
+            if (this._channelPool != null)
+            {
+                this._channelPool.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
+                this._channelPool.Close();
+            }
 #if NO
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
