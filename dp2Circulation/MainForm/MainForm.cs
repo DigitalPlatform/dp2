@@ -8067,7 +8067,7 @@ Keys keyData)
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                Program.SuppressMutex();
+                Program.ReleaseMutex();
                 StartClickOnceDp2circulation();
                 return;
             }
@@ -8077,6 +8077,8 @@ Keys keyData)
 
             List<string> args = StringUtil.GetCommandLineArgs();
             args.Add("newinstance");
+
+            // 调试用 Program.ReleaseMutex();
 
             processInfo.UseShellExecute = true;
             // processInfo.Verb = "runas";

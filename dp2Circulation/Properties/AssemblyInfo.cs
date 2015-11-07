@@ -29,5 +29,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.5.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("2.5.0.0")]
+[assembly: AssemblyVersion("2.6.*")]  // "2.4.*"
+[assembly: AssemblyFileVersion("2.6.0.0")]
+
+// 2015/11/7 V2.6 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障

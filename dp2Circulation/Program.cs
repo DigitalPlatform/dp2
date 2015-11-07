@@ -18,8 +18,9 @@ namespace dp2Circulation
         static ExecutionContext context = ExecutionContext.Capture();
         static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
 #endif
-        static bool _suppressMutex = false;   // 是否越过 Mutex 机制？ true 表示要越过
-        
+        static ExecutionContext context = null;
+        static Mutex mutex = null;
+
         static bool _bExiting = false;   // 是否处在 正在退出 的状态
 
         static MainForm _mainForm = null;
@@ -52,61 +53,77 @@ namespace dp2Circulation
             }
 #endif
 
-                // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
-                bool createdNew = true;
-                // mutex name need contains windows account name. or us programes file path, hashed
-                using (Mutex mutex = new Mutex(true, 
-                    "{A810CFB4-D932-4821-91D4-4090C84C5C68}", 
-                    out createdNew))
-                {
-                    if (createdNew || _suppressMutex || args.IndexOf("newinstance") != -1)
-                    {
-                        if (StringUtil.IsDevelopMode() == false)
-                            PrepareCatchException();
+            // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
+            bool createdNew = true;
 
-                        Application.EnableVisualStyles();
-                        Application.SetCompatibleTextRenderingDefault(false);
-                        _mainForm = new MainForm();
-                        Application.Run(_mainForm);
-                    }
-                    else
+            context = ExecutionContext.Capture();
+            mutex = new Mutex(true,
+                "{A810CFB4-D932-4821-91D4-4090C84C5C68}",
+                out createdNew);
+            try
+            {
+                if (createdNew 
+                    // || _suppressMutex 
+                    || args.IndexOf("newinstance") != -1)
+                {
+                    if (StringUtil.IsDevelopMode() == false)
+                        PrepareCatchException();
+
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    _mainForm = new MainForm();
+                    Application.Run(_mainForm);
+                }
+                else
+                {
+                    Process current = Process.GetCurrentProcess();
+                    foreach (Process process in Process.GetProcessesByName(current.ProcessName))
                     {
-                        Process current = Process.GetCurrentProcess();
-                        foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+                        if (process.Id != current.Id)
                         {
-                            if (process.Id != current.Id)
+                            API.SetForegroundWindow(process.MainWindowHandle);
+                            if (API.IsIconic(process.MainWindowHandle))
                             {
-                                API.SetForegroundWindow(process.MainWindowHandle);
-                                if (API.IsIconic(process.MainWindowHandle))
-                                {
-                                    // API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
-                                    API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
-                                }
-                                // break;
+                                // API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
+                                API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
                             }
+                            // break;
                         }
                     }
                 }
-        }
-
-        public static void SuppressMutex()
-        {
-            _suppressMutex = true;
+            }
+            finally
+            {
+                if (mutex != null)
+                    mutex.Close();
+            }
         }
 
 #if NO
+        static bool _suppressMutex = false;   // 是否越过 Mutex 机制？ true 表示要越过
+
+        public static void SuppressMutex()
+        {
+            // TODO: 这个方法只能让当前实例不在乎重复启动，而无法避免后面新起来的实例被当前实例的 Mutex 禁止
+            // 似乎还需要找到进程直接共享信息的方法，告诉后一个实例允许重复启动
+            _suppressMutex = true;
+        }
+#endif
+
         public static void ReleaseMutex()
         {
             ExecutionContext.Run(context, (state) => {
                 if (mutex != null)
                 {
+#if NO
                     mutex.ReleaseMutex();
                     mutex.Dispose();
+#endif
+                    mutex.Close();
                     mutex = null;
                 }
             }, null);
         }
-#endif
 
         static List<string> _promptStrings = new List<string>();
         public static void MemoPromptString(string strText)

@@ -5577,6 +5577,26 @@ out strError);
             return -1;
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“MarcDetailForm”。
+Stack:
+在 System.Windows.Forms.Control.CreateHandle()
+在 System.Windows.Forms.Form.CreateHandle()
+在 System.Windows.Forms.Control.get_Handle()
+在 System.Windows.Forms.Control.GetSafeHandle(IWin32Window window)
+在 System.Windows.Forms.MessageBox.ShowCore(IWin32Window owner, String text, String caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton, MessageBoxOptions options, Boolean showHelp)
+在 System.Windows.Forms.MessageBox.Show(IWin32Window owner, String text)
+在 dp2Catalog.MarcDetailForm.AutoGenerate(Object sender, GenerateDataEventArgs e, Boolean bOnlyFillMenu)
+在 dp2Catalog.MarcDetailForm.MarcEditor_GenerateData(Object sender, GenerateDataEventArgs e)
+在 DigitalPlatform.Marc.MarcEditor.OnGenerateData(GenerateDataEventArgs e)
+在 DigitalPlatform.Marc.MyEdit.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.Control.PreProcessMessage(Message& msg)
+在 System.Windows.Forms.Control.PreProcessControlMessageInternal(Control target, Message& msg)
+在 System.Windows.Forms.Application.ThreadContext.PreTranslateMessage(MSG& msg)
+         * */
         // 自动加工数据
         // parameters:
         //      sender    从何处启动? MarcEditor EntityEditForm
@@ -5587,156 +5607,162 @@ out strError);
             int nRet = 0;
 
             string strError = "";
-            bool bAssemblyReloaded = false;
 
-            // 初始化 dp2catalog_marc_autogen.cs 的 Assembly，并new MarcDetailHost对象
-            // return:
-            //      -2  清除了Assembly
-            //      -1  error
-            //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
-            //      1   重新(或者首次)初始化了Assembly
-            nRet = InitialAutogenAssembly(out strError);
-            if (nRet == -2)
-            {
-                if (bOnlyFillMenu == true)
-                    return;
-            }
-            if (nRet == -1)
-                goto ERROR1;
-            if (nRet == 0)
-            {
-                if (this.m_detailHostObj == null)
-                    return; // 库名不具备，无法初始化
-            }
-            if (nRet == 1)
-                bAssemblyReloaded = true;
-
-            Debug.Assert(this.m_detailHostObj != null, "");
-
-
-
-
-            if (this.AutoGenNewStyle == true)
-            {
-                DisplayAutoGenMenuWindow(this.MainForm.PanelFixedVisible == false ? true : false);
-                if (bOnlyFillMenu == false)
-                {
-                    if (this.MainForm.PanelFixedVisible == true)
-                        MainForm.ActivateGenerateDataPage();
-                }
-
-                if (this.m_genDataViewer != null)
-                {
-                    this.m_genDataViewer.sender = sender;
-                    this.m_genDataViewer.e = e;
-                }
-
-                // 清除残留菜单事项
-                if (m_autogenSender != sender
-                    || bAssemblyReloaded == true)
-                {
-                    if (this.m_genDataViewer != null
-                        && this.m_genDataViewer.Count > 0)
-                        this.m_genDataViewer.Clear();
-                }
-            }
-            else // 旧的风格
-            {
-                if (this.m_genDataViewer != null)
-                {
-                    this.m_genDataViewer.Close();
-                    this.m_genDataViewer = null;
-                }
-
-                if (this.Focused == true || this.MarcEditor.Focused)
-                    this.MainForm.CurrentGenerateDataControl = null;
-
-                // 如果意图仅仅为填充菜单
-                if (bOnlyFillMenu == true)
-                    return;
-            }
-
+            this._processing++;
             try
             {
-                // 旧的风格
-                if (this.AutoGenNewStyle == false)
-                {
-                    this.m_detailHostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
-sender,
-e);
-                    // this.SetSaveAllButtonState(true);
-                    return;
-                }
+                bool bAssemblyReloaded = false;
 
-                // 初始化菜单
-                try
+                // 初始化 dp2catalog_marc_autogen.cs 的 Assembly，并new MarcDetailHost对象
+                // return:
+                //      -2  清除了Assembly
+                //      -1  error
+                //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
+                //      1   重新(或者首次)初始化了Assembly
+                nRet = InitialAutogenAssembly(out strError);
+                if (nRet == -2)
+                {
+                    if (bOnlyFillMenu == true)
+                        return;
+                }
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    if (this.m_detailHostObj == null)
+                        return; // 库名不具备，无法初始化
+                }
+                if (nRet == 1)
+                    bAssemblyReloaded = true;
+
+                Debug.Assert(this.m_detailHostObj != null, "");
+
+                if (this.AutoGenNewStyle == true)
+                {
+                    DisplayAutoGenMenuWindow(this.MainForm.PanelFixedVisible == false ? true : false);
+                    if (bOnlyFillMenu == false)
+                    {
+                        if (this.MainForm.PanelFixedVisible == true)
+                            MainForm.ActivateGenerateDataPage();
+                    }
+
+                    if (this.m_genDataViewer != null)
+                    {
+                        this.m_genDataViewer.sender = sender;
+                        this.m_genDataViewer.e = e;
+                    }
+
+                    // 清除残留菜单事项
+                    if (m_autogenSender != sender
+                        || bAssemblyReloaded == true)
+                    {
+                        if (this.m_genDataViewer != null
+                            && this.m_genDataViewer.Count > 0)
+                            this.m_genDataViewer.Clear();
+                    }
+                }
+                else // 旧的风格
                 {
                     if (this.m_genDataViewer != null)
                     {
-                        if (this.m_genDataViewer.Count == 0)
-                        {
-                            dynamic o = this.m_detailHostObj;
-                            o.CreateMenu(sender, e);
-
-                            this.m_genDataViewer.Actions = this.m_detailHostObj.ScriptActions;
-                        }
-
-                        // 根据当前插入符位置刷新加亮事项
-                        this.m_genDataViewer.RefreshState();
+                        this.m_genDataViewer.Close();
+                        this.m_genDataViewer = null;
                     }
 
-                    if (String.IsNullOrEmpty(e.ScriptEntry) == false)
+                    if (this.Focused == true || this.MarcEditor.Focused)
+                        this.MainForm.CurrentGenerateDataControl = null;
+
+                    // 如果意图仅仅为填充菜单
+                    if (bOnlyFillMenu == true)
+                        return;
+                }
+
+                try
+                {
+                    // 旧的风格
+                    if (this.AutoGenNewStyle == false)
                     {
-                        this.m_detailHostObj.Invoke(e.ScriptEntry,
-                            sender,
-                            e);
+                        this.m_detailHostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
+    sender,
+    e);
+                        // this.SetSaveAllButtonState(true);
+                        return;
                     }
-                    else
+
+                    // 初始化菜单
+                    try
                     {
-                        if (this.MainForm.PanelFixedVisible == true
-                            && bOnlyFillMenu == false
-                            && this.MainForm.CurrentGenerateDataControl != null)
+                        if (this.m_genDataViewer != null)
                         {
-                            TableLayoutPanel table = (TableLayoutPanel)this.MainForm.CurrentGenerateDataControl;
-                            for (int i = 0; i < table.Controls.Count; i++)
+                            if (this.m_genDataViewer.Count == 0)
                             {
-                                Control control = table.Controls[i];
-                                if (control is DpTable)
-                                {
-                                    control.Focus();
-                                    break;
-                                }
+                                dynamic o = this.m_detailHostObj;
+                                o.CreateMenu(sender, e);
+
+                                this.m_genDataViewer.Actions = this.m_detailHostObj.ScriptActions;
                             }
 
+                            // 根据当前插入符位置刷新加亮事项
+                            this.m_genDataViewer.RefreshState();
                         }
+
+                        if (String.IsNullOrEmpty(e.ScriptEntry) == false)
+                        {
+                            this.m_detailHostObj.Invoke(e.ScriptEntry,
+                                sender,
+                                e);
+                        }
+                        else
+                        {
+                            if (this.MainForm.PanelFixedVisible == true
+                                && bOnlyFillMenu == false
+                                && this.MainForm.CurrentGenerateDataControl != null)
+                            {
+                                TableLayoutPanel table = (TableLayoutPanel)this.MainForm.CurrentGenerateDataControl;
+                                for (int i = 0; i < table.Controls.Count; i++)
+                                {
+                                    Control control = table.Controls[i];
+                                    if (control is DpTable)
+                                    {
+                                        control.Focus();
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        /*
+                        // 被迫改用旧的风格
+                        this.m_detailHostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
+        sender,
+        e);
+                        this.SetSaveAllButtonState(true);
+                        return;
+                         * */
+                        throw;
                     }
                 }
                 catch (Exception ex)
                 {
-                    /*
-                    // 被迫改用旧的风格
-                    this.m_detailHostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
-    sender,
-    e);
-                    this.SetSaveAllButtonState(true);
-                    return;
-                     * */
-                    throw;
+                    strError = "执行脚本文件 '" + m_strAutogenDataCfgFilename + "' 过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                    goto ERROR1;
                 }
+
+                this.m_autogenSender = sender;  // 记忆最近一次的调用发起者
+
+                if (bOnlyFillMenu == false
+                    && this.m_genDataViewer != null)
+                    this.m_genDataViewer.TryAutoRun();
+
+                return;
             }
-            catch (Exception ex)
+            finally
             {
-                strError = "执行脚本文件 '" + m_strAutogenDataCfgFilename + "' 过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                goto ERROR1;
+                this._processing--;
             }
-
-            this.m_autogenSender = sender;  // 记忆最近一次的调用发起者
-
-            if (bOnlyFillMenu == false
-                && this.m_genDataViewer != null)
-                this.m_genDataViewer.TryAutoRun();
-
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
