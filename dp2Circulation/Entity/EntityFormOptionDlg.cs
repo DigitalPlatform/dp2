@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -335,6 +336,13 @@ this.checkBox_normalRegister_simple.Checked);
             this.entityEditControl_normalRegisterDefault.DisplayMode = this.checkBox_normalRegister_simple.Checked == true ? "simple" : "full";
         }
 
+        List<Control> _freeControls = new List<Control>();
+
+        void DisposeFreeControls()
+        {
+            ControlExtention.DisposeFreeControls(_freeControls);
+        }
+
         void HidePages()
         {
             if (StringUtil.IsInList("all", this.DisplayStyle) == true)
@@ -347,6 +355,7 @@ this.checkBox_normalRegister_simple.Checked);
                 if (StringUtil.IsInList(strPageName, this.DisplayStyle) == false)
                 {
                     this.tabControl_main.TabPages.Remove(page);
+                    ControlExtention.AddFreeControl(_freeControls, page);
                     i--;
                 }
             }

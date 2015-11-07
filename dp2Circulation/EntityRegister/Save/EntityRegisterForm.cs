@@ -16,7 +16,7 @@ using DigitalPlatform.IO;
 
 namespace dp2Circulation
 {
-
+#if NO
     public partial class EntityRegisterForm : MyForm
     {
         // FloatingMessageForm _floatingMessage = null;
@@ -442,5 +442,5 @@ MessageBoxDefaultButton.Button2);
 
         #endregion // 显示属性
     }
-
+#endif
 }

@@ -18,7 +18,6 @@ namespace DigitalPlatform.CommonControl
     {
         internal const int WM_SET_BORDERSYTLE = API.WM_USER + 201;
 
-
         internal List<dp2QueryLine> Lines = new List<dp2QueryLine>();
 
         public event GetListEventHandler GetList = null;

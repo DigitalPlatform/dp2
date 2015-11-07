@@ -8204,6 +8204,7 @@ out string strError)
             if (this.tabControl_query.SelectedTab == this.tabPage_logic)
                 this.tabControl_query.SelectedTab = this.tabPage_simple;
 
+            // TODO: 这里有内存泄漏，要改进
             this.splitContainer_main.Panel1.Controls.RemoveAt(0);
             this.splitContainer_main.Panel2.Controls.RemoveAt(0);
 

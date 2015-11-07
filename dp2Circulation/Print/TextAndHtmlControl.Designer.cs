@@ -13,6 +13,8 @@ namespace dp2Circulation.Print
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            this.DisposeFreeControls();
+
             if (disposing && (components != null))
             {
                 components.Dispose();

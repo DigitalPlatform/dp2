@@ -14,6 +14,7 @@
         protected override void Dispose(bool disposing)
         {
             this.ExitWebBrowser();
+            this.DisposeFreeControls();
 
             if (disposing && (components != null))
             {

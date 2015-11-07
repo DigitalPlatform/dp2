@@ -28,6 +28,7 @@ namespace dp2Catalog
 
                 if (value == false)
                 {
+                    // TODO: 这里有内存泄漏，需要改进
                     if (this.tabControl_main.TabPages.IndexOf(this.tabPage_originData) != -1)
                         this.tabControl_main.TabPages.Remove(this.tabPage_originData);
                 }

@@ -388,6 +388,7 @@ namespace dp2Circulation
                 this.tableLayoutPanel_readerInfo.Controls.Add(this.tableLayoutPanel_operation,
                     0, 4);
                 this.tableLayoutPanel_biblioAndItem.Controls.Remove(this.tableLayoutPanel_operation);
+
                 // 把readerinfo表格控件(从main的panel1)提升到最高层
                 this.panel_main.Controls.Add(this.tableLayoutPanel_readerInfo); // Dock本来就是Fill
 
@@ -431,21 +432,6 @@ namespace dp2Circulation
 
             if (this.NoBiblioAndItemInfo == true)
             {
-                /*
-                // 把operation表格控件，从biblioanditem移动到readerinfo表格控件内
-                this.tableLayoutPanel_readerInfo.Controls.Add(this.tableLayoutPanel_operation,
-                    0, 4);
-                this.tableLayoutPanel_biblioAndItem.Controls.Remove(this.tableLayoutPanel_operation);
-                // 把readerinfo表格控件(从main的panel1)提升到最高层
-                this.Controls.Add(this.tableLayoutPanel_readerInfo);
-                this.splitContainer_main.Panel1.Controls.Remove(this.tableLayoutPanel_readerInfo);
-
-                // 把readerinfo的Dock方式修改为Fill
-                this.tableLayoutPanel_readerInfo.Dock = DockStyle.Fill;
-
-                // 隐藏splitContainer_main
-                this.splitContainer_main.Visible = false;
-                 * */
                 ChangeLayout(true);
             }
 

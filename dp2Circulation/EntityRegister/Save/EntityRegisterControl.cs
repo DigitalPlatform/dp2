@@ -27,6 +27,8 @@ using DigitalPlatform.AmazonInterface;
 
 namespace dp2Circulation
 {
+#if NO
+    // 本类已经废止
     /// <summary>
     /// 快速册登记主体控件
     /// 每个书目信息行后面跟一个册信息行
@@ -2731,18 +2733,6 @@ MessageBoxDefaultButton.Button1);
 
     }
 
-    public class FilterHost
-    {
-        public MainForm MainForm = null;
-        public string ID = "";
-        public string ResultString = "";    // 结果字符串。用 \t 字符分隔
-        public string ColumnTitles = "";    // 栏目标题。用 \t 字符分隔 2015/8/11
-    }
-
-    public class BrowseFilterDocument : FilterDocument
-    {
-        public FilterHost FilterHost = null;
-    }
 
     /// <summary>
     /// 确保可见事件事件
@@ -2763,22 +2753,7 @@ MessageBoxDefaultButton.Button1);
         public Rectangle Rect = new Rectangle();
     }
 
-    /// <summary>
-    /// 显示错误信息事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void DisplayErrorEventHandler(object sender,
-    DisplayErrorEventArgs e);
 
-    /// <summary>
-    /// 显示错误信息事件的参数
-    /// </summary>
-    public class DisplayErrorEventArgs : EventArgs
-    {
-        public string Text = "";    // [in]
-        public string Color = "";   // [in]
-    }
 
 #if NO
     /// <summary>
@@ -2798,5 +2773,8 @@ MessageBoxDefaultButton.Button1);
         public string ServerName = "";  // [in]
         public string ServerType = "";  // [out]
     }
+#endif
+
+
 #endif
 }

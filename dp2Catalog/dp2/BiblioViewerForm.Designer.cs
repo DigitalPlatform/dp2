@@ -13,6 +13,8 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            this.DisposeFreeControls();
+
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -34,15 +36,15 @@
             this.tabPage_xml = new System.Windows.Forms.TabPage();
             this.webBrowser_xml = new System.Windows.Forms.WebBrowser();
             this.tabControl_main = new System.Windows.Forms.TabControl();
-            this.toolStripButton_dock = new System.Windows.Forms.ToolStripButton();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tabPage_marc = new System.Windows.Forms.TabPage();
             this.webBrowser_marc = new System.Windows.Forms.WebBrowser();
+            this.toolStripButton_dock = new System.Windows.Forms.ToolStripButton();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tabPage_html.SuspendLayout();
             this.tabPage_xml.SuspendLayout();
             this.tabControl_main.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
             this.tabPage_marc.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // webBrowser_html
@@ -98,6 +100,25 @@
             this.tabControl_main.Size = new System.Drawing.Size(333, 239);
             this.tabControl_main.TabIndex = 4;
             // 
+            // tabPage_marc
+            // 
+            this.tabPage_marc.Controls.Add(this.webBrowser_marc);
+            this.tabPage_marc.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_marc.Name = "tabPage_marc";
+            this.tabPage_marc.Size = new System.Drawing.Size(325, 213);
+            this.tabPage_marc.TabIndex = 2;
+            this.tabPage_marc.Text = "MARC";
+            this.tabPage_marc.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser_marc
+            // 
+            this.webBrowser_marc.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser_marc.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser_marc.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_marc.Name = "webBrowser_marc";
+            this.webBrowser_marc.Size = new System.Drawing.Size(325, 213);
+            this.webBrowser_marc.TabIndex = 2;
+            // 
             // toolStripButton_dock
             // 
             this.toolStripButton_dock.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -119,25 +140,6 @@
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // tabPage_marc
-            // 
-            this.tabPage_marc.Controls.Add(this.webBrowser_marc);
-            this.tabPage_marc.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_marc.Name = "tabPage_marc";
-            this.tabPage_marc.Size = new System.Drawing.Size(325, 213);
-            this.tabPage_marc.TabIndex = 2;
-            this.tabPage_marc.Text = "MARC";
-            this.tabPage_marc.UseVisualStyleBackColor = true;
-            // 
-            // webBrowser_marc
-            // 
-            this.webBrowser_marc.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser_marc.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_marc.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser_marc.Name = "webBrowser_marc";
-            this.webBrowser_marc.Size = new System.Drawing.Size(325, 213);
-            this.webBrowser_marc.TabIndex = 2;
-            // 
             // BiblioViewerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -150,9 +152,9 @@
             this.tabPage_html.ResumeLayout(false);
             this.tabPage_xml.ResumeLayout(false);
             this.tabControl_main.ResumeLayout(false);
+            this.tabPage_marc.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.tabPage_marc.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

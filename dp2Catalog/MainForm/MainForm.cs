@@ -2294,8 +2294,13 @@ out string strError)
             set
             {
                 // 清除原有控件
+#if NO
                 while (this.tabPage_property.Controls.Count > 0)
-                    this.tabPage_property.Controls.RemoveAt(0);
+                {
+                    this.tabPage_property.Controls.RemoveAt(0); 可能造成资源泄露!
+                }
+#endif
+                GuiUtil.ClearControls(this.tabPage_property.Controls);
 
                 if (value != null)
                 {
@@ -2321,8 +2326,11 @@ out string strError)
             set
             {
                 // 清除原有控件
+#if NO
                 while (this.tabPage_verifyResult.Controls.Count > 0)
                     this.tabPage_verifyResult.Controls.RemoveAt(0);
+#endif
+                GuiUtil.ClearControls(this.tabPage_verifyResult.Controls);
 
                 if (value != null)
                 {
@@ -2349,8 +2357,11 @@ out string strError)
             set
             {
                 // 清除原有控件
+#if NO
                 while (this.tabPage_generateData.Controls.Count > 0)
                     this.tabPage_generateData.Controls.RemoveAt(0);
+#endif
+                GuiUtil.ClearControls(this.tabPage_generateData.Controls);
 
                 if (value != null)
                 {

@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Threading;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -185,14 +186,22 @@ namespace dp2Circulation
             }
         }
 
+        List<Control> _freeControls = new List<Control>();
+
         /// <summary>
         /// 进行停靠
         /// </summary>
         /// <param name="bShowFixedPanel">是否同时促成显示固定面板</param>
         public void DoDock(bool bShowFixedPanel)
         {
+            // return; // 测试内存泄漏
             if (this.MainForm.CurrentPropertyControl != this.tabControl_main)
+            {
                 this.MainForm.CurrentPropertyControl = this.tabControl_main;
+                // 防止内存泄漏
+                ControlExtention.AddFreeControl(_freeControls, this.tabControl_main);
+            }
+
             if (bShowFixedPanel == true
                 && this.MainForm.PanelFixedVisible == false)
                 this.MainForm.PanelFixedVisible = true;
@@ -267,6 +276,19 @@ this.MainForm != null ? this.MainForm.DataDir : null);
         {
             if (this.m_bSuppressScriptErrors == true)
                 e.Handled = true;
+        }
+
+        void DisposeFreeControls()
+        {
+            // 2015/11/7
+            if (this.tabControl_main != null && this.MainForm != null)
+            {
+                // 如果当前固定面板拥有 tabcontrol，则要先解除它的拥有关系，否则怕本 Form 摧毁的时候无法 Dispose() 它
+                if (this.MainForm.CurrentPropertyControl == this.tabControl_main)
+                    this.MainForm.CurrentPropertyControl = null;
+            }
+
+            ControlExtention.DisposeFreeControls(_freeControls);
         }
 
     }

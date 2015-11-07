@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -239,8 +241,13 @@ namespace dp2Circulation
                 throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
 
             // 清除原有控件
+#if NO
             while (page.Controls.Count > 0)
-                page.Controls.RemoveAt(0);
+            {
+                page.Controls.RemoveAt(0); 可能造成资源泄露！
+            }
+#endif
+            page.ClearControls();   // 2015/11/7
 
             if (value != null)
             {

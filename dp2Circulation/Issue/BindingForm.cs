@@ -9,6 +9,7 @@ using System.Drawing.Drawing2D;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -875,6 +876,13 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        List<Control> _freeControls = new List<Control>();
+
+        void DisposeFreeControls()
+        {
+            ControlExtention.DisposeFreeControls(_freeControls);
+        }
+
         void VisibleEditArea(bool bVisible)
         {
             this.checkBox_displayEditArea.Checked = bVisible;
@@ -896,6 +904,7 @@ MessageBoxDefaultButton.Button2);
                 this.Controls.Add(this.bindingControl1);
 
                 this.Controls.Remove(this.splitContainer_main);
+                ControlExtention.AddFreeControl(_freeControls, this.splitContainer_main);
             }
             else
             {
@@ -910,6 +919,7 @@ MessageBoxDefaultButton.Button2);
                 this.splitContainer_main.Panel1.Controls.Add(this.bindingControl1);
 
                 this.Controls.Add(this.splitContainer_main);
+                ControlExtention.RemoveFreeControl(_freeControls, this.splitContainer_main);
             }
 
             this.m_bEditAreaVisible = bVisible;

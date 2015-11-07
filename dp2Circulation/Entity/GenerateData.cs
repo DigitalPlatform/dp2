@@ -46,13 +46,29 @@ namespace dp2Circulation
 
         public void Close()
         {
+            CloseGenDataViewer();
+        }
+
+        void CloseGenDataViewer()
+        {
             if (this.m_genDataViewer != null)
             {
-                m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
+                // 2015/11/7
+                // 注意解除 dock 时建立的关系。便于后面 Dispose()
+                if (this.MainForm.CurrentGenerateDataControl == m_genDataViewer.Table)
+                {
+                    this.MainForm.CurrentGenerateDataControl = null;
+                }
+
+                m_genDataViewer.DoDockEvent -= new DoDockEventHandler(m_genDataViewer_DoDockEvent);
                 m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
+                m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
+                m_genDataViewer.MyFormClosed -= new EventHandler(m_genDataViewer_MyFormClosed);
+                m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
                 this.m_genDataViewer.Close();
                 this.m_genDataViewer = null;
             }
+
         }
 
         public void ClearViewer()
@@ -509,11 +525,14 @@ out strError);
                 }
                 else // 旧的风格
                 {
+#if NO
                     if (this.m_genDataViewer != null)
                     {
                         this.m_genDataViewer.Close();
                         this.m_genDataViewer = null;
                     }
+#endif
+                    CloseGenDataViewer();
 
                     if (this._myForm.Focused == true 
                         // || this.m_marcEditor.Focused TODO: 这里要研究一下如何实现
@@ -716,7 +735,11 @@ out strError);
         void m_genDataViewer_DoDockEvent(object sender, DoDockEventArgs e)
         {
             if (this.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
+            {
                 this.MainForm.CurrentGenerateDataControl = m_genDataViewer.Table;
+                // 防止内存泄漏
+                m_genDataViewer.AddFreeControl(m_genDataViewer.Table);
+            }
 
             if (e.ShowFixedPanel == true
                 && this.MainForm.PanelFixedVisible == false)
@@ -798,8 +821,11 @@ out strError);
                     if (this.m_genDataViewer != null)
                     {
                         this.m_genDataViewer.Clear();
+#if NO
                         this.m_genDataViewer.Close();
                         this.m_genDataViewer = null;
+#endif
+                        CloseGenDataViewer();
                         return;
                     }
                 }
@@ -843,7 +869,10 @@ out strError);
                 }
 
                 this.MainForm.AppInfo.UnlinkFormState(m_genDataViewer);
+#if NO
                 this.m_genDataViewer = null;
+#endif
+                CloseGenDataViewer();
             }
         }
 
@@ -862,7 +891,8 @@ out strError);
                 }
 
                 this.MainForm.AppInfo.UnlinkFormState(m_genDataViewer);
-                this.m_genDataViewer = null;
+                // this.m_genDataViewer = null;
+                CloseGenDataViewer();
             }
         }
 

@@ -3941,7 +3941,13 @@ nHeight);
                     if (this.m_innerControl != null
                         && this.Container != null
                         && this.Container.Control != null)
+                    {
                         this.Container.Control.Controls.Remove(m_innerControl);
+
+                        // 2015/11/7
+                        m_innerControl.Dispose();
+                        m_innerControl = null;
+                    }
                 }
 
                 if (value != this.m_innerControl)

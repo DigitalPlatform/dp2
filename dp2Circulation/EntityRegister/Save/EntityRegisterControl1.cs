@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 namespace dp2Circulation
 {
+#if NO
     /// <summary>
     /// 册登记控件
     /// 负责一种图书的册登记
@@ -64,4 +65,6 @@ namespace dp2Circulation
 #endif
         }
     }
+
+#endif
 }

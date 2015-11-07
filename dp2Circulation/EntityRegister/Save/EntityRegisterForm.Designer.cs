@@ -1,4 +1,5 @@
-﻿namespace dp2Circulation
+﻿#if NO
+namespace dp2Circulation
 {
     partial class EntityRegisterForm
     {
@@ -227,3 +228,4 @@
         private System.Windows.Forms.Button button_start_createCfgFile;
     }
 }
+#endif

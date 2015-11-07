@@ -8,18 +8,18 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 using System.Web;
+using System.Reflection;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
-
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
-using System.Reflection;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.MarcDom;
 
 // 2013/3/16 添加 XML 注释
 
@@ -632,6 +632,8 @@ string strUserName = ".")
             this.OnMyFormClosed();
 
             base.OnFormClosed(e);
+
+            this.DisposeFreeControls();
         }
 
         /// <summary>
@@ -1216,5 +1218,42 @@ out string strError)
 
             return StringUtil.SplitList(this.Channel.LibraryCodeList);
         }
+
+        #region 防止控件泄露
+
+        // 不会被自动 Dispose 的 子 Control，放在这里托管，避免内存泄漏
+        List<Control> _freeControls = new List<Control>();
+
+        public void AddFreeControl(Control control)
+        {
+            ControlExtention.AddFreeControl(_freeControls, control);
+        }
+
+        public void RemoveFreeControl(Control control)
+        {
+            ControlExtention.RemoveFreeControl(_freeControls, control);
+        }
+
+        public void DisposeFreeControls()
+        {
+            ControlExtention.DisposeFreeControls(_freeControls);
+        }
+
+        #endregion
+
     }
+
+    public class FilterHost
+    {
+        public MainForm MainForm = null;
+        public string ID = "";
+        public string ResultString = "";    // 结果字符串。用 \t 字符分隔
+        public string ColumnTitles = "";    // 栏目标题。用 \t 字符分隔 2015/8/11
+    }
+
+    public class BrowseFilterDocument : FilterDocument
+    {
+        public FilterHost FilterHost = null;
+    }
+
 }

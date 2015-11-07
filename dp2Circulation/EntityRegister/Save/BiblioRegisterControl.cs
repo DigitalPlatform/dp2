@@ -23,6 +23,8 @@ using DigitalPlatform.Script;
 
 namespace dp2Circulation
 {
+#if NO
+    // 此类已经废止
     /// <summary>
     /// 负责书目信息输入的控件
     /// 被册登记控件内嵌使用
@@ -769,6 +771,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             this.flowLayoutPanel1.Controls.Remove(control);
+            control.Dispose();  // 2015/11/7
         }
 
         // 删除一个册记录控件
@@ -2039,107 +2042,14 @@ MessageBoxDefaultButton.Button2);
         }
     }
 
-    /// <summary>
-    /// 在内存中缓存一条书目信息。能够表示新旧记录的修改关系
-    /// </summary>
-    public class RegisterBiblioInfo
-    {
-        /// <summary>
-        /// 记录路径
-        /// </summary>
-        public string RecPath = "";
-        /// <summary>
-        /// 旧的记录 XML
-        /// </summary>
-        public string OldXml = "";
-        /// <summary>
-        /// 新的记录 XML
-        /// </summary>
-        public string NewXml = "";
-        /// <summary>
-        /// 时间戳
-        /// </summary>
-        public byte[] Timestamp = null;
-
-        /// <summary>
-        /// MARC 格式类型
-        /// </summary>
-        public string MarcSyntax = "";
-
-        /// <summary>
-        /// 封面图像文件名。临时文件
-        /// </summary>
-        public string CoverImageFileName = "";
-
-        public bool CoverImageRquested = false; // 如果为 true ,表示已经请求了异步获取图像，不要重复请求
-
-        public RegisterBiblioInfo()
-        {
-        }
-
-        public RegisterBiblioInfo(string strRecPath,
-            string strOldXml,
-            string strNewXml,
-            byte[] timestamp,
-            string strMarcSyntax)
-        {
-            this.RecPath = strRecPath;
-            this.OldXml = strOldXml;
-            this.NewXml = strNewXml;
-            this.Timestamp = timestamp;
-            this.MarcSyntax = strMarcSyntax;
-        }
-
-        // 拷贝构造
-        public RegisterBiblioInfo(RegisterBiblioInfo ref_obj)
-        {
-            this.RecPath = ref_obj.RecPath;
-            this.OldXml = ref_obj.OldXml;
-            this.NewXml = ref_obj.NewXml;
-            this.Timestamp = ref_obj.Timestamp;
-            this.MarcSyntax = ref_obj.MarcSyntax;
-        }
-
-    }
 
     
 
-        /// <summary>
-    /// 事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void AsyncGetImageEventHandler(object sender,
-    AsyncGetImageEventArgs e);
-
-    /// <summary>
-    /// 事件的参数
-    /// </summary>
-    public class AsyncGetImageEventArgs : EventArgs
-    {
-        public string RecPath = "";
-        public string ObjectPath = "";  // 一般只是 ID 部分
-        public string FileName = "";    // 预先给出的临时文件名
-        public DpRow Row = null;
-    }
 
 
-    /// <summary>
-    /// 事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void DeleteItemEventHandler(object sender,
-    DeleteItemEventArgs e);
 
-    /// <summary>
-    /// 事件的参数
-    /// </summary>
-    public class DeleteItemEventArgs : EventArgs
-    {
-        public EntityEditControl Control = null;
-        public string ErrorInfo = "";   // [out]
-    }
+
+#endif
 }
 
 #pragma warning restore 1591

@@ -320,6 +320,15 @@ namespace dp2Circulation
                 stop = null;
             }
 
+            // 2015/11/7
+            if (this.panel_main != null && this.MainForm != null)
+            {
+                // 如果当前固定面板拥有 panel_main，则要先解除它的拥有关系，否则怕本 Form 摧毁的时候无法 Dispose() 它
+                if (this.MainForm.CurrentAcceptControl == this.panel_main)
+                    this.MainForm.CurrentAcceptControl = null;
+            }
+
+
             //
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
@@ -4901,14 +4910,23 @@ this.checkBox_prepare_createCallNumber.Checked);
         /// </summary>
         public bool Docked = false;
 
+        List<Control> _freeControls = new List<Control>();
+
         /// <summary>
         /// 进行停靠
         /// </summary>
         /// <param name="bShowFixedPanel">是否同时促成显示固定面板</param>
         public void DoDock(bool bShowFixedPanel)
         {
+            // return; // 测试内存泄漏
+
             if (this.MainForm.CurrentAcceptControl != this.panel_main)
+            {
                 this.MainForm.CurrentAcceptControl = this.panel_main;
+                // 防止内存泄漏
+                ControlExtention.AddFreeControl(_freeControls, this.panel_main);
+            }
+
             if (bShowFixedPanel == true
                 && this.MainForm.PanelFixedVisible == false)
                 this.MainForm.PanelFixedVisible = true;
@@ -4917,6 +4935,19 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             this.Docked = true;
             this.Visible = false;
+        }
+
+        void DisposeFreeControls()
+        {
+            // 2015/11/7
+            if (this.panel_main != null && this.MainForm != null)
+            {
+                // 如果当前固定面板拥有 tabcontrol，则要先解除它的拥有关系，否则怕本 Form 摧毁的时候无法 Dispose() 它
+                if (this.MainForm.CurrentAcceptControl == this.panel_main)
+                    this.MainForm.CurrentAcceptControl = null;
+            }
+
+            ControlExtention.DisposeFreeControls(_freeControls);
         }
 
         /// <summary>

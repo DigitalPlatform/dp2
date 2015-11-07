@@ -430,7 +430,7 @@ namespace dp2Circulation
             }
         }
 
-        static void EnablePage(bool bEnable,
+        void EnablePage(bool bEnable,
             TabControl container,
             TabPage page)
         {
@@ -439,6 +439,7 @@ namespace dp2Circulation
                 if (container.TabPages.IndexOf(page) == -1)
                 {
                     container.TabPages.Add(page);
+                    this.RemoveFreeControl(page);
                 }
             }
             else
@@ -446,6 +447,7 @@ namespace dp2Circulation
                 if (container.TabPages.IndexOf(page) != -1)
                 {
                     container.TabPages.Remove(page);
+                    this.AddFreeControl(page);
                 }
             }
         }
@@ -527,10 +529,12 @@ namespace dp2Circulation
             if (this.Cataloging == false)
             {
                 this.tabControl_biblioInfo.TabPages.Remove(this.tabPage_marc);
+                this.AddFreeControl(this.tabPage_marc); // 2015/11/7
                 this.toolStrip_marcEditor.Enabled = false;
 
                 // 对象管理功能也被禁止
                 this.tabControl_itemAndIssue.TabPages.Remove(this.tabPage_object);
+                this.AddFreeControl(this.tabPage_object);   // 2015/11/7
                 this.binaryResControl1.Enabled = false;
             }
 
@@ -2485,7 +2489,6 @@ true);
 
             if (this.easyMarcControl1 != null)
             {
-#if NO
                 // 放在一起 Dispose 速度就快了！
                 List<Control> controls = this.easyMarcControl1.Clear(false);
                 foreach (Control control in controls)
@@ -2493,7 +2496,7 @@ true);
                     if (control != null)
                         control.Dispose();
                 }
-#endif
+
                 //this.easyMarcControl1.Clear(true);
                 //GC.Collect();
                 //GC.WaitForPendingFinalizers();
@@ -11088,7 +11091,11 @@ Keys keyData)
         void m_viewer_DoDockEvent(object sender, DoDockEventArgs e)
         {
             if (this.MainForm.CurrentVerifyResultControl != m_verifyViewer.ResultControl)
+            {
                 this.MainForm.CurrentVerifyResultControl = m_verifyViewer.ResultControl;
+                // 防止内存泄漏
+                this.m_verifyViewer.AddFreeControl(m_verifyViewer.ResultControl);
+            }
 
             if (e.ShowFixedPanel == true
                 && this.MainForm.PanelFixedVisible == false)
@@ -11234,6 +11241,24 @@ Keys keyData)
             if (m_verifyViewer != null)
             {
                 this.MainForm.AppInfo.UnlinkFormState(m_verifyViewer);
+
+                // this.m_verifyViewer = null;
+                CloseVerifyViewer();
+            }
+        }
+
+        void CloseVerifyViewer()
+        {
+            if (m_verifyViewer != null)
+            {
+                if (this.MainForm != null
+                    && this.MainForm.CurrentVerifyResultControl == m_verifyViewer.ResultControl)
+                {
+                    // 避免多重拥有。方便后面的 Dispose()
+                    this.MainForm.CurrentVerifyResultControl = null;
+                }
+
+                this.m_verifyViewer.DisposeFreeControls();
                 this.m_verifyViewer = null;
             }
         }

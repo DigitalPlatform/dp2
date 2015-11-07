@@ -1,4 +1,5 @@
-﻿namespace dp2Circulation
+﻿#if NO
+namespace dp2Circulation
 {
     partial class EntityRegisterControl
     {
@@ -74,3 +75,4 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
+#endif

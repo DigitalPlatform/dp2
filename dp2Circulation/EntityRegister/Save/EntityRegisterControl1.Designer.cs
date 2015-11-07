@@ -1,4 +1,5 @@
-﻿namespace dp2Circulation
+﻿#if NO
+namespace dp2Circulation
 {
     partial class EntityRegisterControlOld
     {
@@ -123,3 +124,4 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel_entities;
     }
 }
+#endif

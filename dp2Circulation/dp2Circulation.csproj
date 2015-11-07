@@ -264,22 +264,16 @@
     <Compile Include="EntityRegister\AmazonSearch.cs" />
     <Compile Include="EntityRegister\BiblioAndEntities.cs" />
     <Compile Include="EntityRegister\EntityRegisterBase.cs" />
-    <Compile Include="EntityRegister\EntityRegisterControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="EntityRegister\EntityRegisterControl.Designer.cs">
+    <Compile Include="EntityRegister\Save\EntityRegisterControl.cs" />
+    <Compile Include="EntityRegister\Save\EntityRegisterControl.Designer.cs">
       <DependentUpon>EntityRegisterControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntityRegister\EntityRegisterForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EntityRegister\EntityRegisterForm.Designer.cs">
+    <Compile Include="EntityRegister\Save\EntityRegisterForm.cs" />
+    <Compile Include="EntityRegister\Save\EntityRegisterForm.Designer.cs">
       <DependentUpon>EntityRegisterForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntityRegister\BiblioRegisterControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="EntityRegister\BiblioRegisterControl.Designer.cs">
+    <Compile Include="EntityRegister\Save\BiblioRegisterControl.cs" />
+    <Compile Include="EntityRegister\Save\BiblioRegisterControl.Designer.cs">
       <DependentUpon>BiblioRegisterControl.cs</DependentUpon>
     </Compile>
     <Compile Include="EntityRegister\EntityRegisterWizard.cs">
@@ -312,16 +306,14 @@
     <Compile Include="EntityRegister\PlusButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="EntityRegister\Save\EntitiesControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="EntityRegister\Save\EntitiesControl.cs" />
     <Compile Include="EntityRegister\Save\EntitiesControl.Designer.cs">
       <DependentUpon>EntitiesControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntityRegister\EntityRegisterControl1.cs">
+    <Compile Include="EntityRegister\Save\EntityRegisterControl1.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="EntityRegister\EntityRegisterControl1.Designer.cs">
+    <Compile Include="EntityRegister\Save\EntityRegisterControl1.Designer.cs">
       <DependentUpon>EntityRegisterControl1.cs</DependentUpon>
     </Compile>
     <Compile Include="EntityRegister\ScanRegisterBarcodeForm.cs">
@@ -1500,13 +1492,13 @@
     <EmbeddedResource Include="EntityForm\PartialDeniedDialog.resx">
       <DependentUpon>PartialDeniedDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EntityRegister\EntityRegisterControl.resx">
+    <EmbeddedResource Include="EntityRegister\Save\EntityRegisterControl.resx">
       <DependentUpon>EntityRegisterControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EntityRegister\EntityRegisterForm.resx">
+    <EmbeddedResource Include="EntityRegister\Save\EntityRegisterForm.resx">
       <DependentUpon>EntityRegisterForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EntityRegister\BiblioRegisterControl.resx">
+    <EmbeddedResource Include="EntityRegister\Save\BiblioRegisterControl.resx">
       <DependentUpon>BiblioRegisterControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\EntityRegisterWizard.resx">
@@ -1524,7 +1516,7 @@
     <EmbeddedResource Include="EntityRegister\Save\EntitiesControl.resx">
       <DependentUpon>EntitiesControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EntityRegister\EntityRegisterControl1.resx">
+    <EmbeddedResource Include="EntityRegister\Save\EntityRegisterControl1.resx">
       <DependentUpon>EntityRegisterControl1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\ScanRegisterBarcodeForm.resx">

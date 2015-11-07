@@ -837,41 +837,6 @@ MessageBoxDefaultButton.Button1);
                     this.ShowMessage(strError, "red", true);
                 else if (nHitCount == 0)
                     this.ShowMessage("没有命中", "yellow", true);
-#if NO
-                // line.SetBiblioSearchState(nHitCount.ToString());
-
-                // 
-                if (nHitCount == 1)
-                {
-                    // TODO: 如果有报错的行，是否就不要自动模拟双击了？ 假如这种情况是因为红泥巴服务器持续无法访问引起的，需要有配置办法可以临时禁用这个数据源
-
-                    // 模拟双击
-                    int index = line._biblioRegister.GetFirstRecordIndex();
-                    if (index == -1)
-                    {
-                        strError = "获得第一个浏览记录 index 时出错";
-                        goto ERROR1;
-                    }
-                    nRet = line._biblioRegister.SelectBiblio(index,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                }
-                else
-                {
-                    if (nHitCount > 1)
-                        line.SetDisplayMode("select");
-                    else
-                    {
-                        // 进入详细状态，可以新创建一条记录
-                        line.AddBiblioBrowseLine(BiblioRegisterControl.TYPE_INFO,
-                            "没有命中书目记录。双击本行新创建书目记录",
-                            "",
-                            BuildBlankBiblioInfo(line.BiblioBarcode));
-                        line.SetDisplayMode("select");
-                    }
-                }
-#endif
             }
             finally
             {
@@ -2161,7 +2126,6 @@ out strError);
         // 事件筛选
         class EventFilter
         {
-            // public BiblioRegisterControl BiblioRegister = null;
             public DpRow Row = null;    // 浏览行对象
             public string BiblioRecPath = "";   // 书目记录路径
         }
@@ -2861,10 +2825,28 @@ MessageBoxDefaultButton.Button1);
                 // this.Progress.Initial("");
             }
         ERROR1:
-            BiblioRegisterControl.SetEditErrorInfo(edit, strError);
+            SetEditErrorInfo(edit, strError);
             //line._biblioRegister.BarColor = "R";   // 红色
             //this.SetColorList();
         this.ShowMessage(strError, "red", true);
+        }
+
+        // return:
+        //      错误信息字符串是否确实被改变
+        public static bool SetEditErrorInfo(EntityEditControl edit,
+            string strErrorInfo)
+        {
+            if (edit.InvokeRequired)
+            {
+                return (bool)edit.Invoke(new Func<EntityEditControl, string, bool>(SetEditErrorInfo), edit, strErrorInfo);
+            }
+            if (edit.ErrorInfo != strErrorInfo)
+            {
+                edit.ErrorInfo = strErrorInfo;
+                return true;
+            }
+
+            return false;
         }
 
 
@@ -5070,5 +5052,58 @@ out strError);
         }
 #endif
 
+    }
+
+    /// <summary>
+    /// 事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void AsyncGetImageEventHandler(object sender,
+    AsyncGetImageEventArgs e);
+
+    /// <summary>
+    /// 事件的参数
+    /// </summary>
+    public class AsyncGetImageEventArgs : EventArgs
+    {
+        public string RecPath = "";
+        public string ObjectPath = "";  // 一般只是 ID 部分
+        public string FileName = "";    // 预先给出的临时文件名
+        public DpRow Row = null;
+    }
+
+    /// <summary>
+    /// 事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void DeleteItemEventHandler(object sender,
+    DeleteItemEventArgs e);
+
+    /// <summary>
+    /// 事件的参数
+    /// </summary>
+    public class DeleteItemEventArgs : EventArgs
+    {
+        public EntityEditControl Control = null;
+        public string ErrorInfo = "";   // [out]
+    }
+
+    /// <summary>
+    /// 显示错误信息事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void DisplayErrorEventHandler(object sender,
+    DisplayErrorEventArgs e);
+
+    /// <summary>
+    /// 显示错误信息事件的参数
+    /// </summary>
+    public class DisplayErrorEventArgs : EventArgs
+    {
+        public string Text = "";    // [in]
+        public string Color = "";   // [in]
     }
 }

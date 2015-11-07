@@ -7530,11 +7530,6 @@ Keys keyData)
 #endif
         }
 
-        private void MenuItem_openEntityRegisterForm_Click(object sender, EventArgs e)
-        {
-            OpenWindow<EntityRegisterForm>();
-        }
-
         private void MenuItem_openEntityRegisterWizard_Click(object sender, EventArgs e)
         {
             if (this.ServerVersion < 2.48)

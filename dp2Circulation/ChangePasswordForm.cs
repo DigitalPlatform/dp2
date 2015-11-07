@@ -68,6 +68,7 @@ namespace dp2Circulation
             {
                 this.textBox_reader_comment.Text = "这是读者为自己修改密码。";
                 this.tabControl_main.Controls.Remove(this.tabPage_worker);
+                this.AddFreeControl(this.tabPage_worker);   // 2015/11/7
             }
 
             checkBox_worker_force_CheckedChanged(this, null);

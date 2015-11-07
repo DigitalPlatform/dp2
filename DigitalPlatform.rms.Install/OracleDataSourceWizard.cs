@@ -114,6 +114,13 @@ namespace DigitalPlatform.rms
 
         bool _createMode = true;
 
+        List<Control> _freeControls = new List<Control>();
+
+        void DisposeFreeControls()
+        {
+            ControlExtention.DisposeFreeControls(_freeControls);
+        }
+
         private void OracleDataSourceWizard_Load(object sender, EventArgs e)
         {
             this._originTitle = this.Text;
@@ -135,8 +142,10 @@ namespace DigitalPlatform.rms
                 this.textBox_hostName.Enabled = false;
                 this.textBox_serviceName.Enabled = false;
                 this.tabControl_serverName.TabPages.Remove(this.tabPage_template);
+                ControlExtention.AddFreeControl(_freeControls, this.tabPage_template);  // 2015/11/7
             }
         }
+
         private void OracleDataSourceWizard_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (_floatingMessage != null)

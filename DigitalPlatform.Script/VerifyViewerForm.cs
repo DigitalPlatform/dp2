@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.Script
 {
@@ -48,6 +49,8 @@ namespace DigitalPlatform.Script
 
         public void DoDock(bool bShowFixedPanel)
         {
+            // return; // 测试内存泄漏
+
             /*
             this.MainForm.CurrentVerifyResultControl = this.textBox_verifyResult;
             if (bShowFixedPanel == true
@@ -64,6 +67,30 @@ namespace DigitalPlatform.Script
                 this.DoDockEvent(this, e);
             }
         }
+
+        #region 防止控件泄露
+
+        // 不会被自动 Dispose 的 子 Control，放在这里托管，避免内存泄漏
+        List<Control> _freeControls = new List<Control>();
+
+        public void AddFreeControl(Control control)
+        {
+            ControlExtention.AddFreeControl(_freeControls, control);
+        }
+
+        public void RemoveFreeControl(Control control)
+        {
+            ControlExtention.RemoveFreeControl(_freeControls, control);
+        }
+
+        public void DisposeFreeControls()
+        {
+
+            ControlExtention.DisposeFreeControls(_freeControls);
+        }
+
+        #endregion
+
 
         public void Clear()
         {

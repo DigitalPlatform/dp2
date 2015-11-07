@@ -5,19 +5,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Text;
 using System.Text.RegularExpressions;
-
 using System.Threading;
-// using System.Resources;
 using System.Globalization;
 
-using DigitalPlatform.Text;
+using Microsoft.CSharp;
+using Microsoft.VisualBasic;
 
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
 // 2005/4/18	增加PrevName NextName DupCount变量

@@ -1553,12 +1553,15 @@ ref bHideMessageBox);
 
         private void button_entitiesControl_addLine_Click(object sender, EventArgs e)
         {
+#if NO
             RegisterLine line = new RegisterLine(this.entitiesControl1);
             this.entitiesControl1.InsertNewLine(0, line, true);
+#endif
         }
 
         private void button_entityRegisterControl_addLine_Click(object sender, EventArgs e)
         {
+#if NO
             // this.entityRegisterControl1.SetMarc(this.textBox_marcTemplate_marc.Text);
 
             string strError = "";
@@ -1568,7 +1571,7 @@ ref bHideMessageBox);
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
-
+#endif
         }
 
         private void button_amazonSearch_openDialog_Click(object sender, EventArgs e)

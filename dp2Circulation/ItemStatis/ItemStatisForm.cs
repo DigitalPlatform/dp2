@@ -272,6 +272,7 @@ namespace dp2Circulation
                     this.button_findInputBarcodeFilename.Visible = false;
 
                     this.tabControl_main.TabPages.Remove(this.tabPage_filter);
+                    this.AddFreeControl(this.tabPage_filter);   // 2015/11/7
 
                     this.label_inputItemDbName.Text = this.DbTypeCaption + "库名(&I)";
                 }

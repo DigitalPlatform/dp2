@@ -7,7 +7,8 @@ using System.Drawing;
 
 using System.Runtime.InteropServices;
 
-using Microsoft.Win32;  // for Registry
+using Microsoft.Win32;
+using System.Collections.Generic;  // for Registry
 
 namespace DigitalPlatform.GUI
 {
@@ -24,6 +25,7 @@ namespace DigitalPlatform.GUI
 
     public class GuiUtil
     {
+
         // http://stackoverflow.com/questions/4842160/auto-width-of-comboboxs-content
         // 获得 ComboBox 列表事项的最大宽度
         public static int GetComboBoxMaxItemWidth(ComboBox cb)

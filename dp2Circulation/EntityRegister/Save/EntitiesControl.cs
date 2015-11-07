@@ -11,6 +11,7 @@ using System.Diagnostics;
 
 namespace dp2Circulation
 {
+#if NO
     /// <summary>
     /// 负责显示和编辑若干册记录信息的控件
     /// 被册登记控件内嵌使用
@@ -207,4 +208,5 @@ namespace dp2Circulation
             this.textBox_barcode.ReadOnly = bReadOnly;
         }
     }
+#endif
 }

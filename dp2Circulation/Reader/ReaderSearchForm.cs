@@ -3413,6 +3413,7 @@ MessageBoxDefaultButton.Button1);
                     && this.Controls.IndexOf(this.m_labelPrompt) != -1)
                 {
                     this.Controls.Remove(this.m_labelPrompt);
+                    this.AddFreeControl(this.m_labelPrompt);    // 2015/11/7
                     this.m_labelPrompt = null;
                 }
                 return;

@@ -1,4 +1,5 @@
-﻿namespace dp2Circulation
+﻿#if NO
+namespace dp2Circulation
 {
     partial class BiblioRegisterControl
     {
@@ -302,3 +303,4 @@
         private System.Windows.Forms.ImageList imageList_progress;
     }
 }
+#endif

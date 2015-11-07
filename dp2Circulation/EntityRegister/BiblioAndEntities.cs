@@ -260,24 +260,6 @@ MessageBoxDefaultButton.Button2);
                     return 0;
             }
 
-#if NO
-            // 警告那些从原书目记录下属装入的册记录修改。但新增的册不会被清除
-            if (HasEntitiesChanged("normal") == true)
-            {
-                DialogResult result = MessageBox.Show(this.Owner,
-"当前有册记录修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
-"BiblioRegisterControl",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-                if (result == DialogResult.No)
-                    return 0;
-            }
-            
-            this.ClearEntityEditControls("normal");
-
-#endif
-
             string strMARC = "";
             string strMarcSyntax = "";
             // 将XML格式转换为MARC格式
@@ -1234,7 +1216,6 @@ MessageBoxDefaultButton.Button2);
             }
             else
             {
-                // this.flowLayoutPanel1.Controls.Remove(control);
                 RemoveEditControl(control);
             }
         }
@@ -2650,5 +2631,68 @@ MessageBoxDefaultButton.Button2);
         public string Xml = "";         // [out]
         public string ErrorInfo = "";   // [out]
     }
+
+    /// <summary>
+    /// 在内存中缓存一条书目信息。能够表示新旧记录的修改关系
+    /// </summary>
+    public class RegisterBiblioInfo
+    {
+        /// <summary>
+        /// 记录路径
+        /// </summary>
+        public string RecPath = "";
+        /// <summary>
+        /// 旧的记录 XML
+        /// </summary>
+        public string OldXml = "";
+        /// <summary>
+        /// 新的记录 XML
+        /// </summary>
+        public string NewXml = "";
+        /// <summary>
+        /// 时间戳
+        /// </summary>
+        public byte[] Timestamp = null;
+
+        /// <summary>
+        /// MARC 格式类型
+        /// </summary>
+        public string MarcSyntax = "";
+
+        /// <summary>
+        /// 封面图像文件名。临时文件
+        /// </summary>
+        public string CoverImageFileName = "";
+
+        public bool CoverImageRquested = false; // 如果为 true ,表示已经请求了异步获取图像，不要重复请求
+
+        public RegisterBiblioInfo()
+        {
+        }
+
+        public RegisterBiblioInfo(string strRecPath,
+            string strOldXml,
+            string strNewXml,
+            byte[] timestamp,
+            string strMarcSyntax)
+        {
+            this.RecPath = strRecPath;
+            this.OldXml = strOldXml;
+            this.NewXml = strNewXml;
+            this.Timestamp = timestamp;
+            this.MarcSyntax = strMarcSyntax;
+        }
+
+        // 拷贝构造
+        public RegisterBiblioInfo(RegisterBiblioInfo ref_obj)
+        {
+            this.RecPath = ref_obj.RecPath;
+            this.OldXml = ref_obj.OldXml;
+            this.NewXml = ref_obj.NewXml;
+            this.Timestamp = ref_obj.Timestamp;
+            this.MarcSyntax = ref_obj.MarcSyntax;
+        }
+    }
+
 }
 #pragma warning restore 1591

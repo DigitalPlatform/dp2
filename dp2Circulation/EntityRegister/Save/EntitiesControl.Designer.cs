@@ -1,4 +1,5 @@
-﻿namespace dp2Circulation
+﻿#if NO
+namespace dp2Circulation
 {
     partial class EntitiesControl
     {
@@ -71,3 +72,4 @@
         internal System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
+#endif

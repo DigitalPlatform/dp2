@@ -194,10 +194,8 @@ namespace dp2Circulation
             this.button_marcTemplate_addLine = new System.Windows.Forms.Button();
             this.tabPage_entitiesControl = new System.Windows.Forms.TabPage();
             this.button_entitiesControl_addLine = new System.Windows.Forms.Button();
-            this.entitiesControl1 = new dp2Circulation.EntityRegisterControl();
             this.tabPage_entityRegisterControl = new System.Windows.Forms.TabPage();
             this.button_entityRegisterControl_addLine = new System.Windows.Forms.Button();
-            this.entityRegisterControl1 = new dp2Circulation.EntityRegisterControlOld();
             this.tabPage_amazonSearch = new System.Windows.Forms.TabPage();
             this.button_amazonSearch_openDialog = new System.Windows.Forms.Button();
             this.tabPage_test = new System.Windows.Forms.TabPage();
@@ -2110,7 +2108,6 @@ namespace dp2Circulation
             // tabPage_entitiesControl
             // 
             this.tabPage_entitiesControl.Controls.Add(this.button_entitiesControl_addLine);
-            this.tabPage_entitiesControl.Controls.Add(this.entitiesControl1);
             this.tabPage_entitiesControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_entitiesControl.Name = "tabPage_entitiesControl";
             this.tabPage_entitiesControl.Size = new System.Drawing.Size(339, 225);
@@ -2129,25 +2126,9 @@ namespace dp2Circulation
             this.button_entitiesControl_addLine.UseVisualStyleBackColor = true;
             this.button_entitiesControl_addLine.Click += new System.EventHandler(this.button_entitiesControl_addLine_Click);
             // 
-            // entitiesControl1
-            // 
-            this.entitiesControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.entitiesControl1.AutoScroll = true;
-            this.entitiesControl1.IsFocued = true;
-            this.entitiesControl1.Location = new System.Drawing.Point(3, 14);
-            this.entitiesControl1.MainForm = null;
-            this.entitiesControl1.Name = "entitiesControl1";
-            this.entitiesControl1.Progress = null;
-            this.entitiesControl1.ServersDom = null;
-            this.entitiesControl1.Size = new System.Drawing.Size(333, 194);
-            this.entitiesControl1.TabIndex = 0;
-            // 
             // tabPage_entityRegisterControl
             // 
             this.tabPage_entityRegisterControl.Controls.Add(this.button_entityRegisterControl_addLine);
-            this.tabPage_entityRegisterControl.Controls.Add(this.entityRegisterControl1);
             this.tabPage_entityRegisterControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_entityRegisterControl.Name = "tabPage_entityRegisterControl";
             this.tabPage_entityRegisterControl.Size = new System.Drawing.Size(339, 225);
@@ -2165,16 +2146,6 @@ namespace dp2Circulation
             this.button_entityRegisterControl_addLine.Text = "Add Line";
             this.button_entityRegisterControl_addLine.UseVisualStyleBackColor = true;
             this.button_entityRegisterControl_addLine.Click += new System.EventHandler(this.button_entityRegisterControl_addLine_Click);
-            // 
-            // entityRegisterControl1
-            // 
-            this.entityRegisterControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.entityRegisterControl1.Location = new System.Drawing.Point(4, 32);
-            this.entityRegisterControl1.Name = "entityRegisterControl1";
-            this.entityRegisterControl1.Size = new System.Drawing.Size(332, 164);
-            this.entityRegisterControl1.TabIndex = 0;
             // 
             // tabPage_amazonSearch
             // 
@@ -2479,10 +2450,8 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_marcTemplate_marc;
         private System.Windows.Forms.Button button_marcTemplate_getMarc;
         private System.Windows.Forms.TabPage tabPage_entitiesControl;
-        private EntityRegisterControl entitiesControl1;
         private System.Windows.Forms.Button button_entitiesControl_addLine;
         private System.Windows.Forms.TabPage tabPage_entityRegisterControl;
-        private EntityRegisterControlOld entityRegisterControl1;
         private System.Windows.Forms.Button button_entityRegisterControl_addLine;
         private System.Windows.Forms.TabPage tabPage_amazonSearch;
         private System.Windows.Forms.Button button_amazonSearch_openDialog;

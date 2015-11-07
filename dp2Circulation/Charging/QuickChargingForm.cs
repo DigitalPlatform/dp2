@@ -95,10 +95,11 @@ namespace dp2Circulation
 
             if (this.DisplayFormat == "卡片")
             {
+                this.splitContainer_main.Panel1.Controls.Remove(this.webBrowser_reader);
+                this.AddFreeControl(this.webBrowser_reader);    // 2015/11/7
+
                 _cardControl = new PatronCardControl();
                 _cardControl.Dock = DockStyle.Fill;
-
-                this.splitContainer_main.Panel1.Controls.Remove(this.webBrowser_reader);
                 this.splitContainer_main.Panel1.Controls.Add(_cardControl);
             }
 
