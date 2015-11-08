@@ -1036,15 +1036,6 @@ MessageBoxDefaultButton.Button2);
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-            /*
-            int nDelta = 8;
-            RectangleF rect = this.entityEditControl1.ContentControl.DisplayRectangle;
-            rect.Inflate(nDelta, nDelta);
-            Pen pen = new Pen(Color.Gray);
-            BindingControl.RoundRectangle(e.Graphics,
-                pen, null, rect, 10);
-             * */
-
             if (!(this.m_item is ItemBindingItem))
                 return;
 

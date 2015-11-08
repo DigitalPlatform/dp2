@@ -1,4 +1,4 @@
-#if NO
+ï»¿#if NO
 
 
 using System;
@@ -12,12 +12,12 @@ namespace DigitalPlatform.Drawing
 {
 	public class GraphicsUtil
 	{
-        // ¸ù¾İFont£¬µÃµ½×Ö·û´®µÄ¿í¶È
+        // æ ¹æ®Fontï¼Œå¾—åˆ°å­—ç¬¦ä¸²çš„å®½åº¦
         // parameter:
-        //		font	Font¶ÔÏó
-        //		strText	×Ö·û´®
+        //		font	Fontå¯¹è±¡
+        //		strText	å­—ç¬¦ä¸²
         // return:
-        //		×Ö·û´®µÄ¿í¶È
+        //		å­—ç¬¦ä¸²çš„å®½åº¦
         public static int GetWidth(
             Font font,
             string strText)
@@ -30,13 +30,13 @@ namespace DigitalPlatform.Drawing
             return size.Width;
         }
 
-		// ¸ù¾İFont£¬µÃµ½×Ö·û´®µÄ¿í¶È
+		// æ ¹æ®Fontï¼Œå¾—åˆ°å­—ç¬¦ä¸²çš„å®½åº¦
 		// parameter:
-		//		g	Graphics¶ÔÏó
-		//		font	Font¶ÔÏó
-		//		strText	×Ö·û´®
+		//		g	Graphicså¯¹è±¡
+		//		font	Fontå¯¹è±¡
+		//		strText	å­—ç¬¦ä¸²
 		// return:
-		//		×Ö·û´®µÄ¿í¶È
+		//		å­—ç¬¦ä¸²çš„å®½åº¦
 		public static int GetWidth(Graphics g,
 			Font font,
 			string strText)
@@ -45,18 +45,18 @@ namespace DigitalPlatform.Drawing
 			sizef = g.MeasureString(
 				strText,
 				font);
-			return sizef.ToSize().Width + 6;    // Î¢µ÷
+			return sizef.ToSize().Width + 6;    // å¾®è°ƒ
 		}
 
-        // ËõĞ¡Í¼Ïñ
+        // ç¼©å°å›¾åƒ
         // parameters:
-        //		nNewWidth0	¿í¶È(0±íÊ¾²»±ä»¯)
-        //		nNewHeight0	¸ß¶È
-        //      bRatio  ÊÇ·ñ±£³Ö×İºá±ÈÀı
+        //		nNewWidth0	å®½åº¦(0è¡¨ç¤ºä¸å˜åŒ–)
+        //		nNewHeight0	é«˜åº¦
+        //      bRatio  æ˜¯å¦ä¿æŒçºµæ¨ªæ¯”ä¾‹
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒªËõ·Å(objBitmapÎ´´¦Àí)
-        //      1   ÒÑ¾­Ëõ·Å
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦ç¼©æ”¾(objBitmapæœªå¤„ç†)
+        //      1   å·²ç»ç¼©æ”¾
         public static int ShrinkPic(ref Image objBitmap,
             int nNewWidth0,
             int nNewHeight0,
@@ -68,15 +68,15 @@ namespace DigitalPlatform.Drawing
             int nNewWidth = nNewWidth0;
             int nNewHeight = nNewHeight0;
 
-            // ²»±ØÒªËõ·Å
+            // ä¸å¿…è¦ç¼©æ”¾
             if (nNewHeight0 == 0 && nNewWidth0 == 0)
             {
                 return 0;
             }
 
-            if (nNewWidth == 0 && nNewHeight == 0) // Á½±ß¶¼²»ÏŞÖÆ
+            if (nNewWidth == 0 && nNewHeight == 0) // ä¸¤è¾¹éƒ½ä¸é™åˆ¶
                 goto NONEED;
-            else if (nNewWidth == 0) // ¿í¶È²»ÏŞÖÆ
+            else if (nNewWidth == 0) // å®½åº¦ä¸é™åˆ¶
             {
                 if (objBitmap.Height <= nNewHeight)
                     goto NONEED;
@@ -86,7 +86,7 @@ namespace DigitalPlatform.Drawing
                 if (bRatio == true)
                     nNewHeight = (int)(ratio * (float)objBitmap.Height);
             }
-            else if (nNewHeight == 0)	// ¸ß¶È²»ÏŞÖÆ
+            else if (nNewHeight == 0)	// é«˜åº¦ä¸é™åˆ¶
             {
                 if (objBitmap.Width <= nNewWidth)
                     goto NONEED;
@@ -94,9 +94,9 @@ namespace DigitalPlatform.Drawing
                 float ratio = (float)nNewWidth / (float)objBitmap.Width;
                 nNewHeight = (int)(ratio * (float)objBitmap.Height);
                 if (bRatio == true)
-                    nNewWidth = (int)(ratio * (float)objBitmap.Width);	// Èç¹ûËø¶¨×İºá±ÈÀı
+                    nNewWidth = (int)(ratio * (float)objBitmap.Width);	// å¦‚æœé”å®šçºµæ¨ªæ¯”ä¾‹
             }
-            else // ¿í¶È¸ß¶È¶¼ÏŞÖÆ
+            else // å®½åº¦é«˜åº¦éƒ½é™åˆ¶
             {
                 float wratio = 1.0F;
                 float hratio = 1.0F;
@@ -151,24 +151,24 @@ namespace DigitalPlatform.Drawing
 
             objBitmap.Dispose();
             objBitmap = BitmapDest;
-            return 1;	//  ³É¹¦±£´æ
+            return 1;	//  æˆåŠŸä¿å­˜
         ERROR1:
             return -1;
         NONEED:
             return 0;
         }
 
-        // ËõĞ¡Í¼Ïñ
+        // ç¼©å°å›¾åƒ
         // parameters:
-		//      oFile   ´«ÈëµÄÎÄ¼şÁ÷
-		//      strContentType  ÎÄ¼şÀàĞÍ×Ö·û´®
-		//		nNewWidth0	¿í¶È(0±íÊ¾²»±ä»¯)
-		//		nNewHeight	¸ß¶È
-		//      oTargetFile:Ä¿±êÁ÷
+		//      oFile   ä¼ å…¥çš„æ–‡ä»¶æµ
+		//      strContentType  æ–‡ä»¶ç±»å‹å­—ç¬¦ä¸²
+		//		nNewWidth0	å®½åº¦(0è¡¨ç¤ºä¸å˜åŒ–)
+		//		nNewHeight	é«˜åº¦
+		//      oTargetFile:ç›®æ ‡æµ
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒªËõ·Å(oTargetÎ´´¦Àí)
-        //      1   ÒÑ¾­Ëõ·Å
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦ç¼©æ”¾(oTargetæœªå¤„ç†)
+        //      1   å·²ç»ç¼©æ”¾
         public static int ShrinkPic(Stream oFile,
             string strContentType,
             int nNewWidth0,
@@ -182,7 +182,7 @@ namespace DigitalPlatform.Drawing
             int nNewWidth = nNewWidth0;
             int nNewHeight = nNewHeight0;
 
-            // ²»±ØÒªËõ·Å
+            // ä¸å¿…è¦ç¼©æ”¾
             if (nNewHeight0 == 0 && nNewWidth0 == 0)
             {
                 return 0;
@@ -196,13 +196,13 @@ namespace DigitalPlatform.Drawing
             }
             catch (Exception ex)
             {
-                strError = "´´½¨bitmap³ö´í: " + ex.Message;
+                strError = "åˆ›å»ºbitmapå‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
 
-            if (nNewWidth == 0 && nNewHeight == 0) // Á½±ß¶¼²»ÏŞÖÆ
+            if (nNewWidth == 0 && nNewHeight == 0) // ä¸¤è¾¹éƒ½ä¸é™åˆ¶
                 goto NONEED;
-            else if (nNewWidth == 0) // ¿í¶È²»ÏŞÖÆ
+            else if (nNewWidth == 0) // å®½åº¦ä¸é™åˆ¶
             {
                 if (objBitmap.Height <= nNewHeight)
                     goto NONEED;
@@ -212,7 +212,7 @@ namespace DigitalPlatform.Drawing
                 if (bRatio == true)
                     nNewHeight = (int)(ratio * (float)objBitmap.Height);
             }
-            else if (nNewHeight == 0)	// ¸ß¶È²»ÏŞÖÆ
+            else if (nNewHeight == 0)	// é«˜åº¦ä¸é™åˆ¶
             {
                 if (objBitmap.Width <= nNewWidth)
                     goto NONEED;
@@ -220,9 +220,9 @@ namespace DigitalPlatform.Drawing
                 float ratio = (float)nNewWidth / (float)objBitmap.Width;
                 nNewHeight = (int)(ratio * (float)objBitmap.Height);
                 if (bRatio == true)
-                    nNewWidth = (int)(ratio * (float)objBitmap.Width);	// Èç¹ûËø¶¨×İºá±ÈÀı
+                    nNewWidth = (int)(ratio * (float)objBitmap.Width);	// å¦‚æœé”å®šçºµæ¨ªæ¯”ä¾‹
             }
-            else // ¿í¶È¸ß¶È¶¼ÏŞÖÆ
+            else // å®½åº¦é«˜åº¦éƒ½é™åˆ¶
             {
                 float wratio = 1.0F;
                 float hratio = 1.0F;
@@ -280,13 +280,13 @@ namespace DigitalPlatform.Drawing
                 BitmapDest.Dispose();
                 objBitmap.Dispose();
                 // 2010/12/29 add
-                strError = "BitmapDest.Save()Å×³öÒì³£ strContentType='"+strContentType+"' : " + ExceptionUtil.GetDebugText(ex);
+                strError = "BitmapDest.Save()æŠ›å‡ºå¼‚å¸¸ strContentType='"+strContentType+"' : " + ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
 
             BitmapDest.Dispose();
             objBitmap.Dispose();
-            return 1;	//  ³É¹¦±£´æ
+            return 1;	//  æˆåŠŸä¿å­˜
         ERROR1:
             if (objBitmap != null)
                 objBitmap.Dispose();

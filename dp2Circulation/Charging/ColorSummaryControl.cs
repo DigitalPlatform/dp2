@@ -104,65 +104,66 @@ namespace dp2Circulation
         {
             double cell_width = (double)size.Width / (double)strColorList.Length;
 
-            Brush brushRed = new SolidBrush(Color.Red);
-            Brush brushGreen = new SolidBrush(Color.Green);
-            Brush brushYellow = new SolidBrush(Color.Yellow);
-            Brush brushGray = new SolidBrush(Color.LightGray);
-            Brush brushWhite = new SolidBrush(Color.White);
-            Brush brushPurple = new SolidBrush(Color.Purple);
-            Brush brushBlack = new SolidBrush(Color.Black);
-
-            double offs = 0;
-            foreach (char ch in strColorList)
+            using (Brush brushRed = new SolidBrush(Color.Red))
+            using (Brush brushGreen = new SolidBrush(Color.Green))
+            using (Brush brushYellow = new SolidBrush(Color.Yellow))
+            using (Brush brushGray = new SolidBrush(Color.LightGray))
+            using (Brush brushWhite = new SolidBrush(Color.White))
+            using (Brush brushPurple = new SolidBrush(Color.Purple))
+            using (Brush brushBlack = new SolidBrush(Color.Black))
             {
-                RectangleF rect = new RectangleF();
-                rect.X = (float)offs + x;
-                rect.Y = 0 + y;
-                rect.Width = (float)cell_width - 1;
-                if (rect.Width < 1.1F)
-                    rect.Width = 1.1F;
-                rect.Height = size.Height;
-                Brush brush = null;
-                if (ch == 'R')
+
+                double offs = 0;
+                foreach (char ch in strColorList)
                 {
-                    brush = brushRed;
-                    if (bWide == false)
-                        rect.Height = rect.Height / 2;
-                }
-                else if (ch == 'P')
-                {
-                    brush = brushPurple;
-                    if (bWide == false)
-                        rect.Height = rect.Height / 2;
-                }
-                else if (ch == 'B')
-                {
-                    brush = brushBlack;
-                    if (bWide == false)
-                        rect.Height = rect.Height / 2;
-                }
-                else if (ch == 'G')
-                {
-                    brush = brushGreen;
-                    rect.Height = rect.Height / 3;  // 绿色的显示窄一些
-                }
-                else if (ch == 'Y')
-                {
-                    brush = brushYellow;
-                    if (bWide == false)
-                        rect.Height = rect.Height / 2;
-                }
-                else if (ch == 'L')
-                    brush = brushGray;
-                else if (ch == 'W')
-                {
-                    brush = brushWhite;
-                    if (bWide == false)
-                        rect.Height = rect.Height / 2;
-                }
-                else
-                {
-                    throw new ArgumentException("未知的字符 '" + ch.ToString() + "'");
+                    RectangleF rect = new RectangleF();
+                    rect.X = (float)offs + x;
+                    rect.Y = 0 + y;
+                    rect.Width = (float)cell_width - 1;
+                    if (rect.Width < 1.1F)
+                        rect.Width = 1.1F;
+                    rect.Height = size.Height;
+                    Brush brush = null;
+                    if (ch == 'R')
+                    {
+                        brush = brushRed;
+                        if (bWide == false)
+                            rect.Height = rect.Height / 2;
+                    }
+                    else if (ch == 'P')
+                    {
+                        brush = brushPurple;
+                        if (bWide == false)
+                            rect.Height = rect.Height / 2;
+                    }
+                    else if (ch == 'B')
+                    {
+                        brush = brushBlack;
+                        if (bWide == false)
+                            rect.Height = rect.Height / 2;
+                    }
+                    else if (ch == 'G')
+                    {
+                        brush = brushGreen;
+                        rect.Height = rect.Height / 3;  // 绿色的显示窄一些
+                    }
+                    else if (ch == 'Y')
+                    {
+                        brush = brushYellow;
+                        if (bWide == false)
+                            rect.Height = rect.Height / 2;
+                    }
+                    else if (ch == 'L')
+                        brush = brushGray;
+                    else if (ch == 'W')
+                    {
+                        brush = brushWhite;
+                        if (bWide == false)
+                            rect.Height = rect.Height / 2;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("未知的字符 '" + ch.ToString() + "'");
 #if NO
 #if DEBUG
                     Debug.Assert(false, "未知的字符 '" + ch.ToString() + "'");
@@ -170,29 +171,30 @@ namespace dp2Circulation
 #endif
 #endif
 
-                }
-
-                g.FillRectangle(brush,
-                    rect);
-                // 黄色(或者白色)的边框容易看不清，补充描边一次
-                if (ch == 'Y' || ch == 'W')
-                {
-                    rect.Width -= 1;
-
-                    if (rect.Width > 6)
-                    {
-                        rect.Height -= 1;
-                        g.DrawRectangle(
-                            ch == 'Y' ? Pens.Gray : Pens.LightGray,
-                            rect.X,
-                            rect.Y,
-                            rect.Width,
-                            rect.Height);
                     }
-                }
-                offs += cell_width;
-            }
 
+                    g.FillRectangle(brush,
+                        rect);
+                    // 黄色(或者白色)的边框容易看不清，补充描边一次
+                    if (ch == 'Y' || ch == 'W')
+                    {
+                        rect.Width -= 1;
+
+                        if (rect.Width > 6)
+                        {
+                            rect.Height -= 1;
+                            g.DrawRectangle(
+                                ch == 'Y' ? Pens.Gray : Pens.LightGray,
+                                rect.X,
+                                rect.Y,
+                                rect.Width,
+                                rect.Height);
+                        }
+                    }
+                    offs += cell_width;
+                }
+
+#if NO
             brushRed.Dispose();
             brushGreen.Dispose();
             brushYellow.Dispose();
@@ -200,6 +202,8 @@ namespace dp2Circulation
             brushWhite.Dispose();
             brushPurple.Dispose();
             brushBlack.Dispose();
+#endif
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)

@@ -170,20 +170,22 @@ namespace DigitalPlatform.Drawing
 
             Bitmap BitmapDest = new Bitmap(nNewWidth, nNewHeight);
 
-            Graphics objGraphics = Graphics.FromImage(BitmapDest);
-            Rectangle compressionRectangle = new Rectangle(0,
-                0, nNewWidth, nNewHeight);
-
-            /*
-            using (Brush trans_brush = new SolidBrush(Color.White))
+            using (Graphics objGraphics = Graphics.FromImage(BitmapDest))
             {
-                objGraphics.FillRectangle(trans_brush, compressionRectangle);
-            }
-             * */
+                Rectangle compressionRectangle = new Rectangle(0,
+                    0, nNewWidth, nNewHeight);
 
-            // set Drawing Quality 
-            objGraphics.InterpolationMode = InterpolationMode.High;
-            objGraphics.DrawImage(objBitmap, compressionRectangle);
+                /*
+                using (Brush trans_brush = new SolidBrush(Color.White))
+                {
+                    objGraphics.FillRectangle(trans_brush, compressionRectangle);
+                }
+                 * */
+
+                // set Drawing Quality 
+                objGraphics.InterpolationMode = InterpolationMode.High;
+                objGraphics.DrawImage(objBitmap, compressionRectangle);
+            }
 
             objBitmap.Dispose();
             objBitmap = BitmapDest;
@@ -297,27 +299,29 @@ namespace DigitalPlatform.Drawing
 
             Bitmap BitmapDest = new Bitmap(nNewWidth, nNewHeight);
 
-            Graphics objGraphics = Graphics.FromImage(BitmapDest);
-            Rectangle compressionRectangle = new Rectangle(0,
-                0, nNewWidth, nNewHeight);
-
-            // set Drawing Quality 
-            objGraphics.InterpolationMode = InterpolationMode.High;
-            objGraphics.DrawImage(objBitmap, compressionRectangle);
-
-            try
+            using (Graphics objGraphics = Graphics.FromImage(BitmapDest))
             {
-                BitmapDest.Save(
-                    oTargetFile,
-                    GetImageType(strContentType));	// System.drawing.Imaging.ImageFormat.Jpeg)
-            }
-            catch (Exception ex)
-            {
-                BitmapDest.Dispose();
-                objBitmap.Dispose();
-                // 2010/12/29 add
-                strError = "BitmapDest.Save()抛出异常 strContentType='" + strContentType + "' : " + ExceptionUtil.GetDebugText(ex);
-                goto ERROR1;
+                Rectangle compressionRectangle = new Rectangle(0,
+                    0, nNewWidth, nNewHeight);
+
+                // set Drawing Quality 
+                objGraphics.InterpolationMode = InterpolationMode.High;
+                objGraphics.DrawImage(objBitmap, compressionRectangle);
+
+                try
+                {
+                    BitmapDest.Save(
+                        oTargetFile,
+                        GetImageType(strContentType));	// System.drawing.Imaging.ImageFormat.Jpeg)
+                }
+                catch (Exception ex)
+                {
+                    BitmapDest.Dispose();
+                    objBitmap.Dispose();
+                    // 2010/12/29 add
+                    strError = "BitmapDest.Save()抛出异常 strContentType='" + strContentType + "' : " + ExceptionUtil.GetDebugText(ex);
+                    goto ERROR1;
+                }
             }
 
             BitmapDest.Dispose();

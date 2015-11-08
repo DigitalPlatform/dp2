@@ -218,9 +218,10 @@ namespace DigitalPlatform.Xml
 			DEFAULT:
 			{
                 Color defaultBackColor = SystemColors.Control;
-                Brush brush = new SolidBrush(defaultBackColor);
-				e.Graphics.FillRectangle(brush, e.ClipRectangle);
-				brush.Dispose();
+                using (Brush brush = new SolidBrush(defaultBackColor))
+                {
+                    e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                }
 			}
 		}
        

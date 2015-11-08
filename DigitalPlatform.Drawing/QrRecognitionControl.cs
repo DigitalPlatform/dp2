@@ -56,6 +56,9 @@ namespace DigitalPlatform.Drawing
         {
             if (disposing)
             {
+                if (resultRectPen != null)
+                    resultRectPen.Dispose();
+
                 decodingThread.Abort();
                 if (camDevices.Current != null)
                 {
@@ -488,11 +491,13 @@ namespace DigitalPlatform.Drawing
                 _colorPosIndex = 0;
             using (var g = pictureBox1.CreateGraphics())
             {
-                SolidBrush brush = new SolidBrush(color);
-                if (color == Color.Green)
-                    g.FillRectangle(brush, 0, 0, pictureBox1.Width, nCellHeight);
-                else
-                    g.FillRectangle(brush, nCellHeight * _colorPosIndex, 0, nCellHeight, nCellHeight);
+                using (SolidBrush brush = new SolidBrush(color))
+                {
+                    if (color == Color.Green)
+                        g.FillRectangle(brush, 0, 0, pictureBox1.Width, nCellHeight);
+                    else
+                        g.FillRectangle(brush, nCellHeight * _colorPosIndex, 0, nCellHeight, nCellHeight);
+                }
             }
 
             _colorPosIndex ++;

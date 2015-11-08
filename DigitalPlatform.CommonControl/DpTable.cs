@@ -4262,25 +4262,27 @@ nHeight);
             g.Clip = old_clip;
 
             nNormalHeight--;    // 防止白线出现
-            LinearGradientBrush linGrBrush = new LinearGradientBrush(
+            using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
 new PointF(0, textRect.Y + nNormalHeight),
 new PointF(0, textRect.Bottom),
 Color.FromArgb(255, textColor),
 Color.FromArgb(0, textColor)
-);
-            linGrBrush.GammaCorrection = true;
+))
+            {
+                linGrBrush.GammaCorrection = true;
 
-            clip = textRect;
-            clip.Y += nNormalHeight;
-            clip.Height = clip.Height - nNormalHeight;
+                clip = textRect;
+                clip.Y += nNormalHeight;
+                clip.Height = clip.Height - nNormalHeight;
 
-            g.IntersectClip(clip);
-            g.DrawString(
-    strText,
-    font,
-    linGrBrush,
-    textRect,
-    format);
+                g.IntersectClip(clip);
+                g.DrawString(
+        strText,
+        font,
+        linGrBrush,
+        textRect,
+        format);
+            }
             g.Clip = old_clip;
         }
 

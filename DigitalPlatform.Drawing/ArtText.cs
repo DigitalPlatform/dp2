@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -32,7 +32,7 @@ namespace DigitalPlatform.Drawing
 
     public class ArtText
     {
-        // ∞—◊÷∑˚¥Æ≤Œ ˝∑≠“ÎŒ™’˚ ˝
+        // ÊääÂ≠óÁ¨¶‰∏≤ÂèÇÊï∞ÁøªËØë‰∏∫Êï¥Êï∞
         static int GetValue(string strText,
             int value,
             int width,
@@ -76,164 +76,160 @@ namespace DigitalPlatform.Drawing
         {
             SizeF size;
 
-            Image source = Image.FromFile(strSourceFileName);
+            using (Image source = Image.FromFile(strSourceFileName))
+            {
 
-            int width = source.Width;
-            int height = source.Height;
+                int width = source.Width;
+                int height = source.Height;
 
-            int x = 0;
+                int x = 0;
 
-            if (s_x != "center")
-                x = GetValue(s_x,
-                 width,
-                 width,
-                 height);
+                if (s_x != "center")
+                    x = GetValue(s_x,
+                     width,
+                     width,
+                     height);
 
-            int y = GetValue(s_y,
+                int y = GetValue(s_y,
+        height,
+        width,
+        height);
+                int max_width = GetValue(s_max_width,
+        width,
+        width,
+        height);
+                int max_height = GetValue(s_max_height,
     height,
     width,
     height);
-            int max_width = GetValue(s_max_width,
-    width,
-    width,
-    height);
-            int max_height = GetValue(s_max_height,
-height,
-width,
-height);
-
-            Font font = null;
-
-            using (Bitmap bitmapTemp = new Bitmap(1, 1))
-            {
-
-                Graphics graphicsTemp = Graphics.FromImage(bitmapTemp);
-
-                int text_height = (int)((float)max_height * 0.8);
-                // µ⁄“ª¥Œ≤‚À„£¨∞¥’’◊Ó¥Û∏ﬂ∂»
-                font = new Font(info.FontFace, text_height, info.fontstyle, GraphicsUnit.Pixel);
-
-                    size = graphicsTemp.MeasureString(
-                        strText,
-                        font);
-
-                    int width_delta = (int)size.Width - max_width;
-                    if (width_delta > 0)
+                Font font = null;
+                try
+                {
+                    using (Bitmap bitmapTemp = new Bitmap(1, 1))
                     {
-                        int nFontHeight = (int)((float)text_height * ((float)max_width / size.Width));
-                        font = new Font(info.FontFace, nFontHeight, info.fontstyle, GraphicsUnit.Pixel);
-                        y += (text_height - nFontHeight) / 2;
+                        using (Graphics graphicsTemp = Graphics.FromImage(bitmapTemp))
+                        {
+                            int text_height = (int)((float)max_height * 0.8);
+                            // Á¨¨‰∏ÄÊ¨°ÊµãÁÆóÔºåÊåâÁÖßÊúÄÂ§ßÈ´òÂ∫¶
+                            font = new Font(info.FontFace, text_height, info.fontstyle, GraphicsUnit.Pixel);
+
+                            size = graphicsTemp.MeasureString(
+                                strText,
+                                font);
+
+                            int width_delta = (int)size.Width - max_width;
+                            if (width_delta > 0)
+                            {
+                                int nFontHeight = (int)((float)text_height * ((float)max_width / size.Width));
+                                if (font != null)
+                                    font.Dispose();
+                                font = new Font(info.FontFace, nFontHeight, info.fontstyle, GraphicsUnit.Pixel);
+                                y += (text_height - nFontHeight) / 2;
+                            }
+
+                            if ((info.effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                            {
+                                size.Height += 2;
+                                size.Width += 2;
+                            }
+                        }
                     }
 
-
-
-                if ((info.effect & ArtEffect.Shadow) == ArtEffect.Shadow)
-                {
-                    size.Height += 2;
-                    size.Width += 2;
-                }
-            }
-
-
-            // ’˝ ΩµƒÕºœÒ
-            Bitmap bitmapDest = new Bitmap(
-                source.Width,   //                (int)size.Width + 1,
-                Math.Max(source.Height, y + max_height),  // (int)size.Height + 1,
-                PixelFormat.Format64bppPArgb);
-
-            try
-            {
-
-                Graphics objGraphics = Graphics.FromImage(bitmapDest);
-
-                objGraphics.Clear(info.colorBack);// Color.Transparent
-
-                objGraphics.DrawImageUnscaled(source, new Point(0, 0));
-
-
-                // 
-                objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
-                // System.Drawing.Text.TextRenderingHint oldrenderhint = objGraphics.TextRenderingHint;
-                //…Ë÷√∏ﬂ÷ ¡ø,µÕÀŸ∂»≥ œ÷∆Ωª¨≥Ã∂» 
-                objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-
-                StringFormat stringFormat = new StringFormat();
-
-                if (s_x == "center")
-                {
-                    stringFormat.Alignment = StringAlignment.Center;
-                    x = 0;
-                    size.Width = source.Width;
-                }
-                else
-                    stringFormat.Alignment = StringAlignment.Near;
-
-
-                // Color.FromArgb(128, 100, 100, 100)
-                SolidBrush objBrush = new SolidBrush(info.colorText); // Õ∏√˜—’…´ ' Color.Black
-                RectangleF rect = new RectangleF(x,
-                    y, 
-                    size.Width, size.Height);
-
-                if ((info.effect & ArtEffect.Shadow) == ArtEffect.Shadow)
-                {
-                    SolidBrush objBrushShadow = new SolidBrush(info.colorShadow);
-                    RectangleF rectShadow = new RectangleF(rect.X,
-                        rect.Y, rect.Width, rect.Height);
-                    rectShadow.Offset(2, 2);
-                    objGraphics.DrawString(strText,
-                        font,
-                        objBrushShadow,
-                        rectShadow,
-                        stringFormat);
-                }
-
-                objGraphics.DrawString(strText,
-                    font,
-                    objBrush,
-                    rect,
-                    stringFormat);
-
-                MemoryStream stream = new MemoryStream();
-
-                /*
-
-                stream = SaveGIFWithNewColorTable(
-                    bitmapDest,
-                    256,
-                    true);
-                 */
-
-
-                if (imageformat == ImageFormat.Gif)
-                {
-                    bitmapDest.MakeTransparent(
-                    info.colorBack);
-
-                    OctreeQuantizer quantizer = new OctreeQuantizer(255, 8);
-                    quantizer.TransparentColor = info.colorBack;
-
-                    using (Bitmap quantized = quantizer.Quantize(bitmapDest))
+                    // Ê≠£ÂºèÁöÑÂõæÂÉè
+                    using (Bitmap bitmapDest = new Bitmap(
+                        source.Width,   //                (int)size.Width + 1,
+                        Math.Max(source.Height, y + max_height),  // (int)size.Height + 1,
+                        PixelFormat.Format64bppPArgb))
                     {
-                        quantized.Save(stream, imageformat);
+                        using (Graphics objGraphics = Graphics.FromImage(bitmapDest))
+                        {
+
+                            objGraphics.Clear(info.colorBack);// Color.Transparent
+
+                            objGraphics.DrawImageUnscaled(source, new Point(0, 0));
+
+
+                            // 
+                            objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+                            // System.Drawing.Text.TextRenderingHint oldrenderhint = objGraphics.TextRenderingHint;
+                            //ËÆæÁΩÆÈ´òË¥®Èáè,‰ΩéÈÄüÂ∫¶ÂëàÁé∞Âπ≥ÊªëÁ®ãÂ∫¶ 
+                            objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+                            StringFormat stringFormat = new StringFormat();
+
+                            if (s_x == "center")
+                            {
+                                stringFormat.Alignment = StringAlignment.Center;
+                                x = 0;
+                                size.Width = source.Width;
+                            }
+                            else
+                                stringFormat.Alignment = StringAlignment.Near;
+
+                            using (Brush objBrush = new SolidBrush(info.colorText)) // ÈÄèÊòéÈ¢úËâ≤ ' Color.Black
+                            {
+                                RectangleF rect = new RectangleF(x,
+                                y,
+                                size.Width,
+                                size.Height);
+
+                                if ((info.effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                                {
+                                    using (Brush objBrushShadow = new SolidBrush(info.colorShadow))
+                                    {
+                                        RectangleF rectShadow = new RectangleF(rect.X,
+                                            rect.Y, rect.Width, rect.Height);
+                                        rectShadow.Offset(2, 2);
+                                        objGraphics.DrawString(strText,
+                                            font,
+                                            objBrushShadow,
+                                            rectShadow,
+                                            stringFormat);
+                                    }
+                                }
+
+                                objGraphics.DrawString(strText,
+                                    font,
+                                    objBrush,
+                                    rect,
+                                    stringFormat);
+                            }
+
+                            MemoryStream stream = new MemoryStream();
+
+                            if (imageformat == ImageFormat.Gif)
+                            {
+                                bitmapDest.MakeTransparent(
+                                info.colorBack);
+
+                                OctreeQuantizer quantizer = new OctreeQuantizer(255, 8);
+                                quantizer.TransparentColor = info.colorBack;
+
+                                using (Bitmap quantized = quantizer.Quantize(bitmapDest))
+                                {
+                                    quantized.Save(stream, imageformat);
+                                }
+                            }
+                            else
+                            {
+                                bitmapDest.Save(stream, imageformat);   // System.Drawing.Imaging.ImageFormat.Jpeg
+                            }
+
+                            return stream;
+                        }
                     }
                 }
-                else
+                finally
                 {
-                    bitmapDest.Save(stream, imageformat);   // System.Drawing.Imaging.ImageFormat.Jpeg
+                    if (font != null)
+                        font.Dispose();
                 }
-
-                return stream;
-            }
-            finally
-            {
-                bitmapDest.Dispose();
             }
         }
 
         // parameters:
-        //      nWidth  øÿ÷∆’€––µƒŒª÷√
+        //      nWidth  ÊéßÂà∂ÊäòË°åÁöÑ‰ΩçÁΩÆ
         public static MemoryStream BuildArtText(
             string strText,
             string strFontFace,
@@ -246,135 +242,111 @@ height);
             ImageFormat imageformat,
             int nWidth = 500)
         {
-            Bitmap bitmapTemp = new Bitmap(1, 1);
             SizeF size;
-            Font font = new Font(strFontFace, fFontSize, fontstyle);
-
-            try
+            using (Font font = new Font(strFontFace, fFontSize, fontstyle))
             {
-                Graphics graphicsTemp = Graphics.FromImage(bitmapTemp);
-
-                size = graphicsTemp.MeasureString(
-                    strText,
-                    font,
-                    nWidth);
-
-                if ((effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                using (Bitmap bitmapTemp = new Bitmap(1, 1))
                 {
-                    size.Height += 2;
-                    size.Width += 2;
-                }
-            }
-            finally
-            {
-                bitmapTemp.Dispose();
-                bitmapTemp = null;
-            }
-
-            // ’˝ ΩµƒÕºœÒ
-            Bitmap bitmapDest = new Bitmap((int)size.Width + 1, (int)size.Height + 1, PixelFormat.Format64bppPArgb);
-
-            try
-            {
-
-                Graphics objGraphics = Graphics.FromImage(bitmapDest);
-
-                // colorBack = Color.FromArgb(0, colorBack);
-                objGraphics.Clear(colorBack);// Color.Transparent
-
-                // 
-                objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
-                // System.Drawing.Text.TextRenderingHint oldrenderhint = objGraphics.TextRenderingHint;
-                //…Ë÷√∏ﬂ÷ ¡ø,µÕÀŸ∂»≥ œ÷∆Ωª¨≥Ã∂» 
-                objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                // objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-                StringFormat stringFormat = new StringFormat();
-
-                /*
-                // ÀÊª˙≤˙…˙“ª∏ˆ«„–±Ω«∂»
-                Random random = new Random(unchecked((int)DateTime.Now.Ticks));
-                int angle = random.Next(-10, 10);
-
-                objGraphics.RotateTransform(angle);
-                 */
-
-                stringFormat.Alignment = StringAlignment.Near;
-                /*
-                if (angle > 0)
-                    stringFormat.LineAlignment = StringAlignment.Near;
-                else
-                    stringFormat.LineAlignment = StringAlignment.Far;
-                 */
-
-
-
-                // Color.FromArgb(128, 100, 100, 100)
-                SolidBrush objBrush = new SolidBrush(colorText); // Õ∏√˜—’…´ ' Color.Black
-                RectangleF rect = new RectangleF(0, 0, size.Width, size.Height);
-
-                if ((effect & ArtEffect.Shadow) == ArtEffect.Shadow)
-                {
-                    SolidBrush objBrushShadow = new SolidBrush(colorShadow);
-                    RectangleF rectShadow = new RectangleF(rect.X,
-                        rect.Y, rect.Width, rect.Height);
-                    rectShadow.Offset(2, 2);
-                    objGraphics.DrawString(strText,
-                        font,
-                        objBrushShadow,
-                        rectShadow,
-                        stringFormat);
-                }
-
-                objGraphics.DrawString(strText,
-                    font,
-                    objBrush,
-                    rect,
-                    stringFormat);
-
-                MemoryStream stream = new MemoryStream();
-
-                /*
-
-                stream = SaveGIFWithNewColorTable(
-                    bitmapDest,
-                    256,
-                    true);
-                 */
-                if (imageformat == ImageFormat.Png
-                    && colorBack == Color.Transparent)
-                {
-                    bitmapDest.MakeTransparent(colorBack);
-                }
-
-                if (imageformat == ImageFormat.Gif)
-                {
-                    bitmapDest.MakeTransparent(
-                    colorBack);
-
-                    OctreeQuantizer quantizer = new OctreeQuantizer(255, 8);
-                    quantizer.TransparentColor = colorBack;
-
-                    using (Bitmap quantized = quantizer.Quantize(bitmapDest))
+                    using (Graphics graphicsTemp = Graphics.FromImage(bitmapTemp))
                     {
-                        quantized.Save(stream, imageformat);
+                        size = graphicsTemp.MeasureString(
+                            strText,
+                            font,
+                            nWidth);
+
+                        if ((effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                        {
+                            size.Height += 2;
+                            size.Width += 2;
+                        }
                     }
                 }
-                else
-                {
-                    bitmapDest.Save(stream, imageformat);   // System.Drawing.Imaging.ImageFormat.Jpeg
-                }
 
-                return stream;
-            }
-            finally
-            {
-                bitmapDest.Dispose();
+                // Ê≠£ÂºèÁöÑÂõæÂÉè
+                using (Bitmap bitmapDest = new Bitmap((int)size.Width + 1, (int)size.Height + 1, PixelFormat.Format64bppPArgb))
+                {
+                    using (Graphics objGraphics = Graphics.FromImage(bitmapDest))
+                    {
+                        // colorBack = Color.FromArgb(0, colorBack);
+                        objGraphics.Clear(colorBack);// Color.Transparent
+
+                        // 
+                        objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+                        // System.Drawing.Text.TextRenderingHint oldrenderhint = objGraphics.TextRenderingHint;
+                        //ËÆæÁΩÆÈ´òË¥®Èáè,‰ΩéÈÄüÂ∫¶ÂëàÁé∞Âπ≥ÊªëÁ®ãÂ∫¶ 
+                        objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                        objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                        // objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+                        StringFormat stringFormat = new StringFormat();
+                        stringFormat.Alignment = StringAlignment.Near;
+
+                        // Color.FromArgb(128, 100, 100, 100)
+                        using (Brush objBrush = new SolidBrush(colorText)) // ÈÄèÊòéÈ¢úËâ≤ ' Color.Black
+                        {
+                            RectangleF rect = new RectangleF(0, 0, size.Width, size.Height);
+
+                            if ((effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                            {
+                                using (Brush objBrushShadow = new SolidBrush(colorShadow))
+                                {
+                                    RectangleF rectShadow = new RectangleF(rect.X,
+                                        rect.Y, rect.Width, rect.Height);
+                                    rectShadow.Offset(2, 2);
+                                    objGraphics.DrawString(strText,
+                                        font,
+                                        objBrushShadow,
+                                        rectShadow,
+                                        stringFormat);
+                                }
+                            }
+
+                            objGraphics.DrawString(strText,
+                                font,
+                                objBrush,
+                                rect,
+                                stringFormat);
+                        }
+                    }
+
+                    MemoryStream stream = new MemoryStream();
+
+                    /*
+                    stream = SaveGIFWithNewColorTable(
+                        bitmapDest,
+                        256,
+                        true);
+                     */
+                    if (imageformat == ImageFormat.Png
+                        && colorBack == Color.Transparent)
+                    {
+                        bitmapDest.MakeTransparent(colorBack);
+                    }
+
+                    if (imageformat == ImageFormat.Gif)
+                    {
+                        bitmapDest.MakeTransparent(
+                        colorBack);
+
+                        OctreeQuantizer quantizer = new OctreeQuantizer(255, 8);
+                        quantizer.TransparentColor = colorBack;
+
+                        using (Bitmap quantized = quantizer.Quantize(bitmapDest))
+                        {
+                            quantized.Save(stream, imageformat);
+                        }
+                    }
+                    else
+                    {
+                        bitmapDest.Save(stream, imageformat);   // System.Drawing.Imaging.ImageFormat.Jpeg
+                    }
+
+                    return stream;
+                }
             }
         }
 
-        //∏˘æ›#XXXXXX∏Ò Ω◊÷∑˚¥Æµ√µΩColor
+        //Ê†πÊçÆ#XXXXXXÊ†ºÂºèÂ≠óÁ¨¶‰∏≤ÂæóÂà∞Color
         public static Color ColorFromHexString(string strColor)
         {
             string strR = strColor.Substring(1, 2);

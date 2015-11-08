@@ -366,51 +366,6 @@ namespace dp2Circulation
             }
         }
 
-#if NO
-        // defines how far we are extending the Glass margins
-        private API.MARGINS margins;
-
-        /// <summary>
-        /// Override the OnPaintBackground method, to draw the desired
-        /// Glass regions black and display as Glass
-        /// </summary>
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            if (API.DwmIsCompositionEnabled())
-            {
-                e.Graphics.Clear(Color.Black);
-                // put back the original form background for non-glass area
-                Rectangle clientArea = new Rectangle(
-                margins.Left,
-                margins.Top,
-                this.ClientRectangle.Width - margins.Left - margins.Right,
-                this.ClientRectangle.Height - margins.Top - margins.Bottom);
-                Brush b = new SolidBrush(this.BackColor);
-                e.Graphics.FillRectangle(b, clientArea);
-            }
-        }
-
-
-        /// <summary>
-        /// Use the form padding values to define a Glass margin
-        /// </summary>
-        private void SetGlassRegion()
-        {
-            // Set up the glass effect using padding as the defining glass region
-            if (API.DwmIsCompositionEnabled())
-            {
-                Padding padding = new System.Windows.Forms.Padding(50);
-                margins = new API.MARGINS();
-                margins.Top = padding.Top;
-                margins.Left = padding.Left;
-                margins.Bottom = padding.Bottom;
-                margins.Right = padding.Right;
-                API.DwmExtendFrameIntoClientArea(this.Handle, ref margins);
-            }
-        }
-#endif
-
         private void MainForm_Load(object sender, EventArgs e)
         {
             /*

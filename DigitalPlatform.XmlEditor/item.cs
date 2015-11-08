@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
@@ -16,16 +16,16 @@ namespace DigitalPlatform.Xml
 {
 	public abstract class Item : Box,IXPathNavigable
 	{
-		#region ³ÉÔ±±äÁ¿
+		#region æˆå‘˜å˜é‡
 
-		public ElementItem parent = null;       // ¸¸Ç×
+		public ElementItem parent = null;       // çˆ¶äº²
 		public XmlEditor m_document = null;     // XmlEditor
 
-		public string BaseURI = "";  // XPathNavigatorµÄĞèÒª,ÈÎºÎ½Úµã¶¼ÓĞBaseURI
+		public string BaseURI = "";  // XPathNavigatorçš„éœ€è¦,ä»»ä½•èŠ‚ç‚¹éƒ½æœ‰BaseURI
 		
-		// µ±Ã»ÓĞ¶ÔÓ¦µÄvisual½á¹¹Ê±,ÓÃm_paraValue±íÊ¾¸ÃItemµÄÖµ
-		// µ±ÓĞÁËvisual½á¹¹,ÔòÖ±½ÓÊ¹ÓÃvisualµÄtext
-		// ±¾±äÁ¿¶ÔElementItem¶ÔÏóÎŞÒâÒå
+		// å½“æ²¡æœ‰å¯¹åº”çš„visualç»“æ„æ—¶,ç”¨m_paraValueè¡¨ç¤ºè¯¥Itemçš„å€¼
+		// å½“æœ‰äº†visualç»“æ„,åˆ™ç›´æ¥ä½¿ç”¨visualçš„text
+		// æœ¬å˜é‡å¯¹ElementItemå¯¹è±¡æ— æ„ä¹‰
 		public string m_paraValue1 = "";
 
 		public bool m_bConnected = false;
@@ -34,7 +34,7 @@ namespace DigitalPlatform.Xml
 
 	
 
-		#region ¹ØÓÚÑùÊ½ÅäÖÃÎÄ¼şµÄÒ»Ğ©ÊôĞÔ
+		#region å…³äºæ ·å¼é…ç½®æ–‡ä»¶çš„ä¸€äº›å±æ€§
 
 		/////////////////////////////////////////////////////////
 		// some property about cfg
@@ -46,12 +46,12 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// ¹©GetBackColor(region)¡¢GetTextColor(region)¡¢GetBorderColor(region)µ÷µÄË½ÓĞº¯Êı
+		// ä¾›GetBackColor(region)ã€GetTextColor(region)ã€GetBorderColor(region)è°ƒçš„ç§æœ‰å‡½æ•°
         // parameters:
-		//      region        Ã¶¾ÙÖµ£¬È¡ÄÄ¸öÇøÓò
-		//      valueStyle    Ã¶¾ÙÖµ£¬È¡ÄÄÖÖÀàĞÍµÄÖµ
+		//      region        æšä¸¾å€¼ï¼Œå–å“ªä¸ªåŒºåŸŸ
+		//      valueStyle    æšä¸¾å€¼ï¼Œå–å“ªç§ç±»å‹çš„å€¼
         // return:
-        //      Color¶ÔÏó
+        //      Colorå¯¹è±¡
 		Color GetColor(ItemRegion region,ValueStyle valueStyle)
 		{
 			XmlEditor editor = this.m_document;
@@ -70,7 +70,7 @@ namespace DigitalPlatform.Xml
 				return style.BorderColor  ;
 			
 			END1:
-				//È±Ê¡Öµ
+				//ç¼ºçœå€¼
 				if (valueStyle == ValueStyle.BackColor)
 				{
                     if (region == ItemRegion.Text)
@@ -95,10 +95,10 @@ namespace DigitalPlatform.Xml
 		}
 	
 		
-		// ¹©³ß´çÖµµÃµ÷µÄË½ÓĞº¯Êı.
+		// ä¾›å°ºå¯¸å€¼å¾—è°ƒçš„ç§æœ‰å‡½æ•°.
         // parameters:
-		//      region      Ã¶¾ÙÖµ£¬È¡ÄÄ¸öÇøÓò
-		//      valueStyle  Ã¶¾ÙÖµ£¬È¡ÄÄÖÖÀàĞÍµÄÖµ
+		//      region      æšä¸¾å€¼ï¼Œå–å“ªä¸ªåŒºåŸŸ
+		//      valueStyle  æšä¸¾å€¼ï¼Œå–å“ªç§ç±»å‹çš„å€¼
 		int GetPixelValue(ItemRegion region,ValueStyle valueStyle)
 		{
 			XmlEditor editor = this.m_document;
@@ -130,7 +130,7 @@ namespace DigitalPlatform.Xml
 			else if (valueStyle == ValueStyle.RightBorderWidth)
 				return style.RightBorderWidth;			
 			END1:
-				//È±Ê¡Öµ
+				//ç¼ºçœå€¼
 				if (valueStyle == ValueStyle.LeftBlank )
 				{
 					if (region == ItemRegion.ExpandAttributes 
@@ -172,11 +172,11 @@ namespace DigitalPlatform.Xml
 		}
 
 		
-		// µÃµ½×ÖÌå
+		// å¾—åˆ°å­—ä½“
         // parameters:
-		//      region  Ã¶¾ÙÖµ£¬ÄÄ¸öÇøÓòµÄ×ÖÌå
+		//      region  æšä¸¾å€¼ï¼Œå“ªä¸ªåŒºåŸŸçš„å­—ä½“
         // return:
-        //      Font¶ÔÏó
+        //      Fontå¯¹è±¡
 		public Font GetFont(ItemRegion region)
 		{
 			XmlEditor editor = this.m_document;
@@ -194,7 +194,7 @@ namespace DigitalPlatform.Xml
 		}
 
 		
-		// ÒÔÏÂÎª·½±ãÊ¹ÓÃµÄ¾ßÌåĞ¡º¯Êı/////////////////////////////////////////
+		// ä»¥ä¸‹ä¸ºæ–¹ä¾¿ä½¿ç”¨çš„å…·ä½“å°å‡½æ•°/////////////////////////////////////////
 		public int GetLeftBlank(ItemRegion region)
 		{
 			return GetPixelValue(region,ValueStyle.LeftBlank );
@@ -257,9 +257,9 @@ namespace DigitalPlatform.Xml
 
 		#endregion
 
-		#region ¹ØÓÚ¿í¶ÈÊı×éÖĞÅäÖÃĞÅÏ¢µÄº¯Êı
+		#region å…³äºå®½åº¦æ•°ç»„ä¸­é…ç½®ä¿¡æ¯çš„å‡½æ•°
 
-		// ¸øÊı×éÖĞÉèÖµ
+		// ç»™æ•°ç»„ä¸­è®¾å€¼
 		public void SetValue(string strName,int nValue)
 		{
 			ItemWidth width = m_document.widthList. GetItemWidth(this.GetLevel());
@@ -269,7 +269,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		// ´ÓÊı×éÖĞÈ¡Öµ
+		// ä»æ•°ç»„ä¸­å–å€¼
 		public int GetValue(string strName)
 		{
 			ItemWidth width = m_document.widthList. GetItemWidth(this.GetLevel());
@@ -292,7 +292,7 @@ namespace DigitalPlatform.Xml
 
 		#endregion
 
-		#region ¹«¹²º¯Êı
+		#region å…¬å…±å‡½æ•°
         
 		public ElementItem Parent
 		{
@@ -302,7 +302,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		// ¶ÔÍâ¹«²¼µÄÊôĞÔ
+		// å¯¹å¤–å…¬å¸ƒçš„å±æ€§
 		public string Value
 		{
 			get
@@ -315,7 +315,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		// µÃµ½²ãºÅ, ´Ó1¿ªÊ¼¼ÆÊı(1ÊÇĞé¸ù)
+		// å¾—åˆ°å±‚å·, ä»1å¼€å§‹è®¡æ•°(1æ˜¯è™šæ ¹)
 		internal int GetLevel()
 		{
 			int nLevel = 1;
@@ -330,7 +330,7 @@ namespace DigitalPlatform.Xml
 			return nLevel;
 		}
 
-		// µÃµ½XPath
+		// å¾—åˆ°XPath
 		public string GetXPath()
 		{
 			ElementItem root = (ElementItem)this.m_document.docRoot;
@@ -340,32 +340,32 @@ namespace DigitalPlatform.Xml
 			return strPath;
 		}
 
-		// ¶ÔElementItemÎŞÒâÒå,¶ø»»³ÉGetContentText() ºÍ GetAttributesText()
-		// Ò»¶¨ÊÇÔÚ³õÊ¼»¯ºÃvisual½á¹¹,²ÅÄÜµ÷´Ëº¯Êı
+		// å¯¹ElementItemæ— æ„ä¹‰,è€Œæ¢æˆGetContentText() å’Œ GetAttributesText()
+		// ä¸€å®šæ˜¯åœ¨åˆå§‹åŒ–å¥½visualç»“æ„,æ‰èƒ½è°ƒæ­¤å‡½æ•°
 		// region:
-		//		-1	Ò»°ãµÄÎÄ±¾½Úµã£¬²»·ÖÇøÓò
-		//		0	ÊôĞÔÇø
-		//		1	¶ù×ÓÇø
+		//		-1	ä¸€èˆ¬çš„æ–‡æœ¬èŠ‚ç‚¹ï¼Œä¸åˆ†åŒºåŸŸ
+		//		0	å±æ€§åŒº
+		//		1	å„¿å­åŒº
 		// style:
-		//		µ±Ç°ÇøÓòµÄ×´Ì¬
+		//		å½“å‰åŒºåŸŸçš„çŠ¶æ€
 		internal virtual XmlText GetVisualText()
 		{
 			if (this.m_paraValue1 != null)
 			{
-				Debug.Assert(false,"»¹Ã»ÓĞ³õÊ¼»¯visual½á¹¹,²»ÄÜµ÷´Ëº¯Êı");
+				Debug.Assert(false,"è¿˜æ²¡æœ‰åˆå§‹åŒ–visualç»“æ„,ä¸èƒ½è°ƒæ­¤å‡½æ•°");
 				return null;
 			}
 
 			if (this.childrenVisual == null)
 			{
-				Debug.Assert(false,"»¹Ã»ÓĞ³õÊ¼»¯visual½á¹¹,²»ÄÜµ÷´Ëº¯Êı");
+				Debug.Assert(false,"è¿˜æ²¡æœ‰åˆå§‹åŒ–visualç»“æ„,ä¸èƒ½è°ƒæ­¤å‡½æ•°");
 				return null;
 			}
 
 			Box boxTotal = this.GetBoxTotal();
 			if (boxTotal == null)
 			{
-				Debug.Assert(false,"²»¿ÉÄÜÃ»ÓĞBoxTotal");
+				Debug.Assert(false,"ä¸å¯èƒ½æ²¡æœ‰BoxTotal");
 				return null;
 			}
 
@@ -385,29 +385,29 @@ namespace DigitalPlatform.Xml
 
 			if (text == null)
 			{
-				Debug.Assert(false,"²»¿ÉÄÜÃ»ÓĞText¶ÔÏó");
+				Debug.Assert(false,"ä¸å¯èƒ½æ²¡æœ‰Textå¯¹è±¡");
 				return null;
 			}
 			return text;
 		}
 
 	
-		// ElementItemÒªÖØĞ´Õâ¸öº¯Êı
+		// ElementItemè¦é‡å†™è¿™ä¸ªå‡½æ•°
 		public virtual string GetValue()
 		{
 			string strValue = null;
 
 			if (this.m_paraValue1 == null)
 			{
-				// ËµÃ÷ÒÑ½¨Á¢µÄvisual½á¹¹,´ÓvisualÀïµÃµ½Öµ
+				// è¯´æ˜å·²å»ºç«‹çš„visualç»“æ„,ä»visualé‡Œå¾—åˆ°å€¼
 				XmlText text = this.GetVisualText();
 				if (text == null)
 				{
-					Debug.Assert(false,"m_paraValueÎªnullÊ±,visual²»¿ÉÄÜ²»´æÔÚ");
-					throw new Exception("m_paraValueÎªnullÊ±,visual²»¿ÉÄÜ²»´æÔÚ");
+					Debug.Assert(false,"m_paraValueä¸ºnullæ—¶,visualä¸å¯èƒ½ä¸å­˜åœ¨");
+					throw new Exception("m_paraValueä¸ºnullæ—¶,visualä¸å¯èƒ½ä¸å­˜åœ¨");
 				}
 				Debug.Assert(text.Text != null,"");
-				strValue = text.Text;  //×¢ÒâÓÃ×ª»»³Éxmlstring
+				strValue = text.Text;  //æ³¨æ„ç”¨è½¬æ¢æˆxmlstring
 			}
 			else
 			{
@@ -417,21 +417,21 @@ namespace DigitalPlatform.Xml
 			return StringUtil.GetVisualableStringSimple(strValue);
 		}
 
-		// ElementItemÒªÖØĞ´Õâ¸öº¯Êı
+		// ElementItemè¦é‡å†™è¿™ä¸ªå‡½æ•°
 		public virtual void SetValue(string strValue)
 		{
 			strValue = StringUtil.GetXmlStringSimple(strValue);
 
 			if (this.m_paraValue1 == null)
 			{
-				// ËµÃ÷ÒÑ½¨Á¢µÄvisual½á¹¹,´ÓvisualÀïµÃµ½Öµ
+				// è¯´æ˜å·²å»ºç«‹çš„visualç»“æ„,ä»visualé‡Œå¾—åˆ°å€¼
 				XmlText text = this.GetVisualText();
 				if (text == null)
 				{
-					Debug.Assert(false,"m_paraValueÎªnullÊ±,visual²»¿ÉÄÜ²»´æÔÚ");
-					throw new Exception("m_paraValueÎªnullÊ±,visual²»¿ÉÄÜ²»´æÔÚ");
+					Debug.Assert(false,"m_paraValueä¸ºnullæ—¶,visualä¸å¯èƒ½ä¸å­˜åœ¨");
+					throw new Exception("m_paraValueä¸ºnullæ—¶,visualä¸å¯èƒ½ä¸å­˜åœ¨");
 				}
-				text.Text = strValue;  //??????»¹ÓÃ×ª»»³Éxmlstring?²»ÓÃ
+				text.Text = strValue;  //??????è¿˜ç”¨è½¬æ¢æˆxmlstring?ä¸ç”¨
 			}
 			else
 			{
@@ -447,7 +447,7 @@ namespace DigitalPlatform.Xml
 		// ElementItem	<a>test</a>
 		// AttrItem	a="test"
 		// TextItem test
-		// ÅÉÉúÀà²»±ØÒªÔÙÖØĞ´¸ÃÊôĞÔ,Ö»ĞèÖØĞ´GetOutXml()¾Í¿ÉÒÔÁË
+		// æ´¾ç”Ÿç±»ä¸å¿…è¦å†é‡å†™è¯¥å±æ€§,åªéœ€é‡å†™GetOutXml()å°±å¯ä»¥äº†
 		public virtual string OuterXml 
 		{
 			get
@@ -456,12 +456,12 @@ namespace DigitalPlatform.Xml
 			}
 			set 
 			{
-				throw(new Exception("ÉĞÎ´ÊµÏÖOuterXml set¹¦ÄÜ"));
+				throw(new Exception("å°šæœªå®ç°OuterXml setåŠŸèƒ½"));
 			}
 		}
 
 		// parameter:
-		//		FragmentRoot	ÊÇ·ñ´øÃû×Ö¿Õ¼ä,¸Ã²ÎÊı½ö¶ÔElementItemÓĞÒâÒå
+		//		FragmentRoot	æ˜¯å¦å¸¦åå­—ç©ºé—´,è¯¥å‚æ•°ä»…å¯¹ElementItemæœ‰æ„ä¹‰
 		internal virtual string GetOuterXml(ElementItem FragmentRoot)
 		{
 			return "";
@@ -469,7 +469,7 @@ namespace DigitalPlatform.Xml
 
 
 
-		// µÃµ½childrenVisualÖĞµÄLabel¶ÔÏó
+		// å¾—åˆ°childrenVisualä¸­çš„Labelå¯¹è±¡
 		public XmlLabel GetLable()
 		{
 			if (this.childrenVisual == null)
@@ -525,7 +525,7 @@ namespace DigitalPlatform.Xml
 			return myParent.children [nIndex + 1];
 		}
 
-		#region ÓÃxpathÑ¡½Úµã
+		#region ç”¨xpathé€‰èŠ‚ç‚¹
 
 		public virtual XPathNavigator CreateNavigator()
 		{
@@ -533,7 +533,7 @@ namespace DigitalPlatform.Xml
 			return nav;
 		}
 
-		// strXpath	¿ÉÒÔÊÇÏà¶ÔÂ·¾¶
+		// strXpath	å¯ä»¥æ˜¯ç›¸å¯¹è·¯å¾„
 		public ItemList SelectItems(string strXpath)
 		{
 			ItemList items = new ItemList();
@@ -592,17 +592,17 @@ namespace DigitalPlatform.Xml
 
 		#endregion
 
-		#region ³õÊ¼»¯Item²ã´Î
+		#region åˆå§‹åŒ–Itemå±‚æ¬¡
 
 
-		// ÓÃnode³õÊ¼»¯±¾¶ÔÏóºÍÏÂ¼¶
+		// ç”¨nodeåˆå§‹åŒ–æœ¬å¯¹è±¡å’Œä¸‹çº§
 		// parameters:
-		//		node	XmlNode½Úµã
-		//		allocator	¶ÔÏó´´½¨Æ÷¡£ÓÃÀ´¹¹ÔìÏÂ¼¶ÔªËØ¶ÔÏó
-		//		style	×´Ì¬,Õ¹¿ª ÊÕËõµÈ ½ö¶ÔElementItemÓĞÒâÒå
+		//		node	XmlNodeèŠ‚ç‚¹
+		//		allocator	å¯¹è±¡åˆ›å»ºå™¨ã€‚ç”¨æ¥æ„é€ ä¸‹çº§å…ƒç´ å¯¹è±¡
+		//		style	çŠ¶æ€,å±•å¼€ æ”¶ç¼©ç­‰ ä»…å¯¹ElementItemæœ‰æ„ä¹‰
 		// return:
-		//		-1  ³ö´í
-		//		-2  ÖĞÍ¾cancel;
+		//		-1  å‡ºé”™
+		//		-2  ä¸­é€”cancel;
 		//		0   successed
 		public virtual int Initial(XmlNode node, 
 			ItemAllocator allocator,
@@ -615,49 +615,49 @@ namespace DigitalPlatform.Xml
 
 		#endregion
 
-		#region ³õÊ¼»¯Visual²ã´Î
+		#region åˆå§‹åŒ–Visualå±‚æ¬¡
 
-		// ´Ëº¯ÊıµÈ´ıÅÉÉúÀàÖØĞ´
+		// æ­¤å‡½æ•°ç­‰å¾…æ´¾ç”Ÿç±»é‡å†™
 		public virtual void InitialVisualSpecial(Box boxtotal)
 		{
 
 		}
 
-		// ±¾º¯Êı¶ÔÓÚÅÉÉúÀàÀ´ËµÒ»°ã²»ÒªÖØÔØ¡£Ò»°ãÖØÔØInitialVisualSpecial()¼´¿É¡£
-		// ÒòÎª±¾º¯Êı´úÂëÇ°ºó²¿·Ö»ù±¾ÊÇ¹²ÓÃµÄ£¬Ö»ÓĞÖĞ¶Î²ÉÓÃµ÷ÓÃInitialVisualSpecial()µÄ°ì·¨¡£
-		// ²»¹ıÈç¹ûÖØÔØÁË±¾º¯Êı£¬²¢ÇÒ²»ÏëÔÚÆäÖĞµ÷ÓÃInitialVisualSpecial()£¬ÔòĞèÒª×ÔĞĞÊµÏÖÈ«²¿¹¦ÄÜ
+		// æœ¬å‡½æ•°å¯¹äºæ´¾ç”Ÿç±»æ¥è¯´ä¸€èˆ¬ä¸è¦é‡è½½ã€‚ä¸€èˆ¬é‡è½½InitialVisualSpecial()å³å¯ã€‚
+		// å› ä¸ºæœ¬å‡½æ•°ä»£ç å‰åéƒ¨åˆ†åŸºæœ¬æ˜¯å…±ç”¨çš„ï¼Œåªæœ‰ä¸­æ®µé‡‡ç”¨è°ƒç”¨InitialVisualSpecial()çš„åŠæ³•ã€‚
+		// ä¸è¿‡å¦‚æœé‡è½½äº†æœ¬å‡½æ•°ï¼Œå¹¶ä¸”ä¸æƒ³åœ¨å…¶ä¸­è°ƒç”¨InitialVisualSpecial()ï¼Œåˆ™éœ€è¦è‡ªè¡Œå®ç°å…¨éƒ¨åŠŸèƒ½
 		public virtual void  InitialVisual()
 		{
 			if (this.childrenVisual != null)
 				this.childrenVisual.Clear();
 
-			// ¼ÓLabel
+			// åŠ Label
 			XmlLabel label = new XmlLabel();
 			label.container = this;
 			label.Text = this.Name;
 			this.AddChildVisual(label);
 
-			// ¶¨ÒåÒ»¸ö×Ü¿ò
+			// å®šä¹‰ä¸€ä¸ªæ€»æ¡†
 			Box boxTotal = new Box ();
 			boxTotal.Name = "BoxTotal";
 			boxTotal.container = this;
 			this.AddChildVisual (boxTotal);
 
-			// ÍâÃæ×Ü¿òµÄlayoutStyleÑùÊ½ÎªÊúÅÅ
+			// å¤–é¢æ€»æ¡†çš„layoutStyleæ ·å¼ä¸ºç«–æ’
 			boxTotal.LayoutStyle = LayoutStyle.Vertical;
 
 			///
 			InitialVisualSpecial(boxTotal);
 			///
 
-			//Èç¹ûboxTotalÖ»ÓĞÒ»¸öbox£¬ÔòÉèÎªºáÅÅ
+			//å¦‚æœboxTotalåªæœ‰ä¸€ä¸ªboxï¼Œåˆ™è®¾ä¸ºæ¨ªæ’
 			if (boxTotal.childrenVisual != null 
 				&& boxTotal.childrenVisual .Count == 1)
 			{
 				boxTotal.LayoutStyle = LayoutStyle.Horizontal ;
 			}
 
-			/*  ÔİÊ±²»¼ÓcommentÇøÓò
+			/*  æš‚æ—¶ä¸åŠ commentåŒºåŸŸ
 			Comment comment = new Comment ();
 			comment.container = this;
 			this.AddChildVisual  (comment);
@@ -669,15 +669,15 @@ namespace DigitalPlatform.Xml
 	
 		#endregion
 
-		#region ÖØĞ´Ğéº¯Êı
+		#region é‡å†™è™šå‡½æ•°
 		
-		// ÎªÊ²Ã´ÒªÖØĞ´ĞéÊôĞÔ,itemÊÇ´ÓvisualÅÉÉú,¶øvisualÅÉÉúÀà²¢Ã»ÓĞ¾ßÌåÊµÏÖÕâ¸öº¯Êı
+		// ä¸ºä»€ä¹ˆè¦é‡å†™è™šå±æ€§,itemæ˜¯ä»visualæ´¾ç”Ÿ,è€Œvisualæ´¾ç”Ÿç±»å¹¶æ²¡æœ‰å…·ä½“å®ç°è¿™ä¸ªå‡½æ•°
 		public override void Paint(PaintEventArgs pe,
 			int nBaseX,
 			int nBaseY,
 			PaintMember paintMember)
 		{
-			// 1.¼ÆËã³ö±¾¶ÔÏóµÄÊµ¼ÊÇøÓò
+			// 1.è®¡ç®—å‡ºæœ¬å¯¹è±¡çš„å®é™…åŒºåŸŸ
 			Rectangle rectPaintThis = new Rectangle (0,0,0,0);
 			rectPaintThis = new Rectangle (nBaseX + this.Rect.X,
 				nBaseY + this.Rect.Y,
@@ -686,37 +686,37 @@ namespace DigitalPlatform.Xml
 			if (rectPaintThis.IntersectsWith(pe.ClipRectangle )== false)
 				return;
 
-			Brush brush = null;
-
-			// 2.»­±³¾°É«
-			//	ÈçÓĞÈ±Ê¡Í¸Ã÷É«,µ±Ç°ÑÕÉ«ÓëÍ¸Ã÷É«ÏàÍ¬Ôò²»»­ÁË
+			// 2.ç”»èƒŒæ™¯è‰²
+			//	å¦‚æœ‰ç¼ºçœé€æ˜è‰²,å½“å‰é¢œè‰²ä¸é€æ˜è‰²ç›¸åŒåˆ™ä¸ç”»äº†
 			Object colorDefault = null;
 			XmlEditor editor = this.m_document;
 			if (editor != null && editor.VisualCfg != null)
 				colorDefault = editor.VisualCfg.transparenceColor;
-			if (colorDefault != null)  //È±Ê¡ÑÕÉ«
+			if (colorDefault != null)  //ç¼ºçœé¢œè‰²
 			{
 				if (((Color)colorDefault).Equals(BackColor) == true)
 					goto SkipDrawBack;
 			}
 
-			brush = new SolidBrush(this.BackColor);
-			pe.Graphics.FillRectangle (brush,rectPaintThis);
+            using (Brush brush = new SolidBrush(this.BackColor))
+            {
+                pe.Graphics.FillRectangle(brush, rectPaintThis);
+            }
 
-			// Ìø¹ı»­±³¾°É«			
+			// è·³è¿‡ç”»èƒŒæ™¯è‰²			
 			SkipDrawBack:
 
 
 
-				// 3.»­ÏßÌõ
-				// µ±µ¥ÏßÌõÊ±£¬×Ô¼º²»»­,¿¿¶ù×ÓÀ´»­
+				// 3.ç”»çº¿æ¡
+				// å½“å•çº¿æ¡æ—¶ï¼Œè‡ªå·±ä¸ç”»,é å„¿å­æ¥ç”»
 				if (editor != null
 					&& editor.VisualCfg == null)
 				{
 				}
 				else
 				{
-					// ÅäÖÃÎÄ¼ş¶¨ÁËµÄÊ±ºò
+					// é…ç½®æ–‡ä»¶å®šäº†çš„æ—¶å€™
 					this.DrawLines(rectPaintThis,
 						this.TopBorderHeight,
 						this.BottomBorderHeight,
@@ -725,7 +725,7 @@ namespace DigitalPlatform.Xml
 						this.BorderColor);
 				}
 
-			// 4.»­¶ù×Ó
+			// 4.ç”»å„¿å­
 			if (childrenVisual == null)
 				return;
 
@@ -762,36 +762,13 @@ namespace DigitalPlatform.Xml
 						visual.BorderColor);
 				}
 			}
-
-
-			/*
-
-						// 5.¸øµ±Ç°»î¶¯µÄItem¼ÓÁÁÏÔÊ¾
-						XmlEditor myEditor = this.m_document;
-						if (myEditor != null)
-						{
-							if (this == myEditor.SelectedItem)
-							{
-								//²âÊÔÓÃÏßÌõ¿ò
-								rectPaint = new Rectangle (nBaseX + this.rect .X,
-									nBaseY + this.rect .Y,
-									this.rect .Width ,
-									this.rect .Height-1);
-								Pen pen = new Pen(Color.White,1);
-								pe.Graphics .DrawRectangle (pen,rectPaint );
-								pen.Dispose ();
-							}
-						}
-			*/			
 		}
-
-
 		#endregion
 	} 
 
 
 
-	// ÔªËØºÍÊôĞÔ¹²ÓĞµÄ»ùÀà¡£Ò»°ã²»Ö±½ÓÊµÀı»¯
+	// å…ƒç´ å’Œå±æ€§å…±æœ‰çš„åŸºç±»ã€‚ä¸€èˆ¬ä¸ç›´æ¥å®ä¾‹åŒ–
 	public class ElementAttrBase : Item
 	{
 		public string Prefix = null;
@@ -800,8 +777,8 @@ namespace DigitalPlatform.Xml
 
 		internal string m_strTempURI = null;
 
-		// ¸ÃÔªËØÊÇ²»ÊÇÃüÃû¿Õ¼ä½Úµã 
-		// ËµÃ÷,Ä¿Ç°ÎÒÃÇµÄÃüÁî¿Õ¼ä½ÚµãÓëÊôĞÔ½ÚµãÊÇ·ÅÔÚÒ»µãµÄ,ËùÒÔÓÃÒ»¸öÊôĞÔÀ´Çø±ğ
+		// è¯¥å…ƒç´ æ˜¯ä¸æ˜¯å‘½åç©ºé—´èŠ‚ç‚¹ 
+		// è¯´æ˜,ç›®å‰æˆ‘ä»¬çš„å‘½ä»¤ç©ºé—´èŠ‚ç‚¹ä¸å±æ€§èŠ‚ç‚¹æ˜¯æ”¾åœ¨ä¸€ç‚¹çš„,æ‰€ä»¥ç”¨ä¸€ä¸ªå±æ€§æ¥åŒºåˆ«
 		public bool IsNamespace = false;  
 
 		public virtual string NamespaceURI 
@@ -815,7 +792,7 @@ namespace DigitalPlatform.Xml
 
 
 
-	// Item¼¯ºÏ
+	// Itemé›†åˆ
 	public class ItemList : CollectionBase
 	{
 		public Item this[int index]

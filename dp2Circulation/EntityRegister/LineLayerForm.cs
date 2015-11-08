@@ -44,6 +44,7 @@ namespace dp2Circulation
 
         Pen CreateHatchPen(Color color, float width)
         {
+            // TODO: brush 被谁拥有？会被正确释放么？
             Brush brush = new HatchBrush(HatchStyle.DarkUpwardDiagonal, // WideDownwardDiagonal,
                 // Color.FromArgb(0, 255, 255, 255),
                 Color.FromArgb(0, 254, 254, 254),

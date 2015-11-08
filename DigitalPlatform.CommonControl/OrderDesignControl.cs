@@ -2254,162 +2254,96 @@ namespace DigitalPlatform.CommonControl
 
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
-            Brush brushText = new SolidBrush(Color.Black);
-
-
-            // Brush brushDark = new SolidBrush(Color.Gray); // Color.DarkGreen
-            // e.Graphics.FillRectangle(brush, e.ClipRectangle);
-
-            Pen pen = new Pen(Color.Red);
-
-            Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
-            // Debug.WriteLine("p x=" + p.X.ToString() + " y=" + p.Y.ToString());
-
-            // int[] row_heights = this.tableLayoutPanel_content.GetRowHeights();
-            int[] column_widths = this.tableLayoutPanel_content.GetColumnWidths();
-            // Debug.WriteLine("height count=" + row_heights.Length.ToString() + " width count=" + column_widths.Length.ToString());
-
-            Font font = null;
-            List<string> column_titles = new List<string>();
-            for (int j = 0; j < this.tableLayoutPanel_content.ColumnCount; j++)
+            using(Brush brushText = new SolidBrush(Color.Black))
+            using (Pen pen = new Pen(Color.Red))
             {
-                Control control = this.tableLayoutPanel_content.GetControlFromPosition(j, 0);
-                if (control != null)
+
+                Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
+                // Debug.WriteLine("p x=" + p.X.ToString() + " y=" + p.Y.ToString());
+
+                // int[] row_heights = this.tableLayoutPanel_content.GetRowHeights();
+                int[] column_widths = this.tableLayoutPanel_content.GetColumnWidths();
+                // Debug.WriteLine("height count=" + row_heights.Length.ToString() + " width count=" + column_widths.Length.ToString());
+
+                Font font = null;
+                List<string> column_titles = new List<string>();
+                for (int j = 0; j < this.tableLayoutPanel_content.ColumnCount; j++)
                 {
-                    column_titles.Add(control.Text);
-                    if (font == null)
-                        font = control.Font;
-                }
-                else
-                    column_titles.Add("");
-            }
-
-
-            // float y = row_heights[0];   // +this.AutoScrollPosition.Y + this.tableLayoutPanel_content.Location.Y;
-            for (int i = 0; i < this.Items.Count; i++)
-            {
-                Item item = this.Items[i];
-
-                if ((item.State & ItemState.Selected) == 0
-                    || i == 0)
-                    continue;
-
-                // int height = row_heights[i + 1];
-
-                Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
-                rect.Width = this.tableLayoutPanel_content.DisplayRectangle.Width;
-                rect.Offset(-p.X, -p.Y);
-                rect.Height = (int)this.Font.GetHeight() + 8;
-
-                LinearGradientBrush brushGradient = new LinearGradientBrush(
-new PointF(rect.X, rect.Y),
-new PointF(rect.X, rect.Y + rect.Height),
-Color.FromArgb(10, Color.Gray),
-Color.FromArgb(50, Color.Gray)
-);
-
-
-                e.Graphics.FillRectangle(brushGradient, rect);
-
-
-                // 一行中每个格子
-                float x = rect.X;    //  this.AutoScrollPosition.X + this.tableLayoutPanel_content.Location.X;
-                for (int j = 0; j < column_widths.Length; j++)
-                {
-                    float fWidth = column_widths[j];
-
-                    string strTitle = column_titles[j];
-                    // Debug.WriteLine("x=" + x.ToString() + " y=" + y.ToString());
-
-                    /*
-                    Rectangle rect = new Rectangle((int)x, (int)y, (int)fWidth, height);
-                    rect.Offset(-p.X, -p.Y);
-                    e.Graphics.DrawRectangle(pen, rect);
-                     * */
-                    if (fWidth > 0 && string.IsNullOrEmpty(strTitle) == false)
+                    Control control = this.tableLayoutPanel_content.GetControlFromPosition(j, 0);
+                    if (control != null)
                     {
-
-                        e.Graphics.DrawString(
-                        strTitle,
-                        font,
-                        brushText,
-                        x + 6,
-                        rect.Y + 4);
+                        column_titles.Add(control.Text);
+                        if (font == null)
+                            font = control.Font;
                     }
-                    x += fWidth;
-
-
+                    else
+                        column_titles.Add("");
                 }
 
-                // y += height;
+
+                // float y = row_heights[0];   // +this.AutoScrollPosition.Y + this.tableLayoutPanel_content.Location.Y;
+                for (int i = 0; i < this.Items.Count; i++)
+                {
+                    Item item = this.Items[i];
+
+                    if ((item.State & ItemState.Selected) == 0
+                        || i == 0)
+                        continue;
+
+                    // int height = row_heights[i + 1];
+
+                    Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
+                    rect.Width = this.tableLayoutPanel_content.DisplayRectangle.Width;
+                    rect.Offset(-p.X, -p.Y);
+                    rect.Height = (int)this.Font.GetHeight() + 8;
+
+                    using (LinearGradientBrush brushGradient = new LinearGradientBrush(
+    new PointF(rect.X, rect.Y),
+    new PointF(rect.X, rect.Y + rect.Height),
+    Color.FromArgb(10, Color.Gray),
+    Color.FromArgb(50, Color.Gray)
+    ))
+                    {
+                        e.Graphics.FillRectangle(brushGradient, rect);
+                    }
+
+                    // 一行中每个格子
+                    float x = rect.X;    //  this.AutoScrollPosition.X + this.tableLayoutPanel_content.Location.X;
+                    for (int j = 0; j < column_widths.Length; j++)
+                    {
+                        float fWidth = column_widths[j];
+
+                        string strTitle = column_titles[j];
+                        // Debug.WriteLine("x=" + x.ToString() + " y=" + y.ToString());
+
+                        if (fWidth > 0 && string.IsNullOrEmpty(strTitle) == false)
+                        {
+                            e.Graphics.DrawString(
+                            strTitle,
+                            font,
+                            brushText,
+                            x + 6,
+                            rect.Y + 4);
+                        }
+                        x += fWidth;
+                    }
+
+                    // y += height;
+                }
             }
-
-
-
-
-
-
-#if NOOOOOOOOOOOOOOOOOOO
-            Brush brush = new SolidBrush(Color.Red);
-            // e.Graphics.FillRectangle(brush, e.ClipRectangle);
-
-            Pen pen = new Pen(Color.Red);
-
-            Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
-
-            // 画横线
-            for (int i = 0; i < this.Items.Count; i++)
-            {
-                Item item = this.Items[i];
-
-                Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
-                rect.Width = this.tableLayoutPanel_content.DisplayRectangle.Width;
-                rect.Offset(-p.X, -p.Y);
-                e.Graphics.DrawRectangle(pen, rect);
-            }
-
-            /*
-            // 画横线
-            float y = 0;
-            for (int i = 0; i < this.tableLayoutPanel_content.RowStyles.Count; i++)
-            {
-                float fHeight = this.tableLayoutPanel_content.RowStyles[i].Height;
-
-                e.Graphics.DrawLine(pen,
-                    p.X, y+p.Y,
-                    p.X + 3000, y+p.Y);
-                y += fHeight;
-            }
-             * */
-
-            // 画竖线
-            float x = 0;
-            for(int i=0;i<this.tableLayoutPanel_content.ColumnStyles.Count;i++)
-            {
-                float fWidth = this.tableLayoutPanel_content.ColumnStyles[i].Width;
-
-                e.Graphics.DrawLine(pen, 
-                    x+p.X, 0,
-                    x+p.X, 3000);
-                x += fWidth;
-            }
-#endif
         }
 
         private void tableLayoutPanel_content_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
         {
-            /*
-            Brush brush = new SolidBrush(Color.Red);
-            Rectangle rect = Rectangle.Inflate(e.CellBounds, -1, -1);
-            e.Graphics.FillRectangle(brush, rect);
-             * */
             if (this.m_nInSuspend > 0)
                 return; // 防止闪动
 
             // Rectangle rect = Rectangle.Inflate(e.CellBounds, -1, -1);
             Rectangle rect = e.CellBounds;
-            Pen pen = new Pen(Color.FromArgb(200,200,200));
-            e.Graphics.DrawRectangle(pen, rect);
+            using (Pen pen = new Pen(Color.FromArgb(200, 200, 200)))
+            {
+                e.Graphics.DrawRectangle(pen, rect);
+            }
         }
 
 

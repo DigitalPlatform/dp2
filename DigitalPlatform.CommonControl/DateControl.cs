@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -29,7 +29,7 @@ namespace DigitalPlatform.CommonControl
 
             m_oldTextBoxLocation = this.maskedTextBox_date.Location;
 
-            OnTextBoxHeightChanged();   // ≥ı ºªØ∏ﬂ∂»
+            OnTextBoxHeightChanged();   // ÂàùÂßãÂåñÈ´òÂ∫¶
         }
 
         [Category("Appearance")]
@@ -60,7 +60,7 @@ namespace DigitalPlatform.CommonControl
             {
                 base.BorderStyle = value;
 
-                OnTextBoxHeightChanged();   // ±ﬂøÚ∏ƒ±‰£¨µº÷¬∏ﬂ∂»∏ƒ±‰
+                OnTextBoxHeightChanged();   // ËæπÊ°ÜÊîπÂèòÔºåÂØºËá¥È´òÂ∫¶ÊîπÂèò
 
             }
         }
@@ -94,7 +94,7 @@ namespace DigitalPlatform.CommonControl
 
             if (this.DateTextChanged != null)
             {
-                this.DateTextChanged(this, e);  // 205/5/25 “‘«∞Œ™ sender
+                this.DateTextChanged(this, e);  // 205/5/25 ‰ª•Ââç‰∏∫ sender
             }
 
             // this.OnTextChanged(e);
@@ -113,7 +113,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        // µ±«∞value «∑ÒŒ™ø’÷µ
+        // ÂΩìÂâçvalueÊòØÂê¶‰∏∫Á©∫ÂÄº
         public bool IsValueNull()
         {
             if (this.Value == new DateTime((long)0))
@@ -159,9 +159,9 @@ namespace DigitalPlatform.CommonControl
 
         static string GetDateString(DateTime date)
         {
-            return date.Year.ToString().PadLeft(4, '0') + "ƒÍ"
-                + date.Month.ToString().PadLeft(2, '0') + "‘¬"
-                + date.Day.ToString().PadLeft(2, '0') + "»’";
+            return date.Year.ToString().PadLeft(4, '0') + "Âπ¥"
+                + date.Month.ToString().PadLeft(2, '0') + "Êúà"
+                + date.Day.ToString().PadLeft(2, '0') + "Êó•";
         }
 
         string GetPureDateText()
@@ -324,60 +324,67 @@ namespace DigitalPlatform.CommonControl
     Rectangle rect,
     bool bActive)
         {
-            Brush brush = new SolidBrush(
-                SystemColors.ButtonFace);
-            g.FillRectangle(brush, rect);
+            using (Brush brush = new SolidBrush(
+                SystemColors.ButtonFace))
+            {
+                g.FillRectangle(brush, rect);
+            }
 
             if (bActive == true)
             {
-                Pen penBorder = new Pen(SystemColors.Window);
-                g.DrawRectangle(penBorder, rect);
+                using (Pen penBorder = new Pen(SystemColors.Window))
+                {
+                    g.DrawRectangle(penBorder, rect);
+                }
             }
 
             int nCenterX = rect.X + rect.Width / 2 + (rect.Width % 2);
             int nCenterY = rect.Y + rect.Height / 2 + (rect.Height % 2);
 
-            Pen pen = new Pen(
-                bActive ? SystemColors.ControlText : SystemColors.GrayText);
+            using (Pen pen = new Pen(
+                bActive ? SystemColors.ControlText : SystemColors.GrayText))
+            {
+                Point pt1 = new Point(nCenterX - 2, nCenterY - 1);
+                Point pt2 = new Point(nCenterX + 2, nCenterY - 1);
+                g.DrawLine(pen, pt1, pt2);
 
-            Point pt1 = new Point(nCenterX - 2, nCenterY - 1);
-            Point pt2 = new Point(nCenterX + 2, nCenterY - 1);
-            g.DrawLine(pen, pt1, pt2);
+                pt1 = new Point(nCenterX - 1, nCenterY);
+                pt2 = new Point(nCenterX + 1, nCenterY);
+                g.DrawLine(pen, pt1, pt2);
 
-            pt1 = new Point(nCenterX - 1, nCenterY);
-            pt2 = new Point(nCenterX + 1, nCenterY);
-            g.DrawLine(pen, pt1, pt2);
-
-            pt1 = new Point(nCenterX, nCenterY + 1);
-            g.FillRectangle(new SolidBrush(pen.Color), pt1.X, pt1.Y, 1, 1); // draw one pixel
-            // g.DrawLine(pen, pt1, pt2);
+                pt1 = new Point(nCenterX, nCenterY + 1);
+                using (Brush brush = new SolidBrush(pen.Color))
+                {
+                    g.FillRectangle(brush, pt1.X, pt1.Y, 1, 1); // draw one pixel
+                }
+                // g.DrawLine(pen, pt1, pt2);
+            }
         }
 
         private void DateControl_Paint(object sender, PaintEventArgs e)
         {
             if (this.maskedTextBox_date.Enabled == false)
             {
-                Brush brush = new SolidBrush(SystemColors.Control);
-                e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                using (Brush brush = new SolidBrush(SystemColors.Control))
+                {
+                    e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                }
 
-                Pen pen = new Pen(Color.DarkGray);
+                using (Pen pen = new Pen(Color.DarkGray))
+                {
 
-                Rectangle rect = this.ClientRectangle;
-                rect.Height--;
-                rect.Width--;
+                    Rectangle rect = this.ClientRectangle;
+                    rect.Height--;
+                    rect.Width--;
 
-                // ª≠±ﬂøÚ
-                e.Graphics.DrawRectangle(pen, rect);
+                    // ÁîªËæπÊ°Ü
+                    e.Graphics.DrawRectangle(pen, rect);
+                }
 
-                // ∞¥≈•
+                // ÊåâÈíÆ
                 if (this.m_flatstyle == System.Windows.Forms.FlatStyle.Flat)
                 {
                     DrawFlatComboButton(e.Graphics, this.RectButton, false);
-                    /*
-                    ControlPaint.DrawComboButton(e.Graphics,
-        this.RectButton,
-        ButtonState.Inactive | ButtonState.Flat);
-                     * */
                 }
                 else
                 {
@@ -397,14 +404,15 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
-                Brush brush = new SolidBrush(SystemColors.Window);
-                e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                using (Brush brush = new SolidBrush(SystemColors.Window))
+                {
+                    e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                }
 
-                // ∞¥≈•
+                // ÊåâÈíÆ
                 if (this.m_flatstyle == System.Windows.Forms.FlatStyle.Flat)
                 {
                     DrawFlatComboButton(e.Graphics, this.RectButton, true);
-
                 }
                 else
                 {
@@ -421,9 +429,7 @@ namespace DigitalPlatform.CommonControl
     ButtonState.Normal);
                     }
                 }
-
             }
-
         }
 
         FlatStyle m_flatstyle = FlatStyle.Standard;
@@ -456,7 +462,7 @@ namespace DigitalPlatform.CommonControl
 
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
-            // ƒ£∑¬ComboBox TextBoxµ»£¨Location∫ÕSizeø…“‘±ªÀı∑≈£¨µ´ «Margin∫ÕPadding≤ª±‰
+            // Ê®°‰ªøComboBox TextBoxÁ≠âÔºåLocationÂíåSizeÂèØ‰ª•Ë¢´Áº©ÊîæÔºå‰ΩÜÊòØMarginÂíåPadding‰∏çÂèò
             Padding margin = this.Margin;
             Padding Padding = this.Padding;
             base.ScaleControl(factor, specified);

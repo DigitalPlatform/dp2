@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
@@ -10,7 +10,7 @@ namespace DigitalPlatform.Xml
 {
 	public class TextVisual : Visual
 	{
-		#region ³ÉÔ±±äÁ¿
+		#region æˆå‘˜å˜é‡
 
 		private string strText = null;
 
@@ -18,15 +18,15 @@ namespace DigitalPlatform.Xml
 
 		#endregion
 
-		#region TextVisualµÄÊôÐÔ
+		#region TextVisualçš„å±žæ€§
 
-		// ×ö³ÉÊôÐÔµÄÔ­ÒòÊÇ½«À´ËæÊ±´ÓÅäÖÃÎÄ¼þÖÐÕÒ,²»ÓÃm_*±äÁ¿±£´æ
-		// TextVisualÊÇ»ùÀà£¬»¹ÅÉÉúÁËÒ»Ð©Àà
+		// åšæˆå±žæ€§çš„åŽŸå› æ˜¯å°†æ¥éšæ—¶ä»Žé…ç½®æ–‡ä»¶ä¸­æ‰¾,ä¸ç”¨m_*å˜é‡ä¿å­˜
+		// TextVisualæ˜¯åŸºç±»ï¼Œè¿˜æ´¾ç”Ÿäº†ä¸€äº›ç±»
 		public virtual string Text
 		{
 			get
 			{
-				Debug.Assert(this.strText != null,"ÉÐÎ´³õÊ¼»¯111");
+				Debug.Assert(this.strText != null,"å°šæœªåˆå§‹åŒ–111");
 				return strText;
 			}
 			set
@@ -41,7 +41,7 @@ namespace DigitalPlatform.Xml
 
 		#endregion
 
-		#region ¹ØÓÚCfgµÄÊôÐÔ
+		#region å…³äºŽCfgçš„å±žæ€§
 
 		public Font GetFont() 
 		{
@@ -74,23 +74,23 @@ namespace DigitalPlatform.Xml
 		}
 		#endregion
 
-		#region ÖØÐ´»ùÀàµÄÐéº¯Êý
+		#region é‡å†™åŸºç±»çš„è™šå‡½æ•°
 
-        // ¸ù¾Ý´«ÈëµÄÏà¶Ô×ø±ê£¬µÃµ½»÷ÖÐµÄVisual¶ÔÏó
+        // æ ¹æ®ä¼ å…¥çš„ç›¸å¯¹åæ ‡ï¼Œå¾—åˆ°å‡»ä¸­çš„Visualå¯¹è±¡
         // parameters:
-        //      p           ´«ÈëµÄÏà¶Ô×ø±ê
-        //      retVisual   out²ÎÊý£¬·µ»Ø»÷ÖÐµÄvisual
+        //      p           ä¼ å…¥çš„ç›¸å¯¹åæ ‡
+        //      retVisual   outå‚æ•°ï¼Œè¿”å›žå‡»ä¸­çš„visual
         // return:
-        //      -1  ×ø±ê²»ÔÚ±¾ÇøÓò
-        //      0   ÎÄ×ÖÇø
-        //      1   ¿Õ°×
-        //      2   ·ìÏ¶ÉÏ
+        //      -1  åæ ‡ä¸åœ¨æœ¬åŒºåŸŸ
+        //      0   æ–‡å­—åŒº
+        //      1   ç©ºç™½
+        //      2   ç¼éš™ä¸Š
 		public override int HitTest(Point p,
 			out Visual retVisual)
 		{
 			retVisual = null;
-			int nResizeAreaWidth = 4;   //·ìÏ¶µÄ¿í¶È
-			//ÔÚ·ìÉÏ
+			int nResizeAreaWidth = 4;   //ç¼éš™çš„å®½åº¦
+			//åœ¨ç¼ä¸Š
 			if ( p.X >= this.Rect.X + this.Rect.Width - (nResizeAreaWidth/2)
 				&& p.X < this.Rect.X + this.Rect.Width + (nResizeAreaWidth/2)) 
 			{
@@ -98,7 +98,7 @@ namespace DigitalPlatform.Xml
 				return  2;
 			}
 
-			//²»ÔÚÇøÓò
+			//ä¸åœ¨åŒºåŸŸ
 			if (p.X < this.Rect.X 
 				|| p.Y < this.Rect.Y )
 			{
@@ -110,8 +110,8 @@ namespace DigitalPlatform.Xml
 				return -1;
 			}
 
-			//ÔÚÏßÌõºÍ¿Õ°×
-			//1. ×óÏßÌõ¿Õ°×´¦
+			//åœ¨çº¿æ¡å’Œç©ºç™½
+			//1. å·¦çº¿æ¡ç©ºç™½å¤„
 			if (p.X > this.Rect.X 
 				&& p.X < this.Rect.X + this.LeftResWidth
 				&& p.Y > this.Rect.Y
@@ -121,7 +121,7 @@ namespace DigitalPlatform.Xml
 				return -1;
 			}
 
-			// 2.ÓÒÏßÌõ¿Õ°×´¦
+			// 2.å³çº¿æ¡ç©ºç™½å¤„
 			if (p.X > this.Rect.X + this.Rect.Width - this.RightResWidth
 				&& p.X < this.Rect.X + this.Rect.Width
 				&& p.Y > this.Rect.Y
@@ -130,7 +130,7 @@ namespace DigitalPlatform.Xml
 				retVisual = this;
 				return -1;
 			}
-			// 3.ÉÏÏßÌõ¿Õ°×´¦
+			// 3.ä¸Šçº¿æ¡ç©ºç™½å¤„
 			if (p.Y > this.Rect.Y
 				&& p.Y < this.Rect.Y + this.TopResHeight
 				&& p.X > this.Rect.X
@@ -139,7 +139,7 @@ namespace DigitalPlatform.Xml
 				retVisual = this;
 				return -1;
 			}
-			// 4.ÏÂÏßÌõ¿Õ°×´¦
+			// 4.ä¸‹çº¿æ¡ç©ºç™½å¤„
 			if (p.Y > this.Rect.Y + this.Rect.Height - this.BottomResHeight
 				&& p.Y < this.Rect.Y + this.Rect.Height
 				&& p.X > this.Rect.X
@@ -150,7 +150,7 @@ namespace DigitalPlatform.Xml
 			}
 
 			
-			//ÔÚÎÄ×ÖÇø
+			//åœ¨æ–‡å­—åŒº
 			if (p.X >= this.Rect.X + this.LeftResWidth 
 				&& p.Y >= this.Rect.Y + this.TopResHeight 
 				&& p.X < this.Rect.X + this.Rect.Width - this.RightResWidth
@@ -198,9 +198,7 @@ namespace DigitalPlatform.Xml
 				this.Rect.Width, 
 				this.Rect.Height);
 
-			Brush brush = null;
-
-			//±³¾°É«
+			//èƒŒæ™¯è‰²
 			Item item = this.GetItem ();
 			Object colorDefault = null;
 			XmlEditor editor = item.m_document;
@@ -213,12 +211,14 @@ namespace DigitalPlatform.Xml
 
 			}
 
-			brush = new SolidBrush(this.BackColor);
-			pe.Graphics .FillRectangle (brush,rectPaint);
+            using (Brush brush = new SolidBrush(this.BackColor))
+            {
+                pe.Graphics.FillRectangle(brush, rectPaint);
+            }
 
 			SKIPDRAWBACK:
 
-				//µ÷DrawLines»­±ß¿ò
+				//è°ƒDrawLinesç”»è¾¹æ¡†
 				if (editor != null && editor.VisualCfg == null)
 				{
 				}
@@ -232,28 +232,24 @@ namespace DigitalPlatform.Xml
 						this.BorderColor);
 				}
 
-			//ÄÚÈÝÇøÓò
+			//å†…å®¹åŒºåŸŸ
 			rectPaint = new Rectangle (nBaseX + this.Rect.X + this.LeftResWidth/*LeftBlank*/,
 				nBaseY + this.Rect.Y + this.TopResHeight/*this.TopBlank*/,
 				this.Rect.Width - this.TotalRestWidth/*this.LeftBlank - this.RightBlank*/,
 				this.Rect.Height - this.TotalRestHeight/*this.TopBlank - this.BottomBlank*/);
 			
-			brush = new SolidBrush(TextColor);
 			Font font1 = this.GetFont();
-			Font font = new Font(font1.Name,font1.Size);
+			using(Font font = new Font(font1.Name,font1.Size))
+            using (Brush brush = new SolidBrush(TextColor))
+            {
 
-			pe.Graphics.DrawString(Text,
-				font, 
-				brush,	
-				rectPaint,
-				new StringFormat());
-	
-			font.Dispose();
-
-			brush.Dispose ();
-			font.Dispose ();
+                pe.Graphics.DrawString(Text,
+                    font,
+                    brush,
+                    rectPaint,
+                    new StringFormat());
+            }
 		}
-
 
 		#endregion
 	}

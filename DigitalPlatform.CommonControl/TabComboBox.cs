@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// ÄÜÔÚÁĞ±íÄÚÈİÖĞÏÔÊ¾ÖÆ±í·ûÀ¸Î»µÄ ComboBox
+    /// èƒ½åœ¨åˆ—è¡¨å†…å®¹ä¸­æ˜¾ç¤ºåˆ¶è¡¨ç¬¦æ ä½çš„ ComboBox
     /// </summary>
     public partial class TabComboBox : ComboBox
     {
@@ -49,7 +49,7 @@ namespace DigitalPlatform.CommonControl
         
         FontStyle m_rightFontStyle = FontStyle.Regular;
 
-        public bool RemoveRightPartAtTextBox = true;    // ÔÚtextboxÓòÖĞÉ¾³ıÎÄ×ÖµÄÓÒ±ß²¿·Ö(Ò²¾ÍÊÇ'\t'ÓÒ±ßµÄ²¿·Ö£¬°üÀ¨'\t')
+        public bool RemoveRightPartAtTextBox = true;    // åœ¨textboxåŸŸä¸­åˆ é™¤æ–‡å­—çš„å³è¾¹éƒ¨åˆ†(ä¹Ÿå°±æ˜¯'\t'å³è¾¹çš„éƒ¨åˆ†ï¼ŒåŒ…æ‹¬'\t')
 
         const int WM_CHANGED = API.WM_USER + 300;
 
@@ -72,35 +72,55 @@ namespace DigitalPlatform.CommonControl
                 strRight = strText.Substring(nRet + 1);
             }
 
-            Brush brushBack = new SolidBrush(e.BackColor);
-            e.Graphics.FillRectangle(brushBack, e.Bounds);
-            brushBack.Dispose();
-            brushBack = null;
+            using (Brush brushBack = new SolidBrush(e.BackColor))
+            {
+                e.Graphics.FillRectangle(brushBack, e.Bounds);
+            }
 
+            using (Brush brush = new SolidBrush(e.ForeColor))
+            {
+                {
+                    Font font = null;
+                    try
+                    {
+                        if (this.LeftFontStyle == FontStyle.Regular)
+                            font = e.Font;
+                        else
+                            font = new Font(e.Font, this.LeftFontStyle);
 
-            Brush brush = new SolidBrush(e.ForeColor);
-            Font font = null;
-            if (this.LeftFontStyle == FontStyle.Regular)
-                font = e.Font;
-            else
-                font = new Font(e.Font, this.LeftFontStyle);
+                        e.Graphics.DrawString(strLeft, font, brush, e.Bounds);
+                    }
+                    finally
+                    {
+                        if (font != e.Font && font != null)
+                            font.Dispose();
+                    }
+                }
 
-            e.Graphics.DrawString(strLeft, font, brush, e.Bounds);
+                SizeF size = e.Graphics.MeasureString(strRight, e.Font);
+                RectangleF rightBound = new RectangleF(e.Bounds.Right - size.Width,
+                    e.Bounds.Y,
+                    e.Bounds.Width,
+                    e.Bounds.Height);
 
-            SizeF size = e.Graphics.MeasureString(strRight, e.Font);
-            RectangleF rightBound = new RectangleF(e.Bounds.Right - size.Width,
-                e.Bounds.Y,
-                e.Bounds.Width,
-                e.Bounds.Height);
+                {
+                    Font font = null;
+                    try
+                    {
+                        if (this.RightFontStyle == FontStyle.Regular)
+                            font = e.Font;
+                        else
+                            font = new Font(e.Font, this.RightFontStyle);
 
-            if (this.RightFontStyle == FontStyle.Regular)
-                font = e.Font;
-            else
-                font = new Font(e.Font, this.RightFontStyle);
-
-            e.Graphics.DrawString(strRight, font, brush, rightBound);
-
-            brush.Dispose();
+                        e.Graphics.DrawString(strRight, font, brush, rightBound);
+                    }
+                    finally
+                    {
+                        if (font != e.Font && font != null)
+                            font.Dispose();
+                    }
+                }
+            }
         }
 
         private void TabComboBox_TextChanged(object sender, EventArgs e)
@@ -118,7 +138,7 @@ namespace DigitalPlatform.CommonControl
             return strText.Substring(0, nRet).Trim();
         }
 
-        // É¾³ıµôÅú´ÎºÅÓÒ±ßµÄ²¿·Ö
+        // åˆ é™¤æ‰æ‰¹æ¬¡å·å³è¾¹çš„éƒ¨åˆ†
         void RemoveRightPart()
         {
             string strText = this.Text;
@@ -128,9 +148,9 @@ namespace DigitalPlatform.CommonControl
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)

@@ -2092,11 +2092,11 @@ namespace DigitalPlatform.CommonControl
             if (this.m_nDisableDrawCell > 0)
                 return;
 
-
-            // Rectangle rect = Rectangle.Inflate(e.CellBounds, -1, -1);
             Rectangle rect = e.CellBounds;
-            Pen pen = new Pen(Color.FromArgb(200, 200, 200));
-            e.Graphics.DrawRectangle(pen, rect);
+            using (Pen pen = new Pen(Color.FromArgb(200, 200, 200)))
+            {
+                e.Graphics.DrawRectangle(pen, rect);
+            }
         }
 
     }

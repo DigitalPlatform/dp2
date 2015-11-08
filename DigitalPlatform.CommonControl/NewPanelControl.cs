@@ -21,9 +21,11 @@ namespace DigitalPlatform.CommonControl
         {
             RectangleF rect = new RectangleF(10, 10,
                 this.Size.Width, this.Size.Height);
-            Pen pen = new Pen(Color.Gray);
-            RoundRectangle(pe.Graphics,
-                pen, null, rect, 10);
+            using (Pen pen = new Pen(Color.Gray))
+            {
+                RoundRectangle(pe.Graphics,
+                    pen, null, rect, 10);
+            }
 
             // Calling the base class OnPaint
             base.OnPaint(pe);
@@ -60,21 +62,22 @@ namespace DigitalPlatform.CommonControl
             float height,
             float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(x + radius, y, x + width - (radius * 2), y);
-            path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
-            path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
-            path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
-            path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
-            path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
-            path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
-            path.CloseFigure();
-            if (brush != null)
-                graphics.FillPath(brush, path);
-            if (pen != null)
-                graphics.DrawPath(pen, path);
-            path.Dispose();
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(x + radius, y, x + width - (radius * 2), y);
+                path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
+                path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
+                path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
+                path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
+                path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
+                path.AddLine(x, y + height - (radius * 2), x, y + radius);
+                path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
+                path.CloseFigure();
+                if (brush != null)
+                    graphics.FillPath(brush, path);
+                if (pen != null)
+                    graphics.DrawPath(pen, path);
+            }
         }
     }
 }

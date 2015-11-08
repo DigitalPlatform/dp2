@@ -4895,28 +4895,6 @@ this.Volume);
             // 优化
             if (rect.IntersectsWith(e.ClipRectangle) == true)
             {
-                /*
-                if (this.Selected == true)
-                {
-                    // 选择后的背景
-                    RectangleF rect1 = new RectangleF(
-                       x0,
-                       y0,
-                       this.LeftTextWidth,
-                        this.Height);
-                    Brush brush = new SolidBrush(this.Container.SelectedBackColor);
-                    e.Graphics.FillRectangle(brush,
-                        rect1);
-                }
-                else
-                {
-                    // 右边的竖线
-                    e.Graphics.DrawLine(new Pen(Color.LightGray, (float)1),
-                        new PointF(x0 + this.LeftTextWidth, y0),
-                        new PointF(x0 + this.LeftTextWidth, y0 + this.Height));
-                }
-                 * */
-
                 PaintLeftTextArea(
                     nLineNo,
                     x0,
@@ -4924,7 +4902,6 @@ this.Volume);
                     this.LeftTextWidth,
                     (int)this.Height,
                     e);
-
             }
 
             int x = x0;
@@ -5008,88 +4985,61 @@ this.Volume);
             int nHeight11,
             PaintEventArgs e)
         {
-            Pen penBorder = new Pen(Color.FromArgb(255, Color.LightGray), (float)1);
 
             Rectangle rectFrame = new Rectangle(start_x, start_y, nWidth11, nHeight11);
 
-            Brush brushBack = null;
-            if (this.Selected == true)
             {
-                // 选择后的背景
-                /*
-                RectangleF rect1 = new RectangleF(
-                   x0,
-                   y0,
-                   this.LeftTextWidth,
-                    this.Height);
-                 * */
-                brushBack = new SolidBrush(this.Container.SelectedBackColor);
+                Brush brushBack = null;
+
+                try
+                {
+                    if (this.Selected == true)
+                    {
+                        // 选择后的背景
+                        brushBack = new SolidBrush(this.Container.SelectedBackColor);
+                    }
+                    else
+                    {
+                        brushBack = new SolidBrush(this.Container.IssueBoxBackColor);
+                    }
+
+                    bool bFirstLine = false;
+                    bool bTailLine = false;
+                    if (nLineNo == 0)
+                        bFirstLine = true;
+                    if (nLineNo == this.Container.Issues.Count - 1)
+                        bTailLine = true;
+                    string strMask = "++++";
+                    if (bFirstLine && bTailLine)
+                        strMask = "+rr+";
+                    else if (bFirstLine == true)
+                        strMask = "+r++";
+                    else if (bTailLine == true)
+                        strMask = "++r+";
+
+                    using (Pen penBorder = new Pen(Color.FromArgb(255, Color.LightGray), (float)1))
+                    {
+                        BindingControl.PartRoundRectangle(
+                            e.Graphics,
+            penBorder,
+            brushBack,
+            rectFrame,
+            10,
+            strMask); // 左上 右上 右下 左下
+                    }
+                }
+                finally
+                {
+                    if (brushBack != null)
+                        brushBack.Dispose();
+                }
             }
-            else
-            {
-                brushBack = new SolidBrush(this.Container.IssueBoxBackColor);
-            }
-
-            /*
-            e.Graphics.FillRectangle(brushBack,
-                    rectFrame);
-             * */
-
-            /*
-            // 左方竖线
-            e.Graphics.DrawLine(penBorder,
-                new PointF(rectFrame.X, rectFrame.Y),
-                new PointF(rectFrame.X, rectFrame.Y + rectFrame.Height)
-                );
-
-            // 上方横线
-            e.Graphics.DrawLine(penBorder,
-                new PointF(rectFrame.X, rectFrame.Y),
-                new PointF(rectFrame.X + rectFrame.Width, rectFrame.Y)
-                );
-
-            // 右边的竖线
-            e.Graphics.DrawLine(penBorder,
-                new PointF(rectFrame.X+rectFrame.Width, rectFrame.Y),
-                new PointF(rectFrame.X + rectFrame.Width, rectFrame.Y + rectFrame.Height)
-                );
-
-             * */
-            bool bFirstLine = false;
-            bool bTailLine = false;
-            if (nLineNo == 0)
-                bFirstLine = true;
-            if (nLineNo == this.Container.Issues.Count - 1)
-                bTailLine = true;
-            string strMask = "++++";
-            if (bFirstLine && bTailLine)
-                strMask = "+rr+";
-            else if (bFirstLine == true)
-                strMask = "+r++";
-            else if (bTailLine == true)
-                strMask = "++r+";
-
-            BindingControl.PartRoundRectangle(
-                e.Graphics,
-penBorder,
-brushBack,
-rectFrame,
-10,
-strMask); // 左上 右上 右下 左下
 
             rectFrame = GuiUtil.PaddingRect(this.Container.LeftTextMargin,
 rectFrame);
 
             Rectangle rectContent = GuiUtil.PaddingRect(this.Container.LeftTextPadding,
     rectFrame);
-
-            /*
-            // 绘制立体背景
-            BindingControl.PaintButton(e.Graphics,
-            Color.Red,
-            rectContent);
-             * */
-
 
             int x0 = rectContent.X;
             int y0 = rectContent.Y;
@@ -5098,380 +5048,366 @@ rectFrame);
 
             Color colorDark = this.Container.IssueBoxForeColor;
             Color colorGray = this.Container.IssueBoxGrayColor;
-            Brush brushText = null;
-
-            int nMaxWidth = nWidth;
-            int nMaxHeight = nHeight;
-            int nUsedHeight = 0;
-            SizeF size;
-
-            string strPublishTime = this.PublishTime;
-
             bool bFree = false; // 是否为自由期
-            if (String.IsNullOrEmpty(strPublishTime) == true)
-                bFree = true;
-
-            bool bFirstIssue = false;
-            if (this.Container.IsYearFirstIssue(this) == true)
-                bFirstIssue = true;
-
-            // 预先获得期号，以便绘制条形背景
-            string strNo = "";
-            string strYear = "";
-            if (bFree == true)
-            {
-                strNo = "(自由)";
-            }
-            else
-            {
-                strYear = IssueUtil.GetYearPart(strPublishTime);
-                strNo = this.Issue;
-            }
-
-            size = e.Graphics.MeasureString(strNo,
-    this.Container.m_fontTitleLarge);
-            if (size.Width > nMaxWidth)
-                size.Width = nMaxWidth;
-            if (size.Height > nMaxHeight)
-                size.Height = nMaxHeight;
-
-
-            // 标题背景
-            if (bFirstIssue == true || bFree == true)
-            {
-                RectangleF rect1 = new RectangleF(
-                    x0,
-                    y0,
-                    nMaxWidth,
-                    size.Height);
-
-                // 左下 -- 右上
-                LinearGradientBrush brushGradient = new LinearGradientBrush(
-new PointF(rect1.X, rect1.Y + rect1.Height),
-new PointF(rect1.X + rect1.Width, rect1.Y),
-this.Container.IssueBoxBackColor,
-ControlPaint.Light(this.Container.IssueBoxForeColor, 0.99F)
-);
-
-                e.Graphics.FillRectangle(brushGradient,
-                    rect1);
-            }
-
-            Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
-            //Padding margin = this.Container.LeftTextMargin;
-            //Padding padding = this.Container.LeftTextPadding;
-
-            // 新建的和发生过修改的，侧边条颜色需要设定
-            if (this.NewCreated == true)
-            {
-                // 新创建的单册
-                colorSideBar = this.Container.NewBarColor;
-            }
-            else if (this.Changed == true)
-            {
-                // 修改过的的单册
-                colorSideBar = this.Container.ChangedBarColor;
-            }
 
             {
-                // 边条。左侧
-                Brush brushSideBar = new SolidBrush(colorSideBar);
-                RectangleF rectSideBar = new RectangleF(
-    start_x,
-    y0,
-    Math.Max(4, this.Container.LeftTextMargin.Left),
-    nMaxHeight);
-                e.Graphics.FillRectangle(brushSideBar, rectSideBar);
-            }
+                Brush brushText = null;
 
-            if (this.Virtual == true)
-            {
-
-                float nLittleWidth = Math.Min(nMaxWidth,
-                    nMaxHeight);
-
-                RectangleF rectMask = new RectangleF(
-                    x0 + nMaxWidth/2 - nLittleWidth/2,
-                    y0 + nMaxHeight/2 - nLittleWidth/2,
-                    nLittleWidth,
-                    nLittleWidth);
-                Cell.PaintDeletedMask(rectMask,
-                    Color.LightGray,
-                    e,
-                    false);
-            }
-
-            // 第一行文字 年份+期号
-            // 如果不是某年的第一期，则年份显示为淡色
-            {
-
-
-                // 1) 期号
-                brushText = new SolidBrush(colorDark);
-                // size里面已经有strNo的尺寸
-                RectangleF rect = new RectangleF(
-                    x0 + nMaxWidth - size.Width,   // 靠右
-                    y0,
-                    size.Width,
-                    size.Height);
-                float fNoLeft = x0 + nMaxWidth - size.Width;  // 记忆下这个点
-
-                e.Graphics.FillRectangle(brushText, rect);
-
-
-                Brush brushBackground = new SolidBrush(this.Container.IssueBoxBackColor);
-
-                StringFormat stringFormat = new StringFormat();
-                stringFormat.Alignment = StringAlignment.Far;
-                stringFormat.LineAlignment = StringAlignment.Near;
-                stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-
-                e.Graphics.DrawString(strNo,
-                    this.Container.m_fontTitleLarge,
-                    brushBackground,
-                    rect,
-                    stringFormat);
-
-                // 2) 年份
-                if (String.IsNullOrEmpty(strYear) == false)
+                try
                 {
-                    if (bFirstIssue == true)
-                        brushText = new SolidBrush(colorDark);
-                    else
-                        brushText = new SolidBrush(colorGray);
+                    int nMaxWidth = nWidth;
+                    int nMaxHeight = nHeight;
+                    int nUsedHeight = 0;
+                    SizeF size;
 
-                    size = e.Graphics.MeasureString(strYear,
-                        this.Container.m_fontTitleLarge);
+                    string strPublishTime = this.PublishTime;
+
+                    if (String.IsNullOrEmpty(strPublishTime) == true)
+                        bFree = true;
+
+                    bool bFirstIssue = false;
+                    if (this.Container.IsYearFirstIssue(this) == true)
+                        bFirstIssue = true;
+
+                    // 预先获得期号，以便绘制条形背景
+                    string strNo = "";
+                    string strYear = "";
+                    if (bFree == true)
+                    {
+                        strNo = "(自由)";
+                    }
+                    else
+                    {
+                        strYear = IssueUtil.GetYearPart(strPublishTime);
+                        strNo = this.Issue;
+                    }
+
+                    size = e.Graphics.MeasureString(strNo,
+            this.Container.m_fontTitleLarge);
                     if (size.Width > nMaxWidth)
                         size.Width = nMaxWidth;
                     if (size.Height > nMaxHeight)
                         size.Height = nMaxHeight;
-                    rect = new RectangleF(
-                        x0,  // + 4 // 靠左
-                        y0,
-                        size.Width,
-                        size.Height);
-                    /*
-                    // 如果为当年第一个期，还需要绘制淡色文字背景
-                    if (bFirstIssue == true)
+
+                    // 标题背景
+                    if (bFirstIssue == true || bFree == true)
                     {
                         RectangleF rect1 = new RectangleF(
-                            x0,   // 靠左
+                            x0,
                             y0,
-                            fNoLeft - x0,   // 把宽度修正为贯通紧靠右边的no区域
+                            nMaxWidth,
                             size.Height);
-                        Brush brushRect = new SolidBrush(ControlPaint.Light(this.Container.ForeColor, 0.99F));
-                        // 左上 -- 右下
-                        LinearGradientBrush brushGradient = new LinearGradientBrush(
-    new PointF(rect1.X, rect1.Y),
-    new PointF(rect1.X + rect1.Width, rect1.Y + rect1.Height),
-    Color.White,
-    ControlPaint.Light(this.Container.ForeColor, 0.99F)
-    );
 
-                        e.Graphics.FillRectangle(brushGradient,
-                            rect1);
+                        // 左下 -- 右上
+                        using (LinearGradientBrush brushGradient = new LinearGradientBrush(
+        new PointF(rect1.X, rect1.Y + rect1.Height),
+        new PointF(rect1.X + rect1.Width, rect1.Y),
+        this.Container.IssueBoxBackColor,
+        ControlPaint.Light(this.Container.IssueBoxForeColor, 0.99F)
+        ))
+                        {
+                            e.Graphics.FillRectangle(brushGradient,
+                                rect1);
+                        }
                     }
-                     * */
 
-                    stringFormat = new StringFormat();
-                    stringFormat.Alignment = StringAlignment.Near;
-                    stringFormat.LineAlignment = StringAlignment.Near;
-                    stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+                    Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
+                    //Padding margin = this.Container.LeftTextMargin;
+                    //Padding padding = this.Container.LeftTextPadding;
 
-                    e.Graphics.DrawString(strYear,
-                        this.Container.m_fontTitleLarge,
-                        brushText,
-                        rect,
-                        stringFormat);
-                }
-
-                nUsedHeight += (int)size.Height;
-            }
-
-            if (nUsedHeight >= nMaxHeight)
-                return;
-
-            // 第二行文字 出版日期
-            // 淡色。字体稍小
-            if (bFree == false)
-            {
-                y0 += (int)size.Height;
-                string strText = BindingControl.GetDisplayPublishTime(this.PublishTime);
-
-                brushText = new SolidBrush(colorGray);
-                size = e.Graphics.MeasureString(strText,
-                    this.Container.m_fontTitleSmall);
-                if (size.Width > nMaxWidth)
-                    size.Width = nMaxWidth;
-                if (size.Height > nMaxHeight - nUsedHeight)
-                    size.Height = nMaxHeight - nUsedHeight;
-                RectangleF rect = new RectangleF(
-                    x0 + nMaxWidth - size.Width,   // 靠右
-                    y0,
-                    size.Width,
-                    size.Height);
-
-                StringFormat stringFormat = new StringFormat();
-                stringFormat.Alignment = StringAlignment.Far;
-                stringFormat.LineAlignment = StringAlignment.Near;
-                stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-
-                e.Graphics.DrawString(strText,
-        this.Container.m_fontTitleSmall,
-        brushText,
-        rect,
-        stringFormat);
-                nUsedHeight += (int)size.Height;
-            }
-
-            if (nUsedHeight >= nMaxHeight)
-                return;
-
-            // 第三行文字 卷号+总期号
-            // 淡色。字体稍小
-            if (bFree == false)
-            {
-                string strText = this.Comment;
-
-                int nTrimLength = 6;
-                if (strText.Length > nTrimLength)
-                    strText = strText.Substring(0, nTrimLength) + "...";
-
-                if (String.IsNullOrEmpty(this.Volume) == false)
-                {
-                    if (String.IsNullOrEmpty(strText) == false)
-                        strText += " ";
-                    strText += "v." + this.Volume;
-                }
-
-                if (String.IsNullOrEmpty(this.Zong) == false)
-                {
-                    if (String.IsNullOrEmpty(strText) == false)
-                        strText += " ";
-                    strText += "总." + this.Zong;
-                }
-
-                if (String.IsNullOrEmpty(strText) == false)
-                {
-                    y0 += (int)size.Height;
-                    brushText = new SolidBrush(colorGray);
-                    size = e.Graphics.MeasureString(strText,
-                        this.Container.m_fontTitleSmall);
-                    if (size.Width > nMaxWidth)
-                        size.Width = nMaxWidth;
-                    if (size.Height > nMaxHeight - nUsedHeight)
-                        size.Height = nMaxHeight - nUsedHeight;
-                    RectangleF rect = new RectangleF(
-                        x0 + nMaxWidth - size.Width,   // 靠右
-                        y0,
-                        size.Width,
-                        size.Height);
-
-                    StringFormat stringFormat = new StringFormat();
-                    stringFormat.Alignment = StringAlignment.Far;
-                    stringFormat.LineAlignment = StringAlignment.Near;
-                    stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-
-                    e.Graphics.DrawString(strText,
-            this.Container.m_fontTitleSmall,
-            brushText,
-            rect,
-            stringFormat);
-                    nUsedHeight += (int)size.Height;
-                }
-            }
-
-            if (nUsedHeight >= nMaxHeight)
-                return;
-            //
-            // 第四行文字 到达/订购数字
-            // 淡色。字体稍小
-            if (bFree == false)
-            {
-                string strText = "";
-                // 获得订购/到达数量字符串
-                // return:
-                //      -2  全缺
-                //      -1  缺
-                //      0   到齐
-                //      1   超出。比到齐还要多
-                int nState = GetOrderAndArrivedCountString(out strText);
-
-                int nFreeCount = GetFreeArrivedCount();
-                if (nFreeCount > 0)
-                    strText += " + " + nFreeCount.ToString();
-
-                if (String.IsNullOrEmpty(strText) == false)
-                {
-                    y0 += (int)size.Height;
-                    // brushText = new SolidBrush(colorGray);
-                    if (nState == -2)
-                        brushText = new SolidBrush(colorGray);
-                    else if (nState == -1)
-                        brushText = new SolidBrush(Color.DarkRed);
-                    else if (nState == 0)
-                        brushText = new SolidBrush(Color.DarkGreen);
-                    else
+                    // 新建的和发生过修改的，侧边条颜色需要设定
+                    if (this.NewCreated == true)
                     {
-                        Debug.Assert(nState == 1, "");
-                        brushText = new SolidBrush(Color.DarkOrange);
+                        // 新创建的单册
+                        colorSideBar = this.Container.NewBarColor;
+                    }
+                    else if (this.Changed == true)
+                    {
+                        // 修改过的的单册
+                        colorSideBar = this.Container.ChangedBarColor;
                     }
 
-                    size = e.Graphics.MeasureString(strText,
-                        this.Container.m_fontTitleSmall);
-                    if (size.Width > nMaxWidth)
-                        size.Width = nMaxWidth;
-                    if (size.Height > nMaxHeight - nUsedHeight)
-                        size.Height = nMaxHeight - nUsedHeight;
-                    RectangleF rect = new RectangleF(
-                        x0 + nMaxWidth - size.Width,   // 靠右
-                        y0,
-                        size.Width,
-                        size.Height);
+                    {
+                        // 边条。左侧
+                        using (Brush brushSideBar = new SolidBrush(colorSideBar))
+                        {
+                            RectangleF rectSideBar = new RectangleF(
+                start_x,
+                y0,
+                Math.Max(4, this.Container.LeftTextMargin.Left),
+                nMaxHeight);
+                            e.Graphics.FillRectangle(brushSideBar, rectSideBar);
+                        }
+                    }
 
-                    StringFormat stringFormat = new StringFormat();
-                    stringFormat.Alignment = StringAlignment.Far;
-                    stringFormat.LineAlignment = StringAlignment.Near;
-                    stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+                    if (this.Virtual == true)
+                    {
 
-                    e.Graphics.DrawString(strText,
-            this.Container.m_fontTitleSmall,
-            brushText,
-            rect,
-            stringFormat);
-                    int nImageIndex = 0;
-                    if (nState == -1)
-                        nImageIndex = 1;
-                    else if (nState == 0 || nState == 1)
-                        nImageIndex = 2;
+                        float nLittleWidth = Math.Min(nMaxWidth,
+                            nMaxHeight);
 
-                    ImageAttributes attr = new ImageAttributes();
-                    attr.SetColorKey(this.Container.imageList_treeIcon.TransparentColor,
-                        this.Container.imageList_treeIcon.TransparentColor);
+                        RectangleF rectMask = new RectangleF(
+                            x0 + nMaxWidth / 2 - nLittleWidth / 2,
+                            y0 + nMaxHeight / 2 - nLittleWidth / 2,
+                            nLittleWidth,
+                            nLittleWidth);
+                        Cell.PaintDeletedMask(rectMask,
+                            Color.LightGray,
+                            e,
+                            false);
+                    }
 
-                    Image image = this.Container.imageList_treeIcon.Images[nImageIndex];
-                    /*
-                    e.Graphics.DrawImage(image,
-                        rect.X + rect.Width - size.Width - image.Width - 4,
-                        rect.Y);
-                     * */
-                    e.Graphics.DrawImage(
-                        image,
-                        new Rectangle(
-                        (int)(rect.X + rect.Width - size.Width - image.Width - 4),
-                        (int)rect.Y,
-                        image.Width,
-                        image.Height),
-                        0, 0, image.Width, image.Height,
-                        GraphicsUnit.Pixel,
-                        attr);
+                    // 第一行文字 年份+期号
+                    // 如果不是某年的第一期，则年份显示为淡色
+                    {
+                        // 1) 期号
+                        brushText = new SolidBrush(colorDark);
+                        // size里面已经有strNo的尺寸
+                        RectangleF rect = new RectangleF(
+                            x0 + nMaxWidth - size.Width,   // 靠右
+                            y0,
+                            size.Width,
+                            size.Height);
+                        float fNoLeft = x0 + nMaxWidth - size.Width;  // 记忆下这个点
+
+                        e.Graphics.FillRectangle(brushText, rect);
+
+                        using (Brush brushBackground = new SolidBrush(this.Container.IssueBoxBackColor))
+                        {
+                            StringFormat stringFormat = new StringFormat();
+                            stringFormat.Alignment = StringAlignment.Far;
+                            stringFormat.LineAlignment = StringAlignment.Near;
+                            stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                            e.Graphics.DrawString(strNo,
+                                this.Container.m_fontTitleLarge,
+                                brushBackground,
+                                rect,
+                                stringFormat);
+                        }
+
+                        // 2) 年份
+                        if (String.IsNullOrEmpty(strYear) == false)
+                        {
+                            if (bFirstIssue == true)
+                                brushText = new SolidBrush(colorDark);
+                            else
+                                brushText = new SolidBrush(colorGray);
+
+                            size = e.Graphics.MeasureString(strYear,
+                                this.Container.m_fontTitleLarge);
+                            if (size.Width > nMaxWidth)
+                                size.Width = nMaxWidth;
+                            if (size.Height > nMaxHeight)
+                                size.Height = nMaxHeight;
+                            rect = new RectangleF(
+                                x0,  // + 4 // 靠左
+                                y0,
+                                size.Width,
+                                size.Height);
+
+                            StringFormat stringFormat = new StringFormat();
+                            stringFormat.Alignment = StringAlignment.Near;
+                            stringFormat.LineAlignment = StringAlignment.Near;
+                            stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                            e.Graphics.DrawString(strYear,
+                                this.Container.m_fontTitleLarge,
+                                brushText,
+                                rect,
+                                stringFormat);
+                        }
+
+                        nUsedHeight += (int)size.Height;
+                    }
+
+                    if (nUsedHeight >= nMaxHeight)
+                        return;
+
+                    // 第二行文字 出版日期
+                    // 淡色。字体稍小
+                    if (bFree == false)
+                    {
+                        y0 += (int)size.Height;
+                        string strText = BindingControl.GetDisplayPublishTime(this.PublishTime);
+
+                        brushText = new SolidBrush(colorGray);
+                        size = e.Graphics.MeasureString(strText,
+                            this.Container.m_fontTitleSmall);
+                        if (size.Width > nMaxWidth)
+                            size.Width = nMaxWidth;
+                        if (size.Height > nMaxHeight - nUsedHeight)
+                            size.Height = nMaxHeight - nUsedHeight;
+                        RectangleF rect = new RectangleF(
+                            x0 + nMaxWidth - size.Width,   // 靠右
+                            y0,
+                            size.Width,
+                            size.Height);
+
+                        StringFormat stringFormat = new StringFormat();
+                        stringFormat.Alignment = StringAlignment.Far;
+                        stringFormat.LineAlignment = StringAlignment.Near;
+                        stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                        e.Graphics.DrawString(strText,
+                this.Container.m_fontTitleSmall,
+                brushText,
+                rect,
+                stringFormat);
+                        nUsedHeight += (int)size.Height;
+                    }
+
+                    if (nUsedHeight >= nMaxHeight)
+                        return;
+
+                    // 第三行文字 卷号+总期号
+                    // 淡色。字体稍小
+                    if (bFree == false)
+                    {
+                        string strText = this.Comment;
+
+                        int nTrimLength = 6;
+                        if (strText.Length > nTrimLength)
+                            strText = strText.Substring(0, nTrimLength) + "...";
+
+                        if (String.IsNullOrEmpty(this.Volume) == false)
+                        {
+                            if (String.IsNullOrEmpty(strText) == false)
+                                strText += " ";
+                            strText += "v." + this.Volume;
+                        }
+
+                        if (String.IsNullOrEmpty(this.Zong) == false)
+                        {
+                            if (String.IsNullOrEmpty(strText) == false)
+                                strText += " ";
+                            strText += "总." + this.Zong;
+                        }
+
+                        if (String.IsNullOrEmpty(strText) == false)
+                        {
+                            y0 += (int)size.Height;
+                            brushText = new SolidBrush(colorGray);
+                            size = e.Graphics.MeasureString(strText,
+                                this.Container.m_fontTitleSmall);
+                            if (size.Width > nMaxWidth)
+                                size.Width = nMaxWidth;
+                            if (size.Height > nMaxHeight - nUsedHeight)
+                                size.Height = nMaxHeight - nUsedHeight;
+                            RectangleF rect = new RectangleF(
+                                x0 + nMaxWidth - size.Width,   // 靠右
+                                y0,
+                                size.Width,
+                                size.Height);
+
+                            StringFormat stringFormat = new StringFormat();
+                            stringFormat.Alignment = StringAlignment.Far;
+                            stringFormat.LineAlignment = StringAlignment.Near;
+                            stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                            e.Graphics.DrawString(strText,
+                    this.Container.m_fontTitleSmall,
+                    brushText,
+                    rect,
+                    stringFormat);
+                            nUsedHeight += (int)size.Height;
+                        }
+                    }
+
+                    if (nUsedHeight >= nMaxHeight)
+                        return;
+                    //
+                    // 第四行文字 到达/订购数字
+                    // 淡色。字体稍小
+                    if (bFree == false)
+                    {
+                        string strText = "";
+                        // 获得订购/到达数量字符串
+                        // return:
+                        //      -2  全缺
+                        //      -1  缺
+                        //      0   到齐
+                        //      1   超出。比到齐还要多
+                        int nState = GetOrderAndArrivedCountString(out strText);
+
+                        int nFreeCount = GetFreeArrivedCount();
+                        if (nFreeCount > 0)
+                            strText += " + " + nFreeCount.ToString();
+
+                        if (String.IsNullOrEmpty(strText) == false)
+                        {
+                            y0 += (int)size.Height;
+                            // brushText = new SolidBrush(colorGray);
+                            if (nState == -2)
+                                brushText = new SolidBrush(colorGray);
+                            else if (nState == -1)
+                                brushText = new SolidBrush(Color.DarkRed);
+                            else if (nState == 0)
+                                brushText = new SolidBrush(Color.DarkGreen);
+                            else
+                            {
+                                Debug.Assert(nState == 1, "");
+                                brushText = new SolidBrush(Color.DarkOrange);
+                            }
+
+                            size = e.Graphics.MeasureString(strText,
+                                this.Container.m_fontTitleSmall);
+                            if (size.Width > nMaxWidth)
+                                size.Width = nMaxWidth;
+                            if (size.Height > nMaxHeight - nUsedHeight)
+                                size.Height = nMaxHeight - nUsedHeight;
+                            RectangleF rect = new RectangleF(
+                                x0 + nMaxWidth - size.Width,   // 靠右
+                                y0,
+                                size.Width,
+                                size.Height);
+
+                            StringFormat stringFormat = new StringFormat();
+                            stringFormat.Alignment = StringAlignment.Far;
+                            stringFormat.LineAlignment = StringAlignment.Near;
+                            stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                            e.Graphics.DrawString(strText,
+                    this.Container.m_fontTitleSmall,
+                    brushText,
+                    rect,
+                    stringFormat);
+                            int nImageIndex = 0;
+                            if (nState == -1)
+                                nImageIndex = 1;
+                            else if (nState == 0 || nState == 1)
+                                nImageIndex = 2;
+
+                            ImageAttributes attr = new ImageAttributes();
+                            attr.SetColorKey(this.Container.imageList_treeIcon.TransparentColor,
+                                this.Container.imageList_treeIcon.TransparentColor);
+
+                            Image image = this.Container.imageList_treeIcon.Images[nImageIndex];
+                            /*
+                            e.Graphics.DrawImage(image,
+                                rect.X + rect.Width - size.Width - image.Width - 4,
+                                rect.Y);
+                             * */
+                            e.Graphics.DrawImage(
+                                image,
+                                new Rectangle(
+                                (int)(rect.X + rect.Width - size.Width - image.Width - 4),
+                                (int)rect.Y,
+                                image.Width,
+                                image.Height),
+                                0, 0, image.Width, image.Height,
+                                GraphicsUnit.Pixel,
+                                attr);
+                        }
+                    }
+
                 }
-
-
-
+                finally
+                {
+                    if (brushText != null)
+                        brushText.Dispose();
+                }
             }
-
 
             // 布局模式
             if (bFree == false)
@@ -5507,98 +5443,6 @@ ControlPaint.Light(this.Container.IssueBoxForeColor, 0.99F)
             }
 
         }
-
-#if NOOOOOOOOOOOOOOOOOOOO
-        // 设置树节点的文字和图像Icon
-        public void SetNodeCaption(TreeNode tree_node)
-        {
-            Debug.Assert(this.dom != null, "");
-
-            string strPublishTime = DomUtil.GetElementText(this.dom.DocumentElement,
-                "publishTime");
-            string strIssue = DomUtil.GetElementText(this.dom.DocumentElement,
-                "issue");
-            string strVolume = DomUtil.GetElementText(this.dom.DocumentElement,
-                "volume");
-            string strZong = DomUtil.GetElementText(this.dom.DocumentElement,
-                "zong");
-
-            int nOrderdCount = 0;
-            int nRecievedCount = 0;
-            // 已验收的册数
-            // string strOrderInfoXml = "";
-
-            if (this.dom == null)
-                goto SKIP_COUNT;
-
-            {
-
-                XmlNodeList nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*/copy");
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    XmlNode node = nodes[i];
-
-                    string strCopy = node.InnerText.Trim();
-                    if (String.IsNullOrEmpty(strCopy) == true)
-                        continue;
-
-                    string strNewCopy = "";
-                    string strOldCopy = "";
-                    OrderDesignControl.ParseOldNewValue(strCopy,
-                        out strOldCopy,
-                        out strNewCopy);
-
-                    int nNewCopy = 0;
-                    int nOldCopy = 0;
-
-                    try
-                    {
-                        if (String.IsNullOrEmpty(strNewCopy) == false)
-                        {
-                            nNewCopy = Convert.ToInt32(strNewCopy);
-                        }
-                        if (String.IsNullOrEmpty(strOldCopy) == false)
-                        {
-                            nOldCopy = Convert.ToInt32(strOldCopy);
-                        }
-                    }
-                    catch
-                    {
-                    }
-
-                    nOrderdCount += nOldCopy;
-                    nRecievedCount += nNewCopy;
-                }
-            }
-
-        SKIP_COUNT:
-
-            if (this.OrderedCount == -1 && nOrderdCount > 0)
-                this.OrderedCount = nOrderdCount;
-
-            tree_node.Text = strPublishTime + " no." + strIssue + " 总." + strZong + " v." + strVolume + " (" + nRecievedCount.ToString() + ")";
-
-            if (this.OrderedCount == -1)
-            {
-                if (nRecievedCount == 0)
-                    tree_node.ImageIndex = IssueManageControl.TYPE_RECIEVE_ZERO;
-                else
-                    tree_node.ImageIndex = IssueManageControl.TYPE_RECIEVE_NOT_COMPLETE;
-            }
-            else
-            {
-                if (nRecievedCount >= this.OrderedCount)
-                    tree_node.ImageIndex = IssueManageControl.TYPE_RECIEVE_COMPLETED;
-                else if (nRecievedCount > 0)
-                    tree_node.ImageIndex = IssueManageControl.TYPE_RECIEVE_NOT_COMPLETE;
-                else
-                    tree_node.ImageIndex = IssueManageControl.TYPE_RECIEVE_ZERO;
-            }
-
-            tree_node.SelectedImageIndex = tree_node.ImageIndex;
-        }
-
-#endif
 
         // TODO: 即将废止
         // 装载期下属的册对象

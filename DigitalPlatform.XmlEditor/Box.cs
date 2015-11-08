@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
@@ -9,15 +9,15 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.Xml
 {
 	//******************************************************
-	// BoxVisual Àà
+	// BoxVisual ç±»
 	//******************************************************
 	public class Box : Visual
 	{
 
-		public   ArrayList childrenVisual = null;   //°üº¬µÄvisual,²¢²»ÊÇÊı¾İµÄ²ã´Î
+		public   ArrayList childrenVisual = null;   //åŒ…å«çš„visual,å¹¶ä¸æ˜¯æ•°æ®çš„å±‚æ¬¡
 
 
-		// ¼ÓÒ»¸ö×Óvisual
+		// åŠ ä¸€ä¸ªå­visual
 		public void AddChildVisual(Visual visual)
 		{
 			if (childrenVisual == null)
@@ -26,7 +26,7 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		// Çå³ıËùÓĞ×Óvisual
+		// æ¸…é™¤æ‰€æœ‰å­visual
 		public void ClearChildVisual()
 		{
 			if (childrenVisual != null)
@@ -53,13 +53,13 @@ namespace DigitalPlatform.Xml
 		{
 			retVisual = null;
 			
-			//ÓĞ¶ù×ÓÊ±,ÏÈ¿´¶ù×Ó
+			//æœ‰å„¿å­æ—¶,å…ˆçœ‹å„¿å­
 			if (this.childrenVisual != null)
 			{
 				Point p1 = new Point (p.X - this.Rect.X,
 					p.Y - this.Rect.Y);
 
-				//ÏÈÈÏÈõÕß,ÕâÀïÊÇÃ»ÓĞ±ØÒªµÄ£¬ÒòÎªÏßÌõ¹é¸÷×ÔµÄÇøÓò¹Ü£¬
+				//å…ˆè®¤å¼±è€…,è¿™é‡Œæ˜¯æ²¡æœ‰å¿…è¦çš„ï¼Œå› ä¸ºçº¿æ¡å½’å„è‡ªçš„åŒºåŸŸç®¡ï¼Œ
 				Visual visual = null;
 				int nCount = this.childrenVisual.Count ;
 				for(int i = nCount -1;i>=0;i--)
@@ -78,12 +78,12 @@ namespace DigitalPlatform.Xml
 				}
 			}
 
-			//µ±Ã»¶ù×Ó£¬»òÕß¶ù×ÓÒ»¸ö¶¼²»·ûºÏ£¬ÄÇÃ´¾Í¿´×Ô¼ºÁË
+			//å½“æ²¡å„¿å­ï¼Œæˆ–è€…å„¿å­ä¸€ä¸ªéƒ½ä¸ç¬¦åˆï¼Œé‚£ä¹ˆå°±çœ‹è‡ªå·±äº†
 
 
 			retVisual = null;
-			int nResizeAreaWidth = 4;   //·ìÏ¶µÄ¿í¶È
-			//ÔÚ·ìÉÏ
+			int nResizeAreaWidth = 4;   //ç¼éš™çš„å®½åº¦
+			//åœ¨ç¼ä¸Š
 			if ( p.X >= this.Rect.X + this.Rect.Width - (nResizeAreaWidth/2)
 				&& p.X < this.Rect.X + this.Rect.Width + (nResizeAreaWidth/2)) 
 			{
@@ -91,7 +91,7 @@ namespace DigitalPlatform.Xml
 				return  2;
 			}
 
-			//²»ÔÚÇøÓò
+			//ä¸åœ¨åŒºåŸŸ
 			if (p.X < this.Rect.X 
 				|| p.Y < this.Rect.Y )
 			{
@@ -103,8 +103,8 @@ namespace DigitalPlatform.Xml
 				return -1;
 			}
 
-			//ÔÚÏßÌõºÍ¿Õ°×
-			//1. ×óÏßÌõ¿Õ°×´¦
+			//åœ¨çº¿æ¡å’Œç©ºç™½
+			//1. å·¦çº¿æ¡ç©ºç™½å¤„
 			if (p.X > this.Rect.X 
 				&& p.X < this.Rect.X + this.LeftResWidth
 				&& p.Y >= this.Rect.Y
@@ -114,7 +114,7 @@ namespace DigitalPlatform.Xml
 				return -1;
 			}
 
-			// 2.ÓÒÏßÌõ¿Õ°×´¦
+			// 2.å³çº¿æ¡ç©ºç™½å¤„
 			if (p.X > this.Rect.X + this.Rect.Width - this.RightResWidth
 				&& p.X < this.Rect.X + this.Rect.Width
 				&& p.Y >= this.Rect.Y
@@ -123,7 +123,7 @@ namespace DigitalPlatform.Xml
 				retVisual = this;
 				return -1;
 			}
-			// 3.ÉÏÏßÌõ¿Õ°×´¦
+			// 3.ä¸Šçº¿æ¡ç©ºç™½å¤„
 			if (p.Y >= this.Rect.Y
 				&& p.Y < this.Rect.Y + this.TopResHeight
 				&& p.X >= this.Rect.X
@@ -132,7 +132,7 @@ namespace DigitalPlatform.Xml
 				retVisual = this;
 				return -1;
 			}
-			// 4.ÏÂÏßÌõ¿Õ°×´¦
+			// 4.ä¸‹çº¿æ¡ç©ºç™½å¤„
 			if (p.Y >= this.Rect.Y + this.Rect.Height - this.BottomResHeight
 				&& p.Y < this.Rect.Y + this.Rect.Height
 				&& p.X >= this.Rect.X
@@ -143,7 +143,7 @@ namespace DigitalPlatform.Xml
 			}
 
 			
-			//ÔÚÎÄ×ÖÇø
+			//åœ¨æ–‡å­—åŒº
 			if (p.X >= this.Rect.X + this.LeftResWidth 
 				&& p.Y >= this.Rect.Y + this.TopResHeight 
 				&& p.X < this.Rect.X + this.Rect.Width - this.RightResWidth
@@ -157,7 +157,7 @@ namespace DigitalPlatform.Xml
 
 
 
-		// ²¼¾Ö
+		// å¸ƒå±€
 		public override void Layout(int x,
 			int y,
 			int nInitialWidth,
@@ -178,7 +178,7 @@ namespace DigitalPlatform.Xml
 				bEnlargeHeight = true;
 			if (bEnlargeWidth == true	|| bEnlargeHeight == true)
 			{
-				//¸¸Ç×ºÍĞÖµÜ¶¼Ó°ÏìÁË
+				//çˆ¶äº²å’Œå…„å¼Ÿéƒ½å½±å“äº†
 				if ((layoutMember & LayoutMember.Up ) == LayoutMember.Up )
 				{
 					if (bEnlargeHeight == true)
@@ -188,10 +188,10 @@ namespace DigitalPlatform.Xml
 						if (myContainer == null)
 							return;
 	
-						//ºáÅÅ
+						//æ¨ªæ’
 						if (myContainer.LayoutStyle == LayoutStyle.Horizontal )
 						{
-							//Ó°ÏìĞÖµÜ
+							//å½±å“å…„å¼Ÿ
 							foreach(Visual child in myContainer.childrenVisual )
 							{
 								if (child.Equals (this) == true)
@@ -227,7 +227,7 @@ namespace DigitalPlatform.Xml
 								out nRetHeight,
 								layoutMember);
 						}
-						//ÊúÅÅ
+						//ç«–æ’
 						if (myContainer.LayoutStyle == LayoutStyle.Vertical )
 						{
 							int nTempTotalHeight = 0;
@@ -249,7 +249,7 @@ namespace DigitalPlatform.Xml
 								layoutMember);
 
 
-							//ÉèĞÖµÜ×ø±ê
+							//è®¾å…„å¼Ÿåæ ‡
 							int nXDelta = myContainer.LeftResWidth;
 							int nYDelta = myContainer.TopResHeight;
 							foreach(Visual childVisual in myContainer.childrenVisual )
@@ -312,8 +312,8 @@ namespace DigitalPlatform.Xml
 			{
 				strTempInfo = "\r\n"
 					+ strLevelString + "******************************\r\n"
-					+ strLevelString + "ÕâÊÇµÚ" + nTempLevel + "²ãµÄ" + this.GetType ().Name + "µ÷layout¿ªÊ¼\r\n" 
-					+ strLevelString + "²ÎÊıÎª:\r\n"
+					+ strLevelString + "è¿™æ˜¯ç¬¬" + nTempLevel + "å±‚çš„" + this.GetType ().Name + "è°ƒlayoutå¼€å§‹\r\n" 
+					+ strLevelString + "å‚æ•°ä¸º:\r\n"
 					+ strLevelString + "x=" + x + "\r\n"
 					+ strLevelString + "y=" + y + "\r\n"
 					+ strLevelString + "nInitialWidth=" + nInitialWidth + "\r\n"
@@ -321,13 +321,13 @@ namespace DigitalPlatform.Xml
 					+ strLevelString + "nTimeStamp=" + nTimeStamp + "\r\n"
 					+ strLevelString + "layoutMember=" + layoutMember.ToString () + "\r\n"
 					+ strLevelString + "LayoutStyle=" + this.LayoutStyle.ToString () + "\r\n"
-					+ strLevelString + "Ê¹×Ü´ÎÊı±äÎª" + item.m_document.nTime  + "\r\n";
+					+ strLevelString + "ä½¿æ€»æ¬¡æ•°å˜ä¸º" + item.m_document.nTime  + "\r\n";
 				StreamUtil.WriteText ("I:\\debug.txt",strTempInfo);
 			}
 
 			if (Catch == true)
 			{
-				//µ±ÊäÈë²ÎÊıÏàÍ¬Ê±£¬Ö±½Ó·µ»ØcatchÄÚÈİ
+				//å½“è¾“å…¥å‚æ•°ç›¸åŒæ—¶ï¼Œç›´æ¥è¿”å›catchå†…å®¹
 				if (sizeCatch.nInitialWidth == nInitialWidth
 					&& sizeCatch.nInitialHeight == nInitialHeight
 					&& (sizeCatch.layoutMember == layoutMember))
@@ -336,16 +336,16 @@ namespace DigitalPlatform.Xml
 					{
 						strTempInfo = "\r\n"
 							+ strLevelString + "------------------"
-							+ strLevelString + "Óë»º´æÊ±ÏàÍ¬\r\n"
-							+ strLevelString + "´«ÈëµÄÖµ: initialWidth:"+nInitialWidth + " initialHeight:" + nInitialHeight + " timeStamp: " + nTimeStamp + " layoutMember:" + layoutMember.ToString () + "\r\n"
-							+ strLevelString + "»º´æµÄÖµ: initialWidth:"+sizeCatch.nInitialWidth + " initialHeight:" + sizeCatch.nInitialHeight + " timeStamp: " + sizeCatch.nTimeStamp + " layoutMember:" + sizeCatch.layoutMember.ToString () + "\r\n";
+							+ strLevelString + "ä¸ç¼“å­˜æ—¶ç›¸åŒ\r\n"
+							+ strLevelString + "ä¼ å…¥çš„å€¼: initialWidth:"+nInitialWidth + " initialHeight:" + nInitialHeight + " timeStamp: " + nTimeStamp + " layoutMember:" + layoutMember.ToString () + "\r\n"
+							+ strLevelString + "ç¼“å­˜çš„å€¼: initialWidth:"+sizeCatch.nInitialWidth + " initialHeight:" + sizeCatch.nInitialHeight + " timeStamp: " + sizeCatch.nTimeStamp + " layoutMember:" + sizeCatch.layoutMember.ToString () + "\r\n";
 					}
 
 					if ((layoutMember & LayoutMember.Layout) != LayoutMember.Layout )
 					{
 						if (this.IsWriteInfo == true)
 						{
-							strTempInfo += strLevelString + "²»ÊÇÊµ×ö£¬Ö±½Ó·µ»Ø»º³åÇøÖµ\r\n";
+							strTempInfo += strLevelString + "ä¸æ˜¯å®åšï¼Œç›´æ¥è¿”å›ç¼“å†²åŒºå€¼\r\n";
 						}
 
 						nRetWidth = sizeCatch.nRetWidth  ;
@@ -353,7 +353,7 @@ namespace DigitalPlatform.Xml
 
 						if (this.IsWriteInfo == true)
 						{
-							strTempInfo +=   strLevelString + "----------½áÊø------\r\n";
+							strTempInfo +=   strLevelString + "----------ç»“æŸ------\r\n";
 							StreamUtil.WriteText ("I:\\debug.txt",strTempInfo);
 						}
 						goto END1;
@@ -362,13 +362,13 @@ namespace DigitalPlatform.Xml
 					{
 						if (this.IsWriteInfo == true)
 						{
-							strTempInfo += strLevelString + "°üº¬Êµ×ö£¬ÏòÏÂ¼ÌĞø\r\n";
+							strTempInfo += strLevelString + "åŒ…å«å®åšï¼Œå‘ä¸‹ç»§ç»­\r\n";
 						}
 					}
 
 					if (this.IsWriteInfo == true)
 					{				
-						strTempInfo += strLevelString + "----------½áÊø------\r\n";
+						strTempInfo += strLevelString + "----------ç»“æŸ------\r\n";
 						StreamUtil.WriteText ("I:\\debug.txt",strTempInfo);
 					}
 				}
@@ -378,11 +378,11 @@ namespace DigitalPlatform.Xml
 					{
 						strTempInfo = "\r\n"
 							+ strLevelString + "------------------"
-							+ strLevelString + "Óë»º´æÊ±²»Í¬\r\n"
-							+ strLevelString + "´«ÈëµÄÖµ: initialWidth:"+nInitialWidth + " initialHeight:" + nInitialHeight + " timeStamp: " + nTimeStamp + " layoutMember:" + layoutMember.ToString () + "\r\n"
-							+ strLevelString + "»º´æµÄÖµ: initialWidth:"+sizeCatch.nInitialWidth + " initialHeight:" + sizeCatch.nInitialHeight + " timeStamp: " + sizeCatch.nTimeStamp + " layoutMember:" + sizeCatch.layoutMember.ToString () + "\r\n";
+							+ strLevelString + "ä¸ç¼“å­˜æ—¶ä¸åŒ\r\n"
+							+ strLevelString + "ä¼ å…¥çš„å€¼: initialWidth:"+nInitialWidth + " initialHeight:" + nInitialHeight + " timeStamp: " + nTimeStamp + " layoutMember:" + layoutMember.ToString () + "\r\n"
+							+ strLevelString + "ç¼“å­˜çš„å€¼: initialWidth:"+sizeCatch.nInitialWidth + " initialHeight:" + sizeCatch.nInitialHeight + " timeStamp: " + sizeCatch.nTimeStamp + " layoutMember:" + sizeCatch.layoutMember.ToString () + "\r\n";
 
-						strTempInfo +=   strLevelString + "----------½áÊø------\r\n";
+						strTempInfo +=   strLevelString + "----------ç»“æŸ------\r\n";
 						StreamUtil.WriteText ("I:\\debug.txt",strTempInfo);
 					}			
 				}
@@ -391,32 +391,32 @@ namespace DigitalPlatform.Xml
 
 
 
-			//¼ÆËãÃ¿Ò»Ğ¡¿éÓÃµÃ²ÎÊı
+			//è®¡ç®—æ¯ä¸€å°å—ç”¨å¾—å‚æ•°
 			int nPartWidth = 0;  
 			int nPartHeight = 0;
-			int nRetPartWidth = 0;;  //·µ»Ø
+			int nRetPartWidth = 0;;  //è¿”å›
 			int nRetPartHeight = 0;
 
-			int nTotalWidth = 0; //ºáÅÅ×Ü¿í¶È
-			int nMaxHeight = 0; //ºáÅÅÊ±µÄ×î´ó¸ß¶È,µ±±ä´ó£¬ÒªÖØĞÂËã
+			int nTotalWidth = 0; //æ¨ªæ’æ€»å®½åº¦
+			int nMaxHeight = 0; //æ¨ªæ’æ—¶çš„æœ€å¤§é«˜åº¦,å½“å˜å¤§ï¼Œè¦é‡æ–°ç®—
 
-			int nMaxWidth = 0; //ÊúÅÅÊ±µÄ×î´ó¿í¶È£¬µ±±ä´ó£¬ÒªÖØĞÂËã
-			int nTotalHeight = 0; //ÊúÅÅ×Ü¸ß¶È
+			int nMaxWidth = 0; //ç«–æ’æ—¶çš„æœ€å¤§å®½åº¦ï¼Œå½“å˜å¤§ï¼Œè¦é‡æ–°ç®—
+			int nTotalHeight = 0; //ç«–æ’æ€»é«˜åº¦
 
 			Visual visual = null;
 
-			ArrayList aVisualUnDefineWidth = null;  //Ã»ÓĞ¶¨Òå¿í¶ÈµÄVisual×é³ÉµÄÊı×é
-			PartInfo partInfo = null;  //ÓÃÀ´¼Æ¿í¶ÈµÄ¶ÔÏó
+			ArrayList aVisualUnDefineWidth = null;  //æ²¡æœ‰å®šä¹‰å®½åº¦çš„Visualç»„æˆçš„æ•°ç»„
+			PartInfo partInfo = null;  //ç”¨æ¥è®¡å®½åº¦çš„å¯¹è±¡
 
-			//ºáÅÅ
+			//æ¨ªæ’
 			if (LayoutStyle == LayoutStyle.Horizontal )
 			{
 				//******************************************
-				//1.Ö»²â¿í¶È,ÓÃµÈºÅ
+				//1.åªæµ‹å®½åº¦,ç”¨ç­‰å·
 				//*******************************************
 				if ((layoutMember == LayoutMember.CalcuWidth ))
 				{
-					nTotalWidth = 0;  //×Ü¿í¶È¸³0
+					nTotalWidth = 0;  //æ€»å®½åº¦èµ‹0
 					if (aVisualUnDefineWidth != null)
 						aVisualUnDefineWidth.Clear ();
 					else 
@@ -424,13 +424,13 @@ namespace DigitalPlatform.Xml
 
 					if (this.childrenVisual != null)
 					{
-						//°ÑÊı×éÖĞÕÒµ½¶¨ÒåµÄ¿í¶È
+						//æŠŠæ•°ç»„ä¸­æ‰¾åˆ°å®šä¹‰çš„å®½åº¦
 						for(int i = 0 ; i < this.childrenVisual.Count ;i++)
 						{
 							visual = (Visual)childrenVisual[i];
 							PartWidth  partWidth = item.GetPartWidth (visual.GetType ().Name );
 						
-							//Ã»ÕÒµ½¶ÔÏó£¬»ò¼¶±ğºÅĞ¡ÓÚµÈÓÚ0£¬¼Óµ½Î´¶¨Òå¿í¶ÈÊı×é
+							//æ²¡æ‰¾åˆ°å¯¹è±¡ï¼Œæˆ–çº§åˆ«å·å°äºç­‰äº0ï¼ŒåŠ åˆ°æœªå®šä¹‰å®½åº¦æ•°ç»„
 							if (partWidth == null
 								|| partWidth.nGradeNo <= 0)
 							{
@@ -442,11 +442,11 @@ namespace DigitalPlatform.Xml
 						}
 					}
 
-					//ËãÄÇĞ©Ã»ÓĞÔÚÊı×éÀï¶¨ÒåµÄ¿í¶ÈµÄÇøÓò
+					//ç®—é‚£äº›æ²¡æœ‰åœ¨æ•°ç»„é‡Œå®šä¹‰çš„å®½åº¦çš„åŒºåŸŸ
 					if (aVisualUnDefineWidth != null 
 						&& aVisualUnDefineWidth.Count >0)
 					{
-						//¼ÆËãµÃµ½ÆäËüÏîµÄÆ½¾ù¿í¶È
+						//è®¡ç®—å¾—åˆ°å…¶å®ƒé¡¹çš„å¹³å‡å®½åº¦
 						int nTemp = nInitialWidth
 							- nTotalWidth
 							- this.TotalRestWidth;
@@ -460,17 +460,17 @@ namespace DigitalPlatform.Xml
 							visual.Layout (0,
 								0,
 								nPartWidth,
-								0,   //²»¹ØĞÄ¸ß¶È
+								0,   //ä¸å…³å¿ƒé«˜åº¦
 								nTimeStamp,
 								out nRetPartWidth,
 								out nRetPartHeight,
-								LayoutMember.CalcuWidth );   //Ö»²â¿í¶È
+								LayoutMember.CalcuWidth );   //åªæµ‹å®½åº¦
 
 							nTotalWidth += nRetPartWidth;
 						}
 					}
 
-					//Ëã·µ»Ø¿í¶È
+					//ç®—è¿”å›å®½åº¦
 					nTotalWidth += this.TotalRestWidth;
 					nRetWidth = (nRetWidth > nTotalWidth) ? nRetWidth : nTotalWidth;
 					
@@ -478,19 +478,19 @@ namespace DigitalPlatform.Xml
 				}
 
 				//*****************************************
-				//2.¼´²â¿í¶È£¬ÓÖ²â¸ß¶È
+				//2.å³æµ‹å®½åº¦ï¼Œåˆæµ‹é«˜åº¦
 				//*******************************************
 				if (((layoutMember & LayoutMember.CalcuWidth ) == LayoutMember.CalcuWidth )
 					&& ((layoutMember & LayoutMember.CalcuHeight) == LayoutMember.CalcuHeight ))
 				{
-					nTotalWidth = 0;  //×Ü¿í¶È¸³0
+					nTotalWidth = 0;  //æ€»å®½åº¦èµ‹0
 					if (aVisualUnDefineWidth != null)
 						aVisualUnDefineWidth.Clear ();
 					else
 						aVisualUnDefineWidth = new ArrayList ();
 
 
-					//×î´ó¸ß¶È
+					//æœ€å¤§é«˜åº¦
 					nMaxHeight = nInitialHeight 
 						- this.TotalRestHeight;
 
@@ -501,7 +501,7 @@ namespace DigitalPlatform.Xml
 							visual = (Visual)childrenVisual[i];
 							PartWidth  partWidth = item.GetPartWidth (visual.GetType ().Name );
 						
-							//Ã»ÕÒµ½¶ÔÏó£¬»ò¼¶±ğºÅĞ¡ÓÚµÈÓÚ0£¬¼Óµ½Î´¶¨Òå¿í¶ÈÊı×é
+							//æ²¡æ‰¾åˆ°å¯¹è±¡ï¼Œæˆ–çº§åˆ«å·å°äºç­‰äº0ï¼ŒåŠ åˆ°æœªå®šä¹‰å®½åº¦æ•°ç»„
 							if (partWidth == null
 								|| partWidth.nGradeNo <= 0)
 							{
@@ -513,22 +513,22 @@ namespace DigitalPlatform.Xml
 
 							visual.Layout (0,
 								0,
-								nPartWidth,  //´«ÈëÒ»¸ö¹Ì¶¨¿í¶È
+								nPartWidth,  //ä¼ å…¥ä¸€ä¸ªå›ºå®šå®½åº¦
 								nMaxHeight,
 								nTimeStamp,
 								out nRetPartWidth,
 								out nRetPartHeight,
-								LayoutMember.CalcuWidth | LayoutMember.CalcuHeight  );   //Ö»²â¿í¶È
+								LayoutMember.CalcuWidth | LayoutMember.CalcuHeight  );   //åªæµ‹å®½åº¦
 
 							if (nRetPartHeight > nMaxHeight)
 								nMaxHeight = nRetPartHeight;
 
-							//×Ü¿í¶ÈÔö¼Ó?£¬¿í¶ÈÊÇ·ñ»á·¢Éú¸Ä±ä
+							//æ€»å®½åº¦å¢åŠ ?ï¼Œå®½åº¦æ˜¯å¦ä¼šå‘ç”Ÿæ”¹å˜
 							nTotalWidth += nRetPartWidth;
 						}
 					}
 
-					//ËãÄÇĞ©Ã»ÓĞÔÚÊı×éÀï¶¨ÒåµÄ¿í¶ÈµÄÇøÓò
+					//ç®—é‚£äº›æ²¡æœ‰åœ¨æ•°ç»„é‡Œå®šä¹‰çš„å®½åº¦çš„åŒºåŸŸ
 					if (aVisualUnDefineWidth != null && aVisualUnDefineWidth.Count >0)
 					{
 						int nTemp = nInitialWidth
@@ -544,11 +544,11 @@ namespace DigitalPlatform.Xml
 							visual.Layout (0,
 								0,
 								nPartWidth,
-								nMaxHeight,   //0,   //²»¹ØĞÄ¸ß¶È
+								nMaxHeight,   //0,   //ä¸å…³å¿ƒé«˜åº¦
 								nTimeStamp,
 								out nRetPartWidth,
 								out nRetPartHeight,
-								LayoutMember.CalcuWidth | LayoutMember.CalcuHeight );   //Ö»²â¿í¶È
+								LayoutMember.CalcuWidth | LayoutMember.CalcuHeight );   //åªæµ‹å®½åº¦
 
 							nTotalWidth += nRetPartWidth;
 							if (nRetPartHeight > nMaxHeight)
@@ -569,21 +569,21 @@ namespace DigitalPlatform.Xml
 				}
 
 				//******************************************
-				//3.ÊµËã
+				//3.å®ç®—
 				//********************************************
 				if( (layoutMember & LayoutMember.Layout )== LayoutMember.Layout )
 				{
-					nTotalWidth = 0;  //×Ü¿í¶È¸³0
+					nTotalWidth = 0;  //æ€»å®½åº¦èµ‹0
 					if (aVisualUnDefineWidth != null)
 						aVisualUnDefineWidth.Clear ();
 					else
 						aVisualUnDefineWidth = new ArrayList ();
 
-					//×î´ó¸ß¶È
+					//æœ€å¤§é«˜åº¦
 					nMaxHeight = nInitialHeight
 						- this.TotalRestHeight;
 
-					//Õâ¸öÊı×éÓÃÀ´¼ÇÏÂÃ¿¸öpartµÄ¿í¶È
+					//è¿™ä¸ªæ•°ç»„ç”¨æ¥è®°ä¸‹æ¯ä¸ªpartçš„å®½åº¦
 					ArrayList aWidth = new ArrayList ();
 
 					if (this.childrenVisual != null)
@@ -593,7 +593,7 @@ namespace DigitalPlatform.Xml
 							visual = (Visual)childrenVisual[i];
 							PartWidth  partWidth = item.GetPartWidth (visual.GetType ().Name );
 						
-							//Ã»ÕÒµ½¶ÔÏó£¬»ò¼¶±ğºÅĞ¡ÓÚµÈÓÚ0£¬¼Óµ½Î´¶¨Òå¿í¶ÈÊı×é
+							//æ²¡æ‰¾åˆ°å¯¹è±¡ï¼Œæˆ–çº§åˆ«å·å°äºç­‰äº0ï¼ŒåŠ åˆ°æœªå®šä¹‰å®½åº¦æ•°ç»„
 							if (partWidth == null
 								|| partWidth.nGradeNo <= 0)
 							{
@@ -601,9 +601,9 @@ namespace DigitalPlatform.Xml
 								continue;
 							}
 							nPartWidth = partWidth.nWidth ;
-							nTotalWidth += nPartWidth;    //ÕâÀï¼ÓµÄÄ¿µÄÊÇÎªÁËÒÔºó¼õÉÙ
+							nTotalWidth += nPartWidth;    //è¿™é‡ŒåŠ çš„ç›®çš„æ˜¯ä¸ºäº†ä»¥åå‡å°‘
 
-							//¼Çµ½Êı×éÀï
+							//è®°åˆ°æ•°ç»„é‡Œ
 							partInfo = new PartInfo ();
 							partInfo.strName = visual.GetType ().Name ;
 							partInfo.nWidth = nPartWidth;
@@ -611,23 +611,23 @@ namespace DigitalPlatform.Xml
 						}
 					}
 
-					//ËãÄÇĞ©Ã»ÓĞÔÚÊı×éÀï¶¨ÒåµÄ¿í¶ÈµÄÇøÓò
+					//ç®—é‚£äº›æ²¡æœ‰åœ¨æ•°ç»„é‡Œå®šä¹‰çš„å®½åº¦çš„åŒºåŸŸ
 					if (aVisualUnDefineWidth != null && aVisualUnDefineWidth.Count >0)
 					{
-						//Õâ¶ùÒıÆğÁËÃ»·¨ÒÔ×îĞ¡¿í¶È¼ÆËã
+						//è¿™å„¿å¼•èµ·äº†æ²¡æ³•ä»¥æœ€å°å®½åº¦è®¡ç®—
 						int nTemp = nInitialWidth
 							- nTotalWidth
 							- this.TotalRestWidth;
 
 						nPartWidth = nTemp/(aVisualUnDefineWidth.Count);
-						//nPartWidth¿ÉÄÜÎª¸ºÊı
+						//nPartWidthå¯èƒ½ä¸ºè´Ÿæ•°
 
 						for(int i=0;i<aVisualUnDefineWidth.Count ;i++)
 						{
 							visual = (Visual)aVisualUnDefineWidth[i];
 							nTotalWidth += nPartWidth;
 
-							//¼Çµ½Êı×éÀï
+							//è®°åˆ°æ•°ç»„é‡Œ
 							partInfo = new PartInfo ();
 							partInfo.strName = visual.GetType ().Name ;
 							partInfo.nWidth = nPartWidth;
@@ -637,7 +637,7 @@ namespace DigitalPlatform.Xml
 
 					item.SetValue (this.GetType().Name,nRetWidth);
 
-					//¸ù¾İ²¼¾ÖÑùÊ½ÅÅÁĞÒ»ÏÂ
+					//æ ¹æ®å¸ƒå±€æ ·å¼æ’åˆ—ä¸€ä¸‹
 					int nXDelta = this.LeftResWidth;
 					int nYDelta = this.TopResHeight;
 
@@ -683,7 +683,7 @@ namespace DigitalPlatform.Xml
 					if (nRetHeight < 0)
 						nRetHeight = 0;
 
-					//°Ñ×Ô¼ºµÄrectÉèºÃ
+					//æŠŠè‡ªå·±çš„rectè®¾å¥½
 					this.Rect = new Rectangle (x,
 						y,
 						nRetWidth,
@@ -694,11 +694,11 @@ namespace DigitalPlatform.Xml
 
 			}
 
-			//ÊúÅÅ
+			//ç«–æ’
 			if (LayoutStyle == LayoutStyle.Vertical  )
 			{
 				//******************************************
-				//1.Ö»²â¿í¶È,ÓÃµÈºÅ
+				//1.åªæµ‹å®½åº¦,ç”¨ç­‰å·
 				//*******************************************
 				if ((layoutMember == LayoutMember.CalcuWidth ))
 				{
@@ -732,16 +732,16 @@ namespace DigitalPlatform.Xml
 				}
 
 				//*****************************************
-				//2.¼´²â¿í¶È£¬ÓÖ²â¸ß¶È
+				//2.å³æµ‹å®½åº¦ï¼Œåˆæµ‹é«˜åº¦
 				//*******************************************
 				if (((layoutMember & LayoutMember.CalcuWidth ) == LayoutMember.CalcuWidth )
 					&& ((layoutMember & LayoutMember.CalcuHeight) == LayoutMember.CalcuHeight ))
 				{
-					//×î´ó¿í¶È
+					//æœ€å¤§å®½åº¦
 					nMaxWidth = nInitialWidth 
 						- this.TotalRestWidth;
 
-					nTotalHeight= 0;  //×Ü¸ß¶È¸³0
+					nTotalHeight= 0;  //æ€»é«˜åº¦èµ‹0
 
 					if (this.childrenVisual != null)
 					{
@@ -773,19 +773,19 @@ namespace DigitalPlatform.Xml
 				}
 
 				//******************************************
-				//3.ÊµËã
+				//3.å®ç®—
 				//********************************************
 				if( (layoutMember & LayoutMember.Layout )== LayoutMember.Layout )
 				{
-					//×î´ó¿í¶È
+					//æœ€å¤§å®½åº¦
 					nMaxWidth = nInitialWidth 
 						- this.TotalRestWidth;
 					
-					nTotalHeight= 0;  //×Ü¸ß¶È¸³0
+					nTotalHeight= 0;  //æ€»é«˜åº¦èµ‹0
 
 					item.SetValue (this.GetType().Name,nRetWidth);
 
-					//¸ù¾İ²¼¾ÖÑùÊ½ÅÅÁĞÒ»ÏÂ
+					//æ ¹æ®å¸ƒå±€æ ·å¼æ’åˆ—ä¸€ä¸‹
 					int nXDelta = this.LeftResWidth;
 					int nYDelta = this.TopResHeight;
 
@@ -825,7 +825,7 @@ namespace DigitalPlatform.Xml
 						nRetHeight = 0;
 
 
-					//°Ñ×Ô¼ºµÄrectÉèºÃ
+					//æŠŠè‡ªå·±çš„rectè®¾å¥½
 					this.Rect = new Rectangle (x,
 						y,
 						nRetWidth,
@@ -836,15 +836,15 @@ namespace DigitalPlatform.Xml
 				}
 
 				//****************************************
-				//4.Ö»²â¸ß¶È,ÕâÀïÓĞÒÉÎÊ
+				//4.åªæµ‹é«˜åº¦,è¿™é‡Œæœ‰ç–‘é—®
 				//*****************************************
 				if (layoutMember == LayoutMember.CalcuHeight)
 				{
-					//×î´ó¿í¶È
+					//æœ€å¤§å®½åº¦
 					nMaxWidth = nInitialWidth 
 						- this.TotalRestWidth;
 
-					nTotalHeight= 0;  //×Ü¸ß¶È¸³0
+					nTotalHeight= 0;  //æ€»é«˜åº¦èµ‹0
 					if (this.childrenVisual != null)
 					{
 						for(int i = 0 ; i < this.childrenVisual.Count ;i++)
@@ -889,8 +889,8 @@ namespace DigitalPlatform.Xml
 			{
 				strTempInfo = "";
 				strTempInfo = "\r\n"
-					+ strLevelString + "ÕâÊÇµÚ" + nTempLevel + "²ãµÄ" + this.GetType ().Name + "µ÷layout½áÊø\r\n" 
-					+ strLevelString + "·µ»ØÖµÎª: \r\n"
+					+ strLevelString + "è¿™æ˜¯ç¬¬" + nTempLevel + "å±‚çš„" + this.GetType ().Name + "è°ƒlayoutç»“æŸ\r\n" 
+					+ strLevelString + "è¿”å›å€¼ä¸º: \r\n"
 					+ strLevelString + "x=" + x + "\r\n"
 					+ strLevelString + "y=" + y + "\r\n"
 					+ strLevelString + "nRetWidth=" + nRetWidth + "\r\n"
@@ -906,7 +906,7 @@ namespace DigitalPlatform.Xml
 		}
 
 
-		//µÃµ½ÔÚ¼ÇÏÂµÄ¿í¶È
+		//å¾—åˆ°åœ¨è®°ä¸‹çš„å®½åº¦
 		public int GetRememberWidth(ArrayList aWidth,string strName)
 		{
 			foreach(PartInfo partInfo in aWidth)
@@ -932,7 +932,6 @@ namespace DigitalPlatform.Xml
 			if (rectPaintThis.IntersectsWith (pe.ClipRectangle )== false)
 				return;
 
-			Brush brush = null;
 			Item item = this.GetItem ();
 			if (item == null)
 				return;
@@ -948,8 +947,10 @@ namespace DigitalPlatform.Xml
 					goto SKIPDRAWBACK;
 
 			}
-			brush = new SolidBrush(this.BackColor);
-			pe.Graphics .FillRectangle (brush,rectPaintThis);
+            using (Brush brush = new SolidBrush(this.BackColor))
+            {
+                pe.Graphics.FillRectangle(brush, rectPaintThis);
+            }
 
 			SKIPDRAWBACK:
 
@@ -958,7 +959,7 @@ namespace DigitalPlatform.Xml
 				}
 				else
 				{
-					//µ÷DrawLines»­±ß¿ò
+					//è°ƒDrawLinesç”»è¾¹æ¡†
 					this.DrawLines(rectPaintThis,
 						this.TopBorderHeight,
 						this.BottomBorderHeight,
@@ -1001,7 +1002,7 @@ namespace DigitalPlatform.Xml
 
 						if (nDelta > 0)
 						{
-							// »­ÏÂ·½ÏßÌõ
+							// ç”»ä¸‹æ–¹çº¿æ¡
 							this.DrawLines(new Rectangle(rectPaintChild.X,
 								rectPaintChild.Y,
 								rectPaintChild.Width,
@@ -1017,11 +1018,10 @@ namespace DigitalPlatform.Xml
 
 					if (i <= 0)
 						continue;
-
 			
 					if (this.LayoutStyle == LayoutStyle.Vertical)
 					{
-						// Ö»»­ÉÏ·½ÏßÌõ
+						// åªç”»ä¸Šæ–¹çº¿æ¡
 						this.DrawLines(rectPaintChild,
 							visual.TopBorderHeight,
 							0,
@@ -1041,8 +1041,6 @@ namespace DigitalPlatform.Xml
 				}
 			}
 		}
-
-
 	}
 
 }

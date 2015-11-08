@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
@@ -29,9 +29,7 @@ namespace DigitalPlatform.Xml
                 this.Rect.Width,
                 this.Rect.Height);
 
-            Brush brush = null;
-
-            //±³¾°É«
+            //èƒŒæ™¯è‰²
             Item item = this.GetItem();
             Object colorDefault = null;
             XmlEditor editor = item.m_document;
@@ -46,7 +44,7 @@ namespace DigitalPlatform.Xml
 
             Color backColor = this.BackColor;
 
-            // Èç¹û¶ÔÏóµÄ¸¸Ç× ÊÇ »î¶¯µÄItem ¼ÓÁÁÏÔÊ¾
+            // å¦‚æžœå¯¹è±¡çš„çˆ¶äº² æ˜¯ æ´»åŠ¨çš„Item åŠ äº®æ˜¾ç¤º
             if (editor != null)
             {
                 if (item == editor.m_selectedItem)
@@ -55,12 +53,14 @@ namespace DigitalPlatform.Xml
                 }
             }
 
-            brush = new SolidBrush(backColor);
-            pe.Graphics.FillRectangle(brush, rectPaint);
+            using (Brush brush = new SolidBrush(backColor))
+            {
+                pe.Graphics.FillRectangle(brush, rectPaint);
+            }
 
         SKIPDRAWBACK:
 
-            //µ÷DrawLines»­±ß¿ò
+            //è°ƒDrawLinesç”»è¾¹æ¡†
             if (editor != null && editor.VisualCfg == null)
             {
             }
@@ -74,24 +74,22 @@ namespace DigitalPlatform.Xml
                     this.BorderColor);
             }
 
-            //ÄÚÈÝÇøÓò
+            //å†…å®¹åŒºåŸŸ
             rectPaint = new Rectangle(nBaseX + this.Rect.X + this.LeftResWidth/*LeftBlank*/,
                 nBaseY + this.Rect.Y + this.TopResHeight/*this.TopBlank*/,
                 this.Rect.Width - this.TotalRestWidth/*this.LeftBlank - this.RightBlank*/,
                 this.Rect.Height - this.TotalRestHeight/*this.TopBlank - this.BottomBlank*/);
 
-            brush = new SolidBrush(TextColor);
             Font font1 = this.GetFont();
-            Font font = new Font(font1.Name, font1.Size);
-
-            pe.Graphics.DrawString(Text,
-                font,
-                brush,
-                rectPaint,
-                new StringFormat());
-
-            brush.Dispose();
-            font.Dispose();
+            using(Font font = new Font(font1.Name, font1.Size))
+            using (Brush brush = new SolidBrush(TextColor))
+            {
+                pe.Graphics.DrawString(Text,
+                    font,
+                    brush,
+                    rectPaint,
+                    new StringFormat());
+            }
         }
     }
 }

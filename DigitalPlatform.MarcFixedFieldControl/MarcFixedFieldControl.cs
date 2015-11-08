@@ -1195,56 +1195,6 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
         }
 
-
-#if NOOOOOOOOOOOOOOOOOOOOOOOOO
-        private void MarcFixedFieldControl_Paint(object sender, PaintEventArgs e)
-        {
-            //int nJianGeWidth = 8;
-            //int nNameWidth = 60;
-
-            int nLabelWidth = this.GetMaxLabelWidth(//g,
-    this.DefaultInfoFont);
-
-            int nMaxValueWidth = 0;
-            //int x = 0;
-            int y = 0;
-            for (int i = 0; i < this.templateRoot.Lines.Count; i++)
-            {
-                TemplateLine line = (TemplateLine)this.templateRoot.Lines[i];
-
-                string strTempValue = line.m_strValue;
-                // strTempValue = strTempValue.Replace(' ','m');   // ?
-                /*
-                string strTemp = "";
-                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16
-                 * */
-                strTempValue = strTempValue.Replace(' ', 'M');   // ?
-
-                int nValueWidth = GraphicsUtil.GetWidth(//g,
-                    this.DefaultValueFont,
-                    strTempValue);
-
-                if (nMaxValueWidth < nValueWidth)
-                    nMaxValueWidth = nValueWidth;
-
-                int nHeight = this.DefaultValueFont.Height;
-
-                Pen pen = new Pen(Color.Red);
-                e.Graphics.DrawRectangle(pen, line.TextBox_value.Location.X, line.TextBox_value.Location.Y + line.TextBox_value.Height,
-                    nValueWidth, nHeight);
-
-                nHeight = line.TextBox_value.Size.Height;
-
-                // µ÷ÊÔ
-                // line.TextBox_value.ClientSize = new Size(nValueWidth, line.TextBox_value.ClientSize.Height);
-
-                y = y + nHeight * 2;  // µ÷ÊÔ
-            }
-
-        }
-#endif
-
-
         public void AdjustTextboxSize(
             bool bSimulate,
             out int nResultWidth,

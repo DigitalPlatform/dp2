@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -10,48 +10,48 @@ using System.Drawing.Drawing2D;
 
 namespace DigitalPlatform.Marc
 {
-    // ×Ö¶Î
+    // å­—æ®µ
     /// <summary>
-    /// ×Ö¶Î¶ÔÏó
+    /// å­—æ®µå¯¹è±¡
     /// </summary>
 	public class Field
 	{
         /// <summary>
-        /// ÈİÆ÷£¬Ò²¾ÍÊÇµ±Ç°×Ö¶Î¶ÔÏóËù´ÓÊôµÄ×Ö¶Î¶ÔÏóÊı×é
+        /// å®¹å™¨ï¼Œä¹Ÿå°±æ˜¯å½“å‰å­—æ®µå¯¹è±¡æ‰€ä»å±çš„å­—æ®µå¯¹è±¡æ•°ç»„
         /// </summary>
 		internal FieldCollection container = null;
 
 		internal string m_strName = "";
 		internal string m_strIndicator = "";
 		internal string m_strValue = "";
-		internal string m_strNameCaption = "×Ö¶ÎËµÃ÷";
+		internal string m_strNameCaption = "å­—æ®µè¯´æ˜";
 
 		internal int PureHeight = 20;
 
         /// <summary>
-        /// µ±Ç°¶ÔÏóÊÇ·ñ´¦ÔÚÑ¡ÖĞ×´Ì¬
+        /// å½“å‰å¯¹è±¡æ˜¯å¦å¤„åœ¨é€‰ä¸­çŠ¶æ€
         /// </summary>
 		public bool Selected = false;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
 		public Field()
 		{
 		}
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
-        /// <param name="field_collection">ÓµÓĞ±¾¶ÔÏóµÄ×Ö¶Î¶ÔÏóÊı×é</param>
+        /// <param name="field_collection">æ‹¥æœ‰æœ¬å¯¹è±¡çš„å­—æ®µå¯¹è±¡æ•°ç»„</param>
 		public Field(FieldCollection field_collection)
 		{
 			this.container = field_collection;
 		}
 
-		// ×Ö¶ÎÃû
+		// å­—æ®µå
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ×Ö¶ÎÃû
+        /// è·å–æˆ–è®¾ç½®å­—æ®µå
         /// </summary>
 		public string Name
 		{
@@ -76,13 +76,13 @@ namespace DigitalPlatform.Marc
 						this.container.MarcEditor.curEdit.Text = this.m_strName;
 					}
 
-					// Ê§Ğ§???ÓÃ²»µ½ÅĞ¶Ïµ±Ç°ÔªËØÊÇÄ©Î²ÔªËØ´Ó¶øÊ¹ÓÃBoundsPortion.FieldAndBottom
+					// å¤±æ•ˆ???ç”¨ä¸åˆ°åˆ¤æ–­å½“å‰å…ƒç´ æ˜¯æœ«å°¾å…ƒç´ ä»è€Œä½¿ç”¨BoundsPortion.FieldAndBottom
 					Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
 						1,
 						BoundsPortion.Field);
 					this.container.MarcEditor.Invalidate(rect);
 
-					// ÎÄµµ·¢Éú¸Ä±ä
+					// æ–‡æ¡£å‘ç”Ÿæ”¹å˜
 					this.container.MarcEditor.FireTextChanged();
 
 				}
@@ -94,9 +94,9 @@ namespace DigitalPlatform.Marc
             this.m_strNameCaption = this.container.MarcEditor.GetLabel(this.m_strName);
         }
 
-		// ×Ö¶ÎÖ¸Ê¾·û
+		// å­—æ®µæŒ‡ç¤ºç¬¦
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ×Ö¶ÎÖ¸Ê¾·û
+        /// è·å–æˆ–è®¾ç½®å­—æ®µæŒ‡ç¤ºç¬¦
         /// </summary>
 		public string Indicator
 		{
@@ -123,19 +123,19 @@ namespace DigitalPlatform.Marc
 					}
 
 
-					// Ê§Ğ§???ÓÃ²»ÓÃÅĞ¶Ïµ±Ç°ÔªËØÊÇÄ©Î²ÔªËØ´Ó¶øÊ¹ÓÃBoundsPortion.FieldAndBottom
+					// å¤±æ•ˆ???ç”¨ä¸ç”¨åˆ¤æ–­å½“å‰å…ƒç´ æ˜¯æœ«å°¾å…ƒç´ ä»è€Œä½¿ç”¨BoundsPortion.FieldAndBottom
 					Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
 						1,
 						BoundsPortion.Field);
 					this.container.MarcEditor.Invalidate(rect);
 
-					// ÎÄµµ·¢Éú¸Ä±ä
+					// æ–‡æ¡£å‘ç”Ÿæ”¹å˜
 					this.container.MarcEditor.FireTextChanged();
 				}
 			}
 		}
 
-		// ×Ö¶ÎÖµ¡£getÃ»ÓĞÌæ»»^·ûºÅ
+		// å­—æ®µå€¼ã€‚getæ²¡æœ‰æ›¿æ¢^ç¬¦å·
 		internal string ValueKernel
 		{
 			get
@@ -163,13 +163,13 @@ namespace DigitalPlatform.Marc
 						this.container.MarcEditor.curEdit.Text = this.m_strValue;
 					}
 
-					// Ê§Ğ§???ÓÃ²»µ½ÅĞ¶Ïµ±Ç°ÔªËØÊÇÄ©Î²ÔªËØ´Ó¶øÊ¹ÓÃBoundsPortion.FieldAndBottom
+					// å¤±æ•ˆ???ç”¨ä¸åˆ°åˆ¤æ–­å½“å‰å…ƒç´ æ˜¯æœ«å°¾å…ƒç´ ä»è€Œä½¿ç”¨BoundsPortion.FieldAndBottom
 					Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
 						-1,
 						BoundsPortion.FieldAndBottom);
 					this.container.MarcEditor.Invalidate(rect);
 
-					// ÎÄµµ·¢Éú¸Ä±ä
+					// æ–‡æ¡£å‘ç”Ÿæ”¹å˜
 					this.container.MarcEditor.FireTextChanged();
 				}
 			}
@@ -177,7 +177,7 @@ namespace DigitalPlatform.Marc
 		}
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ ×Ö¶ÎÖ¸Ê¾·ûÁªºÏ×Ö¶ÎÄÚÈİ
+        /// è·å–æˆ–è®¾ç½® å­—æ®µæŒ‡ç¤ºç¬¦è”åˆå­—æ®µå†…å®¹
         /// </summary>
         public string IndicatorAndValue
         {
@@ -200,15 +200,15 @@ namespace DigitalPlatform.Marc
                 }
                 else
                 {
-                    this.Indicator = value.PadRight(2, ' ');    // Ìî³ä¿Õ°×
+                    this.Indicator = value.PadRight(2, ' ');    // å¡«å……ç©ºç™½
                     this.Value = "";
                 }
             }
         }
 
-        // ×Ö¶ÎÖµ¡£getÌæ»»ÁË^·ûºÅ
+        // å­—æ®µå€¼ã€‚getæ›¿æ¢äº†^ç¬¦å·
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ ×Ö¶ÎÖµ£¬Ò²¾ÍÊÇ×Ö¶ÎÄÚÈİ
+        /// è·å–æˆ–è®¾ç½® å­—æ®µå€¼ï¼Œä¹Ÿå°±æ˜¯å­—æ®µå†…å®¹
         /// </summary>
         public string Value
         {
@@ -230,7 +230,7 @@ namespace DigitalPlatform.Marc
                 {
                     this.m_strValue = strValue;
 
-                    this.CalculateHeight(null, false);  // ÖØĞÂ¼ÆËã¸ß¶È 2014/11/4
+                    this.CalculateHeight(null, false);  // é‡æ–°è®¡ç®—é«˜åº¦ 2014/11/4
 
                     if (this.container.MarcEditor.FocusedField == this
                         && this.container.MarcEditor.m_nFocusCol == 3)
@@ -238,19 +238,19 @@ namespace DigitalPlatform.Marc
                         this.container.MarcEditor.curEdit.Text = this.m_strValue;
                     }
 
-                    // Ê§Ğ§???ÓÃ²»µ½ÅĞ¶Ïµ±Ç°ÔªËØÊÇÄ©Î²ÔªËØ´Ó¶øÊ¹ÓÃBoundsPortion.FieldAndBottom
+                    // å¤±æ•ˆ???ç”¨ä¸åˆ°åˆ¤æ–­å½“å‰å…ƒç´ æ˜¯æœ«å°¾å…ƒç´ ä»è€Œä½¿ç”¨BoundsPortion.FieldAndBottom
                     Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
                         -1,
                         BoundsPortion.FieldAndBottom);
                     this.container.MarcEditor.Invalidate(rect);
 
-                    // ÎÄµµ·¢Éú¸Ä±ä
+                    // æ–‡æ¡£å‘ç”Ÿæ”¹å˜
                     this.container.MarcEditor.FireTextChanged();
                 }
             }
         }
 		
-		// ×Ö¶ÎÃû³ÆËµÃ÷
+		// å­—æ®µåç§°è¯´æ˜
 		internal string NameCaption
 		{
 			get
@@ -259,9 +259,9 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// ±¾×Ö¶Î×Ü¸ß¶È
+		// æœ¬å­—æ®µæ€»é«˜åº¦
         /// <summary>
-        /// »ñÈ¡±¾×Ö¶ÎµÄÏÔÊ¾ÇøÓòµÄ¸ß¶È
+        /// è·å–æœ¬å­—æ®µçš„æ˜¾ç¤ºåŒºåŸŸçš„é«˜åº¦
         /// </summary>
 		public int TotalHeight
 		{
@@ -275,7 +275,7 @@ namespace DigitalPlatform.Marc
 		}
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ±¾×Ö¶ÎµÄ MARC ×Ö·û´® (»úÄÚ¸ñÊ½)
+        /// è·å–æˆ–è®¾ç½®æœ¬å­—æ®µçš„ MARC å­—ç¬¦ä¸² (æœºå†…æ ¼å¼)
         /// </summary>
 		public string Text
 		{
@@ -292,12 +292,12 @@ namespace DigitalPlatform.Marc
                 if (this.container.MarcEditor == null)
                     return;
 
-				// Ê§Ğ§???ÓÃ²»µ½ÅĞ¶Ïµ±Ç°ÔªËØÊÇÄ©Î²ÔªËØ´Ó¶øÊ¹ÓÃBoundsPortion.FieldAndBottom
+				// å¤±æ•ˆ???ç”¨ä¸åˆ°åˆ¤æ–­å½“å‰å…ƒç´ æ˜¯æœ«å°¾å…ƒç´ ä»è€Œä½¿ç”¨BoundsPortion.FieldAndBottom
 				Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
 					-1,
 					BoundsPortion.FieldAndBottom);
 
-				// Ó¦°ÑÊ§Ğ§ÇøÓò¼ÆËã³öÀ´£¬½øĞĞÓÅ»¯
+				// åº”æŠŠå¤±æ•ˆåŒºåŸŸè®¡ç®—å‡ºæ¥ï¼Œè¿›è¡Œä¼˜åŒ–
 				InvalidateRect iRect = new InvalidateRect();
 				iRect.bAll = false;
 				iRect.rect  = rect;
@@ -306,30 +306,30 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-        // »ñµÃ×Ö¶ÎµÄMARC¸ñÊ½
+        // è·å¾—å­—æ®µçš„MARCæ ¼å¼
         // parameters:
-        //      bAddFLDEND  ÊÇ·ñ¼Ó×Ö¶Î½áÊø·û
+        //      bAddFLDEND  æ˜¯å¦åŠ å­—æ®µç»“æŸç¬¦
         // return:
-        //      ×Ö¶ÎµÄMARC×Ö·û´®
+        //      å­—æ®µçš„MARCå­—ç¬¦ä¸²
         /// <summary>
-        /// »ñÈ¡±¾×Ö¶ÎµÄ MARC ×Ö·û´® (»úÄÚ¸ñÊ½)
+        /// è·å–æœ¬å­—æ®µçš„ MARC å­—ç¬¦ä¸² (æœºå†…æ ¼å¼)
         /// </summary>
-        /// <param name="bAddFLDEND">ÊÇ·ñ°üº¬×Ö¶Î½áÊø·û</param>
-        /// <returns>MARC ×Ö·û´®</returns>
+        /// <param name="bAddFLDEND">æ˜¯å¦åŒ…å«å­—æ®µç»“æŸç¬¦</param>
+        /// <returns>MARC å­—ç¬¦ä¸²</returns>
 		public string GetFieldMarc(bool bAddFLDEND)
 		{
-			if (this.Name == "###") // Í·±êÇø
+			if (this.Name == "###") // å¤´æ ‡åŒº
 			{
                 this.m_strValue = this.m_strValue.PadRight(24, '?');
 				return this.m_strValue;
 			}
 
 
-			if (Record.IsControlFieldName(this.m_strName) == true) // ¿ØÖÆ×Ö¶Î
+			if (Record.IsControlFieldName(this.m_strName) == true) // æ§åˆ¶å­—æ®µ
 			{
 				if (this.Indicator != "")
 				{
-					//Debug.Assert(false,"²»¿ÉÄÜµÄÇé¿ö£¬¿ØÖÆ×Ö¶ÎÎŞ×Ö¶ÎÖ¸Ê¾·û");
+					//Debug.Assert(false,"ä¸å¯èƒ½çš„æƒ…å†µï¼Œæ§åˆ¶å­—æ®µæ— å­—æ®µæŒ‡ç¤ºç¬¦");
 					this.m_strIndicator = "";
 				}
 			}
@@ -337,7 +337,7 @@ namespace DigitalPlatform.Marc
 			{
 				if(this.Indicator.Length != 2)
 				{
-					//Debug.Assert(false,"²»¿ÉÄÜµÄÇé¿ö£¬×Ö¶ÎÖ¸Ê¾·û1±ØĞëÊÇÁ½Î»");
+					//Debug.Assert(false,"ä¸å¯èƒ½çš„æƒ…å†µï¼Œå­—æ®µæŒ‡ç¤ºç¬¦1å¿…é¡»æ˜¯ä¸¤ä½");
 
 					if (this.m_strIndicator.Length > 2)
 						this.m_strIndicator = this.m_strIndicator.Substring(0,2);
@@ -360,19 +360,19 @@ namespace DigitalPlatform.Marc
 		}
 
                 /// <summary>
-        /// ÉèÖÃ±¾×Ö¶ÎµÄ MARC ×Ö·û´® (»úÄÚ¸ñÊ½)
+        /// è®¾ç½®æœ¬å­—æ®µçš„ MARC å­—ç¬¦ä¸² (æœºå†…æ ¼å¼)
         /// </summary>
-        /// <param name="strFieldMarc">±¾×Ö¶ÎµÄ MARC ×Ö·û´®</param>
+        /// <param name="strFieldMarc">æœ¬å­—æ®µçš„ MARC å­—ç¬¦ä¸²</param>
         public void SetFieldMarc(string strFieldMarc)
         {
             SetFieldMarc(strFieldMarc, true);
         }
 
         /// <summary>
-        /// ÉèÖÃ±¾×Ö¶ÎµÄ MARC ×Ö·û´® (»úÄÚ¸ñÊ½)
+        /// è®¾ç½®æœ¬å­—æ®µçš„ MARC å­—ç¬¦ä¸² (æœºå†…æ ¼å¼)
         /// </summary>
-        /// <param name="strFieldMarc">±¾×Ö¶ÎµÄ MARC ×Ö·û´®</param>
-        /// <param name="bFlushEdit">ÊÇ·ñ×Ô¶¯Ë¢ĞÂĞ¡ Edit</param>
+        /// <param name="strFieldMarc">æœ¬å­—æ®µçš„ MARC å­—ç¬¦ä¸²</param>
+        /// <param name="bFlushEdit">æ˜¯å¦è‡ªåŠ¨åˆ·æ–°å° Edit</param>
 		internal void SetFieldMarc(string strFieldMarc, bool bFlushEdit)
 		{
             if (this.container == null)
@@ -434,9 +434,9 @@ namespace DigitalPlatform.Marc
 			this.container.MarcEditor.FireTextChanged();
 		}
 
-		// ¼ÆËãĞĞµÄ¸ß¶È
-		//		g	Graphics¶ÔÏó£¬Èç¹ûÎªnull£¬Ôò×Ô¶¯ÕÒ
-		//		bIgnoreEdit	ÊÇ·ñºöÂÔĞ¡edit¿Ø¼ş false²»ºöÂÔ
+		// è®¡ç®—è¡Œçš„é«˜åº¦
+		//		g	Graphicså¯¹è±¡ï¼Œå¦‚æœä¸ºnullï¼Œåˆ™è‡ªåŠ¨æ‰¾
+		//		bIgnoreEdit	æ˜¯å¦å¿½ç•¥å°editæ§ä»¶ falseä¸å¿½ç•¥
 		internal void CalculateHeight(Graphics g_param, bool bIgnoreEdit)
 		{
             Graphics g = g_param;
@@ -451,7 +451,7 @@ namespace DigitalPlatform.Marc
 
                 //IntPtr hFontOld = IntPtr.Zero;
 
-                // ¼ÆËãName
+                // è®¡ç®—Name
                 /*
                 SizeF size = g.MeasureString(this.m_strName,
                     font, 
@@ -467,7 +467,7 @@ namespace DigitalPlatform.Marc
 
                 int h1 = (int)size.Height;
 
-                // ¼ÆËãIndicator1
+                // è®¡ç®—Indicator1
                 /*
                 size = g.MeasureString(this.m_strIndicator,
                     font, 
@@ -486,7 +486,7 @@ namespace DigitalPlatform.Marc
                     h1 = h2;
 
 
-                // ¼ÆËãm_strValue
+                // è®¡ç®—m_strValue
                 /*
                 size = g.MeasureString(this.m_strValue,
                     font, 
@@ -511,9 +511,9 @@ namespace DigitalPlatform.Marc
                 if (h1 < h3)
                     h1 = h3;
 
-                // ×¢ÒâÕâÀï¹ÊÒâÃ»ËãNameCaptionµÄ¸ß¶È
+                // æ³¨æ„è¿™é‡Œæ•…æ„æ²¡ç®—NameCaptionçš„é«˜åº¦
                 /*
-                // ¼ÆËãNameCaption
+                // è®¡ç®—NameCaption
                 size = g.MeasureString(this.strNameCaption,
                     font, 
                     container.NameCaptionPureWidth,
@@ -527,7 +527,7 @@ namespace DigitalPlatform.Marc
                 if (this.container.MarcEditor.SelectedFieldIndices.Count == 1)
                 {
                     Field FocusedField = this.container.MarcEditor.FocusedField;
-                    // Èç¹û bIgnoreEdit == true£¬²»¿¼ÂÇµ±Ç°ĞĞedit¿Ø¼şµÄ¼ÈÓĞ¸ß¶È
+                    // å¦‚æœ bIgnoreEdit == trueï¼Œä¸è€ƒè™‘å½“å‰è¡Œeditæ§ä»¶çš„æ—¢æœ‰é«˜åº¦
                     if (bIgnoreEdit == false
                         && FocusedField != null
                         && this == FocusedField)
@@ -547,11 +547,11 @@ namespace DigitalPlatform.Marc
             }
 		}
 
-		// °Ñ±¾ĞĞ»æÖÆ³öÀ´
+		// æŠŠæœ¬è¡Œç»˜åˆ¶å‡ºæ¥
 		// parameters:
-		//		pe	ÓÃPaintEventArgs¶ÔÏó¶ø²»ÓÃGraphics¶ÔÏóµÄÄ¿µÄÊÇÎªÁËÆäÓĞClipRectangle³ÉÔ±£¬ËùÒÔÊ¹»æÖÆÓÅ»¯
-		//		nBaseX	x×ø±ê
-		//		nBaseY	y×ø±ê
+		//		pe	ç”¨PaintEventArgså¯¹è±¡è€Œä¸ç”¨Graphicså¯¹è±¡çš„ç›®çš„æ˜¯ä¸ºäº†å…¶æœ‰ClipRectangleæˆå‘˜ï¼Œæ‰€ä»¥ä½¿ç»˜åˆ¶ä¼˜åŒ–
+		//		nBaseX	xåæ ‡
+		//		nBaseY	yåæ ‡
 		// return:
 		//		void
 		internal void Paint(PaintEventArgs pe, 
@@ -559,22 +559,22 @@ namespace DigitalPlatform.Marc
 			int nBaseY)
 		{
 			// -----------------------------------------
-			// ¼ÆËã³ö±¾ĞĞµÄ×Ü¹²ÇøÓò
-			// Ã¿ĞĞÇøÓòÖĞ°üÀ¨×óÉÏµÄÏß£¬²»°üÀ¨ÓÒÏÂµÄÏß
+			// è®¡ç®—å‡ºæœ¬è¡Œçš„æ€»å…±åŒºåŸŸ
+			// æ¯è¡ŒåŒºåŸŸä¸­åŒ…æ‹¬å·¦ä¸Šçš„çº¿ï¼Œä¸åŒ…æ‹¬å³ä¸‹çš„çº¿
 			Rectangle totalRect = new Rectangle(
 				nBaseX,
 				nBaseY,
 				this.container.record.TotalLineWidth,
 				this.TotalHeight);
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
 			if (totalRect.IntersectsWith(pe.ClipRectangle )== false)
 				return;
 
 			// -----------------------------------------
-			// Ã¿¸öµ¥Ôª¸ñ°üÀ¨×óÉÏµÄÏß£¬²»°üÀ¨ÓÒÏÂµÄÏß
+			// æ¯ä¸ªå•å…ƒæ ¼åŒ…æ‹¬å·¦ä¸Šçš„çº¿ï¼Œä¸åŒ…æ‹¬å³ä¸‹çš„çº¿
 
-			// »æNameCaption
+			// ç»˜NameCaption
 			Rectangle nameCaptionRect = new Rectangle(
 				nBaseX,
 				nBaseY,
@@ -587,7 +587,7 @@ namespace DigitalPlatform.Marc
 					nameCaptionRect);
 			}
 
-			// »æName
+			// ç»˜Name
 			Rectangle nameRect = new Rectangle(
 				nBaseX + this.container.record.NameCaptionTotalWidth,
 				nBaseY,
@@ -600,7 +600,7 @@ namespace DigitalPlatform.Marc
 					nameRect);
 			}
 
-			// »æIndicator
+			// ç»˜Indicator
 			Rectangle indicatorRect = new Rectangle(
 				nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth,
 				nBaseY,
@@ -612,7 +612,7 @@ namespace DigitalPlatform.Marc
 					2,
 					indicatorRect);
 			}
-			// »æm_strValue
+			// ç»˜m_strValue
 			Rectangle valueRect = new Rectangle(
 				nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth + this.container.record.IndicatorTotalWidth /*+ this.container.Indicator2TotalWidth*/,
 				nBaseY,
@@ -626,285 +626,294 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// »­µ¥Ôª¸ñ£¬°üÀ¨±³¾°£¬ÎÄ×Ö ºÍ ×óÉÏÏßÌõ
+		// ç”»å•å…ƒæ ¼ï¼ŒåŒ…æ‹¬èƒŒæ™¯ï¼Œæ–‡å­— å’Œ å·¦ä¸Šçº¿æ¡
 		// parameter:
-		//		g	Graphics¶ÔÏó
-		//		nCol	ÁĞºÅ 
-		//				0 ×Ö¶ÎËµÃ÷;
-		//				1 ×Ö¶ÎÃû;
-		//				2 ×Ö¶ÎÖ¸Ê¾·û 
-		//				3 ×Ö¶ÎÄÚÈİ
-		//		rect	ÇøÓò Èç¹ûÎªnull£¬Ôò×Ô¶¯¸ù¾İÁĞºÅ¼ÆËã µ«Ä¿Ç°²»Ö§³Ö
+		//		g	Graphicså¯¹è±¡
+		//		nCol	åˆ—å· 
+		//				0 å­—æ®µè¯´æ˜;
+		//				1 å­—æ®µå;
+		//				2 å­—æ®µæŒ‡ç¤ºç¬¦ 
+		//				3 å­—æ®µå†…å®¹
+		//		rect	åŒºåŸŸ å¦‚æœä¸ºnullï¼Œåˆ™è‡ªåŠ¨æ ¹æ®åˆ—å·è®¡ç®— ä½†ç›®å‰ä¸æ”¯æŒ
 		// return:
 		//		void
 		internal void DrawCell(Graphics g,
 			int nCol,
 			Rectangle rect)
 		{
-			Debug.Assert(g != null,"g²ÎÊı²»ÄÜÎªnull");
+			Debug.Assert(g != null,"gå‚æ•°ä¸èƒ½ä¸ºnull");
 
 			string strText = "";
-			Brush brush = null;
 			int nWidth = 0;
 
             bool bEnabled = this.container.MarcEditor.Enabled;
             bool bReadOnly = this.container.MarcEditor.ReadOnly;
 
-			if (nCol == 0)
-			{
-				// NameCaption
-
-				Color backColor;
-
-                if (bEnabled == false || bReadOnly == true)
-                    backColor = SystemColors.Control;
-                else
-                    backColor = this.container.MarcEditor.defaultNameCaptionBackColor;
-
-
-				// Èç¹û±¾ĞĞÎªµ±Ç°»î¶¯ĞĞ£¬ÔòÃû³Æ²¿·Ö¸ßÁÁÏÔÊ¾
-				if (this.Selected == true)//this.container.marcEditor.CurField == this)
-				{
-                    if (backColor.GetBrightness() < 0.5f)
-					    backColor = ControlPaint.Light(backColor);
-                    else
-                        backColor = ControlPaint.Dark(backColor);
-
-				}
-
-				strText = this.m_strNameCaption;
-				nWidth = this.container.record.NameCaptionPureWidth;
-				brush = new SolidBrush(backColor);
-			}
-			else if (nCol == 1)
-			{
-				// Name
-                Color backColor;
-
-                if (bEnabled == false || bReadOnly == true)
-                    backColor = SystemColors.Control;
-                else
-                    backColor = this.container.MarcEditor.defaultNameBackColor;
-
-				if (this.Name == "###")
-					backColor = this.container.record.marcEditor.defaultNameCaptionBackColor;
-
-				// Èç¹û±¾ĞĞÎªµ±Ç°»î¶¯ĞĞ£¬ÔòÃû³Æ²¿·Ö¸ßÁÁÏÔÊ¾
-				if (this.Selected == true)//this.container.marcEditor.FocusedField == this)
-				{
-					backColor = ControlPaint.Light(backColor);
-				}
-
-				strText = this.m_strName;
-				nWidth = this.container.record.NamePureWidth;
-				brush = new SolidBrush(backColor);
-			}
-			else if (nCol == 2)
-			{
-				// Indicator
-                Color backColor;
-
-                if (bEnabled == false || bReadOnly == true)
-                    backColor = SystemColors.Control;
-                else
-                    backColor = this.container.MarcEditor.defaultIndicatorBackColor;
-
-				if (Record.IsControlFieldName(this.Name) == true)
-					backColor = this.container.MarcEditor.defaultIndicatorBackColorDisabled;
-
-				// Èç¹û±¾ĞĞÎªµ±Ç°»î¶¯ĞĞ£¬ÔòÃû³Æ²¿·Ö¸ßÁÁÏÔÊ¾
-				if (this.Selected == true)//this.container.marcEditor.FocusedField == this)
-				{
-					backColor = ControlPaint.Light(backColor);
-				}
-
-				strText = this.m_strIndicator;
-				nWidth = this.container.record.IndicatorPureWidth;
-				brush = new SolidBrush(backColor);
-			}			
-			else if (nCol == 3)
-			{
-				// m_strValue
-				strText = this.m_strValue;
-				nWidth = this.container.record.ValuePureWidth + 0;  // 1ÎªÎ¢µ÷,ÕıºÃ!
-                if (bEnabled == false || bReadOnly == true)
-                    brush = new SolidBrush(SystemColors.Control);
-                else
-                    brush = new SolidBrush(this.container.MarcEditor.defaultContentBackColor);
-			}
-			else
-			{
-				Debug.Assert(false,"nColµÄÖµ'" + Convert.ToString(nCol)+ "'²»ºÏ·¨");
-			}
-
-//               new Point(-this.container.MarcEditor.DocumentOrgX + 0, -this.container.MarcEditor.DocumentOrgY + this.container.MarcEditor.DocumentHeight),
-   //new Point(-this.container.MarcEditor.DocumentOrgX + this.container.MarcEditor.DocumentWidth, - this.container.MarcEditor.DocumentOrgY + 0),
-            
-            LinearGradientBrush linGrBrush = new LinearGradientBrush(
-   new Point(0, 0),
-   new Point(this.container.MarcEditor.DocumentWidth, 0),
-   Color.FromArgb(255, 240, 240, 240),  // 240, 240, 240
-   Color.FromArgb(255, 255, 255, 255)   // Opaque red
-   );  // Opaque blue
-
-            linGrBrush.GammaCorrection = true;
-
-			// --------»­±³¾°----------------------------
-
-            if ((nCol == 1 || nCol == 2 || nCol == 3)
-                && (bEnabled == true && bReadOnly == false))
+			Brush brush = null;
+            try
             {
-                g.FillRectangle(linGrBrush, rect);
-            }
-            else
-                g.FillRectangle(brush, rect);
-
-			// --------»­ÏßÌõ----------------------------
-
-            // Ö»»­ÉÏ£¬×ó
-
-			// »­ÉÏ·½µÄÏßÌõ
-			Field.DrawLines(g,
-				rect,
-				this.container.record.GridHorzLineHeight,
-				0,
-				0,
-				0,
-				this.container.record.marcEditor.defaultHorzGridColor);
-
-			// »­×ó·½µÄÏßÌõ
-			int nGridWidth = 0;
-			if (nCol == 1)
-				nGridWidth = this.container.record.GridVertLineWidthForSplit;
-			else
-				nGridWidth = this.container.record.GridVertLineWidth;
-
-            // indicator×ó±ßµÄÊúÏß¶ÌÒ»µã
-            if (nCol == 2)
-            {
-                rect.Y += 2;
-                rect.Height = this.container.record.NamePureHeight;
-            }
-	
-			Field.DrawLines(g,
-				rect,
-				0,
-				0,
-				nGridWidth,//this.container.GridVertLineWidth,
-				0,
-				this.container.MarcEditor.defaultVertGridColor);
-
-            if (nCol == 2)  // »¹Ô­
-            {
-                rect.Y -= 2;
-            }
-
-			// --------»­ÎÄ×Ö----------------------------
-			if (nWidth > 0)
-			{
-				Rectangle textRect = new Rectangle(
-					rect.X + nGridWidth/*this.container.GridVertLineWidth*/ + this.container.record.CellLeftBlank,
-					rect.Y + this.container.record.GridHorzLineHeight + this.container.record.CellTopBlank,
-					nWidth,
-					this.PureHeight);
-
-                // ÕâÀïµÄ font ÊÇÒıÓÃ£¬Òò´Ë²»ĞèÒªÊÍ·Å
-                Font font = null;
                 if (nCol == 0)
                 {
-                    font = this.container.MarcEditor.CaptionFont;
-                    Debug.Assert(font != null, "");
-                }
-                else if (nCol == 1 || nCol == 2)
-                {
-                    font = this.container.MarcEditor.FixedSizeFont;
-                    Debug.Assert(font != null, "");
-                }
-                else 
-                {
-                    font = this.container.MarcEditor.Font;
-                    Debug.Assert(font != null, "");
-                }
+                    // NameCaption
 
-                // System.Drawing.Text.TextRenderingHint oldrenderhint = g.TextRenderingHint;
-                // g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                    Color backColor;
 
-                if (nCol == 0)  // ×Ö¶ÎÃûÌáÊ¾
-                {
-                    /*
-                    StringFormat format = StringFormat.GenericDefault; //new StringFormat();
-                    g.DrawString(strText,
-                        font,
-                        brush,	// System.Drawing.Brushes.Blue,
-                        textRect,
-                        format);
-                     */
+                    if (bEnabled == false || bReadOnly == true)
+                        backColor = SystemColors.Control;
+                    else
+                        backColor = this.container.MarcEditor.defaultNameCaptionBackColor;
 
-                    Color textcolor = this.container.MarcEditor.defaultNameCaptionTextColor;
 
-                    if (this.Selected == true)
+                    // å¦‚æœæœ¬è¡Œä¸ºå½“å‰æ´»åŠ¨è¡Œï¼Œåˆ™åç§°éƒ¨åˆ†é«˜äº®æ˜¾ç¤º
+                    if (this.Selected == true)//this.container.marcEditor.CurField == this)
                     {
-                        textcolor = ReverseColor(textcolor);
+                        if (backColor.GetBrightness() < 0.5f)
+                            backColor = ControlPaint.Light(backColor);
+                        else
+                            backColor = ControlPaint.Dark(backColor);
+
                     }
 
-                    TextRenderer.DrawText(
-                        g,
-                        strText,
-                        font,
-                        textRect,
-                        textcolor,
-                        TextFormatFlags.EndEllipsis);
+                    strText = this.m_strNameCaption;
+                    nWidth = this.container.record.NameCaptionPureWidth;
+                    brush = new SolidBrush(backColor);
+                }
+                else if (nCol == 1)
+                {
+                    // Name
+                    Color backColor;
 
+                    if (bEnabled == false || bReadOnly == true)
+                        backColor = SystemColors.Control;
+                    else
+                        backColor = this.container.MarcEditor.defaultNameBackColor;
+
+                    if (this.Name == "###")
+                        backColor = this.container.record.marcEditor.defaultNameCaptionBackColor;
+
+                    // å¦‚æœæœ¬è¡Œä¸ºå½“å‰æ´»åŠ¨è¡Œï¼Œåˆ™åç§°éƒ¨åˆ†é«˜äº®æ˜¾ç¤º
+                    if (this.Selected == true)//this.container.marcEditor.FocusedField == this)
+                    {
+                        backColor = ControlPaint.Light(backColor);
+                    }
+
+                    strText = this.m_strName;
+                    nWidth = this.container.record.NamePureWidth;
+                    brush = new SolidBrush(backColor);
                 }
-                else if (nCol == 1)    // ×Ö¶ÎÃû
+                else if (nCol == 2)
                 {
-                    TextRenderer.DrawText(
-                        g,
-                        strText,
-                        font,
-                        textRect,
-                        this.container.MarcEditor.defaultNameTextColor,
-                        MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                    // Indicator
+                    Color backColor;
+
+                    if (bEnabled == false || bReadOnly == true)
+                        backColor = SystemColors.Control;
+                    else
+                        backColor = this.container.MarcEditor.defaultIndicatorBackColor;
+
+                    if (Record.IsControlFieldName(this.Name) == true)
+                        backColor = this.container.MarcEditor.defaultIndicatorBackColorDisabled;
+
+                    // å¦‚æœæœ¬è¡Œä¸ºå½“å‰æ´»åŠ¨è¡Œï¼Œåˆ™åç§°éƒ¨åˆ†é«˜äº®æ˜¾ç¤º
+                    if (this.Selected == true)//this.container.marcEditor.FocusedField == this)
+                    {
+                        backColor = ControlPaint.Light(backColor);
+                    }
+
+                    strText = this.m_strIndicator;
+                    nWidth = this.container.record.IndicatorPureWidth;
+                    brush = new SolidBrush(backColor);
                 }
-                else if (nCol == 2)    // Ö¸Ê¾·û
+                else if (nCol == 3)
                 {
-                    TextRenderer.DrawText(
-                        g,
-                        strText,
-                        font,
-                        textRect,
-                        this.container.MarcEditor.defaultIndicatorTextColor,
-                        MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                    // m_strValue
+                    strText = this.m_strValue;
+                    nWidth = this.container.record.ValuePureWidth + 0;  // 1ä¸ºå¾®è°ƒ,æ­£å¥½!
+                    if (bEnabled == false || bReadOnly == true)
+                        brush = new SolidBrush(SystemColors.Control);
+                    else
+                        brush = new SolidBrush(this.container.MarcEditor.defaultContentBackColor);
                 }
                 else
-                {   // ÄÚÈİ
-#if BIDI_SUPPORT
-                    strText = strText.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
-#endif
-                    TextRenderer.DrawText(
-                        g,
-                        strText,
-                        font,
-                        textRect,
-                        this.container.MarcEditor.m_contentTextColor,
-                        MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                {
+                    Debug.Assert(false, "nColçš„å€¼'" + Convert.ToString(nCol) + "'ä¸åˆæ³•");
                 }
-			}
 
-			brush.Dispose();
+                //               new Point(-this.container.MarcEditor.DocumentOrgX + 0, -this.container.MarcEditor.DocumentOrgY + this.container.MarcEditor.DocumentHeight),
+                //new Point(-this.container.MarcEditor.DocumentOrgX + this.container.MarcEditor.DocumentWidth, - this.container.MarcEditor.DocumentOrgY + 0),
 
+                using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
+       new Point(0, 0),
+       new Point(this.container.MarcEditor.DocumentWidth, 0),
+       Color.FromArgb(255, 240, 240, 240),  // 240, 240, 240
+       Color.FromArgb(255, 255, 255, 255)   // Opaque red
+       ))  // Opaque blue
+                {
+                    linGrBrush.GammaCorrection = true;
+
+                    // --------ç”»èƒŒæ™¯----------------------------
+
+                    if ((nCol == 1 || nCol == 2 || nCol == 3)
+                        && (bEnabled == true && bReadOnly == false))
+                    {
+                        g.FillRectangle(linGrBrush, rect);
+                    }
+                    else
+                        g.FillRectangle(brush, rect);
+                }
+
+                // --------ç”»çº¿æ¡----------------------------
+
+                // åªç”»ä¸Šï¼Œå·¦
+
+                // ç”»ä¸Šæ–¹çš„çº¿æ¡
+                Field.DrawLines(g,
+                    rect,
+                    this.container.record.GridHorzLineHeight,
+                    0,
+                    0,
+                    0,
+                    this.container.record.marcEditor.defaultHorzGridColor);
+
+                // ç”»å·¦æ–¹çš„çº¿æ¡
+                int nGridWidth = 0;
+                if (nCol == 1)
+                    nGridWidth = this.container.record.GridVertLineWidthForSplit;
+                else
+                    nGridWidth = this.container.record.GridVertLineWidth;
+
+                // indicatorå·¦è¾¹çš„ç«–çº¿çŸ­ä¸€ç‚¹
+                if (nCol == 2)
+                {
+                    rect.Y += 2;
+                    rect.Height = this.container.record.NamePureHeight;
+                }
+
+                Field.DrawLines(g,
+                    rect,
+                    0,
+                    0,
+                    nGridWidth,//this.container.GridVertLineWidth,
+                    0,
+                    this.container.MarcEditor.defaultVertGridColor);
+
+                if (nCol == 2)  // è¿˜åŸ
+                {
+                    rect.Y -= 2;
+                }
+
+                // --------ç”»æ–‡å­—----------------------------
+                if (nWidth > 0)
+                {
+                    Rectangle textRect = new Rectangle(
+                        rect.X + nGridWidth/*this.container.GridVertLineWidth*/ + this.container.record.CellLeftBlank,
+                        rect.Y + this.container.record.GridHorzLineHeight + this.container.record.CellTopBlank,
+                        nWidth,
+                        this.PureHeight);
+
+                    // è¿™é‡Œçš„ font æ˜¯å¼•ç”¨ï¼Œå› æ­¤ä¸éœ€è¦é‡Šæ”¾
+                    Font font = null;
+                    if (nCol == 0)
+                    {
+                        font = this.container.MarcEditor.CaptionFont;
+                        Debug.Assert(font != null, "");
+                    }
+                    else if (nCol == 1 || nCol == 2)
+                    {
+                        font = this.container.MarcEditor.FixedSizeFont;
+                        Debug.Assert(font != null, "");
+                    }
+                    else
+                    {
+                        font = this.container.MarcEditor.Font;
+                        Debug.Assert(font != null, "");
+                    }
+
+                    // System.Drawing.Text.TextRenderingHint oldrenderhint = g.TextRenderingHint;
+                    // g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+                    if (nCol == 0)  // å­—æ®µåæç¤º
+                    {
+                        /*
+                        StringFormat format = StringFormat.GenericDefault; //new StringFormat();
+                        g.DrawString(strText,
+                            font,
+                            brush,	// System.Drawing.Brushes.Blue,
+                            textRect,
+                            format);
+                         */
+
+                        Color textcolor = this.container.MarcEditor.defaultNameCaptionTextColor;
+
+                        if (this.Selected == true)
+                        {
+                            textcolor = ReverseColor(textcolor);
+                        }
+
+                        TextRenderer.DrawText(
+                            g,
+                            strText,
+                            font,
+                            textRect,
+                            textcolor,
+                            TextFormatFlags.EndEllipsis);
+
+                    }
+                    else if (nCol == 1)    // å­—æ®µå
+                    {
+                        TextRenderer.DrawText(
+                            g,
+                            strText,
+                            font,
+                            textRect,
+                            this.container.MarcEditor.defaultNameTextColor,
+                            MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                    }
+                    else if (nCol == 2)    // æŒ‡ç¤ºç¬¦
+                    {
+                        TextRenderer.DrawText(
+                            g,
+                            strText,
+                            font,
+                            textRect,
+                            this.container.MarcEditor.defaultIndicatorTextColor,
+                            MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                    }
+                    else
+                    {   // å†…å®¹
+#if BIDI_SUPPORT
+                        strText = strText.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+#endif
+                        TextRenderer.DrawText(
+                            g,
+                            strText,
+                            font,
+                            textRect,
+                            this.container.MarcEditor.m_contentTextColor,
+                            MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                    }
+                }
+            }
+            finally
+            {
+                if (brush != null)
+                    brush.Dispose();
+            }
+
+#if NO
             // 2015/10/19
             if (linGrBrush != null)
                 linGrBrush.Dispose();
+#endif
 		}
 
-        // »ñµÃ·´ÏàÑÕÉ«
+        // è·å¾—åç›¸é¢œè‰²
         static Color ReverseColor(Color color)
         {
             return Color.FromArgb(255-color.R, 255-color.G, 255-color.B);
         }
 		
-		// »­ÏßÌõ
+		// ç”»çº¿æ¡
 		internal static void DrawLines(Graphics g,
 			Rectangle myRect,
 			int nTopBorderHeight,
@@ -927,13 +936,13 @@ namespace DigitalPlatform.Marc
 				|| nRightBorderWidth > myRect.Width)
 				return;
 
-			//×ó±ß´¹Ö±¸Ö±Ê
+			//å·¦è¾¹å‚ç›´é’¢ç¬”
 			using(Pen penLeft = new Pen(color,nLeftBorderWidth))
-			//ÓÒ±ß´¹Ö±¸Ö±Ê
+			//å³è¾¹å‚ç›´é’¢ç¬”
 			using(Pen penRight = new Pen(color,nRightBorderWidth))
-			//ÉÏ·½µÄË®Æ½¸Ö±Ê
+			//ä¸Šæ–¹çš„æ°´å¹³é’¢ç¬”
 			using(Pen penTop = new Pen(color,nTopBorderHeight))
-			//ÏÂ·½µÄË®Æ½¸Ö±Ê
+			//ä¸‹æ–¹çš„æ°´å¹³é’¢ç¬”
             using (Pen penBottom = new Pen(color, nBottomBorderHeight))
             {
                 int nLeftDelta = nLeftBorderWidth / 2;
@@ -977,7 +986,7 @@ namespace DigitalPlatform.Marc
 
                 }
 
-                //ÉÏ·½
+                //ä¸Šæ–¹
                 if (nTopBorderHeight > 0)
                 {
                     if (nLeftBorderWidth == 0
@@ -1005,7 +1014,7 @@ namespace DigitalPlatform.Marc
                     }
                 }
 
-                //ÏÂ·½
+                //ä¸‹æ–¹
                 if (nBottomBorderHeight > 0)
                 {
                     if (nLeftBorderWidth == 0
@@ -1041,7 +1050,7 @@ namespace DigitalPlatform.Marc
                     else
                         nLeftTemp = nLeftDelta;
                 }
-                //×ó·½
+                //å·¦æ–¹
                 if (nLeftBorderWidth > 0)
                 {
                     if (nTopBorderHeight == 0
@@ -1077,7 +1086,7 @@ namespace DigitalPlatform.Marc
                     else
                         nRightTemp = nRightDelta;
                 }
-                //ÓÒ·½
+                //å³æ–¹
                 if (nRightBorderWidth > 0)
                 {
                     if (nTopBorderHeight == 0
@@ -1114,11 +1123,11 @@ namespace DigitalPlatform.Marc
 #endif
 		}
 
-        // ×Ó×Ö¶Î¼¯ºÏ
-        // Í¨¹ıgetµÃµ½µÄ¼¯ºÏ£¬removeÆäÖĞµÄsubfield¶ÔÏó£¬fieldÖĞ²»ÄÜ¶ÒÏÖ¡£
-        // ĞèÒªsetÄÇ¸öremoveºóµÄ¼¯ºÏ»ØÀ´£¬²ÅÄÜ¶ÒÏÖ
+        // å­å­—æ®µé›†åˆ
+        // é€šè¿‡getå¾—åˆ°çš„é›†åˆï¼Œremoveå…¶ä¸­çš„subfieldå¯¹è±¡ï¼Œfieldä¸­ä¸èƒ½å…‘ç°ã€‚
+        // éœ€è¦seté‚£ä¸ªremoveåçš„é›†åˆå›æ¥ï¼Œæ‰èƒ½å…‘ç°
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ×Ó×Ö¶Î¶ÔÏó¼¯ºÏ
+        /// è·å–æˆ–è®¾ç½®å­å­—æ®µå¯¹è±¡é›†åˆ
         /// </summary>
 		public SubfieldCollection Subfields 
 		{
@@ -1134,7 +1143,7 @@ namespace DigitalPlatform.Marc
                 {
                     value.Container = this;
 
-                    value.Flush();  // Flush()ÖĞ±Ø¶¨×÷ÁËÕë¶ÔthisµÄÊÂÇé
+                    value.Flush();  // Flush()ä¸­å¿…å®šä½œäº†é’ˆå¯¹thisçš„äº‹æƒ…
                 }
 			}
 		}

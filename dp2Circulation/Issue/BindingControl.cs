@@ -13289,35 +13289,38 @@ MessageBoxDefaultButton.Button2);
             float x = rect.X;
             float y = rect.Y;
 
-            LinearGradientBrush linGrBrush = new LinearGradientBrush(
+            using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
 new PointF(0, y),
 new PointF(0, y + upper_height),
 Color.FromArgb(70, color),
 Color.FromArgb(120, color)
-);
-            linGrBrush.GammaCorrection = true;
+))
+            {
+                linGrBrush.GammaCorrection = true;
 
-            RectangleF rectBack = new RectangleF(
-x,
-y,
-rect.Width,
-upper_height);
-            graphics.FillRectangle(linGrBrush, rectBack);
-
+                RectangleF rectBack = new RectangleF(
+    x,
+    y,
+    rect.Width,
+    upper_height);
+                graphics.FillRectangle(linGrBrush, rectBack);
+            }
             //
 
-            linGrBrush = new LinearGradientBrush(
+            using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
 new PointF(0, y + upper_height),
 new PointF(0, y + upper_height + lower_height),
 Color.FromArgb(200, color),
 Color.FromArgb(100, color)
-);
-            rectBack = new RectangleF(
-x,
-y + upper_height,
-rect.Width,
-lower_height - 1);
-            graphics.FillRectangle(linGrBrush, rectBack);
+))
+            {
+                RectangleF rectBack = new RectangleF(
+    x,
+    y + upper_height,
+    rect.Width,
+    lower_height - 1);
+                graphics.FillRectangle(linGrBrush, rectBack);
+            }
         }
 
         // paramters:
@@ -13351,21 +13354,22 @@ lower_height - 1);
             float height,
             float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(x + radius, y, x + width - (radius * 2), y);
-            path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90); 
-            path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
-            path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
-            path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
-            path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
-            path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
-            path.CloseFigure();
-            if (brush != null)
-                graphics.FillPath(brush, path);
-            if (pen != null)
-                graphics.DrawPath(pen, path);
-            path.Dispose();
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(x + radius, y, x + width - (radius * 2), y);
+                path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
+                path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
+                path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
+                path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
+                path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
+                path.AddLine(x, y + height - (radius * 2), x, y + radius);
+                path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
+                path.CloseFigure();
+                if (brush != null)
+                    graphics.FillPath(brush, path);
+                if (pen != null)
+                    graphics.DrawPath(pen, path);
+            }
         }
 
         // 包装版本
@@ -13408,136 +13412,137 @@ lower_height - 1);
             float width0 = 0;
             float height0 = 0;
 
-            GraphicsPath path = new GraphicsPath();
+            using (GraphicsPath path = new GraphicsPath())
+            {
 
-            // 左上 --> 右上
-            if (strMask[0] == 'r')
-            {
-                x0 = x + radius;
-                y0 = y;
-                if (strMask[1] == 'r') 
-                    width0 = width-radius*2;
+                // 左上 --> 右上
+                if (strMask[0] == 'r')
+                {
+                    x0 = x + radius;
+                    y0 = y;
+                    if (strMask[1] == 'r')
+                        width0 = width - radius * 2;
+                    else
+                        width0 = width - radius * 1;
+                }
                 else
-                    width0 = width-radius*1;
-            }
-            else
-            {
-                // != 'r'
-                x0 = x;
-                y0 = y;
+                {
+                    // != 'r'
+                    x0 = x;
+                    y0 = y;
+                    if (strMask[1] == 'r')
+                        width0 = width - radius * 1;
+                    else
+                        width0 = width;
+                }
+
+                path.AddLine(x0, y0,
+                    x0 + width0, y0);
+
+                // 右上
                 if (strMask[1] == 'r')
-                    width0 = width - radius * 1;
+                    path.AddArc(x + width - (radius * 2), y,
+                        radius * 2, radius * 2,
+                        270, 90);
+
+                // 右上 --> 右下
+                if (strMask[1] == 'r')
+                {
+                    x0 = x + width;
+                    y0 = y + radius;
+                    if (strMask[2] == 'r')
+                        height0 = height - radius * 2;
+                    else
+                        height0 = height - radius * 1;
+                }
                 else
-                    width0 = width;
-            }
+                {
+                    // != 'r'
+                    x0 = x + width;
+                    y0 = y;
+                    if (strMask[2] == 'r')
+                        height0 = height - radius * 1;
+                    else
+                        height0 = height;
+                }
 
-            path.AddLine(x0, y0,
-                x0 + width0, y0);
 
-            // 右上
-            if (strMask[1] == 'r')
-                path.AddArc(x + width - (radius * 2), y,
-                    radius * 2, radius * 2,
-                    270, 90);
+                path.AddLine(x0, y0,
+                    x0, y0 + height0);
 
-            // 右上 --> 右下
-            if (strMask[1] == 'r')
-            {
-                x0 = x + width;
-                y0 = y + radius;
+                // 右下
                 if (strMask[2] == 'r')
-                    height0 = height - radius * 2;
-                else
-                    height0 = height - radius * 1;
-            }
-            else
-            {
-                // != 'r'
-                x0 = x + width;
-                y0 = y;
+                    path.AddArc(x + width - (radius * 2), y + height - (radius * 2),
+                        radius * 2, radius * 2,
+                        0, 90); // Corner
+
+                // 右下 --> 左下
                 if (strMask[2] == 'r')
-                    height0 = height - radius * 1;
+                {
+                    x0 = x + width - radius;
+                    y0 = y + height;
+                    if (strMask[3] == 'r')
+                        width0 = width - radius * 2;
+                    else
+                        width0 = width - radius * 1;
+                }
                 else
-                    height0 = height;
-            }
+                {
+                    // != 'r'
+                    x0 = x + width;
+                    y0 = y + height;
+                    if (strMask[3] == 'r')
+                        width0 = width - radius * 1;
+                    else
+                        width0 = width;
+                }
 
+                path.AddLine(x0, y0,
+                    x0 - width0, y0);
 
-            path.AddLine(x0, y0, 
-                x0, y0 + height0);
-
-            // 右下
-            if (strMask[2] == 'r')
-                path.AddArc(x + width - (radius * 2), y + height - (radius * 2),
-                    radius * 2, radius * 2,
-                    0, 90); // Corner
-
-            // 右下 --> 左下
-            if (strMask[2] == 'r')
-            {
-                x0 = x + width - radius;
-                y0 = y + height;
+                // 左下
                 if (strMask[3] == 'r')
-                    width0 = width - radius * 2;
-                else
-                    width0 = width - radius * 1;
-            }
-            else
-            {
-                // != 'r'
-                x0 = x + width;
-                y0 = y + height;
+                    path.AddArc(x, y + height - (radius * 2),
+                        radius * 2, radius * 2,
+                        90, 90);
+
+                // 左下 --> 左上
                 if (strMask[3] == 'r')
-                    width0 = width - radius * 1;
+                {
+                    x0 = x;
+                    y0 = y + height - radius;
+                    if (strMask[0] == 'r')
+                        height0 = height - radius * 2;
+                    else
+                        height0 = height - radius * 1;
+                }
                 else
-                    width0 = width;
-            }
+                {
+                    // != 'r'
+                    x0 = x;
+                    y0 = y + height;
+                    if (strMask[0] == 'r')
+                        height0 = height - radius * 1;
+                    else
+                        height0 = height;
+                }
 
-            path.AddLine(x0, y0,
-                x0 - width0, y0);
+                path.AddLine(x0, y0,
+                    x0, y0 - height0);
 
-            // 左下
-            if (strMask[3] == 'r')
-                path.AddArc(x, y + height - (radius * 2), 
-                    radius * 2, radius * 2,
-                    90, 90);
-
-            // 左下 --> 左上
-            if (strMask[3] == 'r')
-            {
-                x0 = x;
-                y0 = y + height - radius;
+                // 左上
                 if (strMask[0] == 'r')
-                    height0 = height - radius * 2;
-                else
-                    height0 = height - radius * 1;
+                    path.AddArc(x, y,
+                        radius * 2, radius * 2,
+                        180, 90);
+
+                path.CloseFigure();
+
+                if (brush != null)
+                    graphics.FillPath(brush, path);
+                if (pen != null)
+                    graphics.DrawPath(pen, path);
             }
-            else
-            {
-                // != 'r'
-                x0 = x;
-                y0 = y + height;
-                if (strMask[0] == 'r')
-                    height0 = height - radius * 1;
-                else
-                    height0 = height;
-            }
-
-            path.AddLine(x0, y0,
-                x0, y0 - height0);
-
-            // 左上
-            if (strMask[0] == 'r')
-                path.AddArc(x, y, 
-                    radius * 2, radius * 2,
-                    180, 90);
-
-            path.CloseFigure();
-
-            if (brush != null)
-                graphics.FillPath(brush, path);
-            if (pen != null)
-                graphics.DrawPath(pen, path);
-            path.Dispose();
         }
 
         // paramters:
@@ -13575,38 +13580,39 @@ lower_height - 1);
             float radius,
             float que_radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            // 左上 --> 右上
-            path.AddLine(x + radius, y,
-                x + width - (radius + que_radius), y);
-            // 右上
-            path.AddArc(x + width - (que_radius), y - que_radius,
-                que_radius * 2, que_radius * 2, 180, -90);
-            /*
-            // 右上 --> 右下
-            path.AddLine(x + width, y + que_radius, 
-                x + width, y + height - (radius + que_radius));
-             * */
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                // 左上 --> 右上
+                path.AddLine(x + radius, y,
+                    x + width - (radius + que_radius), y);
+                // 右上
+                path.AddArc(x + width - (que_radius), y - que_radius,
+                    que_radius * 2, que_radius * 2, 180, -90);
+                /*
+                // 右上 --> 右下
+                path.AddLine(x + width, y + que_radius, 
+                    x + width, y + height - (radius + que_radius));
+                 * */
 
-            // 右下
-            path.AddArc(x + width - (radius * 2), y + height - (radius * 2),
-                radius * 2, radius * 2, 0, 90); // Corner
-            // 右下 --> 左下
-            path.AddLine(x + width - (radius * 2), y + height,
-                x + radius, y + height);
-            // 左下
-            path.AddArc(x, y + height - (radius * 2), 
-                radius * 2, radius * 2, 90, 90);
-            // 左下 --> 左上
-            path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            // 左上
-            path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
-            path.CloseFigure();
-            if (brush != null)
-                graphics.FillPath(brush, path);
-            if (pen != null)
-                graphics.DrawPath(pen, path);
-            path.Dispose();
+                // 右下
+                path.AddArc(x + width - (radius * 2), y + height - (radius * 2),
+                    radius * 2, radius * 2, 0, 90); // Corner
+                // 右下 --> 左下
+                path.AddLine(x + width - (radius * 2), y + height,
+                    x + radius, y + height);
+                // 左下
+                path.AddArc(x, y + height - (radius * 2),
+                    radius * 2, radius * 2, 90, 90);
+                // 左下 --> 左上
+                path.AddLine(x, y + height - (radius * 2), x, y + radius);
+                // 左上
+                path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
+                path.CloseFigure();
+                if (brush != null)
+                    graphics.FillPath(brush, path);
+                if (pen != null)
+                    graphics.DrawPath(pen, path);
+            }
         }
 
         // paramters:
@@ -13617,25 +13623,26 @@ lower_height - 1);
             Brush brush,
             RectangleF rect)
         {
-            GraphicsPath path = new GraphicsPath();
-            if (pen != null)
+            using (GraphicsPath path = new GraphicsPath())
             {
-                rect.Inflate(-pen.Width / 2, -pen.Width / 2);
+                if (pen != null)
+                {
+                    rect.Inflate(-pen.Width / 2, -pen.Width / 2);
+                }
+
+                float x = rect.X;
+                float y = rect.Y;
+                float width = rect.Width;
+                float height = rect.Height;
+
+                path.AddArc(x, y,
+                    width, height, 0, 360);
+                path.CloseFigure();
+                if (brush != null)
+                    graphics.FillPath(brush, path);
+                if (pen != null)
+                    graphics.DrawPath(pen, path);
             }
-
-            float x = rect.X;
-            float y = rect.Y;
-            float width = rect.Width;
-            float height = rect.Height;
-
-            path.AddArc(x, y,
-                width, height, 0, 360);
-            path.CloseFigure();
-            if (brush != null)
-                graphics.FillPath(brush, path);
-            if (pen != null)
-                graphics.DrawPath(pen, path);
-            path.Dispose();
         }
 
         // paramters:
@@ -13647,48 +13654,49 @@ lower_height - 1);
             RectangleF rect,
             float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-
-            rect.Inflate(0, -pen.Width/2);
-
-            float x = rect.X;
-            float y = rect.Y;
-            float width = rect.Width;
-            float height = rect.Height;
-
-            if (bLeft == true)
+            using (GraphicsPath path = new GraphicsPath())
             {
-                path.AddArc(x + width - radius, y,
-                    radius * 2, radius * 2, 270, -90);
-                /*
-                path.AddLine(x + width - (radius), y+(radius),
-                    x + width - (radius), y + (height/2)-(radius));
-                 * */
-                path.AddArc(x + width - (radius * 2) - radius, y + (height / 2) - (radius) - radius,
-                    radius * 2, radius * 2, 0, 90);
-                path.AddArc(x + width - (radius * 2) - radius, y + (height / 2),
-        radius * 2, radius * 2, 270, 90);
-                /*
-                path.AddLine(x + width - (radius), y + (height/2)+(radius),
-        x + width - (radius), y + height - (radius));
-                 * */
-                path.AddArc(x + width - (radius), y + height - (radius) - radius,
-        radius * 2, radius * 2, 180, -90);
-            }
-            else
-            {
-                path.AddArc(x - radius, y,
-                    radius * 2, radius * 2, 270, 90);
-                path.AddArc(x + radius , y + height/2 - radius*2,
-                    radius * 2, radius * 2, 180, -90);
-                path.AddArc(x + radius, y + (height / 2),
-        radius * 2, radius * 2, 270, -90);
-                path.AddArc(x - radius, y + height - radius*2,
-        radius * 2, radius * 2, 0, 90);
-            }
 
-            graphics.DrawPath(pen, path);
-            path.Dispose();
+                rect.Inflate(0, -pen.Width / 2);
+
+                float x = rect.X;
+                float y = rect.Y;
+                float width = rect.Width;
+                float height = rect.Height;
+
+                if (bLeft == true)
+                {
+                    path.AddArc(x + width - radius, y,
+                        radius * 2, radius * 2, 270, -90);
+                    /*
+                    path.AddLine(x + width - (radius), y+(radius),
+                        x + width - (radius), y + (height/2)-(radius));
+                     * */
+                    path.AddArc(x + width - (radius * 2) - radius, y + (height / 2) - (radius) - radius,
+                        radius * 2, radius * 2, 0, 90);
+                    path.AddArc(x + width - (radius * 2) - radius, y + (height / 2),
+            radius * 2, radius * 2, 270, 90);
+                    /*
+                    path.AddLine(x + width - (radius), y + (height/2)+(radius),
+            x + width - (radius), y + height - (radius));
+                     * */
+                    path.AddArc(x + width - (radius), y + height - (radius) - radius,
+            radius * 2, radius * 2, 180, -90);
+                }
+                else
+                {
+                    path.AddArc(x - radius, y,
+                        radius * 2, radius * 2, 270, 90);
+                    path.AddArc(x + radius, y + height / 2 - radius * 2,
+                        radius * 2, radius * 2, 180, -90);
+                    path.AddArc(x + radius, y + (height / 2),
+            radius * 2, radius * 2, 270, -90);
+                    path.AddArc(x - radius, y + height - radius * 2,
+            radius * 2, radius * 2, 0, 90);
+                }
+
+                graphics.DrawPath(pen, path);
+            }
         }
 
         public static void RoundRectangle(Graphics graphics,
@@ -13713,18 +13721,19 @@ lower_height - 1);
             float height,
             float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(x + radius, y, x + width - (radius * 2), y);
-            path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
-            path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
-            path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
-            path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
-            path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
-            path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
-            path.CloseFigure();
-            graphics.DrawPath(pen, path);
-            path.Dispose();
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(x + radius, y, x + width - (radius * 2), y);
+                path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
+                path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
+                path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
+                path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
+                path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
+                path.AddLine(x, y + height - (radius * 2), x, y + radius);
+                path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
+                path.CloseFigure();
+                graphics.DrawPath(pen, path);
+            }
         }
         
         void DoEndRectSelecting()
@@ -14744,137 +14753,30 @@ lower_height - 1);
 
             // 右、下线条
 
-            Pen penFrame = new Pen(Color.FromArgb(50, Color.Gray), (float)1);
-
-            // 右方竖线
-            if (TooLarge(x0 + this.m_lContentWidth) == false)
-            {
-                e.Graphics.DrawLine(penFrame,
-                    new PointF((int)x0 + this.m_lContentWidth, (int)y0),
-                    new PointF((int)x0 + this.m_lContentWidth, (int)(y0 + lHeight))
-                    );
-            }
-
-            // 下方横线
-            if (bDrawBottomLine == true
-                && TooLarge(y0 + lHeight) == false)
+            using (Pen penFrame = new Pen(Color.FromArgb(50, Color.Gray), (float)1))
             {
 
-                e.Graphics.DrawLine(penFrame,
-                    new PointF((int)x0 + this.m_nLeftTextWidth, (int)(y0 + lHeight)),
-                    new PointF((int)x0 + this.m_lContentWidth, (int)(y0 + lHeight))
-                    );
-            }
-
-#if NOOOOOOOOOOOOOOOO
-            // 绘制合订本范围的方框
-            // Debug.WriteLine("Draw border clip=" + e.ClipRectangle.ToString());
-            // 遍历合订册对象数组
-            for (int i = 0; i < this.ParentItems.Count; i++)
-            {
-                ItemBindingItem parent_item = this.ParentItems[i];
-
-                IssueBindingItem issue = parent_item.Container; // 假装属于这个期
-                Debug.Assert(issue != null, "");
-
-                // 找到行号
-                int nLineNo = this.Issues.IndexOf(issue);
-                Debug.Assert(nLineNo != -1, "");
-                if (nLineNo == -1)
-                    continue;
-
-                long lStartY = (long)this.m_nTopBlank + (long)m_nCellHeight * (long)nLineNo;
-                int nWidth = m_nCellWidth * 2;
-
-                int nCol = issue.IndexOfItem(parent_item);
-                Debug.Assert(nCol != -1, "");
-                if (nCol == -1)
-                    continue;
-
-                long lStartX = (long)this.m_nLeftBlank
-                    + (long)this.m_nLeftTextWidth
-                    + (long)nCol * (long)m_nCellWidth;
-
-                // 看看垂直方向包含多少个期
-                int nIssueCount = 0;
-                if (parent_item.MemberCells.Count == 0)
-                    nIssueCount = 1;
-                else
+                // 右方竖线
+                if (TooLarge(x0 + this.m_lContentWidth) == false)
                 {
-                    // TODO: 要保证item.MemberCells数组中对象是有序的
-                    IssueBindingItem tail_issue = parent_item.MemberCells[parent_item.MemberCells.Count - 1].Container;// item.MemberItems[item.MemberItems.Count - 1].Container;
-                    Debug.Assert(tail_issue != null, "");
-                    // 找到行号
-                    int nTailLineNo = this.Issues.IndexOf(tail_issue);
-                    Debug.Assert(nTailLineNo != -1, "");
-
-                    nIssueCount = nTailLineNo - nLineNo + 1;
+                    e.Graphics.DrawLine(penFrame,
+                        new PointF((int)x0 + this.m_lContentWidth, (int)y0),
+                        new PointF((int)x0 + this.m_lContentWidth, (int)(y0 + lHeight))
+                        );
                 }
 
-                long lThisHeight = m_nCellHeight * nIssueCount;
-
+                // 下方横线
+                if (bDrawBottomLine == true
+                    && TooLarge(y0 + lHeight) == false)
                 {
-                    RectangleF rect = new RectangleF((float)(lStartX + this.m_lWindowOrgX),
-                        (float)(lStartY + this.m_lWindowOrgY),
-                        (float)nWidth,
-                        (float)lThisHeight);
 
-                    if (rect.IntersectsWith(e.ClipRectangle) == false)
-                        continue;
-
-                    Pen penBorder = null;
-                    Brush brushInner = null;
-
-                    if (CheckProcessingState(parent_item) == false)
-                    {
-                        Color colorBorder = this.FixedBorderColor;
-                        penBorder = new Pen(Color.FromArgb(100, colorBorder),
-                            (float)8);  // 固化，绿色实线
-                        // brushInner = new SolidBrush(Color.FromArgb(30, Color.Green));
-                    }
-                    else
-                    {
-                        Color colorBorder = this.NewlyBorderColor;
-                        Brush brush = new HatchBrush(HatchStyle.WideDownwardDiagonal,
-                            Color.FromArgb(0, 255, 255, 255),
-                            Color.FromArgb(255, colorBorder)
-                            );    // back
-                        penBorder = new Pen(brush,
-                            (float)4);  // 可修改，红色虚线
-                        // penBorder.Alignment = PenAlignment.
-                    }
-
-                    float delta = (penBorder.Width/2) + 1;
-                    rect.Inflate(-delta,-delta);
-
-                    e.Graphics.RenderingOrigin = new Point((int)rect.X, (int)rect.Y);
-                    BindingControl.RoundRectangle(e.Graphics,
-                        penBorder,
-                        brushInner,
-                        rect,
-                        10);
+                    e.Graphics.DrawLine(penFrame,
+                        new PointF((int)x0 + this.m_nLeftTextWidth, (int)(y0 + lHeight)),
+                        new PointF((int)x0 + this.m_lContentWidth, (int)(y0 + lHeight))
+                        );
                 }
-
-                /*
-                e.Graphics.DrawRectangle(penBorder,
-                    (float)(lStartX + this.m_lWindowOrgX + 2),
-                    (float)(lStartY + this.m_lWindowOrgY + 2),
-                    (float)nWidth - 4,
-                    (float)lThisHeight - 4);
-                 * */
-                /*
-                Debug.WriteLine("rect="
-                    + lStartX.ToString()
-                    + ","
-                    + lStartY.ToString()
-                    + ","
-                    + nWidth.ToString()
-                    + ","
-                    + lThisHeight.ToString());
-                 * */
-
             }
-#endif
+
             // 绘制合订本范围的连接线
             // 遍历合订册对象数组
             for (int i = 0; i < this.ParentItems.Count; i++)
@@ -14907,77 +14809,89 @@ lower_height - 1);
                 }
 
                 Color colorBorder;
-                Pen penBorder = null;
-                Brush brushInner = null;
-
-                if (CheckProcessingState(parent_item) == false)
                 {
-                    colorBorder = this.FixedBorderColor;
-                    penBorder = new Pen(Color.FromArgb(150, colorBorder),
-                        (float)4);  // 固化
-                    // brushInner = new SolidBrush(Color.FromArgb(30, Color.Green));
-                }
-                else
-                {
-                    colorBorder = this.NewlyBorderColor;
-                    Brush brush = new HatchBrush(HatchStyle.WideDownwardDiagonal,
-                        Color.FromArgb(0, 255, 255, 255),
-                        Color.FromArgb(255, colorBorder)
-                        );    // back
-                    penBorder = new Pen(brush,
-                        (float)4);  // 可修改
-                    // penBorder.Alignment = PenAlignment.
-                }
+                    Pen penBorder = null;
+                    Brush brushInner = null;
+                    try
+                    {
+                        if (CheckProcessingState(parent_item) == false)
+                        {
+                            colorBorder = this.FixedBorderColor;
+                            penBorder = new Pen(Color.FromArgb(150, colorBorder),
+                                (float)4);  // 固化
+                            brushInner = new SolidBrush(Color.FromArgb(30, Color.Green));
+                        }
+                        else
+                        {
+                            colorBorder = this.NewlyBorderColor;
+                            Brush brush = new HatchBrush(HatchStyle.WideDownwardDiagonal,
+                                Color.FromArgb(0, 255, 255, 255),
+                                Color.FromArgb(255, colorBorder)
+                                );    // back
+                            penBorder = new Pen(brush,
+                                (float)4);  // 可修改
+                            // penBorder.Alignment = PenAlignment.
+                        }
 
-                e.Graphics.RenderingOrigin = Point.Round(points[0]);
+                        e.Graphics.RenderingOrigin = Point.Round(points[0]);
 
-                // 绘制方框
-                if (bAllBindingLayout == true)
-                {
-                    float delta = (penBorder.Width / 2) + 1;
-                    rectBound.Inflate(-delta, -delta);
+                        // 绘制方框
+                        if (bAllBindingLayout == true)
+                        {
+                            float delta = (penBorder.Width / 2) + 1;
+                            rectBound.Inflate(-delta, -delta);
 
-                    BindingControl.RoundRectangle(e.Graphics,
-    penBorder,
-    brushInner,
-    rectBound,
-    10);
-                    continue;
-                }
+                            BindingControl.RoundRectangle(e.Graphics,
+            penBorder,
+            brushInner,
+            rectBound,
+            10);
+                            continue;
+                        }
 
                         // 获得纵向偏移量
-                int nOffset = GetVerticalOffset(parent_item.Container,
-                    parent_item);
-                if (nOffset == 0)
-                {
-                    if (this.LineStyle == BoundLineStyle.Line)
-                        e.Graphics.DrawLines(penBorder, points);
-                    else
-                        e.Graphics.DrawCurve(penBorder, points);
-                }
-                else
-                {
-                    int nStep = (this.m_nCellHeight - this.CellMargin.Vertical - this.CellPadding.Vertical) / 4;
-                    nOffset = (nOffset % 5);
-                    if ((nOffset % 2) == 1)
-                    {
-                        nOffset = -1 * ((nOffset + 1) / 2);
-                    }
-                    else
-                    {
-                        nOffset = nOffset / 2;
-                    }
+                        int nOffset = GetVerticalOffset(parent_item.Container,
+                            parent_item);
+                        if (nOffset == 0)
+                        {
+                            if (this.LineStyle == BoundLineStyle.Line)
+                                e.Graphics.DrawLines(penBorder, points);
+                            else
+                                e.Graphics.DrawCurve(penBorder, points);
+                        }
+                        else
+                        {
+                            int nStep = (this.m_nCellHeight - this.CellMargin.Vertical - this.CellPadding.Vertical) / 4;
+                            nOffset = (nOffset % 5);
+                            if ((nOffset % 2) == 1)
+                            {
+                                nOffset = -1 * ((nOffset + 1) / 2);
+                            }
+                            else
+                            {
+                                nOffset = nOffset / 2;
+                            }
 
-                    if (points.Length >= 2)
-                    {
-                        points[0].Y += nOffset * nStep;
-                        points[1].Y += nOffset * nStep;
-                    }
+                            if (points.Length >= 2)
+                            {
+                                points[0].Y += nOffset * nStep;
+                                points[1].Y += nOffset * nStep;
+                            }
 
-                    if (this.LineStyle == BoundLineStyle.Line)
-                        e.Graphics.DrawLines(penBorder, points);
-                    else
-                        e.Graphics.DrawCurve(penBorder, points);
+                            if (this.LineStyle == BoundLineStyle.Line)
+                                e.Graphics.DrawLines(penBorder, points);
+                            else
+                                e.Graphics.DrawCurve(penBorder, points);
+                        }
+
+                    }
+                    finally
+                    {
+                        if (penBorder != null)
+                            penBorder.Dispose();
+                        if (brushInner != null)
+                            brushInner.Dispose();
+                    }
                 }
 
                 PaintCenterDots(points,

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,7 +16,7 @@ using DigitalPlatform.Range;
 
 namespace DigitalPlatform.CommonDialog
 {
-    // ËùÓĞÇøÓòÀàµÄ»ùÀà
+    // æ‰€æœ‰åŒºåŸŸç±»çš„åŸºç±»
     public class AreaBase
     {
         internal bool m_bSelected = false;
@@ -29,7 +29,7 @@ namespace DigitalPlatform.CommonDialog
 
         public List<AreaBase> ChildrenCollection = new List<AreaBase>();
 
-        public int NameValue = 0;   // 0 ±íÊ¾ÉĞÎ´³õÊ¼»¯
+        public int NameValue = 0;   // 0 è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
 
         public AreaBase FirstChild
         {
@@ -61,8 +61,8 @@ namespace DigitalPlatform.CommonDialog
                 return this.ChildrenCollection[this.ChildrenCollection.Count - 1];
         }
 
-        // Çå³ı»º´æµÄ±äÁ¿
-        // ÑØ×Å×æÏÈµÄÂ·¾¶, È«²¿Çå³ı
+        // æ¸…é™¤ç¼“å­˜çš„å˜é‡
+        // æ²¿ç€ç¥–å…ˆçš„è·¯å¾„, å…¨éƒ¨æ¸…é™¤
         public virtual void ClearCache()
         {
             AreaBase obj = this;
@@ -76,7 +76,7 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // ÎªÏÂ¼¶ÒÔ¼°ÔÙÏÂ¼¶ÓĞselectedµÄÉèÖÃ×´Ì¬ (²»°üÀ¨×Ô¼º)
+        // ä¸ºä¸‹çº§ä»¥åŠå†ä¸‹çº§æœ‰selectedçš„è®¾ç½®çŠ¶æ€ (ä¸åŒ…æ‹¬è‡ªå·±)
         // parameters:
         public void SetChildrenDayState(int nState,
             ref List<AreaBase> update_objects,
@@ -86,7 +86,7 @@ namespace DigitalPlatform.CommonDialog
             {
                 AreaBase obj = this.ChildrenCollection[i];
 
-                // Èç¹ûÊÇDayAreaÀàĞÍ
+                // å¦‚æœæ˜¯DayAreaç±»å‹
                 if (obj is DayArea)
                 {
                     DayArea day = (DayArea)obj;
@@ -103,7 +103,7 @@ namespace DigitalPlatform.CommonDialog
                 }
                 else
                 {
-                    // µİ¹é
+                    // é€’å½’
                     obj.SetChildrenDayState(nState,
                         ref update_objects,
                         nMaxCount);
@@ -114,10 +114,10 @@ namespace DigitalPlatform.CommonDialog
 
 
         /*
-        // ÎªÏÂ¼¶ÒÔ¼°ÔÙÏÂ¼¶ÓĞselectedµÄÉèÖÃ×´Ì¬ (²»°üÀ¨×Ô¼º)
+        // ä¸ºä¸‹çº§ä»¥åŠå†ä¸‹çº§æœ‰selectedçš„è®¾ç½®çŠ¶æ€ (ä¸åŒ…æ‹¬è‡ªå·±)
         // parameters:
-        //      bForce  Èç¹ûÎªtrue£¬Ôò±íÊ¾²»¹ÜÊÇ·ñÓĞÑ¡Ôñ±ê¼Ç£¬¶¼ĞŞ¸Ä×´Ì¬
-        //              Èç¹ûÎªfalse£¬ÔòÓĞÑ¡Ôñ±ê¼ÇµÄ²ÅĞŞ¸Ä×´Ì¬
+        //      bForce  å¦‚æœä¸ºtrueï¼Œåˆ™è¡¨ç¤ºä¸ç®¡æ˜¯å¦æœ‰é€‰æ‹©æ ‡è®°ï¼Œéƒ½ä¿®æ”¹çŠ¶æ€
+        //              å¦‚æœä¸ºfalseï¼Œåˆ™æœ‰é€‰æ‹©æ ‡è®°çš„æ‰ä¿®æ”¹çŠ¶æ€
         public void SetChildrenDayState(int nState,
             bool bForce,
             ref List<AreaBase> update_objects,
@@ -127,7 +127,7 @@ namespace DigitalPlatform.CommonDialog
             {
                 AreaBase obj = this.ChildrenCollection[i];
 
-                // Èç¹ûÊÇDayAreaÀàĞÍ
+                // å¦‚æœæ˜¯DayAreaç±»å‹
                 if (obj is DayArea)
                 {
                     DayArea day = (DayArea)obj;
@@ -146,12 +146,12 @@ namespace DigitalPlatform.CommonDialog
                 {
                     bool bNewForce = false;
 
-                    // Èç¹ûÒ»¸ö¶ÔÏóËäÈ»²»ÊÇDayArea¶ÔÏó£¬µ«Èç¹ûËüÒÑ¾­±»Ñ¡Ôñ£¬ÄÇ¾ÍÒâÎ¶×ÅÆäÏÂ¼¶È«²¿DayArea¶ÔÏó¶¼ÒªÇ¿ÖÆ±»ÉèÖÃ×´Ì¬
+                    // å¦‚æœä¸€ä¸ªå¯¹è±¡è™½ç„¶ä¸æ˜¯DayAreaå¯¹è±¡ï¼Œä½†å¦‚æœå®ƒå·²ç»è¢«é€‰æ‹©ï¼Œé‚£å°±æ„å‘³ç€å…¶ä¸‹çº§å…¨éƒ¨DayAreaå¯¹è±¡éƒ½è¦å¼ºåˆ¶è¢«è®¾ç½®çŠ¶æ€
                     if (bForce == true
                         || obj.m_bSelected == true)
                         bNewForce = true;
 
-                    // µİ¹é
+                    // é€’å½’
                     obj.SetChildrenDayState(nState,
                         bNewForce,
                         ref update_objects,
@@ -163,7 +163,7 @@ namespace DigitalPlatform.CommonDialog
         }
          * */
 
-        // ÏÂ¼¶ÒÔ¼°ÔÙÏÂ¼¶ÊÇ·ñÓĞselected? (²»°üÀ¨×Ô¼º)
+        // ä¸‹çº§ä»¥åŠå†ä¸‹çº§æ˜¯å¦æœ‰selected? (ä¸åŒ…æ‹¬è‡ªå·±)
         public bool HasChildrenSelected()
         {
             for (int i = 0; i < this.ChildrenCollection.Count; i++)
@@ -172,7 +172,7 @@ namespace DigitalPlatform.CommonDialog
                 if (obj.m_bSelected == true)
                     return true;
 
-                // µİ¹é
+                // é€’å½’
                 if (obj.HasChildrenSelected() == true)
                     return true;
             }
@@ -180,7 +180,7 @@ namespace DigitalPlatform.CommonDialog
             return false;
         }
 
-        // Çå³ıËùÓĞÏÂ¼¶¶ÔÏó
+        // æ¸…é™¤æ‰€æœ‰ä¸‹çº§å¯¹è±¡
         public virtual void Clear()
         {
             this.ChildrenCollection.Clear();
@@ -190,10 +190,10 @@ namespace DigitalPlatform.CommonDialog
             m_lWidthCache = -1;
             m_lHeightCache = -1;
 
-            NameValue = 0;   // 0 ±íÊ¾ÉĞÎ´³õÊ¼»¯
+            NameValue = 0;   // 0 è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
         }
 
-        // Çå³ıµ±Ç°¶ÔÏó±¾ÉíÒÔ¼°È«²¿ÏÂ¼¶µÄÑ¡Ôñ±êÖ¾
+        // æ¸…é™¤å½“å‰å¯¹è±¡æœ¬èº«ä»¥åŠå…¨éƒ¨ä¸‹çº§çš„é€‰æ‹©æ ‡å¿—
         public void ClearAllSubSelected()
         {
             this.m_bSelected = false;
@@ -204,12 +204,12 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // Çå³ıµ±Ç°¶ÔÏó±¾ÉíÒÔ¼°È«²¿ÏÂ¼¶µÄÑ¡Ôñ±êÖ¾, ²¢·µ»ØĞèÒªË¢ĞÂµÄ¶ÔÏó
+        // æ¸…é™¤å½“å‰å¯¹è±¡æœ¬èº«ä»¥åŠå…¨éƒ¨ä¸‹çº§çš„é€‰æ‹©æ ‡å¿—, å¹¶è¿”å›éœ€è¦åˆ·æ–°çš„å¯¹è±¡
         public void ClearAllSubSelected(ref List<AreaBase> objects,
             int nMaxCount)
         {
 
-            // ĞŞ¸Ä¹ıµÄ²Å¼ÓÈëÊı×é
+            // ä¿®æ”¹è¿‡çš„æ‰åŠ å…¥æ•°ç»„
             if (this.m_bSelected == true && objects.Count < nMaxCount)
                 objects.Add(this);
 
@@ -222,37 +222,37 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // ¸ù¾İ¸ø³öµÄNameValueÖµ, ´Óµ±Ç°¶ÔÏó¿ªÊ¼(°üÀ¨µ±Ç°¶ÔÏó) ¶¨Î»ºó´ú¶ÔÏó
+        // æ ¹æ®ç»™å‡ºçš„NameValueå€¼, ä»å½“å‰å¯¹è±¡å¼€å§‹(åŒ…æ‹¬å½“å‰å¯¹è±¡) å®šä½åä»£å¯¹è±¡
         public AreaBase FindByNameValue(List<int> values)
         {
             if (values == null)
             {
-                Debug.Assert(false, "values²»ÄÜÎª¿Õ");
+                Debug.Assert(false, "valuesä¸èƒ½ä¸ºç©º");
                 return null;
             }
 
             if (values.Count == 0)
             {
-                Debug.Assert(false, "values.Count²»ÄÜÎª0");
+                Debug.Assert(false, "values.Countä¸èƒ½ä¸º0");
                 return null;
             }
 
-            if (values[0] == -1 // -1±íÊ¾Í¨Åä·û
+            if (values[0] == -1 // -1è¡¨ç¤ºé€šé…ç¬¦
                  || this.NameValue == values[0])
             {
                 if (values.Count == 1)
                     return this;
 
                 Debug.Assert(values.Count > 1, "");
-                // ¼ÌĞøÏòÏÂÕÒ
+                // ç»§ç»­å‘ä¸‹æ‰¾
 
-                // Ëõ¶Ì²ÎÊıÒ»¼¶
+                // ç¼©çŸ­å‚æ•°ä¸€çº§
                 List<int> temp = new List<int>();
                 temp.AddRange(values);
                 temp.RemoveAt(0);
 
-                // ¼ÌĞøÏòÏÂÕÒ
-                // µİ¹é¼´¿É
+                // ç»§ç»­å‘ä¸‹æ‰¾
+                // é€’å½’å³å¯
                 for (int i = 0; i < this.ChildrenCollection.Count; i++)
                 {
                     AreaBase obj = this.ChildrenCollection[i];
@@ -261,9 +261,9 @@ namespace DigitalPlatform.CommonDialog
                     if (result_obj != null)
                         return result_obj;
 
-                    // ÓÅ»¯
-                    // Èç¹ûÊÇobj×Ô¼ºÕâÒ»¼¶Æ¥Åä³É¹¦£¬µ«ÊÇÏÂÃæÃ»ÓĞÆ¥Åä³É¹¦
-                    if (temp[0] != -1 // -1±íÊ¾Í¨Åä·û
+                    // ä¼˜åŒ–
+                    // å¦‚æœæ˜¯objè‡ªå·±è¿™ä¸€çº§åŒ¹é…æˆåŠŸï¼Œä½†æ˜¯ä¸‹é¢æ²¡æœ‰åŒ¹é…æˆåŠŸ
+                    if (temp[0] != -1 // -1è¡¨ç¤ºé€šé…ç¬¦
                         && obj.NameValue == temp[0])
                     {
                         return null;
@@ -271,7 +271,7 @@ namespace DigitalPlatform.CommonDialog
             
                     /*
                     if (temp[0] != -1)
-                        return null;    // Èç¹û²»ÊÇÍ¨Åä·ûÄ£Ê½, µ½´Ë¾Í½áÊøÁË
+                        return null;    // å¦‚æœä¸æ˜¯é€šé…ç¬¦æ¨¡å¼, åˆ°æ­¤å°±ç»“æŸäº†
                      * */
                 }
 
@@ -284,7 +284,7 @@ namespace DigitalPlatform.CommonDialog
 
         }
 
-        // ÕÒµ½ÏÂÒ»¸öÍ¬¼¶¶ÔÏó£¨¿ÉÒÔÊÇ¿çÔ½¸¸Ç×¡¢×æ±²µÄ£©
+        // æ‰¾åˆ°ä¸‹ä¸€ä¸ªåŒçº§å¯¹è±¡ï¼ˆå¯ä»¥æ˜¯è·¨è¶Šçˆ¶äº²ã€ç¥–è¾ˆçš„ï¼‰
         public AreaBase GetNextSibling()
         {
             if (this._Container == null)
@@ -305,21 +305,21 @@ namespace DigitalPlatform.CommonDialog
             AreaBase parent = this._Container;
             //    stack.Add(this._Container);
 
-            // Ã»ÓĞÕÒµ½
+            // æ²¡æœ‰æ‰¾åˆ°
             for (; ; )
             {
-                // ÕÒµ½¸¸Ç×µÄĞÖµÜ
+                // æ‰¾åˆ°çˆ¶äº²çš„å…„å¼Ÿ
                 AreaBase parent_sibling = parent.GetNextSibling();
                 if (parent_sibling == null)
                     return null;
 
                 List<AreaBase> temp_children = parent_sibling.ChildrenCollection;
 
-                // ¸¸Ç×ĞÖµÜµÄµÚÒ»¸ö¶ù×Ó
+                // çˆ¶äº²å…„å¼Ÿçš„ç¬¬ä¸€ä¸ªå„¿å­
                 if (temp_children.Count != 0)
                     return temp_children[0];
 
-                // ·ñÔò¼ÌĞøÕÒ¸¸Ç×µÄĞÖµÜ
+                // å¦åˆ™ç»§ç»­æ‰¾çˆ¶äº²çš„å…„å¼Ÿ
 
                 parent = parent_sibling;
             }
@@ -328,7 +328,7 @@ namespace DigitalPlatform.CommonDialog
             // return null;
         }
 
-        // ÕÒµ½Ç°Ò»¸öÍ¬¼¶¶ÔÏó£¨¿ÉÒÔÊÇ¿çÔ½¸¸Ç×¡¢×æ±²µÄ£©
+        // æ‰¾åˆ°å‰ä¸€ä¸ªåŒçº§å¯¹è±¡ï¼ˆå¯ä»¥æ˜¯è·¨è¶Šçˆ¶äº²ã€ç¥–è¾ˆçš„ï¼‰
         public AreaBase GetPrevSibling()
         {
             if (this._Container == null)
@@ -346,21 +346,21 @@ namespace DigitalPlatform.CommonDialog
 
             AreaBase parent = this._Container;
 
-            // Ã»ÓĞÕÒµ½
+            // æ²¡æœ‰æ‰¾åˆ°
             for (; ; )
             {
-                // ÕÒµ½¸¸Ç×µÄĞÖµÜ
+                // æ‰¾åˆ°çˆ¶äº²çš„å…„å¼Ÿ
                 AreaBase parent_sibling = parent.GetPrevSibling();
                 if (parent_sibling == null)
                     return null;
 
                 List<AreaBase> temp_children = parent_sibling.ChildrenCollection;
 
-                // ¸¸Ç×ĞÖµÜµÄ×îÄ©Ò»¸ö¶ù×Ó
+                // çˆ¶äº²å…„å¼Ÿçš„æœ€æœ«ä¸€ä¸ªå„¿å­
                 if (temp_children.Count != 0)
                     return temp_children[temp_children.Count-1];
 
-                // ·ñÔò¼ÌĞøÕÒ¸¸Ç×µÄĞÖµÜ
+                // å¦åˆ™ç»§ç»­æ‰¾çˆ¶äº²çš„å…„å¼Ÿ
                 parent = parent_sibling;
             }
 
@@ -372,14 +372,14 @@ namespace DigitalPlatform.CommonDialog
         {
             get
             {
-                return "ÉĞÎ´ÊµÏÖ";
+                return "å°šæœªå®ç°";
             }
         }
 
 
         // return:
-        //      true    ×´Ì¬·¢Éú±ä»¯
-        //      false   ×´Ì¬Ã»ÓĞ±ä»¯
+        //      true    çŠ¶æ€å‘ç”Ÿå˜åŒ–
+        //      false   çŠ¶æ€æ²¡æœ‰å˜åŒ–
         public bool Select(SelectAction action,
             bool bRecursive)
         {
@@ -398,7 +398,7 @@ namespace DigitalPlatform.CommonDialog
                     this.m_bSelected = true;
             }
 
-            // µİ¹é
+            // é€’å½’
             if (bRecursive == true)
             {
                 for (int i = 0; i < this.ChildrenCollection.Count; i++)
@@ -427,13 +427,13 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // »ñµÃ×Ó¶ÔÏóÔÚ ±¾¶ÔÏó×ø±êÌåÏµÖĞµÄ ×óÉÏ½ÇÎ»ÖÃ
+        // è·å¾—å­å¯¹è±¡åœ¨ æœ¬å¯¹è±¡åæ ‡ä½“ç³»ä¸­çš„ å·¦ä¸Šè§’ä½ç½®
         public virtual PointF GetChildLeftTopPoint(AreaBase child)
         {
-            throw new Exception("ÉĞÎ´ÊµÏÖ");
+            throw new Exception("å°šæœªå®ç°");
         }
 
-        // ½«±¾¶ÔÏó×ø±êÌåÏµ µÄ¾ØĞÎ ×ª»»Îª ¶¥²ã¶ÔÏóµÄ×ø±êÌåÏµ
+        // å°†æœ¬å¯¹è±¡åæ ‡ä½“ç³» çš„çŸ©å½¢ è½¬æ¢ä¸º é¡¶å±‚å¯¹è±¡çš„åæ ‡ä½“ç³»
         public virtual RectangleF ToRootCoordinate(RectangleF rect)
         {
             AreaBase obj = this;
@@ -446,7 +446,7 @@ namespace DigitalPlatform.CommonDialog
 
                 PointF childStart = parent.GetChildLeftTopPoint(obj);
 
-                // ±ä»»Îª¸¸µÄ×ø±ê
+                // å˜æ¢ä¸ºçˆ¶çš„åæ ‡
                 rect.Offset(childStart.X, childStart.Y);
 
                 obj = parent;
@@ -455,9 +455,9 @@ namespace DigitalPlatform.CommonDialog
             return rect;
         }
 
-        // »­±³¾°
+        // ç”»èƒŒæ™¯
         // parameters:
-        //      colorBack   Õı³£µÄ±³¾°ÑÕÉ«
+        //      colorBack   æ­£å¸¸çš„èƒŒæ™¯é¢œè‰²
         public virtual void PaintBack(
             long x0,
             long y0,
@@ -472,39 +472,20 @@ namespace DigitalPlatform.CommonDialog
                 width,
                 height);
 
-
             Rectangle rectClip = e.ClipRectangle;
-            rectClip.Inflate(1, 1); // ½»²æºóµÄ¾ØĞÎ£¬ÓÉÓÚÊÇfloat¸ñÊ½£¬ÈİÒ×¶ªÊ§1ÏñËØ
+            rectClip.Inflate(1, 1); // äº¤å‰åçš„çŸ©å½¢ï¼Œç”±äºæ˜¯floatæ ¼å¼ï¼Œå®¹æ˜“ä¸¢å¤±1åƒç´ 
             RectangleF result = RectangleF.Intersect(rect, rectClip);
 
             if (result.IsEmpty)
                 return;
 
-            /*
-            // ÓÅ»¯
-            if (rect.IntersectsWith(e.ClipRectangle) == false)
-                return;
-             * */
-
-            Brush brush = null;
-            /*
-            if (this.m_bSelected == true)
+            using (Brush brush = new SolidBrush(colorBack))
             {
-                // ±»Ñ¡ÖĞºóµÄ±³¾°ÑÕÉ«
-                brush = new SolidBrush(Color.LightGray);
+                e.Graphics.FillRectangle(brush, result);
             }
-            else
-            {*/
-                // Õı³£±³¾°ÑÕÉ«
-                brush = new SolidBrush(colorBack);
-            /*
-            }
-             * */
-
-            e.Graphics.FillRectangle(brush, result);
         }
 
-        // »­Ñ¡ÔñĞ§¹û
+        // ç”»é€‰æ‹©æ•ˆæœ
         // parameters:
         public virtual void PaintSelectEffect(
             long x0,
@@ -522,31 +503,23 @@ namespace DigitalPlatform.CommonDialog
                 width,
                 height);
 
-
             Rectangle rectClip = e.ClipRectangle;
-            rectClip.Inflate(1, 1); // ½»²æºóµÄ¾ØĞÎ£¬ÓÉÓÚÊÇfloat¸ñÊ½£¬ÈİÒ×¶ªÊ§1ÏñËØ
+            rectClip.Inflate(1, 1); // äº¤å‰åçš„çŸ©å½¢ï¼Œç”±äºæ˜¯floatæ ¼å¼ï¼Œå®¹æ˜“ä¸¢å¤±1åƒç´ 
             RectangleF result = RectangleF.Intersect(rect, rectClip);
 
             if (result.IsEmpty)
                 return;
 
-            /*
-            // ÓÅ»¯
-            if (rect.IntersectsWith(e.ClipRectangle) == false)
-                return;
-             * */
-
-            Brush brush = null;
-
-            brush = new SolidBrush(Color.FromArgb(20, SystemColors.Highlight));
-
-            e.Graphics.FillRectangle(brush, result);
+            using (Brush brush = new SolidBrush(Color.FromArgb(20, SystemColors.Highlight)))
+            {
+                e.Graphics.FillRectangle(brush, result);
+            }
         }
     }
 
 
-    // ×¨ÃÅÎª½â¾öÊı×éÄÚÔªËØÀàĞÍÎÊÌâ¶øÉè¼ÆµÄÊı×é°ü¹üÆ÷
-    // Ç¿ÀàĞÍ T µÄÊı×é½çÃæ (TÎªAreaBaseµÄÅÉÉúÀà)
+    // ä¸“é—¨ä¸ºè§£å†³æ•°ç»„å†…å…ƒç´ ç±»å‹é—®é¢˜è€Œè®¾è®¡çš„æ•°ç»„åŒ…è£¹å™¨
+    // å¼ºç±»å‹ T çš„æ•°ç»„ç•Œé¢ (Tä¸ºAreaBaseçš„æ´¾ç”Ÿç±»)
     public class TypedList<T> where T : AreaBase
     {
         List<AreaBase> m_base_array = null;
@@ -557,7 +530,7 @@ namespace DigitalPlatform.CommonDialog
             this.m_base_array = base_array;
         }
 
-        // ºÍÒ»¸öList<AreaBase>ĞÍµÄÊı×éÁ¬½ÓÆğÀ´
+        // å’Œä¸€ä¸ªList<AreaBase>å‹çš„æ•°ç»„è¿æ¥èµ·æ¥
         public void Link(List<AreaBase> base_array)
         {
             this.m_base_array = base_array;
@@ -584,7 +557,7 @@ namespace DigitalPlatform.CommonDialog
         }
 
         /*
-        // Á½ÖÖÃû×Ö¶¼Ìá¹©
+        // ä¸¤ç§åå­—éƒ½æä¾›
         public int Length
         {
             get
@@ -611,7 +584,7 @@ namespace DigitalPlatform.CommonDialog
 
     }
 
-    // ÔÚAreaBaseºÍÊµ¼ÊÅÉÉúÀàÖ®¼äµÄÒ»¸ö»º³åÀà£¬ÓÃÀ´Òş²ØÒ»Ğ©·±ËöµÄ³õÊ¼»¯Ï¸½Ú¡£
+    // åœ¨AreaBaseå’Œå®é™…æ´¾ç”Ÿç±»ä¹‹é—´çš„ä¸€ä¸ªç¼“å†²ç±»ï¼Œç”¨æ¥éšè—ä¸€äº›ç¹ççš„åˆå§‹åŒ–ç»†èŠ‚ã€‚
     public class NamedArea<ChildType> : AreaBase
         where ChildType : AreaBase
     {
@@ -623,26 +596,26 @@ namespace DigitalPlatform.CommonDialog
         }
     }
 
-    // °üº¬Èô¸ÉÄêµÄ¶¥²ãÈİÆ÷
+    // åŒ…å«è‹¥å¹²å¹´çš„é¡¶å±‚å®¹å™¨
     public class DataRoot : NamedArea<YearArea>
     {
         // public List<YearArea> YearCollection = new List<YearArea>();
 
-        internal int m_nYearNameWidth = 100; // 50 // ×ó±ßÏÔÊ¾ÄêÃûµÄÊúµÀµÄ¿í¶È
-        internal int m_nMonthNameWidth = 80;     // ×ó±ßÏÔÊ¾ÔÂÃûµÄÊúµÀµÄ¿í¶È
+        internal int m_nYearNameWidth = 100; // 50 // å·¦è¾¹æ˜¾ç¤ºå¹´åçš„ç«–é“çš„å®½åº¦
+        internal int m_nMonthNameWidth = 80;     // å·¦è¾¹æ˜¾ç¤ºæœˆåçš„ç«–é“çš„å®½åº¦
 
-        internal int m_nDayCellWidth = 100; // ÈÕ¸ñ×ÓµÄ¿í¶È
-        internal int m_nDayCellHeight = 100;    // ÈÕ¸ñ×ÓµÄ¸ß¶È
+        internal int m_nDayCellWidth = 100; // æ—¥æ ¼å­çš„å®½åº¦
+        internal int m_nDayCellHeight = 100;    // æ—¥æ ¼å­çš„é«˜åº¦
 
-        internal Rectangle m_rectCheckBox = new Rectangle(4, 4, 16, 16); // checkbox¾ØĞÎ(ÔÚDayArea×ø±êÄÚ)
+        internal Rectangle m_rectCheckBox = new Rectangle(4, 4, 16, 16); // checkboxçŸ©å½¢(åœ¨DayAreaåæ ‡å†…)
 
-        internal int m_nDayOfWeekTitleHeight = 30;   // ĞÇÆÚ±êÌâµÄ¸ß¶È
+        internal int m_nDayOfWeekTitleHeight = 30;   // æ˜ŸæœŸæ ‡é¢˜çš„é«˜åº¦
 
         internal string m_strDayOfWeekTitleLang = "zh";
 
         public Font DayTextFont = new Font("Arial Black", 12, FontStyle.Regular);
 
-        public Font DaysOfWeekTitleFont = new Font("¿¬Ìå_GB2312", 11, FontStyle.Regular);
+        public Font DaysOfWeekTitleFont = new Font("æ¥·ä½“_GB2312", 11, FontStyle.Regular);
 
         public Color YearBackColor = Color.White;
 
@@ -658,12 +631,12 @@ namespace DigitalPlatform.CommonDialog
 
         public DayStateDefCollection DayStateDefs = new DayStateDefCollection();
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         public DataRoot()
         {
             this.DayTextFont = new Font("Arial Black", 12, FontStyle.Regular);
             if (m_strDayOfWeekTitleLang == "zh")
-                this.DaysOfWeekTitleFont = new Font("¿¬Ìå_GB2312", 11, FontStyle.Regular);
+                this.DaysOfWeekTitleFont = new Font("æ¥·ä½“_GB2312", 11, FontStyle.Regular);
             else
                 this.DaysOfWeekTitleFont = new Font("Arial", 11, FontStyle.Regular);
 
@@ -685,7 +658,7 @@ namespace DigitalPlatform.CommonDialog
 
                 if (this.m_bBackColorTransparent == true)
                 {
-                    // ±äÎªÍ¸Ã÷
+                    // å˜ä¸ºé€æ˜
                     if (this.YearBackColor.A >= 255)
                         this.YearBackColor = Color.FromArgb(100, this.YearBackColor);
                     if (this.MonthBackColor.A >= 255)
@@ -693,21 +666,21 @@ namespace DigitalPlatform.CommonDialog
                 }
                 else
                 {
-                    // ±äÎª²»Í¸Ã÷
+                    // å˜ä¸ºä¸é€æ˜
                     this.YearBackColor = Color.FromArgb(255, this.YearBackColor);
                     this.MonthBackColor = Color.FromArgb(255, this.MonthBackColor);
                 }
             }
         }
 
-        // ½«Ê±¼ä·¶Î§É¾³ıÒ»Äê(Í·²¿»òÕßÎ²²¿)
+        // å°†æ—¶é—´èŒƒå›´åˆ é™¤ä¸€å¹´(å¤´éƒ¨æˆ–è€…å°¾éƒ¨)
         public bool ShrinkYear(bool bHead)
         {
             YearArea first_year = null;
 
             if (this.YearCollection.Count > 0)
             {
-                // µÃµ½ÏÖ´æµÚÒ»Äê
+                // å¾—åˆ°ç°å­˜ç¬¬ä¸€å¹´
 
                 if (bHead == true)
                 {
@@ -729,7 +702,7 @@ namespace DigitalPlatform.CommonDialog
             return true;
         }
 
-        // ½«Ê±¼ä·¶Î§É¾³ıÒ»ÔÂ(Í·²¿»òÕßÎ²²¿)
+        // å°†æ—¶é—´èŒƒå›´åˆ é™¤ä¸€æœˆ(å¤´éƒ¨æˆ–è€…å°¾éƒ¨)
         public bool ShrinkMonth(bool bHead)
         {
             YearArea first_year = null;
@@ -745,14 +718,14 @@ namespace DigitalPlatform.CommonDialog
 
             bool bRet = first_year.ShrinkMonth(bHead);
 
-            // ×¢ÒâÉÆºó
+            // æ³¨æ„å–„å
             if (first_year.MonthCollection.Count == 0)
                 this.YearCollection.Remove(first_year);
 
             return bRet;
         }
 
-        // ½«Ê±¼ä·¶Î§É¾³ıÒ»ĞÇÆÚ
+        // å°†æ—¶é—´èŒƒå›´åˆ é™¤ä¸€æ˜ŸæœŸ
         public bool ShrinkWeek(bool bHead)
         {
             YearArea first_year = null;
@@ -781,7 +754,7 @@ namespace DigitalPlatform.CommonDialog
 
             bool bRet = first_month.ShrinkWeek(bHead);
 
-            // ×¢ÒâÉÆºó
+            // æ³¨æ„å–„å
             if (bRet == true 
                 && first_month.WeekCollection.Count == 0)
             {
@@ -793,8 +766,8 @@ namespace DigitalPlatform.CommonDialog
             return bRet;
         }
 
-        // ½«Ê±¼ä·¶Î§À©Õ¹Ò»Äê
-        // ×¢ÒâĞèÒª¼ì²éÔ­ÓĞµÄµÚÒ»Äê»òÕß×îºóÒ»ÄêÊÇ·ñÍêÕû
+        // å°†æ—¶é—´èŒƒå›´æ‰©å±•ä¸€å¹´
+        // æ³¨æ„éœ€è¦æ£€æŸ¥åŸæœ‰çš„ç¬¬ä¸€å¹´æˆ–è€…æœ€åä¸€å¹´æ˜¯å¦å®Œæ•´
         public YearArea ExpandYear(bool bHead, 
             bool bEmpty)
         {
@@ -802,35 +775,35 @@ namespace DigitalPlatform.CommonDialog
 
             if (this.YearCollection.Count > 0)
             {
-            // µÃµ½ÏÖ´æµÚÒ»Äê
+            // å¾—åˆ°ç°å­˜ç¬¬ä¸€å¹´
                 YearArea first_year = null;
 
                 if (bHead == true)
                 {
                     first_year = (YearArea)this.FirstChild;
-                    // È·±£ÄêÍêÕû
+                    // ç¡®ä¿å¹´å®Œæ•´
                     first_year.CompleteMonth(bHead);
 
                     nNewYear = first_year.Year - 1;
                     if (nNewYear < 0)
-                        throw new Exception("Äêµ½´ï×îĞ¡¼«ÏŞÖµ");
+                        throw new Exception("å¹´åˆ°è¾¾æœ€å°æé™å€¼");
                 }
                 else
                 {
                     first_year = (YearArea)this.LastChild;
 
-                    // È·±£ÄêÍêÕû
+                    // ç¡®ä¿å¹´å®Œæ•´
                     first_year.CompleteMonth(bHead);
 
                     nNewYear = first_year.Year + 1;
                     if (nNewYear > 9999)
-                        throw new Exception("Äêµ½´ï×î´ó¼«ÏŞÖµ");
+                        throw new Exception("å¹´åˆ°è¾¾æœ€å¤§æé™å€¼");
 
                 }
             }
             else
             {
-                // ¸ù¾İµ±Ç°Ê±¼ä²úÉúĞÂ¶ÔÏóµÄÄê·İÖµ
+                // æ ¹æ®å½“å‰æ—¶é—´äº§ç”Ÿæ–°å¯¹è±¡çš„å¹´ä»½å€¼
                 DateTime now = DateTime.Now;
                 nNewYear = now.Year;
             }
@@ -846,7 +819,7 @@ namespace DigitalPlatform.CommonDialog
             return new_year;
         }
 
-        // ½«Ê±¼ä·¶Î§À©Õ¹Ò»ÔÂ
+        // å°†æ—¶é—´èŒƒå›´æ‰©å±•ä¸€æœˆ
         public MonthArea ExpandMonth(bool bHead,
             bool bEmpty)
         {
@@ -854,7 +827,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (this.YearCollection.Count == 0)
             {
-                // ÏÈÀ©³äÒ»¸ö¿ÕµÄÄê
+                // å…ˆæ‰©å……ä¸€ä¸ªç©ºçš„å¹´
                 first_year = this.ExpandYear(bHead, true);
             }
             else
@@ -866,7 +839,7 @@ namespace DigitalPlatform.CommonDialog
                 bEmpty);
         }
 
-        // ½«Ê±¼ä·¶Î§À©Õ¹Ò»ĞÇÆÚ
+        // å°†æ—¶é—´èŒƒå›´æ‰©å±•ä¸€æ˜ŸæœŸ
         public WeekArea ExpandWeek(bool bHead,
             bool bEmpty)
         {
@@ -874,7 +847,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (this.YearCollection.Count == 0)
             {
-                // ÏÈÀ©³äÒ»¸ö¿ÕµÄÄê
+                // å…ˆæ‰©å……ä¸€ä¸ªç©ºçš„å¹´
                 first_year = this.ExpandYear(bHead, true);
             }
             else
@@ -886,7 +859,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (first_year.MonthCollection.Count == 0)
             {
-                // ÏÈÀ©³äÒ»¸ö¿ÕµÄÔÂ
+                // å…ˆæ‰©å……ä¸€ä¸ªç©ºçš„æœˆ
                 first_month = first_year.ExpandMonth(bHead, true);
             }
             else
@@ -901,20 +874,20 @@ namespace DigitalPlatform.CommonDialog
         }
 
 
-        // ÔÙ»»Ò»¸öÃû×ÖÒ²ÎŞ·Á
-        // ÕâÊÇ×îºóÒ»µã¡°Ã¤³¦¡±¡£Èç¹ûgenericÖ§³Ö¸ù¾İÀàĞÍÃû×Ö·û´®¹¹Ôì¶¯Ì¬µÄº¯ÊıÃû¾ÍºÃÁË
+        // å†æ¢ä¸€ä¸ªåå­—ä¹Ÿæ— å¦¨
+        // è¿™æ˜¯æœ€åä¸€ç‚¹â€œç›²è‚ â€ã€‚å¦‚æœgenericæ”¯æŒæ ¹æ®ç±»å‹åå­—ç¬¦ä¸²æ„é€ åŠ¨æ€çš„å‡½æ•°åå°±å¥½äº†
         public TypedList<YearArea> YearCollection
         {
             get
             {
-                return this.ChildTypedCollection;    // ÆäÊµNamedCollectionÒ²ºÜºÃÓÃ£¬¾ÍÊÇÃû×ÖÃ»ÓĞÌØÉ«
+                return this.ChildTypedCollection;    // å…¶å®NamedCollectionä¹Ÿå¾ˆå¥½ç”¨ï¼Œå°±æ˜¯åå­—æ²¡æœ‰ç‰¹è‰²
             }
         }
 
-        // ´´½¨
+        // åˆ›å»º
         // parameters:
-        //      nStartYear  ¿ªÊ¼Äê
-        //      nEndYear    ½áÊøÄê(°üº¬´ËÄê)
+        //      nStartYear  å¼€å§‹å¹´
+        //      nEndYear    ç»“æŸå¹´(åŒ…å«æ­¤å¹´)
         public int Build(int nStartYear,
             int nEndYear,
             out string strError)
@@ -923,7 +896,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (nStartYear > nEndYear)
             {
-                strError = "ÆğÊ¼Äê²»Ó¦´óÓÚ½áÊøÄê";
+                strError = "èµ·å§‹å¹´ä¸åº”å¤§äºç»“æŸå¹´";
                 return -1;
             }
 
@@ -937,7 +910,7 @@ namespace DigitalPlatform.CommonDialog
             return 0;
         }
 
-        #region DataRootÖØÔØAreaBaseµÄvirtualº¯Êı
+        #region DataRooté‡è½½AreaBaseçš„virtualå‡½æ•°
 
         public override string FullName
         {
@@ -978,11 +951,11 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // »ñµÃ×Ó¶ÔÏóÔÚ ±¾¶ÔÏó×ø±êÌåÏµÖĞµÄ ×óÉÏ½ÇÎ»ÖÃ
+        // è·å¾—å­å¯¹è±¡åœ¨ æœ¬å¯¹è±¡åæ ‡ä½“ç³»ä¸­çš„ å·¦ä¸Šè§’ä½ç½®
         public override PointF GetChildLeftTopPoint(AreaBase child)
         {
             if (!(child is YearArea))
-                throw new Exception("childÖ»ÄÜÎªYearAreaÀàĞÍ");
+                throw new Exception("childåªèƒ½ä¸ºYearAreaç±»å‹");
 
             YearArea year = (YearArea)child;
 
@@ -1000,7 +973,7 @@ namespace DigitalPlatform.CommonDialog
             }
 
             if (bFound == false)
-                throw new Exception("childÔÚ×Ó¶ÔÏóÖĞÃ»ÓĞÕÒµ½");
+                throw new Exception("childåœ¨å­å¯¹è±¡ä¸­æ²¡æœ‰æ‰¾åˆ°");
 
             return new PointF(0,
                 lHeight);
@@ -1009,7 +982,7 @@ namespace DigitalPlatform.CommonDialog
 
         #endregion
 
-        // ¼ì²éÒ»¸ölongÊÇ·ñÔ½¹ıint16ÄÜ±í´ïµÄÖµ·¶Î§
+        // æ£€æŸ¥ä¸€ä¸ªlongæ˜¯å¦è¶Šè¿‡int16èƒ½è¡¨è¾¾çš„å€¼èŒƒå›´
         public static bool TooLarge(long lValue)
         {
             if (lValue >= Int16.MaxValue || lValue <= Int16.MinValue)
@@ -1017,31 +990,31 @@ namespace DigitalPlatform.CommonDialog
             return false;
         }
 
-        // Êı¾İ·¶Î§Ö®×îĞ¡Äê
+        // æ•°æ®èŒƒå›´ä¹‹æœ€å°å¹´
         public int MinYear
         {
             get
             {
                 if (this.ChildrenCollection.Count == 0)
-                    return -1;  // ±íÊ¾ÉĞÎ´³õÊ¼»¯
+                    return -1;  // è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
                 return ((YearArea)this.ChildrenCollection[0]).Year;
             }
         }
 
-        // Êı¾İ·¶Î§Ö®×î´óÄê
+        // æ•°æ®èŒƒå›´ä¹‹æœ€å¤§å¹´
         public int MaxYear
         {
             get
             {
                 if (this.ChildrenCollection.Count == 0)
-                    return -1;  // ±íÊ¾ÉĞÎ´³õÊ¼»¯
+                    return -1;  // è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
                 return ((YearArea)this.ChildrenCollection[this.ChildrenCollection.Count - 1]).Year;
             }
         }
 
-        // µã»÷¼ì²â
+        // ç‚¹å‡»æ£€æµ‹
         // parameters:
-        //      p_x   ÒÑ¾­ÊÇÎÄµµ×ø±ê¡£¼´ÎÄµµ×óÉÏ½ÇÎª(0,0)
+        //      p_x   å·²ç»æ˜¯æ–‡æ¡£åæ ‡ã€‚å³æ–‡æ¡£å·¦ä¸Šè§’ä¸º(0,0)
         public void HitTest(
             long p_x,
             long p_y,
@@ -1060,12 +1033,12 @@ namespace DigitalPlatform.CommonDialog
                 return;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÉÏ²¿Ò²Ëã×÷µÚÒ»¸öÄêµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œä¸Šéƒ¨ä¹Ÿç®—ä½œç¬¬ä¸€ä¸ªå¹´çš„
             if (p_y < 0 && dest_type != null)
             {
                 if (this.YearCollection.Count > 1)
                 {
-                    // È·¶¨ÔÚÒ»¸öYearArea¶ÔÏóÖĞ
+                    // ç¡®å®šåœ¨ä¸€ä¸ªYearAreaå¯¹è±¡ä¸­
                     this.YearCollection[0].HitTest(p_x,
                         p_y,
                         dest_type,
@@ -1077,7 +1050,7 @@ namespace DigitalPlatform.CommonDialog
             long y = 0;
             for (int i = 0; i < this.YearCollection.Count; i++)
             {
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (dest_type == null
                     && y > p_y)
                     break;
@@ -1088,7 +1061,7 @@ namespace DigitalPlatform.CommonDialog
 
                 if (p_y >= y && p_y < y + lYearHeight)
                 {
-                    // È·¶¨ÔÚÒ»¸öYearArea¶ÔÏóÖĞ
+                    // ç¡®å®šåœ¨ä¸€ä¸ªYearAreaå¯¹è±¡ä¸­
                     year.HitTest(p_x,
                         p_y - y,
                         dest_type,
@@ -1098,12 +1071,12 @@ namespace DigitalPlatform.CommonDialog
                 y += lYearHeight;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÏÂ²¿Ò²Ëã×÷×îºóÒ»¸öÄêµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œä¸‹éƒ¨ä¹Ÿç®—ä½œæœ€åä¸€ä¸ªå¹´çš„
             if (dest_type != null)
             {
                 if (this.YearCollection.Count > 1)
                 {
-                    // È·¶¨ÔÚÒ»¸öYearArea¶ÔÏóÖĞ
+                    // ç¡®å®šåœ¨ä¸€ä¸ªYearAreaå¯¹è±¡ä¸­
                     this.YearCollection[this.YearCollection.Count - 1].HitTest(p_x,
                         p_y - y,
                         dest_type,
@@ -1112,7 +1085,7 @@ namespace DigitalPlatform.CommonDialog
                 }
             }
 
-            // Èç¹ûÃ»ÓĞÆ¥ÅäÉÏÈÎºÎYearArea¶ÔÏó
+            // å¦‚æœæ²¡æœ‰åŒ¹é…ä¸Šä»»ä½•YearAreaå¯¹è±¡
             result = new HitTestResult();
             result.Object = this;
             result.AreaPortion = AreaPortion.BottomBlank;
@@ -1120,7 +1093,7 @@ namespace DigitalPlatform.CommonDialog
             result.Y = p_y;
         }
 
-        // »æÍ¼ ¸ùÈİÆ÷
+        // ç»˜å›¾ æ ¹å®¹å™¨
         public void Paint(
             long x0,
             long y0,
@@ -1146,7 +1119,7 @@ namespace DigitalPlatform.CommonDialog
             long x = x0;
             long y = y0;
 
-            bool bDrawBottomLine = true;    // ÊÇ·ñÒª»­ÏÂ·½ÏßÌõ
+            bool bDrawBottomLine = true;    // æ˜¯å¦è¦ç”»ä¸‹æ–¹çº¿æ¡
 
             long lYearWidth = this.Width;
 
@@ -1160,7 +1133,7 @@ namespace DigitalPlatform.CommonDialog
                     || TooLarge(y) == true)
                     goto CONTINUE;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 RectangleF rect = new RectangleF((int)x,
                     (int)y,
                     lYearWidth,
@@ -1183,34 +1156,36 @@ namespace DigitalPlatform.CommonDialog
                 lHeight += lYearHeight;
             }
 
-            // ÓÒ¡¢ÏÂÏßÌõ
+            // å³ã€ä¸‹çº¿æ¡
 
-            Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2);
-
-            // ÓÒ·½ÊúÏß
-            if (TooLarge(x0 + this.Width) == false)
-            {
-                e.Graphics.DrawLine(penBold,
-                    new PointF((int)x0 + this.Width, (int)y0),
-                    new PointF((int)x0 + this.Width, (int)(y0 + lHeight))
-                    );
-            }
-
-            // ÏÂ·½ºáÏß
-            if (bDrawBottomLine == true
-                && TooLarge(y0 + lHeight) == false)
+            using (Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2))
             {
 
-                e.Graphics.DrawLine(penBold,
-                    new PointF((int)x0, (int)(y0 + lHeight)),
-                    new PointF((int)x0 + this.Width, (int)(y0 + lHeight))
-                    );
+                // å³æ–¹ç«–çº¿
+                if (TooLarge(x0 + this.Width) == false)
+                {
+                    e.Graphics.DrawLine(penBold,
+                        new PointF((int)x0 + this.Width, (int)y0),
+                        new PointF((int)x0 + this.Width, (int)(y0 + lHeight))
+                        );
+                }
+
+                // ä¸‹æ–¹æ¨ªçº¿
+                if (bDrawBottomLine == true
+                    && TooLarge(y0 + lHeight) == false)
+                {
+
+                    e.Graphics.DrawLine(penBold,
+                        new PointF((int)x0, (int)(y0 + lHeight)),
+                        new PointF((int)x0 + this.Width, (int)(y0 + lHeight))
+                        );
+                }
             }
 
         }
 
         /*
-        // ÕÒµ½Ö¸¶¨ÈÕÆÚµÄDayArea¶ÔÏó
+        // æ‰¾åˆ°æŒ‡å®šæ—¥æœŸçš„DayAreaå¯¹è±¡
         public DayArea FindDayArea(int year, int month, int day)
         {
             for (int i = 0; i < this.ChildrenCollection.Count; i++)
@@ -1219,7 +1194,7 @@ namespace DigitalPlatform.CommonDialog
                 if (cur_year.Year == year)
                     return cur_year.FindDayArea(month, day);
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (year < cur_year.Year)
                     return null;
             }
@@ -1228,20 +1203,20 @@ namespace DigitalPlatform.CommonDialog
         }
          * */
 
-        // ÕÒµ½Ö¸¶¨ÈÕÆÚµÄDayArea¶ÔÏó
+        // æ‰¾åˆ°æŒ‡å®šæ—¥æœŸçš„DayAreaå¯¹è±¡
         public DayArea FindDayArea(int year, int month, int day)
         {
             List<int> values = new List<int>();
-            values.Add(-1); // -1 ±íÊ¾±¾¶ÔÏóÕâÒ»¼¶, Í¨Åä
+            values.Add(-1); // -1 è¡¨ç¤ºæœ¬å¯¹è±¡è¿™ä¸€çº§, é€šé…
             values.Add(year);
             values.Add(month);
-            values.Add(-1); // -1 ±íÊ¾ĞÇÆÚÄÄÒ»¼¶, Í¨Åä
+            values.Add(-1); // -1 è¡¨ç¤ºæ˜ŸæœŸå“ªä¸€çº§, é€šé…
             values.Add(day);
 
             return (DayArea)this.FindByNameValue(values);
         }
 
-        // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+        // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
         public void Select(RectangleF rect,
             SelectAction action,
             List<Type> types,
@@ -1267,11 +1242,11 @@ namespace DigitalPlatform.CommonDialog
                 {
                     YearArea year = this.YearCollection[i];
 
-                    // ÓÅ»¯
+                    // ä¼˜åŒ–
                     if (y > rect.Bottom)
                         break;
 
-                    // ±ä»»ÎªyearÄÚ×ø±ê
+                    // å˜æ¢ä¸ºyearå†…åæ ‡
                     RectangleF rectYear = rect;
                     rectYear.Offset(0, -y);
 
@@ -1288,16 +1263,16 @@ namespace DigitalPlatform.CommonDialog
         }
     }
 
-    // Äê
+    // å¹´
     public class YearArea : NamedArea<MonthArea>
     {
         // public List<MonthArea> MonthCollection = new List<MonthArea>();
 
         // int m_nYear = 0;
 
-        // È·±£Ò»ÄêÖĞµÄÇ°·½»òÕßºó·½ÔÂ·İÍêÕû¡£
+        // ç¡®ä¿ä¸€å¹´ä¸­çš„å‰æ–¹æˆ–è€…åæ–¹æœˆä»½å®Œæ•´ã€‚
         // return:
-        //      ÊÇ·ñ·¢ÉúÁËÔö²¹
+        //      æ˜¯å¦å‘ç”Ÿäº†å¢è¡¥
         public bool CompleteMonth(bool bHead)
         {
             if (this.MonthCollection.Count == 12)
@@ -1331,7 +1306,7 @@ namespace DigitalPlatform.CommonDialog
             return bChanged;
         }
 
-        // ½«Ê±¼ä·¶Î§É¾³ıÒ»ÔÂ
+        // å°†æ—¶é—´èŒƒå›´åˆ é™¤ä¸€æœˆ
         // return:
         public bool ShrinkMonth(bool bHead)
         {
@@ -1340,7 +1315,7 @@ namespace DigitalPlatform.CommonDialog
                 MonthArea first_month = null;
             if (this.MonthCollection.Count > 0)
             {
-                // µÃµ½ÏÖ´æµÚÒ»ÔÂ
+                // å¾—åˆ°ç°å­˜ç¬¬ä¸€æœˆ
 
                 if (bHead == true)
                 {
@@ -1361,10 +1336,10 @@ namespace DigitalPlatform.CommonDialog
             return true;
         }
 
-        // ½«Ê±¼ä·¶Î§À©Õ¹Ò»ÔÂ
-        // ×¢ÒâĞèÒª¼ì²éÔ­ÓĞµÄµÚÒ»ÔÂ»òÕß×îºóÒ»ÔÂÊÇ·ñÍêÕû
+        // å°†æ—¶é—´èŒƒå›´æ‰©å±•ä¸€æœˆ
+        // æ³¨æ„éœ€è¦æ£€æŸ¥åŸæœ‰çš„ç¬¬ä¸€æœˆæˆ–è€…æœ€åä¸€æœˆæ˜¯å¦å®Œæ•´
         // return:
-        //      ÆäËû    Ëù´´½¨µÄĞÂÔÂ·İ¶ÔÏó
+        //      å…¶ä»–    æ‰€åˆ›å»ºçš„æ–°æœˆä»½å¯¹è±¡
         public MonthArea ExpandMonth(bool bHead, 
             bool bEmpty)
         {
@@ -1372,30 +1347,30 @@ namespace DigitalPlatform.CommonDialog
 
             if (this.MonthCollection.Count > 0)
             {
-                // µÃµ½ÏÖ´æµÚÒ»ÔÂ
+                // å¾—åˆ°ç°å­˜ç¬¬ä¸€æœˆ
                 MonthArea first_month = null;
 
                 if (bHead == true)
                 {
                     first_month = (MonthArea)this.FirstChild;
-                    // È·±£ÔÂÍêÕû
+                    // ç¡®ä¿æœˆå®Œæ•´
                     first_month.CompleteWeek(bHead);
                     nNewMonth = first_month.Month - 1;
                     if (nNewMonth == 0)
                     {
-                        // ĞèÒªÏÈÀ©Äê
+                        // éœ€è¦å…ˆæ‰©å¹´
                         return this.Container.ExpandYear(bHead, true).ExpandMonth(bHead, bEmpty);
                     }
                 }
                 else
                 {
                     first_month = (MonthArea)this.LastChild;
-                    // È·±£ÔÂÍêÕû
+                    // ç¡®ä¿æœˆå®Œæ•´
                     first_month.CompleteWeek(bHead);
                     nNewMonth = first_month.Month + 1;
                     if (nNewMonth >= 13)
                     {
-                        // ĞèÒªÏÈÀ©Äê
+                        // éœ€è¦å…ˆæ‰©å¹´
                         return this.Container.ExpandYear(bHead, true).ExpandMonth(bHead, bEmpty);
                     }
                 }
@@ -1419,7 +1394,7 @@ namespace DigitalPlatform.CommonDialog
             return new_month;
         }
 
-        // À©Õ¹Ò»¸öĞÇÆÚ
+        // æ‰©å±•ä¸€ä¸ªæ˜ŸæœŸ
         public WeekArea ExpandWeek(bool bHead,
             bool bEmpty)
         {
@@ -1427,7 +1402,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (this.MonthCollection.Count == 0)
             {
-                // ÏÈÀ©³äÒ»¸ö¿ÕµÄÔÂ
+                // å…ˆæ‰©å……ä¸€ä¸ªç©ºçš„æœˆ
                 first_month = this.ExpandMonth(bHead, true);
             }
             else
@@ -1449,15 +1424,15 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // ¹¹Ôìº¯Êı
-        // (²ÎÊı°ü×°°æ±¾)
+        // æ„é€ å‡½æ•°
+        // (å‚æ•°åŒ…è£…ç‰ˆæœ¬)
         public YearArea(DataRoot container,
             int nYear)
         {
             InitialYearArea(container, nYear, false);
         }
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         public YearArea(DataRoot container,
             int nYear,
             bool bEmpty)
@@ -1465,7 +1440,7 @@ namespace DigitalPlatform.CommonDialog
             InitialYearArea(container, nYear, bEmpty);
         }
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         void InitialYearArea(DataRoot container,
             int nYear,
             bool bEmpty)
@@ -1476,7 +1451,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (bEmpty == false)
             {
-                // ´´½¨ÔÂÊı×é
+                // åˆ›å»ºæœˆæ•°ç»„
                 for (int i = 0; i < 12; i++)
                 {
                     MonthArea month = new MonthArea(this, i + 1);
@@ -1485,16 +1460,16 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // ±ğÃû
+        // åˆ«å
         public TypedList<MonthArea> MonthCollection
         {
             get
             {
-                return this.ChildTypedCollection;    // ÆäÊµNamedCollectionÒ²ºÜºÃÓÃ£¬¾ÍÊÇÃû×ÖÃ»ÓĞÌØÉ«
+                return this.ChildTypedCollection;    // å…¶å®NamedCollectionä¹Ÿå¾ˆå¥½ç”¨ï¼Œå°±æ˜¯åå­—æ²¡æœ‰ç‰¹è‰²
             }
         }
 
-        // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+        // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
         public void Select(RectangleF rect,
             SelectAction action,
             List<Type> types,
@@ -1529,13 +1504,13 @@ namespace DigitalPlatform.CommonDialog
                 {
                     MonthArea month = this.MonthCollection[i];
 
-                    // ÓÅ»¯
+                    // ä¼˜åŒ–
                     if (y > rect.Bottom)
                         break;
 
                     
 
-                    // ±ä»»ÎªmonthÄÚ×ø±ê
+                    // å˜æ¢ä¸ºmonthå†…åæ ‡
                     RectangleF rectMonth = rect;
                     rectMonth.Offset(-this.DataRoot.m_nYearNameWidth, -y);
 
@@ -1551,7 +1526,7 @@ namespace DigitalPlatform.CommonDialog
 
         }
 
-        #region YearAreaÖØÔØAreaBaseµÄvirtualº¯Êı
+        #region YearAreaé‡è½½AreaBaseçš„virtualå‡½æ•°
 
         public override string FullName
         {
@@ -1597,7 +1572,7 @@ bool bRecursive)
         {
             bool bRet = base.Select(action, bRecursive);
 
-            // µİ¹é
+            // é€’å½’
             if (bRecursive == true)
             {
                 for (int i = 0; i < this.MonthCollection.Count; i++)
@@ -1610,11 +1585,11 @@ bool bRecursive)
             return bRet;
         }*/
 
-        // »ñµÃ×Ó¶ÔÏóÔÚ ±¾¶ÔÏó×ø±êÌåÏµÖĞµÄ ×óÉÏ½ÇÎ»ÖÃ
+        // è·å¾—å­å¯¹è±¡åœ¨ æœ¬å¯¹è±¡åæ ‡ä½“ç³»ä¸­çš„ å·¦ä¸Šè§’ä½ç½®
         public override PointF GetChildLeftTopPoint(AreaBase child)
         {
             if (!(child is MonthArea))
-                throw new Exception("childÖ»ÄÜÎªMonthAreaÀàĞÍ");
+                throw new Exception("childåªèƒ½ä¸ºMonthAreaç±»å‹");
 
             MonthArea month = (MonthArea)child;
 
@@ -1632,7 +1607,7 @@ bool bRecursive)
             }
 
             if (bFound == false)
-                throw new Exception("childÔÚ×Ó¶ÔÏóÖĞÃ»ÓĞÕÒµ½");
+                throw new Exception("childåœ¨å­å¯¹è±¡ä¸­æ²¡æœ‰æ‰¾åˆ°");
 
             return new PointF(this.DataRoot.m_nYearNameWidth,
                 lHeight);
@@ -1650,7 +1625,7 @@ bool bRecursive)
         }
 
 
-        // µã»÷¼ì²â
+        // ç‚¹å‡»æ£€æµ‹
         public void HitTest(
             long p_x,
             long p_y,
@@ -1669,8 +1644,8 @@ bool bRecursive)
                 return;
             }
 
-            // ¿´¿´ÊÇ²»ÊÇÔÚ×ó±ßµÄÊúµÀÉÏ
-            // dest_typeÈç¹ûÓĞÒªÇó£¬Ôò°Ñ×ó±ßÊúµÀÒ²ÈÃ¸øÏÂ¼¶ÅĞ¶Ï
+            // çœ‹çœ‹æ˜¯ä¸æ˜¯åœ¨å·¦è¾¹çš„ç«–é“ä¸Š
+            // dest_typeå¦‚æœæœ‰è¦æ±‚ï¼Œåˆ™æŠŠå·¦è¾¹ç«–é“ä¹Ÿè®©ç»™ä¸‹çº§åˆ¤æ–­
             if (dest_type == null
                 && p_x < this.DataRoot.m_nYearNameWidth)
             {
@@ -1682,7 +1657,7 @@ bool bRecursive)
                 return;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÉÏ²¿Ò²Ëã×÷µÚÒ»¸öÔÂ·İµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œä¸Šéƒ¨ä¹Ÿç®—ä½œç¬¬ä¸€ä¸ªæœˆä»½çš„
             if (p_y < 0 && dest_type != null)
             {
                 if (this.MonthCollection.Count > 1)
@@ -1698,7 +1673,7 @@ bool bRecursive)
             long y = 0;
             for (int i = 0; i < this.MonthCollection.Count; i++)
             {
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (dest_type == null
                     && y > p_y)
                     break;
@@ -1709,7 +1684,7 @@ bool bRecursive)
 
                 if (p_y >= y && p_y < y + lMonthHeight)
                 {
-                    // È·¶¨ÔÚÒ»¸öMonthArea¶ÔÏóÖĞ
+                    // ç¡®å®šåœ¨ä¸€ä¸ªMonthAreaå¯¹è±¡ä¸­
                     month.HitTest(p_x - this.DataRoot.m_nYearNameWidth,
                         p_y - y,
                         dest_type,
@@ -1719,7 +1694,7 @@ bool bRecursive)
                 y += lMonthHeight;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÏÂ²¿Ò²Ëã×÷×îºóÒ»¸öÔÂ·İµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œä¸‹éƒ¨ä¹Ÿç®—ä½œæœ€åä¸€ä¸ªæœˆä»½çš„
             if (dest_type != null)
             {
                 if (this.MonthCollection.Count > 1)
@@ -1732,7 +1707,7 @@ bool bRecursive)
                 }
             }
 
-            // Èç¹ûÃ»ÓĞÆ¥ÅäÉÏÈÎºÎMonthArea¶ÔÏó
+            // å¦‚æœæ²¡æœ‰åŒ¹é…ä¸Šä»»ä½•MonthAreaå¯¹è±¡
             result = new HitTestResult();
             result.Object = this;
             result.AreaPortion = AreaPortion.BottomBlank;
@@ -1740,7 +1715,7 @@ bool bRecursive)
             result.Y = p_y;
         }
 
-        // »æÍ¼¡¡Äê
+        // ç»˜å›¾ã€€å¹´
         public void Paint(
             long start_x,
             long start_y,
@@ -1754,7 +1729,7 @@ bool bRecursive)
             PaintBack(
     start_x,
     start_y,
-    // this.Width, // ÕâÀï²»ÓÅ»¯£¬Ñ¡ÖĞµÄÊ±ºòË¢ĞÂ·´¶ø²»ÉÁ¶¯ 
+    // this.Width, // è¿™é‡Œä¸ä¼˜åŒ–ï¼Œé€‰ä¸­çš„æ—¶å€™åˆ·æ–°åè€Œä¸é—ªåŠ¨ 
     this.DataRoot.m_nYearNameWidth,
     this.Height,
     e,
@@ -1764,15 +1739,15 @@ bool bRecursive)
             PaintBack(
                 start_x,
                 start_y,
-                this.Width, // ÕâÀï²»ÓÅ»¯£¬¼ÓÉÏÌáÇ°ÔÚÄÚÈİÓòÓ¦ÓÃÑ¡ÖĞĞ§¹û£¬ÄÇÃ´Ñ¡ÖĞµÄÊ±ºòË¢ĞÂ·´¶ø²»ÉÁ¶¯ 
+                this.Width, // è¿™é‡Œä¸ä¼˜åŒ–ï¼ŒåŠ ä¸Šæå‰åœ¨å†…å®¹åŸŸåº”ç”¨é€‰ä¸­æ•ˆæœï¼Œé‚£ä¹ˆé€‰ä¸­çš„æ—¶å€™åˆ·æ–°åè€Œä¸é—ªåŠ¨ 
                 this.Height,
                 e,
                 this.DataRoot.YearBackColor);
 
-            // Îª·ÀÖ¹ÉÁ¶¯¶øÔö¼ÓµÄ´úÂë
+            // ä¸ºé˜²æ­¢é—ªåŠ¨è€Œå¢åŠ çš„ä»£ç 
             if (this.m_bSelected == true)
             {
-                // ÌáÇ°°ÑÍ¸Ã÷µş¼ÓºóµÄ±³¾°ÑÕÉ«Ä£Äâ³öÀ´
+                // æå‰æŠŠé€æ˜å åŠ åçš„èƒŒæ™¯é¢œè‰²æ¨¡æ‹Ÿå‡ºæ¥
                 Color colorMask = SystemColors.Highlight;
                 Color colorBase = Color.White;
                 int r = (byte)((float)colorBase.R * ((255F - 20F) / 255F)
@@ -1797,14 +1772,14 @@ bool bRecursive)
 
             RectangleF rect;
 
-            // »æÖÆÄêÃû×Ö
+            // ç»˜åˆ¶å¹´åå­—
             rect = new RectangleF(
 x0,
 y0,
 this.DataRoot.m_nYearNameWidth,
 this.Height);
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true)
             {
                 PaintYearName(
@@ -1814,7 +1789,7 @@ this.Height);
                     (int)this.Height,
                     e);
 
-                // Ñ¡ÔñºóµÄĞ§¹û
+                // é€‰æ‹©åçš„æ•ˆæœ
                 if (this.m_bSelected == true)
                 {
                     this.PaintSelectEffect(
@@ -1829,7 +1804,7 @@ this.Height);
             int x = x0;
             int y = y0;
 
-            // »æÖÆÔÂ·İ
+            // ç»˜åˆ¶æœˆä»½
             x = x0 + this.DataRoot.m_nYearNameWidth;
             y = y0;
             for (int i = 0; i < this.MonthCollection.Count; i++)
@@ -1842,11 +1817,11 @@ this.Height);
     month.Width,
     month.Height);
 
-                // ÌáÇ°½áÊøÑ­»·
+                // æå‰ç»“æŸå¾ªç¯
                 if (rect.Y > e.ClipRectangle.Bottom)
                     break;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true)
                     month.Paint(x, y, e);
 
@@ -1856,7 +1831,7 @@ this.Height);
             }
         }
 
-        // »æÄêÃû×Ö
+        // ç»˜å¹´åå­—
         void PaintYearName(
             int x0,
             int y0,
@@ -1864,47 +1839,47 @@ this.Height);
             int nHeight,
             PaintEventArgs e)
         {
-            Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2);
+            using (Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2))
+            {
+                // å·¦æ–¹ç«–çº¿
+                e.Graphics.DrawLine(penBold,
+                    new PointF(x0, y0),
+                    new PointF(x0, y0 + nHeight)
+                    );
 
-            // ×ó·½ÊúÏß
-            e.Graphics.DrawLine(penBold,
-                new PointF(x0, y0),
-                new PointF(x0, y0 + nHeight)
-                );
-
-            // ÉÏ·½ºáÏß
+            // ä¸Šæ–¹æ¨ªçº¿
             e.Graphics.DrawLine(penBold,
                 new PointF(x0, y0),
                 new PointF(x0 + nWidth, y0)
                 );
+            }
 
             int nFontHeight = Math.Min(nWidth, nHeight / 5);
 
-            Font font = new Font("Arial", nFontHeight, FontStyle.Bold, GraphicsUnit.Pixel);
-            Brush brushText = null;
+            using(Font font = new Font("Arial", nFontHeight, FontStyle.Bold, GraphicsUnit.Pixel))
+            using (Brush brushText = new SolidBrush(Color.Blue))
+            {
+                RectangleF rect = new RectangleF(
+        x0 + nWidth / 4,
+        y0,
+        nWidth / 2,
+        nHeight);
 
-            brushText = new SolidBrush(Color.Blue);
+                StringFormat stringFormat = new StringFormat();
 
-            RectangleF rect = new RectangleF(
-    x0 + nWidth / 4,
-    y0,
-    nWidth / 2 ,
-    nHeight);
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
 
-            StringFormat stringFormat = new StringFormat();
-
-            stringFormat.Alignment = StringAlignment.Center;
-            stringFormat.LineAlignment = StringAlignment.Center;
-
-            e.Graphics.DrawString(this.YearName,
-                font,
-                brushText,
-                rect,
-                stringFormat);
+                e.Graphics.DrawString(this.YearName,
+                    font,
+                    brushText,
+                    rect,
+                    stringFormat);
+            }
         }
 
 
-        // Äê·İÖµ
+        // å¹´ä»½å€¼
         public int Year
         {
             get
@@ -1929,10 +1904,10 @@ this.Height);
         }
 
 
-        // ±¾ÄêÖ®ºóÒ»¸öÄê¶ÔÏó
+        // æœ¬å¹´ä¹‹åä¸€ä¸ªå¹´å¯¹è±¡
         public YearArea NextYearArea
         {
-            // ¸ÄĞ´
+            // æ”¹å†™
             get
             {
                 return (YearArea)this.GetNextSibling();
@@ -1944,7 +1919,7 @@ this.Height);
                 int nIndex = this.Container.YearCollection.IndexOf(this);
 
                 if (nIndex == -1)
-                    throw new Exception("µ±Ç°YearArea¶ÔÏó²»ÔÚÈİÆ÷ÖĞ");
+                    throw new Exception("å½“å‰YearAreaå¯¹è±¡ä¸åœ¨å®¹å™¨ä¸­");
 
                 if (nIndex + 1 < this.Container.YearCollection.Count)
                     return this.Container.YearCollection[nIndex + 1];
@@ -1966,7 +1941,7 @@ this.Height);
         }
 
         /*
-        // ±¾ÄêµÚÒ»¸ö¡°Ìì¡±¶ÔÏó
+        // æœ¬å¹´ç¬¬ä¸€ä¸ªâ€œå¤©â€å¯¹è±¡
         public DayArea FirstDayArea
         {
             get
@@ -1979,7 +1954,7 @@ this.Height);
         }*/
 
         /*
-        // ÕÒµ½Ö¸¶¨ÈÕÆÚµÄDayArea¶ÔÏó
+        // æ‰¾åˆ°æŒ‡å®šæ—¥æœŸçš„DayAreaå¯¹è±¡
         public DayArea FindDayArea(int month, int day)
         {
             if (this.ChildrenCollection.Count == 0)
@@ -1987,10 +1962,10 @@ this.Height);
 
             MonthArea cur_month = null;
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (((MonthArea)this.ChildrenCollection[0]).Month == 1)
             {
-                // ËµÃ÷µÚÒ»¸öÔÂ·İ¶ÔÏóÊÇ1ÔÂ£¬month¾Í¿ÉÒÔÓÃ×÷ÏÂ±ê
+                // è¯´æ˜ç¬¬ä¸€ä¸ªæœˆä»½å¯¹è±¡æ˜¯1æœˆï¼Œmonthå°±å¯ä»¥ç”¨ä½œä¸‹æ ‡
                 if (month - 1 < this.ChildrenCollection.Count)
                     cur_month = (MonthArea)this.ChildrenCollection[month - 1];
                 else
@@ -1998,7 +1973,7 @@ this.Height);
             }
             else
             {
-                // ²éÕÒ
+                // æŸ¥æ‰¾
                 for (int i = 0; i < this.ChildrenCollection.Count; i++)
                 {
                     cur_month = (MonthArea)this.ChildrenCollection[i];
@@ -2006,7 +1981,7 @@ this.Height);
                         goto FOUND;
 
 
-                    if (month > cur_month.Month)    // ÓÅ»¯
+                    if (month > cur_month.Month)    // ä¼˜åŒ–
                         return null;
                 }
 
@@ -2023,26 +1998,26 @@ this.Height);
 
     }
 
-    // ÔÂ
+    // æœˆ
     public class MonthArea : NamedArea<WeekArea>
     {
         // public List<WeekArea> WeekCollection = new List<WeekArea>();
 
-        // int m_nMonth = 0;   // ÉĞÎ´³õÊ¼»¯
+        // int m_nMonth = 0;   // å°šæœªåˆå§‹åŒ–
 
-        // ±¾ÔÂ×î´óĞÇÆÚÊı
+        // æœ¬æœˆæœ€å¤§æ˜ŸæœŸæ•°
         public int MaxWeekCount
         {
             get
             {
                 int nWeekCount = 0;
 
-                // ÆğÊ¼ÈÕ 1ºÅ
+                // èµ·å§‹æ—¥ 1å·
                 DateTime date = new DateTime(this.Year,
                     this.Month,
                     1);
 
-                int nStartIndex = Convert.ToInt32(date.DayOfWeek);   // ÆğÊ¼ÈÕµÄĞòºÅ¡£0ÎªĞÇÆÚÌì
+                int nStartIndex = Convert.ToInt32(date.DayOfWeek);   // èµ·å§‹æ—¥çš„åºå·ã€‚0ä¸ºæ˜ŸæœŸå¤©
                 int nMaxDays = this.Days;
                 int nDay = 1;
                 bool bBlank = true;
@@ -2050,11 +2025,11 @@ this.Height);
                 {
                     for (int nDayOfWeek = 0; nDayOfWeek < 7; nDayOfWeek++)
                     {
-                        // ±äÎª²»ÊÇ¿Õ°×
+                        // å˜ä¸ºä¸æ˜¯ç©ºç™½
                         if (nCurWeek == 1 && nDayOfWeek >= nStartIndex)
                             bBlank = false;
 
-                        // ±ä»Ø¿Õ°×
+                        // å˜å›ç©ºç™½
                         if (nDay > nMaxDays)
                             bBlank = true;
 
@@ -2068,9 +2043,9 @@ this.Height);
             }
         }
 
-        // È·±£Ò»ÔÂÖĞµÄÇ°·½»òÕßºó·½ĞÇÆÚÍêÕû¡£
+        // ç¡®ä¿ä¸€æœˆä¸­çš„å‰æ–¹æˆ–è€…åæ–¹æ˜ŸæœŸå®Œæ•´ã€‚
         // return:
-        //      ÊÇ·ñ·¢ÉúÁËÔö²¹
+        //      æ˜¯å¦å‘ç”Ÿäº†å¢è¡¥
         public bool CompleteWeek(bool bHead)
         {
             if (this.WeekCollection.Count == 6)
@@ -2104,14 +2079,14 @@ this.Height);
             return bChanged;
         }
 
-        // ½«Ê±¼ä·¶Î§É¾³ıÒ»ĞÇÆÚ
+        // å°†æ—¶é—´èŒƒå›´åˆ é™¤ä¸€æ˜ŸæœŸ
         // return:
         public bool ShrinkWeek(bool bHead)
         {
                 WeekArea first_week = null;
             if (this.WeekCollection.Count > 0)
             {
-                // µÃµ½ÏÖ´æµÚÒ»ĞÇÆÚ
+                // å¾—åˆ°ç°å­˜ç¬¬ä¸€æ˜ŸæœŸ
                 if (bHead == true)
                 {
                     first_week = (WeekArea)this.FirstChild;
@@ -2132,17 +2107,17 @@ this.Height);
             return true;
         }
 
-        // ½«Ê±¼ä·¶Î§À©Õ¹Ò»ĞÇÆÚ
-        // ×¢ÒâĞèÒª¼ì²éÔ­ÓĞµÄµÚÒ»ĞÇÆÚ»òÕß×îºóÒ»ĞÇÆÚÊÇ·ñÍêÕû
+        // å°†æ—¶é—´èŒƒå›´æ‰©å±•ä¸€æ˜ŸæœŸ
+        // æ³¨æ„éœ€è¦æ£€æŸ¥åŸæœ‰çš„ç¬¬ä¸€æ˜ŸæœŸæˆ–è€…æœ€åä¸€æ˜ŸæœŸæ˜¯å¦å®Œæ•´
         // return:
-        //      ÆäËû    Ëù´´½¨µÄĞÂµÄĞÇÆÚ¶ÔÏó
+        //      å…¶ä»–    æ‰€åˆ›å»ºçš„æ–°çš„æ˜ŸæœŸå¯¹è±¡
         public WeekArea ExpandWeek(bool bHead,
             bool bEmpty)
         {
             int nNewWeek = 0;
             if (this.WeekCollection.Count > 0)
             {
-                // µÃµ½ÏÖ´æµÚÒ»ĞÇÆÚ
+                // å¾—åˆ°ç°å­˜ç¬¬ä¸€æ˜ŸæœŸ
                 WeekArea first_week = null;
 
                 if (bHead == true)
@@ -2151,7 +2126,7 @@ this.Height);
                     nNewWeek = first_week.Week - 1;
                     if (nNewWeek == 0)
                     {
-                        // ĞèÒªÏÈÀ©ÔÂ
+                        // éœ€è¦å…ˆæ‰©æœˆ
                         return this.Container.ExpandMonth(bHead, true).ExpandWeek(bHead, bEmpty);
                     }
                 }
@@ -2161,7 +2136,7 @@ this.Height);
                     nNewWeek = first_week.Week + 1;
                     if (first_week.MaxDay >= first_week.Container.Days)
                     {
-                        // ĞèÒªÏÈÀ©ÔÂ
+                        // éœ€è¦å…ˆæ‰©æœˆ
                         return this.Container.ExpandMonth(bHead, true).ExpandWeek(bHead, bEmpty);
                     }
                 }
@@ -2169,7 +2144,7 @@ this.Height);
             else
             {
                 if (bHead == true)
-                    nNewWeek = this.MaxWeekCount;  // Ä©ĞÇÆÚ
+                    nNewWeek = this.MaxWeekCount;  // æœ«æ˜ŸæœŸ
                 else
                     nNewWeek = 1;
             }
@@ -2193,9 +2168,9 @@ this.Height);
             }
         }
 
-                // ¹¹Ôìº¯Êı
+                // æ„é€ å‡½æ•°
         // parameters:
-        //      nMonth  ÔÂ·İÊı¡£´Ó1¿ªÊ¼¼ÆÊı
+        //      nMonth  æœˆä»½æ•°ã€‚ä»1å¼€å§‹è®¡æ•°
         public MonthArea(YearArea container,
             int nMonth,
             bool bEmpty)
@@ -2203,18 +2178,18 @@ this.Height);
             InitialMonthArea(container, nMonth, bEmpty);
         }
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         // parameters:
-        //      nMonth  ÔÂ·İÊı¡£´Ó1¿ªÊ¼¼ÆÊı
+        //      nMonth  æœˆä»½æ•°ã€‚ä»1å¼€å§‹è®¡æ•°
         public MonthArea(YearArea container,
             int nMonth)
         {
             InitialMonthArea(container, nMonth, false);
         }
 
-        // ¹¹Ôìº¯ÊıÊµ¼Ê¹¦ÄÜ
+        // æ„é€ å‡½æ•°å®é™…åŠŸèƒ½
         // parameters:
-        //      nMonth  ÔÂ·İÊı¡£´Ó1¿ªÊ¼¼ÆÊı
+        //      nMonth  æœˆä»½æ•°ã€‚ä»1å¼€å§‹è®¡æ•°
         void InitialMonthArea(YearArea container,
             int nMonth,
             bool bEmpty)
@@ -2226,23 +2201,23 @@ this.Height);
             if (bEmpty == true)
                 return;
 
-            // ´´½¨ÖÜÊı×éºÍÏÂÊôµÄÈÕÊı×é
+            // åˆ›å»ºå‘¨æ•°ç»„å’Œä¸‹å±çš„æ—¥æ•°ç»„
             int nDays = this.Days;
 
             WeekArea week = null;
             int nWeek = 0;
             for (int i = 0; i < nDays; i++)
             {
-                // this.Days¿ÉÒÔµÃÖª±¾ÔÂÓĞ¶àÉÙÌì
-                // DataTime.DayOfWeek¿ÉÒÔÓÃÀ´Ì½²â±¾ÔÂÒ»ºÅÎªĞÇÆÚ¼¸£¬ÕâÑùÒ»Ö±ÍÆËãÏÂÈ¥
-                // ¾Í¿ÉÒÔµÃÖªÓĞ¶àÉÙ¸öĞÇÆÚ¡£
-                // ×¢Òâ£¬DayOfWeekµÄ0±íÊ¾ĞÇÆÚÌì¡£A DayOfWeek enumerated constant that indicates the day of the week. This property value ranges from zero, indicating Sunday, to six, indicating Saturday. 
-                // ÁíÍâ½¨ÒéÍÆËãµÄ¹ı³Ì£¬Ò²ÊÇÍ¬Ê±´´½¨WeekAreaºÍDayArea¶ÔÏóµÄ¹ı³Ì£¬²»±ØÔÙ·ÖÁ½¼¶È¥´´½¨ÁË
+                // this.Dayså¯ä»¥å¾—çŸ¥æœ¬æœˆæœ‰å¤šå°‘å¤©
+                // DataTime.DayOfWeekå¯ä»¥ç”¨æ¥æ¢æµ‹æœ¬æœˆä¸€å·ä¸ºæ˜ŸæœŸå‡ ï¼Œè¿™æ ·ä¸€ç›´æ¨ç®—ä¸‹å»
+                // å°±å¯ä»¥å¾—çŸ¥æœ‰å¤šå°‘ä¸ªæ˜ŸæœŸã€‚
+                // æ³¨æ„ï¼ŒDayOfWeekçš„0è¡¨ç¤ºæ˜ŸæœŸå¤©ã€‚A DayOfWeek enumerated constant that indicates the day of the week. This property value ranges from zero, indicating Sunday, to six, indicating Saturday. 
+                // å¦å¤–å»ºè®®æ¨ç®—çš„è¿‡ç¨‹ï¼Œä¹Ÿæ˜¯åŒæ—¶åˆ›å»ºWeekAreaå’ŒDayAreaå¯¹è±¡çš„è¿‡ç¨‹ï¼Œä¸å¿…å†åˆ†ä¸¤çº§å»åˆ›å»ºäº†
                 DateTime date = new DateTime(this.Container.Year,
                     this.Month,
                     i + 1);
 
-                // ·êÉÏ±¾ÔÂµÚÒ»Ìì£¬»òÕßÃ¿ÖÜµÚÒ»Ìì£¨ĞÇÆÚÌì£©£¬²Å´úÎª´´½¨ĞÇÆÚ¶ÔÏó
+                // é€¢ä¸Šæœ¬æœˆç¬¬ä¸€å¤©ï¼Œæˆ–è€…æ¯å‘¨ç¬¬ä¸€å¤©ï¼ˆæ˜ŸæœŸå¤©ï¼‰ï¼Œæ‰ä»£ä¸ºåˆ›å»ºæ˜ŸæœŸå¯¹è±¡
                 if (i == 0
                     || date.DayOfWeek == 0)
                 {
@@ -2253,16 +2228,16 @@ this.Height);
 
         }
 
-        // ±ğÃû
+        // åˆ«å
         public TypedList<WeekArea> WeekCollection
         {
             get
             {
-                return this.ChildTypedCollection;    // ÆäÊµNamedCollectionÒ²ºÜºÃÓÃ£¬¾ÍÊÇÃû×ÖÃ»ÓĞÌØÉ«
+                return this.ChildTypedCollection;    // å…¶å®NamedCollectionä¹Ÿå¾ˆå¥½ç”¨ï¼Œå°±æ˜¯åå­—æ²¡æœ‰ç‰¹è‰²
             }
         }
 
-        // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+        // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
         public void Select(RectangleF rect,
             SelectAction action,
             List<Type> types,
@@ -2294,11 +2269,11 @@ this.Height);
                 {
                     WeekArea week = this.WeekCollection[i];
 
-                    // ÓÅ»¯
+                    // ä¼˜åŒ–
                     if (y > rect.Bottom)
                         break;
 
-                    // ±ä»»ÎªweekÄÚ×ø±ê
+                    // å˜æ¢ä¸ºweekå†…åæ ‡
                     RectangleF rectWeek = rect;
                     rectWeek.Offset(-this.DataRoot.m_nMonthNameWidth, -y);
 
@@ -2314,7 +2289,7 @@ this.Height);
 
         }
 
-        #region MonthAreaÖØÔØAreaBaseµÄvirtualº¯Êı
+        #region MonthAreaé‡è½½AreaBaseçš„virtualå‡½æ•°
 
         public override string FullName
         {
@@ -2344,7 +2319,7 @@ this.Height);
             {
                 if (m_lHeightCache == -1)
                 {
-                    long lHeight = this.DataRoot.m_nDayOfWeekTitleHeight; // ±êÌâ¸ß¶È
+                    long lHeight = this.DataRoot.m_nDayOfWeekTitleHeight; // æ ‡é¢˜é«˜åº¦
 
                     for (int i = 0; i < this.WeekCollection.Count; i++)
                     {
@@ -2376,7 +2351,7 @@ bool bRecursive)
         {
             bool bRet = base.Select(action, bRecursive);
 
-            // µİ¹é
+            // é€’å½’
             if (bRecursive == true)
             {
                 for (int i = 0; i < this.WeekCollection.Count; i++)
@@ -2390,17 +2365,17 @@ bool bRecursive)
         }
          * */
 
-        // »ñµÃ×Ó¶ÔÏóÔÚ ±¾¶ÔÏó×ø±êÌåÏµÖĞµÄ ×óÉÏ½ÇÎ»ÖÃ
+        // è·å¾—å­å¯¹è±¡åœ¨ æœ¬å¯¹è±¡åæ ‡ä½“ç³»ä¸­çš„ å·¦ä¸Šè§’ä½ç½®
         public override PointF GetChildLeftTopPoint(AreaBase child)
         {
             if (!(child is WeekArea))
-                throw new Exception("childÖ»ÄÜÎªWeekAreaÀàĞÍ");
+                throw new Exception("childåªèƒ½ä¸ºWeekAreaç±»å‹");
 
             WeekArea week = (WeekArea)child;
             int index = this.ChildrenCollection.IndexOf(week);
 
             if (index == -1)
-                throw new Exception("childÔÚ×Ó¶ÔÏóÖĞÃ»ÓĞÕÒµ½");
+                throw new Exception("childåœ¨å­å¯¹è±¡ä¸­æ²¡æœ‰æ‰¾åˆ°");
 
             return new PointF(this.DataRoot.m_nMonthNameWidth,
                 this.DataRoot.m_nDayOfWeekTitleHeight + index * week.Height);
@@ -2416,7 +2391,7 @@ bool bRecursive)
             }
         }
 
-        // µã»÷¼ì²â
+        // ç‚¹å‡»æ£€æµ‹
         public void HitTest(
             long p_x,
             long p_y,
@@ -2435,8 +2410,8 @@ bool bRecursive)
                 return;
             }
 
-            // ¿´¿´ÊÇ²»ÊÇÔÚ×ó±ßµÄÊúµÀ(ÔÂÃû)ÉÏ
-            // dest_typeÈç¹ûÓĞÒªÇó£¬Ôò°Ñ×ó±ßÊúµÀÒ²ÈÃ¸øÏÂ¼¶ÅĞ¶Ï
+            // çœ‹çœ‹æ˜¯ä¸æ˜¯åœ¨å·¦è¾¹çš„ç«–é“(æœˆå)ä¸Š
+            // dest_typeå¦‚æœæœ‰è¦æ±‚ï¼Œåˆ™æŠŠå·¦è¾¹ç«–é“ä¹Ÿè®©ç»™ä¸‹çº§åˆ¤æ–­
             if (dest_type == null
                 && p_x < this.DataRoot.m_nMonthNameWidth)
             {
@@ -2448,20 +2423,20 @@ bool bRecursive)
                 return;
             }
 
-            // ¿´¿´ÊÇ²»ÊÇÔÚĞÇÆÚ±êÌâÉÏ
-            // dest_typeÈç¹ûÓĞÒªÇó£¬Ôò°Ñ±êÌâÒ²ÈÃ¸øÏÂ¼¶ÅĞ¶Ï
+            // çœ‹çœ‹æ˜¯ä¸æ˜¯åœ¨æ˜ŸæœŸæ ‡é¢˜ä¸Š
+            // dest_typeå¦‚æœæœ‰è¦æ±‚ï¼Œåˆ™æŠŠæ ‡é¢˜ä¹Ÿè®©ç»™ä¸‹çº§åˆ¤æ–­
             if (dest_type == null
                 && p_y < this.DataRoot.m_nDayOfWeekTitleHeight)
             {
                 result = new HitTestResult();
                 result.AreaPortion = AreaPortion.ColumnTitle;
                 result.Object = this;
-                result.X = p_x; // ×¢Òâx×ø±ê»¹°üº¬ÁËm_nMonthNameWidth²¿·Ö
+                result.X = p_x; // æ³¨æ„xåæ ‡è¿˜åŒ…å«äº†m_nMonthNameWidthéƒ¨åˆ†
                 result.Y = p_y;
                 return;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÉÏ²¿ºÍÖÜ±êÌâÒ²Ëã×÷µÚÒ»¸öĞÇÆÚµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œä¸Šéƒ¨å’Œå‘¨æ ‡é¢˜ä¹Ÿç®—ä½œç¬¬ä¸€ä¸ªæ˜ŸæœŸçš„
             if (p_y < this.DataRoot.m_nDayOfWeekTitleHeight
                 && dest_type != null)
             {
@@ -2475,11 +2450,11 @@ bool bRecursive)
                 }
             }
 
-            // ¿´¿´ÊÇ²»ÊÇÔÚĞÇÆÚĞĞÉÏ
+            // çœ‹çœ‹æ˜¯ä¸æ˜¯åœ¨æ˜ŸæœŸè¡Œä¸Š
             long y = this.DataRoot.m_nDayOfWeekTitleHeight;
             for (int i = 0; i < this.WeekCollection.Count; i++)
             {
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (dest_type == null
                     && y > p_y)
                     break;
@@ -2490,7 +2465,7 @@ bool bRecursive)
 
                 if (p_y >= y && p_y < y + lWeekHeight)
                 {
-                    // È·¶¨ÔÚÒ»¸öWeekArea¶ÔÏóÖĞ
+                    // ç¡®å®šåœ¨ä¸€ä¸ªWeekAreaå¯¹è±¡ä¸­
                     week.HitTest(p_x - this.DataRoot.m_nMonthNameWidth,
                         p_y - y,
                         dest_type,
@@ -2500,7 +2475,7 @@ bool bRecursive)
                 y += lWeekHeight;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÏÂ²¿Ò²Ëã×÷×îºóÒ»¸öĞÇÆÚµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œä¸‹éƒ¨ä¹Ÿç®—ä½œæœ€åä¸€ä¸ªæ˜ŸæœŸçš„
             if (dest_type != null)
             {
                 if (this.WeekCollection.Count > 1)
@@ -2513,7 +2488,7 @@ bool bRecursive)
                 }
             }
 
-            // Èç¹ûÃ»ÓĞÆ¥ÅäÉÏÈÎºÎWeekArea¶ÔÏó
+            // å¦‚æœæ²¡æœ‰åŒ¹é…ä¸Šä»»ä½•WeekAreaå¯¹è±¡
             result = new HitTestResult();
             result.Object = this;
             result.AreaPortion = AreaPortion.BottomBlank;
@@ -2521,7 +2496,7 @@ bool bRecursive)
             result.Y = p_y;
         }
 
-        // »æÖÆÖÜ±êÌâ
+        // ç»˜åˆ¶å‘¨æ ‡é¢˜
         void PaintDayOfWeekTitle(long x0,
             long y0,
             PaintEventArgs e)
@@ -2529,125 +2504,115 @@ bool bRecursive)
             int nTitleHeight = this.DataRoot.m_nDayOfWeekTitleHeight;
             int nTitleCellWidth = this.DataRoot.m_nDayCellWidth;
 
-            /*
-            PaintBack(
-x0,
-y0,
-nTitleCellWidth * 7,
-nTitleHeight,
-e,
-Color.White);
-             * */
-
-            // »æÖÆĞÇÆÚ±êÌâ
+            // ç»˜åˆ¶æ˜ŸæœŸæ ‡é¢˜
             Font font = this.DataRoot.DaysOfWeekTitleFont;
-            Brush brushText = null;
 
-            Pen pen = new Pen(Color.FromArgb(50, Color.Gray));
-            Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2);
+            using(Pen pen = new Pen(Color.FromArgb(50, Color.Gray)))
+            using(Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2))
 
-            brushText = new SolidBrush(Color.Gray);
-            long x = x0;
-            long y = y0;
-
-            // ±³¾°
+            using (Brush brushText = new SolidBrush(Color.Gray))
             {
-                float upper_height = ((float)nTitleHeight / 2) + 1;
-                float lower_height = ((float)nTitleHeight / 2);
+                long x = x0;
+                long y = y0;
 
-                LinearGradientBrush linGrBrush = new LinearGradientBrush(
-new PointF(0, y),
-new PointF(0, y + upper_height),
-Color.FromArgb(200, 251, 252, 253), 
-Color.FromArgb(255, 235, 238, 242)
-); 
+                // èƒŒæ™¯
+                {
+                    float upper_height = ((float)nTitleHeight / 2) + 1;
+                    float lower_height = ((float)nTitleHeight / 2);
 
-                linGrBrush.GammaCorrection = true;
+                    using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
+    new PointF(0, y),
+    new PointF(0, y + upper_height),
+    Color.FromArgb(200, 251, 252, 253),
+    Color.FromArgb(255, 235, 238, 242)
+    ))
+                    {
 
-                RectangleF rectBack = new RectangleF(
-    x,
-    y,
-    nTitleCellWidth * 7,
-    upper_height);
-                e.Graphics.FillRectangle(linGrBrush, rectBack);
+                        linGrBrush.GammaCorrection = true;
 
-                //
+                        RectangleF rectBack = new RectangleF(
+            x,
+            y,
+            nTitleCellWidth * 7,
+            upper_height);
+                        e.Graphics.FillRectangle(linGrBrush, rectBack);
+                    }
+                    //
 
-                linGrBrush = new LinearGradientBrush(
-new PointF(0, y + upper_height),
-new PointF(0, y + upper_height + lower_height),
-Color.FromArgb(255, 220, 226, 231),
-Color.FromArgb(255, 215, 222, 228)
-);
-                rectBack = new RectangleF(
-    x,
-    y + upper_height,
-    nTitleCellWidth * 7,
-    lower_height-1);
-                e.Graphics.FillRectangle(linGrBrush, rectBack);
+                    using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
+    new PointF(0, y + upper_height),
+    new PointF(0, y + upper_height + lower_height),
+    Color.FromArgb(255, 220, 226, 231),
+    Color.FromArgb(255, 215, 222, 228)
+    ))
+                    {
+                        RectangleF rectBack = new RectangleF(
+            x,
+            y + upper_height,
+            nTitleCellWidth * 7,
+            lower_height - 1);
+                        e.Graphics.FillRectangle(linGrBrush, rectBack);
+                    }
+                }
 
+                using (Pen penVert = new Pen(Color.FromArgb(200, Color.White), (float)1.5))
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        RectangleF rectUpdate = new RectangleF(
+                            x,
+                            y,
+                            nTitleCellWidth,
+                            nTitleHeight);
 
+                        // ä¼˜åŒ–
+                        if (rectUpdate.IntersectsWith(e.ClipRectangle) == false)
+                            goto CONTINUE;
+
+                        // å·¦æ–¹ç«–çº¿
+                        e.Graphics.DrawLine(penVert,
+                            new PointF(x, y + 1),
+                            new PointF(x, y + 1 + nTitleHeight)
+                            );
+
+                        // ä¸Šæ–¹æ¨ªçº¿
+                        e.Graphics.DrawLine(penBold,
+                            new PointF(x, y),
+                            new PointF(x + nTitleCellWidth, y)
+                            );
+
+                        // æ–‡å­—
+                        RectangleF rect = new RectangleF(
+                            x,
+                            y,
+                            nTitleCellWidth,
+                            nTitleHeight);
+
+                        StringFormat stringFormat = new StringFormat();
+
+                        stringFormat.Alignment = StringAlignment.Center;
+                        stringFormat.LineAlignment = StringAlignment.Center;
+
+                        string strText = "";
+                        if (this.DataRoot.m_strDayOfWeekTitleLang == "zh")
+                            strText = WeekArea.WeekDayNames_ZH[i];
+                        if (this.DataRoot.m_strDayOfWeekTitleLang == "en")
+                            strText = WeekArea.WeekDayNames_EN[i];
+
+                        e.Graphics.DrawString(strText,
+                            font,
+                            brushText,
+                            rect,
+                            stringFormat);
+
+                    CONTINUE:
+                        x += nTitleCellWidth;
+                    }
+                }
             }
-
-            Pen penVert = new Pen(Color.FromArgb(200, Color.White), (float)1.5);
-
-
-            for (int i = 0; i < 7; i++)
-            {
-                RectangleF rectUpdate = new RectangleF(
-                    x,
-                    y,
-                    nTitleCellWidth,
-                    nTitleHeight);
-
-                // ÓÅ»¯
-                if (rectUpdate.IntersectsWith(e.ClipRectangle) == false)
-                    goto CONTINUE;
-
-                // ×ó·½ÊúÏß
-                e.Graphics.DrawLine(penVert,
-                    new PointF(x, y+1),
-                    new PointF(x, y+1 + nTitleHeight)
-                    );
-
-                // ÉÏ·½ºáÏß
-                e.Graphics.DrawLine(penBold,
-                    new PointF(x, y),
-                    new PointF(x + nTitleCellWidth, y)
-                    );
-
-
-                // ÎÄ×Ö
-                RectangleF rect = new RectangleF(
-                    x,
-                    y,
-                    nTitleCellWidth,
-                    nTitleHeight);
-
-                StringFormat stringFormat = new StringFormat();
-
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-
-                string strText = "";
-                if (this.DataRoot.m_strDayOfWeekTitleLang == "zh")
-                    strText = WeekArea.WeekDayNames_ZH[i];
-                if (this.DataRoot.m_strDayOfWeekTitleLang == "en")
-                    strText = WeekArea.WeekDayNames_EN[i];
-
-                e.Graphics.DrawString(strText,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
-
-            CONTINUE:
-                x += nTitleCellWidth;
-            }
-
         }
 
-        // »æÍ¼ ÔÂ
+        // ç»˜å›¾ æœˆ
         public void Paint(
             long start_x,
             long start_y,
@@ -2657,8 +2622,7 @@ Color.FromArgb(255, 215, 222, 228)
     || DataRoot.TooLarge(start_y) == true)
                 return;
 
-
-            // »æÖÆ±³¾°
+            // ç»˜åˆ¶èƒŒæ™¯
             PaintBack(
     start_x,
     start_y,
@@ -2672,15 +2636,14 @@ Color.FromArgb(255, 215, 222, 228)
 
             RectangleF rectUpdate;
 
-
-            // »æÖÆÔÂÃû×Ö
+            // ç»˜åˆ¶æœˆåå­—
             rectUpdate = new RectangleF(
 x0,
 y0,
 this.DataRoot.m_nMonthNameWidth,
 this.Height);
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rectUpdate.IntersectsWith(e.ClipRectangle) == true)
             {
                 PaintLeftMonthName(
@@ -2690,10 +2653,10 @@ this.Height);
        (int)this.Height,
        e);
 
-                // Ñ¡ÔñºóµÄĞ§¹û
+                // é€‰æ‹©åçš„æ•ˆæœ
                 if (this.m_bSelected == true)
                 {
-                    // ÔÂÃû
+                    // æœˆå
                     this.PaintSelectEffect(
                         x0,
                         y0,
@@ -2701,33 +2664,29 @@ this.Height);
                         (int)this.Height,
                         e);
                 }
-
             }
-
-
 
             int x = x0 + this.DataRoot.m_nMonthNameWidth;
             int y = y0;
 
-
-            // »æÖÆĞÇÆÚ±êÌâ 
+            // ç»˜åˆ¶æ˜ŸæœŸæ ‡é¢˜ 
             rectUpdate = new RectangleF(
                 x,
                 y,
                 this.DataRoot.m_nDayCellWidth * 7,  // this.Width - this.DataRoot.m_nMonthNameWidth,
                 this.DataRoot.m_nDayOfWeekTitleHeight);
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rectUpdate.IntersectsWith(e.ClipRectangle) == true)
             {
                 PaintDayOfWeekTitle(x,
                 y,
                 e);
 
-                // Ñ¡ÔñºóµÄĞ§¹û
+                // é€‰æ‹©åçš„æ•ˆæœ
                 if (this.m_bSelected == true)
                 {
-                    // ĞÇÆÚ±êÌâ
+                    // æ˜ŸæœŸæ ‡é¢˜
                     this.PaintSelectEffect(
                     x0 + this.DataRoot.m_nMonthNameWidth,
                     y0,
@@ -2738,7 +2697,7 @@ this.Height);
                 }
             }
 
-            // »æÖÆ±³¾°ÖĞÔÂÃû×Ö
+            // ç»˜åˆ¶èƒŒæ™¯ä¸­æœˆåå­—
             this.PaintBackMonthName(
                x0 + this.DataRoot.m_nMonthNameWidth,
                y0 + this.DataRoot.m_nDayOfWeekTitleHeight,
@@ -2746,13 +2705,13 @@ this.Height);
                this.Height - this.DataRoot.m_nDayOfWeekTitleHeight,
                e);
 
-            // »æÖÆÏÂ¼¶ÄÚÈİ
+            // ç»˜åˆ¶ä¸‹çº§å†…å®¹
 
             x = x0 + this.DataRoot.m_nMonthNameWidth;
             y += this.DataRoot.m_nDayOfWeekTitleHeight;
 
 
-            // »æÖÆÃ¿¸öĞÇÆÚ
+            // ç»˜åˆ¶æ¯ä¸ªæ˜ŸæœŸ
             for (int i = 0; i < this.WeekCollection.Count; i++)
             {
                 WeekArea week = this.WeekCollection[i];
@@ -2763,23 +2722,20 @@ this.Height);
     week.Width,
     week.Height);
 
-                // ÌáÇ°½áÊøÑ­»·
+                // æå‰ç»“æŸå¾ªç¯
                 if (rectUpdate.Y > e.ClipRectangle.Bottom)
                     break;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rectUpdate.IntersectsWith(e.ClipRectangle) == true) 
                     week.Paint(x, y, e);
 
                 long lWeekHeight = week.Height;
                 y += (int)lWeekHeight;
-
             }
-
-
         }
 
-        // »æ×ó±ßÊúµÀÉÏµÄÔÂÃû×Ö
+        // ç»˜å·¦è¾¹ç«–é“ä¸Šçš„æœˆåå­—
         void PaintLeftMonthName(
             int x0,
             int y0,
@@ -2787,26 +2743,26 @@ this.Height);
             int nHeight,
             PaintEventArgs e)
         {
-            Pen pen = new Pen(Color.FromArgb(50, Color.Gray));
-            Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2);
+            using (Pen pen = new Pen(Color.FromArgb(50, Color.Gray)))
+            {
 
-            // ×ó·½ÊúÏß
-            e.Graphics.DrawLine(pen,
-                new PointF(x0, y0),
-                new PointF(x0, y0 + nHeight)
-                );
+                // å·¦æ–¹ç«–çº¿
+                e.Graphics.DrawLine(pen,
+                    new PointF(x0, y0),
+                    new PointF(x0, y0 + nHeight)
+                    );
+            }
 
-            // ÉÏ·½ºáÏß
-            e.Graphics.DrawLine(penBold,
-                new PointF(x0, y0),
-                new PointF(x0 + nWidth, y0)
-                );
+            using (Pen penBold = new Pen(Color.FromArgb(50, Color.Gray), (float)2))
+            {
+                // ä¸Šæ–¹æ¨ªçº¿
+                e.Graphics.DrawLine(penBold,
+                    new PointF(x0, y0),
+                    new PointF(x0 + nWidth, y0)
+                    );
+            }
 
-
-            Font font = null;
-            Brush brushText = null;
-
-            // »æÖÆĞ¡µÄÄêÃû×Ö
+            // ç»˜åˆ¶å°çš„å¹´åå­—
 
             int x = x0;
             int y = y0;
@@ -2814,58 +2770,61 @@ this.Height);
             RectangleF rect;
 
             {
-                font = new Font("Arial Black",
+                using(Font font = new Font("Arial Black",
                     this.DataRoot.m_nMonthNameWidth/4,
                     FontStyle.Regular, 
-                    GraphicsUnit.Pixel);
-                brushText = new SolidBrush(Color.Blue);
+                    GraphicsUnit.Pixel))
+                using (Brush brushText = new SolidBrush(Color.Blue))
+                {
 
-                rect = new RectangleF(
-    x,
-    y,
-    nWidth,
-    this.DataRoot.m_nDayOfWeekTitleHeight);
+                    rect = new RectangleF(
+        x,
+        y,
+        nWidth,
+        this.DataRoot.m_nDayOfWeekTitleHeight);
 
-                StringFormat stringFormat = new StringFormat();
+                    StringFormat stringFormat = new StringFormat();
 
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Far;
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Far;
 
-                e.Graphics.DrawString(this.Container.YearName,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
-
+                    e.Graphics.DrawString(this.Container.YearName,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
+                }
             }
 
 
-            // »æÖÆÔÂÃû×Ö
+            // ç»˜åˆ¶æœˆåå­—
             {
-                font = new Font("Arial", 20, FontStyle.Bold);
-                brushText = new SolidBrush(Color.Green);
+                using(Font font = new Font("Arial", 20, FontStyle.Bold))
+                using (Brush brushText = new SolidBrush(Color.Green))
+                {
 
-                rect = new RectangleF(
-                    x0,
-                    y0 + this.DataRoot.m_nDayOfWeekTitleHeight,
-                    nWidth,
-                    nHeight - this.DataRoot.m_nDayOfWeekTitleHeight);
+                    rect = new RectangleF(
+                        x0,
+                        y0 + this.DataRoot.m_nDayOfWeekTitleHeight,
+                        nWidth,
+                        nHeight - this.DataRoot.m_nDayOfWeekTitleHeight);
 
-                StringFormat stringFormat = new StringFormat();
+                    StringFormat stringFormat = new StringFormat();
 
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Center;
 
-                e.Graphics.DrawString(this.MonthName,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
+                    e.Graphics.DrawString(this.MonthName,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
+                }
             }
 
         }
 
-        // »æ±³¾°ÉÏµÄµ­É«ÔÂÃû×Ö(ºÍÄêÃû×Ö)
+        // ç»˜èƒŒæ™¯ä¸Šçš„æ·¡è‰²æœˆåå­—(å’Œå¹´åå­—)
         void PaintBackMonthName(
             long x0,
             long y0,
@@ -2879,75 +2838,69 @@ this.Height);
                 lWidth,
                 lHeight);
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rectUpdate.IntersectsWith(e.ClipRectangle) == false)
                 return;
 
-            // »æÖÆÄêÃû×Ö
+            // ç»˜åˆ¶å¹´åå­—
             RectangleF rect;
             long lHalfHeight = lHeight / 2;
             long lRegionHeight = Math.Min(lHalfHeight, this.DataRoot.m_nDayCellHeight * 2);
-            Font font = null;
-            Brush brushText = null;
+            //Font font = null;
+            //Brush brushText = null;
 
 
                 long lYearNameHeight = lRegionHeight/2;
-            long lYDelta = lHalfHeight - lYearNameHeight;// ÄêÃû×ÖÉÏ·½Ô¤ÁôµÄ¿Õ°×
+            long lYDelta = lHalfHeight - lYearNameHeight;// å¹´åå­—ä¸Šæ–¹é¢„ç•™çš„ç©ºç™½
             {
-                font = new Font("Arial Black", lYearNameHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-                brushText = new SolidBrush(Color.FromArgb(80, Color.LightGray));
+                using(Font font = new Font("Arial Black", lYearNameHeight, FontStyle.Regular, GraphicsUnit.Pixel))
+                using (Brush brushText = new SolidBrush(Color.FromArgb(80, Color.LightGray)))
+                {
+                    rect = new RectangleF(
+        x0,
+        y0 + lYDelta - (lYDelta / 2),
+        lWidth,
+        lYearNameHeight);
 
-                rect = new RectangleF(
-    x0,
-    y0 + lYDelta - (lYDelta / 2),
-    lWidth,
-    lYearNameHeight);
+                    StringFormat stringFormat = new StringFormat();
 
-                StringFormat stringFormat = new StringFormat();
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Center;
 
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-
-                e.Graphics.DrawString(this.Container.YearName,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
-
+                    e.Graphics.DrawString(this.Container.YearName,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
+                }
             }
 
-
-            // »æÖÆÔÂÃû×Ö
+            // ç»˜åˆ¶æœˆåå­—
             {
-                font = new Font("Arial Black", lRegionHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-                brushText = new SolidBrush(Color.FromArgb(100, Color.LightGray));
+                using(Font font = new Font("Arial Black", lRegionHeight, FontStyle.Regular, GraphicsUnit.Pixel))
+                using (Brush brushText = new SolidBrush(Color.FromArgb(100, Color.LightGray)))
+                {
+                    rect = new RectangleF(
+        x0,
+        y0 + lHalfHeight - (lYDelta / 2),
+        lWidth,
+        Math.Min(lRegionHeight, lHalfHeight));
 
-                rect = new RectangleF(
-    x0,
-    y0 + lHalfHeight - (lYDelta / 2),
-    lWidth,
-    Math.Min(lRegionHeight,lHalfHeight));
+                    StringFormat stringFormat = new StringFormat();
 
-                StringFormat stringFormat = new StringFormat();
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Center;
 
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-
-                /*
-                Brush brushTest = new SolidBrush(Color.Yellow);
-                e.Graphics.FillRectangle(brushTest, rect);
-                 * */
-
-                e.Graphics.DrawString(this.MonthName,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
+                    e.Graphics.DrawString(this.MonthName,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
+                }
             }
-
         }
 
-        // ´Ó1¿ªÊ¼¼ÆÊı
+        // ä»1å¼€å§‹è®¡æ•°
         public int Month
         {
             get
@@ -2978,13 +2931,13 @@ this.Height);
 
 
 
-        // ±¾ÔÂ¹²ÓĞ¶àÉÙÌì
+        // æœ¬æœˆå…±æœ‰å¤šå°‘å¤©
         public int Days
         {
             get
             {
                 if (this.Month == 0)
-                    throw new Exception("ÒªÊ¹ÓÃDaysÊôĞÔ, MonthÊôĞÔ±ØĞëÏÈ±»³õÊ¼»¯");
+                    throw new Exception("è¦ä½¿ç”¨Dayså±æ€§, Monthå±æ€§å¿…é¡»å…ˆè¢«åˆå§‹åŒ–");
 
                 return DaysInOneMonth(Container.Year, this.Month);
             }
@@ -3008,16 +2961,16 @@ this.Height);
 };
 
         // parameters:
-        //      month   ´Ó1¿ªÊ¼¼ÆÊı
+        //      month   ä»1å¼€å§‹è®¡æ•°
         public static int DaysInOneMonth(int year, int month)
         {
             if (month < 1 || month > 12)
-                return -1;  // ³ö´í
+                return -1;  // å‡ºé”™
 
             if (month != 2)
                 return month_array[month - 1];
 
-            // ÈòÄê¼ÆËã
+            // é—°å¹´è®¡ç®—
             if ((year % 100) == 0)
             {
                 if ((year % 400) == 0)
@@ -3042,25 +2995,25 @@ this.Height);
 
     }
 
-    // ĞÇÆÚ
+    // æ˜ŸæœŸ
     public class WeekArea : NamedArea<DayArea>
     {
         // public List<DayArea> DayCollection = new List<DayArea>();
 
-        // int m_nWeek = 0;    // µ±Ç°¶ÔÏóÊÇ±¾ÔÂµÚ¼¸¸öĞÇÆÚ£¬´Ó1¿ªÊ¼¼ÆÊı 0±íÊ¾ÉĞÎ´³õÊ¼»¯
+        // int m_nWeek = 0;    // å½“å‰å¯¹è±¡æ˜¯æœ¬æœˆç¬¬å‡ ä¸ªæ˜ŸæœŸï¼Œä»1å¼€å§‹è®¡æ•° 0è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
 
-        int m_nMinDay = -1; // ±¾ĞÇÆÚÄÚµÄ×îĞ¡ÈÕÖµ
-        int m_nMaxDay = -1; // ±¾ĞÇÆÚÄÚµÄ×î´óÈÕÖµ
+        int m_nMinDay = -1; // æœ¬æ˜ŸæœŸå†…çš„æœ€å°æ—¥å€¼
+        int m_nMaxDay = -1; // æœ¬æ˜ŸæœŸå†…çš„æœ€å¤§æ—¥å€¼
 
         public static string[] WeekDayNames_ZH = new string[]
         {
-            "ĞÇÆÚÈÕ",
-            "ĞÇÆÚÒ»",
-            "ĞÇÆÚ¶ş",
-            "ĞÇÆÚÈı",
-            "ĞÇÆÚËÄ",
-            "ĞÇÆÚÎå",
-            "ĞÇÆÚÁù",
+            "æ˜ŸæœŸæ—¥",
+            "æ˜ŸæœŸä¸€",
+            "æ˜ŸæœŸäºŒ",
+            "æ˜ŸæœŸä¸‰",
+            "æ˜ŸæœŸå››",
+            "æ˜ŸæœŸäº”",
+            "æ˜ŸæœŸå…­",
         };
 
         public static string[] WeekDayNames_EN = new string[]
@@ -3084,8 +3037,8 @@ this.Height);
 
 
 
-        // ¹¹Ôìº¯Êı
-        // Ö»Ìá¹©ÖÜ±àºÅ£¬º¯Êı»á×ÔĞĞÍÆËãÈÕÆÚ
+        // æ„é€ å‡½æ•°
+        // åªæä¾›å‘¨ç¼–å·ï¼Œå‡½æ•°ä¼šè‡ªè¡Œæ¨ç®—æ—¥æœŸ
         // parameters:
         public WeekArea(MonthArea container,
             int nWeek)
@@ -3094,12 +3047,12 @@ this.Height);
 
             this.NameValue = nWeek;
 
-            // ÆğÊ¼ÈÕ 1ºÅ
+            // èµ·å§‹æ—¥ 1å·
             DateTime date = new DateTime(this.Container.Container.Year,
                 this.Container.Month,
                 1);
 
-            int nStartIndex = Convert.ToInt32(date.DayOfWeek);   // ÆğÊ¼ÈÕµÄĞòºÅ¡£0ÎªĞÇÆÚÌì
+            int nStartIndex = Convert.ToInt32(date.DayOfWeek);   // èµ·å§‹æ—¥çš„åºå·ã€‚0ä¸ºæ˜ŸæœŸå¤©
             int nMaxDays = this.Container.Days;
             int nDay = 1;
             bool bBlank = true;
@@ -3107,19 +3060,19 @@ this.Height);
             {
                 for (int nDayOfWeek = 0; nDayOfWeek < 7; nDayOfWeek++)
                 {
-                    // ±äÎª²»ÊÇ¿Õ°×
+                    // å˜ä¸ºä¸æ˜¯ç©ºç™½
                     if (nCurWeek == 1 && nDayOfWeek >= nStartIndex)
                         bBlank = false;
 
-                    // ±ä»Ø¿Õ°×
+                    // å˜å›ç©ºç™½
                     if (nDay > nMaxDays)
                         bBlank = true;
 
-                    // Ö»ÓĞµ½Ö¸¶¨±àºÅµÄĞÇÆÚ£¬²Å¿ªÊ¼´´½¨
+                    // åªæœ‰åˆ°æŒ‡å®šç¼–å·çš„æ˜ŸæœŸï¼Œæ‰å¼€å§‹åˆ›å»º
                     if (nCurWeek == nWeek)
                     {
                         DayArea day = null;
-                        // ´´½¨ÈÕ¸ñ×Ó
+                        // åˆ›å»ºæ—¥æ ¼å­
                         if (bBlank == true)
                             day = new DayArea(this, 0, nCurWeek);
                         else
@@ -3128,7 +3081,7 @@ this.Height);
                             if (this.m_nMinDay == -1)
                                 this.m_nMinDay = nDay;
 
-                            this.m_nMaxDay = nDay; // ²»¶Ï±»Ë¢ĞÂ
+                            this.m_nMaxDay = nDay; // ä¸æ–­è¢«åˆ·æ–°
                         }
 
                         this.ChildrenCollection.Add(day);
@@ -3141,10 +3094,10 @@ this.Height);
 
         }
 
-        // ¹¹Ôìº¯Êı
-        // ĞèÒªÌá¹©ÆğÊ¼ÈÕÆÚºÍĞÇÆÚ±àºÅ
+        // æ„é€ å‡½æ•°
+        // éœ€è¦æä¾›èµ·å§‹æ—¥æœŸå’Œæ˜ŸæœŸç¼–å·
         // parameters:
-        //      nStartDay   ÆğÊ¼ÈÕÆÚ
+        //      nStartDay   èµ·å§‹æ—¥æœŸ
         public WeekArea(MonthArea container,
             int nStartDay,
             int nWeek)
@@ -3154,12 +3107,12 @@ this.Height);
             this.NameValue = nWeek;
             // this.m_nWeek = nWeek;
 
-            // ¹Û²ìÆğÊ¼ÈÕ
+            // è§‚å¯Ÿèµ·å§‹æ—¥
             DateTime date = new DateTime(this.Container.Container.Year,
                 this.Container.Month,
                 nStartDay);
 
-            int nStartIndex = Convert.ToInt32(date.DayOfWeek);   // ÆğÊ¼ÈÕµÄĞòºÅ¡£0ÎªĞÇÆÚÌì
+            int nStartIndex = Convert.ToInt32(date.DayOfWeek);   // èµ·å§‹æ—¥çš„åºå·ã€‚0ä¸ºæ˜ŸæœŸå¤©
             int nMaxDays = this.Container.Days;
             for (int i = 0; i < 7; i++)
             {
@@ -3173,7 +3126,7 @@ this.Height);
                     if (i == nStartIndex)
                         this.m_nMinDay = nStartDay;
 
-                    this.m_nMaxDay = nStartDay; // ²»¶Ï±»Ë¢ĞÂ
+                    this.m_nMaxDay = nStartDay; // ä¸æ–­è¢«åˆ·æ–°
 
                     day = new DayArea(this, nStartDay++, i);
                 }
@@ -3182,16 +3135,16 @@ this.Height);
             }
         }
 
-        // ±ğÃû
+        // åˆ«å
         public TypedList<DayArea> DayCollection
         {
             get
             {
-                return this.ChildTypedCollection;    // ÆäÊµNamedCollectionÒ²ºÜºÃÓÃ£¬¾ÍÊÇÃû×ÖÃ»ÓĞÌØÉ«
+                return this.ChildTypedCollection;    // å…¶å®NamedCollectionä¹Ÿå¾ˆå¥½ç”¨ï¼Œå°±æ˜¯åå­—æ²¡æœ‰ç‰¹è‰²
             }
         }
 
-        // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+        // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
         public void Select(RectangleF rect,
             SelectAction action,
             List<Type> types,
@@ -3217,11 +3170,11 @@ this.Height);
                 {
                     DayArea day = this.DayCollection[i];
 
-                    // ÓÅ»¯
+                    // ä¼˜åŒ–
                     if (x > rect.Right)
                         break;
 
-                    // ±ä»»ÎªdayÄÚ×ø±ê
+                    // å˜æ¢ä¸ºdayå†…åæ ‡
                     RectangleF rectDay = rect;
                     rectDay.Offset(-x, 0);
 
@@ -3237,13 +3190,13 @@ this.Height);
 
         }
 
-        #region WeekAreaÖØÔØAreaBaseµÄvirtualº¯Êı
+        #region WeekAreaé‡è½½AreaBaseçš„virtualå‡½æ•°
 
         public override string FullName
         {
             get
             {
-                return this.Year.ToString().PadLeft(4, '0') + "/" + this.Month.ToString() + " µÚ " + this.Week.ToString() + " ÖÜ";
+                return this.Year.ToString().PadLeft(4, '0') + "/" + this.Month.ToString() + " ç¬¬ " + this.Week.ToString() + " å‘¨";
             }
         }
 
@@ -3265,7 +3218,7 @@ this.Height);
         {
             get
             {
-                // ²»ĞèÒª»º´æ
+                // ä¸éœ€è¦ç¼“å­˜
                 return this.DataRoot.m_nDayCellHeight;
                 /*
                 if (m_lHeightCache == -1)
@@ -3280,7 +3233,7 @@ this.Height);
         {
             get
             {
-                // ²»ĞèÒª»º´æ
+                // ä¸éœ€è¦ç¼“å­˜
                 return this.DataRoot.m_nDayCellWidth * 7;
                 /*
                 if (m_lWidthCache == -1)
@@ -3297,7 +3250,7 @@ bool bRecursive)
         {
             bool bRet = base.Select(action, bRecursive);
 
-            // µİ¹é
+            // é€’å½’
             if (bRecursive == true)
             {
                 for (int i = 0; i < this.DayCollection.Count; i++)
@@ -3310,17 +3263,17 @@ bool bRecursive)
             return bRet;
         }*/
 
-        // »ñµÃ×Ó¶ÔÏóÔÚ ±¾¶ÔÏó×ø±êÌåÏµÖĞµÄ ×óÉÏ½ÇÎ»ÖÃ
+        // è·å¾—å­å¯¹è±¡åœ¨ æœ¬å¯¹è±¡åæ ‡ä½“ç³»ä¸­çš„ å·¦ä¸Šè§’ä½ç½®
         public override PointF GetChildLeftTopPoint(AreaBase child)
         {
             if (!(child is DayArea))
-                throw new Exception("childÖ»ÄÜÎªDayAreaÀàĞÍ");
+                throw new Exception("childåªèƒ½ä¸ºDayAreaç±»å‹");
 
             DayArea day = (DayArea)child;
             int index = this.ChildrenCollection.IndexOf(day);
 
             if (index == -1)
-                throw new Exception("childÔÚ×Ó¶ÔÏóÖĞÃ»ÓĞÕÒµ½");
+                throw new Exception("childåœ¨å­å¯¹è±¡ä¸­æ²¡æœ‰æ‰¾åˆ°");
 
             return new PointF(index * day.Width, 0);
         }
@@ -3333,7 +3286,7 @@ bool bRecursive)
         {
             get
             {
-                // »º´æ
+                // ç¼“å­˜
                 if (m_cacheDataRoot == null)
                     m_cacheDataRoot = this.Container.Container.Container;
 
@@ -3341,7 +3294,7 @@ bool bRecursive)
             }
         }
 
-        // µã»÷¼ì²â
+        // ç‚¹å‡»æ£€æµ‹
         public void HitTest(
             long p_x,
             long p_y,
@@ -3360,7 +3313,7 @@ bool bRecursive)
                 return;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬×ó²¿Ò²Ëã×÷µÚÒ»ÈÕµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œå·¦éƒ¨ä¹Ÿç®—ä½œç¬¬ä¸€æ—¥çš„
             if (p_x < 0 && dest_type != null)
             {
                 if (this.DayCollection.Count > 1)
@@ -3374,23 +3327,23 @@ bool bRecursive)
             }
 
             long x = 0;
-            int nDayWidth = -1; // -1 ±íÊ¾ÉĞÎ´³õÊ¼»¯
+            int nDayWidth = -1; // -1 è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
             for (int i = 0; i < this.DayCollection.Count; i++)
             {
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (dest_type == null
                     && x > p_x)
                     break;
 
                 DayArea day = this.DayCollection[i];
 
-                // Ìá¸ßËÙ¶È
+                // æé«˜é€Ÿåº¦
                 if (nDayWidth == -1)
                     nDayWidth = (int)day.Width;
 
                 if (p_x >= x && p_x < x + nDayWidth)
                 {
-                    // È·¶¨ÔÚÒ»¸öDayArea¶ÔÏóÖĞ
+                    // ç¡®å®šåœ¨ä¸€ä¸ªDayAreaå¯¹è±¡ä¸­
                     day.HitTest(p_x - x,
                         p_y,
                         dest_type,
@@ -3400,7 +3353,7 @@ bool bRecursive)
                 x += nDayWidth;
             }
 
-            // Èç¹ûÓĞÌØÊâÒªÇó£¬ÓÒ²¿Ò²Ëã×÷×îºóÒ»ÈÕµÄ
+            // å¦‚æœæœ‰ç‰¹æ®Šè¦æ±‚ï¼Œå³éƒ¨ä¹Ÿç®—ä½œæœ€åä¸€æ—¥çš„
             if (dest_type != null)
             {
                 if (this.DayCollection.Count > 1)
@@ -3413,7 +3366,7 @@ bool bRecursive)
                 }
             }
 
-            // Ã»ÓĞÆ¥ÅäÉÏÈÎºÎDayArea¶ÔÏó
+            // æ²¡æœ‰åŒ¹é…ä¸Šä»»ä½•DayAreaå¯¹è±¡
             result = new HitTestResult();
             result.Object = this;
             result.AreaPortion = AreaPortion.RightBlank;
@@ -3422,7 +3375,7 @@ bool bRecursive)
         }
 
 
-        // »æÍ¼ ĞÇÆÚ
+        // ç»˜å›¾ æ˜ŸæœŸ
         public void Paint(
             long start_x,
             long start_y,
@@ -3458,11 +3411,11 @@ e,
     day.Width,
     day.Height);
 
-                // ÌáÇ°ÍË³öÑ­»·
+                // æå‰é€€å‡ºå¾ªç¯
                 if (x > rectUpdate.Right)
                     break;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rectUpdate.IntersectsWith(e.ClipRectangle) == true)
                     day.Paint(x, y, e);
 
@@ -3472,7 +3425,7 @@ e,
         }
 
 
-        // ±¾ĞÇÆÚÄÚµÄ×îĞ¡ÈÕÖµ¡£´Ó1¿ªÊ¼¼ÆÊı
+        // æœ¬æ˜ŸæœŸå†…çš„æœ€å°æ—¥å€¼ã€‚ä»1å¼€å§‹è®¡æ•°
         public int MinDay
         {
             get
@@ -3481,7 +3434,7 @@ e,
             }
         }
 
-        // ±¾ĞÇÆÚÄÚµÄ×î´óÈÕÖµ¡£´Ó1¿ªÊ¼¼ÆÊı
+        // æœ¬æ˜ŸæœŸå†…çš„æœ€å¤§æ—¥å€¼ã€‚ä»1å¼€å§‹è®¡æ•°
         public int MaxDay
         {
             get
@@ -3518,13 +3471,13 @@ e,
 
         /*
 
-        // ÏÂÒ»¸öĞÇÆÚ¡£×¢Òâ£¬¿ÉÒÔ¿çÔ½±¾ÔÂ
+        // ä¸‹ä¸€ä¸ªæ˜ŸæœŸã€‚æ³¨æ„ï¼Œå¯ä»¥è·¨è¶Šæœ¬æœˆ
         public WeekArea NextWeekArea
         {
             get
             {
                 if (this.Week == 0)
-                    throw new Exception("WeekArea¶ÔÏóµÄWeekÊôĞÔÉĞÎ´³õÊ¼»¯");
+                    throw new Exception("WeekAreaå¯¹è±¡çš„Weekå±æ€§å°šæœªåˆå§‹åŒ–");
 
                 if (this.Week < this.Container.WeekCollection.Length)
                     return this.Container.WeekCollection[this.Week];
@@ -3539,12 +3492,12 @@ e,
          * */
 
         /*
-        // ·µ»ØÏÂÒ»¸öĞÇÆÚµÄµÚÒ»¸ö·Ç¿Õ°×ÈÕ
+        // è¿”å›ä¸‹ä¸€ä¸ªæ˜ŸæœŸçš„ç¬¬ä¸€ä¸ªéç©ºç™½æ—¥
         public DayArea NextWeekFirstDay()
         {
             WeekArea next_week = null;
 
-            // Èç¹û±¾ÔÂÖĞÓĞÏÂÒ»ĞÇÆÚ
+            // å¦‚æœæœ¬æœˆä¸­æœ‰ä¸‹ä¸€æ˜ŸæœŸ
             if (this.Week < this.Container.WeekCollection.Count)
             {
                 next_week = this.Container.WeekCollection[this.Week];
@@ -3565,30 +3518,30 @@ e,
                         return day;
                 }
 
-                return null;    // Ã»ÓĞÕÒµ½
+                return null;    // æ²¡æœ‰æ‰¾åˆ°
             }
         }
     }
 
 
-    // ÈÕ
+    // æ—¥
     public class DayArea : AreaBase
     {
         // bool m_bChecked = false;
         public bool m_bHover = false;
 
-        // int m_nDay = 0; // ÈÕ£¬´Ó1¿ªÊ¼¼ÆÊı¡£Èç¹ûÎª0£¬±íÊ¾¸Ã¸ñ×ÓÎ´Ê¹ÓÃ
+        // int m_nDay = 0; // æ—¥ï¼Œä»1å¼€å§‹è®¡æ•°ã€‚å¦‚æœä¸º0ï¼Œè¡¨ç¤ºè¯¥æ ¼å­æœªä½¿ç”¨
 
-        int m_nDayOfWeek = -1;  // -1±íÊ¾ÉĞÎ´³õÊ¼»¯
+        int m_nDayOfWeek = -1;  // -1è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
 
         // DayState m_daystate = DayState.WorkDay;
-        int m_nDayState = -1;   // -1±íÊ¾ÉĞÎ´³õÊ¼»¯
+        int m_nDayState = -1;   // -1è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
 
         /*
         int m_nCacheHeight = -1;
         int m_nCacheWidth = -1;
          */
-        DataRoot m_cacheDataRoot = null;    // Ìá¸ß·ÃÎÊDataRootµÄËÙ¶È
+        DataRoot m_cacheDataRoot = null;    // æé«˜è®¿é—®DataRootçš„é€Ÿåº¦
 
         public WeekArea Container
         {
@@ -3598,7 +3551,7 @@ e,
             }
         }
 
-        // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+        // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
         public void Select(RectangleF rect,
             SelectAction action,
             List<Type> types,
@@ -3620,7 +3573,7 @@ e,
             }
         }
 
-        #region DayAreaÖØÔØAreaBaseµÄvirtualº¯Êı
+        #region DayAreaé‡è½½AreaBaseçš„virtualå‡½æ•°
 
         public override string FullName
         {
@@ -3634,7 +3587,7 @@ e,
         {
             get
             {
-                // Ã»ÓĞ»º´æ
+                // æ²¡æœ‰ç¼“å­˜
                 return this.DataRoot.m_nDayCellHeight;
             }
         }
@@ -3643,12 +3596,12 @@ e,
         {
             get
             {
-                // Ã»ÓĞ»º´æ
+                // æ²¡æœ‰ç¼“å­˜
                 return this.DataRoot.m_nDayCellWidth;
             }
         }
 
-        // Select()²»ĞèÒªÖØÔØ
+        // Select()ä¸éœ€è¦é‡è½½
 
         #endregion
 
@@ -3665,7 +3618,7 @@ e,
 
 
 
-        // µã»÷¼ì²â
+        // ç‚¹å‡»æ£€æµ‹
         public void HitTest(
             long p_x,
             long p_y,
@@ -3686,7 +3639,7 @@ e,
             result = new HitTestResult();
             result.Object = this;
 
-            // ¹Û²ìµã»÷µ½ÁËÄÄ¸ö²¿Î»
+            // è§‚å¯Ÿç‚¹å‡»åˆ°äº†å“ªä¸ªéƒ¨ä½
             Rectangle rectCheckBox = this.DataRoot.m_rectCheckBox;
             if (p_x >= rectCheckBox.X
                 && p_x <= rectCheckBox.X + rectCheckBox.Width
@@ -3699,7 +3652,7 @@ e,
             result.Y = p_y;
         }
 
-        // »æÍ¼ ÈÕ¸ñ×Ó
+        // ç»˜å›¾ æ—¥æ ¼å­
         public void Paint(
             long start_x,
             long start_y,
@@ -3722,7 +3675,7 @@ e,
             {
                 colorBack = Color.FromArgb(100, colorBack);
 
-                // »æÖÆ±³¾°
+                // ç»˜åˆ¶èƒŒæ™¯
                 PaintBack(
                     start_x,
                     start_y,
@@ -3736,19 +3689,21 @@ e,
             int y0 = (int)start_y;
 
 
-            Pen pen = new Pen(Color.FromArgb(50, Color.Gray));
+            using (Pen pen = new Pen(Color.FromArgb(50, Color.Gray)))
+            {
 
-            // ×ó·½ÊúÏß
-            e.Graphics.DrawLine(pen,
-                new PointF(x0, y0),
-                new PointF(x0, y0 + this.Height)
-                );
+                // å·¦æ–¹ç«–çº¿
+                e.Graphics.DrawLine(pen,
+                    new PointF(x0, y0),
+                    new PointF(x0, y0 + this.Height)
+                    );
 
-            // ÉÏ·½ºáÏß
-            e.Graphics.DrawLine(pen,
-                new PointF(x0, y0),
-                new PointF(x0 + this.Width, y0)
-                );
+                // ä¸Šæ–¹æ¨ªçº¿
+                e.Graphics.DrawLine(pen,
+                    new PointF(x0, y0),
+                    new PointF(x0 + this.Width, y0)
+                    );
+            }
 
             RectangleF rect = new RectangleF(
 x0,
@@ -3759,7 +3714,7 @@ this.Height);
             if (this.Blank == false )
             {
 
-                // »æÖÆ×´Ì¬Í¼±ê
+                // ç»˜åˆ¶çŠ¶æ€å›¾æ ‡
                 if (def != null 
                     && (this.DataRoot.HoverCheckBox == false || this.m_bHover == true))
                 {
@@ -3772,33 +3727,42 @@ this.Height);
                     }
                 }
 
+                Font new_font = null;
+                try
+                {
+                    // ç»˜åˆ¶æ–‡å­—
+                    Font font = this.DataRoot.DayTextFont;
+                    if (this.m_bFocus)
+                    {
+                        font = new Font(font.FontFamily.GetName(0),
+                            font.Size + 3,
+                            font.Style,
+                            font.Unit);
+                        new_font = font;
+                    }
 
-                // »æÖÆÎÄ×Ö
-                Font font = this.DataRoot.DayTextFont;
-                if (this.m_bFocus)
-                    font = new Font(font.FontFamily.GetName(0), 
-                        font.Size + 3, 
-                        font.Style, 
-                        font.Unit);
-                Brush brushText = null;
+                    using (Brush brushText = new SolidBrush(colorText))
+                    {
+                        StringFormat stringFormat = new StringFormat();
 
+                        stringFormat.Alignment = StringAlignment.Center;
+                        stringFormat.LineAlignment = StringAlignment.Center;
 
-                brushText = new SolidBrush(colorText);
-
-
-                StringFormat stringFormat = new StringFormat();
-
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-
-                e.Graphics.DrawString(this.DayName,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
+                        e.Graphics.DrawString(this.DayName,
+                            font,
+                            brushText,
+                            rect,
+                            stringFormat);
+                    }
+                }
+                finally
+                {
+                    if (new_font != null)
+                        new_font.Dispose();
+                }
             }
 
-            // Ñ¡ÔñºóµÄĞ§¹û
+            // é€‰æ‹©åçš„æ•ˆæœ
             if (this.m_bSelected == true)
             {
                 this.PaintSelectEffect(
@@ -3809,7 +3773,7 @@ this.Height);
                     e);
             }
 
-            // ½¹µãĞéÏß
+            // ç„¦ç‚¹è™šçº¿
             if (this.m_bFocus == true)
             {
                 rect.Inflate(-4, -4);
@@ -3826,7 +3790,7 @@ this.Height);
             }
             set
             {
-                // ¿Õ°×¸ñ×Ó²»ÄÜĞŞ¸Ä×´Ì¬
+                // ç©ºç™½æ ¼å­ä¸èƒ½ä¿®æ”¹çŠ¶æ€
                 if (this.Blank == false)
                     this.m_nDayState = value;
             }
@@ -3859,7 +3823,7 @@ this.Height);
             get
             {
                 if (this.Day == 0)
-                    return null;    // ±íÊ¾µ±Ç°¸ñ×ÓÃ»ÓĞÊ¹ÓÃ
+                    return null;    // è¡¨ç¤ºå½“å‰æ ¼å­æ²¡æœ‰ä½¿ç”¨
 
                 return this.Day.ToString();
             }
@@ -3873,7 +3837,7 @@ this.Height);
             }
         }
 
-        // µÚ¼¸¸öĞÇÆÚ
+        // ç¬¬å‡ ä¸ªæ˜ŸæœŸ
         public int Week
         {
             get
@@ -3890,7 +3854,7 @@ this.Height);
             }
         }
 
-        // ÔÚÒ»¸öĞÇÆÚÖĞµÄÄÄÒ»Ìì 0±íÊ¾ĞÇÆÚÌì
+        // åœ¨ä¸€ä¸ªæ˜ŸæœŸä¸­çš„å“ªä¸€å¤© 0è¡¨ç¤ºæ˜ŸæœŸå¤©
         public int DayOfWeek
         {
             get
@@ -3906,10 +3870,10 @@ this.Height);
                 return WeekArea.WeekDayNames_ZH[this.m_nDayOfWeek];
             if (strLang == "en")
                 return WeekArea.WeekDayNames_EN[this.m_nDayOfWeek];
-            throw new Exception("²»Ö§³ÖµÄÓïÑÔ´úÂë '" + strLang + "'");
+            throw new Exception("ä¸æ”¯æŒçš„è¯­è¨€ä»£ç  '" + strLang + "'");
         }
 
-        // ÊÇ·ñÎª¿Õ°×¸ñ×Ó
+        // æ˜¯å¦ä¸ºç©ºç™½æ ¼å­
         public bool Blank
         {
             get
@@ -3921,9 +3885,9 @@ this.Height);
             }
         }
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         // parameters:
-        //      nDay    ÈÕ£¬´Ó1¿ªÊ¼¼ÆÊı¡£Èç¹ûÎª0£¬±íÊ¾¸Ã¸ñ×ÓÎ´Ê¹ÓÃ
+        //      nDay    æ—¥ï¼Œä»1å¼€å§‹è®¡æ•°ã€‚å¦‚æœä¸º0ï¼Œè¡¨ç¤ºè¯¥æ ¼å­æœªä½¿ç”¨
         public DayArea(WeekArea container, int nDay, int nDayOfWeek)
         {
             this._Container = container;
@@ -3932,16 +3896,16 @@ this.Height);
             // this.m_nDay = nDay;
 
             if (nDay != 0)
-                this.m_nDayState = 0;   // ³õÊ¼»¯ÎªÈ±Ê¡×´Ì¬
+                this.m_nDayState = 0;   // åˆå§‹åŒ–ä¸ºç¼ºçœçŠ¶æ€
 
 
             this.m_nDayOfWeek = nDayOfWeek;
         }
 
-        // ·µ»Ø·Ç¿ÕµÄÏÂÒ»ÈÕ
+        // è¿”å›éç©ºçš„ä¸‹ä¸€æ—¥
         public DayArea NextNoneBlankDayArea
         {
-            // ¸ÄĞ´
+            // æ”¹å†™
             get
             {
                 DayArea day = this;
@@ -3956,7 +3920,7 @@ this.Height);
             }
         }
 
-        // ·µ»Ø·Ç¿ÕµÄÇ°Ò»ÈÕ
+        // è¿”å›éç©ºçš„å‰ä¸€æ—¥
         public DayArea PrevNoneBlankDayArea
         {
             get
@@ -3974,9 +3938,9 @@ this.Height);
         }
 
 
-        // ÇĞ»»ÈÕ×´Ì¬
+        // åˆ‡æ¢æ—¥çŠ¶æ€
         // return:
-        //      ×´Ì¬ÊÇ·ñ·¢ÉúÁË¸Ä±ä
+        //      çŠ¶æ€æ˜¯å¦å‘ç”Ÿäº†æ”¹å˜
         public bool ToggleState()
         {
             if (this.Blank == true)
@@ -3986,7 +3950,7 @@ this.Height);
             if (defs != null)
             {
                 if (defs.Count == 1)
-                    return false;   // Ö»ÓĞÒ»¸ö×´Ì¬£¬ÎŞ·¨ÇĞ»»
+                    return false;   // åªæœ‰ä¸€ä¸ªçŠ¶æ€ï¼Œæ— æ³•åˆ‡æ¢
 
                 if (this.m_nDayState >= defs.Count - 1)
                 {
@@ -4012,35 +3976,35 @@ this.Height);
 
     }
 
-    // ÇøÓòÃû³Æ
+    // åŒºåŸŸåç§°
     public enum AreaPortion
     {
         None = 0,
-        LeftBar = 1,    // ×ó±ßµÄÊúÌõ
-        ColumnTitle = 2,    // À¸Ä¿±êÌâ
-        Content = 3,    // ÄÚÈİ±¾Ìå
+        LeftBar = 1,    // å·¦è¾¹çš„ç«–æ¡
+        ColumnTitle = 2,    // æ ç›®æ ‡é¢˜
+        Content = 3,    // å†…å®¹æœ¬ä½“
         CheckBox = 4,   // checkbox
 
-        LeftBlank = 5,  // ×ó±ß¿Õ°×
-        TopBlank = 6,   // ÉÏ·½¿Õ°×
-        RightBlank = 7, // ÓÒ·½¿Õ°×
-        BottomBlank = 8,    // ÏÂ·½¿Õ°×
+        LeftBlank = 5,  // å·¦è¾¹ç©ºç™½
+        TopBlank = 6,   // ä¸Šæ–¹ç©ºç™½
+        RightBlank = 7, // å³æ–¹ç©ºç™½
+        BottomBlank = 8,    // ä¸‹æ–¹ç©ºç™½
     }
 
-    // µã»÷¼ì²â½á¹û
+    // ç‚¹å‡»æ£€æµ‹ç»“æœ
     public class HitTestResult
     {
-        public AreaBase Object = null;    // µã»÷µ½µÄÄ©¼¶¶ÔÏó
+        public AreaBase Object = null;    // ç‚¹å‡»åˆ°çš„æœ«çº§å¯¹è±¡
         public AreaPortion AreaPortion = AreaPortion.None;
 
-        // ¶ÔÏó×ø±êÏÂµÄµã»÷Î»ÖÃ
+        // å¯¹è±¡åæ ‡ä¸‹çš„ç‚¹å‡»ä½ç½®
         public long X = -1;
         public long Y = -1;
 
-        public int Param = 0;   // ÆäËû²ÎÊı
+        public int Param = 0;   // å…¶ä»–å‚æ•°
     }
 
-    // Ñ¡ÔñÒ»¸ö¶ÔÏóµÄ¶¯×÷
+    // é€‰æ‹©ä¸€ä¸ªå¯¹è±¡çš„åŠ¨ä½œ
     public enum SelectAction
     {
         Toggle = 0,
@@ -4049,34 +4013,34 @@ this.Height);
     }
 
     /*
-        // ÈÕ×´Ì¬
+        // æ—¥çŠ¶æ€
     public enum DayState
     {
         NoneWorkDay = 0,
         WorkDay = 1,
     }*/
 
-    // Ò»¸ö×´Ì¬¶¨Òå
+    // ä¸€ä¸ªçŠ¶æ€å®šä¹‰
     public class DayStateDef
     {
-        // Ãû³Æ
+        // åç§°
         public string Caption = "";
 
         /*
-        // ×´Ì¬Öµ
-        public int State = -1;  // -1±íÊ¾ÉĞÎ´³õÊ¼»¯
+        // çŠ¶æ€å€¼
+        public int State = -1;  // -1è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
          * */
 
-        // Í¼±ê
+        // å›¾æ ‡
         public Image Icon = null;
 
-        // ÎÄ×ÖÑÕÉ«
+        // æ–‡å­—é¢œè‰²
         public Color TextColor = Color.Black;
-        // ±³¾°ÑÕÉ«
+        // èƒŒæ™¯é¢œè‰²
         public Color BackColor = Color.White;
     }
 
-    // Ò»ÏµÁĞ×´Ì¬¶¨Òå
+    // ä¸€ç³»åˆ—çŠ¶æ€å®šä¹‰
     public class DayStateDefCollection : List<DayStateDef>
     {
         public int IconWidth 

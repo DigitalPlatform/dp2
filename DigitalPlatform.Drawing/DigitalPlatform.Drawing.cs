@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Net;
 using System.Drawing;
 using System.IO;
@@ -10,7 +10,6 @@ namespace DigitalPlatform.Drawing
 	/// </summary>
 	public class DrawingUtil
 	{
-
 		public static MemoryStream MakeTextPic(
 			string strText,
 			string strFace,
@@ -19,71 +18,68 @@ namespace DigitalPlatform.Drawing
 		{
             SizeF size;
             Font font = null;
-
-			Bitmap bitmapTemp = new Bitmap(1,1);
-
-            using (bitmapTemp)
+            try
             {
-                Graphics graphicsTemp = Graphics.FromImage(bitmapTemp);
+                using (Bitmap bitmapTemp = new Bitmap(1, 1))
+                {
+                    using (Graphics graphicsTemp = Graphics.FromImage(bitmapTemp))
+                    {
 
-                font = new Font(strFace, nSize, FontStyle.Bold);
-                size = graphicsTemp.MeasureString(
-                    strText,
-                    font);
-                size.Height = (int)((double)size.Height * 1.5F);
-                size.Width = (int)((double)size.Width * 1.2F);
+                        font = new Font(strFace, nSize, FontStyle.Bold);
+                        size = graphicsTemp.MeasureString(
+                            strText,
+                            font);
+                        size.Height = (int)((double)size.Height * 1.5F);
+                        size.Width = (int)((double)size.Width * 1.2F);
+                    }
+                }
 
+                // æ­£å¼çš„å›¾åƒ
+                using (Bitmap bitmapDest = new Bitmap((int)size.Width, (int)size.Height))
+                {
+                    using (Graphics objGraphics = Graphics.FromImage(bitmapDest))
+                    {
+                        objGraphics.Clear(colorBack/*Color.DarkGray*/);// Color.Teal
+                        objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+
+                        StringFormat stringFormat = new StringFormat();
+
+                        // éšæœºäº§ç”Ÿä¸€ä¸ªå€¾æ–œè§’åº¦
+                        Random random = new Random(unchecked((int)DateTime.Now.Ticks));
+                        int angle = random.Next(-10, 10);
+
+                        objGraphics.RotateTransform(angle);
+
+                        stringFormat.Alignment = StringAlignment.Near;
+                        if (angle > 0)
+                            stringFormat.LineAlignment = StringAlignment.Near;
+                        else
+                            stringFormat.LineAlignment = StringAlignment.Far;
+
+                        // Color.FromArgb(128, 100, 100, 100)
+                        using (Brush objBrush = new SolidBrush(Color.Black)) // é€æ˜é¢œè‰² ' Color.Black
+                        {
+                            RectangleF rect = new RectangleF(0, 0, size.Width, size.Height);
+                            objGraphics.DrawString(strText,
+                                font,
+                                objBrush,
+                                rect,
+                                stringFormat);
+                        }
+                    }
+
+                    MemoryStream stream = new MemoryStream();
+
+                    bitmapDest.Save(stream, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    return stream;
+                }
             }
-			// bitmapTemp.Dispose();
-
-            MemoryStream stream = null;
-
-			// ÕıÊ½µÄÍ¼Ïñ
-			Bitmap bitmapDest = new Bitmap((int)size.Width, (int)size.Height);
-
-            using (bitmapDest)
+            finally
             {
-
-                Graphics objGraphics = Graphics.FromImage(bitmapDest);
-
-                objGraphics.Clear(colorBack/*Color.DarkGray*/);// Color.Teal
-
-                objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
-
-                StringFormat stringFormat = new StringFormat();
-
-
-                // Ëæ»ú²úÉúÒ»¸öÇãĞ±½Ç¶È
-                Random random = new Random(unchecked((int)DateTime.Now.Ticks));
-                int angle = random.Next(-10, 10);
-
-                objGraphics.RotateTransform(angle);
-
-                stringFormat.Alignment = StringAlignment.Near;
-                if (angle > 0)
-                    stringFormat.LineAlignment = StringAlignment.Near;
-                else
-                    stringFormat.LineAlignment = StringAlignment.Far;
-
-
-
-                // Color.FromArgb(128, 100, 100, 100)
-                SolidBrush objBrush = new SolidBrush(Color.Black); // Í¸Ã÷ÑÕÉ« ' Color.Black
-                RectangleF rect = new RectangleF(0, 0, size.Width, size.Height);
-                objGraphics.DrawString(strText,
-                    font,
-                    objBrush,
-                    rect,
-                    stringFormat);
-
-                stream = new MemoryStream();
-
-                bitmapDest.Save(stream, System.Drawing.Imaging.ImageFormat.Jpeg);
+                if (font != null)
+                    font.Dispose();
             }
-			// bitmapDest.Dispose();
-
-			return stream;
-		}
+        }
 
 		public static int MakeTextPic(
 			string strText,
@@ -91,52 +87,58 @@ namespace DigitalPlatform.Drawing
 			int nSize,
 			string strOutputFileName)
 		{
-			Bitmap bitmapTemp = new Bitmap(1,1);
-			Graphics graphicsTemp = Graphics.FromImage(bitmapTemp);
+            SizeF size;
+            using (Font font = new Font(strFace, nSize, FontStyle.Bold))
+            {
+                using (Bitmap bitmapTemp = new Bitmap(1, 1))
+                {
+                    using (Graphics graphicsTemp = Graphics.FromImage(bitmapTemp))
+                    {
+                        size = graphicsTemp.MeasureString(
+                            strText,
+                            font);
+                    }
+                }
 
-			Font font = new Font(strFace, nSize, FontStyle.Bold);
-			SizeF size = graphicsTemp.MeasureString(
-				strText,
-				font);
+                // æ­£å¼çš„å›¾åƒ
+                using (Bitmap bitmapDest = new Bitmap((int)size.Width, (int)size.Height))
+                {
+                    using (Graphics objGraphics = Graphics.FromImage(bitmapDest))
+                    {
+                        objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
 
-			bitmapTemp.Dispose();
+                        StringFormat stringFormat = new StringFormat();
 
-			// ÕıÊ½µÄÍ¼Ïñ
-			Bitmap bitmapDest = new Bitmap((int)size.Width, (int)size.Height);
+                        stringFormat.Alignment = StringAlignment.Near;
+                        stringFormat.LineAlignment = StringAlignment.Near;
 
-			Graphics objGraphics = Graphics.FromImage(bitmapDest);
+                        using (Brush objBrush = new SolidBrush(Color.FromArgb(128, 100, 100, 100))) // é€æ˜é¢œè‰² ' Color.Black
+                        {
+                            RectangleF rect = new RectangleF(0, 0, size.Width, size.Height);
+                            objGraphics.DrawString(strText,
+                                font,
+                                objBrush,
+                                rect,
+                                stringFormat);
+                        }
+                    }
 
- 
-			objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
- 
-			StringFormat stringFormat = new StringFormat();
+                    bitmapDest.Save(strOutputFileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
 
-			stringFormat.Alignment = StringAlignment.Near;
-			stringFormat.LineAlignment = StringAlignment.Near;
- 
-			SolidBrush objBrush= new SolidBrush( Color.FromArgb(128, 100, 100, 100)); // Í¸Ã÷ÑÕÉ« ' Color.Black
-			RectangleF rect = new RectangleF(0,0, size.Width, size.Height);
-			objGraphics.DrawString(strText,
-				font, 
-				objBrush,
-				rect,
-				stringFormat);
- 
-			bitmapDest.Save(strOutputFileName, System.Drawing.Imaging.ImageFormat.Jpeg);
-			bitmapDest.Dispose();
-
-			return 0;
+                return 0;
+            }
 		}
 
 
-        // ´ÓURI»ñÈ¡Í¼Ïñ¶ÔÏó
+        // ä»URIè·å–å›¾åƒå¯¹è±¡
         // parameters:
-        //      strUrl  Í¼ÏñÂ·¾¶
-        //      image   out²ÎÊı£¬·µ»ØImage¶ÔÏó
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      strUrl  å›¾åƒè·¯å¾„
+        //      image   outå‚æ•°ï¼Œè¿”å›Imageå¯¹è±¡
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public static int GetImageFormUrl(string strUrl,
             out Image image,
             out string strError)
@@ -146,7 +148,7 @@ namespace DigitalPlatform.Drawing
 
             try
             {
-                // Í¨¹ıURL»ñµÃÍ¼ÏñÎÄ¼şµÄ¹ı³Ì¿ÉÒÔÓÅ»¯£¬ ¿ÉÒÔÎªEditor½¨Á¢Ò»¸öÎÄ¼şcache
+                // é€šè¿‡URLè·å¾—å›¾åƒæ–‡ä»¶çš„è¿‡ç¨‹å¯ä»¥ä¼˜åŒ–ï¼Œ å¯ä»¥ä¸ºEditorå»ºç«‹ä¸€ä¸ªæ–‡ä»¶cache
                 WebRequest request = WebRequest.Create(strUrl);
                 WebResponse response = request.GetResponse();
 
@@ -156,7 +158,7 @@ namespace DigitalPlatform.Drawing
             }
             catch(Exception ex)
             {
-                strError = "´Ó'" + strUrl + "'»ñÈ¡Í¼Ïñ³ö´í£¬Ô­Òò£º" + ex.Message;
+                strError = "ä»'" + strUrl + "'è·å–å›¾åƒå‡ºé”™ï¼ŒåŸå› ï¼š" + ex.Message;
                 return -1;
             }
         }

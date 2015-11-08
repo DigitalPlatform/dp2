@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,7 +19,7 @@ namespace DigitalPlatform.CommonControl
 {
     public partial class BinaryEditor : Control
     {
-        // ĞĞ¸ß
+        // è¡Œé«˜
         int m_nLineHeight = 14;
         int m_nCellWidth = 40;
         int m_nLineTitleWidth = 110;
@@ -35,20 +35,20 @@ namespace DigitalPlatform.CommonControl
 
         int nNestedSetScrollBars = 0;
 
-        // ¾í¹öÌõ±ÈÂÊ Ğ¡ÓÚµÈÓÚ1.0F
+        // å·æ»šæ¡æ¯”ç‡ å°äºç­‰äº1.0F
         double m_v_ratio = 1.0F;
         double m_h_ratio = 1.0F;
 
-        int m_nLeftBlank = 10;	// ±ß¿Õ
+        int m_nLeftBlank = 10;	// è¾¹ç©º
         int m_nRightBlank = 10;
         int m_nTopBlank = 10;
         int m_nBottomBlank = 10;
 
-        long m_lWindowOrgX = 0;    // ´°¿ÚÔ­µã
+        long m_lWindowOrgX = 0;    // çª—å£åŸç‚¹
         long m_lWindowOrgY = 0;
 
-        long m_lContentWidth = 0;    // ÄÚÈİ²¿·ÖµÄ¿í¶È
-        long m_lContentHeight = 0;   // ÄÚÈİ²¿·ÖµÄ¸ß¶È
+        long m_lContentWidth = 0;    // å†…å®¹éƒ¨åˆ†çš„å®½åº¦
+        long m_lContentHeight = 0;   // å†…å®¹éƒ¨åˆ†çš„é«˜åº¦
 
         public BinaryEditor()
         {
@@ -129,9 +129,9 @@ namespace DigitalPlatform.CommonControl
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -224,7 +224,7 @@ namespace DigitalPlatform.CommonControl
                     || TooLarge(y) == true)
                     goto CONTINUE;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 RectangleF rect = new RectangleF((int)x,
                     (int)y,
                     this.m_lContentWidth,
@@ -270,7 +270,7 @@ namespace DigitalPlatform.CommonControl
             DeleteTempFile();
         }
 
-        // »æÖÆÒ»¸öĞĞ
+        // ç»˜åˆ¶ä¸€ä¸ªè¡Œ
         public void PaintLine(
             long x0,
             long y0,
@@ -280,119 +280,101 @@ namespace DigitalPlatform.CommonControl
             long x = x0;
             long y = y0;
 
-            // È¡³öÊı¾İ
+            // å–å‡ºæ•°æ®
             byte[] buffer = new byte[16];
 
             this.m_stream.Seek(lLineNumber * 16, SeekOrigin.Begin);
             int nBytes = this.m_stream.Read(buffer, 0, 16);
 
-
             // Font font = new Font("Courier New", this.m_nLineHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             Font font = this.Font;
-            Brush brushText = null;
-
-            brushText = new SolidBrush(this.ForeColor);
-
-            // ×ó±ß±êÌâ
+            using (Brush brushText = new SolidBrush(this.ForeColor))
             {
-                string strText = Convert.ToString(lLineNumber*16, 16).PadLeft(8, '0');
+                // å·¦è¾¹æ ‡é¢˜
+                {
+                    string strText = Convert.ToString(lLineNumber * 16, 16).PadLeft(8, '0');
 
-                StringFormat stringFormat = new StringFormat();
+                    StringFormat stringFormat = new StringFormat();
 
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Center;
 
-                RectangleF rect = new RectangleF(
-                    x,
-                    y,
-                    this.m_nLineTitleWidth,
-                    this.m_nLineHeight);
+                    RectangleF rect = new RectangleF(
+                        x,
+                        y,
+                        this.m_nLineTitleWidth,
+                        this.m_nLineHeight);
 
-                e.Graphics.DrawString(strText,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
+                    e.Graphics.DrawString(strText,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
+                }
 
-
-            }
-
-
-            // ÄÚÈİ
-            x += this.m_nLineTitleWidth;
-            for (int i = 0; i < nBytes; i++)
-            {
-                string strText = Convert.ToString(buffer[i], 16).PadLeft(2, '0').ToUpper();
-
-                int nDelta = 0;
-                if (i >= 8)
-                    nDelta = this.m_nCellWidth/2;
-
-                StringFormat stringFormat = new StringFormat();
-
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-
-                RectangleF rect = new RectangleF(
-                    x + i * this.m_nCellWidth + nDelta,
-                    y,
-                    this.m_nCellWidth,
-                    this.m_nLineHeight);
-
-                e.Graphics.DrawString(strText,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
-
-            }
-
-            // ×¢ÊÍ
-            x += (this.m_nCellWidth * 16) + (this.m_nCellWidth / 2);
-            {
-                string strText = "";
-                /*
+                // å†…å®¹
+                x += this.m_nLineTitleWidth;
                 for (int i = 0; i < nBytes; i++)
                 {
-                    char c = (char)buffer[i];
-                    if (char.IsLetterOrDigit(c) == true)
-                        strText += c;
-                    else
-                        strText += '.';
-                }
-                 * */
-                string strTextSource = Encoding.ASCII.GetString(buffer, 0, nBytes);
+                    string strText = Convert.ToString(buffer[i], 16).PadLeft(2, '0').ToUpper();
 
-                for (int i = 0; i < strTextSource.Length; i++)
+                    int nDelta = 0;
+                    if (i >= 8)
+                        nDelta = this.m_nCellWidth / 2;
+
+                    StringFormat stringFormat = new StringFormat();
+
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Center;
+
+                    RectangleF rect = new RectangleF(
+                        x + i * this.m_nCellWidth + nDelta,
+                        y,
+                        this.m_nCellWidth,
+                        this.m_nLineHeight);
+
+                    e.Graphics.DrawString(strText,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
+                }
+
+                // æ³¨é‡Š
+                x += (this.m_nCellWidth * 16) + (this.m_nCellWidth / 2);
                 {
-                    char c = strTextSource[i];
-                    if (char.IsLetterOrDigit(c) == true)
-                        strText += c;
-                    else
-                        strText += '.';
+                    string strText = "";
+                    string strTextSource = Encoding.ASCII.GetString(buffer, 0, nBytes);
+
+                    for (int i = 0; i < strTextSource.Length; i++)
+                    {
+                        char c = strTextSource[i];
+                        if (char.IsLetterOrDigit(c) == true)
+                            strText += c;
+                        else
+                            strText += '.';
+                    }
+
+                    strText.PadRight(16, ' ');
+
+                    StringFormat stringFormat = new StringFormat();
+
+                    stringFormat.Alignment = StringAlignment.Near;
+                    stringFormat.LineAlignment = StringAlignment.Center;
+
+                    RectangleF rect = new RectangleF(
+                        x,
+                        y,
+                        this.m_nCommentWidth,
+                        this.m_nLineHeight);
+
+                    e.Graphics.DrawString(strText,
+                        font,
+                        brushText,
+                        rect,
+                        stringFormat);
                 }
-
-                strText.PadRight(16, ' ');
-
-                StringFormat stringFormat = new StringFormat();
-
-                stringFormat.Alignment = StringAlignment.Near;
-                stringFormat.LineAlignment = StringAlignment.Center;
-
-                RectangleF rect = new RectangleF(
-                    x,
-                    y,
-                    this.m_nCommentWidth,
-                    this.m_nLineHeight);
-
-                e.Graphics.DrawString(strText,
-                    font,
-                    brushText,
-                    rect,
-                    stringFormat);
-
             }
-
         }
 
         public override Font Font
@@ -412,13 +394,13 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ¸ù¾İ×ÖÌå³õÊ¼»¯¸÷ÖÖ³ß´ç²ÎÊı
+        // æ ¹æ®å­—ä½“åˆå§‹åŒ–å„ç§å°ºå¯¸å‚æ•°
         void InitialSizes(Font font)
         {
-            // ĞĞ¸ß¶È °üÀ¨ÁËĞĞ¼ä¾à
-            this.m_nLineHeight = (int)(font.SizeInPoints + (font.SizeInPoints / 2));   // ¶îÍâ¼ÓÉÏ×ÖÌå¸ß¶ÈÒ»°ëµÄĞĞ¼ä¾à
+            // è¡Œé«˜åº¦ åŒ…æ‹¬äº†è¡Œé—´è·
+            this.m_nLineHeight = (int)(font.SizeInPoints + (font.SizeInPoints / 2));   // é¢å¤–åŠ ä¸Šå­—ä½“é«˜åº¦ä¸€åŠçš„è¡Œé—´è·
 
-            // Á½¸ö×Ö·ûÒ»¸öµ¥ÔªµÄ¿í¶È
+            // ä¸¤ä¸ªå­—ç¬¦ä¸€ä¸ªå•å…ƒçš„å®½åº¦
             using (Graphics graphicsTemp = Graphics.FromHwnd(this.Handle))
             {
 
@@ -439,12 +421,12 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ÉèÖÃÊı¾İ
+        // è®¾ç½®æ•°æ®
         public void SetData(byte [] baData)
         {
 
-            // ÄÚ²¿ĞèÒªÒ»¸öÁÙÊ±ÎÄ¼ş£¬½«Ëù¹ÜÏ½µÄÄÚÈİ¸´ÖÆ¹ıÀ´¡£
-            // ÓÉÓÚ²ÉÓÃÁËÄÚ²¿ÎÄ¼ş£¬ËùÒÔÄÚÈİ¿ÉÒÔÌØ±ğ´ó£¬Ò²²»Ó°ÏìÄÚ´æ
+            // å†…éƒ¨éœ€è¦ä¸€ä¸ªä¸´æ—¶æ–‡ä»¶ï¼Œå°†æ‰€ç®¡è¾–çš„å†…å®¹å¤åˆ¶è¿‡æ¥ã€‚
+            // ç”±äºé‡‡ç”¨äº†å†…éƒ¨æ–‡ä»¶ï¼Œæ‰€ä»¥å†…å®¹å¯ä»¥ç‰¹åˆ«å¤§ï¼Œä¹Ÿä¸å½±å“å†…å­˜
 
             DeleteTempFile();
 
@@ -466,8 +448,8 @@ namespace DigitalPlatform.CommonControl
         }
 
         // return:
-        //      null    ³¬¹ı×î´ó³¤¶ÈÁË
-        //      ÆäËû    ÄÚÈİ
+        //      null    è¶…è¿‡æœ€å¤§é•¿åº¦äº†
+        //      å…¶ä»–    å†…å®¹
         public byte[] GetData(int maxlen)
         {
             if (this.m_stream.Length > (long)maxlen)
@@ -479,14 +461,14 @@ namespace DigitalPlatform.CommonControl
             return result;
         }
         
-        // ÉèÖÃÊı¾İ
+        // è®¾ç½®æ•°æ®
         public void SetData(Stream stream,
             long start,
             long len)
         {
 
-            // ÄÚ²¿ĞèÒªÒ»¸öÁÙÊ±ÎÄ¼ş£¬½«Ëù¹ÜÏ½µÄÄÚÈİ¸´ÖÆ¹ıÀ´¡£
-            // ÓÉÓÚ²ÉÓÃÁËÄÚ²¿ÎÄ¼ş£¬ËùÒÔÄÚÈİ¿ÉÒÔÌØ±ğ´ó£¬Ò²²»Ó°ÏìÄÚ´æ
+            // å†…éƒ¨éœ€è¦ä¸€ä¸ªä¸´æ—¶æ–‡ä»¶ï¼Œå°†æ‰€ç®¡è¾–çš„å†…å®¹å¤åˆ¶è¿‡æ¥ã€‚
+            // ç”±äºé‡‡ç”¨äº†å†…éƒ¨æ–‡ä»¶ï¼Œæ‰€ä»¥å†…å®¹å¯ä»¥ç‰¹åˆ«å¤§ï¼Œä¹Ÿä¸å½±å“å†…å­˜
 
             DeleteTempFile();
 
@@ -502,7 +484,7 @@ namespace DigitalPlatform.CommonControl
             this.m_stream = File.Create(this.m_strTempFileName);
 
             stream.Seek(start, SeekOrigin.Begin);
-            // ¸´ÖÆÄÚÈİ
+            // å¤åˆ¶å†…å®¹
             byte [] buffer = new byte[4096];
             long lWrited = 0;
             for (; ; )
@@ -547,7 +529,7 @@ namespace DigitalPlatform.CommonControl
             AfterDocumentChanged(ScrollBarMember.Both);
 
             /*
-            // Ê×´ÎÏÔÊ¾Ç°, OnSizeChanged()Ò»´ÎÒ²Ã»ÓĞ±»µ÷ÓÃÇ°, ÏÔÊ¾ºÃ¾í¹öÌõ
+            // é¦–æ¬¡æ˜¾ç¤ºå‰, OnSizeChanged()ä¸€æ¬¡ä¹Ÿæ²¡æœ‰è¢«è°ƒç”¨å‰, æ˜¾ç¤ºå¥½å·æ»šæ¡
             SetScrollBars(ScrollBarMember.Both);
              * */
         }
@@ -564,7 +546,7 @@ namespace DigitalPlatform.CommonControl
             }
 
 
-            // Èç¹ûclientÇøÓò×ã¹»´ó£¬µ÷Õûorg£¬±ÜÃâ¿´²»¼ûÄ³²¿·Ö
+            // å¦‚æœclientåŒºåŸŸè¶³å¤Ÿå¤§ï¼Œè°ƒæ•´orgï¼Œé¿å…çœ‹ä¸è§æŸéƒ¨åˆ†
             DocumentOrgY = DocumentOrgY;
             DocumentOrgX = DocumentOrgX;
 
@@ -632,7 +614,7 @@ namespace DigitalPlatform.CommonControl
 
                 if (lDelta != 0)
                 {
-                    // Èç¹û¾í¹öµÄ¾àÀë³¬¹ı32Î»ÕûÊı·¶Î§
+                    // å¦‚æœå·æ»šçš„è·ç¦»è¶…è¿‡32ä½æ•´æ•°èŒƒå›´
                     if (lDelta >= Int32.MaxValue || lDelta <= Int32.MinValue)
                         this.Invalidate();
                     else
@@ -699,7 +681,7 @@ namespace DigitalPlatform.CommonControl
                 long lDelta = m_lWindowOrgY - lWindowOrgY_old;
                 if (lDelta != 0)
                 {
-                    // Èç¹û¾í¹öµÄ¾àÀë³¬¹ı32Î»ÕûÊı·¶Î§
+                    // å¦‚æœå·æ»šçš„è·ç¦»è¶…è¿‡32ä½æ•´æ•°èŒƒå›´
                     if (lDelta >= Int32.MaxValue || lDelta <= Int32.MinValue)
                         this.Invalidate();
                     else
@@ -729,7 +711,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // µ±ÎÄµµ³ß´çºÍÎÄµµÔ­µã¸Ä±äºó£¬¸üĞÂ¾í¹öÌõµÈµÈÉèÊ©×´Ì¬£¬ÒÔ±ãÎÄµµ¿É¼û
+        // å½“æ–‡æ¡£å°ºå¯¸å’Œæ–‡æ¡£åŸç‚¹æ”¹å˜åï¼Œæ›´æ–°å·æ»šæ¡ç­‰ç­‰è®¾æ–½çŠ¶æ€ï¼Œä»¥ä¾¿æ–‡æ¡£å¯è§
         void AfterDocumentChanged(ScrollBarMember member)
         {
             if (member == ScrollBarMember.Both
@@ -750,7 +732,7 @@ namespace DigitalPlatform.CommonControl
             Both = 2,
         };
 
-        // ¼ì²éÒ»¸ölongÊÇ·ñÔ½¹ıint16ÄÜ±í´ïµÄÖµ·¶Î§
+        // æ£€æŸ¥ä¸€ä¸ªlongæ˜¯å¦è¶Šè¿‡int16èƒ½è¡¨è¾¾çš„å€¼èŒƒå›´
         public static bool TooLarge(long lValue)
         {
             if (lValue >= Int16.MaxValue || lValue <= Int16.MinValue)
@@ -770,7 +752,7 @@ namespace DigitalPlatform.CommonControl
                 int nClientWidth = this.ClientSize.Width;
                 int nClientHeight = this.ClientSize.Height;
 
-                // ÎÄµµ³ß´ç
+                // æ–‡æ¡£å°ºå¯¸
                 long lDocumentWidth = DocumentWidth;
                 long lDocumentHeight = DocumentHeight;
 
@@ -792,7 +774,7 @@ namespace DigitalPlatform.CommonControl
                     else
                         this.m_h_ratio = 1.0F;
 
-                    // Ë®Æ½·½Ïò
+                    // æ°´å¹³æ–¹å‘
                     API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
                     si.cbSize = Marshal.SizeOf(si);
@@ -820,7 +802,7 @@ namespace DigitalPlatform.CommonControl
                     else
                         this.m_v_ratio = 1.0F;
 
-                    // ´¹Ö±·½Ïò
+                    // å‚ç›´æ–¹å‘
                     API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
                     si.cbSize = Marshal.SizeOf(si);

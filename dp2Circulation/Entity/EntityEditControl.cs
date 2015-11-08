@@ -582,30 +582,6 @@ namespace dp2Circulation
             }
         }
 
-#if NO
-        void SetLabelText(Label label, 
-            int nWidth,
-            string strText)
-        {
-            label.Text = strText;
-
-            Graphics g = Graphics.FromHwnd(this.Handle);
-
-            StringFormat sf = new StringFormat();
-            sf.Trimming = StringTrimming.None;
-            SizeF size = g.MeasureString(strText + "\r\n",   //给最后加一个'\r\n'以保证算出最后空行的高度
-                label.Font,
-                nWidth,
-                sf);
-
-            int nTempHeight = (int)size.Height;
-            if (nTempHeight <= 0)
-                nTempHeight = 20;
-
-            label.ClientSize = new Size(nWidth, nTempHeight);
-        }
-#endif
-
         // 创建 ErrorInfo 标签
         // parameters:
         //      strText 文字。如果为 null，表示不设置初始文本

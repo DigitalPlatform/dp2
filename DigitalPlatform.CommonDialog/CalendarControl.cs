@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,12 +31,12 @@ namespace DigitalPlatform.CommonDialog
 
         bool m_bRectSelectMode = true;
 
-        bool m_bRectSelecting = false;  // ÕıÔÚ¾ØĞÎÑ¡ÔñÖĞÍ¾
+        bool m_bRectSelecting = false;  // æ­£åœ¨çŸ©å½¢é€‰æ‹©ä¸­é€”
 
-        // Êó±êÔÚÍÏ¶¯¿ªÊ¼Ê±µÄÎ»ÖÃ ÕûÌåÎÄµµ×ø±ê
+        // é¼ æ ‡åœ¨æ‹–åŠ¨å¼€å§‹æ—¶çš„ä½ç½® æ•´ä½“æ–‡æ¡£åæ ‡
         PointF m_DragStartPointOnDoc = new PointF(0, 0);
 
-        // Êó±êÔÚÍÏ¶¯ÖĞÍ¾Ê±µÄÎ»ÖÃ ÕûÌåÎÄµµ×ø±ê
+        // é¼ æ ‡åœ¨æ‹–åŠ¨ä¸­é€”æ—¶çš„ä½ç½® æ•´ä½“æ–‡æ¡£åæ ‡
         PointF m_DragCurrentPointOnDoc = new PointF(0, 0);
 
         // AreaBase m_focusObject = null;
@@ -48,15 +48,15 @@ namespace DigitalPlatform.CommonDialog
         int m_nDirectionAB = 0;
         int m_nDirectionBC = 0;
 
-        // ÍÏ¶¯¿ªÊ¼Ê±µÄ¶ÔÏó
+        // æ‹–åŠ¨å¼€å§‹æ—¶çš„å¯¹è±¡
         AreaBase m_DragStartObject = null;
-        // ÍÏ¶¯¿ªÊ¼Ê±µÄÊó±êÎ»ÖÃ£¬view×ø±ê
+        // æ‹–åŠ¨å¼€å§‹æ—¶çš„é¼ æ ‡ä½ç½®ï¼Œviewåæ ‡
         Point DragStartMousePosition = new Point(0, 0);
 
-        // ÍÏ¶¯ÖĞÍ¾×î½ü¾­¹ıµÄ¶ÔÏó
+        // æ‹–åŠ¨ä¸­é€”æœ€è¿‘ç»è¿‡çš„å¯¹è±¡
         AreaBase m_DragLastEndObject = null;
 
-        #region Éè¼ÆÌ¬½Ó¿Ú
+        #region è®¾è®¡æ€æ¥å£
 
         [Category("Appearance")]
         [DescriptionAttribute("Day Cell Height")]
@@ -120,9 +120,9 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-        // ÊÇ·ñÊó±êÔÚ¸ñ×ÓÉÏ¸¡¶¯µÄÊ±ºò²Å³öÏÖcheckbox
-        // true ¸¡¶¯µÄÊ±ºò²Å³öÏÖ
-        // false Ò»Ö±³öÏÖ
+        // æ˜¯å¦é¼ æ ‡åœ¨æ ¼å­ä¸Šæµ®åŠ¨çš„æ—¶å€™æ‰å‡ºç°checkbox
+        // true æµ®åŠ¨çš„æ—¶å€™æ‰å‡ºç°
+        // false ä¸€ç›´å‡ºç°
         [Category("Appearance")]
         [DescriptionAttribute("Hover CheckBox")]
         [DefaultValue(false)]
@@ -256,7 +256,7 @@ namespace DigitalPlatform.CommonDialog
 
         #endregion
 
-        #region ´°¿ÚÊÂ¼ş
+        #region çª—å£äº‹ä»¶
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
@@ -268,7 +268,7 @@ namespace DigitalPlatform.CommonDialog
 
             if (GuiUtil.PtInRect(e.X, e.Y, this.ClientRectangle) == false)
             {
-                // ·ÀÖ¹ÔÚ¾í¹öÌõÉÏµ¥»÷ºóÍÏ¶¯Ôì³É¸±×÷ÓÃ
+                // é˜²æ­¢åœ¨å·æ»šæ¡ä¸Šå•å‡»åæ‹–åŠ¨é€ æˆå‰¯ä½œç”¨
                 goto END1;
             }
 
@@ -282,7 +282,7 @@ namespace DigitalPlatform.CommonDialog
                 bool bShift = (Control.ModifierKeys == Keys.Shift);
 
                 HitTestResult result = null;
-                // ÆÁÄ»×ø±ê
+                // å±å¹•åæ ‡
                 this.HitTest(
                     e.X,
                     e.Y,
@@ -291,40 +291,40 @@ namespace DigitalPlatform.CommonDialog
                 if (result == null)
                     goto END1;
 
-                // ¿´¿´ÊÇ·ñµã»÷ÔÚcheckbox²¿·Ö
+                // çœ‹çœ‹æ˜¯å¦ç‚¹å‡»åœ¨checkboxéƒ¨åˆ†
                 if (this._readOnly == false
                     && result.AreaPortion == AreaPortion.CheckBox
                     && result.Object is DayArea)
                 {
                     DayArea day = (DayArea)result.Object;
 
-                    if (day.Blank == false) // ¿Õ°×¸ñ×ÓÃ»ÓĞÕâ¸ö¹¦ÄÜ
+                    if (day.Blank == false) // ç©ºç™½æ ¼å­æ²¡æœ‰è¿™ä¸ªåŠŸèƒ½
                     {
                         if (day.ToggleState() == true)
                         {
-                            // Ë¢ĞÂ
+                            // åˆ·æ–°
                             this.UpdateObject(day);
                             this.AfterBoxStateChanged();
                             
                         }
                         else
                         {
-                            // ·¢³ö¾¯¸æĞÔµÄÏìÉù
+                            // å‘å‡ºè­¦å‘Šæ€§çš„å“å£°
                             Console.Beep();
                         }
 
-                        this.Capture = false;   // ²»ÈÃ¼ÌĞøÍÏ×§
+                        this.Capture = false;   // ä¸è®©ç»§ç»­æ‹–æ‹½
                         goto END1;
                     }
                 }
 
-                this.DragLastEndObject = null;  // Çå³ı
+                this.DragLastEndObject = null;  // æ¸…é™¤
                 this.DragStartObject = result.Object;
 
                 this.DragStartMousePosition = e.Location;
 
-                // Çå³ıÒÔÇ°µÄÑ¡Ôñ
-                if (bControl == false && bShift == false)   // °´ÏÂÁËSHIFT£¬Ò²²»Çå³ıÒÔÇ°µÄ
+                // æ¸…é™¤ä»¥å‰çš„é€‰æ‹©
+                if (bControl == false && bShift == false)   // æŒ‰ä¸‹äº†SHIFTï¼Œä¹Ÿä¸æ¸…é™¤ä»¥å‰çš„
                 {
                     if (m_bSelectedAreaOverflowed == false)
                     {
@@ -333,9 +333,9 @@ namespace DigitalPlatform.CommonDialog
                     }
                     else
                     {
-                        // Ö»ºÃ²ÉÓÃ±éÀúµÄ·½·¨À´È«²¿Çå³ı
+                        // åªå¥½é‡‡ç”¨éå†çš„æ–¹æ³•æ¥å…¨éƒ¨æ¸…é™¤
                         /*
-                         * // Õâ¸ö·½·¨ÆÁÄ»Òª¶¶¶¯
+                         * // è¿™ä¸ªæ–¹æ³•å±å¹•è¦æŠ–åŠ¨
                         this.DataRoot.ClearAllSubSelected();
                         this.Invalidate();
                          * */
@@ -345,14 +345,14 @@ namespace DigitalPlatform.CommonDialog
                             this.Invalidate();
                         else
                         {
-                            // Õâ¸ö·½·¨ÆÁÄ»²»¶¶¶¯
+                            // è¿™ä¸ªæ–¹æ³•å±å¹•ä¸æŠ–åŠ¨
 
                             UpdateObjects(objects);
                         }
                     }
                 }
 
-                // ¾ØĞÎÑ¡Ôñ¿ªÊ¼
+                // çŸ©å½¢é€‰æ‹©å¼€å§‹
                 if (m_bRectSelectMode == true
                     && e.Button == MouseButtons.Left)
                 {
@@ -366,7 +366,7 @@ namespace DigitalPlatform.CommonDialog
                 if (result.Object != null)
                 {
                     // 
-                    // µ¥¶ÀË¢ĞÂÒ»¸ö
+                    // å•ç‹¬åˆ·æ–°ä¸€ä¸ª
                     List<AreaBase> temp = new List<AreaBase>();
                     temp.Add(result.Object);
                     if (bControl == true)
@@ -400,7 +400,7 @@ namespace DigitalPlatform.CommonDialog
 
             Point p = this.PointToClient(Control.MousePosition);
 
-            // ÆÁÄ»×ø±ê
+            // å±å¹•åæ ‡
             this.HitTest(
                 p.X,
                 p.Y,
@@ -458,10 +458,10 @@ namespace DigitalPlatform.CommonDialog
             if (this.Capture == true
                 && e.Button == MouseButtons.Left)
             {
-                // ÍÏ¶¯Êó±ê
+                // æ‹–åŠ¨é¼ æ ‡
                 if (IsNearestPoint(this.DragStartMousePosition, e.Location) == true)
                 {
-                    // ·ÀÖ¹ÔÚÔ­µØ¾Í±»µ±×÷Êó±êÍÏ¶¯
+                    // é˜²æ­¢åœ¨åŸåœ°å°±è¢«å½“ä½œé¼ æ ‡æ‹–åŠ¨
                     goto END1;
                 }
 
@@ -471,16 +471,16 @@ namespace DigitalPlatform.CommonDialog
                     && e.Button == MouseButtons.Left
                     )
                 {
-                    // Çå³ıÉÏ´ÎÍ¼Ïñ?
+                    // æ¸…é™¤ä¸Šæ¬¡å›¾åƒ?
                     DrawSelectRect();
 
-                    // »­³öÕâ´ÎµÄÍ¼Ïñ
+                    // ç”»å‡ºè¿™æ¬¡çš„å›¾åƒ
                     this.m_DragCurrentPointOnDoc = new PointF(e.X - m_lWindowOrgX,
                         e.Y - m_lWindowOrgY);
 
                     DrawSelectRect();
 
-                    // ÎªÁËÄÜ¾í¹ö
+                    // ä¸ºäº†èƒ½å·æ»š
                     {
                         Type objType = typeof(DayArea);
 
@@ -489,7 +489,7 @@ namespace DigitalPlatform.CommonDialog
 
                         result = null;
 
-                        // ÆÁÄ»×ø±ê
+                        // å±å¹•åæ ‡
                         this.HitTest(
                             e.X,
                             e.Y,
@@ -504,18 +504,18 @@ namespace DigitalPlatform.CommonDialog
                         if (result.Object.GetType() != objType)
                             goto END1;
 
-                        // ²¹ÉÏ
+                        // è¡¥ä¸Š
                         if (this.DragStartObject == null)
                             this.DragStartObject = result.Object;
 
                         if (this.DragLastEndObject != result.Object)
                         {
-                            // Çå³ı
+                            // æ¸…é™¤
                             DrawSelectRect();
                             if (EnsureVisibleWhenScrolling(result.Object) == true)
                                 this.Update();
 
-                            // ÖØ»­
+                            // é‡ç”»
                             DrawSelectRect();
 
                             this.DragLastEndObject = result.Object;
@@ -539,7 +539,7 @@ namespace DigitalPlatform.CommonDialog
                     goto END1;
 
 
-                // ÕÒµ½µ±Ç°Êó±êÏÂµÄ¶ÔÏó¡£±ØĞëÊÇºÍDragStartObjectÍ¬Ò»¼¶µÄ¶ÔÏó
+                // æ‰¾åˆ°å½“å‰é¼ æ ‡ä¸‹çš„å¯¹è±¡ã€‚å¿…é¡»æ˜¯å’ŒDragStartObjectåŒä¸€çº§çš„å¯¹è±¡
                 if (this.DragStartObject == null)
                     goto END1;
 
@@ -547,7 +547,7 @@ namespace DigitalPlatform.CommonDialog
                 bool bControl = (Control.ModifierKeys == Keys.Control);
                 bool bShift = (Control.ModifierKeys == Keys.Shift);
 
-                // ÆÁÄ»×ø±ê
+                // å±å¹•åæ ‡
                 this.HitTest(
                     e.X,
                     e.Y,
@@ -586,16 +586,16 @@ namespace DigitalPlatform.CommonDialog
                     goto END1;
                 }
 
-                // ·½·¨1
-                // ´Óthis.DragStartObject µ½ DragCurrentObject Ö®¼äÇå³ı
-                // È»ºó DragCurrentObject µ½ result.ObjectÖ®¼ä£¬Ñ¡ÉÏ
-                // Õâ¸ö·½·¨ËÙ¶ÈÂı
+                // æ–¹æ³•1
+                // ä»this.DragStartObject åˆ° DragCurrentObject ä¹‹é—´æ¸…é™¤
+                // ç„¶å DragCurrentObject åˆ° result.Objectä¹‹é—´ï¼Œé€‰ä¸Š
+                // è¿™ä¸ªæ–¹æ³•é€Ÿåº¦æ…¢
 
-                // ·½·¨2
-                // Currentµ½ result.ObjectÖ®¼ä£¬toggle£»È»ºó£¬ÔÚÁôÒâ°ÑStartÑ¡ÉÏ
+                // æ–¹æ³•2
+                // Currentåˆ° result.Objectä¹‹é—´ï¼Œtoggleï¼›ç„¶åï¼Œåœ¨ç•™æ„æŠŠStarté€‰ä¸Š
 
                 List<AreaBase> objects = null;
-                if (this.DragLastEndObject == null) // µÚÒ»´ÎµÄÌØÊâÇé¿ö
+                if (this.DragLastEndObject == null) // ç¬¬ä¸€æ¬¡çš„ç‰¹æ®Šæƒ…å†µ
                 {
                     // this.SetObjectFocus(this.DragStartObject, false);
 
@@ -607,13 +607,13 @@ namespace DigitalPlatform.CommonDialog
                 }
                 else
                 {
-                    // B CÖ®¼äµÄ·½Ïò
+                    // B Cä¹‹é—´çš„æ–¹å‘
                     this.m_nDirectionBC = GetDirection(this.DragLastEndObject, result.Object);
 
-                    Debug.Assert(this.m_nDirectionBC != 0, "B CÁ½¸ö¶ÔÏó£¬²»ÄÜÏàÍ¬");
+                    Debug.Assert(this.m_nDirectionBC != 0, "B Cä¸¤ä¸ªå¯¹è±¡ï¼Œä¸èƒ½ç›¸åŒ");
 
-                    // Èç¹û A-B B-CÍ¬Ïò£¬ Ôò²»°üº¬Í·²¿£¬°üº¬Î²²¿
-                    if (this.m_nDirectionAB == 0 // Ê×´ÎÌØÊâÇé¿ö
+                    // å¦‚æœ A-B B-CåŒå‘ï¼Œ åˆ™ä¸åŒ…å«å¤´éƒ¨ï¼ŒåŒ…å«å°¾éƒ¨
+                    if (this.m_nDirectionAB == 0 // é¦–æ¬¡ç‰¹æ®Šæƒ…å†µ
                         || this.m_nDirectionAB == this.m_nDirectionBC)
                     {
                         objects = GetRangeObjects(
@@ -624,7 +624,7 @@ namespace DigitalPlatform.CommonDialog
                     }
                     else
                     {
-                        // Èç¹û A-B B-C²»Í¬Ïò£¬ Ôò°üº¬Í·²¿£¬²»°üº¬Î²²¿
+                        // å¦‚æœ A-B B-Cä¸åŒå‘ï¼Œ åˆ™åŒ…å«å¤´éƒ¨ï¼Œä¸åŒ…å«å°¾éƒ¨
                         objects = GetRangeObjects(
                             true,
                             false,
@@ -636,10 +636,10 @@ namespace DigitalPlatform.CommonDialog
                 SelectObjects(objects, SelectAction.Toggle);
 
                 {
-                    // ×·¼ÓÑ¡ÉÏÔ­Ê¼Í·²¿
+                    // è¿½åŠ é€‰ä¸ŠåŸå§‹å¤´éƒ¨
                     List<AreaBase> temp = new List<AreaBase>();
                     temp.Add(this.DragStartObject);
-                    temp.Add(result.Object);    // CÒ²±£ÏÕ
+                    temp.Add(result.Object);    // Cä¹Ÿä¿é™©
                     SelectObjects(temp, SelectAction.On);
                 }
 
@@ -651,7 +651,7 @@ namespace DigitalPlatform.CommonDialog
                 // this.SetObjectFocus(this.DragLastEndObject, true);
 
 
-                // A B Ö®¼äµÄ·½Ïò
+                // A B ä¹‹é—´çš„æ–¹å‘
                 this.m_nDirectionAB = GetDirection(this.DragStartObject, this.DragLastEndObject);
 
                 if (EnsureVisibleWhenScrolling(result.Object) == true)
@@ -681,7 +681,7 @@ namespace DigitalPlatform.CommonDialog
             {
                 if (IsNearestPoint(this.DragStartMousePosition, e.Location) == false)
                 {
-                    // ·ÀÖ¹ÔÚÔ­µØµÄ¶àÓàÒ»´ÎMouseMoveÏûÏ¢Òş²Øtip´°¿Ú
+                    // é˜²æ­¢åœ¨åŸåœ°çš„å¤šä½™ä¸€æ¬¡MouseMoveæ¶ˆæ¯éšè—tipçª—å£
                     trackTip.Hide(this);
 
                     /*
@@ -689,7 +689,7 @@ namespace DigitalPlatform.CommonDialog
 
                     HitTestResult result = null;
 
-                    // ÆÁÄ»×ø±ê
+                    // å±å¹•åæ ‡
                     this.HitTest(
                         e.X,
                         e.Y,
@@ -726,14 +726,14 @@ namespace DigitalPlatform.CommonDialog
             // trackTip.Hide(this);
 
 
-            // ÍÏ¶¯¾ØĞÎ¿òÎ§Ñ¡µÄ½áÊø´¦Àí
+            // æ‹–åŠ¨çŸ©å½¢æ¡†å›´é€‰çš„ç»“æŸå¤„ç†
             if (m_bRectSelecting == true
                 && e.Button == MouseButtons.Left)
             {
                 DoEndRectSelecting();
             }
 
-            // ÍÏ¶¯Portion
+            // æ‹–åŠ¨Portion
             if (e.Button == MouseButtons.Left)
             {
             }
@@ -750,17 +750,17 @@ namespace DigitalPlatform.CommonDialog
             bool bControl = (Control.ModifierKeys == Keys.Control);
             // bool bShift = (Control.ModifierKeys == Keys.Shift);
 
-            // Çå³ıÑ¡Ôñ¿ò
+            // æ¸…é™¤é€‰æ‹©æ¡†
             DrawSelectRect();
 
-            // ÕûÌåÎÄµµ×ø±ê
+            // æ•´ä½“æ–‡æ¡£åæ ‡
             RectangleF rect = MakeRect(m_DragStartPointOnDoc,
 m_DragCurrentPointOnDoc);
 
-            // DataRoot×ø±ê
+            // DataRootåæ ‡
             rect.Offset(-this.m_nLeftBlank, -this.m_nTopBlank);
 
-            // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+            // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
             List<Type> types = new List<Type>();
             /*
             types.Add(typeof(YearArea));
@@ -780,10 +780,10 @@ m_DragCurrentPointOnDoc);
             else
                 this.Invalidate();
 
-            m_bRectSelecting = false;   // ½áÊø
+            m_bRectSelecting = false;   // ç»“æŸ
         }
 
-        // Êó±ê¹öÂÖ
+        // é¼ æ ‡æ»šè½®
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             int numberOfTextLinesToMove = e.Delta * SystemInformation.MouseWheelScrollLines / 120;
@@ -798,7 +798,7 @@ m_DragCurrentPointOnDoc);
         {
             switch (e.KeyCode)
             {
-                    // ²Ëµ¥¼ü
+                    // èœå•é”®
                 case Keys.Apps:
                     {
                         Point p;
@@ -829,7 +829,7 @@ m_DragCurrentPointOnDoc);
                         if (this.EnsureVisible(this.m_lastFocusObj) == true)
                             this.Update();
 
-                        // »ñµÃµ±Ç°½¹µã¸ñ×ÓµÄÖĞĞÄËùÔÚµÄ´°¿Ú×ø±ê
+                        // è·å¾—å½“å‰ç„¦ç‚¹æ ¼å­çš„ä¸­å¿ƒæ‰€åœ¨çš„çª—å£åæ ‡
                         RectangleF rect = this.GetViewRect(this.m_lastFocusObj);
 
                         if (e.KeyCode == Keys.PageDown)
@@ -837,16 +837,16 @@ m_DragCurrentPointOnDoc);
                         else 
                             this.DocumentOrgY += this.ClientSize.Height;
 
-                        // ·­Ò³Ç°Í¬ÑùµÄ´°¿Ú×ø±êÎ»ÖÃ£¬Ä£ÄâµãÒ»ÏÂÊó±ê
+                        // ç¿»é¡µå‰åŒæ ·çš„çª—å£åæ ‡ä½ç½®ï¼Œæ¨¡æ‹Ÿç‚¹ä¸€ä¸‹é¼ æ ‡
                         MouseEventArgs e1 = new MouseEventArgs(MouseButtons.Left,
                             1,
                             (int)(rect.X + rect.Width / 2),
                             (int)(rect.Y + rect.Height / 2),
                             0);
 
-                        // µãµ½ĞÇÆÚ±êÌâÉÏÔõÃ´°ì£¿ËÆºõ»¹ĞèÒª¸üºÃµÄ½â¾ö°ì·¨¡£
-                        // ¿ÉÒÔ¹ÀËãµ±Ç°¿Í»§Çø¸ß¶ÈÏàµ±ÓÚ¶àÉÙĞĞ£¬È»ºóÖ±½Ó°Ñ½¹µã
-                        // ÊúÏòÒÆ¶¯ÕâÃ´¶àĞĞ£¬¾íÈëÊÓÏß·¶Î§£¬¼´¿É¡£
+                        // ç‚¹åˆ°æ˜ŸæœŸæ ‡é¢˜ä¸Šæ€ä¹ˆåŠï¼Ÿä¼¼ä¹è¿˜éœ€è¦æ›´å¥½çš„è§£å†³åŠæ³•ã€‚
+                        // å¯ä»¥ä¼°ç®—å½“å‰å®¢æˆ·åŒºé«˜åº¦ç›¸å½“äºå¤šå°‘è¡Œï¼Œç„¶åç›´æ¥æŠŠç„¦ç‚¹
+                        // ç«–å‘ç§»åŠ¨è¿™ä¹ˆå¤šè¡Œï¼Œå·å…¥è§†çº¿èŒƒå›´ï¼Œå³å¯ã€‚
 
                         this.OnMouseDown(e1);
                         this.OnMouseUp(e1);
@@ -865,16 +865,16 @@ m_DragCurrentPointOnDoc);
 
                         DayArea day = (DayArea)this.m_lastFocusObj;
 
-                        if (day.Blank == true) // ¿Õ°×¸ñ×ÓÃ»ÓĞÕâ¸ö¹¦ÄÜ
+                        if (day.Blank == true) // ç©ºç™½æ ¼å­æ²¡æœ‰è¿™ä¸ªåŠŸèƒ½
                             break;
                         if (day.ToggleState() == true)
                         {
-                            // Ë¢ĞÂ
+                            // åˆ·æ–°
                             this.UpdateObject(day);
                         }
                         else
                         {
-                            // ·¢³ö¾¯¸æĞÔµÄÏìÉù
+                            // å‘å‡ºè­¦å‘Šæ€§çš„å“å£°
                             Console.Beep();
                         }
 
@@ -885,14 +885,14 @@ m_DragCurrentPointOnDoc);
             base.OnKeyDown(e);
         }
 
-        // ÉÏÏÂ×óÓÒ·½Ïò¼ü
-        // TODO: ¿ÉÒÔÎªGetRangeObjects()Éè¼ÆÒ»¸ö×ø±êµ¹×ªµÄ×´Ì¬£¬¼´ÉÏÏÂÒÆ¶¯ÈÏÎª²ÅÊÇÏßĞÔµÄ¡£ÕâÑù·½±ã¶¨ÒåÍ¬ÊúÏòÎ»ÖÃµÄÌì
+        // ä¸Šä¸‹å·¦å³æ–¹å‘é”®
+        // TODO: å¯ä»¥ä¸ºGetRangeObjects()è®¾è®¡ä¸€ä¸ªåæ ‡å€’è½¬çš„çŠ¶æ€ï¼Œå³ä¸Šä¸‹ç§»åŠ¨è®¤ä¸ºæ‰æ˜¯çº¿æ€§çš„ã€‚è¿™æ ·æ–¹ä¾¿å®šä¹‰åŒç«–å‘ä½ç½®çš„å¤©
         void DoArrowLeftRight(Keys key)
         {
             if (m_lastFocusObj == null)
             {
-                // ×Ô¶¯°ÑµÚÒ»¸ö¸ñ×ÓÉèÎª½¹µã
-                m_lastFocusObj = this.DataRoot.FindDayArea(-1, -1, -1); // »ñµÃµÚÒ»Ìì
+                // è‡ªåŠ¨æŠŠç¬¬ä¸€ä¸ªæ ¼å­è®¾ä¸ºç„¦ç‚¹
+                m_lastFocusObj = this.DataRoot.FindDayArea(-1, -1, -1); // è·å¾—ç¬¬ä¸€å¤©
                 SetObjectFocus(m_lastFocusObj);
 
                 return;
@@ -938,8 +938,8 @@ m_DragCurrentPointOnDoc);
 
             if (obj != null)
             {
-                // Çå³ıÒÔÇ°µÄÑ¡Ôñ
-                if (bControl == false && bShift == false)   // °´ÏÂÁËSHIFT£¬Ò²²»Çå³ıÒÔÇ°µÄ
+                // æ¸…é™¤ä»¥å‰çš„é€‰æ‹©
+                if (bControl == false && bShift == false)   // æŒ‰ä¸‹äº†SHIFTï¼Œä¹Ÿä¸æ¸…é™¤ä»¥å‰çš„
                 {
                     if (m_bSelectedAreaOverflowed == false)
                     {
@@ -948,21 +948,21 @@ m_DragCurrentPointOnDoc);
                     }
                     else
                     {
-                        // Ö»ºÃ²ÉÓÃ±éÀúµÄ·½·¨À´È«²¿Çå³ı
+                        // åªå¥½é‡‡ç”¨éå†çš„æ–¹æ³•æ¥å…¨éƒ¨æ¸…é™¤
                         List<AreaBase> objects = new List<AreaBase>();
                         this.DataRoot.ClearAllSubSelected(ref objects, 100);
                         if (objects.Count >= 100)
                             this.Invalidate();
                         else
                         {
-                            // Õâ¸ö·½·¨ÆÁÄ»²»¶¶¶¯
+                            // è¿™ä¸ªæ–¹æ³•å±å¹•ä¸æŠ–åŠ¨
                             UpdateObjects(objects);
                         }
                     }
                 }
                 else
                 {
-                    // °´ÏÂÁËCtrl»òÕßShiftµÄÇé¿ö
+                    // æŒ‰ä¸‹äº†Ctrlæˆ–è€…Shiftçš„æƒ…å†µ
                     if (obj.GetType() != this.DragStartObject.GetType())
                         return;
 
@@ -973,11 +973,11 @@ m_DragCurrentPointOnDoc);
                         return;
                     }
 
-                    // ·½·¨2
-                    // Currentµ½ result.ObjectÖ®¼ä£¬toggle£»È»ºó£¬ÔÚÁôÒâ°ÑStartÑ¡ÉÏ
+                    // æ–¹æ³•2
+                    // Currentåˆ° result.Objectä¹‹é—´ï¼Œtoggleï¼›ç„¶åï¼Œåœ¨ç•™æ„æŠŠStarté€‰ä¸Š
 
                     List<AreaBase> objects = null;
-                    if (this.DragLastEndObject == null) // µÚÒ»´ÎµÄÌØÊâÇé¿ö
+                    if (this.DragLastEndObject == null) // ç¬¬ä¸€æ¬¡çš„ç‰¹æ®Šæƒ…å†µ
                     {
                         objects = GetRangeObjects(
                             true,
@@ -987,13 +987,13 @@ m_DragCurrentPointOnDoc);
                     }
                     else
                     {
-                        // B CÖ®¼äµÄ·½Ïò
+                        // B Cä¹‹é—´çš„æ–¹å‘
                         this.m_nDirectionBC = GetDirection(this.DragLastEndObject, obj);
 
-                        Debug.Assert(this.m_nDirectionBC != 0, "B CÁ½¸ö¶ÔÏó£¬²»ÄÜÏàÍ¬");
+                        Debug.Assert(this.m_nDirectionBC != 0, "B Cä¸¤ä¸ªå¯¹è±¡ï¼Œä¸èƒ½ç›¸åŒ");
 
-                        // Èç¹û A-B B-CÍ¬Ïò£¬ Ôò²»°üº¬Í·²¿£¬°üº¬Î²²¿
-                        if (this.m_nDirectionAB == 0 // Ê×´ÎÌØÊâÇé¿ö
+                        // å¦‚æœ A-B B-CåŒå‘ï¼Œ åˆ™ä¸åŒ…å«å¤´éƒ¨ï¼ŒåŒ…å«å°¾éƒ¨
+                        if (this.m_nDirectionAB == 0 // é¦–æ¬¡ç‰¹æ®Šæƒ…å†µ
                             || this.m_nDirectionAB == this.m_nDirectionBC)
                         {
                             objects = GetRangeObjects(
@@ -1004,7 +1004,7 @@ m_DragCurrentPointOnDoc);
                         }
                         else
                         {
-                            // Èç¹û A-B B-C²»Í¬Ïò£¬ Ôò°üº¬Í·²¿£¬²»°üº¬Î²²¿
+                            // å¦‚æœ A-B B-Cä¸åŒå‘ï¼Œ åˆ™åŒ…å«å¤´éƒ¨ï¼Œä¸åŒ…å«å°¾éƒ¨
                             objects = GetRangeObjects(
                                 true,
                                 false,
@@ -1016,16 +1016,16 @@ m_DragCurrentPointOnDoc);
                     SelectObjects(objects, SelectAction.Toggle);
 
                     {
-                        // ×·¼ÓÑ¡ÉÏÔ­Ê¼Í·²¿
+                        // è¿½åŠ é€‰ä¸ŠåŸå§‹å¤´éƒ¨
                         List<AreaBase> temp0 = new List<AreaBase>();
                         temp0.Add(this.DragStartObject);
-                        temp0.Add(obj);    // CÒ²±£ÏÕ
+                        temp0.Add(obj);    // Cä¹Ÿä¿é™©
                         SelectObjects(temp0, SelectAction.On);
                     }
 
                     this.DragLastEndObject = obj;
 
-                    // A B Ö®¼äµÄ·½Ïò
+                    // A B ä¹‹é—´çš„æ–¹å‘
                     this.m_nDirectionAB = GetDirection(this.DragStartObject, this.DragLastEndObject);
 
                     if (EnsureVisibleWhenScrolling(obj) == true)
@@ -1035,9 +1035,9 @@ m_DragCurrentPointOnDoc);
                 }
 
                 DragStartObject = obj;
-                this.DragLastEndObject = null;  // Çå³ı
+                this.DragLastEndObject = null;  // æ¸…é™¤
 
-                // Ñ¡ÔñĞÂÒ»¸ö
+                // é€‰æ‹©æ–°ä¸€ä¸ª
                 List<AreaBase> temp = new List<AreaBase>();
                 temp.Add(obj);
                 if (bControl == true)
@@ -1058,7 +1058,7 @@ m_DragCurrentPointOnDoc);
             }
             else
             {
-                // ·¢³ö¾¯¸æĞÔµÄÏìÉù
+                // å‘å‡ºè­¦å‘Šæ€§çš„å“å£°
                 // Console.Beep();
             }
 
@@ -1068,7 +1068,7 @@ m_DragCurrentPointOnDoc);
         {
             base.OnHandleCreated(e);
 
-            // Ê×´ÎÏÔÊ¾Ç°, OnSizeChanged()Ò»´ÎÒ²Ã»ÓĞ±»µ÷ÓÃÇ°, ÏÔÊ¾ºÃ¾í¹öÌõ
+            // é¦–æ¬¡æ˜¾ç¤ºå‰, OnSizeChanged()ä¸€æ¬¡ä¹Ÿæ²¡æœ‰è¢«è°ƒç”¨å‰, æ˜¾ç¤ºå¥½å·æ»šæ¡
             SetScrollBars(ScrollBarMember.Both);
         }
 
@@ -1084,7 +1084,7 @@ m_DragCurrentPointOnDoc);
             }
 
 
-            // Èç¹ûclientÇøÓò×ã¹»´ó£¬µ÷Õûorg£¬±ÜÃâ¿´²»¼ûÄ³²¿·Ö
+            // å¦‚æœclientåŒºåŸŸè¶³å¤Ÿå¤§ï¼Œè°ƒæ•´orgï¼Œé¿å…çœ‹ä¸è§æŸéƒ¨åˆ†
             DocumentOrgY = DocumentOrgY;
             DocumentOrgX = DocumentOrgX;
 
@@ -1097,7 +1097,7 @@ m_DragCurrentPointOnDoc);
 
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -1121,7 +1121,7 @@ m_DragCurrentPointOnDoc);
             }
         }
 
-        // Çå³ıËùÓĞ¸ñ×Ó
+        // æ¸…é™¤æ‰€æœ‰æ ¼å­
         public void Clear()
         {
             this.DataRoot.ChildrenCollection.Clear();
@@ -1136,7 +1136,7 @@ m_DragCurrentPointOnDoc);
             this.m_lastHoverObj = null;
             this.m_lastFocusObj = null;
 
-            m_bRectSelecting = false;  // ÕıÔÚ¾ØĞÎÑ¡ÔñÖĞÍ¾
+            m_bRectSelecting = false;  // æ­£åœ¨çŸ©å½¢é€‰æ‹©ä¸­é€”
 
             m_DragStartPointOnDoc = new PointF(0, 0);
 
@@ -1170,7 +1170,7 @@ m_DragCurrentPointOnDoc);
             }
         }
 
-        // ÍÏ¶¯ÖĞÍ¾×î½ü¾­¹ıµÄ¶ÔÏó
+        // æ‹–åŠ¨ä¸­é€”æœ€è¿‘ç»è¿‡çš„å¯¹è±¡
         AreaBase DragLastEndObject
         {
             get
@@ -1187,33 +1187,33 @@ m_DragCurrentPointOnDoc);
         }
 
 
-        // °ïÖú¿ìËÙÇå³ıÏÔÊ¾µÄÑ¡Ôñ¶ÔÏóÏà¹ØÊı×é(²»ÊÇÌ«¾«È·)
+        // å¸®åŠ©å¿«é€Ÿæ¸…é™¤æ˜¾ç¤ºçš„é€‰æ‹©å¯¹è±¡ç›¸å…³æ•°ç»„(ä¸æ˜¯å¤ªç²¾ç¡®)
         List<AreaBase> m_aSelectedArea = new List<AreaBase>();
-        bool m_bSelectedAreaOverflowed = true;  // true¿ÉÒÔÓÃÀ´²âÊÔÃ»ÓĞÕâ¸ö»úÖÆÊ±µÄÇé¿ö
+        bool m_bSelectedAreaOverflowed = true;  // trueå¯ä»¥ç”¨æ¥æµ‹è¯•æ²¡æœ‰è¿™ä¸ªæœºåˆ¶æ—¶çš„æƒ…å†µ
 
         BorderStyle borderStyle = BorderStyle.Fixed3D;
 
         int nNestedSetScrollBars = 0;
 
-        // ¾í¹öÌõ±ÈÂÊ Ğ¡ÓÚµÈÓÚ1.0F
+        // å·æ»šæ¡æ¯”ç‡ å°äºç­‰äº1.0F
         double m_v_ratio = 1.0F;
         double m_h_ratio = 1.0F;
 
-        public DateTime StartDate;  // ÏÔÊ¾·¶Î§¿ªÊ¼ÈÕ
-        public DateTime EndDate;    // ÏÔÊ¾·¶Î§½áÊøÈÕ
+        public DateTime StartDate;  // æ˜¾ç¤ºèŒƒå›´å¼€å§‹æ—¥
+        public DateTime EndDate;    // æ˜¾ç¤ºèŒƒå›´ç»“æŸæ—¥
 
         public DataRoot DataRoot = new DataRoot();
 
-        int m_nLeftBlank = 10;	// ±ß¿Õ
+        int m_nLeftBlank = 10;	// è¾¹ç©º
         int m_nRightBlank = 10;
         int m_nTopBlank = 10;
         int m_nBottomBlank = 10;
 
-        long m_lWindowOrgX = 0;    // ´°¿ÚÔ­µã
+        long m_lWindowOrgX = 0;    // çª—å£åŸç‚¹
         long m_lWindowOrgY = 0;
 
-        long m_lContentWidth = 0;    // ÄÚÈİ²¿·ÖµÄ¿í¶È
-        long m_lContentHeight = 0;   // ÄÚÈİ²¿·ÖµÄ¸ß¶È
+        long m_lContentWidth = 0;    // å†…å®¹éƒ¨åˆ†çš„å®½åº¦
+        long m_lContentHeight = 0;   // å†…å®¹éƒ¨åˆ†çš„é«˜åº¦
 
         public long DocumentWidth
         {
@@ -1273,7 +1273,7 @@ m_DragCurrentPointOnDoc);
 
                 if (lDelta != 0)
                 {
-                    // Èç¹û¾í¹öµÄ¾àÀë³¬¹ı32Î»ÕûÊı·¶Î§
+                    // å¦‚æœå·æ»šçš„è·ç¦»è¶…è¿‡32ä½æ•´æ•°èŒƒå›´
                     if (lDelta >= Int32.MaxValue || lDelta <= Int32.MinValue)
                         this.Invalidate();
                     else
@@ -1340,7 +1340,7 @@ m_DragCurrentPointOnDoc);
                 long lDelta = m_lWindowOrgY - lWindowOrgY_old;
                 if (lDelta != 0)
                 {
-                                        // Èç¹û¾í¹öµÄ¾àÀë³¬¹ı32Î»ÕûÊı·¶Î§
+                                        // å¦‚æœå·æ»šçš„è·ç¦»è¶…è¿‡32ä½æ•´æ•°èŒƒå›´
                     if (lDelta >= Int32.MaxValue || lDelta <= Int32.MinValue)
                         this.Invalidate();
                     else
@@ -1370,7 +1370,7 @@ m_DragCurrentPointOnDoc);
             }
         }
 
-        // µ±ÎÄµµ³ß´çºÍÎÄµµÔ­µã¸Ä±äºó£¬¸üĞÂ¾í¹öÌõµÈµÈÉèÊ©×´Ì¬£¬ÒÔ±ãÎÄµµ¿É¼û
+        // å½“æ–‡æ¡£å°ºå¯¸å’Œæ–‡æ¡£åŸç‚¹æ”¹å˜åï¼Œæ›´æ–°å·æ»šæ¡ç­‰ç­‰è®¾æ–½çŠ¶æ€ï¼Œä»¥ä¾¿æ–‡æ¡£å¯è§
         void AfterDocumentChanged(ScrollBarMember member)
         {
             if (member == ScrollBarMember.Both
@@ -1379,34 +1379,16 @@ m_DragCurrentPointOnDoc);
 
             if (member == ScrollBarMember.Both
                || member == ScrollBarMember.Vert)
-                this.m_lContentHeight = this.DataRoot.Height;   // ÓÃÕûÊı£¬Ê¹ÎªÁËÌá¸ßËÙ¶È¡£×¢ÒâÒª¼°Ê±ĞŞ¸Ä
+                this.m_lContentHeight = this.DataRoot.Height;   // ç”¨æ•´æ•°ï¼Œä½¿ä¸ºäº†æé«˜é€Ÿåº¦ã€‚æ³¨æ„è¦åŠæ—¶ä¿®æ”¹
 
             SetScrollBars(member);
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-
             base.OnPaintBackground(e);
             return;
-
-            /*
-                Brush brush0 = null;
-
-                if (this.Enabled == false)
-                    brush0 = new SolidBrush(Color.LightGray);
-                else
-                    brush0 = new SolidBrush(Color.White);
-
-                e.Graphics.FillRectangle(brush0, e.ClipRectangle);
-
-                brush0.Dispose();
-                return;
-
-            */
-
         }
-
 
         protected override CreateParams CreateParams
         {
@@ -1450,9 +1432,9 @@ m_DragCurrentPointOnDoc);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -1533,7 +1515,7 @@ m_DragCurrentPointOnDoc);
         }
 
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         public CalendarControl()
         {
             trackTip = new ToolTip();
@@ -1541,7 +1523,7 @@ m_DragCurrentPointOnDoc);
 
             InitializeComponent();
 
-            // Ò»Ğ©È±Ê¡Öµ
+            // ä¸€äº›ç¼ºçœå€¼
             this.DayStateDefCollection = DefaultDayStateDefCollection();
             string strYear = DateTime.Now.Year.ToString().PadLeft(4, '0');
             this.TimeRange = strYear + "0101" + "-" + strYear + "1231";
@@ -1556,7 +1538,7 @@ m_DragCurrentPointOnDoc);
 
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            // e.Graphics.SetClip(e.ClipRectangle); // ·Ï»°
+            // e.Graphics.SetClip(e.ClipRectangle); // åºŸè¯
 
             long xOffset = m_lWindowOrgX + m_nLeftBlank;
             long yOffset = m_lWindowOrgY + m_nTopBlank;
@@ -1566,7 +1548,7 @@ m_DragCurrentPointOnDoc);
             /*
             for (line = 0; line < m_nCellCount; line++)
             {
-                // Ã¿´ÎÒ»ĞĞ
+                // æ¯æ¬¡ä¸€è¡Œ
                 RectangleF rect = new RectangleF(0 + xOffset,
                     line * cell_width + yOffset,
                     m_nCellCount * cell_width + 1,
@@ -1619,7 +1601,7 @@ m_DragCurrentPointOnDoc);
             if (m_bRectSelecting == true)
                 return;
 
-            if (obj == null)    // ±íÊ¾¹Ø±Õ×îºófocus¶ÔÏóµÄfocus×´Ì¬
+            if (obj == null)    // è¡¨ç¤ºå…³é—­æœ€åfocuså¯¹è±¡çš„focusçŠ¶æ€
             {
                 goto OFF_OLD;
             }
@@ -1634,7 +1616,7 @@ m_DragCurrentPointOnDoc);
             if (obj == this.m_lastFocusObj)
                 return;
             
-            // offÏÈÇ°µÄfocus¶ÔÏó
+            // offå…ˆå‰çš„focuså¯¹è±¡
             OFF_OLD:
             if (this.m_lastFocusObj != null
                 && this.m_lastFocusObj.m_bFocus == true)
@@ -1643,10 +1625,10 @@ m_DragCurrentPointOnDoc);
                 this.UpdateObject(this.m_lastFocusObj);
             }
 
-            this.m_lastFocusObj = obj;  // ¼ÇÒä
+            this.m_lastFocusObj = obj;  // è®°å¿†
         }
 
-        // Ë¢ĞÂÒ»Èº¶ÔÏóµÄÇøÓò
+        // åˆ·æ–°ä¸€ç¾¤å¯¹è±¡çš„åŒºåŸŸ
         void UpdateObjects(List<AreaBase> objects)
         {
             for (int i = 0; i < objects.Count; i++)
@@ -1662,7 +1644,7 @@ m_DragCurrentPointOnDoc);
             }
         }
 
-        // Ë¢ĞÂÒ»¸ö¶ÔÏóµÄÇøÓò
+        // åˆ·æ–°ä¸€ä¸ªå¯¹è±¡çš„åŒºåŸŸ
         void UpdateObject(AreaBase obj)
         {
             /*
@@ -1677,7 +1659,7 @@ m_DragCurrentPointOnDoc);
 
         }
 
-        // Ë¢ĞÂÒ»¸ö¶ÔÏóµÄcheckboxÇøÓò
+        // åˆ·æ–°ä¸€ä¸ªå¯¹è±¡çš„checkboxåŒºåŸŸ
         void UpdateObjectHover(DayArea obj)
         {
             RectangleF rectUpdate = obj.DataRoot.m_rectCheckBox;
@@ -1703,7 +1685,7 @@ m_DragCurrentPointOnDoc);
                 DayArea day = (DayArea)obj;
                 
                 if (day.Blank == true)
-                    strTipText = "¿Õ°×";
+                    strTipText = "ç©ºç™½";
                 else
                     strTipText = String.Format(" {0} {1} ", day.FullName, day.DayOfWeekName(this.DataRoot.m_strDayOfWeekTitleLang));
             }
@@ -1727,7 +1709,7 @@ m_DragCurrentPointOnDoc);
         }
 
 
-        // ÉÏÏÂÎÄ²Ëµ¥
+        // ä¸Šä¸‹æ–‡èœå•
         void PopupMenu(Point point)
         {
             ContextMenuStrip contextMenu = new ContextMenuStrip();
@@ -1747,148 +1729,148 @@ m_DragCurrentPointOnDoc);
             contextMenu.Items.Add(button);
              * */
 
-            ToolStripLabel label = new ToolStripLabel("ÈÕÆÚ·¶Î§");
+            ToolStripLabel label = new ToolStripLabel("æ—¥æœŸèŒƒå›´");
             label.Font = new Font(label.Font, FontStyle.Bold);
             contextMenu.Items.Add(label);
 
-            // Ç°À©
-            menuItem = new ToolStripMenuItem("Ç°À©");
+            // å‰æ‰©
+            menuItem = new ToolStripMenuItem("å‰æ‰©");
             if (this._readOnly == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ĞÇÆÚ";
+            subMenuItem.Text = "æ˜ŸæœŸ";
             subMenuItem.Tag = "week";
             subMenuItem.Click += new EventHandler(MenuItem_headExpand_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÔÂ";
+            subMenuItem.Text = "æœˆ";
             subMenuItem.Tag = "month";
             subMenuItem.Click += new EventHandler(MenuItem_headExpand_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Äê";
+            subMenuItem.Text = "å¹´";
             subMenuItem.Tag = "year";
             subMenuItem.Click += new EventHandler(MenuItem_headExpand_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
-            // ºóÀ©
-            menuItem = new ToolStripMenuItem("ºóÀ©");
+            // åæ‰©
+            menuItem = new ToolStripMenuItem("åæ‰©");
             if (this._readOnly == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ĞÇÆÚ";
+            subMenuItem.Text = "æ˜ŸæœŸ";
             subMenuItem.Tag = "week";
             subMenuItem.Click += new EventHandler(MenuItem_tailExpand_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÔÂ";
+            subMenuItem.Text = "æœˆ";
             subMenuItem.Tag = "month";
             subMenuItem.Click += new EventHandler(MenuItem_tailExpand_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Äê";
+            subMenuItem.Text = "å¹´";
             subMenuItem.Tag = "year";
             subMenuItem.Click += new EventHandler(MenuItem_tailExpand_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             // 
-            // È·±£Í·²¿ÍêÕû
-            menuItem = new ToolStripMenuItem("²¹ÆëÍ·²¿");
+            // ç¡®ä¿å¤´éƒ¨å®Œæ•´
+            menuItem = new ToolStripMenuItem("è¡¥é½å¤´éƒ¨");
             if (this._readOnly == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÔÂ";
+            subMenuItem.Text = "æœˆ";
             subMenuItem.Tag = "month";
             subMenuItem.Click += new EventHandler(MenuItem_headComplete_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Äê";
+            subMenuItem.Text = "å¹´";
             subMenuItem.Tag = "year";
             subMenuItem.Click += new EventHandler(MenuItem_headComplete_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             // 
-            // È·±£Î²²¿ÍêÕû
-            menuItem = new ToolStripMenuItem("²¹ÆëÎ²²¿");
+            // ç¡®ä¿å°¾éƒ¨å®Œæ•´
+            menuItem = new ToolStripMenuItem("è¡¥é½å°¾éƒ¨");
             if (this._readOnly == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÔÂ";
+            subMenuItem.Text = "æœˆ";
             subMenuItem.Tag = "month";
             subMenuItem.Click += new EventHandler(MenuItem_tailComplete_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Äê";
+            subMenuItem.Text = "å¹´";
             subMenuItem.Tag = "year";
             subMenuItem.Click += new EventHandler(MenuItem_tailComplete_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
 
             //
-            // Ç°É¾
-            menuItem = new ToolStripMenuItem("Ç°É¾");
+            // å‰åˆ 
+            menuItem = new ToolStripMenuItem("å‰åˆ ");
             if (this._readOnly == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ĞÇÆÚ";
+            subMenuItem.Text = "æ˜ŸæœŸ";
             subMenuItem.Tag = "week";
             subMenuItem.Click += new EventHandler(MenuItem_headShrink_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÔÂ";
+            subMenuItem.Text = "æœˆ";
             subMenuItem.Tag = "month";
             subMenuItem.Click += new EventHandler(MenuItem_headShrink_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Äê";
+            subMenuItem.Text = "å¹´";
             subMenuItem.Tag = "year";
             subMenuItem.Click += new EventHandler(MenuItem_headShrink_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
-            // ºóÉ¾
-            menuItem = new ToolStripMenuItem("ºóÉ¾");
+            // ååˆ 
+            menuItem = new ToolStripMenuItem("ååˆ ");
             if (this._readOnly == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ĞÇÆÚ";
+            subMenuItem.Text = "æ˜ŸæœŸ";
             subMenuItem.Tag = "week";
             subMenuItem.Click += new EventHandler(MenuItem_tailShrink_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÔÂ";
+            subMenuItem.Text = "æœˆ";
             subMenuItem.Tag = "month";
             subMenuItem.Click += new EventHandler(MenuItem_tailShrink_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Äê";
+            subMenuItem.Text = "å¹´";
             subMenuItem.Tag = "year";
             subMenuItem.Click += new EventHandler(MenuItem_tailShrink_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
@@ -1898,14 +1880,14 @@ m_DragCurrentPointOnDoc);
             menuSepItem = new ToolStripSeparator();
             contextMenu.Items.Add(menuSepItem);
 
-            // ±êÌâ
-            label = new ToolStripLabel("Õë¶ÔÑ¡Ôñ±ê¼Ç");
+            // æ ‡é¢˜
+            label = new ToolStripLabel("é’ˆå¯¹é€‰æ‹©æ ‡è®°");
             label.Font = new Font(label.Font, FontStyle.Bold);
             contextMenu.Items.Add(label);
 
 
-            // ÉèÖÃ×´Ì¬
-            menuItem = new ToolStripMenuItem("ÉèÖÃ×´Ì¬(&S)");
+            // è®¾ç½®çŠ¶æ€
+            menuItem = new ToolStripMenuItem("è®¾ç½®çŠ¶æ€(&S)");
             if (bHasSelected == false || this._readOnly == true)
                 menuItem.Enabled = false;
             else
@@ -1935,13 +1917,13 @@ m_DragCurrentPointOnDoc);
             menuSepItem = new ToolStripSeparator();
             contextMenu.Items.Add(menuSepItem);
 
-            // ±êÌâ
-            label = new ToolStripLabel("×´Ì¬");
+            // æ ‡é¢˜
+            label = new ToolStripLabel("çŠ¶æ€");
             label.Font = new Font(label.Font, FontStyle.Bold);
             contextMenu.Items.Add(label);
 
-            // È«Ñ¡
-            menuItem = new ToolStripMenuItem("¸¡¶¯ÏÔÊ¾×´Ì¬Í¼±ê(&H)");
+            // å…¨é€‰
+            menuItem = new ToolStripMenuItem("æµ®åŠ¨æ˜¾ç¤ºçŠ¶æ€å›¾æ ‡(&H)");
             if (this.HoverCheckBox == true)
                 menuItem.Checked = true;
             else
@@ -1950,13 +1932,13 @@ m_DragCurrentPointOnDoc);
             contextMenu.Items.Add(menuItem);
 
 
-            // Ñ¡ÔñÄ£Ê½
-            menuItem = new ToolStripMenuItem("Ñ¡ÔñÄ£Ê½(&M)");
+            // é€‰æ‹©æ¨¡å¼
+            menuItem = new ToolStripMenuItem("é€‰æ‹©æ¨¡å¼(&M)");
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "ÏßĞÔ(&L)";
+            subMenuItem.Text = "çº¿æ€§(&L)";
             subMenuItem.Tag = 0;
             if (this.m_bRectSelectMode == false)
                 subMenuItem.Checked = true;
@@ -1964,7 +1946,7 @@ m_DragCurrentPointOnDoc);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "¾ØĞÎ(&R)";
+            subMenuItem.Text = "çŸ©å½¢(&R)";
             subMenuItem.Tag = 1;
             if (this.m_bRectSelectMode == true)
                 subMenuItem.Checked = true;
@@ -1976,13 +1958,13 @@ m_DragCurrentPointOnDoc);
             menuSepItem = new ToolStripSeparator();
             contextMenu.Items.Add(menuSepItem);
 
-            // ±êÌâ
-            label = new ToolStripLabel("Ñ¡Ôñ±ê¼Ç");
+            // æ ‡é¢˜
+            label = new ToolStripLabel("é€‰æ‹©æ ‡è®°");
             label.Font = new Font(label.Font, FontStyle.Bold);
             contextMenu.Items.Add(label);
 
-            // È«Ñ¡
-            menuItem = new ToolStripMenuItem("È«Ñ¡(&A)");
+            // å…¨é€‰
+            menuItem = new ToolStripMenuItem("å…¨é€‰(&A)");
             menuItem.Click += new EventHandler(menuItem_selectAll_Click);
             contextMenu.Items.Add(menuItem);
 
@@ -1998,7 +1980,7 @@ m_DragCurrentPointOnDoc);
                 this.HoverCheckBox = true;
         }
 
-        // Ç°À©ÈÕÆÚ·¶Î§
+        // å‰æ‰©æ—¥æœŸèŒƒå›´
         void MenuItem_headExpand_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2007,7 +1989,7 @@ m_DragCurrentPointOnDoc);
             ExpandTimeRange(strUnit, true);
         }
 
-        // ºóÀ©ÈÕÆÚ·¶Î§
+        // åæ‰©æ—¥æœŸèŒƒå›´
         void MenuItem_tailExpand_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2016,7 +1998,7 @@ m_DragCurrentPointOnDoc);
             ExpandTimeRange(strUnit, false);
         }
 
-        // È·±£Í·²¿ÍêÕûÈÕÆÚ·¶Î§
+        // ç¡®ä¿å¤´éƒ¨å®Œæ•´æ—¥æœŸèŒƒå›´
         void MenuItem_headComplete_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2025,7 +2007,7 @@ m_DragCurrentPointOnDoc);
             CompleteTimeRange(strUnit, true);
         }
 
-        // È·±£Î²²¿ÍêÕûÈÕÆÚ·¶Î§
+        // ç¡®ä¿å°¾éƒ¨å®Œæ•´æ—¥æœŸèŒƒå›´
         void MenuItem_tailComplete_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2035,7 +2017,7 @@ m_DragCurrentPointOnDoc);
         }
 
         //
-        // Ç°É¾ÈÕÆÚ·¶Î§
+        // å‰åˆ æ—¥æœŸèŒƒå›´
         void MenuItem_headShrink_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2044,7 +2026,7 @@ m_DragCurrentPointOnDoc);
             ShrinkTimeRange(strUnit, true);
         }
 
-        // ºóÉ¾ÈÕÆÚ·¶Î§
+        // ååˆ æ—¥æœŸèŒƒå›´
         void MenuItem_tailShrink_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2053,7 +2035,7 @@ m_DragCurrentPointOnDoc);
             ShrinkTimeRange(strUnit, false);
         }
 
-        // É¾³ıÊ±¼ä·¶Î§
+        // åˆ é™¤æ—¶é—´èŒƒå›´
         void ShrinkTimeRange(string strUnit,
             bool bHead)
         {
@@ -2062,22 +2044,22 @@ m_DragCurrentPointOnDoc);
             string strName = "";
                         if (strUnit == "year")
             {
-                strName = "Äê";
+                strName = "å¹´";
             }
             else if (strUnit == "month")
             {
-                strName = "ÔÂ";
+                strName = "æœˆ";
             }
             else if (strUnit == "week")
             {
-                strName = "ĞÇÆÚ";
+                strName = "æ˜ŸæœŸ";
             }
             else
-                throw new Exception("ÎŞ·¨Ê¶±ğµÄunit '" + strUnit + "'");
+                throw new Exception("æ— æ³•è¯†åˆ«çš„unit '" + strUnit + "'");
 
-            string strWarning = "È·ÊµÒªÉ¾³ı"
-                + (bHead == true ? "×îÇ°²¿" : "×îºóÃæ")
-                + "µÄÒ»¸ö "
+            string strWarning = "ç¡®å®è¦åˆ é™¤"
+                + (bHead == true ? "æœ€å‰éƒ¨" : "æœ€åé¢")
+                + "çš„ä¸€ä¸ª "
                 + strName + " ?";
 
             DialogResult result = MessageBox.Show(this,
@@ -2103,7 +2085,7 @@ MessageBoxDefaultButton.Button2);
                 bRet = this.DataRoot.ShrinkWeek(bHead);
             }
             else
-                throw new Exception("ÎŞ·¨Ê¶±ğµÄunit '" + strUnit + "'");
+                throw new Exception("æ— æ³•è¯†åˆ«çš„unit '" + strUnit + "'");
 
             if (bRet == true)
             {
@@ -2114,12 +2096,12 @@ MessageBoxDefaultButton.Button2);
             this.AfterBoxStateChanged();
 
             if (bHead == true)
-                this.DocumentOrgY = 0; // ÏÔÊ¾×îÇ°Ãæ
+                this.DocumentOrgY = 0; // æ˜¾ç¤ºæœ€å‰é¢
             else
                 this.DocumentOrgY = -this.DocumentHeight;
         }
 
-        // À©Õ¹Ê±¼ä·¶Î§
+        // æ‰©å±•æ—¶é—´èŒƒå›´
         void ExpandTimeRange(string strUnit,
             bool bHead)
         {
@@ -2128,45 +2110,45 @@ MessageBoxDefaultButton.Button2);
             {
                 YearArea new_year = this.DataRoot.ExpandYear(bHead, false);
 
-                // ²¢ÇÒÑ¡ÖĞ
+                // å¹¶ä¸”é€‰ä¸­
                 new_year.Select(SelectAction.On, true);
 
-                AfterDocumentChanged(ScrollBarMember.Both); // Èç¹ûÀ©³äÇ°ÄÚÈİÄÚÈİ£¬Õâ¾ÍÊÇÊ×´Î£¬Òª³Ğµ£Ë®Æ½¾í¹öÌõµÄÉèÖÃÈÎÎñ
+                AfterDocumentChanged(ScrollBarMember.Both); // å¦‚æœæ‰©å……å‰å†…å®¹å†…å®¹ï¼Œè¿™å°±æ˜¯é¦–æ¬¡ï¼Œè¦æ‰¿æ‹…æ°´å¹³å·æ»šæ¡çš„è®¾ç½®ä»»åŠ¡
                 this.Invalidate();
             }
             else if (strUnit == "month")
             {
                 MonthArea new_month = this.DataRoot.ExpandMonth(bHead, false);
 
-                // ²¢ÇÒÑ¡ÖĞ
+                // å¹¶ä¸”é€‰ä¸­
                 new_month.Select(SelectAction.On, true);
 
-                AfterDocumentChanged(ScrollBarMember.Both); // Èç¹ûÀ©³äÇ°ÄÚÈİÄÚÈİ£¬Õâ¾ÍÊÇÊ×´Î£¬Òª³Ğµ£Ë®Æ½¾í¹öÌõµÄÉèÖÃÈÎÎñ
+                AfterDocumentChanged(ScrollBarMember.Both); // å¦‚æœæ‰©å……å‰å†…å®¹å†…å®¹ï¼Œè¿™å°±æ˜¯é¦–æ¬¡ï¼Œè¦æ‰¿æ‹…æ°´å¹³å·æ»šæ¡çš„è®¾ç½®ä»»åŠ¡
                 this.Invalidate();
             }
             else if (strUnit == "week")
             {
                 WeekArea new_week = this.DataRoot.ExpandWeek(bHead, false);
 
-                // ²¢ÇÒÑ¡ÖĞ
+                // å¹¶ä¸”é€‰ä¸­
                 new_week.Select(SelectAction.On, true);
 
-                AfterDocumentChanged(ScrollBarMember.Both); // Èç¹ûÀ©³äÇ°ÄÚÈİÄÚÈİ£¬Õâ¾ÍÊÇÊ×´Î£¬Òª³Ğµ£Ë®Æ½¾í¹öÌõµÄÉèÖÃÈÎÎñ
+                AfterDocumentChanged(ScrollBarMember.Both); // å¦‚æœæ‰©å……å‰å†…å®¹å†…å®¹ï¼Œè¿™å°±æ˜¯é¦–æ¬¡ï¼Œè¦æ‰¿æ‹…æ°´å¹³å·æ»šæ¡çš„è®¾ç½®ä»»åŠ¡
                 this.Invalidate();
             }
             else
-                throw new Exception("ÎŞ·¨Ê¶±ğµÄunit '" + strUnit + "'");
+                throw new Exception("æ— æ³•è¯†åˆ«çš„unit '" + strUnit + "'");
 
             this.AfterBoxStateChanged();
 
             if (bHead == true)
-                this.DocumentOrgY = 0; // ÏÔÊ¾×îÇ°Ãæ
+                this.DocumentOrgY = 0; // æ˜¾ç¤ºæœ€å‰é¢
             else
                 this.DocumentOrgY = -this.DocumentHeight;
 
         }
 
-        // È·±£Í·²¿»òÕßÎ²²¿Ê±¼ä·¶Î§ÍêÕû
+        // ç¡®ä¿å¤´éƒ¨æˆ–è€…å°¾éƒ¨æ—¶é—´èŒƒå›´å®Œæ•´
         void CompleteTimeRange(string strUnit,
             bool bHead)
         {
@@ -2183,7 +2165,7 @@ MessageBoxDefaultButton.Button2);
 
                 this.AfterBoxStateChanged();
 
-                AfterDocumentChanged(ScrollBarMember.Both); // Èç¹ûÀ©³äÇ°ÄÚÈİÄÚÈİ£¬Õâ¾ÍÊÇÊ×´Î£¬Òª³Ğµ£Ë®Æ½¾í¹öÌõµÄÉèÖÃÈÎÎñ
+                AfterDocumentChanged(ScrollBarMember.Both); // å¦‚æœæ‰©å……å‰å†…å®¹å†…å®¹ï¼Œè¿™å°±æ˜¯é¦–æ¬¡ï¼Œè¦æ‰¿æ‹…æ°´å¹³å·æ»šæ¡çš„è®¾ç½®ä»»åŠ¡
                 this.Invalidate();
             }
             else if (strUnit == "month")
@@ -2202,14 +2184,14 @@ MessageBoxDefaultButton.Button2);
 
                 this.AfterBoxStateChanged();
 
-                AfterDocumentChanged(ScrollBarMember.Both); // Èç¹ûÀ©³äÇ°ÄÚÈİÄÚÈİ£¬Õâ¾ÍÊÇÊ×´Î£¬Òª³Ğµ£Ë®Æ½¾í¹öÌõµÄÉèÖÃÈÎÎñ
+                AfterDocumentChanged(ScrollBarMember.Both); // å¦‚æœæ‰©å……å‰å†…å®¹å†…å®¹ï¼Œè¿™å°±æ˜¯é¦–æ¬¡ï¼Œè¦æ‰¿æ‹…æ°´å¹³å·æ»šæ¡çš„è®¾ç½®ä»»åŠ¡
                 this.Invalidate();
             }
             else
-                throw new Exception("ÎŞ·¨Ê¶±ğµÄunit '" + strUnit + "'");
+                throw new Exception("æ— æ³•è¯†åˆ«çš„unit '" + strUnit + "'");
 
             if (bHead == true)
-                this.DocumentOrgY = 0; // ÏÔÊ¾×îÇ°Ãæ
+                this.DocumentOrgY = 0; // æ˜¾ç¤ºæœ€å‰é¢
             else
                 this.DocumentOrgY = -this.DocumentHeight;
 
@@ -2227,14 +2209,14 @@ MessageBoxDefaultButton.Button2);
 
         }
 
-        // È«Ñ¡
+        // å…¨é€‰
         void menuItem_selectAll_Click(object sender, EventArgs e)
         {
             this.DataRoot.Select(SelectAction.On, true);
             this.Invalidate();
         }
 
-        // ĞŞ¸ÄËùÑ¡Ôñ¿éµÄ×´Ì¬
+        // ä¿®æ”¹æ‰€é€‰æ‹©å—çš„çŠ¶æ€
         void DayStateMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem subMenuItem = (ToolStripMenuItem)sender;
@@ -2243,10 +2225,10 @@ MessageBoxDefaultButton.Button2);
             // MessageBox.Show(this, nState.ToString());
 
             List<AreaBase> update_objects = new List<AreaBase>();
-            // ÎªÏÂ¼¶ÒÔ¼°ÔÙÏÂ¼¶ÓĞselectedµÄÉèÖÃ×´Ì¬ (²»°üÀ¨×Ô¼º)
+            // ä¸ºä¸‹çº§ä»¥åŠå†ä¸‹çº§æœ‰selectedçš„è®¾ç½®çŠ¶æ€ (ä¸åŒ…æ‹¬è‡ªå·±)
             // parameters:
-            //      bForce  Èç¹ûÎªtrue£¬Ôò±íÊ¾²»¹ÜÊÇ·ñÓĞÑ¡Ôñ±ê¼Ç£¬¶¼ĞŞ¸Ä×´Ì¬
-            //              Èç¹ûÎªfalse£¬ÔòÓĞÑ¡Ôñ±ê¼ÇµÄ²ÅĞŞ¸Ä×´Ì¬
+            //      bForce  å¦‚æœä¸ºtrueï¼Œåˆ™è¡¨ç¤ºä¸ç®¡æ˜¯å¦æœ‰é€‰æ‹©æ ‡è®°ï¼Œéƒ½ä¿®æ”¹çŠ¶æ€
+            //              å¦‚æœä¸ºfalseï¼Œåˆ™æœ‰é€‰æ‹©æ ‡è®°çš„æ‰ä¿®æ”¹çŠ¶æ€
             this.DataRoot.SetChildrenDayState(nState,
                 ref update_objects,
                 100);
@@ -2266,8 +2248,8 @@ MessageBoxDefaultButton.Button2);
 
 
 
-        // µãbÊÇ·ñ´¦ÔÚµãaÖÜÎ§Ò»¸ö²»´óµÄ¾ØĞÎ·¶Î§ÄÚ
-        // ¾ØĞÎ²ÉÓÃÏµÍ³DoubleClickSize
+        // ç‚¹bæ˜¯å¦å¤„åœ¨ç‚¹aå‘¨å›´ä¸€ä¸ªä¸å¤§çš„çŸ©å½¢èŒƒå›´å†…
+        // çŸ©å½¢é‡‡ç”¨ç³»ç»ŸDoubleClickSize
         static bool IsNearestPoint(Point a, Point b)
         {
             Rectangle rect = new Rectangle(a.X, a.Y, 0, 0);
@@ -2288,7 +2270,7 @@ MessageBoxDefaultButton.Button2);
             return rect.Contains(b.X, b.Y);
         }
 
-        // ½»»»Á½¸öÖµ
+        // äº¤æ¢ä¸¤ä¸ªå€¼
         static void Exchange<T>(ref T v1, ref T v2)
         {
             T temp = v1;
@@ -2296,8 +2278,8 @@ MessageBoxDefaultButton.Button2);
             v2 = temp;
         }
 
-        // ¹¹ÔìÒ»¸ö¾ØĞÎ£¬Í¨¹ıÁ½¸ö¶Ëµã
-        // ±¾º¯Êı¿ÉÒÔ×Ô¶¯±È½Ï¶Ëµã´óĞ¡£¬´´½¨³öÕı¹æµÄ¾ØĞÎ
+        // æ„é€ ä¸€ä¸ªçŸ©å½¢ï¼Œé€šè¿‡ä¸¤ä¸ªç«¯ç‚¹
+        // æœ¬å‡½æ•°å¯ä»¥è‡ªåŠ¨æ¯”è¾ƒç«¯ç‚¹å¤§å°ï¼Œåˆ›å»ºå‡ºæ­£è§„çš„çŸ©å½¢
         static RectangleF MakeRect(PointF p1,
             PointF p2)
         {
@@ -2319,8 +2301,8 @@ MessageBoxDefaultButton.Button2);
                 y2 - y1);
         }
 
-        // »­¡¢»òÕßÇå³ıÑ¡Ôñ¾ØĞÎ
-        // ÒòÎªÊÇÒì»òÔËËã£¬µÚÒ»´ÎÊÇ»­£¬µÚ¶ş´ÎÔÚÍ¬ÑùÎ»ÖÃ¾ÍÊÇÇå³ı
+        // ç”»ã€æˆ–è€…æ¸…é™¤é€‰æ‹©çŸ©å½¢
+        // å› ä¸ºæ˜¯å¼‚æˆ–è¿ç®—ï¼Œç¬¬ä¸€æ¬¡æ˜¯ç”»ï¼Œç¬¬äºŒæ¬¡åœ¨åŒæ ·ä½ç½®å°±æ˜¯æ¸…é™¤
         void DrawSelectRect()
         {
             this.Update();
@@ -2335,11 +2317,11 @@ MessageBoxDefaultButton.Button2);
                 FrameStyle.Dashed);
         }
 
-        // Ì½²âÁ½¸öÍ¬¼¶¶ÔÏóµÄÏÈºó¹ØÏµ
+        // æ¢æµ‹ä¸¤ä¸ªåŒçº§å¯¹è±¡çš„å…ˆåå…³ç³»
         // return:
-        //      -1  startÔÚendÖ®Ç°
-        //      0   startºÍendÊÇÍ¬Ò»¸ö¶ÔÏó
-        //      1   startÔÚendÖ®ºó
+        //      -1  startåœ¨endä¹‹å‰
+        //      0   startå’Œendæ˜¯åŒä¸€ä¸ªå¯¹è±¡
+        //      1   startåœ¨endä¹‹å
         int GetDirection(AreaBase start, AreaBase end)
         {
             Debug.Assert(start != null, "");
@@ -2348,7 +2330,7 @@ MessageBoxDefaultButton.Button2);
             if (start == end)
                 return 0;
 
-            // ÕÒµ½¹²Í¬µÄ×æÏÈ
+            // æ‰¾åˆ°å…±åŒçš„ç¥–å…ˆ
             AreaBase a = start;
             AreaBase b = end;
 
@@ -2376,12 +2358,12 @@ MessageBoxDefaultButton.Button2);
 
             if (bFound == false)
             {
-                Debug.Assert(false, "Ëù¸ø³öµÄÁ½¸ö¶ÔÏóÃ»ÓĞ¹²Í¬×æÏÈ");
+                Debug.Assert(false, "æ‰€ç»™å‡ºçš„ä¸¤ä¸ªå¯¹è±¡æ²¡æœ‰å…±åŒç¥–å…ˆ");
                 return 0;
             }
 
 
-            // ÕâÊ±¿ÉÒÔÍ¨¹ıÅĞ¶Ïa bÖ®¼äµÄË³ĞòÀ´¶Ï¶¨ºó´úµÄË³Ğò
+            // è¿™æ—¶å¯ä»¥é€šè¿‡åˆ¤æ–­a bä¹‹é—´çš„é¡ºåºæ¥æ–­å®šåä»£çš„é¡ºåº
             List<AreaBase> children = a._Container.ChildrenCollection;
 
             int index_a = -1;
@@ -2397,14 +2379,14 @@ MessageBoxDefaultButton.Button2);
 
             if (index_a > index_b)
             {
-                // startÔÚendºóÃæ
+                // startåœ¨endåé¢
                 return 1;
             }
 
-            return -1;  // startÔÚendÇ°Ãæ
+            return -1;  // startåœ¨endå‰é¢
         }
 
-        // ´ÓÆğµãµ½ÖÕµã£¬¹¹Ôì°üº¬ËùÓĞĞÖµÜ¶ÔÏóµÄÊı×é
+        // ä»èµ·ç‚¹åˆ°ç»ˆç‚¹ï¼Œæ„é€ åŒ…å«æ‰€æœ‰å…„å¼Ÿå¯¹è±¡çš„æ•°ç»„
         List<AreaBase> GetRangeObjects(
             bool bIncludeStart,
             bool bIncludeEnd,
@@ -2429,17 +2411,17 @@ MessageBoxDefaultButton.Button2);
                 return result;
             }
              
-            // ÏÈ¹Û²ìÄÄ¸öÔÚÇ°Ãæ
+            // å…ˆè§‚å¯Ÿå“ªä¸ªåœ¨å‰é¢
             int nDirection = GetDirection(start, end);
 
             if (nDirection > 0)
             {
-                // ½»»»startºÍend
+                // äº¤æ¢startå’Œend
                 AreaBase temp = start;
                 start = end;
                 end = temp;
 
-                // ½»»»bool
+                // äº¤æ¢bool
                 bool bTemp = bIncludeStart;
                 bIncludeStart = bIncludeEnd;
                 bIncludeEnd = bTemp;
@@ -2450,28 +2432,28 @@ MessageBoxDefaultButton.Button2);
                 start = start.GetNextSibling();
                 if (start == null)
                 {
-                    return result;  // ·µ»Ø¿Õ¼¯ºÏ
+                    return result;  // è¿”å›ç©ºé›†åˆ
                 }
                 Debug.Assert(start != null, "");
             }
 
-            // ´Óstartµ½end£¬½¨Á¢Êı×é
+            // ä»startåˆ°endï¼Œå»ºç«‹æ•°ç»„
             for (; ; )
             {
                 if (bIncludeEnd == false
                     && start == end)
-                    break;  // ²»°üº¬Î²²¿
+                    break;  // ä¸åŒ…å«å°¾éƒ¨
 
                 Debug.Assert(start != null, "");
                 result.Add(start);
 
                 if (start == end)
-                    break;  // °üº¬Î²²¿
+                    break;  // åŒ…å«å°¾éƒ¨
 
                 start = start.GetNextSibling();
                 if (start == null)
                 {
-                    Debug.Assert(false, "¾¹È»Ã»ÓĞÓöÉÏend");
+                    Debug.Assert(false, "ç«Ÿç„¶æ²¡æœ‰é‡ä¸Šend");
                     break;
                 }
             }
@@ -2506,7 +2488,7 @@ MessageBoxDefaultButton.Button2);
             this.m_aSelectedArea.Remove(obj);
         }
 
-        // Ñ¡ÔñÒ»ÏµÁĞ¶ÔÏó
+        // é€‰æ‹©ä¸€ç³»åˆ—å¯¹è±¡
         void SelectObjects(List<AreaBase> aObject,
             SelectAction action)
         {
@@ -2519,7 +2501,7 @@ MessageBoxDefaultButton.Button2);
                 if (obj == null)
                     continue;
 
-                // Êı×é²»ÊÇm_aSelectedArea²ÅÄÜ×ö
+                // æ•°ç»„ä¸æ˜¯m_aSelectedAreaæ‰èƒ½åš
                 if (aObject != m_aSelectedArea)
                 {
                     if (action == SelectAction.On
@@ -2543,7 +2525,7 @@ MessageBoxDefaultButton.Button2);
                 /*
                 rectUpdate = Object.ToRootCoordinate(rectUpdate);
 
-                // ÓÉDataRoot×ø±ê£¬±ä»»ÎªÕûÌåÎÄµµ×ø±ê£¬È»ºó±ä»»ÎªÆÁÄ»×ø±ê
+                // ç”±DataRootåæ ‡ï¼Œå˜æ¢ä¸ºæ•´ä½“æ–‡æ¡£åæ ‡ï¼Œç„¶åå˜æ¢ä¸ºå±å¹•åæ ‡
                 rectUpdate.Offset(this.m_lWindowOrgX + m_nLeftBlank,
                     this.m_lWindowOrgY + m_nTopBlank);
                  */
@@ -2551,26 +2533,26 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // µÃµ½Ò»¸ö¶ÔÏóµÄ¾ØĞÎ(view×ø±ê)
+        // å¾—åˆ°ä¸€ä¸ªå¯¹è±¡çš„çŸ©å½¢(viewåæ ‡)
         RectangleF GetViewRect(AreaBase obj)
         {
             RectangleF rect = new RectangleF(0, 0, obj.Width, obj.Height);
 
             rect = obj.ToRootCoordinate(rect);
 
-            // ÓÉDataRoot×ø±ê£¬±ä»»ÎªÕûÌåÎÄµµ×ø±ê£¬È»ºó±ä»»Îªview×ø±ê
+            // ç”±DataRootåæ ‡ï¼Œå˜æ¢ä¸ºæ•´ä½“æ–‡æ¡£åæ ‡ï¼Œç„¶åå˜æ¢ä¸ºviewåæ ‡
             rect.Offset(this.m_lWindowOrgX + m_nLeftBlank,
                 this.m_lWindowOrgY + m_nTopBlank);
 
             return rect;
         }
 
-        // È·±£Ò»¸öÇøÓòÔÚ´°¿Ú¿Í»§Çø¿É¼û
+        // ç¡®ä¿ä¸€ä¸ªåŒºåŸŸåœ¨çª—å£å®¢æˆ·åŒºå¯è§
         // parameters:
-        //      rectCell    Òª¹Ø×¢µÄÇøÓò
-        //      rectCaret   Òª¹Ø×¢µÄÇøÓòÖĞ£¬ÓÃÓÚ²åÈë·û£¨ÈÈµã£©µÄ¾ØĞÎ¡£Ò»°ã¿ÉÒÔĞ¡ÓÚrectCell
+        //      rectCell    è¦å…³æ³¨çš„åŒºåŸŸ
+        //      rectCaret   è¦å…³æ³¨çš„åŒºåŸŸä¸­ï¼Œç”¨äºæ’å…¥ç¬¦ï¼ˆçƒ­ç‚¹ï¼‰çš„çŸ©å½¢ã€‚ä¸€èˆ¬å¯ä»¥å°äºrectCell
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisible(RectangleF rectCell,
             RectangleF rectCaret)
         {
@@ -2586,7 +2568,7 @@ MessageBoxDefaultButton.Button2);
             if (lDelta + rectCaret.Height >= this.ClientSize.Height)
             {
                 if (rectCaret.Height >= this.ClientSize.Height)
-                    DocumentOrgY = DocumentOrgY - (lDelta + (long)rectCaret.Height) + ClientSize.Height + /*µ÷ÕûÏµÊı*/ ((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2);
+                    DocumentOrgY = DocumentOrgY - (lDelta + (long)rectCaret.Height) + ClientSize.Height + /*è°ƒæ•´ç³»æ•°*/ ((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2);
                 else
                     DocumentOrgY = DocumentOrgY - (lDelta + (long)rectCaret.Height) + ClientSize.Height;
                 bScrolled = true;
@@ -2594,18 +2576,18 @@ MessageBoxDefaultButton.Button2);
             else if (lDelta < 0)
             {
                 if (rectCaret.Height >= this.ClientSize.Height)
-                    DocumentOrgY = DocumentOrgY - (lDelta) - /*µ÷ÕûÏµÊı*/ (((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2));
+                    DocumentOrgY = DocumentOrgY - (lDelta) - /*è°ƒæ•´ç³»æ•°*/ (((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2));
                 else
                     DocumentOrgY = DocumentOrgY - (lDelta);
                 bScrolled = true;
             }
             else
             {
-                // y²»ĞèÒª¾í¹ö
+                // yä¸éœ€è¦å·æ»š
             }
 
             ////
-            // Ë®Æ½·½Ïò
+            // æ°´å¹³æ–¹å‘
             lDelta = 0;
 
             lDelta = (long)rectCell.X;
@@ -2614,7 +2596,7 @@ MessageBoxDefaultButton.Button2);
             if (lDelta + rectCaret.Width >= this.ClientSize.Width)
             {
                 if (rectCaret.Width >= this.ClientSize.Width)
-                    DocumentOrgX = DocumentOrgX - (lDelta + (long)rectCaret.Width) + ClientSize.Width + /*µ÷ÕûÏµÊı*/ ((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2);
+                    DocumentOrgX = DocumentOrgX - (lDelta + (long)rectCaret.Width) + ClientSize.Width + /*è°ƒæ•´ç³»æ•°*/ ((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2);
                 else
                     DocumentOrgX = DocumentOrgX - (lDelta + (long)rectCaret.Width) + ClientSize.Width;
                 bScrolled = true;
@@ -2622,23 +2604,23 @@ MessageBoxDefaultButton.Button2);
             else if (lDelta < 0)
             {
                 if (rectCaret.Width >= this.ClientSize.Width)
-                    DocumentOrgX = DocumentOrgX - (lDelta) - /*µ÷ÕûÏµÊı*/ (((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2));
+                    DocumentOrgX = DocumentOrgX - (lDelta) - /*è°ƒæ•´ç³»æ•°*/ (((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2));
                 else
                     DocumentOrgX = DocumentOrgX - (lDelta);
                 bScrolled = true;
             }
             else
             {
-                // x²»ĞèÒª¾í¹ö
+                // xä¸éœ€è¦å·æ»š
             }
 
 
             return bScrolled;
         }
 
-        // È·±£Ò»¸öµ¥ÔªÔÚ´°¿Ú¿Í»§Çø¿É¼û
+        // ç¡®ä¿ä¸€ä¸ªå•å…ƒåœ¨çª—å£å®¢æˆ·åŒºå¯è§
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisible(AreaBase obj)
         {
             RectangleF rectUpdate = GetViewRect(obj);
@@ -2650,10 +2632,10 @@ MessageBoxDefaultButton.Button2);
             return EnsureVisible(rectCell, rectCaret);
         }
 
-        // È·±£Ò»¸ö¶ÔÏóµ¥ÔªÔÚ´°¿Ú¿Í»§Çø¿É¼û
-        // ¶ÔDayAreaÓĞÌØÊâ´¦Àí
+        // ç¡®ä¿ä¸€ä¸ªå¯¹è±¡å•å…ƒåœ¨çª—å£å®¢æˆ·åŒºå¯è§
+        // å¯¹DayAreaæœ‰ç‰¹æ®Šå¤„ç†
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisibleWhenScrolling(AreaBase obj)
         {
 
@@ -2662,18 +2644,18 @@ MessageBoxDefaultButton.Button2);
             if (obj is DayArea)
             {
                 DayArea day = (DayArea)obj;
-                // Èç¹ûÊÇÃ¿ÔÂµÚÒ»¸öĞÇÆÚµÄÈÕ×Ó
+                // å¦‚æœæ˜¯æ¯æœˆç¬¬ä¸€ä¸ªæ˜ŸæœŸçš„æ—¥å­
                 if (day.Container.Week == 1)
                 {
-                // µ÷Õû¾ØĞÎ£¬ÒÔ°üÀ¨ĞÇÆÚÃû±êÌâ
+                // è°ƒæ•´çŸ©å½¢ï¼Œä»¥åŒ…æ‹¬æ˜ŸæœŸåæ ‡é¢˜
                     rectUpdate.Y -= this.DataRoot.m_nDayOfWeekTitleHeight;
                     rectUpdate.Height += this.DataRoot.m_nDayOfWeekTitleHeight;
                 }
             }
 
             // TODO:
-            // Èç¹ûÊÇÔÂ¡¢ÄêµÈ½Ï´ó³ß´çµÄÎïÌå£¬Ö»ÒªÕâ¸öÎïÌåµ±Ç°²¿·Ö¿É¼û£¬¾Í²»±Ø¾í¹öÁË
-            // Ò²¿ÉÒÔÍ¨¹ı°ÑcaretÉèÖÃÎªÒÑ¾­¿É¼ûµÄ²¿·Ö£¬À´ÊµÏÖÀàËÆĞ§¹û
+            // å¦‚æœæ˜¯æœˆã€å¹´ç­‰è¾ƒå¤§å°ºå¯¸çš„ç‰©ä½“ï¼Œåªè¦è¿™ä¸ªç‰©ä½“å½“å‰éƒ¨åˆ†å¯è§ï¼Œå°±ä¸å¿…å·æ»šäº†
+            // ä¹Ÿå¯ä»¥é€šè¿‡æŠŠcaretè®¾ç½®ä¸ºå·²ç»å¯è§çš„éƒ¨åˆ†ï¼Œæ¥å®ç°ç±»ä¼¼æ•ˆæœ
 
             RectangleF rectCell = rectUpdate;
 
@@ -2682,10 +2664,10 @@ MessageBoxDefaultButton.Button2);
             return EnsureVisible(rectCell, rectCaret);
         }
 
-        // µã»÷²âÊÔ
+        // ç‚¹å‡»æµ‹è¯•
         // parameters:
-        //      p_x µã»÷Î»ÖÃx¡£ÎªÆÁÄ»×ø±ê
-        //      type    Òª²âÊÔµÄ×îÏÂ¼¶£¨Ò¶¼¶£©¶ÔÏóµÄÀàĞÍ¡£Èç¹ûÎªnull£¬±íÊ¾Ò»Ö±µ½Ä©¶Ë
+        //      p_x ç‚¹å‡»ä½ç½®xã€‚ä¸ºå±å¹•åæ ‡
+        //      type    è¦æµ‹è¯•çš„æœ€ä¸‹çº§ï¼ˆå¶çº§ï¼‰å¯¹è±¡çš„ç±»å‹ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸€ç›´åˆ°æœ«ç«¯
         void HitTest(long p_x,
             long p_y,
             Type dest_type,
@@ -2699,20 +2681,20 @@ MessageBoxDefaultButton.Button2);
                 bIsRequiredType = true;
 
 
-            // »»ËãÎªÕûÌåÎÄµµ(°üº¬ÉÏÏÂ×óÓÒµÄ¿Õ°×ÇøÓò)×ø±ê
+            // æ¢ç®—ä¸ºæ•´ä½“æ–‡æ¡£(åŒ…å«ä¸Šä¸‹å·¦å³çš„ç©ºç™½åŒºåŸŸ)åæ ‡
             long x = p_x - m_lWindowOrgX;
             long y = p_y - m_lWindowOrgY;
 
             if (y < this.m_nTopBlank)
-                result.AreaPortion = AreaPortion.TopBlank;  // ÉÏ·½¿Õ°×
+                result.AreaPortion = AreaPortion.TopBlank;  // ä¸Šæ–¹ç©ºç™½
             else if (y > this.m_nTopBlank + this.m_lContentHeight)
-                result.AreaPortion = AreaPortion.BottomBlank;  // ÏÂ·½¿Õ°×
-            else if ((dest_type == null || bIsRequiredType == true) // Èç¹ûÄ©¼¶ÀàĞÍÓĞÌØÊâÒªÇó£¬Ôò×óÓÒ¿Õ°×¶¼Ëã×÷ÏÂ¼¶¶ÔÏóµÄ·¶Î§
+                result.AreaPortion = AreaPortion.BottomBlank;  // ä¸‹æ–¹ç©ºç™½
+            else if ((dest_type == null || bIsRequiredType == true) // å¦‚æœæœ«çº§ç±»å‹æœ‰ç‰¹æ®Šè¦æ±‚ï¼Œåˆ™å·¦å³ç©ºç™½éƒ½ç®—ä½œä¸‹çº§å¯¹è±¡çš„èŒƒå›´
                 && x < this.m_nLeftBlank)
-                result.AreaPortion = AreaPortion.LeftBlank;  // ×ó·½¿Õ°×
+                result.AreaPortion = AreaPortion.LeftBlank;  // å·¦æ–¹ç©ºç™½
             else if ((dest_type == null || bIsRequiredType == true)
                 && x > this.m_nLeftBlank + this.m_lContentWidth)
-                result.AreaPortion = AreaPortion.RightBlank;  // ÓÒ·½¿Õ°×
+                result.AreaPortion = AreaPortion.RightBlank;  // å³æ–¹ç©ºç™½
             else
             {
                 if (dest_type == typeof(CalendarControl))
@@ -2728,7 +2710,7 @@ MessageBoxDefaultButton.Button2);
                 long x = p.X - xOffset;
                 long y = p.Y - yOffset;
                  * */
-                // ½»¸øÎÄµµ¶ÔÏó´¦Àí
+                // äº¤ç»™æ–‡æ¡£å¯¹è±¡å¤„ç†
                 this.DataRoot.HitTest(x - m_nLeftBlank, 
                     y - m_nTopBlank,
                     dest_type,
@@ -2761,7 +2743,7 @@ MessageBoxDefaultButton.Button2);
                 int nClientWidth = this.ClientSize.Width;
                 int nClientHeight = this.ClientSize.Height;
 
-                // ÎÄµµ³ß´ç
+                // æ–‡æ¡£å°ºå¯¸
                 long lDocumentWidth = DocumentWidth;
                 long lDocumentHeight = DocumentHeight;
 
@@ -2783,7 +2765,7 @@ MessageBoxDefaultButton.Button2);
                     else
                         this.m_h_ratio = 1.0F;
 
-                    // Ë®Æ½·½Ïò
+                    // æ°´å¹³æ–¹å‘
                     API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
                     si.cbSize = Marshal.SizeOf(si);
@@ -2811,7 +2793,7 @@ MessageBoxDefaultButton.Button2);
                     else
                         this.m_v_ratio = 1.0F;
 
-                    // ´¹Ö±·½Ïò
+                    // å‚ç›´æ–¹å‘
                     API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
                     si.cbSize = Marshal.SizeOf(si);
@@ -2831,9 +2813,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ÉèÖÃÊı¾İ
+        // è®¾ç½®æ•°æ®
         // parameters:
-        //      strDataString   ¸ñÊ½Èç '19980101-20010505,20030701-20030801'
+        //      strDataString   æ ¼å¼å¦‚ '19980101-20010505,20030701-20030801'
         public int SetData(
             string strRangeString,
             int nState,
@@ -2857,7 +2839,7 @@ MessageBoxDefaultButton.Button2);
 
             /*
             this.m_lContentWidth = this.DataRoot.Width;
-            this.m_lContentHeight = this.DataRoot.Height;   // ÓÃÕûÊı£¬Ê¹ÎªÁËÌá¸ßËÙ¶È¡£×¢ÒâÒª¼°Ê±ĞŞ¸Ä
+            this.m_lContentHeight = this.DataRoot.Height;   // ç”¨æ•´æ•°ï¼Œä½¿ä¸ºäº†æé«˜é€Ÿåº¦ã€‚æ³¨æ„è¦åŠæ—¶ä¿®æ”¹
              * */
 
             AfterDocumentChanged(ScrollBarMember.Both);
@@ -2867,22 +2849,22 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // ÏµÍ³ÄÚÖÃµÄ¸ñ×Ó×´Ì¬ÅäÖÃ
+        // ç³»ç»Ÿå†…ç½®çš„æ ¼å­çŠ¶æ€é…ç½®
         public DayStateDefCollection DefaultDayStateDefCollection()
         {
             DayStateDefCollection array = new DayStateDefCollection();
 
-            // ¹¤×÷ÈÕ
+            // å·¥ä½œæ—¥
             DayStateDef state = new DayStateDef();
-            state.Caption = "¹¤×÷ÈÕ";
+            state.Caption = "å·¥ä½œæ—¥";
             state.BackColor = Color.White;
             state.TextColor = Color.Black;
             state.Icon = this.imageList_stateIcons.Images[0];
             array.Add(state);
 
-            // ĞİÏ¢ÈÕ
+            // ä¼‘æ¯æ—¥
             state = new DayStateDef();
-            state.Caption = "ĞİÏ¢ÈÕ";
+            state.Caption = "ä¼‘æ¯æ—¥";
             state.BackColor = Color.LightYellow;
             state.TextColor = Color.Red;
             state.Icon = this.imageList_stateIcons.Images[1];
@@ -2898,7 +2880,7 @@ MessageBoxDefaultButton.Button2);
             if (first_year == null)
                 return "";
 
-            DayArea first_day = this.DataRoot.FindDayArea(-1, -1, -1); // »ñµÃµÚÒ»Ìì
+            DayArea first_day = this.DataRoot.FindDayArea(-1, -1, -1); // è·å¾—ç¬¬ä¸€å¤©
             if (first_day == null)
                 return "";
 
@@ -2923,7 +2905,7 @@ MessageBoxDefaultButton.Button2);
             return first_day.Name8;
         }
 
-        // °´ÕÕ¸ø¶¨µÄÊ±¼ä·¶Î§³õÊ¼»¯Êı¾İÊ÷¡£
+        // æŒ‰ç…§ç»™å®šçš„æ—¶é—´èŒƒå›´åˆå§‹åŒ–æ•°æ®æ ‘ã€‚
         public int InitialDataTree(string strRangeString,
             out string strError)
         {
@@ -2937,13 +2919,13 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = "½âÎöÈÕÆÚ×Ö·û´® '" + strRangeString + "' Ê±·¢Éú´íÎó: " + ex.Message;
+                strError = "è§£ææ—¥æœŸå­—ç¬¦ä¸² '" + strRangeString + "' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
             this.ClearMember();
 
-            // ¹¹ÔìµÚÒ»¼¶¶ÔÏó Äê
+            // æ„é€ ç¬¬ä¸€çº§å¯¹è±¡ å¹´
             if (this.DataRoot == null)
                 this.DataRoot = new DataRoot();
             else
@@ -2955,11 +2937,11 @@ MessageBoxDefaultButton.Button2);
             long lMax = rl.max();
             long lMin = rl.min();
 
-            // ÌáÈ¡ÆğÊ¼ºÍ½áÊøÈÕÆÚ
+            // æå–èµ·å§‹å’Œç»“æŸæ—¥æœŸ
             string strStartDate = lMin.ToString().PadLeft(8, '0');
             string strEndDate = lMax.ToString().PadLeft(8, '0');
 
-            // ÌáÈ¡ÆğÊ¼ºÍ½áÊøÄê
+            // æå–èµ·å§‹å’Œç»“æŸå¹´
             string strStartYear = strStartDate.Substring(0, 4);
             string strEndYear = strEndDate.Substring(0, 4);
 
@@ -2977,7 +2959,7 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // ÎªÖ¸¶¨µÄ¸ñ×ÓÉèÖÃÖ¸¶¨×´Ì¬
+        // ä¸ºæŒ‡å®šçš„æ ¼å­è®¾ç½®æŒ‡å®šçŠ¶æ€
         public int SetDayState(
             int nState,
             string strDataString,
@@ -2990,7 +2972,7 @@ MessageBoxDefaultButton.Button2);
 
             if (this.DataRoot.YearCollection.Count == 0)
             {
-                strError = "ÈÕÆÚ·¶Î§ÉĞÎ´³õÊ¼»¯";
+                strError = "æ—¥æœŸèŒƒå›´å°šæœªåˆå§‹åŒ–";
                 return -1;
             }
 
@@ -3002,7 +2984,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = "½âÎöÈÕÆÚ×Ö·û´® '" + strDataString + "' Ê±·¢Éú´íÎó: " + ex.Message;
+                strError = "è§£ææ—¥æœŸå­—ç¬¦ä¸² '" + strDataString + "' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -3012,31 +2994,31 @@ MessageBoxDefaultButton.Button2);
             long lMax = rl.max();
             long lMin = rl.min();
 
-            // ÌáÈ¡ÆğÊ¼ºÍ½áÊøÈÕÆÚ
+            // æå–èµ·å§‹å’Œç»“æŸæ—¥æœŸ
             string strStartDate = lMin.ToString().PadLeft(8, '0');
             string strEndDate = lMax.ToString().PadLeft(8, '0');
 
-            // ÌáÈ¡ÆğÊ¼ºÍ½áÊøÄê
+            // æå–èµ·å§‹å’Œç»“æŸå¹´
             string strStartYear = strStartDate.Substring(0, 4);
             string strEndYear = strEndDate.Substring(0, 4);
 
             int nStartYear = Convert.ToInt32(strStartYear);
             int nEndYear = Convert.ToInt32(strEndYear);
 
-            // ¼ì²é·¶Î§
+            // æ£€æŸ¥èŒƒå›´
             if (nStartYear < this.DataRoot.MinYear)
             {
-                strError = "ÒªÉèÖÃµÄÈÕÆÚ·¶Î§Í·²¿ '"+nStartYear.ToString().PadLeft(4, '0')+"' ÄêÔ½¹ıÁË µ±Ç°·¶Î§µÄÍ·²¿ '"+this.DataRoot.MinYear.ToString().PadLeft(4,'0')+"'";
+                strError = "è¦è®¾ç½®çš„æ—¥æœŸèŒƒå›´å¤´éƒ¨ '"+nStartYear.ToString().PadLeft(4, '0')+"' å¹´è¶Šè¿‡äº† å½“å‰èŒƒå›´çš„å¤´éƒ¨ '"+this.DataRoot.MinYear.ToString().PadLeft(4,'0')+"'";
                 return -1;
             }
 
             if (nEndYear > this.DataRoot.MaxYear)
             {
-                strError = "ÒªÉèÖÃµÄÈÕÆÚ·¶Î§Î²²¿ '" + nEndYear.ToString().PadLeft(4, '0') + "' ÄêÔ½¹ıÁË µ±Ç°·¶Î§µÄÍ·²¿ '" + this.DataRoot.MaxYear.ToString().PadLeft(4, '0') + "'";
+                strError = "è¦è®¾ç½®çš„æ—¥æœŸèŒƒå›´å°¾éƒ¨ '" + nEndYear.ToString().PadLeft(4, '0') + "' å¹´è¶Šè¿‡äº† å½“å‰èŒƒå›´çš„å¤´éƒ¨ '" + this.DataRoot.MaxYear.ToString().PadLeft(4, '0') + "'";
                 return -1;
             }
 
-            // ÉèÖÃ±»Ñ¡ÈÕÆÚµÄ×´Ì¬
+            // è®¾ç½®è¢«é€‰æ—¥æœŸçš„çŠ¶æ€
             for (int i = 0; i < rl.Count; i++)
             {
                 RangeItem range = (RangeItem)rl[i];
@@ -3062,11 +3044,11 @@ MessageBoxDefaultButton.Button2);
                 DayArea objDay = this.DataRoot.FindDayArea(year, month, day);
                 if (objDay == null)
                 {
-                    strError = "ÈÕ¶ÔÏóÔÚÊ÷½á¹¹ÖĞÃ»ÓĞÕÒµ½: " + year.ToString() + "." + month.ToString() + "." + day.ToString();
+                    strError = "æ—¥å¯¹è±¡åœ¨æ ‘ç»“æ„ä¸­æ²¡æœ‰æ‰¾åˆ°: " + year.ToString() + "." + month.ToString() + "." + day.ToString();
                     return -1;
                 }
 
-                // ÎªÒ»¸öÁ¬ĞøµÄÈÕ¶ÎÂäÉèÖÃ×´Ì¬
+                // ä¸ºä¸€ä¸ªè¿ç»­çš„æ—¥æ®µè½è®¾ç½®çŠ¶æ€
                 for (; ; )
                 {
 
@@ -3098,7 +3080,7 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // »ñµÃ±íÊ¾È«²¿ËùÒªµÄ×´Ì¬µÄÈÕ×Ó µÄÈÕÆÚ×Ö·û´®
+        // è·å¾—è¡¨ç¤ºå…¨éƒ¨æ‰€è¦çš„çŠ¶æ€çš„æ—¥å­ çš„æ—¥æœŸå­—ç¬¦ä¸²
         public int GetDates(int nState,
             out string strDateString,
             out string strError)
@@ -3109,28 +3091,28 @@ MessageBoxDefaultButton.Button2);
             /*
             List<int> levels = new List<int>();
             levels.Add(-1); // DataRoot
-            levels.Add(-1); // Äê
-            levels.Add(-1); // ÔÂ
-            levels.Add(-1); // ÖÜ
-            levels.Add(-1); // ÈÕ
+            levels.Add(-1); // å¹´
+            levels.Add(-1); // æœˆ
+            levels.Add(-1); // å‘¨
+            levels.Add(-1); // æ—¥
 
-                    // ¸ù¾İ¸ø³öµÄNameValueÖµ, ´Óµ±Ç°¶ÔÏó¿ªÊ¼(°üÀ¨µ±Ç°¶ÔÏó) ¶¨Î»ºó´ú¶ÔÏó
+                    // æ ¹æ®ç»™å‡ºçš„NameValueå€¼, ä»å½“å‰å¯¹è±¡å¼€å§‹(åŒ…æ‹¬å½“å‰å¯¹è±¡) å®šä½åä»£å¯¹è±¡
             AreaBase obj = FindByNameValue(levels);
             if (obj == null)
                 return 0;
              * */
 
 
-            DayArea objDay = this.DataRoot.FindDayArea(-1, -1, -1); // »ñµÃµÚÒ»Ìì
+            DayArea objDay = this.DataRoot.FindDayArea(-1, -1, -1); // è·å¾—ç¬¬ä¸€å¤©
             if (objDay == null)
                 return 0;
 
             string strStart = "";
             string strEnd = "";
-            // ÎªÒ»¸öÁ¬ĞøµÄÈÕ¶ÎÂäÉèÖÃ×´Ì¬
+            // ä¸ºä¸€ä¸ªè¿ç»­çš„æ—¥æ®µè½è®¾ç½®çŠ¶æ€
             for (; ; )
             {
-                // Èç¹ûÕıºÃÊÇËùÒªµÄ×´Ì¬
+                // å¦‚æœæ­£å¥½æ˜¯æ‰€è¦çš„çŠ¶æ€
                 if (objDay != null
                     && objDay.State == nState)
                 {
@@ -3139,8 +3121,8 @@ MessageBoxDefaultButton.Button2);
                     else
                         strEnd = objDay.Name8;
                 }
-                else if (objDay == null // ×îºóÒ»´Î
-                    || objDay.State != nState // Èç¹û×´Ì¬²»ÊÇËùÒªµÄ
+                else if (objDay == null // æœ€åä¸€æ¬¡
+                    || objDay.State != nState // å¦‚æœçŠ¶æ€ä¸æ˜¯æ‰€è¦çš„
                     ) 
                 {
                     if (strStart != "" && strEnd != "")
@@ -3194,7 +3176,7 @@ MessageBoxDefaultButton.Button2);
             day = Convert.ToInt32(strDate.Substring(6, 2));
         }
 
-        // Ä£·ÂMouseMoveÊÂ¼şµ¼ÖÂ¾í¹ö
+        // æ¨¡ä»¿MouseMoveäº‹ä»¶å¯¼è‡´å·æ»š
         private void timer_dragScroll_Tick(object sender, EventArgs e)
         {
             if (this.Capture == false)

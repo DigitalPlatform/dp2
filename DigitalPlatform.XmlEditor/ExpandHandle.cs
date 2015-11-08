@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
@@ -10,7 +10,7 @@ namespace DigitalPlatform.Xml
 {
 	public class ExpandHandle : Visual
 	{
-		// ÅÐ¶ÏÒ»¸övisualÊÇ·ñÊÇExpandHandle
+		// åˆ¤æ–­ä¸€ä¸ªvisualæ˜¯å¦æ˜¯ExpandHandle
 		public override bool IsExpandHandle()
 		{
 			return true;
@@ -24,7 +24,7 @@ namespace DigitalPlatform.Xml
 				if (item == null)
 					return ExpandIconStyle.Minus;
 
-				//Èç¹ûËüÊÇÊôÐÔµÄÕ¹¿ª°´Å¥
+				//å¦‚æžœå®ƒæ˜¯å±žæ€§çš„å±•å¼€æŒ‰é’®
 				if (this.Name == "ExpandAttributes")
 				{
 					if (item.m_attrsExpand == ExpandStyle.Expand)
@@ -55,16 +55,16 @@ namespace DigitalPlatform.Xml
 		}	
 
         // return:
-        //      -1  ×ø±ê²»ÔÚ±¾ÇøÓò
-        //      0   ÎÄ×ÖÇø
-        //      1   ¿Õ°×
-        //      2   ·ìÏ¶
+        //      -1  åæ ‡ä¸åœ¨æœ¬åŒºåŸŸ
+        //      0   æ–‡å­—åŒº
+        //      1   ç©ºç™½
+        //      2   ç¼éš™
 		public override int HitTest(Point p,
 			out Visual retVisual)
 		{
 			retVisual = null;
-			int nResizeAreaWidth = 4;   //·ìÏ¶µÄ¿í¶È
-			//ÔÚ·ìÉÏ
+			int nResizeAreaWidth = 4;   //ç¼éš™çš„å®½åº¦
+			//åœ¨ç¼ä¸Š
 			if ( p.X >= this.Rect.X + this.Rect.Width - (nResizeAreaWidth/2)
 				&& p.X < this.Rect.X + this.Rect.Width + (nResizeAreaWidth/2)) 
 			{
@@ -72,7 +72,7 @@ namespace DigitalPlatform.Xml
 				return  2;
 			}
 
-			//²»ÔÚÇøÓò
+			//ä¸åœ¨åŒºåŸŸ
 			if (p.X < this.Rect.X 
 				|| p.Y < this.Rect.Y )
 			{
@@ -84,8 +84,8 @@ namespace DigitalPlatform.Xml
 				return -1;
 			}
 
-			//ÔÚÏßÌõºÍ¿Õ°×
-			//1. ×óÏßÌõ¿Õ°×´¦
+			//åœ¨çº¿æ¡å’Œç©ºç™½
+			//1. å·¦çº¿æ¡ç©ºç™½å¤„
 			if (p.X > this.Rect.X 
 				&& p.X < this.Rect.X + this.LeftResWidth
 				&& p.Y > this.Rect.Y
@@ -95,7 +95,7 @@ namespace DigitalPlatform.Xml
 				return -1;
 			}
 
-			// 2.ÓÒÏßÌõ¿Õ°×´¦
+			// 2.å³çº¿æ¡ç©ºç™½å¤„
 			if (p.X > this.Rect.X + this.Rect.Width - this.RightResWidth
 				&& p.X < this.Rect.X + this.Rect.Width
 				&& p.Y > this.Rect.Y
@@ -104,7 +104,7 @@ namespace DigitalPlatform.Xml
 				retVisual = this;
 				return -1;
 			}
-			// 3.ÉÏÏßÌõ¿Õ°×´¦
+			// 3.ä¸Šçº¿æ¡ç©ºç™½å¤„
 			if (p.Y > this.Rect.Y
 				&& p.Y < this.Rect.Y + this.TopResHeight
 				&& p.X > this.Rect.X
@@ -113,7 +113,7 @@ namespace DigitalPlatform.Xml
 				retVisual = this;
 				return -1;
 			}
-			// 4.ÏÂÏßÌõ¿Õ°×´¦
+			// 4.ä¸‹çº¿æ¡ç©ºç™½å¤„
 			if (p.Y > this.Rect.Y + this.Rect.Height - this.BottomResHeight
 				&& p.Y < this.Rect.Y + this.Rect.Height
 				&& p.X > this.Rect.X
@@ -124,7 +124,7 @@ namespace DigitalPlatform.Xml
 			}
 
 			
-			//ÔÚÎÄ×ÖÇø
+			//åœ¨æ–‡å­—åŒº
 			if (p.X >= this.Rect.X + this.LeftResWidth 
 				&& p.Y >= this.Rect.Y + this.TopResHeight 
 				&& p.X < this.Rect.X + this.Rect.Width - this.RightResWidth
@@ -161,8 +161,10 @@ namespace DigitalPlatform.Xml
 				this.Rect.Height);
 
 			Color backColor = this.BackColor ;
-			Brush brush = new SolidBrush(this.BackColor );
-			pe.Graphics .FillRectangle (brush,rectPaint);
+            using (Brush brush = new SolidBrush(this.BackColor))
+            {
+                pe.Graphics.FillRectangle(brush, rectPaint);
+            }
 
 			Item item = this.GetItem();
 			XmlEditor editor = null;
@@ -176,7 +178,7 @@ namespace DigitalPlatform.Xml
 			}
 			else
 			{
-				//µ÷DrawLines»­±ß¿ò
+				//è°ƒDrawLinesç”»è¾¹æ¡†
 				this.DrawLines (rectPaint,
 					this.TopBorderHeight,
 					this.BottomBorderHeight,
@@ -194,24 +196,7 @@ namespace DigitalPlatform.Xml
 				rectPaint.Y,
 				nWidth,
 				this.expandIconStyle);
-
-			/*
-						//»­µÃÏÂÃæµÄÏß
-						Pen pen = new Pen (Color.Gray );
-						pe.Graphics.DrawLine  (pen,
-							rectPaint.X + rectPaint.Width /2,
-							rectPaint.Y + nWidth ,
-							rectPaint.X + rectPaint.Width /2,
-							rectPaint.Y + rectPaint.Height -5);
-
-						pe.Graphics.DrawLine  (pen,
-							rectPaint.X + rectPaint.Width /2,
-							rectPaint.Y + rectPaint.Height -5,
-							rectPaint.X + rectPaint.Width /2+3,
-							rectPaint.Y + rectPaint.Height -5);
-			*/
 		}
-
 		
 		public void PaintButton(Graphics g,
 			int x,
@@ -219,56 +204,55 @@ namespace DigitalPlatform.Xml
 			int nWidth,
 			ExpandIconStyle iconStyle)
 		{
-			Pen pen = new Pen (Color.Gray );
-			Pen penMid = new Pen (Color.Black );
+			using(Pen pen = new Pen (Color.Gray ))
+            using (Pen penMid = new Pen(Color.Black))
+            {
+                //ä¸Šçº¿
+                g.DrawLine(pen,
+                    x,
+                    y,
+                    x + nWidth - 1,
+                    y);
 
-			//ÉÏÏß
-			g.DrawLine(pen,
-				x ,
-				y ,
-				x + nWidth -1,
-				y );
-						
-			//ÏÂÏß
-			g.DrawLine (pen,
-				x,
-				y + nWidth -1,
-				x + nWidth -1,
-				y + nWidth -1);
+                //ä¸‹çº¿
+                g.DrawLine(pen,
+                    x,
+                    y + nWidth - 1,
+                    x + nWidth - 1,
+                    y + nWidth - 1);
 
 
-			//×óÏß
-			g.DrawLine (pen,
-				x,
-				y,
-				x,
-				y + nWidth -1);
+                //å·¦çº¿
+                g.DrawLine(pen,
+                    x,
+                    y,
+                    x,
+                    y + nWidth - 1);
 
-			//ÓÒÏß
-			g.DrawLine (pen,
-				x + nWidth -1,
-				y  ,
-				x + nWidth -1,
-				y + nWidth -1);
+                //å³çº¿
+                g.DrawLine(pen,
+                    x + nWidth - 1,
+                    y,
+                    x + nWidth - 1,
+                    y + nWidth - 1);
 
-			//ÖÐ¼äºáÏò
-			g.DrawLine (penMid,
-				x + 2,
-				y + nWidth/2,
-				x + nWidth -2 -1,
-				y + nWidth/2);
+                //ä¸­é—´æ¨ªå‘
+                g.DrawLine(penMid,
+                    x + 2,
+                    y + nWidth / 2,
+                    x + nWidth - 2 - 1,
+                    y + nWidth / 2);
 
-			if (iconStyle == ExpandIconStyle.Plus)
-			{
-				//ÖÐ¼ä×ÝÏò
-				g.DrawLine (penMid,
-					x + nWidth/2,
-					y + 2,
-					x + nWidth/2,
-					y + nWidth -2 -1);
-			}
-			penMid.Dispose ();
-			pen .Dispose ();
+                if (iconStyle == ExpandIconStyle.Plus)
+                {
+                    //ä¸­é—´çºµå‘
+                    g.DrawLine(penMid,
+                        x + nWidth / 2,
+                        y + 2,
+                        x + nWidth / 2,
+                        y + nWidth - 2 - 1);
+                }
+            }
 		}
 
 

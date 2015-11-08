@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -15,10 +15,10 @@ namespace DigitalPlatform.CommonControl
     public partial class CheckedComboBox : UserControl
     {
         public bool HideCloseButton = true;
-        public int DropDownHeight = -1; // -1 ±íÊ¾ÓÃÈ±Ê¡Öµ
-        public int DropDownWidth = -1;  // -1 ±íÊ¾ÓÃÈ±Ê¡Öµ
+        public int DropDownHeight = -1; // -1 è¡¨ç¤ºç”¨ç¼ºçœå€¼
+        public int DropDownWidth = -1;  // -1 è¡¨ç¤ºç”¨ç¼ºçœå€¼
 
-        // µ±ÏÂÀ­ÁĞ±í³öÏÖµÄÊ±ºò¡£Ò²¾ÍÊÇPropertyStringDialog¶Ô»°¿ò´ò¿ªÇ°
+        // å½“ä¸‹æ‹‰åˆ—è¡¨å‡ºç°çš„æ—¶å€™ã€‚ä¹Ÿå°±æ˜¯PropertyStringDialogå¯¹è¯æ¡†æ‰“å¼€å‰
         [Category("New Event")]
         public event EventHandler DropDown = null;
 
@@ -56,7 +56,7 @@ namespace DigitalPlatform.CommonControl
 
         string m_strCaption = "";
 
-        // È«²¿¿ÉÓÃÖµµÄÁĞ±í
+        // å…¨éƒ¨å¯ç”¨å€¼çš„åˆ—è¡¨
         public List<string> Items = new List<string>();
 
 
@@ -75,7 +75,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // °ÑtextboxµÄ±ß¿òÀí½âÎª×ÜµÄ±ß¿ò
+        // æŠŠtextboxçš„è¾¹æ¡†ç†è§£ä¸ºæ€»çš„è¾¹æ¡†
         [Category("Appearance")]
         [DescriptionAttribute("Border style of the control")]
         [DefaultValue(typeof(System.Windows.Forms.BorderStyle), "None")]
@@ -89,7 +89,7 @@ namespace DigitalPlatform.CommonControl
             {
                 base.BorderStyle = value;
 
-                OnTextBoxHeightChanged();   // ±ß¿ò¸Ä±ä£¬µ¼ÖÂ¸ß¶È¸Ä±ä
+                OnTextBoxHeightChanged();   // è¾¹æ¡†æ”¹å˜ï¼Œå¯¼è‡´é«˜åº¦æ”¹å˜
             }
         }
 
@@ -150,7 +150,7 @@ namespace DigitalPlatform.CommonControl
 
             m_oldTextBoxLocation = this.textBox_text.Location;
 
-            OnTextBoxHeightChanged();   // ³õÊ¼»¯¸ß¶È
+            OnTextBoxHeightChanged();   // åˆå§‹åŒ–é«˜åº¦
         }
 
 #if NO
@@ -161,7 +161,7 @@ namespace DigitalPlatform.CommonControl
 
 
             /*
-            this.button_dropDownList.Height = this.Height - 2;  // ÈÃ³ö±ß¿ò
+            this.button_dropDownList.Height = this.Height - 2;  // è®©å‡ºè¾¹æ¡†
             this.button_dropDownList.Location = new Point(this.ClientRectangle.Width - this.button_dropDownList.Width,
                 this.button_dropDownList.Location.Y);
             this.textBox_text.Width = this.ClientRectangle.Width - this.button_dropDownList.Width*2;
@@ -289,11 +289,11 @@ namespace DigitalPlatform.CommonControl
             Debug.WriteLine("MouseDown");
 
             /*
-             * // TODO: MouseDownÏûÏ¢ÔÚÏÂÀ­µÄLostFocusÒÔºó²ÅµÃµ½£¬ÔİÊ±ÎŞ·¨½â¾öÊ¶±ğÎÊÌâ
-            // ÏÂÀ­ÒÑ¾­ÏÔÊ¾µÄÇé¿öÏÂ£¬µã±¾°´Å¥
+             * // TODO: MouseDownæ¶ˆæ¯åœ¨ä¸‹æ‹‰çš„LostFocusä»¥åæ‰å¾—åˆ°ï¼Œæš‚æ—¶æ— æ³•è§£å†³è¯†åˆ«é—®é¢˜
+            // ä¸‹æ‹‰å·²ç»æ˜¾ç¤ºçš„æƒ…å†µä¸‹ï¼Œç‚¹æœ¬æŒ‰é’®
             if (dlg != null && dlg.IsDisposed == false)
             {
-                // ²»ÔÙÖØ¸´´ò¿ª
+                // ä¸å†é‡å¤æ‰“å¼€
                 return;
             }
              * */
@@ -331,7 +331,7 @@ namespace DigitalPlatform.CommonControl
             if (this.DropDownHeight != -1)
                 dlg.Height = this.DropDownHeight;
 
-            dlg.Show(); // ÎŞÄ£Ê½¶Ô»°¿ò
+            dlg.Show(); // æ— æ¨¡å¼å¯¹è¯æ¡†
             // dlg.ShowDialog(this);
 
             /*
@@ -363,52 +363,62 @@ namespace DigitalPlatform.CommonControl
             Rectangle rect,
             bool bActive)
         {
-            Brush brush = new SolidBrush(
-                SystemColors.ButtonFace);
-            g.FillRectangle(brush, rect);
+            using (Brush brush = new SolidBrush(
+                SystemColors.ButtonFace))
+            {
+                g.FillRectangle(brush, rect);
+            }
 
             if (bActive == true)
             {
-                Pen penBorder = new Pen(SystemColors.Window);
-                g.DrawRectangle(penBorder, rect);
+                using (Pen penBorder = new Pen(SystemColors.Window))
+                {
+                    g.DrawRectangle(penBorder, rect);
+                }
             }
 
             int nCenterX = rect.X + rect.Width / 2 + (rect.Width % 2);
             int nCenterY = rect.Y + rect.Height / 2 + (rect.Height % 2);
 
-            Pen pen = new Pen(
-                bActive ? SystemColors.ControlText : SystemColors.GrayText);
+            using (Pen pen = new Pen(
+                bActive ? SystemColors.ControlText : SystemColors.GrayText))
+            {
+                Point pt1 = new Point(nCenterX - 2, nCenterY - 1);
+                Point pt2 = new Point(nCenterX + 2, nCenterY - 1);
+                g.DrawLine(pen, pt1, pt2);
 
-            Point pt1 = new Point(nCenterX - 2, nCenterY - 1);
-            Point pt2 = new Point(nCenterX + 2, nCenterY - 1);
-            g.DrawLine(pen, pt1, pt2);
+                pt1 = new Point(nCenterX - 1, nCenterY);
+                pt2 = new Point(nCenterX + 1, nCenterY);
+                g.DrawLine(pen, pt1, pt2);
 
-            pt1 = new Point(nCenterX - 1, nCenterY);
-            pt2 = new Point(nCenterX + 1, nCenterY);
-            g.DrawLine(pen, pt1, pt2);
-
-            pt1 = new Point(nCenterX, nCenterY + 1);
-            g.FillRectangle(new SolidBrush(pen.Color), pt1.X, pt1.Y, 1, 1); // draw one pixel
-            // g.DrawLine(pen, pt1, pt2);
+                pt1 = new Point(nCenterX, nCenterY + 1);
+                using (Brush brush = new SolidBrush(pen.Color))
+                {
+                    g.FillRectangle(brush, pt1.X, pt1.Y, 1, 1); // draw one pixel
+                }
+            }
         }
 
         private void CheckedComboBox_Paint(object sender, PaintEventArgs e)
         {
             if (this.textBox_text.Enabled == false)
             {
-                Brush brush = new SolidBrush(SystemColors.Control);
-                e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                using (Brush brush = new SolidBrush(SystemColors.Control))
+                {
+                    e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                }
 
-                Pen pen = new Pen(Color.DarkGray);
+                using (Pen pen = new Pen(Color.DarkGray))
+                {
+                    Rectangle rect = this.ClientRectangle;
+                    rect.Height--;
+                    rect.Width--;
 
-                Rectangle rect = this.ClientRectangle;
-                rect.Height--;
-                rect.Width--;
+                    // ç”»è¾¹æ¡†
+                    e.Graphics.DrawRectangle(pen, rect);
+                }
 
-                // »­±ß¿ò
-                e.Graphics.DrawRectangle(pen, rect);
-
-                // °´Å¥
+                // æŒ‰é’®
                 if (this.m_flatstyle == System.Windows.Forms.FlatStyle.Flat)
                 {
                     DrawFlatComboButton(e.Graphics, this.RectButton, false);
@@ -436,18 +446,15 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
-                Brush brush = new SolidBrush(SystemColors.Window);
-                e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                using (Brush brush = new SolidBrush(SystemColors.Window))
+                {
+                    e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                }
 
-                // °´Å¥
+                // æŒ‰é’®
                 if (this.m_flatstyle == System.Windows.Forms.FlatStyle.Flat)
                 {
                     DrawFlatComboButton(e.Graphics, this.RectButton, true);
-                    /*
-                    ControlPaint.DrawComboButton(e.Graphics,
-        this.RectButton,
-        ButtonState.Normal | ButtonState.Flat);
-                     * */
                 }
                 else
                 {
@@ -464,25 +471,8 @@ namespace DigitalPlatform.CommonControl
     ButtonState.Normal);
                     }
                 }
-
-                /*
-                if (ComboBoxRenderer.IsSupported == true)
-                {
-                    ComboBoxRenderer.DrawDropDownButton(e.Graphics,
-                        rectButton,
-                        System.Windows.Forms.VisualStyles.ComboBoxState.Normal);
-                }
-                else
-                {
-                    ControlPaint.DrawComboButton(e.Graphics,
-                        rectButton,
-                        ButtonState.Flat);
-                }
-                 * */
             }
         }
-
-
 
         FlatStyle m_flatstyle = FlatStyle.Standard;
 
@@ -567,7 +557,7 @@ namespace DigitalPlatform.CommonControl
 
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
-            // Ä£·ÂComboBox TextBoxµÈ£¬LocationºÍSize¿ÉÒÔ±»Ëõ·Å£¬µ«ÊÇMarginºÍPadding²»±ä
+            // æ¨¡ä»¿ComboBox TextBoxç­‰ï¼ŒLocationå’ŒSizeå¯ä»¥è¢«ç¼©æ”¾ï¼Œä½†æ˜¯Marginå’ŒPaddingä¸å˜
             Padding margin = this.Margin;
             Padding Padding = this.Padding;
             base.ScaleControl(factor, specified);

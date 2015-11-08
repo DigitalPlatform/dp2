@@ -50,86 +50,84 @@ namespace UpgradeUtil
             Point pt = AutoScrollPosition;
             pe.Graphics.TranslateTransform(pt.X, pt.Y);
 
-            Font fontSmall = new Font("微软雅黑", 12, GraphicsUnit.Pixel);
-            Font fontLarge = new Font("微软雅黑", 24, GraphicsUnit.Pixel);
-            Brush brushText = new SolidBrush(Color.Black);
-            Brush brushGray = new SolidBrush(Color.LightGray);
-            Pen penBorder = new Pen(Color.Gray);
-
-
-            int y = m_padding.Top;
+            using(Font fontSmall = new Font("微软雅黑", 12, GraphicsUnit.Pixel))
+            using(Font fontLarge = new Font("微软雅黑", 24, GraphicsUnit.Pixel))
+            using(Brush brushText = new SolidBrush(Color.Black))
+            using(Brush brushGray = new SolidBrush(Color.LightGray))
+            using (Pen penBorder = new Pen(Color.Gray))
             {
-                // 日格子水平标题
-                int x = this.m_padding.Left + this.m_nLeftTextWidth;
-                for (int i = 0; i < 31; i++)
+                int y = m_padding.Top;
                 {
-                    Rectangle rectCell = new Rectangle(x, y,
-                        this.m_nCellWidth, this.m_nDaysTitleHeight);
-
-                    pe.Graphics.DrawRectangle(penBorder, rectCell);
-                    pe.Graphics.DrawString((i + 1).ToString(), fontSmall, brushText, rectCell);
-
-                    x += this.m_nCellWidth;
-                }
-            }
-
-            y += m_nDaysTitleHeight;
-            for (int i = 0; i < this.Years.Count; i++)
-            {
-                JidaoYear year = this.Years[i];
-
-                for (int j = 0; j < year.Months.Count; j++)
-                {
-                    JidaoMonth month = year.Months[j];
-                    // 年份，月份
-                    string strTitle = year.Year.ToString().PadLeft(4, '0') + "." + month.Month.ToString();
-                    Rectangle rect = new Rectangle(this.m_padding.Left,
-                        y,
-                        this.m_nLeftTextWidth,
-                        this.m_nCellHeight);
-                    pe.Graphics.DrawString(strTitle, fontSmall, brushText, rect);
-
-                    // 日格子
+                    // 日格子水平标题
                     int x = this.m_padding.Left + this.m_nLeftTextWidth;
-                    for (int k = 0; k < month.Cells.Count; k++)
+                    for (int i = 0; i < 31; i++)
                     {
-                        JidaoCell cell = month.Cells[k];
                         Rectangle rectCell = new Rectangle(x, y,
-                            this.m_nCellWidth, this.m_nCellHeight);
+                            this.m_nCellWidth, this.m_nDaysTitleHeight);
 
-                        if (this.TimeStyle == "month"
-                            && k > 0)
-                        {
-                            pe.Graphics.FillRectangle(brushGray, rectCell);
-                        }
-                        else
-                        {
-                            if (cell != null && cell.Disable == false)
-                            {
-                                pe.Graphics.DrawRectangle(penBorder, rectCell);
-                                string strDate = year.Year.ToString() + "-" + month.Month.ToString() + "-" + (k + 1).ToString();
-
-                                PaintCell(
-                                    strDate,
-                                    rectCell,
-                                    cell,
-                                    pe,
-                                    brushText,
-                                    fontSmall,
-                                    fontLarge);
-                            }
-                            else
-                                pe.Graphics.FillRectangle(brushGray, rectCell);
-                        }
+                        pe.Graphics.DrawRectangle(penBorder, rectCell);
+                        pe.Graphics.DrawString((i + 1).ToString(), fontSmall, brushText, rectCell);
 
                         x += this.m_nCellWidth;
                     }
+                }
 
-                    y += this.m_nCellHeight;
+                y += m_nDaysTitleHeight;
+                for (int i = 0; i < this.Years.Count; i++)
+                {
+                    JidaoYear year = this.Years[i];
+
+                    for (int j = 0; j < year.Months.Count; j++)
+                    {
+                        JidaoMonth month = year.Months[j];
+                        // 年份，月份
+                        string strTitle = year.Year.ToString().PadLeft(4, '0') + "." + month.Month.ToString();
+                        Rectangle rect = new Rectangle(this.m_padding.Left,
+                            y,
+                            this.m_nLeftTextWidth,
+                            this.m_nCellHeight);
+                        pe.Graphics.DrawString(strTitle, fontSmall, brushText, rect);
+
+                        // 日格子
+                        int x = this.m_padding.Left + this.m_nLeftTextWidth;
+                        for (int k = 0; k < month.Cells.Count; k++)
+                        {
+                            JidaoCell cell = month.Cells[k];
+                            Rectangle rectCell = new Rectangle(x, y,
+                                this.m_nCellWidth, this.m_nCellHeight);
+
+                            if (this.TimeStyle == "month"
+                                && k > 0)
+                            {
+                                pe.Graphics.FillRectangle(brushGray, rectCell);
+                            }
+                            else
+                            {
+                                if (cell != null && cell.Disable == false)
+                                {
+                                    pe.Graphics.DrawRectangle(penBorder, rectCell);
+                                    string strDate = year.Year.ToString() + "-" + month.Month.ToString() + "-" + (k + 1).ToString();
+
+                                    PaintCell(
+                                        strDate,
+                                        rectCell,
+                                        cell,
+                                        pe,
+                                        brushText,
+                                        fontSmall,
+                                        fontLarge);
+                                }
+                                else
+                                    pe.Graphics.FillRectangle(brushGray, rectCell);
+                            }
+
+                            x += this.m_nCellWidth;
+                        }
+
+                        y += this.m_nCellHeight;
+                    }
                 }
             }
-
-
 
             // Calling the base class OnPaint
             base.OnPaint(pe);

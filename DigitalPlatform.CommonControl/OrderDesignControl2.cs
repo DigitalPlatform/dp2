@@ -2081,67 +2081,19 @@ namespace DigitalPlatform.CommonControl
 
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
-#if NOOOOOOOOOOOOOOOOOOO
-            Brush brush = new SolidBrush(Color.Red);
-            // e.Graphics.FillRectangle(brush, e.ClipRectangle);
-
-            Pen pen = new Pen(Color.Red);
-
-            Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
-
-            // 画横线
-            for (int i = 0; i < this.Items.Count; i++)
-            {
-                Item2 item = this.Items[i];
-
-                Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
-                rect.Width = this.tableLayoutPanel_content.DisplayRectangle.Width;
-                rect.Offset(-p.X, -p.Y);
-                e.Graphics.DrawRectangle(pen, rect);
-            }
-
-            /*
-            // 画横线
-            float y = 0;
-            for (int i = 0; i < this.tableLayoutPanel_content.RowStyles.Count; i++)
-            {
-                float fHeight = this.tableLayoutPanel_content.RowStyles[i].Height;
-
-                e.Graphics.DrawLine(pen,
-                    p.X, y+p.Y,
-                    p.X + 3000, y+p.Y);
-                y += fHeight;
-            }
-             * */
-
-            // 画竖线
-            float x = 0;
-            for(int i=0;i<this.tableLayoutPanel_content.ColumnStyles.Count;i++)
-            {
-                float fWidth = this.tableLayoutPanel_content.ColumnStyles[i].Width;
-
-                e.Graphics.DrawLine(pen, 
-                    x+p.X, 0,
-                    x+p.X, 3000);
-                x += fWidth;
-            }
-#endif
         }
 
         private void tableLayoutPanel_content_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
         {
-            /*
-            Brush brush = new SolidBrush(Color.Red);
-            Rectangle rect = Rectangle.Inflate(e.CellBounds, -1, -1);
-            e.Graphics.FillRectangle(brush, rect);
-             * */
             if (this.m_nInSuspend > 0)
                 return; // 防止闪动
 
             // Rectangle rect = Rectangle.Inflate(e.CellBounds, -1, -1);
             Rectangle rect = e.CellBounds;
-            Pen pen = new Pen(Color.FromArgb(200,200,200));
-            e.Graphics.DrawRectangle(pen, rect);
+            using (Pen pen = new Pen(Color.FromArgb(200, 200, 200)))
+            {
+                e.Graphics.DrawRectangle(pen, rect);
+            }
         }
 
 

@@ -1,10 +1,10 @@
-using System;
+ï»¿using System;
 using System.Windows.Forms;
 using System.Drawing;
 
 namespace DigitalPlatform.Xml
 {
-	// ÎÄµµ¸ù½Úµã
+	// æ–‡æ¡£æ ¹èŠ‚ç‚¹
 	public class VirtualRootItem : ElementItem
 	{
 		internal VirtualRootItem(XmlEditor document):base(document)
@@ -13,14 +13,14 @@ namespace DigitalPlatform.Xml
 			this.m_document = document;
 		}
 
-		// ÎªÊ²Ã´ÒªÖØĞ´Õâ¸öº¯Êı
-		// ÒòÎªÖ»»­µ¥ÏßÌõÊ±,Ö»ÓĞ¸ù²Å»­ËÄÏß,ÆäËü¸¸Ç×²»»­ÏßÌõ
+		// ä¸ºä»€ä¹ˆè¦é‡å†™è¿™ä¸ªå‡½æ•°
+		// å› ä¸ºåªç”»å•çº¿æ¡æ—¶,åªæœ‰æ ¹æ‰ç”»å››çº¿,å…¶å®ƒçˆ¶äº²ä¸ç”»çº¿æ¡
 		public override void Paint(PaintEventArgs pe,
 			int nBaseX,
 			int nBaseY,
 			PaintMember paintMember)
 		{
-			// 1.¼ÆËã³öÇøÓò
+			// 1.è®¡ç®—å‡ºåŒºåŸŸ
 			Rectangle rectPaintThis = new Rectangle (0,0,0,0);
 			rectPaintThis = new Rectangle (nBaseX + this.Rect.X,
 				nBaseY + this.Rect.Y,
@@ -29,26 +29,26 @@ namespace DigitalPlatform.Xml
 			if (rectPaintThis.IntersectsWith(pe.ClipRectangle )== false)
 				return;
 
-			Brush brush = null;
-
-			// 2.»­±³¾°É«
-			//	ÈçÓĞÈ±Ê¡Í¸Ã÷É«,µ±Ç°ÑÕÉ«ÓëÍ¸Ã÷É«ÏàÍ¬Ôò²»»­ÁË
+			// 2.ç”»èƒŒæ™¯è‰²
+			//	å¦‚æœ‰ç¼ºçœé€æ˜è‰²,å½“å‰é¢œè‰²ä¸é€æ˜è‰²ç›¸åŒåˆ™ä¸ç”»äº†
 			//?
 			Object colorDefault = null;
 			XmlEditor editor = this.m_document;
 			if (editor != null && editor.VisualCfg != null)
 				colorDefault = editor.VisualCfg.transparenceColor;
-			if (colorDefault != null)  //È±Ê¡ÑÕÉ«
+			if (colorDefault != null)  //ç¼ºçœé¢œè‰²
 			{
 				if (((Color)colorDefault).Equals (BackColor) == true)
 					goto SKIPDRAWBACK;
 			}
-			brush = new SolidBrush(BackColor);
-			pe.Graphics .FillRectangle (brush,rectPaintThis);
+            using (Brush brush = new SolidBrush(BackColor))
+            {
+                pe.Graphics.FillRectangle(brush, rectPaintThis);
+            }
 
 			SKIPDRAWBACK:
 
-				// 4.»­¶ù×Ó
+				// 4.ç”»å„¿å­
 				if (childrenVisual == null)
 					goto END1;
 
@@ -100,7 +100,7 @@ namespace DigitalPlatform.Xml
 			}
 
 			END1:
-				// 3.»­¸ùÔªËØµÄÍâ±ß¿òÏßÌõ
+				// 3.ç”»æ ¹å…ƒç´ çš„å¤–è¾¹æ¡†çº¿æ¡
 
 				this.DrawLines(rectPaintThis,
 					this.TopBorderHeight,

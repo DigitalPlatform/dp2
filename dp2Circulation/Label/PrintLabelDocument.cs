@@ -460,17 +460,6 @@ namespace dp2Circulation
 
             if (this.IsDesignMode)
             {
-#if NO
-                Pen pen = new Pen(Color.Blue, (float)1);
-
-                e.Graphics.DrawRectangle(pen,
-                    0 + 1 - nXDelta,
-                    0 + 1 - nYDelta,
-                    e.PageBounds.Width - 2,
-                    e.PageBounds.Height - 2);
-
-                pen.Dispose();
-#endif
                 // 绘制整个纸张背景 白色
                 using (Brush brushBack = new SolidBrush(Color.White))
                 {
@@ -480,21 +469,6 @@ namespace dp2Circulation
                         e.PageBounds.Height - 2);
                     e.Graphics.FillRectangle(brushBack, rectPaper);
                 }
-
-#if NO
-                // 绘制配置文件的页面区域
-                if (PageHeight > 0 && PageWidth > 0)
-                {
-                    using (Brush brushBack = new SolidBrush(Color.FromArgb(128, Color.LightYellow)))
-                    {
-                        RectangleF rectPaper = new RectangleF(0 - nXDelta,
-                            0 - nYDelta,
-                            (float)PageWidth,
-                            (float)PageHeight);
-                        e.Graphics.FillRectangle(brushBack, rectPaper);
-                    }
-                }
-#endif
             }
 
             // 绘制可打印区域
@@ -807,22 +781,26 @@ namespace dp2Circulation
 
                                     {
                                         Brush brushText = null;
-
-                                        if (format != null && string.IsNullOrEmpty(format.ForeColor) == false)
+                                        try
                                         {
-                                            brushText = new SolidBrush(GetColor(format.ForeColor));
+                                            if (format != null && string.IsNullOrEmpty(format.ForeColor) == false)
+                                            {
+                                                brushText = new SolidBrush(GetColor(format.ForeColor));
+                                            }
+                                            else
+                                                brushText = System.Drawing.Brushes.Black;
+
+                                            e.Graphics.DrawString(strText,
+                                                this_font,
+                                                brushText,
+                                                rect,
+                                                s_format);
                                         }
-                                        else
-                                            brushText = System.Drawing.Brushes.Black;
-
-                                        e.Graphics.DrawString(strText,
-                                            this_font,
-                                            brushText,
-                                            rect,
-                                            s_format);
-
-                                        if (brushText != System.Drawing.Brushes.Black)
-                                            brushText.Dispose();
+                                        finally
+                                        {
+                                            if (brushText != System.Drawing.Brushes.Black)
+                                                brushText.Dispose();
+                                        }
                                     }
 
 
