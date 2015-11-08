@@ -2002,7 +2002,7 @@ namespace DigitalPlatform.rms
                     oUser,
                     dom);
 
-                //进行检索
+                // 进行检索
                 // return:
                 //		-1	出错
                 //		-6	无权限

@@ -501,7 +501,6 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-
             // 根据nodeItem得到检索信息
             string strTarget;
             string strWord;
@@ -511,6 +510,7 @@ namespace DigitalPlatform.rms
             string strIdOrder;
             string strKeyOrder;
             string strOrderBy;
+            string strHint = "";
             int nMaxCount;
             nRet = QueryUtil.GetSearchInfo(nodeItem,
                 strOutputStyle,
@@ -523,6 +523,7 @@ namespace DigitalPlatform.rms
                 out strKeyOrder,
                 out strOrderBy,
                 out nMaxCount,
+                out strHint,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -530,7 +531,9 @@ namespace DigitalPlatform.rms
             bool bSearched = false;
             bool bNeedSort = false;
 
-            //将target以;号分成多个库
+            bool bFirst = StringUtil.IsInList("first", strHint);    // 是否为 命中则停止继续检索
+
+            // 将 target 以 ; 号分成多个库
             string[] aDatabase = strTarget.Split(new Char[] { ';' });
             foreach (string strOneDatabase in aDatabase)
             {
@@ -609,6 +612,9 @@ namespace DigitalPlatform.rms
 
                 if (nRet == 1)
                     bNeedSort = true;
+
+                if (nRet >= 1 && bFirst == true)
+                    break;
             }
 
             // 2010/5/17
@@ -727,7 +733,7 @@ namespace DigitalPlatform.rms
                     resultSet.Clear();
                 }
 
-                //到item时不再继续递归
+                // 到item时不再继续递归
                 if (nodeRoot.Name == "item")
                 {
                     if (resultSet == null)

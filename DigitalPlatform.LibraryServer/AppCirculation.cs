@@ -941,6 +941,7 @@ namespace DigitalPlatform.LibraryServer
                             // sessioninfo.Channels,
                             channel,
                             strItemBarcode,
+                            "first",    // 在若干实体库中顺次检索，命中一个以上则返回，不再继续检索更多
                             out strItemXml,
                             100,
                             out aPath,
@@ -3814,6 +3815,7 @@ start_time_1,
                             // sessioninfo.Channels,
                             channel,
                             strItemBarcodeParam,
+                            "first",    // 在若干实体库中顺次检索，命中一个以上则返回，不再继续检索更多
                             out strItemXml,
                             100,
                             out aPath,

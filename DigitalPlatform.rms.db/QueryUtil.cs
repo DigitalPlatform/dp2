@@ -37,6 +37,7 @@ namespace DigitalPlatform.rms
             out string strKeyOrder,
             out string strOrderBy,
             out int nMaxCount,
+            out string strHint,
             out string strError)
         {
             strTarget = "";
@@ -48,6 +49,7 @@ namespace DigitalPlatform.rms
             strKeyOrder = "";
             strOrderBy = "";
             nMaxCount = 0;
+            strHint = "";
             strError = "";
 
             bool bOutputKeyCount = StringUtil.IsInList("keycount", strOutputStyle);
@@ -55,7 +57,7 @@ namespace DigitalPlatform.rms
 
             //--------------------------------------
             //调GetTarget函数，得到检索目标target节点
-            XmlNode nodeTarget = QueryUtil.GetTarget(nodeItem);
+            XmlElement nodeTarget = QueryUtil.GetTarget(nodeItem);
             if (nodeTarget == null)
             {
                 strError = "检索式的target元素未定义";
@@ -73,6 +75,8 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            // 2015/11/8
+            strHint = nodeTarget.GetAttribute("hint");
 
             //-------------------------------------------
             //检索文本 可以为空字符串
@@ -315,27 +319,25 @@ namespace DigitalPlatform.rms
             return StringUtil.IsInList(strDataType, strDataTypeList);
         }
 
-        // 得到上级target节点
+        // 得到上级(最近的一个) target 元素节点
         // parameter:
         //		nodeItem    item节点
         // return:
         //		target节点，没找到返回null
-        private static XmlNode GetTarget(XmlNode nodeItem)
+        private static XmlElement GetTarget(XmlNode nodeItem)
         {
             XmlNode nodeCurrent = nodeItem;
             while (true)
             {
                 if (nodeCurrent == null)
-                    break;
+                    return null;
 
                 if (nodeCurrent.Name == "target")
-                    return nodeCurrent;
+                    return nodeCurrent as XmlElement;
 
                 nodeCurrent = nodeCurrent.ParentNode;
             }
-            return null;
         }
-
 
         // 将字母表示法的关系符改成符号表示法
         // parameter:

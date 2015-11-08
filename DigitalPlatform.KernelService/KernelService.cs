@@ -318,11 +318,12 @@ namespace dp2Kernel
         //      2.58 2015/8/25 修改空值检索的错误。( keycount 和 keyid 风格之下 不正确的 not in ... union 语句)
         //      2.59 2015/8/27 GetRecords()/GetBrowse()等 API 中 strStyle 的 format:@coldef:xxx|xxx 格式，其中 xxx 除了原先 xpath 用法外，还可以使用 xpath->convert 格式。
         //      2.60 2015/9/26 WriteXml() 对整个操作超过一秒的情况，会将时间构成详情写入错误日志
+        //      2.61 2015/11/8 Search() 和 SearchEx() 中，XML 检索式的 target 元素增加了 hint 属性。如果 hint 属性包含 first 子串，则当 target 元素的 list 属性包含多个数据库时，顺次检索的过程中只要有一次命中，就立即停止检索返回。此方式能提高检索速度，但不保证能检索全命中结果。比较适合用于册条码号等特定的检索途径进行借书还书操作
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.60";
+            result.ErrorString = "2.61";
             return result;
         }
 
@@ -571,11 +572,9 @@ namespace dp2Kernel
                 app.MyWriteDebugInfo("因后一个search(ex)的到来，前一个search(ex)不得不中断 ");
             }
 
-
             sessioninfo.BeginSearch();
             try
             {
-
                 if (this.sessioninfo.UserName == "")
                 {
                     result.Value = -1;
@@ -681,7 +680,6 @@ namespace dp2Kernel
                             return result;
                         }
                     }
-
                 } // end of lock
             }
             catch (Exception ex)    // TODO: 将来把异常处理在中层函数内

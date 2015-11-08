@@ -96,7 +96,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.54 (2015/9/28) ManageDatabase() 中刷新检索点定义功能，增加了对读者库选择刷新 keys 为普通状态和适合日志恢复状态的功能
         //      2.55 (2015/10/16) SetReaderInfo() API 允许使用用户定义的读者同步扩充字段。扩充字段在 library.xml 的 circulation 元素 patronReplicationFields 属性中定义
         //      2.56 (2015/10/18) GetReaderInfo() API 为 html 格式增加了 style_dark 和 style_light 风格。缺省为 style_light。light 对应于 readerhtml.css, dark 对英语 readerhtml_dark.css
-        public static string Version = "2.56";
+        //      2.57 (2015/11/8) Borrow() 和 Return() API 利用 dp2kernel 优化的检索式提高了运行速度
+        public static string Version = "2.57";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1559,7 +1560,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            double base_version = 2.59;
+            double base_version = 2.61;
 
             if (value < base_version)
             {
@@ -6494,12 +6495,12 @@ out strError);
         public int GetItemRecXml(
     // RmsChannelCollection channels,
             RmsChannel channel,
-    string strBarcode,
-    out string strXml,
-    int nMax,
-    out List<string> aPath,
-    out byte[] timestamp,
-    out string strError)
+            string strBarcode,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
         {
             return GetItemRecXml(// channels,
                 channel,
@@ -6770,6 +6771,7 @@ out strError);
             if (nRet == -1)
                 return -1;
 
+#if NO
             // 构造检索式
             string strQueryXml = "";
             int nDbCount = 0;
@@ -6800,15 +6802,43 @@ out strError);
             {
                 strQueryXml = "<group>" + strQueryXml + "</group>";
             }
-
-#if NO
-            RmsChannel channel = channels.GetChannel(app.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
 #endif
+            string strHint = "";
+            if (StringUtil.IsInList("first", strStyle) == true)
+            {
+                strHint = " hint='first' ";
+                StringUtil.SetInList(ref strStyle, "first", false); // 去掉 first 子串。因为 strStyle 这个用法只有在本函数有意义
+            }
+
+            string strQueryXml = "";
+            {
+                // 构造检索式
+                // 新方法只用一个 item 元素，把各个库的 dbname 和 from 都拍紧到同一个 targetlist 中
+                StringBuilder targetList = new StringBuilder();
+                for (int i = 0; i < dbnames.Count; i++)
+                {
+                    string strDbName = dbnames[i];
+
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                        continue;
+                    if (targetList.Length > 0)
+                        targetList.Append(";");
+                    targetList.Append(strDbName + ":" + strFrom);
+                }
+
+                if (targetList.Length == 0)
+                {
+                    strError = "没有任何可检索的目标数据库";
+                    return -1;
+                }
+
+                strQueryXml = "<target list='"
+        + StringUtil.GetXmlStringSimple(targetList.ToString())
+        + "' "+strHint+"><item><word>"
+        + StringUtil.GetXmlStringSimple(strBarcode)
+        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+            }
+
             if (channel == null)
                 throw new ArgumentException("channel 参数不应为空", "channel");
 
