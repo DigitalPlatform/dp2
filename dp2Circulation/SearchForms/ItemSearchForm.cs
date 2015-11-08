@@ -484,12 +484,6 @@ this.DbType + "_search_form",
             
         }
 
-        /*
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }*/
-
         private void ItemSearchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             /*

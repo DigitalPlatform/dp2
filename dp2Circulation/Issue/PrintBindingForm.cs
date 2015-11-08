@@ -425,19 +425,6 @@ namespace dp2Circulation
             base.DefWndProc(ref m);
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>

@@ -462,19 +462,6 @@ namespace dp2Circulation
             base.DefWndProc(ref m);
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
         bool m_bEnabled = true;
 
         /// <summary>

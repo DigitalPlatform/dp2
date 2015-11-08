@@ -167,19 +167,6 @@ namespace dp2Circulation
             this.entityEditControl1.GetValueTable -= new GetValueTableEventHandler(entityEditControl1_GetValueTable);
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
         // 
         // return:
         //      -1  error

@@ -128,12 +128,6 @@ namespace dp2Circulation
         {
             e.IsBusy = this.m_webExternalHost_item.ChannelInUse || this.m_webExternalHost_biblio.ChannelInUse;
         }
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-#endif
 
         private void ItemInfoForm_FormClosing(object sender, FormClosingEventArgs e)
         {

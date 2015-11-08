@@ -416,19 +416,6 @@ namespace dp2Circulation
         }
 
 #if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
-#if NO
         private void scriptManager_CreateDefaultContent(object sender, CreateDefaultContentEventArgs e)
         {
             string strPureFileName = Path.GetFileName(e.FileName);

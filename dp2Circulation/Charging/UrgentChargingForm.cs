@@ -131,13 +131,6 @@ namespace dp2Circulation
 
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            MainForm.Channel_BeforeLogin(this, e);
-        }
-#endif
-
         private void UrgentChargingForm_FormClosing(object sender, FormClosingEventArgs e)
         {
 #if NO

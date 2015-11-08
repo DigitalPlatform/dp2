@@ -91,26 +91,10 @@ namespace dp2Circulation
             base.DefWndProc(ref m);
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-
-#endif
-
         private void ChangePasswordForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 
         }
-
-
 
         private void button_reader_changePassword_Click(object sender, EventArgs e)
         {

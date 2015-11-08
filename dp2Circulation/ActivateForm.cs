@@ -181,13 +181,6 @@ namespace dp2Circulation
             e.values = values;
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-#endif
-
         private void textBox_oldBarcode_Enter(object sender, EventArgs e)
         {
             this.AcceptButton = this.button_loadOldUserInfo;

@@ -94,12 +94,12 @@ namespace dp2Circulation
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(this, e);
+            this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(this, e);
+            this.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
 

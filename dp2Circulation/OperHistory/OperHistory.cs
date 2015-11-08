@@ -348,7 +348,7 @@ namespace dp2Circulation
 #if USE_LOCAL_CHANNEL
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(this, e);
+            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #endif
 

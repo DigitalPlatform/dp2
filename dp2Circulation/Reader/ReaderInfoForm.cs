@@ -318,13 +318,6 @@ namespace dp2Circulation
             e.values = values;
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-#endif
-
         private void ReaderInfoForm_FormClosing(object sender, FormClosingEventArgs e)
         {
 #if NO

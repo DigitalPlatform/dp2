@@ -99,13 +99,6 @@ namespace dp2Circulation
             e.IsBusy = this.m_webExternalHost.ChannelInUse;
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-#endif
-
         void ReaderManageForm_GetValueTable(object sender, GetValueTableEventArgs e)
         {
             string strError = "";

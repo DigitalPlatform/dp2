@@ -325,20 +325,12 @@ namespace dp2Circulation
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(this, e);
+            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #else
         void Channels_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            /*
-            LibraryChannel channel = (LibraryChannel)sender;
-
-            string strUrl = channel.Url;
-
-            e.LibraryServerUrl = strUrl;
-             * */
-
-            MainForm.Channel_BeforeLogin(this, e);
+            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #endif
 

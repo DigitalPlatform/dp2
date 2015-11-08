@@ -2508,19 +2508,6 @@ true);
             this.commentControl1.SetLibraryCodeFilter(this.Channel.LibraryCodeList);
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        public void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
         // 
         /// <summary>
         /// 对象信息是否被改变

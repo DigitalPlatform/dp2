@@ -403,36 +403,6 @@ namespace dp2Circulation
 
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
-#if NO
-        private void scriptManager_CreateDefaultContent(object sender, CreateDefaultContentEventArgs e)
-        {
-            string strPureFileName = Path.GetFileName(e.FileName);
-
-            if (String.Compare(strPureFileName, "main.cs", true) == 0)
-            {
-                CreateDefaultMainCsFile(e.FileName);
-                e.Created = true;
-            }
-            else
-            {
-                e.Created = false;
-            }
-
-        }
-#endif
         internal override void CreateDefaultContent(CreateDefaultContentEventArgs e)
         {
             string strPureFileName = Path.GetFileName(e.FileName);

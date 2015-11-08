@@ -498,19 +498,6 @@ this.splitContainer_lists,
             SaveSize();
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
         // 从读者记录 XML 字符串中取出读者证条码号
         // return:
         //      -1  出错

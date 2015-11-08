@@ -17,8 +17,9 @@ namespace dp2Circulation
     /// <summary>
     /// 时钟窗
     /// </summary>
-    public partial class ClockForm : Form
+    public partial class ClockForm : MyForm
     {
+#if NO
         /// <summary>
         /// 通讯通道
         /// </summary>
@@ -35,10 +36,13 @@ namespace dp2Circulation
         public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
+#endif
 
+#if NO
         int m_nIn = 0;  // 正在和服务器打交道的层数
 
         const int WM_PREPARE = API.WM_USER + 200;
+#endif
 
         /// <summary>
         /// 构造函数
@@ -57,6 +61,7 @@ namespace dp2Circulation
 
             this.dateTimePicker1.Value = DateTime.Now;
 
+#if NO
             this.Channel.Url = this.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -67,19 +72,53 @@ namespace dp2Circulation
 
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
+#endif
 
-            API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
+            // API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
+            this.BeginInvoke(new Action(Initial));
+
             this.timer1.Start();
         }
 
+#if NO
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(this, e);
+            this.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(this, e);
+            this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+        }
+#endif
+
+        private void ClockForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+#if NO
+            if (stop != null)
+            {
+                if (stop.State == 0)    // 0 表示正在处理
+                {
+                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
+                    e.Cancel = true;
+                    return;
+                }
+
+            }
+#endif
+
+            this.timer1.Stop();
+        }
+
+        private void ClockForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+#if NO
+            if (stop != null) // 脱离关联
+            {
+                stop.Unregister();	// 和容器关联
+                stop = null;
+            }
+#endif
         }
 
         private void button_set_Click(object sender, EventArgs e)
@@ -95,23 +134,27 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在设置服务器当前时钟为 "+this.RFC1123TimeString+" ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
 
-            int value = Interlocked.Increment(ref this.m_nIn);
+            // int value = Interlocked.Increment(ref this.m_nIn);
 
             try
             {
+#if NO
                 if (value > 1)
                 {
                     strError = "通道正在被另一操作使用，当前操作被放弃";
                     goto ERROR1;   // 防止重入
                 }
+#endif
 
-                long lRet = Channel.SetClock(
+                long lRet = channel.SetClock(
                     stop,
                     this.RFC1123TimeString,
                     out strError);
@@ -121,26 +164,32 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                Interlocked.Decrement(ref this.m_nIn);
+                // Interlocked.Decrement(ref this.m_nIn);
 
                 this.EnableControls(true);
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
             }
 
-            MessageBox.Show(this, "时钟设置成功");
+            // MessageBox.Show(this, "时钟设置成功");
+            this.ShowMessage("时钟设置成功", "green", true);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
-            return;
+            //MessageBox.Show(this, strError);
+            //return;
+            this.ShowMessage(strError, "red", true);
         }
 
         int GetServerTime(bool bChangeEnableState,
             out string strError)
         {
             strError = "";
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获得服务器当前时钟 ...");
@@ -149,25 +198,29 @@ MessageBoxDefaultButton.Button2);
             if (bChangeEnableState == true)
                 this.EnableControls(false);
 
-            int value = Interlocked.Increment(ref this.m_nIn);
+            // int value = Interlocked.Increment(ref this.m_nIn);
             try
             {
+#if NO
                 if (value > 1)
                     return 0;   // 防止重入
+#endif
 
                 string strTime = "";
-                long lRet = Channel.GetClock(
+                long lRet = channel.GetClock(
                     stop,
                     out strTime,
                     out strError);
                 if (lRet == -1)
                     return -1;
 
+                // TODO: 最好转换为 GMT 为东八区的 RFC1123 字符串显示
                 this.RFC1123TimeString = strTime;
+                return 0;
             }
             finally
             {
-                Interlocked.Decrement(ref this.m_nIn);
+                // Interlocked.Decrement(ref this.m_nIn);
 
                 if (bChangeEnableState == true)
                     this.EnableControls(true);
@@ -175,9 +228,9 @@ MessageBoxDefaultButton.Button2);
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
-            }
 
-            return 0;
+                this.ReturnChannel(channel);
+            }
         }
 
         private void button_get_Click(object sender, EventArgs e)
@@ -191,8 +244,9 @@ MessageBoxDefaultButton.Button2);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
-            return;
+            // MessageBox.Show(this, strError);
+            // return;
+            this.ShowMessage(strError, "red", true);
         }
 
         private void button_reset_Click(object sender, EventArgs e)
@@ -208,6 +262,7 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在将服务器时钟复原为硬件时钟 ...");
@@ -215,17 +270,19 @@ MessageBoxDefaultButton.Button2);
 
             this.EnableControls(false);
 
-            int value = Interlocked.Increment(ref this.m_nIn);
+            // int value = Interlocked.Increment(ref this.m_nIn);
 
             try
             {
+#if NO
                 if (value > 1)
                 {
                     strError = "通道正在被另一操作使用，当前操作被放弃";
                     goto ERROR1;   // 防止重入
                 }
+#endif
 
-                long lRet = Channel.SetClock(
+                long lRet = channel.SetClock(
                     stop,
                     null,
                     out strError);
@@ -235,13 +292,15 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                Interlocked.Decrement(ref this.m_nIn);
+                // Interlocked.Decrement(ref this.m_nIn);
 
                 this.EnableControls(true);
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
             }
 
             MessageBox.Show(this, "服务器时钟复原成功");
@@ -303,20 +362,14 @@ MessageBoxDefaultButton.Button2);
             this.textBox_time.Text = DateTimeUtil.Rfc1123DateTimeString(time);
         }
 
-        private void ClockForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (stop != null) // 脱离关联
-            {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }
-        }
 
+#if NO
         void DoStop(object sender, StopEventArgs e)
         {
             if (this.Channel != null)
                 this.Channel.Abort();
         }
+#endif
 
         private void ClockForm_Activated(object sender, EventArgs e)
         {
@@ -354,7 +407,7 @@ MessageBoxDefaultButton.Button2);
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public void EnableControls(bool bEnable)
+        public override void EnableControls(bool bEnable)
         {
             if (this.checkBox_autoGetServerTime.Checked == false)
                 this.dateTimePicker1.Enabled = bEnable;
@@ -393,22 +446,19 @@ MessageBoxDefaultButton.Button2);
             this.textBox_localTime.Text = now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        private void ClockForm_FormClosing(object sender, FormClosingEventArgs e)
+        void Initial()
         {
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
+            string strError = "";
 
-            }
+            // 窗口打开后，第一次获得服务器时间显示
+            GetServerTime(true, // changed
+                out strError);
 
-            this.timer1.Stop();
+            // 第一次刷新本地时间显示
+            DateTime now = DateTime.Now;
+            this.textBox_localTime.Text = now.ToString("yyyy-MM-dd HH:mm:ss");
         }
-
+#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -436,5 +486,6 @@ MessageBoxDefaultButton.Button2);
             }
             base.DefWndProc(ref m);
         }
+#endif
     }
 }

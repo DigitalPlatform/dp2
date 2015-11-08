@@ -4461,6 +4461,12 @@ string strUserName = ".")
 #endif
             LibraryChannel channel = this.GetChannel();
 
+            if (this.Stop == null)
+            {
+                strError = "MainForm.Stop 尚未初始化";
+                return -1;
+            }
+
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在验证条码号 "+strBarcode+"...");
             Stop.BeginLoop();

@@ -605,30 +605,6 @@ namespace dp2Circulation
             // SaveSize();
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
-        /*
-        private void button_clearAllDbs_Click(object sender, EventArgs e)
-        {
-            string strError = "";
-            int nRet = ClearAllDbs(out strError);
-            if (nRet == -1)
-                MessageBox.Show(this, strError);
-            else
-                MessageBox.Show(this, "OK");
-        }*/
-
         // 
         int ClearAllDbs(
             out string strError)

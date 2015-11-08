@@ -4286,7 +4286,11 @@ chi	中文	如果是中文，则为空。
 #endif
 
         // 通过词典库对照关系创建新字段
-        public void RelationGenerate(string strDef)
+        // parameters:
+        //      strDef  关系定义。例如 "dbname=LCC-CLC,source=050a,target=098a,color=#00aa00;dbname=DDC-CLC,source=082a,target=098a,color=#aaaa00"
+        //      strDefaultStyle 缺省的处理风格。如果为空，表示不改变 RelationDialog 本身的缺省处理风格，即 DefaultStyle 值。
+        public void RelationGenerate(string strDef, 
+            string strDefaultStyle = "")
         {
             string strError = "";
 
@@ -4301,6 +4305,8 @@ chi	中文	如果是中文，则为空。
             {
                 RelationDialog dlg = new RelationDialog();
                 MainForm.SetControlFont(dlg, this.DetailForm.Font, false);
+                if (string.IsNullOrEmpty(strDefaultStyle) == false)
+                    dlg.DefaultStyle = strDefaultStyle;
                 dlg.Channel = channel;
                 dlg.ProcSearchDictionary = SearchDictionary;
 #if NO

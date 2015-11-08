@@ -46,7 +46,7 @@ namespace dp2Circulation
 
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            MainForm.Channel_AfterLogin(this, e);
+            MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_Idle(object sender, IdleEventArgs e)
@@ -56,7 +56,7 @@ namespace dp2Circulation
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(this, e);
+            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         public void Close()

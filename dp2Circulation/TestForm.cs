@@ -1353,7 +1353,7 @@ ref bHideMessageBox);
 
         void Channel_BeforeLogin(object sender, DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(this, e);
+            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         Stop _stop = null;

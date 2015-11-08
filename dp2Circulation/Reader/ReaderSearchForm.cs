@@ -179,13 +179,6 @@ namespace dp2Circulation
             }
         }
 
-        /*
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }*/
-
-
         /// <summary>
         /// 重载的 Channel_BeforeLogin()
         /// </summary>

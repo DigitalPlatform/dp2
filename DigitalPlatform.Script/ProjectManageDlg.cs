@@ -2109,11 +2109,30 @@ namespace DigitalPlatform.Script
 
 		}
 
-
-		// 解包, 即从文件复制到当前窗口 进入当前选定的目录
+        /*
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 System.Runtime.Serialization.Formatters.Binary.__BinaryParser.ReadObjectNull(BinaryHeaderEnum binaryHeaderEnum)
+在 System.Runtime.Serialization.Formatters.Binary.__BinaryParser.Run()
+在 System.Runtime.Serialization.Formatters.Binary.ObjectReader.Deserialize(HeaderHandler handler, __BinaryParser serParser, Boolean fCheck, Boolean isCrossAppDomain, IMethodCallMessage methodCallMessage)
+在 System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Deserialize(Stream serializationStream, HeaderHandler handler, Boolean fCheck, Boolean isCrossAppDomain, IMethodCallMessage methodCallMessage)
+在 System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Deserialize(Stream serializationStream)
+在 DigitalPlatform.Script.ProjectManageDlg.button_PasteFromFile_Click(Object sender, EventArgs e)
+在 DigitalPlatform.Script.ProjectManageDlg.button_import_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+在 System.Windows.Forms.Button.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+         * */
+        // 解包, 即从文件复制到当前窗口 进入当前选定的目录
 		private void button_PasteFromFile_Click(object sender, System.EventArgs e)
 		{
             string strError = "";
+
             // 询问包文件全路径
 			OpenFileDialog dlg = new OpenFileDialog();
 
@@ -2126,9 +2145,7 @@ namespace DigitalPlatform.Script
 			dlg.RestoreDirectory = true ;
 
 			if(dlg.ShowDialog() != DialogResult.OK)
-			{
 				return;
-			}
 
 			strRecentPackageFilePath = dlg.FileName;
 
@@ -2139,8 +2156,8 @@ namespace DigitalPlatform.Script
 			}
 			catch (FileNotFoundException)
 			{
-				MessageBox.Show(this, "文件 " + dlg.FileName + "不存在...");
-				return;
+				strError = "文件 " + dlg.FileName + "不存在...";
+				goto ERROR1;
 			}
 
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -2152,10 +2169,15 @@ namespace DigitalPlatform.Script
 			}
 			catch (SerializationException ex) 
 			{
-				MessageBox.Show("装载打包文件出错：" + ex.Message);
-				return;
+				strError = "装载打包文件 '"+dlg.FileName+"' 时出错：" + ex.Message;
+				goto ERROR1;
 			}
-			finally  
+            catch (Exception ex)
+            {
+                strError = "装载打包文件 '"+dlg.FileName+"' 时出错：" + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+            finally  
 			{
 				stream.Close();
 			}
@@ -2181,14 +2203,13 @@ namespace DigitalPlatform.Script
                     false,
                     out strError);
 				if (nRet == -1) 
-				{
-					MessageBox.Show(strError);
-					return;
-				}
-			}
-		}
+				    goto ERROR1;
+            }
 
-
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
 		// 将Project对象Paste到管理界面中
 		// bRestoreOriginNamePath	是否恢复到原始名字路径。==false，表示恢复到treeview当前目录

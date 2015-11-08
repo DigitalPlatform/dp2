@@ -1122,16 +1122,21 @@ out strError);
 
         static string GetExceptionMessage(Exception ex)
         {
-            string strResult = ex.GetType().ToString() + ":" + ex.Message;
-            while (ex != null)
+            if (ex is NullReferenceException)
+                return ExceptionUtil.GetDebugText(ex);  // 2015/11/8
+
             {
-                if (ex.InnerException != null)
-                    strResult += "\r\n" + ex.InnerException.GetType().ToString() + ": " + ex.InnerException.Message;
+                string strResult = ex.GetType().ToString() + ":" + ex.Message;
+                while (ex != null)
+                {
+                    if (ex.InnerException != null)
+                        strResult += "\r\n" + ex.InnerException.GetType().ToString() + ": " + ex.InnerException.Message;
 
-                ex = ex.InnerException;
+                    ex = ex.InnerException;
+                }
+
+                return strResult;
             }
-
-            return strResult;
         }
 
         // 检索读者信息
