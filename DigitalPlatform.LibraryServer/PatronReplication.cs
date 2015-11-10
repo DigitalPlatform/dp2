@@ -31,7 +31,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class PatronReplication : BatchTask
     {
-                // 构造函数
+        // 构造函数
         public PatronReplication(LibraryApplication app,
             string strName)
             : base(app, strName)
@@ -1313,13 +1313,35 @@ out kernel_errorcode);
                 "nation",   // 2011/9/24
             };
 
-        static int BuildNewPatronXml(
+        int BuildNewPatronXml(
             XmlDocument domNew,
             out string strOutputXml,
             out string strError)
         {
             strOutputXml = "";
             strError = "";
+
+            string[] element_names = null;
+
+            // 字段的定义，如果第一个元素为空，表示全部用定义的值；如果第一个元素不是空，则增补缺省的定义
+            if (this.App.PatronReplicationFields == null
+                || this.App.PatronReplicationFields.Count == 0)
+            {
+                element_names = _patron_rep_element_names;
+                this.App.WriteDebugInfo("BuildNewPatronXml() 使用了缺省的字段名列表");
+            }
+            else if (string.IsNullOrEmpty(this.App.PatronReplicationFields[0]) == false)
+            {
+                element_names = StringUtil.Append(_patron_rep_element_names, this.App.PatronReplicationFields.ToArray());
+                this.App.WriteDebugInfo("BuildNewPatronXml() 使用了扩展后的字段名列表 '" + string.Join(",", element_names) + "' 。扩展部分为 '" + StringUtil.MakePathList(this.App.PatronReplicationFields) + "'");
+            }
+            else
+            {
+                element_names = this.App.PatronReplicationFields.ToArray();
+                this.App.WriteDebugInfo("BuildNewPatronXml() 使用了重新定义的字段名列表 '" + string.Join(",", element_names) + "' 。");
+            }
+
+            this.App.WriteDebugInfo("MergePatronXml() domNew='" + domNew.OuterXml + "'");
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -1330,6 +1352,14 @@ out kernel_errorcode);
                 if (node.NodeType != XmlNodeType.Element)
                     continue;
 
+                // 2015/11/10
+                if (Array.IndexOf(element_names, node.Name) == -1)
+                {
+                    domNew.DocumentElement.RemoveChild(node);
+                    i--;
+                    continue;
+                }
+
                 XmlNode attr = node.SelectSingleNode("@dprms:missing", nsmgr);
                 if (attr != null)
                 {
@@ -1339,12 +1369,13 @@ out kernel_errorcode);
             }
 
             // 合成<state>元素内容
+            if (Array.IndexOf(element_names, "state") != -1)
             {
                 String strState = DomUtil.GetElementText(domNew.DocumentElement,
                     "state");
                 List<string> source_list = StringUtil.SplitList(strState);
 
-                // 否则需要将strTextExust中的非“卡中心”部分和new_list合并
+                // 否则需要将strTextExist中的非“卡中心”部分和new_list合并
                 List<string> result_list = StringUtil.SplitList("待启用");
                 foreach (string strText in source_list)
                 {
@@ -1356,6 +1387,8 @@ out kernel_errorcode);
             }
 
             strOutputXml = domNew.DocumentElement.OuterXml;
+
+            this.App.WriteDebugInfo("MergePatronXml() strOutputXml='" + strOutputXml + "'");
             return 0;
         }
 
@@ -1418,11 +1451,23 @@ out kernel_errorcode);
             // 字段的定义，如果第一个元素为空，表示全部用定义的值；如果第一个元素不是空，则增补缺省的定义
             if (this.App.PatronReplicationFields == null
                 || this.App.PatronReplicationFields.Count == 0)
+            {
                 element_names = _patron_rep_element_names;
+                this.App.WriteDebugInfo("MergePatronXml() 使用了缺省的字段名列表");
+            }
             else if (string.IsNullOrEmpty(this.App.PatronReplicationFields[0]) == false)
+            {
                 element_names = StringUtil.Append(_patron_rep_element_names, this.App.PatronReplicationFields.ToArray());
+                this.App.WriteDebugInfo("MergePatronXml() 使用了扩展后的字段名列表 '" + string.Join(",", element_names) + "' 。扩展部分为 '" + StringUtil.MakePathList(this.App.PatronReplicationFields) + "'");
+            }
             else
+            {
                 element_names = this.App.PatronReplicationFields.ToArray();
+                this.App.WriteDebugInfo("MergePatronXml() 使用了重新定义的字段名列表 '" + string.Join(",", element_names) + "' 。");
+            }
+
+            this.App.WriteDebugInfo("MergePatronXml() domExist='"+domExist.OuterXml+"'");
+            this.App.WriteDebugInfo("MergePatronXml() domNew='" + domNew.OuterXml + "'");
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -1460,7 +1505,7 @@ strElementName);
                     if (StringUtil.IsEqualList(exist_list, new_list) == true)
                         continue;
 
-                    // 否则需要将strTextExust中的非“卡中心”部分和new_list合并
+                    // 否则需要将 strTextExist 中的非“卡中心”部分和new_list合并
                     List<string> result_list = GetNoneCardCenterState(strTextExist0);
                     foreach (string strText in new_list)
                     {
@@ -1483,6 +1528,8 @@ strElementName);
             }
 
             strMergedXml = domExist.OuterXml;
+
+            this.App.WriteDebugInfo("MergePatronXml() strMergedXml='" + strMergedXml + "'");
 
             if (bChanged == true)
                 return 1;

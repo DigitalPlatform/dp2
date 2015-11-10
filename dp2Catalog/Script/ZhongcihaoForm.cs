@@ -31,7 +31,9 @@ namespace dp2Catalog
         public LibraryChannelCollection Channels = null;
         LibraryChannel Channel = null;
 
+#if NO
         public string Lang = "zh";
+#endif
 
         //public MainForm MainForm = null;
         //DigitalPlatform.Stop stop = null;

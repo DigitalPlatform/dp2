@@ -234,12 +234,15 @@ namespace dp2Circulation
             }
         }
 
-        public void Close()
+        public void Close(bool bForce = true)
         {
             if (stop != null)
                 stop.DoStop();
+#if NO
             this.eventClose.Set();
             Stopped = true;
+#endif
+            this.StopThread(bForce);
         }
 
         public void Clear()

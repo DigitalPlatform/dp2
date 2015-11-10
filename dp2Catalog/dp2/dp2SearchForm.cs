@@ -60,7 +60,9 @@ namespace dp2Catalog
         public LibraryChannelCollection Channels = null;
         internal LibraryChannel Channel = null;
 
+#if NO
         public string Lang = "zh";
+#endif
 
         const int WM_SELECT_INDEX_CHANGED = API.WM_USER + 200;
         const int WM_LOADSIZE = API.WM_USER + 201;

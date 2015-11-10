@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using System.Xml;
+using System.Drawing.Drawing2D;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
@@ -17,8 +19,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
-using System.Drawing.Drawing2D;
-using System.Xml;
 using DigitalPlatform.Xml;
 
 namespace dp2Circulation
@@ -52,6 +52,7 @@ namespace dp2Circulation
         // 借书、还书等主要业务的任务队列
         TaskList _taskList = new TaskList();
 
+        // 刷新书目摘要的任务队列
         SummaryList _summaryList = new SummaryList();
 
         internal ExternalChannel _summaryChannel = new ExternalChannel();
@@ -204,9 +205,13 @@ namespace dp2Circulation
                 this.m_webExternalHost_readerInfo.Destroy();
             }
 
+            this.ShowMessage("正在停止任务线程 ...", "green", false);
             this._taskList.Close();
 
+            this.ShowMessage("正在停止刷新摘要线程 ...", "green", false);
             this._summaryList.Close();
+
+            this.ClearMessage();
 
             this._summaryChannel.Close();
             this._barcodeChannel.Close();
@@ -368,6 +373,9 @@ namespace dp2Circulation
                 return -1;
             }
 
+            if (this.IsDisposed)
+                return 0;
+
             if (this.InvokeRequired)
             {
                 Delegate_SelectOnePatron d = new Delegate_SelectOnePatron(SelectOnePatron);
@@ -440,6 +448,9 @@ namespace dp2Circulation
         {
             strError = "";
             strItemBarcode = "";
+
+            if (this.IsDisposed)
+                return 0;
 
             if (this.InvokeRequired)
             {
@@ -563,6 +574,9 @@ dlg.UiState);
             string strConfirmItemRecPath,
             ChargingTask task)
         {
+            if (this.IsDisposed)
+                return;
+
             // 这里被做事的线程调用，希望启动任务后尽快返回。但不应把长时任务交给界面线程
             if (this.InvokeRequired)
             {
@@ -613,6 +627,9 @@ dlg.UiState);
             string strSummary,
             bool bSpeak)
         {
+            if (this.IsDisposed)
+                return;
+
             // 这里被做事的线程调用，希望启动任务后尽快返回。但不应把长时任务交给界面线程
             if (this.InvokeRequired)
             {
@@ -769,6 +786,9 @@ out strError);
         delegate void Delegate_SetReaderCardString(string strText);
         public void SetReaderCardString(string strText)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_SetReaderCardString d = new Delegate_SetReaderCardString(SetReaderCardString);
@@ -776,20 +796,20 @@ out strError);
                 return;
             }
 
-                if (string.IsNullOrEmpty(strText) == false
-                    && strText[0] != '<')
-                    _cardControl.Text = strText;
-                else
+            if (string.IsNullOrEmpty(strText) == false
+                && strText[0] != '<')
+                _cardControl.Text = strText;
+            else
+            {
+                try
                 {
-                    try
-                    {
-                        _cardControl.Xml = strText;
-                    }
-                    catch (Exception ex)
-                    {
-                        _cardControl.Text = ex.Message;
-                    }
+                    _cardControl.Xml = strText;
                 }
+                catch (Exception ex)
+                {
+                    _cardControl.Text = ex.Message;
+                }
+            }
         }
 
         delegate void Delegate_SetReaderHtmlString(string strHtml);
@@ -799,6 +819,9 @@ out strError);
         /// <param name="strHtml">HTML 字符串</param>
         public void SetReaderHtmlString(string strHtml)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_SetReaderHtmlString d = new Delegate_SetReaderHtmlString(_setReaderHtmlString);
@@ -893,6 +916,9 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         /// <param name="strText">文本字符串</param>
         public void SetReaderTextString(string strText)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_SetReaderTextString d = new Delegate_SetReaderTextString(SetReaderTextString);
@@ -1066,6 +1092,9 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         internal void DisplayTask(string strAction,
             ChargingTask task)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_DisplayTask d = new Delegate_DisplayTask(_displayTask);
@@ -1229,6 +1258,9 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         // 进入或离开 PQR 状态
         void EnterOrLeavePQR(bool bEnter, InputType input_type = InputType.ALL)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired == true)
             {
                 Delegate_EnterOrLeavePQR d = new Delegate_EnterOrLeavePQR(EnterOrLeavePQR);
@@ -2010,6 +2042,9 @@ false);
         // 注意，并不负责删除 _taskList 中的元素
         internal void ClearTaskList(List<ChargingTask> tasks)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_ClearTaskList d = new Delegate_ClearTaskList(ClearTaskList);
@@ -2043,6 +2078,9 @@ false);
         /// <param name="strReaderBarcode">读者证条码号</param>
         void DisplayCurrentReaderBarcode(string strReaderBarcode)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_DisplayCurrentReaderBarcode d = new Delegate_DisplayCurrentReaderBarcode(DisplayCurrentReaderBarcode);
@@ -2053,11 +2091,13 @@ false);
             this.toolStripLabel_currentPatron.Text = strReaderBarcode;
         }
 
-
         delegate void Delegate_SetInputMessage(bool bReaderBarcode);
         // 刷新 输入号码类型的标签显示
         void SetInputMessage(bool bReaderBarcode)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_SetInputMessage d = new Delegate_SetInputMessage(SetInputMessage);
@@ -2081,6 +2121,9 @@ false);
         // 显示色条
         internal void SetColorList()
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_SetColorList d = new Delegate_SetColorList(SetColorList);

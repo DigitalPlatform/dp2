@@ -5238,6 +5238,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
+        // 注：此功能较旧，其菜单已经被隐藏
         // 导出到 Excel 文件
         private void toolStripMenuItem_exportExcel_Click(object sender, EventArgs e)
         {
@@ -5491,6 +5492,38 @@ MessageBoxDefaultButton.Button1);
                 MessageBox.Show(this, "好友字段已经被修改，请注意重新装载读者记录");
             }
             this.MainForm.StatusBarMessage = strError;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void toolStripMenuItem_exportDetailToExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strNewXml = "";
+            int nRet = this.readerEditControl1.GetData(
+                out strNewXml,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            List<string> xmls = new List<string>();
+            xmls.Add(strNewXml);
+
+            // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
+            // return:
+            //      -1  出错
+            //      0   用户中断
+            //      1   成功
+            nRet = ReaderSearchForm.CreateReaderDetailExcelFile(xmls,
+                this.MainForm.GetBiblioSummary,
+                null,
+                false,
+                true,
+                out strError);
+            if (nRet != 1)
+                goto ERROR1;
             return;
         ERROR1:
             MessageBox.Show(this, strError);

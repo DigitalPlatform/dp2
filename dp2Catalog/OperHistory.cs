@@ -35,7 +35,7 @@ namespace dp2Catalog
             WebBrowser webbrowser,
             out string strError)
         {
-            int nRet = 0;
+            //int nRet = 0;
             strError = "";
 
             this.MainForm = main_form;

@@ -2029,7 +2029,7 @@ out string strError)
         {
             strError = "";
 
-            int nRet = 0;
+            //int nRet = 0;
 
             if (this.IsDisposed == true)
             {

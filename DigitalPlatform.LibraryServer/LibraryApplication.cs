@@ -2501,7 +2501,7 @@ namespace DigitalPlatform.LibraryServer
         {
             if (this.DebugMode == false)
                 return;
-            StreamUtil.WriteText(this.LogDir + "\\debug.txt", "-- " + DateTime.Now.ToString("u") + " " + strTitle + "\r\n");
+            StreamUtil.WriteText(Path.Combine(this.LogDir, "\\debug.txt"), "-- " + DateTime.Now.ToString("u") + " " + strTitle + "\r\n");
         }
 
         public void WriteAppDownDetectFile(string strText)

@@ -3027,7 +3027,7 @@ MessageBoxDefaultButton.Button1);
             int nRet = this.CreateReaderDetailExcelFile(barcodes,
                 true,
                 out strError);
-            if (nRet == -1)
+            if (nRet != 1)
                 goto ERROR1;
 
             // MessageBox.Show(this, "导出完成");
@@ -4817,6 +4817,174 @@ out strFingerprint);
 
         #endregion
 
+        // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
+        // return:
+        //      -1  出错
+        //      0   用户中断
+        //      1   成功
+        public static int CreateReaderDetailExcelFile(List<string> xmls,
+            Delegate_GetBiblioSummary procGetBiblioSummary,
+            Stop stop,
+            bool bAdvanceXml,
+            bool bLaunchExcel,
+            out string strError)
+        {
+            strError = "";
+            //int nRet = 0;
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = this.ExportExcelFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return 0;
+
+            XLWorkbook doc = null;
+
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "ReaderSearchForm new XLWorkbook() {0BD1CB34-DF8A-4DDB-B884-8A9CF830D7C7} exception: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+            try
+            {
+                if (stop != null)
+                    stop.SetProgressRange(0, xmls.Count);
+
+                // 每个列的最大字符数
+                List<int> column_max_chars = new List<int>();
+
+                // TODO: 表的标题，创建时间
+
+                int nRowIndex = 3;  // 空出前两行
+                //int nColIndex = 1;
+
+                int nReaderIndex = 0;
+                foreach (string strXml in xmls)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                        return 0;
+
+                    if (string.IsNullOrEmpty(strXml) == true)
+                        continue;
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载读者记录 XML 到 DOM 时发生错误: " + ex.Message;
+                        return -1;
+                    }
+
+                    // 
+                    //
+                    OutputReaderInfo(sheet,
+            dom,
+            nReaderIndex,
+            ref nRowIndex,
+            ref column_max_chars);
+
+                    // 输出在借册表格
+                    OutputBorrows(sheet,
+            dom,
+            procGetBiblioSummary,
+            bAdvanceXml,
+            ref nRowIndex,
+            ref column_max_chars);
+
+                    // 输出违约金表格
+                    OutputOverdues(sheet,
+            dom,
+            procGetBiblioSummary,
+            ref nRowIndex,
+            ref column_max_chars);
+
+                    nRowIndex++;    // 读者之间的空行
+
+                    nReaderIndex++;
+                    if (stop != null)
+                        stop.SetProgressValue(nReaderIndex);
+                }
+
+                {
+                    if (stop != null)
+                        stop.SetMessage("正在调整列宽度 ...");
+                    Application.DoEvents();
+
+                    // 字符数太多的列不要做 width auto adjust
+                    foreach (IXLColumn column in sheet.Columns())
+                    {
+                        int MAX_CHARS = 50;   // 60
+
+                        int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                        if (nIndex >= column_max_chars.Count)
+                            break;
+                        int nChars = column_max_chars[nIndex];
+
+                        if (nIndex == 1)
+                        {
+                            column.Width = 10;
+                            continue;
+                        }
+
+                        if (nIndex == 3)
+                            MAX_CHARS = 50;
+                        else
+                            MAX_CHARS = 24;
+
+                        if (nChars < MAX_CHARS)
+                            column.AdjustToContents();
+                        else
+                            column.Width = Math.Min(MAX_CHARS, nChars);
+                    }
+                }
+            }
+            finally
+            {
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+            }
+            return 1;
+        }
+
         // return:
         //      -1  出错
         //      0   用户中断
@@ -4887,11 +5055,8 @@ out strFingerprint);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                            return 0;
-                    }
+                    if (stop != null && stop.State != 0)
+                        return 0;
 
                     if (string.IsNullOrEmpty(strBarcode) == true)
                         continue;
@@ -4951,12 +5116,15 @@ out strFingerprint);
                     // 输出在借册表格
                     OutputBorrows(sheet,
             dom,
+            this.MainForm.GetBiblioSummary,
+            true,
             ref nRowIndex,
             ref column_max_chars);
 
                     // 输出违约金表格
                     OutputOverdues(sheet,
             dom,
+            this.MainForm.GetBiblioSummary,
             ref nRowIndex,
             ref column_max_chars);
 
@@ -5036,7 +5204,7 @@ out strFingerprint);
                 }
 
             }
-            return 0;
+            return 1;
         }
 
         static string GetContactString(XmlDocument dom)
@@ -5088,7 +5256,7 @@ out strFingerprint);
             nRowIndex++;
         }
 
-        void OutputReaderInfo(IXLWorksheet sheet,
+        static void OutputReaderInfo(IXLWorksheet sheet,
             XmlDocument dom,
             int nReaderIndex,
             ref int nRowIndex,
@@ -5264,8 +5432,13 @@ out strFingerprint);
 
         }
 
-        void OutputBorrows(IXLWorksheet sheet,
+        // TODO: 是否超期列也应能从 returningDate 计算出，以适应非 AdvanceXml 的情况
+        // parameters:
+        //      bAdvanceXml 是否为 AdvanceXml 情况
+        static void OutputBorrows(IXLWorksheet sheet,
             XmlDocument dom,
+            Delegate_GetBiblioSummary procGetBiblioSummary,
+            bool bAdvanceXml,
             ref int nRowIndex,
             ref List<int> column_max_chars)
         {
@@ -5323,16 +5496,50 @@ XLColor.DarkGreen,
                 bool bIsOverdue = DomUtil.IsBooleanTrue(strIsOverdue, false);
                 string strOverdueInfo = borrow.GetAttribute("overdueInfo1");
 
+                if (bAdvanceXml == false)
+                {
+                    string strPeriod = borrow.GetAttribute("borrowPeriod");
+                    string strRfc1123String = borrow.GetAttribute("returningDate");
+                    try
+                    {
+                        DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strRfc1123String);
+                        TimeSpan delta = DateTime.Now - time.ToLocalTime();
+                        if (strPeriod.IndexOf("hour") != -1)
+                        {
+                            if (delta.Hours > 0)
+                            {
+                                strOverdueInfo = "已超期 " + delta.Hours + " 小时";
+                                bIsOverdue = true;
+                            }
+                        }
+                        else
+                        {
+                            if (delta.Days > 0)
+                            {
+                                strOverdueInfo = "已超期 " + delta.Days + " 天";
+                                bIsOverdue = true;
+                            }
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
                 string strSummary = borrow.GetAttribute("summary");
-#if NO
-                            nRet = this.MainForm.GetBiblioSummary(strItemBarcode,
-                                strRecPath, // strConfirmItemRecPath,
-                                false,
-                                out strSummary,
-                                out strError);
-                            if (nRet == -1)
-                                strSummary = strError;
-#endif
+                if (string.IsNullOrEmpty(strItemBarcode) == false
+                    && string.IsNullOrEmpty(strSummary) == true)
+                {
+                    string strError = "";
+                    int nRet = procGetBiblioSummary(strItemBarcode,
+                        strRecPath, // strConfirmItemRecPath,
+                        false,
+                        out strSummary,
+                        out strError);
+                    if (nRet == -1)
+                        strSummary = strError;
+                }
 
                 List<string> cols = new List<string>();
                 cols.Add((nItemIndex + 1).ToString());
@@ -5392,8 +5599,15 @@ XLColor.DarkGreen,
             sheet.Rows(nStartRow + 1, nRowIndex-1).Group();
         }
 
-        void OutputOverdues(IXLWorksheet sheet,
+        public delegate int Delegate_GetBiblioSummary(string strItemBarcode,
+    string strConfirmItemRecPath,
+    bool bDisplayProgress,
+    out string strSummary,
+    out string strError);
+
+        static void OutputOverdues(IXLWorksheet sheet,
     XmlDocument dom,
+           Delegate_GetBiblioSummary procGetBiblioSummary,
     ref int nRowIndex,
     ref List<int> column_max_chars)
         {
@@ -5459,7 +5673,7 @@ XLColor.DarkGreen,
                     && string.IsNullOrEmpty(strSummary) == true)
                 {
                     string strError = "";
-                    nRet = this.MainForm.GetBiblioSummary(strItemBarcode,
+                    nRet = procGetBiblioSummary(strItemBarcode,
                         strRecPath, // strConfirmItemRecPath,
                         false,
                         out strSummary,

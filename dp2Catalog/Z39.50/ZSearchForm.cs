@@ -24,7 +24,7 @@ using DigitalPlatform.CirculationClient;    // for NormalDbProperty
 
 namespace dp2Catalog
 {
-    public partial class ZSearchForm : Form, ISearchForm, IZSearchForm
+    public partial class ZSearchForm : MyForm, ISearchForm, IZSearchForm
     {
         public string UsedLogFilename = ""; // 曾经用过的通讯包日志文件名
 
@@ -51,6 +51,7 @@ namespace dp2Catalog
 
         public string CurrentRefID = "0";   // "1 0 116101 11 1";
 
+#if NO
         MainForm m_mainForm = null;
 
         public MainForm MainForm
@@ -66,6 +67,7 @@ namespace dp2Catalog
         }
 
         // DigitalPlatform.Stop Stop = null;
+#endif
 
         // public ZChannel ZChannel = new ZChannel();
         public ZConnectionCollection ZConnections = new ZConnectionCollection();
@@ -100,9 +102,9 @@ namespace dp2Catalog
 
         private void ZSearchForm_Load(object sender, EventArgs e)
         {
-            if (this.m_mainForm != null)
+            if (this.MainForm != null)
             {
-                GuiUtil.SetControlFont(this, this.m_mainForm.DefaultFont);
+                GuiUtil.SetControlFont(this, this.MainForm.DefaultFont);
             }
 
             this.ZConnections.IZSearchForm = this;
@@ -114,7 +116,7 @@ namespace dp2Catalog
             Stop.Register(MainForm.stopManager);	// 和容器关联
              * */
 
-            string strWidths = this.m_mainForm.AppInfo.GetString(
+            string strWidths = this.MainForm.AppInfo.GetString(
 "zsearchform",
 "record_list_column_width",
 "");
@@ -124,7 +126,7 @@ namespace dp2Catalog
                     strWidths,
                     true);
             }
-            string[] fromlist = this.m_mainForm.GetFromList();
+            string[] fromlist = this.MainForm.GetFromList();
 
             for (int i = 0; i < 4; i++)
             {
@@ -133,21 +135,21 @@ namespace dp2Catalog
 
             int nRet = 0;
             string strError = "";
-            nRet = this.zTargetControl1.Load(Path.Combine(m_mainForm.UserDir, "zserver.xml"),
+            nRet = this.zTargetControl1.Load(Path.Combine(MainForm.UserDir, "zserver.xml"),
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
-            this.zTargetControl1.Marc8Encoding = this.m_mainForm.Marc8Encoding;
+            this.zTargetControl1.Marc8Encoding = this.MainForm.Marc8Encoding;
 
-            this.zTargetControl1.MainForm = this.m_mainForm;  // 2007/12/16
+            this.zTargetControl1.MainForm = this.MainForm;  // 2007/12/16
 
             //// this.ZChannel.CommIdle += new CommIdleEventHandle(ZChannel_CommIdle);
             this.zTargetControl1.AllowCheckbox = false;
 
 
             // 恢复上次留下的检索式
-            string strContentsXml = m_mainForm.AppInfo.GetString(
+            string strContentsXml = MainForm.AppInfo.GetString(
                 "zsearchform",
                 "query_contents",
                 "");
@@ -159,7 +161,7 @@ namespace dp2Catalog
                 this.zTargetControl1);
 
             // 选定上次选定的树节点
-            string strLastTargetPath = m_mainForm.AppInfo.GetString(
+            string strLastTargetPath = MainForm.AppInfo.GetString(
                 "zsearchform",
                 "last_targetpath",
                 "");
@@ -187,7 +189,7 @@ namespace dp2Catalog
         public void LoadSize()
         {
             // 设置窗口尺寸状态
-            m_mainForm.AppInfo.LoadMdiChildFormStates(this,
+            this.MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
                 MainForm.DefaultMdiWindowWidth,
                 MainForm.DefaultMdiWindowHeight);
@@ -210,7 +212,7 @@ namespace dp2Catalog
                 }
             }
              * */
-            this.m_mainForm.LoadSplitterPos(
+            this.MainForm.LoadSplitterPos(
 this.splitContainer_main,
 "zsearchform",
 "splitContainer_main");
@@ -233,7 +235,7 @@ this.splitContainer_main,
                 }
             }
              * */
-            this.m_mainForm.LoadSplitterPos(
+            this.MainForm.LoadSplitterPos(
 this.splitContainer_up,
 "zsearchform",
 "splitContainer_up");
@@ -255,7 +257,7 @@ this.splitContainer_up,
                 }
             }
              * */
-            this.m_mainForm.LoadSplitterPos(
+            this.MainForm.LoadSplitterPos(
 this.splitContainer_queryAndResultInfo,
 "zsearchform",
 "splitContainer_queryAndResultInfo");
@@ -266,7 +268,7 @@ this.splitContainer_queryAndResultInfo,
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                m_mainForm.AppInfo.SaveMdiChildFormStates(this,
+                this.MainForm.AppInfo.SaveMdiChildFormStates(this,
                     "mdi_form_state");
 
                 // 保存splitContainer_main的状态
@@ -276,7 +278,7 @@ this.splitContainer_queryAndResultInfo,
                     "splitContainer_main",
                     this.splitContainer_main.SplitterDistance);
                  * */
-                this.m_mainForm.SaveSplitterPos(
+                this.MainForm.SaveSplitterPos(
         this.splitContainer_main,
         "zsearchform",
         "splitContainer_main");
@@ -288,7 +290,7 @@ this.splitContainer_queryAndResultInfo,
                     "splitContainer_up",
                     this.splitContainer_up.SplitterDistance);
                  * */
-                this.m_mainForm.SaveSplitterPos(
+                this.MainForm.SaveSplitterPos(
     this.splitContainer_up,
     "zsearchform",
     "splitContainer_up");
@@ -300,7 +302,7 @@ this.splitContainer_queryAndResultInfo,
                     "splitContainer_queryAndResultInfo",
                     this.splitContainer_queryAndResultInfo.SplitterDistance);
                  * */
-                this.m_mainForm.SaveSplitterPos(
+                this.MainForm.SaveSplitterPos(
     this.splitContainer_queryAndResultInfo,
     "zsearchform",
     "splitContainer_queryAndResultInfo");
@@ -369,14 +371,6 @@ this.splitContainer_queryAndResultInfo,
 
         private void ZSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            /*
-            if (Stop != null) // 脱离关联
-            {
-                Stop.DoStop();
-
-                Stop.Unregister();	// 和容器关联
-                Stop = null;
-            }*/
             this.ZConnections.UnlinkAllStop();
 
             //// this.ZChannel.CommIdle -= new CommIdleEventHandle(ZChannel_CommIdle);
@@ -387,7 +381,7 @@ this.splitContainer_queryAndResultInfo,
                     '\\');
 
                 // TODO: applicationInfo有时为null
-                m_mainForm.AppInfo.SetString(
+                this.MainForm.AppInfo.SetString(
                     "zsearchform",
                     "last_targetpath",
                     strLastTargetPath);
@@ -395,7 +389,7 @@ this.splitContainer_queryAndResultInfo,
                 // 促使当前一个treenode的检索式送到connections结构中，以便保存
                 zTargetControl1_BeforeSelect(null, null);
 
-                m_mainForm.AppInfo.SetString(
+                this.MainForm.AppInfo.SetString(
                     "zsearchform",
                     "query_contents",
                     this.ZConnections.GetAllQueryXml());
@@ -404,7 +398,7 @@ this.splitContainer_queryAndResultInfo,
                 // this.queryControl1.GetContent());
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
-                this.m_mainForm.AppInfo.SetString(
+                this.MainForm.AppInfo.SetString(
                     "zsearchform",
                     "record_list_column_width",
                     strWidths);
@@ -413,10 +407,7 @@ this.splitContainer_queryAndResultInfo,
             SaveSize();
 
             this.zTargetControl1.Save();
-
         }
-
-
 
         // 2007/7/28
         // 获得当前选中的一个服务器目标相关的ZConnection
@@ -433,7 +424,6 @@ this.splitContainer_queryAndResultInfo,
 
             return result;
         }
-
 
         // 2007/7/28
         // 获得和一个服务器树节点相关的ZConnection
@@ -489,6 +479,7 @@ this.splitContainer_queryAndResultInfo,
                 }*/
             }
 
+            // 注意，此时 TargetInfo 依然有可能为 null
             return connection;
         }
 
@@ -666,58 +657,61 @@ this.splitContainer_queryAndResultInfo,
             string strError = "";
             int nRet = 0;
 
-            TreeNode node = this.zTargetControl1.SelectedNode;
-            if (ZTargetControl.IsServerType(node) == true
-                || ZTargetControl.IsDatabaseType(node) == true)
+            this._processing++;
+            try
             {
-                // return:
-                //      -2  尚未输入检索词
-                //      -1  一般错误
-                //      0   成功启动检索
-                nRet = DoSearchOneServer(
-                    node,
-                    out strError);
-                if (nRet == -1 || nRet == -2)
-                    goto ERROR1;
-            }
-            else
-            {
-                Debug.Assert(ZTargetControl.IsDirType(node) == true, "");
-
-                if (this.m_stops.Count != 0)
+                TreeNode node = this.zTargetControl1.SelectedNode;
+                if (ZTargetControl.IsServerType(node) == true
+                    || ZTargetControl.IsDatabaseType(node) == true)
                 {
-                    // TODO: 是否需要提示出哪个目录正在进行群检?
-                    strError = "当前正在进行着群检，不允许多次启动群检";
-                    goto ERROR1;
+                    // return:
+                    //      -2  尚未输入检索词
+                    //      -1  一般错误
+                    //      0   成功启动检索
+                    nRet = DoSearchOneServer(
+                        node,
+                        out strError);
+                    if (nRet == -1 || nRet == -2)
+                        goto ERROR1;
                 }
-
-                ZConnection connection = this.GetCurrentZConnection();
-
-                // 获得共同的检索式
-                connection.QueryXml = this.queryControl1.GetContent(true);
-                if (String.IsNullOrEmpty(connection.QueryXml) == true)
+                else
                 {
-                    strError = "尚未输入检索式";
-                    goto ERROR1;
-                }
+                    Debug.Assert(ZTargetControl.IsDirType(node) == true, "");
 
-                // 准备工作
-                this.m_nTotalHitCount = 0;
-                this.m_nCompleteServerCount = 0;
-                this.m_nServerCount = 0;
+                    if (this.m_stops.Count != 0)
+                    {
+                        // TODO: 是否需要提示出哪个目录正在进行群检?
+                        strError = "当前正在进行着群检，不允许多次启动群检";
+                        goto ERROR1;
+                    }
 
-                this.m_stopDir = connection.Stop;
-                this.m_connectionDir = connection;
-                this.m_stops.Clear();
-                this.m_bStartGroupSearch = false;
+                    ZConnection connection = this.GetCurrentZConnection();
 
-                node.Expand();
+                    // 获得共同的检索式
+                    connection.QueryXml = this.queryControl1.GetContent(true);
+                    if (String.IsNullOrEmpty(connection.QueryXml) == true)
+                    {
+                        strError = "尚未输入检索式";
+                        goto ERROR1;
+                    }
 
-                /*
-                lock (this)
-                {
-                } 
-                 * */
+                    // 准备工作
+                    this.m_nTotalHitCount = 0;
+                    this.m_nCompleteServerCount = 0;
+                    this.m_nServerCount = 0;
+
+                    this.m_stopDir = connection.Stop;
+                    this.m_connectionDir = connection;
+                    this.m_stops.Clear();
+                    this.m_bStartGroupSearch = false;
+
+                    node.Expand();
+
+                    /*
+                    lock (this)
+                    {
+                    } 
+                     * */
 
 #if NOOOOOOOOOOOOO
                 this.m_stopDir.OnStop += new StopEventHandler(m_stopDir_OnStop);
@@ -728,14 +722,14 @@ this.splitContainer_queryAndResultInfo,
 #endif
 
 
-                List<ZConnection> connections = new List<ZConnection>();
+                    List<ZConnection> connections = new List<ZConnection>();
 
-                nRet = PrepareSearchOneDir(node,
-                    connection.QueryXml,
-                    ref connections,
-                    out strError);
-                if (nRet == -1 || this.m_stops.Count == 0)
-                {
+                    nRet = PrepareSearchOneDir(node,
+                        connection.QueryXml,
+                        ref connections,
+                        out strError);
+                    if (nRet == -1 || this.m_stops.Count == 0)
+                    {
 #if NOOOOOOOOOOOOOO
                     lock (this)
                     {
@@ -756,44 +750,49 @@ this.splitContainer_queryAndResultInfo,
                         this.m_stops.Clear();
                     }
 #endif
-                    goto ERROR1;
-                }
+                        goto ERROR1;
+                    }
 
-                this.m_nServerCount = this.m_stops.Count;
+                    this.m_nServerCount = this.m_stops.Count;
 
-                // 启动检索
-                for (int i = 0; i < connections.Count; i++)
-                {
-                    ZConnection temp = connections[i];
+                    // 启动检索
+                    for (int i = 0; i < connections.Count; i++)
+                    {
+                        ZConnection temp = connections[i];
 #if THREAD_POOLING
-                    List<string> commands = new List<string>();
-                    commands.Add("search");
-                    commands.Add("present");
+                        List<string> commands = new List<string>();
+                        commands.Add("search");
+                        commands.Add("present");
 
-                    temp.SetSearchParameters(
-            temp.QueryString,
-            temp.TargetInfo.DefaultQueryTermEncoding,
-            temp.TargetInfo.DbNames,
-            temp.TargetInfo.DefaultResultSetName);
+                        temp.SetSearchParameters(
+                temp.QueryString,
+                temp.TargetInfo.DefaultQueryTermEncoding,
+                temp.TargetInfo.DbNames,
+                temp.TargetInfo.DefaultResultSetName);
 
-                    temp.SetPresentParameters(
-            temp.TargetInfo.DefaultResultSetName,
-            0, // nStart,
-            temp.TargetInfo.PresentPerBatchCount, // nCount,
-            temp.TargetInfo.PresentPerBatchCount,   // 推荐的每次数量
-            temp.DefaultElementSetName,    // "F" strElementSetName,
-            temp.PreferredRecordSyntax,
-            true);
+                        temp.SetPresentParameters(
+                temp.TargetInfo.DefaultResultSetName,
+                0, // nStart,
+                temp.TargetInfo.PresentPerBatchCount, // nCount,
+                temp.TargetInfo.PresentPerBatchCount,   // 推荐的每次数量
+                temp.DefaultElementSetName,    // "F" strElementSetName,
+                temp.PreferredRecordSyntax,
+                true);
 
-                    temp.BeginCommands(commands);
+                        temp.BeginCommands(commands);
 
 #else
                     temp.Search();
 #endif
+                    }
                 }
-            }
 
-            return 0;
+                return 0;
+            }
+            finally
+            {
+                this._processing--;
+            }
         ERROR1:
             // 这里的报错，是在界面线程的报错
             try // 防止最后退出时报错
@@ -863,14 +862,14 @@ this.splitContainer_queryAndResultInfo,
             int nRet = 0;
 
             ZConnection connection = this.GetZConnection(nodeServerOrDatabase);
-            Debug.Assert(connection.TargetInfo != null, "");
 
+            Debug.Assert(connection.TargetInfo != null, "");
             Debug.Assert(connection.TreeNode == nodeServerOrDatabase, "");
 
             string strQueryString = "";
 
             IsbnConvertInfo isbnconvertinfo = new IsbnConvertInfo();
-            isbnconvertinfo.IsbnSplitter = this.m_mainForm.IsbnSplitter;
+            isbnconvertinfo.IsbnSplitter = this.MainForm.IsbnSplitter;
             isbnconvertinfo.ConvertStyle =
                 (connection.TargetInfo.IsbnAddHyphen == true ? "addhyphen," : "")
                 + (connection.TargetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
@@ -880,7 +879,7 @@ this.splitContainer_queryAndResultInfo,
 
 
             nRet = ZQueryControl.GetQueryString(
-                this.m_mainForm.Froms,
+                this.MainForm.Froms,
                 strQueryXml,
                 isbnconvertinfo,
                 out strQueryString,
@@ -916,6 +915,8 @@ this.splitContainer_queryAndResultInfo,
         // 启动检索以后控制就立即返回
         // thread:
         //      界面线程
+        // parameters:
+        //      nodeServerOrDatabase    服务器或者数据库类型的节点
         // return:
         //      -2  尚未输入检索词
         //      -1  一般错误
@@ -970,7 +971,7 @@ this.splitContainer_queryAndResultInfo,
 
             }
             IsbnConvertInfo isbnconvertinfo = new IsbnConvertInfo();
-            isbnconvertinfo.IsbnSplitter = this.m_mainForm.IsbnSplitter;
+            isbnconvertinfo.IsbnSplitter = this.MainForm.IsbnSplitter;
             isbnconvertinfo.ConvertStyle =
                 (connection.TargetInfo.IsbnAddHyphen == true ? "addhyphen," : "")
                 + (connection.TargetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
@@ -980,7 +981,7 @@ this.splitContainer_queryAndResultInfo,
 
 
                 nRet = ZQueryControl.GetQueryString(
-                    this.m_mainForm.Froms,
+                    this.MainForm.Froms,
                     connection.QueryXml,
                     isbnconvertinfo,
                     out strQueryString,
@@ -2230,7 +2231,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 nImageIndex = BROWSE_TYPE_FULL;
 
             Encoding currrentEncoding = connection.GetRecordsEncoding(
-                this.m_mainForm,
+                this.MainForm,
                 record.m_strSyntaxOID);
 
             string strSytaxOID = record.m_strSyntaxOID;
@@ -2302,7 +2303,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 // ISO2709转换为机内格式
                 nRet = Marc8Encoding.ConvertByteArrayToMarcRecord(
                     record.m_baRecord,
-                    connection.GetRecordsEncoding(this.m_mainForm, record.m_strSyntaxOID),  // Encoding.GetEncoding(936),
+                    connection.GetRecordsEncoding(this.MainForm, record.m_strSyntaxOID),  // Encoding.GetEncoding(936),
                     true,
                     out strMARC,
                     out strError);
@@ -2369,11 +2370,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
 
             FilterHost host = new FilterHost();
             host.ID = "";
-            host.MainForm = this.m_mainForm;
+            host.MainForm = this.MainForm;
 
             BrowseFilterDocument filter = null;
 
-            string strFilterFileName = this.m_mainForm.DataDir + "\\" + strSytaxOID.Replace(".", "_") + "\\marc_browse.fltx";
+            string strFilterFileName = this.MainForm.DataDir + "\\" + strSytaxOID.Replace(".", "_") + "\\marc_browse.fltx";
 
             int nRet = this.PrepareMarcFilter(
                 host,
@@ -2803,7 +2804,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 EnableQueryControl(false);
 
                 this.Update();
-                // this.m_mainForm.Update();
+                // this.MainForm.Update();
 
                 try
                 {
@@ -2990,7 +2991,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 EnableQueryControl(false);
 
                 this.Update();
-                this.m_mainForm.Update();
+                this.MainForm.Update();
 
                 ActivateStopDisplay();  // 2011/9/11
 
@@ -3160,7 +3161,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             byte[] baRecord = record.m_baRecord;    // Encoding.ASCII.GetBytes(record.m_strRecord);
 
             currrentEncoding = connection.GetRecordsEncoding(
-                this.m_mainForm,
+                this.MainForm,
                 record.m_strSyntaxOID);
 
 
@@ -3240,7 +3241,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             // ISO2709转换为机内格式
             nRet = Marc8Encoding.ConvertByteArrayToMarcRecord(
                 baRecord,
-                connection.GetRecordsEncoding(this.m_mainForm, record.m_strSyntaxOID),  // Encoding.GetEncoding(936),
+                connection.GetRecordsEncoding(this.MainForm, record.m_strSyntaxOID),  // Encoding.GetEncoding(936),
                 true,
                 out strMARC,
                 out strError);
@@ -3304,7 +3305,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             }
 
 
-            currrentEncoding = connection.GetRecordsEncoding(this.m_mainForm, record.m_strSyntaxOID);
+            currrentEncoding = connection.GetRecordsEncoding(this.MainForm, record.m_strSyntaxOID);
             strOutStyle = "marc";
             return 0;
         }
@@ -3470,8 +3471,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
 
             MarcDetailForm form = new MarcDetailForm();
 
-            form.MdiParent = this.m_mainForm;
-            form.MainForm = this.m_mainForm;
+            form.MdiParent = this.MainForm;
+            form.MainForm = this.MainForm;
 
 
             // 继承自动识别的OID
@@ -3525,8 +3526,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             {
                 DcForm form = new DcForm();
 
-                form.MdiParent = this.m_mainForm;
-                form.MainForm = this.m_mainForm;
+                form.MdiParent = this.MainForm;
+                form.MainForm = this.MainForm;
                 form.Show();
 
                 form.LoadRecord(this, index);
@@ -3581,8 +3582,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             {
                 XmlDetailForm form = new XmlDetailForm();
 
-                form.MdiParent = this.m_mainForm;
-                form.MainForm = this.m_mainForm;
+                form.MdiParent = this.MainForm;
+                form.MainForm = this.MainForm;
                 form.Show();
 
                 form.LoadRecord(this, index);
@@ -3641,8 +3642,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             {
                 XmlDetailForm form = new XmlDetailForm();
 
-                form.MdiParent = this.m_mainForm;
-                form.MainForm = this.m_mainForm;
+                form.MdiParent = this.MainForm;
+                form.MainForm = this.MainForm;
                 form.Show();
 
                 form.LoadRecord(this, index);
@@ -3653,8 +3654,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 MarcDetailForm form = new MarcDetailForm();
 
 
-                form.MdiParent = this.m_mainForm;
-                form.MainForm = this.m_mainForm;
+                form.MdiParent = this.MainForm;
+                form.MainForm = this.MainForm;
 
                 // 继承自动识别的OID
                 if (connection.TargetInfo != null
@@ -3676,11 +3677,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             ZConnection connection = this.GetCurrentZConnection();
             if (connection != null)
             {
-                m_mainForm.stopManager.Active(connection.Stop);
+                this.MainForm.stopManager.Active(connection.Stop);
             }
             else
             {
-                m_mainForm.stopManager.Active(null);
+                this.MainForm.stopManager.Active(null);
             }
         }
 
@@ -3704,59 +3705,59 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             int nSelectedCount = 0;
             if (connection != null)
             {
-                m_mainForm.stopManager.Active(connection.Stop);
+                this.MainForm.stopManager.Active(connection.Stop);
 
                 nSelectedCount = connection.VirtualItems.SelectedIndices.Count;
             }
             else
             {
-                m_mainForm.stopManager.Active(null);
+                this.MainForm.stopManager.Active(null);
             }
 
-            m_mainForm.SetMenuItemState();
+            this.MainForm.SetMenuItemState();
 
             // 菜单
             if (nSelectedCount == 0)
             {
-                m_mainForm.MenuItem_saveOriginRecordToIso2709.Enabled = false;
-                m_mainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = false;
+                this.MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = false;
+                this.MainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = false;
             }
             else
             {
-                m_mainForm.MenuItem_saveOriginRecordToIso2709.Enabled = true;
-                m_mainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = true;
+                this.MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = true;
+                this.MainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = true;
             }
 
 
-            m_mainForm.MenuItem_font.Enabled = false;
+            this.MainForm.MenuItem_font.Enabled = false;
 
             // 工具条按钮
             if (nSelectedCount == 0)
             {
-                m_mainForm.toolButton_saveTo.Enabled = false;
-                m_mainForm.toolButton_loadFullRecord.Enabled = false;
+                this.MainForm.toolButton_saveTo.Enabled = false;
+                this.MainForm.toolButton_loadFullRecord.Enabled = false;
             }
             else
             {
-                m_mainForm.toolButton_saveTo.Enabled = true;
-                m_mainForm.toolButton_loadFullRecord.Enabled = true;
+                this.MainForm.toolButton_saveTo.Enabled = true;
+                this.MainForm.toolButton_loadFullRecord.Enabled = true;
             }
 
-            m_mainForm.toolButton_save.Enabled = false;
-            m_mainForm.toolButton_search.Enabled = true;
-            m_mainForm.toolButton_prev.Enabled = false;
-            m_mainForm.toolButton_next.Enabled = false;
-            m_mainForm.toolButton_nextBatch.Enabled = true;
+            this.MainForm.toolButton_save.Enabled = false;
+            this.MainForm.toolButton_search.Enabled = true;
+            this.MainForm.toolButton_prev.Enabled = false;
+            this.MainForm.toolButton_next.Enabled = false;
+            this.MainForm.toolButton_nextBatch.Enabled = true;
 
-            m_mainForm.toolButton_getAllRecords.Enabled = true;
+            this.MainForm.toolButton_getAllRecords.Enabled = true;
 
-            m_mainForm.toolButton_delete.Enabled = false;
+            this.MainForm.toolButton_delete.Enabled = false;
 
-            m_mainForm.toolButton_loadTemplate.Enabled = false;
+            this.MainForm.toolButton_loadTemplate.Enabled = false;
 
-            m_mainForm.toolButton_dup.Enabled = false;
-            m_mainForm.toolButton_verify.Enabled = false;
-            m_mainForm.toolButton_refresh.Enabled = false;
+            this.MainForm.toolButton_dup.Enabled = false;
+            this.MainForm.toolButton_verify.Enabled = false;
+            this.MainForm.toolButton_refresh.Enabled = false;
         }
 
 
@@ -3951,7 +3952,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
 
             DigitalPlatform.Stop stop = null;
             stop = new DigitalPlatform.Stop();
-            stop.Register(m_mainForm.stopManager, true);	// 和容器关联
+            stop.Register(this.MainForm.stopManager, true);	// 和容器关联
 
             stop.BeginLoop();
 
@@ -4061,7 +4062,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             string strError = "";
             int nRet = 0;
 
-            string strLastSavePath = m_mainForm.LastSavePath;
+            string strLastSavePath = this.MainForm.LastSavePath;
             if (String.IsNullOrEmpty(strLastSavePath) == false)
             {
                 string strOutputPath = "";
@@ -4070,7 +4071,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                     out strError);
                 if (nRet == -1)
                 {
-                    m_mainForm.LastSavePath = ""; // 避免下次继续出错
+                    this.MainForm.LastSavePath = ""; // 避免下次继续出错
                     goto ERROR1;
                 }
                 strLastSavePath = strOutputPath;
@@ -4082,7 +4083,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
 
             dlg.SaveToDbMode = true;    // 不允许在textbox中修改路径
 
-            dlg.MainForm = this.m_mainForm;
+            dlg.MainForm = this.MainForm;
             dlg.GetDtlpSearchParam += new GetDtlpSearchParamEventHandle(dlg_GetDtlpSearchParam);
             dlg.GetDp2SearchParam += new GetDp2SearchParamEventHandle(dlg_GetDp2SearchParam);
             {
@@ -4097,7 +4098,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            m_mainForm.LastSavePath = dlg.RecPath;
+            this.MainForm.LastSavePath = dlg.RecPath;
 
             string strProtocol = "";
             string strPath = "";
@@ -4140,7 +4141,7 @@ MessageBoxDefaultButton.Button1);
             // TODO: 禁止问号以外的其它ID
             DigitalPlatform.Stop stop = null;
             stop = new DigitalPlatform.Stop();
-            stop.Register(m_mainForm.stopManager, true);	// 和容器关联
+            stop.Register(this.MainForm.stopManager, true);	// 和容器关联
 
             stop.BeginLoop();
 
@@ -4396,7 +4397,7 @@ MessageBoxDefaultButton.Button1);
         {
             DtlpSearchForm dtlp_searchform = null;
 
-            dtlp_searchform = this.m_mainForm.TopDtlpSearchForm;
+            dtlp_searchform = this.MainForm.TopDtlpSearchForm;
 
             if (dtlp_searchform == null)
             {
@@ -4404,8 +4405,8 @@ MessageBoxDefaultButton.Button1);
                 FormWindowState old_state = this.WindowState;
 
                 dtlp_searchform = new DtlpSearchForm();
-                dtlp_searchform.MainForm = this.m_mainForm;
-                dtlp_searchform.MdiParent = this.m_mainForm;
+                dtlp_searchform.MainForm = this.MainForm;
+                dtlp_searchform.MdiParent = this.MainForm;
                 dtlp_searchform.WindowState = FormWindowState.Minimized;
                 dtlp_searchform.Show();
 
@@ -4424,7 +4425,7 @@ MessageBoxDefaultButton.Button1);
             dp2SearchForm dp2_searchform = null;
 
 
-            dp2_searchform = this.m_mainForm.TopDp2SearchForm;
+            dp2_searchform = this.MainForm.TopDp2SearchForm;
 
             if (dp2_searchform == null)
             {
@@ -4432,8 +4433,8 @@ MessageBoxDefaultButton.Button1);
                 FormWindowState old_state = this.WindowState;
 
                 dp2_searchform = new dp2SearchForm();
-                dp2_searchform.MainForm = this.m_mainForm;
-                dp2_searchform.MdiParent = this.m_mainForm;
+                dp2_searchform.MainForm = this.MainForm;
+                dp2_searchform.MdiParent = this.MainForm;
                 dp2_searchform.WindowState = FormWindowState.Minimized;
                 dp2_searchform.Show();
 
@@ -4452,7 +4453,7 @@ MessageBoxDefaultButton.Button1);
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
             e.dp2Channels = dp2_searchform.Channels;
-            e.MainForm = this.m_mainForm;
+            e.MainForm = this.MainForm;
         }
 
         void dlg_GetDtlpSearchParam(object sender, GetDtlpSearchParamEventArgs e)
@@ -4560,7 +4561,7 @@ MessageBoxDefaultButton.Button1);
             dlg.Title = "请指定要保存的工作单文件名";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
-            dlg.FileName = m_mainForm.LastWorksheetFileName;
+            dlg.FileName = this.MainForm.LastWorksheetFileName;
             dlg.Filter = "工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
@@ -4594,20 +4595,20 @@ MessageBoxDefaultButton.Button1);
             }
 
 
-            m_mainForm.LastWorksheetFileName = dlg.FileName;
+            this.MainForm.LastWorksheetFileName = dlg.FileName;
 
             StreamWriter sw = null;
 
             try
             {
                 // 创建文件
-                sw = new StreamWriter(m_mainForm.LastWorksheetFileName,
+                sw = new StreamWriter(this.MainForm.LastWorksheetFileName,
                     bAppend,	// append
                     System.Text.Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                strError = "打开或创建文件 " + m_mainForm.LastWorksheetFileName + " 失败，原因: " + ex.Message;
+                strError = "打开或创建文件 " + this.MainForm.LastWorksheetFileName + " 失败，原因: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -4678,16 +4679,16 @@ MessageBoxDefaultButton.Button1);
 
                 // 
                 if (bAppend == true)
-                    m_mainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
-                        + "条记录成功追加到文件 " + m_mainForm.LastWorksheetFileName + " 尾部";
+                    this.MainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
+                        + "条记录成功追加到文件 " + this.MainForm.LastWorksheetFileName + " 尾部";
                 else
-                    m_mainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
-                        + "条记录成功保存到新文件 " + m_mainForm.LastWorksheetFileName + " 尾部";
+                    this.MainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
+                        + "条记录成功保存到新文件 " + this.MainForm.LastWorksheetFileName + " 尾部";
 
             }
             catch (Exception ex)
             {
-                strError = "写入文件 " + m_mainForm.LastWorksheetFileName + " 失败，原因: " + ex.Message;
+                strError = "写入文件 " + this.MainForm.LastWorksheetFileName + " 失败，原因: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -4755,7 +4756,7 @@ MessageBoxDefaultButton.Button1);
                  * */
 
                 preferredEncoding = connection.GetRecordsEncoding(
-                    this.m_mainForm,
+                    this.MainForm,
                     first_record.m_strSyntaxOID);
 
             }
@@ -4781,13 +4782,13 @@ MessageBoxDefaultButton.Button1);
             dlg.IsOutput = true;
             dlg.GetEncoding -= new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.GetEncoding += new GetEncodingEventHandler(dlg_GetEncoding);
-            dlg.FileName = m_mainForm.LastIso2709FileName;
-            dlg.CrLf = m_mainForm.LastCrLfIso2709;
+            dlg.FileName = this.MainForm.LastIso2709FileName;
+            dlg.CrLf = this.MainForm.LastCrLfIso2709;
             dlg.RemoveField998Visible = false;
             dlg.Mode880Visible = false; // 暂时不支持 880 模式转换
             dlg.EncodingListItems = Global.GetEncodingList(true);
             dlg.EncodingName =
-                (String.IsNullOrEmpty(m_mainForm.LastEncodingName) == true ? GetEncodingForm.GetEncodingName(preferredEncoding) : m_mainForm.LastEncodingName);
+                (String.IsNullOrEmpty(this.MainForm.LastEncodingName) == true ? GetEncodingForm.GetEncodingName(preferredEncoding) : this.MainForm.LastEncodingName);
             dlg.EncodingComment = "注: 原始编码方式为 " + GetEncodingForm.GetEncodingName(preferredEncoding);
             dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
             dlg.EnableMarcSyntax = false;
@@ -4798,13 +4799,13 @@ MessageBoxDefaultButton.Button1);
             Encoding targetEncoding = null;
 
             if (dlg.EncodingName == "MARC-8"
-                && preferredEncoding.Equals(this.m_mainForm.Marc8Encoding) == false)
+                && preferredEncoding.Equals(this.MainForm.Marc8Encoding) == false)
             {
                 strError = "保存操作无法进行。只有在记录的原始编码方式为 MARC-8 时，才能使用这个编码方式保存记录。";
                 goto ERROR1;
             }
 
-            nRet = this.m_mainForm.GetEncoding(dlg.EncodingName,
+            nRet = this.MainForm.GetEncoding(dlg.EncodingName,
                 out targetEncoding,
                 out strError);
             if (nRet == -1)
@@ -4820,8 +4821,8 @@ MessageBoxDefaultButton.Button1);
                 strPreferedMarcSyntax = "";
              * */
 
-            string strLastFileName = m_mainForm.LastIso2709FileName;
-            string strLastEncodingName = m_mainForm.LastEncodingName;
+            string strLastFileName = this.MainForm.LastIso2709FileName;
+            string strLastEncodingName = this.MainForm.LastEncodingName;
 
 
             bool bExist = File.Exists(dlg.FileName);
@@ -4870,15 +4871,15 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            m_mainForm.LastIso2709FileName = dlg.FileName;
-            m_mainForm.LastCrLfIso2709 = dlg.CrLf;
-            m_mainForm.LastEncodingName = dlg.EncodingName;
+            this.MainForm.LastIso2709FileName = dlg.FileName;
+            this.MainForm.LastCrLfIso2709 = dlg.CrLf;
+            this.MainForm.LastEncodingName = dlg.EncodingName;
 
             Stream s = null;
 
             try
             {
-                s = File.Open(m_mainForm.LastIso2709FileName,
+                s = File.Open(this.MainForm.LastIso2709FileName,
                      FileMode.OpenOrCreate);
                 if (bAppend == false)
                     s.SetLength(0);
@@ -4887,7 +4888,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "打开或创建文件 " + m_mainForm.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                strError = "打开或创建文件 " + this.MainForm.LastIso2709FileName + " 失败，原因: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -4933,7 +4934,7 @@ MessageBoxDefaultButton.Button1);
                     byte[] baTarget = null;
 
                     Encoding sourceEncoding = connection.GetRecordsEncoding(
-                        this.m_mainForm,
+                        this.MainForm,
                         record.m_strSyntaxOID);
 
                     string strMarcSyntax = "";
@@ -4978,16 +4979,16 @@ MessageBoxDefaultButton.Button1);
 
                 // 
                 if (bAppend == true)
-                    m_mainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString() 
-                        + "条记录成功追加到文件 " + m_mainForm.LastIso2709FileName + " 尾部";
+                    this.MainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
+                        + "条记录成功追加到文件 " + this.MainForm.LastIso2709FileName + " 尾部";
                 else
-                    m_mainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
-                        + "条记录成功保存到新文件 " + m_mainForm.LastIso2709FileName + " 尾部";
+                    this.MainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
+                        + "条记录成功保存到新文件 " + this.MainForm.LastIso2709FileName + " 尾部";
 
             }
             catch (Exception ex)
             {
-                strError = "写入文件 " + m_mainForm.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                strError = "写入文件 " + this.MainForm.LastIso2709FileName + " 失败，原因: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -5004,7 +5005,7 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
             Encoding encoding = null;
-            int nRet = this.m_mainForm.GetEncoding(e.EncodingName,
+            int nRet = this.MainForm.GetEncoding(e.EncodingName,
                 out encoding,
                 out strError);
             if (nRet == -1)
@@ -5300,7 +5301,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 激活当前Stop对象
-            m_mainForm.stopManager.Active(connection == null ? null : connection.Stop);
+            this.MainForm.stopManager.Active(connection == null ? null : connection.Stop);
 
             /*
             if (connection.TargetInfo == null)
@@ -5695,7 +5696,7 @@ MessageBoxDefaultButton.Button1);
             connection.Stop.BeginLoop();
 
             this.Update();
-            this.m_mainForm.Update();
+            this.MainForm.Update();
 
 
             try
@@ -5804,7 +5805,7 @@ MessageBoxDefaultButton.Button1);
             connection.Stop.BeginLoop();
 
             this.Update();
-            this.m_mainForm.Update();
+            this.MainForm.Update();
 
 
             try
@@ -5915,7 +5916,7 @@ MessageBoxDefaultButton.Button1);
             connection.Stop.BeginLoop();
 
             this.Update();
-            this.m_mainForm.Update();
+            this.MainForm.Update();
             try
             {
 
@@ -6045,17 +6046,17 @@ MessageBoxDefaultButton.Button1);
             // 菜单动态变化
             if (nSelectedCount == 0)
             {
-                m_mainForm.toolButton_saveTo.Enabled = false;
-                m_mainForm.MenuItem_saveOriginRecordToIso2709.Enabled = false;
-                m_mainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = false;
-                m_mainForm.toolButton_loadFullRecord.Enabled = false;
+                this.MainForm.toolButton_saveTo.Enabled = false;
+                this.MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = false;
+                this.MainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = false;
+                this.MainForm.toolButton_loadFullRecord.Enabled = false;
             }
             else
             {
-                m_mainForm.toolButton_saveTo.Enabled = true;
-                m_mainForm.MenuItem_saveOriginRecordToIso2709.Enabled = true;
-                m_mainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = true;
-                m_mainForm.toolButton_loadFullRecord.Enabled = true;
+                this.MainForm.toolButton_saveTo.Enabled = true;
+                this.MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = true;
+                this.MainForm.MenuItem_saveOriginRecordToWorksheet.Enabled = true;
+                this.MainForm.toolButton_loadFullRecord.Enabled = true;
             }
 
         }

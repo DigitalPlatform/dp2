@@ -281,6 +281,9 @@ namespace dp2Circulation
 
         public void ClearMessage()
         {
+            if (this._floatingMessage == null)
+                return;
+
             this._floatingMessage.Text = "";
         }
 
@@ -629,9 +632,8 @@ string strUserName = ".")
         /// <param name="e">事件参数</param>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            this.OnMyFormClosed();
-
             base.OnFormClosed(e);
+            this.OnMyFormClosed();  // 这里的顺序调整过 2015/11/10
 
             this.DisposeFreeControls();
         }

@@ -233,7 +233,7 @@ namespace dp2Circulation
 
         #region 绿色安装包 自动更新
 
-        MyWebClient _webClient = null;
+        // MyWebClient _webClient = null;
         System.Net.WebRequest _webRequest = null;
 
         /*
@@ -354,9 +354,12 @@ Stack:
         {
             if (ApplicationDeployment.IsNetworkDeployed == false)
             {
+#if NO
                 WebClient temp_webclient = this._webClient;
                 if (temp_webclient != null)
                     temp_webclient.CancelAsync();
+#endif
+                this.CancelWebClients();
 
                 WebRequest temp_webrequest = this._webRequest;
                 if (temp_webrequest != null)
@@ -738,6 +741,36 @@ MessageBoxDefaultButton.Button1);
             //return 0;
         }
 
+        // 记忆 WebClient 对象，用于中断操作
+        List<MyWebClient> _webClients = new List<MyWebClient>();
+
+        void AddWebClient(MyWebClient webClient)
+        {
+            lock(_webClients)
+            {
+                _webClients.Add(webClient);
+            }
+        }
+
+        void RemoveWebClient(MyWebClient webClient)
+        {
+            lock (_webClients)
+            {
+                _webClients.Remove(webClient);
+            }
+        }
+
+        void CancelWebClients()
+        {
+            lock (_webClients)
+            {
+                foreach (MyWebClient webClient in _webClients)
+                {
+                    webClient.CancelAsync();    // 没有测试过 MyWebClient.Cancel()
+                }
+            }
+        }
+
         // 从 http 服务器下载一个文件
         // 阻塞式
         int DownloadFile(string strUrl,
@@ -746,50 +779,53 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            if (_webClient == null)
+            using (MyWebClient webClient = new MyWebClient())
             {
-                _webClient = new MyWebClient();
-                _webClient.Timeout = 5000;
-                _webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-            }
-
-            string strTempFileName = strLocalFileName + ".temp";
-            // TODO: 先下载到临时文件，然后复制到目标文件
-            try
-            {
-                _webClient.DownloadFile(new Uri(strUrl, UriKind.Absolute), strTempFileName);
-
-                File.Delete(strLocalFileName);
-                File.Move(strTempFileName, strLocalFileName);
-
-                return 0;
-            }
-            catch (WebException ex)
-            {
-                if (ex.Status == WebExceptionStatus.ProtocolError)
+                this.AddWebClient(webClient);
+                try
                 {
-                    var response = ex.Response as HttpWebResponse;
-                    if (response != null)
+                    webClient.Timeout = 5000;
+                    webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+
+                    string strTempFileName = strLocalFileName + ".temp";
+                    // TODO: 先下载到临时文件，然后复制到目标文件
+                    try
                     {
-                        if (response.StatusCode == HttpStatusCode.NotFound)
+                        webClient.DownloadFile(new Uri(strUrl, UriKind.Absolute), strTempFileName);
+
+                        File.Delete(strLocalFileName);
+                        File.Move(strTempFileName, strLocalFileName);
+
+                        return 0;
+                    }
+                    catch (WebException ex)
+                    {
+                        if (ex.Status == WebExceptionStatus.ProtocolError)
                         {
-                            strError = ex.Message;
-                            return -1;
+                            var response = ex.Response as HttpWebResponse;
+                            if (response != null)
+                            {
+                                if (response.StatusCode == HttpStatusCode.NotFound)
+                                {
+                                    strError = ex.Message;
+                                    return -1;
+                                }
+                            }
                         }
+
+                        strError = ExceptionUtil.GetDebugText(ex);
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ExceptionUtil.GetDebugText(ex);
+                        return -1;
                     }
                 }
-
-                strError = ExceptionUtil.GetDebugText(ex);
-                return -1;
-            }
-            catch (Exception ex)
-            {
-                strError = ExceptionUtil.GetDebugText(ex);
-                return -1;
-            }
-            finally
-            {
-                _webClient = null;
+                finally
+                {
+                    this.RemoveWebClient(webClient);
+                }
             }
         }
 

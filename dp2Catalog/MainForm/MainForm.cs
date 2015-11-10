@@ -2300,7 +2300,7 @@ out string strError)
                     this.tabPage_property.Controls.RemoveAt(0); 可能造成资源泄露!
                 }
 #endif
-                GuiUtil.ClearControls(this.tabPage_property.Controls);
+                ControlExtention.ClearControls(this.tabPage_property);
 
                 if (value != null)
                 {
@@ -2330,7 +2330,7 @@ out string strError)
                 while (this.tabPage_verifyResult.Controls.Count > 0)
                     this.tabPage_verifyResult.Controls.RemoveAt(0);
 #endif
-                GuiUtil.ClearControls(this.tabPage_verifyResult.Controls);
+                ControlExtention.ClearControls(this.tabPage_verifyResult);
 
                 if (value != null)
                 {
@@ -2361,7 +2361,7 @@ out string strError)
                 while (this.tabPage_generateData.Controls.Count > 0)
                     this.tabPage_generateData.Controls.RemoveAt(0);
 #endif
-                GuiUtil.ClearControls(this.tabPage_generateData.Controls);
+                ControlExtention.ClearControls(this.tabPage_generateData);
 
                 if (value != null)
                 {
@@ -2370,7 +2370,6 @@ out string strError)
                 }
             }
         }
-
 
         public bool PanelFixedVisible
         {

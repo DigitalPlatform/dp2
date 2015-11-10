@@ -67,6 +67,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_exportDetailToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportExcel = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_exportBorrowingBarcode = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
@@ -145,6 +146,7 @@ namespace dp2Circulation
             this.readerEditControl1.Post = "";
             this.readerEditControl1.ReaderType = "";
             this.readerEditControl1.RecPath = "";
+            this.readerEditControl1.RefID = "";
             this.readerEditControl1.Rights = "";
             this.readerEditControl1.Size = new System.Drawing.Size(318, 253);
             this.readerEditControl1.State = "";
@@ -230,9 +232,11 @@ namespace dp2Circulation
             this.binaryResControl1.BiblioRecPath = "";
             this.binaryResControl1.Changed = false;
             this.binaryResControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.binaryResControl1.ErrorInfo = "";
             this.binaryResControl1.Location = new System.Drawing.Point(0, 0);
             this.binaryResControl1.Margin = new System.Windows.Forms.Padding(2);
             this.binaryResControl1.Name = "binaryResControl1";
+            this.binaryResControl1.RightsCfgFileName = null;
             this.binaryResControl1.Size = new System.Drawing.Size(598, 257);
             this.binaryResControl1.TabIndex = 1;
             // 
@@ -497,6 +501,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_otherFunc.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveTemplate,
             this.toolStripSeparator8,
+            this.toolStripMenuItem_exportDetailToExcelFile,
             this.toolStripMenuItem_exportExcel,
             this.ToolStripMenuItem_exportBorrowingBarcode,
             this.toolStripSeparator7,
@@ -526,11 +531,19 @@ namespace dp2Circulation
             this.toolStripSeparator8.Name = "toolStripSeparator8";
             this.toolStripSeparator8.Size = new System.Drawing.Size(253, 6);
             // 
+            // toolStripMenuItem_exportDetailToExcelFile
+            // 
+            this.toolStripMenuItem_exportDetailToExcelFile.Name = "toolStripMenuItem_exportDetailToExcelFile";
+            this.toolStripMenuItem_exportDetailToExcelFile.Size = new System.Drawing.Size(256, 22);
+            this.toolStripMenuItem_exportDetailToExcelFile.Text = "导出读者信息到 Excel 文件(&E)...";
+            this.toolStripMenuItem_exportDetailToExcelFile.Click += new System.EventHandler(this.toolStripMenuItem_exportDetailToExcelFile_Click);
+            // 
             // toolStripMenuItem_exportExcel
             // 
             this.toolStripMenuItem_exportExcel.Name = "toolStripMenuItem_exportExcel";
             this.toolStripMenuItem_exportExcel.Size = new System.Drawing.Size(256, 22);
             this.toolStripMenuItem_exportExcel.Text = "导出到 Excel 文件(&X)...";
+            this.toolStripMenuItem_exportExcel.Visible = false;
             this.toolStripMenuItem_exportExcel.Click += new System.EventHandler(this.toolStripMenuItem_exportExcel_Click);
             // 
             // ToolStripMenuItem_exportBorrowingBarcode
@@ -720,6 +733,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_loadBlank;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_exportExcel;
         private System.Windows.Forms.ToolStripButton toolStripButton_addFriends;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_exportDetailToExcelFile;
 
     }
 }

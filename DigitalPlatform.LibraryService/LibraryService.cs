@@ -4754,6 +4754,8 @@ namespace dp2Library
 
             try
             {
+                // Thread.Sleep(5000);
+
                 result = app.Borrow(
                     sessioninfo,
                     bRenew,
@@ -4832,6 +4834,8 @@ namespace dp2Library
 
             try
             {
+                // Thread.Sleep(5000);
+
                 return app.Return(sessioninfo,
                     strAction,
                     strReaderBarcode,

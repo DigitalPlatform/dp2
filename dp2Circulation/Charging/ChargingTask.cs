@@ -870,7 +870,6 @@ end_time);
 
             times.Add(DateTime.Now);
             LogOperTime("borrow", times, strOperText);
-
             return;
         ERROR1:
             task.State = "error";
@@ -1229,12 +1228,15 @@ end_time);
         }
 
 
-        public void Close()
+        public void Close(bool bForce = true)
         {
             if (stop != null)
                 stop.DoStop();
+#if NO
             this.eventClose.Set();
             Stopped = true;
+#endif
+            this.StopThread(bForce);
         }
 
         public void Clear()

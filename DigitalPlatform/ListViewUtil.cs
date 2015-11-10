@@ -274,7 +274,7 @@ namespace DigitalPlatform.GUI
 
             if (prop == null)
             {
-                throw new Exception("ListView的Tag没有包含ListViewProperty对象");
+                throw new Exception("ListView 的 Tag 没有包含 ListViewProperty 对象");
             }
 
             if (list.SelectedItems.Count == 0)
@@ -286,7 +286,6 @@ namespace DigitalPlatform.GUI
             ListViewItem item = list.SelectedItems[0];
             // 获得路径。假定都在第一列？
             string strRecPath = GetItemText(item, nRecPathColumn);
-
 
             ColumnPropertyCollection props = null;
             string strDbName = "";
@@ -311,7 +310,7 @@ namespace DigitalPlatform.GUI
 
             props = prop.GetColumnName(strDbName);
 
-            DO_REFRESH:
+        DO_REFRESH:
 
             if (props == null)
             {
@@ -320,7 +319,6 @@ namespace DigitalPlatform.GUI
                 // 清除所有栏目标题为1,2,3...，或者保留以前的残余值?
                 props = new ColumnPropertyCollection();
             }
-
 
             // 修改文字
             int index = 0;

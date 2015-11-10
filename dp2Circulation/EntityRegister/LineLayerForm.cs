@@ -33,7 +33,6 @@ namespace dp2Circulation
             {
                 CreateParams cp = base.CreateParams;
 
-
                 cp.ExStyle |= 0x80000 |  // WS_EX_LAYERED
                     0x20; // WS_EX_TRANSPARENT
 
@@ -42,16 +41,32 @@ namespace dp2Circulation
             }
         }
 
-        Pen CreateHatchPen(Color color, float width)
+        class HatchPen : IDisposable
         {
+            public Pen Pen = null;
+            public Brush Brush = null;
+
+            public void Dispose()
+            {
+                if (this.Pen != null)
+                    this.Pen.Dispose();
+                if (this.Brush != null)
+                    this.Brush.Dispose();
+            }
+        }
+
+        HatchPen CreateHatchPen(Color color, float width)
+        {
+            HatchPen pen = new HatchPen();
             // TODO: brush 被谁拥有？会被正确释放么？
-            Brush brush = new HatchBrush(HatchStyle.DarkUpwardDiagonal, // WideDownwardDiagonal,
+            pen.Brush = new HatchBrush(HatchStyle.DarkUpwardDiagonal, // WideDownwardDiagonal,
                 // Color.FromArgb(0, 255, 255, 255),
                 Color.FromArgb(0, 254, 254, 254),
                 Color.FromArgb(255, color)
                 );    // back
-            return new Pen(brush,
+            pen.Pen = new Pen(pen.Brush,
                 width);  // 可修改
+            return pen;
         }
 
         Brush CreateHatchBrush(Color color)
@@ -80,28 +95,19 @@ namespace dp2Circulation
                         e.Graphics.FillRectangle(brush, this.ClientRectangle);
                     }
 
-                    //Point[] points = GetLinePoints();
-                    //e.Graphics.RenderingOrigin = Point.Round(points[0]);
-                    using (Pen pen = CreateHatchPen(Color.Blue, 6))
+                    using (HatchPen hatch_pen = CreateHatchPen(Color.Blue, 6))
                     {
                         Rectangle rectTarget = this.RectangleToClient(_targetRect);
 
                         Rectangle rectTargetBorder = rectTarget;
 
+                        Pen pen = hatch_pen.Pen;
                         rectTargetBorder.Inflate((int)pen.Width / 2, (int)pen.Width / 2);
-
-                        // rectTargetBorder.Offset((int)(-pen.Width / 2), (int)(-pen.Width / 2));
-                        //rectTargetBorder.Width--;
-                        //rectTargetBorder.Height--;
 
                         using (Brush brush = new SolidBrush(this.BackColor))
                         {
                             e.Graphics.FillRectangle(brush, rectTarget);
                         }
-
-                        // e.Graphics.DrawRectangle(pen, rectTargetBorder);
-
-                        //e.Graphics.DrawCurve(pen, points, 0.2F);
                     }
 
                     // 将 source 位置的线条用背景色擦除
@@ -111,12 +117,13 @@ namespace dp2Circulation
                         e.Graphics.FillRectangle(brush, rectSource);
                     }
 
-                    using (Pen pen = CreateHatchPen(Color.Blue, 6))
+                    using (HatchPen hatch_pen = CreateHatchPen(Color.Blue, 6))
                     {
                         Rectangle rectSource = this.RectangleToClient(_sourceRect);
 
                         Rectangle rectBorder = rectSource;
 
+                        Pen pen = hatch_pen.Pen;
                         rectBorder.Inflate((int)pen.Width / 2, (int)pen.Width / 2);
                         e.Graphics.DrawRectangle(pen, rectBorder);
                     }
