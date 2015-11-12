@@ -1664,10 +1664,8 @@ namespace DigitalPlatform.CommonControl
         public Item InsertNewItem(int index)
         {
             this.DisableUpdate();   // 防止闪动。彻底解决问题。2009/10/13 
-
             try
             {
-
                 this.tableLayoutPanel_content.RowCount += 1;
                 this.tableLayoutPanel_content.RowStyles.Insert(index + 1, new System.Windows.Forms.RowStyle());
 
@@ -1699,7 +1697,6 @@ namespace DigitalPlatform.CommonControl
             END1:
 
                 item.State = ItemState.New;
-
                 return item;
             }
             finally

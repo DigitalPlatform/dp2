@@ -37,6 +37,25 @@ namespace dp2Circulation
 
         private void button_next_Click(object sender, EventArgs e)
         {
+            // 属性页切换前的检查
+            if (this.tabControl_main.SelectedTab == this.tabPage_licenseMode)
+            {
+                if (this.radioButton_licenseMode_standard.Checked == true)
+                {
+                    DialogResult result = MessageBox.Show(this,
+"安装专业版需要您事先获得数字平台或经销商的授权。为鉴别授权，稍后步骤需要您获取和输入序列号，安装才能成功。\r\n(您也可以改为选择社区版，此种方式不需要序列号)\r\n\r\n确信要继续安装为专业版?",
+"dp2Circulation",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            // 切换属性页
             if (this.tabControl_main.SelectedIndex < this.tabControl_main.TabPages.Count - 1)
             {
                 this.tabControl_main.SelectedIndex++;
@@ -44,6 +63,7 @@ namespace dp2Circulation
                 SetButtonState();
             }
 
+            // 切换后的补充动作
             if (this.tabControl_main.SelectedTab == this.tabPage_serverInfo)
             {
                 if (string.IsNullOrEmpty(this.comboBox_server_serverType.Text) == true

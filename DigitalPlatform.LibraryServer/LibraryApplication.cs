@@ -594,6 +594,7 @@ namespace DigitalPlatform.LibraryServer
                     out bValue,
                     out strError);
                 this.DebugMode = bValue;
+                WriteErrorLog("是否为调试态: " + this.DebugMode);
 
                 // 2013/4/10 
                 // uid
@@ -2501,7 +2502,8 @@ namespace DigitalPlatform.LibraryServer
         {
             if (this.DebugMode == false)
                 return;
-            StreamUtil.WriteText(Path.Combine(this.LogDir, "\\debug.txt"), "-- " + DateTime.Now.ToString("u") + " " + strTitle + "\r\n");
+            // 写入一个恒定名字的文件。TODO: 也可以直接写入普通的错误日志文件？
+            StreamUtil.WriteText(Path.Combine(this.LogDir, "debug.txt"), "-- " + DateTime.Now.ToString("u") + " " + strTitle + "\r\n");
         }
 
         public void WriteAppDownDetectFile(string strText)

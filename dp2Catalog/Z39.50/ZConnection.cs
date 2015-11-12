@@ -951,6 +951,7 @@ namespace dp2Catalog
         {
             Debug.Assert(this.ResultCount >= 0, "");
 
+            // TODO: Ð¡ÐÄ this.TargetInfo Îª¿Õ
             int nCount = Math.Min(this.TargetInfo.PresentPerBatchCount,
                 this.ResultCount - this.Records.Count);
 

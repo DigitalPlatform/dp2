@@ -2512,7 +2512,7 @@ Stack:
                 if (nRet == -1)
                 {
                     channel.Close();
-                    Program.PromptAndExit(this, "dp2Circulation 需要先设置序列号才能使用");
+                    Program.PromptAndExit(this, "dp2Circulation 专业版需要先设置序列号才能使用。\r\n\r\n注：可以切换为社区版，不需要设置序列号即可使用。方法是：在设置序列号对话框中，按左下角的“切换为社区版”按钮。");
                     return;
                 }
             }

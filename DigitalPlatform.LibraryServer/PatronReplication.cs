@@ -1355,6 +1355,7 @@ out kernel_errorcode);
                 // 2015/11/10
                 if (Array.IndexOf(element_names, node.Name) == -1)
                 {
+                    // TODO: 似可以把被去掉的元素详情写入调试日志
                     domNew.DocumentElement.RemoveChild(node);
                     i--;
                     continue;

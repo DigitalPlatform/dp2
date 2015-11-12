@@ -2043,7 +2043,8 @@ this.splitContainer_queryAndResultInfo,
             bool bTriggerSelChanged = false)
         {
             bool bRet = false;  // 没有被显示
-            if (connection == this.GetCurrentZConnection())
+            if (connection != null
+                && connection == this.GetCurrentZConnection())
             {
                 LinkRecordsToListView(connection.VirtualItems);
                 bRet = true;    // 被显示了

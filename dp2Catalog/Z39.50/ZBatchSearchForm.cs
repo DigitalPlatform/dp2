@@ -2906,15 +2906,22 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-                using (StreamWriter sw = new StreamWriter(this.textBox_saveResult_notHitFilename.Text,
-                    bAppend, Encoding.UTF8))
+                try
                 {
-                    foreach (string word in words)
+                    using (StreamWriter sw = new StreamWriter(this.textBox_saveResult_notHitFilename.Text,
+                        bAppend, Encoding.UTF8))
                     {
-                        sw.WriteLine(word);
+                        foreach (string word in words)
+                        {
+                            sw.WriteLine(word);
+                        }
                     }
                 }
-
+                catch (Exception ex)
+                {
+                    strError = "写入文件 '" + this.textBox_saveResult_notHitFilename .Text+ "' 时出错: " + ex.Message;
+                    goto ERROR1;
+                }
             }
             finally
             {
