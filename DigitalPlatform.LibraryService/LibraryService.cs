@@ -8462,7 +8462,6 @@ namespace dp2Library
                     return result;
                 }
 
-
                 nRet = app.ChangeUserPassword(
                     sessioninfo.LibraryCodeList,
                     strUserName,
@@ -13819,7 +13818,7 @@ out strError);
             info = null;
 
             LibraryServerResult result = this.PrepareEnvironment("GetStatisInfo", true,
-                true);  // 要求登录, 但不要求权限。主要是为了通道管理观察方便
+                true);
             if (result.Value == -1)
                 return result;
 
@@ -13884,6 +13883,49 @@ out strError);
                 return result;
             }
         }
+
+        public LibraryServerResult HitCounter(string strAction,
+            string strName)
+        {
+            string strError = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("HitCounter", true,
+                true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // TODO: 检查权限。至少 set 要求权限
+
+                if (strAction == "get")
+                    result.Value = app.HitCountDatabase.GetHitCount(strName);
+                else if (strAction == "set")
+                    app.HitCountDatabase.IncHitCount(strName);
+                else
+                {
+                    strError = "未知的 strAction '"+strAction+"'";
+                    goto ERROR1;
+                }
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library HitCounter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
     }
 
     public class HostInfo : IExtension<ServiceHostBase>, IDisposable

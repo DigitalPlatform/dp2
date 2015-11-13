@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.IO;
 
 using DigitalPlatform;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -290,11 +291,14 @@ namespace DigitalPlatform.rms.Client
 			this.textBox_size.Text = Convert.ToString(fileInfo.Length);
 			this.textBox_state.Text = "尚未上载";
 
+#if NO
 			textBox_mime.Text = API.MimeTypeFrom(ReadFirst256Bytes(dlg.FileName),
 				"");
+#endif
+            textBox_mime.Text = PathUtil.MimeTypeFrom(dlg.FileName);
 		}
 
-
+#if NO
 		// 读取文件前256bytes
 		byte[] ReadFirst256Bytes(string strFileName)
 		{
@@ -311,6 +315,7 @@ namespace DigitalPlatform.rms.Client
 
 			return result;
 		}
+#endif
 
 
 

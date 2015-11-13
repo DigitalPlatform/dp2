@@ -802,5 +802,10 @@ SessionMode = SessionMode.NotAllowed)]
             long lStart,
             long lLength,
             out List<FileItemInfo> infos);
+
+        [OperationContract]
+        LibraryServerResult HitCounter(string strAction,
+            string strName);
+
     }
 }

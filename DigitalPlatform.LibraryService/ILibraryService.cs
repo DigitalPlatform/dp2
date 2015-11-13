@@ -782,5 +782,10 @@ namespace dp2Library
             long lStart,
             long lLength,
             out List<FileItemInfo> infos);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult HitCounter(string strAction,
+            string strName);
+
     }
 }

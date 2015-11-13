@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="oPEZRp4iuZfcsvHTNym5wwEDpfE=">
+<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="ygjJRdZujBamfwEbNvrmpCXA0Z4=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="basicHttpBinding" name="BasicHttpBinding_dp2libraryREST">
       <properties>
@@ -427,10 +427,10 @@
     </bindingConfiguration>
   </bindingConfigurations>
   <endpoints>
-    <endpoint name="NetTcpBinding_dp2library" contract="localhost.dp2library" bindingType="netTcpBinding" address="net.tcp://localhost:8003/dp2library/" bindingConfiguration="NetTcpBinding_dp2library">
+    <endpoint name="NetTcpBinding_dp2library" contract="localhost.dp2library" bindingType="netTcpBinding" address="net.tcp://localhost:8002/dp2library/" bindingConfiguration="NetTcpBinding_dp2library">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>net.tcp://localhost:8003/dp2library/</serializedValue>
+          <serializedValue>net.tcp://localhost:8002/dp2library/</serializedValue>
         </property>
         <property path="/behaviorConfiguration" isComplexType="false" isExplicitlyDefined="false" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue />

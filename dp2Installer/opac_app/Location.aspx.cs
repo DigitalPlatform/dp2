@@ -122,6 +122,7 @@ ref sessioninfo) == false)
         return Response.IsClientConnected;
     }
 
+#if NO
     // 读取文件前256bytes
     byte[] ReadFirst256Bytes(string strFileName)
     {
@@ -138,6 +139,7 @@ ref sessioninfo) == false)
 
         return result;
     }
+#endif
 
     // return:
     //      -1  出错
@@ -175,8 +177,8 @@ ref sessioninfo) == false)
 
         page.Response.AddHeader("Last-Modified", DateTimeUtil.Rfc1123DateTimeString(lastmodified)); // .ToUniversalTime()
 
-        string strContentType = API.MimeTypeFrom(ReadFirst256Bytes(strImageFile),
-"");
+        // string strContentType = API.MimeTypeFrom(ReadFirst256Bytes(strImageFile), "");
+        string strContentType = PathUtil.MimeTypeFrom(strImageFile);
 
         page.Response.ContentType = strContentType;
 

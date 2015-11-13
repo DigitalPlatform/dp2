@@ -639,8 +639,8 @@ ref sessioninfo) == false)
             MergeRights(sessioninfo.RightsOrigin, sessioninfo.SsoRights),
             strRoomName,
             strFileName);
-        string strContentType = API.MimeTypeFrom(ReadFirst256Bytes(strFilePath),
-"");
+        // string strContentType = API.MimeTypeFrom(ReadFirst256Bytes(strFilePath), "");
+        string strContentType = PathUtil.MimeTypeFrom(strFilePath);
         nRet = DumpFile(strFilePath,
             strContentType,
             out strError);
@@ -669,6 +669,7 @@ ref sessioninfo) == false)
         this.Response.End();
     }
 
+#if NO
     // 读取文件前256bytes
     byte[] ReadFirst256Bytes(string strFileName)
     {
@@ -685,6 +686,7 @@ ref sessioninfo) == false)
 
         return result;
     }
+#endif
 
     // return:
     //      -1  出错

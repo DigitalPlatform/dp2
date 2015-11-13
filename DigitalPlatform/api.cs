@@ -148,12 +148,36 @@ namespace DigitalPlatform
 			IntPtr hwnd,
 			[MarshalAs(UnmanagedType.U4)] int wFlag);
 
-
+#if NO
 		public static string MimeTypeFrom(string strFileName)
 		{
 			return MimeTypeFrom(ReadFirst256Bytes(strFileName),
 				"");
 		}
+#endif
+
+#if NO
+        public static string MimeTypeFrom(string strFileName)
+        {
+            string strMime = MimeTypeFrom(ReadFirst256Bytes(strFileName),
+                "");
+
+            // 如果通过内容无法判断，则进一步用文件扩展名判断
+            if (strMime == "application/octet-stream")
+            {
+                string strFileExtension = Path.GetExtension(strFileName).ToLower();
+                if (strFileExtension == ".rar")
+                    return "application/x-rar-compressed";
+            }
+
+            return strMime;
+        }
+#endif
+        public static string GetMimeTypeFromFile(string strFileName)
+        {
+            return MimeTypeFrom(ReadFirst256Bytes(strFileName),
+                "");
+        }
 
 		// 读取文件前256bytes
 		static byte[] ReadFirst256Bytes(string strFileName)
@@ -177,7 +201,7 @@ namespace DigitalPlatform
 
 		}
 
-		public static string MimeTypeFrom(
+		static string MimeTypeFrom(
 			byte[] dataBytes,
 			string mimeProposed) 
 		{

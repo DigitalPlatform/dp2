@@ -2963,6 +2963,14 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
+        System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -3994,6 +4002,25 @@ namespace DigitalPlatform.CirculationClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class HitCounterCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public HitCounterCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -6441,6 +6468,12 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private System.Threading.SendOrPostCallback onListFileCompletedDelegate;
         
+        private BeginOperationDelegate onBeginHitCounterDelegate;
+        
+        private EndOperationDelegate onEndHitCounterDelegate;
+        
+        private System.Threading.SendOrPostCallback onHitCounterCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -6991,6 +7024,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         public event System.EventHandler<GetFileCompletedEventArgs> GetFileCompleted;
         
         public event System.EventHandler<ListFileCompletedEventArgs> ListFileCompleted;
+        
+        public event System.EventHandler<HitCounterCompletedEventArgs> HitCounterCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -7804,6 +7839,58 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strFileName,
                         lStart,
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName) {
+            return base.Channel.HitCounter(strAction, strName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginHitCounter(strAction, strName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result) {
+            return base.Channel.EndHitCounter(result);
+        }
+        
+        private System.IAsyncResult OnBeginHitCounter(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strName = ((string)(inValues[1]));
+            return this.BeginHitCounter(strAction, strName, callback, asyncState);
+        }
+        
+        private object[] OnEndHitCounter(System.IAsyncResult result) {
+            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnHitCounterCompleted(object state) {
+            if ((this.HitCounterCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.HitCounterCompleted(this, new HitCounterCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void HitCounterAsync(string strAction, string strName) {
+            this.HitCounterAsync(strAction, strName, null);
+        }
+        
+        public void HitCounterAsync(string strAction, string strName, object userState) {
+            if ((this.onBeginHitCounterDelegate == null)) {
+                this.onBeginHitCounterDelegate = new BeginOperationDelegate(this.OnBeginHitCounter);
+            }
+            if ((this.onEndHitCounterDelegate == null)) {
+                this.onEndHitCounterDelegate = new EndOperationDelegate(this.OnEndHitCounter);
+            }
+            if ((this.onHitCounterCompletedDelegate == null)) {
+                this.onHitCounterCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnHitCounterCompleted);
+            }
+            base.InvokeAsync(this.onBeginHitCounterDelegate, new object[] {
+                        strAction,
+                        strName}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
         }
         
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -12846,6 +12933,14 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
+        System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -13871,6 +13966,25 @@ namespace DigitalPlatform.CirculationClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class HitCounterCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public HitCounterCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -16318,6 +16432,12 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private System.Threading.SendOrPostCallback onListFileCompletedDelegate;
         
+        private BeginOperationDelegate onBeginHitCounterDelegate;
+        
+        private EndOperationDelegate onEndHitCounterDelegate;
+        
+        private System.Threading.SendOrPostCallback onHitCounterCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -16868,6 +16988,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         public event System.EventHandler<GetFileCompletedEventArgs1> GetFileCompleted;
         
         public event System.EventHandler<ListFileCompletedEventArgs1> ListFileCompleted;
+        
+        public event System.EventHandler<HitCounterCompletedEventArgs1> HitCounterCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -17681,6 +17803,58 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strFileName,
                         lStart,
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName) {
+            return base.Channel.HitCounter(strAction, strName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginHitCounter(strAction, strName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result) {
+            return base.Channel.EndHitCounter(result);
+        }
+        
+        private System.IAsyncResult OnBeginHitCounter(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strName = ((string)(inValues[1]));
+            return this.BeginHitCounter(strAction, strName, callback, asyncState);
+        }
+        
+        private object[] OnEndHitCounter(System.IAsyncResult result) {
+            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnHitCounterCompleted(object state) {
+            if ((this.HitCounterCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.HitCounterCompleted(this, new HitCounterCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void HitCounterAsync(string strAction, string strName) {
+            this.HitCounterAsync(strAction, strName, null);
+        }
+        
+        public void HitCounterAsync(string strAction, string strName, object userState) {
+            if ((this.onBeginHitCounterDelegate == null)) {
+                this.onBeginHitCounterDelegate = new BeginOperationDelegate(this.OnBeginHitCounter);
+            }
+            if ((this.onEndHitCounterDelegate == null)) {
+                this.onEndHitCounterDelegate = new EndOperationDelegate(this.OnEndHitCounter);
+            }
+            if ((this.onHitCounterCompletedDelegate == null)) {
+                this.onHitCounterCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnHitCounterCompleted);
+            }
+            base.InvokeAsync(this.onBeginHitCounterDelegate, new object[] {
+                        strAction,
+                        strName}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
         }
         
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {

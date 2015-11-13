@@ -177,6 +177,8 @@ namespace DigitalPlatform.LibraryServer
         public OrderItemDatabase OrderItemDatabase = null;
         public CommentItemDatabase CommentItemDatabase = null;
 
+        public HitCountDatabase HitCountDatabase = new HitCountDatabase();
+
         public Semaphore PictureLimit = new Semaphore(10, 10);
 
         public HangupReason HangupReason = HangupReason.None;
@@ -1089,6 +1091,18 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         strError = "初始化书目摘要库时出错: " + strError;
+                        app.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: Open HitCountDatabase");
+#endif
+                    nRet = this.HitCountDatabase.Open(this.MongoDbConnStr,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "初始化计数器库时出错: " + strError;
                         app.WriteErrorLog(strError);
                     }
                 }

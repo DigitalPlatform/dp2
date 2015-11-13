@@ -9,6 +9,7 @@ using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -170,8 +171,13 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_size.Text = Convert.ToString(fileInfo.Length);
             this.textBox_state.Text = "ипн╢иоть";
 
+#if NO
             textBox_mime.Text = API.MimeTypeFrom(ReadFirst256Bytes(dlg.FileName),
                 "");
+#endif
+
+            // 2015/11/13
+            textBox_mime.Text = PathUtil.MimeTypeFrom(dlg.FileName);
         }
 
         public int SetObjectFilePath(string strObjectFilePath,
@@ -190,9 +196,11 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_size.Text = Convert.ToString(fileInfo.Length);
             this.textBox_state.Text = "ипн╢иоть";
 
+#if NO
             textBox_mime.Text = API.MimeTypeFrom(ReadFirst256Bytes(strObjectFilePath),
                 "");
-
+#endif
+            textBox_mime.Text = PathUtil.MimeTypeFrom(strObjectFilePath);
             return 0;
         }
 

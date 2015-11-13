@@ -58,7 +58,7 @@ namespace DigitalPlatform.CirculationClient
     BeforeLoginEventArgs e);
 
     /// <summary>
-    /// 登陆前时间的参数
+    /// 登录前事件的参数
     /// </summary>
     public class BeforeLoginEventArgs : EventArgs
     {
@@ -9217,6 +9217,60 @@ out strError);
                         goto REDO;
                     return -1;
                 }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
+        public long HitCounter(string strAction,
+            string strName,
+            out long lValue,
+            out string strError)
+        {
+            strError = "";
+            lValue = 0;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginHitCounter(
+                    strAction,
+                    strName,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndHitCounter(
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                lValue = result.Value;
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();

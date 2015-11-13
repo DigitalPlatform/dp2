@@ -931,7 +931,7 @@ bool bChanged)
             {
                 ListViewItem item = this.ListView.Items[i];
                 string strCurrentID = ListViewUtil.GetItemText(item, COLUMN_ID);
-                if (strCurrentID == strID)
+                if (strID == "*" || strCurrentID == strID)
                     results.Add(item);
             }
 
@@ -1117,7 +1117,6 @@ bool bChanged)
             if (nRet == -1)
                 return -1;
 
-
             item = new ListViewItem();
             this.ListView.Items.Add(item);
 
@@ -1136,6 +1135,30 @@ bool bChanged)
             ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
             this.Changed = true;
             return 0;
+        }
+
+        // 设置一行的修改状态
+        // 当外部脚本直接修改 ListViewItem 的 SubItems 以后，还需要用本函数标定修改状态，后面才能顺利保存修改
+        public void SetItemChanged(ListViewItem item,
+            bool bResChanged = true,
+            bool bXmlChanged = true)
+        {
+            LineState old_state = GetLineState(item);
+
+            if (old_state == LineState.Deleted)
+            {
+                throw new Exception("对已经标记删除的行不能进行修改...");
+            }
+
+            if (bResChanged)
+                SetResChanged(item, true);
+            if (bXmlChanged)
+                SetXmlChanged(item, true);
+
+            if (old_state != LineState.New)
+                SetLineInfo(item, LineState.Changed);
+
+            this.Changed = true;
         }
 
         // 标记删除若干事项

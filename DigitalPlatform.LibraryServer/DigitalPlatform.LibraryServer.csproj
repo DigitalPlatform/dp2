@@ -123,6 +123,7 @@
     <Compile Include="DkywReplication.cs" />
     <Compile Include="DupResultSet.cs" />
     <Compile Include="Garden.cs" />
+    <Compile Include="HitCountDatabase.cs" />
     <Compile Include="ItemDatabase\CommentItemDatabase.cs" />
     <Compile Include="ItemDatabase\IssueItemDatabase.cs" />
     <Compile Include="ItemDatabase\ItemDatabase.cs" />

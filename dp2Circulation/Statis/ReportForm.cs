@@ -12396,8 +12396,11 @@ MessageBoxDefaultButton.Button1);
 
             string strResPath = strServerFilePath;
 
+#if NO
             string strMime = API.MimeTypeFrom(ResObjectDlg.ReadFirst256Bytes(strClientFilePath),
 "");
+#endif
+            string strMime = PathUtil.MimeTypeFrom(strClientFilePath);
 
             // 检测文件尺寸
             FileInfo fi = new FileInfo(strClientFilePath);

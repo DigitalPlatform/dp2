@@ -62,6 +62,10 @@
       <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
       <Name>DigitalPlatform.CommonControl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
       <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
