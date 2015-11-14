@@ -15,6 +15,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -74,7 +75,6 @@ namespace DigitalPlatform.CirculationClient
                 }
             }
         }
-
 
         /// <summary>
         /// 权限值配置文件全路径
@@ -151,6 +151,8 @@ namespace DigitalPlatform.CirculationClient
         public void Clear()
         {
             this.ListView.Items.Clear();
+
+            this.DeleteTempFiles();
         }
 
         // return:
@@ -262,8 +264,7 @@ namespace DigitalPlatform.CirculationClient
                     ListViewItem item = new ListViewItem();
 
                     // state
-                    SetLineInfo(item,
-                        LineState.Normal);
+                    SetLineInfo(item, LineState.Normal);
 
                     // id
                     ListViewUtil.ChangeItemText(item, COLUMN_ID, strID);
@@ -801,6 +802,24 @@ bool bChanged)
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            bool bHasClipboardObject = false;
+            IDataObject iData = Clipboard.GetDataObject();
+            if (iData != null
+                && (iData.GetDataPresent(typeof(Bitmap)) == true
+                || iData.GetDataPresent(DataFormats.FileDrop) == true))
+                bHasClipboardObject = true;
+
+            menuItem = new MenuItem("粘贴(&P)");
+            menuItem.Click += new System.EventHandler(this.menu_paste_Click);
+            if (bHasBillioLoaded == false || bHasClipboardObject == false)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             //
             menuItem = new MenuItem("导出(&E)");
             menuItem.Click += new System.EventHandler(this.menu_export_Click);
@@ -835,6 +854,125 @@ bool bChanged)
             }
 
             contextMenu.Show(this.ListView, new Point(e.X, e.Y));	
+        }
+
+        /// <summary>
+        /// 临时文件目录
+        /// </summary>
+        public string TempDir
+        {
+            get;
+            set;
+        }
+
+        List<string> _tempFileNames = new List<string>();
+
+        void DeleteTempFiles()
+        {
+            foreach(string filename in _tempFileNames)
+            {
+                File.Delete(filename);
+            }
+            _tempFileNames.Clear();
+        }
+
+        // 粘贴
+        void menu_paste_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string strTempFilePath = "";    // 临时文件在本函数中不能删除。因为保存时候要用到。TODO: 可以在保存完成后统一删除
+
+            List<string> filenames = new List<string>();
+
+            IDataObject obj1 = Clipboard.GetDataObject();
+            if (obj1.GetDataPresent(typeof(Bitmap)))
+            {
+                if (string.IsNullOrEmpty(this.TempDir) == true)
+                    strTempFilePath = Path.GetTempFileName();
+                else
+                    strTempFilePath = FileUtil.NewTempFileName(this.TempDir,
+"~temp_make_image_",
+".png");
+
+                using (Image image = (Image)obj1.GetData(typeof(Bitmap)))
+                {
+                    image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                filenames.Add(strTempFilePath);
+
+                _tempFileNames.Add(strTempFilePath);
+            }
+            else if (obj1.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])obj1.GetData(DataFormats.FileDrop);
+                filenames.AddRange(files);
+            }
+            else
+            {
+                strError = "当前 Windows 剪贴板中没有文件或图形对象。无法创建对象";
+                goto ERROR1;
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃
+            //      1   成功
+            nRet = AddFiles(filenames,
+                null,   // "",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // parameters:
+        //      strDefaultUsage usage 对话框中的起始值。如果为 null，表示不出现请求输入 usage 的对话框，此时加入的对象其 usage 值为空
+        // return:
+        //      -1  出错
+        //      0   放弃
+        //      1   成功
+        int AddFiles(List<string> filenames,
+            string strDefaultUsage,
+            out string strError)
+        {
+            strError = "";
+
+            string strUsage = "";
+
+            if (strDefaultUsage != null)
+            {
+                strUsage = InputDlg.GetInput(
+                     this,
+                     "请指定用途字段",
+                     "用途: ",
+                     strDefaultUsage,
+                     this.Font);
+                if (strUsage == null)
+                    return 0;
+            }
+
+            foreach (string filename in filenames)
+            {
+                // TODO: 如果遇到目录，是否自动获取其下的所有文件？最好出现一个对话框询问是否要这样做。
+
+                ListViewItem item = null;
+                int nRet = this.AppendNewItem(
+    filename,
+    strUsage,
+    "",
+    out item,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 1;
         }
 
         // 创建数据
@@ -1901,6 +2039,8 @@ bool bChanged)
                     SetXmlChanged(item, false);
                     SetResChanged(item, false);
                 }
+
+                this.DeleteTempFiles();
 
                 this.Changed = false;
                 return nUploadCount;

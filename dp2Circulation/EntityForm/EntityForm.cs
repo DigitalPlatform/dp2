@@ -765,6 +765,7 @@ namespace dp2Circulation
                 this.binaryResControl1.GenerateData -= new GenerateDataEventHandler(entityControl1_GenerateData);
                 this.binaryResControl1.GenerateData += new GenerateDataEventHandler(entityControl1_GenerateData);
 
+                this.binaryResControl1.TempDir = this.MainForm.UserTempDir;
 
                 LoadFontToMarcEditor();
 
