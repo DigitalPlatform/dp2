@@ -6774,7 +6774,6 @@ namespace DigitalPlatform.rms
         //		timestamp   out参数，返回时间戳
         //		strError    out参数，返回出错信息
         // return:
-        // return:
         //		-1  出错
         //		-4  记录不存在
         //		>=0 资源总长度

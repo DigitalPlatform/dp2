@@ -125,6 +125,7 @@
     <Compile Include="BinaryResControl.Designer.cs">
       <DependentUpon>BinaryResControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="BrowseLoader.cs" />
     <Compile Include="CfgCache.cs" />
     <Compile Include="ConfirmSupervisorDialog.cs">
       <SubType>Form</SubType>

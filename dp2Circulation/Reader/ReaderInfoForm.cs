@@ -621,6 +621,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         nRet = this.binaryResControl1.LoadObject(strOutputRecPath,    // 2008/11/2 changed
                             strXml,
+                            this.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -876,6 +877,7 @@ MessageBoxDefaultButton.Button2);
                         this.binaryResControl1.Clear();
                         nRet = this.binaryResControl1.LoadObject(strOutputRecPath,    // 2008/11/2 changed
                             strXml,
+                            this.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2491,6 +2493,7 @@ strSavedXml);
                     {
                         nRet = this.binaryResControl1.LoadObject(strSavedPath,    // 2008/11/2 changed
                             strSavedXml,
+                            this.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {

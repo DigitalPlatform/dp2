@@ -2275,7 +2275,7 @@ namespace DigitalPlatform.rms
             }
 
             // 检查目标路径，必须是记录路径形态，而不能是其他例如配置文件资源的形态
-            bool bRecordPath = this.IsRecordPath(strTargetRecordPath);
+            bool bRecordPath = IsRecordPath(strTargetRecordPath);
             if (bRecordPath == false)
             {
                 strError = "复制操作被拒绝，因为目标记录路径 '" + strTargetRecordPath + "' 不合法(必须是记录路径形态)";
@@ -3079,7 +3079,7 @@ namespace DigitalPlatform.rms
                     }
 
                     // 检查路径类型
-                    bool bRecordPath = this.IsRecordPath(record.Path);
+                    bool bRecordPath = IsRecordPath(record.Path);
                     if (bRecordPath == false)
                     {
                         record.Result.Value = -1;
@@ -3309,7 +3309,7 @@ namespace DigitalPlatform.rms
                 //分析出资源的类型
                 //---------------------------------------------------
 
-                bool bRecordPath = this.IsRecordPath(strResPath);
+                bool bRecordPath = IsRecordPath(strResPath);
                 if (bRecordPath == false)
                 {
                     // 检查路径中是否有非法字符
@@ -4343,6 +4343,134 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        public class PathInfo
+        {
+            public string OriginPath = "";
+
+            public bool IsConfigFilePath = false;   // 是否为配置文件路径?
+
+            public string DbName = "";
+            public string RecordID = "";
+            public string ObjectID = "";
+            public string XPath = "";
+
+            public Database Database = null;
+
+            public bool IsObjectPath
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(this.ObjectID) == false)
+                        return true;
+                    return false;
+                }
+            }
+
+            public string RecordID10
+            {
+                get
+                {
+                    return DbPath.GetID10(this.RecordID);
+                }
+            }
+
+        }
+
+        // 解析资源路径
+        // return:
+        //      -1  一般性错误
+        //		-5	未找到数据库
+        //		-7	路径不合法
+        //      0   成功
+        public int ParsePath(string strResPath,
+    out PathInfo info,
+    out string strError)
+        {
+            info = new PathInfo();
+            strError = "";
+
+            info.OriginPath = strResPath;
+
+            bool bRecordPath = IsRecordPath(strResPath);
+            if (bRecordPath == false)
+            {
+                info.IsConfigFilePath = true;
+                return 0;
+            }
+
+            // 判断资源类型
+            string strPath = strResPath;
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            //***********吃掉第1层*************
+            // 到此为止，strPath不含数据库名了,下面的路径有两种情况:cfgs;其余都被当作记录id
+            if (string.IsNullOrEmpty(strPath) == true)
+            {
+                strError = "资源路径 '" + strResPath + "' 不合法: 未指定库的下级";
+                return -7;
+            }
+
+            // 根据资源类型，写资源
+            info.Database = this.GetDatabase(strDbName);
+            if (info.Database == null)
+            {
+                strError = "未找到'" + strDbName + "'库";
+                return -5;
+            }
+
+            bool bObject = false;
+            string strRecordID = "";
+            string strObjectID = "";
+            string strXPath = "";
+
+            string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+            //***********吃掉第2层*************
+            // 到此为止，strPath记录号层了，下级分情况判断
+
+            strRecordID = strFirstPart;
+            // 只到记录号层的路径
+            if (strPath == "")
+            {
+                bObject = false;
+                info.DbName = strDbName;
+                info.RecordID = strRecordID;
+                return 0;
+            }
+
+            strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+            //***********吃掉第2层*************
+            // 到此为止，strPath不含object或xpath层 strFirstPart可能是object 或 xpath
+            if (strFirstPart != "object"
+                && strFirstPart != "xpath")
+            {
+                strError = "资源路径 '" + strResPath + "' 不合法,第3级必须是'object'或'xpath'";
+                return -7;
+            }
+            if (strPath == "")  //object或xpath下级必须有值
+            {
+                strError = "资源路径 '" + strResPath + "' 不合法,当第3级是'object'或'xpath'，第4级必须有内容。";
+                return -7;
+            }
+
+            if (strFirstPart == "object")
+            {
+                strObjectID = strPath;
+                bObject = true;
+            }
+            else
+            {
+                strXPath = strPath;
+                bObject = false;
+            }
+
+            info.DbName = strDbName;
+            info.RecordID = strRecordID;
+            info.XPath = strXPath;
+            info.ObjectID = strObjectID;
+            info.IsConfigFilePath = false;
+            return 0;
+        }
+
 
         // GetRes()用range不太好实现,因为原来当请求的长度超过允许的长度时,长度会自动为截取
         // 而如果用range来表示,则不知该截短哪部分好。
@@ -4452,6 +4580,46 @@ namespace DigitalPlatform.rms
             {
                 long lRet = 0;
 
+                PathInfo info = null;
+                        // 解析资源路径
+        // return:
+        //      -1  一般性错误
+        //		-5	未找到数据库
+        //		-7	路径不合法
+        //      0   成功
+                int nRet = ParsePath(strResPath,
+    out info,
+    out strError);
+                if (nRet < 0)
+                    return nRet;
+                if (info.IsConfigFilePath == true)
+                {
+                                        //当配置事项处理
+                    // return:
+                    //		-1  一般性错误
+                    //		-4	未找到路径对应的对象
+                    //		-6	没有足够的权限
+                    //		>= 0    成功 返回最大长度
+                    lRet = this.GetFileCfgItem(
+                        false,
+                        strResPath,
+                        lStart,
+                        nLength,
+                        nMaxLength,
+                        strStyle,
+                        user,
+                        out baData,
+                        out strMetadata,
+                        out baOutputTimestamp,
+                        out strError);
+                    if (StringUtil.IsInList("outputpath", strStyle) == true)
+                    {
+                        strOutputResPath = strResPath;
+                    }
+                    return lRet;
+                }
+
+#if NO
                 bool bRecordPath = this.IsRecordPath(strResPath);
                 if (bRecordPath == false)
                 {
@@ -4547,6 +4715,7 @@ namespace DigitalPlatform.rms
                         bObject = false;
                     }
 
+#endif
                     ///////////////////////////////////
                 ///开始做事情
                 //////////////////////////////////////////
@@ -4554,23 +4723,23 @@ namespace DigitalPlatform.rms
                 DOGET:
                     // 检查对数据库中记录的权限
                     string strExistRights = "";
-                    bool bHasRight = user.HasRights(strDbName + "/" + strRecordID,
+                    bool bHasRight = user.HasRights(info.DbName + "/" + info.RecordID,
                         ResType.Record,
                         "read",
                         out strExistRights);
                     if (bHasRight == false)
                     {
-                        strError = "您的帐户名为'" + user.Name + "'，对'" + strDbName + "'库没有'读记录(read)'权限，目前的权限值为'" + strExistRights + "'。";
+                        strError = "您的帐户名为'" + user.Name + "'，对'" + info.DbName + "'库没有'读记录(read)'权限，目前的权限值为'" + strExistRights + "'。";
                         return -6;
                     }
 
-                    if (bObject == true)  // 对象
+                    if (info.IsObjectPath == true)  // 对象
                     {
                         //		-1  出错
                         //		-4  记录不存在
                         //		>=0 资源总长度
-                        lRet = db.GetObject(strRecordID,
-                            strObjectID,
+                        lRet = info.Database.GetObject(info.RecordID,
+                            info.ObjectID,
                             lStart,
                             nLength,
                             nMaxLength,
@@ -4582,7 +4751,7 @@ namespace DigitalPlatform.rms
 
                         if (StringUtil.IsInList("outputpath", strStyle) == true)
                         {
-                            strOutputResPath = strDbName + "/" + strRecordID + "/object/" + strObjectID;
+                            strOutputResPath = info.DbName + "/" + info.RecordID + "/object/" + info.ObjectID;
                         }
                     }
                     else
@@ -4594,8 +4763,8 @@ namespace DigitalPlatform.rms
                         //      -10 记录局部未找到
                         //		>=0 资源总长度
                         //      nAdditionError -50 有一个以上下级资源记录不存在
-                        lRet = db.GetXml(strRecordID,
-                            strXPath,
+                        lRet = info.Database.GetXml(info.RecordID,
+                            info.XPath,
                             lStart,
                             nLength,
                             nMaxLength,
@@ -4609,19 +4778,13 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (StringUtil.IsInList("outputpath", strStyle) == true)
                         {
-                            strRecordID = strOutputID;
-                        }
-
-                        if (StringUtil.IsInList("outputpath", strStyle) == true)
-                        {
-                            if (strXPath == "")
-                                strOutputResPath = strDbName + "/" + strRecordID;
+                            // strRecordID = strOutputID;
+                            if (string.IsNullOrEmpty(info.XPath) == true)
+                                strOutputResPath = info.DbName + "/" + strOutputID;
                             else
-                                strOutputResPath = strDbName + "/" + strRecordID + "/xpath/" + strXPath;
-
+                                strOutputResPath = info.DbName + "/" + strOutputID + "/xpath/" + info.XPath;
                         }
                     }
-                }
 
                 return lRet;
             }
@@ -4636,7 +4799,7 @@ namespace DigitalPlatform.rms
         }
 
         // 检查一个路径是否是数据库记录路径
-        private bool IsRecordPath(string strResPath)
+        internal static bool IsRecordPath(string strResPath)
         {
             string[] paths = strResPath.Split(new char[] { '/' });
             if (paths.Length >= 2)
@@ -4983,7 +5146,7 @@ namespace DigitalPlatform.rms
             {
                 int nRet = 0;
 
-                bool bRecordPath = this.IsRecordPath(strResPath);
+                bool bRecordPath = IsRecordPath(strResPath);
                 if (bRecordPath == false)
                 {
                     // 也可能是数据库对象
@@ -5135,7 +5298,7 @@ namespace DigitalPlatform.rms
             {
                 int nRet = 0;
 
-                bool bRecordPath = this.IsRecordPath(strResPath);
+                bool bRecordPath = IsRecordPath(strResPath);
                 if (bRecordPath == false)
                 {
                     strError = "不支持对 '" + strResPath + "' 对象的重建keys操作";

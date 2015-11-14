@@ -2676,6 +2676,8 @@ MessageBoxDefaultButton.Button1);
                         stop.SetProgressValue(i);
                     }
 
+                    // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
+
                     ListViewItem item = items[i];
                     if (record.Cols == null)
                     {

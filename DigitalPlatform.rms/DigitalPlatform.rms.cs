@@ -344,6 +344,7 @@ namespace DigitalPlatform.rms
 		//私有成员字段，存放记录ID
 		private string m_strID = "";
 
+#if NO
 		//构造函数:将传入的逻辑ID拆分为两部分：数据库名和记录ID，分别赋值给m_strName和m_strID
 		//strDpPath: 传入的组合形式
 		public DbPath(string strDbPath)
@@ -359,6 +360,23 @@ namespace DigitalPlatform.rms
 			m_strName = strDbPath.Substring(0,nPosition);
 			m_strID = strDbPath.Substring(nPosition+1);
 		}
+#endif
+
+        //构造函数:将传入的逻辑ID拆分为两部分：数据库名和记录ID，分别赋值给m_strName和m_strID
+        //strDpPath: 传入的组合形式
+        public DbPath(string strDbPath)
+        {
+            int nPosition = strDbPath.IndexOf("/"); // 2015/11/14
+            //只不存在/号时，只有一个库名ID
+            if (nPosition < 0)
+            {
+                //				m_strID = strDbPath;
+                this.m_strName = strDbPath;
+                return;
+            }
+            m_strName = strDbPath.Substring(0, nPosition);
+            m_strID = strDbPath.Substring(nPosition + 1);
+        }
 
 		//公共Name属性，表示数据库名，提供给外部代码访问
 		public string Name

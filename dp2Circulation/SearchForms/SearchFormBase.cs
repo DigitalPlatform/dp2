@@ -1,21 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DigitalPlatform.CommonControl;
-using System.Collections;
 using System.Windows.Forms;
 using System.Web;
 using System.Diagnostics;
 using System.Drawing;
 using System.Xml;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.IO;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -719,29 +720,7 @@ out strError);
 
                     ListViewItem item = items[i];
 
-#if NO
-                    if (record.Cols == null)
-                    {
-                        int c = 0;
-                        foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)
-                        {
-                            if (c != 0)
-                                subitem.Text = "";
-                            c++;
-                        }
-                    }
-                    else
-                    {
-                        for (int c = 0; c < record.Cols.Length; c++)
-                        {
-                            ListViewUtil.ChangeItemText(item,
-                            c + 1,
-                            record.Cols[c]);
-                        }
-
-                        // TODO: 是否清除余下的列内容?
-                    }
-#endif
+                    // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
                     RefreshOneLine(item, record.Cols, bClearRestColumns);
 
                     i++;

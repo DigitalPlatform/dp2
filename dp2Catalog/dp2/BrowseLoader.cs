@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Collections;
+using System.Diagnostics;
+
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
-using System.Diagnostics;
+
+// TODO: 可以改造为使用 ChannelPool。这样和 dp2circulation 也能统一了
 
 namespace dp2Catalog
 {
@@ -173,4 +176,5 @@ namespace dp2Catalog
             }
         }
     }
+
 }

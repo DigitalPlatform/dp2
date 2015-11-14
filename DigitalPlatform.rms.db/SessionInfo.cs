@@ -854,17 +854,7 @@ out strError);
                         if (StringUtil.IsInList("cols", strStyle, true) == true)
                         {
                             string[] cols = null;
-                            /*未完成
-                            nRet = db.GetCols(dbpath.ID10,
-                                out cols,
-                                out strError);
-                            if (nRet <= -1)
-                            {
-                                richRecord.Result.Value = -1;
-                                richRecord.Result.ErrorCode = GlobalInfo.Ret2ErrorCode(nRet);
-                                richRecord.Result.ErrorString = strError;
-                            }
-                             */
+
                             nRet = db.GetCols(
                                 strFormat,
                                 dbpath.ID10,
@@ -892,7 +882,6 @@ out strError);
 
                         if (StringUtil.IsInList("timestamp", strStyle, true) == true)
                             bTimestamp = true;
-
 
                         if (bXml == true
                             || bTimestamp == true)
@@ -962,7 +951,6 @@ out strError);
                                 if (nStart0 >= nTotalLength)
                                     break;
                             }
-
 
                             // 记录体
                             // 转换成字符串
@@ -1038,6 +1026,7 @@ out strError);
         {
             records = null;
             strError = "";
+            int nRet = 0;
 
             //定义一个最大数量 ,应该是用尺寸，这里暂时用数组个数计算
             //int nMaxCount = 100;
@@ -1059,6 +1048,8 @@ out strError);
                 Record record = new Record();
 
                 string strPath = paths[i];
+
+#if NO
                 DbPath path = new DbPath(strPath);
                 Database db = this.app.Dbs.GetDatabaseSafety(path.Name);
                 if (db == null)
@@ -1066,16 +1057,30 @@ out strError);
                     strError = "没有找到数据库'" + path.Name + "'，换语言版本时出错";
                     return -1;
                 }
+#endif
+                DatabaseCollection.PathInfo info = null;
+                        // 解析资源路径
+        // return:
+        //      -1  一般性错误
+        //		-5	未找到数据库
+        //		-7	路径不合法
+        //      0   成功
+                nRet = this.app.Dbs.ParsePath(strPath,
+    out info,
+    out strError);
+                if (nRet < 0)
+                    return -1;
+
                 if (bHasID == true)
                 {
                     record.Path = strPath;
                 }
-                if (bHasCols == true)
+                if (bHasCols == true && info.IsObjectPath == false)
                 {
                     string[] cols;
-                    int nRet = db.GetCols(
+                    nRet = info.Database.GetCols(
                         strFormat,
-                        path.ID10,
+                        info.RecordID10,    // path.ID10,
                         "",
                         0,
                         out cols);
@@ -1094,11 +1099,13 @@ out strError);
                 string strXml = "";
                 string strMetadata = "";
                 byte[] baTimestamp = null;
-                if (bXml == true || bTimestamp == true || bMetadata == true)
+                if (info.IsObjectPath == false &&
+                    (bXml == true || bTimestamp == true || bMetadata == true)
+                    )
                 {
                     long lRet = GetXmlBody(
-db,
-path.ID,
+info.Database,  // db,
+info.RecordID,  // path.ID,
 bXml,
 bTimestamp,
 bMetadata,
@@ -1107,23 +1114,58 @@ out strXml,
 out strMetadata,
 out baTimestamp,
 out strError);
-                    if (lRet <= -1)
-                        return (int)lRet;
-
-#if NO
-                    lTotalPackageLength += strXml.Length;
-                    if (lTotalPackageLength > QUOTA_SIZE
-                        && i > 0)
-                    {
-                        // 响应包的尺寸已经超过 1M，并且已经至少包含了一条记录
-                        break;
-                    }
-#endif
 
                     record.RecordBody = new RecordBody();
                     record.RecordBody.Xml = strXml;
                     record.RecordBody.Metadata = strMetadata;
                     record.RecordBody.Timestamp = baTimestamp;
+
+                    if (lRet <= -1)
+                    {
+                        Result result = new Result();
+                        result.Value = -1;
+                        result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                        result.ErrorString = strError;
+                        record.RecordBody.Result = result;
+                        // return (int)lRet;
+                    }
+                }
+
+                // 2015/11/14
+                if (info.IsObjectPath == true &&
+                    (bTimestamp == true || bMetadata == true)
+                    )
+                {
+                    byte[] buffer = new byte[10];
+                    // return:
+                    //		-1  出错
+                    //		-4  记录不存在
+                    //		>=0 资源总长度
+                    long lRet = info.Database.GetObject(info.RecordID,
+                        info.ObjectID,
+                        0,
+                        0,
+                        -1,
+                        strStyle,
+                        out buffer,
+                        out strMetadata,
+                        out baTimestamp,
+                        out strError);
+
+                    record.RecordBody = new RecordBody();
+                    record.RecordBody.Xml = "";
+                    record.RecordBody.Metadata = strMetadata;
+                    record.RecordBody.Timestamp = baTimestamp;
+
+                    if (lRet <= -1)
+                    {
+                        Result result = new Result();
+                        result.Value = -1;
+                        result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                        result.ErrorString = strError;
+                        record.RecordBody.Result = result;
+                        // return (int)lRet;
+                    }
                 }
 
                 lTotalPackageLength += GetLength(record);

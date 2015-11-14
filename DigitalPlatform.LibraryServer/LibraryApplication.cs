@@ -97,7 +97,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.55 (2015/10/16) SetReaderInfo() API 允许使用用户定义的读者同步扩充字段。扩充字段在 library.xml 的 circulation 元素 patronReplicationFields 属性中定义
         //      2.56 (2015/10/18) GetReaderInfo() API 为 html 格式增加了 style_dark 和 style_light 风格。缺省为 style_light。light 对应于 readerhtml.css, dark 对英语 readerhtml_dark.css
         //      2.57 (2015/11/8) Borrow() 和 Return() API 利用 dp2kernel 优化的检索式提高了运行速度
-        public static string Version = "2.57";
+        //      2.58 (2015/11/14) GetBrowseRecords() API 允许获取对象的 metadata 和 timestamp 了。这个版本要求 dp2kernel 为 V 以上
+        public static string Version = "2.58";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1575,7 +1576,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            double base_version = 2.61;
+            double base_version = 2.62;
 
             if (value < base_version)
             {

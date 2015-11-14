@@ -3269,6 +3269,7 @@ true);
                             {
                                 nRet = this.binaryResControl1.LoadObject(strOutputBiblioRecPath,    // 2008/11/2 changed
                                     strXml,
+                                    this.MainForm.ServerVersion,
                                     out strError);
                                 if (nRet == -1)
                                 {

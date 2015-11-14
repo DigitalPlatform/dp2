@@ -14,6 +14,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient.localhost;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -158,6 +159,7 @@ namespace DigitalPlatform.CirculationClient
         //      1   已经装载
         public int LoadObject(string strBiblioRecPath,
             string strXml,
+            double dp2library_version,
             out string strError)
         {
             strError = "";
@@ -190,6 +192,7 @@ namespace DigitalPlatform.CirculationClient
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
 
             return LoadObject(nodes,
+                dp2library_version,
                 out strError);
         }
 
@@ -234,6 +237,7 @@ namespace DigitalPlatform.CirculationClient
         //      0   没有填充任何内容，列表为空
         //      1   已经填充了内容
         public int LoadObject(XmlNodeList nodes,
+            double dp2library_version,
             out string strError)
         {
             strError = "";
@@ -245,6 +249,7 @@ namespace DigitalPlatform.CirculationClient
             {
                 this.ListView.Items.Clear();
 
+                List<string> recpaths = new List<string>();
                 List<ListViewItem> items = new List<ListViewItem>();
                 // 第一阶段，把来自 XML 记录中的 <file> 元素信息填入。
                 // 这样就保证了至少可以在保存书目记录阶段能还原 XML 记录中的相关部分
@@ -269,56 +274,148 @@ namespace DigitalPlatform.CirculationClient
                     this.ListView.Items.Add(item);
 
                     items.Add(item);
+
+                    string strResPath = this.BiblioRecPath + "/object/" + strID;
+                    strResPath = strResPath.Replace(":", "/");
+                    recpaths.Add(strResPath);
+
                 }
 
-                // 第二阶段，从 dp2library 服务器获取 metadata 信息，填充其他字段内容
-                foreach(ListViewItem item in items)
+                if (dp2library_version >= 2.58)
                 {
-                    string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+                    // 新方法，速度快
+                    Stop.OnStop += new StopEventHandler(this.DoStop);
+                    Stop.Initial("正在下载对象的元数据");
+                    Stop.BeginLoop();
 
-                    string strMetadataXml = "";
-                    byte[] baMetadataTimestamp = null;
-                    // 获得一个对象资源的元数据
-                    int nRet = GetOneObjectMetadata(
-                        this.BiblioRecPath,
-                        strID,
-                        out strMetadataXml,
-                        out baMetadataTimestamp,
-                        out strError);
-                    if (nRet == -1)
+                    try
                     {
-                        if (Channel.ErrorCode == localhost.ErrorCode.AccessDenied)
+                        BrowseLoader loader = new BrowseLoader();
+                        loader.Channel = this.Channel;
+                        loader.Stop = this.Stop;
+                        loader.RecPaths = recpaths;
+                        loader.Format = "id,metadata,timestamp";
+
+                        int i = 0;
+                        foreach (DigitalPlatform.CirculationClient.localhost.Record record in loader)
                         {
-                            return -1;
+                            Application.DoEvents();
+
+                            if (this.Stop != null && this.Stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                return -1;
+                            }
+
+                            Debug.Assert(record.Path == recpaths[i], "");
+                            ListViewItem item = items[i];
+
+                            if (record.RecordBody.Result != null
+                                && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
+                                item.ImageIndex = 1;    // error!
+                                i++;
+                                continue;
+                            }
+
+                            string strMetadataXml = record.RecordBody.Metadata;
+                            Debug.Assert(string.IsNullOrEmpty(strMetadataXml) == false, "");
+
+                            byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
+                            Debug.Assert(baMetadataTimestamp != null, "");
+
+                            // 取metadata值
+                            Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
+                                out strError);
+                            if (values == null)
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
+                                item.ImageIndex = 1;    // error!
+                                continue;
+                            }
+
+                            // localpath
+                            ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, (string)values["localpath"]);
+
+                            // size
+                            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, (string)values["size"]);
+
+                            // mime
+                            ListViewUtil.ChangeItemText(item, COLUMN_MIME, (string)values["mimetype"]);
+
+                            // tiemstamp
+                            string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
+                            ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
+
+                            i++;
                         }
-                        // item.SubItems.Add(strError);
-                        ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
-                        item.ImageIndex = 1;    // error!
-                        continue;
                     }
-
-                    // 取metadata值
-                    Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
-                        out strError);
-                    if (values == null)
+                    catch (Exception ex)
                     {
-                        ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
-                        item.ImageIndex = 1;    // error!
-                        continue;
+                        // TODO: 出现异常后，是否改为用原来的方法一个一个对象地获取 metadata?
+                        strError = ex.Message;
+                        return -1;
                     }
+                    finally
+                    {
+                        Stop.EndLoop();
+                        Stop.OnStop -= new StopEventHandler(this.DoStop);
+                        Stop.Initial("");
+                    }
+                }
+                else
+                {
+                    // *** 以前的方法，速度较慢
+                    // 第二阶段，从 dp2library 服务器获取 metadata 信息，填充其他字段内容
+                    foreach (ListViewItem item in items)
+                    {
+                        string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
 
-                    // localpath
-                    ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, (string)values["localpath"]);
+                        string strMetadataXml = "";
+                        byte[] baMetadataTimestamp = null;
+                        // 获得一个对象资源的元数据
+                        int nRet = GetOneObjectMetadata(
+                            this.BiblioRecPath,
+                            strID,
+                            out strMetadataXml,
+                            out baMetadataTimestamp,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (Channel.ErrorCode == localhost.ErrorCode.AccessDenied)
+                            {
+                                return -1;
+                            }
+                            // item.SubItems.Add(strError);
+                            ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
+                            item.ImageIndex = 1;    // error!
+                            continue;
+                        }
 
-                    // size
-                    ListViewUtil.ChangeItemText(item, COLUMN_SIZE, (string)values["size"]);
+                        // 取metadata值
+                        Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
+                            out strError);
+                        if (values == null)
+                        {
+                            ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
+                            item.ImageIndex = 1;    // error!
+                            continue;
+                        }
 
-                    // mime
-                    ListViewUtil.ChangeItemText(item, COLUMN_MIME, (string)values["mimetype"]);
+                        // localpath
+                        ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, (string)values["localpath"]);
 
-                    // tiemstamp
-                    string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
-                    ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
+                        // size
+                        ListViewUtil.ChangeItemText(item, COLUMN_SIZE, (string)values["size"]);
+
+                        // mime
+                        ListViewUtil.ChangeItemText(item, COLUMN_MIME, (string)values["mimetype"]);
+
+                        // tiemstamp
+                        string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
+                        ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
+                    }
                 }
 
                 this.Changed = false;
