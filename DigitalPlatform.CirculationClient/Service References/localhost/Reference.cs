@@ -2964,10 +2964,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
-        System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result);
         
@@ -7841,13 +7841,13 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName) {
-            return base.Channel.HitCounter(strAction, strName);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress) {
+            return base.Channel.HitCounter(strAction, strName, strClientAddress);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginHitCounter(strAction, strName, callback, asyncState);
+        public System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginHitCounter(strAction, strName, strClientAddress, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -7858,7 +7858,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private System.IAsyncResult OnBeginHitCounter(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
             string strName = ((string)(inValues[1]));
-            return this.BeginHitCounter(strAction, strName, callback, asyncState);
+            string strClientAddress = ((string)(inValues[2]));
+            return this.BeginHitCounter(strAction, strName, strClientAddress, callback, asyncState);
         }
         
         private object[] OnEndHitCounter(System.IAsyncResult result) {
@@ -7874,11 +7875,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void HitCounterAsync(string strAction, string strName) {
-            this.HitCounterAsync(strAction, strName, null);
+        public void HitCounterAsync(string strAction, string strName, string strClientAddress) {
+            this.HitCounterAsync(strAction, strName, strClientAddress, null);
         }
         
-        public void HitCounterAsync(string strAction, string strName, object userState) {
+        public void HitCounterAsync(string strAction, string strName, string strClientAddress, object userState) {
             if ((this.onBeginHitCounterDelegate == null)) {
                 this.onBeginHitCounterDelegate = new BeginOperationDelegate(this.OnBeginHitCounter);
             }
@@ -7890,7 +7891,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
             base.InvokeAsync(this.onBeginHitCounterDelegate, new object[] {
                         strAction,
-                        strName}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
+                        strName,
+                        strClientAddress}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
         }
         
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -12934,10 +12936,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
-        System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result);
         
@@ -17805,13 +17807,13 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName) {
-            return base.Channel.HitCounter(strAction, strName);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress) {
+            return base.Channel.HitCounter(strAction, strName, strClientAddress);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginHitCounter(string strAction, string strName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginHitCounter(strAction, strName, callback, asyncState);
+        public System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginHitCounter(strAction, strName, strClientAddress, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -17822,7 +17824,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private System.IAsyncResult OnBeginHitCounter(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
             string strName = ((string)(inValues[1]));
-            return this.BeginHitCounter(strAction, strName, callback, asyncState);
+            string strClientAddress = ((string)(inValues[2]));
+            return this.BeginHitCounter(strAction, strName, strClientAddress, callback, asyncState);
         }
         
         private object[] OnEndHitCounter(System.IAsyncResult result) {
@@ -17838,11 +17841,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void HitCounterAsync(string strAction, string strName) {
-            this.HitCounterAsync(strAction, strName, null);
+        public void HitCounterAsync(string strAction, string strName, string strClientAddress) {
+            this.HitCounterAsync(strAction, strName, strClientAddress, null);
         }
         
-        public void HitCounterAsync(string strAction, string strName, object userState) {
+        public void HitCounterAsync(string strAction, string strName, string strClientAddress, object userState) {
             if ((this.onBeginHitCounterDelegate == null)) {
                 this.onBeginHitCounterDelegate = new BeginOperationDelegate(this.OnBeginHitCounter);
             }
@@ -17854,7 +17857,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
             base.InvokeAsync(this.onBeginHitCounterDelegate, new object[] {
                         strAction,
-                        strName}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
+                        strName,
+                        strClientAddress}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
         }
         
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {

@@ -2785,7 +2785,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
                 {
                     File.Delete(filenames[i]);
                 }
-                catch { 
+                catch
+                { 
                 }
             }
         }

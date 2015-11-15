@@ -31,7 +31,6 @@ ref sessioninfo) == false)
             return;
 
         /*
-
         // 是否登录?
         if (sessioninfo.UserID == "")
         {
@@ -40,11 +39,18 @@ ref sessioninfo) == false)
             return;
         }
          * */
-
+        string strError = "";
+        int nRet = 0;
         // string strAction = Request.QueryString["action"];
         string strURI = Request.QueryString["uri"];
         string strStyle = Request.QueryString["style"];
 
+        LibraryChannel channel = null;
+#if CHANNEL_POOL
+        channel = sessioninfo.GetChannel(true, sessioninfo.Parameters);
+#else
+        channel = sessioninfo.GetChannel(false);
+#endif
         try
         {
             Uri uri = new Uri(strURI);
@@ -52,6 +58,7 @@ ref sessioninfo) == false)
             {
                 if (StringUtil.IsInList("hitcount", strStyle) == true)
                 {
+#if NO
                     if (app.SearchLog != null)
                     {
                         long lHitCount = app.SearchLog.GetHitCount(strURI);
@@ -65,58 +72,76 @@ ref sessioninfo) == false)
                         Color.FromArgb(200, Color.Blue),
                         "*"); // 星号表示尚未启用外部链接计数功能
                     this.Response.End();
+#endif
+
+                    string strText = "";
+                    long lValue = 0;
+                    long lRet = app.GetHitCount(channel,
+            strURI,
+            out lValue,
+            out strError);
+                    if (lRet == -1)
+                        strText = strError;
+                    else
+                        strText = lValue.ToString();
+                    OpacApplication.OutputImage(this,
+    Color.FromArgb(200, Color.Blue),
+    strText);
+                    this.Response.End();
                     return;
                 }
                 else
                 {
+#if NO
                     if (app.SearchLog != null)
                         app.SearchLog.IncHitCount(strURI);
-                    this.Response.Redirect(strURI, true);
+#endif
+                    long lRet = app.IncHitCount(channel,
+strURI,
+this.Request.UserHostAddress,
+true,
+out strError);
+                    if (lRet == -1)
+                        Response.Write("IncHitCount 出错: " + strError);
+                    else
+                        this.Response.Redirect(strURI, true);
+                    this.Response.End();
                     return;
                 }
             }
+
+            string strSaveAs = Request.QueryString["saveas"];
+            bool bSaveAs = false;
+            if (strSaveAs == "true")
+                bSaveAs = true;
+
+            // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
+
+            this.Response.BufferOutput = false;
+            this.Server.ScriptTimeout = 10 * 60 * 60;    // 10 个小时
+
+            nRet = app.DownloadObject(
+                this,
+                // flushdelegate,
+                // sessioninfo.Channels,
+                channel,
+                strURI,
+                bSaveAs,
+                strStyle,
+                out strError);
+            if (nRet == -1)
+                Response.Write(strError);
+
+            Response.End();
+            return;
         }
-        catch
+        finally
         {
 
-        }
-
-        string strSaveAs = Request.QueryString["saveas"];
-        bool bSaveAs = false;
-        if (strSaveAs == "true")
-            bSaveAs = true;
-
-
-        // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
-
-        this.Response.BufferOutput = false;
-        this.Server.ScriptTimeout = 10 * 60 * 60;    // 10 个小时
-
-        string strError = "";
-
-        LibraryChannel channel = null;
-#if CHANNEL_POOL
-            channel = sessioninfo.GetChannel(true, sessioninfo.Parameters);
-#else
-        channel = sessioninfo.GetChannel(false);
-#endif
-        int nRet = app.DownloadObject(
-            this,
-            // flushdelegate,
-            // sessioninfo.Channels,
-            channel,
-            strURI,
-            bSaveAs,
-            strStyle,
-            out strError);
 #if CHANNEL_POOL
             sessioninfo.ReturnChannel(channel);
 #endif
-        if (nRet == -1)
-            Response.Write(strError);
-
-        Response.End();
-        return;
+        }
     }
 
     /*

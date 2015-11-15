@@ -1077,7 +1077,6 @@ namespace DigitalPlatform.OPAC.Server
 
                 PathUtil.CreateDirIfNeed(strTargetDir);
 
-
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
                 for (int i = 0; i < subs.Length; i++)
@@ -3554,6 +3553,77 @@ out strError);
             }
         }
 
+        // 获得计数器值
+        public long GetHitCount(LibraryChannel channel,
+            string strUrl,
+            out long lValue,
+            out string strError)
+        {
+            lValue = 0;
+            strError = "";
+
+            SessionInfo session = null;
+            if (channel == null)
+            {
+                // 临时的SessionInfo对象
+                // 用管理员身份
+                session = new SessionInfo(this);
+                session.UserID = this.ManagerUserName;
+                session.Password = this.ManagerPassword;
+                session.IsReader = false;
+                channel = session.Channel;
+            }
+            try
+            {
+                return channel.HitCounter("get", 
+                    strUrl,
+                    "",
+                    out lValue,
+                    out strError);
+            }
+            finally
+            {
+                if (session != null)
+                    session.CloseSession();
+            }
+        }
+
+        // 增量计数器值
+        public long IncHitCount(LibraryChannel channel,
+            string strUrl,
+            string strClientAddress,
+            bool bLog,
+            out string strError)
+        {
+            strError = "";
+
+            SessionInfo session = null;
+            if (channel == null)
+            {
+                // 临时的SessionInfo对象
+                // 用管理员身份
+                session = new SessionInfo(this);
+                session.UserID = this.ManagerUserName;
+                session.Password = this.ManagerPassword;
+                session.IsReader = false;
+                channel = session.Channel;
+            }
+            try
+            {
+                long lValue = 0;
+                return channel.HitCounter(bLog ? "inc_and_log" : "inc", 
+                    strUrl,
+                    strClientAddress,
+                    out lValue,
+                    out strError);
+            }
+            finally
+            {
+                if (session != null)
+                    session.CloseSession();
+            }
+        }
+
         // parameters:
         //      channel 通讯通道。如果为 null，则函数会自动使用管理员身份创建通道
         public int DownloadObject(System.Web.UI.Page Page,
@@ -3881,6 +3951,7 @@ Value data: HEX 0x1
             return 1;
         }
 
+        // 输出 计数数字 图像
         public static void OutputImage(Page Page,
             Color text_color,
             string strReadCount)
@@ -3914,7 +3985,6 @@ Value data: HEX 0x1
 
                 image.Seek(0, SeekOrigin.Begin);
                 StreamUtil.DumpStream(image, Page.Response.OutputStream/*, flushdelegate*/);
-
             }
             Page.Response.Flush();
         }

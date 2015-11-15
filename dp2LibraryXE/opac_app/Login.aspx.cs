@@ -226,7 +226,7 @@ ref this.sessioninfo) == false)
                 // LogoutSsoCookie(sessioninfo.UserID);
 
                 Session.Abandon();
-            this.ClearCookiesLogin("online,token");
+                this.ClearCookiesLogin("online,token");
 
                 string strPureUserName = "";
                 string strDomain = "";
@@ -520,8 +520,10 @@ ref this.sessioninfo) == false)
 
     void Redirect(string strRedirect)
     {
-        if (app.UseTransfer == true)
+        if (app.UseTransfer == true
+            && strRedirect.ToLower() != "login.aspx")
         {
+            // 注意，不允许 Transfer 到当前 aspx。这样会引起 IIS Express 崩溃
             Server.Transfer(strRedirect);
             return;
         }

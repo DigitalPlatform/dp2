@@ -78,6 +78,7 @@ namespace dp2Circulation
 
         public delegate bool FileNameFilterProc(FileSystemInfo fi);
 
+        // TODO: 可改用 PathUtil 中同名函数
         /*
 Type: System.IO.IOException
 Message: 文件“c:\dp2circulation\DigitalPlatform.CirculationClient.dll”正由另一进程使用，因此该进程无法访问此文件。

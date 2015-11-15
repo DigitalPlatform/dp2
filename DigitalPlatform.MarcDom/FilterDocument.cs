@@ -68,8 +68,7 @@ namespace DigitalPlatform.MarcDom
 				if (value == null)
 				{
 					this.NodeTable.Clear();	// 释放那些type entry指针
-                    Debug.WriteLine("NodeTable Cleared. count" + NodeTable.Count.ToString());
-
+                    // Debug.WriteLine("NodeTable Cleared. count" + NodeTable.Count.ToString());
 				}
 				else 
 				{
@@ -81,7 +80,6 @@ namespace DigitalPlatform.MarcDom
 				}
 			}
 		}
-
 
 		public void Load(string strFileName)
 		{
@@ -411,8 +409,7 @@ namespace DigitalPlatform.MarcDom
             if (xmlNode.ParentNode == null)
             {
                 NodeTable.Clear();
-                Debug.WriteLine("NodeTable Cleared. count" + NodeTable.Count.ToString());
-
+                // Debug.WriteLine("NodeTable Cleared. count" + NodeTable.Count.ToString());
             }
 
 			if (xmlNode.NodeType != XmlNodeType.Element) 
@@ -422,7 +419,6 @@ namespace DigitalPlatform.MarcDom
 				return -1;
 			}
 
-
 			if (IsStructureElementName(xmlNode.Name) == false) 
 			{
 				Debug.Assert(false,
@@ -430,14 +426,13 @@ namespace DigitalPlatform.MarcDom
 				return -1;
 			}
 
-
 			HashFilterItem item = new HashFilterItem();
 
 			item.xmlNode = xmlNode;
 			item.Name = DomUtil.GetAttr(xmlNode, "name");
 			item.ItemType = (ItemType)Enum.Parse(typeof(ItemType), xmlNode.Name, true);
 			NodeTable.Add(xmlNode, item);
-            Debug.WriteLine("add new NodeTable count" + NodeTable.Count.ToString());
+            // Debug.WriteLine("add new NodeTable count" + NodeTable.Count.ToString());
 
 			for(int i =0;i<xmlNode.ChildNodes.Count; i++)
 			{

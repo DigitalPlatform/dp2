@@ -1165,7 +1165,7 @@ value);
 
             List<string> filenames = null;
 
-            filenames = GetFileNames(strDataDir);
+            filenames = PathUtil.GetFileNames(strDataDir);
 
             if (filenames.Count == 0)
                 return 0;
@@ -1200,6 +1200,7 @@ value);
             return 1;
         }
 
+#if NO
         // 获得一个目录下的全部文件名。包括子目录中的
         static List<string> GetFileNames(string strDataDir)
         {
@@ -1222,6 +1223,7 @@ value);
 
             return result;
         }
+#endif
 
         // 曾经显示过的动态 message
         string _message = "";

@@ -3236,30 +3236,6 @@ this.Font);
             MessageBox.Show(this, strError);
         }
 
-        // 获得一个目录下的全部文件名。包括子目录中的
-        static List<string> GetFileNames(string strDataDir)
-        {
-            // Application.DoEvents();
-
-            DirectoryInfo di = new DirectoryInfo(strDataDir);
-
-            List<string> result = new List<string>();
-
-            FileInfo[] fis = di.GetFiles();
-            foreach (FileInfo fi in fis)
-            {
-                        result.Add(fi.FullName);
-            }
-
-            // 处理下级目录，递归
-            DirectoryInfo[] dis = di.GetDirectories();
-            foreach (DirectoryInfo subdir in dis)
-            {
-                result.AddRange(GetFileNames(subdir.FullName));
-            }
-
-            return result;
-        }
 
 #if NO
         // 记忆配置文件的版本

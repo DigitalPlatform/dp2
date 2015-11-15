@@ -932,6 +932,7 @@ bool bChanged)
         }
 
         // parameters:
+        //      filenames   文件名或目录名的列表
         //      strDefaultUsage usage 对话框中的起始值。如果为 null，表示不出现请求输入 usage 的对话框，此时加入的对象其 usage 值为空
         // return:
         //      -1  出错
@@ -957,10 +958,25 @@ bool bChanged)
                     return 0;
             }
 
+            List<string> expanded_filenames = new List<string>();
             foreach (string filename in filenames)
             {
-                // TODO: 如果遇到目录，是否自动获取其下的所有文件？最好出现一个对话框询问是否要这样做。
+                FileAttributes attr = File.GetAttributes(filename);
 
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    expanded_filenames.AddRange(PathUtil.GetFileNames(filename, 
+                        (fi) => {
+                        if (fi.Name.ToLower() == "desktop.ini")
+                            return false;
+                        return true;
+                        }
+                        ));
+                else
+                    expanded_filenames.Add(filename);
+            }
+
+            foreach (string filename in expanded_filenames)
+            {
                 ListViewItem item = null;
                 int nRet = this.AppendNewItem(
     filename,

@@ -8582,6 +8582,7 @@ namespace dp2Library
             }
         }
 
+        // TODO: 可以尝试用通用版本的 GetFileNames() 加上回调函数定制出本函数
         // 获得一个子目录内的所有文件名和所有下级子目录内的文件名
         // parameters:
         //      bLastWriteTime  是否在文件名后面附加此文件的最后修改时间
@@ -13885,7 +13886,8 @@ out strError);
         }
 
         public LibraryServerResult HitCounter(string strAction,
-            string strName)
+            string strName,
+            string strClientAddress)
         {
             string strError = "";
 
@@ -13900,11 +13902,51 @@ out strError);
 
                 if (strAction == "get")
                     result.Value = app.HitCountDatabase.GetHitCount(strName);
-                else if (strAction == "set")
+                else if (strAction == "inc")
                     app.HitCountDatabase.IncHitCount(strName);
+                else if (strAction == "inc_and_log")    // 增量计数器，并且同时记载到访问日志中
+                {
+                    app.HitCountDatabase.IncHitCount(strName);
+
+                    // 写入日志
+                    {
+                        XmlDocument domOperLog = new XmlDocument();
+                        domOperLog.LoadXml("<root />");
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "operation",
+                            "getRes");
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "path",
+        strName);
+
+                        if (app.Statis != null)
+                            app.Statis.IncreaseEntryValue(
+                            sessioninfo.LibraryCodeList,
+                            "获取外部对象",
+                            "次",
+                            1);
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                            sessioninfo.UserID);
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                            app.Clock.GetClock());
+                        if (string.IsNullOrEmpty(strClientAddress) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "requestClientAddress",
+                                strClientAddress);
+
+                        int nRet = app.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "HitCounter() API 写入日志时发生错误: " + strError;
+                            goto ERROR1;
+                        }
+                    }
+                }
                 else
                 {
-                    strError = "未知的 strAction '"+strAction+"'";
+                    strError = "未知的 strAction '" + strAction + "'";
                     goto ERROR1;
                 }
                 return result;

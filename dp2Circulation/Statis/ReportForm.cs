@@ -12606,7 +12606,7 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-
+        // TODO: 可以尝试用通用版本的 GetFileNames() 加上回调函数定制出本函数
         // 获得一个目录下的全部文件名。包括子目录中的
         static List<string> GetFileNames(string strDataDir,
             FileAttributes attr)
@@ -12676,6 +12676,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // TODO: 可以尝试用通用版本的 GetFileNames() 加上回调函数定制出本函数
         // 获得一个目录下的全部 .rml 文件名。包括子目录中的
         static List<string> GetRmlFileNames(string strDataDir)
         {

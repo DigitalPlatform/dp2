@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace DigitalPlatform.IO
 {
@@ -14,6 +15,38 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class PathUtil
     {
+        // 获得一个目录下的全部文件名。包括子目录中的
+        public static List<string> GetFileNames(string strDataDir,
+            FileNameFilterProc filter_proc = null)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDataDir);
+
+            List<string> result = new List<string>();
+
+            if (filter_proc != null && filter_proc(di) == false)
+                return result;
+
+            FileInfo[] fis = di.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                if (filter_proc != null && filter_proc(fi) == false)
+                    continue;
+                result.Add(fi.FullName);
+            }
+
+            // 处理下级目录，递归
+            DirectoryInfo[] dis = di.GetDirectories();
+            foreach (DirectoryInfo subdir in dis)
+            {
+                if (filter_proc != null && filter_proc(subdir) == false)
+                    continue;
+
+                result.AddRange(GetFileNames(subdir.FullName));
+            }
+
+            return result;
+        }
+
         // 根据文件内容和扩展名获得 MIME 类型
         public static string MimeTypeFrom(string strFileName)
         {
@@ -695,6 +728,107 @@ namespace DigitalPlatform.IO
             }
         }
 
+        public delegate bool FileNameFilterProc(FileSystemInfo fi);
+
+        // 拷贝目录
+        // return:
+        //      -1  出错
+        //      >=0 复制的文件总数
+        public static int CopyDirectory(string strSourceDir,
+            string strTargetDir,
+            FileNameFilterProc filter_proc,
+            out string strError)
+        {
+            strError = "";
+
+            int nCount = 0;
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strSourceDir);
+
+                if (di.Exists == false)
+                {
+                    strError = "源目录 '" + strSourceDir + "' 不存在...";
+                    return -1;
+                }
+
+#if NO
+                if (bDeleteTargetBeforeCopy == true)
+                {
+                    if (Directory.Exists(strTargetDir) == true)
+                        Directory.Delete(strTargetDir, true);
+                }
+#endif
+
+                CreateDirIfNeed(strTargetDir);
+
+                FileSystemInfo[] subs = di.GetFileSystemInfos();
+
+                foreach (FileSystemInfo sub in subs)
+                {
+                    if (filter_proc != null && filter_proc(sub) == false)
+                        continue;
+
+                    // 复制目录
+                    if ((sub.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                    {
+                        int nRet = CopyDirectory(sub.FullName,
+                            Path.Combine(strTargetDir, sub.Name),
+                            filter_proc,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        nCount += nRet;
+                        continue;
+                    }
+                    // 复制文件
+                    string source = sub.FullName;
+                    string target = Path.Combine(strTargetDir, sub.Name);
+                    // 如果目标文件已经存在，并且修后修改时间相同，则不复制了
+                    if (File.Exists(target) == true && File.GetLastWriteTimeUtc(source) == File.GetLastWriteTimeUtc(target))
+                        continue;
+
+                    // File.Copy(source, target, true);
+
+                    // 拷贝文件，最多重试 10 次
+                    for (int nRedoCount = 0; ; nRedoCount++)
+                    {
+                        try
+                        {
+                            File.Copy(source, target, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (nRedoCount < 10)
+                            {
+                                Thread.Sleep(100);
+                                continue;
+                            }
+                            else
+                            {
+                                string strText = "source '" + source + "' lastmodified = '" + File.GetLastWriteTimeUtc(source).ToString() + "'; "
+                                    + "target '" + target + "' lastmodified = '" + File.GetLastWriteTimeUtc(target).ToString() + "'";
+                                throw new Exception(strText, ex);
+                            }
+                        }
+                        Debug.Assert(File.GetLastWriteTimeUtc(source) == File.GetLastWriteTimeUtc(target), "源文件和目标文件复制完成后，最后修改时间不同");
+                        break;
+                    }
+
+                    // 把最后修改时间设置为和 source 一样
+                    File.SetLastWriteTimeUtc(target, File.GetLastWriteTimeUtc(source));
+                    nCount++;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            return nCount;
+        }
+
         // 拷贝目录
         public static int CopyDirectory(string strSourceDir,
             string strTargetDir,
@@ -1017,7 +1151,6 @@ namespace DigitalPlatform.IO
             return false;
         }
 
-
         public static string EnsureTailBackslash(string strPath)
         {
             if (strPath == "")
@@ -1152,7 +1285,6 @@ namespace DigitalPlatform.IO
                 {
                     strResult += strPart;
                 }
-
             }
 
             return strResult;
@@ -1207,7 +1339,6 @@ namespace DigitalPlatform.IO
                 nCurPos = nRet;
                 return strResult;
             }
-
         }
 
         public static string GetShortFileName(string strFileName)

@@ -9233,6 +9233,7 @@ out strError);
 
         public long HitCounter(string strAction,
             string strName,
+            string strClientAddress,
             out long lValue,
             out string strError)
         {
@@ -9245,6 +9246,7 @@ out strError);
                 IAsyncResult soapresult = this.ws.BeginHitCounter(
                     strAction,
                     strName,
+                    strClientAddress,
                     null,
                     null);
 
