@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Threading;
-using DigitalPlatform.ResultSet;
 using System.Diagnostics;
 using System.IO;
+
+using DigitalPlatform.ResultSet;
 
 namespace DigitalPlatform.rms
 {

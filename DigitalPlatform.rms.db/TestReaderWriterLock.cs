@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -6,7 +6,7 @@ using System.Threading;
 namespace DigitalPlatform.rms
 {
     /// <summary>
-    /// ²âÊÔÓÃµÄËø
+    /// æµ‹è¯•ç”¨çš„é”
     /// </summary>
     public class TestReaderWriterLock
     {
@@ -16,14 +16,14 @@ namespace DigitalPlatform.rms
         public void AcquireReaderLock(int timeout)
         {
             if (this.nLockCount != 0)
-                throw new Exception("ÖØ¸´¼ÓËøÁË£¡");
+                throw new Exception("é‡å¤åŠ é”äº†ï¼");
             m_lock.AcquireReaderLock(timeout);
             this.nLockCount++;
         }
         public void AcquireWriterLock(int timeout)
         {
             if (this.nLockCount != 0)
-                throw new Exception("ÖØ¸´¼ÓËøÁË£¡");
+                throw new Exception("é‡å¤åŠ é”äº†ï¼");
             m_lock.AcquireWriterLock(timeout);
             this.nLockCount++;
         }

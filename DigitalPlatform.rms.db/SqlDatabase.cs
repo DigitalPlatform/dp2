@@ -10,6 +10,8 @@ using System.Xml;
 using System.IO;
 using System.Collections;
 using System.Data;
+using System.Threading;
+using System.Diagnostics;
 
 using System.Data.SqlClient;
 using System.Data.SQLite;
@@ -19,9 +21,6 @@ using MySql.Data.MySqlClient;
 
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
-
-using System.Threading;
-using System.Diagnostics;
 
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;

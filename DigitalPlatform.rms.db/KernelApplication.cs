@@ -11,12 +11,6 @@ using System.Runtime.Serialization;
 
 using System.ServiceModel;
 
-//using DigitalPlatform;
-//using DigitalPlatform.rms;
-//using DigitalPlatform.IO;
-//using DigitalPlatform.Xml;
-//using DigitalPlatform.Text;
-//using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
 using DigitalPlatform.ResultSet;
 
