@@ -2964,12 +2964,12 @@ namespace DigitalPlatform.CirculationClient.localhost {
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
         System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
@@ -4017,10 +4017,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
+        public long Value {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((long)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -7841,8 +7848,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress) {
-            return base.Channel.HitCounter(strAction, strName, strClientAddress);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress) {
+            return base.Channel.HitCounter(out Value, strAction, strName, strClientAddress);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -7851,8 +7858,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result) {
-            return base.Channel.EndHitCounter(result);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result) {
+            return base.Channel.EndHitCounter(out Value, result);
         }
         
         private System.IAsyncResult OnBeginHitCounter(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -7863,8 +7870,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndHitCounter(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(result);
+            long Value = this.GetDefaultValueForInitialization<long>();
+            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(out Value, result);
             return new object[] {
+                    Value,
                     retVal};
         }
         
@@ -12936,12 +12945,12 @@ namespace DigitalPlatform.CirculationClient.localhost {
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
         System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
@@ -13983,10 +13992,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
+        public long Value {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((long)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -17807,8 +17823,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(string strAction, string strName, string strClientAddress) {
-            return base.Channel.HitCounter(strAction, strName, strClientAddress);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress) {
+            return base.Channel.HitCounter(out Value, strAction, strName, strClientAddress);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -17817,8 +17833,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(System.IAsyncResult result) {
-            return base.Channel.EndHitCounter(result);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result) {
+            return base.Channel.EndHitCounter(out Value, result);
         }
         
         private System.IAsyncResult OnBeginHitCounter(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -17829,8 +17845,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndHitCounter(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(result);
+            long Value = this.GetDefaultValueForInitialization<long>();
+            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(out Value, result);
             return new object[] {
+                    Value,
                     retVal};
         }
         

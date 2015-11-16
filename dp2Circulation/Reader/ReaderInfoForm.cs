@@ -580,7 +580,7 @@ MessageBoxDefaultButton.Button2);
                         if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                             return 0;
 
-                        strBarcode = dlg.SelectedBarcode;
+                        strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16 // .SelectedBarcode;
                         nRedoCount++;
                         goto REDO;
                     }
@@ -1886,6 +1886,7 @@ strNewDefault);
 
                 // 如果特意选定过要保存的位置
                 if (string.IsNullOrEmpty(strTargetRecPath) == false
+                    && Global.IsAppendRecPath(strTargetRecPath) == false // 2015/11/16 增加的此句，消除 Bug
                     && strAction == "new")
                     strAction = "change";
 
@@ -1979,7 +1980,9 @@ strNewDefault);
                     // return:
                     //		-1	error
                     //		>=0 实际上载的资源对象数
-                    nRet = this.binaryResControl1.Save(out strError);
+                    nRet = this.binaryResControl1.Save(
+                        this.MainForm.ServerVersion,
+                        out strError);
                     if (nRet == -1)
                     {
                         MessageBox.Show(this, strError);
@@ -2447,7 +2450,9 @@ strSavedXml);
                     // return:
                     //		-1	error
                     //		>=0 实际上载的资源对象数
-                    nRet = this.binaryResControl1.Save(out strError);
+                    nRet = this.binaryResControl1.Save(
+                        this.MainForm.ServerVersion,
+                        out strError);
                     if (nRet == -1)
                     {
                         MessageBox.Show(this, strError);

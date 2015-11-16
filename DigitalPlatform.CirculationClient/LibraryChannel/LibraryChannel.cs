@@ -7303,9 +7303,6 @@ out strError);
                     return -1;
                 goto REDO;
             }
-
-
-
         }
 
         // 保存Xml记录。包装版本。用于保存文本类型的资源。
@@ -7504,6 +7501,7 @@ out strError);
         // 保存资源记录
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath
+        //      strObjectFileName   对象文件名。如果为空，表示本次调用仅根据 strLocalPath 和 strMime 修改 对象的 metadata 部分
         //		bTailHint	是否为最后一次写入操作。这是一个暗示参数，本函数将根据此参数为最后一次写入操作设置特殊的超时时间。
         //					假定有时整个资源尺寸很大，虽然每次局部写入耗时不多，但是最后一次写入因为服务器要执行整个资源转存
         //					的操作后API才返回，所以可能会耗费类似20分钟这样的长时间，导致WebService API超时失败。
@@ -7522,22 +7520,31 @@ out strError);
         {
             strError = "";
             output_timestamp = null;
-
-            FileInfo fi = new FileInfo(strObjectFileName);
-            if (fi.Exists == false)
-            {
-                strError = "文件 '" + strObjectFileName + "'不存在...";
-                return -1;
-            }
+            long lRet = 0;
 
             byte[] baTotal = null;
-            long lRet = RangeList.CopyFragment(
-                strObjectFileName,
-                strRange,
-                out baTotal,
-                out strError);
-            if (lRet == -1)
-                return -1;
+            long lTotalLength = 0;
+            if (string.IsNullOrEmpty(strObjectFileName) == false)
+            {
+                FileInfo fi = new FileInfo(strObjectFileName);
+                if (fi.Exists == false)
+                {
+                    strError = "文件 '" + strObjectFileName + "'不存在...";
+                    return -1;
+                }
+
+                lRet = RangeList.CopyFragment(
+                    strObjectFileName,
+                    strRange,
+                    out baTotal,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                lTotalLength = fi.Length;
+            }
+            else
+                lTotalLength = -1;
 
             // string strOutputPath = "";
 
@@ -7562,7 +7569,7 @@ out strError);
                 stop,
                 strPath,
                 strRange,
-                fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
+                lTotalLength,   // fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
                 baTotal,
                 strMetadata,
                 "", // strStyle,
@@ -9265,6 +9272,7 @@ out strError);
                 }
 
                 LibraryServerResult result = this.ws.EndHitCounter(
+                    out lValue,
                     soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
@@ -9272,7 +9280,6 @@ out strError);
                         goto REDO;
                     return -1;
                 }
-                lValue = result.Value;
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();

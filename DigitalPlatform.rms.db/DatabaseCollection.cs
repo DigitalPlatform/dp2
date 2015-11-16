@@ -3260,25 +3260,37 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-
                 //------------------------------------------------
                 //检查输入参数是否合法，并规范输入参数
                 //---------------------------------------------------
                 if (user == null)
                 {
-                    strError = "WriteRes()调用错误，user对象不能为null";
+                    strError = "WriteRes()调用错误，user 对象不能为 null";
                     return -1;
                 }
                 if (String.IsNullOrEmpty(strResPath) == true)
                 {
-                    strError = "资源路径'" + strResPath + "'不合法，不能为null或空字符串。";
+                    strError = "资源路径'" + strResPath + "'不合法，不能为null或空字符串";
                     return -7;
                 }
-                if (lTotalLength < 0)
+
+                if (lTotalLength == -1)
                 {
-                    strError = "WriteRes()，lTotalLength不能为'" + Convert.ToString(lTotalLength) + "'，必须>=0。";
-                    return -1;
+                    if (baSource != null && baSource.Length > 0)
+                    {
+                        strError = "当参数 lTotalLength 为 -1 的时候，参数 baSource 的值必须为空";
+                        return -1;
+                    }
                 }
+                else
+                {
+                    if (lTotalLength < 0)
+                    {
+                        strError = "WriteRes()，lTotalLength不能为'" + Convert.ToString(lTotalLength) + "'，必须 >= 0";
+                        return -1;
+                    }
+                }
+
                 if (strRanges == null) //里面的函数，会处理成代表的范围
                     strRanges = "";
                 if (strMetadata == null)
@@ -3298,9 +3310,9 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
                  * */
-                if (baSource == null)
+                if (lTotalLength != -1 && baSource == null)
                 {
-                    strError = "WriteRes()调用错误，baSource参数不能为null。";
+                    strError = "WriteRes()调用错误，baSource参数不能为null (当 lTotalLength 不为 -1 时)";
                     return -1;
                 }
 

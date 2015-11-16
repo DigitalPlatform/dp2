@@ -4445,7 +4445,9 @@ true);
                 // return:
                 //		-1	error
                 //		>=0 实际上载的资源对象数
-                nRet = this.binaryResControl1.Save(out strError);
+                nRet = this.binaryResControl1.Save(
+                    this.MainForm.ServerVersion,
+                    out strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this, "保存对象信息时出错: " + strError);

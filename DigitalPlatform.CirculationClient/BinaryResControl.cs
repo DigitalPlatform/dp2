@@ -1823,6 +1823,7 @@ bool bChanged)
         //		-1	error
         //		>=0 实际上载的资源对象数
         public int Save(
+            double dp2library_version,
             out string strError)
         {
             strError = "";
@@ -1873,7 +1874,7 @@ bool bChanged)
                     // string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
 
                     LineState state = GetLineState(item);
-
+                    bool bOnlyChangeMetadata = false;
                     if (state == LineState.Changed ||
                         state == LineState.New)
                     {
@@ -1882,12 +1883,21 @@ bool bChanged)
                             if (info != null
                                 && info.ResChanged == false)
                             {
+                                if (dp2library_version < 2.59)
+                                {
+                                    strError = "单独修改对象 metadata 的操作需要连接的 dp2library 版本在 2.59 以上 (然而当前 dp2library 版本为 "+dp2library_version+")";
+                                    return -1;
+                                }
+                                // 这种情况应该是 metadata 修改过
+                                bOnlyChangeMetadata = true;
+#if NO
                                 SetLineInfo(item,
                                     // strUsage, 
                                     LineState.Normal);
                                 SetXmlChanged(item, false);
                                 SetResChanged(item, false);
                                 continue;   // 资源没有修改的，则跳过上载
+#endif
                             }
                         }
                     }
@@ -1913,139 +1923,165 @@ bool bChanged)
                     string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
                     string strTimestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
 
-                    // 检测文件尺寸
-                    FileInfo fi = new FileInfo(strLocalFilename);
-
-                    if (fi.Exists == false)
-                    {
-                        strError = "文件 '" + strLocalFilename + "' 不存在...";
-                        return -1;
-                    }
-
-                    string[] ranges = null;
-
-                    if (fi.Length == 0)
-                    {
-                        // 空文件
-                        ranges = new string[1];
-                        ranges[0] = "";
-                    }
-                    else
-                    {
-                        string strRange = "";
-                        strRange = "0-" + Convert.ToString(fi.Length - 1);
-
-                        // 按照100K作为一个chunk
-                        // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
-                        ranges = RangeList.ChunkRange(strRange,
-                            500 * 1024);
-                    }
-
                     byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
                     byte[] output_timestamp = null;
 
                     nUploadCount++;
 
-                    // REDOWHOLESAVE:
-                    string strWarning = "";
-
-                    for (int j = 0; j < ranges.Length; j++)
+                    if (bOnlyChangeMetadata)
                     {
-                        // REDOSINGLESAVE:
-
-                        Application.DoEvents();	// 出让界面控制权
-
-                        if (Stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-
-                        string strWaiting = "";
-                        if (j == ranges.Length - 1)
-                            strWaiting = " 请耐心等待...";
-
-                        string strPercent = "";
-                        RangeList rl = new RangeList(ranges[j]);
-                        if (rl.Count >= 1)
-                        {
-                            double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
-                            strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
-                        }
-
-                        if (Stop != null)
-                            Stop.SetMessage("正在上载 " + ranges[j] + "/"
-                                + Convert.ToString(fi.Length)
-                                + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
-
                         long lRet = this.Channel.SaveResObject(
-                            Stop,
-                            strResPath,
-                            strLocalFilename,
-                            strLocalFilename,
-                            strMime,
-                            ranges[j],
-                            j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-                            timestamp,
-                            out output_timestamp,
-                            out strError);
+    Stop,
+    strResPath,
+    "",
+    strLocalFilename,
+    strMime,
+    "", // range
+    true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+    timestamp,
+    out output_timestamp,
+    out strError);
                         timestamp = output_timestamp;
-
+                        if (timestamp != null)
                         ListViewUtil.ChangeItemText(item,
                             COLUMN_TIMESTAMP,
                             ByteArray.GetHexTimeStampString(timestamp));
-
-                        strWarning = "";
-
                         if (lRet == -1)
-                        {
-                            /*
-                            if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
-                            {
-
-                                if (this.bNotAskTimestampMismatchWhenOverwrite == true)
-                                {
-                                    timestamp = new byte[output_timestamp.Length];
-                                    Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                    strWarning = " (时间戳不匹配, 自动重试)";
-                                    if (ranges.Length == 1 || j == 0)
-                                        goto REDOSINGLESAVE;
-                                    goto REDOWHOLESAVE;
-                                }
-
-
-                                DialogResult result = MessageDlg.Show(this,
-                                    "上载 '" + strLocalFilename + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(fi.Length)
-                                    + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                                    + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
-                                    "dp2batch",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxDefaultButton.Button1,
-                                    ref this.bNotAskTimestampMismatchWhenOverwrite);
-                                if (result == DialogResult.Yes)
-                                {
-                                    timestamp = new byte[output_timestamp.Length];
-                                    Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                    strWarning = " (时间戳不匹配, 应用户要求重试)";
-                                    if (ranges.Length == 1 || j == 0)
-                                        goto REDOSINGLESAVE;
-                                    goto REDOWHOLESAVE;
-                                }
-
-                                if (result == DialogResult.No)
-                                {
-                                    goto END1;	// 继续作后面的资源
-                                }
-
-                                if (result == DialogResult.Cancel)
-                                {
-                                    strError = "用户中断";
-                                    goto ERROR1;	// 中断整个处理
-                                }
-                            }
-                             * */
-
                             goto ERROR1;
+                        Debug.Assert(timestamp != null, "");
+                        // TODO: 出错的情况下是否要修改 timestamp 显示？是否应为非空才兑现显示
+                    }
+                    else
+                    {
+                        // 检测文件尺寸
+                        FileInfo fi = new FileInfo(strLocalFilename);
+
+                        if (fi.Exists == false)
+                        {
+                            strError = "文件 '" + strLocalFilename + "' 不存在...";
+                            return -1;
+                        }
+
+                        string[] ranges = null;
+
+                        if (fi.Length == 0)
+                        {
+                            // 空文件
+                            ranges = new string[1];
+                            ranges[0] = "";
+                        }
+                        else
+                        {
+                            string strRange = "";
+                            strRange = "0-" + Convert.ToString(fi.Length - 1);
+
+                            // 按照100K作为一个chunk
+                            // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
+                            ranges = RangeList.ChunkRange(strRange,
+                                500 * 1024);
+                        }
+
+                        // REDOWHOLESAVE:
+                        string strWarning = "";
+
+                        for (int j = 0; j < ranges.Length; j++)
+                        {
+                            // REDOSINGLESAVE:
+
+                            Application.DoEvents();	// 出让界面控制权
+
+                            if (Stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                goto ERROR1;
+                            }
+
+                            string strWaiting = "";
+                            if (j == ranges.Length - 1)
+                                strWaiting = " 请耐心等待...";
+
+                            string strPercent = "";
+                            RangeList rl = new RangeList(ranges[j]);
+                            if (rl.Count >= 1)
+                            {
+                                double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
+                                strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
+                            }
+
+                            if (Stop != null)
+                                Stop.SetMessage("正在上载 " + ranges[j] + "/"
+                                    + Convert.ToString(fi.Length)
+                                    + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
+
+                            long lRet = this.Channel.SaveResObject(
+                                Stop,
+                                strResPath,
+                                strLocalFilename,
+                                strLocalFilename,
+                                strMime,
+                                ranges[j],
+                                j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+                                timestamp,
+                                out output_timestamp,
+                                out strError);
+                            timestamp = output_timestamp;
+
+                            if (timestamp != null)
+                                ListViewUtil.ChangeItemText(item,
+                                COLUMN_TIMESTAMP,
+                                ByteArray.GetHexTimeStampString(timestamp));
+
+                            strWarning = "";
+
+                            if (lRet == -1)
+                            {
+                                /*
+                                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                                {
+
+                                    if (this.bNotAskTimestampMismatchWhenOverwrite == true)
+                                    {
+                                        timestamp = new byte[output_timestamp.Length];
+                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
+                                        strWarning = " (时间戳不匹配, 自动重试)";
+                                        if (ranges.Length == 1 || j == 0)
+                                            goto REDOSINGLESAVE;
+                                        goto REDOWHOLESAVE;
+                                    }
+
+
+                                    DialogResult result = MessageDlg.Show(this,
+                                        "上载 '" + strLocalFilename + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(fi.Length)
+                                        + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
+                                        + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
+                                        "dp2batch",
+                                        MessageBoxButtons.YesNoCancel,
+                                        MessageBoxDefaultButton.Button1,
+                                        ref this.bNotAskTimestampMismatchWhenOverwrite);
+                                    if (result == DialogResult.Yes)
+                                    {
+                                        timestamp = new byte[output_timestamp.Length];
+                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
+                                        strWarning = " (时间戳不匹配, 应用户要求重试)";
+                                        if (ranges.Length == 1 || j == 0)
+                                            goto REDOSINGLESAVE;
+                                        goto REDOWHOLESAVE;
+                                    }
+
+                                    if (result == DialogResult.No)
+                                    {
+                                        goto END1;	// 继续作后面的资源
+                                    }
+
+                                    if (result == DialogResult.Cancel)
+                                    {
+                                        strError = "用户中断";
+                                        goto ERROR1;	// 中断整个处理
+                                    }
+                                }
+                                 * */
+                                goto ERROR1;
+                            }
                         }
                     }
 

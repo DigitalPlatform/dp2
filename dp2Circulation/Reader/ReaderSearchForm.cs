@@ -933,7 +933,6 @@ out strError);
         void LoadRecordToReaderInfoForm(string strOpenStyle,
             string strIdType)
         {
-
             if (this.listView_records.SelectedItems.Count == 0)
             {
                 MessageBox.Show(this, "尚未选定要装入读者窗的事项");

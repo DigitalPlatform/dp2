@@ -368,7 +368,9 @@ MessageBoxDefaultButton.Button2);
                         return 0;
                     }
 
-                    strBarcode = dlg.SelectedBarcode;
+                    // strBarcode = dlg.SelectedBarcode;
+                    strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16
+
                     nRedoCount++;
                     goto REDO;
                 }

@@ -786,7 +786,8 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult HitCounter(string strAction,
             string strName,
-            string strClientAddress);
+            string strClientAddress,
+            out long Value);
 
     }
 }

@@ -786,6 +786,7 @@ namespace DigitalPlatform.LibraryServer
                 element_names = _selfchangeable_reader_element_names;
             }
 
+            // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
             bool bBarcodeChanged = false;
             if (nRet == 1)
                 bBarcodeChanged = true;
@@ -845,8 +846,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 2014/1/10
                 // 检查空条码号
-                if (bBarcodeChanged == true
-    && (strAction == "new"
+                if (// bBarcodeChanged == true &&
+     (strAction == "new"
         || strAction == "change"
         || strAction == "changestate"
         || strAction == "changeforegift"
@@ -883,8 +884,8 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 对读者证条码号查重，如果必要，并获得strRecPath
-                if (bBarcodeChanged == true
-                    && (strAction == "new"
+                if ( // bBarcodeChanged == true &&
+                    (strAction == "new"
                         || strAction == "change"
                         || strAction == "changestate"
                         || strAction == "changeforegift"
@@ -996,9 +997,9 @@ namespace DigitalPlatform.LibraryServer
                         strError = "条码号 '" + strNewBarcode + "' 已经被下列读者记录使用了: " + String.Join(",", pathlist) + "。操作失败。";
                          * */
                         if (String.IsNullOrEmpty(strNewDisplayName) == false)
-                            strError = "条码号 '" + strNewBarcode + "' 或 显示名 '"+strNewDisplayName+"' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
+                            strError = "证条码号 '" + strNewBarcode + "' 或 显示名 '"+strNewDisplayName+"' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
                         else
-                            strError = "条码号 '" + strNewBarcode + "' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
+                            strError = "证条码号 '" + strNewBarcode + "' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
 
                         // 2008/8/15 changed
                         result.Value = -1;
@@ -1038,7 +1039,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                         if (nRet == -1)
                         {
-                            strError = "校验显示名 '" + strNewDisplayName + "' 和条码号(空间)潜在冲突过程中(调用函数DoVerifyBarcodeScriptFunction()时)发生错误: " + strError;
+                            strError = "校验显示名 '" + strNewDisplayName + "' 和证条码号(空间)潜在冲突过程中(调用函数DoVerifyBarcodeScriptFunction()时)发生错误: " + strError;
                             goto ERROR1;
                         }
 
@@ -1046,7 +1047,7 @@ namespace DigitalPlatform.LibraryServer
 
                         if (nResultValue == -1)
                         {
-                            strError = "校验显示名 '" + strNewDisplayName + "' 和条码号(空间)潜在冲突过程中发生错误: " + strError;
+                            strError = "校验显示名 '" + strNewDisplayName + "' 和证条码号(空间)潜在冲突过程中发生错误: " + strError;
                             goto ERROR1;
                         }
 
@@ -1509,8 +1510,8 @@ strLibraryCode);    // 读者所在的馆代码
         // 对新旧读者记录(或者册记录)中包含的条码号进行比较, 看看是否发生了变化(进而就需要查重)
         // 条码号包含在<barcode>元素中
         // parameters:
-        //      strOldBarcode   顺便返回旧记录中的条码号
-        //      strNewBarcode   顺便返回新记录中的条码号
+        //      strOldBarcode   顺便返回旧记录中的证条码号
+        //      strNewBarcode   顺便返回新记录中的证条码号
         // return:
         //      -1  出错
         //      0   相等
@@ -1990,8 +1991,15 @@ strLibraryCode);    // 读者所在的馆代码
             string strOutputPath = "";
             string strMetaData = "";
 
-        REDOLOAD:
+            // 2015/11/16
+            string strTargetRecId = ResPath.GetRecordId(strRecPath);
+            if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
+            {
+                strError = "修改读者记录的操作 '"+strAction+"' 不允许使用追加形态的记录路径 '"+strRecPath+"'";
+                goto ERROR1;
+            }
 
+        REDOLOAD:
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(strRecPath,
                 out strExistXml,
@@ -2019,7 +2027,6 @@ strLibraryCode);    // 读者所在的馆代码
 
             // 把记录装入DOM
             XmlDocument domExist = new XmlDocument();
-
             try
             {
                 domExist.LoadXml(strExistXml);
@@ -3451,7 +3458,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 try
                 {
-#if NO
+                    // 慢速版本。但能获得重复的记录路径
                     // return:
                     //      -1  error
                     //      0   not found
@@ -3471,7 +3478,8 @@ strLibraryCode);    // 读者所在的馆代码
                    if (nRet > 0)
                         strOutputPath = recpaths[0];
 
-#endif
+#if NO
+                    // 快速版本。无法获得全部重复的路径
                     // return:
                     //      -1  error
                     //      0   not found
@@ -3485,6 +3493,7 @@ strLibraryCode);    // 读者所在的馆代码
                         out strOutputPath,
                         out baTimestamp,
                         out strError);
+#endif
                 }
                 finally
                 {

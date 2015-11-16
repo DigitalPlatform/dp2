@@ -300,18 +300,18 @@ namespace DigitalPlatform.rms
             try
             {
 #endif
-                if (this.SQLiteInfo != null)
+            if (this.SQLiteInfo != null)
+            {
+                lock (this.SQLiteInfo)
                 {
-                    lock (this.SQLiteInfo)
+                    if (this.SQLiteInfo != null
+                        && this.SQLiteInfo.m_connection != null)
                     {
-                        if (this.SQLiteInfo != null
-                            && this.SQLiteInfo.m_connection != null)
-                        {
-                            this.SQLiteInfo.m_connection.Close(false);
-                            this.SQLiteInfo.m_connection = null;
-                        }
+                        this.SQLiteInfo.m_connection.Close(false);
+                        this.SQLiteInfo.m_connection = null;
                     }
                 }
+            }
 #if NO
             }
             finally
@@ -643,31 +643,31 @@ namespace DigitalPlatform.rms
         {
             //try
             //{
-                DirectoryInfo di = new DirectoryInfo(strDir);
-                if (di.Exists == false)
-                    return true;
-
-                // 删除所有的下级目录
-                DirectoryInfo[] dirs = di.GetDirectories();
-                foreach (DirectoryInfo childDir in dirs)
-                {
-                    if (PathUtil.IsChildOrEqual(strExcludeFileName, childDir.FullName) == true)
-                    {
-                        ClearDir(childDir.FullName, strExcludeFileName);    // 递归
-                    }
-                    else
-                        Directory.Delete(childDir.FullName, true);
-                }
-
-                // 删除所有文件
-                FileInfo[] fis = di.GetFiles();
-                foreach (FileInfo fi in fis)
-                {
-                    if (fi.FullName.ToLower() != strExcludeFileName.ToLower())
-                        File.Delete(fi.FullName);
-                }
-
+            DirectoryInfo di = new DirectoryInfo(strDir);
+            if (di.Exists == false)
                 return true;
+
+            // 删除所有的下级目录
+            DirectoryInfo[] dirs = di.GetDirectories();
+            foreach (DirectoryInfo childDir in dirs)
+            {
+                if (PathUtil.IsChildOrEqual(strExcludeFileName, childDir.FullName) == true)
+                {
+                    ClearDir(childDir.FullName, strExcludeFileName);    // 递归
+                }
+                else
+                    Directory.Delete(childDir.FullName, true);
+            }
+
+            // 删除所有文件
+            FileInfo[] fis = di.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                if (fi.FullName.ToLower() != strExcludeFileName.ToLower())
+                    File.Delete(fi.FullName);
+            }
+
+            return true;
 #if NO
             }
             catch (Exception ex)
@@ -1332,7 +1332,7 @@ namespace DigitalPlatform.rms
         {
             if (ex.Errors == null || ex.Errors.Count == 0)
                 return false;
-            foreach(SqlError error in ex.Errors)
+            foreach (SqlError error in ex.Errors)
             {
                 if (error.Number == 5701)
                     continue;
@@ -1355,7 +1355,7 @@ namespace DigitalPlatform.rms
                     return true;
             }
 
-            return false; 
+            return false;
         }
 
         // 管理keys表的index
@@ -1822,7 +1822,7 @@ namespace DigitalPlatform.rms
             }
             else if (server_type == SqlServerType.MySql)
             {
-                string strCommand = 
+                string strCommand =
                     " DROP DATABASE IF EXISTS `" + this.m_strSqlDbName + "`; \n"
                     + " CREATE DATABASE IF NOT EXISTS `" + this.m_strSqlDbName + "`;\n";
                 return strCommand;
@@ -1979,7 +1979,7 @@ namespace DigitalPlatform.rms
 
                 return 0;
             }
-            #endregion // SQLite 
+            #endregion // SQLite
 
             #region MySql
             else if (strSqlServerType == SqlServerType.MySql)
@@ -1991,7 +1991,7 @@ namespace DigitalPlatform.rms
                     "DROP TABLE IF EXISTS `" + this.m_strSqlDbName + "`.records" + " ;\n"
                     + "CREATE TABLE `" + this.m_strSqlDbName + "`.records" + " \n"
                     + "(" + "\n"
-                    + "id varchar (255) "+strCharset+" NULL UNIQUE," + "\n"
+                    + "id varchar (255) " + strCharset + " NULL UNIQUE," + "\n"
                     + "`range` varchar (4000) " + strCharset + " NULL," + "\n"
                     + "dptimestamp varchar (100) " + strCharset + " NULL ," + "\n"
                     + "newdptimestamp varchar (100) " + strCharset + " NULL ," + "\n"
@@ -2040,7 +2040,7 @@ namespace DigitalPlatform.rms
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 // 创建records表
-                strCommand = "CREATE TABLE "+this.m_strSqlDbName+"_records " + "\n"
+                strCommand = "CREATE TABLE " + this.m_strSqlDbName + "_records " + "\n"
                     + "(" + "\n"
                     + "id nvarchar2 (255) NULL UNIQUE," + "\n"
                     + "range nvarchar2 (2000) NULL," + "\n"
@@ -2248,7 +2248,7 @@ namespace DigitalPlatform.rms
                         else
                         {
                             // 表不存在才创建
-                            strCommand += 
+                            strCommand +=
                                 "CREATE TABLE if not exists " + tableInfo.SqlTableName + " \n" +
                                 "(" + "\n" +
                                 "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystring的长度由配置文件定
@@ -2541,7 +2541,7 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            #endregion // SQLite 
+            #endregion // SQLite
 
             #region MySql
             else if (strSqlServerType == SqlServerType.MySql)
@@ -3534,7 +3534,7 @@ namespace DigitalPlatform.rms
                                     DpRecord dprecord = new DpRecord((string)reader[0]);
                                     dprecord.Index = 1;
                                     resultSet.Add(dprecord);
-                                } 
+                                }
                                 else if (bOutputKeyID == true)
                                 {
                                     // datareader key, id
@@ -3966,7 +3966,7 @@ namespace DigitalPlatform.rms
                     {
                         string[] list = new string[keys.Count];
                         keys.CopyTo(list);
-                        strError = "不支持把检索词 '" + strKeyValue + "' 通过'split'样式加工成多个("+string.Join(",", list)+")";
+                        strError = "不支持把检索词 '" + strKeyValue + "' 通过'split'样式加工成多个(" + string.Join(",", list) + ")";
                         return -1;
                     }
                     strKeyValue = keys[0];
@@ -4604,7 +4604,7 @@ namespace DigitalPlatform.rms
                     string strOneCommand = "";
                     if (i == 0)// 第一个表
                     {
-                        strOneCommand = 
+                        strOneCommand =
                             " SELECT "
                             + strDistinct
                             + strTop
@@ -4636,7 +4636,7 @@ namespace DigitalPlatform.rms
                                 else
                                 {
                                     strOneCommand = strOneCommand
-                                        + (string.IsNullOrEmpty(strWhere) == false ? " AND " : " ") 
+                                        + (string.IsNullOrEmpty(strWhere) == false ? " AND " : " ")
                                         + strLimit;
                                 }
                             }
@@ -4711,7 +4711,7 @@ namespace DigitalPlatform.rms
                             strOneCommand = "select "
         + strColumns // " id "
         + "from records where id like '__________' and id not in (" + strOneCommand + ") "
-        ; 
+        ;
                         }
 
                     }
@@ -4782,11 +4782,11 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(strTop) == false
                             || string.IsNullOrEmpty(strLimit) == false
                             || string.IsNullOrEmpty(strOrderBy) == false)
-                        strCommand = "select "
-    + strTop
-    + " * FROM (" + strCommand + ") "
-    + strOrderBy
-    + strLimit;
+                            strCommand = "select "
+        + strTop
+        + " * FROM (" + strCommand + ") "
+        + strOrderBy
+        + strLimit;
                     }
 
 
@@ -5026,7 +5026,7 @@ namespace DigitalPlatform.rms
                 else if (this.container.SqlServerType == SqlServerType.SQLite)
                 {
                     // SQLite 采用保守连接
-                    SQLiteConnection connection = 
+                    SQLiteConnection connection =
                         new SQLiteConnection(this.m_strConnString/*Pooling*/);
                     // connection.Open();
                     Open(connection);
@@ -5193,7 +5193,7 @@ namespace DigitalPlatform.rms
                                 command.Parameters.Add(sqlParameter);
                             }
                             command.CommandTimeout = 20 * 60;  // 把检索时间变大
-                                
+
                             IAsyncResult r = command.BeginExecuteReader(CommandBehavior.CloseConnection);
                             while (true)
                             {
@@ -5484,7 +5484,7 @@ namespace DigitalPlatform.rms
 #if DEBUG_LOCK_SQLDATABASE
 				this.container.WriteDebugInfo("SearchByUnion()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
-                
+
                 // 2006/12/18 changed
 
                 TimeSpan delta = DateTime.Now - start_time;
@@ -5639,7 +5639,7 @@ namespace DigitalPlatform.rms
                 {
                     if (DbPath.GetCompressedID(strCurrentRecordID) == "-1")
                     {
-                        strWhere = " where id like "+strPattern+" ";
+                        strWhere = " where id like " + strPattern + " ";
                         strOrder = " ORDER BY id DESC ";
                     }
                     else if (StringUtil.IsInList("myself", strStyle) == true)
@@ -6102,8 +6102,8 @@ namespace DigitalPlatform.rms
             {
 #endif
 
-                //********给库加读锁**************
-                m_db_lock.AcquireReaderLock(m_nTimeOut);
+            //********给库加读锁**************
+            m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
 			this.container.WriteDebugInfo("GetXml()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
 #endif
@@ -6114,7 +6114,6 @@ namespace DigitalPlatform.rms
 
             try
             {
-
                 // 取出实际的记录号
                 if (StringUtil.IsInList("prev", strStyle) == true
                     || StringUtil.IsInList("next", strStyle) == true)
@@ -6623,8 +6622,8 @@ namespace DigitalPlatform.rms
                 else
                 {
 #endif
-                    //***********对数据库解读锁*****************
-                    m_db_lock.ReleaseReaderLock();
+                //***********对数据库解读锁*****************
+                m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
 				this.container.WriteDebugInfo("GetXml()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
@@ -6897,7 +6896,7 @@ namespace DigitalPlatform.rms
             }
             if (rangeList.Count != 1)
             {
-                strError = "范围字符串必须是一个连续的起止单元。(但现在是 '"+strRange+"')";
+                strError = "范围字符串必须是一个连续的起止单元。(但现在是 '" + strRange + "')";
                 return -1;
             }
             if (rangeList[0].lStart != 0)
@@ -7063,7 +7062,7 @@ namespace DigitalPlatform.rms
                             strPartComm += ",";
                         strPartComm += " @metadata=metadata";
                     }
-                    
+
                     // 5.range，一定要有，用于判断方向
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
@@ -7157,7 +7156,7 @@ namespace DigitalPlatform.rms
             100);
                             newtimestampParam.Direction = ParameterDirection.Output;
                         }
-                        
+
                         // 4.metadata
                         SqlParameter metadataParam = null;
                         if (StringUtil.IsInList("metadata", strStyle) == true
@@ -7169,6 +7168,7 @@ namespace DigitalPlatform.rms
                                 4000);
                             metadataParam.Direction = ParameterDirection.Output;
                         }
+
                         // 5.range，一定要有
                         SqlParameter rangeParam =
                                 command.Parameters.Add("@range",
@@ -7336,7 +7336,7 @@ namespace DigitalPlatform.rms
 
                             }
                         }
-                        
+
                         // 4.metadata
                         if (StringUtil.IsInList("metadata", strStyle) == true
                         || StringUtil.IsInList("incReadCount", strStyle) == true)
@@ -7746,7 +7746,7 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (row_info == null 
+                        if (row_info == null
                             || string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
@@ -8489,12 +8489,12 @@ namespace DigitalPlatform.rms
                 // return lTotalLength;
                 goto END1;
             }
-            strError = "未知的 connection 类型 '"+connection.SqlServerType.ToString()+"'";
+            strError = "未知的 connection 类型 '" + connection.SqlServerType.ToString() + "'";
             return -1;
         END1:
             int nBufferLength = 0;
-        if (destBuffer != null)
-            nBufferLength = destBuffer.Length;
+            if (destBuffer != null)
+                nBufferLength = destBuffer.Length;
             if (StringUtil.IsInList("incReadCount", strStyle) == true
                 && lStart + nBufferLength >= lTotalLength && lTotalLength != -1)
             {
@@ -8714,7 +8714,7 @@ namespace DigitalPlatform.rms
             string strXPath,
             string strOldXml,
             ref string strNewXml,
-            byte [] baNewPreamble,
+            byte[] baNewPreamble,
             out byte[] baWholeXml,
             out string strRange,
             out string strOutputValue,
@@ -8730,96 +8730,179 @@ namespace DigitalPlatform.rms
 
             // 修改部分
 
-                string strLocateXPath = "";
-                string strCreatePath = "";
-                string strNewRecordTemplate = "";
-                string strAction = "";
-                nRet = DatabaseUtil.ParseXPathParameter(strXPath,
-                    out strLocateXPath,
-                    out strCreatePath,
-                    out strNewRecordTemplate,
-                    out strAction,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
+            string strLocateXPath = "";
+            string strCreatePath = "";
+            string strNewRecordTemplate = "";
+            string strAction = "";
+            nRet = DatabaseUtil.ParseXPathParameter(strXPath,
+                out strLocateXPath,
+                out strCreatePath,
+                out strNewRecordTemplate,
+                out strAction,
+                out strError);
+            if (nRet == -1)
+                return -1;
 
-                XmlDocument tempDom = new XmlDocument();
-                tempDom.PreserveWhitespace = true; //设PreserveWhitespace为true
+            XmlDocument tempDom = new XmlDocument();
+            tempDom.PreserveWhitespace = true; //设PreserveWhitespace为true
 
-                try
+            try
+            {
+                if (strOldXml == "")
                 {
-                    if (strOldXml == "")
-                    {
-                        if (strNewRecordTemplate == "")
-                            tempDom.LoadXml("<root/>");
-                        else
-                            tempDom.LoadXml(strNewRecordTemplate);
-                    }
+                    if (strNewRecordTemplate == "")
+                        tempDom.LoadXml("<root/>");
                     else
-                        tempDom.LoadXml(strOldXml);
+                        tempDom.LoadXml(strNewRecordTemplate);
                 }
-                catch (Exception ex)
+                else
+                    tempDom.LoadXml(strOldXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "1 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时，装载旧记录到dom出错,原因:" + ex.Message;
+                return -1;
+            }
+
+
+            if (strLocateXPath == "")
+            {
+                strError = "xpath表达式中的locate参数不能为空值";
+                return -1;
+            }
+
+            // 通过strLocateXPath定位到指定的节点
+            XmlNode node = null;
+            try
+            {
+                node = tempDom.DocumentElement.SelectSingleNode(strLocateXPath);
+            }
+            catch (Exception ex)
+            {
+                strError = "2 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时，XPath式子'" + strXPath + "'选择元素时出错,原因:" + ex.Message;
+                return -1;
+            }
+
+            if (node == null)
+            {
+                if (strCreatePath == "")
                 {
-                    strError = "1 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时，装载旧记录到dom出错,原因:" + ex.Message;
+                    strError = "给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时，XPath式子'" + strXPath + "'指定的节点未找到。此时xpath表达式中的create参数不能为空值";
                     return -1;
                 }
 
-
-                if (strLocateXPath == "")
-                {
-                    strError = "xpath表达式中的locate参数不能为空值";
-                    return -1;
-                }
-
-                // 通过strLocateXPath定位到指定的节点
-                XmlNode node = null;
-                try
-                {
-                    node = tempDom.DocumentElement.SelectSingleNode(strLocateXPath);
-                }
-                catch (Exception ex)
-                {
-                    strError = "2 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时，XPath式子'" + strXPath + "'选择元素时出错,原因:" + ex.Message;
-                    return -1;
-                }
-
+                node = DomUtil.CreateNodeByPath(tempDom.DocumentElement,
+                    strCreatePath);
                 if (node == null)
                 {
-                    if (strCreatePath == "")
-                    {
-                        strError = "给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时，XPath式子'" + strXPath + "'指定的节点未找到。此时xpath表达式中的create参数不能为空值";
-                        return -1;
-                    }
-
-                    node = DomUtil.CreateNodeByPath(tempDom.DocumentElement,
-                        strCreatePath);
-                    if (node == null)
-                    {
-                        strError = "内部错误!";
-                        return -1;
-                    }
-
+                    strError = "内部错误!";
+                    return -1;
                 }
 
-                if (node.NodeType == XmlNodeType.Attribute)
+            }
+
+            if (node.NodeType == XmlNodeType.Attribute)
+            {
+
+                if (strAction == "AddInteger"
+                    || strAction == "+AddInteger"
+                    || strAction == "AddInteger+")
+                {
+                    int nNumber = 0;
+                    try
+                    {
+                        nNumber = Convert.ToInt32(strNewXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "传入的内容'" + strNewXml + "'不是数字格式。" + ex.Message;
+                        return -1;
+                    }
+
+                    string strOldValue = node.Value;
+                    string strLastValue;
+                    nRet = StringUtil.IncreaseNumber(strOldValue,
+                        nNumber,
+                        out strLastValue,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    if (strAction == "AddInteger+")
+                    {
+                        strOutputValue = node.Value;
+                    }
+                    else
+                    {
+                        strOutputValue = strLastValue;
+                    }
+
+                    node.Value = strLastValue;
+                    //strOutputValue = node.Value;
+                }
+                else if (strAction == "AppendString")
                 {
 
-                    if (strAction == "AddInteger"
-                        || strAction == "+AddInteger"
-                        || strAction == "AddInteger+")
+                    node.Value = node.Value + strNewXml;
+                    strOutputValue = node.Value;
+                }
+                else if (strAction == "Push")
+                {
+                    string strLastValue;
+                    nRet = StringUtil.GetBiggerLedNumber(node.Value,
+                        strNewXml,
+                        out strLastValue,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    node.Value = strLastValue;
+                    strOutputValue = node.Value;
+                }
+                else
+                {
+                    node.Value = strNewXml;
+                    strOutputValue = node.Value;
+                }
+            }
+            else if (node.NodeType == XmlNodeType.Element)
+            {
+
+                //Create a document fragment.
+                XmlDocumentFragment docFrag = tempDom.CreateDocumentFragment();
+
+                //Set the contents of the document fragment.
+                docFrag.InnerXml = strNewXml;
+
+                //Add the children of the document fragment to the
+                //original document.
+                node.ParentNode.InsertBefore(docFrag, node);
+
+                if (strAction == "AddInteger"
+                    || strAction == "AppendString")
+                {
+                    XmlNode newNode = node.PreviousSibling;
+                    if (newNode == null)
+                    {
+                        strError = "newNode不可能为null";
+                        return -1;
+                    }
+
+                    string strNewValue = newNode.InnerText;
+                    string strOldValue = node.InnerText.Trim();  // 2012/2/16
+                    if (strAction == "AddInteger")
                     {
                         int nNumber = 0;
                         try
                         {
-                            nNumber = Convert.ToInt32(strNewXml);
+                            nNumber = Convert.ToInt32(strNewValue);
                         }
                         catch (Exception ex)
                         {
-                            strError = "传入的内容'" + strNewXml + "'不是数字格式。" + ex.Message;
+                            strError = "传入的内容'" + strNewValue + "'不是数字格式。" + ex.Message;
                             return -1;
                         }
 
-                        string strOldValue = node.Value;
                         string strLastValue;
                         nRet = StringUtil.IncreaseNumber(strOldValue,
                             nNumber,
@@ -8827,159 +8910,76 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (nRet == -1)
                             return -1;
-
-                        if (strAction == "AddInteger+")
-                        {
-                            strOutputValue = node.Value;
-                        }
-                        else
-                        {
-                            strOutputValue = strLastValue;
-                        }
-
-                        node.Value = strLastValue;
-                        //strOutputValue = node.Value;
+                        /*
+                        string strLastValue;
+                        nRet = Database.AddInteger(strNewValue,
+                            strOldValue,
+                            out strLastValue,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        */
+                        newNode.InnerText = strLastValue;
+                        strOutputValue = newNode.OuterXml;
                     }
                     else if (strAction == "AppendString")
                     {
-
-                        node.Value = node.Value + strNewXml;
-                        strOutputValue = node.Value;
+                        newNode.InnerText = strOldValue + strNewValue;
+                        strOutputValue = newNode.OuterXml;
                     }
                     else if (strAction == "Push")
                     {
                         string strLastValue;
-                        nRet = StringUtil.GetBiggerLedNumber(node.Value,
-                            strNewXml,
+                        nRet = StringUtil.GetBiggerLedNumber(strOldValue,
+                            strNewValue,
                             out strLastValue,
                             out strError);
                         if (nRet == -1)
                             return -1;
 
-                        node.Value = strLastValue;
-                        strOutputValue = node.Value;
-                    }
-                    else
-                    {
-                        node.Value = strNewXml;
-                        strOutputValue = node.Value;
+                        newNode.InnerText = strLastValue;
+                        strOutputValue = newNode.OuterXml;
                     }
                 }
-                else if (node.NodeType == XmlNodeType.Element)
-                {
 
-                    //Create a document fragment.
-                    XmlDocumentFragment docFrag = tempDom.CreateDocumentFragment();
+                node.ParentNode.RemoveChild(node);
 
-                    //Set the contents of the document fragment.
-                    docFrag.InnerXml = strNewXml;
+            }
 
-                    //Add the children of the document fragment to the
-                    //original document.
-                    node.ParentNode.InsertBefore(docFrag, node);
+            strNewXml = tempDom.OuterXml;
 
-                    if (strAction == "AddInteger"
-                        || strAction == "AppendString")
-                    {
-                        XmlNode newNode = node.PreviousSibling;
-                        if (newNode == null)
-                        {
-                            strError = "newNode不可能为null";
-                            return -1;
-                        }
+            baWholeXml =
+                DatabaseUtil.StringToByteArray(
+                strNewXml,
+                baNewPreamble);
 
-                        string strNewValue = newNode.InnerText;
-                        string strOldValue = node.InnerText.Trim();  // 2012/2/16
-                        if (strAction == "AddInteger")
-                        {
-                            int nNumber = 0;
-                            try
-                            {
-                                nNumber = Convert.ToInt32(strNewValue);
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "传入的内容'" + strNewValue + "'不是数字格式。" + ex.Message;
-                                return -1;
-                            }
+            strRange = "0-" + Convert.ToString(baWholeXml.Length - 1);
 
-                            string strLastValue;
-                            nRet = StringUtil.IncreaseNumber(strOldValue,
-                                nNumber,
-                                out strLastValue,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            /*
-                            string strLastValue;
-                            nRet = Database.AddInteger(strNewValue,
-                                strOldValue,
-                                out strLastValue,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            */
-                            newNode.InnerText = strLastValue;
-                            strOutputValue = newNode.OuterXml;
-                        }
-                        else if (strAction == "AppendString")
-                        {
-                            newNode.InnerText = strOldValue + strNewValue;
-                            strOutputValue = newNode.OuterXml;
-                        }
-                        else if (strAction == "Push")
-                        {
-                            string strLastValue;
-                            nRet = StringUtil.GetBiggerLedNumber(strOldValue,
-                                strNewValue,
-                                out strLastValue,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
+            /*
+                lTotalLength = baRealXml.Length;
 
-                            newNode.InnerText = strLastValue;
-                            strOutputValue = newNode.OuterXml;
-                        }
-                    }
-
-                    node.ParentNode.RemoveChild(node);
-
-                }
-
-                strNewXml = tempDom.OuterXml;
-
-                baWholeXml =
-                    DatabaseUtil.StringToByteArray(
-                    strNewXml,
-                    baNewPreamble);
-
-                strRange = "0-" + Convert.ToString(baWholeXml.Length - 1);
-
-                /*
-                    lTotalLength = baRealXml.Length;
-
-                    // return:
-                    //		-1	一般性错误
-                    //		-2	时间戳不匹配
-                    //		0	成功
-                    nRet = this.WriteSqlRecord(connection,
-                        ref row_info,
-                        strID,
-                        strMyRange,
-                        lTotalLength,
-                        baRealXml,
-                        // null,
-                        strMetadata,
-                        strStyle,
-                        outputTimestamp,   //注意这儿
-                        out outputTimestamp,
-                        out bFull,
-                        out bSingleFull,
-                        out strError);
-                    if (nRet <= -1)
-                        return nRet;
-                */
-                return 0;
+                // return:
+                //		-1	一般性错误
+                //		-2	时间戳不匹配
+                //		0	成功
+                nRet = this.WriteSqlRecord(connection,
+                    ref row_info,
+                    strID,
+                    strMyRange,
+                    lTotalLength,
+                    baRealXml,
+                    // null,
+                    strMetadata,
+                    strStyle,
+                    outputTimestamp,   //注意这儿
+                    out outputTimestamp,
+                    out bFull,
+                    out bSingleFull,
+                    out strError);
+                if (nRet <= -1)
+                    return nRet;
+            */
+            return 0;
         }
 
         // 更新 Keys
@@ -9396,7 +9396,7 @@ namespace DigitalPlatform.rms
                             {
                                 strCommand +=
     " INSERT INTO records(id, data, range, metadata, dptimestamp,  filename) "
-    + " VALUES(@id" + i + ", NULL, @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ", @filename"+i+")"
+    + " VALUES(@id" + i + ", NULL, @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ", @filename" + i + ")"
     + "\n";
                             }
 
@@ -9464,7 +9464,7 @@ SqlDbType.NVarChar);
                                 strCommand += " UPDATE records "
                                 + " SET dptimestamp=@dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
-                                + " data=@data"+i+", newdata=NULL,"
+                                + " data=@data" + i + ", newdata=NULL,"
                                 + " range=@range" + i + ","
                                 + " filename=NULL, newfilename=NULL,"
                                 + " metadata=@metadata" + i + " "
@@ -9477,7 +9477,7 @@ SqlDbType.NVarChar);
                                 + " newdptimestamp=NULL,"
                                 + " data=NULL, newdata=NULL,"
                                 + " range=@range" + i + ","
-                                + " filename=@filename"+i+", newfilename=NULL,"
+                                + " filename=@filename" + i + ", newfilename=NULL,"
                                 + " metadata=@metadata" + i + " "
                                 + " WHERE id=@id" + i + " \n";
                             }
@@ -9544,7 +9544,7 @@ SqlDbType.NVarChar);
 
                     if (string.IsNullOrEmpty(strCommand) == false)
                     {
-                        command.CommandText = "use " + this.m_strSqlDbName + "\n" 
+                        command.CommandText = "use " + this.m_strSqlDbName + "\n"
                             + strCommand + "use master\n";
 
                         int nCount = command.ExecuteNonQuery();
@@ -9876,7 +9876,7 @@ MySqlDbType.String);
                             MySqlDbType.String);
                                 filenameParam.Value = strShortFileName;
 
-                                nParameters += 5; 
+                                nParameters += 5;
                                 parts.Add(info);
                             }
                             else
@@ -9892,7 +9892,7 @@ MySqlDbType.String);
 
                                 string strCurrentRange = "";
 
-                                MySqlParameter idParam = 
+                                MySqlParameter idParam =
                                     command.Parameters.Add("@id" + i,
                                     MySqlDbType.String);
                                 idParam.Value = info.ID;
@@ -9917,7 +9917,7 @@ MySqlDbType.String);
                                     MySqlDbType.String);
                                 filenameParam.Value = strShortFileName;
 
-                                nParameters += 5; 
+                                nParameters += 5;
                                 parts.Add(info);
                             }
 
@@ -10080,7 +10080,7 @@ OracleDbType.NVarchar2);
 
                                 string strCurrentRange = "";
 
-                                OracleParameter idParam = 
+                                OracleParameter idParam =
                                     command.Parameters.Add(":id" + i,
                                     OracleDbType.NVarchar2);
                                 idParam.Value = info.ID;
@@ -10659,7 +10659,7 @@ out strError);
                 && this.container.SqlServerType != SqlServerType.MySql
                 && this.container.SqlServerType != SqlServerType.SQLite)
             {
-                strError = "BulkCopy() 不支持 "+this.container.SqlServerType.ToString()+" 类型的数据库";
+                strError = "BulkCopy() 不支持 " + this.container.SqlServerType.ToString() + " 类型的数据库";
                 return -1;
             }
 
@@ -11021,7 +11021,7 @@ out strError);
             }
 
             bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
-            bool bIfNotExist =  StringUtil.IsInList("ifnotexist", strStyle);
+            bool bIfNotExist = StringUtil.IsInList("ifnotexist", strStyle);
 
             //*********对数据库加读锁*************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
@@ -11064,7 +11064,7 @@ out strError);
                         {
                             List<WriteInfo> temp = new List<WriteInfo>();
                             // 把 row_info 不为 null 的清除。不过追加方式的写入动作依然保留
-                            foreach(WriteInfo info in records)
+                            foreach (WriteInfo info in records)
                             {
                                 // TODO 也可以看 info.ID
                                 if (info.row_info == null
@@ -11357,7 +11357,7 @@ out strError);
         }
 
         // 上次完整写入时的记录体
-        static byte [] GetCompleteData(RecordRowInfo row_info)
+        static byte[] GetCompleteData(RecordRowInfo row_info)
         {
             string strCurrentRange = row_info.Range;
 
@@ -11417,7 +11417,7 @@ out strError);
                 strID = "-1";
 
             bool bPushTailNo = false;
-            bPushTailNo = this.EnsureID(ref strID); 
+            bPushTailNo = this.EnsureID(ref strID);
             if (oUser != null)
             {
                 DateTime start_time_1 = DateTime.Now;
@@ -11925,7 +11925,7 @@ time_lines,
 start_time,
 "WriteXml 总耗时 ");
                 this.container.KernelApplication.WriteErrorLog(
-                    "--- 写入 XML 记录的时间超过 1 秒。详情: \r\n" 
+                    "--- 写入 XML 记录的时间超过 1 秒。详情: \r\n"
                     + "记录路径: " + this.GetCaption("zh-CN") + "/" + strID + "\r\n"
                     + StringUtil.MakePathList(time_lines, ";\r\n")
                     + "\r\n");
@@ -11971,7 +11971,7 @@ start_time,
         }
 
         // parameters:
-        //      strRecorID   记录ID
+        //      strRecordID   记录ID
         //      strObjectID  对象ID
         //      其它参数同WriteXml,无strOutputID参数
         // return:
@@ -12208,19 +12208,19 @@ start_time,
 #endif
                         }
 
-/* // 不要在保存对象后修改记录的时间戳了
-                        // 负责修改一下记录的时间戳
-                        string strNewTimestamp = this.CreateTimestampForDb();
-                        // return:
-                        //      -1  出错
-                        //      >=0   成功 返回被影响的记录数
-                        nRet = this.SetTimestampForDb(connection,
-                            strRecordID,
-                            strNewTimestamp,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
- * */
+                        /* // 不要在保存对象后修改记录的时间戳了
+                                                // 负责修改一下记录的时间戳
+                                                string strNewTimestamp = this.CreateTimestampForDb();
+                                                // return:
+                                                //      -1  出错
+                                                //      >=0   成功 返回被影响的记录数
+                                                nRet = this.SetTimestampForDb(connection,
+                                                    strRecordID,
+                                                    strNewTimestamp,
+                                                    out strError);
+                                                if (nRet == -1)
+                                                    return -1;
+                         * */
                     }
                     catch (SqlException sqlEx)
                     {
@@ -12350,7 +12350,7 @@ start_time,
         }
 
         static bool IsSingleFull(string strRanges,
-            byte [] baSource,
+            byte[] baSource,
             long lTotalLength)
         {
             // 准备rangelist
@@ -12395,7 +12395,8 @@ start_time,
         //		strRanges	    目标范围，多个范围用逗号分隔
         //		nTotalLength	记录内容总长度
         //						对于Sql Server目前只支持int，所以nTotalLength设为int类型，但对外接口是long
-        //		baContent	    内容字节数组	可以为null
+        //                      如果为 -1，表示本次不写入对象内容，只修改 metadata
+        //		baSource	    内容字节数组	可以为null
         //		streamContent	内容流	可以为null
         //		strStyle	    风格
         //					    ignorechecktimestamp	忽略时间戳
@@ -12451,6 +12452,62 @@ start_time,
                 strError = "WriteSqlRecord()调用错误，strID参数不能为null或空字符串。";
                 return -1;
             }
+
+            // 仅修改 metadata
+            if (lTotalLength == -1)
+            {
+                string strTimestamp = row_info.GetTimestamp();
+                byte[] baExistTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
+                // 检查时间戳
+                if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
+                {
+
+                    if (baExistTimestamp != null
+                        && ByteArray.Compare(baInputTimestamp,
+                            baExistTimestamp) != 0)
+                    {
+                        strError = "时间戳不匹配";
+                        baOutputTimestamp = baExistTimestamp;   // 返回给前端，让前端能够得知当前的时间戳
+                        return -2;
+                    }
+                }
+
+                string strResultMetadata = "";
+                bool bIncReaderCount = StringUtil.IsInList("incReadCount", strStyle);
+                // parameters:
+                //		strOldMetadata	旧元数据
+                //		strNewMetadata	新元数据
+                //		lLength	长度 -1表示长度未知 -2表示长度不变
+                //      strReadCount  读取次数。"" 表示不变(即不修改 readCount 属性内容), "+??"表示增加数量，"-??"表示减少数量，"??"表示直接修改为此数量
+                //		strResult	out参数，返回合并后的元数据
+                //		strError	out参数，返回出错信息
+                // return:
+                //		-1	出错
+                //		0	成功
+                nRet = DatabaseUtil.MergeMetadata(row_info.Metadata,
+                    strMetadata,
+                    -2,
+                    bIncReaderCount ? "+1" : "",
+                    out strResultMetadata,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                nRet = WriteMetadataColumn(
+                    connection,
+                    strID,
+                    strResultMetadata,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // TODO: 最好执行一次 API 就修改一次 timestamp
+
+                // 返回时间戳给前端
+                baOutputTimestamp = baExistTimestamp;
+                return 0;
+            }
+
             if (lTotalLength < 0)
             {
                 strError = "WriteSqlRecord()调用错误，lTotalLength参数值不能为'" + Convert.ToString(lTotalLength) + "'，必须大于等于0。";
@@ -12488,6 +12545,7 @@ start_time,
                 nSourceTotalLength = streamSource.Length;
              * */
 
+
             // 准备rangelist
             RangeList rangeList = null;
             if (string.IsNullOrEmpty(strRanges) == true)
@@ -12506,7 +12564,7 @@ start_time,
                 }
                 catch (Exception ex)
                 {
-                    strError = "用字符串 '"+strRanges+"' 创建 RangeList 时出错: " + ex.Message;
+                    strError = "用字符串 '" + strRanges + "' 创建 RangeList 时出错: " + ex.Message;
                     return -1;
                 }
             }
@@ -12655,7 +12713,7 @@ start_time,
 
             if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
-                && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)   // 写入对象文件是只针对二进制对象，而不针对普通XML记录
+ && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)   // 写入对象文件是只针对二进制对象，而不针对普通XML记录
 #endif
                 && String.IsNullOrEmpty(strCurrentRange) == false
                 && strCurrentRange[0] == '#')
@@ -12667,9 +12725,9 @@ start_time,
             }
             else if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
-                && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)
+ && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)
 #endif
- && (string.IsNullOrEmpty(strCurrentRange) == true || strCurrentRange == "!") )
+ && (string.IsNullOrEmpty(strCurrentRange) == true || strCurrentRange == "!"))
             {
                 bObjectFile = true;
 
@@ -12804,7 +12862,7 @@ start_time,
                         row_info.NewFileName = GetShortFileName(strFileName); // 记忆
                         if (row_info.NewFileName == null)
                         {
-                            strError = "构造短文件名时出错。记录ID '"+strID+"', 对象文件目录 '"+this.m_strObjectDir+"', 物理文件名 '"+strFileName+"'";
+                            strError = "构造短文件名时出错。记录ID '" + strID + "', 对象文件目录 '" + this.m_strObjectDir + "', 物理文件名 '" + strFileName + "'";
                             return -1;
                         }
                     }
@@ -12854,7 +12912,7 @@ start_time,
                     }
                     catch (Exception ex)
                     {
-                        strError = "写入文件 '"+strFileName+"' 时发生错误: " + ex.Message;
+                        strError = "写入文件 '" + strFileName + "' 时发生错误: " + ex.Message;
                         return -1;
                     }
 
@@ -12977,7 +13035,7 @@ start_time,
                         }
                         catch (Exception ex)
                         {
-                            strError = "创建0字节的文件 '"+strFileName+"' 时出错：" + ex.Message;
+                            strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
                             return -1;
                         }
                     }
@@ -13009,53 +13067,55 @@ start_time,
                 lCurrentLength = -1;
             }
 
-            // 最后,更新range,metadata,dptimestamp;
 
-            // 得到组合后的Metadata;
-            string strResultMetadata = "";
-            if (bFull == true)
             {
-                bool bIncReaderCount = StringUtil.IsInList("incReaderCount", strStyle);
-                // return:
-                //		-1	出错
-                //		0	成功
-                nRet = DatabaseUtil.MergeMetadata(row_info.Metadata,
-                    strMetadata,
-                    lCurrentLength,
-                    bIncReaderCount ? "+1" : "",
-                    out strResultMetadata,
-                    out strError);
+                // 最后,更新range,metadata,dptimestamp;
+
+                // 得到组合后的Metadata;
+                string strResultMetadata = "";
+                if (bFull == true)
+                {
+                    bool bIncReaderCount = StringUtil.IsInList("incReadCount", strStyle);
+                    // return:
+                    //		-1	出错
+                    //		0	成功
+                    nRet = DatabaseUtil.MergeMetadata(row_info.Metadata,
+                        strMetadata,
+                        lCurrentLength,
+                        bIncReaderCount ? "+1" : "",
+                        out strResultMetadata,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+                // 2013/11/23
+                // 是否要直接利用输入的时间戳
+                bool bForceTimestamp = StringUtil.IsInList("forcesettimestamp", strStyle);
+
+                // 生成新的时间戳,保存到数据库里
+                string strOutputTimestamp = "";
+                if (bForceTimestamp == true)
+                    strOutputTimestamp = ByteArray.GetHexTimeStampString(baInputTimestamp);
+                else
+                    strOutputTimestamp = this.CreateTimestampForDb();
+
+                // 写入 records 表
+                nRet = WriteLine(
+                connection,
+                ref row_info,
+                strID,
+                strOutputTimestamp,
+                strCurrentRange,
+                strResultMetadata,
+                bObjectFile,
+                bFull,
+                bReverse,
+                bNeedInsertRow,
+                "", // strPartList,
+                out strError);
                 if (nRet == -1)
                     return -1;
-            }
-
-            // 2013/11/23
-            // 是否要直接利用输入的时间戳
-            bool bForceTimestamp = StringUtil.IsInList("forcesettimestamp", strStyle);
-
-            // 生成新的时间戳,保存到数据库里
-            string strOutputTimestamp = "";
-            if (bForceTimestamp == true)
-                strOutputTimestamp = ByteArray.GetHexTimeStampString(baInputTimestamp);
-            else
-                strOutputTimestamp = this.CreateTimestampForDb();
-
-            // 写入 records 表
-            nRet = WriteLine(
-            connection,
-            ref row_info,
-            strID,
-            strOutputTimestamp,
-            strCurrentRange,
-            strResultMetadata,
-            bObjectFile,
-            bFull,
-            bReverse,
-            bNeedInsertRow,
-            "", // strPartList,
-            out strError);
-            if (nRet == -1)
-                return -1;
 #if NO
             string strCommand = "";
             if (bObjectFile == false)
@@ -13439,44 +13499,45 @@ start_time,
 
 #endif
 
-            baOutputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);    // Encoding.UTF8.GetBytes(strOutputTimestamp);
+                baOutputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);    // Encoding.UTF8.GetBytes(strOutputTimestamp);
 
-            // 本次变化后的时间戳
-            if (bObjectFile == true)
-            {
-                if (bFull == true)
+                // 本次变化后的时间戳
+                if (bObjectFile == true)
                 {
-                    row_info.TimestampString = strOutputTimestamp;
-                    row_info.NewTimestampString = "";
-                }
-                else
-                {
-                    row_info.NewTimestampString = strOutputTimestamp;
-                }
-            }
-            else
-            {
-                if (bReverse == false)
-                    row_info.NewTimestampString = strOutputTimestamp;
-                else
-                    row_info.TimestampString = strOutputTimestamp;
-
-                if (bFull == true)
-                {
-                    // 反映已经被清除
-                    if (bReverse == false)
+                    if (bFull == true)
                     {
-                        row_info.TimestampString = "";
-
-                        row_info.data_length = 0;
-                        row_info.data_textptr = null;
+                        row_info.TimestampString = strOutputTimestamp;
+                        row_info.NewTimestampString = "";
                     }
                     else
                     {
-                        row_info.NewTimestampString = "";
+                        row_info.NewTimestampString = strOutputTimestamp;
+                    }
+                }
+                else
+                {
+                    if (bReverse == false)
+                        row_info.NewTimestampString = strOutputTimestamp;
+                    else
+                        row_info.TimestampString = strOutputTimestamp;
 
-                        row_info.newdata_length = 0;
-                        row_info.newdata_textptr = null;
+                    if (bFull == true)
+                    {
+                        // 反映已经被清除
+                        if (bReverse == false)
+                        {
+                            row_info.TimestampString = "";
+
+                            row_info.data_length = 0;
+                            row_info.data_textptr = null;
+                        }
+                        else
+                        {
+                            row_info.NewTimestampString = "";
+
+                            row_info.newdata_length = 0;
+                            row_info.newdata_textptr = null;
+                        }
                     }
                 }
             }
@@ -13910,21 +13971,21 @@ start_time,
                 }
                 else if (connection.SqlServerType == SqlServerType.SQLite)
                 {
-                        strCommand = " UPDATE records SET "
-                             + " metadata=@metadata "
-                             + " WHERE id=@id";
+                    strCommand = " UPDATE records SET "
+                         + " metadata=@metadata "
+                         + " WHERE id=@id";
                 }
                 else if (connection.SqlServerType == SqlServerType.MySql)
                 {
-                        strCommand = " UPDATE `" + this.m_strSqlDbName + "`.records SET "
-                             + " metadata=@metadata "
-                             + " WHERE id=@id";
+                    strCommand = " UPDATE `" + this.m_strSqlDbName + "`.records SET "
+                         + " metadata=@metadata "
+                         + " WHERE id=@id";
                 }
                 else if (connection.SqlServerType == SqlServerType.Oracle)
                 {
-                        strCommand = " UPDATE " + this.m_strSqlDbName + "_records SET "
-                             + " metadata=:metadata "
-                             + " WHERE id=:id";
+                    strCommand = " UPDATE " + this.m_strSqlDbName + "_records SET "
+                         + " metadata=:metadata "
+                         + " WHERE id=:id";
                 }
             }
 
@@ -13942,7 +14003,7 @@ start_time,
                         command.Parameters.Add("@metadata",
                         SqlDbType.NVarChar,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
 
                     int nCount = command.ExecuteNonQuery();
                     if (nCount == 0)
@@ -13966,7 +14027,7 @@ start_time,
                         command.Parameters.Add("@metadata",
                         DbType.String,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
 
                     try
                     {
@@ -13999,7 +14060,7 @@ start_time,
                         command.Parameters.Add("@metadata",
                         MySqlDbType.String,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
 
                     try
                     {
@@ -14035,7 +14096,7 @@ start_time,
                         command.Parameters.Add(":metadata",
                         OracleDbType.NVarchar2,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
 
                     try
                     {
@@ -14136,7 +14197,7 @@ start_time,
 
             if (connection.SqlServerType != SqlServerType.MsSqlServer)
             {
-                strError = "SqlServerType '"+connection.SqlServerType.ToString()+"' 的connection不能用于调用WriteImage()函数";
+                strError = "SqlServerType '" + connection.SqlServerType.ToString() + "' 的connection不能用于调用WriteImage()函数";
                 return -1;
             }
 
@@ -14166,7 +14227,7 @@ start_time,
             //---------------------------------------
             //开始做事情
             //-----------------------------------------
-            if (textPtr == null 
+            if (textPtr == null
                 || lStartOfTarget == 0 && lCurrentLength > lTotalLength)
             {
                 string strCommand = "use " + this.m_strSqlDbName + " "
@@ -14256,7 +14317,7 @@ start_time,
 #if UPDATETEXT_WITHLOG
                     + " WITH LOG"
 #endif
-                    + " @inserted_data";   //不能加where语句
+ + " @inserted_data";   //不能加where语句
 
                 strCommand += " use master " + "\n";
 
@@ -14453,11 +14514,11 @@ start_time,
                                 string strIdParamName = "@id" + strIndex;
                                 string strKeynumParamName = "@keynum" + strIndex;
 
-                                strCommand.Append( " DELETE FROM " + strKeysTableName
-                                    + " WHERE keystring = " + strKeyParamName 
+                                strCommand.Append(" DELETE FROM " + strKeysTableName
+                                    + " WHERE keystring = " + strKeyParamName
                                     + " AND fromstring = " + strFromParamName
                                     + " AND idstring = " + strIdParamName
-                                    + " AND keystringnum = " + strKeynumParamName );
+                                    + " AND keystringnum = " + strKeynumParamName);
 
                                 SqlParameter keyParam =
                                     command.Parameters.Add(strKeyParamName,
@@ -14486,7 +14547,7 @@ start_time,
                                         + " use master " + "\n";
                                     command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
 
-                                        command.ExecuteNonQuery();
+                                    command.ExecuteNonQuery();
 
                                     strCommand.Clear();
                                     nExecuted += nCount;
@@ -14554,7 +14615,7 @@ start_time,
                                         + " use master " + "\n";
                                     command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
 
-                                        command.ExecuteNonQuery();
+                                    command.ExecuteNonQuery();
 
                                     strCommand.Clear();
                                     nExecuted += nCount;
@@ -14618,7 +14679,7 @@ start_time,
 
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
             #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
@@ -14655,10 +14716,10 @@ start_time,
                                 string strIdParamName = "@id" + strIndex;
                                 string strKeynumParamName = "@keynum" + strIndex;
 
-                                strCommand.Append( " DELETE FROM " + strKeysTableName
+                                strCommand.Append(" DELETE FROM " + strKeysTableName
                                     + " WHERE keystring = " + strKeyParamName
-                                    + " AND fromstring = " + strFromParamName 
-                                    + " AND idstring = " + strIdParamName 
+                                    + " AND fromstring = " + strFromParamName
+                                    + " AND idstring = " + strIdParamName
                                     + " AND keystringnum = " + strKeynumParamName
                                     + " ; ");
 
@@ -14720,7 +14781,7 @@ start_time,
                                 string strKeynumParamName = "@keynum" + strIndex;
 
                                 //加keynum
-                                strCommand.Append( " INSERT INTO " + strKeysTableName
+                                strCommand.Append(" INSERT INTO " + strKeysTableName
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES (" + strKeyParamName + ","
                                     + strFromParamName + ","
@@ -14777,7 +14838,7 @@ start_time,
                     }
                 } // end of using command
             }
-#endregion // SQLite
+            #endregion // SQLite
 
             #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
@@ -14863,9 +14924,9 @@ start_time,
                                     command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                         + strCommand
 #if !PARAMETERS
-                                        + " ;\n"
+ + " ;\n"
 #endif
-                                        ;
+;
                                     try
                                     {
                                         command.ExecuteNonQuery();
@@ -14968,9 +15029,9 @@ start_time,
                                     command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                         + strCommand
 #if !PARAMETERS
-                                        + " ;\n"
+ + " ;\n"
 #endif
-                                        ;
+;
                                     try
                                     {
                                         command.ExecuteNonQuery();
@@ -14998,9 +15059,9 @@ start_time,
                             command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                 + strCommand
 #if !PARAMETERS
-                                + " ;\n"
+ + " ;\n"
 #endif
-                                ;
+;
                             try
                             {
                                 command.ExecuteNonQuery();
@@ -15031,7 +15092,7 @@ start_time,
 
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
             #region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
@@ -15069,8 +15130,8 @@ start_time,
 
                                 strCommand.Append(" DELETE FROM " + this.m_strSqlDbName + "_" + strKeysTableName
                                     + " WHERE keystring = " + strKeyParamName
-                                    + " AND fromstring = " + strFromParamName 
-                                    + " AND idstring = " + strIdParamName 
+                                    + " AND fromstring = " + strFromParamName
+                                    + " AND idstring = " + strIdParamName
                                     + " AND keystringnum = " + strKeynumParamName
                                     + " ");
 
@@ -15190,7 +15251,7 @@ start_time,
                     }
                 } // end of using command
             }
-#endregion // Oracle
+            #endregion // Oracle
 
             return 0;
         }
@@ -16529,6 +16590,40 @@ bool bTempObject)
             public string ID = "";                  // 2013/2/17
             public byte[] Data = null;              // 2013/2/17
             public byte[] NewData = null;           // 2013/2/17
+
+            // 获得当前起作用的一个 timestamp
+            public string GetCurrentTimestamp()
+            {
+                string strCurrentRange = this.Range;
+                if (String.IsNullOrEmpty(strCurrentRange) == false
+        && strCurrentRange[0] == '!')
+                    return this.TimestampString;
+
+                return this.NewTimestampString;
+            }
+
+            // 获得完成状态的一个 timestamp
+            public string GetCompleteTimestamp()
+            {
+                string strCurrentRange = this.Range;
+                if (String.IsNullOrEmpty(strCurrentRange) == false
+        && strCurrentRange[0] == '!')
+                {
+                    return this.NewTimestampString;
+                }
+
+                return this.TimestampString;
+            }
+
+            // 先试探获得 current，如果为空则获得 complete
+            public string GetTimestamp()
+            {
+                string strCurrent = GetCurrentTimestamp();
+                if (string.IsNullOrEmpty(strCurrent) == false)
+                    return strCurrent;
+                return GetCompleteTimestamp();
+            }
+
         }
 
         // 检查记录在库中是否存在，如果存在在则返回一些字段内容，如果不存在则插入一条新记录
@@ -16539,7 +16634,7 @@ bool bTempObject)
         //      2   需要创建新的记录，但因为优化的缘故(稍后需要创建)而没有创建
         private int CreateNewRecordIfNeed(Connection connection,
             string strID,
-            byte [] sourceBuffer,
+            byte[] sourceBuffer,
             out RecordRowInfo row_info,
             out string strError)
         {
@@ -16549,7 +16644,7 @@ bool bTempObject)
             // 2013/2/17
             if (StringUtil.IsPureNumber(strID) == false)
             {
-                strError = "ID '"+strID+"' 必须是纯数字";
+                strError = "ID '" + strID + "' 必须是纯数字";
                 return -1;
             }
 
@@ -16709,7 +16804,7 @@ bool bTempObject)
                             }
                         }
                     }
-                    catch(SqlException ex)
+                    catch (SqlException ex)
                     {
                         strError = "插入数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
 
@@ -18279,7 +18374,7 @@ bool bTempObject)
             if (nRet == -1)
                 return -1;
 
-            foreach(string strRecordID in ids)
+            foreach (string strRecordID in ids)
             {
                 Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()调用错误，strRecordID参数值不能为null且长度必须等于10位。");
                 if (string.IsNullOrEmpty(strRecordID) == true || strRecordID.Length != 10)
@@ -19149,7 +19244,7 @@ bool bTempObject)
             ConnectionStyle style = ConnectionStyle.None)
         {
             // SQLite 专用, 快速的， 全局共用的
-            if ( ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
+            if (((style & ConnectionStyle.Global) == ConnectionStyle.Global)
                 && this.SQLiteInfo != null) // && this.SQLiteInfo.FastMode == true
             {
                 Debug.Assert(this.SQLiteInfo != null, "");
@@ -19279,7 +19374,7 @@ bool bTempObject)
 
         void SQLiteConnectionOpen()
         {
-            #if REDO_OPEN
+#if REDO_OPEN
             int nRedoCount = 0;
             REDO:
             try

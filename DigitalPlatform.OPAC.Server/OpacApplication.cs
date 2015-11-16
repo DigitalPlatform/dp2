@@ -590,6 +590,7 @@ namespace DigitalPlatform.OPAC.Server
                 XmlElement nodeSearchLog = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog") as XmlElement;
                 if (nodeSearchLog != null)
                 {
+#if NO
                     string strEnable = nodeSearchLog.GetAttribute("enable");
                     // TODO: 如果以前已经有这个对象，需要先关闭它
                     // TODO: 如果因为MongoDB启动落后于dp2OPAC怎么办？ 是否需要重试?
@@ -600,6 +601,7 @@ namespace DigitalPlatform.OPAC.Server
                         app.WriteErrorLog("启动 SearchLog 时出错：" + strError);
                         this.SearchLog = null;
                     }
+#endif
                 }
 
                 // chat room
@@ -3589,6 +3591,10 @@ out strError);
         }
 
         // 增量计数器值
+        // return:
+        //      -1  出错
+        //      0   mongodb 没有启用
+        //      1   成功
         public long IncHitCount(LibraryChannel channel,
             string strUrl,
             string strClientAddress,
@@ -3726,6 +3732,8 @@ out strError);
         }
 
         // 下载对象资源
+        // parameters:
+        //      strStyle    如果包含 hitcount，表示希望获取访问计数的数字，返回图像格式。否则是希望返回对象本身
         // return:
         //      -1  出错
         //      0   304返回

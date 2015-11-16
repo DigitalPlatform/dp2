@@ -13885,11 +13885,15 @@ out strError);
             }
         }
 
+        // parameters:
+        //      Value   [out]返回整数值。strAction 为 "inc" 或 "inc_and_log" 的时候不使用这个参数
         public LibraryServerResult HitCounter(string strAction,
             string strName,
-            string strClientAddress)
+            string strClientAddress,
+            out long Value)
         {
             string strError = "";
+            Value = 0;
 
             LibraryServerResult result = this.PrepareEnvironment("HitCounter", true,
                 true);
@@ -13901,12 +13905,20 @@ out strError);
                 // TODO: 检查权限。至少 set 要求权限
 
                 if (strAction == "get")
-                    result.Value = app.HitCountDatabase.GetHitCount(strName);
+                    Value = app.HitCountDatabase.GetHitCount(strName);   // 如果 mongodb 没有打开，则这里会返回 Value = -1，但 ErrorCode 没有错误码
                 else if (strAction == "inc")
-                    app.HitCountDatabase.IncHitCount(strName);
+                {
+                    if (app.HitCountDatabase.IncHitCount(strName) == false)
+                        result.Value = 0;   // mongodb 没有打开
+                    else
+                        result.Value = 1;
+                }
                 else if (strAction == "inc_and_log")    // 增量计数器，并且同时记载到访问日志中
                 {
-                    app.HitCountDatabase.IncHitCount(strName);
+                    if (app.HitCountDatabase.IncHitCount(strName) == false)
+                        result.Value = 0;   // mongodb 没有打开
+                    else
+                        result.Value = 1;
 
                     // 写入日志
                     {

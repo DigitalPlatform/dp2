@@ -73,11 +73,14 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 增加一次访问计数
-        public void IncHitCount(string strURL)
+        // return:
+        //      false   没有成功。通常因为 mongodb 无法打开等原因
+        //      true    成功
+        public bool IncHitCount(string strURL)
         {
             MongoCollection<HitCountItem> collection = this.HitCountCollection;
             if (collection == null)
-                return;
+                return false;
 
             var query = new QueryDocument("URL", strURL);
             var update = Update.Inc("HitCount", 1);
@@ -85,6 +88,7 @@ namespace DigitalPlatform.LibraryServer
     query,
     update,
     UpdateFlags.Upsert);
+            return true;
         }
 
         public long GetHitCount(string strURL)

@@ -57,6 +57,7 @@ ref sessioninfo) == false)
             if (uri != null
                 && (uri.Scheme == "http" || uri.Scheme == "https"))
             {
+                // 以下是处理 dp2 系统外部的 URL
                 if (StringUtil.IsInList("hitcount", strStyle) == true)
                 {
 #if NO
@@ -74,7 +75,7 @@ ref sessioninfo) == false)
                         "*"); // 星号表示尚未启用外部链接计数功能
                     this.Response.End();
 #endif
-
+                    // TODO: 这里可以优化一下，当 lValue == -1 的时候，可以为 App 设置一个标志，以后就不再为外部 URL 请求 dp2library 的 HitCounver() API 了
                     string strText = "";
                     long lValue = 0;
                     long lRet = app.GetHitCount(channel,
@@ -84,7 +85,7 @@ ref sessioninfo) == false)
                     if (lRet == -1)
                         strText = strError;
                     else
-                        strText = lValue.ToString();
+                        strText = (lValue == -1 ? "*" : lValue.ToString());    // * 表示 dp2library 中 mongodb 没有启用
                     OpacApplication.OutputImage(this,
     Color.FromArgb(200, Color.Blue),
     strText);
@@ -110,6 +111,8 @@ out strError);
                     return;
                 }
             }
+
+            // *** 以下是处理 dp2 系统内部对象
 
             string strSaveAs = Request.QueryString["saveas"];
             bool bSaveAs = false;

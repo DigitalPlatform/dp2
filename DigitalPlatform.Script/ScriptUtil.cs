@@ -223,16 +223,27 @@ namespace DigitalPlatform.Script
                 Hashtable table = StringUtil.ParseParameters(x, ';', ':');
                 string strType = (string)table["type"];
                 string strSize = (string)table["size"];
+                string s_q = field.select("subfield[@name='q']").FirstContent;
 
                 string u = field.select("subfield[@name='u']").FirstContent;
                 string strUri = MakeObjectUrl(strRecPath, u);
 
+                string strSaveAs = "";
+                if (s_q.StartsWith("text/") == true
+                    || s_q.StartsWith("image/") == true)
+                {
+
+                }
+                else
+                {
+                    strSaveAs = "&saveas=true";
+                }
                 string strHitCountImage = "";
                 string strObjectUrl = strUri;
                 if (StringUtil.HasHead(strUri, "http:") == false
                     && StringUtil.HasHead(strUri, "https:") == false)
                 {
-                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                     strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
                 }
                 else
@@ -240,7 +251,7 @@ namespace DigitalPlatform.Script
                     // http: 或 https: 的情形
                     if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
                     {
-                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                         strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
                     }
                 }
@@ -269,7 +280,6 @@ namespace DigitalPlatform.Script
                     urlTemp = urlLabel;
 
                 string s_3 = field.select("subfield[@name='3']").FirstContent;
-                string s_q = field.select("subfield[@name='q']").FirstContent;
                 string s_s = field.select("subfield[@name='s']").FirstContent;
                 string s_z = field.select("subfield[@name='z']").FirstContent;
 
