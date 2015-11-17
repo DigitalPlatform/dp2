@@ -9,7 +9,6 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
-using Microsoft.Win32;
 
 using System.Security.Cryptography.X509Certificates;
 // using System.IdentityModel.Selectors;
@@ -19,6 +18,8 @@ using System.ServiceModel.Description;
 using System.Xml;
 using System.IdentityModel.Selectors;
 using System.Collections;
+
+using Microsoft.Win32;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
@@ -260,6 +261,22 @@ namespace dp2Library
             return (string)table["licensetype"];
         }
 
+        static string GetFunction(string strSerialCode)
+        {
+            string strExtParams = SerialCodeForm.GetExtParams(strSerialCode);
+            Hashtable table = StringUtil.ParseParameters(strExtParams);
+            return (string)table["function"];
+        }
+
+        // 检查序列号中是否具备某个功能
+        static bool CheckFunction(string strSerialCode, string strFunction)
+        {
+            string strExtParams = SerialCodeForm.GetExtParams(strSerialCode);
+            Hashtable table = StringUtil.ParseParameters(strExtParams);
+            string strFunctionList = (string)table["function"];
+            return StringUtil.IsInList(strFunction, strFunctionList);
+        }
+
         // 将本地字符串匹配序列号
         static bool MatchLocalString(string strSerialNumber, 
             string strInstanceName,
@@ -342,6 +359,7 @@ namespace dp2Library
 
                 int nMaxClients = 0;
                 string strLicenseType = "";
+                string strFunction = "";
 
 #if SN
                 //string strLocalString = OneInstanceDialog.GetEnvironmentString(strSerialNumber, strInstanceName);
@@ -375,6 +393,7 @@ namespace dp2Library
                     }
 
                     strLicenseType = GetLicenseType(strSerialNumber);
+                    strFunction = GetFunction(strSerialNumber);
                 }
 #else
                 nMaxClients = 100;
@@ -387,7 +406,8 @@ namespace dp2Library
                 HostInfo info = new HostInfo();
                 info.DataDir = strDataDir;
                 info.MaxClients = nMaxClients;
-                info.LicenseType = strLicenseType; 
+                info.LicenseType = strLicenseType;
+                info.Function = strFunction;
                 host.Extensions.Add(info);
                 /// 
 

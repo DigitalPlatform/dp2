@@ -140,6 +140,7 @@ namespace dp2Library
                 info.App.TestMode = info.TestMode;
                 info.App.MaxClients = info.MaxClients;
                 info.App.LicenseType = info.LicenseType;
+                info.App.Function = info.Function;
             }
 
             this.app = info.App;
@@ -383,7 +384,10 @@ namespace dp2Library
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCode.Hangup;
-                    result.ErrorInfo = "因系统处于维护状态 " + app.HangupReason.ToString() + "，本功能暂时不能使用";
+                    if (app.HangupReason == HangupReason.Expire)
+                        result.ErrorInfo = "系统当前处于维护状态，本功能暂时不能使用。原因: dp2library 版本太旧，请立即升级到最新版本";
+                    else
+                        result.ErrorInfo = "因系统处于维护状态 " + app.HangupReason.ToString() + "，本功能暂时不能使用";
                     return result;
                 }
             }
@@ -13992,7 +13996,7 @@ out strError);
         public bool TestMode = false;   // 是否需要启动为评估模式
         public int MaxClients = 5;      // 最多允许的前端机器台数 -1表示不限定
         public string LicenseType = ""; // 许可类型 server 表示服务器授权模式
-
+        public string Function = "";    // 许可的功能列表
         public string Protocol = "";    // 所绑定的协议。例如 http net.tcp 等
 
         void IExtension<ServiceHostBase>.Attach(ServiceHostBase owner)

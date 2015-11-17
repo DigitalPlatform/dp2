@@ -165,6 +165,15 @@ namespace DigitalPlatform.LibraryServer
         }
 
         /// <summary>
+        /// 许可的功能列表。patronReplication 表示读者同步功能
+        /// </summary>
+        public string Function
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// 失效的前端 MAC 地址集合
         /// Key 为 MAC 地址。大写。如果 Key 在 Hashtable 中已经存在，则表示这个 MAC 地址已经失效了
         /// </summary>
@@ -884,7 +893,6 @@ namespace DigitalPlatform.LibraryServer
                     app.OpacServerUrl = DomUtil.GetAttr(node, "url");
                 }
 
-
                 // 违约金
                 // 元素<amerce>
                 // 属性dbname/overdueStyle
@@ -912,9 +920,6 @@ namespace DigitalPlatform.LibraryServer
                 nRet = 0;
 
                 {
-
-
-
                     /*
                     // 准备工作: 映射数据库名
                     nRet = this.GetGlobalCfg(session.Channels,
@@ -1003,7 +1008,6 @@ namespace DigitalPlatform.LibraryServer
 #if LOG_INFO
                         app.WriteErrorLog("INFO: 临时 session 使用完毕");
 #endif
-
                     }
 
                 }
@@ -1035,8 +1039,6 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog(strError);
                         goto ERROR1;
                     }
-
-
                 }
 
                 // *** 初始化统计对象
@@ -1108,6 +1110,9 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog(strError);
                     }
                 }
+
+                if (this.BatchTasks == null)
+                    this.BatchTasks = new BatchTaskCollection();    // Close() 的时候会设置为 null。因此这里要准备重新 new
 
                 // 启动批处理任务
                 // TODO: 这一段考虑分离到一个函数中
@@ -1190,8 +1195,6 @@ namespace DigitalPlatform.LibraryServer
                             app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
                         }
 
-
-
                         if (messageMonitor.StartInfo == null)
                             messageMonitor.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
 
@@ -1207,7 +1210,6 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog("启动批处理任务MessageMonitor时出错：" + ex.Message);
                         goto ERROR1;
                     }
-
 
                     // 启动DkywReplication
                     // <dkyw>
@@ -1392,9 +1394,7 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         }
                     }
-
                 }
-
 
                 // 公共查询最大命中数
                 {
@@ -1487,7 +1487,12 @@ namespace DigitalPlatform.LibraryServer
 #endif
                 }
 
-                // Application["errorinfo"] = "";  // 清除以前可能残留的错误信息 2007/10/10
+                if (DateTime.Now > new DateTime(2016, 2, 1))
+                {
+                    // 通知系统挂起
+                    this.HangupReason = HangupReason.Expire;
+                    this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                }
 
                 // 2013/4/10
                 if (this.Changed == true)
@@ -3157,8 +3162,6 @@ namespace DigitalPlatform.LibraryServer
 
             disposed = true;
         }
-
-
 
         // 初始化虚拟库集合定义对象
         public int InitialVdbs(
@@ -13442,9 +13445,6 @@ strLibraryCode);    // 读者所在的馆代码
 
             return ResPathType.None;
         }
-
-
-
     }
 
     // 系统挂起的理由
@@ -13456,6 +13456,7 @@ strLibraryCode);    // 读者所在的馆代码
         Normal = 3, // 普通维护
         OperLogError = 4,   // 操作日志错误（例如日志空间满）
         Exit = 5,  // 系统正在退出
+        Expire = 6, // 因长期没有升级版本，当前版本已经失效
     }
 
     // API错误码

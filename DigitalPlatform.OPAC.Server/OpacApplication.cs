@@ -4300,6 +4300,8 @@ out string strError)
         Backup = 2, // 大备份
         Normal = 3, // 普通维护
         OperLogError = 4,   // 操作日志错误（例如日志空间满）
+        Exit = 5,  // 系统正在退出
+        Expire = 6, // 因长期没有升级版本，当前版本已经失效
     }
 
     public class WebPageStop : Stop

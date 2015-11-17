@@ -150,6 +150,15 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
+            if (DateTime.Now > new DateTime(2015,12,31) // 2016/1/1 以后可删除此语句
+                && StringUtil.IsInList("patronReplication", this.App.Function) == false)
+            {
+                string strErrorText = "读者同步功能需要设置序列号才能运行";
+                this.AppendResultText(strErrorText + "\r\n");
+                // this.App.WriteErrorLog(strErrorText);
+                return;
+            }
+
             string strError = "";
             int nRet = 0;
 

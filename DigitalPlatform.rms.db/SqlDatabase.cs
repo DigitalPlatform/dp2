@@ -6085,7 +6085,7 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
-            // 将样式去空白
+            // 去空白
             strStyle = strStyle.Trim();
 
 #if SUPER
@@ -6162,6 +6162,14 @@ namespace DigitalPlatform.rms
                         out strError);
                     if (nRet == -1)
                         return -1;
+                }
+                else
+                {
+                    if (strRecordID == "-1")
+                    {
+                        strError = "记录 ID 不能为 '?'。必须是一个明确的数字";
+                        return -1;
+                    }
                 }
 
                 // 根据风格要求，返回资源路径

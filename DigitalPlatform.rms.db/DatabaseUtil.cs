@@ -173,16 +173,17 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-#if NO
             //把'?'换成'-1'  因为原来系统都认得'-1'
             if (strRecordID == "?")
                 strRecordID = "-1";
-#endif
+
+#if NO
             if (strRecordID == "?")
             {
                 strError = "记录 ID 不能为 '?'。必须是一个明确的数字";
                 return -1;
             }
+#endif
 
             // 不能转换成数据不合法
             try

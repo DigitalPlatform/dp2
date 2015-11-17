@@ -223,14 +223,14 @@ namespace DigitalPlatform.Script
                 Hashtable table = StringUtil.ParseParameters(x, ';', ':');
                 string strType = (string)table["type"];
                 string strSize = (string)table["size"];
-                string s_q = field.select("subfield[@name='q']").FirstContent;
+                string s_q = field.select("subfield[@name='q']").FirstContent;  // 注意， FirstContent 可能会返回 null
 
                 string u = field.select("subfield[@name='u']").FirstContent;
                 string strUri = MakeObjectUrl(strRecPath, u);
 
                 string strSaveAs = "";
-                if (s_q.StartsWith("text/") == true
-                    || s_q.StartsWith("image/") == true)
+                if (StringUtil.MatchMIME(s_q, "text") == true
+                    || StringUtil.MatchMIME(s_q, "image") == true)
                 {
 
                 }

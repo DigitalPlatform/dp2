@@ -335,6 +335,20 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             }
         }
 
+        public void SetFunction(string strFunction)
+        {
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info != null)
+                {
+                    info.Function = strFunction;
+                    if (info.App != null)
+                        info.App.Function = strFunction;
+                }
+            }
+        }
+
         static void SetTimeout(System.ServiceModel.Channels.Binding binding)
         {
             binding.SendTimeout = new TimeSpan(0, 20, 0);

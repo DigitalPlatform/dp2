@@ -177,6 +177,12 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            if (this.BatchTasks == null)
+            {
+                strError = "this.AppTasks == null";
+                return -1;
+            }
+
             BatchTask task = this.BatchTasks.GetBatchTask(strName);
 
             // 创建新的任务

@@ -16,6 +16,20 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 将 strMime 的左边部分和 strLeftParam 进行比较
+        // return:
+        //      false   不匹配
+        //      true    匹配
+        public static bool MatchMIME(string strMime, string strLeftParam)
+        {
+            string strLeft = "";
+            string strRight = "";
+            ParseTwoPart(strMime, "/", out strLeft, out strRight);
+            if (string.Compare(strLeft, strLeftParam, true) == 0)
+                return true;
+            return false;
+        }
+
         // 
         /// <summary>
         /// 过滤掉最外面的 {} 字符
