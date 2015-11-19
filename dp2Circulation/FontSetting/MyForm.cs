@@ -220,12 +220,7 @@ namespace dp2Circulation
                 stop = null;
             }
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null
-                && Floating == false && this.SupressSizeSetting == false)
-            {
-                MainForm.AppInfo.SaveMdiChildFormStates(this,
-                    "mdi_form_state");
-            }
+            /// 原来
 
             if (this.MainForm != null)
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
@@ -632,6 +627,13 @@ string strUserName = ".")
         /// <param name="e">事件参数</param>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            if (this.MainForm != null && this.MainForm.AppInfo != null
+    && Floating == false && this.SupressSizeSetting == false)
+            {
+                MainForm.AppInfo.SaveMdiChildFormStates(this,
+                    "mdi_form_state");
+            }
+
             base.OnFormClosed(e);
             this.OnMyFormClosed();  // 这里的顺序调整过 2015/11/10
 
