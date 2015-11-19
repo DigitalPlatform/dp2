@@ -487,7 +487,6 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-
                 this.KernelApplication.WriteErrorLog("开始校验数据库尾号。");
 
                 int nRet = 0;
@@ -498,14 +497,18 @@ namespace DigitalPlatform.rms
                     {
                         Database db = (Database)this[i];
                         string strTempError = "";
+                        // return:
+                        //      -2  连接错误
+                        //      -1  出错
+                        //      0   成功
                         nRet = db.CheckTailNo(out strTempError);
-                        if (nRet == -1)
+                        if (nRet < 0)
                         {
                             nFailCount++;
-                            strError += strTempError + "; ";
-                            // 继续校验其他数据库
-
-                            // return -1;
+                            strError += strTempError + ";\r\n";
+                            if (nRet == -2)
+                                return -1;  // 如果是连接出错，没有必要一个一个数据库地试了
+                            // 否则继续校验其他数据库
                         }
                     }
 

@@ -321,10 +321,10 @@ namespace DigitalPlatform.CirculationClient
                             }
 
                             string strMetadataXml = record.RecordBody.Metadata;
-                            Debug.Assert(string.IsNullOrEmpty(strMetadataXml) == false, "");
+                            //Debug.Assert(string.IsNullOrEmpty(strMetadataXml) == false, "");
 
                             byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
-                            Debug.Assert(baMetadataTimestamp != null, "");
+                            //Debug.Assert(baMetadataTimestamp != null, "");
 
                             // 取metadata值
                             Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,

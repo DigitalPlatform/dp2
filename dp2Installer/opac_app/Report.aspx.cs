@@ -33,7 +33,6 @@ ref app,
 ref sessioninfo) == false)
             return;
 
-
         this.TitleBarControl1.CurrentColumn = TitleColumn.Statis;
 
         this.SideBarControl1.LayoutStyle = SideBarLayoutStyle.Horizontal;
@@ -240,7 +239,6 @@ var data = [
 #endif
 
             text.Append(" { \"label\" : " + BuildJSONString(strName) + " ");
-
 
             if (string.IsNullOrEmpty(strLink) == false
                 && string.IsNullOrEmpty(strBaseDir) == false)

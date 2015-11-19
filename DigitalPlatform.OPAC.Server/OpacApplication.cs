@@ -33,6 +33,16 @@ namespace DigitalPlatform.OPAC.Server
 {
     public partial class OpacApplication
     {
+        /// <summary>
+        /// 读用途的日志，启用了哪些具体功能
+        /// hitcount,log
+        /// </summary>
+        public string SearchLogEnable
+        {
+            get;
+            set;
+        }
+
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
         public double dp2LibraryVersion = 0;
@@ -602,6 +612,7 @@ namespace DigitalPlatform.OPAC.Server
                         this.SearchLog = null;
                     }
 #endif
+                    this.SearchLogEnable = nodeSearchLog.GetAttribute("enable");
                 }
 
                 // chat room
@@ -3556,8 +3567,10 @@ out strError);
         }
 
         // 获得计数器值
+        // parameters:
+        //      strName 名字。为 书目记录路径 + '|' + URL
         public long GetHitCount(LibraryChannel channel,
-            string strUrl,
+            string strName,
             out long lValue,
             out string strError)
         {
@@ -3578,7 +3591,7 @@ out strError);
             try
             {
                 return channel.HitCounter("get", 
-                    strUrl,
+                    strName,
                     "",
                     out lValue,
                     out strError);
@@ -3591,12 +3604,14 @@ out strError);
         }
 
         // 增量计数器值
+        // parameters:
+        //      strName 名字。为 书目记录路径 + '|' + URL
         // return:
         //      -1  出错
         //      0   mongodb 没有启用
         //      1   成功
         public long IncHitCount(LibraryChannel channel,
-            string strUrl,
+            string strName,
             string strClientAddress,
             bool bLog,
             out string strError)
@@ -3618,7 +3633,7 @@ out strError);
             {
                 long lValue = 0;
                 return channel.HitCounter(bLog ? "inc_and_log" : "inc", 
-                    strUrl,
+                    strName,
                     strClientAddress,
                     out lValue,
                     out strError);
@@ -3746,6 +3761,15 @@ out strError);
             out string strError)
         {
             strError = "";
+
+            if (StringUtil.IsInList("hitcount", strStyle) == true
+                && StringUtil.IsInList("hitcount", this.SearchLogEnable) == false)
+            {
+                OpacApplication.OutputImage(Page,
+                    Color.FromArgb(200, Color.Blue),
+                    "*"); // 星号表示尚未启用内部对象计数功能
+                return 1;
+            }
 
             WebPageStop stop = new WebPageStop(Page);
 
@@ -3940,12 +3964,16 @@ Value data: HEX 0x1
             if (Page.Response.IsClientConnected == false)
                 return -1;
 
+            string strGetStyle = "content,data,incReadCount";
+            if (StringUtil.IsInList("log", this.SearchLogEnable) == false)
+                strGetStyle += ",skipLog";
+
             // 传输数据
             lRet = channel.GetRes(
                 stop,
                 strPath,
                 Page.Response.OutputStream,
-                "content,data,incReadCount",
+                strGetStyle,
                 null,	// byte [] input_timestamp,
                 out strMetaData,
                 out baOutputTimeStamp,

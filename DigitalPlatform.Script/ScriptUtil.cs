@@ -129,8 +129,10 @@ namespace DigitalPlatform.Script
         /// 优先选择中等大小的图片
         /// </summary>
         /// <param name="strMARC">MARC机内格式字符串</param>
+        /// <param name="strPreferredType">优先使用何种大小类型</param>
         /// <returns>返回封面图像 URL。空表示没有找到</returns>
-        public static string GetCoverImageUrl(string strMARC, string strPreferredType = "MediumImage")
+        public static string GetCoverImageUrl(string strMARC, 
+            string strPreferredType = "MediumImage")
         {
             string strLargeUrl = "";
             string strMediumUrl = "";   // type:FrontCover.MediumImage
@@ -243,16 +245,17 @@ namespace DigitalPlatform.Script
                 if (StringUtil.HasHead(strUri, "http:") == false
                     && StringUtil.HasHead(strUri, "https:") == false)
                 {
+                    // 内部对象
                     strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                     strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
                 }
                 else
                 {
-                    // http: 或 https: 的情形
+                    // http: 或 https: 的情形，即外部 URL
                     if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
                     {
-                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
-                        strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
+                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs + "&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath);
+                        strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath) + "' alt='hitcount'></img>";
                     }
                 }
 

@@ -201,6 +201,13 @@ namespace DigitalPlatform.Text
 
             string strObject = StringUtil.GetFirstPartPath(ref strPath);
 
+            // 书目记录名下的外部 URL
+            if (strObject == "url")
+            {
+                strObjectID = strPath;
+                return true;
+            }
+
             // 对象资源
             if (strObject != "object")
                 return false;

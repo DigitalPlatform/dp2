@@ -110,6 +110,7 @@ namespace DigitalPlatform.rms
         // parameters:
         //      strError    out参数，返回出错信息
         // return:
+        //      -2  连接错误
         //      -1  出错
         //      0   成功
         // 线：安全的
@@ -130,9 +131,13 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
+                // return:
+                //      -1  一般错误
+                //      -2  连接错误
+                //      0   成功
                 nRet = this.UpdateStructure(out strError);
-                if (nRet == -1)
-                    return -1;
+                if (nRet < 0)
+                    return nRet;
 
                 // return:
                 //		-1  出错
@@ -175,7 +180,6 @@ namespace DigitalPlatform.rms
             }
 
             this.m_bTailNoVerified = true;
-
             return 0;
         }
 
@@ -2155,7 +2159,7 @@ namespace DigitalPlatform.rms
         {
             // bool bTailNoChanged = false;    // 数据库记忆的尾号是否发生了变化?
             if (this.m_bTailNoVerified == false)
-                throw (new Exception("数据库 '" + this.GetCaption("zh") + "' 因其尾号尚未经过校验，无法进行写入操作"));
+                throw (new TailNumberException("数据库 '" + this.GetCaption("zh") + "' 因其尾号尚未经过校验，无法进行写入操作"));
 
             if (strID == "-1") // 追加记录,GetNewTailNo()是安全的
             {

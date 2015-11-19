@@ -11,6 +11,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.Globalization;
+using System.ServiceModel.Channels;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
@@ -21,7 +22,6 @@ using DigitalPlatform.Message;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.ServiceModel.Channels;
 
 namespace dp2Library
 {
@@ -11667,6 +11667,7 @@ namespace dp2Library
         //                  metadata表示要在strMetadata参数内返回元数据内容
         //                  timestamp表示要在baOutputTimestam参数内返回资源的时间戳内容
         //                  outputpath表示要在strOutputResPath参数内返回实际记录路径内容
+        //                  skipLog 表示不希望在 dp2library 范围内记入日志
         //      baContent   返回的byte数组
         //      strMetadata 返回的元数据内容
         //      strOutputResPath    返回的实际记录路径
@@ -11907,6 +11908,7 @@ namespace dp2Library
                     out strXmlRecPath,
                     out strObjectID);
                 if (app.GetObjectWriteToOperLog == true
+                    && StringUtil.IsInList("skipLog", strStyle) == false
                     && nStart == 0 // 获取全部二进制信息的循环中，只记载第一次 API 访问
                     && string.IsNullOrEmpty(strObjectID) == false
                     && StringUtil.IsInList("data", strStyle) == true)
@@ -13890,6 +13892,7 @@ out strError);
         }
 
         // parameters:
+        //      strName 名字。为 书目记录路径 + '|' + URL
         //      Value   [out]返回整数值。strAction 为 "inc" 或 "inc_and_log" 的时候不使用这个参数
         public LibraryServerResult HitCounter(string strAction,
             string strName,
@@ -13908,23 +13911,28 @@ out strError);
             {
                 // TODO: 检查权限。至少 set 要求权限
 
+                string strBiblioRecPath = "";
+                string strUrl = "";
+                StringUtil.ParseTwoPart(strName, "|", out strBiblioRecPath, out strUrl);
+
                 if (strAction == "get")
-                    Value = app.HitCountDatabase.GetHitCount(strName);   // 如果 mongodb 没有打开，则这里会返回 Value = -1，但 ErrorCode 没有错误码
+                    Value = app.HitCountDatabase.GetHitCount(strUrl);   // 如果 mongodb 没有打开，则这里会返回 Value = -1，但 ErrorCode 没有错误码
                 else if (strAction == "inc")
                 {
-                    if (app.HitCountDatabase.IncHitCount(strName) == false)
+                    if (app.HitCountDatabase.IncHitCount(strUrl) == false)
                         result.Value = 0;   // mongodb 没有打开
                     else
                         result.Value = 1;
                 }
                 else if (strAction == "inc_and_log")    // 增量计数器，并且同时记载到访问日志中
                 {
-                    if (app.HitCountDatabase.IncHitCount(strName) == false)
+                    if (app.HitCountDatabase.IncHitCount(strUrl) == false)
                         result.Value = 0;   // mongodb 没有打开
                     else
                         result.Value = 1;
 
                     // 写入日志
+                    if (app.GetObjectWriteToOperLog == true)
                     {
                         XmlDocument domOperLog = new XmlDocument();
                         domOperLog.LoadXml("<root />");
@@ -13933,7 +13941,7 @@ out strError);
                             "operation",
                             "getRes");
                         DomUtil.SetElementText(domOperLog.DocumentElement, "path",
-        strName);
+        strBiblioRecPath + "/url/" + strUrl);
 
                         if (app.Statis != null)
                             app.Statis.IncreaseEntryValue(
@@ -13983,7 +13991,6 @@ out strError);
                 return result;
             }
         }
-
     }
 
     public class HostInfo : IExtension<ServiceHostBase>, IDisposable

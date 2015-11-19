@@ -22,4 +22,13 @@ namespace DigitalPlatform.rms
             : base(strEx)
         { }
     }
+
+    // 2015/11/19
+    // 尾号尚未校验
+    public class TailNumberException : Exception
+    {
+        public TailNumberException(string strEx)
+            : base(strEx)
+        { }
+    }
 }

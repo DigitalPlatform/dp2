@@ -44,6 +44,7 @@ ref sessioninfo) == false)
         // string strAction = Request.QueryString["action"];
         string strURI = Request.QueryString["uri"];
         string strStyle = Request.QueryString["style"];
+        string strBiblioRecPath = Request.QueryString["biblioRecPath"];
 
         LibraryChannel channel = null;
 #if CHANNEL_POOL
@@ -75,20 +76,28 @@ ref sessioninfo) == false)
                         "*"); // 星号表示尚未启用外部链接计数功能
                     this.Response.End();
 #endif
+                    if (StringUtil.IsInList("hitcount", app.SearchLogEnable) == false)
+                    {
+                        OpacApplication.OutputImage(this,
+                            Color.FromArgb(200, Color.Blue),
+                            "*"); // 星号表示尚未启用外部链接计数功能
+                        this.Response.End();
+                        return;
+                    }
                     // TODO: 这里可以优化一下，当 lValue == -1 的时候，可以为 App 设置一个标志，以后就不再为外部 URL 请求 dp2library 的 HitCounver() API 了
                     string strText = "";
                     long lValue = 0;
                     long lRet = app.GetHitCount(channel,
-            strURI,
-            out lValue,
-            out strError);
+                        strBiblioRecPath + "|" + strURI,
+                        out lValue,
+                        out strError);
                     if (lRet == -1)
                         strText = strError;
                     else
                         strText = (lValue == -1 ? "*" : lValue.ToString());    // * 表示 dp2library 中 mongodb 没有启用
                     OpacApplication.OutputImage(this,
-    Color.FromArgb(200, Color.Blue),
-    strText);
+                        Color.FromArgb(200, Color.Blue),
+                        strText);
                     this.Response.End();
                     return;
                 }
@@ -98,21 +107,29 @@ ref sessioninfo) == false)
                     if (app.SearchLog != null)
                         app.SearchLog.IncHitCount(strURI);
 #endif
+                    if (StringUtil.IsInList("hitcount", app.SearchLogEnable) == false)
+                    {
+                        this.Response.Redirect(strURI, true);
+                        return;
+                    }
                     long lRet = app.IncHitCount(channel,
-strURI,
-this.Request.UserHostAddress,
-true,
-out strError);
+                        strBiblioRecPath + "|" + strURI,
+                        this.Request.UserHostAddress,
+                        StringUtil.IsInList("log", app.SearchLogEnable),    // 是否要创建日志
+                        out strError);
                     if (lRet == -1)
+                    {
                         Response.Write("IncHitCount 出错: " + strError);
+                        this.Response.End();
+                    }
                     else
                         this.Response.Redirect(strURI, true);
-                    this.Response.End();
                     return;
                 }
             }
 
             // *** 以下是处理 dp2 系统内部对象
+            // TODO: dp2 系统内部对象总是有访问计数功能的，是否需要设计为 SearchLogEnable 中的 hitcount 具备与否对它无影响?
 
             string strSaveAs = Request.QueryString["saveas"];
             bool bSaveAs = false;

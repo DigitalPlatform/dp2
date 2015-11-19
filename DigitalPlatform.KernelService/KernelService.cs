@@ -9,6 +9,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 // using System.ServiceProcess;
+using System.ServiceModel.Channels;
 
 using DigitalPlatform;
 using DigitalPlatform.rms;
@@ -16,7 +17,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
-using System.ServiceModel.Channels;
 
 namespace dp2Kernel
 {
@@ -2109,6 +2109,9 @@ namespace dp2Kernel
             }
             catch (Exception ex)
             {
+                if (ex is TailNumberException)
+                    app.ActivateWorker();
+
                 string strErrorText = "WriteRes() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
 

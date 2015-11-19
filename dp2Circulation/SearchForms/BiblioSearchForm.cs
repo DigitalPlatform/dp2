@@ -512,7 +512,6 @@ Keys keyData)
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 bClear = false;
 
-
             // 修改窗口标题
             this.Text = "书目查询 逻辑检索";
 
@@ -574,6 +573,7 @@ Keys keyData)
                 if (nRet == -1)
                     goto ERROR1;
 
+                channel.Timeout = new TimeSpan(0, 5, 0);
                 long lRet = channel.Search(stop,
                     strQueryXml,
                     "default",

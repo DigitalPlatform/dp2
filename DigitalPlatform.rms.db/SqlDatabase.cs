@@ -5522,51 +5522,58 @@ namespace DigitalPlatform.rms
 
         // 检查是否要自动升级 SQL 数据库结构
         // 为records表增加newdptimestamp列
+        // return:
+        //      -1  一般错误
+        //      -2  连接错误
+        //      0   成功
         internal override int UpdateStructure(out string strError)
         {
             strError = "";
 
             if (this.container.SqlServerType == SqlServerType.MsSqlServer)
             {
-                SqlConnection connection = new SqlConnection(this.m_strConnString);
-                connection.Open();
                 try
                 {
-                    /*
-                    string strCommand = "use " + this.m_strSqlDbName + "\n"
-                        + "IF NOT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_name = 'records' and column_name = 'newdptimestamp')"
-                        + "begin\n"
-                        + "ALTER TABLE records ADD [newdptimestamp] [nvarchar] (100) NULL\n"
-                        + "end\n"
-                        + "IF NOT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_name = 'records' and column_name = 'filename')"
-                        + "begin\n"
-                        + "ALTER TABLE records ADD [filename] [nvarchar] (255) NULL\n"
-                        + ", [newfilename] [nvarchar] (255) NULL\n"
-                        + "end\n"
-                        + "use master\n";
-                     * */
-                    string strCommand = "use " + this.m_strSqlDbName + "\n"
-        + "IF NOT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_name = 'records' and column_name = 'newdptimestamp')"
-        + "begin\n"
-        + "ALTER TABLE records ADD [newdptimestamp] [nvarchar] (100) NULL\n"
-        + ", [filename] [nvarchar] (255) NULL\n"
-        + ", [newfilename] [nvarchar] (255) NULL\n"
-        + "end\n"
-        + "use master\n";
+                    using (SqlConnection connection = new SqlConnection(this.m_strConnString))
+                    {
+                        connection.Open();
 
-                    SqlCommand command = new SqlCommand(strCommand,
-                        connection);
-                    try
-                    {
-                        command.ExecuteNonQuery();
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "增加 newdptimestamp 列时出错.\r\n"
-                            + ex.Message + "\r\n"
-                            + "SQL命令:\r\n"
-                            + strCommand;
-                        return -1;
+                        /*
+                        string strCommand = "use " + this.m_strSqlDbName + "\n"
+                            + "IF NOT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_name = 'records' and column_name = 'newdptimestamp')"
+                            + "begin\n"
+                            + "ALTER TABLE records ADD [newdptimestamp] [nvarchar] (100) NULL\n"
+                            + "end\n"
+                            + "IF NOT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_name = 'records' and column_name = 'filename')"
+                            + "begin\n"
+                            + "ALTER TABLE records ADD [filename] [nvarchar] (255) NULL\n"
+                            + ", [newfilename] [nvarchar] (255) NULL\n"
+                            + "end\n"
+                            + "use master\n";
+                         * */
+                        string strCommand = "use " + this.m_strSqlDbName + "\n"
+            + "IF NOT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_name = 'records' and column_name = 'newdptimestamp')"
+            + "begin\n"
+            + "ALTER TABLE records ADD [newdptimestamp] [nvarchar] (100) NULL\n"
+            + ", [filename] [nvarchar] (255) NULL\n"
+            + ", [newfilename] [nvarchar] (255) NULL\n"
+            + "end\n"
+            + "use master\n";
+
+                        SqlCommand command = new SqlCommand(strCommand,
+                            connection);
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "增加 newdptimestamp 列时出错.\r\n"
+                                + ex.Message + "\r\n"
+                                + "SQL命令:\r\n"
+                                + strCommand;
+                            return -1;
+                        }
                     }
                 }
                 catch (SqlException ex)
@@ -5575,6 +5582,11 @@ namespace DigitalPlatform.rms
                     if (ex.Errors is SqlErrorCollection)
                         return 0;
                      * */
+                    if (ContainsErrorCode(ex, 2) == true)
+                    {
+                        strError = ex.Message;
+                        return -2;
+                    }
 
                     strError = "2: " + ex.Message;
                     return -1;
@@ -5584,12 +5596,7 @@ namespace DigitalPlatform.rms
                     strError = "3: " + ex.Message;
                     return -1;
                 }
-                finally // 连接
-                {
-                    connection.Close();
-                }
             }
-
             return 0;
         }
 

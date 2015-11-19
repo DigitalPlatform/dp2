@@ -788,7 +788,7 @@ Stack:
             if (Stop != null) // 脱离关联
             {
                 Stop.Unregister(true);
-                Stop = null;
+                // Stop = null;
             }
 
             if (this._channelPool != null)

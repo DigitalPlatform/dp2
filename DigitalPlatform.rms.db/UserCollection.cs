@@ -68,7 +68,6 @@ namespace DigitalPlatform.rms
             {
                 // 清空成员
                 this.Clear();
-
             }
             finally
             {

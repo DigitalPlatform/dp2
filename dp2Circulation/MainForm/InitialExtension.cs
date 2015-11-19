@@ -870,6 +870,24 @@ MessageBoxDefaultButton.Button1);
             return true;
         }
 
+        static long GetUserDiskFreeSpace()
+        {
+             string strUserFolder =  Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+             return GetTotalFreeSpace(Path.GetPathRoot(strUserFolder));
+        }
+
+        static long GetTotalFreeSpace(string driveName)
+        {
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
+            {
+                if (drive.IsReady && drive.Name == driveName)
+                {
+                    return drive.TotalFreeSpace;
+                }
+            }
+            return -1;
+        }
+
         // 程序启动时候需要执行的初始化操作
         // 这些操作只需要执行一次。也就是说，和登录和连接的服务器无关。如果有关，则要放在 InitialProperties() 中
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
@@ -943,6 +961,12 @@ MessageBoxDefaultButton.Button1);
             this.MenuItem_upgradeFromDisk.Visible = !ApplicationDeployment.IsNetworkDeployed;
 
             OpenBackgroundForm();
+
+            if (GetUserDiskFreeSpace() < 1024*1024*10)
+            {
+                Program.PromptAndExit(this, "用户目录所在硬盘剩余空间太小(已小于10M)。请先腾出足够空间，再重新启动 dp2circulation");
+                return;
+            }
 
             {
                 // 2013/6/16
