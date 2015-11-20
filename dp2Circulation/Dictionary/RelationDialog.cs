@@ -150,6 +150,8 @@ namespace dp2Circulation
             CloseFloatingMessage();
         }
 
+        #region FloatingMessage
+
         public void CloseFloatingMessage()
         {
             if (_floatingMessage != null)
@@ -206,6 +208,8 @@ bool bClickClose = false)
             }
         }
 
+        #endregion
+
         void EnableControls(bool bEnable)
         {
             foreach(ToolStripItem item in this.toolStrip1.Items)
@@ -215,6 +219,71 @@ bool bClickClose = false)
                     item.Enabled = bEnable;
             }
         }
+
+        #region 外部接口
+
+        public List<RelationControl> RelationControls
+        {
+            get
+            {
+                List<RelationControl> results = new List<RelationControl>();
+                foreach(RelationControl control in this.flowLayoutPanel_relationList.Controls)
+                {
+                    results.Add(control);
+                }
+
+                return results;
+            }
+        }
+
+        public static string BuildDebugInfo(RelationDialog dlg)
+        {
+            StringBuilder text = new StringBuilder();
+            List<RelationControl> controls = dlg.RelationControls;
+
+            // text.Append("*** 书目记录路径 " + strBiblioRecPath + "\r\n");
+
+            text.Append("* 位数调整 " + dlg.ExpandLevel + "\r\n\r\n");
+
+            int i = 0;
+            foreach(RelationControl control in controls)
+            {
+                RelationDialog.ControlInfo info = (RelationDialog.ControlInfo)control.Tag;
+
+                text.Append("* 关系"+(i+1)+":\r\n");
+                text.Append(" 库名=[" + info.Relation.DbName + "] \r\n");
+                text.Append(" 源分类号=[" + control.SourceTextOrigin + "] \r\n");
+                text.Append(" 源分类号(缩位后的)=[" + control.SourceText + "] \r\n");
+                text.Append(" 目标分类号(自动选定)=[" + control.TargetText + "] \r\n");
+
+                text.Append(" 命中事项("+info.Rows.Count+"):\r\n");
+                int j = 0;
+                foreach(DpRow row in info.Rows)
+                {
+                    text.Append(
+                        "   " + (j+1).ToString() + ") " + BuildRowLine(row) + "\r\n");
+                    j++;
+                }
+
+                i++;
+            }
+
+            text.Append("\r\n\r\n");
+
+            return text.ToString();
+        }
+
+        static string BuildRowLine(DpRow row)
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append("source_key 源=[" + row[RelationDialog.COLUMN_KEY].Text + "] ");
+            text.Append("target_key 目标=[" + row[RelationDialog.COLUMN_REL].Text + "] ");
+            text.Append("weight权值 =[" + row[RelationDialog.COLUMN_WEIGHT].Text + "] ");
+            text.Append("level级别 =[" + row[RelationDialog.COLUMN_LEVEL].Text + "] ");
+            return text.ToString();
+        }
+
+        #endregion
 
         int _processing = 0;
 
@@ -296,6 +365,7 @@ bool bClickClose = false)
             public int Weight = 0;   // 权值之和
             public List<string> SourceClassTypes = new List<string>(); // 源分类号类型。例如 "DDC"
             public List<RowWrapper> Wrappers = new List<RowWrapper>();
+            public double ClusterWeight = 0;    // 聚集权重
         }
 
         /*
@@ -366,6 +436,7 @@ bool bClickClose = false)
                         else
                         {
                             current = new Merged();
+                            current.Rel = wrapper.Row[COLUMN_REL].Text;
                             merged_list.Add(current);
                         }
 
@@ -384,6 +455,7 @@ bool bClickClose = false)
                         Debug.Assert(item != null, "");
                     }
 #endif
+                    SetClusterWeight(merged_list);
 
                     // merged_list 按照 weight 排序。大在前
                     merged_list.Sort((x, y) =>
@@ -394,13 +466,13 @@ bool bClickClose = false)
                         // 来源于 LCC 的靠前
                         bool bRet1 = x.SourceClassTypes.IndexOf("LCC") != -1;
                         bool bRet2 = y.SourceClassTypes.IndexOf("LCC") != -1;
-                        if (bRet1 == true && bRet2 == true)
-                            return 0;
-                        if (bRet1 == true)
+                        if (bRet1 == true && bRet2 == false)
                             return -1;
-                        if (bRet2 == true)
+                        if (bRet2 == true && bRet1 == false)
                             return 1;
-                        return 0;
+                        Debug.Assert(bRet1 == bRet2, "");
+                        double ret = x.ClusterWeight - y.ClusterWeight;
+                        return -1*((int)ret);
                     });
 
                     // 选定第一个
@@ -415,6 +487,51 @@ bool bClickClose = false)
 
             RefreshAllTargetText();
             return 0;
+        }
+
+        // 为 Merged 队列里面的每个事项设置 聚集权重
+        // 所谓聚集权重，就是对一个事项，评估其余事项的偏向性。第一级字符每出现一次，增加 1，第二级字符每出现一次，增加 0.1；然后是 0.01 等，类推
+        static void SetClusterWeight(List<Merged> merged_list)
+        {
+            foreach(Merged current in merged_list)
+            {
+                SetClusterWeight(merged_list, current);
+            }
+        }
+
+        static void SetClusterWeight(List<Merged> merged_list, Merged start)
+        {
+            string strStartClass = start.Rel;
+            double total_weight = 0;
+            for (int key_length = 1; key_length<strStartClass.Length;key_length++ )
+            {
+                string strLead = strStartClass.Substring(0, key_length);
+                double weight_facter = GetWeightFacter(key_length);
+                int nHitCount = 0;
+                foreach (Merged current in merged_list)
+                {
+                    if (current == start)
+                        continue;
+                    if (current.Rel.StartsWith(strLead) == true)
+                    {
+                        total_weight += weight_facter;
+                        nHitCount++;
+                    }
+                }
+                if (nHitCount == 0)
+                    break;  // 某一轮一次也没有匹配的，就遁出
+            }
+            start.ClusterWeight = total_weight;
+        }
+
+        static double GetWeightFacter(int length)
+        {
+            double result = 10;
+            for(int i=0;i<length;i++)
+            {
+                result = result / 10;
+            }
+            return result;
         }
 
         static string GetSourceClassType(string strDbName)
@@ -1231,7 +1348,7 @@ bool bClickClose = false)
         }
 
         // RelationControl 所携带的附加信息
-        class ControlInfo
+        public class ControlInfo
         {
             // 对照关系定义
             public Relation Relation = null;

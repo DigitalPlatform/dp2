@@ -627,6 +627,7 @@ string strUserName = ".")
         /// <param name="e">事件参数</param>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            // 在这里保存。如果靠后调用，可能会遇到 base.OnFormClosed() 里面相关事件被卸掉的问题
             if (this.MainForm != null && this.MainForm.AppInfo != null
     && Floating == false && this.SupressSizeSetting == false)
             {
