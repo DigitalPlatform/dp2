@@ -107,7 +107,9 @@ namespace DigitalPlatform.CirculationClient
             {
                 if (wrapper.InUsing == false
                     && wrapper.Channel.Url == strUrl
-                    && wrapper.Channel.UserName == strUserName)
+                    && (string.IsNullOrEmpty(wrapper.Channel.UserName) == true 
+                    || wrapper.Channel.UserName == strUserName)
+                    )
                 {
                     if (bAutoSetUsing == true)
                         wrapper.InUsing = true;

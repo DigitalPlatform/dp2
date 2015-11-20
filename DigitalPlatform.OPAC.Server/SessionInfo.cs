@@ -247,10 +247,15 @@ namespace DigitalPlatform.OPAC.Server
             // 2015/6/11
             if (string.IsNullOrEmpty(strParam) == true)
             {
-                string strParameters = "location=#opac@" + this.ClientIP;
-                if (m_bIsReader == true)
-                    strParameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
-                channel.Param = strParameters;  // Tag
+                if (string.IsNullOrEmpty(this.m_strParameters) == false)
+                    channel.Param = this.m_strParameters;   // 2015/11/20 SSO Login 会这么用
+                else
+                {
+                    string strParameters = "location=#opac@" + this.ClientIP;
+                    if (m_bIsReader == true)
+                        strParameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
+                    channel.Param = strParameters;  // Tag
+                }
             }
             else
                 channel.Param = strParam;
@@ -745,6 +750,13 @@ namespace DigitalPlatform.OPAC.Server
             {
                 strError = "当前登录的用户不是读者类型";
                 return -2;
+            }
+
+            // 2015/11/20
+            if (this.UserID.IndexOf(":") != -1)
+            {
+                strError = "this.UserID '"+this.UserID+"' 中不应包含冒号";
+                return -1;
             }
 
             Debug.Assert(this.UserID.IndexOf(":") == -1, "UserID中不能包含冒号");
