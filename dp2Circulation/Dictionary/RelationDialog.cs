@@ -88,7 +88,7 @@ namespace dp2Circulation
         }
 
         // 作为模式对话框打开的时候，传递给 Process() 函数的 strStyle 值
-        string _defaultStyle = "auto_select,shangtu"; // exact_match
+        string _defaultStyle = "auto_select,shangtu,expand_2"; // exact_match
         //                  shangtu 表示使用上图专用的算法
         //                  expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
         //                  exact_match 表示精确一致检索。当 exact_match 结合上 expand_all_search 时，中途都是前方一致的，最后一次才会精确一致
@@ -215,7 +215,8 @@ bool bClickClose = false)
             foreach(ToolStripItem item in this.toolStrip1.Items)
             {
                 if (item != this.toolStripButton_stop
-                    && item != this.toolStripLabel_message)
+                    && item != this.toolStripLabel_message
+                    && item != this.toolStripButton_exact)
                     item.Enabled = bEnable;
             }
         }
@@ -288,7 +289,7 @@ bool bClickClose = false)
         int _processing = 0;
 
         // parameters:
-        //      strStyle auto_select/remove_dup/select_top_weight
+        //      strStyle auto_select/expand_1/expand_2
         public void Process(string strStyle 
             // = "auto_select,expand_all_search"
             )
@@ -310,9 +311,14 @@ bool bClickClose = false)
                 if (nRet == -1)
                     goto ERROR1;
 
-                this.ExpandLevel = 1;  // 1 表示不截断的精确一致; 0 表示不截断的前方一致; -1 表示截断一个字符，前方一致
-                while (true)
+                bool bExpand_2 = StringUtil.IsInList("expand_2", strStyle);
+
+                if (bExpand_2 == true)
                 {
+                    this.toolStripButton_expand_1.Checked = false;
+                    this.toolStripButton_expand_2.Checked = true;
+
+                    this.ExpandLevel = 2;
                     // 针对所有关系，检索出事项，并存储起来备用
                     // return:
                     //      -2  key 已经截断到极限
@@ -321,11 +327,29 @@ bool bClickClose = false)
                     nRet = SearchAll(strStyle, this.ExpandLevel, out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    if (nRet == -2)
-                        break;
-                    if (nRet > 0)
-                        break;
-                    this.ExpandLevel--;
+                }
+                else
+                {
+                    this.toolStripButton_expand_1.Checked = true;
+                    this.toolStripButton_expand_2.Checked = false;
+
+                    this.ExpandLevel = 1;  // 1 表示不截断的精确一致; 0 表示不截断的前方一致; -1 表示截断一个字符，前方一致
+                    while (true)
+                    {
+                        // 针对所有关系，检索出事项，并存储起来备用
+                        // return:
+                        //      -2  key 已经截断到极限
+                        //      -1  出错
+                        //      >=0 命中总数
+                        nRet = SearchAll(strStyle, this.ExpandLevel, out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == -2)
+                            break;
+                        if (nRet > 0)
+                            break;
+                        this.ExpandLevel--;
+                    }
                 }
 
                 // 选取第一个关系，填充事项列表
@@ -1204,7 +1228,7 @@ bool bClickClose = false)
             if (nDelta != 0)
                 return -1 * nDelta; // 降序
 
-            // 级次一样的，还要看是否精确命中。
+            // 级次一样的，还要看是否精确命中。TODO: 这个要考虑到最后阶段
             string strKey1 = x[COLUMN_KEY].Text;
             string strKey2 = y[COLUMN_KEY].Text;
 
@@ -1244,7 +1268,8 @@ bool bClickClose = false)
 
         // 针对所有关系，检索出事项，并存储起来备用
         // parameters:
-        //      strStyle    expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
+        //      strStyle    
+        //      nExpandLevel    2 表示每个检索词独立自动截断探索; 1 表示不截断的精确一致; 0 表示不截断的前方一致; -1 表示截断一个字符，前方一致
         // return:
         //      -2  key 已经截断到极限
         //      -1  出错
@@ -1294,8 +1319,17 @@ bool bClickClose = false)
                             key = key.Substring(0, nLength);
                         }
 
-                            nKeyCount++;
-                        // string strOutputKey = "";
+                        nKeyCount++;
+
+                        string strOneStyle = "";
+                        if (nExpandLevel == 2)
+                            strOneStyle = "auto_expand";
+                        else if (nExpandLevel == 1)
+                            strOneStyle = "exact";
+                        else
+                            strOneStyle = "left";
+
+                        string strOutputKey = "";
                         List<ResultItem> results = null;
                         // 针对一个 key 字符串进行检索
                         // return:
@@ -1305,15 +1339,14 @@ bool bClickClose = false)
                         int nRet = SearchOneKey(
                     info.Relation,
                     key,
-                    nExpandLevel == 1 ? "exact" : "left",
-
-                    // out strOutputKey,
+                    strOneStyle,
+                    out strOutputKey,
                     out results,
                     out strError);
                         if (nRet == -1)
                             return -1;
 
-                        control.SourceText = key;    // strOutputKey;
+                        control.SourceText = strOutputKey;
 
                         List<DpRow> rows = null;
                         nRet = PrepareRows(control,
@@ -1377,6 +1410,7 @@ bool bClickClose = false)
 
         // 针对一个 key 字符串进行检索
         // parameters:
+        //      strMatchStyle   auto_expand/exact/left 分别是自动截断探索/精确一致/前方一致
         //      strStyle    expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
         //                  exact_match 表示精确一致检索。当 exact_match 结合上 expand_all_search 时，中途都是前方一致的，最后一次才会精确一致
         //      strOutputKey    [out]经过加工后的 key。可能和 strKey 内容不同
@@ -1388,13 +1422,13 @@ bool bClickClose = false)
             string strKey,
             // string strStyle,
             string strMatchStyle,
-            // out string strOutputKey,
+            out string strOutputKey,
             out List<ResultItem> results,
             out string strError)
         {
             strError = "";
             results = new List<ResultItem>();
-            // strOutputKey = strKey;
+            strOutputKey = strKey;
 
             if (string.IsNullOrEmpty(strKey) == true)
             {
@@ -1484,12 +1518,47 @@ bool bClickClose = false)
             }
 #endif
             List<SearchItem> keys = new List<SearchItem>();
+
+            if (strMatchStyle == "exact" || strMatchStyle == "left")
             {
                 SearchItem key = new SearchItem();
                 key.Key = strKey;
                 key.MatchStyle = strMatchStyle; // "exact";
                 key.Style = "stop";
                 keys.Add(key);
+            }
+            else if (strMatchStyle == "auto_expand")
+            {
+                // 先检索较长的 key
+                for (int i = strKey.Length; i > 0; i--)
+                {
+                    if (i == strKey.Length)
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey;
+                        key.MatchStyle = "exact";
+                        key.Style = "stop";
+                        keys.Add(key);
+                    }
+
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey.Substring(0, i);
+
+                        key.MatchStyle = "left";
+                        if (i < strKey.Length)
+                            key.Style = "stop"; // 命中则停止探索
+                        else
+                            key.Style = ""; // 如果是最长的 key，则不精确检索即便命中也不停止后面的继续探索
+                        keys.Add(key);
+                    }
+
+                }
+            }
+            else
+            {
+                strError = "无法识别的 strMatchStyle ["+strMatchStyle+"]";
+                return -1;
             }
 
             // 用于去重
@@ -1508,7 +1577,7 @@ bool bClickClose = false)
                     }
 
                     // string strPartKey = strKey.Substring(0, i);
-                    List<string> temp = new List<string>();
+                    List<string> temp_results = new List<string>();
                     // return:
                     //      -1  出错
                     //      0   没有找到
@@ -1517,13 +1586,13 @@ bool bClickClose = false)
                         key.Key,
                         key.MatchStyle,  // "left",
                         MaxHitCount + 1,
-                        ref temp,
+                        ref temp_results,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
                     // 去重并加入最后集合
-                    foreach (string s in temp)
+                    foreach (string s in temp_results)
                     {
                         string strRecPath = "";
                         string strXml = "";
@@ -1538,7 +1607,10 @@ bool bClickClose = false)
                     }
 
                     if (key.Style == "stop" && nRet > 0)
+                    {
+                        strOutputKey = key.Key; // 实际命中的 key
                         break;
+                    }
 
 #if NO
                     // 在扩展检索情形下，如果一次检索命中结果超过极限，说明还需要继续检索下一个 key(这是担心结果集不足以概括更下级的类目)。继续检索下去直到一次检索的结果数量小于极限
@@ -1839,11 +1911,17 @@ strHtml2 +
             }
         }
 
-        private void toolStripButton_expandAll_Click(object sender, EventArgs e)
+        private void toolStripButton_expand_1_Click(object sender, EventArgs e)
         {
+#if NO
             string strStyle = _defaultStyle;
             StringUtil.RemoveFromInList("expand_search", true, ref strStyle);
             StringUtil.SetInList(ref strStyle, "expand_all_search", true);
+            this.Process(strStyle);
+#endif
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_2", true, ref strStyle);
+            StringUtil.SetInList(ref strStyle, "expand_1", true);
             this.Process(strStyle);
         }
 
@@ -1855,11 +1933,17 @@ strHtml2 +
             this.Process(strStyle);
         }
 
-        private void toolStripButton_expand_search_Click(object sender, EventArgs e)
+        private void toolStripButton_expand_2_Click(object sender, EventArgs e)
         {
+#if NO
             string strStyle = _defaultStyle;
             StringUtil.RemoveFromInList("expand_all_search", true, ref strStyle);
             StringUtil.SetInList(ref strStyle, "expand_search", true);
+            this.Process(strStyle);
+#endif
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_1", true, ref strStyle);
+            StringUtil.SetInList(ref strStyle, "expand_2", true);
             this.Process(strStyle);
         }
 
