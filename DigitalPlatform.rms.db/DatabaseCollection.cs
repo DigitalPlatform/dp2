@@ -561,12 +561,13 @@ namespace DigitalPlatform.rms
                     File.Copy(this.m_strDbsCfgFilePath, strBackupFilename, true);
                 }
 
-                XmlTextWriter w = new XmlTextWriter(this.m_strDbsCfgFilePath,
-                    Encoding.UTF8);
-                w.Formatting = Formatting.Indented;
-                w.Indentation = 4;
-                m_dom.WriteTo(w);
-                w.Close();
+                using (XmlTextWriter w = new XmlTextWriter(this.m_strDbsCfgFilePath,
+                    Encoding.UTF8))
+                {
+                    w.Formatting = Formatting.Indented;
+                    w.Indentation = 4;
+                    m_dom.WriteTo(w);
+                }
 
                 this.Changed = false;
 
@@ -4068,8 +4069,10 @@ namespace DigitalPlatform.rms
             }
             else
             {
-                FileStream s = File.Create(strFilePath);
-                s.Close();
+                using(FileStream s = File.Create(strFilePath))
+                {
+
+                }
                 baOutputTimestamp = DatabaseUtil.CreateTimestampForCfg(strFilePath);
             }
 
@@ -4284,15 +4287,11 @@ namespace DigitalPlatform.rms
             // 5.metadata的长度为目标文件的总长度
             if (bFull == true)
             {
-                Stream s = new FileStream(strNewFilePath,
-                    FileMode.OpenOrCreate);
-                try
-                {
+                using(Stream s = new FileStream(strNewFilePath,
+                    FileMode.OpenOrCreate))
+                { 
+
                     s.SetLength(lTotalLength);
-                }
-                finally
-                {
-                    s.Close();
                 }
 
                 // 用.new临时文件替换直接文件
@@ -5015,19 +5014,14 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                FileStream s = new FileStream(strFilePath,
-                    FileMode.Open);
-                try
-                {
+                using(FileStream s = new FileStream(strFilePath,
+                    FileMode.Open))
+                { 
                     destBuffer = new byte[lOutputLength];
                     s.Seek(lStart, SeekOrigin.Begin);
                     s.Read(destBuffer,
                         0,
                         (int)lOutputLength);
-                }
-                finally
-                {
-                    s.Close();
                 }
             }
             return lTotalLength;

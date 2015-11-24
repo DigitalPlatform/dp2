@@ -626,7 +626,7 @@ namespace dp2Circulation
         // parameters:
         //      strPrinterName  "LPT1"
         /// <summary>
-        /// 获得代表打印机的 StreamWriter 对象
+        /// 获得代表打印机的 StreamWriter 对象。调用者要注意用后释放 StreamWriter 对象
         /// </summary>
         /// <param name="strPrinterName">打印机名字</param>
         /// <param name="encoding">编码方式</param>
@@ -656,7 +656,6 @@ namespace dp2Circulation
             // TODO: 据说这个构造函数被废除了？
             FileStream fs = new FileStream(iHandle, FileAccess.ReadWrite);
             stream = new StreamWriter(fs, encoding); // 用于写文本
-
             return 0;
         }
 

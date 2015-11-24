@@ -92,14 +92,14 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strTargetFileName = strDataDir + "\\xml.txt";
-                StreamWriter sw = new StreamWriter(strTargetFileName,
+                strTargetFileName = Path.Combine(strDataDir, "xml.txt");
+                using (StreamWriter sw = new StreamWriter(strTargetFileName,
     false,	// append
-    System.Text.Encoding.UTF8);
-                sw.Write("XML内容装入DOM时出错: " + ex.Message + "\r\n\r\n" + strXml);
-                sw.Close();
+    System.Text.Encoding.UTF8))
+                {
+                    sw.Write("XML内容装入DOM时出错: " + ex.Message + "\r\n\r\n" + strXml);
+                }
                 webBrowser.Navigate(strTargetFileName);
-
                 return;
             }
 

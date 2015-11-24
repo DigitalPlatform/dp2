@@ -704,9 +704,10 @@ namespace DigitalPlatform.Script
             }
             else 
 			{
-				StreamWriter sw = new StreamWriter(strFileName);
-				sw.WriteLine("");
-				sw.Close();
+                using (StreamWriter sw = new StreamWriter(strFileName))
+                {
+                    sw.WriteLine("");
+                }
 			}
 
 			// 装入listview

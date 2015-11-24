@@ -184,7 +184,6 @@ namespace DigitalPlatform.OPAC.Server
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             this.m_strTempDir = PathUtil.MergePath(app.SessionDir, this.GetHashCode().ToString());
-
         }
 
         // 2015/1/22
@@ -289,6 +288,7 @@ namespace DigitalPlatform.OPAC.Server
             catch
             {
             }
+            // this.ClearFilterTask(); 后面一句 ClearTempFiles() 会删除所有临时文件
             this.ClearTempFiles();
         }
 
@@ -444,9 +444,7 @@ namespace DigitalPlatform.OPAC.Server
             readerinfo.DisplayName = DomUtil.GetElementText(readerdom.DocumentElement,
 "displayName");
 
-
             readerinfo.ReaderDomLastTime = DateTime.Now;
-
         }
 
         public void SetLoginReaderDomChanged()
@@ -506,40 +504,38 @@ namespace DigitalPlatform.OPAC.Server
 
             long lRet = 0;
 
-
-
             string strExistingXml = "";
             CirculationClient.localhost.ErrorCodeValue kernel_errorcode = CirculationClient.localhost.ErrorCodeValue.NoError;
 
             // 注：保存读者记录本来是为上传透着个性头像，修改 preference 等用途提供的。如果用代理帐户做这个操作，就要求代理帐户具有修改读者记录的权限，同时修改哪些字段就得不到限制了。可以考虑在 dp2library，增加一种功能，在代理帐户修改读者记录的时候，模仿读者权限来进行限制？
-                //TempChannel temp = GetTempChannel(this.Password);
-                try
+            //TempChannel temp = GetTempChannel(this.Password);
+            try
+            {
+                lRet = this.Channel.SetReaderInfo(
+                    null,
+                    "change",
+                    this.ReaderInfo.ReaderDomPath,
+                    readerdom.OuterXml,
+                    "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                    this.ReaderInfo.ReaderDomTimestamp,
+                    out strExistingXml,
+                    out strOutputXml,
+                    out strOutputPath,
+                    out output_timestamp,
+                    out kernel_errorcode,
+                    out strError);
+                if (lRet == -1)
                 {
-                    lRet = this.Channel.SetReaderInfo(
-                        null,
-                        "change",
-                        this.ReaderInfo.ReaderDomPath,
-                        readerdom.OuterXml,
-                        "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
-                        this.ReaderInfo.ReaderDomTimestamp,
-                        out strExistingXml,
-                        out strOutputXml,
-                        out strOutputPath,
-                        out output_timestamp,
-                        out kernel_errorcode,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (this.Channel.ErrorCode == CirculationClient.localhost.ErrorCode.TimestampMismatch
-                            || kernel_errorcode == CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
-                            return -2;
-                        return -1;
-                    }
+                    if (this.Channel.ErrorCode == CirculationClient.localhost.ErrorCode.TimestampMismatch
+                        || kernel_errorcode == CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
+                        return -2;
+                    return -1;
                 }
-                finally
-                {
-                    //ReleaseTempChannel(temp);
-                }
+            }
+            finally
+            {
+                //ReleaseTempChannel(temp);
+            }
 
             int nRet = OpacApplication.LoadToDom(strOutputXml,
                 out readerdom,
@@ -725,8 +721,6 @@ namespace DigitalPlatform.OPAC.Server
         }
 #endif
 
-
-
         // 获得当前session中已经登录的读者记录DOM
         // return:
         //      -2  当前登录的用户不是reader类型
@@ -755,7 +749,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2015/11/20
             if (this.UserID.IndexOf(":") != -1)
             {
-                strError = "this.UserID '"+this.UserID+"' 中不应包含冒号";
+                strError = "this.UserID '" + this.UserID + "' 中不应包含冒号";
                 return -1;
             }
 
@@ -888,7 +882,7 @@ namespace DigitalPlatform.OPAC.Server
                 return;
              * */
             // 工作人员也可代替读者进行操作,所以工作人员身份也应该可以Clear...Cache
-            
+
             if (this.ReaderInfo == null)
                 return;
 
@@ -973,7 +967,7 @@ namespace DigitalPlatform.OPAC.Server
                     lCount = lTotalCount - lStart;
 
                 // 处理
-                for(int i=0;i<iteminfos.Length;i++)
+                for (int i = 0; i < iteminfos.Length; i++)
                 {
                     EntityInfo info = iteminfos[i];
 
@@ -1019,7 +1013,7 @@ namespace DigitalPlatform.OPAC.Server
 
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
-                strError = "从书目记录路径 '"+strBiblioRecPath+"' 中无法获得库名部分";
+                strError = "从书目记录路径 '" + strBiblioRecPath + "' 中无法获得库名部分";
                 return -1;
             }
 
@@ -1285,8 +1279,20 @@ namespace DigitalPlatform.OPAC.Server
             return -1;
         }
 
-
         Hashtable FilterTasks = new Hashtable();
+
+        void ClearFilterTask()
+        {
+            string strTempDir = this.GetTempDir();
+
+            foreach(string key in this.FilterTasks.Keys)
+            {
+                FilterTask task = (FilterTask)this.FilterTasks[key];
+                if (task != null)
+                    task.DeleteTempFiles(strTempDir);
+            }
+            this.FilterTasks.Clear();
+        }
 
         public FilterTask FindFilterTask(string strName)
         {
@@ -1296,6 +1302,8 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+        // parameters:
+        //      task    要设置的 FilterTask 对象。如果为 null，表示要删除名字为 strName 的对象
         public void SetFilterTask(string strName, FilterTask task)
         {
             lock (this.FilterTasks)
@@ -1308,6 +1316,7 @@ namespace DigitalPlatform.OPAC.Server
                 if (old_task != null)
                     old_task.DeleteTempFiles(this.GetTempDir());
 
+                // TODO: 是否要定义一个极限值，不让元素数超过这个数目
                 if (task == null)
                     this.FilterTasks.Remove(strName);
                 else

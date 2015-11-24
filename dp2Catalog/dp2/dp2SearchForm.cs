@@ -5232,7 +5232,6 @@ namespace dp2Catalog
 
 
             Stream s = null;
-
             try
             {
                 s = File.Open(MainForm.LastIso2709FileName,
@@ -7679,11 +7678,10 @@ out string strError)
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
+            using(StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
+                System.Text.Encoding.UTF8))
+            { 
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
 
@@ -7711,11 +7709,6 @@ out string strError)
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";

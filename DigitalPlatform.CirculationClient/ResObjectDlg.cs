@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,7 +14,7 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// ±à¼­×ÊÔ´¶ÔÏóµÄ¶Ô»°¿ò
+    /// ç¼–è¾‘èµ„æºå¯¹è±¡çš„å¯¹è¯æ¡†
     /// </summary>
     public partial class ResObjectDlg : Form
     {
@@ -121,7 +121,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        bool m_bResChanged = false; // ¶ÔÏó±»¸Ä±ä¹ı
+        bool m_bResChanged = false; // å¯¹è±¡è¢«æ”¹å˜è¿‡
         public bool ResChanged
         {
             get
@@ -138,7 +138,7 @@ namespace DigitalPlatform.CirculationClient
         {
             if (textBox_localPath.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÎÄ¼ş±¾µØÂ·¾¶");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ–‡ä»¶æœ¬åœ°è·¯å¾„");
                 return;
             }
 
@@ -155,7 +155,7 @@ namespace DigitalPlatform.CirculationClient
         private void button_findLocalPath_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Title = "Ñ¡ÔñÎÄ¼ş";
+            dlg.Title = "é€‰æ‹©æ–‡ä»¶";
             //dlg.InitialDirectory = "c:\\" ;
             //dlg.FileName = itemSelected.Text ;
             dlg.Filter = "All files (*.*)|*.*";
@@ -169,7 +169,7 @@ namespace DigitalPlatform.CirculationClient
 
             this.textBox_localPath.Text = fileInfo.FullName;
             this.textBox_size.Text = Convert.ToString(fileInfo.Length);
-            this.textBox_state.Text = "ÉĞÎ´ÉÏÔØ";
+            this.textBox_state.Text = "å°šæœªä¸Šè½½";
 
 #if NO
             textBox_mime.Text = API.MimeTypeFrom(ReadFirst256Bytes(dlg.FileName),
@@ -188,13 +188,13 @@ namespace DigitalPlatform.CirculationClient
             FileInfo fileInfo = new FileInfo(strObjectFilePath);
             if (fileInfo.Exists == false)
             {
-                strError = "ÎÄ¼ş '"+strObjectFilePath+"' ÉĞ²»´æÔÚ";
+                strError = "æ–‡ä»¶ '"+strObjectFilePath+"' å°šä¸å­˜åœ¨";
                 return -1;
             }
 
             this.textBox_localPath.Text = fileInfo.FullName;
             this.textBox_size.Text = Convert.ToString(fileInfo.Length);
-            this.textBox_state.Text = "ÉĞÎ´ÉÏÔØ";
+            this.textBox_state.Text = "å°šæœªä¸Šè½½";
 
 #if NO
             textBox_mime.Text = API.MimeTypeFrom(ReadFirst256Bytes(strObjectFilePath),
@@ -204,7 +204,7 @@ namespace DigitalPlatform.CirculationClient
             return 0;
         }
 
-        // ¶ÁÈ¡ÎÄ¼şÇ°256bytes
+        // è¯»å–æ–‡ä»¶å‰256bytes
         public static byte[] ReadFirst256Bytes(string strFileName)
         {
             using (FileStream fileSource = File.Open(
@@ -213,10 +213,8 @@ namespace DigitalPlatform.CirculationClient
                 FileAccess.Read,
                 FileShare.ReadWrite))
             {
-
                 byte[] result = new byte[Math.Min(256, fileSource.Length)];
                 fileSource.Read(result, 0, result.Length);
-
                 return result;
             }
         }
@@ -232,7 +230,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// È¨ÏŞÖµÅäÖÃÎÄ¼şÈ«Â·¾¶
+        /// æƒé™å€¼é…ç½®æ–‡ä»¶å…¨è·¯å¾„
         /// </summary>
         public string RightsCfgFileName
         {
@@ -246,7 +244,7 @@ namespace DigitalPlatform.CirculationClient
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.Text = "¶ÔÏóµÄÈ¨ÏŞ";
+            dlg.Text = "å¯¹è±¡çš„æƒé™";
             dlg.PropertyString = this.textBox_rights.Text;
             dlg.CfgFileName = RightsCfgFileName;
             dlg.ShowDialog(this);

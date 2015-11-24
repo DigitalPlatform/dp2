@@ -946,6 +946,7 @@
     <Content Include="template_style\0\total.jpg" />
     <Content Include="template_style\0\userinfoaspx.css" />
     <Content Include="template_style\0\XMLFile.xml" />
+    <Content Include="Test.aspx" />
     <Content Include="testlogin.html" />
     <Content Include="UserInfo.aspx" />
     <Content Include="packages.config" />
@@ -1220,6 +1221,13 @@
     </Compile>
     <Compile Include="StatisChart.aspx.designer.cs">
       <DependentUpon>StatisChart.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Test.aspx.cs">
+      <DependentUpon>Test.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Test.aspx.designer.cs">
+      <DependentUpon>Test.aspx</DependentUpon>
     </Compile>
     <Compile Include="UserInfo.aspx.cs">
       <DependentUpon>UserInfo.aspx</DependentUpon>

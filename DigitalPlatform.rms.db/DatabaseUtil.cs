@@ -618,8 +618,10 @@ namespace DigitalPlatform.rms
             strError = "";
             if (String.IsNullOrEmpty(strXml) == true)
             {
-                Stream s = File.Create(strFileName);
-                s.Close();
+                using(Stream s = File.Create(strFileName))
+                {
+
+                }
                 return 0;
             }
 
@@ -634,11 +636,12 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-            XmlTextWriter w = new XmlTextWriter(strFileName,
-                System.Text.Encoding.UTF8);
-            dom.Save(w);
-            w.Close();
-
+            using (XmlTextWriter w = new XmlTextWriter(strFileName,
+                System.Text.Encoding.UTF8))
+            {
+                dom.Save(w);
+                w.Close();
+            }
             return 0;
         }
 

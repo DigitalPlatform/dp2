@@ -1193,6 +1193,7 @@ namespace DigitalPlatform.LibraryServer
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
         // return:
         //      -1  error
         //      0   file not found
@@ -1207,7 +1208,8 @@ namespace DigitalPlatform.LibraryServer
             string strFilter,
             out long lHintNext,
             out string strXml,
-            ref Stream attachment,
+            // ref Stream attachment,
+            Stream attachment,
             out string strError)
         {
             strError = "";
@@ -1233,7 +1235,7 @@ namespace DigitalPlatform.LibraryServer
                     strFilePath,
                     FileMode.Open,
                     FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
-                    FileShare.ReadWrite);   
+                    FileShare.ReadWrite);
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -1276,45 +1278,45 @@ namespace DigitalPlatform.LibraryServer
                         ////Debug.WriteLine("end read lock 1");
                     }
                 }
-                    // lIndex == -1表示希望获得文件整个的尺寸
-                    if (lIndex == -1)
-                    {
-                        lHintNext = lFileSize;  //  stream.Length;
-                        return 1;   // 成功
-                    }
+                // lIndex == -1表示希望获得文件整个的尺寸
+                if (lIndex == -1)
+                {
+                    lHintNext = lFileSize;  //  stream.Length;
+                    return 1;   // 成功
+                }
 
-                    // 没有暗示，只能从头开始找
-                    if (lHint == -1 || lIndex == 0)
-                    {
-                        // return:
-                        //      -1  error
-                        //      0   成功
-                        //      1   到达文件末尾或者超出
-                        nRet = LocationRecord(stream,
-                            lFileSize,
-                            lIndex,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        if (nRet == 1)
-                            return 2;
-                    }
-                    else
-                    {
-                        // 根据暗示找到
-                        if (lHint == stream.Length)
-                            return 2;
+                // 没有暗示，只能从头开始找
+                if (lHint == -1 || lIndex == 0)
+                {
+                    // return:
+                    //      -1  error
+                    //      0   成功
+                    //      1   到达文件末尾或者超出
+                    nRet = LocationRecord(stream,
+                        lFileSize,
+                        lIndex,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return 2;
+                }
+                else
+                {
+                    // 根据暗示找到
+                    if (lHint == stream.Length)
+                        return 2;
 
-                        if (lHint > stream.Length)
-                        {
-                            strError = "lHint参数值不正确";
-                            return -1;
-                        }
-                        if (stream.Position != lHint)
-                            stream.Seek(lHint, SeekOrigin.Begin);
+                    if (lHint > stream.Length)
+                    {
+                        strError = "lHint参数值不正确";
+                        return -1;
                     }
+                    if (stream.Position != lHint)
+                        stream.Seek(lHint, SeekOrigin.Begin);
+                }
 
-                    //////
+                //////
 
                 // MemoryStream attachment = null; // new MemoryStream();
                 // TODO: 是否可以优化为，先读出XML部分，如果需要再读出attachment? 并且attachment可以按需读出分段
@@ -1325,7 +1327,8 @@ namespace DigitalPlatform.LibraryServer
                 nRet = ReadEnventLog(
                     stream,
                     out strXml,
-                    ref attachment,
+                    // ref attachment,
+                    attachment,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2252,7 +2255,6 @@ out strTargetLibraryCode);
                 info.AttachmentLength = lAttachmentLength;
                 results.Add(info);
 
-
                 lIndex++;
                 lHint = lHintNext;
             }
@@ -2261,7 +2263,6 @@ out strTargetLibraryCode);
             results.CopyTo(records);
             return 1;
         }
-
 
         // 获得一个日志记录
         // parameters:
@@ -2621,6 +2622,8 @@ out strTargetLibraryCode);
 
         // 从日志文件当前位置读出一条日志记录
         // 要读出附件
+        // parameters:
+        //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
         // return:
         //      1   出错
         //      0   成功
@@ -2628,7 +2631,8 @@ out strTargetLibraryCode);
         public static int ReadEnventLog(
             Stream stream,
             out string strXmlBody,
-            ref Stream attachment,
+            // ref Stream attachment,
+            Stream attachment,
             out string strError)
         {
             strError = "";
@@ -2672,7 +2676,8 @@ out strTargetLibraryCode);
             nRet = ReadEntry(
                 stream,
                 out strMetaData,
-                ref attachment,
+                // ref attachment,
+                attachment,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -2975,10 +2980,13 @@ out strTargetLibraryCode);
         }
 
         // 读出一个事项(Stream类型)
+        // parameters:
+        //      streamBody  承载输出的 body 部分的 Stream 对象。如果为 null，表示不输出这部分
         public static int ReadEntry(
             Stream stream,
             out string strMetaData,
-            ref Stream streamBody,
+            // ref Stream streamBody,
+            Stream streamBody,
             out string strError)
         {
             strError = "";
@@ -3074,7 +3082,6 @@ out strTargetLibraryCode);
                             break;
                     }
                 }
-
             }
 
             // 文件指针此时自然在末尾

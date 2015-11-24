@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Windows .Forms ;
 using System.Drawing ;
 using System.Xml ;
@@ -23,13 +23,13 @@ namespace DigitalPlatform.rms.Client
 		public string strFileNo = null;
 	}
 
-	//·şÎñÆ÷ÁĞ±í
+	//æœåŠ¡å™¨åˆ—è¡¨
 	public class HostList:ArrayList
 	{
-		public string m_strFileName;	// XMLÎÄ¼şÃû
+		public string m_strFileName;	// XMLæ–‡ä»¶å
 
 		public ReaderWriterLock m_lock = new ReaderWriterLock();
-		public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+		public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
 		public HostList(string strFileName)
 		{
@@ -37,10 +37,10 @@ namespace DigitalPlatform.rms.Client
 			Load(strFileName);
 		}
 
-		// ¸ù¾İhosturlÕÒµ½Host¶ÔÏó
+		// æ ¹æ®hosturlæ‰¾åˆ°Hostå¯¹è±¡
 		public HostItem GetHost(string strHostUrl)
 		{
-			// ¶Ô±¾listÒª½øĞĞ¶ÁÈ¡µÄ²Ù×÷
+			// å¯¹æœ¬listè¦è¿›è¡Œè¯»å–çš„æ“ä½œ
 			m_lock.AcquireReaderLock(m_nLockTimeout);
 
 			try 
@@ -60,12 +60,12 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ¸ù¾İhosturlÕÒµ½Host¶ÔÏó
+		// æ ¹æ®hosturlæ‰¾åˆ°Hostå¯¹è±¡
 		public HostItem NewHost(string strHostUrl)
 		{
 			if (strHostUrl == "")
 				return null;
-			// ¶Ô±¾listÒª½øĞĞ¶ÁÈ¡µÄ²Ù×÷
+			// å¯¹æœ¬listè¦è¿›è¡Œè¯»å–çš„æ“ä½œ
 			m_lock.AcquireWriterLock(m_nLockTimeout);
 
 			try 
@@ -74,7 +74,7 @@ namespace DigitalPlatform.rms.Client
 				{
 					HostItem obj = (HostItem)this[i];
 					if (obj.m_strHostURL == strHostUrl)
-						return obj;	// ÒÑ¾­ÓĞÁË
+						return obj;	// å·²ç»æœ‰äº†
 				}
 
 				HostItem newhost = new HostItem();
@@ -93,13 +93,13 @@ namespace DigitalPlatform.rms.Client
 		public HostList()
 		{}
 
-		//¸ù¾İ¸ù½Úµã£¬´´½¨HostList
+		//æ ¹æ®æ ¹èŠ‚ç‚¹ï¼Œåˆ›å»ºHostList
 		public static HostList CreateBy(XmlNode nodeRoot)
 		{
 			HostList hostlistObj = new HostList();
 			XmlNodeList nodes = nodeRoot.SelectNodes("host");
 
-			// ¶ÔlistÒª½øĞĞ²åÈëÔªËØµÄ²Ù×÷
+			// å¯¹listè¦è¿›è¡Œæ’å…¥å…ƒç´ çš„æ“ä½œ
 			hostlistObj.m_lock.AcquireWriterLock(m_nLockTimeout);
 
 			try 
@@ -125,9 +125,9 @@ namespace DigitalPlatform.rms.Client
 
 			strCode = "<root";
 			strCode += " >";
-			// ¹ØĞÄÏÂ¼¶
+			// å…³å¿ƒä¸‹çº§
 
-			// ¶Ô±¾listÒª½øĞĞ¶ÁÈ¡µÄ²Ù×÷
+			// å¯¹æœ¬listè¦è¿›è¡Œè¯»å–çš„æ“ä½œ
 			m_lock.AcquireReaderLock(m_nLockTimeout);
 			try 
 			{
@@ -155,24 +155,24 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		//´ÓXMLÎÄ¼şÖĞ×°ÔØÈ«²¿ĞÅÏ¢
-		//strFileName: XmlLÎÄ¼şÃû
+		//ä»XMLæ–‡ä»¶ä¸­è£…è½½å…¨éƒ¨ä¿¡æ¯
+		//strFileName: XmlLæ–‡ä»¶å
 		public void Load(string strFileName)
 		{
 			XmlDocument dom = new XmlDocument();
 			dom.Load(strFileName);
-			// ´Ó<root>ÏÂÃæµÄ<user>ÔªËØ³õÊ¼»¯User¶ÔÏó
+			// ä»<root>ä¸‹é¢çš„<user>å…ƒç´ åˆå§‹åŒ–Userå¯¹è±¡
 			CreateBy(dom.DocumentElement);
 		}
 
 
-		//¹©Íâ²¿µ÷µÄ±£´æµ½ÎÄ¼şµÄº¯Êı
+		//ä¾›å¤–éƒ¨è°ƒçš„ä¿å­˜åˆ°æ–‡ä»¶çš„å‡½æ•°
 		public void Save()
 		{
 			this.Save(this.m_strFileName );
 		}
 
-		// ±£´æÈ«²¿ĞÅÏ¢µ½xmlÎÄ¼ş
+		// ä¿å­˜å…¨éƒ¨ä¿¡æ¯åˆ°xmlæ–‡ä»¶
 		private void Save(string strFileName)
 		{
 			if (strFileName == null)
@@ -184,22 +184,23 @@ namespace DigitalPlatform.rms.Client
 			strCode = "<?xml version='1.0' encoding='utf-8' ?>"
 				+ GetXml();
 
-			StreamWriter sw = new StreamWriter(strFileName, 
-				false,	// overwrite
-				System.Text.Encoding.UTF8);
-			sw.Write(strCode);
-			sw.Close();
+            using (StreamWriter sw = new StreamWriter(strFileName,
+                false,	// overwrite
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strCode);
+            }
 		}
 	}
 
 
-	// ·şÎñÆ÷¶ÔÏó
+	// æœåŠ¡å™¨å¯¹è±¡
 	public class HostItem
 	{
 		public string m_strHostURL;
 		public CookieContainer Cookies = new System.Net.CookieContainer();
 		
-		//¸ù¾İnode´´½¨±¾¶ÔÏó
+		//æ ¹æ®nodeåˆ›å»ºæœ¬å¯¹è±¡
 		public static HostItem CreateBy (XmlNode node)
 		{
 			HostItem newHost = new HostItem ();
@@ -208,7 +209,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 		
-		//µÃµ½AttrXml×Ö·û´®
+		//å¾—åˆ°AttrXmlå­—ç¬¦ä¸²
 		public string GetAttrXml()
 		{
 			string strCode;
@@ -217,7 +218,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		//µÃµ½Xml
+		//å¾—åˆ°Xml
 		public string GetXml()
 		{
 			string strCode = "";
@@ -231,12 +232,12 @@ namespace DigitalPlatform.rms.Client
 	}
 
 
-	// ²éÑ¯Ê½¶ÔÏó
+	// æŸ¥è¯¢å¼å¯¹è±¡
 	public class QueryClient
 	{
 	
-		// ÖĞ¼ä¸ñÊ½¼ìË÷Ê½ ×ª»»Îª dprmsÏµÍ³Õı¹æµÄXML¼ìË÷Ê½
-		// ËùÎ½ÖĞ¼ä¸ñÊ½£¬¾ÍÊÇ target|query word
+		// ä¸­é—´æ ¼å¼æ£€ç´¢å¼ è½¬æ¢ä¸º dprmsç³»ç»Ÿæ­£è§„çš„XMLæ£€ç´¢å¼
+		// æ‰€è°“ä¸­é—´æ ¼å¼ï¼Œå°±æ˜¯ target|query word
 		public static string ProcessQuery2Xml(
 			string strQuery,
 			string strLanguage)
@@ -310,7 +311,7 @@ namespace DigitalPlatform.rms.Client
 					}
 				}
 
-                // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
+                // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
 				strXml += "<item><word>"
                     +StringUtil.GetXmlStringSimple(strWord)+
 					"</word><match>"+strMatch+
@@ -319,7 +320,7 @@ namespace DigitalPlatform.rms.Client
 					"</dataType></item>";
 			}
 			if (strLanguage == "")
-				MessageBox.Show ("ÓïÑÔÒÑÑ¡ÖĞ£¬ÔõÃ´Îª¿ÕÄØ£¿");
+				MessageBox.Show ("è¯­è¨€å·²é€‰ä¸­ï¼Œæ€ä¹ˆä¸ºç©ºå‘¢ï¼Ÿ");
 			strXml = "<target list='"
                 + StringUtil.GetXmlStringSimple(strTarget)     // 2007/9/14
                 +"'>"+strXml+"<lang>"+strLanguage+"</lang></target>";
@@ -327,7 +328,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 		
-		//½«"***-***"²ğ·Ö³ÉÁ½²¿·Ö
+		//å°†"***-***"æ‹†åˆ†æˆä¸¤éƒ¨åˆ†
 		public static int SplitRangeID(string strRange ,
 			out string strID1, 
 			out string strID2)
@@ -357,10 +358,10 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ¸ù¾İ±íÊ¾Ê½£¬µÃµ½²Ù×÷·ûºÍÖµ
+		// æ ¹æ®è¡¨ç¤ºå¼ï¼Œå¾—åˆ°æ“ä½œç¬¦å’Œå€¼
 		// return:
-		//		0	ÓĞ¹ØÏµ²Ù×÷·û
-		//		-1	ÎŞ¹ØÏµ²Ù×÷·û				
+		//		0	æœ‰å…³ç³»æ“ä½œç¬¦
+		//		-1	æ— å…³ç³»æ“ä½œç¬¦				
 		public static int GetPartCondition(string strText,
 			out string strOperator,
 			out string strRealText)
@@ -426,7 +427,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		//½«¸÷Ïî×éºÏ³ÉXMLµÄÒ»Ïî
+		//å°†å„é¡¹ç»„åˆæˆXMLçš„ä¸€é¡¹
 		public static int combination(
 			string strTarget,
 			string strWord,
@@ -474,14 +475,14 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch(Exception ex )
 			{
-				strInfo += "²»ºÏ·¨µÄXML\r\n"+ex.Message ;
+				strInfo += "ä¸åˆæ³•çš„XML\r\n"+ex.Message ;
 				return -1;
 			}
 
 			XmlNodeList listFile = dom.SelectNodes("//file");
 			
 
-			//µÃµ½×î´óµÄÎÄ¼şºÅ
+			//å¾—åˆ°æœ€å¤§çš„æ–‡ä»¶å·
 			int nMaxFileNo = 0;
 			foreach(XmlNode node in listFile)
 			{
@@ -495,41 +496,41 @@ namespace DigitalPlatform.rms.Client
 				}
 			}
 
-			//¼Ó´óÒ»ºÅ
+			//åŠ å¤§ä¸€å·
 			nMaxFileNo ++;
 
-			//Æ´³öÃ¿¸öÎÄ¼şµÄID£¬²¢±£´æµ½xmlÀï
+			//æ‹¼å‡ºæ¯ä¸ªæ–‡ä»¶çš„IDï¼Œå¹¶ä¿å­˜åˆ°xmlé‡Œ
 			ArrayList aFileID = new ArrayList ();
 			for(int i=0;i<aFileName.Count ;i++)
 			{
 				string strFileName = (string)aFileName[i];
 				string strExtention = Path.GetExtension (strFileName);
 				string strFileID = Convert.ToString (nMaxFileNo++)+strExtention;
-				//ÏÈ¸øxmlÀïÉèºÃ
+				//å…ˆç»™xmlé‡Œè®¾å¥½
 				XmlNode nodeFile = listFile[i];
 				DomUtil.SetNodeText (nodeFile,strFileID);
-				//¼Óµ½aFileIDÊı×éÀï£¬ÔÚ´ò°üÊ±ÓÃµ½
+				//åŠ åˆ°aFileIDæ•°ç»„é‡Œï¼Œåœ¨æ‰“åŒ…æ—¶ç”¨åˆ°
 				aFileID.Add (strFileID);
 			}
 
-			long lTotalLength = 0;  //ÄÚÈİ×Ü³¤¶È£¬²»°üÀ¨¿ªÍ·µÄ8¸ö×Ö½Ú
-			//³¤¶È×Ö½ÚÊı×é
+			long lTotalLength = 0;  //å†…å®¹æ€»é•¿åº¦ï¼Œä¸åŒ…æ‹¬å¼€å¤´çš„8ä¸ªå­—èŠ‚
+			//é•¿åº¦å­—èŠ‚æ•°ç»„
 			byte[] bufferLength = new byte[8];
 
-			//¼Ç×¡Ğ´×Ü³¤¶ÈµÄÎ»ÖÃ
+			//è®°ä½å†™æ€»é•¿åº¦çš„ä½ç½®
 			long lPositon = target.Position ;
 
-			//1.¿ªÍ·¿Õ³ö8×Ö½Ú£¬×îºóĞ´×Ü³¤¶È*****************
+			//1.å¼€å¤´ç©ºå‡º8å­—èŠ‚ï¼Œæœ€åå†™æ€»é•¿åº¦*****************
 			target.Write(bufferLength,0,8);
 
-			//2.Ğ´XMlÎÄ¼ş*******************
+			//2.å†™XMlæ–‡ä»¶*******************
 			MemoryStream ms = new MemoryStream ();
 			dom.Save (ms);
 
-			//½«×Ö·û´®×ª»»³É×Ö·ûÊı×é
+			//å°†å­—ç¬¦ä¸²è½¬æ¢æˆå­—ç¬¦æ•°ç»„
 			//byte[] bufferXmlText = System.Text.Encoding.UTF8.GetBytes(strXmlText);
 			
-			//Ëã³öXMLÎÄ¼şµÄ×Ö½ÚÊı
+			//ç®—å‡ºXMLæ–‡ä»¶çš„å­—èŠ‚æ•°
 			long lXmlLength = ms.Length  ;//(long)bufferXmlText.Length;
 			bufferLength =	System.BitConverter.GetBytes(lXmlLength);
 			
@@ -541,8 +542,8 @@ namespace DigitalPlatform.rms.Client
 			StreamUtil.DumpStream (ms,target);
 			lTotalLength += lXmlLength ;
 
-			//3.Ğ´ÎÄ¼ş
-			long lFileLengthTotal = 0;  //È«²¿ÎÄ¼şµÄ³¤¶È,Ò²¿ÉÒÔ¼ÌĞøÓÃlTotalLength£¬µ«ĞÂÉêÇëÒ»¸ö±äÁ¿³öÎÊÌâµÄÇé¿ö¸üĞ¡
+			//3.å†™æ–‡ä»¶
+			long lFileLengthTotal = 0;  //å…¨éƒ¨æ–‡ä»¶çš„é•¿åº¦,ä¹Ÿå¯ä»¥ç»§ç»­ç”¨lTotalLengthï¼Œä½†æ–°ç”³è¯·ä¸€ä¸ªå˜é‡å‡ºé—®é¢˜çš„æƒ…å†µæ›´å°
 			for(int i=0;i<aFileName.Count ;i++)
 			{
 				FileStream streamFile = File.Open ((string)aFileName[i],FileMode.Open);
@@ -554,12 +555,12 @@ namespace DigitalPlatform.rms.Client
 			}
 			lTotalLength += lFileLengthTotal;
 
-			//4.Ğ´×Ü³¤¶È
+			//4.å†™æ€»é•¿åº¦
 			bufferLength = System.BitConverter.GetBytes(lTotalLength);
 			target.Seek (lPositon,SeekOrigin.Begin);
 			target.Write (bufferLength,0,8);
 
-			//½«Ö¸ÕëÒÆµ½×îºó
+			//å°†æŒ‡é’ˆç§»åˆ°æœ€å
 			target.Seek (0,SeekOrigin.End);
 			return 0;
 		}
@@ -567,10 +568,10 @@ namespace DigitalPlatform.rms.Client
 
 
 
-		//½«Ò»Ìõ¼ÇÂ¼¼°°üº¬µÄ¶à¸ö×ÊÔ´ÎÄ¼ş´ò°ü
-		//Ó¦±£Ö¤Íâ²¿°ÑtargetµÄÎ»ÖÃ¶¨ºÃ
-		//0:³É¹¦
-		//-1:³ö´í
+		//å°†ä¸€æ¡è®°å½•åŠåŒ…å«çš„å¤šä¸ªèµ„æºæ–‡ä»¶æ‰“åŒ…
+		//åº”ä¿è¯å¤–éƒ¨æŠŠtargetçš„ä½ç½®å®šå¥½
+		//0:æˆåŠŸ
+		//-1:å‡ºé”™
 		public static int DaBag(string strXmlText,
 			ArrayList aFileItem,
 			Stream target,
@@ -585,122 +586,123 @@ namespace DigitalPlatform.rms.Client
 			}
 			catch(Exception ex )
 			{
-				strInfo += "²»ºÏ·¨µÄXML\r\n"+ex.Message ;
+				strInfo += "ä¸åˆæ³•çš„XML\r\n"+ex.Message ;
 				return -1;
 			}
 
-			long lTotalLength = 0;  //ÄÚÈİ×Ü³¤¶È£¬²»°üÀ¨¿ªÍ·µÄ8¸ö×Ö½Ú
-			//³¤¶È×Ö½ÚÊı×é
+			long lTotalLength = 0;  //å†…å®¹æ€»é•¿åº¦ï¼Œä¸åŒ…æ‹¬å¼€å¤´çš„8ä¸ªå­—èŠ‚
+			//é•¿åº¦å­—èŠ‚æ•°ç»„
 			byte[] bufferLength = new byte[8];
 
-			//¼Ç×¡Ğ´×Ü³¤¶ÈµÄÎ»ÖÃ
+			//è®°ä½å†™æ€»é•¿åº¦çš„ä½ç½®
 			long lPositon = target.Position ;
 
-			//1.¿ªÍ·¿Õ³ö8×Ö½Ú£¬×îºóĞ´×Ü³¤¶È*****************
+			//1.å¼€å¤´ç©ºå‡º8å­—èŠ‚ï¼Œæœ€åå†™æ€»é•¿åº¦*****************
 			target.Write(bufferLength,0,8);
 
-			//2.Ğ´XMlÎÄ¼ş*******************
-			MemoryStream ms = new MemoryStream ();
-			dom.Save (ms);
+			//2.å†™XMlæ–‡ä»¶*******************
+            using (MemoryStream ms = new MemoryStream())
+            {
+                dom.Save(ms);
 
-			//½«×Ö·û´®×ª»»³É×Ö·ûÊı×é
-			//byte[] bufferXmlText = System.Text.Encoding.UTF8.GetBytes(strXmlText);
-			
-			//Ëã³öXMLÎÄ¼şµÄ×Ö½ÚÊı
-			long lXmlLength = ms.Length  ;//(long)bufferXmlText.Length;
-			bufferLength =	System.BitConverter.GetBytes(lXmlLength);
-			
-			target.Write(bufferLength,0,8);
-			lTotalLength += 8;
+                //å°†å­—ç¬¦ä¸²è½¬æ¢æˆå­—ç¬¦æ•°ç»„
+                //byte[] bufferXmlText = System.Text.Encoding.UTF8.GetBytes(strXmlText);
 
-			//target.Write (bufferXmlText,0,lXmlLength);
-			ms.Seek (0,SeekOrigin.Begin );
-			StreamUtil.DumpStream (ms,target);
-			lTotalLength += lXmlLength ;
+                //ç®—å‡ºXMLæ–‡ä»¶çš„å­—èŠ‚æ•°
+                long lXmlLength = ms.Length;//(long)bufferXmlText.Length;
+                bufferLength = System.BitConverter.GetBytes(lXmlLength);
 
-			//3.Ğ´ÎÄ¼ş
-			long lFileLengthTotal = 0;  //È«²¿ÎÄ¼şµÄ³¤¶È,Ò²¿ÉÒÔ¼ÌĞøÓÃlTotalLength£¬µ«ĞÂÉêÇëÒ»¸ö±äÁ¿³öÎÊÌâµÄÇé¿ö¸üĞ¡
+                target.Write(bufferLength, 0, 8);
+                lTotalLength += 8;
+
+                //target.Write (bufferXmlText,0,lXmlLength);
+                ms.Seek(0, SeekOrigin.Begin);
+                StreamUtil.DumpStream(ms, target);
+                lTotalLength += lXmlLength;
+            }
+
+			//3.å†™æ–‡ä»¶
+			long lFileLengthTotal = 0;  //å…¨éƒ¨æ–‡ä»¶çš„é•¿åº¦,ä¹Ÿå¯ä»¥ç»§ç»­ç”¨lTotalLengthï¼Œä½†æ–°ç”³è¯·ä¸€ä¸ªå˜é‡å‡ºé—®é¢˜çš„æƒ…å†µæ›´å°
 			
 			FileItem fileItem = null;
 			for(int i=0;i<aFileItem.Count ;i++)
 			{
 				fileItem = (FileItem)aFileItem[i];
 				//MessageBox.Show (fileItem.strClientPath + " --- " + fileItem.strItemPath + " --- " + fileItem.strFileNo  );
-			
-				FileStream streamFile = File.Open (fileItem.strClientPath ,FileMode.Open);
-				WriteFile(streamFile,
-					fileItem.strFileNo ,
-					target,
-					ref lFileLengthTotal);
-				streamFile.Close ();
+
+                using (FileStream streamFile = File.Open(fileItem.strClientPath, FileMode.Open))
+                {
+                    WriteFile(streamFile,
+                        fileItem.strFileNo,
+                        target,
+                        ref lFileLengthTotal);
+                }
 			}
 
 			lTotalLength += lFileLengthTotal;
 
-			//4.Ğ´×Ü³¤¶È
+			//4.å†™æ€»é•¿åº¦
 			bufferLength = System.BitConverter.GetBytes(lTotalLength);
 			target.Seek (lPositon,SeekOrigin.Begin);
 			target.Write (bufferLength,0,8);
 
-			//½«Ö¸ÕëÒÆµ½×îºó
+			//å°†æŒ‡é’ˆç§»åˆ°æœ€å
 			target.Seek (0,SeekOrigin.End);
 			return 0;
 		}
 
-
-
-		//Ğ´×ÓÎÄ¼şÊı¾İ	×¢.Íâ²¿±£Ö¤°ÑÎ»ÖÃÒÆºÃ
-		//source: ¶ş½øÖÆÁ÷
-		//strID: ¼ÇÂ¼ID
-		//target: Ä¿±êÁ÷
-		//lFileLengthTotal: ÎÄ¼ş×Ü³¤¶È
-		//0: Õı³£µÃµ½ÎÄ¼şÄÚÈİ -1:ÎÄ¼şÃûÎª¿Õ
+		//å†™å­æ–‡ä»¶æ•°æ®	æ³¨.å¤–éƒ¨ä¿è¯æŠŠä½ç½®ç§»å¥½
+		//source: äºŒè¿›åˆ¶æµ
+		//strID: è®°å½•ID
+		//target: ç›®æ ‡æµ
+		//lFileLengthTotal: æ–‡ä»¶æ€»é•¿åº¦
+		//0: æ­£å¸¸å¾—åˆ°æ–‡ä»¶å†…å®¹ -1:æ–‡ä»¶åä¸ºç©º
 		public static int WriteFile(Stream source,
 			string strID,
 			Stream target,
 			ref long lFileLengthTotal)
 		{
-			long lTotalLength = 0;  //×Ü³¤¶È
-			//³¤¶È×Ö½ÚÊı×é
+			long lTotalLength = 0;  //æ€»é•¿åº¦
+			//é•¿åº¦å­—èŠ‚æ•°ç»„
 			byte[] bufferLength = new byte[8];
 
-			//¼Ç×¡Ğ´×Ü³¤¶ÈµÄÎ»ÖÃ
+			//è®°ä½å†™æ€»é•¿åº¦çš„ä½ç½®
 			long lPosition = target.Position ;
 
-			//1.¿ªÍ·¿Õ³ö8×Ö½Ú£¬×îºóĞ´×Ü³¤¶È*****************
+			//1.å¼€å¤´ç©ºå‡º8å­—èŠ‚ï¼Œæœ€åå†™æ€»é•¿åº¦*****************
 			target.Write(bufferLength,0,8);
 
-			//2.ÏÈĞ´Ãû³Æ×Ö·û´®µÄ³¤¶È;
-			//½«×Ö·û´®×ª»»³É×Ö·ûÊı×é
+			//2.å…ˆå†™åç§°å­—ç¬¦ä¸²çš„é•¿åº¦;
+			//å°†å­—ç¬¦ä¸²è½¬æ¢æˆå­—ç¬¦æ•°ç»„
 			byte[] bufferID = System.Text.Encoding.UTF8 .GetBytes(strID);
 			bufferLength = System.BitConverter.GetBytes((long)bufferID.Length);
 			target.Write (bufferLength,0,8);
 			lTotalLength += 8;
 
-			//3.Ğ´Ãû³Æ×Ö·û´®
+			//3.å†™åç§°å­—ç¬¦ä¸²
 			target.Write (bufferID,
 				0,
 				bufferID.Length );
 			lTotalLength += bufferID.Length;
 
-			//4.Ğ´¶ş½øÖÆÎÄ¼ş
+			//4.å†™äºŒè¿›åˆ¶æ–‡ä»¶
 			bufferLength = System.BitConverter.GetBytes(source.Length);
-			//¶ş½øÖÆÎÄ¼şµÄ³¤¶È;
+			//äºŒè¿›åˆ¶æ–‡ä»¶çš„é•¿åº¦;
 			target.Write (bufferLength,0,8);
 			lTotalLength += 8;
-			//Ğ´¶ş½øÖÆÎÄ¼şÄÚÈİ
+			//å†™äºŒè¿›åˆ¶æ–‡ä»¶å†…å®¹
 			source.Seek (0,SeekOrigin.Begin);
 			StreamUtil.DumpStream (source,
 				target);
 			lTotalLength += source.Length ;
 
 
-			//5.·µ»Ø¿ªÍ·Ğ´×Ü³¤¶È
+			//5.è¿”å›å¼€å¤´å†™æ€»é•¿åº¦
 			bufferLength =	System.BitConverter.GetBytes(lTotalLength);
 			target.Seek (lPosition,SeekOrigin.Begin);
 			target.Write (bufferLength,0,8);
 
-			//½«Ö¸ÕëÒÆµ½×îºó
+			//å°†æŒ‡é’ˆç§»åˆ°æœ€å
 			target.Seek (0,SeekOrigin.End);
 			lFileLengthTotal += (lTotalLength+8);
 			return 0;
@@ -709,7 +711,7 @@ namespace DigitalPlatform.rms.Client
 
 
 		/*
-		//½«Ò»¸ö°üÎÄ¼ş·Ö³É·¶Î§¼¯ºÏ
+		//å°†ä¸€ä¸ªåŒ…æ–‡ä»¶åˆ†æˆèŒƒå›´é›†åˆ
 		public static int SplitFile2FragmentList(string strClientFilePath,
 			FragmentList fragmentList)
 		{
@@ -736,7 +738,7 @@ namespace DigitalPlatform.rms.Client
 					FragmentItem fragmentItem = fragmentList.newItem(
 						strClientFilePath,
 						strContentRange,
-						false,    //ÊÇ·ñÁ¢¼´´´½¨ÁÙÊ±ÎÄ¼ş? true:±íÊ¾Á¢¼´¸´ÖÆÁÙÊ±ÎÄ¼ş;false:²»¸´ÖÆ,½¨Òé²»ÒªÁ¢¿Ì¸´ÖÆ£¬µÈµ½·¢°üÊ±ÔÙ¸´ÖÆ
+						false,    //æ˜¯å¦ç«‹å³åˆ›å»ºä¸´æ—¶æ–‡ä»¶? true:è¡¨ç¤ºç«‹å³å¤åˆ¶ä¸´æ—¶æ–‡ä»¶;false:ä¸å¤åˆ¶,å»ºè®®ä¸è¦ç«‹åˆ»å¤åˆ¶ï¼Œç­‰åˆ°å‘åŒ…æ—¶å†å¤åˆ¶
 						out strErrorInfo);
 
 					if (fragmentItem == null)
@@ -745,10 +747,10 @@ namespace DigitalPlatform.rms.Client
 			}
 			else 
 			{
-				// ÎÄ¼ş³ß´çÃ»ÓĞ³¬¹ı°ü³ß´çÏŞÖÆ
+				// æ–‡ä»¶å°ºå¯¸æ²¡æœ‰è¶…è¿‡åŒ…å°ºå¯¸é™åˆ¶
 				FragmentItem fragmentItem = fragmentList.newItem(
 					strClientFilePath,
-					"",	// ¿Õ×Ö·û´®±íÊ¾ÎÄ¼şÖĞÈ«²¿ÄÚÈİ½øÈë
+					"",	// ç©ºå­—ç¬¦ä¸²è¡¨ç¤ºæ–‡ä»¶ä¸­å…¨éƒ¨å†…å®¹è¿›å…¥
 					false,
 					out strErrorInfo);
 				if (fragmentItem == null)

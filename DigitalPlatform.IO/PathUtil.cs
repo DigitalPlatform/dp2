@@ -47,6 +47,29 @@ namespace DigitalPlatform.IO
             return result;
         }
 
+        public static bool GetWindowsMimeType(string ext, out string mime)
+        {
+            mime = "application/octet-stream";
+            // 2015/11/23 增加 using 部分
+            using (Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext))
+            {
+                if (regKey != null)
+                {
+                    object val = regKey.GetValue("Content Type");
+                    if (val != null)
+                    {
+                        string strval = val.ToString();
+                        if (!(string.IsNullOrEmpty(strval) || string.IsNullOrWhiteSpace(strval)))
+                        {
+                            mime = strval;
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
+
         // 根据文件内容和扩展名获得 MIME 类型
         public static string MimeTypeFrom(string strFileName)
         {

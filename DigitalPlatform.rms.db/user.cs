@@ -490,49 +490,48 @@ namespace DigitalPlatform.rms
             DbPath path = new DbPath(this.m_strRecPath);
 
             // 将帐户记录的内容读到一个字节数组
-            MemoryStream fs = new MemoryStream();
-            this.m_dom.Save(fs);
-            fs.Seek(0, SeekOrigin.Begin);
-            byte[] baSource = new byte[fs.Length];
-            fs.Read(baSource,
-                0,
-                baSource.Length);
-            fs.Close();
+            using (MemoryStream fs = new MemoryStream())
+            {
+                this.m_dom.Save(fs);
+                fs.Seek(0, SeekOrigin.Begin);
+                byte[] baSource = new byte[fs.Length];
+                fs.Read(baSource,
+                    0,
+                    baSource.Length);
 
-            string strRange = "0-" + Convert.ToString(baSource.Length - 1);
-            byte[] baInputTimestamp = null;
-            byte[] baOutputTimestamp = null;
-            string strOutputID = "";
-            string strOutputValue = "";
-            string strStyle = "ignorechecktimestamp";
-            // return:
-            //		-1  出错
-            //		-2  时间戳不匹配 // 因为风格中有ignorechecktimestamp,所以此次调用不可能出现-2的情况
-            //      -4  记录不存在
-            //      -6  权限不够    // 此次调用不可能出现权限不够的情况
-            //		0   成功
-            // 因为传了user对象为null，所以不可能出现权限不够的情况
-            int nRet = db.WriteXml(null, //oUser
-                path.ID,
-                null,
-                strRange,
-                baSource.Length,
-                baSource,
-                // null,
-                "",  //metadata
-                strStyle,
-                baInputTimestamp,
-                out baOutputTimestamp,
-                out strOutputID,
-                out strOutputValue,
-                false,  //bCheckAccount
-                out strError);
+                string strRange = "0-" + Convert.ToString(baSource.Length - 1);
+                byte[] baInputTimestamp = null;
+                byte[] baOutputTimestamp = null;
+                string strOutputID = "";
+                string strOutputValue = "";
+                string strStyle = "ignorechecktimestamp";
+                // return:
+                //		-1  出错
+                //		-2  时间戳不匹配 // 因为风格中有ignorechecktimestamp,所以此次调用不可能出现-2的情况
+                //      -4  记录不存在
+                //      -6  权限不够    // 此次调用不可能出现权限不够的情况
+                //		0   成功
+                // 因为传了user对象为null，所以不可能出现权限不够的情况
+                int nRet = db.WriteXml(null, //oUser
+                    path.ID,
+                    null,
+                    strRange,
+                    baSource.Length,
+                    baSource,
+                    // null,
+                    "",  //metadata
+                    strStyle,
+                    baInputTimestamp,
+                    out baOutputTimestamp,
+                    out strOutputID,
+                    out strOutputValue,
+                    false,  //bCheckAccount
+                    out strError);
 
-            Debug.Assert(nRet != -1 && nRet != -4, "不可能的情况。");
-
-            return nRet;
+                Debug.Assert(nRet != -1 && nRet != -4, "不可能的情况。");
+                return nRet;
+            }
         }
-
 
         // 增加一次使用数
         // 在login()时被调

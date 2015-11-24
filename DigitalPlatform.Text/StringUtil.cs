@@ -2818,16 +2818,13 @@ namespace DigitalPlatform.Text
         // 得到xml中适用的字符串，这是替换了xml敏感符号为实体的字符串
         public static string GetXmlString(string strText)
         {
-            XmlTextWriter xmlTextWriter = null;
-            TextWriter textWrite = null;
-
-            textWrite = new StringWriter();
-            xmlTextWriter = new XmlTextWriter(textWrite);
-
-            xmlTextWriter.WriteString(strText);
-            return textWrite.ToString();
+            using (TextWriter textWrite = new StringWriter())
+            using (XmlTextWriter xmlTextWriter = new XmlTextWriter(textWrite))
+            {
+                xmlTextWriter.WriteString(strText);
+                return textWrite.ToString();
+            }
         }
-
 
         public static string GetVisualableStringSimple(string strText)
         {

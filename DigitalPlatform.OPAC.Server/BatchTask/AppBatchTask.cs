@@ -41,11 +41,14 @@ namespace DigitalPlatform.OPAC.Server
 
             string strFileName = this.LogDir + "\\" + strTaskName.Replace(" ", "_") + ".breakpoint";
 
-            StreamReader sr = null;
-
             try
             {
-                sr = new StreamReader(strFileName, Encoding.UTF8);
+                using (StreamReader sr = new StreamReader(strFileName, Encoding.UTF8))
+                {
+                    sr.ReadLine();  // 读入时间行
+                    strText = sr.ReadToEnd();// 读入其余
+                    return 1;
+                }
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -53,20 +56,9 @@ namespace DigitalPlatform.OPAC.Server
             }
             catch (Exception ex)
             {
-                strError = "open file '" + strFileName + "' error : " + ex.Message;
+                strError = "read file '" + strFileName + "' error : " + ex.Message;
                 return -1;
             }
-            try
-            {
-                sr.ReadLine();  // 读入时间行
-                strText = sr.ReadToEnd();// 读入其余
-            }
-            finally
-            {
-                sr.Close();
-            }
-
-            return 1;
         }
 
         // 写入断点记忆文件

@@ -43,33 +43,21 @@ namespace dp2Catalog
 
             string strLogFilename = this.textBox_logFilename.Text;
 
-            Stream stream = null;
-
             try
             {
-                stream = File.OpenRead(strLogFilename);
-            }
-            catch (Exception ex)
-            {
-                strError = "file '" + strLogFilename + "'open error: " + ex.Message;
-                goto ERROR1;
-            }
-
-            try
-            {
-                if (info.Offs > stream.Length)
+                using (Stream stream = File.OpenRead(strLogFilename))
                 {
-                    strError = "info.Offs " + info.Offs.ToString() + " > stream.Length " + stream.Length.ToString(); 
-                    goto ERROR1;
+                    if (info.Offs > stream.Length)
+                    {
+                        strError = "info.Offs " + info.Offs.ToString() + " > stream.Length " + stream.Length.ToString();
+                        goto ERROR1;
+                    }
+                    stream.Seek(info.Offs, SeekOrigin.Begin);
+
+                    this.Package = new byte[info.Length];
+
+                    int nRet = stream.Read(this.Package, 0, (int)info.Length);
                 }
-                stream.Seek(info.Offs, SeekOrigin.Begin);
-
-                this.Package = new byte[info.Length];
-
-                int nRet = stream.Read(this.Package, 0, (int)info.Length);
-
-                stream.Close();
-
             }
             catch (Exception ex)
             {

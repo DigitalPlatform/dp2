@@ -603,8 +603,10 @@ namespace dp2Catalog
                     try
                     {
                         this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
-                        nRet = this.binaryResControl1.LoadObject(strLocalPath,
+                        nRet = this.binaryResControl1.LoadObject(
+                            strLocalPath,
                             strRecordXml,
+                            0,  // TODO
                             out strError);
                         if (nRet == -1)
                         {
@@ -809,8 +811,10 @@ namespace dp2Catalog
             if (bLoadResObject == true)
             {
                 this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
-                nRet = this.binaryResControl1.LoadObject(strLocalPath,
+                nRet = this.binaryResControl1.LoadObject(
+                    strLocalPath,
                     strRecordXml,
+                            0,  // TODO
                     out strError);
                 if (nRet == -1)
                 {
@@ -843,15 +847,12 @@ namespace dp2Catalog
         {
             string strTempFileName = MainForm.DataDir + "\\xml.xml";
 
-            Stream stream = File.Create(strTempFileName);
-
-            // 写入xml内容
-            byte[] buffer = Encoding.UTF8.GetBytes(strRecordXml);
-
-            stream.Write(buffer, 0, buffer.Length);
-
-            stream.Close();
-
+            using (Stream stream = File.Create(strTempFileName))
+            {
+                // 写入xml内容
+                byte[] buffer = Encoding.UTF8.GetBytes(strRecordXml);
+                stream.Write(buffer, 0, buffer.Length);
+            }
             this.webBrowser_xml.Navigate(strTempFileName);
         }
 
@@ -1319,7 +1320,8 @@ namespace dp2Catalog
                     // return:
                     //		-1	error
                     //		>=0 实际上载的资源对象数
-                    nRet = this.binaryResControl1.Save(out strError);
+                    nRet = this.binaryResControl1.Save(0,   // TODO: 要替换为 server_version
+                        out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
                     else

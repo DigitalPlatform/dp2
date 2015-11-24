@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -6,13 +6,13 @@ using System.Text;
 namespace DigitalPlatform.IO
 {
 	/// <summary>
-	/// ²Ù×İ .dp2bak ¸ñÊ½µÄÎÄ¼ş
+	/// æ“çºµ .dp2bak æ ¼å¼çš„æ–‡ä»¶
 	/// </summary>
 	public class Backup
 	{
 
-		// ½«µÚÒ»¸öResµÄÈ«²¿×ÊÔ´×éºÏ³ÉÍêÕûµÄResÊı¾İ,Ğ´ÈëÁ÷ÖĞ
-		// µ÷ÓÃ±¾º¯ÊıÇ°£¬×¢Òâ°ÑÎÄ¼şÖ¸ÕëÉèÖÃµ½ÊÊµ±Î»ÖÃ(ÀıÈçÎÄ¼şµÄÄ©Î²£¬»òÕßÒª¸²¸ÇÎ»ÖÃµÄ¿ªÊ¼)¡£
+		// å°†ç¬¬ä¸€ä¸ªResçš„å…¨éƒ¨èµ„æºç»„åˆæˆå®Œæ•´çš„Resæ•°æ®,å†™å…¥æµä¸­
+		// è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œæ³¨æ„æŠŠæ–‡ä»¶æŒ‡é’ˆè®¾ç½®åˆ°é€‚å½“ä½ç½®(ä¾‹å¦‚æ–‡ä»¶çš„æœ«å°¾ï¼Œæˆ–è€…è¦è¦†ç›–ä½ç½®çš„å¼€å§‹)ã€‚
 		public static long WriteFirstResToBackupFile(Stream outputfile,
 			string strMetaData,
 			string strBody)
@@ -21,42 +21,42 @@ namespace DigitalPlatform.IO
 
 			outputfile.Seek(8, SeekOrigin.Current);
 
-			// Ğ´ÈëmetadataµÄ³¤¶È, 8bytes
+			// å†™å…¥metadataçš„é•¿åº¦, 8bytes
 			byte[] data = Encoding.UTF8.GetBytes(strMetaData);
 			long lMetaDataLength = data.Length;
 
 			outputfile.Write(BitConverter.GetBytes(lMetaDataLength), 0, 8);
 
-			// Ğ´ÈëmetadataÄÚÈİ
+			// å†™å…¥metadataå†…å®¹
 			outputfile.Write(data, 0, data.Length);
 
-			// ×¼±¸BodyÊı¾İ
+			// å‡†å¤‡Bodyæ•°æ®
 			data = Encoding.UTF8.GetBytes(strBody);
 
-			// Ğ´ÈëbodyµÄ³¤¶È, 8bytes
+			// å†™å…¥bodyçš„é•¿åº¦, 8bytes
 			long lBodyLength = data.Length;
 			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
 
-			// Ğ´ÈëbodyÄÚÈİ
+			// å†™å…¥bodyå†…å®¹
 			outputfile.Write(data, 0 , data.Length);
 
-			long lTotalLength = outputfile.Position - lStart - 8;	// ¾»³¤¶È
+			long lTotalLength = outputfile.Position - lStart - 8;	// å‡€é•¿åº¦
 
-			// ×îºóĞ´¿ªÊ¼µÄ×Ü³¤¶È
+			// æœ€åå†™å¼€å§‹çš„æ€»é•¿åº¦
             outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
             Debug.Assert(outputfile.Position == lStart, "");
 
-            // outputfile.Seek(lStart, SeekOrigin.Begin);     // ÎÄ¼ş´óÁËÒÔºóÕâ¾ä»°µÄĞÔÄÜ»áºÜ²î
+            // outputfile.Seek(lStart, SeekOrigin.Begin);     // æ–‡ä»¶å¤§äº†ä»¥åè¿™å¥è¯çš„æ€§èƒ½ä¼šå¾ˆå·®
 			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
 
-			// ÊÕÎ²,ÎªºóÃæ¼ÌĞøĞ´ÉèÖÃºÃÎÄ¼şÖ¸Õë
+			// æ”¶å°¾,ä¸ºåé¢ç»§ç»­å†™è®¾ç½®å¥½æ–‡ä»¶æŒ‡é’ˆ
 			outputfile.Seek(lTotalLength, SeekOrigin.Current);
 
-			return lTotalLength + 8;	// ·µ»ØÃ«³¤¶È
+			return lTotalLength + 8;	// è¿”å›æ¯›é•¿åº¦
 		}
 
-		// ½«µÚÒ»¸öResÒÔÍâµÄResÊı¾İ,Ğ´ÈëÁ÷ÖĞ
-		// µ÷ÓÃ±¾º¯ÊıÇ°£¬×¢Òâ°ÑÎÄ¼şÖ¸ÕëÉèÖÃµ½ÊÊµ±Î»ÖÃ(ÀıÈçÎÄ¼şµÄÄ©Î²£¬»òÕßÒª¸²¸ÇÎ»ÖÃµÄ¿ªÊ¼)¡£
+		// å°†ç¬¬ä¸€ä¸ªResä»¥å¤–çš„Resæ•°æ®,å†™å…¥æµä¸­
+		// è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œæ³¨æ„æŠŠæ–‡ä»¶æŒ‡é’ˆè®¾ç½®åˆ°é€‚å½“ä½ç½®(ä¾‹å¦‚æ–‡ä»¶çš„æœ«å°¾ï¼Œæˆ–è€…è¦è¦†ç›–ä½ç½®çš„å¼€å§‹)ã€‚
 		public static long WriteOtherResToBackupFile(Stream outputfile,
 			string strMetaData,
 			string strBodyFileName)
@@ -65,55 +65,48 @@ namespace DigitalPlatform.IO
 
 			outputfile.Seek(8, SeekOrigin.Current);
 
-			// Ğ´ÈëmetadataµÄ³¤¶È, 8bytes
+			// å†™å…¥metadataçš„é•¿åº¦, 8bytes
 			byte[] data = Encoding.UTF8.GetBytes(strMetaData);
 			long lMetaDataLength = data.Length;
 
 			outputfile.Write(BitConverter.GetBytes(lMetaDataLength), 0, 8);
 
-			// Ğ´ÈëmetadataÄÚÈİ
+			// å†™å…¥metadataå†…å®¹
 			outputfile.Write(data, 0, data.Length);
 
-			FileStream fileSource = File.Open(
-				strBodyFileName,
-				FileMode.Open,
-				FileAccess.Read, 
-				FileShare.ReadWrite);
+            using (FileStream fileSource = File.Open(
+                strBodyFileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite))
+            {
+                // bodyçš„é•¿åº¦, 8bytes
+                long lBodyLength = fileSource.Length;
+                outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
 
-			try 
-			{
+                // bodyå†…å®¹
+                StreamUtil.DumpStream(fileSource, outputfile);
+            }
 
-			// bodyµÄ³¤¶È, 8bytes
-				long lBodyLength = fileSource.Length;
-				outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
+			long lTotalLength = outputfile.Position - lStart - 8;	// å‡€é•¿åº¦
 
-				// bodyÄÚÈİ
-				StreamUtil.DumpStream(fileSource, outputfile);
-			}
-			finally 
-			{
-				fileSource.Close();
-			}
-
-			long lTotalLength = outputfile.Position - lStart - 8;	// ¾»³¤¶È
-
-			// ×îºóĞ´¿ªÊ¼µÄ×Ü³¤¶È
+			// æœ€åå†™å¼€å§‹çš„æ€»é•¿åº¦
             outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
             Debug.Assert(outputfile.Position == lStart, "");
 
-			// outputfile.Seek(lStart, SeekOrigin.Begin);   // ĞÔÄÜ
+			// outputfile.Seek(lStart, SeekOrigin.Begin);   // æ€§èƒ½
 			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
 
-			// ÊÕÎ²,ÎªºóÃæ¼ÌĞøĞ´ÉèÖÃºÃÎÄ¼şÖ¸Õë
+			// æ”¶å°¾,ä¸ºåé¢ç»§ç»­å†™è®¾ç½®å¥½æ–‡ä»¶æŒ‡é’ˆ
 			outputfile.Seek(lTotalLength, SeekOrigin.Current);
 
-			return lTotalLength + 8;	// ·µ»ØÃ«³¤¶È
+			return lTotalLength + 8;	// è¿”å›æ¯›é•¿åº¦
 		}
 
-		// Ğ´resµÄÍ·¡£
-		// Èç¹û²»ÄÜÔ¤ÏÈÈ·ÖªÕû¸öresµÄ³¤¶È£¬¿ÉÒÔÓÃËæ±ãÒ»¸ölTotalLengthÖµµ÷ÓÃ±¾º¯Êı£¬
-		// µ«ÊÇĞèÒª¼ÇÒäÏÂº¯ÊıËù·µ»ØµÄlStart£¬×îºóµ÷ÓÃEndWriteResToBackupFile()¡£
-		// Èç¹ûÄÜÔ¤ÏÈÈ·ÖªÕû¸öresµÄ³¤¶È£¬Ôò×îºó²»±Øµ÷ÓÃEndWriteResToBackupFile()
+		// å†™resçš„å¤´ã€‚
+		// å¦‚æœä¸èƒ½é¢„å…ˆç¡®çŸ¥æ•´ä¸ªresçš„é•¿åº¦ï¼Œå¯ä»¥ç”¨éšä¾¿ä¸€ä¸ªlTotalLengthå€¼è°ƒç”¨æœ¬å‡½æ•°ï¼Œ
+		// ä½†æ˜¯éœ€è¦è®°å¿†ä¸‹å‡½æ•°æ‰€è¿”å›çš„lStartï¼Œæœ€åè°ƒç”¨EndWriteResToBackupFile()ã€‚
+		// å¦‚æœèƒ½é¢„å…ˆç¡®çŸ¥æ•´ä¸ªresçš„é•¿åº¦ï¼Œåˆ™æœ€åä¸å¿…è°ƒç”¨EndWriteResToBackupFile()
 		public static long BeginWriteResToBackupFile(Stream outputfile,
 			long lTotalLength,
 			out long lStart)
@@ -130,14 +123,14 @@ namespace DigitalPlatform.IO
 			long lTotalLength,
 			long lStart)
 		{
-			// ×îºóĞ´¿ªÊ¼µÄ×Ü³¤¶È
+			// æœ€åå†™å¼€å§‹çš„æ€»é•¿åº¦
             outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
             Debug.Assert(outputfile.Position == lStart, "");
 
-			// outputfile.Seek(lStart, SeekOrigin.Begin);   // ĞÔÄÜ
+			// outputfile.Seek(lStart, SeekOrigin.Begin);   // æ€§èƒ½
 			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
 
-			// ÊÕÎ²,ÎªºóÃæ¼ÌĞøĞ´ÉèÖÃºÃÎÄ¼şÖ¸Õë
+			// æ”¶å°¾,ä¸ºåé¢ç»§ç»­å†™è®¾ç½®å¥½æ–‡ä»¶æŒ‡é’ˆ
 			outputfile.Seek(lTotalLength, SeekOrigin.Current);
 
 			return 0;
@@ -146,24 +139,24 @@ namespace DigitalPlatform.IO
 		public static long WriteResMetadataToBackupFile(Stream outputfile,
 			string strMetaData)
 		{
-			// Ğ´ÈëmetadataµÄ³¤¶È, 8bytes
+			// å†™å…¥metadataçš„é•¿åº¦, 8bytes
 			byte[] data = Encoding.UTF8.GetBytes(strMetaData);
 			long lMetaDataLength = data.Length;
 
 			outputfile.Write(BitConverter.GetBytes(lMetaDataLength), 0, 8);
 
-			// Ğ´ÈëmetadataÄÚÈİ
+			// å†™å…¥metadataå†…å®¹
 			outputfile.Write(data, 0, data.Length);
 
 			return 0;
 		}
 
-		// Ğ´res bodyµÄÍ·¡£
-		// Èç¹û²»ÄÜÔ¤ÏÈÈ·ÖªbodyµÄ³¤¶È£¬¿ÉÒÔÓÃËæ±ãÒ»¸ölBodyLengthÖµµ÷ÓÃ±¾º¯Êı£¬
-		// µ«ÊÇĞèÒª¼ÇÒäÏÂº¯ÊıËù·µ»ØµÄlBodyStart£¬×îºóµ÷ÓÃEndWriteResBodyToBackupFile()¡£
-		// Èç¹ûÄÜÔ¤ÏÈÈ·ÖªbodyµÄ³¤¶È£¬Ôò×îºó²»±Øµ÷ÓÃEndWriteResBodyToBackupFile()
+		// å†™res bodyçš„å¤´ã€‚
+		// å¦‚æœä¸èƒ½é¢„å…ˆç¡®çŸ¥bodyçš„é•¿åº¦ï¼Œå¯ä»¥ç”¨éšä¾¿ä¸€ä¸ªlBodyLengthå€¼è°ƒç”¨æœ¬å‡½æ•°ï¼Œ
+		// ä½†æ˜¯éœ€è¦è®°å¿†ä¸‹å‡½æ•°æ‰€è¿”å›çš„lBodyStartï¼Œæœ€åè°ƒç”¨EndWriteResBodyToBackupFile()ã€‚
+		// å¦‚æœèƒ½é¢„å…ˆç¡®çŸ¥bodyçš„é•¿åº¦ï¼Œåˆ™æœ€åä¸å¿…è°ƒç”¨EndWriteResBodyToBackupFile()
 		// parameters:
-		//		lBodyStart	·µ»Øres bodyÉĞÎ´Ğ´µ«ÊÇ¼´½«Ğ´µÄÎ»ÖÃ£¬Ò²¾ÍÊÇÉĞÎ´Ğ´8byte³ß´çµÄÎ»ÖÃ
+		//		lBodyStart	è¿”å›res bodyå°šæœªå†™ä½†æ˜¯å³å°†å†™çš„ä½ç½®ï¼Œä¹Ÿå°±æ˜¯å°šæœªå†™8byteå°ºå¯¸çš„ä½ç½®
 		public static long BeginWriteResBodyToBackupFile(
 			Stream outputfile,
 			long lBodyLength,
@@ -175,20 +168,20 @@ namespace DigitalPlatform.IO
 			return 0;
 		}
 
-		// res bodyÊÕÎ²
+		// res bodyæ”¶å°¾
 		public static long EndWriteResBodyToBackupFile(
 			Stream outputfile,
 			long lBodyLength,
 			long lBodyStart)
 		{
-			// ×îºóĞ´¿ªÊ¼µÄ×Ü³¤¶È
+			// æœ€åå†™å¼€å§‹çš„æ€»é•¿åº¦
             outputfile.Seek(lBodyStart - outputfile.Position, SeekOrigin.Current);
             Debug.Assert(outputfile.Position == lBodyStart, "");
 
-			// outputfile.Seek(lBodyStart, SeekOrigin.Begin);  // ĞÔÄÜ
+			// outputfile.Seek(lBodyStart, SeekOrigin.Begin);  // æ€§èƒ½
 			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
 
-			// ÊÕÎ²,ÎªºóÃæ¼ÌĞøĞ´ÉèÖÃºÃÎÄ¼şÖ¸Õë
+			// æ”¶å°¾,ä¸ºåé¢ç»§ç»­å†™è®¾ç½®å¥½æ–‡ä»¶æŒ‡é’ˆ
 			outputfile.Seek(lBodyLength, SeekOrigin.Current);
 
 			return 0;

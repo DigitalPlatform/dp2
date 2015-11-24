@@ -1346,9 +1346,7 @@ namespace dp2Circulation
                     sr.Close();
             }
 
-
             return 0;
-
         ERROR1:
             return -1;
         }

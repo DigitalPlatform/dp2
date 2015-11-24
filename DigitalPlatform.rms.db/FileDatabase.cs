@@ -760,9 +760,8 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                FileStream s = new FileStream(strFilePath,
-                    FileMode.Open);
-                try
+                using (FileStream s = new FileStream(strFilePath,
+                    FileMode.Open))
                 {
                     destBuffer = new byte[lOutputLength];
                     s.Seek(lStart, SeekOrigin.Begin);
@@ -770,14 +769,9 @@ namespace DigitalPlatform.rms
                         0,
                         (int)lOutputLength);
                 }
-                finally
-                {
-                    s.Close();
-                }
             }
             return nTotalLength;
         }
-
 
         // 写xml数据
         // parameter:
@@ -1519,8 +1513,10 @@ namespace DigitalPlatform.rms
             if (nRet == 1)
             {
                 // 资源将被置空
-                Stream s = File.Create(strNewFileName);
-                s.Close();
+                using(Stream s = File.Create(strNewFileName))
+                {
+
+                }
 
                 nFull = 1;
                 lCurrentLength = 0;
@@ -1539,9 +1535,8 @@ namespace DigitalPlatform.rms
 
             RangeList rangeList = new RangeList(strRanges);
 
-            Stream target = File.Open(strNewFileName,
-                FileMode.OpenOrCreate);
-            try
+            using (Stream target = File.Open(strNewFileName,
+                FileMode.OpenOrCreate))
             {
                 int nStartOfSource = 0;
                 for (int i = 0; i < rangeList.Count; i++)
@@ -1572,11 +1567,6 @@ namespace DigitalPlatform.rms
                      * */
                 }
             }
-            finally
-            {
-                target.Close();
-            }
-
 
             string strOldRanges = "";
             if (File.Exists(strRangeFileName) == true)
@@ -1598,9 +1588,10 @@ namespace DigitalPlatform.rms
                 nFull = 1;
                 lCurrentLength = lTotalLength;
 
-                Stream s = File.Open(strNewFileName, FileMode.Open);
-                s.SetLength(lTotalLength);
-                s.Close();
+                using (Stream s = File.Open(strNewFileName, FileMode.Open))
+                {
+                    s.SetLength(lTotalLength);
+                }
 
                 if (File.Exists(strRangeFileName) == true)
                     File.Delete(strRangeFileName);
@@ -1703,22 +1694,18 @@ namespace DigitalPlatform.rms
             outputTimestamp = null;
             string strXmlFilePath = this.GetXmlFilePath(strRecordID);
 
-            // 此处不用写finally
-            Stream file = File.Create(strXmlFilePath);
-            file.Close();
+            using(Stream file = File.Create(strXmlFilePath))
+            {
+
+            }
 
             // new字段
             string strNewFileName = DatabaseUtil.GetNewFileName(strXmlFilePath);
-            Stream s = File.Create(strNewFileName);
-            try
+            using (Stream s = File.Create(strNewFileName))
             {
                 s.Write(new byte[] { 0x0 },
                     0,
                     1);
-            }
-            finally
-            {
-                s.Close();
             }
 
             // timeatamp
@@ -1756,21 +1743,15 @@ namespace DigitalPlatform.rms
 
             // new字段
             string strNewFileName = DatabaseUtil.GetNewFileName(strObjectPath);
-            Stream s = File.Create(strNewFileName);
-            try
+            using (Stream s = File.Create(strNewFileName))
             {
                 s.Write(new byte[] { 0x0 },
                     0,
                     1);
             }
-            finally
-            {
-                s.Close();
-            }
 
             // timeatamp
             string strTimestampFileName = DatabaseUtil.GetTimestampFileName(strObjectPath);
-
 
             // 2013/11/23
             // 是否要直接利用输入的时间戳
@@ -1970,12 +1951,11 @@ namespace DigitalPlatform.rms
             out string strError)
         {
             strError = "";
-            Stream s = File.Create(strObjectPath);
-            s.Close();
+            using (Stream s = File.Create(strObjectPath))
+            {
+            }
             return 0;
         }
-
-
 
         // 检索点表名到表文件名
         public string TableName2TableFileName(string strKeyName)

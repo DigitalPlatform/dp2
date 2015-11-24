@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,18 +13,18 @@ using DigitalPlatform.GUI;
 namespace DigitalPlatform.Marc
 {
 	/// <summary>
-	/// ´ò¿ª»òÕß±£´æ ISO2709 ÎÄ¼şµÄÍ¨ÓÃ¶Ô»°¿ò
+	/// æ‰“å¼€æˆ–è€…ä¿å­˜ ISO2709 æ–‡ä»¶çš„é€šç”¨å¯¹è¯æ¡†
 	/// </summary>
     public class OpenMarcFileDlg : System.Windows.Forms.Form
     {
         /// <summary>
-        /// »ñµÃ±àÂë·½Ê½µÄÊÂ¼ş
+        /// è·å¾—ç¼–ç æ–¹å¼çš„äº‹ä»¶
         /// </summary>
         public event GetEncodingEventHandler GetEncoding = null;
 
         bool m_bIsOutput = false;
         /// <summary>
-        /// ÊÇ·ñÎªÊä³öÎÄ¼ş·½Ê½¡£µ±±£´æÎÄ¼şµÄÊ±ºòÓ¦¸ÃÎª true
+        /// æ˜¯å¦ä¸ºè¾“å‡ºæ–‡ä»¶æ–¹å¼ã€‚å½“ä¿å­˜æ–‡ä»¶çš„æ—¶å€™åº”è¯¥ä¸º true
         /// </summary>
         public bool IsOutput
         {
@@ -37,13 +37,13 @@ namespace DigitalPlatform.Marc
                 this.m_bIsOutput = value;
                 if (value == true)
                 {
-                    // ¸ÄÎªÓÃEnableMarcSyntax³ÉÔ±¿ØÖÆ
+                    // æ”¹ä¸ºç”¨EnableMarcSyntaxæˆå‘˜æ§åˆ¶
                     // this.comboBox_marcSyntax.Enabled = false;
-                    this.checkBox_880.Text = "×ª»»Îª 880 Ä£Ê½(&C)";
+                    this.checkBox_880.Text = "è½¬æ¢ä¸º 880 æ¨¡å¼(&C)";
                 }
                 else
                 {
-                    this.checkBox_880.Text = "×ª»»ÎªÆ½ĞĞÄ£Ê½(&C)";
+                    this.checkBox_880.Text = "è½¬æ¢ä¸ºå¹³è¡Œæ¨¡å¼(&C)";
 
                     this.checkBox_crLf.Visible = false;
                     this.checkBox_addG01Field.Visible = false;
@@ -74,7 +74,7 @@ namespace DigitalPlatform.Marc
         private IContainer components;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public OpenMarcFileDlg()
         {
@@ -132,7 +132,7 @@ namespace DigitalPlatform.Marc
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(179, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "MARC (ISO2709¸ñÊ½) ÎÄ¼şÃû(&F):";
+            this.label1.Text = "MARC (ISO2709æ ¼å¼) æ–‡ä»¶å(&F):";
             // 
             // textBox_filename
             // 
@@ -151,7 +151,7 @@ namespace DigitalPlatform.Marc
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 12);
             this.label2.TabIndex = 5;
-            this.label2.Text = "±àÂë·½Ê½(&E):";
+            this.label2.Text = "ç¼–ç æ–¹å¼(&E):";
             // 
             // comboBox_encoding
             // 
@@ -173,14 +173,14 @@ namespace DigitalPlatform.Marc
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 12);
             this.label3.TabIndex = 3;
-            this.label3.Text = "MARC¸ñÊ½(&S):";
+            this.label3.Text = "MARCæ ¼å¼(&S):";
             // 
             // comboBox_marcSyntax
             // 
             this.comboBox_marcSyntax.Items.AddRange(new object[] {
             "UNIMARC",
             "USMARC",
-            "<×Ô¶¯>"});
+            "<è‡ªåŠ¨>"});
             this.comboBox_marcSyntax.Location = new System.Drawing.Point(94, 49);
             this.comboBox_marcSyntax.Name = "comboBox_marcSyntax";
             this.comboBox_marcSyntax.Size = new System.Drawing.Size(168, 20);
@@ -195,7 +195,7 @@ namespace DigitalPlatform.Marc
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 14;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -205,7 +205,7 @@ namespace DigitalPlatform.Marc
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 15;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_findFileName
@@ -225,7 +225,7 @@ namespace DigitalPlatform.Marc
             this.checkBox_crLf.Name = "checkBox_crLf";
             this.checkBox_crLf.Size = new System.Drawing.Size(210, 16);
             this.checkBox_crLf.TabIndex = 12;
-            this.checkBox_crLf.Text = "ÔÚÃ¿Ìõ¼ÇÂ¼ºóÌí¼Ó»Ø³µ»»ĞĞ·ûºÅ(&C)";
+            this.checkBox_crLf.Text = "åœ¨æ¯æ¡è®°å½•åæ·»åŠ å›è½¦æ¢è¡Œç¬¦å·(&C)";
             // 
             // label_encodingComment
             // 
@@ -241,20 +241,20 @@ namespace DigitalPlatform.Marc
             this.checkBox_addG01Field.Name = "checkBox_addG01Field";
             this.checkBox_addG01Field.Size = new System.Drawing.Size(108, 16);
             this.checkBox_addG01Field.TabIndex = 13;
-            this.checkBox_addG01Field.Text = "¼ÓÈë-01×Ö¶Î(&G)";
+            this.checkBox_addG01Field.Text = "åŠ å…¥-01å­—æ®µ(&G)";
             this.checkBox_addG01Field.UseVisualStyleBackColor = true;
             // 
             // comboBox_catalogingRule
             // 
             this.comboBox_catalogingRule.Items.AddRange(new object[] {
-            "<ÎŞÏŞÖÆ>",
+            "<æ— é™åˆ¶>",
             "NLC",
             "CALIS"});
             this.comboBox_catalogingRule.Location = new System.Drawing.Point(94, 117);
             this.comboBox_catalogingRule.Name = "comboBox_catalogingRule";
             this.comboBox_catalogingRule.Size = new System.Drawing.Size(168, 20);
             this.comboBox_catalogingRule.TabIndex = 9;
-            this.comboBox_catalogingRule.Text = "<ÎŞÏŞÖÆ>";
+            this.comboBox_catalogingRule.Text = "<æ— é™åˆ¶>";
             this.comboBox_catalogingRule.Visible = false;
             // 
             // label_catalogingRule
@@ -264,7 +264,7 @@ namespace DigitalPlatform.Marc
             this.label_catalogingRule.Name = "label_catalogingRule";
             this.label_catalogingRule.Size = new System.Drawing.Size(77, 12);
             this.label_catalogingRule.TabIndex = 8;
-            this.label_catalogingRule.Text = "±àÄ¿¹æÔò(&R):";
+            this.label_catalogingRule.Text = "ç¼–ç›®è§„åˆ™(&R):";
             this.label_catalogingRule.Visible = false;
             // 
             // webBrowser1
@@ -285,7 +285,7 @@ namespace DigitalPlatform.Marc
             this.checkBox_removeField998.Name = "checkBox_removeField998";
             this.checkBox_removeField998.Size = new System.Drawing.Size(120, 16);
             this.checkBox_removeField998.TabIndex = 10;
-            this.checkBox_removeField998.Text = "É¾³ı 998 ×Ö¶Î(&R)";
+            this.checkBox_removeField998.Text = "åˆ é™¤ 998 å­—æ®µ(&R)";
             this.checkBox_removeField998.UseVisualStyleBackColor = true;
             // 
             // checkBox_880
@@ -295,7 +295,7 @@ namespace DigitalPlatform.Marc
             this.checkBox_880.Name = "checkBox_880";
             this.checkBox_880.Size = new System.Drawing.Size(132, 16);
             this.checkBox_880.TabIndex = 11;
-            this.checkBox_880.Text = "×ª»»Îª 998 Ä£Ê½(&C)";
+            this.checkBox_880.Text = "è½¬æ¢ä¸º 998 æ¨¡å¼(&C)";
             this.checkBox_880.UseVisualStyleBackColor = true;
             this.checkBox_880.CheckedChanged += new System.EventHandler(this.checkBox_880_CheckedChanged);
             // 
@@ -335,7 +335,7 @@ namespace DigitalPlatform.Marc
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "OpenMarcFileDlg";
             this.ShowInTaskbar = false;
-            this.Text = "ÇëÖ¸¶¨MARCÎÄ¼şÃû";
+            this.Text = "è¯·æŒ‡å®šMARCæ–‡ä»¶å";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OpenMarcFileDlg_FormClosed);
             this.Load += new System.EventHandler(this.OpenMarcFileDlg_Load);
             this.panel_main.ResumeLayout(false);
@@ -351,25 +351,25 @@ namespace DigitalPlatform.Marc
 
             if (String.IsNullOrEmpty(this.FileName) == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ MARC ÎÄ¼şÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®š MARC æ–‡ä»¶å");
                 return;
             }
 
             if (String.IsNullOrEmpty(this.comboBox_encoding.Text) == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨±àÂë·½Ê½");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šç¼–ç æ–¹å¼");
                 return;
             }
 
             // 2015/10/8
-            // ÑéÖ¤ÊäÈëµÄ±àÂë·½Ê½Ãû³ÆÊÇ·ñºÏ·¨
+            // éªŒè¯è¾“å…¥çš„ç¼–ç æ–¹å¼åç§°æ˜¯å¦åˆæ³•
             try
             {
                 Encoding encoding = this.Encoding;
             }
             catch(Exception ex)
             {
-                strError = "ÄúÊäÈëµÄ±àÂë·½Ê½Ãû³Æ²»ºÏ·¨: " + ex.Message;
+                strError = "æ‚¨è¾“å…¥çš„ç¼–ç æ–¹å¼åç§°ä¸åˆæ³•: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -391,7 +391,7 @@ namespace DigitalPlatform.Marc
 #if NO
             if (IsOutput == true)
             {
-                // ¸ÄÎªÓÃEnableMarcSyntax³ÉÔ±¿ØÖÆ
+                // æ”¹ä¸ºç”¨EnableMarcSyntaxæˆå‘˜æ§åˆ¶
                 // this.comboBox_marcSyntax.Enabled = false;
             }
             else
@@ -428,15 +428,15 @@ namespace DigitalPlatform.Marc
         {
             if (this.IsOutput == true)
             {
-                // »ñµÃÊä³öÎÄ¼şÃû
+                // è·å¾—è¾“å‡ºæ–‡ä»¶å
                 SaveFileDialog dlg = new SaveFileDialog();
 
-                dlg.Title = "ÇëÖ¸¶¨ÒªÊä³öµÄ MARC(ISO2709¸ñÊ½) ÎÄ¼şÃû";
+                dlg.Title = "è¯·æŒ‡å®šè¦è¾“å‡ºçš„ MARC(ISO2709æ ¼å¼) æ–‡ä»¶å";
                 dlg.CreatePrompt = false;
                 dlg.OverwritePrompt = false;
                 dlg.FileName = this.textBox_filename.Text;
 
-                dlg.Filter = "MARC (ISO2709) ÎÄ¼ş (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+                dlg.Filter = "MARC (ISO2709) æ–‡ä»¶ (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
 
                 dlg.RestoreDirectory = true;
 
@@ -450,10 +450,10 @@ namespace DigitalPlatform.Marc
             {
                 OpenFileDialog dlg = new OpenFileDialog();
 
-                dlg.Title = "ÇëÖ¸¶¨Òªµ¼ÈëµÄ MARC(ISO2709¸ñÊ½) ÎÄ¼şÃû";
+                dlg.Title = "è¯·æŒ‡å®šè¦å¯¼å…¥çš„ MARC(ISO2709æ ¼å¼) æ–‡ä»¶å";
                 dlg.FileName = this.textBox_filename.Text;
 
-                dlg.Filter = "ISO2709 ÎÄ¼ş (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+                dlg.Filter = "ISO2709 æ–‡ä»¶ (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
                 dlg.RestoreDirectory = true;
 
                 if (dlg.ShowDialog() != DialogResult.OK)
@@ -464,7 +464,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃÎÄ¼şÃûÈ«Â·¾¶
+        /// è·å–æˆ–è®¾ç½®æ–‡ä»¶åå…¨è·¯å¾„
         /// </summary>
         public string FileName
         {
@@ -476,13 +476,13 @@ namespace DigitalPlatform.Marc
             {
                 this.textBox_filename.Text = value;
 
-                // ×Ô¶¯ÏÔÊ¾ÎÄ¼şµÄµÚÒ»Ìõ
+                // è‡ªåŠ¨æ˜¾ç¤ºæ–‡ä»¶çš„ç¬¬ä¸€æ¡
                 DisplayFirstRecord(value, this.Encoding);
             }
         }
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ MARC ¸ñÊ½¡£Îª "unimarc" "usmarc" Ö®Ò»
+        /// è·å–æˆ–è®¾ç½® MARC æ ¼å¼ã€‚ä¸º "unimarc" "usmarc" ä¹‹ä¸€
         /// </summary>
         public string MarcSyntax
         {
@@ -497,8 +497,8 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// »ñµÃ±àÂë·½Ê½
-        /// ¿ÉÄÜ»áÅ×³öÒì³£
+        /// è·å¾—ç¼–ç æ–¹å¼
+        /// å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         /// </summary>
         public Encoding Encoding
         {
@@ -529,7 +529,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// »ñµÃ»òÉèÖÃ±àÂë·½Ê½Ãû
+        /// è·å¾—æˆ–è®¾ç½®ç¼–ç æ–¹å¼å
         /// </summary>
         public string EncodingName
         {
@@ -541,7 +541,7 @@ namespace DigitalPlatform.Marc
             {
                 this.comboBox_encoding.Text = value;
 
-                // ×Ô¶¯ÏÔÊ¾ÎÄ¼şµÄµÚÒ»Ìõ
+                // è‡ªåŠ¨æ˜¾ç¤ºæ–‡ä»¶çš„ç¬¬ä¸€æ¡
                 try
                 {
                     DisplayFirstRecord(this.FileName, this.Encoding);
@@ -554,7 +554,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// ¡°ÔÚÃ¿Ìõ¼ÇÂ¼ºóÌí¼Ó»Ø³µ»»ĞĞ·ûºÅ¡± checkbox ÊÇ·ñ¿É¼û
+        /// â€œåœ¨æ¯æ¡è®°å½•åæ·»åŠ å›è½¦æ¢è¡Œç¬¦å·â€ checkbox æ˜¯å¦å¯è§
         /// </summary>
         public bool CrLfVisible
         {
@@ -569,8 +569,8 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// Êä³öÎÄ¼şÊ±£¬ÊÇ·ñÒªÔÚ¼ÇÂ¼Ö®¼ä¼ÓÈë»Ø³µ»»ĞĞ·ûºÅ¡£
-        /// ¼ÓÈë»Ø³µ»»ĞĞ·ûºÅÕâÒ»×ö·¨ÊÇ±±Í¼·¢ĞĞ MARC Êı¾İ´ÅÅÌÊ±ºòµÄÒ»ÖÖ×ö·¨£¬µ«²¢²»ÊÇ±ê×¼µÄ×ö·¨
+        /// è¾“å‡ºæ–‡ä»¶æ—¶ï¼Œæ˜¯å¦è¦åœ¨è®°å½•ä¹‹é—´åŠ å…¥å›è½¦æ¢è¡Œç¬¦å·ã€‚
+        /// åŠ å…¥å›è½¦æ¢è¡Œç¬¦å·è¿™ä¸€åšæ³•æ˜¯åŒ—å›¾å‘è¡Œ MARC æ•°æ®ç£ç›˜æ—¶å€™çš„ä¸€ç§åšæ³•ï¼Œä½†å¹¶ä¸æ˜¯æ ‡å‡†çš„åšæ³•
         /// </summary>
         public bool CrLf
         {
@@ -585,7 +585,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// ¡°¼ÓÈë -01 ×Ö¶Î¡± checkbox ÊÇ·ñ¿É¼û
+        /// â€œåŠ å…¥ -01 å­—æ®µâ€ checkbox æ˜¯å¦å¯è§
         /// </summary>
         public bool AddG01Visible
         {
@@ -601,7 +601,7 @@ namespace DigitalPlatform.Marc
 
         // 2008/11/10
         /// <summary>
-        /// Êä³öÎÄ¼şÊ±£¬ÊÇ·ñ¼ÓÈë -01 ×Ö¶Î
+        /// è¾“å‡ºæ–‡ä»¶æ—¶ï¼Œæ˜¯å¦åŠ å…¥ -01 å­—æ®µ
         /// </summary>
         public bool AddG01
         {
@@ -616,7 +616,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// ¡°É¾³ı 998 ×Ö¶Î¡± checkbox ÊÇ·ñ¿É¼û
+        /// â€œåˆ é™¤ 998 å­—æ®µâ€ checkbox æ˜¯å¦å¯è§
         /// </summary>
         public bool RemoveField998Visible
         {
@@ -631,7 +631,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// Êä³öÎÄ¼şÊ±£¬ÊÇ·ñÒª´Ó MARC ¼ÇÂ¼ÖĞÉ¾³ı 998 ×Ö¶Î
+        /// è¾“å‡ºæ–‡ä»¶æ—¶ï¼Œæ˜¯å¦è¦ä» MARC è®°å½•ä¸­åˆ é™¤ 998 å­—æ®µ
         /// </summary>
         public bool RemoveField998
         {
@@ -646,7 +646,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// ¡°±àÄ¿¹æÔò¡± combobox ¼°±êÇ©ÊÇ·ñ¿É¼û
+        /// â€œç¼–ç›®è§„åˆ™â€ combobox åŠæ ‡ç­¾æ˜¯å¦å¯è§
         /// </summary>
         public bool RuleVisible
         {
@@ -662,7 +662,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// ±àÄ¿¹æÔò
+        /// ç¼–ç›®è§„åˆ™
         /// </summary>
         public string Rule
         {
@@ -677,7 +677,7 @@ namespace DigitalPlatform.Marc
         }
 
         /// <summary>
-        /// ËùÓĞ¿ÉÓÃµÄ±àÂë·½Ê½
+        /// æ‰€æœ‰å¯ç”¨çš„ç¼–ç æ–¹å¼
         /// </summary>
         public List<string> EncodingListItems
         {
@@ -702,11 +702,11 @@ namespace DigitalPlatform.Marc
 
         }
 
-        // ÊÇ·ñĞèÒªÊä³öµÄÊ±ºòÔÊĞíÓÃ»§Ñ¡Ôñmarcsyntax list¡£
-        // Èç¹ûÉèÖÃÎª½ûÖ¹£¬Õâ¾ÍÒâÎ¶×Å³ÌĞò»á×Ô¶¯ÉèÖÃºÃÆäÖĞµÄÖµ(ËäÈ»Îªdisable×´Ì¬)£¬ÓÃ»§Ò²ÄÜ¿´µ½£¬µ«ÊÇ²»ÄÜÑ¡Ôñ¡£
-        // dp2¿ÉÒÔÊ¶±ğmarc syntax£¬¶ødt1000/dp1²»ÄÜ¡£ºóÕßĞèÒªEnableÕâ¸ölist£¬ÒÔ±ãÈÃÓÃ»§¼ÓÒÔÑ¡Ôñ
+        // æ˜¯å¦éœ€è¦è¾“å‡ºçš„æ—¶å€™å…è®¸ç”¨æˆ·é€‰æ‹©marcsyntax listã€‚
+        // å¦‚æœè®¾ç½®ä¸ºç¦æ­¢ï¼Œè¿™å°±æ„å‘³ç€ç¨‹åºä¼šè‡ªåŠ¨è®¾ç½®å¥½å…¶ä¸­çš„å€¼(è™½ç„¶ä¸ºdisableçŠ¶æ€)ï¼Œç”¨æˆ·ä¹Ÿèƒ½çœ‹åˆ°ï¼Œä½†æ˜¯ä¸èƒ½é€‰æ‹©ã€‚
+        // dp2å¯ä»¥è¯†åˆ«marc syntaxï¼Œè€Œdt1000/dp1ä¸èƒ½ã€‚åè€…éœ€è¦Enableè¿™ä¸ªlistï¼Œä»¥ä¾¿è®©ç”¨æˆ·åŠ ä»¥é€‰æ‹©
         /// <summary>
-        /// ¡°MARC ¸ñÊ½¡± ComboBox µÄ Enabled ×´Ì¬
+        /// â€œMARC æ ¼å¼â€ ComboBox çš„ Enabled çŠ¶æ€
         /// </summary>
         public bool EnableMarcSyntax
         {
@@ -721,9 +721,9 @@ namespace DigitalPlatform.Marc
             }
         }
 
-        // ±àÂë·½Ê½×¢¡£¿ÉÒÔÓÃÀ´×¢Ã÷Ô­Ê¼µÄ±àÂë·½Ê½ÊÇÊ²Ã´¡£
+        // ç¼–ç æ–¹å¼æ³¨ã€‚å¯ä»¥ç”¨æ¥æ³¨æ˜åŸå§‹çš„ç¼–ç æ–¹å¼æ˜¯ä»€ä¹ˆã€‚
         /// <summary>
-        /// ±àÂë·½Ê½×¢ÊÍÎÄ×Ö
+        /// ç¼–ç æ–¹å¼æ³¨é‡Šæ–‡å­—
         /// </summary>
         public string EncodingComment
         {
@@ -750,8 +750,8 @@ namespace DigitalPlatform.Marc
             string strMARC = "";
             string strError = "";
                     // return:
-        //      -1  ³ö´í
-        //      0   Õı³£
+        //      -1  å‡ºé”™
+        //      0   æ­£å¸¸
             int nRet = LoadFirstRecord(strFileName,
             encoding,
             out strMARC,
@@ -760,7 +760,7 @@ namespace DigitalPlatform.Marc
                 goto ERROR1;
 
             if (this.Mode880 == true
-                && (this.comboBox_marcSyntax.Text == "USMARC" || this.comboBox_marcSyntax.Text == "<×Ô¶¯>"))
+                && (this.comboBox_marcSyntax.Text == "USMARC" || this.comboBox_marcSyntax.Text == "<è‡ªåŠ¨>"))
             {
                 if (this.IsOutput == false)
                 {
@@ -773,7 +773,7 @@ namespace DigitalPlatform.Marc
             string strHead = @"<head>
 <style type='text/css'>
 BODY {
-	FONT-FAMILY: Microsoft YaHei, Verdana, ËÎÌå;
+	FONT-FAMILY: Microsoft YaHei, Verdana, å®‹ä½“;
 	FONT-SIZE: 8pt;
 }
 TABLE.marc
@@ -893,12 +893,12 @@ TABLE.marc SPAN.fieldend
                 doc = doc.OpenNew(true);
             doc.Write(strHtml);
 
-            // ±£³ÖÄ©ĞĞ¿É¼û
+            // ä¿æŒæœ«è¡Œå¯è§
             // ScrollToEnd(webBrowser);
         }
 
         private MessageBalloon m_firstUseBalloon = null;
-        bool m_bBalloonDisplayed = false;   // ÊÇ·ñÒÑ¾­ÏÔÊ¾¹ıÒ»´ÎÁË
+        bool m_bBalloonDisplayed = false;   // æ˜¯å¦å·²ç»æ˜¾ç¤ºè¿‡ä¸€æ¬¡äº†
 
         /*public*/ void ShowMessageTip()
         {
@@ -907,9 +907,9 @@ TABLE.marc SPAN.fieldend
 
             m_firstUseBalloon = new MessageBalloon();
             m_firstUseBalloon.Parent = this.webBrowser1;
-            m_firstUseBalloon.Title = "ÈçºÎÈ·¶¨ MARC ÎÄ¼şµÄ±àÂë·½Ê½?";
+            m_firstUseBalloon.Title = "å¦‚ä½•ç¡®å®š MARC æ–‡ä»¶çš„ç¼–ç æ–¹å¼?";
             m_firstUseBalloon.TitleIcon = TooltipIcon.Info;
-            m_firstUseBalloon.Text = "\r\nÕâÀïÏÔÊ¾ÁËµ±Ç°ÎÄ¼şµÚÒ»Ìõ MARC ¼ÇÂ¼µÄÄÚÈİ£¬Çë×ĞÏ¸¹Û²ìºº×ÖÄÚÈİ²¿·ÖÊÇ·ñÕıÈ·¡£\r\n\r\nÈç¹û³öÏÖÁËÂÒÂë£¬¿ÉÖØÑ¡ÆäËû±àÂë·½Ê½ÊÔÊÔ";
+            m_firstUseBalloon.Text = "\r\nè¿™é‡Œæ˜¾ç¤ºäº†å½“å‰æ–‡ä»¶ç¬¬ä¸€æ¡ MARC è®°å½•çš„å†…å®¹ï¼Œè¯·ä»”ç»†è§‚å¯Ÿæ±‰å­—å†…å®¹éƒ¨åˆ†æ˜¯å¦æ­£ç¡®ã€‚\r\n\r\nå¦‚æœå‡ºç°äº†ä¹±ç ï¼Œå¯é‡é€‰å…¶ä»–ç¼–ç æ–¹å¼è¯•è¯•";
 
             m_firstUseBalloon.Align = BalloonAlignment.BottomRight;
             m_firstUseBalloon.CenterStem = false;
@@ -928,10 +928,10 @@ TABLE.marc SPAN.fieldend
             m_firstUseBalloon = null;
         }
 
-        // ´Ó ISO2709 ÎÄ¼şÖĞ¶Á³öµÚÒ»Ìõ¼ÇÂ¼¡£·µ»ØµÄÊÇ»úÄÚ¸ñÊ½
+        // ä» ISO2709 æ–‡ä»¶ä¸­è¯»å‡ºç¬¬ä¸€æ¡è®°å½•ã€‚è¿”å›çš„æ˜¯æœºå†…æ ¼å¼
         // return:
-        //      -1  ³ö´í
-        //      0   Õı³£
+        //      -1  å‡ºé”™
+        //      0   æ­£å¸¸
         /*public*/ static int LoadFirstRecord(string strMarcFileName,
             Encoding encoding,
             out string strMARC,
@@ -947,13 +947,13 @@ TABLE.marc SPAN.fieldend
     FileAccess.Read,
     FileShare.ReadWrite))
                 {
-                    // ´ÓISO2709ÎÄ¼şÖĞ¶ÁÈëÒ»ÌõMARC¼ÇÂ¼
+                    // ä»ISO2709æ–‡ä»¶ä¸­è¯»å…¥ä¸€æ¡MARCè®°å½•
                     // return:
-                    //	-2	MARC¸ñÊ½´í
-                    //	-1	³ö´í
-                    //	0	ÕıÈ·
-                    //	1	½áÊø(µ±Ç°·µ»ØµÄ¼ÇÂ¼ÓĞĞ§)
-                    //	2	½áÊø(µ±Ç°·µ»ØµÄ¼ÇÂ¼ÎŞĞ§)
+                    //	-2	MARCæ ¼å¼é”™
+                    //	-1	å‡ºé”™
+                    //	0	æ­£ç¡®
+                    //	1	ç»“æŸ(å½“å‰è¿”å›çš„è®°å½•æœ‰æ•ˆ)
+                    //	2	ç»“æŸ(å½“å‰è¿”å›çš„è®°å½•æ— æ•ˆ)
                     int nRet = MarcUtil.ReadMarcRecord(stream,
                         encoding,
                         true,	// bRemoveEndCrLf,
@@ -961,42 +961,42 @@ TABLE.marc SPAN.fieldend
                         out strMARC,
                         out strError);
                     if (nRet == 0 || nRet == 1)
-                        return 0;   // Õı³£
+                        return 0;   // æ­£å¸¸
 
-                    strError = "¶ÁÈëMARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                    strError = "è¯»å…¥MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
             }
             catch (Exception ex)
             {
-                strError = "Òì³£: " + ex.Message;
+                strError = "å¼‚å¸¸: " + ex.Message;
                 return -1;
             }
         }
 
         private void textBox_filename_TextChanged(object sender, EventArgs e)
         {
-            // ×Ô¶¯ÏÔÊ¾ÎÄ¼şµÄµÚÒ»Ìõ
+            // è‡ªåŠ¨æ˜¾ç¤ºæ–‡ä»¶çš„ç¬¬ä¸€æ¡
             DisplayFirstRecord(this.FileName, this.Encoding);
         }
 
         private void comboBox_encoding_TextChanged(object sender, EventArgs e)
         {
-            // ×Ô¶¯ÏÔÊ¾ÎÄ¼şµÄµÚÒ»Ìõ
+            // è‡ªåŠ¨æ˜¾ç¤ºæ–‡ä»¶çš„ç¬¬ä¸€æ¡
             try
             {
                 DisplayFirstRecord(this.FileName, this.Encoding);
             }
             catch
             {
-                // TODO: ×îºÃ°Ñ combobox ÏÔÊ¾ÎªÌØÊâÑÕÉ«£¬±íÊ¾ÊäÈëµÄ±àÂë·½Ê½Ãû³Æ²»ºÏ·¨
+                // TODO: æœ€å¥½æŠŠ combobox æ˜¾ç¤ºä¸ºç‰¹æ®Šé¢œè‰²ï¼Œè¡¨ç¤ºè¾“å…¥çš„ç¼–ç æ–¹å¼åç§°ä¸åˆæ³•
             }
         }
 
         private void comboBox_marcSyntax_TextChanged(object sender, EventArgs e)
         {
             if (this.comboBox_marcSyntax.Text == "USMARC"
-                || this.comboBox_marcSyntax.Text == "<×Ô¶¯>")
+                || this.comboBox_marcSyntax.Text == "<è‡ªåŠ¨>")
                 this.checkBox_880.Visible = this.m_bMode880Visible;
             else
                 this.checkBox_880.Visible = false;
@@ -1017,7 +1017,7 @@ TABLE.marc SPAN.fieldend
             }
         }
 
-        // 880 checkbox ÊÇ·ñÒªÏÔÊ¾£¿³ıÁËÕâ¸ö±äÁ¿£¬»¹Òª¿´ MarcSyntax
+        // 880 checkbox æ˜¯å¦è¦æ˜¾ç¤ºï¼Ÿé™¤äº†è¿™ä¸ªå˜é‡ï¼Œè¿˜è¦çœ‹ MarcSyntax
         bool m_bMode880Visible = true;
         public bool Mode880Visible
         {
@@ -1035,7 +1035,7 @@ TABLE.marc SPAN.fieldend
 
         private void checkBox_880_CheckedChanged(object sender, EventArgs e)
         {
-            // ×Ô¶¯ÏÔÊ¾ÎÄ¼şµÄµÚÒ»Ìõ
+            // è‡ªåŠ¨æ˜¾ç¤ºæ–‡ä»¶çš„ç¬¬ä¸€æ¡
             DisplayFirstRecord(this.FileName, this.Encoding);
         }
 
@@ -1049,30 +1049,30 @@ TABLE.marc SPAN.fieldend
     }
 
     /// <summary>
-    /// »ñµÃ±àÂë·½Ê½µÄÊÂ¼ş
+    /// è·å¾—ç¼–ç æ–¹å¼çš„äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetEncodingEventHandler(object sender,
 GetEncodingEventArgs e);
 
     /// <summary>
-    /// »ñµÃ±àÂë·½Ê½ÊÂ¼şµÄ²ÎÊı
+    /// è·å¾—ç¼–ç æ–¹å¼äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class GetEncodingEventArgs : EventArgs
     {
         /// <summary>
-        /// [in] ±àÂë·½Ê½Ãû
+        /// [in] ç¼–ç æ–¹å¼å
         /// </summary>
         public string EncodingName = "";    // [in]
 
         /// <summary>
-        /// [out] ·µ»Ø±àÂë·½Ê½ Encoding ¶ÔÏó
+        /// [out] è¿”å›ç¼–ç æ–¹å¼ Encoding å¯¹è±¡
         /// </summary>
         public Encoding Encoding = null;    // [out]
 
         /// <summary>
-        /// [out] ·µ»Ø³ö´íĞÅÏ¢¡£Èç¹ûÎª¿ÕÔò±íÊ¾Ã»ÓĞ´íÎó
+        /// [out] è¿”å›å‡ºé”™ä¿¡æ¯ã€‚å¦‚æœä¸ºç©ºåˆ™è¡¨ç¤ºæ²¡æœ‰é”™è¯¯
         /// </summary>
         public string ErrorInfo = "";   // [out]
     }

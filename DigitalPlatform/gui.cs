@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Threading;
 
@@ -13,7 +13,7 @@ using System.Collections.Generic;  // for Registry
 namespace DigitalPlatform.GUI
 {
 
-	// Ôö²¹²Ëµ¥
+	// å¢è¡¥èœå•
 	public delegate void GuiAppendMenuEventHandle(object sender,
     GuiAppendMenuEventArgs e);
 
@@ -27,7 +27,7 @@ namespace DigitalPlatform.GUI
     {
 
         // http://stackoverflow.com/questions/4842160/auto-width-of-comboboxs-content
-        // »ñµÃ ComboBox ÁĞ±íÊÂÏîµÄ×î´ó¿í¶È
+        // è·å¾— ComboBox åˆ—è¡¨äº‹é¡¹çš„æœ€å¤§å®½åº¦
         public static int GetComboBoxMaxItemWidth(ComboBox cb)
         {
             int maxWidth = 0, temp = 0;
@@ -76,44 +76,49 @@ namespace DigitalPlatform.GUI
         }
 
 
-        // ×¢²áIE9 WebControlÄ£Ê½
+        // æ³¨å†ŒIE9 WebControlæ¨¡å¼
         public static bool RegisterIE9DocMode()
         {
-            RegistryKey key = null;
             try
             {
                 // "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION"
                 // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_BROWSER_EMULATION
-                key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", true);
+                RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", true);
+                try
+                {
+                    if (key == null)
+                        key = Registry.LocalMachine.CreateSubKey("Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION");
+
+                    if (key == null)
+                        return false;
+
+                    key.SetValue(System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName, 9999, RegistryValueKind.DWord);
+                    return true;
+                }
+                finally
+                {
+                    if (key != null)
+                        key.Close();
+                }
             }
             catch (Exception /*ex*/)
             {
                 return false;
             }
-
-            if (key == null)
-                key = Registry.LocalMachine.CreateSubKey("Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION");
-
-            if (key == null)
-                return false;
-
-            key.SetValue(System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName, 9999, RegistryValueKind.DWord);
-            key.Close();
-            return true;
         }
 
         public static Font GetDefaultFont()
         {
             try
             {
-                FontFamily family = new FontFamily("Î¢ÈíÑÅºÚ");
+                FontFamily family = new FontFamily("å¾®è½¯é›…é»‘");
             }
             catch
             {
                 return null;
             }
 
-            return new Font(new FontFamily("Î¢ÈíÑÅºÚ"), (float)9.0, GraphicsUnit.Point);
+            return new Font(new FontFamily("å¾®è½¯é›…é»‘"), (float)9.0, GraphicsUnit.Point);
         }
 
         static bool IsFontExist(string strFontName)
@@ -130,17 +135,17 @@ namespace DigitalPlatform.GUI
         }
 
         /// <summary>
-        /// »ñµÃÈ±Ê¡µÄ±à¼­Æ÷×ÖÌåÃû
+        /// è·å¾—ç¼ºçœçš„ç¼–è¾‘å™¨å­—ä½“å
         /// </summary>
         /// <returns></returns>
         public static string GetDefaultEditorFontName()
         {
             if (IsFontExist("Consolas") == true)
                 return "Consolas";
-            if (IsFontExist("Î¢ÈíÑÅºÚ") == true)
-                return "Î¢ÈíÑÅºÚ";
+            if (IsFontExist("å¾®è½¯é›…é»‘") == true)
+                return "å¾®è½¯é›…é»‘";
 
-            return "ËÎÌå";
+            return "å®‹ä½“";
         }
 
         public static void AutoSetDefaultFont(Control control)
@@ -155,7 +160,7 @@ namespace DigitalPlatform.GUI
         }
 
         // parameters:
-        //      bForce  ÊÇ·ñÇ¿ÖÆÉèÖÃ¡£Ç¿ÖÆÉèÖÃÊÇÖ¸DefaultFont == null µÄÊ±ºò£¬Ò²Òª°´ÕÕControl.DefaultFontÀ´ÉèÖÃ
+        //      bForce  æ˜¯å¦å¼ºåˆ¶è®¾ç½®ã€‚å¼ºåˆ¶è®¾ç½®æ˜¯æŒ‡DefaultFont == null çš„æ—¶å€™ï¼Œä¹Ÿè¦æŒ‰ç…§Control.DefaultFontæ¥è®¾ç½®
         public static void SetControlFont(Control control,
             Font font,
             bool bForce = false)
@@ -176,11 +181,11 @@ namespace DigitalPlatform.GUI
             ChangeDifferentFaceFont(control, font);
         }
 
-        // TODO: ÊÇ·ñ¿ÉÒÔ±£³ÖÔ­ÓĞ×ÖÌå±ÈÀı?
+        // TODO: æ˜¯å¦å¯ä»¥ä¿æŒåŸæœ‰å­—ä½“æ¯”ä¾‹?
         static void ChangeDifferentFaceFont(Control parent,
             Font font)
         {
-            // ĞŞ¸ÄËùÓĞÏÂ¼¶¿Ø¼şµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰ä¸‹çº§æ§ä»¶çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             foreach (Control sub in parent.Controls)
             {
                 Font subfont = sub.Font;
@@ -200,12 +205,12 @@ namespace DigitalPlatform.GUI
                     ChangeDifferentFaceFont((ToolStrip)sub, font);
                 }
 
-                // µİ¹é
+                // é€’å½’
                 ChangeDifferentFaceFont(sub, font);
             }
         }
 
-        // ĞŞ¸ÄÒ»¸ö¿Ø¼şµÄ×ÖÌå
+        // ä¿®æ”¹ä¸€ä¸ªæ§ä»¶çš„å­—ä½“
         static void ChangeFont(Font font,
             Control item)
         {
@@ -222,7 +227,7 @@ namespace DigitalPlatform.GUI
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
-            // ĞŞ¸ÄËùÓĞÊÂÏîµÄ×ÖÌå£¬Èç¹û×ÖÌåÃû²»Ò»ÑùµÄ»°
+            // ä¿®æ”¹æ‰€æœ‰äº‹é¡¹çš„å­—ä½“ï¼Œå¦‚æœå­—ä½“åä¸ä¸€æ ·çš„è¯
             for (int i = 0; i < tool.Items.Count; i++)
             {
                 ToolStripItem item = tool.Items[i];
@@ -318,8 +323,8 @@ RectangleF rect)
             return true;
         }
 
-        // ¿´¿´Ò»¸ö´°¿Ú¾ä±úÊÇ²»ÊÇMDI×Ó´°¿ÚµÄ¾ä±ú£¿
-        // Èç¹ûÊÇ£¬Ôò·µ»Ø¸ÃMDI×Ó´°¿ÚµÄForm¶ÔÏó
+        // çœ‹çœ‹ä¸€ä¸ªçª—å£å¥æŸ„æ˜¯ä¸æ˜¯MDIå­çª—å£çš„å¥æŸ„ï¼Ÿ
+        // å¦‚æœæ˜¯ï¼Œåˆ™è¿”å›è¯¥MDIå­çª—å£çš„Formå¯¹è±¡
         public static Form IsMdiChildren(Form parent, IntPtr hwnd)
         {
             for (int i = 0; i < parent.MdiChildren.Length; i++)
@@ -332,22 +337,22 @@ RectangleF rect)
             return null;    // not found
         }
 
-        // ´´½¨Ò»¸ö±íÊ¾µ±Ç°´ò¿ªµÄMDI×Ó´°¿ÚµÄ×Ö·û´®
+        // åˆ›å»ºä¸€ä¸ªè¡¨ç¤ºå½“å‰æ‰“å¼€çš„MDIå­çª—å£çš„å­—ç¬¦ä¸²
         public static string GetOpenedMdiWindowString(Form parent)
         {
             if (parent.ActiveMdiChild == null)
                 return null;
 
-            // µÃµ½¶¥²ãµÄMDI Child
+            // å¾—åˆ°é¡¶å±‚çš„MDI Child
             IntPtr hwnd = parent.ActiveMdiChild.Handle;
 
             if (hwnd == IntPtr.Zero)
                 return null;
 
-            // ÕÒµ½×îµ×²¿µÄ×Ó´°¿Ú
+            // æ‰¾åˆ°æœ€åº•éƒ¨çš„å­çª—å£
             IntPtr hwndFirst = API.GetWindow(hwnd, API.GW_HWNDLAST);
 
-            // Ë³´ÎµÃµ½×Ö·û´®
+            // é¡ºæ¬¡å¾—åˆ°å­—ç¬¦ä¸²
             string strResult = "";
             hwnd = hwndFirst;
             for (; ; )
@@ -358,7 +363,7 @@ RectangleF rect)
                 Form temp = IsMdiChildren(parent, hwnd);
                 if (temp != null)
                 {
-                    // ×îĞ¡»¯µÄ±»ºöÂÔ
+                    // æœ€å°åŒ–çš„è¢«å¿½ç•¥
                     if (temp.WindowState != FormWindowState.Minimized)
                         strResult += temp.GetType().ToString() + ",";
                 }
@@ -369,7 +374,7 @@ RectangleF rect)
             return strResult;
         }
 
-        // ÕÒµ½tabË³ĞòµÄÏÂÒ»¸ö¿Ø¼ş£¬µ«ÊÇ±ØĞëÊÇparent¶ù×ÓÒÔÍâµÄ¿Ø¼ş
+        // æ‰¾åˆ°tabé¡ºåºçš„ä¸‹ä¸€ä¸ªæ§ä»¶ï¼Œä½†æ˜¯å¿…é¡»æ˜¯parentå„¿å­ä»¥å¤–çš„æ§ä»¶
         public static Control GetNextControl(
             Control dialog,
             Control start,
@@ -395,8 +400,8 @@ RectangleF rect)
 
     }
 
-    // µ±Ç°Ó¦ÓÃ³ÌĞòµÄÇ°Ì¨´°¿Ú
-    // ÓÃÀı: MessageBox.Show(ForegroundWindow.Instance, "Displayed on top!");
+    // å½“å‰åº”ç”¨ç¨‹åºçš„å‰å°çª—å£
+    // ç”¨ä¾‹: MessageBox.Show(ForegroundWindow.Instance, "Displayed on top!");
     public class ForegroundWindow : IWin32Window
     {
         private static ForegroundWindow _window = new ForegroundWindow();

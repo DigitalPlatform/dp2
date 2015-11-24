@@ -4884,19 +4884,19 @@ ref strNewStyle);	// 不要数据体和metadata
             {
                 Debug.Assert(strLocalName != "", "strLocalName不应为空");
 
-                StreamReader sr = null;
-
                 try
                 {
-                    sr = new StreamReader(strLocalName, Encoding.UTF8);
+                    using (StreamReader sr = new StreamReader(strLocalName, Encoding.UTF8))
+                    {
+                        strResult = sr.ReadToEnd();
+                    }
                 }
                 catch (Exception ex)
                 {
                     strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
-                strResult = sr.ReadToEnd();
-                sr.Close();
+
 
                 return 0;	// 以无错误姿态返回
             }
@@ -4920,12 +4920,12 @@ ref strNewStyle);	// 不要数据体和metadata
             Debug.Assert(strLocalName != "", "PrepareLocalFile()返回的strLocalName为空");
 
             // 写入文件,以便以后从cache获取
-            StreamWriter sw = new StreamWriter(strLocalName,
+            using (StreamWriter sw = new StreamWriter(strLocalName,
                 false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strResult);
-            sw.Close();
-            sw = null;
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strResult);
+            }
 
             Debug.Assert(baOutputTimeStamp != null, "下层GetRes()返回的baOutputTimeStamp为空");
             nRet = cache.SetTimeStamp(strFullPath,

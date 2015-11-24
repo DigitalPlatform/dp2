@@ -15,16 +15,15 @@ using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Text;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Drawing;
 
 using DigitalPlatform.CirculationClient.localhost;
-using System.Drawing.Imaging;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -124,12 +123,10 @@ namespace DigitalPlatform.OPAC.Web
                     }
 
                     page.Response.Write("</pre></body></html>");
-
                     page.Response.End();
                     return false;
                 }
             }
-
 
             /*
             string strErrorInfo = (string)page.Application["errorinfo"];
@@ -140,7 +137,6 @@ namespace DigitalPlatform.OPAC.Web
                 page.Response.End();
                 return false;   // error
             }*/
-
 
             // 获得SessionInfo
             sessioninfo = (SessionInfo)page.Session["sessioninfo"];
@@ -184,7 +180,6 @@ namespace DigitalPlatform.OPAC.Web
                     page.Response.End();
                     return false;
                 }
-
             }
 
             string strLang = (string)page.Session["lang"];
@@ -561,12 +556,12 @@ namespace DigitalPlatform.OPAC.Web
         {
             DataContractJsonSerializer ser = new DataContractJsonSerializer(obj.GetType());
 
-            MemoryStream ms = new MemoryStream();
-            ser.WriteObject(ms, obj);
-            string strResult = Encoding.UTF8.GetString(ms.ToArray());
-            ms.Close();
-
-            return strResult;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ser.WriteObject(ms, obj);
+                string strResult = Encoding.UTF8.GetString(ms.ToArray());
+                return strResult;
+            }
         }
 
         public static long GetServerResultCount(

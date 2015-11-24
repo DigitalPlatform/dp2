@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
@@ -7,7 +7,7 @@ using System.Threading;
 namespace DigitalPlatform.IO
 {
 
-	// Êı¾İÊÂÏî
+	// æ•°æ®äº‹é¡¹
 	public class Item : IComparable
 	{
 //		public int DataLength = 0;
@@ -25,50 +25,50 @@ namespace DigitalPlatform.IO
 
 		public virtual void ReadData(Stream stream)
 		{
-			// ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+			// è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
 
 		}
 
 
 		public virtual void ReadCompareData(Stream stream)
 		{
-			// ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+			// è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
 
 		}
 
 		public virtual void WriteData(Stream stream)
 		{
-			// Ğ´ÈëLength¸öbytesµÄÄÚÈİ
+			// å†™å…¥Lengthä¸ªbytesçš„å†…å®¹
 
 		}
 
         public virtual void BuildBuffer()
         {
-            // ¹¹Ôìm_buffer£¬×¼±¸LengthÖµ
+            // æ„é€ m_bufferï¼Œå‡†å¤‡Lengthå€¼
 
         }
 
-		// ÊµÏÖIComparable½Ó¿ÚµÄCompareTo()·½·¨,
-		// ¸ù¾İID±È½ÏÁ½¸ö¶ÔÏóµÄ´óĞ¡£¬ÒÔ±ãÅÅĞò£¬
-		// °´ÓÒ¶ÔÆë·½Ê½±È½Ï
+		// å®ç°IComparableæ¥å£çš„CompareTo()æ–¹æ³•,
+		// æ ¹æ®IDæ¯”è¾ƒä¸¤ä¸ªå¯¹è±¡çš„å¤§å°ï¼Œä»¥ä¾¿æ’åºï¼Œ
+		// æŒ‰å³å¯¹é½æ–¹å¼æ¯”è¾ƒ
 		// obj: An object to compare with this instance
-		// ·µ»ØÖµ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
+		// è¿”å›å€¼ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
 		// Less than zero: This instance is less than obj.
 		// Zero: This instance is equal to obj.
 		// Greater than zero: This instance is greater than obj.
-		// Òì³£: ArgumentException,obj is not the same type as this instance.
+		// å¼‚å¸¸: ArgumentException,obj is not the same type as this instance.
 		public virtual int CompareTo(object obj)
 		{
 			Item item = (Item)obj;
 
-			return (this.Length - item.Length);	// ±È½ÏË­ÄÚÈİ¸ü³¤
+			return (this.Length - item.Length);	// æ¯”è¾ƒè°å†…å®¹æ›´é•¿
 		}
 
 
 	}
 
 
-	// Ã¶¾ÙÆ÷
+	// æšä¸¾å™¨
 	public class ItemFileBaseEnumerator : IEnumerator
 	{
 		ItemFileBase m_file = null;
@@ -103,48 +103,48 @@ namespace DigitalPlatform.IO
 	}
 
 
-	// ÅÄ½ô·ç¸ñ
+	// æ‹ç´§é£æ ¼
     [Flags]
     public enum CompressStyle 
 	{
-		Index = 0x01,	// ÅÄ½ôË÷ÒıÎÄ¼ş
-		Data = 0x02,	// ÅÄ½ôÊı¾İÎÄ¼ş
+		Index = 0x01,	// æ‹ç´§ç´¢å¼•æ–‡ä»¶
+		Data = 0x02,	// æ‹ç´§æ•°æ®æ–‡ä»¶
 	}
 
 	public delegate Item Delegate_newItem();
 
 	/// <summary>
-	/// ÎÄ¼şÖĞµÄÊÂÏî¼¯ºÏ¡£ÊµÏÖÊÂÏî¿ÉÅÅĞò¡¢×ÔÓÉ´æÈ¡µÄ´óÎÄ¼ş¹¦ÄÜ¡£¶ÔÄÚ´æĞèÇóĞ¡¡£
+	/// æ–‡ä»¶ä¸­çš„äº‹é¡¹é›†åˆã€‚å®ç°äº‹é¡¹å¯æ’åºã€è‡ªç”±å­˜å–çš„å¤§æ–‡ä»¶åŠŸèƒ½ã€‚å¯¹å†…å­˜éœ€æ±‚å°ã€‚
 	/// </summary>
 	public class ItemFileBase : IEnumerable, IDisposable
 	{
         public bool ReadOnly = false;
 
 		public ReaderWriterLock m_lock = new ReaderWriterLock();
-		public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+		public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
 
 		bool disposed = false;
-		// ´óÎÄ¼ş£¬´óÁ÷
+		// å¤§æ–‡ä»¶ï¼Œå¤§æµ
 		public string m_strBigFileName = "";
 		public Stream m_streamBig = null;
 
-		// Ğ¡ÎÄ¼ş£¬Ğ¡Á÷
+		// å°æ–‡ä»¶ï¼Œå°æµ
 		public string m_strSmallFileName = "";
 		public Stream m_streamSmall = null;
 
 		public long m_count = 0;
 
-		bool bDirty = false; //³õÊ¼Öµfalse,±íÊ¾¸É¾»
+		bool bDirty = false; //åˆå§‹å€¼false,è¡¨ç¤ºå¹²å‡€
 
 		public Delegate_newItem procNewItem = null;
 		/*
-		 * Ê¹ÓÃËµÃ÷
-		Èç¹ûprocNewItemÒÑ¾­¹Ò½ÓÁËdelegate£¬Ôò¼¯ºÏÀà»áÔÚÊÊµ±Ê±ºòÊ¹ÓÃËüÀ´´´½¨ĞÂItem»òÆäÅÉÉúÀàµÄ¶ÔÏó
-		Õâ¸ö·½·¨µÄºÃ´¦£¬ÊÇ²»ÓÃÅÉÉú¼¯ºÏÀàItemFileBase
-		Èç¹ûprocNewItemÎª¿Õ£¬¾ÍÊ¹ÓÃthis.NewItem()º¯Êı¡£»ùÀàÖĞÓĞÈ±Ê¡ÊµÏÖ£¬¾ÍÊÇ·µ»ØItemÀàĞÍ¶ÔÏó
-		Õâ¸ö·½·¨µÄÈ±µã£¬ÊÇÒªÅÉÉú¼¯ºÏÀàItemFileBase
-		Á½¸ö·½·¨×îºÃ²»Òª»ìÓÃ£¬ÒòÎªÈİÒ×µ¼ÖÂÀí½â»ìÂÒ¡£Èç¹û»ìÓÃ£¬procNewItemÓÅÏÈ¡£
+		 * ä½¿ç”¨è¯´æ˜
+		å¦‚æœprocNewItemå·²ç»æŒ‚æ¥äº†delegateï¼Œåˆ™é›†åˆç±»ä¼šåœ¨é€‚å½“æ—¶å€™ä½¿ç”¨å®ƒæ¥åˆ›å»ºæ–°Itemæˆ–å…¶æ´¾ç”Ÿç±»çš„å¯¹è±¡
+		è¿™ä¸ªæ–¹æ³•çš„å¥½å¤„ï¼Œæ˜¯ä¸ç”¨æ´¾ç”Ÿé›†åˆç±»ItemFileBase
+		å¦‚æœprocNewItemä¸ºç©ºï¼Œå°±ä½¿ç”¨this.NewItem()å‡½æ•°ã€‚åŸºç±»ä¸­æœ‰ç¼ºçœå®ç°ï¼Œå°±æ˜¯è¿”å›Itemç±»å‹å¯¹è±¡
+		è¿™ä¸ªæ–¹æ³•çš„ç¼ºç‚¹ï¼Œæ˜¯è¦æ´¾ç”Ÿé›†åˆç±»ItemFileBase
+		ä¸¤ä¸ªæ–¹æ³•æœ€å¥½ä¸è¦æ··ç”¨ï¼Œå› ä¸ºå®¹æ˜“å¯¼è‡´ç†è§£æ··ä¹±ã€‚å¦‚æœæ··ç”¨ï¼ŒprocNewItemä¼˜å…ˆã€‚
 		*
 		*/
 
@@ -202,11 +202,11 @@ namespace DigitalPlatform.IO
 				{
 					// Dispose managed resources.
 
-                    // ÕâÀïÓĞÒ»µãÎÊÌâ£º¿ÉÄÜÎö¹¹º¯Êıµ÷²»ÁËClose()
+                    // è¿™é‡Œæœ‰ä¸€ç‚¹é—®é¢˜ï¼šå¯èƒ½ææ„å‡½æ•°è°ƒä¸äº†Close()
 					// this.Close();
 				}
 
-                this.Close();   // 2007/6/8 ÒÆ¶¯µ½ÕâÀïµÄ
+                this.Close();   // 2007/6/8 ç§»åŠ¨åˆ°è¿™é‡Œçš„
 
              
 				/*
@@ -221,16 +221,16 @@ namespace DigitalPlatform.IO
 			disposed = true;         
 		}
 
-		// ´´½¨ĞÂitem¶ÔÏó
-		// Èç¹ûÅÉÉúÁËitemÀà²¢ÇÒÏ£Íû·ÅÔÚ±¾¼¯ºÏÖĞ¹ÜÀí£¬¿ÉÅÉÉú¼¯ºÏÀà²¢ÖØÔØ±¾º¯Êı¡£
-		// Ò²¿ÉÊ¹ÓÃprocNewItem½Ó¿Ú£¬ÕâÑù¾Í²»±ØÅÉÉú¼¯ºÏÀà
-		// ²Î¼ûprocNewItem¶¨Òå´¦ËµÃ÷
+		// åˆ›å»ºæ–°itemå¯¹è±¡
+		// å¦‚æœæ´¾ç”Ÿäº†itemç±»å¹¶ä¸”å¸Œæœ›æ”¾åœ¨æœ¬é›†åˆä¸­ç®¡ç†ï¼Œå¯æ´¾ç”Ÿé›†åˆç±»å¹¶é‡è½½æœ¬å‡½æ•°ã€‚
+		// ä¹Ÿå¯ä½¿ç”¨procNewItemæ¥å£ï¼Œè¿™æ ·å°±ä¸å¿…æ´¾ç”Ÿé›†åˆç±»
+		// å‚è§procNewItemå®šä¹‰å¤„è¯´æ˜
 		public virtual Item NewItem()
 		{
 			return new Item();
 		}
 
-		// ÕûÊıË÷ÒıÆ÷
+		// æ•´æ•°ç´¢å¼•å™¨
 		public Item this[Int64 nIndex]
 		{
 			get
@@ -239,12 +239,12 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// ¼ÇÂ¼Êı
+		// è®°å½•æ•°
 		public Int64 Count
 		{
 			get
 			{
-				// ¼Ó¶ÁËø
+				// åŠ è¯»é”
 				this.m_lock.AcquireReaderLock(m_nLockTimeout);
 				try 
 				{
@@ -258,10 +258,10 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// Çå¿ÕÄÚÈİ£¬µ«ÈÔÈ»ÔÚ¿ÉÓÃ×´Ì¬
+		// æ¸…ç©ºå†…å®¹ï¼Œä½†ä»ç„¶åœ¨å¯ç”¨çŠ¶æ€
 		public void Clear()
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
@@ -281,11 +281,11 @@ namespace DigitalPlatform.IO
 
 		}
 
-        // ´ò¿ª
-        // bInitialIndex	³õÊ¼»¯indexÎÄ¼ş£¬²¢´ò¿ª¡£
+        // æ‰“å¼€
+        // bInitialIndex	åˆå§‹åŒ–indexæ–‡ä»¶ï¼Œå¹¶æ‰“å¼€ã€‚
         public void Open(bool bInitialIndex)
         {
-            // ¼ÓĞ´Ëø
+            // åŠ å†™é”
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
@@ -293,7 +293,7 @@ namespace DigitalPlatform.IO
                 if (m_streamBig == null)
                 {
                     if (m_strBigFileName == "")
-                        m_strBigFileName = this.GetTempFileName();	// ´´½¨ÁÙÊ±ÎÄ¼ş¿ÉÒÔÓÃdelegate´¦Àí
+                        m_strBigFileName = this.GetTempFileName();	// åˆ›å»ºä¸´æ—¶æ–‡ä»¶å¯ä»¥ç”¨delegateå¤„ç†
 
                     m_streamBig = File.Open(m_strBigFileName,
                         FileMode.OpenOrCreate);
@@ -328,10 +328,10 @@ namespace DigitalPlatform.IO
             }
         }
 
-		// ÍêÕû¸´ÖÆÒ»¸ö¼¯ºÏ¶ÔÏó
+		// å®Œæ•´å¤åˆ¶ä¸€ä¸ªé›†åˆå¯¹è±¡
 		public void Copy(ItemFileBase file)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
@@ -349,18 +349,18 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// Ñ¹ËõµôÄÇĞ©ÒÑ±ê¼ÇÉ¾³ıÊÂÏîÕ¼¾İµÄ´ÅÅÌ¿Õ¼ä
-		// ¶ÔÓÚindexÎÄ¼ş£¬Èç¹ûÆäÖĞÃ»ÓĞ°üº¬±ê¼ÇÉ¾³ıµÄÊÂÏî£¬¿ÉÒÔÊ¹ÓÃ³Ë·¨ËÑË÷£¬ËÙ¶È¿ì¡£
-		// Ò»°ãÒªÇóÅÅĞòÇ°£¬CompressÒ»ÏÂ£¬·ñÔòÅÅĞòËÙ¶ÈºÜÂı¡£
+		// å‹ç¼©æ‰é‚£äº›å·²æ ‡è®°åˆ é™¤äº‹é¡¹å æ®çš„ç£ç›˜ç©ºé—´
+		// å¯¹äºindexæ–‡ä»¶ï¼Œå¦‚æœå…¶ä¸­æ²¡æœ‰åŒ…å«æ ‡è®°åˆ é™¤çš„äº‹é¡¹ï¼Œå¯ä»¥ä½¿ç”¨ä¹˜æ³•æœç´¢ï¼Œé€Ÿåº¦å¿«ã€‚
+		// ä¸€èˆ¬è¦æ±‚æ’åºå‰ï¼ŒCompressä¸€ä¸‹ï¼Œå¦åˆ™æ’åºé€Ÿåº¦å¾ˆæ…¢ã€‚
 		public void CompressDeletedItem(CompressStyle style)
 		{
 			if ((style & CompressStyle.Data) == CompressStyle.Data)
 			{
-				// É¾³ı±êÖ¾ÔÚindexÎÄ¼şÖĞ
+				// åˆ é™¤æ ‡å¿—åœ¨indexæ–‡ä»¶ä¸­
 
-				throw(new Exception("ÔİÊ±²»Ö§³Ö´Ë¹¦ÄÜ"));
+				throw(new Exception("æš‚æ—¶ä¸æ”¯æŒæ­¤åŠŸèƒ½"));
 				/*
-				// Çå³ıÀÏindex
+				// æ¸…é™¤è€index
 				RemoveIndexFile();
 				OpenIndexFile();
 				*/
@@ -376,28 +376,28 @@ namespace DigitalPlatform.IO
 
 		}
 
-		// ÔÚÎ²²¿×·¼ÓÒ»¸öÊÂÏî
+		// åœ¨å°¾éƒ¨è¿½åŠ ä¸€ä¸ªäº‹é¡¹
 		public virtual void Add(Item item)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
 
-				// ½«Êı¾İÎÄ¼şÖ¸ÕëÖÃÓÚÎ²²¿
+				// å°†æ•°æ®æ–‡ä»¶æŒ‡é’ˆç½®äºå°¾éƒ¨
 				m_streamBig.Seek(0,
 					SeekOrigin.End);
 
-				// Èô´æÔÚË÷ÒıÎÄ¼ş
+				// è‹¥å­˜åœ¨ç´¢å¼•æ–‡ä»¶
 				if (m_streamSmall != null)
 				{
-					// Ğ´ÈëÒ»¸öĞÂindexÌõÄ¿
+					// å†™å…¥ä¸€ä¸ªæ–°indexæ¡ç›®
 
 					m_streamSmall.Seek (0,SeekOrigin.End);
 					long nPosition = m_streamBig.Position ;
 
 					byte[] bufferPosition = new byte[8];
-					bufferPosition = System.BitConverter.GetBytes((long)nPosition); // Ô­À´È±·¦(long), ÊÇÒ»¸öbug. 2006/10/1 ĞŞ¸Ä
+					bufferPosition = System.BitConverter.GetBytes((long)nPosition); // åŸæ¥ç¼ºä¹(long), æ˜¯ä¸€ä¸ªbug. 2006/10/1 ä¿®æ”¹
                     Debug.Assert(bufferPosition.Length == 8, "");
                     m_streamSmall.Write(bufferPosition, 0, 8);
 				}
@@ -420,17 +420,17 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// ±ê¼ÇÉ¾³ıÒ»Ìõ¼ÇÂ¼
+		// æ ‡è®°åˆ é™¤ä¸€æ¡è®°å½•
 		public void RemoveAt(int nIndex)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
 
 				if (nIndex < 0 || nIndex >= m_count)
 				{
-					throw(new Exception("ÏÂ±ê " + Convert.ToString(nIndex) + " Ô½½ç(Count=" + Convert.ToString(m_count) + ")"));
+					throw(new Exception("ä¸‹æ ‡ " + Convert.ToString(nIndex) + " è¶Šç•Œ(Count=" + Convert.ToString(m_count) + ")"));
 				}
 				int nRet = RemoveAtAuto(nIndex);
 				if (nRet == -1)
@@ -439,7 +439,7 @@ namespace DigitalPlatform.IO
 				}
 
 				m_count --;
-				// bDirty = true;	// ±íÊ¾ÒÑ¾­ÓĞ±ê¼ÇÉ¾³ıµÄÊÂÏîÁË
+				// bDirty = true;	// è¡¨ç¤ºå·²ç»æœ‰æ ‡è®°åˆ é™¤çš„äº‹é¡¹äº†
 
 			}
 			finally
@@ -448,29 +448,29 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		//±ê¼ÇÉ¾³ı¶àÌõ¼ÇÂ¼
+		//æ ‡è®°åˆ é™¤å¤šæ¡è®°å½•
 		public void RemoveAt(int nIndex,
 			int nCount)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
 
 				if (nIndex < 0 || nIndex + nCount > m_count)
 				{
-					throw(new Exception("ÏÂ±ê " + Convert.ToString(nIndex) + " Ô½½ç(Count=" + Convert.ToString(m_count) + ")"));
+					throw(new Exception("ä¸‹æ ‡ " + Convert.ToString(nIndex) + " è¶Šç•Œ(Count=" + Convert.ToString(m_count) + ")"));
 				}
 
 				int nRet = 0;
-				if (m_streamSmall != null) // ÓĞË÷ÒıÎÄ¼şÊ±
+				if (m_streamSmall != null) // æœ‰ç´¢å¼•æ–‡ä»¶æ—¶
 				{
 					// nRet = RemoveAtIndex(nIndex);
 					nRet = CompressRemoveAtIndex(nIndex, nCount);
 				}
 				else 
 				{
-					throw(new Exception ("ÔİÊ±»¹Ã»ÓĞ±àĞ´"));
+					throw(new Exception ("æš‚æ—¶è¿˜æ²¡æœ‰ç¼–å†™"));
 
 				}
 
@@ -481,7 +481,7 @@ namespace DigitalPlatform.IO
 				}
 
 				m_count -= nCount;
-				// bDirty = true;	// ±íÊ¾ÒÑ¾­ÓĞ±ê¼ÇÉ¾³ıµÄÊÂÏîÁË
+				// bDirty = true;	// è¡¨ç¤ºå·²ç»æœ‰æ ‡è®°åˆ é™¤çš„äº‹é¡¹äº†
 
 			}
 			finally
@@ -490,31 +490,31 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// ²åÈëÒ»¸öÊÂÏî
+		// æ’å…¥ä¸€ä¸ªäº‹é¡¹
 		public virtual void Insert(int nIndex,
 			Item item)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
                 if (m_streamSmall == null
                     && m_streamBig == null)
-                    throw (new Exception("ÄÚ²¿ÎÄ¼şÉĞÎ´´ò¿ª»òÕßÒÑ¾­±»¹Ø±Õ"));
+                    throw (new Exception("å†…éƒ¨æ–‡ä»¶å°šæœªæ‰“å¼€æˆ–è€…å·²ç»è¢«å…³é—­"));
 
-				// Èô²»´æÔÚË÷ÒıÎÄ¼ş
+				// è‹¥ä¸å­˜åœ¨ç´¢å¼•æ–‡ä»¶
 				if (m_streamSmall == null)
-					throw(new Exception("Ôİ²»Ö§³ÖÎŞË÷ÒıÎÄ¼ş·½Ê½ÏÂµÄ²åÈë²Ù×÷"));
+					throw(new Exception("æš‚ä¸æ”¯æŒæ— ç´¢å¼•æ–‡ä»¶æ–¹å¼ä¸‹çš„æ’å…¥æ“ä½œ"));
 
 
-				// ½«Êı¾İÎÄ¼şÖ¸ÕëÖÃÓÚÎ²²¿
+				// å°†æ•°æ®æ–‡ä»¶æŒ‡é’ˆç½®äºå°¾éƒ¨
 				m_streamBig.Seek(0,
 					SeekOrigin.End);
 
-				// Èô´æÔÚË÷ÒıÎÄ¼ş
+				// è‹¥å­˜åœ¨ç´¢å¼•æ–‡ä»¶
 				if (m_streamSmall != null)
 				{
-					// ²åÈëÒ»¸öĞÂindexÌõÄ¿
+					// æ’å…¥ä¸€ä¸ªæ–°indexæ¡ç›®
 					long lStart = (long)nIndex * 8;
 					StreamUtil.Move(m_streamSmall,
 						lStart, 
@@ -525,7 +525,7 @@ namespace DigitalPlatform.IO
 					long nPosition = m_streamBig.Position;
 
 					byte[] bufferPosition = new byte[8];
-                    bufferPosition = System.BitConverter.GetBytes((long)nPosition); // Ô­À´È±·¦(long), ÊÇÒ»¸öbug. 2006/10/1 ĞŞ¸Ä
+                    bufferPosition = System.BitConverter.GetBytes((long)nPosition); // åŸæ¥ç¼ºä¹(long), æ˜¯ä¸€ä¸ªbug. 2006/10/1 ä¿®æ”¹
                     Debug.Assert(bufferPosition.Length == 8, "");
 					m_streamSmall.Write (bufferPosition,0,8);
 				}
@@ -546,10 +546,10 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ¹Ø±Õ¡£É¾³ıËùÓĞÎÄ¼ş¡£
+		// å…³é—­ã€‚åˆ é™¤æ‰€æœ‰æ–‡ä»¶ã€‚
 		public void Close()
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
@@ -565,17 +565,17 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// ½«Íâ²¿ÎÄ¼ş°ó¶¨µ½±¾¶ÔÏó
+		// å°†å¤–éƒ¨æ–‡ä»¶ç»‘å®šåˆ°æœ¬å¯¹è±¡
 		public void Attach(string strFileName,
 			string strIndexFileName)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
 
 				RemoveIndexFile();
-				RemoveDataFile();	// Çå³ıµ±Ç°ÕıÔÚÊ¹ÓÃµÄÄÚ²¿Êı¾İÎÄ¼ş
+				RemoveDataFile();	// æ¸…é™¤å½“å‰æ­£åœ¨ä½¿ç”¨çš„å†…éƒ¨æ•°æ®æ–‡ä»¶
 
 				m_strBigFileName = strFileName;
 				m_streamBig = File.Open (m_strBigFileName,
@@ -612,7 +612,7 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ½«Êı¾İÎÄ¼şÕûĞòºóÊä³ö
+		// å°†æ•°æ®æ–‡ä»¶æ•´åºåè¾“å‡º
 		void Resequence(string strOutputFileName)
 		{
 			this.m_streamSmall.Seek(0, SeekOrigin.Begin);
@@ -626,15 +626,15 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ½«Êı¾İÎÄ¼şºÍ¶ÔÏóÍÑ¹³
+		// å°†æ•°æ®æ–‡ä»¶å’Œå¯¹è±¡è„±é’©
 		// parameters:
-		//		bResequence	ÊÇ·ñÖØĞÂÕûĞò?
+		//		bResequence	æ˜¯å¦é‡æ–°æ•´åº?
 		// return:
-		//	Êı¾İÎÄ¼şÃû
+		//	æ•°æ®æ–‡ä»¶å
 		public void Detach(out string strDataFileName,
 			out string strIndexFileName)
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
@@ -642,12 +642,12 @@ namespace DigitalPlatform.IO
 				strDataFileName = m_strBigFileName;
 				CloseDataFile();
 
-				m_strBigFileName = "";	// ±ÜÃâÎö¹¹º¯ÊıÈ¥É¾³ı
+				m_strBigFileName = "";	// é¿å…ææ„å‡½æ•°å»åˆ é™¤
 
 				strIndexFileName = this.m_strSmallFileName;
 				CloseIndexFile();
 
-				this.m_strSmallFileName = "";	// ±ÜÃâÎö¹¹º¯ÊıÈ¥É¾³ı
+				this.m_strSmallFileName = "";	// é¿å…ææ„å‡½æ•°å»åˆ é™¤
 
 				return;
 			}
@@ -657,10 +657,10 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// ÅÅĞò
+		// æ’åº
 		public void Sort()
 		{
-			// ¼ÓĞ´Ëø
+			// åŠ å†™é”
 			this.m_lock.AcquireWriterLock(m_nLockTimeout);
 			try 
 			{
@@ -676,7 +676,7 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-        // È·±£´´½¨ÁËË÷Òı
+        // ç¡®ä¿åˆ›å»ºäº†ç´¢å¼•
         public void EnsureCreateIndex()
         {
             if (this.m_streamSmall == null)
@@ -685,13 +685,13 @@ namespace DigitalPlatform.IO
             }
             else
             {
-                // DebugÊ±¿ÉÒÔĞ£ÑéÒ»ÏÂindexÎÄ¼ş³ß´çºÍCountµÄ¹ØÏµÊÇ·ñÕıÈ·
+                // Debugæ—¶å¯ä»¥æ ¡éªŒä¸€ä¸‹indexæ–‡ä»¶å°ºå¯¸å’ŒCountçš„å…³ç³»æ˜¯å¦æ­£ç¡®
             }
         }
 
-		// ´´½¨Index
+		// åˆ›å»ºIndex
 		// parameters:
-		//	strIndexFileName	Èç¹û==null£¬±íÊ¾×Ô¶¯·ÖÅäÁÙÊ±ÎÄ¼ş
+		//	strIndexFileName	å¦‚æœ==nullï¼Œè¡¨ç¤ºè‡ªåŠ¨åˆ†é…ä¸´æ—¶æ–‡ä»¶
 		public void CreateIndexFile(string strIndexFileName)
 		{
 			int nLength;
@@ -710,14 +710,14 @@ namespace DigitalPlatform.IO
 			long lPosition = 0;
 			for(i=0;;i++)
 			{
-				//³¤¶È×Ö½ÚÊı×é
+				//é•¿åº¦å­—èŠ‚æ•°ç»„
 				byte[] bufferLength = new byte[4];
 				int n = m_streamBig.Read(bufferLength,0,4);
-				if (n<4)   //±íÊ¾ÎÄ¼şµ½Î²
+				if (n<4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 					break;
 
 				nLength = System.BitConverter.ToInt32(bufferLength,0);
-				if (nLength<0)  //É¾³ıÏî
+				if (nLength<0)  //åˆ é™¤é¡¹
 				{
 					nLength = (int)GetRealValue(nLength);
 					goto CONTINUE;
@@ -736,12 +736,12 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ¿ìËÙÅÅĞò
-		// ĞŞ¸Ä£º½¨ÒéÔö¼ÓdelegateÓÃÀ´Ì½²âÊÇ·ñĞèÒªÖĞ¶ÏÑ­»·
-		// Ò»°ãÓÃ»§²»Òªµ÷ÓÃÕâ¸öº¯Êı£¬µ÷ÓÃSort()¼´¿É
-		// ÈçºÎÏÔÊ¾ÅÅĞò½ø¶È? Í·ÌÛµÄÊÂÇé¡£¿É·ñÓÃ¶ÑÕ»Éî¶È±íÊ¾½ø¶È?
-		// ĞèÒª±æ±ğÍêÈ«ÅÅĞòµÄ²¿·ÖÖĞ£¬itemµÄÊıÁ¿£¬½«ÕâĞ©²¿·Ö´Ó×Üitem
-		// ÊıÁ¿ÖĞÈ¥³ı£¬¾ÍÊÇ½ø¶ÈÖ¸Ê¾µÄÒÀ¾İ¡£
+		// å¿«é€Ÿæ’åº
+		// ä¿®æ”¹ï¼šå»ºè®®å¢åŠ delegateç”¨æ¥æ¢æµ‹æ˜¯å¦éœ€è¦ä¸­æ–­å¾ªç¯
+		// ä¸€èˆ¬ç”¨æˆ·ä¸è¦è°ƒç”¨è¿™ä¸ªå‡½æ•°ï¼Œè°ƒç”¨Sort()å³å¯
+		// å¦‚ä½•æ˜¾ç¤ºæ’åºè¿›åº¦? å¤´ç–¼çš„äº‹æƒ…ã€‚å¯å¦ç”¨å †æ ˆæ·±åº¦è¡¨ç¤ºè¿›åº¦?
+		// éœ€è¦è¾¨åˆ«å®Œå…¨æ’åºçš„éƒ¨åˆ†ä¸­ï¼Œitemçš„æ•°é‡ï¼Œå°†è¿™äº›éƒ¨åˆ†ä»æ€»item
+		// æ•°é‡ä¸­å»é™¤ï¼Œå°±æ˜¯è¿›åº¦æŒ‡ç¤ºçš„ä¾æ®ã€‚
 		// return:
 		//  0 succeed
 		//  1 interrupted
@@ -749,10 +749,10 @@ namespace DigitalPlatform.IO
 		{
             if (this.m_streamSmall == null)
             {
-                throw new Exception("µ÷ÓÃQuickSortÇ°£¬ĞèÒªÏÈ´´½¨Ë÷Òı");
+                throw new Exception("è°ƒç”¨QuickSortå‰ï¼Œéœ€è¦å…ˆåˆ›å»ºç´¢å¼•");
             }
 
-			ArrayList stack = new ArrayList (); // ¶ÑÕ»
+			ArrayList stack = new ArrayList (); // å †æ ˆ
 			int   nStackTop = 0;
 			long   nMaxRow = m_streamSmall.Length /8;  //m_count;
 			long   k = 0;
@@ -763,7 +763,7 @@ namespace DigitalPlatform.IO
 				return 0;
 
 			/*
-			if (nMaxRow >= 10) // µ÷ÊÔ
+			if (nMaxRow >= 10) // è°ƒè¯•
 			 nMaxRow = 10;
 			*/
 
@@ -782,12 +782,12 @@ namespace DigitalPlatform.IO
 			return 0;
 		}
 
-		#region »ù´¡º¯Êı
+		#region åŸºç¡€å‡½æ•°
 
-		// É¾³ıIndexÎÄ¼ş
+		// åˆ é™¤Indexæ–‡ä»¶
 		private void RemoveIndexFile()
 		{
-			// Èç¹ûÁ÷¶ÔÏó´æÔÚ£¬¹Ø±Õ£¬ÖÃ¿Õ
+			// å¦‚æœæµå¯¹è±¡å­˜åœ¨ï¼Œå…³é—­ï¼Œç½®ç©º
 			if (m_streamSmall != null)
 			{
 				m_streamSmall.Close();
@@ -796,7 +796,7 @@ namespace DigitalPlatform.IO
 
             if (this.ReadOnly == false)
             {
-                // Èç¹ûÎÄ¼şÃû´æÔÚ£¬É¾³ıÎÄ¼ş£¬ÖÃ±äÁ¿ÖµÎª¿Õ
+                // å¦‚æœæ–‡ä»¶åå­˜åœ¨ï¼Œåˆ é™¤æ–‡ä»¶ï¼Œç½®å˜é‡å€¼ä¸ºç©º
                 if (m_strSmallFileName != "" && m_strSmallFileName != null)
                 {
                     File.Delete(m_strSmallFileName);
@@ -807,10 +807,10 @@ namespace DigitalPlatform.IO
 			bDirty = false;
 		}
 
-		// É¾³ıdataÎÄ¼ş
+		// åˆ é™¤dataæ–‡ä»¶
 		private void RemoveDataFile()
 		{
-			// Èç¹ûÁ÷¶ÔÏó´æÔÚ£¬¹Ø±Õ£¬ÖÃ¿Õ
+			// å¦‚æœæµå¯¹è±¡å­˜åœ¨ï¼Œå…³é—­ï¼Œç½®ç©º
 			if (m_streamBig != null)
 			{
 				m_streamBig.Close();
@@ -819,7 +819,7 @@ namespace DigitalPlatform.IO
 
             if (this.ReadOnly == false)
             {
-                // Èç¹ûÎÄ¼şÃû´æÔÚ£¬É¾³ıÎÄ¼ş£¬ÖÃ±äÁ¿ÖµÎª¿Õ
+                // å¦‚æœæ–‡ä»¶åå­˜åœ¨ï¼Œåˆ é™¤æ–‡ä»¶ï¼Œç½®å˜é‡å€¼ä¸ºç©º
                 if (m_strBigFileName != "" && m_strBigFileName != null)
                 {
                     File.Delete(m_strBigFileName);
@@ -830,7 +830,7 @@ namespace DigitalPlatform.IO
 
 		public void CloseDataFile()
 		{
-			// Èç¹ûÁ÷¶ÔÏó´æÔÚ£¬¹Ø±Õ£¬ÖÃ¿Õ
+			// å¦‚æœæµå¯¹è±¡å­˜åœ¨ï¼Œå…³é—­ï¼Œç½®ç©º
 			if (m_streamBig != null)
 			{
 				m_streamBig.Close();
@@ -839,7 +839,7 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ÊÇ·ñ¾ßÓĞ´ò¿ªµÄË÷ÒıÎÄ¼ş
+		// æ˜¯å¦å…·æœ‰æ‰“å¼€çš„ç´¢å¼•æ–‡ä»¶
 		public bool HasIndexed
 		{
 			get 
@@ -855,14 +855,14 @@ namespace DigitalPlatform.IO
             return Path.GetTempFileName();
         }
 
-		// ´ò¿ªIndexÎÄ¼ş
+		// æ‰“å¼€Indexæ–‡ä»¶
 		private void OpenIndexFile()
 		{
 			if (m_streamSmall == null)
 			{
 				if (m_strSmallFileName == "")
 					m_strSmallFileName = this.GetTempFileName();
-				// ´´½¨indexÎÄ¼şµÄÊ±ºò£¬¿ÉÒÔ¸ø³ö½ÇÉ«°µÊ¾£¬ÒÔ±ãÈ¡ÓĞÌØÉ«µÄÎïÀíÎÄ¼şÃû
+				// åˆ›å»ºindexæ–‡ä»¶çš„æ—¶å€™ï¼Œå¯ä»¥ç»™å‡ºè§’è‰²æš—ç¤ºï¼Œä»¥ä¾¿å–æœ‰ç‰¹è‰²çš„ç‰©ç†æ–‡ä»¶å
 
 				m_streamSmall = File.Open(m_strSmallFileName,
 					FileMode.OpenOrCreate,
@@ -872,13 +872,13 @@ namespace DigitalPlatform.IO
 			}
 
 			bDirty = false;
-			// m_streamSmallµÄ·Ç¿Õ¾Í±íÃ÷Ëü´¦ÓÚOpen×´Ì¬
+			// m_streamSmallçš„éç©ºå°±è¡¨æ˜å®ƒå¤„äºOpençŠ¶æ€
 		}
 
 
 		public void CloseIndexFile()
 		{
-			// Èç¹ûÁ÷¶ÔÏó´æÔÚ£¬¹Ø±Õ£¬ÖÃ¿Õ
+			// å¦‚æœæµå¯¹è±¡å­˜åœ¨ï¼Œå…³é—­ï¼Œç½®ç©º
 			if (m_streamSmall != null)
 			{
 				m_streamSmall.Close();
@@ -889,7 +889,7 @@ namespace DigitalPlatform.IO
 
 		private Int64 GetCountFromDataFile()
 		{
-			Debug.Assert(m_streamBig != null, "dataÁ÷±ØĞëÏÈ´ò¿ª");
+			Debug.Assert(m_streamBig != null, "dataæµå¿…é¡»å…ˆæ‰“å¼€");
 
 			m_streamBig.Seek(0, SeekOrigin.Begin);
 
@@ -898,14 +898,14 @@ namespace DigitalPlatform.IO
 
 			while(true)
 			{
-				//³¤¶È×Ö½ÚÊı×é
+				//é•¿åº¦å­—èŠ‚æ•°ç»„
 				byte[] bufferLength = new byte[4];
 				int n = m_streamBig.Read(bufferLength,0,4);
-				if (n < 4)   //±íÊ¾ÎÄ¼şµ½Î²
+				if (n < 4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 					break;
 
 				nLength = System.BitConverter.ToInt32(bufferLength,0);
-				if (nLength<0)  //É¾³ıÏî
+				if (nLength<0)  //åˆ é™¤é¡¹
 				{
 					nLength = (int)GetRealValue(nLength);
 					goto CONTINUE;
@@ -918,15 +918,15 @@ namespace DigitalPlatform.IO
 			return i;
 		}
 
-		// ´ÓË÷ÒıÎÄ¼şµÃµ½ÔªËØ¸öÊı
-		// ÒªÇóbDirty == false
+		// ä»ç´¢å¼•æ–‡ä»¶å¾—åˆ°å…ƒç´ ä¸ªæ•°
+		// è¦æ±‚bDirty == false
 		private Int64 GetCountFromIndexFile()
 		{
-			Debug.Assert(m_streamSmall != null, "indexÁ÷±ØĞëÏÈ´ò¿ª");
+			Debug.Assert(m_streamSmall != null, "indexæµå¿…é¡»å…ˆæ‰“å¼€");
 
 			return m_streamSmall.Length / 8;
 
-			/* ÊÊµ±Ê±ºòÔö¼Ó±éÀú¼ÆËã¸öÊı¹¦ÄÜ, ÅÅ³ıÄÇĞ©¸ºÊıÆ«ÒÆÖµ
+			/* é€‚å½“æ—¶å€™å¢åŠ éå†è®¡ç®—ä¸ªæ•°åŠŸèƒ½, æ’é™¤é‚£äº›è´Ÿæ•°åç§»å€¼
 			m_streamBig.Seek(0, SeekOrigin.Begin);
 
 			Int64 i=0;
@@ -934,14 +934,14 @@ namespace DigitalPlatform.IO
 
 			while(true)
 			{
-				//³¤¶È×Ö½ÚÊı×é
+				//é•¿åº¦å­—èŠ‚æ•°ç»„
 				byte[] bufferLength = new byte[4];
 				int n = m_streamBig.Read(bufferLength,0,4);
-				if (n < 4)   //±íÊ¾ÎÄ¼şµ½Î²
+				if (n < 4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 					break;
 
 				nLength = System.BitConverter.ToInt32(bufferLength,0);
-				if (nLength<0)  //É¾³ıÏî
+				if (nLength<0)  //åˆ é™¤é¡¹
 				{
 					nLength = (int)GetRealValue(nLength);
 					goto CONTINUE;
@@ -955,7 +955,7 @@ namespace DigitalPlatform.IO
 			*/
 		}
 
-		// µÃµ½ÕæÕıµÄÎ»ÖÃ»ò³¤¶È
+		// å¾—åˆ°çœŸæ­£çš„ä½ç½®æˆ–é•¿åº¦
 		Int64 GetRealValue(Int64 lPositionOrLength)
 		{
 			if (lPositionOrLength<0)
@@ -966,8 +966,8 @@ namespace DigitalPlatform.IO
 			return lPositionOrLength;
 		}
 
-		// µÃµ½É¾³ı±ê¼ÇÊ¹ÓÃµÄÎ»ÖÃ»ò³¤¶È
-		// ¸ºÊı±íÊ¾±»É¾³ıµÄÊÂÏî
+		// å¾—åˆ°åˆ é™¤æ ‡è®°ä½¿ç”¨çš„ä½ç½®æˆ–é•¿åº¦
+		// è´Ÿæ•°è¡¨ç¤ºè¢«åˆ é™¤çš„äº‹é¡¹
 		Int64 GetDeletedValue(Int64 lPositionOrLength)
 		{
 			if (lPositionOrLength >= 0)
@@ -980,21 +980,21 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// bContainDeleted	ÊÇ·ñ°üº¬±»É¾³ıµÄÊÂÏî?
+		// bContainDeleted	æ˜¯å¦åŒ…å«è¢«åˆ é™¤çš„äº‹é¡¹?
 		public Item GetItem(Int64 nIndex,
 			bool bContainDeleted)
 		{
 			Item item = null;
 			long lBigOffset;
 
-			//×Ô¶¯·µ»Ø´óÎÄ¼şµÄ±àÒÆÁ¿,Ğ¡ÎÄ¼ş´æÔÚÊ±£¬´ÓĞ¡ÎÄ¼şµÃµ½£¬²»´æÔÚÊ±£¬´Ó´óÎÄ¼şµÃµ½
-			//bContainDeletedµÈÓÚfalse£¬ºöÂÔÒÑÉ¾³ıµÄ¼ÇÂ¼£¬Îªtrue,²»ºöÂÔ
-			//·µ»ØÖµ
-			//>=0:Õı³£
-			//-1:µ±bContainDeletedÎªfalseÊ±:±íÊ¾³ö´íµÄÇé¿ö£¬trueÊ±±íÊ¾Õı³£µÄ¸ºÖµ
+			//è‡ªåŠ¨è¿”å›å¤§æ–‡ä»¶çš„ç¼–ç§»é‡,å°æ–‡ä»¶å­˜åœ¨æ—¶ï¼Œä»å°æ–‡ä»¶å¾—åˆ°ï¼Œä¸å­˜åœ¨æ—¶ï¼Œä»å¤§æ–‡ä»¶å¾—åˆ°
+			//bContainDeletedç­‰äºfalseï¼Œå¿½ç•¥å·²åˆ é™¤çš„è®°å½•ï¼Œä¸ºtrue,ä¸å¿½ç•¥
+			//è¿”å›å€¼
+			//>=0:æ­£å¸¸
+			//-1:å½“bContainDeletedä¸ºfalseæ—¶:è¡¨ç¤ºå‡ºé”™çš„æƒ…å†µï¼Œtrueæ—¶è¡¨ç¤ºæ­£å¸¸çš„è´Ÿå€¼
 			lBigOffset = GetDataOffsetAuto(nIndex, bContainDeleted);
 
-			//µ±bContainDeletedÎªfalseÊ±¼´²»°üº¬ÒÑÉ¾³ı¼ÇÂ¼Ê±£¬·µ»ØÖµ-1£¬±íÊ¾Ã»ÕÒµ½
+			//å½“bContainDeletedä¸ºfalseæ—¶å³ä¸åŒ…å«å·²åˆ é™¤è®°å½•æ—¶ï¼Œè¿”å›å€¼-1ï¼Œè¡¨ç¤ºæ²¡æ‰¾åˆ°
 			if (bContainDeleted == false)
 			{
 				if (lBigOffset == -1)
@@ -1005,21 +1005,21 @@ namespace DigitalPlatform.IO
 			return item;
 		}
 
-		// bContainDeleted	ÊÇ·ñ°üº¬±»É¾³ıµÄÊÂÏî?
+		// bContainDeleted	æ˜¯å¦åŒ…å«è¢«åˆ é™¤çš„äº‹é¡¹?
 		public Item GetCompareItem(Int64 nIndex,
 			bool bContainDeleted)
 		{
 			Item item = null;
 			long lBigOffset;
 
-			//×Ô¶¯·µ»Ø´óÎÄ¼şµÄ±àÒÆÁ¿,Ğ¡ÎÄ¼ş´æÔÚÊ±£¬´ÓĞ¡ÎÄ¼şµÃµ½£¬²»´æÔÚÊ±£¬´Ó´óÎÄ¼şµÃµ½
-			//bContainDeletedµÈÓÚfalse£¬ºöÂÔÒÑÉ¾³ıµÄ¼ÇÂ¼£¬Îªtrue,²»ºöÂÔ
-			//·µ»ØÖµ
-			//>=0:Õı³£
-			//-1:µ±bContainDeletedÎªfalseÊ±:±íÊ¾³ö´íµÄÇé¿ö£¬trueÊ±±íÊ¾Õı³£µÄ¸ºÖµ
+			//è‡ªåŠ¨è¿”å›å¤§æ–‡ä»¶çš„ç¼–ç§»é‡,å°æ–‡ä»¶å­˜åœ¨æ—¶ï¼Œä»å°æ–‡ä»¶å¾—åˆ°ï¼Œä¸å­˜åœ¨æ—¶ï¼Œä»å¤§æ–‡ä»¶å¾—åˆ°
+			//bContainDeletedç­‰äºfalseï¼Œå¿½ç•¥å·²åˆ é™¤çš„è®°å½•ï¼Œä¸ºtrue,ä¸å¿½ç•¥
+			//è¿”å›å€¼
+			//>=0:æ­£å¸¸
+			//-1:å½“bContainDeletedä¸ºfalseæ—¶:è¡¨ç¤ºå‡ºé”™çš„æƒ…å†µï¼Œtrueæ—¶è¡¨ç¤ºæ­£å¸¸çš„è´Ÿå€¼
 			lBigOffset = GetDataOffsetAuto(nIndex, bContainDeleted);
 
-			//µ±bContainDeletedÎªfalseÊ±¼´²»°üº¬ÒÑÉ¾³ı¼ÇÂ¼Ê±£¬·µ»ØÖµ-1£¬±íÊ¾Ã»ÕÒµ½
+			//å½“bContainDeletedä¸ºfalseæ—¶å³ä¸åŒ…å«å·²åˆ é™¤è®°å½•æ—¶ï¼Œè¿”å›å€¼-1ï¼Œè¡¨ç¤ºæ²¡æ‰¾åˆ°
 			if (bContainDeleted == false)
 			{
 				if (lBigOffset == -1)
@@ -1031,12 +1031,12 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ×Ô¶¯·µ»ØÊÂÏîÔÚÊı¾İÎÄ¼şµÄ±àÒÆÁ¿¡£ËùÎ½×Ô¶¯£¬ÒâË¼ÊÇ, Ğ¡ÎÄ¼ş´æÔÚÊ±£¬´ÓĞ¡ÎÄ¼ş²éµÃµ½(¿ì)£¬²»´æÔÚÊ±£¬´Ó´óÎÄ¼şË³ĞòµÃµ½(Âı)
+		// è‡ªåŠ¨è¿”å›äº‹é¡¹åœ¨æ•°æ®æ–‡ä»¶çš„ç¼–ç§»é‡ã€‚æ‰€è°“è‡ªåŠ¨ï¼Œæ„æ€æ˜¯, å°æ–‡ä»¶å­˜åœ¨æ—¶ï¼Œä»å°æ–‡ä»¶æŸ¥å¾—åˆ°(å¿«)ï¼Œä¸å­˜åœ¨æ—¶ï¼Œä»å¤§æ–‡ä»¶é¡ºåºå¾—åˆ°(æ…¢)
 		// parameters:
-		//		bContainDeletedµÈÓÚfalse£¬ºöÂÔÒÑÉ¾³ıµÄ¼ÇÂ¼£¬Îªtrue,²»ºöÂÔ
-		// ·µ»ØÖµ
-		//		>=0	Õı³£
-		//		-1	µ±bContainDeletedÎªfalseÊ±:±íÊ¾³ö´íµÄÇé¿ö£¬trueÊ±±íÊ¾Õı³£µÄ¸ºÖµ
+		//		bContainDeletedç­‰äºfalseï¼Œå¿½ç•¥å·²åˆ é™¤çš„è®°å½•ï¼Œä¸ºtrue,ä¸å¿½ç•¥
+		// è¿”å›å€¼
+		//		>=0	æ­£å¸¸
+		//		-1	å½“bContainDeletedä¸ºfalseæ—¶:è¡¨ç¤ºå‡ºé”™çš„æƒ…å†µï¼Œtrueæ—¶è¡¨ç¤ºæ­£å¸¸çš„è´Ÿå€¼
 		long GetDataOffsetAuto(long nIndex,bool bContainDeleted)
 		{
 			if (m_streamSmall != null)
@@ -1049,10 +1049,10 @@ namespace DigitalPlatform.IO
 			}
 		}
 
-		// ÔÚÊı¾İÎÄ¼şÖĞÖ±½ÓËÑË÷ÊÂÏîµÄÆğµãÆ«ÒÆÁ¿¡£
-		//	µ±È»£¬ÕâÑùËÙ¶ÈºÜÂı
+		// åœ¨æ•°æ®æ–‡ä»¶ä¸­ç›´æ¥æœç´¢äº‹é¡¹çš„èµ·ç‚¹åç§»é‡ã€‚
+		//	å½“ç„¶ï¼Œè¿™æ ·é€Ÿåº¦å¾ˆæ…¢
 		// return:
-		//		-1	µ±bContainDeletedÎªfalseÊ±-1±íÊ¾³ö´íµÄÇé¿ö£¬bContainDeletedÎªtrueÊ±±íÊ¾Õı³£µÄ¸ºÖµ
+		//		-1	å½“bContainDeletedä¸ºfalseæ—¶-1è¡¨ç¤ºå‡ºé”™çš„æƒ…å†µï¼ŒbContainDeletedä¸ºtrueæ—¶è¡¨ç¤ºæ­£å¸¸çš„è´Ÿå€¼
 		long GetDataOffsetFromDataFile(long nIndex,bool bContainDeleted)
 		{
 			m_streamBig.Seek(0, SeekOrigin.Begin);
@@ -1062,10 +1062,10 @@ namespace DigitalPlatform.IO
 			int i = 0;
 			while(true)
 			{
-				//¶Á4¸ö×Ö½Ú£¬µÃµ½³¤¶È
+				//è¯»4ä¸ªå­—èŠ‚ï¼Œå¾—åˆ°é•¿åº¦
 				byte[] bufferLength = new byte[4];
 				int n = m_streamBig.Read(bufferLength,0,4);
-				if (n<4)   //±íÊ¾ÎÄ¼şµ½Î²
+				if (n<4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 					break;
 				nLength = System.BitConverter.ToInt32(bufferLength,0);
 
@@ -1073,7 +1073,7 @@ namespace DigitalPlatform.IO
 				{
 					if (nLength<0)
 					{
-						//×ª»»ÎªÊµ¼ÊµÄ³¤¶È£¬ÔÙseek
+						//è½¬æ¢ä¸ºå®é™…çš„é•¿åº¦ï¼Œå†seek
 						long lTemp = GetRealValue(nLength);
 						m_streamBig.Seek (lTemp,SeekOrigin.Current);
 
@@ -1099,25 +1099,25 @@ namespace DigitalPlatform.IO
 			return -1;
 		}
 
-		// ´ÓË÷ÒıÎÄ¼şÖĞ¼ÆËã·µ»ØÊÂÏîÔÚÊı¾İÎÄ¼şÖĞµÄÆ«ÒÆÁ¿
+		// ä»ç´¢å¼•æ–‡ä»¶ä¸­è®¡ç®—è¿”å›äº‹é¡¹åœ¨æ•°æ®æ–‡ä»¶ä¸­çš„åç§»é‡
 		// return:
-		//		-1	µ±bContainDeletedÎªfalseÊ±-1±íÊ¾³ö´íµÄÇé¿ö£¬bContainDeletedÎªtrueÊ±±íÊ¾Õı³£µÄ¸ºÖµ
+		//		-1	å½“bContainDeletedä¸ºfalseæ—¶-1è¡¨ç¤ºå‡ºé”™çš„æƒ…å†µï¼ŒbContainDeletedä¸ºtrueæ—¶è¡¨ç¤ºæ­£å¸¸çš„è´Ÿå€¼
 		long GetDataOffsetFromIndexFile(
 			long nIndex,
 			bool bContainDeleted)
 		{
 			if (m_streamSmall == null)
 			{
-				Debug.Assert(true, "Ë÷ÒıÎÄ¼şÁ÷Îªnull, GetDataOffsetFromIndexFile()º¯ÊıÎŞ·¨Ö´ĞĞ");
-				throw(new Exception ("Ë÷ÒıÎÄ¼şÁ÷Îªnull, GetDataOffsetFromIndexFile()º¯ÊıÎŞ·¨Ö´ĞĞ"));
+				Debug.Assert(true, "ç´¢å¼•æ–‡ä»¶æµä¸ºnull, GetDataOffsetFromIndexFile()å‡½æ•°æ— æ³•æ‰§è¡Œ");
+				throw(new Exception ("ç´¢å¼•æ–‡ä»¶æµä¸ºnull, GetDataOffsetFromIndexFile()å‡½æ•°æ— æ³•æ‰§è¡Œ"));
 			}
 
-			// ¸É¾»£¬Ò²¾ÍÊÇË÷ÒıÖĞÈ·±£ÎŞÉ¾³ıÏî´æÔÚµÄÇé¿öÏÂ£¬¿ÉÒÔÓÃ³Ë·¨ÔËËãµÃµ½Î»ÖÃ£¬ËÙ¶È¿ì
+			// å¹²å‡€ï¼Œä¹Ÿå°±æ˜¯ç´¢å¼•ä¸­ç¡®ä¿æ— åˆ é™¤é¡¹å­˜åœ¨çš„æƒ…å†µä¸‹ï¼Œå¯ä»¥ç”¨ä¹˜æ³•è¿ç®—å¾—åˆ°ä½ç½®ï¼Œé€Ÿåº¦å¿«
 			if (bDirty == false)
 			{
 				if (nIndex*8>=m_streamSmall.Length || nIndex<0)
 				{
-					throw(new Exception("Ë÷Òı " + Convert.ToString(nIndex) + "¾­¼ÆËã³¬¹ıË÷ÒıÎÄ¼şµ±Ç°×î´ó·¶Î§"));
+					throw(new Exception("ç´¢å¼• " + Convert.ToString(nIndex) + "ç»è®¡ç®—è¶…è¿‡ç´¢å¼•æ–‡ä»¶å½“å‰æœ€å¤§èŒƒå›´"));
 				}
 				return GetIndexItemValue(nIndex);
 			}
@@ -1129,22 +1129,22 @@ namespace DigitalPlatform.IO
 				int i = 0;
 				while(true)
 				{
-					//¶Á8¸ö×Ö½Ú£¬µÃµ½Î»ÖÃ
+					//è¯»8ä¸ªå­—èŠ‚ï¼Œå¾—åˆ°ä½ç½®
 					byte[] bufferBigOffset = new byte[8];
 					int n = m_streamSmall.Read(bufferBigOffset,0,8);
-					if (n < 8)   //±íÊ¾ÎÄ¼şµ½Î²
+					if (n < 8)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 						break;
 					lBigOffset = System.BitConverter.ToInt32(bufferBigOffset, 0);
 					
 					if (bContainDeleted == false)
 					{
-						//Îª¸ºÊıÊ±Ìø¹ı
+						//ä¸ºè´Ÿæ•°æ—¶è·³è¿‡
 						if (lBigOffset<0)
 						{
 							continue;
 						}
 					}
-					//±íÊ¾°´ĞòºÅÕÒµ½
+					//è¡¨ç¤ºæŒ‰åºå·æ‰¾åˆ°
 					if (i == nIndex)
 					{
 						return lBigOffset;
@@ -1155,18 +1155,18 @@ namespace DigitalPlatform.IO
 			return -1;
 		}
 
-		// ÓÃ*8µÄ·½·¨ËãË÷ÒıÊÂÏîÔÚË÷ÒıÎÄ¼şµÄÎ»ÖÃ£¬È¡µÃÆäÖµ
-		// £¬°üº¬ÒÑÉ¾³ıµÄ¼ÇÂ¼£¬²¢È¡³öËüËù´ú±íµÄÊı¾İÊÂÏîÔÚÊı¾İÎÄ¼şµÄ±àÒÆÁ¿
+		// ç”¨*8çš„æ–¹æ³•ç®—ç´¢å¼•äº‹é¡¹åœ¨ç´¢å¼•æ–‡ä»¶çš„ä½ç½®ï¼Œå–å¾—å…¶å€¼
+		// ï¼ŒåŒ…å«å·²åˆ é™¤çš„è®°å½•ï¼Œå¹¶å–å‡ºå®ƒæ‰€ä»£è¡¨çš„æ•°æ®äº‹é¡¹åœ¨æ•°æ®æ–‡ä»¶çš„ç¼–ç§»é‡
 		long GetIndexItemValue(long nIndex)
 		{
 			if( m_streamSmall == null)
 			{
-				throw(new Exception("m_streamSmall¶ÔÏóÎª¿Õ, GetIndexItemValue()ÎŞ·¨½øĞĞ"));
+				throw(new Exception("m_streamSmallå¯¹è±¡ä¸ºç©º, GetIndexItemValue()æ— æ³•è¿›è¡Œ"));
 			}
 
 			if (nIndex*8 >= m_streamSmall.Length || nIndex<0)
 			{
-				throw(new Exception("Ë÷Òı " + Convert.ToString(nIndex) + "¾­¼ÆËã³¬¹ıË÷ÒıÎÄ¼şµ±Ç°×î´ó·¶Î§"));
+				throw(new Exception("ç´¢å¼• " + Convert.ToString(nIndex) + "ç»è®¡ç®—è¶…è¿‡ç´¢å¼•æ–‡ä»¶å½“å‰æœ€å¤§èŒƒå›´"));
 			}
 
 			m_streamSmall.Seek(nIndex*8, 
@@ -1176,16 +1176,16 @@ namespace DigitalPlatform.IO
 			int n = m_streamSmall.Read(bufferOffset, 0, 8);
 			if (n <= 0)
 			{
-				throw(new Exception("GetIndexItemValue()Òì³££ºÊµ¼ÊÁ÷µÄ³¤¶È"+Convert.ToString (m_streamSmall.Length )+"\r\n"
-					+"Ï£ÍûSeekµ½µÄÎ»ÖÃ"+Convert.ToString (nIndex*8)+"\r\n"
-					+"Êµ¼Ê¶ÁµÄ³¤¶È"+Convert.ToString (n)));
+				throw(new Exception("GetIndexItemValue()å¼‚å¸¸ï¼šå®é™…æµçš„é•¿åº¦"+Convert.ToString (m_streamSmall.Length )+"\r\n"
+					+"å¸Œæœ›Seekåˆ°çš„ä½ç½®"+Convert.ToString (nIndex*8)+"\r\n"
+					+"å®é™…è¯»çš„é•¿åº¦"+Convert.ToString (n)));
 			}
 			long lOffset = System.BitConverter.ToInt64(bufferOffset,0);
 
 			return lOffset;
 		}
 
-		//	lOffset²»ÂÛÕı¸ºÊı¶¼¿ÉÒÔÕÒµ½¼ÇÂ¼£¬µ÷ÓÃÊ±£¬×¢Òâ£¬Èç¹û²»ĞèÒªµÃµ½±»É¾³ıµÄ¼ÇÂ¼£¬×ÔÒÑ×öÅĞ¶Ï
+		//	lOffsetä¸è®ºæ­£è´Ÿæ•°éƒ½å¯ä»¥æ‰¾åˆ°è®°å½•ï¼Œè°ƒç”¨æ—¶ï¼Œæ³¨æ„ï¼Œå¦‚æœä¸éœ€è¦å¾—åˆ°è¢«åˆ é™¤çš„è®°å½•ï¼Œè‡ªå·²åšåˆ¤æ–­
 		Item GetItemByOffset(long lOffset)
 		{
 			Item item = null;
@@ -1197,27 +1197,27 @@ namespace DigitalPlatform.IO
 
 			if (lOffset >= m_streamBig.Length )
 			{
-				throw(new Exception ("ÄÚ²¿´íÎó£¬Î»ÖÃ´óÓÚ×Ü³¤¶È"));
+				throw(new Exception ("å†…éƒ¨é”™è¯¯ï¼Œä½ç½®å¤§äºæ€»é•¿åº¦"));
 				//return null;
 			}
 
 			m_streamBig.Seek(lOffset, SeekOrigin.Begin);
 
-			//³¤¶È×Ö½ÚÊı×é
+			//é•¿åº¦å­—èŠ‚æ•°ç»„
 			byte[] bufferLength = new byte[4];
 			int n = m_streamBig.Read(bufferLength,0,4);
-			if (n<4)   //±íÊ¾ÎÄ¼şµ½Î²
+			if (n<4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 			{
-				throw(new Exception ("ÄÚ²¿´íÎó:Read error"));
+				throw(new Exception ("å†…éƒ¨é”™è¯¯:Read error"));
 				//return null;
 			}
 
-			// Èç¹ûprocNewItemÒÑ¾­¹Ò½ÓÁËdelegate£¬ÔòÊ¹ÓÃËüÀ´´´½¨ĞÂItem»òÆäÅÉÉúÀàµÄ¶ÔÏó
-			// Õâ¸ö·½·¨µÄºÃ´¦£¬ÊÇ²»ÓÃÅÉÉú¼¯ºÏÀàItemFileBase
+			// å¦‚æœprocNewItemå·²ç»æŒ‚æ¥äº†delegateï¼Œåˆ™ä½¿ç”¨å®ƒæ¥åˆ›å»ºæ–°Itemæˆ–å…¶æ´¾ç”Ÿç±»çš„å¯¹è±¡
+			// è¿™ä¸ªæ–¹æ³•çš„å¥½å¤„ï¼Œæ˜¯ä¸ç”¨æ´¾ç”Ÿé›†åˆç±»ItemFileBase
 			if (this.procNewItem != null)
 				item = procNewItem();
-			else	// procNewItemÎª¿Õ£¬¾ÍÊ¹ÓÃthis.NewItem()º¯Êı¡£»ùÀàÖĞÓĞÈ±Ê¡ÊµÏÖ£¬¾ÍÊÇ·µ»ØItemÀàĞÍ¶ÔÏó
-				item = this.NewItem(); // Õâ¸ö·½·¨µÄÈ±µã£¬ÊÇÒªÅÉÉú¼¯ºÏÀàItemFileBase
+			else	// procNewItemä¸ºç©ºï¼Œå°±ä½¿ç”¨this.NewItem()å‡½æ•°ã€‚åŸºç±»ä¸­æœ‰ç¼ºçœå®ç°ï¼Œå°±æ˜¯è¿”å›Itemç±»å‹å¯¹è±¡
+				item = this.NewItem(); // è¿™ä¸ªæ–¹æ³•çš„ç¼ºç‚¹ï¼Œæ˜¯è¦æ´¾ç”Ÿé›†åˆç±»ItemFileBase
 
 			item.Length = System.BitConverter.ToInt32(bufferLength, 0);
 			item.ReadData(m_streamBig);
@@ -1226,7 +1226,7 @@ namespace DigitalPlatform.IO
 		}
 
 
-		//	lOffset²»ÂÛÕı¸ºÊı¶¼¿ÉÒÔÕÒµ½¼ÇÂ¼£¬µ÷ÓÃÊ±£¬×¢Òâ£¬Èç¹û²»ĞèÒªµÃµ½±»É¾³ıµÄ¼ÇÂ¼£¬×ÔÒÑ×öÅĞ¶Ï
+		//	lOffsetä¸è®ºæ­£è´Ÿæ•°éƒ½å¯ä»¥æ‰¾åˆ°è®°å½•ï¼Œè°ƒç”¨æ—¶ï¼Œæ³¨æ„ï¼Œå¦‚æœä¸éœ€è¦å¾—åˆ°è¢«åˆ é™¤çš„è®°å½•ï¼Œè‡ªå·²åšåˆ¤æ–­
 		public Item GetCompareItemByOffset(long lOffset)
 		{
 			Item item = null;
@@ -1238,27 +1238,27 @@ namespace DigitalPlatform.IO
 
 			if (lOffset >= m_streamBig.Length )
 			{
-				throw(new Exception ("ÄÚ²¿´íÎó£¬Î»ÖÃ´óÓÚ×Ü³¤¶È"));
+				throw(new Exception ("å†…éƒ¨é”™è¯¯ï¼Œä½ç½®å¤§äºæ€»é•¿åº¦"));
 				//return null;
 			}
 
 			m_streamBig.Seek(lOffset, SeekOrigin.Begin);
 
-			//³¤¶È×Ö½ÚÊı×é
+			//é•¿åº¦å­—èŠ‚æ•°ç»„
 			byte[] bufferLength = new byte[4];
 			int n = m_streamBig.Read(bufferLength,0,4);
-			if (n<4)   //±íÊ¾ÎÄ¼şµ½Î²
+			if (n<4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 			{
-				throw(new Exception ("ÄÚ²¿´íÎó:Read error"));
+				throw(new Exception ("å†…éƒ¨é”™è¯¯:Read error"));
 				//return null;
 			}
 
-			// Èç¹ûprocNewItemÒÑ¾­¹Ò½ÓÁËdelegate£¬ÔòÊ¹ÓÃËüÀ´´´½¨ĞÂItem»òÆäÅÉÉúÀàµÄ¶ÔÏó
-			// Õâ¸ö·½·¨µÄºÃ´¦£¬ÊÇ²»ÓÃÅÉÉú¼¯ºÏÀàItemFileBase
+			// å¦‚æœprocNewItemå·²ç»æŒ‚æ¥äº†delegateï¼Œåˆ™ä½¿ç”¨å®ƒæ¥åˆ›å»ºæ–°Itemæˆ–å…¶æ´¾ç”Ÿç±»çš„å¯¹è±¡
+			// è¿™ä¸ªæ–¹æ³•çš„å¥½å¤„ï¼Œæ˜¯ä¸ç”¨æ´¾ç”Ÿé›†åˆç±»ItemFileBase
 			if (this.procNewItem != null)
 				item = procNewItem();
-			else	// procNewItemÎª¿Õ£¬¾ÍÊ¹ÓÃthis.NewItem()º¯Êı¡£»ùÀàÖĞÓĞÈ±Ê¡ÊµÏÖ£¬¾ÍÊÇ·µ»ØItemÀàĞÍ¶ÔÏó
-				item = this.NewItem(); // Õâ¸ö·½·¨µÄÈ±µã£¬ÊÇÒªÅÉÉú¼¯ºÏÀàItemFileBase
+			else	// procNewItemä¸ºç©ºï¼Œå°±ä½¿ç”¨this.NewItem()å‡½æ•°ã€‚åŸºç±»ä¸­æœ‰ç¼ºçœå®ç°ï¼Œå°±æ˜¯è¿”å›Itemç±»å‹å¯¹è±¡
+				item = this.NewItem(); // è¿™ä¸ªæ–¹æ³•çš„ç¼ºç‚¹ï¼Œæ˜¯è¦æ´¾ç”Ÿé›†åˆç±»ItemFileBase
 
 			item.Length = System.BitConverter.ToInt32(bufferLength, 0);
 			item.ReadCompareData(m_streamBig);
@@ -1268,7 +1268,7 @@ namespace DigitalPlatform.IO
 
 	
         /*
-		// ÕæÕıÑ¹Ëõ±ê¼ÇÉ¾³ıÁËµÄÄÇĞ©ÊÂÏî
+		// çœŸæ­£å‹ç¼©æ ‡è®°åˆ é™¤äº†çš„é‚£äº›äº‹é¡¹
 		private static int CompressIndex(Stream oStream)
 		{
 			if (oStream == null)
@@ -1276,13 +1276,13 @@ namespace DigitalPlatform.IO
 				return -1;
 			}
 
-			long lDeletedStart = 0;  //É¾³ı¿éµÄÆğÊ¼Î»ÖÃ
-			long lDeletedEnd = 0;    //É¾³ı¿éµÄ½áÊøÎ»ÖÃ
+			long lDeletedStart = 0;  //åˆ é™¤å—çš„èµ·å§‹ä½ç½®
+			long lDeletedEnd = 0;    //åˆ é™¤å—çš„ç»“æŸä½ç½®
 			long lDeletedLength = 0;
-			bool bDeleted = false;   //ÊÇ·ñÒÑ³öÏÖÉ¾³ı¿é
+			bool bDeleted = false;   //æ˜¯å¦å·²å‡ºç°åˆ é™¤å—
 
-			long lUseablePartLength = 0;    //ºóÃæÕı³£¿éµÄ³¤¶È
-			bool bUserablePart = false;    //ÊÇ·ñÒÑ³öÏÖÕı³£¿é
+			long lUseablePartLength = 0;    //åé¢æ­£å¸¸å—çš„é•¿åº¦
+			bool bUserablePart = false;    //æ˜¯å¦å·²å‡ºç°æ­£å¸¸å—
 
 			bool bEnd = false;
 			long lValue = 0;
@@ -1295,10 +1295,10 @@ namespace DigitalPlatform.IO
 				nRet = oStream.Read(bufferValue,0,8);
 				if (nRet != 8 && nRet != 0)  
 				{
-					throw(new Exception ("ÄÚ²¿´íÎó:¶Áµ½µÄ³¤¶È²»µÈÓÚ8"));
+					throw(new Exception ("å†…éƒ¨é”™è¯¯:è¯»åˆ°çš„é•¿åº¦ä¸ç­‰äº8"));
 					//break;
 				}
-				if (nRet == 0)//±íÊ¾½áÊø
+				if (nRet == 0)//è¡¨ç¤ºç»“æŸ
 				{
 					if(bUserablePart == false)
 						break;
@@ -1317,14 +1317,14 @@ namespace DigitalPlatform.IO
 					if (bDeleted == true && bUserablePart == true)
 					{
 						lDeletedEnd = lDeletedStart + lDeletedLength;
-						//µ÷MovePart(lDeletedStart,lDeletedEnd,lUseablePartLength)
+						//è°ƒMovePart(lDeletedStart,lDeletedEnd,lUseablePartLength)
 
 						StreamUtil.Move(oStream,
 							lDeletedEnd,
 							lUseablePartLength,
 							lDeletedStart);
 
-						//ÖØĞÂ¶¨Î»deletedµÄÆğÊ¼Î»ÖÃ
+						//é‡æ–°å®šä½deletedçš„èµ·å§‹ä½ç½®
 						lDeletedStart = lUseablePartLength-lDeletedLength+lDeletedEnd;
 						lDeletedEnd = lDeletedStart+lDeletedLength;
 
@@ -1334,11 +1334,11 @@ namespace DigitalPlatform.IO
 
 					bDeleted = true;
 					bUserablePart = false;
-					lDeletedLength += 8;  //½áÊøÎ»ÖÃ¼Ó8
+					lDeletedLength += 8;  //ç»“æŸä½ç½®åŠ 8
 				}
 				else if (lValue>=0)
 				{
-					//µ±³öÏÖ¹ıÉ¾³ı¿éÊ±£¬ÓÖ½øÈëĞÂµÄÓĞÓÃ¿éÊ±£¬Ç°·½µÄÓĞÓÃ¿é²»¼Æ£¬ÖØĞÂ¼ÆËã³¤¶È
+					//å½“å‡ºç°è¿‡åˆ é™¤å—æ—¶ï¼Œåˆè¿›å…¥æ–°çš„æœ‰ç”¨å—æ—¶ï¼Œå‰æ–¹çš„æœ‰ç”¨å—ä¸è®¡ï¼Œé‡æ–°è®¡ç®—é•¿åº¦
 					//|  userable  | ........ |  userable |
 					//|  ........  | userable |
 					if (bDeleted == true && bUserablePart == false)
@@ -1351,7 +1351,7 @@ namespace DigitalPlatform.IO
 					
 					if (bDeleted == false)
 					{
-						lDeletedStart += 8;  //µ±²»´æÔÚÉ¾³ı¿éÊ±£¬É¾³ı³¬Ê¼Î»ÖÃ¼Ó8
+						lDeletedStart += 8;  //å½“ä¸å­˜åœ¨åˆ é™¤å—æ—¶ï¼Œåˆ é™¤è¶…å§‹ä½ç½®åŠ 8
 					}
 				}
 
@@ -1361,7 +1361,7 @@ namespace DigitalPlatform.IO
 				}
 			}
 
-			//Ö»Ê£Î²²¿µÄ±»É¾³ı¼ÇÂ¼
+			//åªå‰©å°¾éƒ¨çš„è¢«åˆ é™¤è®°å½•
 			if (bDeleted == true && bUserablePart == false)
 			{
 				//lDeletedEnd = lDeletedStart + lDeletedLength;
@@ -1374,8 +1374,8 @@ namespace DigitalPlatform.IO
         */
 
 
-        // ÕæÕıÑ¹Ëõ±ê¼ÇÉ¾³ıÁËµÄÄÇĞ©ÊÂÏî
-        // Ñ¹ËõË÷Òı
+        // çœŸæ­£å‹ç¼©æ ‡è®°åˆ é™¤äº†çš„é‚£äº›äº‹é¡¹
+        // å‹ç¼©ç´¢å¼•
         private static int CompressIndex(Stream oStream)
         {
             if (oStream == null)
@@ -1396,19 +1396,19 @@ namespace DigitalPlatform.IO
                 nRet = oStream.Read(bufferValue, 0, 8);
                 if (nRet != 8 && nRet != 0)
                 {
-                    throw (new Exception("ÄÚ²¿´íÎó:¶Áµ½µÄ³¤¶È²»µÈÓÚ8"));
+                    throw (new Exception("å†…éƒ¨é”™è¯¯:è¯»åˆ°çš„é•¿åº¦ä¸ç­‰äº8"));
                 }
 
                 long lValue = BitConverter.ToInt64(bufferValue, 0);
 
-                if (nRet == 0)//±íÊ¾½áÊø
+                if (nRet == 0)//è¡¨ç¤ºç»“æŸ
                 {
                     break;
                 }
 
                 if (lValue < 0)
                 {
-                    // ±íÊ¾ĞèÒªÉ¾³ı´ËÏîÄ¿
+                    // è¡¨ç¤ºéœ€è¦åˆ é™¤æ­¤é¡¹ç›®
                     lRestLength = oStream.Length - oStream.Position;
 
                     Debug.Assert(oStream.Position - 8 >= 0, "");
@@ -1440,7 +1440,7 @@ namespace DigitalPlatform.IO
 
 	
 
-		#region ÅÅĞòÓĞ¹ØµÄ»ù´¡º¯Êı
+		#region æ’åºæœ‰å…³çš„åŸºç¡€å‡½æ•°
 
 		void Push(ArrayList stack,
 			long lStart,
@@ -1449,16 +1449,16 @@ namespace DigitalPlatform.IO
 		{
 			if (nStackTop < 0)
 			{
-				throw(new Exception ("nStackTop²»ÄÜĞ¡ÓÚ0"));
+				throw(new Exception ("nStackTopä¸èƒ½å°äº0"));
 			}
 			if (lStart < 0)
 			{
-				throw(new Exception ("nStart²»ÄÜĞ¡ÓÚ0"));
+				throw(new Exception ("nStartä¸èƒ½å°äº0"));
 			}
 
 			if (nStackTop*2 != stack.Count )
 			{
-				throw(new Exception ("nStackTop*2²»µÈÓÚstack.m_count"));
+				throw(new Exception ("nStackTop*2ä¸ç­‰äºstack.m_count"));
 			}
 
 
@@ -1476,12 +1476,12 @@ namespace DigitalPlatform.IO
 		{
 			if (nStackTop <= 0)
 			{
-				throw(new Exception ("popÒÔÇ°,nStackTop²»ÄÜĞ¡ÓÚµÈÓÚ0"));
+				throw(new Exception ("popä»¥å‰,nStackTopä¸èƒ½å°äºç­‰äº0"));
 			}
 
 			if (nStackTop*2 != stack.Count )
 			{
-				throw(new Exception ("nStackTop*2²»µÈÓÚstack.m_count"));
+				throw(new Exception ("nStackTop*2ä¸ç­‰äºstack.m_count"));
 			}
 
 			lStart = (long)stack[(nStackTop-1) * 2];
@@ -1497,7 +1497,7 @@ namespace DigitalPlatform.IO
 			long nEnd,
 			ref long nSplitPos)
 		{
-			// È¡µÃÖĞÏî
+			// å–å¾—ä¸­é¡¹
 			long pStart = 0;
 			long pEnd = 0;
 			long pMiddle = 0;
@@ -1514,12 +1514,12 @@ namespace DigitalPlatform.IO
 			pStart = GetIndexItemValue(nStart);  
 			pEnd = GetIndexItemValue(nEnd);   
 
-			// ¿´ÆğµãºÍÖÕµãÊÇ·ñ½ôÃÜÏàÁ¬
+			// çœ‹èµ·ç‚¹å’Œç»ˆç‚¹æ˜¯å¦ç´§å¯†ç›¸è¿
 			if (nStart + 1 == nEnd) 
 			{
 				nRet = Compare(pStart, pEnd);
 				if (nRet > 0) 
-				{ // ½»»»
+				{ // äº¤æ¢
 					T = pStart;
 					SetRowPtr(nStart, pEnd);
 					SetRowPtr(nEnd, T);
@@ -1612,19 +1612,19 @@ namespace DigitalPlatform.IO
 		{
 			byte[] bufferOffset ;
 
-			//µÃµ½Öµ
+			//å¾—åˆ°å€¼
 			bufferOffset = new byte[8];
 			bufferOffset = BitConverter.GetBytes((long)lPtr);
 			
 
-			//¸²¸ÇÖµ
+			//è¦†ç›–å€¼
 			m_streamSmall.Seek (nIndex*8,SeekOrigin.Begin);
             Debug.Assert(bufferOffset.Length == 8, "");
 			m_streamSmall.Write (bufferOffset,0,8);
 
 		}
 
-		// ±¾º¯ÊıÊÇÄÚ²¿Ê¹ÓÃ¡£ÈôÒª¸Ä±äÅÅĞòĞĞÎª£¬¿ÉÖØÔØItemµÄCompareTo()º¯Êı
+		// æœ¬å‡½æ•°æ˜¯å†…éƒ¨ä½¿ç”¨ã€‚è‹¥è¦æ”¹å˜æ’åºè¡Œä¸ºï¼Œå¯é‡è½½Itemçš„CompareTo()å‡½æ•°
 		public virtual int Compare(long lPtr1,long lPtr2)
 		{
 			if (lPtr1<0 && lPtr2<0)
@@ -1644,25 +1644,25 @@ namespace DigitalPlatform.IO
 
 
 
-		#region ºÍÉ¾³ıÓĞ¹ØµÄ»ù´¡º¯Êı
+		#region å’Œåˆ é™¤æœ‰å…³çš„åŸºç¡€å‡½æ•°
 
-		// ×Ô¶¯Ñ¡Ôñ´ÓºÎ´¦É¾³ı
+		// è‡ªåŠ¨é€‰æ‹©ä»ä½•å¤„åˆ é™¤
 		int RemoveAtAuto(int nIndex)
 		{
 			int nRet = -1;
-			if (m_streamSmall != null) // ÓĞË÷ÒıÎÄ¼şÊ±
+			if (m_streamSmall != null) // æœ‰ç´¢å¼•æ–‡ä»¶æ—¶
 			{
 				// nRet = RemoveAtIndex(nIndex);
 				nRet = CompressRemoveAtIndex(nIndex, 1);
 			}
-			else  // Ë÷ÒıÎÄ¼ş²»´æÔÚÊ±£¬ ´ÓÊı¾İÎÄ¼şÖĞÉ¾³ı
+			else  // ç´¢å¼•æ–‡ä»¶ä¸å­˜åœ¨æ—¶ï¼Œ ä»æ•°æ®æ–‡ä»¶ä¸­åˆ é™¤
 			{
 				nRet = RemoveAtData(nIndex);
 			}
 			return nRet;
 		}
 
-		// ÔÚË÷ÒıÁ÷ÖĞ¶¨Î»ÊÂÏî
+		// åœ¨ç´¢å¼•æµä¸­å®šä½äº‹é¡¹
 		public long LocateIndexItem(int nIndex)
 		{
 			long lPositionS = 0;
@@ -1671,7 +1671,7 @@ namespace DigitalPlatform.IO
 				lPositionS = nIndex*8;
 				if (lPositionS>=m_streamSmall.Length || nIndex<0)
 				{
-					throw(new Exception("ÏÂ±êÔ½½ç..."));
+					throw(new Exception("ä¸‹æ ‡è¶Šç•Œ..."));
 				}
 
 				m_streamSmall.Seek(lPositionS, SeekOrigin.Begin);
@@ -1684,20 +1684,20 @@ namespace DigitalPlatform.IO
 				int i = 0;
 				while(true)
 				{
-					//¶Á8¸ö×Ö½Ú£¬µÃµ½Î»ÖÃ
+					//è¯»8ä¸ªå­—èŠ‚ï¼Œå¾—åˆ°ä½ç½®
 					byte[] bufferBigOffset = new byte[8];
 					int n = m_streamSmall.Read(bufferBigOffset,0,8);
-					if (n<8)   //±íÊ¾ÎÄ¼şµ½Î²
+					if (n<8)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 						break;
 					lBigOffset = System.BitConverter.ToInt64(bufferBigOffset,0);
 					
-					//Îª¸ºÊıÊ±Ìø¹ı
+					//ä¸ºè´Ÿæ•°æ—¶è·³è¿‡
 					if (lBigOffset<0)
 					{
 						goto CONTINUE;
 					}
 
-					//±íÊ¾°´ĞòºÅÕÒµ½
+					//è¡¨ç¤ºæŒ‰åºå·æ‰¾åˆ°
 					if (i == nIndex)
 					{
 						m_streamSmall.Seek (lPositionS,SeekOrigin.Begin );
@@ -1712,12 +1712,12 @@ namespace DigitalPlatform.IO
 			return -1;
 		}
 
-		// ´ÓË÷ÒıÎÄ¼şÖĞ±ê¼ÇÉ¾³ıÒ»¸öÊÂÏî
+		// ä»ç´¢å¼•æ–‡ä»¶ä¸­æ ‡è®°åˆ é™¤ä¸€ä¸ªäº‹é¡¹
 		public int MaskRemoveAtIndex(int nIndex)
 		{
 			int nRet;
 
-			// lBigOffset±íÊ¾´óÎÄ¼şµÄ±àÒÆÁ¿£¬-1±íÊ¾´íÎó
+			// lBigOffsetè¡¨ç¤ºå¤§æ–‡ä»¶çš„ç¼–ç§»é‡ï¼Œ-1è¡¨ç¤ºé”™è¯¯
 			long lBigOffset = GetDataOffsetFromIndexFile(nIndex,false);
 			if (lBigOffset == -1)
 				return -1;
@@ -1737,12 +1737,12 @@ namespace DigitalPlatform.IO
 		}
 
 
-		// ´ÓË÷ÒıÎÄ¼şÖĞ¼·Ñ¹Ê½É¾³ıÒ»¸öÊÂÏî
+		// ä»ç´¢å¼•æ–‡ä»¶ä¸­æŒ¤å‹å¼åˆ é™¤ä¸€ä¸ªäº‹é¡¹
 		public int CompressRemoveAtIndex(int nIndex,
 			int nCount)
 		{
 			if (m_streamSmall == null)
-				throw new Exception("Ë÷ÒıÎÄ¼şÉĞÎ´³õÊ¼»¯");
+				throw new Exception("ç´¢å¼•æ–‡ä»¶å°šæœªåˆå§‹åŒ–");
 
 			long lStart = (long)nIndex * 8;
 			StreamUtil.Move(m_streamSmall,
@@ -1756,27 +1756,27 @@ namespace DigitalPlatform.IO
 		}
 
 
-		//´Ó´óÎÄ¼şÖĞÉ¾³ı
+		//ä»å¤§æ–‡ä»¶ä¸­åˆ é™¤
 		public int RemoveAtData(int nIndex)
 		{
-			//µÃµ½´óÎÄ¼şÆ«ÒÆÁ¿
+			//å¾—åˆ°å¤§æ–‡ä»¶åç§»é‡
 			long lBigOffset = GetDataOffsetFromDataFile(nIndex, false);
 			if (lBigOffset == -1)
 				return -1;
 
 			if (lBigOffset >= m_streamBig.Length )
 			{
-				throw(new Exception ("ÄÚ²¿´íÎó£¬Î»ÖÃ´óÓÚ×Ü³¤¶È"));
+				throw(new Exception ("å†…éƒ¨é”™è¯¯ï¼Œä½ç½®å¤§äºæ€»é•¿åº¦"));
 				//return null;
 			}
 
 			m_streamBig.Seek(lBigOffset,SeekOrigin.Begin);
-			//³¤¶È×Ö½ÚÊı×é
+			//é•¿åº¦å­—èŠ‚æ•°ç»„
 			byte[] bufferLength = new byte[4];
 			int n = m_streamBig.Read(bufferLength,0,4);
-			if (n<4)   //±íÊ¾ÎÄ¼şµ½Î²
+			if (n<4)   //è¡¨ç¤ºæ–‡ä»¶åˆ°å°¾
 			{
-				throw(new Exception ("ÄÚ²¿´íÎó:Read error"));
+				throw(new Exception ("å†…éƒ¨é”™è¯¯:Read error"));
 				//return null;
 			}
 

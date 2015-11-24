@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,18 +18,18 @@ using Microsoft.VisualBasic;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-// 2005/4/18	Ôö¼ÓPrevName NextName DupCount±äÁ¿
-// 2005/4/18	¸Ä±ä½á¹¹ÌåÔªËØnameÄÚÈİ¶¨Òå°ì·¨£¬¼Ó@Îªregular expression, ·ñÔòÎªÔ­À´µÄ*×Ö·û´®
+// 2005/4/18	å¢åŠ PrevName NextName DupCountå˜é‡
+// 2005/4/18	æ”¹å˜ç»“æ„ä½“å…ƒç´ nameå†…å®¹å®šä¹‰åŠæ³•ï¼ŒåŠ @ä¸ºregular expression, å¦åˆ™ä¸ºåŸæ¥çš„*å­—ç¬¦ä¸²
 
 namespace DigitalPlatform.MarcDom
 {
 	/// <summary>
-	// MARC¼ÇÂ¼¹ıÂËÆ÷
-	// ¿ÉÖØÔØFilterDocumentÀà¡£ÕâÑù£¬¾Í¿ÉÒÔÔÚÆäÖĞÀ©Õ¹Ò»Ğ©ÓÃÓÚ´æ´¢µÄ³ÉÔ±£¬
-	// ±ãÓÚÁ¬½ÓÆäËûhost¶ÔÏó¡£¿ÉÏ§´ÓScript´úÂëÖĞFilterItem.Document½Ç¶È¿´µ½µÄ
-	// ¿ÉÄÜ»¹ÊÇFilterDocument»ùÀàĞÍ£¬Ê¹ÓÃÖĞĞèÒªcast£¬²»¹ıÒ²¿ÉÒÔÔÚ
-	// script´úÂëÖĞÎªDocument³ÉÔ±ÖØÔØº¯Êı£¬·µ»ØÊµ¼ÊÀàĞÍ?
-	// ¿ÉÒÔ¿¼ÂÇÎª<def>»ò<begin>ÅäÖÃÒ»¶ÎÄÚ¶¨µÄÒş²Ø´úÂë£¬¼´¶¨ÒåÊµ¼ÊÀàĞÍ×ª»»µÄ´úÂë¡£
+	// MARCè®°å½•è¿‡æ»¤å™¨
+	// å¯é‡è½½FilterDocumentç±»ã€‚è¿™æ ·ï¼Œå°±å¯ä»¥åœ¨å…¶ä¸­æ‰©å±•ä¸€äº›ç”¨äºå­˜å‚¨çš„æˆå‘˜ï¼Œ
+	// ä¾¿äºè¿æ¥å…¶ä»–hostå¯¹è±¡ã€‚å¯æƒœä»Scriptä»£ç ä¸­FilterItem.Documentè§’åº¦çœ‹åˆ°çš„
+	// å¯èƒ½è¿˜æ˜¯FilterDocumentåŸºç±»å‹ï¼Œä½¿ç”¨ä¸­éœ€è¦castï¼Œä¸è¿‡ä¹Ÿå¯ä»¥åœ¨
+	// scriptä»£ç ä¸­ä¸ºDocumentæˆå‘˜é‡è½½å‡½æ•°ï¼Œè¿”å›å®é™…ç±»å‹?
+	// å¯ä»¥è€ƒè™‘ä¸º<def>æˆ–<begin>é…ç½®ä¸€æ®µå†…å®šçš„éšè—ä»£ç ï¼Œå³å®šä¹‰å®é™…ç±»å‹è½¬æ¢çš„ä»£ç ã€‚
 	/// </summary>
 	public class FilterDocument
 	{
@@ -53,7 +53,6 @@ namespace DigitalPlatform.MarcDom
 
 		public bool CheckBreakException = true;
 
-
 		public Assembly Assembly 
 		{
 			get 
@@ -63,11 +62,11 @@ namespace DigitalPlatform.MarcDom
 			set 
 			{
 				assembly = value;
-				// µÃµ½Ò»²ã¶ÔÏóµÄtypeĞÅÏ¢
+				// å¾—åˆ°ä¸€å±‚å¯¹è±¡çš„typeä¿¡æ¯
 
 				if (value == null)
 				{
-					this.NodeTable.Clear();	// ÊÍ·ÅÄÇĞ©type entryÖ¸Õë
+					this.NodeTable.Clear();	// é‡Šæ”¾é‚£äº›type entryæŒ‡é’ˆ
                     // Debug.WriteLine("NodeTable Cleared. count" + NodeTable.Count.ToString());
 				}
 				else 
@@ -95,7 +94,7 @@ namespace DigitalPlatform.MarcDom
             BuildOneLevelItem(dom.DocumentElement);
         }
 
-        // »ñµÃÒ»¸öÖ¸¶¨ÓïÑÔµÄ×Ö·û´®
+        // è·å¾—ä¸€ä¸ªæŒ‡å®šè¯­è¨€çš„å­—ç¬¦ä¸²
         public string GetString(string strLang,
             string strID)
         {
@@ -108,9 +107,9 @@ namespace DigitalPlatform.MarcDom
             return GetT(strLang, node);
         }
 
-        // »ñµÃµ±Ç°ÓïÑÔµÄ×Ö·û´®
-        // Èç¹ûÃ»ÓĞ¾«È·Æ¥ÅäµÄÓïÑÔ£¬¾ÍÄ£ºıÆ¥Åä£¬»ò·µ»ØµÚÒ»¸öÓïÑÔµÄ
-        // µ«Èç¹ûid²»´æÔÚ£¬·µ»Ønull
+        // è·å¾—å½“å‰è¯­è¨€çš„å­—ç¬¦ä¸²
+        // å¦‚æœæ²¡æœ‰ç²¾ç¡®åŒ¹é…çš„è¯­è¨€ï¼Œå°±æ¨¡ç³ŠåŒ¹é…ï¼Œæˆ–è¿”å›ç¬¬ä¸€ä¸ªè¯­è¨€çš„
+        // ä½†å¦‚æœidä¸å­˜åœ¨ï¼Œè¿”å›null
         public string GetString(string strID)
         {
             if (this.dom == null)
@@ -123,7 +122,7 @@ namespace DigitalPlatform.MarcDom
             return GetT(strLang, node);
         }
 
-        // È·±£×î»µµÄÇé¿öÏÂÒ²·µ»ØstrID±¾Éí
+        // ç¡®ä¿æœ€åçš„æƒ…å†µä¸‹ä¹Ÿè¿”å›strIDæœ¬èº«
         public string GetStringSafe(string strID)
         {
             string strResult = this.GetString(strID);
@@ -134,8 +133,7 @@ namespace DigitalPlatform.MarcDom
             return strResult;
         }
 
-
-        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶<t>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄÎÄ×ÖÖµ
+        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§<t>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„æ–‡å­—å€¼
         public static string GetT(string strLang,
             XmlNode parent)
         {
@@ -143,7 +141,7 @@ namespace DigitalPlatform.MarcDom
 
             if (String.IsNullOrEmpty(strLang) == true)
             {
-                node = parent.SelectSingleNode("t");  // µÚÒ»¸öcaptionÔªËØ
+                node = parent.SelectSingleNode("t");  // ç¬¬ä¸€ä¸ªcaptionå…ƒç´ 
                 if (node != null)
                     return node.InnerText;
 
@@ -164,7 +162,7 @@ namespace DigitalPlatform.MarcDom
                out strLangLeft,
                out strLangRight);
 
-            // ËùÓĞ<t>ÔªËØ
+            // æ‰€æœ‰<t>å…ƒç´ 
             XmlNodeList nodes = parent.SelectNodes("t");
 
             for (int i = 0; i < nodes.Count; i++)
@@ -178,13 +176,13 @@ namespace DigitalPlatform.MarcDom
                    out strThisLangLeft,
                    out strThisLangRight);
 
-                // ÊÇ²»ÊÇ×óÓÒ¶¼Æ¥ÅäÔò¸üºÃ?Èç¹û²»ĞĞ²ÅÊÇµÚÒ»¸ö×ó±ßÆ¥ÅäµÄ
+                // æ˜¯ä¸æ˜¯å·¦å³éƒ½åŒ¹é…åˆ™æ›´å¥½?å¦‚æœä¸è¡Œæ‰æ˜¯ç¬¬ä¸€ä¸ªå·¦è¾¹åŒ¹é…çš„
 
                 if (strThisLangLeft == strLangLeft)
                     return nodes[i].InnerText;
             }
 
-            // ÊµÔÚ²»ĞĞ£¬ÔòÑ¡µÚÒ»¸ö<t>µÄÎÄ×ÖÖµ
+            // å®åœ¨ä¸è¡Œï¼Œåˆ™é€‰ç¬¬ä¸€ä¸ª<t>çš„æ–‡å­—å€¼
             node = parent.SelectSingleNode("t");
             if (node != null)
                 return node.InnerText;
@@ -193,7 +191,7 @@ namespace DigitalPlatform.MarcDom
         }
 
         /// <summary>
-        /// È¥µô×îÄ©Ò»¸ö±êµã·ûºÅ
+        /// å»æ‰æœ€æœ«ä¸€ä¸ªæ ‡ç‚¹ç¬¦å·
         /// </summary>
         /// <param name="strText"></param>
         /// <returns></returns>
@@ -211,8 +209,8 @@ namespace DigitalPlatform.MarcDom
             return strText;
         }
 
-		// ´´½¨.fltx.csÎÄ¼ş
-        // Ğ´ÈëÖ¸¶¨ÎÄ¼şµÄ°æ±¾
+		// åˆ›å»º.fltx.csæ–‡ä»¶
+        // å†™å…¥æŒ‡å®šæ–‡ä»¶çš„ç‰ˆæœ¬
 		public int BuildScriptFile(string strOutputFile,
 			out string strError)
 		{
@@ -226,16 +224,16 @@ namespace DigitalPlatform.MarcDom
 			if (nRet == -1)
 				return -1;
 
-			// Ğ´ÈëÎÄ¼ş
-			StreamWriter sw = new StreamWriter(strOutputFile, false, Encoding.UTF8);
-			sw.WriteLine(strText);
-			sw.Close();
-
+			// å†™å…¥æ–‡ä»¶
+            using (StreamWriter sw = new StreamWriter(strOutputFile, false, Encoding.UTF8))
+            {
+                sw.WriteLine(strText);
+            }
 			return 0;
 		}
 
-        // ´´½¨.fltx.csÎÄ¼ş
-        // ·µ»Ø×Ö·û´®µÄ°æ±¾
+        // åˆ›å»º.fltx.csæ–‡ä»¶
+        // è¿”å›å­—ç¬¦ä¸²çš„ç‰ˆæœ¬
         public int BuildScriptFile(out string strCode,
             out string strError)
         {
@@ -265,10 +263,10 @@ namespace DigitalPlatform.MarcDom
 			return null;
 		}
 
-        // °ü×°°æ±¾
-        // ´¦ÀíÒ»Ìõ¼ÇÂ¼
+        // åŒ…è£…ç‰ˆæœ¬
+        // å¤„ç†ä¸€æ¡è®°å½•
 		// return:
-		//		-1	³ö´í
+		//		-1	å‡ºé”™
         public int DoRecord(
             object objParam,
             string strMarcRecord,
@@ -278,17 +276,17 @@ namespace DigitalPlatform.MarcDom
             return DoRecord(
                 objParam,
                 strMarcRecord,
-                "", // strMarcSyntax£¬""±íÊ¾¶ÔÃ¿¸ö<record>ÔªËØ¾ùÆ¥Åä
+                "", // strMarcSyntaxï¼Œ""è¡¨ç¤ºå¯¹æ¯ä¸ª<record>å…ƒç´ å‡åŒ¹é…
                 nIndex,
                 out strError);
         }
 
-        // Ô­Ê¼°æ±¾
-		// ´¦ÀíÒ»Ìõ¼ÇÂ¼
+        // åŸå§‹ç‰ˆæœ¬
+		// å¤„ç†ä¸€æ¡è®°å½•
         // parameters:
-        //      strMarcSyntax   MARCÓï·¨
+        //      strMarcSyntax   MARCè¯­æ³•
 		// return:
-		//		-1	³ö´í
+		//		-1	å‡ºé”™
 		public int DoRecord(
 			object objParam,
 			string strMarcRecord,
@@ -303,11 +301,10 @@ namespace DigitalPlatform.MarcDom
 
 			FilterItem itemFilter = null;
 
-			// Èç¹ûfltxÖĞ¶¨ÒåÁË<filter>½ÚµãµÄ»°
+			// å¦‚æœfltxä¸­å®šä¹‰äº†<filter>èŠ‚ç‚¹çš„è¯
 			XmlNode nodeFilter = dom.DocumentElement.SelectSingleNode("//filter");
 			if (nodeFilter != null) 
 			{
-
 				itemFilter = this.NewFilterItem(
 					objParam,
 					nodeFilter,
@@ -315,8 +312,7 @@ namespace DigitalPlatform.MarcDom
 				if (itemFilter == null)
 					return -1;
                 
-				// Ö´ĞĞbegin²¿·Ö´úÂë
-
+				// æ‰§è¡Œbeginéƒ¨åˆ†ä»£ç 
 				itemFilter.Container = null;
 				itemFilter.FilterRoot = itemFilter;
 				itemFilter.Index = nIndex;
@@ -325,17 +321,17 @@ namespace DigitalPlatform.MarcDom
 				if (itemFilter.Break == BreakType.SkipCase)
 					goto DOEND;
 				if (itemFilter.Break == BreakType.SkipCaseEnd)
-					return 0;	// Á¢¼´½áÊø
+					return 0;	// ç«‹å³ç»“æŸ
 			}
 
             // ***
             itemFilter.IncChildDupCount("");
 
-			// fltx.csÖĞ¿ÉÄÜ¶¨Òå¶à¸ö<record>¶ÔÓ¦Àà£¬Ó¦µ±ÒÀ´Î´´½¨²¢Ö´ĞĞ
+			// fltx.csä¸­å¯èƒ½å®šä¹‰å¤šä¸ª<record>å¯¹åº”ç±»ï¼Œåº”å½“ä¾æ¬¡åˆ›å»ºå¹¶æ‰§è¡Œ
 
 			XmlNodeList nodes = dom.DocumentElement.SelectNodes("//record");
 			if (nodes.Count == 0)
-				goto DOEND;	// Ò»¸ö<record>Ò²Ã»ÓĞ¶¨Òå
+				goto DOEND;	// ä¸€ä¸ª<record>ä¹Ÿæ²¡æœ‰å®šä¹‰
 
 			BreakType thisBreak = BreakType.None;
 
@@ -344,15 +340,15 @@ namespace DigitalPlatform.MarcDom
 				XmlNode node = nodes[i];
 
                 /*
-                 * ×¢£º
-                 * 1) Èç¹ûÓÃ¿ÕstrMarcSyntaxÖµµ÷ÓÃ±¾º¯Êı£¬ÔòÈÎºÎ<record>ÔªËØ¶¼Æ¥Åä¡£ÕâÊÇÎªÁËºÍÒÔÇ°µÄ¼æÈİ
-                 * 2) Èç¹û<record>ÔªËØÃ»ÓĞsyntaxÊôĞÔ£¬¼´±ãÓÃ·Ç¿ÕµÄstrMarcSyntaxµ÷ÓÃ±¾º¯Êı£¬ÕâÑùµÄÔªËØÒ²ËãÆ¥Åä
-                 * 3) Èç¹û<record>ÔªËØÓĞsyntaxÊôĞÔ£¬ÔòÒªºÍ·Ç¿ÕµÄstrMarcSyntaxÖµÆ¥Åä£¬²ÅËãÆ¥Åä<record>ÉÏÔªËØ
+                 * æ³¨ï¼š
+                 * 1) å¦‚æœç”¨ç©ºstrMarcSyntaxå€¼è°ƒç”¨æœ¬å‡½æ•°ï¼Œåˆ™ä»»ä½•<record>å…ƒç´ éƒ½åŒ¹é…ã€‚è¿™æ˜¯ä¸ºäº†å’Œä»¥å‰çš„å…¼å®¹
+                 * 2) å¦‚æœ<record>å…ƒç´ æ²¡æœ‰syntaxå±æ€§ï¼Œå³ä¾¿ç”¨éç©ºçš„strMarcSyntaxè°ƒç”¨æœ¬å‡½æ•°ï¼Œè¿™æ ·çš„å…ƒç´ ä¹Ÿç®—åŒ¹é…
+                 * 3) å¦‚æœ<record>å…ƒç´ æœ‰syntaxå±æ€§ï¼Œåˆ™è¦å’Œéç©ºçš„strMarcSyntaxå€¼åŒ¹é…ï¼Œæ‰ç®—åŒ¹é…<record>ä¸Šå…ƒç´ 
                  * 
                  * */
 
                 // 2009/10/8
-                // ¼ì²émarc syntaxÊÇ·ñÆ¥Åä
+                // æ£€æŸ¥marc syntaxæ˜¯å¦åŒ¹é…
                 if (String.IsNullOrEmpty(strMarcSyntax) == false)
                 {
                     string strNodeSyntax = DomUtil.GetAttr(node, "syntax").ToLower();
@@ -363,8 +359,6 @@ namespace DigitalPlatform.MarcDom
                             continue;
                     }
                 }
-
-
 
 				nRet = DoSingleItem(
 					objParam,
@@ -380,30 +374,28 @@ namespace DigitalPlatform.MarcDom
 				if (thisBreak != BreakType.None)
 					break;
 
-				// DoSingleItem()Ö´ĞĞÖĞÍêÈ«¿ÉÄÜ¸Äµ½filterµÄ³ÉÔ±±äÁ¿
+				// DoSingleItem()æ‰§è¡Œä¸­å®Œå…¨å¯èƒ½æ”¹åˆ°filterçš„æˆå‘˜å˜é‡
 				if (itemFilter != null) 
 				{
 					if (itemFilter.Break == BreakType.SkipCase)
 						goto DOEND;
 					if (itemFilter.Break == BreakType.SkipCaseEnd)
-						return 0;	// Á¢¼´½áÊø
+						return 0;	// ç«‹å³ç»“æŸ
                 }
-
             }
 
         DOEND:
             if (itemFilter != null)
             {
-                // Ö´ĞĞend²¿·Ö´úÂë
+                // æ‰§è¡Œendéƒ¨åˆ†ä»£ç 
                 itemFilter.OnEnd();
             }
             return 0;
         }
 
+		#region å†…éƒ¨é€»è¾‘
 
-		#region ÄÚ²¿Âß¼­
-
-		// ´´½¨Ò»²ãFilterItem¶ÔÏó
+		// åˆ›å»ºä¸€å±‚FilterItemå¯¹è±¡
 		int BuildOneLevelItem(XmlNode xmlNode)
 		{
             if (xmlNode.ParentNode == null)
@@ -415,14 +407,14 @@ namespace DigitalPlatform.MarcDom
 			if (xmlNode.NodeType != XmlNodeType.Element) 
 			{
 				Debug.Assert(false,
-					"xmlNodeÀàĞÍ±ØĞëÎªXmlNodeType.Element");
+					"xmlNodeç±»å‹å¿…é¡»ä¸ºXmlNodeType.Element");
 				return -1;
 			}
 
 			if (IsStructureElementName(xmlNode.Name) == false) 
 			{
 				Debug.Assert(false,
-					"xmlNodeµÄnameÊôĞÔÖµÖ»ÄÜÎª½á¹¹ÔªËØ");
+					"xmlNodeçš„nameå±æ€§å€¼åªèƒ½ä¸ºç»“æ„å…ƒç´ ");
 				return -1;
 			}
 
@@ -441,7 +433,6 @@ namespace DigitalPlatform.MarcDom
 				if (node.NodeType != XmlNodeType.Element)
 					continue;
 
-
 				if (IsStructureElementName(node.Name) == false)
 					continue;
 
@@ -450,11 +441,10 @@ namespace DigitalPlatform.MarcDom
 					return -1;
 			}
 
-
 			return 0;
 		}
 
-		// ´´½¨Ò»²ã¶ÔÏóµÄÏà¹ØScript´úÂë
+		// åˆ›å»ºä¸€å±‚å¯¹è±¡çš„ç›¸å…³Scriptä»£ç 
 		int BuildOneLevelScript(XmlNode xmlNode,
 			out string strResult,
 			out string strError)
@@ -493,7 +483,7 @@ namespace DigitalPlatform.MarcDom
 			HashFilterItem item = (HashFilterItem)this.NodeTable[xmlNode];
 			if (item == null)
 			{
-				Debug.Assert(false, "xml½Úµã" + xmlNode.OuterXml + "Ã»ÓĞÔÚNodeTableÖĞ´´½¨¶ÔÓ¦µÄÊÂÏî");
+				Debug.Assert(false, "xmlèŠ‚ç‚¹" + xmlNode.OuterXml + "æ²¡æœ‰åœ¨NodeTableä¸­åˆ›å»ºå¯¹åº”çš„äº‹é¡¹");
 				return -1;
 			}
 			item.FunctionName = strClassName;
@@ -517,7 +507,7 @@ namespace DigitalPlatform.MarcDom
 			}
 
 
-			// ´´½¨ParentÊôĞÔ´úÂë
+			// åˆ›å»ºParentå±æ€§ä»£ç 
 			HashFilterItem itemParent = null;
 			if (xmlNode != dom.DocumentElement
 				&& xmlNode.ParentNode != null
@@ -527,7 +517,7 @@ namespace DigitalPlatform.MarcDom
 				itemParent = (HashFilterItem)this.NodeTable[xmlNode.ParentNode];
 				if (itemParent == null) 
 				{
-					Debug.Assert(false, "xml½Úµã" + xmlNode.ParentNode.OuterXml + "Ã»ÓĞÔÚNodeTableÖĞ´´½¨¶ÔÓ¦µÄÊÂÏî");
+					Debug.Assert(false, "xmlèŠ‚ç‚¹" + xmlNode.ParentNode.OuterXml + "æ²¡æœ‰åœ¨NodeTableä¸­åˆ›å»ºå¯¹åº”çš„äº‹é¡¹");
 					return -1;
 				}			
 			}
@@ -544,32 +534,27 @@ namespace DigitalPlatform.MarcDom
 					" Parent { get { return (" + "FilterItem" + ")null;} } \r\n";
 			}
 
-			// ´´½¨RootÊôĞÔ´úÂë
+			// åˆ›å»ºRootå±æ€§ä»£ç 
 			HashFilterItem itemRoot = null;
 			itemRoot = (HashFilterItem)this.NodeTable[xmlNode.OwnerDocument.DocumentElement];
 			if (itemRoot == null) 
 			{
-				Debug.Assert(false, "xml½Úµã" + xmlNode.OwnerDocument.DocumentElement.OuterXml + "Ã»ÓĞÔÚNodeTableÖĞ´´½¨¶ÔÓ¦µÄÊÂÏî");
+				Debug.Assert(false, "xmlèŠ‚ç‚¹" + xmlNode.OwnerDocument.DocumentElement.OuterXml + "æ²¡æœ‰åœ¨NodeTableä¸­åˆ›å»ºå¯¹åº”çš„äº‹é¡¹");
 				return -1;
 			}
 
 			strResult += strTab + "public " + itemRoot.FunctionName + 
 				" Root { get { return (" + itemRoot.FunctionName + ")FilterRoot;} } \r\n";
 
-
 			if (strPreInitial != "") 
 			{
-				// ³õÊ¼»¯º¯Êı
+				// åˆå§‹åŒ–å‡½æ•°
 				strResult += strTab + "public override void PreInitial() {\r\n";
 
 				strResult += strPreInitial + "\r\n";
 
 				strResult += strTab + "}\r\n";
 			}
-				
-
-
-
 
 			// begin
 			if (strBeginScript != "") 
@@ -617,8 +602,6 @@ namespace DigitalPlatform.MarcDom
 			}
 
 			strResult += "\r\n" + strTab + "} // end of class " + strClassName + "\r\n";
-
-
 			return 0;
 		}
 
@@ -688,7 +671,6 @@ namespace DigitalPlatform.MarcDom
 			strEndScript = "";
 			strDefinitionScript = "";
 
-
 			for(int i =0;i<parent.ChildNodes.Count; i++)
 			{
 				XmlNode node = parent.ChildNodes[i];
@@ -701,13 +683,13 @@ namespace DigitalPlatform.MarcDom
                     /*
 					if (node.ChildNodes.Count != 1) 
 					{
-						strError = "<" + node.Name + ">ÔªËØÏÂÓ¦¸ÃÓĞ¶øÇÒÖ»ÓĞÒ»¸öCDATA½Úµã...";
+						strError = "<" + node.Name + ">å…ƒç´ ä¸‹åº”è¯¥æœ‰è€Œä¸”åªæœ‰ä¸€ä¸ªCDATAèŠ‚ç‚¹...";
 						return -1;
 					}
 
 					if (node.ChildNodes[0].NodeType!= XmlNodeType.CDATA)
 					{
-						strError = "<" + node.Name + ">ÔªËØÏÂÓ¦¸ÃÓĞ¶øÇÒÖ»ÓĞÒ»¸öCDATA½Úµã...";
+						strError = "<" + node.Name + ">å…ƒç´ ä¸‹åº”è¯¥æœ‰è€Œä¸”åªæœ‰ä¸€ä¸ªCDATAèŠ‚ç‚¹...";
 						return -1;
 					}
                      */
@@ -756,13 +738,13 @@ namespace DigitalPlatform.MarcDom
 				{
 					if (node.ChildNodes.Count != 1) 
 					{
-						strError = "<using>ÔªËØÏÂÓ¦¸ÃÓĞ¶øÇÒÖ»ÓĞÒ»¸öCDATA½Úµã...";
+						strError = "<using>å…ƒç´ ä¸‹åº”è¯¥æœ‰è€Œä¸”åªæœ‰ä¸€ä¸ªCDATAèŠ‚ç‚¹...";
 						return -1;
 					}
 
 					if (node.ChildNodes[0].NodeType!= XmlNodeType.CDATA)
 					{
-						strError = "<using>ÔªËØÏÂÓ¦¸ÃÓĞ¶øÇÒÖ»ÓĞÒ»¸öCDATA½Úµã...";
+						strError = "<using>å…ƒç´ ä¸‹åº”è¯¥æœ‰è€Œä¸”åªæœ‰ä¸€ä¸ªCDATAèŠ‚ç‚¹...";
 						return -1;
 					}
 
@@ -772,25 +754,25 @@ namespace DigitalPlatform.MarcDom
 			return 0;
 		}
 
-		// µÃµ½Ò»²ã¶ÔÏóµÄtypeĞÅÏ¢
+		// å¾—åˆ°ä¸€å±‚å¯¹è±¡çš„typeä¿¡æ¯
 		int FillOneLevelType(XmlNode xmlNode,
 			out string strError)
 		{
 			strError = "";
 
-			Debug.Assert(assembly != null, "µ÷ÓÃFillOneLevelType()ÒÔÇ°£¬±ØĞëÏÈ¸øassembly¸³Öµ");
+			Debug.Assert(assembly != null, "è°ƒç”¨FillOneLevelType()ä»¥å‰ï¼Œå¿…é¡»å…ˆç»™assemblyèµ‹å€¼");
 
 			// 
 			HashFilterItem item = (HashFilterItem)this.NodeTable[xmlNode];
             if (item == null)
             {
-                Debug.Assert(false, "xml½Úµã" + xmlNode.OuterXml + "Ã»ÓĞÔÚNodeTableÖĞ´´½¨¶ÔÓ¦µÄÊÂÏî");
+                Debug.Assert(false, "xmlèŠ‚ç‚¹" + xmlNode.OuterXml + "æ²¡æœ‰åœ¨NodeTableä¸­åˆ›å»ºå¯¹åº”çš„äº‹é¡¹");
                 return -1;
             }
 
 			if (item.FunctionName == "")
 			{
-				Debug.Assert(false, "xml½Úµã"+ xmlNode.OuterXml + "Ëù¶ÔÓ¦µÄFilterItemÖĞFunctionNameÎª¿Õ×Ö·û´®£¬²»Õı³£");
+				Debug.Assert(false, "xmlèŠ‚ç‚¹"+ xmlNode.OuterXml + "æ‰€å¯¹åº”çš„FilterItemä¸­FunctionNameä¸ºç©ºå­—ç¬¦ä¸²ï¼Œä¸æ­£å¸¸");
 				return -1;
 			}
 
@@ -810,7 +792,7 @@ namespace DigitalPlatform.MarcDom
 			else 
 			{
 
-				// µÃµ½AssemblyÖĞBatchÅÉÉúÀàType
+				// å¾—åˆ°Assemblyä¸­Batchæ´¾ç”Ÿç±»Type
 				item.FunctionType = assembly.GetType(
 					item.FunctionName,
 					false,	//   bool throwOnError,
@@ -819,14 +801,14 @@ namespace DigitalPlatform.MarcDom
 			}
 			if (item.FunctionType == null) 
 			{
-				Debug.Assert(false, "xml½Úµã"+ xmlNode.OuterXml + " Ó¦ÔÚfltx.csÖĞ´æÔÚ¶ÔÓ¦Àà" + item.FunctionName);
-				strError =  "xml½Úµã"+ xmlNode.OuterXml + " Ó¦ÔÚfltx.csÖĞ´æÔÚ¶ÔÓ¦Àà" + item.FunctionName;
+				Debug.Assert(false, "xmlèŠ‚ç‚¹"+ xmlNode.OuterXml + " åº”åœ¨fltx.csä¸­å­˜åœ¨å¯¹åº”ç±»" + item.FunctionName);
+				strError =  "xmlèŠ‚ç‚¹"+ xmlNode.OuterXml + " åº”åœ¨fltx.csä¸­å­˜åœ¨å¯¹åº”ç±»" + item.FunctionName;
 				return -1;
 			}
 
 			if (item.FunctionType.IsClass == false) 
 			{
-				strError = "½Å±¾ÖĞ£¬[" +item.FunctionName+ "]ÎªÏµÍ³±£Áô×Ö£¬ÓÃ»§´úÂë²»ÄÜÊ¹ÓÃ¡£";
+				strError = "è„šæœ¬ä¸­ï¼Œ[" +item.FunctionName+ "]ä¸ºç³»ç»Ÿä¿ç•™å­—ï¼Œç”¨æˆ·ä»£ç ä¸èƒ½ä½¿ç”¨ã€‚";
 				return -1;
 			}
 			
@@ -851,10 +833,10 @@ namespace DigitalPlatform.MarcDom
 			return 0;
 		}
 
-		// Æ¥Åä×Ö¶ÎÃû/×Ó×Ö¶ÎÃû
+		// åŒ¹é…å­—æ®µå/å­å­—æ®µå
 		// pamameters:
-		//		strName	Ãû×Ö
-		//		strMatchCase	ÒªÆ¥ÅäµÄÒªÇó
+		//		strName	åå­—
+		//		strMatchCase	è¦åŒ¹é…çš„è¦æ±‚
 		// return:
 		//		-1	error
 		//		0	not match
@@ -862,7 +844,7 @@ namespace DigitalPlatform.MarcDom
 		public static int MatchName(string strName,
 			string strMatchCase)
 		{
-			if (strMatchCase == "")	// Èç¹ûstrMatchCaseÎª¿Õ£¬±íÊ¾ÎŞÂÛÊ²Ã´Ãû×Ö¶¼Æ¥Åä
+			if (strMatchCase == "")	// å¦‚æœstrMatchCaseä¸ºç©ºï¼Œè¡¨ç¤ºæ— è®ºä»€ä¹ˆåå­—éƒ½åŒ¹é…
 				return 1;
 
 			// Regular expression
@@ -875,7 +857,7 @@ namespace DigitalPlatform.MarcDom
 					return 1;
 				return 0;
 			}
-			else // Ô­À´µÄ*Ä£Ê½
+			else // åŸæ¥çš„*æ¨¡å¼
 			{
 				if (CmpName(strName, strMatchCase) == 0)
 					return 1;
@@ -884,7 +866,7 @@ namespace DigitalPlatform.MarcDom
 		}
 
         // 2013/1/7
-        // tµÄ³¤¶È¿ÉÒÔÊÇsµÄÕû±¶Êı
+        // tçš„é•¿åº¦å¯ä»¥æ˜¯sçš„æ•´å€æ•°
         public static int CmpName(string s, string t)
         {
             if (s.Length == t.Length)
@@ -892,7 +874,7 @@ namespace DigitalPlatform.MarcDom
 
             if ((t.Length % s.Length) != 0)
             {
-                throw new Exception("t '"+t+"'µÄ³¤¶È "+t.Length.ToString()+" Ó¦µ±Îªs '"+s+"' µÄ³¤¶È "+s.Length.ToString()+"  µÄÕû±¶Êı");
+                throw new Exception("t '"+t+"'çš„é•¿åº¦ "+t.Length.ToString()+" åº”å½“ä¸ºs '"+s+"' çš„é•¿åº¦ "+s.Length.ToString()+"  çš„æ•´å€æ•°");
             }
             int nCount = t.Length / s.Length;
             for (int i = 0; i < nCount; i++)
@@ -905,7 +887,7 @@ namespace DigitalPlatform.MarcDom
             return 1;
         }
 
-        // º¬Í¨Åä·ûµÄ±È½Ï
+        // å«é€šé…ç¬¦çš„æ¯”è¾ƒ
         public static int CmpOneName(string s,
             string t)
         {
@@ -924,7 +906,7 @@ namespace DigitalPlatform.MarcDom
             return 0;
         }
 
-		// ´Óhash±íÖĞÕÒµ½xml½Úµã¶ÔÓ¦µÄ´úÂëType
+		// ä»hashè¡¨ä¸­æ‰¾åˆ°xmlèŠ‚ç‚¹å¯¹åº”çš„ä»£ç Type
 		FilterItem NewFilterItem(
 			object objParam,
 			XmlNode node,
@@ -932,23 +914,23 @@ namespace DigitalPlatform.MarcDom
 		{
 			strError = "";
 
-			Debug.Assert(node != null, "node²ÎÊı²»ÄÜÎªnull");
+			Debug.Assert(node != null, "nodeå‚æ•°ä¸èƒ½ä¸ºnull");
 
 			HashFilterItem itemNode = (HashFilterItem)NodeTable[node];
 
 			if (itemNode == null) 
 			{
-				Debug.Assert(false, "NodeTableÖĞÈ±·¦ÊÂÏî");
+				Debug.Assert(false, "NodeTableä¸­ç¼ºä¹äº‹é¡¹");
 				return null;
 			}
 
-			Debug.Assert(node == itemNode.xmlNode, "item³ÉÔ±xmlNode²»ÕıÈ·");
+			Debug.Assert(node == itemNode.xmlNode, "itemæˆå‘˜xmlNodeä¸æ­£ç¡®");
 
 			Type entryClassType = itemNode.FunctionType;
 
 			if (entryClassType == null) 
 			{
-				Debug.Assert(false, itemNode.FunctionName + "Ã»ÓĞÔ¤ÏÈÌî³äType");
+				Debug.Assert(false, itemNode.FunctionName + "æ²¡æœ‰é¢„å…ˆå¡«å……Type");
 				return null;
 			}
 			FilterItem itemHost = (FilterItem)entryClassType.InvokeMember(null, 
@@ -971,12 +953,11 @@ namespace DigitalPlatform.MarcDom
 			return itemHost;
 		}
 
-
-		// ´¦ÀíÒ»Ìõ¼ÇÂ¼¶ÔÓ¦ÓÚÒ»¸ö<record>¶¨Òå
-		// container²ÎÊıÍêÈ«¿ÉÄÜÎªnull£¬Õâ±íÊ¾<record>Îª¸ùÔªËØ
+		// å¤„ç†ä¸€æ¡è®°å½•å¯¹åº”äºä¸€ä¸ª<record>å®šä¹‰
+		// containerå‚æ•°å®Œå…¨å¯èƒ½ä¸ºnullï¼Œè¿™è¡¨ç¤º<record>ä¸ºæ ¹å…ƒç´ 
 		// return:
-		//		-1	³ö´í
-		//		0	Õı³£·µ»Ø
+		//		-1	å‡ºé”™
+		//		0	æ­£å¸¸è¿”å›
 		int DoSingleItem(
 			object objParam,
 			XmlNode node,
@@ -991,35 +972,35 @@ namespace DigitalPlatform.MarcDom
 			breakType = BreakType.None;
 
 			/*
-			Debug.Assert(node != null, "node²ÎÊı²»ÄÜÎªnull");
+			Debug.Assert(node != null, "nodeå‚æ•°ä¸èƒ½ä¸ºnull");
 
 			HashFilterItem itemNode = (HashFilterItem)NodeTable[node];
 
 			if (itemNode == null) 
 			{
-				Debug.Assert(false, "NodeTableÖĞÈ±·¦ÊÂÏî");
+				Debug.Assert(false, "NodeTableä¸­ç¼ºä¹äº‹é¡¹");
 				return -1;
 			}
 
-			Debug.Assert(node == itemNode.xmlNode, "item³ÉÔ±xmlNode²»ÕıÈ·");
+			Debug.Assert(node == itemNode.xmlNode, "itemæˆå‘˜xmlNodeä¸æ­£ç¡®");
 
 			Type entryClassType = itemNode.FunctionType;
 
 			if (entryClassType == null) 
 			{
-				Debug.Assert(false, itemNode.FunctionName + "Ã»ÓĞÔ¤ÏÈÌî³äType");
+				Debug.Assert(false, itemNode.FunctionName + "æ²¡æœ‰é¢„å…ˆå¡«å……Type");
 				return -1;
 			}
 
-			// °Ñfltx.cs´úÂëÖĞµÄBatch²ã¶ÔÏónew£¬²¢±£³Ö
-			// newÒ»¸öBatchÅÉÉú¶ÔÏó
+			// æŠŠfltx.csä»£ç ä¸­çš„Batchå±‚å¯¹è±¡newï¼Œå¹¶ä¿æŒ
+			// newä¸€ä¸ªBatchæ´¾ç”Ÿå¯¹è±¡
 			FilterItem itemHost = (FilterItem)entryClassType.InvokeMember(null, 
 				BindingFlags.DeclaredOnly | 
 				BindingFlags.Public | BindingFlags.NonPublic | 
 				BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
 				null);
 			*/
-			// ´´½¨Ò»¸öĞÂFilterItem¶ÔÏó
+			// åˆ›å»ºä¸€ä¸ªæ–°FilterItemå¯¹è±¡
 			FilterItem itemHost = NewFilterItem(
 				objParam,
 				node,
@@ -1033,7 +1014,7 @@ namespace DigitalPlatform.MarcDom
 			// itemHost.FilterRoot = container != null ? container : itemHost;
 			itemHost.FilterRoot = GetRootFilterItem(itemHost);
 
-			Debug.Assert(itemHost.FilterRoot != null, "itemHost.FilterRoot²»Ó¦µ±==null");
+			Debug.Assert(itemHost.FilterRoot != null, "itemHost.FilterRootä¸åº”å½“==null");
 
 			if (node.Name == "record") 
 			{
@@ -1048,11 +1029,11 @@ namespace DigitalPlatform.MarcDom
                 itemHost.Data = strData;
 				if (strData.Length < 3) 
 				{
-					strError = "×Ö¶ÎÈ«²¿Êı¾İ³¤¶È²»×ã3×Ö·û";
+					strError = "å­—æ®µå…¨éƒ¨æ•°æ®é•¿åº¦ä¸è¶³3å­—ç¬¦";
 					goto ERROR1;
 				}
-				itemHost.Name = strData.Substring(0, 3);	// ÕâÀïÒªÇóµ÷ÓÃ±¾º¯ÊıµÄ£¬×¼±¸Í·±êÇøÕâ¸öÌØÊâ¡°×Ö¶Î¡±Ê±£¬Òª¼ÓÉÏ'hdr'2×Ö·ûÔÚÄÚÈİÇ°Ãæ
-				// control field  001-009Ã»ÓĞ×Ó×Ö¶Î
+				itemHost.Name = strData.Substring(0, 3);	// è¿™é‡Œè¦æ±‚è°ƒç”¨æœ¬å‡½æ•°çš„ï¼Œå‡†å¤‡å¤´æ ‡åŒºè¿™ä¸ªç‰¹æ®Šâ€œå­—æ®µâ€æ—¶ï¼Œè¦åŠ ä¸Š'hdr'2å­—ç¬¦åœ¨å†…å®¹å‰é¢
+				// control field  001-009æ²¡æœ‰å­å­—æ®µ
 				if (FilterItem.IsControlFieldName(itemHost.Name) == true)
 				{
 					itemHost.Indicator = "";
@@ -1087,7 +1068,7 @@ namespace DigitalPlatform.MarcDom
                 itemHost.Data = strData;
 				if (strData.Length < 1) 
 				{
-					strError = "×Ó×Ö¶ÎÈ«²¿Êı¾İ³¤¶È²»×ã1×Ö·û";
+					strError = "å­å­—æ®µå…¨éƒ¨æ•°æ®é•¿åº¦ä¸è¶³1å­—ç¬¦";
 					goto ERROR1;
 				}
 				itemHost.Name = strData.Substring(0, 1);
@@ -1098,28 +1079,28 @@ namespace DigitalPlatform.MarcDom
 			itemHost.NextName = strNextName;
 			if (itemHost.Container != null) 
 			{
-				itemHost.PrevName = itemHost.Container.LastChildName;	// ÀûÓÃÉÏ´ÎÒÅÁôµÄ
+				itemHost.PrevName = itemHost.Container.LastChildName;	// åˆ©ç”¨ä¸Šæ¬¡é—ç•™çš„
 
-				// ÕâÒ»¾äÓĞµã¶àÓà¡£ÒòÎª±¾º¯Êı·µ»Øºó, ºóÃæÁ¢¼´»á×öĞŞ¸ÄLastChildNameµÄÊÂÇé
-				itemHost.Container.LastChildName = itemHost.Name;	// ±£´æÕâ´ÎµÄ
+				// è¿™ä¸€å¥æœ‰ç‚¹å¤šä½™ã€‚å› ä¸ºæœ¬å‡½æ•°è¿”å›å, åé¢ç«‹å³ä¼šåšä¿®æ”¹LastChildNameçš„äº‹æƒ…
+				itemHost.Container.LastChildName = itemHost.Name;	// ä¿å­˜è¿™æ¬¡çš„
 			}
 
 			itemHost.OnBegin();
 
-			// ¼ì²éÎŞÒâÒåµÄbreakÉèÖÃÇé¿ö
+			// æ£€æŸ¥æ— æ„ä¹‰çš„breakè®¾ç½®æƒ…å†µ
 			if (CheckBreakException == true
 				&& node.Name == "subfield"
 				&& (itemHost.Break == BreakType.SkipCaseEnd
 				|| itemHost.Break == BreakType.SkipCase) )
 			{
-				throw(new Exception("<subfield>ÔªËØÄÚscript´úÂëÖĞÓÃBreak = ???¸Ä±ä½á¹¹Æ¥ÅäÁ÷³ÌÎŞÈÎºÎÒâÒå..."));
+				throw(new Exception("<subfield>å…ƒç´ å†…scriptä»£ç ä¸­ç”¨Break = ???æ”¹å˜ç»“æ„åŒ¹é…æµç¨‹æ— ä»»ä½•æ„ä¹‰..."));
 			}
 
 
 			if (itemHost.Break == BreakType.SkipCaseEnd)
-				goto SKIP1;	// ²»×öOnEnd()
+				goto SKIP1;	// ä¸åšOnEnd()
 			if (itemHost.Break == BreakType.SkipCase)
-				goto SKIP;	// ²»×öOnBeginµÄĞÖµÜcase£¬µ«ÊÇÒª×öOnEnd()
+				goto SKIP;	// ä¸åšOnBeginçš„å…„å¼Ÿcaseï¼Œä½†æ˜¯è¦åšOnEnd()
 
 
 			// int i;
@@ -1127,22 +1108,22 @@ namespace DigitalPlatform.MarcDom
 			// XmlNode child = null;
 			BreakType thisBreak = BreakType.None;
 
-			// <record>Ï£ÍûÏÂ¼¶ÊÇ<field>
+			// <record>å¸Œæœ›ä¸‹çº§æ˜¯<field>
 			if (node.Name == "record") 
 			{
-				// ÇĞ¸î¼ÇÂ¼ÎªÈô¸É×Ö¶Î£¬Æ¥Åäcase
+				// åˆ‡å‰²è®°å½•ä¸ºè‹¥å¹²å­—æ®µï¼ŒåŒ¹é…case
 				for(int r=0;;r++) 
 				{
 					string strField;
 					string strNextFieldName;
 
-					// ´Ó¼ÇÂ¼ÖĞµÃµ½Ò»¸ö×Ö¶Î
+					// ä»è®°å½•ä¸­å¾—åˆ°ä¸€ä¸ªå­—æ®µ
 					// parameters:
-					//		strMARC		MARC¼ÇÂ¼
-					//		strFieldName	×Ö¶ÎÃû¡£Èç¹û==null£¬±íÊ¾ÈÎÒâ×Ö¶Î
-					//		nIndex		Í¬Ãû×Ö¶ÎÖĞµÄµÚ¼¸¸ö¡£´Ó0¿ªÊ¼¼ÆËã(0±íÊ¾Í·±êÇø)
-					//		strField	[out]Êä³ö×Ö¶Î¡£°üÀ¨×Ö¶ÎÃû¡¢±ØÒªµÄ×Ö¶ÎÖ¸Ê¾·û¡¢×Ö¶ÎÄÚÈİ¡£²»°üº¬×Ö¶Î½áÊø·û¡£
-					//					×¢ÒâÍ·±êÇøµ±×÷Ò»¸ö×Ö¶Î·µ»Ø£¬strFieldÖĞ²»°üº¬×Ö¶ÎÃû£¬Ò»ÉÏÀ´¾ÍÊÇÍ·±êÇøÄÚÈİ
+					//		strMARC		MARCè®°å½•
+					//		strFieldName	å­—æ®µåã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºä»»æ„å­—æ®µ
+					//		nIndex		åŒåå­—æ®µä¸­çš„ç¬¬å‡ ä¸ªã€‚ä»0å¼€å§‹è®¡ç®—(0è¡¨ç¤ºå¤´æ ‡åŒº)
+					//		strField	[out]è¾“å‡ºå­—æ®µã€‚åŒ…æ‹¬å­—æ®µåã€å¿…è¦çš„å­—æ®µæŒ‡ç¤ºç¬¦ã€å­—æ®µå†…å®¹ã€‚ä¸åŒ…å«å­—æ®µç»“æŸç¬¦ã€‚
+					//					æ³¨æ„å¤´æ ‡åŒºå½“ä½œä¸€ä¸ªå­—æ®µè¿”å›ï¼ŒstrFieldä¸­ä¸åŒ…å«å­—æ®µåï¼Œä¸€ä¸Šæ¥å°±æ˜¯å¤´æ ‡åŒºå†…å®¹
 					// return:
 					//		-1	error
 					//		0	not found
@@ -1167,7 +1148,6 @@ namespace DigitalPlatform.MarcDom
 					if (strField.Length < 3)
 						goto SKIP;
 
-
 					string strFieldName = "";
 					if (r != 0)
 						strFieldName = strField.Substring(0,3);
@@ -1190,7 +1170,7 @@ namespace DigitalPlatform.MarcDom
 						if (child.Name != "field")
 							continue;
 
-						// Æ¥Åä×Ö¶ÎÃû
+						// åŒ¹é…å­—æ®µå
 						nRet = MatchName( strFieldName, DomUtil.GetAttr(child, "name"));
 						if (nRet == 1) 
 						{
@@ -1209,40 +1189,35 @@ namespace DigitalPlatform.MarcDom
 							if (itemHost.Break != BreakType.None)
 								break;
 						}
-
-
 					} // end of for
 
-					itemHost.LastChildName = strFieldName;	// ±£´æÕâ´ÎµÄ
+					itemHost.LastChildName = strFieldName;	// ä¿å­˜è¿™æ¬¡çš„
 					if (itemHost.Break != BreakType.None)
 						goto SKIP;
-
 				}
-
 			}
 			else if (node.Name == "field")
 			{
-
-				// ÈôÏÂ¼¶Îªsubfield
+				// è‹¥ä¸‹çº§ä¸ºsubfield
 				string strFirstChildName = GetFirstChildElementType(node);
-				// fieldÏÂµÄsubfield
+				// fieldä¸‹çš„subfield
 				if (strFirstChildName == "subfield") 
 				{
-					// ÇĞ¸î¼ÇÂ¼ÎªÈô¸É×Ó×Ö¶Î£¬Æ¥Åäcase
+					// åˆ‡å‰²è®°å½•ä¸ºè‹¥å¹²å­å­—æ®µï¼ŒåŒ¹é…case
 					for(int s=0;;s++) 
 					{
 						string strSubfield;
 						string strNextSubfieldName;
 
-						// ´Ó×Ö¶Î»ò×éÖĞµÃµ½Ò»¸ö×Ó×Ö¶Î
+						// ä»å­—æ®µæˆ–ç»„ä¸­å¾—åˆ°ä¸€ä¸ªå­å­—æ®µ
 						// parameters:
-						//		strText		×Ö¶ÎÄÚÈİ£¬»òÕß×Ó×Ö¶Î×éÄÚÈİ¡£
-						//		textType	±íÊ¾strTextÖĞ°üº¬µÄÊÇ×Ö¶ÎÄÚÈİ»¹ÊÇ×éÄÚÈİ¡£
-						//		strSubfieldName	×Ó×Ö¶ÎÃû¡£Èç¹û==null£¬±íÊ¾ÈÎÒâ×Ó×Ö¶Î
-						//					ĞÎÊ½Îª'a'ÕâÑùµÄ¡£
-						//		nIndex			Í¬Ãû×Ó×Ö¶ÎÖĞµÄµÚ¼¸¸ö¡£´Ó0¿ªÊ¼¼ÆËã¡£
-						//		strSubfield		Êä³ö×Ó×Ö¶Î¡£×Ó×Ö¶ÎÃû(1×Ö·û)¡¢×Ó×Ö¶ÎÄÚÈİ¡£
-						//		strNextSubfieldName	ÏÂÒ»¸ö×Ó×Ö¶ÎµÄÃû×Ö£¬Ò»¸ö×Ö·û
+						//		strText		å­—æ®µå†…å®¹ï¼Œæˆ–è€…å­å­—æ®µç»„å†…å®¹ã€‚
+						//		textType	è¡¨ç¤ºstrTextä¸­åŒ…å«çš„æ˜¯å­—æ®µå†…å®¹è¿˜æ˜¯ç»„å†…å®¹ã€‚
+						//		strSubfieldName	å­å­—æ®µåã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºä»»æ„å­å­—æ®µ
+						//					å½¢å¼ä¸º'a'è¿™æ ·çš„ã€‚
+						//		nIndex			åŒåå­å­—æ®µä¸­çš„ç¬¬å‡ ä¸ªã€‚ä»0å¼€å§‹è®¡ç®—ã€‚
+						//		strSubfield		è¾“å‡ºå­å­—æ®µã€‚å­å­—æ®µå(1å­—ç¬¦)ã€å­å­—æ®µå†…å®¹ã€‚
+						//		strNextSubfieldName	ä¸‹ä¸€ä¸ªå­å­—æ®µçš„åå­—ï¼Œä¸€ä¸ªå­—ç¬¦
 						// return:
 						//		-1	error
 						//		0	not found
@@ -1280,7 +1255,7 @@ namespace DigitalPlatform.MarcDom
 							if (child.Name != "subfield")
 								continue;
 
-							// Æ¥Åä×Ó×Ö¶ÎÃû
+							// åŒ¹é…å­å­—æ®µå
 							nRet = MatchName( strSubfieldName,  DomUtil.GetAttr(child, "name"));
 							if (nRet == 1) 
 							{
@@ -1297,33 +1272,30 @@ namespace DigitalPlatform.MarcDom
 									return -1;
 								if (itemHost.Break != BreakType.None)
 									break;
-
 							}
-
 						} // end of for
 
-						itemHost.LastChildName = strSubfieldName;	// ±£´æÕâ´ÎµÄ
+						itemHost.LastChildName = strSubfieldName;	// ä¿å­˜è¿™æ¬¡çš„
 						if (itemHost.Break != BreakType.None)
 							goto SKIP;
-
 					}
 				}
-				// fieldÏÂÇ¶Ì×µÄfield
+				// fieldä¸‹åµŒå¥—çš„field
 				if (strFirstChildName == "field") 
 				{
-					// ÇĞ¸î×Ö·û´®ÎªÈô¸É×Ö¶Î£¬Æ¥Åäcase
+					// åˆ‡å‰²å­—ç¬¦ä¸²ä¸ºè‹¥å¹²å­—æ®µï¼ŒåŒ¹é…case
 					for(int r=0;;r++) 
 					{
 						string strField;
 						string strNextFieldName;
 
-						// ´Ó¼ÇÂ¼ÖĞµÃµ½Ò»¸ö×Ö¶Î
+						// ä»è®°å½•ä¸­å¾—åˆ°ä¸€ä¸ªå­—æ®µ
 						// parameters:
-						//		strMARC		MARC¼ÇÂ¼
-						//		strFieldName	×Ö¶ÎÃû¡£Èç¹û==null£¬±íÊ¾ÈÎÒâ×Ö¶Î
-						//		nIndex		Í¬Ãû×Ö¶ÎÖĞµÄµÚ¼¸¸ö¡£´Ó0¿ªÊ¼¼ÆËã(0±íÊ¾Í·±êÇø)
-						//		strField	[out]Êä³ö×Ö¶Î¡£°üÀ¨×Ö¶ÎÃû¡¢±ØÒªµÄ×Ö¶ÎÖ¸Ê¾·û¡¢×Ö¶ÎÄÚÈİ¡£²»°üº¬×Ö¶Î½áÊø·û¡£
-						//					×¢ÒâÍ·±êÇøµ±×÷Ò»¸ö×Ö¶Î·µ»Ø£¬strFieldÖĞ²»°üº¬×Ö¶ÎÃû£¬Ò»ÉÏÀ´¾ÍÊÇÍ·±êÇøÄÚÈİ
+						//		strMARC		MARCè®°å½•
+						//		strFieldName	å­—æ®µåã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºä»»æ„å­—æ®µ
+						//		nIndex		åŒåå­—æ®µä¸­çš„ç¬¬å‡ ä¸ªã€‚ä»0å¼€å§‹è®¡ç®—(0è¡¨ç¤ºå¤´æ ‡åŒº)
+						//		strField	[out]è¾“å‡ºå­—æ®µã€‚åŒ…æ‹¬å­—æ®µåã€å¿…è¦çš„å­—æ®µæŒ‡ç¤ºç¬¦ã€å­—æ®µå†…å®¹ã€‚ä¸åŒ…å«å­—æ®µç»“æŸç¬¦ã€‚
+						//					æ³¨æ„å¤´æ ‡åŒºå½“ä½œä¸€ä¸ªå­—æ®µè¿”å›ï¼ŒstrFieldä¸­ä¸åŒ…å«å­—æ®µåï¼Œä¸€ä¸Šæ¥å°±æ˜¯å¤´æ ‡åŒºå†…å®¹
 						// return:
 						//		-1	error
 						//		0	not found
@@ -1344,14 +1316,13 @@ namespace DigitalPlatform.MarcDom
 						if (strField.Length < 3)
 							goto SKIP;
 
-
 						string strFieldName = "";
 						strFieldName = strField.Substring(0,3);
 
                         // ***
                         itemHost.IncChildDupCount(strFieldName);
 
-						// Ç¶Ì××Ö¶Î²»´æÔÚÍ·±êÇø'hdr'×Ö¶ÎÎÊÌâ?
+						// åµŒå¥—å­—æ®µä¸å­˜åœ¨å¤´æ ‡åŒº'hdr'å­—æ®µé—®é¢˜?
 
 						//for(i=0;i<node.ChildNodes.Count;i++) 
                         foreach(XmlNode child in node.ChildNodes)
@@ -1364,7 +1335,7 @@ namespace DigitalPlatform.MarcDom
 							if (child.Name != "field")
 								continue;
 
-							// Æ¥Åä×Ö¶ÎÃû
+							// åŒ¹é…å­—æ®µå
 							nRet = MatchName( strFieldName, DomUtil.GetAttr(child, "name"));
 							if (nRet == 1) 
 							{
@@ -1382,29 +1353,25 @@ namespace DigitalPlatform.MarcDom
 								if (itemHost.Break != BreakType.None)
 									break;
 							}
-
-
 						} // end of for
 
-						itemHost.LastChildName = strFieldName;	// ±£´æÕâ´ÎµÄ
+						itemHost.LastChildName = strFieldName;	// ä¿å­˜è¿™æ¬¡çš„
 						if (itemHost.Break != BreakType.None)
 							goto SKIP;
-
 					}
-
 				}
 
-				// field ÏÂµÄgroup
+				// field ä¸‹çš„group
 				else if (strFirstChildName == "group") 
 				{
-					// ÇĞ¸î¼ÇÂ¼ÎªÈô¸É×Ó×Ö¶Î£¬Æ¥Åäcase
+					// åˆ‡å‰²è®°å½•ä¸ºè‹¥å¹²å­å­—æ®µï¼ŒåŒ¹é…case
 					for(int g=0;;g++) 
 					{
 						string strGroup;
 
-						// ´Ó×Ö¶ÎÖĞµÃµ½×Ó×Ö¶Î×é
+						// ä»å­—æ®µä¸­å¾—åˆ°å­å­—æ®µç»„
 						// parameters:
-						//		strGroup	[out]½á¹û¡£
+						//		strGroup	[out]ç»“æœã€‚
 						// return:
 						//		-1	error
 						//		0	not found
@@ -1436,7 +1403,7 @@ namespace DigitalPlatform.MarcDom
 							if (child.Name != "group")
 								continue;
 
-							// Æ¥Åä×éÃû
+							// åŒ¹é…ç»„å
 							nRet = MatchName( strGroupName,  DomUtil.GetAttr(child, "name"));
 							if (true/*nRet == 1*/) 
 							{
@@ -1453,45 +1420,40 @@ namespace DigitalPlatform.MarcDom
 									return -1;
 								if (itemHost.Break != BreakType.None)
 									break;
-
 							}
-
 						} // end of for
 
-						itemHost.LastChildName = "";	// ±£´æÕâ´ÎµÄ
+						itemHost.LastChildName = "";	// ä¿å­˜è¿™æ¬¡çš„
 						if (itemHost.Break != BreakType.None)
 							goto SKIP;
-
 					}
 				}
-
 			}
 			else if (node.Name == "group")
 			{
-				// ÈôÏÂ¼¶Îªsubfield
+				// è‹¥ä¸‹çº§ä¸ºsubfield
 				string strFirstChildName = GetFirstChildElementType(node);
 				if (strFirstChildName != "subfield") 
 				{
-					strError = ".fltxÖĞ<group>ÏÂ¼¶±ØĞëÎª<subfield>ÔªËØ";
+					strError = ".fltxä¸­<group>ä¸‹çº§å¿…é¡»ä¸º<subfield>å…ƒç´ ";
 					return -1;
 				}
 
-
-				// ÇĞ¸î¼ÇÂ¼ÎªÈô¸É×Ó×Ö¶Î£¬Æ¥Åäcase
+				// åˆ‡å‰²è®°å½•ä¸ºè‹¥å¹²å­å­—æ®µï¼ŒåŒ¹é…case
 				for(int s=0;;s++) 
 				{
 					string strSubfield;
 					string strNextSubfieldName;
 
-					// ´Ó×Ö¶Î»ò×éÖĞµÃµ½Ò»¸ö×Ó×Ö¶Î
+					// ä»å­—æ®µæˆ–ç»„ä¸­å¾—åˆ°ä¸€ä¸ªå­å­—æ®µ
 					// parameters:
-					//		strText		×Ö¶ÎÄÚÈİ£¬»òÕß×Ó×Ö¶Î×éÄÚÈİ¡£
-					//		textType	±íÊ¾strTextÖĞ°üº¬µÄÊÇ×Ö¶ÎÄÚÈİ»¹ÊÇ×éÄÚÈİ¡£
-					//		strSubfieldName	×Ó×Ö¶ÎÃû¡£Èç¹û==null£¬±íÊ¾ÈÎÒâ×Ó×Ö¶Î
-					//					ĞÎÊ½Îª'a'ÕâÑùµÄ¡£
-					//		nIndex			Í¬Ãû×Ó×Ö¶ÎÖĞµÄµÚ¼¸¸ö¡£´Ó0¿ªÊ¼¼ÆËã¡£
-					//		strSubfield		Êä³ö×Ó×Ö¶Î¡£×Ó×Ö¶ÎÃû(1×Ö·û)¡¢×Ó×Ö¶ÎÄÚÈİ¡£
-					//		strNextSubfieldName	ÏÂÒ»¸ö×Ó×Ö¶ÎµÄÃû×Ö£¬Ò»¸ö×Ö·û
+					//		strText		å­—æ®µå†…å®¹ï¼Œæˆ–è€…å­å­—æ®µç»„å†…å®¹ã€‚
+					//		textType	è¡¨ç¤ºstrTextä¸­åŒ…å«çš„æ˜¯å­—æ®µå†…å®¹è¿˜æ˜¯ç»„å†…å®¹ã€‚
+					//		strSubfieldName	å­å­—æ®µåã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºä»»æ„å­å­—æ®µ
+					//					å½¢å¼ä¸º'a'è¿™æ ·çš„ã€‚
+					//		nIndex			åŒåå­å­—æ®µä¸­çš„ç¬¬å‡ ä¸ªã€‚ä»0å¼€å§‹è®¡ç®—ã€‚
+					//		strSubfield		è¾“å‡ºå­å­—æ®µã€‚å­å­—æ®µå(1å­—ç¬¦)ã€å­å­—æ®µå†…å®¹ã€‚
+					//		strNextSubfieldName	ä¸‹ä¸€ä¸ªå­å­—æ®µçš„åå­—ï¼Œä¸€ä¸ªå­—ç¬¦
 					// return:
 					//		-1	error
 					//		0	not found
@@ -1528,7 +1490,7 @@ namespace DigitalPlatform.MarcDom
 						if (child.Name != "subfield")
 							continue;
 
-						// Æ¥Åä×Ó×Ö¶ÎÃû
+						// åŒ¹é…å­å­—æ®µå
 						nRet = MatchName( strSubfieldName,  DomUtil.GetAttr(child, "name"));
 						if (nRet == 1) 
 						{
@@ -1550,17 +1512,14 @@ namespace DigitalPlatform.MarcDom
 
 					} // end of for
 
-					itemHost.LastChildName = strSubfieldName;	// ±£´æÕâ´ÎµÄ
+					itemHost.LastChildName = strSubfieldName;	// ä¿å­˜è¿™æ¬¡çš„
 					if (itemHost.Break != BreakType.None)
 						goto SKIP;
-
-
 				}
-
 			}			
 			else if (node.Name == "subfield")
 			{
-				// ÔİÊ±Ã»ÓĞÊ²Ã´´¦Àí
+				// æš‚æ—¶æ²¡æœ‰ä»€ä¹ˆå¤„ç†
 
 			}
 
@@ -1570,24 +1529,20 @@ namespace DigitalPlatform.MarcDom
 				{
 					itemHost.OnEnd();
 				}
-
-           
 			SKIP1:
-
 				/*
 				if (itemHost.Break != BreakType.None)
 					return 1;
 				*/
 
 				breakType = itemHost.Break;
-
 			return 0;
 
 			ERROR1:
 				return -1;
 		}
 
-		// µÃµ½¶ù×ÓÖĞµÚÒ»¸ö·Çdef/begin/endµÄ¶ù×ÓµÄÔªËØÃû
+		// å¾—åˆ°å„¿å­ä¸­ç¬¬ä¸€ä¸ªédef/begin/endçš„å„¿å­çš„å…ƒç´ å
 		string GetFirstChildElementType(XmlNode parent)
 		{
 			for(int i=0;i<parent.ChildNodes.Count;i++)
@@ -1600,11 +1555,10 @@ namespace DigitalPlatform.MarcDom
 
 				return node.Name;
 			}
-
 			return "";
 		}
 
-        // »ñµÃ.fltxÖĞ<ref>Ëù¶¨ÒåµÄ²Î¿¼¿â
+        // è·å¾—.fltxä¸­<ref>æ‰€å®šä¹‰çš„å‚è€ƒåº“
         public string[] GetRefs()
         {
             XmlNodeList nodes = this.dom.SelectNodes("//ref");
@@ -1626,14 +1580,13 @@ namespace DigitalPlatform.MarcDom
             return results;
         }
 
-
-        // ´´½¨Assembly
+        // åˆ›å»ºAssembly
         // parameters:
-        //	strCode:	½Å±¾´úÂë
-        //	refs:	Á¬½ÓµÄÍâ²¿assembly
-        // strResult:´¦ÀíĞÅÏ¢
-        // objDb:Êı¾İ¿â¶ÔÏó£¬ÔÚ³ö´íµ÷getErrorInfoÓÃµ½
-        // ·µ»ØÖµ:´´½¨ºÃµÄAssembly
+        //	strCode:	è„šæœ¬ä»£ç 
+        //	refs:	è¿æ¥çš„å¤–éƒ¨assembly
+        // strResult:å¤„ç†ä¿¡æ¯
+        // objDb:æ•°æ®åº“å¯¹è±¡ï¼Œåœ¨å‡ºé”™è°ƒgetErrorInfoç”¨åˆ°
+        // è¿”å›å€¼:åˆ›å»ºå¥½çš„Assembly
         public Assembly CreateAssembly(string strCode,
 			string[] refs,
 			out string strErrorInfo)
@@ -1641,7 +1594,7 @@ namespace DigitalPlatform.MarcDom
 			// System.Reflection.Assembly compiledAssembly = null;
 			strErrorInfo = "";
  
-			// CompilerParameters¶ÔÏó
+			// CompilerParameterså¯¹è±¡
 			System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 			compilerParams.GenerateInMemory = true; //Assembly is created in memory
@@ -1671,7 +1624,7 @@ namespace DigitalPlatform.MarcDom
 			}
 			catch (Exception ex) 
 			{
-				strErrorInfo = "³ö´í " + ex.Message;
+				strErrorInfo = "å‡ºé”™ " + ex.Message;
 				return null;
 			}
  
@@ -1680,7 +1633,7 @@ namespace DigitalPlatform.MarcDom
 			}
 			else 
 			{
-				strErrorInfo = "±àÒë³ö´í£¬´íÎóÊı:" + Convert.ToString(results.Errors.Count) + "\r\n";
+				strErrorInfo = "ç¼–è¯‘å‡ºé”™ï¼Œé”™è¯¯æ•°:" + Convert.ToString(results.Errors.Count) + "\r\n";
 				strErrorInfo += getErrorInfo(results.Errors);
 
 				return null;
@@ -1689,17 +1642,16 @@ namespace DigitalPlatform.MarcDom
 			return results.CompiledAssembly;
 		}
 
-		// ¹¹Ôì³ö´íĞÅÏ¢×Ö·û´®
+		// æ„é€ å‡ºé”™ä¿¡æ¯å­—ç¬¦ä¸²
 		public string getErrorInfo(CompilerErrorCollection errors)
 		{
 			string strResult = "";
  
 			if (errors == null)
 			{
-				strResult = "error²ÎÊıÎªnull";
+				strResult = "errorå‚æ•°ä¸ºnull";
 				return strResult;
 			}
-   
  
 			foreach(CompilerError oneError in errors)
 			{
@@ -1712,7 +1664,6 @@ namespace DigitalPlatform.MarcDom
 		}
 
 		#endregion
-
 	}
 
 	public enum ItemType 
@@ -1730,7 +1681,7 @@ namespace DigitalPlatform.MarcDom
 		*/
 	}
 
-	// hash tableÖĞºÍXmlNode¶ÔÓ¦µÄItem
+	// hash tableä¸­å’ŒXmlNodeå¯¹åº”çš„Item
 	public class HashFilterItem
 	{
 		public XmlNode xmlNode = null;
@@ -1738,15 +1689,14 @@ namespace DigitalPlatform.MarcDom
 		public string Name = "";
 		public string FunctionName = "";
 		public Type FunctionType = null;
-
 	}
 
 	public enum BreakType
 	{
-		None = 0,	// ²»break
-		SkipCase = 1,	// Ìø¹ıcase²¿·Ö£¬µ«ÊÇ²»Ìø¹ıend²¿·Ö
-		SkipCaseEnd = 2,	// Ìø¹ıcaseºÍend²¿·Ö
-		SkipDataLoop = 3,	// Ìø¹ıºóÃæµÄÊı¾İ´¦ÀíÑ­»· £¿
+		None = 0,	// ä¸break
+		SkipCase = 1,	// è·³è¿‡caseéƒ¨åˆ†ï¼Œä½†æ˜¯ä¸è·³è¿‡endéƒ¨åˆ†
+		SkipCaseEnd = 2,	// è·³è¿‡caseå’Œendéƒ¨åˆ†
+		SkipDataLoop = 3,	// è·³è¿‡åé¢çš„æ•°æ®å¤„ç†å¾ªç¯ ï¼Ÿ
 	}
 
     public enum NodeType
@@ -1760,94 +1710,94 @@ namespace DigitalPlatform.MarcDom
 
 	// 
     /// <summary>
-    /// Script´úÂëµÄ»ùÀà
+    /// Scriptä»£ç çš„åŸºç±»
     /// </summary>
 	public class FilterItem
 	{
         /// <summary>
-        /// ½ÚµãÀàĞÍ
+        /// èŠ‚ç‚¹ç±»å‹
         /// </summary>
         public NodeType NodeType = NodeType.None;
 
         /// <summary>
-        /// ½ÚµãÃû (×Ö¶Î/×Ó×Ö¶Î...)Ãû¡£Ò»°ã¶øÑÔ Name + Indicator + Content = Data
+        /// èŠ‚ç‚¹å (å­—æ®µ/å­å­—æ®µ...)åã€‚ä¸€èˆ¬è€Œè¨€ Name + Indicator + Content = Data
         /// </summary>
-		public string Name = "";	// Êı¾İ(×Ö¶Î/×Ó×Ö¶Î...)Ãû
+		public string Name = "";	// æ•°æ®(å­—æ®µ/å­å­—æ®µ...)å
 
         /// <summary>
-        /// Ö¸Ê¾·û¡£Ò»°ã¶øÑÔ Name + Indicator + Content = Data
+        /// æŒ‡ç¤ºç¬¦ã€‚ä¸€èˆ¬è€Œè¨€ Name + Indicator + Content = Data
         /// </summary>
 		public string Indicator = "";
 
         /// <summary>
-        /// ÕıÎÄ¡£Ò»°ã¶øÑÔ Name + Indicator + Content = Data
+        /// æ­£æ–‡ã€‚ä¸€èˆ¬è€Œè¨€ Name + Indicator + Content = Data
         /// </summary>
-		public string Content = "";	// Ò»°ã¶øÑÔ Name + Indicator + Content = Data
+		public string Content = "";	// ä¸€èˆ¬è€Œè¨€ Name + Indicator + Content = Data
 
         /// <summary>
-        /// ÉÏ¼¶¶ÔÏó
+        /// ä¸Šçº§å¯¹è±¡
         /// </summary>
 		public FilterItem Container = null;
 
         /// <summary>
-        /// ¸ù¶ÔÏó
+        /// æ ¹å¯¹è±¡
         /// </summary>
 		public FilterItem FilterRoot = null;
 
 		//
         /// <summary>
-        /// ¶ÔÏóµÄÕû¸öÄÚÈİ¡£Ò»°ã¶øÑÔ Name + Indicator + Content = Data
+        /// å¯¹è±¡çš„æ•´ä¸ªå†…å®¹ã€‚ä¸€èˆ¬è€Œè¨€ Name + Indicator + Content = Data
         /// </summary>
 		public string	Data = "";
 
         /// <summary>
-        /// ÖĞ¶Ï±êÖ¾¡£¾ö¶¨ÊÇ·ñÌø¹ıÍ¬¼¶ºóÃæµÄcase/end
+        /// ä¸­æ–­æ ‡å¿—ã€‚å†³å®šæ˜¯å¦è·³è¿‡åŒçº§åé¢çš„case/end
         /// </summary>
-		public BreakType Break = BreakType.None;	// ÊÇ·ñÌø¹ıÍ¬¼¶ºóÃæµÄcase/end
+		public BreakType Break = BreakType.None;	// æ˜¯å¦è·³è¿‡åŒçº§åé¢çš„case/end
 
         /// <summary>
-        /// ÏÂ±ê
+        /// ä¸‹æ ‡
         /// </summary>
-		public int		Index = -1;	// È±Ê¡Öµ-1ÊÇÎªÁË±©Â¶´íÎó
+		public int		Index = -1;	// ç¼ºçœå€¼-1æ˜¯ä¸ºäº†æš´éœ²é”™è¯¯
 
         /// <summary>
-        /// Document ¶ÔÏó
+        /// Document å¯¹è±¡
         /// </summary>
-		public FilterDocument Document = null;	// Document¶ÔÏó¡£¿ÉÒÔÔÚÕâÀï±£´æĞèÒªÔÚrecordÖ®¼ä³Ö¾ÃµÄÖµ
+		public FilterDocument Document = null;	// Documentå¯¹è±¡ã€‚å¯ä»¥åœ¨è¿™é‡Œä¿å­˜éœ€è¦åœ¨recordä¹‹é—´æŒä¹…çš„å€¼
 
         /// <summary>
-        /// ³éÏóµÄ´«µİÊı¾İµÄÖ¸Õë
+        /// æŠ½è±¡çš„ä¼ é€’æ•°æ®çš„æŒ‡é’ˆ
         /// </summary>
-		public object	Param;	// ³éÏóµÄ´«µİÊı¾İµÄÖ¸Õë
+		public object	Param;	// æŠ½è±¡çš„ä¼ é€’æ•°æ®çš„æŒ‡é’ˆ
 
-		// Í¬¼¶½á¹¹¼äÏà»¥¹ØÏµÅäÌ×ÉèÊ©
+		// åŒçº§ç»“æ„é—´ç›¸äº’å…³ç³»é…å¥—è®¾æ–½
         /// <summary>
-        /// Í¬¼¶Ç°Ò»¶ÔÏóÃû
+        /// åŒçº§å‰ä¸€å¯¹è±¡å
         /// </summary>
-		public string	PrevName = "";	// Ç°Ò»Ãû
-
-        /// <summary>
-        /// Í¬¼¶ºóÒ»¶ÔÏóÃû
-        /// </summary>
-		public string	NextName = "";	// ºóÒ»Ãû
+		public string	PrevName = "";	// å‰ä¸€å
 
         /// <summary>
-        /// Í¬¼¶ÖĞºÍ±¾¶ÔÏóÍ¬ÃûµÄ¸öÊı
+        /// åŒçº§åä¸€å¯¹è±¡å
         /// </summary>
-		public int		DupCount = 0;	// Í¬ÃûÖØ¸´´ÎÊı
-
-		private Hashtable ChildDupTable = new Hashtable();	// ¶ù×Ó¶ÔÏóÖØ¸´Çé¿ö¼ÇÒä
-		internal string LastChildName = "";	// ×î½üÓÃ¹ıµÄ×îºóÒ»¸öÏÂ¼¶½á¹¹µÄÃû×Ö
+		public string	NextName = "";	// åä¸€å
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// åŒçº§ä¸­å’Œæœ¬å¯¹è±¡åŒåçš„ä¸ªæ•°
+        /// </summary>
+		public int		DupCount = 0;	// åŒåé‡å¤æ¬¡æ•°
+
+		private Hashtable ChildDupTable = new Hashtable();	// å„¿å­å¯¹è±¡é‡å¤æƒ…å†µè®°å¿†
+		internal string LastChildName = "";	// æœ€è¿‘ç”¨è¿‡çš„æœ€åä¸€ä¸ªä¸‹çº§ç»“æ„çš„åå­—
+
+        /// <summary>
+        /// æ„é€ å‡½æ•°
         /// </summary>
 		public FilterItem()
 		{
 		}
 
-        // ÉèÖÃµ±Ç°¶ÔÏóDupCount±äÁ¿
-        // Container¡¢Name±ØĞë³õÊ¼»¯
+        // è®¾ç½®å½“å‰å¯¹è±¡DupCountå˜é‡
+        // Containerã€Nameå¿…é¡»åˆå§‹åŒ–
         internal void IncChildDupCount(string strChildName)
         {
             if (this.ChildDupTable.Contains(strChildName) == false)
@@ -1867,7 +1817,7 @@ namespace DigitalPlatform.MarcDom
             if (Container == null)
                 return;
 
-            // ´Ó¸¸Ç×ÖĞÕÒµ½ChildDupTable
+            // ä»çˆ¶äº²ä¸­æ‰¾åˆ°ChildDupTable
             if (Container.ChildDupTable.Contains(this.Name) == false)
             {
                 Debug.Assert(false, "");
@@ -1881,14 +1831,14 @@ namespace DigitalPlatform.MarcDom
 
 
 #if NO
-		// ÉèÖÃµ±Ç°¶ÔÏóDupCount±äÁ¿
-		// Container¡¢Name±ØĞë³õÊ¼»¯
+		// è®¾ç½®å½“å‰å¯¹è±¡DupCountå˜é‡
+		// Containerã€Nameå¿…é¡»åˆå§‹åŒ–
 		internal void SetDupCount()
 		{
 			if (Container == null)
 				return;
 
-			// ´Ó¸¸Ç×ÖĞÕÒµ½ChildDupTable
+			// ä»çˆ¶äº²ä¸­æ‰¾åˆ°ChildDupTable
 			if (Container.ChildDupTable.Contains(this.Name) == false)
 			{
 				Container.ChildDupTable.Add(this.Name, (object)1);
@@ -1904,14 +1854,14 @@ namespace DigitalPlatform.MarcDom
 #endif
 
         /// <summary>
-        /// Begin ½×¶Î
+        /// Begin é˜¶æ®µ
         /// </summary>
 		public virtual void OnBegin() 
 		{
 		}
 
         /// <summary>
-        /// End ½×¶Î
+        /// End é˜¶æ®µ
         /// </summary>
 		public virtual void OnEnd() 
 		{
@@ -1919,10 +1869,10 @@ namespace DigitalPlatform.MarcDom
 
 		// 
         /// <summary>
-        /// ¿´Ò»¸ö×Ö¶ÎÃûÊÇ·ñÊÇ¿ØÖÆ×Ö¶Î¡£ËùÎ½¿ØÖÆ×Ö¶ÎÃ»ÓĞÖ¸Ê¾·û¸ÅÄî
+        /// çœ‹ä¸€ä¸ªå­—æ®µåæ˜¯å¦æ˜¯æ§åˆ¶å­—æ®µã€‚æ‰€è°“æ§åˆ¶å­—æ®µæ²¡æœ‰æŒ‡ç¤ºç¬¦æ¦‚å¿µ
         /// </summary>
-        /// <param name="strFieldName">×Ö¶ÎÃû</param>
-        /// <returns>ÊÇ·ñÎª¿ØÖÆ×Ö¶Î</returns>
+        /// <param name="strFieldName">å­—æ®µå</param>
+        /// <returns>æ˜¯å¦ä¸ºæ§åˆ¶å­—æ®µ</returns>
 		public static bool IsControlFieldName(string strFieldName)
 		{
 			if (String.Compare(strFieldName,"hdr",true) == 0)
@@ -1942,7 +1892,7 @@ namespace DigitalPlatform.MarcDom
 		}
 
         /// <summary>
-        /// ±¾¶ÔÏóÊÇ·ñÎª¿ØÖÆ×Ö¶Î¡£(Èç¹û±¾¶ÔÏó²»ÊÇ×Ö¶Î¶ÔÏó£¬·µ»Ø false)
+        /// æœ¬å¯¹è±¡æ˜¯å¦ä¸ºæ§åˆ¶å­—æ®µã€‚(å¦‚æœæœ¬å¯¹è±¡ä¸æ˜¯å­—æ®µå¯¹è±¡ï¼Œè¿”å› false)
         /// </summary>
 		public bool IsControlField
 		{
@@ -1955,7 +1905,7 @@ namespace DigitalPlatform.MarcDom
 		}
 
         /// <summary>
-        /// Initial ½×¶ÎÇ°µÄÔ¤´¦Àí
+        /// Initial é˜¶æ®µå‰çš„é¢„å¤„ç†
         /// </summary>
 		virtual public void PreInitial()
 		{
@@ -1963,19 +1913,19 @@ namespace DigitalPlatform.MarcDom
 		}
 
         /// <summary>
-        /// ¸ù¾İ ID »ñµÃµ±Ç°ÓïÑÔÏÂµÄ×Ö·û´®
-        /// Èç¹ûÃ»ÓĞ¾«È·Æ¥ÅäµÄÓïÑÔ£¬¾ÍÄ£ºıÆ¥Åä£¬»ò·µ»ØµÚÒ»¸öÓïÑÔµÄ
-        /// µ«Èç¹ûid²»´æÔÚ£¬·µ»Ønull
+        /// æ ¹æ® ID è·å¾—å½“å‰è¯­è¨€ä¸‹çš„å­—ç¬¦ä¸²
+        /// å¦‚æœæ²¡æœ‰ç²¾ç¡®åŒ¹é…çš„è¯­è¨€ï¼Œå°±æ¨¡ç³ŠåŒ¹é…ï¼Œæˆ–è¿”å›ç¬¬ä¸€ä¸ªè¯­è¨€çš„
+        /// ä½†å¦‚æœidä¸å­˜åœ¨ï¼Œè¿”å›null
         /// </summary>
         /// <param name="strID">ID</param>
-        /// <returns>×Ö·û´®</returns>
+        /// <returns>å­—ç¬¦ä¸²</returns>
         public string GetString(string strID)
         {
             return this.Document.GetString(strID);
         }
 
         /// <summary>
-        /// ÓïÑÔ´úÂë
+        /// è¯­è¨€ä»£ç 
         /// </summary>
         public string Lang
         {
@@ -1986,39 +1936,39 @@ namespace DigitalPlatform.MarcDom
         }
 
         /// <summary>
-        /// ¸ù¾İ ID »ñµÃµ±Ç°ÓïÑÔÏÂµÄ×Ö·û´®¡£×î»µÇé¿öÏÂ»á·µ»Ø ID ×ÔÉí
+        /// æ ¹æ® ID è·å¾—å½“å‰è¯­è¨€ä¸‹çš„å­—ç¬¦ä¸²ã€‚æœ€åæƒ…å†µä¸‹ä¼šè¿”å› ID è‡ªèº«
         /// </summary>
         /// <param name="strID">ID</param>
-        /// <returns>×Ö·û´®</returns>
+        /// <returns>å­—ç¬¦ä¸²</returns>
         public string GetStringSafe(string strID)
         {
             return this.Document.GetStringSafe(strID);
         }
 
-        // ¼ò»¯Ãû³Æ°æ±¾
+        // ç®€åŒ–åç§°ç‰ˆæœ¬
         /// <summary>
-        /// Í¬ GetString()
+        /// åŒ GetString()
         /// </summary>
         /// <param name="strID">ID</param>
-        /// <returns>×Ö·û´®</returns>
+        /// <returns>å­—ç¬¦ä¸²</returns>
         public string S(string strID)
         {
             return this.Document.GetString(strID);
         }
 
-        // ¼ò»¯Ãû³Æ°æ±¾
+        // ç®€åŒ–åç§°ç‰ˆæœ¬
         /// <summary>
-        /// Í¬ GetStringSafe()
+        /// åŒ GetStringSafe()
         /// </summary>
         /// <param name="strID">ID</param>
-        /// <returns>×Ö·û´®</returns>
+        /// <returns>å­—ç¬¦ä¸²</returns>
         public string SS(string strID)
         {
             return this.Document.GetStringSafe(strID);
         }
 
         /// <summary>
-        /// »ñµÃ¿ÉÓÃÓÚ¶¨Î»±¾¶ÔÏóµÄÎ»ÖÃ×Ö·û´®
+        /// è·å¾—å¯ç”¨äºå®šä½æœ¬å¯¹è±¡çš„ä½ç½®å­—ç¬¦ä¸²
         /// </summary>
         public string LocationString
         {
@@ -2030,10 +1980,10 @@ namespace DigitalPlatform.MarcDom
 
         // 
         /// <summary>
-        /// »ñµÃÌØ¶¨Ãû×ÖµÄµÚÒ»¸ö×Ó×Ö¶ÎÕıÎÄ¡£Èç¹ûµ±Ç°¶ÔÏó²»ÊÇ×Ö¶Î¶ÔÏó£¬Ôò·µ»Ø null
+        /// è·å¾—ç‰¹å®šåå­—çš„ç¬¬ä¸€ä¸ªå­å­—æ®µæ­£æ–‡ã€‚å¦‚æœå½“å‰å¯¹è±¡ä¸æ˜¯å­—æ®µå¯¹è±¡ï¼Œåˆ™è¿”å› null
         /// </summary>
-        /// <param name="strSubfieldName">×Ó×Ö¶ÎÃû</param>
-        /// <returns>×Ó×Ö¶ÎÕıÎÄ×Ö·û´®</returns>
+        /// <param name="strSubfieldName">å­å­—æ®µå</param>
+        /// <returns>å­å­—æ®µæ­£æ–‡å­—ç¬¦ä¸²</returns>
         public string GetFirstSubfieldValue(string strSubfieldName)
         {
             if (this.NodeType != MarcDom.NodeType.Field && this.NodeType != MarcDom.NodeType.Group)
@@ -2057,10 +2007,10 @@ namespace DigitalPlatform.MarcDom
         }
 
         /// <summary>
-        /// »ñµÃ¿ÉÓÃÓÚ¶¨Î»±¾¶ÔÏóµÄÎ»ÖÃ×Ö·û´®
+        /// è·å¾—å¯ç”¨äºå®šä½æœ¬å¯¹è±¡çš„ä½ç½®å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="nCharPos">ÔÚ±¾¶ÔÏóÄÚµÄÆ«ÒÆÁ¿</param>
-        /// <returns>Î»ÖÃ×Ö·û´®</returns>
+        /// <param name="nCharPos">åœ¨æœ¬å¯¹è±¡å†…çš„åç§»é‡</param>
+        /// <returns>ä½ç½®å­—ç¬¦ä¸²</returns>
         public string GetLocationString(int nCharPos = 0)
         {
             string strResult = "";

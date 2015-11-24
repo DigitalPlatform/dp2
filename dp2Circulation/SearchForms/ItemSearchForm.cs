@@ -3975,12 +3975,10 @@ this.MainForm.DefaultFont);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(strFilename,
+            using(StreamWriter sw = new StreamWriter(strFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
-
+                System.Text.Encoding.UTF8))
+            { 
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在导出已验收的册记录路径 ...");
@@ -4024,15 +4022,7 @@ this.MainForm.DefaultFont);
 
                     this.EnableControls(true);
                 }
-
             }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
-            }
-
-
             return nCount;
         }
 
@@ -5271,7 +5261,6 @@ MessageBoxDefaultButton.Button1);
                         continue;
                     sw.WriteLine(strBarcode);   // BUG!!!
                 }
-
             }
             finally
             {
@@ -5817,8 +5806,6 @@ out strError);
                     i++;
                     // biblio_recpath_table[strBiblioRecPath] = 1;
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -6096,11 +6083,10 @@ out strError);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(strFilename,
+            using(StreamWriter sw = new StreamWriter(strFilename,
     bAppend,	// append
-    System.Text.Encoding.UTF8);
-            try
-            {
+    System.Text.Encoding.UTF8))
+            { 
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在导出记录路径 ...");
@@ -6129,11 +6115,6 @@ out strError);
 
                     this.EnableControls(true);
                 }
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             return nCount;
@@ -6261,11 +6242,10 @@ out strError);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportTextFilename,
+            using(StreamWriter sw = new StreamWriter(this.ExportTextFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
+                System.Text.Encoding.UTF8))
+            { 
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
 
@@ -6276,11 +6256,6 @@ out strError);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";

@@ -108,8 +108,10 @@ namespace DigitalPlatform.LibraryServer
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     {
                         // 为了避免以后再次从网络获取耗费时间, 需要在本地写一个0字节的文件
-                        FileStream fs = File.Create(strLocalPath);
-                        fs.Close();
+                        using(FileStream fs = File.Create(strLocalPath))
+                        {
+
+                        }
                         return 0;
                     }
                     return -1;

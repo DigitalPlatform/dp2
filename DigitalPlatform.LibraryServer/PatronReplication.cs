@@ -1117,6 +1117,8 @@ out kernel_errorcode);
             }
             finally
             {
+                if (reader != null)
+                    reader.Close();
                 if (file != null)
                     file.Close();
 

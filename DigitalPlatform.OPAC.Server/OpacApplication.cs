@@ -1525,11 +1525,10 @@ namespace DigitalPlatform.OPAC.Server
             try
             {
                 // 往bin目录中写一个临时文件
-                Stream stream = File.Open(this.BinDir + "\\temp.temp",
-                    FileMode.Create);
-
-                stream.Close();
-
+                using (Stream stream = File.Open(this.BinDir + "\\temp.temp",
+                    FileMode.Create))
+                {
+                }
                 this.WriteErrorLog("opac service 被重新启动。");
             }
             catch (Exception ex)
@@ -1609,7 +1608,6 @@ System.Text.Encoding.UTF8))
             }
 
             page.Response.Write(HttpUtility.HtmlEncode("--- 文件 " + strFileName + " 内容如下 ---\r\n"));
-
             page.Response.Write(HttpUtility.HtmlEncode(strText));
         }
 
@@ -1750,155 +1748,150 @@ System.Text.Encoding.UTF8))
                     this.WriteErrorLog("开始 从内存写入 " + strFileName);
                 }
 
-                XmlTextWriter writer = new XmlTextWriter(strFileName,
-                    Encoding.UTF8);
-
-                // 缩进
-                writer.Formatting = Formatting.Indented;
-                writer.Indentation = 4;
-
-                writer.WriteStartDocument();
-
-                writer.WriteStartElement("root");
-                if (this.DebugMode == true)
-                    writer.WriteAttributeString("debugMode", "true");
-
-                // <version>
+                using (XmlTextWriter writer = new XmlTextWriter(strFileName,
+                    Encoding.UTF8))
                 {
-                    XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("version");
-                    if (node != null)
+                    // 缩进
+                    writer.Formatting = Formatting.Indented;
+                    writer.Indentation = 4;
+
+                    writer.WriteStartDocument();
+
+                    writer.WriteStartElement("root");
+                    if (this.DebugMode == true)
+                        writer.WriteAttributeString("debugMode", "true");
+
+                    // <version>
                     {
-                        node.WriteTo(writer);
+                        XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("version");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
                     }
+
+                    // 内核参数
+                    // 元素<libraryServer>
+                    // 属性url/username/password
+                    writer.WriteStartElement("libraryServer");
+                    writer.WriteAttributeString("url", this.WsUrl);
+                    writer.WriteAttributeString("username", this.ManagerUserName);
+                    writer.WriteAttributeString("password",
+                        Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
+                        );
+                    if (string.IsNullOrEmpty(this.ReportDir) == false)
+                        writer.WriteAttributeString("reportDir", this.ReportDir);
+                    writer.WriteEndElement();
+
+                    // 图书馆业务服务器
+                    // 元素<opacServer>
+                    // 属性url
+                    writer.WriteStartElement("opacServer");
+                    writer.WriteAttributeString("url", this.OpacServerUrl);
+                    writer.WriteAttributeString("useTransfer", this.UseTransfer ? "true" : "false");
+                    writer.WriteEndElement();
+
+                    // mongoDB 服务器
+                    // 元素<mongoDB>
+                    // 属性connectionString
+                    writer.WriteStartElement("mongoDB");
+                    writer.WriteAttributeString("connectionString", this.MongoDbConnStr);
+                    writer.WriteAttributeString("instancePrefix", this.MongoDbInstancePrefix);
+                    writer.WriteEndElement();
+
+                    // 没有进入内存属性的其他XML片断
+                    if (this.OpacCfgDom != null)
+                    {
+                        // 2009/9/23
+                        XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//yczb");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <monitors>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("monitors");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // TODO: 暂时没有任何地方用到这个信息
+                        // <libraryInfo>
+                        // 注: <libraryName>元素在此里面
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <biblioDbGroup>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <arrived>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <browseformats>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("browseformats");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <virtualDatabases>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <externalSsoInterface>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("externalSsoInterface");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // chat room
+                        string strError = "";
+                        string strXml = "";
+                        this.ChatRooms.GetDef(out strXml, out strError);
+                        if (string.IsNullOrEmpty(strXml) == false)
+                            writer.WriteRaw("\r\n" + strXml + "\r\n");
+
+                        // 2012/5/23
+                        // <dp2sso>
+                        /*
+        <dp2sso>
+            <domain name='dp2bbs' loginUrl='http://dp2003.com/dp2bbs/login.aspx?redirect=%redirect%'  logoutUrl='' />
+        </dp2sso>
+                         * */
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//dp2sso");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <searchLog>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                    }
+
+                    writer.WriteEndElement();
+
+                    writer.WriteEndDocument();
                 }
-
-                // 内核参数
-                // 元素<libraryServer>
-                // 属性url/username/password
-                writer.WriteStartElement("libraryServer");
-                writer.WriteAttributeString("url", this.WsUrl);
-                writer.WriteAttributeString("username", this.ManagerUserName);
-                writer.WriteAttributeString("password",
-                    Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
-                    );
-                if (string.IsNullOrEmpty(this.ReportDir) == false)
-                    writer.WriteAttributeString("reportDir", this.ReportDir);
-                writer.WriteEndElement();
-
-
-                // 图书馆业务服务器
-                // 元素<opacServer>
-                // 属性url
-                writer.WriteStartElement("opacServer");
-                writer.WriteAttributeString("url", this.OpacServerUrl);
-                writer.WriteAttributeString("useTransfer", this.UseTransfer ? "true" : "false" );
-                writer.WriteEndElement();
-
-                // mongoDB 服务器
-                // 元素<mongoDB>
-                // 属性connectionString
-                writer.WriteStartElement("mongoDB");
-                writer.WriteAttributeString("connectionString", this.MongoDbConnStr);
-                writer.WriteAttributeString("instancePrefix", this.MongoDbInstancePrefix);
-                writer.WriteEndElement();
-
-
-                // 没有进入内存属性的其他XML片断
-                if (this.OpacCfgDom != null)
-                {
-                    // 2009/9/23
-                    XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//yczb");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <monitors>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("monitors");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-
-                    // TODO: 暂时没有任何地方用到这个信息
-                    // <libraryInfo>
-                    // 注: <libraryName>元素在此里面
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <biblioDbGroup>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <arrived>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <browseformats>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("browseformats");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <virtualDatabases>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <externalSsoInterface>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("externalSsoInterface");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // chat room
-                    string strError = "";
-                    string strXml = "";
-                    this.ChatRooms.GetDef(out strXml, out strError);
-                    if (string.IsNullOrEmpty(strXml) == false)
-                        writer.WriteRaw("\r\n" + strXml + "\r\n");
-
-                    // 2012/5/23
-                    // <dp2sso>
-                    /*
-	<dp2sso>
-		<domain name='dp2bbs' loginUrl='http://dp2003.com/dp2bbs/login.aspx?redirect=%redirect%'  logoutUrl='' />
-	</dp2sso>
-                     * */
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//dp2sso");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-
-                    // <searchLog>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-                }
-
-                writer.WriteEndElement();
-
-                writer.WriteEndDocument();
-
-                writer.Close();
 
                 if (bFlush == false)
                     this.WriteErrorLog("完成 从内存写入 " + strFileName);
@@ -1909,7 +1902,6 @@ System.Text.Encoding.UTF8))
                 {
                     watcher.EnableRaisingEvents = bOldState;
                 }
-
             }
             finally
             {
@@ -3416,6 +3408,10 @@ out string strError)
                 using (Stream t = File.Create(strLocalFileName))
                 {
                     // 缩小尺寸
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要缩放(oTarget未处理)
+                    //      1   已经缩放
                     int nRet = GraphicsUtil.ShrinkPic(postedFile.InputStream,
                             postedFile.ContentType,
                             nLogoLimitW,
@@ -3981,6 +3977,7 @@ Value data: HEX 0x1
                 out strError);
             if (lRet == -1)
             {
+                Page.Response.ContentType = "text/plain";
                 strError = "GetRes() (for res) Error : " + strError;
                 return -1;
             }

@@ -617,10 +617,13 @@ FormWindowState.Normal);
         {
             using (RegistryKey service = Registry.LocalMachine.CreateSubKey("System\\CurrentControlSet\\Services"))
             {
-                RegistryKey path = service.OpenSubKey(serviceName);
-                if (path == null)
-                    return null;   // not found
-                return (string)path.GetValue("ImagePath");
+                // 2015/11/23 增加 using 部分
+                using (RegistryKey path = service.OpenSubKey(serviceName))
+                {
+                    if (path == null)
+                        return null;   // not found
+                    return (string)path.GetValue("ImagePath");
+                }
             }
         }
 

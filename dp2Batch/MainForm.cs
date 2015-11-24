@@ -1423,57 +1423,55 @@ this.checkBox_import_fastMode.Checked);
             if (map == null)
                 return -1;
 
+            int nReadRet = 0;
 
-			Stream file = File.Open(strFileName,
+			using(Stream file = File.Open(strFileName,
 				FileMode.Open,
-				FileAccess.Read);
+				FileAccess.Read))
+            using (XmlTextReader reader = new XmlTextReader(file))
+            {
 
-			XmlTextReader reader = new XmlTextReader(file);
+                //
+                RangeList rl = null;
+                long lMax = 0;
+                long lMin = 0;
+                long lSkipCount = 0;
+                string strCount = "";
 
-			//
-			RangeList rl = null;
-			long lMax = 0;
-			long lMin = 0;
-			long lSkipCount = 0;
-			int nReadRet = 0;
-			string strCount = "";
+                //范围
+                if (textBox_import_range.Text != "")
+                {
+                    rl = new RangeList(textBox_import_range.Text);
+                    rl.Sort();
+                    rl.Merge();
+                    lMin = rl.min();
+                    lMax = rl.max();
+                }
 
-			//范围
-			if (textBox_import_range.Text != "") 
-			{
-				rl = new RangeList(textBox_import_range.Text);
-				rl.Sort();
-				rl.Merge();
-				lMin = rl.min();
-				lMax = rl.max();
-			}
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在导入");
+                stop.BeginLoop();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导入");
-            stop.BeginLoop();
+                stop.SetProgressRange(0, file.Length);
 
-            stop.SetProgressRange(0, file.Length);
+                EnableControls(false);
 
-            EnableControls(false);
+                WriteLog("开始导入XML数据");
 
-            WriteLog("开始导入XML数据");
+                bool bRet = false;
 
-			try
-			{
-				bool bRet = false;
-			
                 // 移动到根元素
-				while(true) 
-				{
-					bRet = reader.Read();
-					if (bRet == false) 
-					{
-						strError = "没有根元素";
-						goto ERROR1;
-					}
-					if (reader.NodeType == XmlNodeType.Element)
-						break;
-				}
+                while (true)
+                {
+                    bRet = reader.Read();
+                    if (bRet == false)
+                    {
+                        strError = "没有根元素";
+                        goto ERROR1;
+                    }
+                    if (reader.NodeType == XmlNodeType.Element)
+                        break;
+                }
 
                 // 移动到其下级第一个element
                 while (true)
@@ -1488,112 +1486,102 @@ this.checkBox_import_fastMode.Checked);
                         break;
                 }
 
-				this.m_nRecordCount = 0;
+                this.m_nRecordCount = 0;
 
-				for(long lCount = 0;;lCount ++)
-				{
-					bool bSkip = false;
-					nReadRet = 0;
+                for (long lCount = 0; ; lCount++)
+                {
+                    bool bSkip = false;
+                    nReadRet = 0;
 
+                    Application.DoEvents();	// 出让界面控制权
 
-					Application.DoEvents();	// 出让界面控制权
-
-					if (stop.State != 0)
-					{
-						DialogResult result = MessageBox.Show(this,
-							"确实要中断当前批处理操作?",
-							"dp2batch",
-							MessageBoxButtons.YesNo,
-							MessageBoxIcon.Question,
-							MessageBoxDefaultButton.Button2);
-						if (result == DialogResult.Yes)
-						{
-							strError = "用户中断";
-							nReadRet = 100;
-							goto ERROR1;
-						}
-						else 
-						{
-							stop.Continue();
-						}
-					}
-
-
-					//检索当前记录是否在处理范围内
-					if (rl != null) 
-					{
-						if (lMax != -1) // -1:不确定
-						{
-							if (lCount > lMax)
-								nReadRet = 2;	// 后面看到这个状态将会break。为什么不在这里break，就是为了后面显示label信息
-						}
-						if (rl.IsInRange(lCount, true) == false) 
-						{
-							bSkip = true;
-						}
-					}
+                    if (stop.State != 0)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+                            "确实要中断当前批处理操作?",
+                            "dp2batch",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.Yes)
+                        {
+                            strError = "用户中断";
+                            nReadRet = 100;
+                            goto ERROR1;
+                        }
+                        else
+                        {
+                            stop.Continue();
+                        }
+                    }
 
 
-					// progressBar_main.Value = (int)((file.Position)/ProgressRatio);
+                    //检索当前记录是否在处理范围内
+                    if (rl != null)
+                    {
+                        if (lMax != -1) // -1:不确定
+                        {
+                            if (lCount > lMax)
+                                nReadRet = 2;	// 后面看到这个状态将会break。为什么不在这里break，就是为了后面显示label信息
+                        }
+                        if (rl.IsInRange(lCount, true) == false)
+                        {
+                            bSkip = true;
+                        }
+                    }
+
+                    // progressBar_main.Value = (int)((file.Position)/ProgressRatio);
                     stop.SetProgressValue(file.Position);
 
-					// 显示信息
-					if (bSkip == true) 
-					{
-						stop.SetMessage( ((bSkip == true) ? "正在跳过 " : "正在处理" )
-							+ Convert.ToString(lCount+1) );
-					}
+                    // 显示信息
+                    if (bSkip == true)
+                    {
+                        stop.SetMessage(((bSkip == true) ? "正在跳过 " : "正在处理")
+                            + Convert.ToString(lCount + 1));
+                    }
 
-					/*
-					if (nReadRet == 2)
-						goto CONTINUE;
+                    /*
+                    if (nReadRet == 2)
+                        goto CONTINUE;
 
-					if (bSkip == true)
-						goto CONTINUE;
-					*/
+                    if (bSkip == true)
+                        goto CONTINUE;
+                    */
 
 
-					/*
-					// 防止一条记录也没有的情况,所以把这个句写到前面
-					if (file.Position >= file.Length)
-						break;
-					*/
+                    /*
+                    // 防止一条记录也没有的情况,所以把这个句写到前面
+                    if (file.Position >= file.Length)
+                        break;
+                    */
 
-					// 上载一个Item
-					nRet = DoXmlItemUpload(
+                    // 上载一个Item
+                    nRet = DoXmlItemUpload(
                         bFastMode,
                         reader,
-						map,
-						bSkip == true || nReadRet == 2,
-						strCount,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
-					if (nRet == 1)
-						break;
+                        map,
+                        bSkip == true || nReadRet == 2,
+                        strCount,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        break;
 
-					strCount = "处理数 "
-						+ Convert.ToString(lCount - lSkipCount)
-						+ "　/ 跳过数 " 
-						+ Convert.ToString(lSkipCount);
+                    strCount = "处理数 "
+                        + Convert.ToString(lCount - lSkipCount)
+                        + "　/ 跳过数 "
+                        + Convert.ToString(lSkipCount);
 
+                    if (bSkip)
+                        lSkipCount++;
 
-					if (bSkip)
-						lSkipCount ++;
+                    if (nReadRet == 1 || nReadRet == 2)  //判断大文件结束
+                        break;
+                }
+            }
 
-					if (nReadRet == 1 || nReadRet == 2)  //判断大文件结束
-						break;
-
-				}
-
-    		}
-			finally
-			{
-				file.Close();
-
-                WriteLog("结束导入XML数据");
-			}
-
+            WriteLog("结束导入XML数据");  // TODO: 是否要放入 finally 中
         END1:
 
             stop.EndLoop();
@@ -4101,7 +4089,6 @@ this.checkBox_import_fastMode.Checked);
                 goto ERROR1;
             }
 
-
             if (String.IsNullOrEmpty(strOutputFileName) == false)
             {
                 // 探测输出文件是否已经存在
@@ -4818,7 +4805,6 @@ this.checkBox_import_fastMode.Checked);
                     outputfile.Close();
                     outputfile = null;
                 }
-
             }
 
             // END1:
@@ -6083,80 +6069,75 @@ this.checkBox_import_fastMode.Checked);
 		// 创建缺省的main.cs文件
 		public static int CreateDefaultMainCsFile(string strFileName)
 		{
+            using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("using System;");
+                sw.WriteLine("using System.Windows.Forms;");
+                sw.WriteLine("using System.IO;");
+                sw.WriteLine("using System.Text;");
+                sw.WriteLine("");
 
-			StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
-			sw.WriteLine("using System;");
-			sw.WriteLine("using System.Windows.Forms;");
-			sw.WriteLine("using System.IO;");
-			sw.WriteLine("using System.Text;");
-			sw.WriteLine("");
+                sw.WriteLine("using DigitalPlatform.MarcDom;");
+                sw.WriteLine("using DigitalPlatform.Statis;");
+                sw.WriteLine("using dp2Batch;");
 
-			sw.WriteLine("using DigitalPlatform.MarcDom;");
-			sw.WriteLine("using DigitalPlatform.Statis;");
-			sw.WriteLine("using dp2Batch;");
+                sw.WriteLine("public class MyBatch : Batch");
 
-			sw.WriteLine("public class MyBatch : Batch");
+                sw.WriteLine("{");
 
-			sw.WriteLine("{");
+                sw.WriteLine("	public override void OnBegin(object sender, BatchEventArgs e)");
+                sw.WriteLine("	{");
+                sw.WriteLine("	}");
 
-			sw.WriteLine("	public override void OnBegin(object sender, BatchEventArgs e)");
-			sw.WriteLine("	{");
-			sw.WriteLine("	}");
-
-
-			sw.WriteLine("}");
-			sw.Close();
-
+                sw.WriteLine("}");
+            }
 			return 0;
 		}
 
 		// 创建缺省的marcfilter.fltx文件
 		public static int CreateDefaultMarcFilterFile(string strFileName)
 		{
+            using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("<?xml version='1.0' encoding='utf-8'?>");
+                sw.WriteLine("<filter>");
+                sw.WriteLine("<using>");
+                sw.WriteLine("<![CDATA[");
+                sw.WriteLine("using System;");
+                sw.WriteLine("using System.IO;");
+                sw.WriteLine("using System.Text;");
+                sw.WriteLine("using System.Windows.Forms;");
+                sw.WriteLine("using DigitalPlatform.MarcDom;");
+                sw.WriteLine("using DigitalPlatform.Marc;");
 
-			StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
+                sw.WriteLine("using dp2Batch;");
 
-			sw.WriteLine("<?xml version='1.0' encoding='utf-8'?>");
-			sw.WriteLine("<filter>");
-			sw.WriteLine("<using>");
-			sw.WriteLine("<![CDATA[");
-			sw.WriteLine("using System;");
-			sw.WriteLine("using System.IO;");
-			sw.WriteLine("using System.Text;");
-			sw.WriteLine("using System.Windows.Forms;");
-			sw.WriteLine("using DigitalPlatform.MarcDom;");
-			sw.WriteLine("using DigitalPlatform.Marc;");
-
-			sw.WriteLine("using dp2Batch;");
-
-			sw.WriteLine("]]>");
-			sw.WriteLine("</using>");
-			sw.WriteLine("	<record>");
-			sw.WriteLine("		<def>");
-			sw.WriteLine("		<![CDATA[");
-			sw.WriteLine("			int i;");
-			sw.WriteLine("			int j;");
-			sw.WriteLine("		]]>");
-			sw.WriteLine("		</def>");
-			sw.WriteLine("		<begin>");
-			sw.WriteLine("		<![CDATA[");
-			sw.WriteLine("			MessageBox.Show(\"record data:\" + this.Data);");
-			sw.WriteLine("		]]>");
-			sw.WriteLine("		</begin>");
-			sw.WriteLine("			 <field name=\"200\">");
-			sw.WriteLine("");
-			sw.WriteLine("			 </field>");
-			sw.WriteLine("		<end>");
-			sw.WriteLine("		<![CDATA[");
-			sw.WriteLine("");
-			sw.WriteLine("			j ++;");
-			sw.WriteLine("		]]>");
-			sw.WriteLine("		</end>");
-			sw.WriteLine("	</record>");
-			sw.WriteLine("</filter>");
-
-			sw.Close();
-
+                sw.WriteLine("]]>");
+                sw.WriteLine("</using>");
+                sw.WriteLine("	<record>");
+                sw.WriteLine("		<def>");
+                sw.WriteLine("		<![CDATA[");
+                sw.WriteLine("			int i;");
+                sw.WriteLine("			int j;");
+                sw.WriteLine("		]]>");
+                sw.WriteLine("		</def>");
+                sw.WriteLine("		<begin>");
+                sw.WriteLine("		<![CDATA[");
+                sw.WriteLine("			MessageBox.Show(\"record data:\" + this.Data);");
+                sw.WriteLine("		]]>");
+                sw.WriteLine("		</begin>");
+                sw.WriteLine("			 <field name=\"200\">");
+                sw.WriteLine("");
+                sw.WriteLine("			 </field>");
+                sw.WriteLine("		<end>");
+                sw.WriteLine("		<![CDATA[");
+                sw.WriteLine("");
+                sw.WriteLine("			j ++;");
+                sw.WriteLine("		]]>");
+                sw.WriteLine("		</end>");
+                sw.WriteLine("	</record>");
+                sw.WriteLine("</filter>");
+            }
 			return 0;
 		}
 

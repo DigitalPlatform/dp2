@@ -52,7 +52,6 @@ namespace DigitalPlatform.OPAC.Web
             // TODO: 如果抛出异常，则要试着取zh-cn的字符串，或者返回一个报错的字符串
             try
             {
-
                 string s = GetRm().GetString(strID, ci);
                 if (String.IsNullOrEmpty(s) == true)
                     return strID;
@@ -79,7 +78,6 @@ namespace DigitalPlatform.OPAC.Web
 
         public void AdjustActiveColumn()
         {
-
             if ((this.LoginStyle & LoginStyle.Librarian) == 0
                 && this.ActiveLoginColumn == LoginColumn.ID)
                 this.ActiveLoginColumn = LoginColumn.Barcode;
@@ -171,7 +169,6 @@ namespace DigitalPlatform.OPAC.Web
 
             this.EnsureChildControls();
 
-
             TextBox password = (TextBox)this.FindControl("password");
             password.Text = strPassword;
 
@@ -240,7 +237,6 @@ namespace DigitalPlatform.OPAC.Web
             literal = new LiteralControl();
             literal.Text = "</td></tr>";
             this.Controls.Add(literal);
-
 
             // 内容区
             literal = new LiteralControl();
@@ -355,8 +351,6 @@ namespace DigitalPlatform.OPAC.Web
 
             CreateBlankLine(blankline);
              * */
-
-
             literal = new LiteralControl();
             literal.Text = "</table></td></tr>";
             this.Controls.Add(literal);
@@ -463,7 +457,6 @@ namespace DigitalPlatform.OPAC.Web
                 CreateOneColumn(LoginColumn.Barcode.ToString(),
                     this.GetString("证条码号"));
                 results.Add(LoginColumn.Barcode);
-
 
                 // 姓名+生日
                 CreateOneColumn(LoginColumn.NameBirthdate.ToString(),
@@ -657,7 +650,6 @@ namespace DigitalPlatform.OPAC.Web
             literal.Text = "'>";
             this.Controls.Add(literal);
 
-
             LinkButton barcode_button = new LinkButton();
             barcode_button.ID = "_" + strColumnName;
             barcode_button.Text = strColumnCaption;
@@ -717,7 +709,6 @@ namespace DigitalPlatform.OPAC.Web
                 }
             }
         }
-
 
         public string GetPrefixString(string strTitle,
 string strWrapperClass)
@@ -915,7 +906,6 @@ string strWrapperClass)
             literal.Text = "<div class='comment'>";
             line.Controls.Add(literal);
 
-
             literal = new LiteralControl();
             literal.ID = "multiple_comment";
             literal.Text = "test comment";
@@ -1055,7 +1045,6 @@ string strWrapperClass)
             }
 
             line.Controls.Add(new LiteralControl("</td></tr>"));
-
         }
 
         protected override void Render(HtmlTextWriter writer)
@@ -1190,7 +1179,6 @@ string strWrapperClass)
             }
         }
 
-
         public int DoAnonymouseLogin(out string strError)
         {
             strError = "";
@@ -1220,8 +1208,6 @@ string strWrapperClass)
                          strParameters,
                          "",
                          out strError);
-
-
             if (lRet != 1)
                 goto ERROR1;
 
@@ -1382,7 +1368,6 @@ string strWrapperClass)
                 return LoginColumn.ID;
             return LoginColumn.Barcode;
         }
-
 
         // 获得栏目的前缀字符串
         static string GetColumnPrefix(LoginColumn column)

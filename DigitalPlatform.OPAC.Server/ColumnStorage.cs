@@ -243,16 +243,17 @@ namespace DigitalPlatform.OPAC.Server
                 m_line = value;
 
                 // 初始化二进制内容
-                MemoryStream s = new MemoryStream();
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(s, m_line);
+                using (MemoryStream s = new MemoryStream())
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(s, m_line);
 
-                this.Length = (int)s.Length + 8 * 2 + (4 + Encoding.UTF8.GetByteCount(m_line.m_strRecPath));
+                    this.Length = (int)s.Length + 8 * 2 + (4 + Encoding.UTF8.GetByteCount(m_line.m_strRecPath));
 
-                m_buffer = new byte[(int)s.Length];
-                s.Seek(0, SeekOrigin.Begin);
-                s.Read(m_buffer, 0, m_buffer.Length);
-                s.Close();
+                    m_buffer = new byte[(int)s.Length];
+                    s.Seek(0, SeekOrigin.Begin);
+                    s.Read(m_buffer, 0, m_buffer.Length);
+                }
 
                 m_ticks = m_line.m_timeLastUpdate.Ticks;
 
@@ -318,12 +319,12 @@ namespace DigitalPlatform.OPAC.Server
             stream.Read(buffer, 0, buffer.Length);
 
             // 还原内存对象
-            MemoryStream s = new MemoryStream(buffer);
+            using (MemoryStream s = new MemoryStream(buffer))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
 
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            m_line = (Line)formatter.Deserialize(s);
-            s.Close();
+                m_line = (Line)formatter.Deserialize(s);
+            }
         }
 
 

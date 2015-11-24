@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Text;
 using System.Collections;
@@ -10,25 +10,25 @@ using DigitalPlatform.Xml;  // DpNs
 namespace DigitalPlatform.Marc
 {
     /// <summary>
-    /// ÓÃÓÚ½² MARC »úÄÚ¸ñÊ½×Ö·û´®×ª»»Îª XML ¸ñÊ½µÄÀà
+    /// ç”¨äºè®² MARC æœºå†…æ ¼å¼å­—ç¬¦ä¸²è½¬æ¢ä¸º XML æ ¼å¼çš„ç±»
     /// </summary>
 	public class MarcXmlWriter : IDisposable
 	{
-		public bool WriteMarcPrefix = true;  //ÊÇ·ñĞ´Ç°×º
-		public bool WriteXsi = false;         //ÊÇ·ñĞ´xsi
-		public string MarcPrefix = "marc";    //Ç°×º
-		public string MarcNameSpaceUri = DigitalPlatform.Xml.Ns.unimarcxml;	// "http://www.loc.gov/MARC21/slim"; //marcµÄÃüÃû¿Õ¼ä
+		public bool WriteMarcPrefix = true;  //æ˜¯å¦å†™å‰ç¼€
+		public bool WriteXsi = false;         //æ˜¯å¦å†™xsi
+		public string MarcPrefix = "marc";    //å‰ç¼€
+		public string MarcNameSpaceUri = DigitalPlatform.Xml.Ns.unimarcxml;	// "http://www.loc.gov/MARC21/slim"; //marcçš„å‘½åç©ºé—´
 
-		private XmlTextWriter writer = null;   //XmlTextWriter¶ÔÏó
-		public Formatting m_Formatting = Formatting.None; //¸ñÊ½
-		public int m_Indentation  = 2;  //Ëõ½øÁ¿
+		private XmlTextWriter _writer = null;   //XmlTextWriterå¯¹è±¡
+		public Formatting m_Formatting = Formatting.None; //æ ¼å¼
+		public int m_Indentation  = 2;  //ç¼©è¿›é‡
 
         public void Dispose()
         {
-            if (this.writer != null)
+            if (this._writer != null)
             {
-                this.writer.Close();
-                this.writer = null;
+                this._writer.Close();
+                this._writer = null;
             }
         }
 
@@ -39,19 +39,19 @@ namespace DigitalPlatform.Marc
 		public MarcXmlWriter(Stream w,	
 			Encoding encoding)// : base(w, encoding)
 		{
-			writer = new XmlTextWriter(w, encoding);
+			_writer = new XmlTextWriter(w, encoding);
 		}
 
         // 2015/5/10
         public MarcXmlWriter(TextWriter w)// : base(w, encoding)
         {
-            writer = new XmlTextWriter(w);
+            _writer = new XmlTextWriter(w);
         }
 
 		public MarcXmlWriter(string filename,
 			Encoding encoding)// : base(filename, encoding)
 		{
-			writer = new XmlTextWriter(filename, encoding);
+			_writer = new XmlTextWriter(filename, encoding);
 		}
 
 		/*
@@ -61,17 +61,20 @@ namespace DigitalPlatform.Marc
 		}
 		*/
 
-		// ¹Ø±Õwrite
+		// å…³é—­write
 		public void Close()
 		{
-			if (writer != null)
-				writer.Close();
+            if (_writer != null)
+            {
+                _writer.Close();
+                _writer = null;
+            }
 		}
 
 		public void Flush()
 		{
-			if (writer != null)
-				writer.Flush();
+			if (_writer != null)
+				_writer.Flush();
 		}
 
 		public Formatting Formatting
@@ -83,9 +86,9 @@ namespace DigitalPlatform.Marc
 			set
 			{
 				m_Formatting = value;
-				if (writer != null) 
+				if (_writer != null) 
 				{
-					writer.Formatting = value;
+					_writer.Formatting = value;
 				}
 			}
 		}
@@ -99,54 +102,54 @@ namespace DigitalPlatform.Marc
 			set
 			{
 				m_Indentation = value;
-				if (writer != null)
+				if (_writer != null)
 				{
-					writer.Indentation = m_Indentation;
+					_writer.Indentation = m_Indentation;
 				}
 			}
 		}
 
-		// Ğ´¿ªÍ·£¬°üÀ¨:
+		// å†™å¼€å¤´ï¼ŒåŒ…æ‹¬:
 		// <? xml version='1.0' encoding='utf-8'?>
-		// collection ¸ùÔªËØ£¬¼°¸ù¾İÇé¿öÅĞ¶ÏÊÇ·ñ´øÃüÃû¿Õ¼ä
+		// collection æ ¹å…ƒç´ ï¼ŒåŠæ ¹æ®æƒ…å†µåˆ¤æ–­æ˜¯å¦å¸¦å‘½åç©ºé—´
 		public int WriteBegin()
 		{
-			writer.WriteStartDocument();
+			_writer.WriteStartDocument();
 
 			if (WriteMarcPrefix == false)
-				writer.WriteStartElement("", "collection", MarcNameSpaceUri);
+				_writer.WriteStartElement("", "collection", MarcNameSpaceUri);
 			else
-				writer.WriteStartElement(MarcPrefix,
+				_writer.WriteStartElement(MarcPrefix,
 					"collection", MarcNameSpaceUri);
 
-            // dprmsÃû×Ö¿Õ¼ä 2010/11/15
-            writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+            // dprmsåå­—ç©ºé—´ 2010/11/15
+            _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
 
 			if (WriteXsi == true) 
 			{
                 /* 2010/10/28
                 writer.WriteAttributeString("xmlns:xsi",
 					"http://www.w3.org/2001/XMLSchema-instance");
-                 * ÉÏÃæÓÃ·¨ÓĞÎÊÌâ¡£»áÔì³É´óÁ¿ÖØ¸´µÄnsuri´æÔÚ¡£Ó¦¸Ã²ÉÓÃÏÂÃæµÄÓÃ·¨£º
+                 * ä¸Šé¢ç”¨æ³•æœ‰é—®é¢˜ã€‚ä¼šé€ æˆå¤§é‡é‡å¤çš„nsuriå­˜åœ¨ã€‚åº”è¯¥é‡‡ç”¨ä¸‹é¢çš„ç”¨æ³•ï¼š
                     writer.WriteAttributeString("xmlns", "dc", null,
     "http://purl.org/dc/elements/1.1/");
                  * */
-                writer.WriteAttributeString("xmlns","xsi",null,
+                _writer.WriteAttributeString("xmlns","xsi",null,
 					"http://www.w3.org/2001/XMLSchema-instance");
-				writer.WriteAttributeString("xsi","schemaLocation",null,
+				_writer.WriteAttributeString("xsi","schemaLocation",null,
 					"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd");
 			}
 			return 0;
 		}
 
-		// ¹Ø±Õcollection
+		// å…³é—­collection
 		public int WriteEnd()
 		{
-			writer.WriteEndElement();
+			_writer.WriteEndElement();
 			return 0;
 		}
 
-        // ½« MARC »úÄÚ¸ñÊ½×Ö·û´®Ğ´Èë¡£Ò²¾ÍÊÇÖ´ĞĞ×ª»»µÄÒâË¼¡£µ÷ÓÃºó£¬ XML ½á¹ûĞèÒª´Ó TextWriter ÖĞÈ¡³ö
+        // å°† MARC æœºå†…æ ¼å¼å­—ç¬¦ä¸²å†™å…¥ã€‚ä¹Ÿå°±æ˜¯æ‰§è¡Œè½¬æ¢çš„æ„æ€ã€‚è°ƒç”¨åï¼Œ XML ç»“æœéœ€è¦ä» TextWriter ä¸­å–å‡º
 		public int WriteRecord(
 			string strMARC,
 			out string strError)
@@ -165,8 +168,8 @@ namespace DigitalPlatform.Marc
 		}
 
 		// return:
-		//		0	³É¹¦
-		//		-1	³ö´í
+		//		0	æˆåŠŸ
+		//		-1	å‡ºé”™
 		public int WriteRecord(
 			string[] saField,
 			out string strError)
@@ -179,20 +182,20 @@ namespace DigitalPlatform.Marc
 			// long lStart = writer.BaseStream.Position;
 			// Debug.Assert(writer.BaseStream.CanSeek == true, "writer.BaseStream.CanSeek != true");
 
-			//¸ù¾İWriteMarcPrefixµÄÖµ£¬È·¶¨ÊÇ·ñ¶ÔÔªËØrecord¼ÓÃüÃû¿Õ¼ä
+			//æ ¹æ®WriteMarcPrefixçš„å€¼ï¼Œç¡®å®šæ˜¯å¦å¯¹å…ƒç´ recordåŠ å‘½åç©ºé—´
 			if (WriteMarcPrefix == false)
-				writer.WriteStartElement("record");
+				_writer.WriteStartElement("record");
 			else
-				writer.WriteStartElement(MarcPrefix,
+				_writer.WriteStartElement(MarcPrefix,
 					"record", MarcNameSpaceUri);
 
-            if (String.IsNullOrEmpty(writer.LookupPrefix("dprms")) == true)
+            if (String.IsNullOrEmpty(_writer.LookupPrefix("dprms")) == true)
             {
-                // dprmsÃû×Ö¿Õ¼ä 2010/11/15
-                writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+                // dprmsåå­—ç©ºé—´ 2010/11/15
+                _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
             }
 
-			//Ñ­»·£¬Ğ´Í·±êÇø¼°Ã¿¸ö×Ó¶Î
+			//å¾ªç¯ï¼Œå†™å¤´æ ‡åŒºåŠæ¯ä¸ªå­æ®µ
 			for(int i=0;i<saField.Length;i++) 
 			{
 				string strLine = saField[i];
@@ -200,10 +203,10 @@ namespace DigitalPlatform.Marc
 				string strInd2 = null;
 				string strContent = null;
 
-				// Í·±êÇø
+				// å¤´æ ‡åŒº
 				if (i == 0) 
 				{
-					// ¶à½ØÉÙÌí
+					// å¤šæˆªå°‘æ·»
 					if (strLine.Length > 24)
 						strLine = strLine.Substring(0,24);
 					else 
@@ -215,16 +218,16 @@ namespace DigitalPlatform.Marc
 					}
 
 					if (WriteMarcPrefix == false)
-						writer.WriteElementString("leader", strLine);
+						_writer.WriteElementString("leader", strLine);
 					else
-						writer.WriteElementString("leader", MarcNameSpaceUri, strLine);
+						_writer.WriteElementString("leader", MarcNameSpaceUri, strLine);
 
 					continue;
 				}
 
 				Debug.Assert(strLine != null, "");
 
-				// ²»ºÏ·¨µÄ×Ö¶Î,²»ËãÊı
+				// ä¸åˆæ³•çš„å­—æ®µ,ä¸ç®—æ•°
 				if (strLine.Length < 3)
 					continue;
 
@@ -234,7 +237,7 @@ namespace DigitalPlatform.Marc
 				else
 					strContent = "";
 
-				// control field  001-009 Ã»ÓĞ×Ó×Ö¶Î
+				// control field  001-009 æ²¡æœ‰å­å­—æ®µ
                 /*
 				if ( (String.Compare(strFieldName, "001") >= 0
 					&& String.Compare(strFieldName, "009") <= 0 )
@@ -243,15 +246,15 @@ namespace DigitalPlatform.Marc
                 if (MarcUtil.IsControlFieldName(strFieldName) == true)
 				{
 					if (WriteMarcPrefix == false)
-						writer.WriteStartElement("controlfield");
+						_writer.WriteStartElement("controlfield");
 					else
-						writer.WriteStartElement(MarcPrefix,
+						_writer.WriteStartElement(MarcPrefix,
 							"controlfield", MarcNameSpaceUri);
 
-					writer.WriteAttributeString("tag", strFieldName);
+					_writer.WriteAttributeString("tag", strFieldName);
 
-					writer.WriteString(strContent);
-					writer.WriteEndElement();
+					_writer.WriteString(strContent);
+					_writer.WriteEndElement();
 					continue;
 				}
 
@@ -261,7 +264,7 @@ namespace DigitalPlatform.Marc
 					strInd2 = " ";
 					strContent = "";
 				}
-					//×Ö¶Î³¤¶ÈµÈÓÚ4µÄÇé¿ö,ÕâÑù×öÊÇÎªÁË·ÀÖ¹Ô½½ç
+					//å­—æ®µé•¿åº¦ç­‰äº4çš„æƒ…å†µ,è¿™æ ·åšæ˜¯ä¸ºäº†é˜²æ­¢è¶Šç•Œ
 				else if (strLine.Length == 4) 
 				{
 					strInd1 = strContent[0].ToString();
@@ -275,27 +278,27 @@ namespace DigitalPlatform.Marc
 					strContent = strContent.Substring(2);
 				}
 
-				// ÆÕÍ¨×Ö¶Î
+				// æ™®é€šå­—æ®µ
 				if (WriteMarcPrefix == false)
-					writer.WriteStartElement("datafield");
+					_writer.WriteStartElement("datafield");
 				else
-					writer.WriteStartElement(MarcPrefix,
+					_writer.WriteStartElement(MarcPrefix,
 						"datafield", MarcNameSpaceUri);
 
-				writer.WriteAttributeString("tag", strFieldName);
-				writer.WriteAttributeString("ind1", strInd1);
-				writer.WriteAttributeString("ind2", strInd2);
+				_writer.WriteAttributeString("tag", strFieldName);
+				_writer.WriteAttributeString("ind1", strInd1);
+				_writer.WriteAttributeString("ind2", strInd2);
 
-				// µÃµ½×Ó×Ö¶ÎÊı×é
+				// å¾—åˆ°å­å­—æ®µæ•°ç»„
 
                 string[] aSubfield = strContent.Split(new char[] { (char)31 });
                 if (aSubfield == null)
                 {
-                    // ²»Ì«¿ÉÄÜ·¢Éú
+                    // ä¸å¤ªå¯èƒ½å‘ç”Ÿ
                     continue;
                 }
 
-				// Ñ­»·Ğ´×Ó×Ö¶Î
+				// å¾ªç¯å†™å­å­—æ®µ
 				for(int j=0;j<aSubfield.Length;j++) 
 				{
                     string strValue = aSubfield[j];
@@ -304,10 +307,10 @@ namespace DigitalPlatform.Marc
 
                     if (j == 0)
                     {
-                        // µÚÒ»¸ö¿Õ×Ö·û´®Òª±»Ìø¹ı¡£ÆäÓàµÄ£¬½«À´·µ»¹Ê±»áÓÃÀ´²úÉúÒ»¸öµ¥¶ÀµÄ 31 ×Ö·û
+                        // ç¬¬ä¸€ä¸ªç©ºå­—ç¬¦ä¸²è¦è¢«è·³è¿‡ã€‚å…¶ä½™çš„ï¼Œå°†æ¥è¿”è¿˜æ—¶ä¼šç”¨æ¥äº§ç”Ÿä¸€ä¸ªå•ç‹¬çš„ 31 å­—ç¬¦
                         if (string.IsNullOrEmpty(aSubfield[0]) == true)
                             continue;
-                        strSubfieldName = null; // ±íÊ¾ºóÃæ²»Òª´´½¨codeÊôĞÔ
+                        strSubfieldName = null; // è¡¨ç¤ºåé¢ä¸è¦åˆ›å»ºcodeå±æ€§
                         strSubfieldContent = strValue;
                     }
                     else
@@ -319,21 +322,21 @@ namespace DigitalPlatform.Marc
                     }
 
 					if (WriteMarcPrefix == false)
-						writer.WriteStartElement("subfield");
+						_writer.WriteStartElement("subfield");
 					else
-						writer.WriteStartElement(MarcPrefix,
+						_writer.WriteStartElement(MarcPrefix,
 							"subfield", MarcNameSpaceUri);
 
                     if (strSubfieldName != null)
-					    writer.WriteAttributeString("code", strSubfieldName);
-                    writer.WriteString(strSubfieldContent); //×¢ÒâÕâÀïÊÇ·ñÓĞÔ½½çµÄÎ£ÏÕ
-					writer.WriteEndElement();
+					    _writer.WriteAttributeString("code", strSubfieldName);
+                    _writer.WriteString(strSubfieldContent); //æ³¨æ„è¿™é‡Œæ˜¯å¦æœ‰è¶Šç•Œçš„å±é™©
+					_writer.WriteEndElement();
 				}
 
-				writer.WriteEndElement();
+				_writer.WriteEndElement();
 			}
 
-			writer.WriteEndElement();
+			_writer.WriteEndElement();
 			return 0;
 		}
 	}

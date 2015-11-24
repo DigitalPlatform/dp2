@@ -6513,42 +6513,46 @@ namespace DigitalPlatform.rms
                             if (StringUtil.IsInList("withresmetadata", strStyle) == true)
                             {
                                 // 使用XmlTextWriter保存成utf8的编码方式
-                                MemoryStream ms = new MemoryStream();
-                                XmlTextWriter textWriter = new XmlTextWriter(ms, Encoding.UTF8);
-                                dom.Save(textWriter);
-                                //dom.Save(ms);
-
-                                long lRealLength;
-                                // return:
-                                //		-1  出错
-                                //		0   成功
-                                nRet = ConvertUtil.GetRealLength(lStart,
-                                    nLength,
-                                    (int)ms.Length,
-                                    nMaxLength,
-                                    out lRealLength,
-                                    out strError);
-                                if (nRet == -1)
-                                    return -1;
-
-                                destBuffer = new byte[lRealLength];
-
-                                // 带元素的信息后的总长度
-                                long nWithMetedataTotalLength = ms.Length;
-
-                                ms.Seek(lStart, SeekOrigin.Begin);
-                                ms.Read(destBuffer,
-                                    0,
-                                    destBuffer.Length);
-                                ms.Close();
-
-                                if (nNotFoundSubRes > 0)
+                                using (MemoryStream ms = new MemoryStream())
                                 {
-                                    strError = "记录" + strRecordID + "中id为 " + strNotFoundSubResIds + " 的下级资源记录不存在";
-                                    nAdditionError = -50; // 有一个以上下级资源记录不存在
-                                }
+                                    // 2015/11/23 增加的 using 语句
+                                    using (XmlTextWriter textWriter = new XmlTextWriter(ms, Encoding.UTF8))
+                                    {
+                                        dom.Save(textWriter);
+                                        //dom.Save(ms);
+                                    }
 
-                                return nWithMetedataTotalLength;
+                                    long lRealLength;
+                                    // return:
+                                    //		-1  出错
+                                    //		0   成功
+                                    nRet = ConvertUtil.GetRealLength(lStart,
+                                        nLength,
+                                        (int)ms.Length,
+                                        nMaxLength,
+                                        out lRealLength,
+                                        out strError);
+                                    if (nRet == -1)
+                                        return -1;
+
+                                    destBuffer = new byte[lRealLength];
+
+                                    // 带元素的信息后的总长度
+                                    long nWithMetedataTotalLength = ms.Length;
+
+                                    ms.Seek(lStart, SeekOrigin.Begin);
+                                    ms.Read(destBuffer,
+                                        0,
+                                        destBuffer.Length);
+
+                                    if (nNotFoundSubRes > 0)
+                                    {
+                                        strError = "记录" + strRecordID + "中id为 " + strNotFoundSubResIds + " 的下级资源记录不存在";
+                                        nAdditionError = -50; // 有一个以上下级资源记录不存在
+                                    }
+
+                                    return nWithMetedataTotalLength;
+                                }
                             }
                         } // end if (dom != null)
 

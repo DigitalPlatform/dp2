@@ -1634,7 +1634,6 @@ out strError);
             stop.Initial("正在导入条码号 ...");
             stop.BeginLoop();
 
-
             try
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
@@ -3080,10 +3079,9 @@ MessageBoxDefaultButton.Button1);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
+                System.Text.Encoding.UTF8))
             {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
@@ -3094,11 +3092,6 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";
@@ -3153,10 +3146,9 @@ MessageBoxDefaultButton.Button1);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
+                System.Text.Encoding.UTF8))
             {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
@@ -3167,11 +3159,6 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";

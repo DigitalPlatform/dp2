@@ -475,18 +475,18 @@ this.InfoDlgOpacity,
             int nLineCount = 0;
             try
             {
-                StreamReader sr = new StreamReader(strLogFileName, true);
-                for (; ; )
+                using (StreamReader sr = new StreamReader(strLogFileName, true))
                 {
-                    string strLine = sr.ReadLine();
-                    if (strLine == null)
-                        break;
-                    Global.WriteHtml(this.webBrowser_operationInfo,
-        strLine + "\r\n");
-                    nLineCount++;
+                    for (; ; )
+                    {
+                        string strLine = sr.ReadLine();
+                        if (strLine == null)
+                            break;
+                        Global.WriteHtml(this.webBrowser_operationInfo,
+            strLine + "\r\n");
+                        nLineCount++;
+                    }
                 }
-                sr.Close();
-
             }
             catch (FileNotFoundException)
             {
@@ -686,53 +686,53 @@ this.InfoDlgOpacity,
 
             try
             {
-                StreamReader sr = new StreamReader(strLogFileName, true);
-                for (; ; )
+                using (StreamReader sr = new StreamReader(strLogFileName, true))
                 {
-                    string strLine = sr.ReadLine();
-                    if (strLine == null)
-                        break;
-
-                    if (String.IsNullOrEmpty(strLine) == true)
-                        continue;
-
-                    string strXml = "";
-                    nRet = BuildRecoverXml(
-                        strLine,
-                        out strXml,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    long lRet = this.Channel.UrgentRecover(
-                        stop,
-                        strXml,
-                        out strError);
-                    if (lRet == -1)
+                    for (; ; )
                     {
-                        DialogResult result = MessageBox.Show(this,
-"行\r\n" + strLine + "\r\n恢复到数据库时出错：" + strError + "。\r\n\r\n要中断处理么? ",
-"UrgentChargingForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-                        if (result == DialogResult.Yes)
+                        string strLine = sr.ReadLine();
+                        if (strLine == null)
+                            break;
+
+                        if (String.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        string strXml = "";
+                        nRet = BuildRecoverXml(
+                            strLine,
+                            out strXml,
+                            out strError);
+                        if (nRet == -1)
                             goto ERROR1;
 
+                        long lRet = this.Channel.UrgentRecover(
+                            stop,
+                            strXml,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+    "行\r\n" + strLine + "\r\n恢复到数据库时出错：" + strError + "。\r\n\r\n要中断处理么? ",
+    "UrgentChargingForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            if (result == DialogResult.Yes)
+                                goto ERROR1;
+
+                            Global.WriteHtml(this.webBrowser_operationInfo,
+    strLine + " *** error: " + strError + "\r\n");
+                            goto CONTINUE_1;
+                        }
+
                         Global.WriteHtml(this.webBrowser_operationInfo,
-strLine + " *** error: " + strError + "\r\n");
-                        goto CONTINUE_1;
+            strLine + "\r\n");
+                    CONTINUE_1:
+                        Global.ScrollToEnd(this.webBrowser_operationInfo);
+
+                        nLineCount++;
                     }
-
-                    Global.WriteHtml(this.webBrowser_operationInfo,
-        strLine + "\r\n");
-                CONTINUE_1:
-                    Global.ScrollToEnd(this.webBrowser_operationInfo);
-
-                    nLineCount++;
                 }
-                sr.Close();
-
             }
             catch (FileNotFoundException)
             {

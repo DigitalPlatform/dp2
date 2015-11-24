@@ -1287,7 +1287,6 @@ namespace dp2Circulation
                     sr.Close();
                 if (sw != null)
                     sw.Close();
-
             }
 
             return 0;

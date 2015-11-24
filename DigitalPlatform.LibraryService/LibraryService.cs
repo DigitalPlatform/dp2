@@ -7552,21 +7552,47 @@ namespace dp2Library
                     return result;
                 }
 
-                // return:
-                //      -1  error
-                //      0   file not found
-                //      1   succeed
-                //      2   超过范围
-                int nRet = app.OperLog.GetOperLogs(
-                    sessioninfo.LibraryCodeList,
-                    strFileName,
-                    lIndex,
-                    lHint,
-                    nCount,
-                    strStyle,
-                    strFilter,
-                    out records,
-                    out strError);
+                int nRet = 0;
+                if (StringUtil.IsInList("accessLog", strStyle) == true)
+                {
+                    if (string.IsNullOrEmpty(app.MongoDbConnStr) == true)
+                    {
+                        // accessLog 尚未使用
+                        records = null;
+                        nRet = 0;
+                    }
+                    else
+                    {
+                        nRet = app.AccessLogDatabase.GetOperLogs(
+                            sessioninfo.LibraryCodeList,
+                            strFileName,
+                            lIndex,
+                            lHint,
+                            nCount,
+                            strStyle,
+                            strFilter,
+                            out records,
+                            out strError);
+                    }
+                }
+                else
+                {
+                    // return:
+                    //      -1  error
+                    //      0   file not found
+                    //      1   succeed
+                    //      2   超过范围
+                    nRet = app.OperLog.GetOperLogs(
+                        sessioninfo.LibraryCodeList,
+                        strFileName,
+                        lIndex,
+                        lHint,
+                        nCount,
+                        strStyle,
+                        strFilter,
+                        out records,
+                        out strError);
+                }
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -7624,6 +7650,7 @@ namespace dp2Library
             lAttachmentTotalLength = 0;
 
             string strError = "";
+            int nRet = 0;
 
             LibraryServerResult result = this.PrepareEnvironment("GetOperLog", true, true);
             if (result.Value == -1)
@@ -7642,12 +7669,46 @@ namespace dp2Library
                     return result;
                 }
 
+                if (StringUtil.IsInList("accessLog", strStyle) == true)
+                    
+                {
+                    if (lIndex == -1)
+                    {
+                        // 获得文件尺寸。用事项个数代替文件尺寸
+                        lHintNext = app.AccessLogDatabase.GetItemCount(strFileName.Substring(0,8));
+                        result.Value = 1;
+                        result.ErrorInfo = strError;
+                        return result;
+                    }
+                    OperLogInfo[] records = null;
+                    nRet = app.AccessLogDatabase.GetOperLogs(
+                        sessioninfo.LibraryCodeList,
+                        strFileName,
+                        lIndex,
+                        lHint,
+                        1,
+                        strStyle,
+                        strFilter,
+                        out records,
+                        out strError);
+                    if (nRet == 1)
+                    {
+                        OperLogInfo info = records[0];
+                        strXml = info.Xml;
+                        lAttachmentTotalLength = info.AttachmentLength;
+                        lHintNext = info.HintNext;
+                    }
+                    result.Value = nRet;
+                    result.ErrorInfo = strError;
+                    return result;
+                }
+
                 // return:
                 //      -1  error
                 //      0   file not found
                 //      1   succeed
                 //      2   超过范围
-                int nRet = app.OperLog.GetOperLog(
+                nRet = app.OperLog.GetOperLog(
                     sessioninfo.LibraryCodeList,
                     strFileName,
                     lIndex,
@@ -11943,22 +12004,8 @@ namespace dp2Library
                 {
                     Hashtable table = StringUtil.ParseMedaDataXml(strMetadata,
                         out strError);
-
-                    XmlDocument domOperLog = new XmlDocument();
-                    domOperLog.LoadXml("<root />");
-
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "operation",
-                        "getRes");
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "path",
-    strResPath);
                     if (table != null)
                     {
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "size",
-                            (string)table["size"]);
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "mime",
-                            (string)table["mimetype"]);
-
                         Int64 v = 0;
                         if (app.Statis != null && Int64.TryParse((string)table["size"], out v) == true)
                             app.Statis.IncreaseEntryValue(
@@ -11974,27 +12021,59 @@ namespace dp2Library
                         "获取对象",
                         "次",
                         1);
-
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                        sessioninfo.UserID);
-
-                    string strOperTime = app.Clock.GetClock();
-
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                        strOperTime);
-
-                    int nRet = app.OperLog.WriteOperLog(domOperLog,
-                        sessioninfo.ClientAddress,
-                        out strError);
-                    if (nRet == -1)
+                    if (string.IsNullOrEmpty(app.MongoDbConnStr) == false)
                     {
-                        if (bClearMetadata == true)
-                            strMetadata = "";
-                        strError = "GetRes() API 写入日志时发生错误: " + strError;
-                        result.Value = -1;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        result.ErrorInfo = strError;
-                        return result;
+                        long size = 0;
+                        long.TryParse((string)table["size"], out size);
+
+                        app.AccessLogDatabase.Add("getRes",
+                            strResPath,
+                            size,
+                            (string)table["mimetype"],
+                            sessioninfo.ClientAddress,
+                            1,
+                            sessioninfo.UserID,
+                            DateTime.Now);
+                    }
+                    else
+                    {
+                        XmlDocument domOperLog = new XmlDocument();
+                        domOperLog.LoadXml("<root />");
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "operation",
+                            "getRes");
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "path",
+        strResPath);
+                        if (table != null)
+                        {
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "size",
+                                (string)table["size"]);
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "mime",
+                                (string)table["mimetype"]);
+                        }
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                            sessioninfo.UserID);
+
+                        string strOperTime = app.Clock.GetClock();
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                            strOperTime);
+
+                        int nRet = app.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (bClearMetadata == true)
+                                strMetadata = "";
+                            strError = "GetRes() API 写入日志时发生错误: " + strError;
+                            result.Value = -1;
+                            result.ErrorCode = ErrorCode.SystemError;
+                            result.ErrorInfo = strError;
+                            return result;
+                        }
                     }
                 }
 
@@ -12372,7 +12451,6 @@ namespace dp2Library
                         if (attachment != null)
                             attachment.Close();
                     }
-
                 }
 
                 return result;

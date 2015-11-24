@@ -288,18 +288,16 @@ namespace dp2Circulation
             try
             {
                 using (System.IO.Stream rs = ftpClient.GetRequestStream())
+                using (System.IO.FileStream fs = fi.OpenRead())
                 {
-                    using (System.IO.FileStream fs = fi.OpenRead())
+                    while (total_bytes > 0)
                     {
-                        while (total_bytes > 0)
-                        {
-                            int bytes = 0;
-                            bytes = fs.Read(buffer, 0, buffer.Length);
-                            rs.Write(buffer, 0, bytes);
-                            total_bytes = total_bytes - bytes;
-                        }
-                        //fs.Flush();
-                    };
+                        int bytes = 0;
+                        bytes = fs.Read(buffer, 0, buffer.Length);
+                        rs.Write(buffer, 0, bytes);
+                        total_bytes = total_bytes - bytes;
+                    }
+                    //fs.Flush();
                 }
                 FtpWebResponse uploadResponse = (FtpWebResponse)ftpClient.GetResponse();
                 string strStatus = uploadResponse.StatusDescription;
@@ -336,9 +334,6 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(pathToCreate) == true)
                 return;
 
-            FtpWebRequest reqFTP = null;
-            Stream ftpStream = null;
-
             pathToCreate = pathToCreate.Replace("\\", "/");
 
             string[] subDirs = pathToCreate.Split('/');
@@ -356,6 +351,9 @@ namespace dp2Circulation
                         if (dir_table.ContainsKey(currentDir) == true)
                             continue;
                     }
+
+                    FtpWebRequest reqFTP = null;
+                    Stream ftpStream = null;
 
                     reqFTP = (FtpWebRequest)FtpWebRequest.Create(currentDir);
                     reqFTP.Method = WebRequestMethods.Ftp.MakeDirectory;

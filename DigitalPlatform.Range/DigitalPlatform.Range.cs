@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,15 +9,15 @@ using DigitalPlatform;
 namespace DigitalPlatform.Range
 {
 	/// <summary>
-	/// RangeItemÊÇRangeList¼¯ºÏµÄ³ÉÔ±£¬±íÊ¾Ò»¸öÁ¬ĞøµÄ·¶Î§
+	/// RangeItemæ˜¯RangeListé›†åˆçš„æˆå‘˜ï¼Œè¡¨ç¤ºä¸€ä¸ªè¿ç»­çš„èŒƒå›´
 	/// </summary>
 	public class RangeItem : IComparable
 	{
-		public long lStart = 0;	// Èç¹ûÎª-1£¬±íÊ¾´ÓÎ²¶Ë³¤¶ÈÎªlLengthµÄÒ»¶Î£¬ÒòÎª×Ü³¤¶ÈÎ´Öª£¬ËùÒÔlStartÎ´Öª£¬µ«ÊÇ-1±íÃ÷ÁËÕâÖÖ×´Ì¬
-		public long lLength = 0;	// Èç¹ûÎª-1£¬±íÊ¾´ÓlStart¿ªÊ¼Ò»Ö±µ½Ä©Î²¡£
+		public long lStart = 0;	// å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºä»å°¾ç«¯é•¿åº¦ä¸ºlLengthçš„ä¸€æ®µï¼Œå› ä¸ºæ€»é•¿åº¦æœªçŸ¥ï¼Œæ‰€ä»¥lStartæœªçŸ¥ï¼Œä½†æ˜¯-1è¡¨æ˜äº†è¿™ç§çŠ¶æ€
+		public long lLength = 0;	// å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºä»lStartå¼€å§‹ä¸€ç›´åˆ°æœ«å°¾ã€‚
 		#region IComparable Members
 
-		// Èç¹ûthisĞ¡ÓÚobj£¬·µ»Ø<0µÄÖµ
+		// å¦‚æœthiså°äºobjï¼Œè¿”å›<0çš„å€¼
 		public int CompareTo(object obj)
         {
             RangeItem item = (RangeItem)obj;
@@ -27,7 +27,7 @@ namespace DigitalPlatform.Range
 			return (int)(this.lStart - item.lStart);
              * */
 
-            // 2012/8/26 ĞŞ¸Ä
+            // 2012/8/26 ä¿®æ”¹
             if (this.lStart == item.lStart)
             {
                 long lDelta = this.lLength - item.lLength;
@@ -60,7 +60,7 @@ namespace DigitalPlatform.Range
 			lLength = item.lLength;
 		}
 
-		// Æ´½ÓÎª±íÊ¾·¶Î§µÄ×Ö·û´®
+		// æ‹¼æ¥ä¸ºè¡¨ç¤ºèŒƒå›´çš„å­—ç¬¦ä¸²
 		public string GetContentRangeString()
 		{
             Debug.Assert(this.lStart >= 0, "");
@@ -74,14 +74,14 @@ namespace DigitalPlatform.Range
 	}
 
 	/// <summary>
-	/// ±íÊ¾·¶Î§µÄÀà
+	/// è¡¨ç¤ºèŒƒå›´çš„ç±»
 	/// </summary>
 	public class RangeList : List<RangeItem>
 	{
-		public string delimeters = ",";	// ·Ö¸ô·û¡£¿ÉÒÔÁĞ³ö¶à¸ö
-		public string contentRange = "";	// ±£´æ·¶Î§×Ö·û´®
+		public string delimeters = ",";	// åˆ†éš”ç¬¦ã€‚å¯ä»¥åˆ—å‡ºå¤šä¸ª
+		public string contentRange = "";	// ä¿å­˜èŒƒå›´å­—ç¬¦ä¸²
 
-		// ¹¹Ôìº¯Êı
+		// æ„é€ å‡½æ•°
 		public RangeList(string strContentRange) 
 		{
 			BuildItems(strContentRange);
@@ -101,7 +101,7 @@ namespace DigitalPlatform.Range
 			BuildItems(strContentRange);
 		}
 
-		// ´´½¨ÄÚÈİÊÂÏî
+		// åˆ›å»ºå†…å®¹äº‹é¡¹
 		public void BuildItems(string strContentRange)
 		{
 			long lStart = 0;
@@ -116,14 +116,14 @@ namespace DigitalPlatform.Range
 			{
 				if (split[i] == "")
 					continue;
-				// ¸ù¾İ-²ğ·Ö
+				// æ ¹æ®-æ‹†åˆ†
 				int nRet = split[i].IndexOf("-");
 				if (nRet == -1) 
 				{
                     lStart = 0; //  Convert.ToInt64(split[i]);
 
                     if (Int64.TryParse(split[i], out lStart) == false)
-                        throw new Exception("ÓÃ×Ö·û´® '" + strContentRange + "' ¹¹ÔìRangeListÊ±³ö´í£ºÊı×Ö '" + split[i].ToString() + "' ¸ñÊ½²»ÕıÈ·");
+                        throw new Exception("ç”¨å­—ç¬¦ä¸² '" + strContentRange + "' æ„é€ RangeListæ—¶å‡ºé”™ï¼šæ•°å­— '" + split[i].ToString() + "' æ ¼å¼ä¸æ­£ç¡®");
 
 					lLength = 1;
 				}
@@ -143,7 +143,7 @@ namespace DigitalPlatform.Range
                         }
                         catch
                         {
-                            throw new Exception("ÓÃ×Ö·û´® '" + strContentRange + "' ¹¹ÔìRangeListÊ±³ö´í£ºÊı×Ö '" + right + "' ¸ñÊ½²»ÕıÈ·");
+                            throw new Exception("ç”¨å­—ç¬¦ä¸² '" + strContentRange + "' æ„é€ RangeListæ—¶å‡ºé”™ï¼šæ•°å­— '" + right + "' æ ¼å¼ä¸æ­£ç¡®");
                         }
                         goto CONTINUE;
                     }
@@ -155,7 +155,7 @@ namespace DigitalPlatform.Range
                         }
                         catch
                         {
-                            throw new Exception("ÓÃ×Ö·û´® '" + strContentRange + "' ¹¹ÔìRangeListÊ±³ö´í£ºÊı×Ö '" + left + "' ¸ñÊ½²»ÕıÈ·");
+                            throw new Exception("ç”¨å­—ç¬¦ä¸² '" + strContentRange + "' æ„é€ RangeListæ—¶å‡ºé”™ï¼šæ•°å­— '" + left + "' æ ¼å¼ä¸æ­£ç¡®");
                         }
 
                     }
@@ -163,23 +163,23 @@ namespace DigitalPlatform.Range
 					if (right == "") 
 					{
 						lLength = -1;
-						// ´ËÊ±lStart²»ÄÜÎª-1
+						// æ­¤æ—¶lStartä¸èƒ½ä¸º-1
 						goto CONTINUE;
 					}
 					else 
 					{
 						long lEnd = 0;  // Convert.ToInt64(right);
                         if (Int64.TryParse(right, out lEnd) == false)
-                            throw new Exception("ÓÃ×Ö·û´® '" + strContentRange + "' ¹¹ÔìRangeListÊ±³ö´í£ºÊı×Ö '" + right.ToString() + "' ¸ñÊ½²»ÕıÈ·");
+                            throw new Exception("ç”¨å­—ç¬¦ä¸² '" + strContentRange + "' æ„é€ RangeListæ—¶å‡ºé”™ï¼šæ•°å­— '" + right.ToString() + "' æ ¼å¼ä¸æ­£ç¡®");
 						if (lStart > lEnd) 
 						{
-                            // TODO: ¾ÀÕı³¬¹ı MaxValue µÄÇé¿ö
+                            // TODO: çº æ­£è¶…è¿‡ MaxValue çš„æƒ…å†µ
 							lLength = (lStart - lEnd) + 1;
 							lStart = lEnd;
 						}
 						else 
 						{
-                            // TODO: ¾ÀÕı³¬¹ı MaxValue µÄÇé¿ö
+                            // TODO: çº æ­£è¶…è¿‡ MaxValue çš„æƒ…å†µ
                             lLength = (lEnd - lStart) + 1;
 						}
 					}
@@ -192,10 +192,10 @@ namespace DigitalPlatform.Range
 				this.Add(item);
 			}
 
-			contentRange = strContentRange;	// ±£´æÆğÀ´
+			contentRange = strContentRange;	// ä¿å­˜èµ·æ¥
 		}
 
-		// Æ´½ÓÎª±íÊ¾·¶Î§µÄ×Ö·û´®
+		// æ‹¼æ¥ä¸ºè¡¨ç¤ºèŒƒå›´çš„å­—ç¬¦ä¸²
 		public string GetContentRangeString() 
 		{
 			string strResult = "";
@@ -211,7 +211,7 @@ namespace DigitalPlatform.Range
 			return strResult;
 		}
 
-		// Æ´½ÓÎª±íÊ¾·¶Î§µÄ×Ö·û´®
+		// æ‹¼æ¥ä¸ºè¡¨ç¤ºèŒƒå›´çš„å­—ç¬¦ä¸²
 		public string GetContentRangeString(int nStart, int nCount) 
 		{
 			string strResult = "";
@@ -227,8 +227,8 @@ namespace DigitalPlatform.Range
 			return strResult;
 		}
 
-		// »ñµÃ×î´ó±ß½ç
-		// ËùÎ½×î´ó±ß½ç£¬ÊÇ·¶Î§ÖĞ³öÏÖµÄ×î´óÊı×Ö¡£ÊÇ°üº¬ÁËÕâ¸öÊı¡£
+		// è·å¾—æœ€å¤§è¾¹ç•Œ
+		// æ‰€è°“æœ€å¤§è¾¹ç•Œï¼Œæ˜¯èŒƒå›´ä¸­å‡ºç°çš„æœ€å¤§æ•°å­—ã€‚æ˜¯åŒ…å«äº†è¿™ä¸ªæ•°ã€‚
 		public long max()
 		{
 			long lValue = 0;
@@ -236,7 +236,7 @@ namespace DigitalPlatform.Range
 			{
 				RangeItem item = (RangeItem)this[i];
 				if (item.lLength == -1)
-					return -1;	// ±íÊ¾²»È·¶¨£¬Ïàµ±ÓÚÎŞÇî´ó
+					return -1;	// è¡¨ç¤ºä¸ç¡®å®šï¼Œç›¸å½“äºæ— ç©·å¤§
 				if (item.lStart + item.lLength + -1> lValue)
 					lValue = item.lStart + item.lLength - 1;
 			}
@@ -244,8 +244,8 @@ namespace DigitalPlatform.Range
 			return lValue;
 		}
 
-		// »ñµÃ×îĞ¡±ß½ç
-		// ËùÎ½×îĞ¡±ß½ç£¬ÊÇ·¶Î§ÖĞ³öÏÖµÄ×îĞ¡Êı×Ö¡£°üº¬Õâ¸öÊı×Ö¡£
+		// è·å¾—æœ€å°è¾¹ç•Œ
+		// æ‰€è°“æœ€å°è¾¹ç•Œï¼Œæ˜¯èŒƒå›´ä¸­å‡ºç°çš„æœ€å°æ•°å­—ã€‚åŒ…å«è¿™ä¸ªæ•°å­—ã€‚
 		public long min()
 		{
 			long lValue = 0;
@@ -269,7 +269,7 @@ namespace DigitalPlatform.Range
 		}
 
 
-		// bIsOrdered	true±íÊ¾RangeListÊÇÅÅĞò¹ıµÄ£¬Ëã·¨¸üÓÅ»¯
+		// bIsOrdered	trueè¡¨ç¤ºRangeListæ˜¯æ’åºè¿‡çš„ï¼Œç®—æ³•æ›´ä¼˜åŒ–
 		public bool IsInRange(long lNumber, 
 			bool bIsOrdered)
 		{
@@ -292,8 +292,8 @@ namespace DigitalPlatform.Range
 			return false;
 		}
 
-		// ºÏ²¢ÖØµşµÄÊÂÏî
-		// ÒªÇóÊÂÏÈÅÅĞò¡£·ñÔò²»ÄÜ±£Ö¤ÔËËãÕıÈ·ĞÔ¡£
+		// åˆå¹¶é‡å çš„äº‹é¡¹
+		// è¦æ±‚äº‹å…ˆæ’åºã€‚å¦åˆ™ä¸èƒ½ä¿è¯è¿ç®—æ­£ç¡®æ€§ã€‚
 		public int Merge()
 		{
 			for(int i=0; i<this.Count; i++) 
@@ -312,7 +312,7 @@ namespace DigitalPlatform.Range
 
 					if (item2.lStart == item1.lStart + item1.lLength)
 					{
-						// ½ôÁÚ
+						// ç´§é‚»
 						item1.lLength += item2.lLength;
 						this.RemoveAt(j);
 						j --;
@@ -321,7 +321,7 @@ namespace DigitalPlatform.Range
 					else if (item2.lStart >= item1.lStart
 						&& item2.lStart <= item1.lStart + item1.lLength - 1)
 					{
-						// ÓĞÖØµş
+						// æœ‰é‡å 
 						long end1 = item1.lStart + item1.lLength;
 						long end2 = item2.lStart + item2.lLength;
 						if (end1 <= end2)
@@ -336,7 +336,7 @@ namespace DigitalPlatform.Range
 					}
 					else 
 					{
-						break;	// Ã»ÓĞÖØµş
+						break;	// æ²¡æœ‰é‡å 
 					}
 					
 				}
@@ -354,74 +354,74 @@ namespace DigitalPlatform.Range
 		{
 			int i,j;
 
-			RangeItem item1 = null;	// ×ó±ß¶ÓÁĞ
-			RangeItem item2 = null;	// ÓÒ±ß¶ÓÁĞ
+			RangeItem item1 = null;	// å·¦è¾¹é˜Ÿåˆ—
+			RangeItem item2 = null;	// å³è¾¹é˜Ÿåˆ—
 
-			RangeItem item = null;	// ÁÙÊ±
+			RangeItem item = null;	// ä¸´æ—¶
 
 			bool bFinished1 = false;
 			bool bFinished2 = false;
 
 			for(i=0,j=0;;) 
 			{
-				// È¡¶ÓÁĞ1
+				// å–é˜Ÿåˆ—1
 				if (item1 == null && bFinished1 == false
 					&& i<source1.Count)
 				{
 					item1 = (RangeItem)source1[i];
 					if (item1 == null) 
 					{
-						throw(new ArgumentException("source1Êı×éÖĞÎ»ÖÃ"+Convert.ToString(i)+"(´Ó0¿ªÊ¼¼ÆÊı)°üº¬¿ÕÔªËØ..."));
+						throw(new ArgumentException("source1æ•°ç»„ä¸­ä½ç½®"+Convert.ToString(i)+"(ä»0å¼€å§‹è®¡æ•°)åŒ…å«ç©ºå…ƒç´ ..."));
 					}
 					i++;
 				}
 
-				// È¡¶ÓÁĞ2
+				// å–é˜Ÿåˆ—2
 				if (item2 == null && bFinished2 == false
 					&& j < source2.Count)
 				{
 					item2 = (RangeItem)source2[j];
 					if (item2 == null) 
 					{
-						throw(new ArgumentException("source2Êı×éÖĞÎ»ÖÃ"+Convert.ToString(j)+"(´Ó0¿ªÊ¼¼ÆÊı)°üº¬¿ÕÔªËØ..."));
+						throw(new ArgumentException("source2æ•°ç»„ä¸­ä½ç½®"+Convert.ToString(j)+"(ä»0å¼€å§‹è®¡æ•°)åŒ…å«ç©ºå…ƒç´ ..."));
 					}
 					j ++;
 				}
 
 				if (item1 == null && item2 == null)
-					break;	// È«²¿´¦ÀíÍê³ÉÁË
+					break;	// å…¨éƒ¨å¤„ç†å®Œæˆäº†
 
-				// ±È½ÏÁ½¸öItem
+				// æ¯”è¾ƒä¸¤ä¸ªItem
 				if (item1 != null && item2 != null) 
 				{
-					// item1ÍêÈ«Ğ¡ÓÚitem2
+					// item1å®Œå…¨å°äºitem2
 					if (item1.lStart + item1.lLength <= item2.lStart)
 					{
 						item = new RangeItem(item1);
 						if (targetLeft != null)
 							targetLeft.Add(item);
-						item1 = null;	// Îª¶ÓÁĞ1È¡ÏÂÒ»¸ö×÷×¼±¸
+						item1 = null;	// ä¸ºé˜Ÿåˆ—1å–ä¸‹ä¸€ä¸ªä½œå‡†å¤‡
 						continue;
 					}
-					// item2ÍêÈ«Ğ¡ÓÚitem1
+					// item2å®Œå…¨å°äºitem1
 					if (item2.lStart + item2.lLength <= item1.lStart)
 					{
 						item = new RangeItem(item2);
 						if (targetRight != null)
 							targetRight.Add(item);
-						item2 = null;	// Îª¶ÓÁĞ2È¡ÏÂÒ»¸ö×÷×¼±¸
+						item2 = null;	// ä¸ºé˜Ÿåˆ—2å–ä¸‹ä¸€ä¸ªä½œå‡†å¤‡
 						continue;
 					}
-					// item1ºÍitem2²¿·ÖÖØµş
+					// item1å’Œitem2éƒ¨åˆ†é‡å 
 
-					// item1ÔÚÇ°
+					// item1åœ¨å‰
 					if (item1.lStart <= item2.lStart) 
 					{
 						// |item1     |
 						//        |item2      |
 						// |  A   | B |   C   |
 
-						// item1 A²¿·ÖÈ¥targetLeft
+						// item1 Aéƒ¨åˆ†å»targetLeft
 						if (item1.lStart != item2.lStart) 
 						{
 							item = new RangeItem();
@@ -431,7 +431,7 @@ namespace DigitalPlatform.Range
 								targetLeft.Add(item);
 						}
 
-						// item1ºÍitem2ÖØµşµÄ²¿·ÖB£¬È¥targetMiddle
+						// item1å’Œitem2é‡å çš„éƒ¨åˆ†Bï¼Œå»targetMiddle
 						item = new RangeItem();
 						item.lStart = item2.lStart;
 
@@ -450,7 +450,7 @@ namespace DigitalPlatform.Range
 						if (targetMiddle != null)
 							targetMiddle.Add(item);
 
-						// item2ºÍItem2²»ÖØµşµÄC²¿·Ö£¬ÁôÏÂÀ´×öÏÂ´ÎÑ­»·
+						// item2å’ŒItem2ä¸é‡å çš„Céƒ¨åˆ†ï¼Œç•™ä¸‹æ¥åšä¸‹æ¬¡å¾ªç¯
 
 						if (end1 <= end2) 
 						{
@@ -475,23 +475,23 @@ namespace DigitalPlatform.Range
 						*/
 
 
-					} // item1ÔÚÇ°
+					} // item1åœ¨å‰
 
-					// item2ÔÚÇ°
+					// item2åœ¨å‰
 					else // if (item1.lStart > item2.lStart) 
 					{
 						// |item2     |
 						//        |item1      |
 						// |  A   | B |   C   |
 
-						// item2 A²¿·ÖÈ¥targetRight
+						// item2 Aéƒ¨åˆ†å»targetRight
 						item = new RangeItem();
 						item.lStart = item2.lStart;
 						item.lLength = item1.lStart - item2.lStart;
 						if (targetRight != null)
 							targetRight.Add(item);
 
-						// item1ºÍitem2ÖØµşµÄ²¿·ÖB£¬È¥targetMiddle
+						// item1å’Œitem2é‡å çš„éƒ¨åˆ†Bï¼Œå»targetMiddle
 						item = new RangeItem();
 						item.lStart = item1.lStart;
 						/*
@@ -509,7 +509,7 @@ namespace DigitalPlatform.Range
 						if (targetMiddle != null)
 							targetMiddle.Add(item);
 
-						// item2ºÍItem2²»ÖØµşµÄC²¿·Ö£¬ÁôÏÂÀ´×öÏÂ´ÎÑ­»·
+						// item2å’ŒItem2ä¸é‡å çš„Céƒ¨åˆ†ï¼Œç•™ä¸‹æ¥åšä¸‹æ¬¡å¾ªç¯
 
 						if (end1 <= end2) 
 						{
@@ -534,10 +534,10 @@ namespace DigitalPlatform.Range
 						*/
 
 
-					} // item2ÔÚÇ°
+					} // item2åœ¨å‰
 
 					if (true)
-					{ // C²¿·Ö
+					{ // Céƒ¨åˆ†
 						long end1 = item1.lStart + item1.lLength;
 						long end2 = item2.lStart + item2.lLength;
 
@@ -552,7 +552,7 @@ namespace DigitalPlatform.Range
 						if (targetMiddle != null)
 							targetMiddle.Add(item);
 
-						// item2ºÍItem2²»ÖØµşµÄC²¿·Ö£¬ÁôÏÂÀ´×öÏÂ´ÎÑ­»·
+						// item2å’ŒItem2ä¸é‡å çš„Céƒ¨åˆ†ï¼Œç•™ä¸‹æ¥åšä¸‹æ¬¡å¾ªç¯
 
 						if (end1 <= end2) 
 						{
@@ -574,13 +574,13 @@ namespace DigitalPlatform.Range
 							item2 = null;
 							continue;
 						}
-					} // -- C²¿·Ö
+					} // -- Céƒ¨åˆ†
 
 
 					// continue;
-				} // -- ±È½ÏÁ½¸öItem
+				} // -- æ¯”è¾ƒä¸¤ä¸ªItem
 
-				// Ö»ÓĞItem1·Ç¿Õ
+				// åªæœ‰Item1éç©º
 				if (item1 != null) 
 				{
 					if (targetLeft != null)
@@ -588,7 +588,7 @@ namespace DigitalPlatform.Range
 					item1 = null;
 					continue;
 				}
-				// Ö»ÓĞItem2·Ç¿Õ
+				// åªæœ‰Item2éç©º
 				if (item2 != null) 
 				{
 					if (targetRight != null)
@@ -599,7 +599,7 @@ namespace DigitalPlatform.Range
 			}
 		}
 
-		// ½«strRange1ÖĞ±íÊ¾µÄ·¶Î§¼õÈ¥strRange2µÄ·¶Î§£¬·µ»Ø
+		// å°†strRange1ä¸­è¡¨ç¤ºçš„èŒƒå›´å‡å»strRange2çš„èŒƒå›´ï¼Œè¿”å›
 		public static string Sub(string strRange1, string strRange2)
 		{
 			RangeList rl1 = new RangeList(strRange1);
@@ -614,7 +614,7 @@ namespace DigitalPlatform.Range
 			return result.GetContentRangeString();
 		}
 
-		// ·µ»Ø·¶Î§ÖĞ°üº¬Êı×Ö¸öÊı
+		// è¿”å›èŒƒå›´ä¸­åŒ…å«æ•°å­—ä¸ªæ•°
 		public static long GetNumberCount(string strRange)
 		{
 			RangeList rl = new RangeList(strRange);
@@ -628,19 +628,19 @@ namespace DigitalPlatform.Range
 			return lTotal;
 		}
 
-		// °ÑÒ»¸öcontentrange×Ö·û´®°´ÕÕ·Ö¿é³ß´çÇĞ¸îÎª¶à¸öcontentrange×Ö·û´®
-		// Ô­Àí£º
-		// °´ÕÕÊı×ÖµÄ¸öÊıÀ´ÇĞ¸î¡£ºÍÊı×Ö±¾ÉíµÄÖµÎŞ¹Ø¡£
-		// ¼ÆËã°ÑÃ¿¸öÁ¬ĞøµÄ¶ÎÂä°üº¬µÄÊı×Ö¸öÊı£¬´Õ¹»ÁËchunksize¾ÍÊä³ö×Ö·û´®¡£Èç¹û²»¹»£¬
-		// Ôò°Ñ¶à¸ö¶ÎÂäÒ»ÆğÊä³öÎªÒ»¸ö×Ö·û´®¡£
+		// æŠŠä¸€ä¸ªcontentrangeå­—ç¬¦ä¸²æŒ‰ç…§åˆ†å—å°ºå¯¸åˆ‡å‰²ä¸ºå¤šä¸ªcontentrangeå­—ç¬¦ä¸²
+		// åŸç†ï¼š
+		// æŒ‰ç…§æ•°å­—çš„ä¸ªæ•°æ¥åˆ‡å‰²ã€‚å’Œæ•°å­—æœ¬èº«çš„å€¼æ— å…³ã€‚
+		// è®¡ç®—æŠŠæ¯ä¸ªè¿ç»­çš„æ®µè½åŒ…å«çš„æ•°å­—ä¸ªæ•°ï¼Œå‡‘å¤Ÿäº†chunksizeå°±è¾“å‡ºå­—ç¬¦ä¸²ã€‚å¦‚æœä¸å¤Ÿï¼Œ
+		// åˆ™æŠŠå¤šä¸ªæ®µè½ä¸€èµ·è¾“å‡ºä¸ºä¸€ä¸ªå­—ç¬¦ä¸²ã€‚
 		public static string[] ChunkRange(string strRange, long lChunkSize)
 		{
 			if (lChunkSize <= 0)
-				throw(new ArgumentException("RangeList.ChunkRange(string strRange, long lChunkSize): lChunkSize²ÎÊı±ØĞë´óÓÚ0"));
+				throw(new ArgumentException("RangeList.ChunkRange(string strRange, long lChunkSize): lChunkSizeå‚æ•°å¿…é¡»å¤§äº0"));
 
             string[] result = null;
 
-            // ¿Õ·¶Î§ 2006/6/27
+            // ç©ºèŒƒå›´ 2006/6/27
             if (String.IsNullOrEmpty(strRange) == true)
             {
                 result = new string[1];
@@ -663,7 +663,7 @@ namespace DigitalPlatform.Range
 				if (lCurSize >= lChunkSize) 
 				{
 					string strText = "";
-					// ´ÓnStartµ½iÖ®¼ä×ª»»ÎªÒ»¸ö×Ö·û´®
+					// ä»nStartåˆ°iä¹‹é—´è½¬æ¢ä¸ºä¸€ä¸ªå­—ç¬¦ä¸²
 					if (nStartIndex < i) 
 					{
 						strText += rl.GetContentRangeString(nStartIndex, i - nStartIndex);
@@ -671,10 +671,10 @@ namespace DigitalPlatform.Range
 					}
 
 					long lDelta = lCurSize - lChunkSize;
-					// iËùÔÚÎ»ÖÃchunkµã×ó±ßµÄ×ª»»ÎªÒ»¸ö×Ö·û´®
+					// iæ‰€åœ¨ä½ç½®chunkç‚¹å·¦è¾¹çš„è½¬æ¢ä¸ºä¸€ä¸ªå­—ç¬¦ä¸²
 					strText += Convert.ToString(item.lStart) + "-"
 						+ Convert.ToString(item.lStart + item.lLength - 1 - lDelta);
-					// ÓàÏÂµÄ²¿·ÖÖØĞÂĞ´ÈëiÎ»ÖÃitem 
+					// ä½™ä¸‹çš„éƒ¨åˆ†é‡æ–°å†™å…¥iä½ç½®item 
 					if (lDelta > 0) 
 					{
 						nStartIndex = i;
@@ -694,11 +694,11 @@ namespace DigitalPlatform.Range
 
 			}
 
-			// ×îºóÒ»´Î
+			// æœ€åä¸€æ¬¡
 			if (nStartIndex < rl.Count)
 			{
 				string strText = "";
-				// ´ÓnStartµ½iÖ®¼ä×ª»»ÎªÒ»¸ö×Ö·û´®
+				// ä»nStartåˆ°iä¹‹é—´è½¬æ¢ä¸ºä¸€ä¸ªå­—ç¬¦ä¸²
 				strText += rl.GetContentRangeString(nStartIndex, rl.Count - nStartIndex);
 				aText.Add(strText);
 			}
@@ -711,7 +711,7 @@ namespace DigitalPlatform.Range
 					result[j] = (string)aText[j];
 				}
 			}
-			else // È·±£Êı×éÓĞÖÁÉÙÒ»¸öÔªËØ
+			else // ç¡®ä¿æ•°ç»„æœ‰è‡³å°‘ä¸€ä¸ªå…ƒç´ 
 			{
 				result = new string[1];
 				result[0] = strRange;
@@ -720,16 +720,16 @@ namespace DigitalPlatform.Range
 			return result;
 		}
 		
-		// ºÏ²¢Á½¸öcontentrange×Ö·û´®ÎªÒ»¸öĞÂ´®
+		// åˆå¹¶ä¸¤ä¸ªcontentrangeå­—ç¬¦ä¸²ä¸ºä¸€ä¸ªæ–°ä¸²
 		// parameters:
-		//		strS1	µÚÒ»¸ö·¶Î§×Ö·û´®
-		//		strS2	µÚ¶ş¸ö·¶Î§×Ö·û´®
-		//		lWholeLength	´óÎÄ¼şµÄ³ß´ç¡£ÓÃÀ´¼ì²â±¾´ÎºÏ²¢ºóµÄ×Ö·û´®ÊÇ·ñÒÑ¾­ÍêÈ«¸²¸ÇÕû¸öÎÄ¼ş·¶Î§
-		//		strResult	out²ÎÊı£¬·µ»ØºÏ²¢ºóµÄ×Ö·û´®
+		//		strS1	ç¬¬ä¸€ä¸ªèŒƒå›´å­—ç¬¦ä¸²
+		//		strS2	ç¬¬äºŒä¸ªèŒƒå›´å­—ç¬¦ä¸²
+		//		lWholeLength	å¤§æ–‡ä»¶çš„å°ºå¯¸ã€‚ç”¨æ¥æ£€æµ‹æœ¬æ¬¡åˆå¹¶åçš„å­—ç¬¦ä¸²æ˜¯å¦å·²ç»å®Œå…¨è¦†ç›–æ•´ä¸ªæ–‡ä»¶èŒƒå›´
+		//		strResult	outå‚æ•°ï¼Œè¿”å›åˆå¹¶åçš„å­—ç¬¦ä¸²
 		// return
-		//		-1	³ö´í 
-		//		0	»¹ÓĞÎ´¸²¸ÇµÄ²¿·Ö 
-		//		1	±¾´ÎÒÑ¾­ÍêÈ«¸²¸Ç
+		//		-1	å‡ºé”™ 
+		//		0	è¿˜æœ‰æœªè¦†ç›–çš„éƒ¨åˆ† 
+		//		1	æœ¬æ¬¡å·²ç»å®Œå…¨è¦†ç›–
 		public static int MergeContentRangeString(string strS1, 
 			string strS2,
 			long lWholeLength,
@@ -742,19 +742,19 @@ namespace DigitalPlatform.Range
 
 			RangeList rl2 = new RangeList(strS2);
 
-			// ×éºÏÁ½¸öRangeList
+			// ç»„åˆä¸¤ä¸ªRangeList
 			rl1.AddRange(rl2);
 
-			// ÅÅĞò
+			// æ’åº
 			rl1.Sort();
 
-			// ºÏ²¢ÊÂÏî
+			// åˆå¹¶äº‹é¡¹
 			rl1.Merge();
 
-            // µ÷ÊÔÓÃ!
+            // è°ƒè¯•ç”¨!
             // Debug.Assert(rl1.Count == 1, "");
 
-			// ·µ»ØºÏ²¢ºóµÄcontentrange×Ö·û´®
+			// è¿”å›åˆå¹¶åçš„contentrangeå­—ç¬¦ä¸²
 			strResult = rl1.GetContentRangeString();
 
 			if (rl1.Count == 1) 
@@ -763,21 +763,21 @@ namespace DigitalPlatform.Range
 
                 if (item.lLength > lWholeLength)
                 {
-                    strError = "Î¨Ò»Ò»¸öÊÂÏîµÄ³¤¶È " + item.lLength.ToString() + " ¾ÓÈ»´óÓÚÕûÌå³¤¶È " + lWholeLength.ToString();
-                    return -1;	// Î¨Ò»Ò»¸öÊÂÏîµÄ³¤¶È¾ÓÈ»³¬¹ı¼ì²âµÄ³¤¶È£¬Í¨³£±íÃ÷ÓĞÊäÈë²ÎÊı´íÎó
+                    strError = "å”¯ä¸€ä¸€ä¸ªäº‹é¡¹çš„é•¿åº¦ " + item.lLength.ToString() + " å±…ç„¶å¤§äºæ•´ä½“é•¿åº¦ " + lWholeLength.ToString();
+                    return -1;	// å”¯ä¸€ä¸€ä¸ªäº‹é¡¹çš„é•¿åº¦å±…ç„¶è¶…è¿‡æ£€æµ‹çš„é•¿åº¦ï¼Œé€šå¸¸è¡¨æ˜æœ‰è¾“å…¥å‚æ•°é”™è¯¯
                 }
 
 				if (item.lStart == 0
 					&& item.lLength == lWholeLength)
-					return 1;	// ±íÊ¾ÍêÈ«¸²¸Ç
+					return 1;	// è¡¨ç¤ºå®Œå…¨è¦†ç›–
 			}
 
-			return 0;	// »¹ÓĞÎ´¸²¸ÇµÄ²¿·Ö
+			return 0;	// è¿˜æœ‰æœªè¦†ç›–çš„éƒ¨åˆ†
 		}
 
-		// ½«Ô´ÎÄ¼şÖĞÖ¸¶¨µÄÆ¬¶ÏÄÚÈİ¸´ÖÆµ½Ä¿±êÎÄ¼şÖĞ
-		// µ±strContentRangeµÄÖµÎª""Ê±£¬±íÊ¾¸´ÖÆÕû¸öÎÄ¼ş
-		// ·µ»ØÖµ£º-1 ³ö´í ÆäËû ¸´ÖÆµÄ×Ü³ß´ç
+		// å°†æºæ–‡ä»¶ä¸­æŒ‡å®šçš„ç‰‡æ–­å†…å®¹å¤åˆ¶åˆ°ç›®æ ‡æ–‡ä»¶ä¸­
+		// å½“strContentRangeçš„å€¼ä¸º""æ—¶ï¼Œè¡¨ç¤ºå¤åˆ¶æ•´ä¸ªæ–‡ä»¶
+		// è¿”å›å€¼ï¼š-1 å‡ºé”™ å…¶ä»– å¤åˆ¶çš„æ€»å°ºå¯¸
 		public static long CopyFragment(
 			string strSourceFileName,
 			string strContentRange,
@@ -790,51 +790,48 @@ namespace DigitalPlatform.Range
 			FileInfo fi = new FileInfo(strSourceFileName);
 			if (fi.Length == 0)
 				return 0;
-			// ±íÊ¾·¶Î§µÄ×Ö·û´®Îª¿Õ£¬Ç¡Ç¡±íÊ¾Òª°üº¬È«²¿·¶Î§
+			// è¡¨ç¤ºèŒƒå›´çš„å­—ç¬¦ä¸²ä¸ºç©ºï¼Œæ°æ°è¡¨ç¤ºè¦åŒ…å«å…¨éƒ¨èŒƒå›´
 			if (strContentRange == "") 
 			{
 				strContentRange = "0-" + Convert.ToString(fi.Length - 1);
 			}
 
-			// ´´½¨RangeList£¬±ãÓÚÀí½â·¶Î§×Ö·û´®
+			// åˆ›å»ºRangeListï¼Œä¾¿äºç†è§£èŒƒå›´å­—ç¬¦ä¸²
 			RangeList rl = new RangeList(strContentRange);
 
 
-			// ¼ì²éstrContentRangeÖ¸³öµÄ×î´ó×îĞ¡±ß½çºÍÔ´ÎÄ¼şÖĞÊµ¼ÊÇé¿öÊÇ·ñÃ¬¶Ü
+			// æ£€æŸ¥strContentRangeæŒ‡å‡ºçš„æœ€å¤§æœ€å°è¾¹ç•Œå’Œæºæ–‡ä»¶ä¸­å®é™…æƒ…å†µæ˜¯å¦çŸ›ç›¾
 			long lMax = rl.max();
 			if (fi.Length <= lMax) 
 			{
-				strErrorInfo = "ÎÄ¼ş" +strSourceFileName+ "ÎÄ¼ş³ß´ç±È·¶Î§" + strContentRange + "ÖĞ¶¨ÒåµÄ×î´ó±ß½ç"
-					+ Convert.ToString(lMax) + "Ğ¡...";
+				strErrorInfo = "æ–‡ä»¶" +strSourceFileName+ "æ–‡ä»¶å°ºå¯¸æ¯”èŒƒå›´" + strContentRange + "ä¸­å®šä¹‰çš„æœ€å¤§è¾¹ç•Œ"
+					+ Convert.ToString(lMax) + "å°...";
 				return -1;
 			}
 
 			long lMin = rl.min();
 			if (fi.Length <= lMin) 
 			{
-				strErrorInfo = "ÎÄ¼ş" +strSourceFileName+ "ÎÄ¼ş³ß´ç±È·¶Î§" + strContentRange + "ÖĞ¶¨ÒåµÄ×îĞ¡±ß½ç"
-					+ Convert.ToString(lMax) + "Ğ¡...";
+				strErrorInfo = "æ–‡ä»¶" +strSourceFileName+ "æ–‡ä»¶å°ºå¯¸æ¯”èŒƒå›´" + strContentRange + "ä¸­å®šä¹‰çš„æœ€å°è¾¹ç•Œ"
+					+ Convert.ToString(lMax) + "å°...";
 				return -1;
 			}
 
-			FileStream fileTarget = File.Create(strTargetFileName);
-			FileStream fileSource = File.Open(strSourceFileName,
-				FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			using(FileStream fileTarget = File.Create(strTargetFileName))
+            using (FileStream fileSource = File.Open(strSourceFileName,
+                FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                // å¾ªç¯ï¼Œå¤åˆ¶æ¯ä¸ªè¿ç»­ç‰‡æ–­
+                for (int i = 0; i < rl.Count; i++)
+                {
+                    RangeItem ri = (RangeItem)rl[i];
 
-			// Ñ­»·£¬¸´ÖÆÃ¿¸öÁ¬ĞøÆ¬¶Ï
-			for(int i=0; i<rl.Count; i++) 
-			{
-				RangeItem ri = (RangeItem)rl[i];
+                    fileSource.Seek(ri.lStart, SeekOrigin.Begin);
+                    DumpStream(fileSource, fileTarget, ri.lLength, true);
 
-				fileSource.Seek(ri.lStart,SeekOrigin.Begin);
-				DumpStream(fileSource, fileTarget, ri.lLength, true);
-
-				lTotalBytes += ri.lLength;
-			}
-
-
-			fileTarget.Close();
-			fileSource.Close();
+                    lTotalBytes += ri.lLength;
+                }
+            }
 		
 			return lTotalBytes;
 		}
@@ -877,48 +874,38 @@ namespace DigitalPlatform.Range
 			return lWrited;
 		}
 
-		// ½«Ô´ÎÄ¼şÖĞÖ¸¶¨µÄÆ¬¶ÏÄÚÈİ¸´ÖÆµ½Ä¿±êÎÄ¼şÖĞ
-		// µ±strContentRangeµÄÖµÎª""Ê±£¬±íÊ¾¸´ÖÆÕû¸öÎÄ¼ş
-		// ·µ»ØÖµ£º-1 ³ö´í ÆäËû ¸´ÖÆµÄ×Ü³ß´ç
-		public static long CopyFragment(
-			string strSourceFileName,
-			string strContentRange,
-			out byte[] baResult,
-			out string strErrorInfo)
-		{
-			baResult = null;
-			strErrorInfo = "";
-
-			FileStream fileSource = File.Open(
-				strSourceFileName,
-				FileMode.Open,
-				FileAccess.Read, 
-				FileShare.ReadWrite);
-			try 
-			{
-				FileInfo fi = new FileInfo(strSourceFileName);
-				
-				if (fi.Length == 0)
-					return 0;
-				
-
-				long lRet = CopyFragment(fileSource,
-					fi.Length,
-					strContentRange,
-					out baResult,
-					out strErrorInfo);
-				return lRet;
-
-			}
-			finally 
-			{
-				fileSource.Close();
-			}
+		// å°†æºæ–‡ä»¶ä¸­æŒ‡å®šçš„ç‰‡æ–­å†…å®¹å¤åˆ¶åˆ°ç›®æ ‡æ–‡ä»¶ä¸­
+		// å½“strContentRangeçš„å€¼ä¸º""æ—¶ï¼Œè¡¨ç¤ºå¤åˆ¶æ•´ä¸ªæ–‡ä»¶
+		// è¿”å›å€¼ï¼š-1 å‡ºé”™ å…¶ä»– å¤åˆ¶çš„æ€»å°ºå¯¸
+        public static long CopyFragment(
+            string strSourceFileName,
+            string strContentRange,
+            out byte[] baResult,
+            out string strErrorInfo)
+        {
+            baResult = null;
+            strErrorInfo = "";
+            FileInfo fi = new FileInfo(strSourceFileName);
+            if (fi.Length == 0)
+                return 0;
+            using (FileStream fileSource = File.Open(
+                strSourceFileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite))
+            {
+                long lRet = CopyFragment(fileSource,
+                    fi.Length,
+                    strContentRange,
+                    out baResult,
+                    out strErrorInfo);
+                return lRet;
+            }
 		}
 
-		// ½«Ô´ÎÄ¼şÖĞÖ¸¶¨µÄÆ¬¶ÏÄÚÈİ¸´ÖÆµ½Ä¿±êÎÄ¼şÖĞ
-		// µ±strContentRangeµÄÖµÎª""Ê±£¬±íÊ¾¸´ÖÆÕû¸öÎÄ¼ş
-		// ·µ»ØÖµ£º-1 ³ö´í ÆäËû ¸´ÖÆµÄ×Ü³ß´ç
+		// å°†æºæ–‡ä»¶ä¸­æŒ‡å®šçš„ç‰‡æ–­å†…å®¹å¤åˆ¶åˆ°ç›®æ ‡æ–‡ä»¶ä¸­
+		// å½“strContentRangeçš„å€¼ä¸º""æ—¶ï¼Œè¡¨ç¤ºå¤åˆ¶æ•´ä¸ªæ–‡ä»¶
+		// è¿”å›å€¼ï¼š-1 å‡ºé”™ å…¶ä»– å¤åˆ¶çš„æ€»å°ºå¯¸
 		public static long CopyFragment(
 			Stream fileSource,
 			long lTotalLength,
@@ -938,7 +925,7 @@ namespace DigitalPlatform.Range
 
 			long lFileStart = fileSource.Position;
 
-			// ±íÊ¾·¶Î§µÄ×Ö·û´®Îª¿Õ£¬Ç¡Ç¡±íÊ¾Òª°üº¬È«²¿·¶Î§
+			// è¡¨ç¤ºèŒƒå›´çš„å­—ç¬¦ä¸²ä¸ºç©ºï¼Œæ°æ°è¡¨ç¤ºè¦åŒ…å«å…¨éƒ¨èŒƒå›´
 			if (strContentRange == "") 
 			{
 				if (lTotalLength == 0) // 2005/6/24
@@ -950,23 +937,23 @@ namespace DigitalPlatform.Range
 				strContentRange = "0-" + Convert.ToString(lTotalLength - 1);
 			}
 
-			// ´´½¨RangeList£¬±ãÓÚÀí½â·¶Î§×Ö·û´®
+			// åˆ›å»ºRangeListï¼Œä¾¿äºç†è§£èŒƒå›´å­—ç¬¦ä¸²
 			RangeList rl = new RangeList(strContentRange);
 
-			// ¼ì²éstrContentRangeÖ¸³öµÄ×î´ó×îĞ¡±ß½çºÍÔ´ÎÄ¼şÖĞÊµ¼ÊÇé¿öÊÇ·ñÃ¬¶Ü
+			// æ£€æŸ¥strContentRangeæŒ‡å‡ºçš„æœ€å¤§æœ€å°è¾¹ç•Œå’Œæºæ–‡ä»¶ä¸­å®é™…æƒ…å†µæ˜¯å¦çŸ›ç›¾
 			long lMax = rl.max();
 			if (lTotalLength <= lMax) 
 			{
-				strErrorInfo = "ÎÄ¼ş³ß´ç±È·¶Î§" + strContentRange + "ÖĞ¶¨ÒåµÄ×î´ó±ß½ç"
-					+ Convert.ToString(lMax) + "Ğ¡...";
+				strErrorInfo = "æ–‡ä»¶å°ºå¯¸æ¯”èŒƒå›´" + strContentRange + "ä¸­å®šä¹‰çš„æœ€å¤§è¾¹ç•Œ"
+					+ Convert.ToString(lMax) + "å°...";
 				return -1;
 			}
 
 			long lMin = rl.min();
 			if (lTotalLength <= lMin) 
 			{
-				strErrorInfo = "ÎÄ¼ş³ß´ç±È·¶Î§" + strContentRange + "ÖĞ¶¨ÒåµÄ×îĞ¡±ß½ç"
-					+ Convert.ToString(lMax) + "Ğ¡...";
+				strErrorInfo = "æ–‡ä»¶å°ºå¯¸æ¯”èŒƒå›´" + strContentRange + "ä¸­å®šä¹‰çš„æœ€å°è¾¹ç•Œ"
+					+ Convert.ToString(lMax) + "å°...";
 				return -1;
 			}
 
@@ -980,7 +967,7 @@ namespace DigitalPlatform.Range
 
 			//			int nStart = 0;
 
-			// Ñ­»·£¬¸´ÖÆÃ¿¸öÁ¬ĞøÆ¬¶Ï
+			// å¾ªç¯ï¼Œå¤åˆ¶æ¯ä¸ªè¿ç»­ç‰‡æ–­
 			for(int i=0,nStart=0; i<rl.Count; i++) 
 			{
 				RangeItem ri = (RangeItem)rl[i];

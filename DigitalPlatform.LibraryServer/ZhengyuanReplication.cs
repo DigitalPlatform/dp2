@@ -594,107 +594,101 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            Stream file = File.Open(strLocalFilePath,
+            using (Stream file = File.Open(strLocalFilePath,
                 FileMode.Open,
-                FileAccess.Read);
-
-            if (file.Length == 0)
-                return 0;
-
-            try
+                FileAccess.Read))
             {
 
-                XmlTextReader reader = new XmlTextReader(file);
+                if (file.Length == 0)
+                    return 0;
 
-                bool bRet = false;
-
-                // 临时的SessionInfo对象
-                SessionInfo sessioninfo = new SessionInfo(this.App);
-
-                // 模拟一个账户
-                Account account = new Account();
-                account.LoginName = "replication";
-                account.Password = "";
-                account.Rights = "setreaderinfo";
-
-                account.Type = "";
-                account.Barcode = "";
-                account.Name = "replication";
-                account.UserID = "replication";
-                account.RmsUserName = this.App.ManagerUserName;
-                account.RmsPassword = this.App.ManagerPassword;
-
-                sessioninfo.Account = account;
-
-                // 找到根
-                while (true)
+                using (XmlTextReader reader = new XmlTextReader(file))
                 {
-                    try
-                    {
-                        bRet = reader.Read();
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "读XML文件发生错误: " + ex.Message;
-                        return -1;
-                    }
+                    bool bRet = false;
 
-                    if (bRet == false)
-                    {
-                        strError = "没有根元素";
-                        return -1;
-                    }
-                    if (reader.NodeType == XmlNodeType.Element)
-                        break;
-                }
+                    // 临时的SessionInfo对象
+                    SessionInfo sessioninfo = new SessionInfo(this.App);
 
-                for (int i = 0; ; i++)
-                {
-                    if (this.Stopped == true)
-                        return 1;
+                    // 模拟一个账户
+                    Account account = new Account();
+                    account.LoginName = "replication";
+                    account.Password = "";
+                    account.Rights = "setreaderinfo";
 
+                    account.Type = "";
+                    account.Barcode = "";
+                    account.Name = "replication";
+                    account.UserID = "replication";
+                    account.RmsUserName = this.App.ManagerUserName;
+                    account.RmsPassword = this.App.ManagerPassword;
 
-                    bool bEnd = false;
-                    // 第二级元素
+                    sessioninfo.Account = account;
+
+                    // 找到根
                     while (true)
                     {
-                        bRet = reader.Read();
+                        try
+                        {
+                            bRet = reader.Read();
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "读XML文件发生错误: " + ex.Message;
+                            return -1;
+                        }
+
                         if (bRet == false)
                         {
-                            bEnd = true;  // 结束
-                            break;
+                            strError = "没有根元素";
+                            return -1;
                         }
                         if (reader.NodeType == XmlNodeType.Element)
                             break;
                     }
 
-                    if (bEnd == true)
-                        break;
+                    for (int i = 0; ; i++)
+                    {
+                        if (this.Stopped == true)
+                            return 1;
 
-                    this.AppendResultText("处理 " + (i + 1).ToString() + "\r\n");
+                        bool bEnd = false;
+                        // 第二级元素
+                        while (true)
+                        {
+                            bRet = reader.Read();
+                            if (bRet == false)
+                            {
+                                bEnd = true;  // 结束
+                                break;
+                            }
+                            if (reader.NodeType == XmlNodeType.Element)
+                                break;
+                        }
 
-                    // 记录体
-                    string strXml = reader.ReadOuterXml();
+                        if (bEnd == true)
+                            break;
 
-                    // return:
-                    //      -1  error
-                    //      0   已经写入
-                    //      1   没有必要写入
-                    nRet = WriteOneReaderInfo(
-                        sessioninfo,
-                        strMapDbName,
-                        strXml,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
+                        this.AppendResultText("处理 " + (i + 1).ToString() + "\r\n");
 
+                        // 记录体
+                        string strXml = reader.ReadOuterXml();
+
+                        // return:
+                        //      -1  error
+                        //      0   已经写入
+                        //      1   没有必要写入
+                        nRet = WriteOneReaderInfo(
+                            sessioninfo,
+                            strMapDbName,
+                            strXml,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                    }
+
+                    return 0;
                 }
-
-                return 0;
-            }
-            finally
-            {
-                file.Close();
             }
         }
 

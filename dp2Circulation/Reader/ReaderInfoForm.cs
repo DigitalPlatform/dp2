@@ -4388,8 +4388,8 @@ MessageBoxDefaultButton.Button2);
             }
 
             this.EnableControls(false);
-
             bool bOldSendKeyEnabled = true;
+            Image image = null; 
             try
             {
                 int nRet = StartIdcardChannel(
@@ -4397,8 +4397,6 @@ MessageBoxDefaultButton.Button2);
                     out strError);
                 if (nRet == -1)
                     return -1;
-
-                Image image = null;
 
                 try
                 {
@@ -4499,6 +4497,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         using (MemoryStream s = new MemoryStream(m_baPhoto))
                         {
+                            Debug.Assert(image == null, "");
                             image = new Bitmap(s);
                         }
 
@@ -4509,7 +4508,6 @@ MessageBoxDefaultButton.Button1);
                         // File.Delete(strLocalTempPhotoFilename);
                     }
                     m_baPhoto = null;   // 释放空间
-
                 }
                 finally
                 {
@@ -4680,6 +4678,11 @@ strReaderXml);
             }
             finally
             {
+                if (image != null)
+                {
+                    image.Dispose();
+                    image = null;
+                }
                 this.EnableControls(true);
             }
         }
@@ -5157,7 +5160,6 @@ MessageBoxDefaultButton.Button1);
 
             using (StreamWriter sw = new StreamWriter(dlg.FileName, bAppend, Encoding.UTF8))
             {
-                
                 foreach (XmlElement node in nodes)
                 {
                     string strBarcode = node.GetAttribute("barcode");

@@ -2290,10 +2290,11 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strKeysFileName) == true)
                     {
-                        StreamReader sr = new StreamReader(strKeysFileName,
-                            Encoding.UTF8);
-                        strKeysText = sr.ReadToEnd();
-                        sr.Close();
+                        using (StreamReader sr = new StreamReader(strKeysFileName,
+                            Encoding.UTF8))
+                        {
+                            strKeysText = sr.ReadToEnd();
+                        }
                     }
 
                     /*
@@ -2340,10 +2341,11 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strBrowseFileName) == true)
                     {
-                        StreamReader sr = new StreamReader(strBrowseFileName,
-                            Encoding.UTF8);
-                        strBrowseText = sr.ReadToEnd();
-                        sr.Close();
+                        using (StreamReader sr = new StreamReader(strBrowseFileName,
+                            Encoding.UTF8))
+                        {
+                            strBrowseText = sr.ReadToEnd();
+                        }
                     }
                     /*
                                     // browse文件
@@ -2569,8 +2571,10 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strKeysFileName) == false)
                     {
-                        Stream s = File.Create(strKeysFileName);
-                        s.Close();
+                        using(Stream s = File.Create(strKeysFileName))
+                        {
+
+                        }
                     }
 
                     nRet = DatabaseUtil.CreateXmlFile(strKeysFileName,
@@ -2637,8 +2641,10 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strBrowseFileName) == false)
                     {
-                        Stream s = File.Create(strBrowseFileName);
-                        s.Close();
+                        using(Stream s = File.Create(strBrowseFileName))
+                        {
+
+                        }
                     }
 
                     nRet = DatabaseUtil.CreateXmlFile(strBrowseFileName,

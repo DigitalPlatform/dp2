@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -9,15 +9,15 @@ namespace DigitalPlatform.rms.Client
 {
 #if NOOOOOOOOOOOOO
     /// <summary>
-    /// °ÑÒ»¸ö¶ÔÏóÄ£ÄâÎª¿ÉÒÔ¶ÁµÄStream
+    /// æŠŠä¸€ä¸ªå¯¹è±¡æ¨¡æ‹Ÿä¸ºå¯ä»¥è¯»çš„Stream
     /// </summary>
     public class RmsStream : Stream
     {
         public RmsChannel RmsChannel = null;
 
-        string m_strObjectPath;	// ¶ÔÏóÂ·¾¶
-        long m_lLength = 0;	// ³¤¶È
-        long m_lCurrent = 0;	// ÎÄ¼şÖ¸Õëµ±Ç°Î»ÖÃ
+        string m_strObjectPath;	// å¯¹è±¡è·¯å¾„
+        long m_lLength = 0;	// é•¿åº¦
+        long m_lCurrent = 0;	// æ–‡ä»¶æŒ‡é’ˆå½“å‰ä½ç½®
 
 
         public RmsStream()
@@ -34,16 +34,16 @@ namespace DigitalPlatform.rms.Client
             this.RmsChannel = channel;
             this.m_strObjectPath = strObjectPath;
 
-            // »ñµÃÔªÊı¾İ¡£×îÖØÒªµÄÊÇ³¤¶È
+            // è·å¾—å…ƒæ•°æ®ã€‚æœ€é‡è¦çš„æ˜¯é•¿åº¦
 
             // return:
-            //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-            //		0	³É¹¦
+            //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+            //		0	æˆåŠŸ
             string strMetaData = "";
             string strOutputPath;
             byte[] baOutputTimeStamp = null;
 
-            // »ñµÃÃ½ÌåÀàĞÍ
+            // è·å¾—åª’ä½“ç±»å‹
             long lRet = channel.GetRes(
                 strPath,
                 null,	// Response.OutputStream,
@@ -63,7 +63,7 @@ namespace DigitalPlatform.rms.Client
             if (Page.Response.IsClientConnected == false)
                 return -1;
 
-            // È¡metadataÖĞµÄmimeÀàĞÍĞÅÏ¢
+            // å–metadataä¸­çš„mimeç±»å‹ä¿¡æ¯
             Hashtable values = ParseMedaDataXml(strMetaData,
                 out strError);
 
@@ -78,8 +78,8 @@ namespace DigitalPlatform.rms.Client
             if (strClientPath != "")
                 strClientPath = PathUtil.PureName(strClientPath);
 
-            // TODO: Èç¹ûÊÇ·Çimage/????ÀàĞÍ£¬¶¼Òª¼ÓÈëcontent-disposition
-            // ÊÇ·ñ³öÏÖÁí´æÎª¶Ô»°¿ò
+            // TODO: å¦‚æœæ˜¯éimage/????ç±»å‹ï¼Œéƒ½è¦åŠ å…¥content-disposition
+            // æ˜¯å¦å‡ºç°å¦å­˜ä¸ºå¯¹è¯æ¡†
             if (bSaveAs == true)
             {
                 string strEncodedFileName = HttpUtility.UrlEncode(strClientPath, Encoding.UTF8);
@@ -91,7 +91,7 @@ namespace DigitalPlatform.rms.Client
             Page.Response.AddHeader("Last-Modified", "Wed, 21 Nov 2007 07:10:54 GMT");
              * */
 
-            // ÓÃ text/plain IE XML ËÑË÷google
+            // ç”¨ text/plain IE XML æœç´¢google
             // http://support.microsoft.com/kb/329661
             // http://support.microsoft.com/kb/239750/EN-US/
             /*
@@ -105,7 +105,7 @@ Value data: HEX 0x1
 
             /*
 
-            Page.Response.CacheControl = "no-cache";    // Èç¹û²»ÓÃ´Ë¾ä£¬text/plain»á±»µ±×÷xmlÎÄ¼ş´ò¿ª
+            Page.Response.CacheControl = "no-cache";    // å¦‚æœä¸ç”¨æ­¤å¥ï¼Œtext/plainä¼šè¢«å½“ä½œxmlæ–‡ä»¶æ‰“å¼€
             Page.Response.AddHeader("Pragma", "no-cache");
             Page.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 //            Page.Response.AddHeader("Cache-Control", "public");
@@ -114,7 +114,7 @@ Value data: HEX 0x1
              * */
 
 
-            // ÉèÖÃÃ½ÌåÀàĞÍ
+            // è®¾ç½®åª’ä½“ç±»å‹
             if (strMime == "text/plain")
                 strMime = "text";
             Page.Response.ContentType = strMime;
@@ -197,7 +197,7 @@ Value data: HEX 0x1
         {
             if (m_stream == null)
             {
-                throw (new Exception("ÄÚ²¿streamÉĞÎ´´ò¿ª..."));
+                throw (new Exception("å†…éƒ¨streamå°šæœªæ‰“å¼€..."));
             }
 
             if (m_lCurrent >= m_lLength)
@@ -212,7 +212,7 @@ Value data: HEX 0x1
             int nRet = m_stream.Read(buffer, offset, count);
             if (nRet != count)
             {
-                throw (new Exception("ÄÚ²¿stream readÒì³£..."));
+                throw (new Exception("å†…éƒ¨stream readå¼‚å¸¸..."));
             }
 
             m_lCurrent += count;
@@ -237,7 +237,7 @@ Value data: HEX 0x1
             }
             else
             {
-                throw (new Exception("²»Ö§³ÖµÄorigin²ÎÊı"));
+                throw (new Exception("ä¸æ”¯æŒçš„originå‚æ•°"));
             }
 
             return m_lCurrent;
@@ -249,12 +249,12 @@ Value data: HEX 0x1
             int count
             )
         {
-            throw (new NotSupportedException("PartStream²»Ö§³ÖWrite()"));
+            throw (new NotSupportedException("PartStreamä¸æ”¯æŒWrite()"));
         }
 
         public override void SetLength(long value)
         {
-            throw (new NotSupportedException("PartStream²»Ö§³ÖSetLength()"));
+            throw (new NotSupportedException("PartStreamä¸æ”¯æŒSetLength()"));
         }
 
     }

@@ -230,7 +230,6 @@ ref sessioninfo) == false)
             }
         }
 
-
         // 返回一级节点的名字和包含记录数量
         this.Response.Write(MyWebPage.GetResultString(result_info));
         this.Response.End();

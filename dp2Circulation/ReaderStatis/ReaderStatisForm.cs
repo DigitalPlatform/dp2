@@ -421,32 +421,31 @@ namespace dp2Circulation
         // 创建缺省的main.cs文件
         static void CreateDefaultMainCsFile(string strFileName)
         {
-            StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
-            sw.WriteLine("using System;");
-            sw.WriteLine("using System.Windows.Forms;");
-            sw.WriteLine("using System.IO;");
-            sw.WriteLine("using System.Text;");
-            sw.WriteLine("using System.Xml;");
-            sw.WriteLine("");
+            using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("using System;");
+                sw.WriteLine("using System.Windows.Forms;");
+                sw.WriteLine("using System.IO;");
+                sw.WriteLine("using System.Text;");
+                sw.WriteLine("using System.Xml;");
+                sw.WriteLine("");
 
-            //sw.WriteLine("using DigitalPlatform.MarcDom;");
-            //sw.WriteLine("using DigitalPlatform.Statis;");
-            sw.WriteLine("using dp2Circulation;");
+                //sw.WriteLine("using DigitalPlatform.MarcDom;");
+                //sw.WriteLine("using DigitalPlatform.Statis;");
+                sw.WriteLine("using dp2Circulation;");
 
-            sw.WriteLine("using DigitalPlatform.Xml;");
+                sw.WriteLine("using DigitalPlatform.Xml;");
 
+                sw.WriteLine("public class MyStatis : ReaderStatis");
 
-            sw.WriteLine("public class MyStatis : ReaderStatis");
+                sw.WriteLine("{");
 
-            sw.WriteLine("{");
+                sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
+                sw.WriteLine("	{");
+                sw.WriteLine("	}");
 
-            sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
-            sw.WriteLine("	{");
-            sw.WriteLine("	}");
-
-
-            sw.WriteLine("}");
-            sw.Close();
+                sw.WriteLine("}");
+            }
         }
 
 
@@ -1063,8 +1062,6 @@ namespace dp2Circulation
                     Global.WriteHtml(this.webBrowser_batchAddItemPrice,
                         "处理结束。共增补价格字符串 " + nCount.ToString() + " 个。\r\n");
                      * */
-
-
                 }
                 finally
                 {
@@ -1099,13 +1096,10 @@ namespace dp2Circulation
             strError = "";
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(strRecPathFilename,
+            using (StreamWriter sw = new StreamWriter(strRecPathFilename,
                 false,	// append
-                System.Text.Encoding.UTF8);
-
-            try
+                System.Text.Encoding.UTF8))
             {
-
                 /*
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在检索 ...");
@@ -1208,12 +1202,6 @@ namespace dp2Circulation
                      * */
                 }
             }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
-            }
-
             return 0;
         ERROR1:
             return -1;
@@ -1587,9 +1575,9 @@ namespace dp2Circulation
             string strRecPath,
             string strAction,
             string strOldXml,
-            byte [] baOldTimestamp,
+            byte[] baOldTimestamp,
             string strNewXml,
-            out byte [] baNewTimestamp,
+            out byte[] baNewTimestamp,
             out string strSavedPath,
             out string strSavedXml,
             out string strError)
@@ -1742,7 +1730,7 @@ namespace dp2Circulation
         // 把否定型模式向前移动
         void MoveReverseItemForward()
         {
-            int j=0;    // 移动过区域的尾部指针
+            int j = 0;    // 移动过区域的尾部指针
             for (int i = 0; i < this.Count; i++)
             {
                 StringMatch match = this[i];
@@ -1775,12 +1763,12 @@ namespace dp2Circulation
                 if (match.Is == true)
                 {
                     if (nRet != -1)   // match
-                        return true; 
+                        return true;
                 }
                 else
                 {
                     if (nRet != -1)   // match
-                        return false; 
+                        return false;
                 }
             }
 
@@ -1830,68 +1818,58 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            StreamReader sr = null;
-
             // 2008/4/3
             Encoding encoding = FileUtil.DetectTextFileEncoding(strCfgFilename);
-
             try
             {
-                sr = new StreamReader(strCfgFilename, encoding);
+                using (StreamReader sr = new StreamReader(strCfgFilename, encoding))
+                {
+                    for (int i = 0; ; i++)
+                    {
+                        string strLine = sr.ReadLine();
+
+                        if (strLine == null)
+                            break;
+
+                        if (String.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        strLine = strLine.Trim();
+
+                        // 注释行
+                        if (strLine.Length >= 2)
+                        {
+                            if (strLine[0] == '/' && strLine[1] == '/')
+                                continue;
+                        }
+
+                        int nRet = strLine.IndexOf("=");
+                        if (nRet == -1)
+                            throw (new Exception("行 '" + strLine + "' 格式不正确，缺乏=号"));
+
+                        string strName = strLine.Substring(0, nRet).Trim();
+
+                        if (String.IsNullOrEmpty(strName) == true)
+                            throw (new Exception("行 '" + strLine + "' 格式不正确，=号左边缺乏正规名部分"));
+
+
+                        string strList = strLine.Substring(nRet + 1).Trim();
+
+                        if (String.IsNullOrEmpty(strList) == true)
+                            throw (new Exception("行 '" + strLine + "' 格式不正确，=号右边缺乏匹配列表部分"));
+
+                        RegularString regular = new RegularString();
+                        regular.RegularText = strName;
+                        regular.match_list = new StringMatchList(strList.Split(new char[] { ',' }));
+
+                        this.Add(regular);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                strError = "打开文件 " + strCfgFilename + " 失败: " + ex.Message;
+                strError = "从文件 " + strCfgFilename + " 读取失败: " + ex.Message;
                 throw new Exception(strError);
-            }
-
-            try
-            {
-                for (int i = 0; ; i++)
-                {
-                    string strLine = sr.ReadLine();
-
-                    if (strLine == null)
-                        break;
-
-                    if (String.IsNullOrEmpty(strLine) == true)
-                        continue;
-
-                    strLine = strLine.Trim();
-
-                    // 注释行
-                    if (strLine.Length >= 2)
-                    {
-                        if (strLine[0] == '/' && strLine[1] == '/')
-                            continue;
-                    }
-
-                    int nRet = strLine.IndexOf("=");
-                    if (nRet == -1)
-                        throw (new Exception("行 '" +strLine+ "' 格式不正确，缺乏=号"));
-
-                    string strName = strLine.Substring(0, nRet).Trim();
-
-                    if (String.IsNullOrEmpty(strName) == true)
-                        throw (new Exception("行 '" + strLine + "' 格式不正确，=号左边缺乏正规名部分"));
-
-
-                    string strList = strLine.Substring(nRet + 1).Trim();
-
-                    if (String.IsNullOrEmpty(strList) == true)
-                        throw (new Exception("行 '" + strLine + "' 格式不正确，=号右边缺乏匹配列表部分"));
-
-                    RegularString regular = new RegularString();
-                    regular.RegularText = strName;
-                    regular.match_list = new StringMatchList(strList.Split(new char[] {','}));
-
-                    this.Add(regular);
-                }
-
-            }
-            finally
-            {
-                sr.Close();
             }
         }
 

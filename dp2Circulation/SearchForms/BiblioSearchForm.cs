@@ -4961,7 +4961,6 @@ MessageBoxDefaultButton.Button1);
                     stop.SetProgressValue(++i);
                 }
             }
-
             finally
             {
                 stop.EndLoop();
@@ -6801,10 +6800,9 @@ MessageBoxDefaultButton.Button2);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
+                System.Text.Encoding.UTF8))
             {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
@@ -6815,11 +6813,6 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";

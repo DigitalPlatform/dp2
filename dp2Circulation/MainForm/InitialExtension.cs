@@ -870,10 +870,11 @@ MessageBoxDefaultButton.Button1);
             return true;
         }
 
-        static long GetUserDiskFreeSpace()
+        static long GetUserDiskFreeSpace(out string strDriveName)
         {
-             string strUserFolder =  Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-             return GetTotalFreeSpace(Path.GetPathRoot(strUserFolder));
+            string strUserFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            strDriveName = Path.GetPathRoot(strUserFolder);
+            return GetTotalFreeSpace(strDriveName);
         }
 
         static long GetTotalFreeSpace(string driveName)
@@ -962,9 +963,10 @@ MessageBoxDefaultButton.Button1);
 
             OpenBackgroundForm();
 
-            if (GetUserDiskFreeSpace() < 1024*1024*10)
+            string strDriveName = "";
+            if (GetUserDiskFreeSpace(out strDriveName) < 1024*1024*10)
             {
-                Program.PromptAndExit(this, "用户目录所在硬盘剩余空间太小(已小于10M)。请先腾出足够空间，再重新启动 dp2circulation");
+                Program.PromptAndExit(this, "用户目录所在硬盘 "+strDriveName+" 剩余空间太小(已小于10M)。请先腾出足够空间，再重新启动 dp2circulation");
                 return;
             }
 
@@ -2710,6 +2712,7 @@ Culture=neutral, PublicKeyToken=null
             return -1;  // 出错，不希望继续以后的操作
         }
 
+        // TODO: 代码中 stream 的用法比较含混，建议修改为 using 包围的方式
         // 每个文件第一次请求只返回文件时间, 如果发现有修改后才全部获得文件内容
         // return:
         //      -1  出错

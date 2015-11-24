@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Collections;
 using System.Xml;
@@ -13,18 +13,18 @@ namespace DigitalPlatform.rms
 	public class rmsUtil
 	{
 #if NO
-		// ½«Æ¬¶ÏÁ÷(sourceStream)ÖĞÈ«²¿ÄÚÈİ¸ù¾İcontentrange×Ö·û´®¶¨ÒåµÄÎ»ÖÃ
-		// »¹Ô­¸´ÖÆµ½Ä¿±êÎÄ¼ş(strOriginFileName)ÖĞ
-		// Ò²¾ÍÊÇËµ,contentrange×Ö·û´®Êµ¼ÊÉÏ¶¨ÒåµÄÊÇ´ÓÄ¿±êÎÄ¼ş³éÈ¡µ½Æ¬¶ÏµÄ¹æÔò
-		// µ±strContentRangeµÄÖµÎª""Ê±£¬±íÊ¾¸´ÖÆÕû¸öÎÄ¼ş
+		// å°†ç‰‡æ–­æµ(sourceStream)ä¸­å…¨éƒ¨å†…å®¹æ ¹æ®contentrangeå­—ç¬¦ä¸²å®šä¹‰çš„ä½ç½®
+		// è¿˜åŸå¤åˆ¶åˆ°ç›®æ ‡æ–‡ä»¶(strOriginFileName)ä¸­
+		// ä¹Ÿå°±æ˜¯è¯´,contentrangeå­—ç¬¦ä¸²å®é™…ä¸Šå®šä¹‰çš„æ˜¯ä»ç›®æ ‡æ–‡ä»¶æŠ½å–åˆ°ç‰‡æ–­çš„è§„åˆ™
+		// å½“strContentRangeçš„å€¼ä¸º""æ—¶ï¼Œè¡¨ç¤ºå¤åˆ¶æ•´ä¸ªæ–‡ä»¶
 		// paramter:
-		//		streamFragment:    Æ¬¶ÏÁ÷
-		//		strContentRange:   Æ¬¶ÏÁ÷ÔÚÎÄ¼şÖĞ´æÔÚµÄÎ»ÖÃ
-		//		strOriginFileName: Ä¿±êÎÄ¼ş
-		//		strError:          out ²ÎÊı,return error info
+		//		streamFragment:    ç‰‡æ–­æµ
+		//		strContentRange:   ç‰‡æ–­æµåœ¨æ–‡ä»¶ä¸­å­˜åœ¨çš„ä½ç½®
+		//		strOriginFileName: ç›®æ ‡æ–‡ä»¶
+		//		strError:          out å‚æ•°,return error info
 		// return:
-		//		-1  ³ö´í
-		//		>=  Êµ¼Ê¸´ÖÆµÄ×Ü³ß´ç
+		//		-1  å‡ºé”™
+		//		>=  å®é™…å¤åˆ¶çš„æ€»å°ºå¯¸
 		public static long RestoreFragment(
 			Stream streamFragment,
 			string strContentRange,
@@ -37,23 +37,23 @@ namespace DigitalPlatform.rms
 			if (streamFragment.Length == 0)
 				return 0;
 
-			// ±íÊ¾·¶Î§µÄ×Ö·û´®Îª¿Õ£¬Ç¡Ç¡±íÊ¾Òª°üº¬È«²¿·¶Î§
+			// è¡¨ç¤ºèŒƒå›´çš„å­—ç¬¦ä¸²ä¸ºç©ºï¼Œæ°æ°è¡¨ç¤ºè¦åŒ…å«å…¨éƒ¨èŒƒå›´
 			if (strContentRange == "") 
 			{
 				strContentRange = "0-" + Convert.ToString(streamFragment.Length - 1);
 			}
 
-			// ´´½¨RangeList£¬±ãÓÚÀí½â·¶Î§×Ö·û´®
+			// åˆ›å»ºRangeListï¼Œä¾¿äºç†è§£èŒƒå›´å­—ç¬¦ä¸²
 			RangeList rl = new RangeList(strContentRange);
 
 			FileStream fileOrigin = File.Open(
 				strOriginFileName,
-				FileMode.OpenOrCreate, // Ô­À´ÊÇOpen£¬ºóÀ´ĞŞ¸ÄÎªOpenOrCreate¡£ÕâÑù¶ÔÁÙÊ±ÎÄ¼ş±»ÏµÍ³¹ÜÀíÔ±ÊÖ¶¯ÒâÍâÉ¾³ı(µ«ÊÇxmlÎÄ¼şÖĞÈÔÈ»¼ÇÔØÁËÈÎÎñ)µÄÇé¿öÄÜ¹»ÊÊÓ¦¡£·ñÔò»áÅ×³öFileNotFoundExceptionÒì³£
+				FileMode.OpenOrCreate, // åŸæ¥æ˜¯Openï¼Œåæ¥ä¿®æ”¹ä¸ºOpenOrCreateã€‚è¿™æ ·å¯¹ä¸´æ—¶æ–‡ä»¶è¢«ç³»ç»Ÿç®¡ç†å‘˜æ‰‹åŠ¨æ„å¤–åˆ é™¤(ä½†æ˜¯xmlæ–‡ä»¶ä¸­ä»ç„¶è®°è½½äº†ä»»åŠ¡)çš„æƒ…å†µèƒ½å¤Ÿé€‚åº”ã€‚å¦åˆ™ä¼šæŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸
 				FileAccess.Write,
 				FileShare.ReadWrite);
 
 
-			// Ñ­»·£¬¸´ÖÆÃ¿¸öÁ¬ĞøÆ¬¶Ï
+			// å¾ªç¯ï¼Œå¤åˆ¶æ¯ä¸ªè¿ç»­ç‰‡æ–­
 			for(int i=0; i<rl.Count; i++) 
 			{
 				RangeItem ri = (RangeItem)rl[i];
@@ -69,7 +69,7 @@ namespace DigitalPlatform.rms
 		}
 #endif
 
-		// µÃµ½´«ºÍµÄ×Ö·û´®£¬×éºÏ·µ»ØÒ»¸öÎÄ¼şÃû×Ö·û´®
+		// å¾—åˆ°ä¼ å’Œçš„å­—ç¬¦ä¸²ï¼Œç»„åˆè¿”å›ä¸€ä¸ªæ–‡ä»¶åå­—ç¬¦ä¸²
 		public static string makeFilePath(string strDir,
 			string strPrefix,
 			string strFileName)
@@ -81,12 +81,12 @@ namespace DigitalPlatform.rms
 		}
 	}
 
-	//±íÊ¾ÎÄ¼şÆ¬¶ÏµÄÀà
+	//è¡¨ç¤ºæ–‡ä»¶ç‰‡æ–­çš„ç±»
 	public class FragmentItem
 	{
-		public string strClientFilePath = "";	// Ëù´ÓÊôµÄÇ°¶ËÎÄ¼şÃû
-		public string strContentRange = "";		// Ëù¶ÔÓ¦µÄÆ¬¶Ï·¶Î§¶¨Òå
-		public string strTempFileName = "";		// ÁÙÊ±ÎÄ¼şÃû
+		public string strClientFilePath = "";	// æ‰€ä»å±çš„å‰ç«¯æ–‡ä»¶å
+		public string strContentRange = "";		// æ‰€å¯¹åº”çš„ç‰‡æ–­èŒƒå›´å®šä¹‰
+		public string strTempFileName = "";		// ä¸´æ—¶æ–‡ä»¶å
 
 		~FragmentItem()
 		{
@@ -94,7 +94,7 @@ namespace DigitalPlatform.rms
 		}
 
 
-		// É¾³ıÁÙÊ±ÎÄ¼ş
+		// åˆ é™¤ä¸´æ—¶æ–‡ä»¶
 		public void DeleteTempFile()
 		{
 			if (strTempFileName != "") 
@@ -109,16 +109,16 @@ namespace DigitalPlatform.rms
 		{
 			if (strClientFilePath == "") 
 			{
-				strErrorInfo = "strClientFilePath²ÎÊıÎª¿Õ...";
+				strErrorInfo = "strClientFilePathå‚æ•°ä¸ºç©º...";
 				return -1;
 			}
 			if (strTempFileName == "") 
 			{
-				// »ñµÃÁÙÊ±ÎÄ¼şÃû
+				// è·å¾—ä¸´æ—¶æ–‡ä»¶å
 				strTempFileName = Path.GetTempFileName();
 			}
 
-			//MessageBox.Show ("ÁÙÊ±ÎÄ¼şÃû:"+strTempFileName);
+			//MessageBox.Show ("ä¸´æ—¶æ–‡ä»¶å:"+strTempFileName);
 			return RangeList.CopyFragment(
 				strClientFilePath,
 				strContentRange,
@@ -127,7 +127,7 @@ namespace DigitalPlatform.rms
 		}
 
 
-		//µÃµ½ÁÙÊ±ÎÄ¼şµÄ³¤¶È
+		//å¾—åˆ°ä¸´æ—¶æ–‡ä»¶çš„é•¿åº¦
 		public long GetTempFileLength()
 		{
 			if (strTempFileName == "")
@@ -137,13 +137,13 @@ namespace DigitalPlatform.rms
 		}
 
 
-		// »ñµÃ±¾Æ¬¶ÏµÄ×Ü³ß´ç
+		// è·å¾—æœ¬ç‰‡æ–­çš„æ€»å°ºå¯¸
 		public long lengthOf()
 		{
 			if (strContentRange == "") 
 			{
 				if (strClientFilePath == "")
-					return -1;	// ±íÊ¾·Ç·¨Öµ
+					return -1;	// è¡¨ç¤ºéæ³•å€¼
 				FileInfo fi = new FileInfo(strClientFilePath);
 				return fi.Length;
 			}
@@ -151,14 +151,14 @@ namespace DigitalPlatform.rms
 		}
 
 
-		// °ÑÒ»¸öcontentrange×Ö·û´®·­ÒëÎª×Ü³ß´ç
+		// æŠŠä¸€ä¸ªcontentrangeå­—ç¬¦ä¸²ç¿»è¯‘ä¸ºæ€»å°ºå¯¸
 		public static long lengthOf(string strContentRange)
 		{
 			long lTotalBytes = 0;
 
-			// ´´½¨RangeList£¬±ãÓÚÀí½â·¶Î§×Ö·û´®
+			// åˆ›å»ºRangeListï¼Œä¾¿äºç†è§£èŒƒå›´å­—ç¬¦ä¸²
 			RangeList rl = new RangeList(strContentRange);
-			// Ñ­»·£¬¸´ÖÆÃ¿¸öÁ¬ĞøÆ¬¶Ï
+			// å¾ªç¯ï¼Œå¤åˆ¶æ¯ä¸ªè¿ç»­ç‰‡æ–­
 			for(int i=0; i<rl.Count; i++) 
 			{
 				RangeItem ri = (RangeItem)rl[i];
@@ -171,15 +171,15 @@ namespace DigitalPlatform.rms
 
 
 
-	//FragmentItemµÄ¼¯ºÏ
+	//FragmentItemçš„é›†åˆ
 	public class FragmentList : ArrayList 
 	{
-		//´´½¨Ò»¸öĞÂµÄFragmentItem¶ÔÏó£¬²¢¼ÓÈë¼¯ºÏ
-		//Èç¹û·¢ÏÖstrClientFilePathºÍContentRange²ÎÊıºÍ¼¯ºÏÖĞÒÑ¾­´æÔÚµÄItemÏàÍ¬£¬Ôò·µ»Ø´íÎó
-		//strClientFilePath: ÎÄ¼şÃû
-		//ContentRange: ·¶Î§
-		//bCreateTempFile: ÊÇ·ñÁ¢¼´´´½¨ÁÙÊ±ÎÄ¼ş
-		//strErrorInfo: ´íÎóĞÅÏ¢
+		//åˆ›å»ºä¸€ä¸ªæ–°çš„FragmentItemå¯¹è±¡ï¼Œå¹¶åŠ å…¥é›†åˆ
+		//å¦‚æœå‘ç°strClientFilePathå’ŒContentRangeå‚æ•°å’Œé›†åˆä¸­å·²ç»å­˜åœ¨çš„Itemç›¸åŒï¼Œåˆ™è¿”å›é”™è¯¯
+		//strClientFilePath: æ–‡ä»¶å
+		//ContentRange: èŒƒå›´
+		//bCreateTempFile: æ˜¯å¦ç«‹å³åˆ›å»ºä¸´æ—¶æ–‡ä»¶
+		//strErrorInfo: é”™è¯¯ä¿¡æ¯
 		public FragmentItem newItem(string strClientFilePath,
 			string strContentRange,
 			bool bCreateTempFile,
@@ -205,19 +205,19 @@ namespace DigitalPlatform.rms
 	} 
 
 
-	//FileNameHolderÀïÃæµÄ¶ÔÏóµÄÀàĞÍÎªFileNameItem
+	//FileNameHolderé‡Œé¢çš„å¯¹è±¡çš„ç±»å‹ä¸ºFileNameItem
 	public class FileNameHolder:ArrayList
 	{
-		//ÁÙÊ±Ä¿Â¼µØÖ·
+		//ä¸´æ—¶ç›®å½•åœ°å€
 		public string m_strDir;           
 
-		//Ç°×º£¬ÏÖÔÚÎªsessionID + recordID
+		//å‰ç¼€ï¼Œç°åœ¨ä¸ºsessionID + recordID
 		public string m_strPrefix;
   
-		//µ÷ÊÔĞÅÏ¢
+		//è°ƒè¯•ä¿¡æ¯
 		public string strFileNameHolderInfo = "";
 
-		//¹«¹²DirÊôĞÔ£¬ÁÙÊ±Ä¿Â¼µØÖ·
+		//å…¬å…±Dirå±æ€§ï¼Œä¸´æ—¶ç›®å½•åœ°å€
 		public string Dir
 		{
 			get
@@ -230,7 +230,7 @@ namespace DigitalPlatform.rms
 			}
 		}
 
-		//¹«¹²PrefixÊôĞÔ£¬±íÊ¾Ç°×º
+		//å…¬å…±Prefixå±æ€§ï¼Œè¡¨ç¤ºå‰ç¼€
 		public string Prefix
 		{
 			get
@@ -243,15 +243,15 @@ namespace DigitalPlatform.rms
 			}
 		}
 
-		//LeaveFilesµ÷ÓÃClear()º¯ÊıÇå³ıËùÓĞ¶ÔÏó£¬
-		//ÄÇÃ´ÔÚÎö¹¹Ê±¾Í²»»áÉ¾³ı¶ÔÏóÁË£¬½«ËùÓĞÈ¨½«¸øxmledit.
+		//LeaveFilesè°ƒç”¨Clear()å‡½æ•°æ¸…é™¤æ‰€æœ‰å¯¹è±¡ï¼Œ
+		//é‚£ä¹ˆåœ¨ææ„æ—¶å°±ä¸ä¼šåˆ é™¤å¯¹è±¡äº†ï¼Œå°†æ‰€æœ‰æƒå°†ç»™xmledit.
 		public void LeaveFiles()
 		{
 			Clear();
 		}
 
-		//ÏÈÎïÀíÉ¾³ıËùÓĞµÄ¶ÔÏó£¬ÔÙÇå¿Õ¼¯ºÏ¡£
-		//³É¹¦·µ»Ø0
+		//å…ˆç‰©ç†åˆ é™¤æ‰€æœ‰çš„å¯¹è±¡ï¼Œå†æ¸…ç©ºé›†åˆã€‚
+		//æˆåŠŸè¿”å›0
 		public int DeleteAllFiles()
 		{
 			foreach(FileNameItem objFileName in this)
@@ -262,21 +262,21 @@ namespace DigitalPlatform.rms
 				}
 				catch (Exception ex)
 				{
-					//Exception ex = new Exception("ÔÚDeleteAllFilesÀïÉ¾³ıÁË" + objFileName.FileName + "ÎÄ¼şÊ§°Ü");
+					//Exception ex = new Exception("åœ¨DeleteAllFilesé‡Œåˆ é™¤äº†" + objFileName.FileName + "æ–‡ä»¶å¤±è´¥");
 					throw(ex);
-					//strFileNameHolderInfo +="ÔÚDeleteAllFilesÀïÉ¾³ıÁË"+objFileName.FileName+"ÎÄ¼şÊ§°Ü";
+					//strFileNameHolderInfo +="åœ¨DeleteAllFilesé‡Œåˆ é™¤äº†"+objFileName.FileName+"æ–‡ä»¶å¤±è´¥";
 				}
 			}
 			Clear();
 			return 0;
 		}
 
-		//ÁĞ³ö¼¯ºÏµÄÖĞµÄËùÓĞÏî
-		//±í¸ñ×Ö·û´®
+		//åˆ—å‡ºé›†åˆçš„ä¸­çš„æ‰€æœ‰é¡¹
+		//è¡¨æ ¼å­—ç¬¦ä¸²
 		public string Dump()
 		{
 			string strResult = "";
-			strResult += "<table border='1'><tr><td>ÎÄ¼şÃû</td></tr>";
+			strResult += "<table border='1'><tr><td>æ–‡ä»¶å</td></tr>";
 
 			foreach(FileNameItem objFileName in this)
 			{
@@ -287,31 +287,31 @@ namespace DigitalPlatform.rms
 			return strResult;
 		}
 
-		//Îö¹¹º¯ÊıÉ¾³ıËùÓĞ¶ÔÏó
+		//ææ„å‡½æ•°åˆ é™¤æ‰€æœ‰å¯¹è±¡
 		~FileNameHolder()
 		{
 			DeleteAllFiles();
 		}
-	} //FileNameHolderÀà½áÊø
+	} //FileNameHolderç±»ç»“æŸ
 
 
-	//FileNameHolderµÄ³ÉÔ±ÀàĞÍ
+	//FileNameHolderçš„æˆå‘˜ç±»å‹
 	public class FileNameItem
 	{
-		//ÎÄ¼şÃû³Æ
+		//æ–‡ä»¶åç§°
 		private string m_strFileName;
 
-		//ÎÄ¼şÀàĞÍ
+		//æ–‡ä»¶ç±»å‹
 		private string m_strContentType;
 
-		//¹¹Ôìº¯Êı°üº¬Ò»¸ö²ÎÊı:strFileName,±íÊ¾¶ÔÏóÎÄ¼şÃû£¬¸³Öµ¸øm_strFileName
-		//strFileName: ÎÄ¼şÃû
+		//æ„é€ å‡½æ•°åŒ…å«ä¸€ä¸ªå‚æ•°:strFileName,è¡¨ç¤ºå¯¹è±¡æ–‡ä»¶åï¼Œèµ‹å€¼ç»™m_strFileName
+		//strFileName: æ–‡ä»¶å
 		public FileNameItem(string strFileName)
 		{
 			m_strFileName = strFileName;
 		}
 
-		//ÎÄ¼şÃû
+		//æ–‡ä»¶å
 		public string FileName
 		{
 			get
@@ -320,7 +320,7 @@ namespace DigitalPlatform.rms
 			}
 		}
 
-		//ÎÄ¼şÀàĞÍ
+		//æ–‡ä»¶ç±»å‹
 		public string ContentType
 		{
 			get
@@ -332,25 +332,25 @@ namespace DigitalPlatform.rms
 				m_strContentType = value;
 			}
 		}
-	} //FileNameItemÀà½áÊø
+	} //FileNameItemç±»ç»“æŸ
 
 
-	// Éè¼ÆÒâÍ¼:ÎªÁË´¦Àí"Êı¾İ¿âÃû:¼ÇÂ¼ID"ÒÔ¼°ID³¤¶ÈÉè¼ÆµÄDbPathÀà
+	// è®¾è®¡æ„å›¾:ä¸ºäº†å¤„ç†"æ•°æ®åº“å:è®°å½•ID"ä»¥åŠIDé•¿åº¦è®¾è®¡çš„DbPathç±»
 	public class DbPath
 	{
-		//Ë½ÓĞ³ÉÔ±×Ö¶Î£¬´æ·ÅÊı¾İ¿âÃû³Æ
+		//ç§æœ‰æˆå‘˜å­—æ®µï¼Œå­˜æ”¾æ•°æ®åº“åç§°
 		private string m_strName = "";
 		
-		//Ë½ÓĞ³ÉÔ±×Ö¶Î£¬´æ·Å¼ÇÂ¼ID
+		//ç§æœ‰æˆå‘˜å­—æ®µï¼Œå­˜æ”¾è®°å½•ID
 		private string m_strID = "";
 
 #if NO
-		//¹¹Ôìº¯Êı:½«´«ÈëµÄÂß¼­ID²ğ·ÖÎªÁ½²¿·Ö£ºÊı¾İ¿âÃûºÍ¼ÇÂ¼ID£¬·Ö±ğ¸³Öµ¸øm_strNameºÍm_strID
-		//strDpPath: ´«ÈëµÄ×éºÏĞÎÊ½
+		//æ„é€ å‡½æ•°:å°†ä¼ å…¥çš„é€»è¾‘IDæ‹†åˆ†ä¸ºä¸¤éƒ¨åˆ†ï¼šæ•°æ®åº“åå’Œè®°å½•IDï¼Œåˆ†åˆ«èµ‹å€¼ç»™m_strNameå’Œm_strID
+		//strDpPath: ä¼ å…¥çš„ç»„åˆå½¢å¼
 		public DbPath(string strDbPath)
 		{
 			int nPosition = strDbPath.LastIndexOf ("/"); //:
-			//Ö»²»´æÔÚ/ºÅÊ±£¬Ö»ÓĞÒ»¸ö¿âÃûID
+			//åªä¸å­˜åœ¨/å·æ—¶ï¼Œåªæœ‰ä¸€ä¸ªåº“åID
 			if (nPosition < 0)
 			{
 //				m_strID = strDbPath;
@@ -362,12 +362,12 @@ namespace DigitalPlatform.rms
 		}
 #endif
 
-        //¹¹Ôìº¯Êı:½«´«ÈëµÄÂß¼­ID²ğ·ÖÎªÁ½²¿·Ö£ºÊı¾İ¿âÃûºÍ¼ÇÂ¼ID£¬·Ö±ğ¸³Öµ¸øm_strNameºÍm_strID
-        //strDpPath: ´«ÈëµÄ×éºÏĞÎÊ½
+        //æ„é€ å‡½æ•°:å°†ä¼ å…¥çš„é€»è¾‘IDæ‹†åˆ†ä¸ºä¸¤éƒ¨åˆ†ï¼šæ•°æ®åº“åå’Œè®°å½•IDï¼Œåˆ†åˆ«èµ‹å€¼ç»™m_strNameå’Œm_strID
+        //strDpPath: ä¼ å…¥çš„ç»„åˆå½¢å¼
         public DbPath(string strDbPath)
         {
             int nPosition = strDbPath.IndexOf("/"); // 2015/11/14
-            //Ö»²»´æÔÚ/ºÅÊ±£¬Ö»ÓĞÒ»¸ö¿âÃûID
+            //åªä¸å­˜åœ¨/å·æ—¶ï¼Œåªæœ‰ä¸€ä¸ªåº“åID
             if (nPosition < 0)
             {
                 //				m_strID = strDbPath;
@@ -378,7 +378,7 @@ namespace DigitalPlatform.rms
             m_strID = strDbPath.Substring(nPosition + 1);
         }
 
-		//¹«¹²NameÊôĞÔ£¬±íÊ¾Êı¾İ¿âÃû£¬Ìá¹©¸øÍâ²¿´úÂë·ÃÎÊ
+		//å…¬å…±Nameå±æ€§ï¼Œè¡¨ç¤ºæ•°æ®åº“åï¼Œæä¾›ç»™å¤–éƒ¨ä»£ç è®¿é—®
 		public string Name
 		{
 			get
@@ -391,7 +391,7 @@ namespace DigitalPlatform.rms
 			}
 		}
 
-		//¹«¹²IDÊôĞÔ£¬±íÊ¾¼ÇÂ¼ID£¬Ìá¹©¸øÍâ²¿´úÂë·ÃÎÊ
+		//å…¬å…±IDå±æ€§ï¼Œè¡¨ç¤ºè®°å½•IDï¼Œæä¾›ç»™å¤–éƒ¨ä»£ç è®¿é—®
 		public string ID
 		{
 			get
@@ -404,7 +404,7 @@ namespace DigitalPlatform.rms
 			}
 		}
 
-		//¹«¹²PathÊôĞÔ£¬±íÊ¾ÍêÕûÂß¼­ID£¨°üÀ¨¿âÃûºÍ¼ÇÂ¼ID£©£¬Ö»¶Á
+		//å…¬å…±Pathå±æ€§ï¼Œè¡¨ç¤ºå®Œæ•´é€»è¾‘IDï¼ˆåŒ…æ‹¬åº“åå’Œè®°å½•IDï¼‰ï¼Œåªè¯»
 		public string Path
 		{
 			get
@@ -413,7 +413,7 @@ namespace DigitalPlatform.rms
 			}
 		}
 
-		//¹«¹²ID10ÊôĞÔ£¬·µ»ØÒ»¸ö10Î»³¤¶ÈµÄ¼ÇÂ¼ID
+		//å…¬å…±ID10å±æ€§ï¼Œè¿”å›ä¸€ä¸ª10ä½é•¿åº¦çš„è®°å½•ID
 		public string ID10
 		{
 			get
@@ -432,13 +432,13 @@ namespace DigitalPlatform.rms
 		}
 
 
-		// È·±£ ID ×Ö·û´®Îª 10 Î»Êı×ÖĞÎÌ¬
+		// ç¡®ä¿ ID å­—ç¬¦ä¸²ä¸º 10 ä½æ•°å­—å½¢æ€
 		public static string GetID10(string strID)
 		{
 			return strID.PadLeft(10, '0');	
 		}
 
-		// »ñµÃÈ¥µôÁËÇ°·½ '0' µÄ¶ÌºÅÂë ID ×Ö·û´®
+		// è·å¾—å»æ‰äº†å‰æ–¹ '0' çš„çŸ­å·ç  ID å­—ç¬¦ä¸²
 		public string CompressedID
 		{
 			get

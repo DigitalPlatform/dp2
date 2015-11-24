@@ -153,25 +153,28 @@ namespace DigitalPlatform.Library
                 // 覆盖记录
             }
 
-            StringWriter sw = new StringWriter();
-            XmlTextWriter xw = new XmlTextWriter(sw);
+            string strXml = "";
 
-            xw.WriteStartDocument();
+            using (StringWriter sw = new StringWriter())
+            using (XmlTextWriter xw = new XmlTextWriter(sw))
+            {
 
-            xw.WriteStartElement("r");
-            xw.WriteAttributeString("n", strName);
-            xw.WriteAttributeString("v", strValue);
-            xw.WriteEndElement();
+                xw.WriteStartDocument();
 
-            xw.WriteEndDocument();
-            xw.Close();
+                xw.WriteStartElement("r");
+                xw.WriteAttributeString("n", strName);
+                xw.WriteAttributeString("v", strValue);
+                xw.WriteEndElement();
 
-            string strXml = sw.ToString();
+                xw.WriteEndDocument();
 
+                xw.Flush(); // sw.Close()
+                strXml = sw.ToString();
+            }
 
             byte[] baOutputTimestamp = null;
 
-            REDO:
+        REDO:
             // return:
             //		-2	时间戳不匹配
             //		-1	一般出错
@@ -189,12 +192,11 @@ namespace DigitalPlatform.Library
 
             if (nRet == -2)
             {
-                    this.Timestamp = baOutputTimestamp;
-                    goto REDO;
+                this.Timestamp = baOutputTimestamp;
+                goto REDO;
             }
 
             this.Timestamp = baOutputTimestamp;
-
             return 0;
         }
 
@@ -229,23 +231,24 @@ namespace DigitalPlatform.Library
             if (nRet == 0)
             {
                 // 新创建记录
-
                 strPath = this.SeedDbName + "/?";
 
-                StringWriter sw = new StringWriter();
-                XmlTextWriter xw = new XmlTextWriter(sw);
+                using(StringWriter sw = new StringWriter())
+                using (XmlTextWriter xw = new XmlTextWriter(sw))
+                {
+                    xw.WriteStartDocument();
 
-                xw.WriteStartDocument();
+                    xw.WriteStartElement("r");
+                    xw.WriteAttributeString("n", strName);
+                    xw.WriteAttributeString("v", strDefaultValue);
+                    xw.WriteEndElement();
 
-                xw.WriteStartElement("r");
-                xw.WriteAttributeString("n", strName);
-                xw.WriteAttributeString("v", strDefaultValue);
-                xw.WriteEndElement();
+                    xw.WriteEndDocument();
+                    // xw.Close();
+                    xw.Flush();
 
-                xw.WriteEndDocument();
-                xw.Close();
-
-                strXml = sw.ToString();
+                    strXml = sw.ToString();
+                }
 
                 bNewRecord = true;
             }

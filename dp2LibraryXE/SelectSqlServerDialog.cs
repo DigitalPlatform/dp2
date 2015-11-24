@@ -90,10 +90,12 @@ namespace dp2LibraryXE
         {
             try
             {
-                RegistryKey key = Registry.LocalMachine.CreateSubKey("SOFTWARE\\Microsoft\\Microsoft SQL Server Local DB\\Installed Versions");
-                if (key.SubKeyCount > 0)
-                    return true;
-                return false;
+                using (RegistryKey key = Registry.LocalMachine.CreateSubKey("SOFTWARE\\Microsoft\\Microsoft SQL Server Local DB\\Installed Versions"))
+                {
+                    if (key.SubKeyCount > 0)
+                        return true;
+                    return false;
+                }
             }
             catch
             {

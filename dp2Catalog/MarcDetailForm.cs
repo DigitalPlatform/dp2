@@ -2175,7 +2175,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
 
             Stream s = null;
-
             try
             {
                 s = File.Open(MainForm.LastIso2709FileName,
@@ -2211,7 +2210,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     if (strMarcSyntaxOID == "1.2.840.10003.5.10")
                         strMarcSyntax = "usmarc";
                 }
-
 
                 if (strMarc != "")
                 {
@@ -2277,7 +2275,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         goto ERROR1;
                 }
 
-
                 s.Seek(0, SeekOrigin.End);
 
                 s.Write(baTarget, 0,
@@ -2296,7 +2293,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 else
                     MainForm.MessageText =
                         "1条记录成功保存到新文件 " + MainForm.LastIso2709FileName + " 尾部";
-
             }
             catch (Exception ex)
             {
@@ -2307,9 +2303,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             {
                 s.Close();
             }
-
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -2496,7 +2490,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     e.ErrorInfo = "文件  " + strPath + " 打开失败: " + ex.Message;
                 }
             }
-
             return;
         ERROR1:
             e.ErrorInfo = strError;

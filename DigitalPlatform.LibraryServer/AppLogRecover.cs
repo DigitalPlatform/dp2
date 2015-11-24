@@ -6192,29 +6192,39 @@ strElementName);
                     goto ERROR1;
                 }
 
-                Stream tempstream = null;
-
                 // 移动信息
                 XmlDocument domTemp = null;
-                // 移动借阅信息 -- <borrows>元素内容
-                // return:
-                //      -1  error
-                //      0   not found brrowinfo
-                //      1   found and moved
-                nRet = DevolveBorrowInfo(
-                    // Channels,
-                    channel,
-                    strSourceReaderBarcode,
-                    strTargetReaderBarcode,
-                    strOperTimeString,
-                    ref source_readerdom,
-                    ref target_readerdom,
-                    ref domTemp,
-                    "",
-                    out tempstream,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+
+                {
+                    Stream tempstream = null;
+                    try
+                    {
+                        // 移动借阅信息 -- <borrows>元素内容
+                        // return:
+                        //      -1  error
+                        //      0   not found brrowinfo
+                        //      1   found and moved
+                        nRet = DevolveBorrowInfo(
+                            // Channels,
+                            channel,
+                            strSourceReaderBarcode,
+                            strTargetReaderBarcode,
+                            strOperTimeString,
+                            ref source_readerdom,
+                            ref target_readerdom,
+                            ref domTemp,
+                            "",
+                            out tempstream,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    finally
+                    {
+                        if (tempstream != null)
+                            tempstream.Close();
+                    }
+                }
 
                 // 移动超期违约金信息 -- <overdues>元素内容
                 // return:

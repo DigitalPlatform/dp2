@@ -827,9 +827,10 @@ namespace dp2Circulation
 
             try
             {
-                StreamWriter sw = new StreamWriter(strFilePath, false, Encoding.UTF8);
-                sw.Write(this.textBox_templates_content.Text);
-                sw.Close();
+                using (StreamWriter sw = new StreamWriter(strFilePath, false, Encoding.UTF8))
+                {
+                    sw.Write(this.textBox_templates_content.Text);
+                }
             }
             catch (Exception ex)
             {

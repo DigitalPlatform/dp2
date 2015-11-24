@@ -259,14 +259,20 @@ namespace DigitalPlatform.rms
                 }
 
                 // 输出到的地方
-                TextWriter tw = new StringWriter();
-                XmlTextWriter xw = new XmlTextWriter(tw);
+                string strResultXml = "";
 
-                //执行转换 
-                this.m_xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
+                using(TextWriter tw = new StringWriter())
+                using (XmlTextWriter xw = new XmlTextWriter(tw))
+                {
 
-                tw.Close();
-                string strResultXml = tw.ToString();
+                    //执行转换 
+                    this.m_xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
+
+                    // tw.Close();
+                    tw.Flush(); // 2015/11/24 增加此句
+
+                    strResultXml = tw.ToString();
+                }
 
                 XmlDocument resultDom = new XmlDocument();
                 try

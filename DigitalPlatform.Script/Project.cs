@@ -23,26 +23,26 @@ namespace DigitalPlatform.Script
 		{
 			ProjectFile file = new ProjectFile();
 
-			file.PureName = PathUtil.PureName(strFileName);
+            file.PureName = PathUtil.PureName(strFileName);
 
-			FileStream fs = File.Open(strFileName, FileMode.Open);
+            using (FileStream fs = File.Open(strFileName, FileMode.Open))
+            {
 
-			if (fs.Length > 1024*1024)
-			{
-				throw(new Exception("file " +strFileName+ " too larg"));
-			}
+                if (fs.Length > 1024 * 1024)
+                {
+                    throw (new Exception("file " + strFileName + " too larg"));
+                }
 
-			file.Content = new byte[fs.Length];
+                file.Content = new byte[fs.Length];
 
-			int nRet =  fs.Read(file.Content, 0, (int)fs.Length);
-			if (nRet != fs.Length) 
-			{
-				throw(new Exception("read file " +strFileName+ " error"));
-			}
-			fs.Close();
-
-			return file;
-		}
+                int nRet = fs.Read(file.Content, 0, (int)fs.Length);
+                if (nRet != fs.Length)
+                {
+                    throw (new Exception("read file " + strFileName + " error"));
+                }
+                return file;
+            }
+        }
 
 		// 写入指定目录
 		public void WriteToLocate(string strLocate,
@@ -58,14 +58,13 @@ namespace DigitalPlatform.Script
                     return;
             }
 
-			FileStream fs = File.Open(strFileName, FileMode.Create);
-
-			if (this.Content != null) 
-			{
-				fs.Write(this.Content, 0, this.Content.Length);
-			}
-
-			fs.Close();
+            using (FileStream fs = File.Open(strFileName, FileMode.Create))
+            {
+                if (this.Content != null)
+                {
+                    fs.Write(this.Content, 0, this.Content.Length);
+                }
+            }
 		}
 
         // 2011/11/25
@@ -155,9 +154,12 @@ namespace DigitalPlatform.Script
 
                 if (file.PureName.ToLower() == "metadata.xml")
                 {
-                    XmlDocument dom = new XmlDocument();
-                    dom.Load(file.GetMemoryStream());
-                    return dom;
+                    using (Stream stream = file.GetMemoryStream())
+                    {
+                        XmlDocument dom = new XmlDocument();
+                        dom.Load(stream);
+                        return dom;
+                    }
                 }
             }
 

@@ -2099,11 +2099,12 @@ namespace DigitalPlatform.Script
 
 				///
 				//Opens a file and serializes the object into it in binary format.
-				Stream stream = File.Open(dlg.FileName, FileMode.Create);
-				BinaryFormatter formatter = new BinaryFormatter();
+                using (Stream stream = File.Open(dlg.FileName, FileMode.Create))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
 
-				formatter.Serialize(stream, array);
-				stream.Close();
+                    formatter.Serialize(stream, array);
+                }
 			}
 
 
@@ -2149,38 +2150,34 @@ Stack:
 
 			strRecentPackageFilePath = dlg.FileName;
 
-			Stream stream = null;
-			try 
-			{
-				stream = File.Open(dlg.FileName, FileMode.Open);
-			}
-			catch (FileNotFoundException)
-			{
-				strError = "文件 " + dlg.FileName + "不存在...";
-				goto ERROR1;
-			}
-
-			BinaryFormatter formatter = new BinaryFormatter();
-
-			ProjectCollection projects = null;
-			try 
-			{
-				projects = (ProjectCollection)formatter.Deserialize(stream);
-			}
-			catch (SerializationException ex) 
-			{
-				strError = "装载打包文件 '"+dlg.FileName+"' 时出错：" + ex.Message;
-				goto ERROR1;
-			}
-            catch (Exception ex)
+            ProjectCollection projects = null;
+            try
             {
-                strError = "装载打包文件 '"+dlg.FileName+"' 时出错：" + ExceptionUtil.GetDebugText(ex);
+                using (Stream stream = File.Open(dlg.FileName, FileMode.Open))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+
+                    try
+                    {
+                        projects = (ProjectCollection)formatter.Deserialize(stream);
+                    }
+                    catch (SerializationException ex)
+                    {
+                        strError = "装载打包文件 '" + dlg.FileName + "' 时出错：" + ex.Message;
+                        goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载打包文件 '" + dlg.FileName + "' 时出错：" + ExceptionUtil.GetDebugText(ex);
+                        goto ERROR1;
+                    }
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                strError = "文件 " + dlg.FileName + "不存在...";
                 goto ERROR1;
             }
-            finally  
-			{
-				stream.Close();
-			}
 
             FileInfo fi = new FileInfo(dlg.FileName);
             string strLastModified = DateTimeUtil.Rfc1123DateTimeString(fi.LastWriteTimeUtc);

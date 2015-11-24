@@ -8,8 +8,6 @@ using System.IO;
 using System.Text;
 using System.Diagnostics;
 
-
-
 using DigitalPlatform.GUI;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
@@ -410,8 +408,10 @@ namespace DigitalPlatform.rms.Client
 					if (this.Stream != null)
 					{
 						this.Stream.Seek(0, SeekOrigin.Begin);
-						StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8);
-                        this.textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
+                        using (StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8))
+                        {
+                            this.textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
+                        }
 					}
 				}
 				else 
@@ -523,8 +523,10 @@ namespace DigitalPlatform.rms.Client
 			if (this.IsText == true)
 			{
 				this.Stream.Seek(0, SeekOrigin.Begin);
-				StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8);
-				this.textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
+                using (StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8))
+                {
+                    this.textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
+                }
 			}
 			else 
 			{
@@ -643,7 +645,7 @@ namespace DigitalPlatform.rms.Client
 			{
 				// 更新stream对象内容
 				byte [] baContent = StringUtil.GetUtf8Bytes(this.textBox_content.Text, true);
-				this.Stream = new MemoryStream(baContent);
+				this.Stream = new MemoryStream(baContent);  // !!! 什么时候释放?
 				/*
 				this.Stream.SetLength(0);
 				StreamWriter sw = new StreamWriter(this.Stream, Encoding.UTF8);
@@ -779,23 +781,25 @@ namespace DigitalPlatform.rms.Client
 				return;
 			}
 
-			MemoryStream m = new MemoryStream();
+			using(MemoryStream m = new MemoryStream())
 
-			XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8);
-			w.Formatting = Formatting.Indented;
-			w.Indentation = 4;
-			dom.Save(w);
-			w.Flush();
+            using (XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8))
+            {
+                w.Formatting = Formatting.Indented;
+                w.Indentation = 4;
+                dom.Save(w);
+                w.Flush();
 
+                m.Seek(0, SeekOrigin.Begin);
 
-			m.Seek(0, SeekOrigin.Begin);
+                using (StreamReader sr = new StreamReader(m, Encoding.UTF8))
+                {
+                    textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
+                }
 
-			StreamReader sr = new StreamReader(m, Encoding.UTF8);
-			textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
-			sr.Close();
-
-			w.Close();
-			//			m.Close();
+                // w.Close();
+                //			m.Close();
+            }
 
 			MessageBox.Show(this, "整理完毕。");
 		}
@@ -845,7 +849,9 @@ namespace DigitalPlatform.rms.Client
 
 		private void CfgFileEditDlg_Closed(object sender, System.EventArgs e)
 		{
-		
+            // 2015/11/23
+            if (this.Stream != null)
+                this.Stream.Close();
 		}
 
 		private void textBox_content_TextChanged(object sender, System.EventArgs e)
@@ -889,11 +895,11 @@ namespace DigitalPlatform.rms.Client
 				return;
 			}
 
-			Stream s = File.Create(dlg.FileName);
-
-			this.Stream.Seek(0, SeekOrigin.Begin);
-			StreamUtil.DumpStream(this.Stream, s);
-			s.Close();
+            using (Stream s = File.Create(dlg.FileName))
+            {
+                this.Stream.Seek(0, SeekOrigin.Begin);
+                StreamUtil.DumpStream(this.Stream, s);
+            }
 		}
 
 		private void button_import_Click(object sender, System.EventArgs e)
@@ -908,20 +914,19 @@ namespace DigitalPlatform.rms.Client
 
 			this.Mime = dlg.textBox_mime.Text;
 			this.LocalPath = dlg.textBox_localPath.Text;
-			Stream s = File.OpenRead(this.LocalPath);
-			if (s.Length > 1024 * 1024)
-			{
-				s.Close();
-				MessageBox.Show(this, "配置文件尺寸不能大于1M");
-				return;
-			}
+            using (Stream s = File.OpenRead(this.LocalPath))
+            {
+                if (s.Length > 1024 * 1024)
+                {
+                    MessageBox.Show(this, "配置文件尺寸不能大于1M");
+                    return;
+                }
 
-			byte [] buffer = new byte[s.Length];
-			s.Read(buffer, 0, (int)s.Length);
-			s.Close();
+                byte[] buffer = new byte[s.Length];
+                s.Read(buffer, 0, (int)s.Length);
 
-			this.Stream = new MemoryStream(buffer);
-
+                this.Stream = new MemoryStream(buffer);
+            }
 
 			//
 			if (this.IsText == true)
@@ -929,15 +934,15 @@ namespace DigitalPlatform.rms.Client
 				if (this.Stream != null)
 				{
 					this.Stream.Seek(0, SeekOrigin.Begin);
-					StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8);
-					this.textBox_content.Text = sr.ReadToEnd();
+                    using (StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8))
+                    {
+                        this.textBox_content.Text = sr.ReadToEnd();
+                    }
 				}
 			}
 			
 			button_OK.Enabled = true;
-
 		}
-
 
 		// 回调函数
 		void DoStop(object sender, StopEventArgs e)

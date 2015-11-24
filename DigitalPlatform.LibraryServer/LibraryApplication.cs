@@ -189,6 +189,7 @@ namespace DigitalPlatform.LibraryServer
         public CommentItemDatabase CommentItemDatabase = null;
 
         public HitCountDatabase HitCountDatabase = new HitCountDatabase();
+        public AccessLogDatabase AccessLogDatabase = new AccessLogDatabase();
 
         public Semaphore PictureLimit = new Semaphore(10, 10);
 
@@ -1107,6 +1108,18 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         strError = "初始化计数器库时出错: " + strError;
+                        app.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: Open AccessLogDatabase");
+#endif
+                    nRet = this.AccessLogDatabase.Open(this.MongoDbConnStr,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "初始化只读日志库时出错: " + strError;
                         app.WriteErrorLog(strError);
                     }
                 }

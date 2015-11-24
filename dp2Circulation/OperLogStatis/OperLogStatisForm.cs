@@ -243,30 +243,31 @@ namespace dp2Circulation
         /// <param name="strFileName">文件全路径</param>
         static void CreateDefaultMainCsFile(string strFileName)
         {
-            StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
-            sw.WriteLine("using System;");
-            sw.WriteLine("using System.Windows.Forms;");
-            sw.WriteLine("using System.IO;");
-            sw.WriteLine("using System.Text;");
-            sw.WriteLine("using System.Xml;");
-            sw.WriteLine("");
+            using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("using System;");
+                sw.WriteLine("using System.Windows.Forms;");
+                sw.WriteLine("using System.IO;");
+                sw.WriteLine("using System.Text;");
+                sw.WriteLine("using System.Xml;");
+                sw.WriteLine("");
 
-            //sw.WriteLine("using DigitalPlatform.MarcDom;");
-            //sw.WriteLine("using DigitalPlatform.Statis;");
-            sw.WriteLine("using dp2Circulation;");
+                //sw.WriteLine("using DigitalPlatform.MarcDom;");
+                //sw.WriteLine("using DigitalPlatform.Statis;");
+                sw.WriteLine("using dp2Circulation;");
 
-            sw.WriteLine("using DigitalPlatform.Xml;");
+                sw.WriteLine("using DigitalPlatform.Xml;");
 
-            sw.WriteLine("public class MyStatis : OperLogStatis");
+                sw.WriteLine("public class MyStatis : OperLogStatis");
 
-            sw.WriteLine("{");
+                sw.WriteLine("{");
 
-            sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
-            sw.WriteLine("	{");
-            sw.WriteLine("	}");
+                sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
+                sw.WriteLine("	{");
+                sw.WriteLine("	}");
 
-            sw.WriteLine("}");
-            sw.Close();
+                sw.WriteLine("}");
+            }
         }
 
         // 方案管理

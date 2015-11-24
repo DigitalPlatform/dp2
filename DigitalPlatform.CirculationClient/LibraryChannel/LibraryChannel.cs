@@ -6812,21 +6812,19 @@ out strError);
             {
                 Debug.Assert(strLocalName != "", "strLocalName不应为空");
 
-                StreamReader sr = null;
-
                 try
                 {
-                    sr = new StreamReader(strLocalName, Encoding.UTF8);
+                    using (StreamReader sr = new StreamReader(strLocalName, Encoding.UTF8))
+                    {
+                        strResult = sr.ReadToEnd();
+                        return 0;	// 以无错误姿态返回
+                    }
                 }
                 catch (Exception ex)
                 {
                     strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
-                strResult = sr.ReadToEnd();
-                sr.Close();
-
-                return 0;	// 以无错误姿态返回
             }
 
         GETDATA:
@@ -6850,12 +6848,12 @@ out strError);
             Debug.Assert(strLocalName != "", "PrepareLocalFile()返回的strLocalName为空");
 
             // 写入文件,以便以后从cache获取
-            StreamWriter sw = new StreamWriter(strLocalName,
+            using (StreamWriter sw = new StreamWriter(strLocalName,
                 false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strResult);
-            sw.Close();
-            sw = null;
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strResult);
+            }
 
             Debug.Assert(baOutputTimeStamp != null, "下层GetRes()返回的baOutputTimeStamp为空");
             nRet = cache.SetTimeStamp(strFullPath,
@@ -6985,12 +6983,12 @@ out strError);
             Debug.Assert(strLocalName != "", "PrepareLocalFile()返回的strLocalName为空");
 
             // 写入文件,以便以后从cache获取
-            StreamWriter sw = new StreamWriter(strLocalName,
+            using (StreamWriter sw = new StreamWriter(strLocalName,
                 false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strResult);
-            sw.Close();
-            sw = null;
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strResult);
+            }
 
             Debug.Assert(baOutputTimeStamp != null, "下层GetRes()返回的baOutputTimeStamp为空");
             nRet = cache.SetTimeStamp(strFullPath,
@@ -7034,7 +7032,6 @@ out strError);
             {
                 Debug.Assert(false, "attachment style暂时不能使用");
             }
-
 
             // 检查参数
             if (StringUtil.IsInList("data", strStyle) == false)
@@ -7183,7 +7180,6 @@ out strError);
             } // end of for
 
             baOutputTimeStamp = timestamp;
-
             return 0;
         }
 
@@ -7226,7 +7222,6 @@ out strError);
                     out strOutputPath,
                     out strError);
             }
-
             finally
             {
                 if (fileTarget != null)

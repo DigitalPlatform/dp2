@@ -156,11 +156,12 @@ namespace dp2Circulation
             {
                 string strText = BuildSampleLabelText();
 
-                Stream stream = new MemoryStream(Encoding.Default.GetBytes(strText));
-                StreamReader sr = new StreamReader(stream, Encoding.Default);
-
-                string strError = "";
-                this.labelDesignControl1.SetLabelFile(sr, out strError);
+                using(Stream stream = new MemoryStream(Encoding.Default.GetBytes(strText)))
+                using (StreamReader sr = new StreamReader(stream, Encoding.Default))
+                {
+                    string strError = "";
+                    this.labelDesignControl1.SetLabelFile(sr, out strError);
+                }
             }
 
             this.labelDesignControl1.Invalidate();
@@ -1445,11 +1446,12 @@ out strError);
         private void textBox_sampleText_DelayTextChanged(object sender, EventArgs e)
         {
             // 将样本内容兑现到 labelDesignControl1 显示
-            Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text));
-            StreamReader sr = new StreamReader(stream, Encoding.Default);
-
-            string strError = "";
-            this.labelDesignControl1.SetLabelFile(sr, out strError);
+            using(Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text)))
+            using (StreamReader sr = new StreamReader(stream, Encoding.Default))
+            {
+                string strError = "";
+                this.labelDesignControl1.SetLabelFile(sr, out strError);
+            }
             this.labelDesignControl1.Invalidate();
         }
 

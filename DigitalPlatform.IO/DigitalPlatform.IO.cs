@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Collections;
 using System.Globalization;
@@ -10,14 +10,14 @@ using DigitalPlatform;
 
 namespace DigitalPlatform.IO
 {
-	// ÁÙÊ±ÎÄ¼ş
+	// ä¸´æ—¶æ–‡ä»¶
 	public class TempFileItem 
 	{
 		public Stream m_stream;
 		public string m_strFileName;
 	}
 
-	// ÁÙÊ±ÎÄ¼şÈİÆ÷
+	// ä¸´æ—¶æ–‡ä»¶å®¹å™¨
 	public class TempFileCollection : ArrayList
 	{
 		public TempFileCollection() 
@@ -60,7 +60,7 @@ namespace DigitalPlatform.IO
 	public delegate bool FlushOutput();
 	public delegate bool ProgressOutput(long lCur);
 
-	// ÔÚ¶ÔÕÕ±íÖĞºê²»´æÔÚ
+	// åœ¨å¯¹ç…§è¡¨ä¸­å®ä¸å­˜åœ¨
 	public class MacroNotFoundException : Exception
 	{
 
@@ -70,7 +70,7 @@ namespace DigitalPlatform.IO
 
 	}
 
-	// ºêÃû¸ñÊ½´í
+	// å®åæ ¼å¼é”™
 	public class MacroNameException : Exception
 	{
 

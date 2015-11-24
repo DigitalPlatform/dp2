@@ -149,7 +149,6 @@ ref sessioninfo) == false)
             }
         }
 
-
         string strPhotoPath = "";
         // 根据读者证条码号找到头像资源路径
         // return:
@@ -216,7 +215,6 @@ ref sessioninfo) == false)
 
                 image.Seek(0, SeekOrigin.Begin);
                 StreamUtil.DumpStream(image, Response.OutputStream, flushdelegate);
-
             }
             Response.Flush();
             Response.End();

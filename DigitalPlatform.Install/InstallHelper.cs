@@ -524,10 +524,11 @@ MessageBoxDefaultButton.Button1);
             {
                 using (RegistryKey product = digitalplatform.CreateSubKey(strProductName))
                 {
-                    RegistryKey instance = product.OpenSubKey("instance_" + nIndex.ToString());
-                    if (instance == null)
-                        return false;   // not found
-                    instance.Close();
+                    using (RegistryKey instance = product.OpenSubKey("instance_" + nIndex.ToString()))
+                    {
+                        if (instance == null)
+                            return false;   // not found
+                    }
 
                     product.DeleteSubKeyTree("instance_" + nIndex.ToString(), false);
                 }
@@ -719,8 +720,6 @@ MessageBoxDefaultButton.Button1);
                 }
             }
         }
-
-
 
         // 删除记录安装参数的文件
         public static void DeleteSetupCfgFile(string strRootDir)
@@ -936,8 +935,6 @@ MessageBoxDefaultButton.Button1);
                 pool = folder.Children.Add(strAppPoolName, "IIsApplicationPool");
             }
 
-
-
             // 删除PeriodicRestartTime 
             pool.Properties["PeriodicRestartTime"][0] = 0;
 
@@ -974,9 +971,6 @@ MessageBoxDefaultButton.Button1);
 
             folderEntry.CommitChanges();
         }
-
-
-
 
         public static int SetControlRightsToDirectory(string strDataDir,
             out string strError)
@@ -1184,7 +1178,6 @@ MessageBoxDefaultButton.Button1);
                 // This means that you will not be able to set or get properties on the object until the KeyType property is set.
                 fileEntry.Properties["keyType"].Value = "IIsWebFile";
                 fileEntry.CommitChanges();
-
             }
 
             fileEntry = new DirectoryEntry(strFilePath);
@@ -1194,7 +1187,6 @@ MessageBoxDefaultButton.Button1);
 
             fileEntry.CommitChanges();
         }
-
 
         // Adds an ACL entry on the specified directory for the specified account.
         public static void AddDirectorySecurity(string FileName,
@@ -1249,7 +1241,6 @@ MessageBoxDefaultButton.Button1);
             // Get a FileSecurity object that represents the 
             // current security settings.
             FileSecurity fileSecurity = fInfo.GetAccessControl();
-
 
             // Add the FileSystemAccessRule to the security settings. 
             fileSecurity.AddAccessRule(new FileSystemAccessRule(Account,
@@ -1442,9 +1433,6 @@ MessageBoxDefaultButton.Button1);
             return aWebSite.Count;
         }
 #endif
-
-
-
     }
 
     // http://stackoverflow.com/questions/6824188/sqldatasourceenumerator-instance-getdatasources-does-not-locate-local-sql-serv

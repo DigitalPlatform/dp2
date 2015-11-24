@@ -1779,9 +1779,8 @@ namespace dp2Circulation
                 // 输出的文件流
 
                 using (FileStream outputfile = File.Create(m_strOutputXmlFilename))
+                using(XmlTextWriter writer = new XmlTextWriter(outputfile, Encoding.UTF8)) // Xml格式输出
                 {
-                    XmlTextWriter writer = null;   // Xml格式输出
-                    writer = new XmlTextWriter(outputfile, Encoding.UTF8);
                     writer.Formatting = Formatting.Indented;
                     writer.Indentation = 4;
 
@@ -1834,7 +1833,7 @@ namespace dp2Circulation
 
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
-                    writer.Close();
+                    // writer.Close();
                 }
             }
             finally

@@ -74,8 +74,10 @@ namespace DigitalPlatform.rms.Client
 				if (fi.Exists == false) 
 				{
 					// 创建一个0 byte的文件
-					FileStream f = File.Create(strFileName);
-					f.Close();
+					using(FileStream f = File.Create(strFileName))
+                    {
+
+                    }
 					return strFileName;
 				}
 			}

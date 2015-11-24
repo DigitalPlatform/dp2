@@ -350,9 +350,7 @@ namespace DigitalPlatform.LibraryServer
 
                     SetProgressText(strFileName + " 记录" + (lIndex + 1).ToString());
 
-                    Stream attachment = File.Create(strTempFileName);
-
-                    try
+                    using (Stream attachment = File.Create(strTempFileName))
                     {
                         // Debug.Assert(!(lIndex == 182 && strFileName == "20071225.log"), "");
 
@@ -377,7 +375,8 @@ namespace DigitalPlatform.LibraryServer
                             "", // strFilter
                             out lHintNext,
                             out strXml,
-                            ref attachment,
+                            // ref attachment,
+                            attachment,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -386,7 +385,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == 2)
                         {
                             // 最后一条补充提示一下
-                            if (((lIndex-1) % 100) != 0)
+                            if (((lIndex - 1) % 100) != 0)
                                 this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex).ToString() + "\r\n");
                             break;
                         }
@@ -414,10 +413,6 @@ namespace DigitalPlatform.LibraryServer
                             if (this.RecoverLevel == RecoverLevel.Logic)
                                 return -1;
                         }
-                    }
-                    finally
-                    {
-                        attachment.Close();
                     }
                 }
 

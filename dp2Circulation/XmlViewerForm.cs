@@ -52,13 +52,14 @@ namespace dp2Circulation
         void SetXmlToWebbrowser(WebBrowser webbrowser,
              string strXml)
         {
-            string strTargetFileName = this.MainForm.DataDir + "\\xml.xml";
+            string strTargetFileName = Path.Combine(this.MainForm.DataDir, "xml.xml");
 
-            StreamWriter sw = new StreamWriter(strTargetFileName,
+            using (StreamWriter sw = new StreamWriter(strTargetFileName,
                 false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strXml);
-            sw.Close();
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strXml);
+            }
 
             webbrowser.Navigate(strTargetFileName);
         }

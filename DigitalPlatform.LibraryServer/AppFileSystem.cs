@@ -448,13 +448,10 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-
                     //如果文件未满，需要做下列几件事情：
                     // 1.把目前的range写到range辅助文件
                     // 2.时间戳以临时文件计算
                     // 3.metadata的长度为-1，即未知的情况
-
-
                     FileUtil.String2File(strResultRange + "|" + lTotalLength.ToString(),
                         strRangeFileName);
 
@@ -496,7 +493,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
             }
-
 
 #if NO
             // 写metadata

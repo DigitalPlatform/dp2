@@ -4531,34 +4531,32 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            StreamReader sr = null;
-
             // 2013/10/31 如果无法通过文件头部探测出来，则不作转换
             Encoding encoding = FileUtil.DetectTextFileEncoding(strFilename, null);
 
             if (encoding == null || encoding.Equals(Encoding.UTF8) == true)
                 return 0;
 
+            string strContent = "";
             try
             {
-                sr = new StreamReader(strFilename, encoding);
+                using (StreamReader sr = new StreamReader(strFilename, encoding))
+                {
+                    strContent = sr.ReadToEnd();
+                }
             }
             catch (Exception ex)
             {
-                strError = "打开文件 " + strFilename + " 失败: " + ex.Message;
+                strError = "从文件 " + strFilename + " 读取失败: " + ex.Message;
                 return -1;
             }
 
-            string strContent = sr.ReadToEnd();
-
-            sr.Close();
-
             try
             {
-
-                StreamWriter sw = new StreamWriter(strFilename, false, Encoding.UTF8);
-                sw.Write(strContent);
-                sw.Close();
+                using (StreamWriter sw = new StreamWriter(strFilename, false, Encoding.UTF8))
+                {
+                    sw.Write(strContent);
+                }
             }
             catch (Exception ex)
             {
@@ -4649,17 +4647,15 @@ namespace DigitalPlatform.LibraryServer
                 string strExistContent = "";
                 string strNewContent = "";
 
-                Stream new_stream = new FileStream(strFullPath, FileMode.Open);
-
+                using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                 {
-                    StreamReader sr = new StreamReader(new_stream, Encoding.UTF8);
-                    strNewContent = ConvertCrLf(sr.ReadToEnd());
-                }
+                    using (StreamReader sr = new StreamReader(new_stream, Encoding.UTF8))
+                    {
+                        strNewContent = ConvertCrLf(sr.ReadToEnd());
+                    }
 
-                new_stream.Seek(0, SeekOrigin.Begin);
+                    new_stream.Seek(0, SeekOrigin.Begin);
 
-                try
-                {
                     string strPath = strDatabaseName + "/cfgs/" + strName;
 
                     // 获取已有的配置文件对象
@@ -4668,9 +4664,7 @@ namespace DigitalPlatform.LibraryServer
                     string strMetaData = "";
 
                     string strStyle = "content,data,metadata,timestamp,outputpath";
-                    MemoryStream exist_stream = new MemoryStream();
-
-                    try
+                    using (MemoryStream exist_stream = new MemoryStream())
                     {
 
                         long lRet = channel.GetRes(
@@ -4696,14 +4690,22 @@ namespace DigitalPlatform.LibraryServer
 
                         exist_stream.Seek(0, SeekOrigin.Begin);
                         {
-                            StreamReader sr = new StreamReader(exist_stream, Encoding.UTF8);
-                            strExistContent = ConvertCrLf(sr.ReadToEnd());
+                            using (StreamReader sr = new StreamReader(exist_stream, Encoding.UTF8))
+                            {
+                                strExistContent = ConvertCrLf(sr.ReadToEnd());
+                            }
                         }
+#if NO
                     }
                     finally
                     {
                         if (exist_stream != null)
+                        {
                             exist_stream.Close();
+                            exist_stream = null;
+                        }
+                    }
+#endif
                     }
 
                     // 比较本地的和服务器的有无区别，无区别就不要上载了
@@ -4712,7 +4714,7 @@ namespace DigitalPlatform.LibraryServer
                         continue;
                     }
 
-                    DO_CREATE:
+                DO_CREATE:
 
                     // 在服务器端创建对象
                     // parameters:
@@ -4738,11 +4740,13 @@ namespace DigitalPlatform.LibraryServer
 
                     if (strName.ToLower() == "keys")
                         bKeysChanged = true;
-
+#if NO
                 }
                 finally
                 {
                     new_stream.Close();
+                }
+#endif
                 }
             }
 
@@ -4799,13 +4803,12 @@ namespace DigitalPlatform.LibraryServer
             string strKeysDef = "";
             string strBrowseDef = "";
 
-            StreamReader sr = null;
-
             try
             {
-                sr = new StreamReader(strKeysDefFileName, Encoding.UTF8);
-                strKeysDef = sr.ReadToEnd();
-                sr.Close();
+                using (StreamReader sr = new StreamReader(strKeysDefFileName, Encoding.UTF8))
+                {
+                    strKeysDef = sr.ReadToEnd();
+                }
             }
             catch (Exception ex)
             {
@@ -4816,16 +4819,16 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
-                sr = new StreamReader(strBrowseDefFileName, Encoding.UTF8);
-                strBrowseDef = sr.ReadToEnd();
-                sr.Close();
+                using (StreamReader sr = new StreamReader(strBrowseDefFileName, Encoding.UTF8))
+                {
+                    strBrowseDef = sr.ReadToEnd();
+                }
             }
             catch (Exception ex)
             {
                 strError = "装载文件 " + strBrowseDefFileName + " 时发生错误: " + ex.Message;
                 return -1;
             }
-
 
             long lRet = channel.DoCreateDB(logicNames,
                 "", // strType,
@@ -4903,15 +4906,9 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     return -1;
 
-                Stream s = new FileStream(strFullPath, FileMode.Open);
-
-                try
+                using (Stream s = new FileStream(strFullPath, FileMode.Open))
                 {
                     string strPath = strDatabaseName + "/cfgs/" + strName;
-
-
-
-
                     // 在服务器端创建对象
                     // parameters:
                     //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
@@ -4929,14 +4926,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         return -1;
                 }
-                finally
-                {
-                    s.Close();
-                }
             }
-
-
-
             return 0;
         }
 
@@ -5004,7 +4994,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
 
         // 数据库是否已经存在？
         // return:

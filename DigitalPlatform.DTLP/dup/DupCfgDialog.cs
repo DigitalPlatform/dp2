@@ -888,25 +888,24 @@ targetDB2=/我的电脑/图书总库,
 
             try
             {
-                StreamReader sr = null;
-                sr = new StreamReader(strIniFilename, Encoding.GetEncoding(936));
-                for (int i = 0; ; i++)
+                using (StreamReader sr = new StreamReader(strIniFilename, Encoding.GetEncoding(936)))
                 {
-                    string strLine = sr.ReadLine();
-                    if (strLine == null)
-                        break;
-                    strLine = strLine.Trim();
-                    if (String.IsNullOrEmpty(strLine) == true)
-                        continue;
-
-                    if (strLine[0] == '[' && strLine[strLine.Length - 1] == ']')
+                    for (int i = 0; ; i++)
                     {
-                        strLine = strLine.Substring(1, strLine.Length - 2); // 去掉外围的[]
-                        sections.Add(strLine);
+                        string strLine = sr.ReadLine();
+                        if (strLine == null)
+                            break;
+                        strLine = strLine.Trim();
+                        if (String.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        if (strLine[0] == '[' && strLine[strLine.Length - 1] == ']')
+                        {
+                            strLine = strLine.Substring(1, strLine.Length - 2); // 去掉外围的[]
+                            sections.Add(strLine);
+                        }
                     }
                 }
-
-                sr.Close();
                 return 1;
             }
             catch (FileNotFoundException)

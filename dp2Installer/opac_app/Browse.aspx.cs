@@ -899,11 +899,10 @@ ref sessioninfo) == false)
             try
             {
 
-                Stream stream = File.Open(strRssFile,
+                using (Stream stream = File.Open(strRssFile,
                     FileMode.Open,
                     FileAccess.ReadWrite,
-                    FileShare.ReadWrite);
-                try
+                    FileShare.ReadWrite))
                 {
                     this.Response.AddHeader("Content-Length", stream.Length.ToString());
 
@@ -913,10 +912,6 @@ ref sessioninfo) == false)
 
                     StreamUtil.DumpStream(stream, this.Response.OutputStream,
                         flushdelegate);
-                }
-                finally
-                {
-                    stream.Close();
                 }
             }
             finally
