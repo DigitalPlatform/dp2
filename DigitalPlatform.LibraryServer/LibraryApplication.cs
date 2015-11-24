@@ -99,7 +99,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.57 (2015/11/8) Borrow() 和 Return() API 利用 dp2kernel 优化的检索式提高了运行速度
         //      2.58 (2015/11/14) GetBrowseRecords() API 允许获取对象的 metadata 和 timestamp 了。这个版本要求 dp2kernel 为 V2.62 以上
         //      2.59 (2015/11/16) WriteRes() API 允许通过 lTotalLength 为 -1 调用，作用是仅修改 metadata。这个版本要求 dp2kernel 为 V2.63 以上
-        public static string Version = "2.59";
+        //      2.60 (2015/11/25) GetOperLogs() 和 GetOperLog() API 开始支持两种日志类型。
+        public static string Version = "2.60";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

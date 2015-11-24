@@ -8,8 +8,8 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
@@ -83,8 +83,6 @@ namespace dp2Circulation
             set;
         }
 
-        
-
         public ProgressEstimate estimate
         {
             get;
@@ -119,6 +117,22 @@ namespace dp2Circulation
             set;
         }
 
+        LogType _logType = LogType.OperLog;
+        /// <summary>
+        /// 要获取的日志的类型。注意，只能用一种类型
+        /// </summary>
+        public LogType LogType
+        {
+            get
+            {
+                return _logType;
+            }
+            set
+            {
+                _logType = value;
+            }
+        }
+
         // 获得一个日志文件的尺寸
         // return:
         //      -1  error
@@ -129,6 +143,7 @@ namespace dp2Circulation
             LibraryChannel channel,
             string strCacheDir,
             string strLogFileName,
+            LogType logType,
             out long lServerFileSize,
             out long lCacheFileSize,
             out string strError)
@@ -149,6 +164,10 @@ namespace dp2Circulation
             long lAttachmentTotalLength = 0;
             byte[] attachment_data = null;
 
+            string strStyle = "level-0";
+            if ((logType & LogType.AccessLog) != 0)
+                strStyle += ",accessLog";
+
             // 获得日志文件尺寸
             // return:
             //      -1  error
@@ -160,8 +179,8 @@ namespace dp2Circulation
                 strLogFileName,
                 -1,    // lIndex,
                 -1, // lHint,
-                "level-0",
-                        "", // strFilter
+                strStyle,
+                "", // strFilter
                 out strXml,
                 out lServerFileSize,
                 0,  // lAttachmentFragmentStart,
@@ -178,7 +197,6 @@ namespace dp2Circulation
             if (lRet != 1)
                 return -1;
             Debug.Assert(lServerFileSize >= 0, "");
-
             return 1;
         }
 
@@ -257,6 +275,10 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
+            if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0
+    && (this.LogType & dp2Circulation.LogType.OperLog) != 0)
+                throw new ArgumentException("OperLogLoader 的 LogType 只能使用一种类型");
+
             if (string.IsNullOrEmpty(this.CacheDir) == false)
                 PathUtil.CreateDirIfNeed(this.CacheDir);
 
@@ -277,6 +299,7 @@ namespace dp2Circulation
                     this.Channel,
                     this.CacheDir,
                     "20121001.log",
+                    this.LogType,
                     out lServerFileSize,
                     out lCacheFileSize,
                     out strError);
@@ -340,13 +363,13 @@ namespace dp2Circulation
                     if (nRet == -1)
                         throw new Exception(strError);
                 }
-
             }
 
             long lTotalSize = 0;
             List<string> lines = new List<string>();    // 经过处理后排除了不存在的文件名
             List<string> ranges = new List<string>();
             List<long> sizes = new List<long>();
+
             this.Stop.SetMessage("正在准备获得日志文件尺寸 ...");
             foreach (string strLine in this.FileNames)
             {
@@ -401,6 +424,7 @@ namespace dp2Circulation
                     this.Channel,
                     this.CacheDir,
                     strLogFilename,
+                    this.LogType,
                     out lServerFileSize,
                     out lCacheFileSize,
                     out strError);
@@ -509,7 +533,6 @@ namespace dp2Circulation
                 }
 #endif
 
-                // begin
                 {
                     OperLogItemLoader loader = new OperLogItemLoader();
                     loader.Stop = this.Stop;
@@ -524,6 +547,7 @@ namespace dp2Circulation
                     loader.lProgressValue = lDoneSize;
                     loader.lSize = lTotalSize;
                     loader.Filter = this.Filter;
+                    loader.LogType = this.LogType;
 
                     loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                     loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -536,12 +560,7 @@ namespace dp2Circulation
                     lDoneSize = loader.lProgressValue;
                     lTotalSize = loader.lSize;
                 }
-                // end
-
             }
-
-
-
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
@@ -549,9 +568,6 @@ namespace dp2Circulation
             if (this.Prompt != null)
                 this.Prompt(sender, e);
         }
-
-
-
     }
 
     /// <summary>
@@ -581,4 +597,10 @@ namespace dp2Circulation
         public string ErrorInfo = "";
     }
 
+    [Flags]
+    public enum LogType
+    {
+        OperLog = 0x01,     // 操作日志
+        AccessLog = 0x02,   // 只读日志
+    }
 }

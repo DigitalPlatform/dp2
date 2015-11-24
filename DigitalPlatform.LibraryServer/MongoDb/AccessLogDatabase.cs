@@ -1,14 +1,17 @@
-﻿using DigitalPlatform.IO;
-using DigitalPlatform.Xml;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver;
-using MongoDB.Driver.Builders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -105,6 +108,7 @@ namespace DigitalPlatform.LibraryServer
             return true;
         }
 
+#if NO
         // 增加一次访问计数
         // return:
         //      false   没有成功。通常因为 mongodb 无法打开等原因
@@ -137,6 +141,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             return item.HitCount;
         }
+#endif
 
         public IEnumerable<AccessLogItem> Find(string date, int start)
         {
@@ -183,9 +188,18 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-#if NO
-        public IEnumerable<AccessLogItem> ListDates(int start)
+        class ValueCount
         {
+            public string Value = "";
+            public int Count = 0;
+        }
+
+        // parameters:
+        //      max 返回最多多少个元素。如果为 -1，表示不限制
+        //      hit_count   返回命中总数。是命中的整个集合的数量，除去 start 以后的值
+        public List<ValueCount> ListDates(int start, int max, out int hit_count)
+        {
+            hit_count = 0;
             MongoCollection<AccessLogItem> collection = this.LogCollection;
             if (collection == null)
                 return null;
@@ -202,17 +216,37 @@ namespace DigitalPlatform.LibraryServer
 20.DBObject dbo = coll.group(key, condition , initial, reduceString); 
 #endif
             var document = new BsonDocument("count", 0);
+            var keyFunction = (BsonJavaScript)@"{
+        var date = new Date(doc.date);
+        var dateKey = date.toISOString().slice(0, 10);
+        return {'day':dateKey};
+    }";
+            //         var dateKey = date.getFullYear()+'|'+(date.getMonth()+1)+'|'+date.getDate();
             var result = collection.Group(
                 Query.Null,
-                "ForeignId",
+                keyFunction,
                 document,
                 new BsonJavaScript("function(doc, out){ out.count++; }"),
                 null
-            );
+            ).Skip<BsonDocument>(start);
 
-            return collection.Group(query, key, initial, reduce, finalize);
+
+            List<ValueCount> values = new List<ValueCount>();
+            int nCount = 0;
+            foreach (BsonDocument doc in result)
+            {
+                ValueCount item = new ValueCount();
+                item.Value = doc.GetValue("day", "").ToString().Replace("-","");
+                item.Count = doc.GetValue("count", 0).ToInt32();
+                values.Add(item);
+                nCount++;
+                if (max != -1 && nCount >= max)
+                    break;
+            }
+
+            hit_count = result.Count<BsonDocument>();
+            return values;
         }
-#endif
 
         static string GetXml(AccessLogItem item)
         {
@@ -240,6 +274,8 @@ namespace DigitalPlatform.LibraryServer
             return domOperLog.OuterXml;
         }
 
+        const int MAX_FILENAME_COUNT = 100;
+
         // parameters:
         //      nCount  本次希望获取的记录数。如果==-1，表示希望尽可能多地获取
         // return:
@@ -262,8 +298,34 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             List<OperLogInfo> results = new List<OperLogInfo>();
 
-            if (strStyle == "getfilenames")
+            if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
+                int hit_count = 0;
+                List<ValueCount> dates = ListDates(0, MAX_FILENAME_COUNT, out hit_count);
+                int nStart = (int)lIndex;
+                int nEnd = dates.Count;
+                if (nCount == -1)
+                    nEnd = dates.Count;
+                else
+                    nEnd = Math.Min(nStart + nCount, dates.Count);
+
+                // 一次不让超过最大数量
+                if (nEnd - nStart > MAX_FILENAME_COUNT)
+                    nEnd = nStart + MAX_FILENAME_COUNT;
+
+                for (int i = nStart; i < nEnd; i++)
+                {
+                    ValueCount item = dates[i];
+                    OperLogInfo info = new OperLogInfo();
+                    info.Index = i;
+                    info.Xml = item.Value + ".log";
+                    info.AttachmentLength = item.Count;
+                    results.Add(info);
+                }
+
+                records = new OperLogInfo[results.Count];
+                results.CopyTo(records);
+                return (int)lIndex + hit_count;
 #if NO
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
                 FileInfo[] fis = di.GetFiles("????????.log");

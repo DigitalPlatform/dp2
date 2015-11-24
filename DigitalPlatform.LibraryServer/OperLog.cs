@@ -2173,7 +2173,7 @@ out strTargetLibraryCode);
             strError = "";
             List<OperLogInfo> results = new List<OperLogInfo>();
 
-            if (strStyle == "getfilenames")
+            if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
                 FileInfo[] fis = di.GetFiles("????????.log");
@@ -2205,7 +2205,7 @@ out strTargetLibraryCode);
 
                 records = new OperLogInfo[results.Count];
                 results.CopyTo(records);
-                return 1;
+                return fis.Length;  // 返回事项总数
             }
 
             int nPackageLength = 0;
