@@ -3577,6 +3577,8 @@ namespace dp2Library
                     return result;
                 }
                  * */
+                // test
+                // Thread.Sleep(new TimeSpan(0, 1, 0));
 
                 return app.GetBiblioInfos(
                         sessioninfo,
@@ -7555,7 +7557,8 @@ namespace dp2Library
                 int nRet = 0;
                 if (StringUtil.IsInList("accessLog", strStyle) == true)
                 {
-                    if (string.IsNullOrEmpty(app.MongoDbConnStr) == true)
+                    if (string.IsNullOrEmpty(app.MongoDbConnStr) == true
+                        || app.AccessLogDatabase == null)
                     {
                         // accessLog 尚未使用
                         records = null;
@@ -7670,16 +7673,30 @@ namespace dp2Library
                 }
 
                 if (StringUtil.IsInList("accessLog", strStyle) == true)
-                    
                 {
-                    if (lIndex == -1)
+                    if (lIndex == -1    // 要获得文件尺寸
+                        || StringUtil.IsInList("getcount", strStyle) == true)// 要获得总记录数
                     {
                         // 获得文件尺寸。用事项个数代替文件尺寸
-                        lHintNext = app.AccessLogDatabase.GetItemCount(strFileName.Substring(0,8));
+                        // -1 表示集合不存在。通常是因为 mongodb 没有配置或没有启动
+                        if (string.IsNullOrEmpty(app.MongoDbConnStr) == true
+                            || app.AccessLogDatabase == null)
+                            lHintNext = -1;
+                        else
+                            lHintNext = app.AccessLogDatabase.GetItemCount(strFileName.Substring(0,8));
                         result.Value = 1;
                         result.ErrorInfo = strError;
                         return result;
                     }
+
+                    if (string.IsNullOrEmpty(app.MongoDbConnStr) == true
+    || app.AccessLogDatabase == null)
+                    {
+                        result.Value = 0;
+                        result.ErrorInfo = "只读日志尚未启用";
+                        return result;
+                    }
+
                     OperLogInfo[] records = null;
                     nRet = app.AccessLogDatabase.GetOperLogs(
                         sessioninfo.LibraryCodeList,
@@ -11729,6 +11746,7 @@ namespace dp2Library
         //                  timestamp表示要在baOutputTimestam参数内返回资源的时间戳内容
         //                  outputpath表示要在strOutputResPath参数内返回实际记录路径内容
         //                  skipLog 表示不希望在 dp2library 范围内记入日志
+        //                  clientAddress:xxxxxx 表示前端地址
         //      baContent   返回的byte数组
         //      strMetadata 返回的元数据内容
         //      strOutputResPath    返回的实际记录路径
@@ -12002,6 +12020,8 @@ namespace dp2Library
 
                 if (bWriteLog)
                 {
+                    string strClientAddress = StringUtil.GetStyleParam(strStyle, "clientAddress");
+
                     Hashtable table = StringUtil.ParseMedaDataXml(strMetadata,
                         out strError);
                     if (table != null)
@@ -12030,7 +12050,7 @@ namespace dp2Library
                             strResPath,
                             size,
                             (string)table["mimetype"],
-                            sessioninfo.ClientAddress,
+                            string.IsNullOrEmpty(strClientAddress) == false ? strClientAddress : sessioninfo.ClientAddress,
                             1,
                             sessioninfo.UserID,
                             DateTime.Now);
@@ -12062,7 +12082,7 @@ namespace dp2Library
                             strOperTime);
 
                         int nRet = app.OperLog.WriteOperLog(domOperLog,
-                            sessioninfo.ClientAddress,
+                            string.IsNullOrEmpty(strClientAddress) == false ? strClientAddress : sessioninfo.ClientAddress,
                             out strError);
                         if (nRet == -1)
                         {
@@ -14001,6 +14021,13 @@ out strError);
                         result.Value = 0;   // mongodb 没有打开
                     else
                         result.Value = 1;
+
+                    if (app.Statis != null)
+                        app.Statis.IncreaseEntryValue(
+                        sessioninfo.LibraryCodeList,
+                        "增量外部对象计数器",
+                        "次",
+                        1);
                 }
                 else if (strAction == "inc_and_log")    // 增量计数器，并且同时记载到访问日志中
                 {
@@ -14009,40 +14036,59 @@ out strError);
                     else
                         result.Value = 1;
 
+                    if (app.Statis != null)
+                        app.Statis.IncreaseEntryValue(
+                        sessioninfo.LibraryCodeList,
+                        "获取外部对象",
+                        "次",
+                        1);
+
                     // 写入日志
                     if (app.GetObjectWriteToOperLog == true)
                     {
-                        XmlDocument domOperLog = new XmlDocument();
-                        domOperLog.LoadXml("<root />");
+                        string strResPath = strBiblioRecPath + "/url/" + strUrl;
 
-                        DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "operation",
-                            "getRes");
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "path",
-        strBiblioRecPath + "/url/" + strUrl);
-
-                        if (app.Statis != null)
-                            app.Statis.IncreaseEntryValue(
-                            sessioninfo.LibraryCodeList,
-                            "获取外部对象",
-                            "次",
-                            1);
-
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                            sessioninfo.UserID);
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                            app.Clock.GetClock());
-                        if (string.IsNullOrEmpty(strClientAddress) == false)
-                            DomUtil.SetElementText(domOperLog.DocumentElement, "requestClientAddress",
-                                strClientAddress);
-
-                        int nRet = app.OperLog.WriteOperLog(domOperLog,
-                            sessioninfo.ClientAddress,
-                            out strError);
-                        if (nRet == -1)
+                        // TODO: 在日志记录中如何明显辨别是 HitCounter() API 写入的，还是 GetRes() API 写入的?
+                        if (string.IsNullOrEmpty(app.MongoDbConnStr) == false)
                         {
-                            strError = "HitCounter() API 写入日志时发生错误: " + strError;
-                            goto ERROR1;
+                            app.AccessLogDatabase.Add("getRes",
+                                strResPath,
+                                0,  // size,
+                                "", // (string)table["mimetype"],
+                                string.IsNullOrEmpty(strClientAddress) == true ? sessioninfo.ClientAddress : strClientAddress,
+                                1,
+                                sessioninfo.UserID,
+                                DateTime.Now);
+                        }
+                        else
+                        {
+                            XmlDocument domOperLog = new XmlDocument();
+                            domOperLog.LoadXml("<root />");
+
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "operation",
+                                "getRes");
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "path",
+            strResPath);
+
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                                sessioninfo.UserID);
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                                app.Clock.GetClock());
+#if NO
+                            if (string.IsNullOrEmpty(strClientAddress) == false)
+                                DomUtil.SetElementText(domOperLog.DocumentElement, "requestClientAddress",
+                                    strClientAddress);
+#endif
+
+                            int nRet = app.OperLog.WriteOperLog(domOperLog,
+                                string.IsNullOrEmpty(strClientAddress) == true ? sessioninfo.ClientAddress : strClientAddress,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "HitCounter() API 写入日志时发生错误: " + strError;
+                                goto ERROR1;
+                            }
                         }
                     }
                 }

@@ -571,11 +571,16 @@ FileShare.ReadWrite);
                     out attachment_data,
                     out lAttachmentTotalLength,
                     out strError);
-
+                // 2015/11/25
+                if (lRet == -1)
+                    throw new Exception(strError);
                 this.lServerFileSize = _lServerFileSize;
 
                 if (lRet == 0)
                     yield break;
+                // 2015/11/25
+                if (_lServerFileSize == -1)
+                    yield break;    // 此类型的日志尚未启用
             }
 
             Stream stream = null;

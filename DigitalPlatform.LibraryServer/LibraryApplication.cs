@@ -656,6 +656,12 @@ namespace DigitalPlatform.LibraryServer
                         this.WsUrl*/);
                     CfgsMap.Clear();
                 }
+                else
+                {
+                    app.WsUrl = "";
+                    app.ManagerUserName = "";
+                    app.ManagerPassword = "";
+                }
 
                 // 元素 <mongoDB>
                 // 属性 connectionString / instancePrefix
@@ -664,6 +670,13 @@ namespace DigitalPlatform.LibraryServer
                 {
                     this.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
                     this.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
+                }
+                else
+                {
+                    this.MongoDbConnStr = "";
+                    this.MongoDbInstancePrefix = "";
+                    this.AccessLogDatabase = new AccessLogDatabase();
+                    this.HitCountDatabase = new HitCountDatabase();
                 }
 
                 // 预约到书
@@ -689,22 +702,6 @@ namespace DigitalPlatform.LibraryServer
 
                     app.OutofReservationThreshold = nValue;
 
-                    /*
-                    string strOutofThreshold = DomUtil.GetAttr(node, "outofReservationThreshold");
-                    if (String.IsNullOrEmpty(strOutofThreshold) == true)
-                        strOutofThreshold = "10";   // 缺省值
-                    try
-                    {
-                        app.OutofReservationThreshold = Convert.ToInt32(strOutofThreshold);
-                    }
-                    catch
-                    {
-                        strError = "<arrived>元素的outofReservationThreshold属性值不合法，应为纯数字。";
-                        app.WriteErrorLog(strError);
-                        goto ERROR1;
-                    }
-                     * */
-
                     bValue = false;
                     nRet = DomUtil.GetBooleanParam(node,
                         "canReserveOnshelf",
@@ -717,14 +714,14 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    this.CanReserveOnshelf = bValue;
-
-                    /*
-                    string strCanReserveOnshelf = DomUtil.GetAttr(node, "canReserveOnshelf");
-                    this.CanReserveOnshelf = ToBoolean(strCanReserveOnshelf,
-                        true);
-                     * */
-
+                    app.CanReserveOnshelf = bValue;
+                }
+                else
+                {
+                    app.ArrivedDbName = "";
+                    app.ArrivedReserveTimeSpan = "";
+                    app.OutofReservationThreshold = 10;
+                    app.CanReserveOnshelf = true;
                 }
 
                 // 2013/9/24
@@ -736,6 +733,10 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 提醒通知的定义
                     app.NotifyDef = DomUtil.GetAttr(node, "notifyDef");
+                }
+                else
+                {
+                    app.NotifyDef = "";
                 }
 
                 // <circulation>
@@ -795,6 +796,19 @@ namespace DigitalPlatform.LibraryServer
                     this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
                     this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
                 }
+                else
+                {
+                    this.PatronAdditionalFroms = new List<string>();
+                    this.PatronAdditionalFields = new List<string>();
+                    this.MaxPatronHistoryItems = 100;
+                    this.MaxItemHistoryItems = 100;
+                    this.VerifyBarcode = false;
+                    this.AcceptBlankItemBarcode = true;
+                    this.AcceptBlankReaderBarcode = true;
+                    this.VerifyBookType = false;
+                    this.VerifyReaderType = false;
+                    this.BorrowCheckOverdue = true;
+                }
 
                 // <channel>
                 node = dom.DocumentElement.SelectSingleNode("channel") as XmlElement;
@@ -821,6 +835,14 @@ namespace DigitalPlatform.LibraryServer
                     if (this.SessionTable != null)
                         this.SessionTable.MaxSessionsLocalHost = v;
                 }
+                else
+                {
+                    if (this.SessionTable != null)
+                    {
+                        this.SessionTable.MaxSessionsPerIp = 50;
+                        this.SessionTable.MaxSessionsLocalHost = 150;
+                    }
+                }
 
                 // <cataloging>
                 node = dom.DocumentElement.SelectSingleNode("cataloging") as XmlElement;
@@ -837,6 +859,10 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog(strError);
                     this.DeleteBiblioSubRecords = bValue;
                 }
+                else
+                {
+                    this.DeleteBiblioSubRecords = true;
+                }
 
                 // 入馆登记
                 // 元素<passgate>
@@ -848,6 +874,10 @@ namespace DigitalPlatform.LibraryServer
 
                     this.PassgateWriteToOperLog = ToBoolean(strWriteOperLog,
                         true);
+                }
+                else
+                {
+                    this.PassgateWriteToOperLog = true;
                 }
 
                 // 对象管理
@@ -861,6 +891,11 @@ namespace DigitalPlatform.LibraryServer
                     this.GetObjectWriteToOperLog = ToBoolean(strWriteOperLog,
                         false);
                 }
+                else
+                {
+                    this.GetObjectWriteToOperLog = false;
+                }
+
                 // 消息
                 // 元素<message>
                 // 属性dbname/reserveTimeSpan
@@ -874,17 +909,11 @@ namespace DigitalPlatform.LibraryServer
                     if (String.IsNullOrEmpty(app.MessageReserveTimeSpan) == true)
                         app.MessageReserveTimeSpan = "365day";
                 }
-
-                /*
-                // 图书馆业务服务器
-                // 元素<libraryserver>
-                // 属性url
-                node = dom.DocumentElement.SelectSingleNode("//libraryserver");
-                if (node != null)
+                else
                 {
-                    app.LibraryServerUrl = DomUtil.GetAttr(node, "url");
+                    app.MessageDbName = "";
+                    app.MessageReserveTimeSpan = "365day";
                 }
-                 * */
 
                 // OPAC服务器
                 // 元素<opacServer>
@@ -893,6 +922,10 @@ namespace DigitalPlatform.LibraryServer
                 if (node != null)
                 {
                     app.OpacServerUrl = DomUtil.GetAttr(node, "url");
+                }
+                else
+                {
+                    app.OpacServerUrl = "";
                 }
 
                 // 违约金
@@ -904,6 +937,11 @@ namespace DigitalPlatform.LibraryServer
                     app.AmerceDbName = DomUtil.GetAttr(node, "dbname");
                     app.OverdueStyle = DomUtil.GetAttr(node, "overdueStyle");
                 }
+                else
+                {
+                    app.AmerceDbName = "";
+                    app.OverdueStyle = "";
+                }
 
                 // 发票
                 // 元素<invoice>
@@ -912,6 +950,10 @@ namespace DigitalPlatform.LibraryServer
                 if (node != null)
                 {
                     app.InvoiceDbName = DomUtil.GetAttr(node, "dbname");
+                }
+                else
+                {
+                    app.InvoiceDbName = "";
                 }
 
                 // *** 进入内存的参数结束
@@ -922,15 +964,6 @@ namespace DigitalPlatform.LibraryServer
                 nRet = 0;
 
                 {
-                    /*
-                    // 准备工作: 映射数据库名
-                    nRet = this.GetGlobalCfg(session.Channels,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog(strError);
-                        goto ERROR1;
-                    }*/
 #if LOG_INFO
                     app.WriteErrorLog("INFO: LoadReaderDbGroupParam");
 #endif
@@ -995,10 +1028,6 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             app.WriteErrorLog("ERR002 首次初始化vdbs失败: " + strError);
-                            // DefaultThread可以重试初始化
-
-                            // session.Close();
-                            // goto ERROR1;
                         }
 
                     }
@@ -1022,6 +1051,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch
                 {
+                    // TODO: 写入错误日志
                 }
 
                 // *** 初始化操作日志环境

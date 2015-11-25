@@ -12,6 +12,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -1436,7 +1437,8 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             if (nRet == -1)
                 goto ERROR1;
             PathUtil.CreateDirIfNeed(strCacheDir);  // 重新创建目录
-            MessageBox.Show(this, "日志文件本地缓存目录 "+strCacheDir+" 已经被清空");
+
+            MessageBox.Show(this, "日志文件本地缓存目录 " + strCacheDir + " 已经被清空");
             return;
         ERROR1:
             MessageBox.Show(this, strError);

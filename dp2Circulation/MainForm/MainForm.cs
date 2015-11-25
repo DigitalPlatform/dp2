@@ -6746,17 +6746,6 @@ out strError);
         }
 
         /// <summary>
-        /// 只读日志本地缓存目录
-        /// </summary>
-        public string AccessLogCacheDir
-        {
-            get
-            {
-                return Path.Combine(this.ServerCfgDir, "accesslogcache"); // 2015/11/22
-            }
-        }
-
-        /// <summary>
         /// 是否自动缓存操作日志
         /// </summary>
         public bool AutoCacheOperlogFile

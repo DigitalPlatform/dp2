@@ -3963,6 +3963,8 @@ Value data: HEX 0x1
             string strGetStyle = "content,data,incReadCount";
             if (StringUtil.IsInList("log", this.SearchLogEnable) == false)
                 strGetStyle += ",skipLog";
+            else
+                strGetStyle += ",clientAddress:" + Page.Request.UserHostAddress;
 
             // 传输数据
             lRet = channel.GetRes(

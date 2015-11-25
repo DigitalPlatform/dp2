@@ -157,6 +157,10 @@ namespace DigitalPlatform.LibraryServer
             return collection.Find(query).Skip(start);
         }
 
+        // 获得一个日期的事项个数
+        // return:
+        //      -1  集合不存在
+        //      >=0 数量
         public int GetItemCount(string date)
         {
             MongoCollection<AccessLogItem> collection = this.LogCollection;
@@ -188,7 +192,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        class ValueCount
+        public class ValueCount
         {
             public string Value = "";
             public int Count = 0;
@@ -216,8 +220,8 @@ namespace DigitalPlatform.LibraryServer
 20.DBObject dbo = coll.group(key, condition , initial, reduceString); 
 #endif
             var document = new BsonDocument("count", 0);
-            var keyFunction = (BsonJavaScript)@"{
-        var date = new Date(doc.date);
+            var keyFunction = (BsonJavaScript)@"function(doc) {
+        var date = new Date(doc.OperTime);
         var dateKey = date.toISOString().slice(0, 10);
         return {'day':dateKey};
     }";
@@ -253,25 +257,61 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domOperLog = new XmlDocument();
             domOperLog.LoadXml("<root />");
 
+            if (string.IsNullOrEmpty(item.LibraryCode) == false)
+            {
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", item.LibraryCode);
+            }
             DomUtil.SetElementText(domOperLog.DocumentElement,
-                "operation",
-                "getRes");
+                "operation", "getRes");
             DomUtil.SetElementText(domOperLog.DocumentElement,
                 "path", item.Path);
-
+            if (item.Size != 0)
+            {
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "size", item.Size.ToString());
+            }
+            if (string.IsNullOrEmpty(item.MIME) == false)
+            {
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "mime", item.MIME);
-
+            }
+            if (string.IsNullOrEmpty(item.ClientAddress) == false)
+            {
+                OperLog.WriteClientAddress(domOperLog, item.ClientAddress);
+            }
+            if (item.HitCount != 1)
+            {
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "hitCount", item.HitCount.ToString());
+            }
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                 item.Operator);
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                 DateTimeUtil.Rfc1123DateTimeStringEx(item.OperTime.ToLocalTime()));
-
             return domOperLog.OuterXml;
+        }
+
+        static void WriteClientAddress(XmlDocument dom,
+    string strClientAddress)
+        {
+            if (string.IsNullOrEmpty(strClientAddress) == true)
+                return;
+
+            string strVia = "";
+            int nRet = strClientAddress.IndexOf("@");
+            if (nRet != -1)
+            {
+                strVia = strClientAddress.Substring(nRet + 1);
+                strClientAddress = strClientAddress.Substring(0, nRet);
+            }
+            XmlNode node = DomUtil.SetElementText(dom.DocumentElement,
+                "clientAddress",
+                strClientAddress);
+            if (string.IsNullOrEmpty(strVia) == false)
+                DomUtil.SetAttr(node, "via", strVia);
         }
 
         const int MAX_FILENAME_COUNT = 100;
@@ -323,8 +363,11 @@ namespace DigitalPlatform.LibraryServer
                     results.Add(info);
                 }
 
+#if NO
                 records = new OperLogInfo[results.Count];
                 results.CopyTo(records);
+#endif
+                records = results.ToArray();
                 return (int)lIndex + hit_count;
 #if NO
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);

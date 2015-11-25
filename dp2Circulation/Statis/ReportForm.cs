@@ -808,6 +808,8 @@ MessageBoxDefaultButton.Button1);
 
                 string strQueryXml = "";
 
+                // 2015/11/25
+                this.Channel.Timeout = new TimeSpan(0, 5, 0);
                 long lRet = this.Channel.SearchBiblio(stop,
                     strBiblioDbNameParam,
                     "", // (lIndex + 1).ToString() + "-", // 
@@ -852,6 +854,8 @@ MessageBoxDefaultButton.Button1);
                         return -1;
                     }
 
+                    // 2015/11/25
+                    this.Channel.Timeout = new TimeSpan(0, 0, 30);
                     lRet = this.Channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
@@ -893,6 +897,9 @@ MessageBoxDefaultButton.Button1);
                     {
                         Debug.Assert(biblio_recpaths.Count == lines.Count, "");
 
+                        // 2015/11/25
+                        this.Channel.Timeout = new TimeSpan(0, 0, 30);
+
                         // 获得书目摘要
                         BiblioLoader loader = new BiblioLoader();
                         loader.Channel = this.Channel;
@@ -900,6 +907,9 @@ MessageBoxDefaultButton.Button1);
                         loader.Format = "summary";
                         loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                         loader.RecPaths = biblio_recpaths;
+
+                        loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                        loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                         try
                         {
@@ -5580,18 +5590,6 @@ MessageBoxDefaultButton.Button2);
                 // 开始处理时的日期
                 string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
 
-                // 获得日志文件中记录的总数
-                // parameters:
-                //      strDate 日志文件的日期，8 字符
-                // return:
-                //      -1  出错
-                //      0   日志文件不存在，或者记录数为 0
-                //      >0  记录数
-                long lCount = GetOperLogCount(strEndDate,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
                 DomUtil.SetAttr(task_dom.DocumentElement, "version", _local_version.ToString());
 
                 DomUtil.SetAttr(task_dom.DocumentElement,
@@ -5599,7 +5597,7 @@ MessageBoxDefaultButton.Button2);
 
                 // 记载首次创建的结束时间点
                 DomUtil.SetAttr(task_dom.DocumentElement, "end_date", strEndDate);
-                DomUtil.SetAttr(task_dom.DocumentElement, "index", lCount.ToString());
+                // DomUtil.SetAttr(task_dom.DocumentElement, "index", lCount.ToString());
 
                 // *** 创建用户表
                 if (strTypeList == "*"
@@ -5828,6 +5826,22 @@ MessageBoxDefaultButton.Button2);
                         return -1;
                     }
 
+                    // 获得日志文件中记录的总数
+                    // parameters:
+                    //      strDate 日志文件的日期，8 字符
+                    // return:
+                    //      -2  此类型的日志在 dp2library 端尚未启用
+                    //      -1  出错
+                    //      0   日志文件不存在，或者记录数为 0
+                    //      >0  记录数
+                    long lCount = GetOperLogCount(strEndDate,
+                        LogType.OperLog,
+                        out strError);
+                    if (lCount < 0)
+                        return -1;
+
+                    DomUtil.SetAttr(task_dom.DocumentElement, "index", lCount.ToString());
+
                     if (nRet == 1)
                     {
                         // 记载第一个日志文件日期
@@ -5866,7 +5880,21 @@ MessageBoxDefaultButton.Button2);
                         return -1;
                     }
 
-                    if (nRet == 1)
+                    // 获得日志文件中记录的总数
+                    // parameters:
+                    //      strDate 日志文件的日期，8 字符
+                    // return:
+                    //      -2  此类型的日志在 dp2library 端尚未启用
+                    //      -1  出错
+                    //      0   日志文件不存在，或者记录数为 0
+                    //      >0  记录数
+                    long lCount = GetOperLogCount(strEndDate,
+                        LogType.AccessLog,
+                        out strError);
+                    if (lCount == -1)
+                        return -1;
+
+                    if (nRet == 1 && lCount >= 0)
                     {
                         // 记载第一个只读日志文件日期
                         DomUtil.SetAttr(task_dom.DocumentElement,
@@ -6776,11 +6804,11 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 return -1;
 
+            // state 元素中的状态，是首次创建本地缓存后总体的状态，是操作日志和只读日志都复制过来以后，才会设置为 "daily" 
             strState = DomUtil.GetAttr(dom.DocumentElement,
-                strPrefix + "state");
+                "state");
             if (strState != "daily")
                 return 1;   // 首次创建尚未完成
-
             return 0;
         }
 
@@ -6815,6 +6843,7 @@ MessageBoxDefaultButton.Button2);
         int DoReplication(
             string strStartDate,
             string strEndDate,
+            LogType logType,
             // long index,
             out string strLastDate,
             out long last_index,
@@ -6834,6 +6863,12 @@ MessageBoxDefaultButton.Button2);
                 out strLeft,
                 out strRight);
             strStartDate = strLeft;
+
+            if (string.IsNullOrEmpty(strStartDate) == true)
+            {
+                strError = "DoReplication() 出错: strStartDate 参数值不应为空";
+                return -1;
+            }
 
             EnableControls(false);
 
@@ -6891,6 +6926,7 @@ MessageBoxDefaultButton.Button2);
                     loader.nLevel = 2;  // this.MainForm.OperLogLevel;
                     loader.AutoCache = false;
                     loader.CacheDir = "";
+                    loader.LogType = logType;
 
                     loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                     loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -6918,7 +6954,6 @@ MessageBoxDefaultButton.Button2);
                         if (string.IsNullOrEmpty(item.Xml) == true)
                             goto CONTINUE;
 
-
                         XmlDocument dom = new XmlDocument();
                         try
                         {
@@ -6926,7 +6961,7 @@ MessageBoxDefaultButton.Button2);
                         }
                         catch (Exception ex)
                         {
-                            strError = "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
+                            strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
                             DialogResult result = MessageBox.Show(this,
 strError + "\r\n\r\n是否跳过此条记录继续处理?",
 "ReportForm",
@@ -7028,14 +7063,12 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         // lProcessCount++;
-
                     CONTINUE:
                         // 便于循环外获得这些值
                         strLastItemDate = item.Date;
                         lLastItemIndex = item.Index + 1;
 
                         // index = 0;  // 第一个日志文件后面的，都从头开始了
-
                     }
 
                     // 缓存中尚未最后兑现的部分
@@ -7045,25 +7078,6 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         return -1;
 
-#if NO
-                    // 最后一批
-                    if (lines.Count > 0)
-                    {
-                        // 写入 operlog 表一次
-                        nRet = OperLogLine.AppendOperLogLines(
-                            connection,
-                            lines,
-                            true,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        lines.Clear();
-
-                        // 记忆
-                        strLastDate = strLastItemDate;
-                        last_index = lLastItemIndex;
-                    }
-#endif
                     // 最后一批
                     nRet = buffer.WriteToDb(connection,
     true,
@@ -8740,10 +8754,12 @@ strSourceRecPath);
         // parameters:
         //      strDate 日志文件的日期，8 字符
         // return:
+        //      -2  此类型的日志在 dp2library 端尚未启用
         //      -1  出错
         //      0   日志文件不存在，或者记录数为 0
         //      >0  记录数
         long GetOperLogCount(string strDate,
+            LogType logType,
             out string strError)
         {
             strError = "";
@@ -8753,6 +8769,10 @@ strSourceRecPath);
             byte[] attachment_data = null;
 
             long lRecCount = 0;
+
+            string strStyle = "getcount";
+            if ((logType & LogType.AccessLog) != 0)
+                strStyle += ",accessLog";
 
             // 获得日志文件尺寸
             // return:
@@ -8765,7 +8785,7 @@ strSourceRecPath);
                 strDate + ".log",
                 -1,    // lIndex,
                 -1, // lHint,
-                "getcount",
+                strStyle,
                 "", // strFilter
                 out strXml,
                 out lRecCount,
@@ -8781,8 +8801,12 @@ strSourceRecPath);
             }
             if (lRet != 1)
                 return -1;
+            if (lRecCount == -1)
+            {
+                strError = logType.ToString() + " 型的日志在 dp2library 中尚未启用";
+                return -2;
+            }
             Debug.Assert(lRecCount >= 0, "");
-
             return lRecCount;
         }
 
@@ -8807,6 +8831,10 @@ strSourceRecPath);
 
         // 执行每日同步任务
         // 从上次记忆的断点位置，开始同步
+        // return:
+        //      -1  出错
+        //      0   没有必要进行同步。因为指定类型的日志在服务器端尚未启用
+        //      1   成功
         int DoDailyReplication(
             LogType logType,
             out string strError)
@@ -8830,10 +8858,17 @@ strSourceRecPath);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            if (strState != "daily")
+            if (nRet == 1 || strState != "daily")
             {
                 strError = "首次创建尚未完成。必须完成后才能进行每日同步";
                 goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(strEndDate) == true
+                && (logType & LogType.AccessLog) != 0)
+            {
+                strError = logType.ToString() + " 型的日志没有启用";
+                return 0;
             }
 
             // TODO: 如果 strEndDate 为空，则需要设定为一个较早的时间
@@ -8856,6 +8891,7 @@ strSourceRecPath);
                 nRet = DoReplication(
                     strEndDate + ":" + lIndex.ToString() + "-",
                     strToday,
+                    logType,
                     // long index,
                     out strLastDate,
                     out last_index,
@@ -8901,7 +8937,7 @@ strSourceRecPath);
                 SetDailyReportButtonState();
             }
 
-            return 0;
+            return 1;
         ERROR1:
             return -1;
         }

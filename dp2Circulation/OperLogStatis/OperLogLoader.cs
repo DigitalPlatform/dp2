@@ -135,6 +135,7 @@ namespace dp2Circulation
 
         // 获得一个日志文件的尺寸
         // return:
+        //      -2  此类型的日志尚未启用
         //      -1  error
         //      0   file not found
         //      1   found
@@ -196,6 +197,11 @@ namespace dp2Circulation
             }
             if (lRet != 1)
                 return -1;
+            if (lServerFileSize == -1)
+            {
+                strError = "日志尚未启用";
+                return -2;
+            }
             Debug.Assert(lServerFileSize >= 0, "");
             return 1;
         }
@@ -291,6 +297,7 @@ namespace dp2Circulation
                 long lCacheFileSize = 0;
                 // 象征性获得一个日志文件的尺寸，主要目的是为了触发一次通道登录
                 // return:
+                //      -2  此类型的日志尚未启用
                 //      -1  error
                 //      0   file not found
                 //      1   found
@@ -305,6 +312,9 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                     throw new Exception(strError);
+                // 2015/11/25
+                if (nRet == -2)
+                    yield break;    // 此类型的日志尚未启用
 
                 // 检查日志文件缓存目录的版本是否和当前用户的信息一致
                 // return:
@@ -415,7 +425,7 @@ namespace dp2Circulation
                 long lServerFileSize = 0;
                 long lCacheFileSize = 0;
                 // 获得一个日志文件的尺寸
-                // return:
+                //      -2  此类型的日志尚未启用
                 //      -1  error
                 //      0   file not found
                 //      1   found
@@ -461,6 +471,9 @@ namespace dp2Circulation
 
                 if (lServerFileSize == 0)
                     continue;   // 0字节的文件当作不存在处理
+                // 2015/11/25
+                if (lServerFileSize == -1)
+                    yield break;    // 此类型的日志尚未启用
 
                 Debug.Assert(lServerFileSize >= 0, "");
 

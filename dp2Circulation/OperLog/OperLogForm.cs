@@ -365,7 +365,7 @@ namespace dp2Circulation
     lines,
     this.MainForm.OperLogLevel,
     strStyle,
-    bControl ? this.MainForm.AccessLogCacheDir : this.MainForm.OperLogCacheDir,
+    this.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
     out strError);
@@ -3351,8 +3351,8 @@ out string strError)
                 }
                 else
                 {
-                    string strCacheFilename = PathUtil.MergePath(
-                        this.AccessLog ? this.MainForm.AccessLogCacheDir : this.MainForm.OperLogCacheDir, 
+                    string strCacheFilename = Path.Combine(
+                        this.MainForm.OperLogCacheDir, 
                         strLogFileName);
                     using (Stream stream = File.Open(
 strCacheFilename,
@@ -3727,7 +3727,7 @@ FileShare.ReadWrite))
                     lines,
                     this.MainForm.OperLogLevel,
                     strStyle,
-                    bControl ? this.MainForm.AccessLogCacheDir : this.MainForm.OperLogCacheDir,
+                    this.MainForm.OperLogCacheDir,
                     null,   // param,
                     DoRecord,
                     out strError);
@@ -4099,7 +4099,7 @@ FileShare.ReadWrite))
     lines,
     this.MainForm.OperLogLevel,
     strStyle,
-    this.AccessLog ? this.MainForm.AccessLogCacheDir : this.MainForm.OperLogCacheDir,
+    this.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
     out strError);
@@ -5780,7 +5780,6 @@ Keys keyData)
                     if (nRet == -1)
                         return -1;
                 }
-
             }
 
             long lTotalSize = 0;
@@ -6021,8 +6020,15 @@ MessageBoxDefaultButton.Button1);
             }
             if (lRet != 1)
                 return -1;
+            if (lServerFileSize == -1)
+            {
+                if (bAccessLog)
+                    strError = "dp2library 只读日志尚未启用";
+                else
+                    strError = "dp2library 操作日志尚未启用";
+                return -1;
+            }
             Debug.Assert(lServerFileSize >= 0, "");
-
             return 1;
         }
 
@@ -6488,6 +6494,7 @@ FileShare.ReadWrite);
         //      lServerFileSize 服务器端日志文件的尺寸。如果为-1，表示函数内会自动获取
         //      lSize   进度条所采用的最大尺寸。如果必要，可能会被本函数推动
         // return:
+        //      -2  此类型的日志尚未启用
         //      -1  error
         //      0   正常结束
         //      1   用户中断
@@ -6545,9 +6552,17 @@ FileShare.ReadWrite);
                     out attachment_data,
                     out lAttachmentTotalLength,
                     out strError);
+                // 2015/11/25
+                if (lRet == -1)
+                    return -1;
                 // 2010/12/13
                 if (lRet == 0)
                     return 0;
+                if (lServerFileSize == -1)
+                {
+                    strError = "日志尚未启用";
+                    return -2;
+                }
             }
 
             Stream stream = null;
@@ -6560,7 +6575,7 @@ FileShare.ReadWrite);
             {
                 nRet = PrepareCacheFile(
                     strCacheDir,
-                    strLogFileName,
+                    bAccessLog ? strLogFileName + ".a" : strLogFileName,
                     lServerFileSize,
                     out bCacheFileExist,
                     out stream,
@@ -6795,7 +6810,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     nRet = CreateCacheMetadataFile(
                         strCacheDir,
-                        strLogFileName,
+                        bAccessLog ? strLogFileName + ".a" : strLogFileName,
                         lServerFileSize,
                         out strError);
                     if (nRet == -1)
@@ -6814,7 +6829,7 @@ MessageBoxDefaultButton.Button1);
                     string strError1 = "";
                     nRet = DeleteCacheFile(
                         strCacheDir,
-                        strLogFileName,
+                        bAccessLog ? strLogFileName + ".a" : strLogFileName,
                         out strError1);
                     if (nRet == -1)
                         MessageBox.Show(owner, strError1);

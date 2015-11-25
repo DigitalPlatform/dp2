@@ -380,12 +380,17 @@ namespace DigitalPlatform.Text
         // 从style字符串中得到 format:XXXX子串
         public static string GetStyleParam(string strStyle, string strParamName)
         {
-            string[] parts = strStyle.Split(new char[] { ',' });
+            string strHead = strParamName + ":";
+            string[] parts = strStyle.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string strPart in parts)
             {
                 string strText = strPart.Trim();
+                if (strText.StartsWith(strHead) == true)
+                    return strText.Substring(strHead.Length).Trim();
+#if NO
                 if (StringUtil.HasHead(strText, strParamName + ":") == true)
                     return strText.Substring((strParamName + ":").Length).Trim();
+#endif
             }
 
             return null;

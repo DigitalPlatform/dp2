@@ -1350,7 +1350,7 @@ out strError);
             }
 
             LibraryChannel current_channel = _base.GetChannel(account.ServerUrl, account.UserName);
-            current_channel.Timeout = new TimeSpan(0, 0, 5);   // 超时值为 5 秒
+            current_channel.Timeout = new TimeSpan(0, 0, 15);   // 超时值为 15 秒
             current_channel.Idle += _channel_Idle;
             lock (this._channels)
             {
