@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -14,13 +14,13 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms
 {
-    // ä¯ÀÀ¸ñÊ½
+    // æµè§ˆæ ¼å¼
     public class BrowseCfg : KeysBrowseBase
     {
         Hashtable m_exprCache = new Hashtable();
         Hashtable m_methodsCache = new Hashtable();
 
-        // XmlDocument m_domTransform = null;  // ÓÃÓÚ×ª»»µÄ×¨ÓÃDOM£¬ÓÉ this.dom ½«<col>ÔªËØÏÂµÄ<title>ÔªËØÈ¥µôºó²úÉú
+        // XmlDocument m_domTransform = null;  // ç”¨äºè½¬æ¢çš„ä¸“ç”¨DOMï¼Œç”± this.dom å°†<col>å…ƒç´ ä¸‹çš„<title>å…ƒç´ å»æ‰åäº§ç”Ÿ
         XslCompiledTransform m_xt = null;
 
         public override void Clear()
@@ -54,16 +54,16 @@ namespace DigitalPlatform.rms
             return convert_methods;
         }
 
-        // TODO: XPathExpression¿ÉÒÔ»º´æÆğÀ´£¬¼Ó¿ìËÙ¶È
-        // ´´½¨Ö¸¶¨¼ÇÂ¼µÄä¯ÀÀ¸ñÊ½¼¯ºÏ
+        // TODO: XPathExpressionå¯ä»¥ç¼“å­˜èµ·æ¥ï¼ŒåŠ å¿«é€Ÿåº¦
+        // åˆ›å»ºæŒ‡å®šè®°å½•çš„æµè§ˆæ ¼å¼é›†åˆ
         // parameters:
-        //		domData	    ¼ÇÂ¼Êı¾İdom ²»ÄÜÎªnull
-        //      nStartCol   ¿ªÊ¼µÄÁĞºÅ¡£Ò»°ãÎª0
-        //      cols        ä¯ÀÀ¸ñÊ½Êı×é
-        //		strError	out²ÎÊı£¬³ö´íĞÅÏ¢
+        //		domData	    è®°å½•æ•°æ®dom ä¸èƒ½ä¸ºnull
+        //      nStartCol   å¼€å§‹çš„åˆ—å·ã€‚ä¸€èˆ¬ä¸º0
+        //      cols        æµè§ˆæ ¼å¼æ•°ç»„
+        //		strError	outå‚æ•°ï¼Œå‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	³ö´í
-        //		>=0	³É¹¦¡£Êı×ÖÖµ´ú±íÃ¿¸öÁĞ°üº¬µÄ×Ö·ûÊıÖ®ºÍ
+        //		-1	å‡ºé”™
+        //		>=0	æˆåŠŸã€‚æ•°å­—å€¼ä»£è¡¨æ¯ä¸ªåˆ—åŒ…å«çš„å­—ç¬¦æ•°ä¹‹å’Œ
         public int BuildCols(XmlDocument domData,
             int nStartCol,
             out string[] cols,
@@ -72,9 +72,9 @@ namespace DigitalPlatform.rms
             strError = "";
             cols = new string[0];
 
-            Debug.Assert(domData != null, "BuildCols()µ÷ÓÃ´íÎó£¬domData²ÎÊı²»ÄÜÎªnull¡£");
+            Debug.Assert(domData != null, "BuildCols()è°ƒç”¨é”™è¯¯ï¼ŒdomDataå‚æ•°ä¸èƒ½ä¸ºnullã€‚");
 
-            // Ã»ÓĞä¯ÀÀ¸ñÊ½¶¨ÒåÊ±£¬¾ÍÃ»ÓĞĞÅÏ¢
+            // æ²¡æœ‰æµè§ˆæ ¼å¼å®šä¹‰æ—¶ï¼Œå°±æ²¡æœ‰ä¿¡æ¯
             if (this.dom == null)
                 return 0;
 
@@ -86,11 +86,11 @@ namespace DigitalPlatform.rms
 
             if (this.dom.DocumentElement.Prefix == "")
             {
-                // µÃµ½xpathµÄÖµ
+                // å¾—åˆ°xpathçš„å€¼
                 XmlNodeList nodeListXpath = this.dom.SelectNodes(@"//xpath");
 
             CREATE_CACHE:
-                // ´´½¨Cache
+                // åˆ›å»ºCache
                 if (m_exprCache.Count == 0 && nodeListXpath.Count > 0)
                 {
                     for (int i = 0; i < nodeListXpath.Count; i++)
@@ -105,11 +105,11 @@ namespace DigitalPlatform.rms
 #if DEBUG
                         if (nsmgr != null)
                         {
-                            Debug.Assert(strNstableName != null, "´ËÊ±Ó¦¸ÃÃ»ÓĞ¶¨Òå'nstable'ÊôĞÔ¡£");
+                            Debug.Assert(strNstableName != null, "æ­¤æ—¶åº”è¯¥æ²¡æœ‰å®šä¹‰'nstable'å±æ€§ã€‚");
                         }
                         else
                         {
-                            Debug.Assert(strNstableName == null, "´ËÊ±±ØĞëÃ»ÓĞ¶¨Òå'nstable'ÊôĞÔ¡£");
+                            Debug.Assert(strNstableName == null, "æ­¤æ—¶å¿…é¡»æ²¡æœ‰å®šä¹‰'nstable'å±æ€§ã€‚");
                         }
 #endif
 
@@ -119,7 +119,7 @@ namespace DigitalPlatform.rms
 
                         m_exprCache[nodeXpath] = expr;
 
-                        // °Ñ convert ²ÎÊıÒ²»º´æÆğÀ´
+                        // æŠŠ convert å‚æ•°ä¹Ÿç¼“å­˜èµ·æ¥
                         XmlNode nodeCol = nodeXpath.ParentNode;
                         string strConvert = DomUtil.GetAttr(nodeCol, "convert");
                         if (string.IsNullOrEmpty(strConvert) == false)
@@ -140,7 +140,7 @@ namespace DigitalPlatform.rms
                     if (string.IsNullOrEmpty(strXpath) == true)
                         continue;
 
-                    // ÓÅ»¯ËÙ¶È 2014/1/29
+                    // ä¼˜åŒ–é€Ÿåº¦ 2014/1/29
                     XmlNode nodeCol = nodeXpath.ParentNode;
 
                     List<string> convert_methods = (List<string>)m_methodsCache[nodeCol];
@@ -155,11 +155,11 @@ namespace DigitalPlatform.rms
                     XmlNamespaceManager nsmgr = (XmlNamespaceManager)this.tableNsClient[nodeXpath];
                     if (nsmgr != null)
                     {
-                        Debug.Assert(strNstableName != null, "´ËÊ±Ó¦¸ÃÃ»ÓĞ¶¨Òå'nstable'ÊôĞÔ¡£");
+                        Debug.Assert(strNstableName != null, "æ­¤æ—¶åº”è¯¥æ²¡æœ‰å®šä¹‰'nstable'å±æ€§ã€‚");
                     }
                     else
                     {
-                        Debug.Assert(strNstableName == null, "´ËÊ±±ØĞëÃ»ÓĞ¶¨Òå'nstable'ÊôĞÔ¡£");
+                        Debug.Assert(strNstableName == null, "æ­¤æ—¶å¿…é¡»æ²¡æœ‰å®šä¹‰'nstable'å±æ€§ã€‚");
                     }
 
 
@@ -174,7 +174,7 @@ namespace DigitalPlatform.rms
                     {
                         this.m_exprCache.Clear();
                         this.m_methodsCache.Clear();
-                        goto CREATE_CACHE;  // TODO: ÈçºÎÔ¤·ÀËÀÑ­»·?
+                        goto CREATE_CACHE;  // TODO: å¦‚ä½•é¢„é˜²æ­»å¾ªç¯?
                     }
 
                     Debug.Assert(expr != null, "");
@@ -199,7 +199,7 @@ namespace DigitalPlatform.rms
                     }
                     else if (expr.ReturnType == XPathResultType.NodeSet)
                     {
-                        // ¿´¿´ÊÇ·ñÒª²åÈëÊ²Ã´·Ö¸ô·û
+                        // çœ‹çœ‹æ˜¯å¦è¦æ’å…¥ä»€ä¹ˆåˆ†éš”ç¬¦
                         string strSep = GetSepString(convert_methods);
 
                         XPathNodeIterator iterator = nav.Select(expr);
@@ -213,7 +213,7 @@ namespace DigitalPlatform.rms
 
                             strOneText = ConvertText(convert_methods, strOneText);
 
-                            // ¼ÓÈë·Ö¸ô·ûºÅ
+                            // åŠ å…¥åˆ†éš”ç¬¦å·
                             if (text.Length > 0 && string.IsNullOrEmpty(strSep) == false)
                                 text.Append(strSep);
 
@@ -224,11 +224,11 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        strError = "XPathExpressionµÄReturnTypeÎª'" + expr.ReturnType.ToString() + "'ÎŞĞ§";
+                        strError = "XPathExpressionçš„ReturnTypeä¸º'" + expr.ReturnType.ToString() + "'æ— æ•ˆ";
                         return -1;
                     }
 
-                    // ¿ÕÄÚÈİÒ²ÒªËã×÷Ò»ÁĞ
+                    // ç©ºå†…å®¹ä¹Ÿè¦ç®—ä½œä¸€åˆ—
 
                     // 2008/12/18
 
@@ -240,7 +240,7 @@ namespace DigitalPlatform.rms
             {
                 if (this.m_xt == null)
                 {
-                    // <col>ÔªËØÏÂµÄ<title>ÔªËØÒªÈ¥µô
+                    // <col>å…ƒç´ ä¸‹çš„<title>å…ƒç´ è¦å»æ‰
                     XmlDocument temp = new XmlDocument();
                     temp.LoadXml(this.dom.OuterXml);
                     XmlNodeList nodes = temp.DocumentElement.SelectNodes("//col/title");
@@ -251,25 +251,24 @@ namespace DigitalPlatform.rms
 
                     XmlReader xr = new XmlNodeReader(temp);
 
-                    // °Ñxsl¼Óµ½XslTransform
+                    // æŠŠxslåŠ åˆ°XslTransform
                     XslCompiledTransform xt = new XslCompiledTransform(); // 2006/10/26 changed
                     xt.Load(xr/*, new XmlUrlResolver(), null*/);
 
                     this.m_xt = xt;
                 }
 
-                // Êä³öµ½µÄµØ·½
+                // è¾“å‡ºåˆ°çš„åœ°æ–¹
                 string strResultXml = "";
 
-                using(TextWriter tw = new StringWriter())
+                using (TextWriter tw = new StringWriter())
                 using (XmlTextWriter xw = new XmlTextWriter(tw))
                 {
-
-                    //Ö´ĞĞ×ª»» 
+                    //æ‰§è¡Œè½¬æ¢ 
                     this.m_xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
 
                     // tw.Close();
-                    tw.Flush(); // 2015/11/24 Ôö¼Ó´Ë¾ä
+                    tw.Flush(); // 2015/11/24 å¢åŠ æ­¤å¥
 
                     strResultXml = tw.ToString();
                 }
@@ -281,7 +280,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "browse½ÇÉ«ÎÄ¼şÉú³ÉµÄ½á¹ûÎÄ¼ş¼ÓÔØµ½dom³ö´í£º" + ex.Message;
+                    strError = "browseè§’è‰²æ–‡ä»¶ç”Ÿæˆçš„ç»“æœæ–‡ä»¶åŠ è½½åˆ°domå‡ºé”™ï¼š" + ex.Message;
                     return -1;
                 }
 
@@ -298,18 +297,18 @@ namespace DigitalPlatform.rms
                     if (String.IsNullOrEmpty(strConvert) == false)
                         strColText = ConvertText(convert_methods, strColText);
 
-                    //if (strColText != "")  //¿ÕÄÚÈİÒ²ÒªËã×÷Ò»ÁĞ
+                    //if (strColText != "")  //ç©ºå†…å®¹ä¹Ÿè¦ç®—ä½œä¸€åˆ—
                     col_array.Add(strColText);
                     nResultLength += strColText.Length;
                 }
             }
             else
             {
-                strError = "browse½ÇÉ«ÎÄ¼şµÄ¸ùÔªËØµÄÇ°×º'" + this.dom.DocumentElement.Prefix + "'²»ºÏ·¨¡£";
+                strError = "browseè§’è‰²æ–‡ä»¶çš„æ ¹å…ƒç´ çš„å‰ç¼€'" + this.dom.DocumentElement.Prefix + "'ä¸åˆæ³•ã€‚";
                 return -1;
             }
 
-            // °Ñcol_array×ªµ½colsÀï
+            // æŠŠcol_arrayè½¬åˆ°colsé‡Œ
             cols = new string[col_array.Count + nStartCol];
             col_array.CopyTo(cols, nStartCol);
             // cols = ConvertUtil.GetStringArray(nStartCol, col_array);
@@ -332,7 +331,7 @@ namespace DigitalPlatform.rms
             return strText;
         }
 #endif
-        // »ñµÃ·Ö¸ô·û¶¨Òå
+        // è·å¾—åˆ†éš”ç¬¦å®šä¹‰
         static string GetSepString(List<string> methods)
         {
             string strMethod = "";
@@ -349,11 +348,11 @@ namespace DigitalPlatform.rms
                 return null;
             strMethod = strMethod.Substring("join(".Length).Trim();
 
-            // È¥µôÄ©Î² ')'
+            // å»æ‰æœ«å°¾ ')'
             if (strMethod.Length > 1)
                 strMethod = strMethod.Substring(0, strMethod.Length - 1);
 
-            // TODO: È¥µôÍâÎ§ÒıºÅ ?
+            // TODO: å»æ‰å¤–å›´å¼•å· ?
             return strMethod;
         }
 

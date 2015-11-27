@@ -47,12 +47,12 @@ namespace dp2Circulation
         /// 目标记录路径
         /// </summary>
         public string TargetRecPath = "";   // 4种状态：1)这里的路径和当前记录路径一致，表明实体记录就创建在当前记录下；2)这里的路径和当前记录路径不一致，种记录已经存在，需要在它下面创建实体记录；3) 这里的路径仅有库名部分，表示种记录不存在，需要根据当前记录的MARC来创建；4) 这里的路径为空，表示需要通过菜单选择目标库，然后处理方法同3)
-        
+
         /// <summary>
         /// 验收批次号
         /// </summary>
         public string AcceptBatchNo = "";   // 验收批次号
-        
+
         /// <summary>
         /// 是否要在验收操作末段自动出现允许输入册条码号的界面?
         /// </summary>
@@ -758,7 +758,9 @@ namespace dp2Circulation
         //      -1  error
         //      0   not dup
         //      1   dup
-        int SearchIssueRefIdDup(string strRefID,
+        int SearchIssueRefIdDup(
+            LibraryChannel channel,
+            string strRefID,
             // string strBiblioRecPath,
             string strOriginRecPath,
             out string[] paths,
@@ -773,9 +775,12 @@ namespace dp2Circulation
                 return -1;
             }
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
             Stop.BeginLoop();
+#endif
+            Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
 
             try
             {
@@ -788,7 +793,7 @@ namespace dp2Circulation
                     out paths,
                     out strError);
                  * */
-                long lRet = Channel.SearchIssue(
+                long lRet = channel.SearchIssue(
     Stop,
     "<全部>",
     strRefID,
@@ -809,7 +814,7 @@ namespace dp2Circulation
                 long lHitCount = lRet;
 
                 List<string> aPath = null;
-                lRet = Channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(Stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -839,8 +844,11 @@ namespace dp2Circulation
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
 
@@ -965,6 +973,7 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
 
+            LibraryChannel channel = this.MainForm.GetChannel();
             this.EnableControls(false);
             try
             {
@@ -1037,7 +1046,9 @@ namespace dp2Circulation
                         //      -1  error
                         //      0   not dup
                         //      1   dup
-                        nRet = SearchIssueRefIdDup(issueitem.RefID,
+                        nRet = SearchIssueRefIdDup(
+                            channel,
+                            issueitem.RefID,
                             // this.BiblioRecPath,
                             issueitem.RecPath,
                             out paths,
@@ -1060,6 +1071,7 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
+                this.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -1794,7 +1806,7 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView, new Point(e.X, e.Y));
         }
 
 
@@ -1996,8 +2008,12 @@ namespace dp2Circulation
                 }
 
                 dlg.Operator = this.MainForm.DefaultUserName;
+#if NO
                 if (this.Channel != null)
                     dlg.LibraryCodeList = this.Channel.LibraryCodeList;
+#endif
+                if (this.MainForm != null)
+                    dlg.LibraryCodeList = this.MainForm._currentLibraryCodeList;
 
                 dlg.SetProcessingState = this.SetProcessingState;
                 /*
@@ -2449,7 +2465,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strPublishTime) == true)
                 {
                     Debug.Assert(String.IsNullOrEmpty(strPublishTime) == false, "");
-                    strError = "序号(从0开始计数)为 " + (i+nRemovedCount).ToString() + " 的期记录XML中没有<publishTime>元素...";
+                    strError = "序号(从0开始计数)为 " + (i + nRemovedCount).ToString() + " 的期记录XML中没有<publishTime>元素...";
                     return -1;
                 }
 
@@ -2515,7 +2531,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strRefID) == true)
                 {
                     Debug.Assert(String.IsNullOrEmpty(strRefID) == false, "");
-                    strError = "序号为 "+i.ToString()+" 的期记录XML中没有<refID>元素...";
+                    strError = "序号为 " + i.ToString() + " 的期记录XML中没有<refID>元素...";
                     return -1;
                 }
 
@@ -2582,7 +2598,7 @@ namespace dp2Circulation
 
                     nRet = issue_item.SetData(issue_item.RecPath,
                         issue_dom.OuterXml,
-                        issue_item.Timestamp, 
+                        issue_item.Timestamp,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -2655,7 +2671,7 @@ namespace dp2Circulation
 
             return 0;
         }
-        
+
         // 记到
         void menu_manageIssue_Click(object sender, EventArgs e)
         {
@@ -3698,7 +3714,7 @@ namespace dp2Circulation
         public string MacroValue = "";
     }
 
-#region 从 IssueManageControl 移动过来
+    #region 从 IssueManageControl 移动过来
 
     /// <summary>
     /// 获得订购信息事件
@@ -3776,7 +3792,7 @@ namespace dp2Circulation
 
 
 
-#endregion
+    #endregion
 
     // 如果不这样书写，视图设计器会出现故障
     /// <summary>

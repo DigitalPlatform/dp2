@@ -430,17 +430,20 @@ namespace dp2Circulation
         /// <summary>
         /// 装载 Item 记录
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strStyle">装载风格</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public override int LoadItemRecords(
+            LibraryChannel channel,
             string strBiblioRecPath,
             // bool bDisplayOtherLibraryItem,
             string strStyle,
             out string strError)
         {
             int nRet = base.LoadItemRecords(
+                channel,
                 strBiblioRecPath,
                 strStyle,
                 out strError);
@@ -1465,7 +1468,7 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView, new Point(e.X, e.Y));
         }
 
         // 增添自由词
@@ -1652,7 +1655,8 @@ namespace dp2Circulation
         }
 
         // 在记录中增加<_recPath>元素
-        /*public*/ static int AddRecPath(ref string strXml,
+        /*public*/
+        static int AddRecPath(ref string strXml,
             string strRecPath,
             out string strError)
         {
@@ -1686,7 +1690,7 @@ namespace dp2Circulation
             if (bOpenWindow == false)
             {
                 if (this.MainForm.PanelFixedVisible == false
-                    && (m_commentViewer == null || m_commentViewer.Visible == false) )
+                    && (m_commentViewer == null || m_commentViewer.Visible == false))
                     return;
             }
 
@@ -1722,14 +1726,16 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = GetCommentHtml(strXml,
+            nRet = GetCommentHtml(
+                null,
+                strXml,
                 out strHtml,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
 
-            bool bNew = false; 
+            bool bNew = false;
             if (this.m_commentViewer == null
                 || (bOpenWindow == true && this.m_commentViewer.Visible == false))
             {
@@ -1794,18 +1800,27 @@ namespace dp2Circulation
             }
         }
 
-        /*public*/ int GetCommentHtml(string strXml,
-    out string strHtml,
-    out string strError)
+        /*public*/
+        int GetCommentHtml(
+            LibraryChannel channel_param,
+            string strXml,
+            out string strHtml,
+            out string strError)
         {
             strError = "";
             strHtml = "";
 
+            LibraryChannel channel = channel_param;
+            if (channel == null)
+                channel = this.MainForm.GetChannel();
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得评注 HTML 信息 ...");
             Stop.BeginLoop();
 
             this.Update();
+#endif
+            Stop.SetMessage("正在获得评注 HTML 信息 ...");
 
             try
             {
@@ -1814,7 +1829,7 @@ namespace dp2Circulation
                 string strBiblio = "";
                 string strOutputBiblioRecPath = "";
 
-                long lRet = Channel.GetCommentInfo(
+                long lRet = channel.GetCommentInfo(
                     Stop,
                     strXml,
                     // "",
@@ -1831,9 +1846,14 @@ namespace dp2Circulation
             }
             finally
             {
+                if (channel_param == null)
+                    this.MainForm.ReturnChannel(channel);
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
+#endif
+                Stop.SetMessage("");
             }
 
             return 1;
@@ -1992,7 +2012,8 @@ namespace dp2Circulation
         }
 #endif
 
-        void ModifyComment(CommentItem commentitem)
+        void ModifyComment(
+            CommentItem commentitem)
         {
             Debug.Assert(commentitem != null, "");
 
@@ -2040,6 +2061,7 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
 
+            LibraryChannel channel = this.MainForm.GetChannel();
 
             this.EnableControls(false);
             try
@@ -2082,7 +2104,9 @@ namespace dp2Circulation
                         //      -1  error
                         //      0   not dup
                         //      1   dup
-                        nRet = SearchCommentRefIdDup(commentitem.RefID,
+                        nRet = SearchCommentRefIdDup(
+                            channel,
+                            commentitem.RefID,
                             // this.BiblioRecPath,
                             commentitem.RecPath,
                             out paths,
@@ -2106,6 +2130,8 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
+
+                this.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -2178,7 +2204,9 @@ namespace dp2Circulation
             return 1;   // found
         }
 #endif
-        int SearchCommentRefIdDup(string strRefID,
+        int SearchCommentRefIdDup(
+            LibraryChannel channel,
+            string strRefID,
             // string strBiblioRecPath,
     string strOriginRecPath,
     out string[] paths,
@@ -2193,13 +2221,16 @@ namespace dp2Circulation
                 return -1;
             }
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
             Stop.BeginLoop();
+#endif
+            Stop.SetMessage("正在对参考ID '" + strRefID + "' 进行查重 ...");
 
             try
             {
-                long lRet = Channel.SearchComment(
+                long lRet = channel.SearchComment(
     Stop,
     "<全部>",
     strRefID,
@@ -2220,7 +2251,7 @@ namespace dp2Circulation
                 long lHitCount = lRet;
 
                 List<string> aPath = null;
-                lRet = Channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(Stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -2250,9 +2281,12 @@ namespace dp2Circulation
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
+#endif
+                Stop.SetMessage("");
             }
 
             return 1;   // found
@@ -2265,7 +2299,8 @@ namespace dp2Circulation
         }
 
         // 新增一个评注事项，要打开对话框让输入详细信息
-        void DoNewComment(/*string strIndex*/)
+        void DoNewComment(
+            /*string strIndex*/)
         {
             string strError = "";
             int nRet = 0;
@@ -2498,7 +2533,6 @@ namespace dp2Circulation
             } // end of ' if (String.IsNullOrEmpty(strIndex) == false)
 
             return;
-
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
@@ -2829,7 +2863,7 @@ namespace dp2Circulation
                 }
 #endif
                 if (bOldChanged != this.Items.Changed)
-                TriggerContentChanged(bOldChanged, this.Items.Changed);
+                    TriggerContentChanged(bOldChanged, this.Items.Changed);
 
             }
             finally
@@ -2922,7 +2956,7 @@ namespace dp2Circulation
         /// [in] 评注记录中打算新增的主题词，不包括状态具有"已处理"的。最后实际新增的内容可能会被修改
         /// </summary>
         public List<string> NewSubjects = null;    // [in] 评注记录中打算新增的主题词，不包括状态具有"已处理"的。最后实际新增的内容可能会被修改
-        
+
         /// <summary>
         /// [in] 评注记录中打算新增的全部主题词，包括状态具有"已处理"的。
         /// </summary>

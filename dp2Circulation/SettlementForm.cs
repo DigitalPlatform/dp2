@@ -45,25 +45,25 @@ namespace dp2Circulation
         const int ITEMTYPE_UNKNOWN = 3;
 
         // 列的位置
-        const int COLUMN_ID =               0;
-        const int COLUMN_STATE =            1;
-        const int COLUMN_READERBARCODE =    2;
-        const int COLUMN_LIBRARYCODE =      3;
-        const int COLUMN_PRICE =            4;
-        const int COLUMN_COMMENT =          5;
-        const int COLUMN_REASON =           6;
-        const int COLUMN_BORROWDATE =       7;
-        const int COLUMN_BORROWPERIOD =     8;
-        const int COLUMN_RETURNDATE =       9;
-        const int COLUMN_RETURNOPERATOR =   10;
-        const int COLUMN_BARCODE =          11;
-        const int COLUMN_SUMMARY =          12;
-        const int COLUMN_AMERCEOPERATOR =   13;
-        const int COLUMN_AMERCETIME =       14;
+        const int COLUMN_ID = 0;
+        const int COLUMN_STATE = 1;
+        const int COLUMN_READERBARCODE = 2;
+        const int COLUMN_LIBRARYCODE = 3;
+        const int COLUMN_PRICE = 4;
+        const int COLUMN_COMMENT = 5;
+        const int COLUMN_REASON = 6;
+        const int COLUMN_BORROWDATE = 7;
+        const int COLUMN_BORROWPERIOD = 8;
+        const int COLUMN_RETURNDATE = 9;
+        const int COLUMN_RETURNOPERATOR = 10;
+        const int COLUMN_BARCODE = 11;
+        const int COLUMN_SUMMARY = 12;
+        const int COLUMN_AMERCEOPERATOR = 13;
+        const int COLUMN_AMERCETIME = 14;
         const int COLUMN_SETTLEMENTOPERATOR = 15;
-        const int COLUMN_SETTLEMENTTIME =   16;
+        const int COLUMN_SETTLEMENTTIME = 16;
 
-        const int COLUMN_RECPATH =          17;
+        const int COLUMN_RECPATH = 17;
 
         // 参与排序的列号数组
         SortColumns SortColumns = new SortColumns();
@@ -219,7 +219,8 @@ namespace dp2Circulation
             SaveSize();
         }
 
-        /*public*/ void LoadSize()
+        /*public*/
+        void LoadSize()
         {
 #if NO
             // 设置窗口尺寸状态
@@ -239,7 +240,8 @@ namespace dp2Circulation
             }
         }
 
-        /*public*/ void SaveSize()
+        /*public*/
+        void SaveSize()
         {
 #if NO
             MainForm.AppInfo.SaveMdiChildFormStates(this,
@@ -665,7 +667,7 @@ namespace dp2Circulation
 
                 if (nLoadCount != lHitCount)
                 {
-                    MessageBox.Show(this, "检索命中 "+lHitCount.ToString()+" 条，实际装入 "+nLoadCount.ToString()+" 条");
+                    MessageBox.Show(this, "检索命中 " + lHitCount.ToString() + " 条，实际装入 " + nLoadCount.ToString() + " 条");
                 }
             }
             finally
@@ -986,7 +988,7 @@ namespace dp2Circulation
         {
             string strState = item.SubItems[COLUMN_STATE].Text;
 
-            if (strState == "amerced" 
+            if (strState == "amerced"
                 || strState == "已收费")
             {
                 item.ImageIndex = ITEMTYPE_AMERCED;
@@ -1476,7 +1478,7 @@ namespace dp2Circulation
 
                 if (strAction == "undosettlement")
                 {
-                    if (strState == "amerced" 
+                    if (strState == "amerced"
                         || strState == "已收费")
                     {
                         /*
@@ -1489,7 +1491,7 @@ namespace dp2Circulation
 
                 if (strAction == "delete")
                 {
-                    if (strState == "amerced" 
+                    if (strState == "amerced"
                         || strState == "已收费")
                     {
                         /*
@@ -1504,7 +1506,7 @@ namespace dp2Circulation
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在进行"+strOperName+" ...");
+            stop.SetMessage("正在进行" + strOperName + " ...");
             stop.BeginLoop();
 
             stop.SetProgressRange(0, total_ids.Count);
@@ -1611,7 +1613,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("移除"+strSelectedName+" " + nSelectedCount.ToString() + " 个事项(&R)");
+            menuItem = new MenuItem("移除" + strSelectedName + " " + nSelectedCount.ToString() + " 个事项(&R)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
             if (nSelectedCount == 0)
                 menuItem.Enabled = false;
@@ -1644,16 +1646,16 @@ namespace dp2Circulation
 
             if (this.toolStripButton_items_useCheck.Checked == true)
                 strText = "勾选";
-            else 
+            else
                 strText = "选定";
 
-            menuItem = new MenuItem(strText+"全部("+nAmercedCount.ToString()+"个) 已收费 事项(&A)");
+            menuItem = new MenuItem(strText + "全部(" + nAmercedCount.ToString() + "个) 已收费 事项(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAmerced_Click);
             if (nAmercedCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem(strText+"全部("+(nNewlySettlementedCount + nOldSettlementedCount).ToString()+"个) 已结算(包括新结算和旧结算) 事项(&S)");
+            menuItem = new MenuItem(strText + "全部(" + (nNewlySettlementedCount + nOldSettlementedCount).ToString() + "个) 已结算(包括新结算和旧结算) 事项(&S)");
             menuItem.Click += new System.EventHandler(this.menu_selectSettlemented_Click);
             if (nNewlySettlementedCount + nOldSettlementedCount == 0)
                 menuItem.Enabled = false;
@@ -1693,7 +1695,7 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_amerced, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_amerced, new Point(e.X, e.Y));
 
         }
 
@@ -1763,7 +1765,7 @@ namespace dp2Circulation
                 }
 
                 // 准备XML输出文件
-                SaveFileDialog dlg = new SaveFileDialog(); 
+                SaveFileDialog dlg = new SaveFileDialog();
                 dlg.Title = "请指定输出的XML文件";
                 dlg.OverwritePrompt = true;
                 dlg.CreatePrompt = false;
@@ -1779,7 +1781,7 @@ namespace dp2Circulation
                 // 输出的文件流
 
                 using (FileStream outputfile = File.Create(m_strOutputXmlFilename))
-                using(XmlTextWriter writer = new XmlTextWriter(outputfile, Encoding.UTF8)) // Xml格式输出
+                using (XmlTextWriter writer = new XmlTextWriter(outputfile, Encoding.UTF8)) // Xml格式输出
                 {
                     writer.Formatting = Formatting.Indented;
                     writer.Indentation = 4;
@@ -1828,7 +1830,7 @@ namespace dp2Circulation
                         }
                         dom.DocumentElement.WriteTo(writer);
 
-                        stop.SetProgressValue(i+1);
+                        stop.SetProgressValue(i + 1);
                     }
 
                     writer.WriteEndElement();
@@ -1870,7 +1872,7 @@ namespace dp2Circulation
 
                 DialogResult result = MessageBox.Show(
                     this,
-                    "确实要从列表中移除所选定的 "+this.listView_amerced.SelectedItems.Count.ToString()+" 个事项?\r\n\r\n(注：本操作不会从数据库中删除记录)",
+                    "确实要从列表中移除所选定的 " + this.listView_amerced.SelectedItems.Count.ToString() + " 个事项?\r\n\r\n(注：本操作不会从数据库中删除记录)",
                     "SettlementForm",
                     MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question,
@@ -2067,7 +2069,7 @@ namespace dp2Circulation
 
             if (nAmercedStateCount > 0)
             {
-                strError = "当前拟打印的事项集合中，有 " +nAmercedStateCount.ToString()+ " 个已收费但未结算的事项(黄底色的事项)，如果这些事项参与打印和统计，那么总计和小计金额将不能代表结算金额。";
+                strError = "当前拟打印的事项集合中，有 " + nAmercedStateCount.ToString() + " 个已收费但未结算的事项(黄底色的事项)，如果这些事项参与打印和统计，那么总计和小计金额将不能代表结算金额。";
             }
 
             if (nOldSettlementStateCount > 0)
@@ -2503,7 +2505,7 @@ namespace dp2Circulation
                 if (item == null)
                 {
                     string strColumnName = StringUtil.GetLeft(column.Name);
-                    if ( strColumnName == "price"
+                    if (strColumnName == "price"
                         || strColumnName == "金额")
                     {
                         strContent = strAmerceOperator + " 共 " + nItemCount.ToString() + "项 小计：" + strSumContent;
@@ -2637,7 +2639,7 @@ namespace dp2Circulation
             return total;
         }
 
-#endregion
+        #endregion
 
         // 打印选项
         private void button_print_option_Click(object sender, EventArgs e)
@@ -2967,7 +2969,7 @@ namespace dp2Circulation
             nNewlySettlementedCount = 0;
             nOtherCount = 0;
 
-            for(int i=0;i<this.listView_amerced.Items.Count;i++)
+            for (int i = 0; i < this.listView_amerced.Items.Count; i++)
             {
                 ListViewItem item = this.listView_amerced.Items[i];
                 if (item.ImageIndex == ITEMTYPE_AMERCED)

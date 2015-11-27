@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -11,7 +11,7 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.Library
 {
     /// <summary>
-    /// ÖÖ´ÎºÅ¹ÜÀíÆ÷
+    /// ç§æ¬¡å·ç®¡ç†å™¨
     /// </summary>
     public class SeedManager
     {
@@ -21,22 +21,22 @@ namespace DigitalPlatform.Library
         SearchPanel SearchPanel = null;
 
         /// <summary>
-        /// ÖÖ×Ó¿âÃû
+        /// ç§å­åº“å
         /// </summary>
         public string SeedDbName = "";
 
         /// <summary>
-        /// ·şÎñÆ÷URL
+        /// æœåŠ¡å™¨URL
         /// </summary>
         public string ServerUrl = "";
 
         /// <summary>
-        /// Ê±¼ä´Á
+        /// æ—¶é—´æˆ³
         /// </summary>
         public byte[] Timestamp = null;
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
         /// <param name="searchpanel"></param>
         /// <param name="strServerUrl"></param>
@@ -58,12 +58,12 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ¼ìË÷³öÖÖ×Ó¼ÇÂ¼Â·¾¶
+        /// æ£€ç´¢å‡ºç§å­è®°å½•è·¯å¾„
         /// </summary>
-        /// <param name="strName">ÖÖ×ÓÃû</param>
-        /// <param name="strPath">·µ»Ø¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strError">·µ»ØµÄ³ö´íĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½;1ÕÒµ½</returns>
+        /// <param name="strName">ç§å­å</param>
+        /// <param name="strPath">è¿”å›è®°å½•è·¯å¾„</param>
+        /// <param name="strError">è¿”å›çš„å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°;1æ‰¾åˆ°</returns>
         int SearchRecPath(
             string strName,
             out string strPath,
@@ -74,24 +74,24 @@ namespace DigitalPlatform.Library
 
             if (this.ServerUrl == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷URL";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨URL";
                 return -1;
             }
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(this.SeedDbName + ":" + "Ãû")       // 2007/9/14
+                + StringUtil.GetXmlStringSimple(this.SeedDbName + ":" + "å")       // 2007/9/14
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strName)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
-            this.SearchPanel.BeginLoop("ÕıÔÚÕë¶Ô¿â '" + this.SeedDbName + "' ¼ìË÷ '" + strName + "'");
+            this.SearchPanel.BeginLoop("æ­£åœ¨é’ˆå¯¹åº“ '" + this.SeedDbName + "' æ£€ç´¢ '" + strName + "'");
 
-            // ¼ìË÷Ò»¸öÃüÖĞ½á¹û
+            // æ£€ç´¢ä¸€ä¸ªå‘½ä¸­ç»“æœ
             // return:
-            //		-1	Ò»°ã´íÎó
+            //		-1	ä¸€èˆ¬é”™è¯¯
             //		0	not found
             //		1	found
-            //		>1	ÃüÖĞ¶àÓÚÒ»Ìõ
+            //		>1	å‘½ä¸­å¤šäºä¸€æ¡
             int nRet = this.SearchPanel.SearchOnePath(
                 this.ServerUrl,
                 strQueryXml,
@@ -102,17 +102,17 @@ namespace DigitalPlatform.Library
 
             if (nRet == -1)
             {
-                strError = "¼ìË÷¿â " + this.SeedDbName + " Ê±³ö´í: " + strError;
+                strError = "æ£€ç´¢åº“ " + this.SeedDbName + " æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
             if (nRet == 0)
             {
-                return 0;	// Ã»ÓĞÕÒµ½
+                return 0;	// æ²¡æœ‰æ‰¾åˆ°
             }
 
             if (nRet > 1)
             {
-                strError = "ÒÔÃû×Ö '" + strName + "' ¼ìË÷¿â " + this.SeedDbName + " Ê±ÃüÖĞ " + Convert.ToString(nRet) + " Ìõ£¬ÎŞ·¨È¡µÃÊÊµ±µÄÖµ¡£ÇëĞŞ¸Ä¿â '" + this.SeedDbName + "' ÖĞÏàÓ¦¼ÇÂ¼£¬È·±£Í¬Ò»Ãû×ÖÖ»ÓĞÒ»Ìõ¶ÔÓ¦µÄ¼ÇÂ¼¡£";
+                strError = "ä»¥åå­— '" + strName + "' æ£€ç´¢åº“ " + this.SeedDbName + " æ—¶å‘½ä¸­ " + Convert.ToString(nRet) + " æ¡ï¼Œæ— æ³•å–å¾—é€‚å½“çš„å€¼ã€‚è¯·ä¿®æ”¹åº“ '" + this.SeedDbName + "' ä¸­ç›¸åº”è®°å½•ï¼Œç¡®ä¿åŒä¸€åå­—åªæœ‰ä¸€æ¡å¯¹åº”çš„è®°å½•ã€‚";
                 return -1;
             }
 
@@ -120,7 +120,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÉèÖÃÖÖ×ÓÖµ
+        /// è®¾ç½®ç§å­å€¼
         /// </summary>
         /// <param name="strName"></param>
         /// <param name="strValue"></param>
@@ -143,14 +143,14 @@ namespace DigitalPlatform.Library
 
             if (nRet == 0)
             {
-                // ĞÂ´´½¨¼ÇÂ¼
+                // æ–°åˆ›å»ºè®°å½•
                 strPath = this.SeedDbName + "/?";
 
-                // ÕâÀïÒÔºó¿¼ÂÇ¼ÓËø
+                // è¿™é‡Œä»¥åè€ƒè™‘åŠ é”
             }
             else
             {
-                // ¸²¸Ç¼ÇÂ¼
+                // è¦†ç›–è®°å½•
             }
 
             string strXml = "";
@@ -158,7 +158,6 @@ namespace DigitalPlatform.Library
             using (StringWriter sw = new StringWriter())
             using (XmlTextWriter xw = new XmlTextWriter(sw))
             {
-
                 xw.WriteStartDocument();
 
                 xw.WriteStartElement("r");
@@ -176,9 +175,9 @@ namespace DigitalPlatform.Library
 
         REDO:
             // return:
-            //		-2	Ê±¼ä´Á²»Æ¥Åä
-            //		-1	Ò»°ã³ö´í
-            //		0	Õı³£
+            //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+            //		-1	ä¸€èˆ¬å‡ºé”™
+            //		0	æ­£å¸¸
             nRet = this.SearchPanel.SaveRecord(
                 this.ServerUrl,
                 strPath,
@@ -201,7 +200,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÔöÁ¿ÖÖ×ÓÖµ
+        /// å¢é‡ç§å­å€¼
         /// </summary>
         /// <param name="strName"></param>
         /// <param name="strDefaultValue"></param>
@@ -230,10 +229,10 @@ namespace DigitalPlatform.Library
 
             if (nRet == 0)
             {
-                // ĞÂ´´½¨¼ÇÂ¼
+                // æ–°åˆ›å»ºè®°å½•
                 strPath = this.SeedDbName + "/?";
 
-                using(StringWriter sw = new StringWriter())
+                using (StringWriter sw = new StringWriter())
                 using (XmlTextWriter xw = new XmlTextWriter(sw))
                 {
                     xw.WriteStartDocument();
@@ -254,7 +253,7 @@ namespace DigitalPlatform.Library
             }
             else
             {
-                string strPartXml = "/xpath/<locate>@v</locate><action>AddInteger+</action>";   // +AddIntegerÎª¼ÓÁËÖµ²¢´æ»ØÔÙ·µ»Ø¼ÓÁËµÄÖµ; AddIntegerÎªÈ¡ÖµºóÔÙ¼ÓÖµ´æ»Ø.
+                string strPartXml = "/xpath/<locate>@v</locate><action>AddInteger+</action>";   // +AddIntegerä¸ºåŠ äº†å€¼å¹¶å­˜å›å†è¿”å›åŠ äº†çš„å€¼; AddIntegerä¸ºå–å€¼åå†åŠ å€¼å­˜å›.
                 strPath += strPartXml;
                 strXml = "1";
 
@@ -266,9 +265,9 @@ namespace DigitalPlatform.Library
 
 
             // return:
-            //		-2	Ê±¼ä´Á²»Æ¥Åä
-            //		-1	Ò»°ã³ö´í
-            //		0	Õı³£
+            //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+            //		-1	ä¸€èˆ¬å‡ºé”™
+            //		0	æ­£å¸¸
             nRet = this.SearchPanel.SaveRecord(
                 this.ServerUrl,
                 strPath,
@@ -298,7 +297,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// »ñµÃÖÖ×ÓÖµ
+        /// è·å¾—ç§å­å€¼
         /// </summary>
         /// <param name="strName"></param>
         /// <param name="strValue"></param>
@@ -324,7 +323,7 @@ namespace DigitalPlatform.Library
 
             XmlDocument tempdom = null;
             byte[] baTimeStamp = null;
-            // »ñÈ¡¼ÇÂ¼
+            // è·å–è®°å½•
             // return:
             //		-1	error
             //		0	not found

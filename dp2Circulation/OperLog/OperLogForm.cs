@@ -6023,7 +6023,7 @@ MessageBoxDefaultButton.Button1);
             if (lServerFileSize == -1)
             {
                 if (bAccessLog)
-                    strError = "dp2library 只读日志尚未启用";
+                    strError = "dp2library 访问日志尚未启用";
                 else
                     strError = "dp2library 操作日志尚未启用";
                 return -1;

@@ -1,53 +1,51 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-// using System.Xml.XPath;
 
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.rms
 {
-
-	//Éè¼ÆÒâÍ¼£º
-	//ÎªÁËÍ¨¹ı¹Ø¼ü×Ö¼ìË÷¼ÇÂ¼£¬ĞèÒª½«Ò»Ìõ¼ÇÂ¼µÄËùÓĞ¹Ø¼ü×ÖÌáÈ¡³öÀ´´æ·Åµ½Êı¾İ¿âkeys±íÖĞ.
-	//¼ÇÂ¼Óë¹Ø¼ü×ÖÊÇÓµÓĞµÄ¹ØÏµ£¬¼´´æ¼ÇÂ¼Ê±Í¬Ê±´æ¹Ø¼ü×Ö£¬É¾¼ÇÂ¼Ê±Í¬Ê±É¾¹Ø¼ü×Ö
-	//Êı¾İ¿âÖĞÃ¿¸ö¹Ø¼ü×Ö°üº¬ÈıÏîÄÚÈİ£º
-	//keystring: ¾ßÌåµÄÎÄ±¾
-	//fromstring: ÏÖÔÚ»¹Ã»ÓĞÓÃµ½
-	//idstring: ¶ÔÓ¦µÄÊı¾İ¼ÇÂ¼ID
-	//¸ù¾İÊı¾İ¼ÇÂ¼ºÍkeysÅäÖÃÎÄ¼ş´´½¨DpKeys¼¯ºÏ
-	//¹Ø¼ü×ÖÅäÖÃÎÄ¼ş°üÀ¨ËÄÏî:
+	//è®¾è®¡æ„å›¾ï¼š
+	//ä¸ºäº†é€šè¿‡å…³é”®å­—æ£€ç´¢è®°å½•ï¼Œéœ€è¦å°†ä¸€æ¡è®°å½•çš„æ‰€æœ‰å…³é”®å­—æå–å‡ºæ¥å­˜æ”¾åˆ°æ•°æ®åº“keysè¡¨ä¸­.
+	//è®°å½•ä¸å…³é”®å­—æ˜¯æ‹¥æœ‰çš„å…³ç³»ï¼Œå³å­˜è®°å½•æ—¶åŒæ—¶å­˜å…³é”®å­—ï¼Œåˆ è®°å½•æ—¶åŒæ—¶åˆ å…³é”®å­—
+	//æ•°æ®åº“ä¸­æ¯ä¸ªå…³é”®å­—åŒ…å«ä¸‰é¡¹å†…å®¹ï¼š
+	//keystring: å…·ä½“çš„æ–‡æœ¬
+	//fromstring: ç°åœ¨è¿˜æ²¡æœ‰ç”¨åˆ°
+	//idstring: å¯¹åº”çš„æ•°æ®è®°å½•ID
+	//æ ¹æ®æ•°æ®è®°å½•å’Œkeysé…ç½®æ–‡ä»¶åˆ›å»ºDpKeysé›†åˆ
+	//å…³é”®å­—é…ç½®æ–‡ä»¶åŒ…æ‹¬å››é¡¹:
 	// <key>
-	//   <xpath>/description/title</xpath>    :Í¨¹ıxpath´ÓÊı¾İdomÖĞÕÒµ½¾ßÌåÄÚÈİ´æ·Åµ½keystring
-	//   <from>title</from>                   :Ö±½ÓÌáÈ¡ÄÚÈİ´æÈëfromstring
-	//   <table name="title"/>                :ÊôÓÚÄÄ¸ö±í
+	//   <xpath>/description/title</xpath>    :é€šè¿‡xpathä»æ•°æ®domä¸­æ‰¾åˆ°å…·ä½“å†…å®¹å­˜æ”¾åˆ°keystring
+	//   <from>title</from>                   :ç›´æ¥æå–å†…å®¹å­˜å…¥fromstring
+	//   <table name="title"/>                :å±äºå“ªä¸ªè¡¨
 	// </key>
-	// DpKeys´ÓArrayList¼Ì³Ğ£¬³ÉÔ±ÎªDpKeys¶ÔÏó¡£ÓÃÓÚ´¦Àí¹Ø¼ü×Ö²¿·Ö¡£
+	// DpKeysä»ArrayListç»§æ‰¿ï¼Œæˆå‘˜ä¸ºDpKeyså¯¹è±¡ã€‚ç”¨äºå¤„ç†å…³é”®å­—éƒ¨åˆ†ã€‚
 	public class KeyCollection : List<KeyItem> 
 	{
 
 
-		//Éè¼ÆÒâÍ¼:
-		//¸²¸Ç¼ÇÂ¼Ê±£¬¸ù¾İĞÂ¼ÇÂ¼µÃµ½Ò»Ğ©ĞÂµÄkey£¬µ«Ô­¾É¼ÇÂ¼Ò²´æÔÚÒ»Ğ©¾ÉµÄkey£¬
-		//¿ÉÒÔÓÃ±¿°ì·¨É¾³ıÔ­¾É¼ÇÂ¼ËùÓĞµÄkey£¬ÔÙÔö¼ÓĞÂ¼ÇÂ¼ËùÓĞµÄkey¡£
+		//è®¾è®¡æ„å›¾:
+		//è¦†ç›–è®°å½•æ—¶ï¼Œæ ¹æ®æ–°è®°å½•å¾—åˆ°ä¸€äº›æ–°çš„keyï¼Œä½†åŸæ—§è®°å½•ä¹Ÿå­˜åœ¨ä¸€äº›æ—§çš„keyï¼Œ
+		//å¯ä»¥ç”¨ç¬¨åŠæ³•åˆ é™¤åŸæ—§è®°å½•æ‰€æœ‰çš„keyï¼Œå†å¢åŠ æ–°è®°å½•æ‰€æœ‰çš„keyã€‚
 		// 
-		//µ«ĞÂ¾É¼ÇÂ¼¿ÉÄÜÓĞÒ»Ğ©ÖØ¸´key£¬¸üºÃµÄ·½·¨ÊÇÈÃĞÂ¾É¼ÇÂ¼µÄÁ½×ékey½øĞĞ±È½Ï£¬
-		//½á¹û·Ö³ÉÈı²¿·Ö£º
-		//1.Ö»ÔÚĞÂ¼ÇÂ¼³öÏÖµÄkey
-		//2.Ö»ÔÚ¾É¼ÇÂ¼³öÏÖµÄkey
-		//3.ÖØ¸´µÄkey¡£
+		//ä½†æ–°æ—§è®°å½•å¯èƒ½æœ‰ä¸€äº›é‡å¤keyï¼Œæ›´å¥½çš„æ–¹æ³•æ˜¯è®©æ–°æ—§è®°å½•çš„ä¸¤ç»„keyè¿›è¡Œæ¯”è¾ƒï¼Œ
+		//ç»“æœåˆ†æˆä¸‰éƒ¨åˆ†ï¼š
+		//1.åªåœ¨æ–°è®°å½•å‡ºç°çš„key
+		//2.åªåœ¨æ—§è®°å½•å‡ºç°çš„key
+		//3.é‡å¤çš„keyã€‚
 		// 
-		//ÕâÑùÔÚÖ´ĞĞ¸²¸ÇÊ±£¬Ôö¼ÓµÚÒ»²¿·Ö£¬É¾³ıµÚ¶ş²¿·Ö£¬ÖØ¸´µÄ±£³Ö²»±ä£¬ËùÒÔ¾Í½ÚÊ¡ÁËÊ±¼ä
+		//è¿™æ ·åœ¨æ‰§è¡Œè¦†ç›–æ—¶ï¼Œå¢åŠ ç¬¬ä¸€éƒ¨åˆ†ï¼Œåˆ é™¤ç¬¬äºŒéƒ¨åˆ†ï¼Œé‡å¤çš„ä¿æŒä¸å˜ï¼Œæ‰€ä»¥å°±èŠ‚çœäº†æ—¶é—´
 		// 
-		//×¢Òâµ÷Õâ¸öº¯ÊıÇ°£¬È·±£¼¯ºÏÊÇÅÅ¹ıĞòµÄ
+		//æ³¨æ„è°ƒè¿™ä¸ªå‡½æ•°å‰ï¼Œç¡®ä¿é›†åˆæ˜¯æ’è¿‡åºçš„
 		// 
-		//Ô­À´newKeysºÍoldKeys²ÎÊıÀàĞÍ¶¼ÊÇref,µ«ÒòÎªÓÃ»§Àà¶¼ÊÇÒıÓÃÀàĞÍ£¬ËùÒÔÃ»±ØĞëÓÃref²ÎÊı
+		//åŸæ¥newKeyså’ŒoldKeyså‚æ•°ç±»å‹éƒ½æ˜¯ref,ä½†å› ä¸ºç”¨æˆ·ç±»éƒ½æ˜¯å¼•ç”¨ç±»å‹ï¼Œæ‰€ä»¥æ²¡å¿…é¡»ç”¨refå‚æ•°
 		// parameters:
-		//		newKeys	ĞÂ¼ÇÂ¼µÄkey¼¯ºÏ
-		//		oldKeys	¾É¼ÇÂ¼µÄkey¼¯ºÏ
+		//		newKeys	æ–°è®°å½•çš„keyé›†åˆ
+		//		oldKeys	æ—§è®°å½•çš„keyé›†åˆ
 		// return:
-		//		ÖØ¸´µÄkey¼¯ºÏ
+		//		é‡å¤çš„keyé›†åˆ
 		public static KeyCollection Merge(KeyCollection newKeys,
 			KeyCollection oldKeys)
 		{
@@ -59,44 +57,44 @@ namespace DigitalPlatform.rms
 
 			KeyItem newOneKey;
 			KeyItem oldOneKey;
-			int i = 0;    //i,jµÈÓÚ-1Ê±±íÊ¾¶ÔÓ¦µÄ¼¯ºÏ½áÊø
+			int i = 0;    //i,jç­‰äº-1æ—¶è¡¨ç¤ºå¯¹åº”çš„é›†åˆç»“æŸ
 			int j = 0;
 			int ret;
 
-			//ÎŞÌõ¼şÑ­»·£¬µ±ÓĞÒ»¸ö¼¯ºÏ½áÊø£¨ÏÂ±ê±äÎª-1£©Ìø³öÑ­»·
+			//æ— æ¡ä»¶å¾ªç¯ï¼Œå½“æœ‰ä¸€ä¸ªé›†åˆç»“æŸï¼ˆä¸‹æ ‡å˜ä¸º-1ï¼‰è·³å‡ºå¾ªç¯
 			while (true)
 			{
 				if (i >= newKeys.Count)
 				{
 					i = -1;
-					//strInfo += "×ó½áÊø<br/>";
+					//strInfo += "å·¦ç»“æŸ<br/>";
 				}
 
 				if (j >= oldKeys.Count)
 				{
 					j = -1;
-					//strInfo += "ÓÒ½áÊø<br/>";
+					//strInfo += "å³ç»“æŸ<br/>";
 				}
 
-				//Á½¸ö¼¯ºÏ¶¼Ã»ÓĞ½áÊøÊ±£¬Ö´ĞĞ±È½Ï£¬·ñÔòÌø³öÑ­»·£¨ÖÁÉÙÒ»¸ö¼¯ºÏ½áÊø£©
+				//ä¸¤ä¸ªé›†åˆéƒ½æ²¡æœ‰ç»“æŸæ—¶ï¼Œæ‰§è¡Œæ¯”è¾ƒï¼Œå¦åˆ™è·³å‡ºå¾ªç¯ï¼ˆè‡³å°‘ä¸€ä¸ªé›†åˆç»“æŸï¼‰
 				if (i != -1 && j != -1)
 				{
 					newOneKey = (KeyItem)newKeys[i];
 					oldOneKey = (KeyItem)oldKeys[j];
 
-					ret = newOneKey.CompareTo(oldOneKey);  //MyCompareTo(oldOneKey); //¸ÄCompareTO
+					ret = newOneKey.CompareTo(oldOneKey);  //MyCompareTo(oldOneKey); //æ”¹CompareTO
 
-					//strInfo += "×ó-ÓÒ,·µ»Ø"+Convert.ToString(ret)+"<br/>";
+					//strInfo += "å·¦-å³,è¿”å›"+Convert.ToString(ret)+"<br/>";
 
-					if (ret == 0)  //µ±µÈÓÚ0Ê±,i,j²»¸Ä±ä
+					if (ret == 0)  //å½“ç­‰äº0æ—¶,i,jä¸æ”¹å˜
 					{
-						newKeys.Remove(newOneKey);          //¸ÄÎªRemoveAt()
+						newKeys.Remove(newOneKey);          //æ”¹ä¸ºRemoveAt()
 						oldKeys.Remove(oldOneKey);
 						dupKeys.Add(oldOneKey);
 					}
 
 
-					//ÄÄÒ»¸öĞ¡£¬ÄÄÒ»¸öÏòÏÂÒÆ¶¯
+					//å“ªä¸€ä¸ªå°ï¼Œå“ªä¸€ä¸ªå‘ä¸‹ç§»åŠ¨
 
 					if (ret<0)  
 						i++;
@@ -114,8 +112,8 @@ namespace DigitalPlatform.rms
 			return dupKeys;
 		}
 
-		//ÁĞ³ö¼¯ºÏÖĞµÄËùÓĞÏî,µ÷ÊÔÊ¹ÓÃ
-		//·µ»Ø±í¸ñ×Ö·û´®
+		//åˆ—å‡ºé›†åˆä¸­çš„æ‰€æœ‰é¡¹,è°ƒè¯•ä½¿ç”¨
+		//è¿”å›è¡¨æ ¼å­—ç¬¦ä¸²
 		public string Dump()
 		{
 			string strResult = "";
@@ -127,7 +125,7 @@ namespace DigitalPlatform.rms
 			return strResult;
 		}
 
-        // ¶Ô¼¯ºÏ½øĞĞÈ¥ÖØ£¬È¥ÖØÖ®Ç°ÏÈÓÃDpKeys.Sort()½øĞĞÅÅĞò¡£
+        // å¯¹é›†åˆè¿›è¡Œå»é‡ï¼Œå»é‡ä¹‹å‰å…ˆç”¨DpKeys.Sort()è¿›è¡Œæ’åºã€‚
         public void RemoveDup()
         {
             KeyItem prev = null;
@@ -147,7 +145,7 @@ namespace DigitalPlatform.rms
         }
 
 #if NO
-		//¶Ô¼¯ºÏ½øĞĞÈ¥ÖØ£¬È¥ÖØÖ®Ç°ÏÈÓÃDpKeys.Sort()½øĞĞÅÅĞò¡£
+		//å¯¹é›†åˆè¿›è¡Œå»é‡ï¼Œå»é‡ä¹‹å‰å…ˆç”¨DpKeys.Sort()è¿›è¡Œæ’åºã€‚
 		public void RemoveDup()
 		{
 			for(int i=0;i<this.Count;i++)
@@ -157,7 +155,7 @@ namespace DigitalPlatform.rms
 					KeyItem Itemi = (KeyItem)this[i];
 					KeyItem Itemj = (KeyItem)this[j];
 
-					if(Itemi.CompareTo(Itemj) == 0)  //MyCompareTo(Itemj) == 0)  //¸ÄCompareTo
+					if(Itemi.CompareTo(Itemj) == 0)  //MyCompareTo(Itemj) == 0)  //æ”¹CompareTo
 					{
 						this.RemoveAt(j);
 						j--;//??????
@@ -174,30 +172,30 @@ namespace DigitalPlatform.rms
 	}
 
 
-	//Éè¼ÆÒâÍ¼:±íÊ¾µ¥¸ökey
-	//¼Ì³ĞIComparable½Ó¿Ú
+	//è®¾è®¡æ„å›¾:è¡¨ç¤ºå•ä¸ªkey
+	//ç»§æ‰¿IComparableæ¥å£
 	public class KeyItem : IComparable<KeyItem>
 	{
-		public string SqlTableName;	// ¶ÔÓ¦µÄSql Server±íÃû
-		public string Key;				// key	¶ÔÓ¦Sql Server±íÖĞµÄkeystring×Ö¶Î
-		public string FromValue;		// <from>µÄÄÚÈİ	¶ÔÓ¦Sql Server±íÖĞµÄfromstring×Ö¶Î
-		public string RecordID;		// ¼ÇÂ¼ID	¶ÔÓ¦Sql Server±íÖĞµÄidstring×Ö¶Î
-		public string Num;				// keyµÄintÀàĞÍ£¬½«´æ·ÅÒ»¸ö×¨ÃÅµÄ×Ö¶ÎÀï£¬½â¾ö11>2µÄÎÊÌâ	¶ÔÓ¦Sql Server±íÖĞµÄkeystringnum×Ö¶Î
+		public string SqlTableName;	// å¯¹åº”çš„Sql Serverè¡¨å
+		public string Key;				// key	å¯¹åº”Sql Serverè¡¨ä¸­çš„keystringå­—æ®µ
+		public string FromValue;		// <from>çš„å†…å®¹	å¯¹åº”Sql Serverè¡¨ä¸­çš„fromstringå­—æ®µ
+		public string RecordID;		// è®°å½•ID	å¯¹åº”Sql Serverè¡¨ä¸­çš„idstringå­—æ®µ
+		public string Num;				// keyçš„intç±»å‹ï¼Œå°†å­˜æ”¾ä¸€ä¸ªä¸“é—¨çš„å­—æ®µé‡Œï¼Œè§£å†³11>2çš„é—®é¢˜	å¯¹åº”Sql Serverè¡¨ä¸­çš„keystringnumå­—æ®µ
 
-		public string KeyNoProcess;	// Î´´¦ÀíµÄkey
-		public string FromName;		// À´Ô´Ãû£¬¸ù¾İÓïÑÔ°æ±¾À´È·¶¨
+		public string KeyNoProcess;	// æœªå¤„ç†çš„key
+		public string FromName;		// æ¥æºåï¼Œæ ¹æ®è¯­è¨€ç‰ˆæœ¬æ¥ç¡®å®š
 
 
 		
 		// parameters:
-		//		strSqlTableName	¶ÔÓ¦µÄSQL Server±íÃû
-		//		strKey			keystring×Ö·û´®
-		//		strFromValue	<from>ÖĞµÄÖµ
-		//		strRecordID		¼ÇÂ¼ID
-		//		strNum			keyµÄÊı×ÖĞÎÊ½
-		//		strKeyNoProcess	Î´´¦ÀíµÄkey
-		//		strFromName		À´Ô´Ãû£¬¸ù¾İ´´½¨keyµÄÓïÑÔ´úÂëÈ·¶¨µÄ
-		// ËµÃ÷:³ıstrKeyNoProcessÍâ£¬¶ÔÃ¿Ò»ÏîÈ¥Ç°ºó¿Õ°×
+		//		strSqlTableName	å¯¹åº”çš„SQL Serverè¡¨å
+		//		strKey			keystringå­—ç¬¦ä¸²
+		//		strFromValue	<from>ä¸­çš„å€¼
+		//		strRecordID		è®°å½•ID
+		//		strNum			keyçš„æ•°å­—å½¢å¼
+		//		strKeyNoProcess	æœªå¤„ç†çš„key
+		//		strFromName		æ¥æºåï¼Œæ ¹æ®åˆ›å»ºkeyçš„è¯­è¨€ä»£ç ç¡®å®šçš„
+		// è¯´æ˜:é™¤strKeyNoProcesså¤–ï¼Œå¯¹æ¯ä¸€é¡¹å»å‰åç©ºç™½
 		public KeyItem(string strSqlTableName,
 			string strKey,
 			string strFromValue,
@@ -208,7 +206,7 @@ namespace DigitalPlatform.rms
 		{
 			this.SqlTableName = strSqlTableName.Trim();
 			
-			// Õâ¸ö×Ö¶ÎĞ´µ½¿âÀï
+			// è¿™ä¸ªå­—æ®µå†™åˆ°åº“é‡Œ
 			this.Key = strKey.Trim().Replace("\n","");
 			this.FromValue = strFromValue.Trim();
 			this.RecordID = strRecordID.Trim();
@@ -219,9 +217,9 @@ namespace DigitalPlatform.rms
 		}
 
 
-		//ÒşÊ½Ö´ĞĞ£¬¿ÉÄÜÖ±½ÓÍ¨¹ıDpKeyµÄ¶ÔÏóÊµÀıÀ´·ÃÎÊ
-		//obj: ±È½ÏµÄ¶ÔÏó
-		//0±íÊ¾ÏàµÈ£¬ÆäËü±íÊ¾²»µÈ
+		//éšå¼æ‰§è¡Œï¼Œå¯èƒ½ç›´æ¥é€šè¿‡DpKeyçš„å¯¹è±¡å®ä¾‹æ¥è®¿é—®
+		//obj: æ¯”è¾ƒçš„å¯¹è±¡
+		//0è¡¨ç¤ºç›¸ç­‰ï¼Œå…¶å®ƒè¡¨ç¤ºä¸ç­‰
         public int CompareTo(KeyItem keyItem)
 		{
             // 2013/2/18
@@ -230,12 +228,12 @@ namespace DigitalPlatform.rms
             if (nRet != 0)
                 return nRet;
 
-			// ÒÀKeyÅÅĞò
+			// ä¾Keyæ’åº
 			nRet = String.Compare(this.Key,keyItem.Key);
             if (nRet != 0)
                 return nRet;
 
-			// ÔÙÒÀ¼ÇÂ¼ºÅÅÅĞò
+			// å†ä¾è®°å½•å·æ’åº
             nRet = String.Compare(this.RecordID, keyItem.RecordID);
             if (nRet != 0)
                 return nRet;
@@ -245,7 +243,7 @@ namespace DigitalPlatform.rms
                 return nRet;
 
 
-			// ×îºóÒÀÊı×ÖkeyÅÅĞò
+			// æœ€åä¾æ•°å­—keyæ’åº
             nRet = String.Compare(this.Num, keyItem.Num);
             return nRet;
 		}

@@ -235,4 +235,40 @@ namespace DigitalPlatform.CirculationClient
         /// </summary>
         public LibraryChannel Channel = null;
     }
+
+    /// <summary>
+    /// 获取通道的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void GetChannelEventHandler(object sender,
+    GetChannelEventArgs e);
+
+    /// <summary>
+    /// 获取通道事件的参数
+    /// </summary>
+    public class GetChannelEventArgs : EventArgs
+    {
+        public bool BeginLoop = false;  // [in]
+        public LibraryChannel Channel = null;   // [out]
+        public string ErrorInfo = "";   // [out]
+    }
+
+    /// <summary>
+    /// 归还通道的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void ReturnChannelEventHandler(object sender,
+    ReturnChannelEventArgs e);
+
+    /// <summary>
+    /// 归还通道事件的参数
+    /// </summary>
+    public class ReturnChannelEventArgs : EventArgs
+    {
+        public LibraryChannel Channel = null;   // [in]
+        public bool EndLoop = false;    // [in]
+    }
+
 }

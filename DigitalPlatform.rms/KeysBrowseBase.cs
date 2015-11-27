@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -10,21 +10,21 @@ using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.rms
 {
-    // KeysCfg µÄÕªÒªËµÃ÷¡£
+    // KeysCfg çš„æ‘˜è¦è¯´æ˜ã€‚
     public class KeysBrowseBase
     {
         public XmlDocument dom = null;
 
-        // <xpath>ÔªËØ ºÍ XmlNamespaceManager¶ÔÏóµÄ¶ÔÕÕ±í 
+        // <xpath>å…ƒç´  å’Œ XmlNamespaceManagerå¯¹è±¡çš„å¯¹ç…§è¡¨ 
         internal Hashtable tableNsClient = new Hashtable();
 
-        // <nstable>ÔªËØµÄxpathÂ·¾¶ ºÍ XmlNamespaceManager¶ÔÏóµÄ¶ÔÕÕ±í
+        // <nstable>å…ƒç´ çš„xpathè·¯å¾„ å’Œ XmlNamespaceManagerå¯¹è±¡çš„å¯¹ç…§è¡¨
         internal Hashtable tableNsServer = new Hashtable();
 
         public string BinDir = "";
 
         // 2015/8/24
-        // ÅäÖÃÎÄ¼şÈ«Â·¾¶
+        // é…ç½®æ–‡ä»¶å…¨è·¯å¾„
         internal string CfgFileName
         {
             get;
@@ -32,7 +32,7 @@ namespace DigitalPlatform.rms
         }
 
 
-        // ³õÊ¼»¯KeysBrowseBase¶ÔÏó£¬°Ñdom×¼±¸ºÃ£¬°ÑÁ½¸öHashtable×¼±¸ºÃ
+        // åˆå§‹åŒ–KeysBrowseBaseå¯¹è±¡ï¼ŒæŠŠdomå‡†å¤‡å¥½ï¼ŒæŠŠä¸¤ä¸ªHashtableå‡†å¤‡å¥½
         public virtual int Initial(string strCfgFileName,
             string strBinDir,
             out string strError)
@@ -41,18 +41,18 @@ namespace DigitalPlatform.rms
 
             this.BinDir = strBinDir;
 
-            // Çå¿Õ
+            // æ¸…ç©º
             this.Clear();
 
             if (File.Exists(strCfgFileName) == false)
             {
-                strError = "ÅäÖÃÎÄ¼ş'" + strCfgFileName + "'ÔÚ±¾µØ²»´æÔÚ";
+                strError = "é…ç½®æ–‡ä»¶'" + strCfgFileName + "'åœ¨æœ¬åœ°ä¸å­˜åœ¨";
                 return -1;
             }
 
 #if NO
             string strText = "";
-            // Èç¹ûkeysÎÄ¼şµÄÄÚÈİÎª¿Õ£¬Ôò²»´´½¨¼ìË÷£¬Õı³£½áÊø
+            // å¦‚æœkeysæ–‡ä»¶çš„å†…å®¹ä¸ºç©ºï¼Œåˆ™ä¸åˆ›å»ºæ£€ç´¢ï¼Œæ­£å¸¸ç»“æŸ
             StreamReader sw = new StreamReader(strCfgFileName, Encoding.UTF8);
             try
             {
@@ -80,14 +80,14 @@ namespace DigitalPlatform.rms
             }
             catch (Exception ex)
             {
-                strError = "¼ÓÔØÅäÖÃÎÄ¼ş '" + strCfgFileName + "' µ½ XMLDOM Ê±³ö´í£º" + ex.Message;
+                strError = "åŠ è½½é…ç½®æ–‡ä»¶ '" + strCfgFileName + "' åˆ° XMLDOM æ—¶å‡ºé”™ï¼š" + ex.Message;
                 return -1;
             }
 
-            // ´´½¨NsTable»º´æ,±»Initialµ÷
+            // åˆ›å»ºNsTableç¼“å­˜,è¢«Initialè°ƒ
             // return:
-            //		-1	³ö´í
-            //		0	³É¹¦
+            //		-1	å‡ºé”™
+            //		0	æˆåŠŸ
             int nRet = this.CreateNsTableCache(out strError);
             if (nRet == -1)
                 return -1;
@@ -96,42 +96,42 @@ namespace DigitalPlatform.rms
         }
 
 
-        // ´´½¨NsTable»º´æ,±»Initialµ÷
+        // åˆ›å»ºNsTableç¼“å­˜,è¢«Initialè°ƒ
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         private int CreateNsTableCache(out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            // Ã»ÓĞÅäÖÃÎÄ¼şÊ±
+            // æ²¡æœ‰é…ç½®æ–‡ä»¶æ—¶
             if (this.dom == null)
                 return 0;
 
-            // ÕÒµ½ËùÓĞµÄ<xpath>ÔªËØ
+            // æ‰¾åˆ°æ‰€æœ‰çš„<xpath>å…ƒç´ 
             XmlNodeList xpathNodeList = dom.DocumentElement.SelectNodes("//xpath[@nstable]");
             for (int i = 0; i < xpathNodeList.Count; i++)
             {
                 XmlNode nodeXpath = xpathNodeList[i];
                 XmlNode nodeNstable = null;
                 // return:
-                //		-1	³ö´í
-                //		0	Ã»ÕÒµ½	strErrorÀïÃæÓĞ³ö´íĞÅÏ¢
-                //		1	ÕÒµ½
-                //		2	¸ù±¾²»Ê¹ÓÃnstable
+                //		-1	å‡ºé”™
+                //		0	æ²¡æ‰¾åˆ°	strErroré‡Œé¢æœ‰å‡ºé”™ä¿¡æ¯
+                //		1	æ‰¾åˆ°
+                //		2	æ ¹æœ¬ä¸ä½¿ç”¨nstable
                 nRet = FindNsTable(nodeXpath,
                     out nodeNstable,
                     out strError);
                 if (nRet == 2)
-                    Debug.Assert(false, "²»¿ÉÄÜÕÒ²»µ½ÁË");
+                    Debug.Assert(false, "ä¸å¯èƒ½æ‰¾ä¸åˆ°äº†");
                 if (nRet != 1)
                     return -1;
 
-                // ¿ÉÄÜÈ·Êµ²»ÓÃnstable
+                // å¯èƒ½ç¡®å®ä¸ç”¨nstable
                 if (nodeNstable != null)
                 {
-                    // È¡³önodeNstableµÄÂ·¾¶
+                    // å–å‡ºnodeNstableçš„è·¯å¾„
                     string strPath = "";
                     nRet = DomUtil.Node2Path(dom.DocumentElement,
                         nodeNstable,
@@ -152,17 +152,17 @@ namespace DigitalPlatform.rms
                         this.tableNsServer[strPath] = nsmgr;
                     }
 
-                    // ¼Óµ½¿Í»§¶Ë±í
+                    // åŠ åˆ°å®¢æˆ·ç«¯è¡¨
                     this.tableNsClient[nodeXpath] = nsmgr;
                 }
             }
             return 0;
         }
 
-        // ¸ù¾İ<nstable>¶¨ÒåµÄÄÚÈİµÃµ½XmlNamespaceManager¶ÔÏó
+        // æ ¹æ®<nstable>å®šä¹‰çš„å†…å®¹å¾—åˆ°XmlNamespaceManagerå¯¹è±¡
         // return
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         private int GetNsManager(XmlNode nodeNstable,
             out XmlNamespaceManager nsmgr,
             out string strError)
@@ -177,14 +177,14 @@ namespace DigitalPlatform.rms
 
                 if (nodeItem.ChildNodes.Count > 0)
                 {
-                    strError = "ÅäÖÃÎÄ¼şÊÇ¾É°æ±¾¡£<item>ÔªËØ²»Ö§³ÖÏÂ¼¶ÔªËØ¡£";
+                    strError = "é…ç½®æ–‡ä»¶æ˜¯æ—§ç‰ˆæœ¬ã€‚<item>å…ƒç´ ä¸æ”¯æŒä¸‹çº§å…ƒç´ ã€‚";
                     return -1;
                 }
 
                 string strPrefix = DomUtil.GetAttr(nodeItem, "prefix");
                 string strUrl = DomUtil.GetAttr(nodeItem, "url");
 
-                //???Èç¹ûÇ°×ºÎª¿ÕÊÇÊ²Ã´Çé¿ö£¬urlÎª¿ÕÊÇÊ²Ã´Çé¿ö¡£
+                //???å¦‚æœå‰ç¼€ä¸ºç©ºæ˜¯ä»€ä¹ˆæƒ…å†µï¼Œurlä¸ºç©ºæ˜¯ä»€ä¹ˆæƒ…å†µã€‚
                 if (strPrefix == "" && strUrl == "")
                     continue;
 
@@ -194,12 +194,12 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ²éÕÒ<xpath>¶ÔÓ¦µÄ<nstable>
+        // æŸ¥æ‰¾<xpath>å¯¹åº”çš„<nstable>
         // return:
-        //		-1	³ö´í
-        //		0	Ã»ÕÒµ½	strErrorÀïÃæÓĞ³ö´íĞÅÏ¢
-        //		1	ÕÒµ½
-        //		2	²»Ê¹ÓÃ
+        //		-1	å‡ºé”™
+        //		0	æ²¡æ‰¾åˆ°	strErroré‡Œé¢æœ‰å‡ºé”™ä¿¡æ¯
+        //		1	æ‰¾åˆ°
+        //		2	ä¸ä½¿ç”¨
         private static int FindNsTable(XmlNode nodeXpath,
             out XmlNode nodeNstable,
             out string strError)
@@ -212,7 +212,7 @@ namespace DigitalPlatform.rms
                 return 2;
 
             string strXPath = "";
-            // ÏòÄÚÕÒ
+            // å‘å†…æ‰¾
             if (strNstableName == "")
                 strXPath = ".//nstable";
             else
@@ -224,9 +224,9 @@ namespace DigitalPlatform.rms
                 return 1;
             }
 
-            // ÏòÍâÕÒ
+            // å‘å¤–æ‰¾
             if (strNstableName == "")
-                strXPath = "//nstable[@name=''] | //nstable[not(@name)]";  //???ÕÒÊôĞÔÖµÎª¿Õ£¬»òÎ´¶¨Òå¸ÃÊôĞÔ
+                strXPath = "//nstable[@name=''] | //nstable[not(@name)]";  //???æ‰¾å±æ€§å€¼ä¸ºç©ºï¼Œæˆ–æœªå®šä¹‰è¯¥å±æ€§
             else
                 strXPath = "//nstable[@name='" + strNstableName + "']";
 
@@ -234,11 +234,11 @@ namespace DigitalPlatform.rms
             if (nodeNstable != null)
                 return 1;
 
-            strError = "Ã»ÕÒµ½Ãû×Ö½Ğ'" + strNstableName + "'µÄ<nstable>½Úµã¡£";
+            strError = "æ²¡æ‰¾åˆ°åå­—å«'" + strNstableName + "'çš„<nstable>èŠ‚ç‚¹ã€‚";
             return 0;
         }
 
-        // Çå¿Õ¶ÔÏó
+        // æ¸…ç©ºå¯¹è±¡
         public virtual void Clear()
         {
             this.tableNsClient.Clear();

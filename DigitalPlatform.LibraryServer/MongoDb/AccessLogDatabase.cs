@@ -23,6 +23,8 @@ namespace DigitalPlatform.LibraryServer
 
         MongoCollection<AccessLogItem> _logCollection = null;
 
+        DailyItemCount _itemCount = null;
+
         // 初始化
         // parameters:
         public int Open(
@@ -61,11 +63,47 @@ namespace DigitalPlatform.LibraryServer
                 _logCollection = db.GetCollection<AccessLogItem>("accessLog");
                 // _logCollection.DropAllIndexes();
                 if (_logCollection.GetIndexes().Count == 0)
-                    _logCollection.CreateIndex(new IndexKeysBuilder().Ascending("Path"),
+                {
+#if NO
+                    _logCollection.CreateIndex(new IndexKeysBuilder().Ascending("OperTime"),
                         IndexOptions.SetUnique(false));
+#endif
+                    CreateIndex();
+                }
             }
 
+            _itemCount = new DailyItemCount();
+            string date = GetToday();
+            _itemCount.SetValue(date, GetItemCount(date));
             return 0;
+        }
+
+        public void CreateIndex()
+        {
+            _logCollection.CreateIndex(new IndexKeysBuilder().Ascending("OperTime"),
+    IndexOptions.SetUnique(false));
+        }
+
+        // 清除集合内的全部内容
+        public int Clear(out string strError)
+        {
+            strError = "";
+
+            if (_logCollection == null)
+            {
+                strError = "访问日志 mongodb 集合尚未初始化";
+                return -1;
+            }
+
+            WriteConcernResult result = _logCollection.RemoveAll();
+            CreateIndex();
+            return 0;
+        }
+
+        // 获得今天的日期，8 字符格式
+        static string GetToday()
+        {
+            return DateTimeUtil.DateTimeToString8(DateTime.Now);
         }
 
         public MongoCollection<AccessLogItem> LogCollection
@@ -76,6 +114,8 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // parameters:
+        //      maxItemCount    最大事项数。如果为 -1 表示不限制
         public bool Add(string operation,
             string path,
             long size,
@@ -83,11 +123,23 @@ namespace DigitalPlatform.LibraryServer
             string clientAddress,
             long initial_hitcount,
             string operator_param,
-            DateTime opertime)
+            DateTime opertime,
+            long maxItemCount)
         {
             MongoCollection<AccessLogItem> collection = this.LogCollection;
             if (collection == null)
                 return false;
+
+            // 限制最大事项数
+            {
+                string date = GetToday();
+                long newValue = _itemCount.GetValue(date, 1);
+                if (maxItemCount != -1 && newValue > maxItemCount)
+                {
+                    _itemCount.GetValue(date, -1);
+                    return false;
+                }
+            }
 
             var query = new QueryDocument("Path", path);
             query.Add("Operation", operation)
@@ -451,5 +503,38 @@ namespace DigitalPlatform.LibraryServer
         //[BsonRepresentation(BsonType.DateTime)]
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime OperTime { get; set; } // 操作时间
+    }
+
+    class DailyItemCount
+    {
+        private static readonly Object syncRoot = new Object();
+
+        public string Date = "";    // 日期。8 字符格式
+        public long Count = 0;  // 当日内计数
+
+        public long GetValue(string strDate, int nInc)
+        {
+            lock (syncRoot)
+            {
+                if (strDate != this.Date)
+                {
+                    this.Date = strDate;
+                    this.Count = nInc;
+                    return this.Count;
+                }
+
+                this.Count += nInc;
+                return this.Count;
+            }
+        }
+
+        public void SetValue(string strDate, long lValue)
+        {
+            lock (syncRoot)
+            {
+                this.Date = strDate;
+                this.Count = lValue;
+            }
+        }
     }
 }

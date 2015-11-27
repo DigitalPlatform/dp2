@@ -90,9 +90,10 @@ namespace DigitalPlatform
 
         // parameters:
         //      strMessage  要显示的消息。如果为 null，表示不显示消息
-        public void Initial(// Delegate_doStop doStopDelegate,
+        public string Initial(// Delegate_doStop doStopDelegate,
             string strMessage)
         {
+            string strOldMessage = m_strMessage;
             // m_doStopDelegate = doStopDelegate;
             if (strMessage != null)
             {
@@ -105,6 +106,8 @@ namespace DigitalPlatform
                         true);
                 }
             }
+
+            return strOldMessage;
         }
 
         // 注册，和管理对象建立联系
@@ -126,9 +129,15 @@ namespace DigitalPlatform
             m_manager = null;
         }
 
+        int _inBeginLoop = 0;
+
         //准备做事情,被循环调，时面了调了Stopmanager的Enable()函数，修改父窗口的按钮状态
         public void BeginLoop()
         {
+            if (_inBeginLoop > 0)
+                throw new Exception("针对同一 Stop 对象，BeginLoop 不能嵌套调用");
+
+            _inBeginLoop++;
             nStop = 0;	// 正在处理
 
             if (m_manager != null)
@@ -156,6 +165,42 @@ namespace DigitalPlatform
                         true);
                 }
             }
+        }
+
+        //事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮为发灰状态
+        public void EndLoop()
+        {
+            nStop = 2;	// 已经停止
+
+            if (m_manager != null)
+            {
+                bool bIsActive = m_manager.IsActive(this);
+
+                this.m_strMessage = "";
+
+                if (this.OnEndLoop != null)
+                {
+                    EndLoopEventArgs e = new EndLoopEventArgs();
+                    e.IsActive = bIsActive;
+                    this.OnEndLoop(this, e);
+                }
+
+                if (bIsActive == true)
+                {
+                    m_manager.ChangeState(this,
+                        StateParts.All | StateParts.RestoreEnabledState,
+                        true);
+                }
+                else
+                {
+                    // 不在激活位置，不要恢复所谓旧状态
+                    m_manager.ChangeState(this,
+                        StateParts.All,
+                        true);
+                }
+            }
+
+            _inBeginLoop--;
         }
 
         public void SetMessage(string strMessage)
@@ -219,39 +264,6 @@ namespace DigitalPlatform
             }
         }
 
-        //事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮为发灰状态
-        public void EndLoop()
-        {
-            nStop = 2;	// 已经停止
-
-            if (m_manager != null)
-            {
-                bool bIsActive = m_manager.IsActive(this);
-
-                this.m_strMessage = "";
-
-                if (this.OnEndLoop != null)
-                {
-                    EndLoopEventArgs e = new EndLoopEventArgs();
-                    e.IsActive = bIsActive;
-                    this.OnEndLoop(this, e);
-                }
-
-                if (bIsActive == true)
-                {
-                    m_manager.ChangeState(this,
-                        StateParts.All | StateParts.RestoreEnabledState,
-                        true);
-                }
-                else
-                {
-                    // 不在激活位置，不要恢复所谓旧状态
-                    m_manager.ChangeState(this,
-                        StateParts.All,
-                        true);
-                }
-            }
-        }
 
         //查看是否结束,被StopManager调
         public virtual int State

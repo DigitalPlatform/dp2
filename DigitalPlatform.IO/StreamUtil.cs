@@ -232,12 +232,10 @@ strFileName,
 FileMode.Append,	// append
 FileAccess.Write,
 FileShare.ReadWrite))
+            using (StreamWriter sw = new StreamWriter(file,
+                System.Text.Encoding.UTF8))
             {
-                using (StreamWriter sw = new StreamWriter(file,
-                    System.Text.Encoding.UTF8))
-                {
-                    sw.Write(strText);
-                }
+                sw.Write(strText);
             }
         }
 

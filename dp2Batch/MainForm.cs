@@ -1430,7 +1430,6 @@ this.checkBox_import_fastMode.Checked);
 				FileAccess.Read))
             using (XmlTextReader reader = new XmlTextReader(file))
             {
-
                 //
                 RangeList rl = null;
                 long lMax = 0;
@@ -4156,7 +4155,6 @@ this.checkBox_import_fastMode.Checked);
                     writer.Formatting = Formatting.Indented;
                     writer.Indentation = 4;
                 }
-
             }
 
             if ((exportType == ExportFileType.BackupFile

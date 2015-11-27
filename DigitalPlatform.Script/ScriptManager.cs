@@ -6,17 +6,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
-
 using System.Reflection;
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+
+using Microsoft.CSharp;
+using Microsoft.VisualBasic;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
@@ -24,10 +23,8 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
-
 namespace DigitalPlatform.Script
 {
-
     /// <summary>
     /// 脚本管理
     /// </summary>

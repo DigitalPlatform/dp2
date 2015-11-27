@@ -220,7 +220,7 @@ namespace dp2Circulation
                 stop = null;
             }
 
-            /// 原来
+            // 原来
 
             if (this.MainForm != null)
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
@@ -331,6 +331,30 @@ string strUserName = ".")
             {
                 if (channel != null)
                     channel.Abort();
+            }
+        }
+
+        public string CurrentUserName
+        {
+            get
+            {
+                return this.MainForm._currentUserName;
+            }
+        }
+
+        public string CurrentLibraryCodeList
+        {
+            get
+            {
+                return this.MainForm._currentLibraryCodeList;
+            }
+        }
+
+        public string CurrentRights
+        {
+            get
+            {
+                return this.MainForm._currentUserRights;
             }
         }
 
@@ -713,9 +737,12 @@ string strUserName = ".")
 
             // EnableControls(false);
 
+#if NO
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在验证条码号 " + strBarcode + "...");
             stop.BeginLoop();
+#endif
+            string strOldMessage = stop.Initial("正在验证条码号 " + strBarcode + "...");
 
             try
             {
@@ -729,9 +756,12 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+#endif
+                stop.Initial(strOldMessage);
 
                 // EnableControls(true);
             }
@@ -819,9 +849,13 @@ string strUserName = ".")
                 return -1;
             }
 
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在下载配置文件 ...");
             Progress.BeginLoop();
+#endif
 
             m_nInGetCfgFile++;
 
@@ -853,9 +887,14 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
+                Progress.Initial(strOldMessage);
+
+                this.ReturnChannel(channel);
 
                 m_nInGetCfgFile--;
             }
@@ -888,9 +927,14 @@ string strUserName = ".")
                 return -1;
             }
 
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在下载配置文件 ...");
             Progress.BeginLoop();
+#endif
 
             m_nInGetCfgFile++;
 
@@ -924,9 +968,13 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
+                Progress.Initial(strOldMessage);
+                this.ReturnChannel(channel);
 
                 m_nInGetCfgFile--;
             }
@@ -945,9 +993,14 @@ string strUserName = ".")
         {
             strError = "";
 
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在保存配置文件 ...");
             Progress.BeginLoop();
+#endif
 
             try
             {
@@ -974,9 +1027,13 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
+                Progress.Initial(strOldMessage);
+                this.ReturnChannel(channel);
             }
 
             return 1;

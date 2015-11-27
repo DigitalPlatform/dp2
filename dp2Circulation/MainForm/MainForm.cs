@@ -1711,6 +1711,7 @@ Stack:
             }
         }
 
+#if NO
         // 登出
         private void MenuItem_logout_Click(object sender, EventArgs e)
         {
@@ -1719,6 +1720,7 @@ Stack:
                 ((EntityForm)this.ActiveMdiChild).Logout();
             }
         }
+#endif
 
         // 打开数据目录文件夹
         private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
@@ -2493,9 +2495,9 @@ Stack:
             }
         }
 
-        string _currentUserName = "";
-        string _currentUserRights = "";
-        string _currentLibraryCodeList = "";
+        internal string _currentUserName = "";
+        internal string _currentUserRights = "";
+        internal string _currentLibraryCodeList = "";
 
         internal void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
@@ -3385,6 +3387,20 @@ string strUserName = ".")
             }
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 dp2Circulation.MainForm.GetValueTable(String strTableName, String strDbName, String[]& values, String& strError)
+在 dp2Circulation.ChangeItemActionDialog.dlg_GetValueTable(Object sender, GetValueTableEventArgs e)
+在 dp2Circulation.OneActionDialog.FillDropDown(ComboBox combobox)
+在 dp2Circulation.OneActionDialog.comboBox_fieldValue_DropDown(Object sender, EventArgs e)
+在 System.Windows.Forms.ComboBox.WmReflectCommand(Message& m)
+在 System.Windows.Forms.ComboBox.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+         * */
         // 获得值列表
         // 带有cache功能
         /// <summary>
@@ -3403,6 +3419,9 @@ string strUserName = ".")
             values = null;
             strError = "";
 
+            if (strTableName == null)
+                strTableName = "";
+
             // 先看看缓存里面是否已经有了
             string strName = strTableName + "~~~" + strDbName;
 
@@ -3420,9 +3439,6 @@ string strUserName = ".")
             }
 #endif
             LibraryChannel channel = this.GetChannel();
-
-
-            // this.Update();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获取值列表 ...");

@@ -252,7 +252,7 @@ namespace DigitalPlatform.dp2.Statis
             strError = "";
             int nRet = 0;
 
-            using(Stream stream = File.OpenRead(strRmlFileName))
+            using (Stream stream = File.OpenRead(strRmlFileName))
             using (XmlTextReader reader = new XmlTextReader(stream))
             {
                 while (true)
@@ -552,7 +552,7 @@ out strError);
         {
             strError = "";
             int nRet = 0;
-            using(Stream stream = File.OpenRead(strRmlFileName))
+            using (Stream stream = File.OpenRead(strRmlFileName))
             using (XmlTextReader reader = new XmlTextReader(stream))
             {
                 while (true)
@@ -560,7 +560,7 @@ out strError);
                     bool bRet = reader.Read();
                     if (bRet == false)
                     {
-                        strError = "文件 "+strRmlFileName+" 没有根元素";
+                        strError = "文件 " + strRmlFileName + " 没有根元素";
                         return -1;
                     }
                     if (reader.NodeType == XmlNodeType.Element)
@@ -604,7 +604,7 @@ out strError);
                             }
                             else if (reader.Name == "columns")
                             {
-                                    // 从 RML 文件中读入 <columns> 元素
+                                // 从 RML 文件中读入 <columns> 元素
                                 nRet = ReadColumnStyle(reader,
             out styles,
             out strError);
@@ -652,8 +652,8 @@ out strError);
                                         string strAlign = style.Align;
                                         if (string.IsNullOrEmpty(strAlign) == true)
                                             strAlign = "left";
-                                        text.Append("TABLE.table ."+style.Class+" {"
-                                            + "text-align: "+strAlign+"; }\r\n");
+                                        text.Append("TABLE.table ." + style.Class + " {"
+                                            + "text-align: " + strAlign + "; }\r\n");
                                     }
 
                                     writer.WriteStartElement("style");
@@ -942,7 +942,7 @@ out strError);
                         if (column.Sum == true
                             && sums[j] != null)
                         {
-                            sum_line.SetValue(j-1, sums[j]);
+                            sum_line.SetValue(j - 1, sums[j]);
                         }
                     }
                     engine.SetGlobalValue("line", sum_line);
@@ -1002,7 +1002,7 @@ out strError);
     strText,
     true);
 #endif
-                    writer.WriteStartElement(j == 0? "th" : "td");
+                    writer.WriteStartElement(j == 0 ? "th" : "td");
                     if (string.IsNullOrEmpty(column.CssClass) == false)
                         writer.WriteAttributeString("class", column.CssClass);
                     writer.WriteString(strText);
@@ -1308,7 +1308,7 @@ true);
     true);
 #endif
                     cells.Add(new CellData(j, strText));
-                    
+
                 }
 
                 // strResult.Append("</tr>\r\n");
@@ -1341,13 +1341,13 @@ true);
                 string strColspan = "";
                 if (column.Colspan > 1)
                     strColspan = " colspan='" + column.Colspan.ToString() + "' ";
-                strResult.Append( "<td class='"
+                strResult.Append("<td class='"
                     + column.CssClass
                     + "'"
                     + strColspan + ">" + strText + "</td>\r\n");
             }
 
-            strResult.Append( "</tr>\r\n");
+            strResult.Append("</tr>\r\n");
 
             // 合计数组
             object[] sums = null;   // 2008/12/1 new changed
@@ -1454,7 +1454,7 @@ true);
                     }
 
 
-                    strResult.Append( "<td class='"
+                    strResult.Append("<td class='"
                         + column.CssClass
                         + "'>" + strText + "</td>\r\n");
 
@@ -1492,31 +1492,31 @@ true);
                                     // sums[j] = ((decimal)sums[j]) + v;
                                 }
                             }
-                                /*
-                            else
+                            /*
+                        else
+                        {
+                            string v = line.GetString(column.ColumnNumber);
+                            if (this.SumCell != null)
                             {
-                                string v = line.GetString(column.ColumnNumber);
-                                if (this.SumCell != null)
-                                {
-                                    SumCellEventArgs e = new SumCellEventArgs();
-                                    e.DataType = column.DataType;
-                                    e.ColumnNumber = column.ColumnNumber;
-                                    e.LineIndex = i;
-                                    e.Line = line;
-                                    e.Value = v;
-                                    this.SumCell(this, e);
-                                    if (e.Value == null)
-                                        continue;
-                                    v = (string)e.Value;
-                                }
-                                sums[j] = PriceUtil.JoinPriceString((string)sums[j],
-                                    v);
+                                SumCellEventArgs e = new SumCellEventArgs();
+                                e.DataType = column.DataType;
+                                e.ColumnNumber = column.ColumnNumber;
+                                e.LineIndex = i;
+                                e.Line = line;
+                                e.Value = v;
+                                this.SumCell(this, e);
+                                if (e.Value == null)
+                                    continue;
+                                v = (string)e.Value;
                             }
-                                 * */
+                            sums[j] = PriceUtil.JoinPriceString((string)sums[j],
+                                v);
+                        }
+                             * */
                         }
                         catch (Exception ex)	// 俘获可能因字符串转换为整数抛出的异常
                         {
-                            throw new Exception("在累加 行 " + i.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，抛出异常: " + ex.Message );
+                            throw new Exception("在累加 行 " + i.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，抛出异常: " + ex.Message);
                         }
                     }
                 }
@@ -1646,7 +1646,7 @@ true);
                     Convert.ToString(o2));
 #endif
             }
-            throw new Exception("无法支持的 "+datatype.ToString()+" 类型累加");
+            throw new Exception("无法支持的 " + datatype.ToString() + " 类型累加");
         }
 
 #if NO
@@ -1860,7 +1860,7 @@ true);
                         {
                             string strSomPrice = "";
                             string strError = "";
-                                    // 汇总价格
+                            // 汇总价格
                             int nRet = PriceUtil.SumPrices(strText,
             out strSomPrice,
             out strError);

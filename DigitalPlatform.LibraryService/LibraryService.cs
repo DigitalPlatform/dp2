@@ -7693,7 +7693,7 @@ namespace dp2Library
     || app.AccessLogDatabase == null)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "只读日志尚未启用";
+                        result.ErrorInfo = "访问日志尚未启用";
                         return result;
                     }
 
@@ -12053,7 +12053,8 @@ namespace dp2Library
                             string.IsNullOrEmpty(strClientAddress) == false ? strClientAddress : sessioninfo.ClientAddress,
                             1,
                             sessioninfo.UserID,
-                            DateTime.Now);
+                            DateTime.Now,
+                            app.AccessLogMaxCountPerDay);
                     }
                     else
                     {
@@ -14058,7 +14059,8 @@ out strError);
                                 string.IsNullOrEmpty(strClientAddress) == true ? sessioninfo.ClientAddress : strClientAddress,
                                 1,
                                 sessioninfo.UserID,
-                                DateTime.Now);
+                                DateTime.Now,
+                                app.AccessLogMaxCountPerDay);
                         }
                         else
                         {

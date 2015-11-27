@@ -2005,7 +2005,9 @@ namespace dp2Circulation
             return 1;   // found
         }
 #endif
-        int SearchOrderRefIdDup(string strRefID,
+        int SearchOrderRefIdDup(
+            LibraryChannel channel,
+            string strRefID,
     string strOriginRecPath,
     out string[] paths,
     out string strError)
@@ -2019,13 +2021,16 @@ namespace dp2Circulation
                 return -1;
             }
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
             Stop.BeginLoop();
+#endif
+            Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
 
             try
             {
-                long lRet = Channel.SearchOrder(
+                long lRet = channel.SearchOrder(
     Stop,
     "<全部>",
     strRefID,
@@ -2046,7 +2051,7 @@ namespace dp2Circulation
                 long lHitCount = lRet;
 
                 List<string> aPath = null;
-                lRet = Channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(Stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -2076,8 +2081,11 @@ namespace dp2Circulation
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
 
@@ -2204,7 +2212,7 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
 
-
+            LibraryChannel channel = this.MainForm.GetChannel();
             this.EnableControls(false);
             try
             {
@@ -2278,7 +2286,9 @@ namespace dp2Circulation
                         //      -1  error
                         //      0   not dup
                         //      1   dup
-                        nRet = SearchOrderRefIdDup(orderitem.RefID,
+                        nRet = SearchOrderRefIdDup(
+                            channel,
+                            orderitem.RefID,
                             // this.BiblioRecPath,
                             orderitem.RecPath,
                             out paths,
@@ -2302,6 +2312,7 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
+                this.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -3060,7 +3071,9 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord", this.Rights) == true;
+            bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord", 
+                this.MainForm._currentUserRights// this.Rights
+                ) == true;
 
             {
                 menuItem = new MenuItem("修改(&M)");

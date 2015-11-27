@@ -57,10 +57,31 @@ namespace DigitalPlatform.LibraryServer
 
                 _hitCountCollection = db.GetCollection<HitCountItem>("hitcount");
                 if (_hitCountCollection.GetIndexes().Count == 0)
-                    _hitCountCollection.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
-                        IndexOptions.SetUnique(true));
+                    CreateIndex();
             }
 
+            return 0;
+        }
+
+        public void CreateIndex()
+        {
+            _hitCountCollection.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
+                IndexOptions.SetUnique(true));
+        }
+
+        // 清除集合内的全部内容
+        public int Clear(out string strError)
+        {
+            strError = "";
+
+            if (_hitCountCollection == null)
+            {
+                strError = "访问计数 mongodb 集合尚未初始化";
+                return -1;
+            }
+
+            WriteConcernResult result = _hitCountCollection.RemoveAll();
+            CreateIndex();
             return 0;
         }
 

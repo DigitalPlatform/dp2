@@ -49,83 +49,6 @@ namespace DigitalPlatform.CirculationClient
         PasswordError = 2,  // 密码不正确
     }
 
-    /// <summary>
-    /// 登录前的事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void BeforeLoginEventHandle(object sender,
-    BeforeLoginEventArgs e);
-
-    /// <summary>
-    /// 登录前事件的参数
-    /// </summary>
-    public class BeforeLoginEventArgs : EventArgs
-    {
-        /// <summary>
-        /// [in] 是否为第一次触发
-        /// </summary>
-        public bool FirstTry = true;    // [in] 是否为第一次触发
-        /// <summary>
-        /// [in] 图书馆应用服务器 URL
-        /// </summary>
-        public string LibraryServerUrl = "";    // [in] 图书馆应用服务器URL
-        /// <summary>
-        /// [out] 用户名
-        /// </summary>
-        public string UserName = "";    // [out] 用户名
-        /// <summary>
-        /// [out] 密码
-        /// </summary>
-        public string Password = "";    // [out] 密码
-        /// <summary>
-        /// [out] 工作台号
-        /// </summary>
-        public string Parameters = "";    // [out] 工作台号
-        // public bool IsReader = false;   // [out] 登录者是否为读者
-        /// <summary>
-        /// [out] 短期保存密码
-        /// </summary>
-        public bool SavePasswordShort = false;  // [out] 短期保存密码
-        /// <summary>
-        /// [out] 长期保存密码
-        /// </summary>
-        public bool SavePasswordLong = false;   // [out] 长期保存密码
-        /// <summary>
-        /// [out] 事件调用是否失败
-        /// </summary>
-        public bool Failed = false; // [out] 事件调用是否失败
-        /// <summary>
-        /// [out] 事件调用是否被放弃
-        /// </summary>
-        public bool Cancel = false; // [out] 事件调用是否被放弃
-        /// <summary>
-        /// [in, out] 事件调用错误信息
-        /// </summary>
-        public string ErrorInfo = "";   // [in, out] 事件调用错误信息
-        /// <summary>
-        /// [in, out] 前次登录失败的原因，本次登录失败的原因
-        /// </summary>
-        public LoginFailCondition LoginFailCondition = LoginFailCondition.NormalError;  // [in, out] 前次登录失败的原因，本次登录失败的原因
-    }
-
-    /// <summary>
-    /// 登录后的事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void AfterLoginEventHandle(object sender,
-    AfterLoginEventArgs e);
-
-    /// <summary>
-    /// 登录后事件的参数
-    /// </summary>
-    public class AfterLoginEventArgs : EventArgs
-    {
-        public string ErrorInfo = "";
-        // public bool Canceled = false;
-    }
-
 #if NO
     public enum CertMode
     {
@@ -9545,6 +9468,84 @@ Stack:
             get { return orgClaim; }
             set { orgClaim = value; }
         }
+    }
+
+
+    /// <summary>
+    /// 登录前的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void BeforeLoginEventHandle(object sender,
+    BeforeLoginEventArgs e);
+
+    /// <summary>
+    /// 登录前事件的参数
+    /// </summary>
+    public class BeforeLoginEventArgs : EventArgs
+    {
+        /// <summary>
+        /// [in] 是否为第一次触发
+        /// </summary>
+        public bool FirstTry = true;    // [in] 是否为第一次触发
+        /// <summary>
+        /// [in] 图书馆应用服务器 URL
+        /// </summary>
+        public string LibraryServerUrl = "";    // [in] 图书馆应用服务器URL
+        /// <summary>
+        /// [out] 用户名
+        /// </summary>
+        public string UserName = "";    // [out] 用户名
+        /// <summary>
+        /// [out] 密码
+        /// </summary>
+        public string Password = "";    // [out] 密码
+        /// <summary>
+        /// [out] 工作台号
+        /// </summary>
+        public string Parameters = "";    // [out] 工作台号
+        // public bool IsReader = false;   // [out] 登录者是否为读者
+        /// <summary>
+        /// [out] 短期保存密码
+        /// </summary>
+        public bool SavePasswordShort = false;  // [out] 短期保存密码
+        /// <summary>
+        /// [out] 长期保存密码
+        /// </summary>
+        public bool SavePasswordLong = false;   // [out] 长期保存密码
+        /// <summary>
+        /// [out] 事件调用是否失败
+        /// </summary>
+        public bool Failed = false; // [out] 事件调用是否失败
+        /// <summary>
+        /// [out] 事件调用是否被放弃
+        /// </summary>
+        public bool Cancel = false; // [out] 事件调用是否被放弃
+        /// <summary>
+        /// [in, out] 事件调用错误信息
+        /// </summary>
+        public string ErrorInfo = "";   // [in, out] 事件调用错误信息
+        /// <summary>
+        /// [in, out] 前次登录失败的原因，本次登录失败的原因
+        /// </summary>
+        public LoginFailCondition LoginFailCondition = LoginFailCondition.NormalError;  // [in, out] 前次登录失败的原因，本次登录失败的原因
+    }
+
+    /// <summary>
+    /// 登录后的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void AfterLoginEventHandle(object sender,
+    AfterLoginEventArgs e);
+
+    /// <summary>
+    /// 登录后事件的参数
+    /// </summary>
+    public class AfterLoginEventArgs : EventArgs
+    {
+        public string ErrorInfo = "";
+        // public bool Canceled = false;
     }
 
 }

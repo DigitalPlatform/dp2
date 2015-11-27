@@ -325,7 +325,7 @@ namespace dp2Circulation
             this.tabControl_main.Enabled = bEnable;
         }
 
-            // 创建事件日志目录
+        // 创建事件日志目录
         private void button_createEventLogDir_Click(object sender, EventArgs e)
         {
             if (this.textBox_evenLogDirName.Text == "")
@@ -343,7 +343,7 @@ namespace dp2Circulation
 
             EventLog Log = new EventLog();
             Log.Source = this.textBox_evenLogDirName.Text;
-            Log.WriteEntry(this.textBox_evenLogDirName.Text + "目录创建成功。", 
+            Log.WriteEntry(this.textBox_evenLogDirName.Text + "目录创建成功。",
                 EventLogEntryType.Information);
 
             MessageBox.Show(this, "OK");
@@ -491,7 +491,7 @@ namespace dp2Circulation
             double y = Convert.ToDouble("6.80");
 
 
-            MessageBox.Show(this, "x=" + x.ToString() + " y=" + y.ToString() + "=" + (x + y).ToString()); 
+            MessageBox.Show(this, "x=" + x.ToString() + " y=" + y.ToString() + "=" + (x + y).ToString());
         }
 
         private void button_checkedComboBox_setList_Click(object sender, EventArgs e)
@@ -518,8 +518,8 @@ namespace dp2Circulation
 
         private void button_times_getRfc1123Time_Click(object sender, EventArgs e)
         {
-            
-            this.textBox_times_rfc1123Time.Text = DateTimeUtil.Rfc1123DateTimeStringEx( 
+
+            this.textBox_times_rfc1123Time.Text = DateTimeUtil.Rfc1123DateTimeStringEx(
                 DateTime.Now);
         }
 
@@ -533,7 +533,7 @@ namespace dp2Circulation
 
         private void button_string_buidRangeString_Click(object sender, EventArgs e)
         {
-            string [] parts = this.textBox_string_numberList.Text.Split(new char [] {','});
+            string[] parts = this.textBox_string_numberList.Text.Split(new char[] { ',' });
             List<String> numbers = new List<string>();
             numbers.AddRange(parts);
             MessageBox.Show(this, Global.BuildNumberRangeString(numbers));
@@ -601,7 +601,7 @@ namespace dp2Circulation
             else
             {
                 string strXml = "";
-                nRet = DomUtil.GetIndentXml(strTarget, 
+                nRet = DomUtil.GetIndentXml(strTarget,
                     out strXml,
                     out strError);
                 if (nRet == -1)
@@ -672,8 +672,8 @@ namespace dp2Circulation
                         cell.Font = new System.Drawing.Font(this.dpTable1.Font, FontStyle.Bold);
 
                     }
-                        if (i == 2)
-                            cell.Alignment = DpTextAlignment.InheritLine;
+                    if (i == 2)
+                        cell.Alignment = DpTextAlignment.InheritLine;
                     line.Add(cell);
                 }
 
@@ -901,46 +901,43 @@ namespace dp2Circulation
             string strTargetFilename = save_dlg.FileName;
 
             using (StreamReader sr = new StreamReader(strSourceFilename))
+            using (XmlTextWriter writer = new XmlTextWriter(strTargetFilename, Encoding.UTF8))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(strTargetFilename, Encoding.UTF8))
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+
+                writer.WriteStartDocument();
+
+                writer.WriteStartElement("collection");
+
+                for (; ; )
                 {
-                    writer.Formatting = Formatting.Indented;
-                    writer.Indentation = 4;
+                    string strLine = sr.ReadLine();
+                    if (strLine == null)
+                        break;
+                    strLine = strLine.Trim();
 
-                    writer.WriteStartDocument();
+                    if (string.IsNullOrEmpty(strLine) == true)
+                        continue;
 
-                    writer.WriteStartElement("collection");
+                    string strNumber = "";
+                    string strText = "";
+                    int nRet = strLine.IndexOf(" ");
+                    if (nRet == -1)
+                        continue;
+                    strNumber = strLine.Substring(0, nRet).Trim();
+                    strText = strLine.Substring(nRet + 1).Trim();
 
-                    for (; ; )
-                    {
-                        string strLine = sr.ReadLine();
-                        if (strLine == null)
-                            break;
-                        strLine = strLine.Trim();
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml("<item />");
+                    DomUtil.SetAttr(dom.DocumentElement, "n", strNumber);
+                    DomUtil.SetAttr(dom.DocumentElement, "t", strText);
 
-                        if (string.IsNullOrEmpty(strLine) == true)
-                            continue;
-
-                        string strNumber = "";
-                        string strText = "";
-                        int nRet = strLine.IndexOf(" ");
-                        if (nRet == -1)
-                            continue;
-                        strNumber = strLine.Substring(0, nRet).Trim();
-                        strText = strLine.Substring(nRet + 1).Trim();
-
-                        XmlDocument dom = new XmlDocument();
-                        dom.LoadXml("<item />");
-                        DomUtil.SetAttr(dom.DocumentElement, "n", strNumber);
-                        DomUtil.SetAttr(dom.DocumentElement, "t", strText);
-
-                        dom.DocumentElement.WriteTo(writer);
-                    }
-
-                    writer.WriteEndElement();
-
-                    writer.WriteEndDocument();
+                    dom.DocumentElement.WriteTo(writer);
                 }
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
             }
 
             MessageBox.Show(this, "OK");
@@ -951,7 +948,7 @@ namespace dp2Circulation
              * */
         }
 
-        
+
 
         private void button_cutter_getEntry_Click(object sender, EventArgs e)
         {
@@ -1039,7 +1036,7 @@ namespace dp2Circulation
 
             TimeSpan delta2 = DateTime.Now - start_time;
 
-            MessageBox.Show(this, ".InnertText 耗费时间 "+delta1.ToString()+"， GetNodeText() 耗费时间" + delta2.ToString());
+            MessageBox.Show(this, ".InnertText 耗费时间 " + delta1.ToString() + "， GetNodeText() 耗费时间" + delta2.ToString());
         }
 
         public static string GetNodeText(XmlNode node)
@@ -1101,7 +1098,7 @@ ref bHideMessageBox);
 
             foreach (char ch in strText)
             {
-                strResult += new string(ch, 1) + " ["+((UInt32)ch)+"] ";
+                strResult += new string(ch, 1) + " [" + ((UInt32)ch) + "] ";
             }
 
             return strResult;
@@ -1372,7 +1369,7 @@ ref bHideMessageBox);
             this.numericUpDown_test_tryChannelCount.Enabled = false;
             try
             {
-                for (int i = 0; i < this.numericUpDown_test_tryChannelCount.Value; i++ )
+                for (int i = 0; i < this.numericUpDown_test_tryChannelCount.Value; i++)
                 {
                     Application.DoEvents();
 
@@ -1533,17 +1530,17 @@ ref bHideMessageBox);
         {
 
             string strFileName = Path.Combine(this.MainForm.DataDir, "marcdef");
-                XmlDocument dom = new XmlDocument();
-                try
-                {
-                    dom.Load(strFileName);
-                }
-                catch (Exception ex)
-                {
-                    e.ErrorInfo = "配置文件 '" + strFileName + "' 装入XMLDUM时出错: " + ex.Message;
-                    return;
-                }
-                e.XmlDocument = dom;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (Exception ex)
+            {
+                e.ErrorInfo = "配置文件 '" + strFileName + "' 装入XMLDUM时出错: " + ex.Message;
+                return;
+            }
+            e.XmlDocument = dom;
         }
 
         private void button_marcTemplate_getMarc_Click(object sender, EventArgs e)
@@ -1698,7 +1695,7 @@ dlg.UiState);
                     }
 #endif
 
-                    _stop.SetMessage(i.ToString() + " username="+strUserName+" password="+strPassword+" lRet = " + lRet.ToString() + " " + strError);
+                    _stop.SetMessage(i.ToString() + " username=" + strUserName + " password=" + strPassword + " lRet = " + lRet.ToString() + " " + strError);
                 }
             }
             finally
@@ -1758,6 +1755,6 @@ dlg.UiState);
             ref results,
             out strError);
         }
-       
+
     }
 }

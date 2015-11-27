@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
 using System.Xml;
 using System.IO;
 using System.Collections;
@@ -345,6 +344,9 @@ namespace DigitalPlatform.LibraryServer
 
         // GetRes() API 获取对象的动作是否写入操作日志
         public bool GetObjectWriteToOperLog = false;
+
+        // 访问日志每天允许创建的最多条目数
+        public int AccessLogMaxCountPerDay = 10000;
 
         // 2013/5/24
         // 用于出纳操作的辅助性的检索途径
@@ -896,6 +898,24 @@ namespace DigitalPlatform.LibraryServer
                     this.GetObjectWriteToOperLog = false;
                 }
 
+                // 2015/11/26
+                // 日志特性
+                // 元素<log>
+                node = dom.DocumentElement.SelectSingleNode("log") as XmlElement;
+                if (node != null)
+                {
+                    int nValue = 0;
+                    DomUtil.GetIntegerParam(node,
+                        "accessLogMaxCountPerDay",
+                        10000,
+                        out nValue,
+                        out strError);
+                    this.AccessLogMaxCountPerDay = nValue;
+                }
+                else
+                {
+                    this.AccessLogMaxCountPerDay = 10000;
+                }
                 // 消息
                 // 元素<message>
                 // 属性dbname/reserveTimeSpan
@@ -1126,7 +1146,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = OpenSummaryStorage(out strError);
                     if (nRet == -1)
                     {
-                        strError = "初始化书目摘要库时出错: " + strError;
+                        strError = "启动书目摘要库时出错: " + strError;
                         app.WriteErrorLog(strError);
                     }
 
@@ -1138,7 +1158,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "初始化计数器库时出错: " + strError;
+                        strError = "启动计数器库时出错: " + strError;
                         app.WriteErrorLog(strError);
                     }
 
@@ -1150,7 +1170,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "初始化只读日志库时出错: " + strError;
+                        strError = "启动访问日志库时出错: " + strError;
                         app.WriteErrorLog(strError);
                     }
                 }
@@ -2674,7 +2694,6 @@ namespace DigitalPlatform.LibraryServer
                 using (XmlTextWriter writer = new XmlTextWriter(strFileName,
                     Encoding.UTF8))
                 {
-
                     // 缩进
                     writer.Formatting = Formatting.Indented;
                     writer.Indentation = 4;
@@ -2767,6 +2786,14 @@ namespace DigitalPlatform.LibraryServer
                     // 属性 writeOperLog
                     writer.WriteStartElement("object");
                     writer.WriteAttributeString("writeGetResOperLog", this.GetObjectWriteToOperLog == true ? "true" : "false");
+                    writer.WriteEndElement();
+
+                    // -----------
+                    // 2015/11/26
+                    // 日志
+                    // 元素<log>
+                    writer.WriteStartElement("log");
+                    writer.WriteAttributeString("accessLogMaxCountPerDay", this.AccessLogMaxCountPerDay.ToString());
                     writer.WriteEndElement();
 
                     // 消息

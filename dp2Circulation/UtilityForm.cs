@@ -374,17 +374,17 @@ namespace dp2Circulation
 
             try
             {
-                XmlTextWriter w = new XmlTextWriter(this.textBox_xmlEditor_xmlFilename.Text,
-                    encoding);
-                if (this.checkBox_xmlEditor_indent.Checked == true)
+                using (XmlTextWriter w = new XmlTextWriter(this.textBox_xmlEditor_xmlFilename.Text,
+                    encoding))
                 {
-                    w.Formatting = Formatting.Indented;
-                    w.Indentation = 4;
+                    if (this.checkBox_xmlEditor_indent.Checked == true)
+                    {
+                        w.Formatting = Formatting.Indented;
+                        w.Indentation = 4;
+                    }
+
+                    dom.WriteTo(w);
                 }
-
-                dom.WriteTo(w);
-
-                w.Close();
             }
             catch (Exception ex)
             {

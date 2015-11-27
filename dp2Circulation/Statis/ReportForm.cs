@@ -5861,7 +5861,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                // *** 创建只读日志表
+                // *** 创建访问日志表
                 if (strTypeList == "*"
                     || StringUtil.IsInList("accesslog", strTypeList) == true)
                 {
@@ -5876,7 +5876,7 @@ MessageBoxDefaultButton.Button2);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "获得第一个只读日志文件日期时出错: " + strError;
+                        strError = "获得第一个访问日志文件日期时出错: " + strError;
                         return -1;
                     }
 
@@ -5896,7 +5896,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (nRet == 1 && lCount >= 0)
                     {
-                        // 记载第一个只读日志文件日期
+                        // 记载第一个访问日志文件日期
                         DomUtil.SetAttr(task_dom.DocumentElement,
                             "first_accesslog_date",
                             strFirstDate);
@@ -6804,7 +6804,7 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 return -1;
 
-            // state 元素中的状态，是首次创建本地缓存后总体的状态，是操作日志和只读日志都复制过来以后，才会设置为 "daily" 
+            // state 元素中的状态，是首次创建本地缓存后总体的状态，是操作日志和访问日志都复制过来以后，才会设置为 "daily" 
             strState = DomUtil.GetAttr(dom.DocumentElement,
                 "state");
             if (strState != "daily")
@@ -8977,10 +8977,36 @@ strSourceRecPath);
 
         List<int> _resultColumnWidths = new List<int>();
 
+        /* 空 SQL 语句容易造成：
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 System.Data.SQLite.SQLiteDataReader.Read()
+在 dp2Circulation.ReportForm.SQLiteQuery()
+在 dp2Circulation.ReportForm.toolStripButton_query_do_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+         * */
         void SQLiteQuery()
         {
             string strError = "";
             // int nRet = 0;
+
+            if (string.IsNullOrEmpty(this.textBox_query_command.Text.Trim()) == true)
+            {
+                strError = "尚未输入 SQL 语句";
+                goto ERROR1;
+            }
 
             EnableControls(false);
 
@@ -8992,7 +9018,6 @@ strSourceRecPath);
             this.timer_qu.Start();
             try
             {
-
                 // 保留以前的列宽度
                 for (int i = 0; i < this.listView_query_results.Columns.Count; i++)
                 {
@@ -9020,6 +9045,12 @@ strSourceRecPath);
                                 if (dr == null
                                     || dr.HasRows == false)
                                     return;
+
+                                if (dr.FieldCount == 0)
+                                {
+                                    strError = "结果中不包含任何列";
+                                    goto ERROR1;
+                                }
 
                                 // 设置列标题
                                 for (int i = 0; i < dr.FieldCount; i++)

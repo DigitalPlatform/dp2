@@ -660,13 +660,13 @@ namespace DigitalPlatform.Xml
 
                     return strText;
                 }
+                // 注意，此后 m 已经关闭
             }
         }
 
         public static string GetIndentInnerXml(XmlNode node)
         {
             using (MemoryStream m = new MemoryStream())
-
             using (XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8))
             {
                 w.Formatting = Formatting.Indented;
@@ -684,6 +684,7 @@ namespace DigitalPlatform.Xml
 
                     return strText;
                 }
+                // 注意，此后 m 已经关闭
             }
         }
 
@@ -731,7 +732,6 @@ namespace DigitalPlatform.Xml
 
             // 
             using (MemoryStream m = new MemoryStream())
-
             using (XmlTextWriter w = new XmlTextWriter(m, encoding))
             {
                 w.Formatting = Formatting.Indented;
@@ -749,6 +749,7 @@ namespace DigitalPlatform.Xml
 
                     return strText;
                 }
+                // 注意，此后 m 已经关闭
             }
         }
 

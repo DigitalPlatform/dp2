@@ -540,6 +540,21 @@ namespace dp2Circulation
             this.button_projectManage.Enabled = bEnable;
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 dp2Circulation.BiblioStatisForm.RunScript(String strProjectName, String strProjectLocate, String strInitialParamString, String& strError, String& strWarning)
+在 dp2Circulation.BiblioStatisForm.button_next_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+在 System.Windows.Forms.Button.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+         * */
         int RunScript(string strProjectName,
             string strProjectLocate,
             string strInitialParamString,
@@ -594,6 +609,7 @@ namespace dp2Circulation
                 this.MarcFilter = filter;
                 //
 
+                Debug.Assert(objStatis != null, "");
 
                 objStatis.ProjectDir = strProjectLocate;
                 objStatis.Console = this.Console;
@@ -610,7 +626,6 @@ namespace dp2Circulation
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
                 }
-
 
                 // 触发Script中OnBegin()代码
                 // OnBegin()中仍然有修改MainForm面板的自由
@@ -630,7 +645,6 @@ namespace dp2Circulation
 
                 if (nRet == 1)
                     goto END1;  // 实际上 SkipAll 是要执行 OnEnd() 的，而 Error 才是不执行 OnEnd()
-
             END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
@@ -643,9 +657,7 @@ namespace dp2Circulation
                         return -1;
                     }
                 }
-
                 return 0;
-
             ERROR1:
                 return -1;
             }
@@ -772,7 +784,6 @@ namespace dp2Circulation
             objStatisParam.ProjectDir = strProjectLocate;
             objStatisParam.InstanceDir = this.InstanceDir;
 
-
             ////
 
             ////////////////////////////
@@ -784,7 +795,6 @@ namespace dp2Circulation
                 filter = new MyFilterDocument();
                 filter.BiblioStatis = objStatisParam;
                 filter.strOtherDef = entryClassType.FullName + " BiblioStatis = null;";
-
 
                 filter.strPreInitial = " MyFilterDocument doc = (MyFilterDocument)this.Document;\r\n";
                 filter.strPreInitial += " BiblioStatis = ("
@@ -830,7 +840,6 @@ namespace dp2Circulation
                     saTotalFilterRef, saAddRef1.Length,
                     saAdditionalRef.Length);
 
-
                 string strfilterCsDllName = Path.Combine(strProjectLocate, "~marcfilter_" + Convert.ToString(AssemblyVersion++) + ".dll");
 
                 // 创建Project中Script的Assembly
@@ -863,12 +872,8 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-
                 filter.Assembly = assemblyFilter;
-
             }
-
-
             return 0;
         ERROR1:
             return -1;

@@ -6514,13 +6514,11 @@ namespace DigitalPlatform.rms
                             {
                                 // 使用XmlTextWriter保存成utf8的编码方式
                                 using (MemoryStream ms = new MemoryStream())
+                                // 2015/11/23 增加的 using 语句
+                                using (XmlTextWriter textWriter = new XmlTextWriter(ms, Encoding.UTF8))
                                 {
-                                    // 2015/11/23 增加的 using 语句
-                                    using (XmlTextWriter textWriter = new XmlTextWriter(ms, Encoding.UTF8))
-                                    {
-                                        dom.Save(textWriter);
-                                        //dom.Save(ms);
-                                    }
+                                    dom.Save(textWriter);
+                                    //dom.Save(ms);
 
                                     long lRealLength;
                                     // return:
@@ -6604,7 +6602,7 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "取记录 '" + strRecordID + "' 出错了，原因: " + ex.Message;
+                        strError = "取记录 '" + strRecordID + "' 出错了，原因: " + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
                     finally //连接

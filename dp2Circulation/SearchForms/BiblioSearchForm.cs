@@ -683,7 +683,6 @@ Keys keyData)
                             cols = searchresult.Cols;
                         }
 
-
                         if (bPushFillingBrowse == true)
                         {
                             if (bTempQuickLoad == true)

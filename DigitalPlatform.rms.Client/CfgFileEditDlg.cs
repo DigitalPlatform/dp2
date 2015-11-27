@@ -16,80 +16,80 @@ using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms.Client
 {
-	/// <summary>
-	/// Summary description for CfgFileEditDlg.
-	/// </summary>
-	public class CfgFileEditDlg : System.Windows.Forms.Form
-	{
-		public NoHasSelTextBox textBox_content;
+    /// <summary>
+    /// Summary description for CfgFileEditDlg.
+    /// </summary>
+    public class CfgFileEditDlg : System.Windows.Forms.Form
+    {
+        public NoHasSelTextBox textBox_content;
 
-		public DatabaseObject Obj = null;
+        public DatabaseObject Obj = null;
 
-		public ApplicationInfo applicationInfo = null;
-		public DigitalPlatform.StopManager stopManager = null;
-		RmsChannel channel = null;
-		public ServerCollection Servers = null;	// 引用
-		public RmsChannelCollection Channels = null;
+        public ApplicationInfo applicationInfo = null;
+        public DigitalPlatform.StopManager stopManager = null;
+        RmsChannel channel = null;
+        public ServerCollection Servers = null;	// 引用
+        public RmsChannelCollection Channels = null;
 
-		public string LocalPath = "";	// 本地物理路径
+        public string LocalPath = "";	// 本地物理路径
 
-		byte [] TimeStamp = null;
-		MemoryStream Stream = null;
+        byte[] TimeStamp = null;
+        MemoryStream Stream = null;
 
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
-		public System.Windows.Forms.TextBox textBox_path;
-		private System.Windows.Forms.Button button_format;
-		private System.Windows.Forms.Label label_message;
-		private System.Windows.Forms.Button button_export;
-		private System.Windows.Forms.Button button_import;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox textBox_mime;
-		private System.Windows.Forms.Label label3;
-		public System.Windows.Forms.TextBox textBox_serverUrl;
-		private System.Windows.Forms.CheckBox checkBox_autoCreate;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
+        public System.Windows.Forms.TextBox textBox_path;
+        private System.Windows.Forms.Button button_format;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.Button button_export;
+        private System.Windows.Forms.Button button_import;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox_mime;
+        private System.Windows.Forms.Label label3;
+        public System.Windows.Forms.TextBox textBox_serverUrl;
+        private System.Windows.Forms.CheckBox checkBox_autoCreate;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public CfgFileEditDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public CfgFileEditDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			textBox_content.DisableEmSetSelMsg = false;
+            textBox_content.DisableEmSetSelMsg = false;
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CfgFileEditDlg));
             this.textBox_content = new DigitalPlatform.GUI.NoHasSelTextBox();
             this.button_OK = new System.Windows.Forms.Button();
@@ -111,8 +111,8 @@ namespace DigitalPlatform.rms.Client
             // 
             this.textBox_content.AcceptsReturn = true;
             this.textBox_content.AcceptsTab = true;
-            this.textBox_content.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_content.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_content.HideSelection = false;
             this.textBox_content.ImeMode = System.Windows.Forms.ImeMode.Off;
@@ -152,7 +152,7 @@ namespace DigitalPlatform.rms.Client
             // 
             // textBox_path
             // 
-            this.textBox_path.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_path.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_path.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_path.Location = new System.Drawing.Point(83, 33);
@@ -172,7 +172,7 @@ namespace DigitalPlatform.rms.Client
             // 
             // label_message
             // 
-            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_message.Location = new System.Drawing.Point(8, 328);
             this.label_message.Name = "label_message";
@@ -228,7 +228,7 @@ namespace DigitalPlatform.rms.Client
             // 
             // textBox_serverUrl
             // 
-            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverUrl.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_serverUrl.Location = new System.Drawing.Point(83, 9);
@@ -285,69 +285,69 @@ namespace DigitalPlatform.rms.Client
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		public string ServerUrl
-		{
-			get 
-			{
-				return this.textBox_serverUrl.Text;
-			}
-			set 
-			{
-				this.textBox_serverUrl.Text = value;
-			}
-		}
+        public string ServerUrl
+        {
+            get
+            {
+                return this.textBox_serverUrl.Text;
+            }
+            set
+            {
+                this.textBox_serverUrl.Text = value;
+            }
+        }
 
 
-		public string Path
-		{
-			get 
-			{
-				return textBox_path.Text;
-			}
-			set 
-			{
-				textBox_path.Text = value;
-			}
-		}
+        public string Path
+        {
+            get
+            {
+                return textBox_path.Text;
+            }
+            set
+            {
+                textBox_path.Text = value;
+            }
+        }
 
-		public void Initial(DatabaseObject objFile,
-			string strPath)
-		{
-			this.Obj = objFile;
-			this.Path = strPath;
-			// this.textBox_path.Text = this.Path;
+        public void Initial(DatabaseObject objFile,
+            string strPath)
+        {
+            this.Obj = objFile;
+            this.Path = strPath;
+            // this.textBox_path.Text = this.Path;
 
-		}
+        }
 
-		public void Initial(ServerCollection servers,
-			RmsChannelCollection channels,
-			DigitalPlatform.StopManager stopManager,
-			string serverUrl,
-			string strCfgFilePath)
-		{
-			this.Servers = servers;
-			this.Channels = channels;
-			this.stopManager = stopManager;
-			this.ServerUrl = serverUrl;
-			this.Path = strCfgFilePath;
-			// this.textBox_path.Text = this.ServerUrl + "?" + this.Path;
+        public void Initial(ServerCollection servers,
+            RmsChannelCollection channels,
+            DigitalPlatform.StopManager stopManager,
+            string serverUrl,
+            string strCfgFilePath)
+        {
+            this.Servers = servers;
+            this.Channels = channels;
+            this.stopManager = stopManager;
+            this.ServerUrl = serverUrl;
+            this.Path = strCfgFilePath;
+            // this.textBox_path.Text = this.ServerUrl + "?" + this.Path;
 
-		}
+        }
 
-		public string Mime
-		{
-			get 
-			{
-				return this.textBox_mime.Text;
-			}
-			set 
-			{
-				this.textBox_mime.Text = value;
-			}
-		}
+        public string Mime
+        {
+            get
+            {
+                return this.textBox_mime.Text;
+            }
+            set
+            {
+                this.textBox_mime.Text = value;
+            }
+        }
 
         static string ConvertCrLf(string strText)
         {
@@ -356,217 +356,213 @@ namespace DigitalPlatform.rms.Client
             return strText.Replace("\r", "\r\n");
         }
 
-		private void CfgFileEditDlg_Load(object sender, System.EventArgs e)
-		{
-			button_export.Enabled = false;
+        private void CfgFileEditDlg_Load(object sender, System.EventArgs e)
+        {
+            button_export.Enabled = false;
 
-			MemoryStream stream = null;
-			string strMetaData;
-			string strError = "";
-			string strMime = "";
+            MemoryStream stream = null;
+            string strMetaData;
+            string strError = "";
+            string strMime = "";
 
-			Hashtable values = null;
+            Hashtable values = null;
 
-			if (Obj != null)
-			{
-				if (this.Obj.Content != null)
-				{
-					stream = new MemoryStream(this.Obj.Content);
-					this.Stream = stream;
-					this.Stream.Seek(0, SeekOrigin.Begin);
+            if (Obj != null)
+            {
+                if (this.Obj.Content != null)
+                {
+                    stream = new MemoryStream(this.Obj.Content);
+                    this.Stream = stream;
+                    this.Stream.Seek(0, SeekOrigin.Begin);
 
-					button_export.Enabled = true;
-				}
+                    button_export.Enabled = true;
+                }
 
-				this.TimeStamp = this.Obj.TimeStamp;
+                this.TimeStamp = this.Obj.TimeStamp;
 
-				strMetaData = this.Obj.Metadata;
+                strMetaData = this.Obj.Metadata;
 
-				// 观察mime
-				// 取metadata
-				values = StringUtil.ParseMedaDataXml(strMetaData,
-					out strError);
-				if (values == null)
-				{
-					MessageBox.Show(this, strError);
-					return;
-				}
-				strMime = (string)values["mimetype"];
-				if (strMime == null || strMime == "")
-					strMime = "text";
-				this.Mime = strMime;
+                // 观察mime
+                // 取metadata
+                values = StringUtil.ParseMedaDataXml(strMetaData,
+                    out strError);
+                if (values == null)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+                strMime = (string)values["mimetype"];
+                if (strMime == null || strMime == "")
+                    strMime = "text";
+                this.Mime = strMime;
 
-				this.LocalPath = (string)values["localpath"];
-				if (this.LocalPath == null)
-					this.LocalPath = "";
+                this.LocalPath = (string)values["localpath"];
+                if (this.LocalPath == null)
+                    this.LocalPath = "";
 
-				this.textBox_content.Text = "";
+                this.textBox_content.Text = "";
 
-				// string strFirstPart = StringUtil.GetFirstPartPath(ref strMime);
-				if (this.IsText == true)
-				{
-					if (this.Stream != null)
-					{
-						this.Stream.Seek(0, SeekOrigin.Begin);
+                // string strFirstPart = StringUtil.GetFirstPartPath(ref strMime);
+                if (this.IsText == true)
+                {
+                    if (this.Stream != null)
+                    {
+                        this.Stream.Seek(0, SeekOrigin.Begin);
                         using (StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8))
                         {
                             this.textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
                         }
-					}
-				}
-				else 
-				{
-				}
+                    }
+                }
+                else
+                {
+                }
 
-				//////
-		
-				button_OK.Enabled = false;
+                //////
 
-				this.textBox_content.SelectionStart = 0;
-				this.textBox_content.SelectionLength = 0;
+                button_OK.Enabled = false;
 
-
-				return;
-			}
+                this.textBox_content.SelectionStart = 0;
+                this.textBox_content.SelectionLength = 0;
 
 
-			this.channel = Channels.GetChannel(this.ServerUrl);
+                return;
+            }
 
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+            this.channel = Channels.GetChannel(this.ServerUrl);
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
-			DigitalPlatform.Stop stop = null;
+            DigitalPlatform.Stop stop = null;
 
-			if (stopManager != null) 
-			{
-				stop = new DigitalPlatform.Stop();
+            if (stopManager != null)
+            {
+                stop = new DigitalPlatform.Stop();
 
                 stop.Register(this.stopManager, true);	// 和容器关联
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在下载配置文件: " + this.Path);
+                stop.Initial("正在下载配置文件: " + this.Path);
 
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-			}
+            }
 
-			// string strContent = "";
-			byte[] baTimeStamp = null;
-			string strOutputPath;
+            // string strContent = "";
+            byte[] baTimeStamp = null;
+            string strOutputPath;
 
-			string strStyle = "content,data,metadata,timestamp,outputpath";
+            string strStyle = "content,data,metadata,timestamp,outputpath";
             //			string strStyle = "attachment,data,metadata,timestamp,outputpath";
 
-			stream = new MemoryStream();
+            stream = new MemoryStream();
 
-			long lRet = channel.GetRes(
-				this.Path,
-				stream,
-				stop,	// stop,
-				strStyle,
-				null,	// byte [] input_timestamp,
-				out strMetaData,
-				out baTimeStamp,
-				out strOutputPath,
-				out strError);
+            long lRet = channel.GetRes(
+                this.Path,
+                stream,
+                stop,	// stop,
+                strStyle,
+                null,	// byte [] input_timestamp,
+                out strMetaData,
+                out baTimeStamp,
+                out strOutputPath,
+                out strError);
 
-			/*
-			long lRet = channel.GetRes((
-				this.Path,
-				out strContent,
-				out strMetaData,
-				out baTimeStamp,
-				out strOutputPath,
-				out strError);
-			*/
+            /*
+            long lRet = channel.GetRes((
+                this.Path,
+                out strContent,
+                out strMetaData,
+                out baTimeStamp,
+                out strOutputPath,
+                out strError);
+            */
 
-			if (stopManager != null) 
-			{
-				stop.EndLoop();
+            if (stopManager != null)
+            {
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
-			}
+            }
 
-			if (lRet == -1) 
-			{
-				MessageBox.Show(this, strError);
-				goto FINISH;
-			}
+            if (lRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                goto FINISH;
+            }
 
-			this.Stream = stream;
-			this.Stream.Seek(0, SeekOrigin.Begin);
+            this.Stream = stream;
+            this.Stream.Seek(0, SeekOrigin.Begin);
 
-			button_export.Enabled = true;
+            button_export.Enabled = true;
 
 
-			this.TimeStamp = baTimeStamp;
+            this.TimeStamp = baTimeStamp;
 
-			// 观察mime
-			// 取metadata
-			values = StringUtil.ParseMedaDataXml(strMetaData,
-				out strError);
-			if (values == null)
-			{
-				MessageBox.Show(this, strError);
-				goto FINISH;
-			}
-			strMime = (string)values["mimetype"];
-			if (strMime == null || strMime == "")
-				strMime = "text";
-			this.Mime = strMime;
+            // 观察mime
+            // 取metadata
+            values = StringUtil.ParseMedaDataXml(strMetaData,
+                out strError);
+            if (values == null)
+            {
+                MessageBox.Show(this, strError);
+                goto FINISH;
+            }
+            strMime = (string)values["mimetype"];
+            if (strMime == null || strMime == "")
+                strMime = "text";
+            this.Mime = strMime;
 
-			this.LocalPath = (string)values["localpath"];
-			if (this.LocalPath == null)
-				this.LocalPath = "";
+            this.LocalPath = (string)values["localpath"];
+            if (this.LocalPath == null)
+                this.LocalPath = "";
 
-			// string strFirstPart = StringUtil.GetFirstPartPath(ref strMime);
-			if (this.IsText == true)
-			{
-				this.Stream.Seek(0, SeekOrigin.Begin);
+            // string strFirstPart = StringUtil.GetFirstPartPath(ref strMime);
+            if (this.IsText == true)
+            {
+                this.Stream.Seek(0, SeekOrigin.Begin);
                 using (StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8))
                 {
                     this.textBox_content.Text = ConvertCrLf(sr.ReadToEnd());
                 }
-			}
-			else 
-			{
-				//this.textBox_content.Text = "<二进制内容无法直接编辑>";
-				//this.textBox_content.ReadOnly = true;
-				//this.button_format.Enabled = false;
-			}
+                // 注意，此后 this.Stream 被关闭
+            }
+            else
+            {
+                //this.textBox_content.Text = "<二进制内容无法直接编辑>";
+                //this.textBox_content.ReadOnly = true;
+                //this.button_format.Enabled = false;
+            }
 
-			//////
-		
-			button_OK.Enabled = false;
-			FINISH:
+            //////
 
-				if (stopManager != null && stop != null) 
-				{
+            button_OK.Enabled = false;
+        FINISH:
+            if (stopManager != null && stop != null)
+            {
+                stop.Unregister();	// 和容器关联
+                stop = null;
+            }
 
-					stop.Unregister();	// 和容器关联
-					stop = null;
-				}
+            this.channel = null;
 
-			this.channel = null;
+            this.textBox_content.SelectionStart = 0;
+            this.textBox_content.SelectionLength = 0;
+        }
 
-			this.textBox_content.SelectionStart = 0;
-			this.textBox_content.SelectionLength = 0;
-				
-		}
+        // mime是否为text开头
+        bool IsText
+        {
+            get
+            {
+                string strMime = this.Mime;
+                string strFirstPart = StringUtil.GetFirstPartPath(ref strMime);
+                if (strFirstPart.ToLower() == "text")
+                    return true;
 
-		// mime是否为text开头
-		bool IsText
-		{
-			get 
-			{
-				string strMime = this.Mime;
-				string strFirstPart = StringUtil.GetFirstPartPath(ref strMime);
-				if (strFirstPart.ToLower() == "text")
-					return true;
-
-				return false;
-			}
-		}
+                return false;
+            }
+        }
 
         // 去掉字符串中的单个0x0a(而不是0x0d 0x0a)
         public static string RemoveSingle0a(string strText)
@@ -575,214 +571,213 @@ namespace DigitalPlatform.rms.Client
             return strResult.Replace("\r", "\r\n");
         }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			string strMetaData = "";
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            string strMetaData = "";
 
             // TODO: 一旦遇到问题，可以放开注释试验
             // this.textBox_content.Text = RemoveSingle0a(this.textBox_content.Text);
 
 
-			if (this.Obj != null)
-			{
-				if (this.IsText == true)
-				{
-					byte [] baContent = StringUtil.GetUtf8Bytes(this.textBox_content.Text, true);
-					this.Obj.Content = baContent;
-				}
-				else 
-				{
-					if (this.Stream != null)
-					{
-						this.Obj.Content = new byte[this.Stream.Length];
-						this.Stream.Seek(0, SeekOrigin.Begin);
-						this.Stream.Read(this.Obj.Content,
-							0, (int)this.Stream.Length);
-					}
-					else 
-					{
-						this.Obj.Content = null;
-					}
-				}
+            if (this.Obj != null)
+            {
+                if (this.IsText == true)
+                {
+                    byte[] baContent = StringUtil.GetUtf8Bytes(this.textBox_content.Text, true);
+                    this.Obj.Content = baContent;
+                }
+                else
+                {
+                    if (this.Stream != null)
+                    {
+                        this.Obj.Content = new byte[this.Stream.Length];
+                        this.Stream.Seek(0, SeekOrigin.Begin);
+                        this.Stream.Read(this.Obj.Content,
+                            0, (int)this.Stream.Length);
+                    }
+                    else
+                    {
+                        this.Obj.Content = null;
+                    }
+                }
 
-				ExportUtil.ChangeMetaData(ref strMetaData,
-					null,	// string strID,
-					this.LocalPath,	// string strLocalPath,
-					this.Mime,	// string strMimeType,
-					null,	// string strLastModified,
-					null,	// string strPath,
-					null);	// string strTimestamp)
-				this.Obj.Metadata = strMetaData;
+                ExportUtil.ChangeMetaData(ref strMetaData,
+                    null,	// string strID,
+                    this.LocalPath,	// string strLocalPath,
+                    this.Mime,	// string strMimeType,
+                    null,	// string strLastModified,
+                    null,	// string strPath,
+                    null);	// string strTimestamp)
+                this.Obj.Metadata = strMetaData;
 
-				this.Obj.Changed = true;
+                this.Obj.Changed = true;
 
-				this.DialogResult = DialogResult.OK;
-				this.Close();
+                this.DialogResult = DialogResult.OK;
+                this.Close();
 
-				return;
-			}
+                return;
+            }
 
-			this.channel = Channels.GetChannel(this.ServerUrl);
+            this.channel = Channels.GetChannel(this.ServerUrl);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
-			DigitalPlatform.Stop stop = null;
+            DigitalPlatform.Stop stop = null;
 
-			if (stopManager != null) 
-			{
-				stop = new DigitalPlatform.Stop();
+            if (stopManager != null)
+            {
+                stop = new DigitalPlatform.Stop();
 
                 stop.Register(this.stopManager, true);	// 和容器关联
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在保存配置文件: " + this.Path);
+                stop.Initial("正在保存配置文件: " + this.Path);
 
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-			}
+            }
 
-			if (this.IsText == true)
-			{
-				// 更新stream对象内容
-				byte [] baContent = StringUtil.GetUtf8Bytes(this.textBox_content.Text, true);
-				this.Stream = new MemoryStream(baContent);  // !!! 什么时候释放?
-				/*
-				this.Stream.SetLength(0);
-				StreamWriter sw = new StreamWriter(this.Stream, Encoding.UTF8);
-				sw.Write(this.textBox_content.Text);
-				*/
-			}
+            if (this.IsText == true)
+            {
+                // 更新stream对象内容
+                byte[] baContent = StringUtil.GetUtf8Bytes(this.textBox_content.Text, true);
+                this.Stream = new MemoryStream(baContent);  // !!! 什么时候释放?
+                /*
+                this.Stream.SetLength(0);
+                StreamWriter sw = new StreamWriter(this.Stream, Encoding.UTF8);
+                sw.Write(this.textBox_content.Text);
+                */
+            }
 
-			if (this.Stream != null)
-				this.Stream.Seek(0, SeekOrigin.Begin);
-			
-			// 保存配置文件
-			string strError = "";
-			byte [] baOutputTimestamp = null;
-			string strOutputPath = "";
-			string strStyle = "";
+            if (this.Stream != null)
+                this.Stream.Seek(0, SeekOrigin.Begin);
 
-			if (this.checkBox_autoCreate.Checked == true)
-			{
-				if (strStyle != "")
-					strStyle += ",";
-				strStyle += "autocreatedir";
-			}
+            // 保存配置文件
+            string strError = "";
+            byte[] baOutputTimestamp = null;
+            string strOutputPath = "";
+            string strStyle = "";
+
+            if (this.checkBox_autoCreate.Checked == true)
+            {
+                if (strStyle != "")
+                    strStyle += ",";
+                strStyle += "autocreatedir";
+            }
 
 
             ExportUtil.ChangeMetaData(ref strMetaData,
-				null,	// string strID,
-				this.LocalPath,	// string strLocalPath,
-				this.Mime,	// string strMimeType,
-				null,	// string strLastModified,
-				null,	// string strPath,
-				null);	// string strTimestamp)
+                null,	// string strID,
+                this.LocalPath,	// string strLocalPath,
+                this.Mime,	// string strMimeType,
+                null,	// string strLastModified,
+                null,	// string strPath,
+                null);	// string strTimestamp)
 
-			string strRange = "";
-			if (this.Stream != null && this.Stream.Length != 0) 
-			{
-				Debug.Assert(this.Stream.Length != 0, "test");
-				strRange = "0-" + Convert.ToString(this.Stream.Length-1);
-			}
-			long lRet = channel.DoSaveResObject(this.Path,
-				this.Stream,
-				(this.Stream != null && this.Stream.Length != 0) ? this.Stream.Length : 0,
-				strStyle,
-				strMetaData,	// strMetadata,
-				strRange,
-				true,
-				this.TimeStamp,	// timestamp,
-				out baOutputTimestamp,
-				out strOutputPath,
-				out strError);
+            string strRange = "";
+            if (this.Stream != null && this.Stream.Length != 0)
+            {
+                Debug.Assert(this.Stream.Length != 0, "test");
+                strRange = "0-" + Convert.ToString(this.Stream.Length - 1);
+            }
+            long lRet = channel.DoSaveResObject(this.Path,
+                this.Stream,
+                (this.Stream != null && this.Stream.Length != 0) ? this.Stream.Length : 0,
+                strStyle,
+                strMetaData,	// strMetadata,
+                strRange,
+                true,
+                this.TimeStamp,	// timestamp,
+                out baOutputTimestamp,
+                out strOutputPath,
+                out strError);
 
-			/*
-			// 保存配置文件
-			byte[] baOutputTimeStamp = null;
-			string strOutputPath = "";
-			string strError = "";
+            /*
+            // 保存配置文件
+            byte[] baOutputTimeStamp = null;
+            string strOutputPath = "";
+            string strError = "";
 
 
-			long lRet = channel.DoSaveTextRes(this.Path,
-				this.textBox_content.Text,
-				true,	// bInlucdePreamble
-				"",	// style
-				this.TimeStamp,
-				out baOutputTimeStamp,
-				out strOutputPath,
-				out strError);
-			*/
+            long lRet = channel.DoSaveTextRes(this.Path,
+                this.textBox_content.Text,
+                true,	// bInlucdePreamble
+                "",	// style
+                this.TimeStamp,
+                out baOutputTimeStamp,
+                out strOutputPath,
+                out strError);
+            */
 
-			if (stopManager != null) 
-			{
-				stop.EndLoop();
+            if (stopManager != null)
+            {
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
-			}
+                stop.Initial("");
+            }
 
-			if (lRet == -1) 
-			{
-				MessageBox.Show(this, strError);
-				goto FINISH;
-			}
+            if (lRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                goto FINISH;
+            }
 
-			this.TimeStamp = baOutputTimestamp;
+            this.TimeStamp = baOutputTimestamp;
 
-			MessageBox.Show(this, "配置文件 '" + this.Path + "' 保存成功");
+            MessageBox.Show(this, "配置文件 '" + this.Path + "' 保存成功");
 
 
-			/////////////
-			FINISH:
+            /////////////
+        FINISH:
 
-				if (stopManager != null && stop != null) 
-				{
+            if (stopManager != null && stop != null)
+            {
 
-					stop.Unregister();	// 和容器关联
-					stop = null;
-				}
+                stop.Unregister();	// 和容器关联
+                stop = null;
+            }
 
-			this.channel = null;
+            this.channel = null;
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void button_format_Click(object sender, System.EventArgs e)
-		{
-			XmlDocument dom = new XmlDocument();
+        private void button_format_Click(object sender, System.EventArgs e)
+        {
+            XmlDocument dom = new XmlDocument();
 
-			try 
-			{
-				dom.LoadXml(textBox_content.Text);
-			}
-			catch (XmlException ex)
-			{
+            try
+            {
+                dom.LoadXml(textBox_content.Text);
+            }
+            catch (XmlException ex)
+            {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
 
-				textBox_content.Focus();
-				//textBox_content.DisableEmSetSelMsg = false;
-				API.SetEditCurrentCaretPos(
-					textBox_content,
-					ex.LinePosition - 1,
-					ex.LineNumber - 1,
-					true);
-				//textBox_content.DisableEmSetSelMsg = true;
-				return;
-			}
-			catch (Exception ex)
-			{
+                textBox_content.Focus();
+                //textBox_content.DisableEmSetSelMsg = false;
+                API.SetEditCurrentCaretPos(
+                    textBox_content,
+                    ex.LinePosition - 1,
+                    ex.LineNumber - 1,
+                    true);
+                //textBox_content.DisableEmSetSelMsg = true;
+                return;
+            }
+            catch (Exception ex)
+            {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-				return;
-			}
+                return;
+            }
 
-			using(MemoryStream m = new MemoryStream())
-
+            using (MemoryStream m = new MemoryStream())
             using (XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8))
             {
                 w.Formatting = Formatting.Indented;
@@ -801,119 +796,119 @@ namespace DigitalPlatform.rms.Client
                 //			m.Close();
             }
 
-			MessageBox.Show(this, "整理完毕。");
-		}
+            MessageBox.Show(this, "整理完毕。");
+        }
 
-		private void textBox_content_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
-		{
-			DisplayCurLineNo();
-		}
+        private void textBox_content_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            DisplayCurLineNo();
+        }
 
-		private void textBox_content_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			DisplayCurLineNo();
-		}
+        private void textBox_content_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            DisplayCurLineNo();
+        }
 
-		void DisplayCurLineNo()
-		{
-			int x =0;
-			int y = 0;
-			API.GetEditCurrentCaretPos(
-				textBox_content,
-				out x,
-				out y);
-			label_message.Text = "Ln " + Convert.ToString(y+1) + "   Ch " + (x >= 0 ? Convert.ToString(x+1) : "?");
+        void DisplayCurLineNo()
+        {
+            int x = 0;
+            int y = 0;
+            API.GetEditCurrentCaretPos(
+                textBox_content,
+                out x,
+                out y);
+            label_message.Text = "Ln " + Convert.ToString(y + 1) + "   Ch " + (x >= 0 ? Convert.ToString(x + 1) : "?");
 
-		}
+        }
 
-		private void CfgFileEditDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (this.DialogResult != DialogResult.OK
-				&& API.GetEditModify(textBox_content) == true) 
-			{
+        private void CfgFileEditDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (this.DialogResult != DialogResult.OK
+                && API.GetEditModify(textBox_content) == true)
+            {
 
-				DialogResult msgResult = MessageBox.Show(this,
-					"配置文件内容已经被修改, 尚未保存。\r\n是否要关闭窗口并放弃修改内容?",
-					"CfgFileEditDlg",
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-				if (msgResult == DialogResult.No) 
-				{
-					e.Cancel = true;
-					return;
-				}
-			}
-		
-		}
+                DialogResult msgResult = MessageBox.Show(this,
+                    "配置文件内容已经被修改, 尚未保存。\r\n是否要关闭窗口并放弃修改内容?",
+                    "CfgFileEditDlg",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (msgResult == DialogResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
-		private void CfgFileEditDlg_Closed(object sender, System.EventArgs e)
-		{
+        }
+
+        private void CfgFileEditDlg_Closed(object sender, System.EventArgs e)
+        {
             // 2015/11/23
             if (this.Stream != null)
                 this.Stream.Close();
-		}
+        }
 
-		private void textBox_content_TextChanged(object sender, System.EventArgs e)
-		{
-			button_OK.Enabled = true;
-		}
+        private void textBox_content_TextChanged(object sender, System.EventArgs e)
+        {
+            button_OK.Enabled = true;
+        }
 
 
-		// 让正文编辑器获得tab键, 当作内容输入
-		protected override bool ProcessTabKey(
-			bool forward)
-		{
-			if (this.textBox_content.Focused == true)
-			{
-				return false;
-			}
+        // 让正文编辑器获得tab键, 当作内容输入
+        protected override bool ProcessTabKey(
+            bool forward)
+        {
+            if (this.textBox_content.Focused == true)
+            {
+                return false;
+            }
 
-			return base.ProcessTabKey(forward);
-		}
+            return base.ProcessTabKey(forward);
+        }
 
-		private void button_export_Click(object sender, System.EventArgs e)
-		{
-			if (this.Stream == null)
-			{
-				MessageBox.Show(this, "尚未装载任何内容");
-				return;
-			}
+        private void button_export_Click(object sender, System.EventArgs e)
+        {
+            if (this.Stream == null)
+            {
+                MessageBox.Show(this, "尚未装载任何内容");
+                return;
+            }
 
-			// 询问文件全路径
-			SaveFileDialog dlg = new SaveFileDialog();
+            // 询问文件全路径
+            SaveFileDialog dlg = new SaveFileDialog();
 
-			dlg.CreatePrompt = false;
-			dlg.FileName = this.LocalPath;
-			// dlg.FileName = "outer_projects.xml";
-			// dlg.InitialDirectory = Environment.CurrentDirectory;
-			dlg.Filter = "All files (*.*)|*.*" ;
-			dlg.RestoreDirectory = true ;
+            dlg.CreatePrompt = false;
+            dlg.FileName = this.LocalPath;
+            // dlg.FileName = "outer_projects.xml";
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
 
-			if(dlg.ShowDialog() != DialogResult.OK)
-			{
-				return;
-			}
+            if (dlg.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
 
             using (Stream s = File.Create(dlg.FileName))
             {
                 this.Stream.Seek(0, SeekOrigin.Begin);
                 StreamUtil.DumpStream(this.Stream, s);
             }
-		}
+        }
 
-		private void button_import_Click(object sender, System.EventArgs e)
-		{
-			OpenCfgFileDlg dlg = new OpenCfgFileDlg();
+        private void button_import_Click(object sender, System.EventArgs e)
+        {
+            OpenCfgFileDlg dlg = new OpenCfgFileDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.ShowDialog(this);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			this.Mime = dlg.textBox_mime.Text;
-			this.LocalPath = dlg.textBox_localPath.Text;
+            this.Mime = dlg.textBox_mime.Text;
+            this.LocalPath = dlg.textBox_localPath.Text;
             using (Stream s = File.OpenRead(this.LocalPath))
             {
                 if (s.Length > 1024 * 1024)
@@ -928,48 +923,48 @@ namespace DigitalPlatform.rms.Client
                 this.Stream = new MemoryStream(buffer);
             }
 
-			//
-			if (this.IsText == true)
-			{
-				if (this.Stream != null)
-				{
-					this.Stream.Seek(0, SeekOrigin.Begin);
+            //
+            if (this.IsText == true)
+            {
+                if (this.Stream != null)
+                {
+                    this.Stream.Seek(0, SeekOrigin.Begin);
                     using (StreamReader sr = new StreamReader(this.Stream, Encoding.UTF8))
                     {
                         this.textBox_content.Text = sr.ReadToEnd();
                     }
-				}
-			}
-			
-			button_OK.Enabled = true;
-		}
+                }
+            }
 
-		// 回调函数
-		void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+            button_OK.Enabled = true;
+        }
 
-		private void textBox_mime_TextChanged(object sender, System.EventArgs e)
-		{
-			if (this.IsText == true)
-			{
-				this.textBox_content.ReadOnly = false;
-				this.button_format.Enabled = true;
-			}
-			else 
-			{
-				this.textBox_content.ReadOnly = true;
-				this.button_format.Enabled = false;
-				this.textBox_content.Text = "<二进制内容无法直接编辑>";
-			}
-		}
+        // 回调函数
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-		private void textBox_content_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-		}
+        private void textBox_mime_TextChanged(object sender, System.EventArgs e)
+        {
+            if (this.IsText == true)
+            {
+                this.textBox_content.ReadOnly = false;
+                this.button_format.Enabled = true;
+            }
+            else
+            {
+                this.textBox_content.ReadOnly = true;
+                this.button_format.Enabled = false;
+                this.textBox_content.Text = "<二进制内容无法直接编辑>";
+            }
+        }
+
+        private void textBox_content_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+        }
 
 
-	}
+    }
 }

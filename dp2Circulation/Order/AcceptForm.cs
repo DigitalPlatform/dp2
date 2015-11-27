@@ -1172,11 +1172,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (m_detailWindow != null
                 && m_detailWindow.IsDisposed == false)
             {
+#if NO
                 if (m_detailWindow.IsLoading == true)
                 {
                     strError = "当前种册窗正在装载记录，请稍候再重试检索";
                     goto ERROR1;
                 }
+#endif
             }
 
             // 迫使detailWindow保存

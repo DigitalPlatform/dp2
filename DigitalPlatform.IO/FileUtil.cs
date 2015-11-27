@@ -158,49 +158,47 @@ namespace DigitalPlatform.IO
         FileMode.Open,
         FileAccess.Read,
         FileShare.ReadWrite))
+                // TODO: 这里的自动探索文件编码方式功能不正确，
+                // 需要专门编写一个函数来探测文本文件的编码方式
+                // 目前只能用UTF-8编码方式
+                using (StreamReader sr = new StreamReader(file, encoding))
                 {
-                    // TODO: 这里的自动探索文件编码方式功能不正确，
-                    // 需要专门编写一个函数来探测文本文件的编码方式
-                    // 目前只能用UTF-8编码方式
-                    using (StreamReader sr = new StreamReader(file, encoding))
+                    if (lMaxLength == -1)
                     {
-                        if (lMaxLength == -1)
-                        {
-                            strContent = sr.ReadToEnd();
-                        }
-                        else
-                        {
-                            long lLoadedLength = 0;
-                            StringBuilder temp = new StringBuilder(4096);
-                            for (; ; )
-                            {
-                                string strLine = sr.ReadLine();
-                                if (strLine == null)
-                                    break;
-                                if (lLoadedLength + strLine.Length > lMaxLength)
-                                {
-                                    strLine = strLine.Substring(0, (int)(lMaxLength - lLoadedLength));
-                                    temp.Append(strLine + " ...");
-                                    bExceed = true;
-                                    break;
-                                }
-
-                                temp.Append(strLine + "\r\n");
-                                lLoadedLength += strLine.Length + 2;
-                                if (lLoadedLength > lMaxLength)
-                                {
-                                    temp.Append(strLine + " ...");
-                                    bExceed = true;
-                                    break;
-                                }
-                            }
-                            strContent = temp.ToString();
-                        }
-                        /*
-                    sr.Close();
-                    sr = null;
-                         * */
+                        strContent = sr.ReadToEnd();
                     }
+                    else
+                    {
+                        long lLoadedLength = 0;
+                        StringBuilder temp = new StringBuilder(4096);
+                        for (; ; )
+                        {
+                            string strLine = sr.ReadLine();
+                            if (strLine == null)
+                                break;
+                            if (lLoadedLength + strLine.Length > lMaxLength)
+                            {
+                                strLine = strLine.Substring(0, (int)(lMaxLength - lLoadedLength));
+                                temp.Append(strLine + " ...");
+                                bExceed = true;
+                                break;
+                            }
+
+                            temp.Append(strLine + "\r\n");
+                            lLoadedLength += strLine.Length + 2;
+                            if (lLoadedLength > lMaxLength)
+                            {
+                                temp.Append(strLine + " ...");
+                                bExceed = true;
+                                break;
+                            }
+                        }
+                        strContent = temp.ToString();
+                    }
+                    /*
+                sr.Close();
+                sr = null;
+                     * */
                 }
 
                 if (bExceed == true)

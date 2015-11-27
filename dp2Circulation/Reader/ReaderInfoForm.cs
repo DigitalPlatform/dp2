@@ -148,7 +148,13 @@ namespace dp2Circulation
             this.binaryResControl1.ContentChanged -= new ContentChangedEventHandler(binaryResControl1_ContentChanged);
             this.binaryResControl1.ContentChanged += new ContentChangedEventHandler(binaryResControl1_ContentChanged);
 
-            this.binaryResControl1.Channel = this.Channel;
+            this.binaryResControl1.GetChannel -= binaryResControl1_GetChannel;
+            this.binaryResControl1.GetChannel += binaryResControl1_GetChannel;
+
+            this.binaryResControl1.ReturnChannel -= binaryResControl1_ReturnChannel;
+            this.binaryResControl1.ReturnChannel += binaryResControl1_ReturnChannel;
+
+            // this.binaryResControl1.Channel = this.Channel;
             this.binaryResControl1.Stop = this.stop;
 
             // webbrowser
@@ -173,6 +179,20 @@ namespace dp2Circulation
             LoadExternalFields();
 
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
+        }
+
+        void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
+        {
+            this.stop.EndLoop();
+            this.stop.OnStop -= new StopEventHandler(this.DoStop);
+            this.ReturnChannel(e.Channel);
+        }
+
+        void binaryResControl1_GetChannel(object sender, GetChannelEventArgs e)
+        {
+            e.Channel = this.GetChannel();
+            this.stop.OnStop += new StopEventHandler(this.DoStop);
+            this.stop.BeginLoop();
         }
 
         void LoadExternalFields()
@@ -619,7 +639,9 @@ MessageBoxDefaultButton.Button2);
 
                     // 接着装入对象资源
                     {
-                        nRet = this.binaryResControl1.LoadObject(strOutputRecPath,    // 2008/11/2 changed
+                        nRet = this.binaryResControl1.LoadObject(
+                            this.Channel,
+                            strOutputRecPath,    // 2008/11/2 changed
                             strXml,
                             this.MainForm.ServerVersion,
                             out strError);
@@ -875,7 +897,9 @@ MessageBoxDefaultButton.Button2);
                     // 接着装入对象资源
                     {
                         this.binaryResControl1.Clear();
-                        nRet = this.binaryResControl1.LoadObject(strOutputRecPath,    // 2008/11/2 changed
+                        nRet = this.binaryResControl1.LoadObject(
+                            this.Channel,
+                            strOutputRecPath,    // 2008/11/2 changed
                             strXml,
                             this.MainForm.ServerVersion,
                             out strError);
@@ -1981,6 +2005,7 @@ strNewDefault);
                     //		-1	error
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
+                        this.Channel,
                         this.MainForm.ServerVersion,
                         out strError);
                     if (nRet == -1)
@@ -2451,6 +2476,7 @@ strSavedXml);
                     //		-1	error
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
+                        this.Channel,
                         this.MainForm.ServerVersion,
                         out strError);
                     if (nRet == -1)
@@ -2496,7 +2522,9 @@ strSavedXml);
 
                     // 接着装入对象资源
                     {
-                        nRet = this.binaryResControl1.LoadObject(strSavedPath,    // 2008/11/2 changed
+                        nRet = this.binaryResControl1.LoadObject(
+                            this.Channel,
+                            strSavedPath,    // 2008/11/2 changed
                             strSavedXml,
                             this.MainForm.ServerVersion,
                             out strError);

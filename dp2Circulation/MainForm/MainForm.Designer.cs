@@ -921,7 +921,6 @@ namespace dp2Circulation
             this.MenuItem_logout.Name = "MenuItem_logout";
             this.MenuItem_logout.Size = new System.Drawing.Size(221, 22);
             this.MenuItem_logout.Text = "µÇ³ö(&O)";
-            this.MenuItem_logout.Click += new System.EventHandler(this.MenuItem_logout_Click);
             // 
             // toolStripSeparator29
             // 

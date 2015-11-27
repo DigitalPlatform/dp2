@@ -640,7 +640,7 @@ namespace DigitalPlatform.rms
                 System.Text.Encoding.UTF8))
             {
                 dom.Save(w);
-                w.Close();
+                // w.Close();
             }
             return 0;
         }

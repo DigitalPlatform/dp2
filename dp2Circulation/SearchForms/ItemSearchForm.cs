@@ -164,17 +164,17 @@ namespace dp2Circulation
              * */
             this.FillFromList();
 
-            string strDefaulFrom = "";
+            string strDefaultFrom = "";
             if (this.DbType == "item")
-                strDefaulFrom = "册条码";
+                strDefaultFrom = "册条码";
             else if (this.DbType == "comment")
-                strDefaulFrom = "标题";
+                strDefaultFrom = "标题";
             else if (this.DbType == "order")
-                strDefaulFrom = "书商";
+                strDefaultFrom = "书商";
             else if (this.DbType == "issue")
-                strDefaulFrom = "期号";
+                strDefaultFrom = "期号";
             else if (this.DbType == "arrive")
-                strDefaulFrom = "册条码号";
+                strDefaultFrom = "册条码号";
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
@@ -182,7 +182,7 @@ namespace dp2Circulation
             this.comboBox_from.Text = this.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "from",
-                strDefaulFrom);
+                strDefaultFrom);
 
             this.comboBox_entityDbName.Text = this.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
@@ -3131,7 +3131,6 @@ this.MainForm.DefaultFont);
     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
-
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -3252,7 +3251,6 @@ this.MainForm.DefaultFont);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         // 快速修改记录
         void menu_quickChangeItemRecords_Click(object sender, EventArgs e)
@@ -4378,7 +4376,9 @@ this.MainForm.DefaultFont);
                     {
                         nCount++;
                         // form.DoSaveAll();
-                        nRet = form.EntityControl.SaveItems(out strError);
+                        nRet = form.EntityControl.SaveItems(
+                            this.Channel,
+                            out strError);
                         if (nRet == -1)
                             goto ERROR;
 
