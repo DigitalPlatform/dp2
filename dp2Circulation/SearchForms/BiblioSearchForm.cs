@@ -63,7 +63,6 @@ namespace dp2Circulation
         /// </summary>
         public string ExportEntityRecPathFilename = ""; // 使用过的导出实体记录路径文件
 
-
         // BiblioDbFromInfo[] DbFromInfos = null;
         /// <summary>
         /// 构造函数
@@ -110,7 +109,7 @@ namespace dp2Circulation
                 e.ColumnTitles = new ColumnPropertyCollection();
                 string strColumnTitles = (string)_browseTitleTable[strFormat];
                 List<string> titles = StringUtil.SplitList(strColumnTitles, '\t');
-                foreach(string s in titles)
+                foreach (string s in titles)
                 {
                     ColumnProperty property = new ColumnProperty(s);
                     e.ColumnTitles.Add(property);
@@ -1023,7 +1022,7 @@ Keys keyData)
                 if (bOutputKeyCount == true)
                 {
                     strOutputStyle = "keycount";
-                } 
+                }
                 else if (bOutputKeyID == true)
                 {
                     strOutputStyle = "keyid";
@@ -1277,8 +1276,8 @@ Keys keyData)
                     {
                         if (_searchParam._searchCount > 0)
                         {
-                            this.ShowMessage("共享书目命中 "+_searchParam._searchCount+" 条", "green");
-                            this._floatingMessage.DelayClear(new TimeSpan(0,0,3));
+                            this.ShowMessage("共享书目命中 " + _searchParam._searchCount + " 条", "green");
+                            this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
 #if NO
                             Application.DoEvents();
                             // TODO: 延时一段自动删除
@@ -2388,7 +2387,7 @@ out strError);
             string strError = "";
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach(ListViewItem item in this.listView_records.Items)
+            foreach (ListViewItem item in this.listView_records.Items)
             {
                 items.Add(item);
             }
@@ -2475,7 +2474,7 @@ out strError);
                         if (channel.ErrorCode == ErrorCode.TimestampMismatch)
                         {
                             DialogResult result = MessageBox.Show(this,
-    "保存书目记录 "+strRecPath+" 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+    "保存书目记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
     "BiblioSearchForm",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -2616,7 +2615,7 @@ MessageBoxDefaultButton.Button1);
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
-        public int RefreshListViewLines(List<ListViewItem> items_param, 
+        public int RefreshListViewLines(List<ListViewItem> items_param,
             out string strError)
         {
             strError = "";
@@ -3305,7 +3304,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                
+
                 strError = "执行 MarcQuery 脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
@@ -3788,7 +3787,7 @@ MessageBoxDefaultButton.Button1);
             {
                 if (stop != null)
                     stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-                
+
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -3891,7 +3890,7 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
 
                     this.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(item.BiblioInfo.RecPath) + "</p>");    // strRecPath
-                    foreach(string key in filter.Host.ColumnTable.Keys)
+                    foreach (string key in filter.Host.ColumnTable.Keys)
                     {
                         string strHtml = "<p>" + HttpUtility.HtmlEncode(key + "=" + (string)filter.Host.ColumnTable[key]) + "</p>";
                         this.MainForm.OperHistory.AppendHtml(strHtml);
@@ -4184,13 +4183,13 @@ MessageBoxDefaultButton.Button1);
             dlg.MainForm = this.MainForm;
             dlg.Text = strActionName + "书目记录到数据库";
 
-            dlg.MessageText = "请指定书目记录要追加"+strActionName+"到的位置";
+            dlg.MessageText = "请指定书目记录要追加" + strActionName + "到的位置";
             dlg.EnableCopyChildRecords = true;
 
             dlg.BuildLink = false;
 
             if (bCopy)
-            dlg.CopyChildRecords = false;
+                dlg.CopyChildRecords = false;
             else
                 dlg.CopyChildRecords = true;
 
@@ -4213,7 +4212,7 @@ MessageBoxDefaultButton.Button1);
 
             if (Global.IsAppendRecPath(dlg.RecPath) == false)
             {
-                strError = "目标记录路径 '"+dlg.RecPath+"' 不合法。必须是追加方式的路径，也就是说 ID 部分必须为问号";
+                strError = "目标记录路径 '" + dlg.RecPath + "' 不合法。必须是追加方式的路径，也就是说 ID 部分必须为问号";
                 goto ERROR1;
             }
             // TODO: 如果源和目标库名相同，要警告
@@ -4238,7 +4237,7 @@ MessageBoxDefaultButton.Button1);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在"+strActionName+"书目记录到数据库 ...");
+            stop.Initial("正在" + strActionName + "书目记录到数据库 ...");
             stop.BeginLoop();
 
             this.EnableControlsInSearching(false);
@@ -4272,7 +4271,7 @@ MessageBoxDefaultButton.Button1);
                     byte[] baOutputTimestamp = null;
                     string strOutputBiblio = "";
 
-                    stop.SetMessage("正在"+strActionName+"书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
+                    stop.SetMessage("正在" + strActionName + "书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
 
                     // result.Value:
                     //      -1  出错
@@ -4738,9 +4737,9 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
 
                     int index = 0;
-                    foreach(MarcField field in fields)
+                    foreach (MarcField field in fields)
                     {
-                        ListViewItem new_item = form.AddLine(info.RecPath, 
+                        ListViewItem new_item = form.AddLine(info.RecPath,
                             info,
                             field,
                             index);
@@ -5245,7 +5244,7 @@ MessageBoxDefaultButton.Button1);
                             strRecPath = strPureRecPath;
                         else
                         {
-                            strError = "长路径 '"+strRecPath+"' 中的服务器 URL 部分 '"+strUrl+"' 和当前 dp2Circulation 服务器 URL '"+this.MainForm.LibraryServerUrl+"' 不匹配，因此无法导入这个记录路径文件";
+                            strError = "长路径 '" + strRecPath + "' 中的服务器 URL 部分 '" + strUrl + "' 和当前 dp2Circulation 服务器 URL '" + this.MainForm.LibraryServerUrl + "' 不匹配，因此无法导入这个记录路径文件";
                             goto ERROR1;
                         }
                     }
@@ -5639,7 +5638,7 @@ MessageBoxDefaultButton.Button1);
                 return;
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach(ListViewItem item in this.listView_records.SelectedItems)
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
                 items.Add(item);
             }
@@ -5648,7 +5647,7 @@ MessageBoxDefaultButton.Button1);
             int nDeleteCount = 0;
 
             // 检查前端权限
-            bool bDeleteSub = StringUtil.IsInList("client_deletebibliosubrecords", 
+            bool bDeleteSub = StringUtil.IsInList("client_deletebibliosubrecords",
                 // this.Channel.Rights
                 this.MainForm.GetCurrentUserRights()
                 );
@@ -5704,7 +5703,7 @@ MessageBoxDefaultButton.Button1);
                     if (lRet == -1)
                     {
                         result = MessageBox.Show(this,
-    "在获得记录 '" + strRecPath + "' 的时间戳的过程中出现错误: "+strError+"。\r\n\r\n是否继续强行删除此记录? (Yes 强行删除；No 不删除；Cancel 放弃当前未完成的全部删除操作)",
+    "在获得记录 '" + strRecPath + "' 的时间戳的过程中出现错误: " + strError + "。\r\n\r\n是否继续强行删除此记录? (Yes 强行删除；No 不删除；Cancel 放弃当前未完成的全部删除操作)",
     "BiblioSearchForm",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -6867,7 +6866,7 @@ MessageBoxDefaultButton.Button2);
             if (this.m_biblioTable != null)
             {
                 // if (CanCallNew(commander, WM_SELECT_INDEX_CHANGED) == true)
-                    RefreshPropertyView(false);
+                RefreshPropertyView(false);
             }
         }
 
@@ -6910,7 +6909,8 @@ MessageBoxDefaultButton.Button2);
             base.DefWndProc(ref m);
         }
 
-        /*public*/ bool CanCallNew(Commander commander, int msg)
+        /*public*/
+        bool CanCallNew(Commander commander, int msg)
         {
             if (this.m_nInViewing > 0)
             {
@@ -7663,6 +7663,37 @@ out strError);
 
         void _doViewProperty(ListViewItem item, bool bOpenWindow)
         {
+            if (this.m_biblioTable == null)
+                return;
+
+            if (item == null)
+                return; // 是否要显示一个空画面?
+
+            this.MainForm.OpenCommentViewer(bOpenWindow);
+
+            string strRecPath = item.Text;
+            if (string.IsNullOrEmpty(strRecPath) == true)
+                return;
+
+            // 存储所获得书目记录 XML
+            BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+            if (info == null)
+            {
+                info = new BiblioInfo();
+                info.RecPath = strRecPath;
+                this.m_biblioTable[strRecPath] = info;  // 后面任务中会填充 info 的内容，如果必要的话
+            }
+
+            BiblioPropertyTask task = new BiblioPropertyTask();
+            task.BiblioInfo = info;
+            task.Stop = this.stop;
+
+            this.MainForm.PropertyTaskList.AddTask(task, true);
+        }
+
+#if NO
+        void _doViewProperty(ListViewItem item, bool bOpenWindow)
+        {
             string strError = "";
             string strHtml = "";
             // string strXml = "";
@@ -7778,143 +7809,11 @@ out strError);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, "DoViewComment() 出错: " + strError);
-        }
-
-#if NO
-        void _doViewProperty(bool bOpenWindow)
-        {
-            string strError = "";
-            string strHtml = "";
-            // string strXml = "";
-
-            // 优化，避免无谓地进行服务器调用
-            if (bOpenWindow == false)
-            {
-                if (this.MainForm.PanelFixedVisible == false
-                    && (m_commentViewer == null || m_commentViewer.Visible == false))
-                    return;
-                // 2013/3/7
-                if (this.MainForm.CanDisplayItemProperty() == false)
-                    return;
-            }
-
-            if (this.m_biblioTable == null
-                || this.listView_records.SelectedItems.Count != 1)
-            {
-                if (this.m_commentViewer != null)
-                    this.m_commentViewer.Clear();
-                return;
-            }
-
-            ListViewItem item = this.listView_records.SelectedItems[0];
-#if NO
-            string strRecPath = this.listView_records.SelectedItems[0].Text;
-            if (string.IsNullOrEmpty(strRecPath) == true)
-            {
-                if (this.m_commentViewer != null)
-                    this.m_commentViewer.Clear();
-                return;
-            }
-#endif
-
-            // BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-            BiblioInfo info = null;
-            int nRet = GetBiblioInfo(
-                true,
-                item,
-                out info,
-                out strError);
-            if (info == null)
-            {
-                if (this.m_commentViewer != null)
-                    this.m_commentViewer.Clear();
-                return;
-            }
-
-            string strXml1 = "";
-            string strHtml2 = "";
-            string strXml2 = "";
-
-            if (nRet == -1)
-            {
-                strHtml2 = HttpUtility.HtmlEncode(strError);
-            }
-            else
-            {
-                nRet = GetXmlHtml(info,
-                    out strXml1,
-                    out strXml2,
-                    out strHtml2,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-            }
-
-            strHtml = "<html>" +
-    GetHeadString() +
-    "<body>" +
-    strHtml2 +
-    EntityForm.GetTimestampHtml(info.Timestamp) +
-    "</body></html>";
-            bool bNew = false;
-            if (this.m_commentViewer == null
-                || (bOpenWindow == true && this.m_commentViewer.Visible == false))
-            {
-                m_commentViewer = new CommentViewerForm();
-                MainForm.SetControlFont(m_commentViewer, this.Font, false);
-                bNew = true;
-            }
-
-            m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
-
-            if (bNew == true)
-                m_commentViewer.InitialWebBrowser();
-
-            m_commentViewer.Text = "MARC内容 '" + info.RecPath + "'";
-            m_commentViewer.HtmlString = strHtml;
-            m_commentViewer.XmlString = MergeXml(strXml1, strXml2);
-            m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
-            m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
-            // this.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
-            // m_viewer.ShowDialog(this);
-            // this.MainForm.AppInfo.UnlinkFormState(m_viewer);
-            if (bOpenWindow == true)
-            {
-                if (m_commentViewer.Visible == false)
-                {
-                    this.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
-                    m_commentViewer.Show(this);
-                    m_commentViewer.Activate();
-
-                    this.MainForm.CurrentPropertyControl = null;
-                }
-                else
-                {
-                    if (m_commentViewer.WindowState == FormWindowState.Minimized)
-                        m_commentViewer.WindowState = FormWindowState.Normal;
-                    m_commentViewer.Activate();
-                }
-            }
-            else
-            {
-                if (m_commentViewer.Visible == true)
-                {
-
-                }
-                else
-                {
-                    if (this.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
-                        m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
-                }
-            }
-            return;
-        ERROR1:
-            MessageBox.Show(this, "DoViewComment() 出错: " + strError);
+            MessageBox.Show(this, "_doViewProperty() 出错: " + strError);
         }
 #endif
 
-        static string MergeXml(string strXml1,
+        internal static string MergeXml(string strXml1,
             string strXml2)
         {
             if (string.IsNullOrEmpty(strXml1) == true)
@@ -7925,7 +7824,7 @@ out strError);
             return strXml1; // 临时这样
         }
 
-        int GetXmlHtml(BiblioInfo info,
+        internal static int GetXmlHtml(BiblioInfo info,
             out string strXml1,
             out string strXml2,
             out string strHtml2,
@@ -7947,7 +7846,7 @@ out strError);
                 string strOutMarcSyntax = "";
                 // 将XML格式转换为MARC格式
                 // 自动从数据记录中获得MARC语法
-                nRet = MarcUtil.Xml2Marc(strXml1, 
+                nRet = MarcUtil.Xml2Marc(strXml1,
                     MarcUtil.Xml2MarcStyle.Warning | MarcUtil.Xml2MarcStyle.OutputFragmentXml,
                     "",
                     out strOutMarcSyntax,
@@ -7980,9 +7879,7 @@ out strError);
                     strError = "XML转换到MARC记录时出错: " + strError;
                     return -1;
                 }
-
             }
-
 
             if (string.IsNullOrEmpty(strOldMARC) == false
                 && string.IsNullOrEmpty(strNewMARC) == false)

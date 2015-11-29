@@ -85,7 +85,7 @@ namespace DigitalPlatform.CirculationClient
         /// <summary>
         /// CloseTimeout
         /// </summary>
-        public TimeSpan CloseTimeout = new TimeSpan(0, 0, 30);
+        public TimeSpan CloseTimeout = new TimeSpan(0, 0, 5);
 
         /// <summary>
         /// OpenTimeout
@@ -9302,6 +9302,7 @@ Stack:
                     // TODO: Search()要单独处理
                     try
                     {
+                        // this.Timeout = new TimeSpan(0,0,4); // 2015/11/28
                         if (this.m_ws.State != CommunicationState.Faulted)
                             this.m_ws.Close();  // 如果长时间不返回怎么办？
                     }

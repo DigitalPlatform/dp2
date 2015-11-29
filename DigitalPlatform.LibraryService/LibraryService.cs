@@ -3216,6 +3216,9 @@ namespace dp2Library
 
             try
             {
+                // test
+                // Thread.Sleep(new TimeSpan(0, 0, 30));
+
                 string[] results = null;
                 byte[] baTimestamp = null;
 
@@ -3578,7 +3581,7 @@ namespace dp2Library
                 }
                  * */
                 // test
-                // Thread.Sleep(new TimeSpan(0, 1, 0));
+                // Thread.Sleep(new TimeSpan(0, 0, 30));
 
                 return app.GetBiblioInfos(
                         sessioninfo,

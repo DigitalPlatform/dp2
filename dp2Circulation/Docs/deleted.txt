@@ -6800,3 +6800,140 @@ namespace DigitalPlatform
                     }
                 }
             }
+
+
+
+			~~~
+			
+#if NO
+        void _doViewProperty(bool bOpenWindow)
+        {
+            string strError = "";
+            string strHtml = "";
+            // string strXml = "";
+
+            // 优化，避免无谓地进行服务器调用
+            if (bOpenWindow == false)
+            {
+                if (this.MainForm.PanelFixedVisible == false
+                    && (m_commentViewer == null || m_commentViewer.Visible == false))
+                    return;
+                // 2013/3/7
+                if (this.MainForm.CanDisplayItemProperty() == false)
+                    return;
+            }
+
+            if (this.m_biblioTable == null
+                || this.listView_records.SelectedItems.Count != 1)
+            {
+                if (this.m_commentViewer != null)
+                    this.m_commentViewer.Clear();
+                return;
+            }
+
+            ListViewItem item = this.listView_records.SelectedItems[0];
+#if NO
+            string strRecPath = this.listView_records.SelectedItems[0].Text;
+            if (string.IsNullOrEmpty(strRecPath) == true)
+            {
+                if (this.m_commentViewer != null)
+                    this.m_commentViewer.Clear();
+                return;
+            }
+#endif
+
+            // BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+            BiblioInfo info = null;
+            int nRet = GetBiblioInfo(
+                true,
+                item,
+                out info,
+                out strError);
+            if (info == null)
+            {
+                if (this.m_commentViewer != null)
+                    this.m_commentViewer.Clear();
+                return;
+            }
+
+            string strXml1 = "";
+            string strHtml2 = "";
+            string strXml2 = "";
+
+            if (nRet == -1)
+            {
+                strHtml2 = HttpUtility.HtmlEncode(strError);
+            }
+            else
+            {
+                nRet = GetXmlHtml(info,
+                    out strXml1,
+                    out strXml2,
+                    out strHtml2,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            strHtml = "<html>" +
+    GetHeadString() +
+    "<body>" +
+    strHtml2 +
+    EntityForm.GetTimestampHtml(info.Timestamp) +
+    "</body></html>";
+            bool bNew = false;
+            if (this.m_commentViewer == null
+                || (bOpenWindow == true && this.m_commentViewer.Visible == false))
+            {
+                m_commentViewer = new CommentViewerForm();
+                MainForm.SetControlFont(m_commentViewer, this.Font, false);
+                bNew = true;
+            }
+
+            m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
+
+            if (bNew == true)
+                m_commentViewer.InitialWebBrowser();
+
+            m_commentViewer.Text = "MARC内容 '" + info.RecPath + "'";
+            m_commentViewer.HtmlString = strHtml;
+            m_commentViewer.XmlString = MergeXml(strXml1, strXml2);
+            m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
+            m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
+            // this.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
+            // m_viewer.ShowDialog(this);
+            // this.MainForm.AppInfo.UnlinkFormState(m_viewer);
+            if (bOpenWindow == true)
+            {
+                if (m_commentViewer.Visible == false)
+                {
+                    this.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                    m_commentViewer.Show(this);
+                    m_commentViewer.Activate();
+
+                    this.MainForm.CurrentPropertyControl = null;
+                }
+                else
+                {
+                    if (m_commentViewer.WindowState == FormWindowState.Minimized)
+                        m_commentViewer.WindowState = FormWindowState.Normal;
+                    m_commentViewer.Activate();
+                }
+            }
+            else
+            {
+                if (m_commentViewer.Visible == true)
+                {
+
+                }
+                else
+                {
+                    if (this.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
+                        m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, "DoViewComment() 出错: " + strError);
+        }
+#endif

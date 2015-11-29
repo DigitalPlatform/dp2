@@ -131,7 +131,15 @@ namespace DigitalPlatform
 
         int _inBeginLoop = 0;
 
+        public bool IsInLoop()
+        {
+            return _inBeginLoop > 0;
+        }
+
         //准备做事情,被循环调，时面了调了Stopmanager的Enable()函数，修改父窗口的按钮状态
+        // return:
+        //      true 成功
+        //      false   失败。BeginLoop() 发生了嵌套
         public void BeginLoop()
         {
             if (_inBeginLoop > 0)
@@ -170,6 +178,9 @@ namespace DigitalPlatform
         //事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮为发灰状态
         public void EndLoop()
         {
+            if (_inBeginLoop == 0)
+                throw new Exception("针对同一 Stop 对象，调用 EndLoop() 不应超过 BeginLoop() 调用次数");
+
             nStop = 2;	// 已经停止
 
             if (m_manager != null)

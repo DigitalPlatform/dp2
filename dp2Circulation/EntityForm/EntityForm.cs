@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
@@ -26,9 +27,8 @@ using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.GcatClient;
-
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GcatClient.gcat_new_ws;
+
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
 
@@ -2847,7 +2847,6 @@ true);
             this.EnableOrdersPage(false);
             this.EnableCommentsPage(false);
 
-
             if (this.m_verifyViewer != null)
                 this.m_verifyViewer.Clear();
 
@@ -2955,12 +2954,18 @@ true);
             if (nRet == -1 || nRet == 2)
             {
                 if (String.IsNullOrEmpty(strError) == false)
-                    MessageBox.Show(this, strError);
+                {
+                    // MessageBox.Show(this, strError);
+                    this.ShowMessage(strError, "red", true);
+                }
             }
             else
             {
                 if (String.IsNullOrEmpty(strError) == false)
-                    MessageBox.Show(this, strError);
+                {
+                    // MessageBox.Show(this, strError);
+                    this.ShowMessage(strError, "red", true);
+                }
             }
 
             return nRet;
@@ -2998,8 +3003,57 @@ true);
             out string strTotalError,
             bool bWarningNotSave = false)
         {
-            string strError = "";
             strTotalError = "";
+
+            if (Progress.IsInLoop() == true)
+            {
+                strTotalError = "种册窗正在执行长操作。装载书目记录 "
+                    + strBiblioRecPath
+                    + (string.IsNullOrEmpty(strPrevNextStyle) == true ? "" : "|" + strPrevNextStyle)
+                    + " 的操作被放弃。请稍后重试";
+                return 2;
+            }
+
+            string strError = "";
+
+            bool bMarcEditorContentChanged = false; // MARC编辑器内的内容可曾修改?
+            bool bBiblioRecordExist = false;    // 书目记录是否存在?
+            bool bSubrecordExist = false;   // 至少有一个从属的记录存在
+            bool bSubrecordListCleared = false; // 子记录的list是否被清除了?
+
+            string strOutputBiblioRecPath = "";
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
+            {
+                // 2008/6/25 
+                if (this.checkBox_autoSavePrev.Checked == true
+                    && bWarningNotSave == false)
+                {
+                    int nRet = this.DoSaveAll();
+                    if (nRet == -1)
+                    {
+                        // strTotalError = "当前记录尚未保存";  // 2014/7/8
+                        return -1;
+                    }
+                }
+                else
+                {
+                    // 警告尚未保存
+                    DialogResult result = MessageBox.Show(this,
+                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                        return 0;
+                }
+            }
 
             LibraryChannel channel = this.GetChannel();
 
@@ -3009,380 +3063,268 @@ true);
             Progress.BeginLoop();
 
             this.ShowMessage(strMessage);
-            // this.m_nChannelInUse++;
+
+            EnableControls(false);
             try
             {
-                if (bCheckInUse == true)
+                // 2012/7/25 移动到这里
+                // 因为 LoadBiblioRecord() 会导致填充AutoGen菜单
+                this._genData.ClearViewer();
+
+                if (this.m_commentViewer != null)
+                    this.m_commentViewer.Clear();
+
+                string strXml = "";
+                int nRet = this.LoadBiblioRecord(
+                    channel,
+                    strBiblioRecPath,
+                    strPrevNextStyle,
+                    false,
+                    out strOutputBiblioRecPath,
+                    out strXml,
+                    out strError);
+                if (nRet == -1)
                 {
-#if NO
-                    if (this.m_nChannelInUse > 1 || this.m_nInSearching > 0)
-                    {
-                        /*
-                        this.m_nChannelInUse--;
-                        MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                        return -1;
-                         * */
-                        strError = "通道已经被占用。请稍后重试";
-                        return 2;   // 通道被占用
-                    }
-#endif
-                }
-
-                bool bMarcEditorContentChanged = false; // MARC编辑器内的内容可曾修改?
-                bool bBiblioRecordExist = false;    // 书目记录是否存在?
-                bool bSubrecordExist = false;   // 至少有一个从属的记录存在
-                bool bSubrecordListCleared = false; // 子记录的list是否被清除了?
-
-                string strOutputBiblioRecPath = "";
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
-                {
-                    // 2008/6/25 
-                    if (this.checkBox_autoSavePrev.Checked == true
-                        && bWarningNotSave == false)
-                    {
-                        int nRet = this.DoSaveAll();
-                        if (nRet == -1)
-                        {
-                            // strTotalError = "当前记录尚未保存";  // 2014/7/8
-                            return -1;
-                        }
-                    }
-                    else
-                    {
-                        // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result == DialogResult.No)
-                            return 0;
-                    }
-                }
-
-                EnableControls(false);
-                try
-                {
-                    // 2012/7/25 移动到这里
-                    // 因为 LoadBiblioRecord() 会导致填充AutoGen菜单
-                    this._genData.ClearViewer();
-
-                    if (this.m_commentViewer != null)
-                        this.m_commentViewer.Clear();
-
-                    string strXml = "";
-                    int nRet = this.LoadBiblioRecord(
-                        channel,
-                        strBiblioRecPath,
-                        strPrevNextStyle,
-                        false,
-                        out strOutputBiblioRecPath,
-                        out strXml,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        string strErrorText = "装载书目记录 '" + strBiblioRecPath + "' (style='" + strPrevNextStyle + "')时发生错误: " + strError;
+                    string strErrorText = "装载书目记录 '" + strBiblioRecPath + "' (style='" + strPrevNextStyle + "')时发生错误: " + strError;
 #if NO
                             Global.SetHtmlString(this.webBrowser_biblioRecord,
                                 strErrorText);
 #endif
-                        this.m_webExternalHost_biblio.SetHtmlString(strErrorText, "entityform_error");
+                    this.m_webExternalHost_biblio.SetHtmlString(strErrorText, "entityform_error");
 
-                        // MessageBox.Show(this, strErrorText);
-                        if (String.IsNullOrEmpty(strTotalError) == false)
-                            strTotalError += "\r\n";
-                        strTotalError += strErrorText;
-                    }
-                    else if (nRet == 0)
+                    // MessageBox.Show(this, strErrorText);
+                    if (String.IsNullOrEmpty(strTotalError) == false)
+                        strTotalError += "\r\n";
+                    strTotalError += strErrorText;
+                }
+                else if (nRet == 0)
+                {
+                    bBiblioRecordExist = false;
+                    // 虽然种记录不存在，但是也继续装载册记录
+                    // return 0;
+
+                    string strText = "";
+
+                    // 在不是前后翻看记录的情况下，要清空MARC窗，避免误会
+                    if (String.IsNullOrEmpty(strPrevNextStyle) == true)
                     {
-                        bBiblioRecordExist = false;
-                        // 虽然种记录不存在，但是也继续装载册记录
-                        // return 0;
+                        strText = "书目记录 '" + strBiblioRecPath + "' 没有找到...";
 
-                        string strText = "";
+                        // 清空MARC窗，避免误会
+                        // this.m_marcEditor.Marc = "012345678901234567890123";
+                        this.SetMarc("012345678901234567890123");
+                        bMarcEditorContentChanged = true;
 
-                        // 在不是前后翻看记录的情况下，要清空MARC窗，避免误会
-                        if (String.IsNullOrEmpty(strPrevNextStyle) == true)
+                        // 如果书目记录不存在，则沿用strBiblioRecPath的路径
+                        if (String.IsNullOrEmpty(strOutputBiblioRecPath) == true)
                         {
-                            strText = "书目记录 '" + strBiblioRecPath + "' 没有找到...";
-
-                            // 清空MARC窗，避免误会
-                            // this.m_marcEditor.Marc = "012345678901234567890123";
-                            this.SetMarc("012345678901234567890123");
-                            bMarcEditorContentChanged = true;
-
-                            // 如果书目记录不存在，则沿用strBiblioRecPath的路径
-                            if (String.IsNullOrEmpty(strOutputBiblioRecPath) == true)
-                            {
-                                strOutputBiblioRecPath = strBiblioRecPath;
-                            }
+                            strOutputBiblioRecPath = strBiblioRecPath;
                         }
-                        else
-                        {
-                            if (strPrevNextStyle == "prev")
-                                strText = "到头";
-                            else if (strPrevNextStyle == "next")
-                                strText = "到尾";
-
-                            strText += "\r\n\r\n(窗口内的原记录没有被刷新)";
-
-                            strOutputBiblioRecPath = "";    // 这时候继续装载下属记录也无法进行了，因为不知道书目记录的路径。TODO: 将来可以采用猜测法，把书目记录路径+1或者-1,直到遇到下一条记录
-                            // MessageBox.Show(this, strText);
-
-                            if (String.IsNullOrEmpty(strTotalError) == false)
-                                strTotalError += "\r\n";
-                            strTotalError += strText;
-
-                            return 0;   // 2008/11/2 
-                        }
-
-                        // MessageBox.Show(this, strText);
-                        if (String.IsNullOrEmpty(strTotalError) == false)
-                            strTotalError += "\r\n";
-                        strTotalError += strText;
                     }
                     else
                     {
-                        bBiblioRecordExist = true;
+                        if (strPrevNextStyle == "prev")
+                            strText = "到头";
+                        else if (strPrevNextStyle == "next")
+                            strText = "到尾";
+
+                        strText += "\r\n\r\n(窗口内的原记录没有被刷新)";
+
+                        strOutputBiblioRecPath = "";    // 这时候继续装载下属记录也无法进行了，因为不知道书目记录的路径。TODO: 将来可以采用猜测法，把书目记录路径+1或者-1,直到遇到下一条记录
+                        // MessageBox.Show(this, strText);
+
+                        if (String.IsNullOrEmpty(strTotalError) == false)
+                            strTotalError += "\r\n";
+                        strTotalError += strText;
+
+                        return 0;   // 2008/11/2 
                     }
 
-                    bool bError = false;
+                    // MessageBox.Show(this, strText);
+                    if (String.IsNullOrEmpty(strTotalError) == false)
+                        strTotalError += "\r\n";
+                    strTotalError += strText;
+                }
+                else
+                {
+                    bBiblioRecordExist = true;
+                }
 
-                    // 注：当bBiblioRecordExist==true时，LoadBiblioRecord()函数中已经设好了书目记录路径
+                bool bError = false;
 
-                    strBiblioRecPath = null;    // 防止后面继续使用。因为prev/next风格时，strBiblioRecPath的路径并不是所获得的记录的路径
+                // 注：当bBiblioRecordExist==true时，LoadBiblioRecord()函数中已经设好了书目记录路径
 
-                    // 清空4个下属记录的控件
-                    this.entityControl1.ClearItems();
-                    this.textBox_itemBarcode.Text = ""; // 2009/1/5 
+                strBiblioRecPath = null;    // 防止后面继续使用。因为prev/next风格时，strBiblioRecPath的路径并不是所获得的记录的路径
 
-                    this.issueControl1.ClearItems();
-                    this.orderControl1.ClearItems();   // 2008/11/2 
-                    this.commentControl1.ClearItems();
-                    this.binaryResControl1.Clear(); // 2008/11/2 
-                    if (this.m_verifyViewer != null)
-                        this.m_verifyViewer.Clear();
+                // 清空4个下属记录的控件
+                this.entityControl1.ClearItems();
+                this.textBox_itemBarcode.Text = ""; // 2009/1/5 
+
+                this.issueControl1.ClearItems();
+                this.orderControl1.ClearItems();   // 2008/11/2 
+                this.commentControl1.ClearItems();
+                this.binaryResControl1.Clear(); // 2008/11/2 
+                if (this.m_verifyViewer != null)
+                    this.m_verifyViewer.Clear();
+                /*
+                if (this.m_genDataViewer != null)
+                    this.m_genDataViewer.Clear();
+                 * */
+
+                bSubrecordListCleared = true;
+
+                if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
+                {
+                    string strBiblioDbName = "";
+
                     /*
-                    if (this.m_genDataViewer != null)
-                        this.m_genDataViewer.Clear();
-                     * */
-
-                    bSubrecordListCleared = true;
-
                     if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
-                    {
-                        string strBiblioDbName = "";
-
-                        /*
-                        if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
-                            strBiblioDbName = Global.GetDbName(strOutputBiblioRecPath);
-                        else
-                        {
-                            Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "");
-                            strBiblioDbName = Global.GetDbName(strBiblioRecPath);
-                        }
-                         * */
                         strBiblioDbName = Global.GetDbName(strOutputBiblioRecPath);
+                    else
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "");
+                        strBiblioDbName = Global.GetDbName(strBiblioRecPath);
+                    }
+                     * */
+                    strBiblioDbName = Global.GetDbName(strOutputBiblioRecPath);
 
-                        // 接着装入相关的所有册
-                        string strItemDbName = this.MainForm.GetItemDbName(strBiblioDbName);
-                        if (String.IsNullOrEmpty(strItemDbName) == false) // 仅在当前书目库有对应的实体库时，才装入册记录
+                    // 接着装入相关的所有册
+                    string strItemDbName = this.MainForm.GetItemDbName(strBiblioDbName);
+                    if (String.IsNullOrEmpty(strItemDbName) == false) // 仅在当前书目库有对应的实体库时，才装入册记录
+                    {
+                        this.EnableItemsPage(true);
+
+                        nRet = this.entityControl1.LoadItemRecords(
+                            channel,
+                            strOutputBiblioRecPath,    // 2008/11/2 new changed
+                            // this.DisplayOtherLibraryItem,
+                            this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
+                            out strError);
+                        if (nRet == -1)
                         {
-                            this.EnableItemsPage(true);
-
-                            nRet = this.entityControl1.LoadItemRecords(
-                                channel,
-                                strOutputBiblioRecPath,    // 2008/11/2 new changed
-                                // this.DisplayOtherLibraryItem,
-                                this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
-                                out strError);
-                            if (nRet == -1)
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
-                                if (channel.ErrorCode == ErrorCode.AccessDenied)
-                                {
-                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                    this.entityControl1.ErrorInfo = strError;
-                                }
-                                else
-                                {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
-
-                                    bError = true;
-                                    // return -1;
-                                }
+                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                this.entityControl1.ErrorInfo = strError;
                             }
-
-                            if (nRet == 1)
-                                bSubrecordExist = true;
-                        }
-                        else
-                        {
-                            this.EnableItemsPage(false);
-                        }
-
-                        // 接着装入相关的所有期
-                        string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
-                        if (String.IsNullOrEmpty(strIssueDbName) == false) // 仅在当前书目库有对应的期库时，才装入期记录
-                        {
-                            this.EnableIssuesPage(true);
-
-                            nRet = this.issueControl1.LoadItemRecords(
-                                channel,
-                                strOutputBiblioRecPath,  // 2008/11/2 changed
-                                "",
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                if (channel.ErrorCode == ErrorCode.AccessDenied)
-                                {
-                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                    this.issueControl1.ErrorInfo = strError;
-                                }
-                                else
-                                {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
-
-                                    bError = true;
-                                    // return -1;
-                                }
-                            }
-
-                            if (nRet == 1)
-                                bSubrecordExist = true;
-                        }
-                        else
-                        {
-                            this.EnableIssuesPage(false);
-                        }
-
-                        // 接着装入相关的所有订购信息
-                        string strOrderDbName = this.MainForm.GetOrderDbName(strBiblioDbName);
-                        if (String.IsNullOrEmpty(strOrderDbName) == false) // 仅在当前书目库有对应的采购库时，才装入采购记录
-                        {
-                            if (String.IsNullOrEmpty(strIssueDbName) == false)
-                                this.orderControl1.SeriesMode = true;
                             else
-                                this.orderControl1.SeriesMode = false;
-
-                            this.EnableOrdersPage(true);
-                            nRet = this.orderControl1.LoadItemRecords(
-                                channel,
-                                strOutputBiblioRecPath,  // 2008/11/2 changed
-                                "",
-                                out strError);
-                            if (nRet == -1)
                             {
-                                if (channel.ErrorCode == ErrorCode.AccessDenied)
-                                {
-                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                    this.orderControl1.ErrorInfo = strError;
-                                }
-                                else
-                                {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                // MessageBox.Show(this, strError);
+                                if (String.IsNullOrEmpty(strTotalError) == false)
+                                    strTotalError += "\r\n";
+                                strTotalError += strError;
 
-                                    bError = true;
-                                    // return -1;
-                                }
+                                bError = true;
+                                // return -1;
                             }
-
-                            if (nRet == 1)
-                                bSubrecordExist = true;
                         }
+
+                        if (nRet == 1)
+                            bSubrecordExist = true;
+                    }
+                    else
+                    {
+                        this.EnableItemsPage(false);
+                    }
+
+                    // 接着装入相关的所有期
+                    string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+                    if (String.IsNullOrEmpty(strIssueDbName) == false) // 仅在当前书目库有对应的期库时，才装入期记录
+                    {
+                        this.EnableIssuesPage(true);
+
+                        nRet = this.issueControl1.LoadItemRecords(
+                            channel,
+                            strOutputBiblioRecPath,  // 2008/11/2 changed
+                            "",
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            {
+                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                this.issueControl1.ErrorInfo = strError;
+                            }
+                            else
+                            {
+                                // MessageBox.Show(this, strError);
+                                if (String.IsNullOrEmpty(strTotalError) == false)
+                                    strTotalError += "\r\n";
+                                strTotalError += strError;
+
+                                bError = true;
+                                // return -1;
+                            }
+                        }
+
+                        if (nRet == 1)
+                            bSubrecordExist = true;
+                    }
+                    else
+                    {
+                        this.EnableIssuesPage(false);
+                    }
+
+                    // 接着装入相关的所有订购信息
+                    string strOrderDbName = this.MainForm.GetOrderDbName(strBiblioDbName);
+                    if (String.IsNullOrEmpty(strOrderDbName) == false) // 仅在当前书目库有对应的采购库时，才装入采购记录
+                    {
+                        if (String.IsNullOrEmpty(strIssueDbName) == false)
+                            this.orderControl1.SeriesMode = true;
                         else
-                        {
-                            this.EnableOrdersPage(false);
-                        }
+                            this.orderControl1.SeriesMode = false;
 
-                        // 接着装入相关的所有评注信息
-                        string strCommentDbName = this.MainForm.GetCommentDbName(strBiblioDbName);
-                        if (String.IsNullOrEmpty(strCommentDbName) == false) // 仅在当前书目库有对应的采购库时，才装入采购记录
+                        this.EnableOrdersPage(true);
+                        nRet = this.orderControl1.LoadItemRecords(
+                            channel,
+                            strOutputBiblioRecPath,  // 2008/11/2 changed
+                            "",
+                            out strError);
+                        if (nRet == -1)
                         {
-                            this.EnableCommentsPage(true);
-                            nRet = this.commentControl1.LoadItemRecords(
-                                channel,
-                                strOutputBiblioRecPath,
-                                "",
-                                out strError);
-                            if (nRet == -1)
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
-                                if (channel.ErrorCode == ErrorCode.AccessDenied)
-                                {
-                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                    this.commentControl1.ErrorInfo = strError;
-                                }
-                                else
-                                {
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
-
-                                    bError = true;
-                                }
+                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                this.orderControl1.ErrorInfo = strError;
                             }
-
-
-                            if (nRet == 1)
-                                bSubrecordExist = true;
-                        }
-                        else
-                        {
-                            this.EnableCommentsPage(false);
-                        }
-
-                        // 接着装入对象资源
-                        {
-                            nRet = this.binaryResControl1.LoadObject(
-                                channel,
-                                strOutputBiblioRecPath,    // 2008/11/2 changed
-                                strXml,
-                                this.MainForm.ServerVersion,
-                                out strError);
-                            if (nRet == -1)
+                            else
                             {
-                                if (channel.ErrorCode == ErrorCode.AccessDenied)
-                                {
-                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                    this.binaryResControl1.ErrorInfo = strError;
-                                }
-                                else
-                                {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                // MessageBox.Show(this, strError);
+                                if (String.IsNullOrEmpty(strTotalError) == false)
+                                    strTotalError += "\r\n";
+                                strTotalError += strError;
 
-                                    bError = true;
-                                    // return -1;
-                                }
+                                bError = true;
+                                // return -1;
                             }
-
-                            if (nRet == 1)
-                                bSubrecordExist = true;
                         }
 
-                        // 装载书目和<dprms:file>以外的其它XML片断
-                        if (string.IsNullOrEmpty(strXml) == false)
+                        if (nRet == 1)
+                            bSubrecordExist = true;
+                    }
+                    else
+                    {
+                        this.EnableOrdersPage(false);
+                    }
+
+                    // 接着装入相关的所有评注信息
+                    string strCommentDbName = this.MainForm.GetCommentDbName(strBiblioDbName);
+                    if (String.IsNullOrEmpty(strCommentDbName) == false) // 仅在当前书目库有对应的采购库时，才装入采购记录
+                    {
+                        this.EnableCommentsPage(true);
+                        nRet = this.commentControl1.LoadItemRecords(
+                            channel,
+                            strOutputBiblioRecPath,
+                            "",
+                            out strError);
+                        if (nRet == -1)
                         {
-                            nRet = LoadXmlFragment(strXml,
-                                out strError);
-                            if (nRet == -1)
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            {
+                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                this.commentControl1.ErrorInfo = strError;
+                            }
+                            else
                             {
                                 if (String.IsNullOrEmpty(strTotalError) == false)
                                     strTotalError += "\r\n";
@@ -3392,67 +3334,118 @@ true);
                             }
                         }
 
-
-                    } // end of if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
-
-                    if (string.IsNullOrEmpty(this.m_strUsedActiveItemPage) == false)
+                        if (nRet == 1)
+                            bSubrecordExist = true;
+                    }
+                    else
                     {
-                        // 只要有实体库，即便当前书目记录没有下属的实体记录，也要显示册listview page
-                        if (LoadActiveItemIssuePage(m_strUsedActiveItemPage) == true)
-                            this.m_strUsedActiveItemPage = "";
+                        this.EnableCommentsPage(false);
                     }
 
-                    if (bBiblioRecordExist == false && bSubrecordExist == true)
-                        this.BiblioRecPath = strOutputBiblioRecPath;
-
-                    if (bBiblioRecordExist == false
-                        && bSubrecordExist == false
-                        && bSubrecordListCleared == true)
+                    // 接着装入对象资源
                     {
-                        if (bMarcEditorContentChanged == false)
+                        nRet = this.binaryResControl1.LoadObject(
+                            channel,
+                            strOutputBiblioRecPath,    // 2008/11/2 changed
+                            strXml,
+                            this.MainForm.ServerVersion,
+                            out strError);
+                        if (nRet == -1)
                         {
-                            this.m_marcEditor.Marc = "012345678901234567890123";
-                            this.SetMarc("012345678901234567890123");
-                            bMarcEditorContentChanged = true;
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            {
+                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                this.binaryResControl1.ErrorInfo = strError;
+                            }
+                            else
+                            {
+                                // MessageBox.Show(this, strError);
+                                if (String.IsNullOrEmpty(strTotalError) == false)
+                                    strTotalError += "\r\n";
+                                strTotalError += strError;
+
+                                bError = true;
+                                // return -1;
+                            }
                         }
 
-                        if (this.DeletedMode == false)
-                            this.BiblioRecPath = "";    // 避免残余记录覆盖了不该覆盖的记录
+                        if (nRet == 1)
+                            bSubrecordExist = true;
                     }
 
-                    // 2008/11/2 
-                    if (bMarcEditorContentChanged == true)
-                        this.BiblioChanged = false; // 避免后面自动保存时错误覆盖了不该覆盖的记录
+                    // 装载书目和<dprms:file>以外的其它XML片断
+                    if (string.IsNullOrEmpty(strXml) == false)
+                    {
+                        nRet = LoadXmlFragment(strXml,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (String.IsNullOrEmpty(strTotalError) == false)
+                                strTotalError += "\r\n";
+                            strTotalError += strError;
 
-                    // 2008/9/16 
-                    this.DeletedMode = false;
+                            bError = true;
+                        }
+                    }
 
-                    if (bError == true)
-                        return -1;
 
-                    // 2013/11/13
-                    if (bBiblioRecordExist == false
+                } // end of if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
+
+                if (string.IsNullOrEmpty(this.m_strUsedActiveItemPage) == false)
+                {
+                    // 只要有实体库，即便当前书目记录没有下属的实体记录，也要显示册listview page
+                    if (LoadActiveItemIssuePage(m_strUsedActiveItemPage) == true)
+                        this.m_strUsedActiveItemPage = "";
+                }
+
+                if (bBiblioRecordExist == false && bSubrecordExist == true)
+                    this.BiblioRecPath = strOutputBiblioRecPath;
+
+                if (bBiblioRecordExist == false
+                    && bSubrecordExist == false
+                    && bSubrecordListCleared == true)
+                {
+                    if (bMarcEditorContentChanged == false)
+                    {
+                        this.m_marcEditor.Marc = "012345678901234567890123";
+                        this.SetMarc("012345678901234567890123");
+                        bMarcEditorContentChanged = true;
+                    }
+
+                    if (this.DeletedMode == false)
+                        this.BiblioRecPath = "";    // 避免残余记录覆盖了不该覆盖的记录
+                }
+
+                // 2008/11/2 
+                if (bMarcEditorContentChanged == true)
+                    this.BiblioChanged = false; // 避免后面自动保存时错误覆盖了不该覆盖的记录
+
+                // 2008/9/16 
+                this.DeletedMode = false;
+
+                if (bError == true)
+                    return -1;
+
+                // 2013/11/13
+                if (bBiblioRecordExist == false
 && bSubrecordExist == false
 && bSubrecordListCleared == true)
-                        return -1;
+                    return -1;
 
-                    // 2008/11/26 
-                    if (m_strFocusedPart == "marceditor"
-                        && bSetFocus == true)
-                    {
-                        SwitchFocus(MARC_EDITOR);
-                    }
-
-                    DoViewComment(false);
-                    return 1;
-                }
-                finally
+                // 2008/11/26 
+                if (m_strFocusedPart == "marceditor"
+                    && bSetFocus == true)
                 {
-                    EnableControls(true);
+                    SwitchFocus(MARC_EDITOR);
                 }
+
+                DoViewComment(false);
+                return 1;
             }
             finally
             {
+                EnableControls(true);
+
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -4192,6 +4185,7 @@ true);
             Progress.Initial("正在保存记录 ...");
             Progress.BeginLoop();
 
+            this.ShowMessage("正在保存记录 ...");
             try
             {
                 if (this.BiblioChanged == true
@@ -4416,6 +4410,8 @@ true);
             }
             finally
             {
+                this.ShowMessage("记录保存成功", "green", true);
+
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -4539,6 +4535,7 @@ true);
             string strError = "";
             int nRet = 0;
             bool bDisplayClickableError = false;
+            long lHitCount = 0;
 
             _willCloseBrowseWindow = false;
             // _browseWindowSelected = false;
@@ -4662,7 +4659,7 @@ true);
 
                 // TODO: 最多检索1000条的限制，可以作为参数配置？在CfgDlg中
 
-                long lHitCount = lRet;
+                lHitCount = lRet;
 
                 if (lHitCount == 0)
                 {
@@ -4793,22 +4790,6 @@ true);
                 }
 #endif
 
-                if (lHitCount > 1)
-                    this.ShowBrowseWindow(lHitCount);
-
-                if (lHitCount == 1)
-                {
-                    this.browseWindow.LoadFirstDetail(true);    // 不会触发 closed 事件
-                    this.CloseBrowseWindow();
-                }
-                else
-                {
-                    if (lHitCount == 0)
-                    {
-                        this.ShowMessage("未命中", "yellow", true);
-                        bDisplayClickableError = true;
-                    }
-                }
 
 #if NO
                 if (lHitCount == 0)
@@ -4841,6 +4822,24 @@ true);
                 m_nInSearching--;
             }
 
+            if (lHitCount > 1)
+                this.ShowBrowseWindow(lHitCount);
+
+            if (lHitCount == 1)
+            {
+                this.browseWindow.LoadFirstDetail(true);    // 不会触发 closed 事件
+                this.CloseBrowseWindow();
+            }
+            else
+            {
+                if (lHitCount == 0)
+                {
+                    this.ShowMessage("未命中", "yellow", true);
+                    bDisplayClickableError = true;
+                }
+            }
+
+
             if (_willCloseBrowseWindow == true)
                 CloseBrowseWindow();
 
@@ -4853,6 +4852,8 @@ true);
             this.textBox_itemBarcode.Focus(); 
              * */
             this.SwitchFocus(ITEM_BARCODE);
+
+            DoPendingList();    // 2015/11/29
             return;
         ERROR1:
             CloseBrowseWindow();
@@ -5224,15 +5225,27 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             if ((e.Paths == null || e.Paths.Length == 0)
                 && e.BiblioInfos != null && e.BiblioInfos.Count > 0)
             {
-
                 BiblioInfo info = e.BiblioInfos[0];
                 Debug.Assert(info != null, "");
+
+                if (this.stop.IsInLoop() == true)
+                {
+                    this.AddToPendingList(info.RecPath, "");
+                    return;
+                }
+
                 string strError = "";
+                // TODO: 已经在 BeginLoop() 中了
                 nRet = this.LoadRecord(info,
                     true,
                     out strError);
-                if (nRet != 1)
-                    MessageBox.Show(this, strError);
+                if (nRet == 2)
+                    this.AddToPendingList(info.RecPath, "");
+                else if (nRet != 1)
+                {
+                    // MessageBox.Show(this, strError);
+                    this.ShowMessage(strError, "red", true);
+                }
                 return;
             }
 
@@ -5241,6 +5254,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
             string strBiblioRecPath = e.Paths[0];
 
+            if (this.stop.IsInLoop() == true)
+            {
+                this.AddToPendingList(strBiblioRecPath, "");
+                return;
+            }
 #if NO
             // 这里有一个重入的问题
             // TODO: 其实这里检查已经没有必要了。因为新的LoadRecord()函数已经检查了m_nInSearching
@@ -5256,14 +5274,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 #endif
 
             nRet = this.LoadRecordOld(strBiblioRecPath, "", true);
-#if NO
             // 2009/11/6 
             if (nRet == 2)
             {
                 this.AddToPendingList(strBiblioRecPath, "");
                 return;
             }
-#endif
         }
 
         // 
@@ -10520,8 +10536,7 @@ merge_dlg.UiState);
             MessageBox.Show(this, strError);
         }
 
-#if NO
-        /*public*/ void AddToPendingList(string strBiblioRecPath,
+        void AddToPendingList(string strBiblioRecPath,
             string strPrevNextStyle)
         {
             PendingLoadRequest request = new PendingLoadRequest();
@@ -10532,9 +10547,36 @@ merge_dlg.UiState);
                 this.m_listPendingLoadRequest.Clear();
                 this.m_listPendingLoadRequest.Add(request);
             }
-            this.timer1.Start();
+            // this.timer1.Start();
         }
-#endif
+
+        void DoPendingList()
+        {
+            lock (this.m_listPendingLoadRequest)
+            {
+                if (this.m_listPendingLoadRequest.Count == 0)
+                    return;
+            }
+            string strError = "";
+            PendingLoadRequest request = null;
+            lock (this.m_listPendingLoadRequest)
+            {
+                request = this.m_listPendingLoadRequest[0];
+            }
+
+            int nRet = this.LoadRecord(request.RecPath,
+                request.PrevNextStyle,
+                true,
+                false,
+                out strError);
+            if (nRet != 1)
+                this.ShowMessage(strError, "red", true);
+
+            lock (this.m_listPendingLoadRequest)
+            {
+                this.m_listPendingLoadRequest.Remove(request);
+            }
+        }
 
         private void timer1_Tick(object sender, EventArgs e)
         {

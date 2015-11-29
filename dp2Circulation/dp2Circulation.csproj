@@ -433,6 +433,7 @@
     <Compile Include="Label\SelectPaperDialog.Designer.cs">
       <DependentUpon>SelectPaperDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainForm\BiblioPropertyTask.cs" />
     <Compile Include="MainForm\DbNameExtension.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -456,6 +457,7 @@
     <Compile Include="MainForm\PinyinExtension.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm\PropertyTask.cs" />
     <Compile Include="MainForm\QrExtension.cs">
       <SubType>Form</SubType>
     </Compile>

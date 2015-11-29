@@ -1277,6 +1277,8 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
+            this.PropertyTaskList.MainForm = this;
+            this.PropertyTaskList.BeginThread();
         }
 
         // 复制出一个绿色安装包

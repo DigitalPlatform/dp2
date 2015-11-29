@@ -90,7 +90,7 @@ namespace dp2Circulation
                 this.m_mainForm = value;
             }
         }
-        
+
         internal DigitalPlatform.Stop stop = null;
 
         /// <summary>
@@ -194,14 +194,11 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
-            if (stop != null)
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
             {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
+                MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
+                e.Cancel = true;
+                return;
             }
         }
 
@@ -445,7 +442,7 @@ string strUserName = ".")
         {
             if (this.MainForm != null)
             {
-                Size oldsize = this.Size; 
+                Size oldsize = this.Size;
                 if (this.MainForm.DefaultFont == null)
                     MainForm.SetControlFont(this, Control.DefaultFont);
                 else
@@ -693,7 +690,7 @@ string strUserName = ".")
         protected override void OnActivated(EventArgs e)
         {
             // if (this.stop != null)
-                this.MainForm.stopManager.Active(this.stop);
+            this.MainForm.stopManager.Active(this.stop);
 
             this.MainForm.MenuItem_font.Enabled = true;
             this.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
