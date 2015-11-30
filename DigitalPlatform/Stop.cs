@@ -131,9 +131,35 @@ namespace DigitalPlatform
 
         int _inBeginLoop = 0;
 
-        public bool IsInLoop()
+        // 检查当前是否已经处于 BeginLoop() 之中
+        public bool IsInLoop
         {
-            return _inBeginLoop > 0;
+            get
+            {
+                return _inBeginLoop > 0;
+            }
+        }
+
+        bool _allowNest = false;
+
+        public bool AllowNest
+        {
+            get
+            {
+                return _allowNest;
+            }
+            set
+            {
+                this._allowNest = value;
+            }
+        }
+
+        // 允许或者禁止嵌套 BeginLoop()
+        public bool SetAllowNest(bool bAllow)
+        {
+            bool bOldValue = this._allowNest;
+            this._allowNest = bAllow;
+            return bOldValue;
         }
 
         //准备做事情,被循环调，时面了调了Stopmanager的Enable()函数，修改父窗口的按钮状态
@@ -142,7 +168,8 @@ namespace DigitalPlatform
         //      false   失败。BeginLoop() 发生了嵌套
         public void BeginLoop()
         {
-            if (_inBeginLoop > 0)
+            if (_inBeginLoop > 0 
+                && _allowNest == false)
                 throw new Exception("针对同一 Stop 对象，BeginLoop 不能嵌套调用");
 
             _inBeginLoop++;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Web;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -16,6 +18,19 @@ namespace dp2Circulation
     public class PropertyTask
     {
         public PropertyTaskList Container = null;
+
+        public string GetWaitingHtml(string strText)
+        {
+            string strGifFileName = Path.Combine(this.Container.MainForm.DataDir, "ajax-loader3.gif");
+
+            // 显示 正在处理
+            return "<html>" +
+    this.Container.MainForm.GetMarcHtmlHeadString(true) +
+    "<body style='background-color: #aaaaaa;'>" +
+    "<h2 align='center'><img src='" + strGifFileName + "' /></h2>"
+            + "<h2 align='center'>" + HttpUtility.HtmlEncode(strText) + "</h2>"
+            + "</body></html>";
+        }
 
         // 打开对话框
         // return:

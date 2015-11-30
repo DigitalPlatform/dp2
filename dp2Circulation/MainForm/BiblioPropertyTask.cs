@@ -1,10 +1,11 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -58,18 +59,14 @@ namespace dp2Circulation
                 try
                 {
                     // 显示 正在处理
-                    this.HTML = "<html>" +
-            this.Container.MainForm.GetMarcHtmlHeadString(true) +
-            "<body>" +
-            HttpUtility.HtmlEncode("正在获取书目记录 " + strRecPath) +
-            EntityForm.GetTimestampHtml(info.Timestamp) +
-            "</body></html>"; 
+                    this.HTML = GetWaitingHtml("正在获取书目记录 " + strRecPath);
+
                     ShowData();
 
                     string[] results = null;
                     byte[] baTimestamp = null;
                     // 获得书目记录
-                    channel.Timeout = new TimeSpan(0, 0, 60);
+                    channel.Timeout = new TimeSpan(0, 0, 5);
                     long lRet = channel.GetBiblioInfos(
                         Stop,
                         strRecPath,
@@ -160,11 +157,13 @@ namespace dp2Circulation
 
         public override bool Cancel()
         {
+#if NO
             lock (syncRoot)
             {
                 if (channel != null)
                     channel.AbortIt();
             }
+#endif
             return true;
         }
     }

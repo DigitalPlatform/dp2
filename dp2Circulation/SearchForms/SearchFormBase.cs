@@ -340,7 +340,7 @@ out strError);
         //      0   成功
         internal virtual int SaveRecord(string strRecPath,
             BiblioInfo info,
-            out byte [] baNewTimestamp,
+            out byte[] baNewTimestamp,
             out string strError)
         {
             strError = "尚未实现";
@@ -348,12 +348,12 @@ out strError);
             return -1;
         }
 
-
         internal virtual string GetHeadString(bool bAjax = true)
         {
             return "";
         }
 
+#if NO
         internal virtual int GetXmlHtml(BiblioInfo info,
     out string strXml,
     out string strHtml2,
@@ -366,7 +366,42 @@ out strError);
 
             return 0;
         }
+#endif
 
+        void _doViewComment(bool bOpenWindow)
+        {
+            if (this.m_biblioTable == null)
+                return;
+
+            if (this._listviewRecords.SelectedItems.Count == 0)
+                return; // 是否要显示一个空画面?
+
+            ListViewItem item = this._listviewRecords.SelectedItems[0];
+
+            this.MainForm.OpenCommentViewer(bOpenWindow);
+
+            string strRecPath = item.Text;
+            if (string.IsNullOrEmpty(strRecPath) == true)
+                return;
+
+            // 存储所获得书目记录 XML
+            BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+            if (info == null)
+            {
+                info = new BiblioInfo();
+                info.RecPath = strRecPath;
+                this.m_biblioTable[strRecPath] = info;  // 后面任务中会填充 info 的内容，如果必要的话
+            }
+
+            ItemPropertyTask task = new ItemPropertyTask();
+            task.BiblioInfo = info;
+            task.Stop = this.stop;
+            task.DbType = this.DbType;
+
+            this.MainForm.PropertyTaskList.AddTask(task, true);
+        }
+
+#if NO
         void _doViewComment(bool bOpenWindow)
         {
             string strError = "";
@@ -497,6 +532,7 @@ out strError);
         ERROR1:
             MessageBox.Show(this, "DoViewComment() 出错: " + strError);
         }
+#endif
 
         void marc_viewer_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -533,7 +569,7 @@ out strError);
             foreach (ListViewItem item in items)
             {
                 if (IsItemChanged(item) == true)
-                    nResult ++;
+                    nResult++;
             }
             return nResult;
         }
@@ -752,7 +788,7 @@ out strError);
         // parameters:
         //      cols    检索结果中的浏览列
         internal virtual void RefreshOneLine(ListViewItem item,
-            string [] cols,
+            string[] cols,
             bool bClearRestColumns)
         {
             if (cols == null)
@@ -922,7 +958,6 @@ out strError);
             DoViewComment(false);
         }
 
-
         // 
         /// <summary>
         /// 丢弃全部修改
@@ -1052,7 +1087,7 @@ out strError);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存"+this.DbTypeCaption+"记录 ...");
+            stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -1137,7 +1172,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         DialogResult result = MessageBox.Show(this,
 "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
-this.DbTypeCaption+"查询",
+this.DbTypeCaption + "查询",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
@@ -1383,7 +1418,7 @@ dlg.UiState);
     MessageBoxDefaultButton.Button1,
     null,
     ref bHideMessageBox,
-    new string [] {"重新修改","继续修改","放弃"});
+    new string[] { "重新修改", "继续修改", "放弃" });
                     if (result == DialogResult.Cancel)
                     {
                         strError = "放弃";
@@ -1595,7 +1630,7 @@ dlg.UiState);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "替换字符串 '"+strFieldValue+"' 中的宏时出错: " + strError;
+                        strError = "替换字符串 '" + strFieldValue + "' 中的宏时出错: " + strError;
                         return -1;
                     }
 

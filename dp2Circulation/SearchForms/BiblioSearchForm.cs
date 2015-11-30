@@ -39,7 +39,7 @@ namespace dp2Circulation
 
         Hashtable m_biblioTable = new Hashtable(); // 书目记录路径 --> 书目信息
 
-        const int WM_SELECT_INDEX_CHANGED = API.WM_USER + 200;
+        // const int WM_SELECT_INDEX_CHANGED = API.WM_USER + 200;
 
         // 最近使用过的记录路径文件名
         string m_strUsedRecPathFilename = "";
@@ -6870,6 +6870,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -6908,6 +6909,7 @@ MessageBoxDefaultButton.Button2);
             }
             base.DefWndProc(ref m);
         }
+#endif
 
         /*public*/
         bool CanCallNew(Commander commander, int msg)
@@ -6951,8 +6953,6 @@ MessageBoxDefaultButton.Button2);
             // this.commander.AddMessage(WM_SELECT_INDEX_CHANGED);
             this.TriggerSelectedIndexChanged();
         }
-
-
 
         private void textBox_queryWord_Enter(object sender, EventArgs e)
         {

@@ -182,7 +182,7 @@ namespace DigitalPlatform.OPAC.Server
                 XmlNode node = this.WebUiDom.DocumentElement.SelectSingleNode("titleBarControl");
                 if (node != null)
                 {
-                    string strValue =  DomUtil.GetAttr(node, "limitLibraryCode");
+                    string strValue = DomUtil.GetAttr(node, "limitLibraryCode");
                     if (strValue == null)
                         return "";
                     return strValue;
@@ -847,7 +847,7 @@ namespace DigitalPlatform.OPAC.Server
             if (root == null)
                 return 0;
 
-            XmlElement library = root.SelectSingleNode("library[@code='"+strLibraryCode+"']") as XmlElement;
+            XmlElement library = root.SelectSingleNode("library[@code='" + strLibraryCode + "']") as XmlElement;
             if (library == null)
                 library = root.SelectSingleNode("library[@style='" + strLibraryCode + "']") as XmlElement;
             if (library == null)
@@ -1481,7 +1481,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
 
                 // 在<virtualDatabases>下找
-                XmlNode node = node_virtual.SelectSingleNode("database[@name='"+strName+"']");
+                XmlNode node = node_virtual.SelectSingleNode("database[@name='" + strName + "']");
                 if (node == null)
                 {
                     database.ParentNode.RemoveChild(database);
@@ -2296,7 +2296,7 @@ System.Text.Encoding.UTF8))
                     }
                     if (strFrom == null)
                     {
-                        strWarning += "虚拟库 '" + vdb.GetName(null) + "' 中针对物理库 '" + strDbName + "'(length="+strDbName.Length+") 中对虚拟From '" + strVirtualFromName + "'(length="+strVirtualFromName.Length+") 未找到对应的物理From名; ";
+                        strWarning += "虚拟库 '" + vdb.GetName(null) + "' 中针对物理库 '" + strDbName + "'(length=" + strDbName.Length + ") 中对虚拟From '" + strVirtualFromName + "'(length=" + strVirtualFromName.Length + ") 未找到对应的物理From名; ";
                         // strError = "虚拟库 '" + vdb.GetName(null) + " '中针对物理库 '" + strDbName + "' 中对虚拟From '" + strVirtualFromName + "' 未找到对应的物理From名";
                         // return -1;
                         continue;
@@ -2567,7 +2567,7 @@ System.Text.Encoding.UTF8))
                     + strTargetList
                     + "'><item>"
                     + (bDesc == true ? "<order>DESC</order>" : "")
-                    +"<word>"
+                    + "<word>"
                     + StringUtil.GetXmlStringSimple(strWord)
                     + "</word><match>"
                     + StringUtil.GetXmlStringSimple(strMatchStyle)
@@ -2637,7 +2637,7 @@ System.Text.Encoding.UTF8))
         //      strFromList     检索途径名列表。用逗号间隔每个From名
         static int BuildTargetList(
             OpacApplication app,
-            string strDbNameList, 
+            string strDbNameList,
             string strFromList,
             out string strTargetList,
             out string strError)
@@ -2645,7 +2645,7 @@ System.Text.Encoding.UTF8))
             strError = "";
             strTargetList = "";
 
-            string[] dbnames = strDbNameList.Split(new char [] {','});
+            string[] dbnames = strDbNameList.Split(new char[] { ',' });
             for (int i = 0; i < dbnames.Length; i++)
             {
                 string strDbName = dbnames[i].Trim();
@@ -2890,7 +2890,7 @@ System.Text.Encoding.UTF8))
             long lRet = sessioninfo.Channel.GetCommentInfo(
 null,
 "@path:" + strCommentRecPath,
-// null,
+                // null,
 "xml", // strResultType
 out strItemXml,
 out strOutputItemPath,
@@ -3195,7 +3195,7 @@ out strError);
                 string strResultTypeList = "xml";
                 string[] results = null;
                 long lRet = session.Channel.GetReaderInfo(null,
-                    this.dp2LibraryVersion >= 2.22 ? 
+                    this.dp2LibraryVersion >= 2.22 ?
                     "@barcode:" + strReaderBarcode // dp2Library V2.22 及以后可以使用这个方法
                     : strReaderBarcode,
                     strResultTypeList,
@@ -3505,7 +3505,7 @@ stop,
 strResPath,
                         strLocalFileName,
                         strLocalPath,
-                        postedFile.ContentType, 
+                        postedFile.ContentType,
                         ranges[j],
 j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
 timestamp,
@@ -3586,7 +3586,7 @@ out strError);
             }
             try
             {
-                return channel.HitCounter("get", 
+                return channel.HitCounter("get",
                     strName,
                     "",
                     out lValue,
@@ -3628,7 +3628,7 @@ out strError);
             try
             {
                 long lValue = 0;
-                return channel.HitCounter(bLog ? "inc_and_log" : "inc", 
+                return channel.HitCounter(bLog ? "inc_and_log" : "inc",
                     strName,
                     strClientAddress,
                     out lValue,
@@ -3702,7 +3702,6 @@ out strError);
             if (nHeight <= 0)
                 nHeight = 300;
 
-
             if (bSaveAs == true)
             {
                 string strEncodedFileName = HttpUtility.UrlEncode("qr.png", Encoding.UTF8);
@@ -3734,7 +3733,7 @@ out strError);
                 }
             };
 
-            using(var bitmap = writer.Write(strCode))
+            using (var bitmap = writer.Write(strCode))
             {
                 bitmap.Save(Page.Response.OutputStream, ImageFormat.Jpeg);
             }
@@ -4293,7 +4292,7 @@ out string strError)
 
             // 如果没有提供photourl，说明是本系统，这里负责创建URL
             if (string.IsNullOrEmpty(strPhotoUrl) == true
-                && bGuest == false )
+                && bGuest == false)
             {
                 if (String.IsNullOrEmpty(strDisplayName) == true)
                     strPhotoUrl = "./getphoto.aspx?userid=" + HttpUtility.UrlEncode(strUserID);
@@ -4302,12 +4301,12 @@ out string strError)
             }
 
             room.AppendText(strRefID,
-                "<div class='"+strStyle+"'>"
+                "<div class='" + strStyle + "'>"
                 + "<div class='userid'"
-                + (string.IsNullOrEmpty(strDisplayName) == false ? " displayName='"+HttpUtility.HtmlEncode(strDisplayName)+"' " : "")
+                + (string.IsNullOrEmpty(strDisplayName) == false ? " displayName='" + HttpUtility.HtmlEncode(strDisplayName) + "' " : "")
                 + (string.IsNullOrEmpty(strPhotoUrl) == false ? " photo='" + HttpUtility.HtmlEncode(strPhotoUrl) + "' " : "")
                 + ">" + HttpUtility.HtmlEncode(strUserID) + "</div>"
-                + (string.IsNullOrEmpty(strIpAddress) == false ? 
+                + (string.IsNullOrEmpty(strIpAddress) == false ?
                 "<div class='ip'>" + HttpUtility.HtmlEncode(strIpAddress) + "</div>" : "")
                 + "<div class='time'>" + DateTime.Now.ToString("u") + "</div>"
                 + "<div class='text'>" + HttpUtility.HtmlEncode(strText).Replace("\n", "<br/>") + "</div>"

@@ -143,7 +143,7 @@ namespace DigitalPlatform.CommonControl
             format.FormatFlags |= StringFormatFlags.FitBlackBox;
             SizeF size = e.Graphics.MeasureString(this.Text,
                 this.Font,
-                this.Size.Width / 2 ,
+                this.Size.Width / 2,
                 format);
 
             RectangleF textRect = new RectangleF(
@@ -295,6 +295,12 @@ size.Height);
         // 一次性设置，比较方便
         public void SetMessage(string strText, Color rectColor, bool bClickClose)
         {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string, Color, bool>(SetMessage), strText, rectColor, bClickClose);
+                return;
+            }
+
             base.Text = strText;
             this._rectColor = rectColor;
             this.Closeable = bClickClose;
@@ -421,7 +427,7 @@ size.Height);
                 }
                 if (this.Clicked != null)
                     this.Clicked(this, new EventArgs());
-            } 
+            }
             else if (m.Msg == API.WM_NCHITTEST
                 && (this.Closeable == true || this.Clicked != null))
             {
@@ -465,7 +471,7 @@ size.Height);
         }
     }
 
-        /// <summary>
+    /// <summary>
     /// 显示浮动信息
     /// </summary>
     /// <param name="sender">发送者</param>
@@ -483,5 +489,5 @@ size.Height);
         public bool ClickClose = false;
     }
 
-    
+
 }

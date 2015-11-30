@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Xml;
+using System.Reflection;
+using System.Web;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -20,10 +23,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient.localhost;
-using System.Reflection;
 using DigitalPlatform.Script;
-using System.Web;
-using System.Threading;
 using DigitalPlatform.dp2.Statis;
 
 // 2013/3/16 添加 XML 注释
@@ -6692,11 +6692,6 @@ out strError);
             }
         }
 
-
-
-
-
-
         static string MergeXml(string strXml1,
     string strXml2)
         {
@@ -6728,8 +6723,7 @@ out strError);
     "</head>";
         }
 
-
-        internal override int GetXmlHtml(BiblioInfo info,
+        internal static int GetXmlHtml(BiblioInfo info,
     out string strXml,
     out string strHtml2,
     out string strError)
@@ -6775,10 +6769,8 @@ out strError);
             }
 
             strXml = MergeXml(strOldXml, strNewXml);
-
             return 0;
         }
-
 
         // 获得一条记录
         //return:

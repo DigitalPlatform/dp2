@@ -367,72 +367,72 @@ namespace DigitalPlatform.LibraryServer
         {
         }
 
-        		// Use C# destructor syntax for finalization code.
-		// This destructor will run only if the Dispose method 
-		// does not get called.
-		// It gives your base class the opportunity to finalize.
-		// Do not provide destructors in types derived from this class.
-        ~LibraryApplication()      
-		{
-			// Do not re-create Dispose clean-up code here.
-			// Calling Dispose(false) is optimal in terms of
-			// readability and maintainability.
-			Dispose(false);
-		}
+        // Use C# destructor syntax for finalization code.
+        // This destructor will run only if the Dispose method 
+        // does not get called.
+        // It gives your base class the opportunity to finalize.
+        // Do not provide destructors in types derived from this class.
+        ~LibraryApplication()
+        {
+            // Do not re-create Dispose clean-up code here.
+            // Calling Dispose(false) is optimal in terms of
+            // readability and maintainability.
+            Dispose(false);
+        }
 
 
-		// Implement IDisposable.
-		// Do not make this method virtual.
-		// A derived class should not be able to override this method.
-		public void Dispose()
-		{
-			Dispose(true);
-			// This object will be cleaned up by the Dispose method.
-			// Therefore, you should call GC.SupressFinalize to
-			// take this object off the finalization queue 
-			// and prevent finalization code for this object
-			// from executing a second time.
-			GC.SuppressFinalize(this);
-		}
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
+        {
+            Dispose(true);
+            // This object will be cleaned up by the Dispose method.
+            // Therefore, you should call GC.SupressFinalize to
+            // take this object off the finalization queue 
+            // and prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
 
         bool disposed = false;
 
-		// Dispose(bool disposing) executes in two distinct scenarios.
-		// If disposing equals true, the method has been called directly
-		// or indirectly by a user's code. Managed and unmanaged resources
-		// can be disposed.
-		// If disposing equals false, the method has been called by the 
-		// runtime from inside the finalizer and you should not reference 
-		// other objects. Only unmanaged resources can be disposed.
-		private void Dispose(bool disposing)
-		{
-			// Check to see if Dispose has already been called.
-			if(!this.disposed)
-			{
-				// If disposing equals true, dispose all managed 
-				// and unmanaged resources.
-				if(disposing)
-				{
-					// Dispose managed resources.
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the 
+        // runtime from inside the finalizer and you should not reference 
+        // other objects. Only unmanaged resources can be disposed.
+        private void Dispose(bool disposing)
+        {
+            // Check to see if Dispose has already been called.
+            if (!this.disposed)
+            {
+                // If disposing equals true, dispose all managed 
+                // and unmanaged resources.
+                if (disposing)
+                {
+                    // Dispose managed resources.
 
                     // 这里有一点问题：可能析构函数调不了Close()
-					// this.Close();
-				}
+                    // this.Close();
+                }
 
                 this.Close();   // 2007/6/8 移动到这里的
 
-             
-				/*
-				// Call the appropriate methods to clean up 
-				// unmanaged resources here.
-				// If disposing is false, 
-				// only the following code is executed.
-				CloseHandle(handle);
-				handle = IntPtr.Zero;            
-				*/
-			}
-			disposed = true;         
-		}
+
+                /*
+                // Call the appropriate methods to clean up 
+                // unmanaged resources here.
+                // If disposing is false, 
+                // only the following code is executed.
+                CloseHandle(handle);
+                handle = IntPtr.Zero;            
+                */
+            }
+            disposed = true;
+        }
 
         public int LoadCfg(
             bool bReload,
@@ -530,7 +530,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         PathUtil.ClearDir(app.TempDir);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出现异常: " + ExceptionUtil.GetDebugText(ex));
                     }
@@ -1569,7 +1569,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
-            // 2008/10/13 
+        // 2008/10/13 
         ERROR1:
             if (bReload == false)
             {
@@ -1592,7 +1592,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (bReload == true)
-                app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 ["+strError+"]，服务处于残缺状态，请及时排除故障后重新启动");
+                app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
             else
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
 
@@ -1642,7 +1642,7 @@ namespace DigitalPlatform.LibraryServer
             double value = 0;
             if (double.TryParse(strVersion, out value) == false)
             {
-                strError = "dp2Kernel版本号 '"+strVersion+"' 格式不正确";
+                strError = "dp2Kernel版本号 '" + strVersion + "' 格式不正确";
                 return -1;
             }
 
@@ -1650,7 +1650,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (value < base_version)
             {
-                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 "+value+")。请立即升级 dp2Kernel 到最新版本。";
+                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + value + ")。请立即升级 dp2Kernel 到最新版本。";
                 return -1;
             }
 
@@ -1698,7 +1698,7 @@ namespace DigitalPlatform.LibraryServer
                         this.LibraryCfgDom.DocumentElement.ChildNodes[0]);
                 else
                  * */
-                    this.LibraryCfgDom.DocumentElement.AppendChild(nodeVersion);
+                this.LibraryCfgDom.DocumentElement.AppendChild(nodeVersion);
 
                 nodeVersion.InnerText = "0.01";    // 从未有过<version>元素的library.xml版本，被认为是0.01版
                 bChanged = true;
@@ -1762,7 +1762,7 @@ namespace DigitalPlatform.LibraryServer
                         string strType = DomUtil.GetAttr(nodeExist, "type");
                         if (strType != "zhongcihao")
                         {
-                            strError = "<utilDb>下name属性值为'"+strDbName+"'的<database>元素，其type属性值不为'zhongcihao'(而是'"+strType+"')，这和<zhongcihao>元素下的初始定义矛盾。请系统管理员在了解这个库的真实类型后，手动对配置文件进行修改。";
+                            strError = "<utilDb>下name属性值为'" + strDbName + "'的<database>元素，其type属性值不为'zhongcihao'(而是'" + strType + "')，这和<zhongcihao>元素下的初始定义矛盾。请系统管理员在了解这个库的真实类型后，手动对配置文件进行修改。";
                             return -1;
                         }
                         continue;
@@ -1988,7 +1988,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        
+
 
 #if NO
         // 2007/7/11 
@@ -3538,7 +3538,7 @@ namespace DigitalPlatform.LibraryServer
         // 实用库包括 publisher / zhongcihao / dictionary 类型
         public bool IsUtilDbName(string strUtilDbName)
         {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='"+strUtilDbName+"']");
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "']");
             if (node == null)
                 return false;
 
@@ -3547,7 +3547,7 @@ namespace DigitalPlatform.LibraryServer
 
         public bool IsUtilDbName(string strUtilDbName, string strType)
         {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "' and @type='"+strType+"']");
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "' and @type='" + strType + "']");
             if (node == null)
                 return false;
 
@@ -3786,7 +3786,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
 
@@ -3856,7 +3856,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -3899,7 +3899,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -3942,7 +3942,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -3987,7 +3987,7 @@ namespace DigitalPlatform.LibraryServer
                 strBiblioDbName = vdb.GetName("zh");
                 if (String.IsNullOrEmpty(strBiblioDbName) == true)
                 {
-                    strError = "数据库 "+vdb.GetName(null) +" 居然没有 zh 语言的名字";
+                    strError = "数据库 " + vdb.GetName(null) + " 居然没有 zh 语言的名字";
                     return -1;
                 }
 
@@ -4160,7 +4160,7 @@ namespace DigitalPlatform.LibraryServer
             return results;
         }
 
-        static string m_strKernelBrowseFomatsXml = 
+        static string m_strKernelBrowseFomatsXml =
             "<formats> "
             + "<format name='browse' type='kernel'>"
             + "    <caption lang='zh-cn'>浏览</caption>"
@@ -4516,10 +4516,10 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            XmlElement node = root.SelectSingleNode("account[@name='"+strUserID+"']") as XmlElement;
+            XmlElement node = root.SelectSingleNode("account[@name='" + strUserID + "']") as XmlElement;
             if (node == null)
             {
-                strError = "用户 '"+strUserID+"' 不存在";
+                strError = "用户 '" + strUserID + "' 不存在";
                 return 0;
             }
 
@@ -4531,7 +4531,7 @@ namespace DigitalPlatform.LibraryServer
             string strText = "";
             try
             {
-                strText =  node.GetAttribute("password");
+                strText = node.GetAttribute("password");
                 if (String.IsNullOrEmpty(strText) == true)
                     account.Password = "";
                 else
@@ -4560,7 +4560,7 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
-                strText =  DomUtil.GetAttr(node, "rmsPassword");
+                strText = DomUtil.GetAttr(node, "rmsPassword");
                 if (String.IsNullOrEmpty(strText) == true)
                     account.RmsPassword = "";
                 else
@@ -4574,7 +4574,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 strError = "用户名为 '" + strUserID + "' 的<account> rmsPassword参数值错误";
                 return -1;
-            }                
+            }
 
             return 1;
         }
@@ -4778,7 +4778,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 包装后的版本
         public int GetReaderRecXml(
-    // RmsChannelCollection channels,
+            // RmsChannelCollection channels,
             RmsChannel channel,
     string strBarcode,
     out string strXml,
@@ -4835,7 +4835,7 @@ namespace DigitalPlatform.LibraryServer
                     + StringUtil.GetXmlStringSimple(strDbName + ":" + "所借册条码")
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBorrowItemBarcode)
-                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
 
                 if (i > 0)
                     strQueryXml += "<operator value='OR'/>";
@@ -5089,7 +5089,7 @@ namespace DigitalPlatform.LibraryServer
             out strError);
             if (recpaths != null && recpaths.Count > 0)
                 strOutputPath = recpaths[0];
-            if (nRet == -1 || nRet > 0 
+            if (nRet == -1 || nRet > 0
                 || string.IsNullOrEmpty(strLibraryCodeList) == true
                 || this.ReaderDbs.Count == 1)
                 return nRet;
@@ -5116,7 +5116,7 @@ out strError);
         // 2013/5/23
         // 包装以后的版本
         public int GetReaderRecXml(
-    // RmsChannelCollection channels,
+            // RmsChannelCollection channels,
             RmsChannel channel,
     string strBarcode,
     out string strXml,
@@ -5127,7 +5127,7 @@ out strError);
             strOutputPath = "";
             List<string> recpaths = null;
             int nRet = GetReaderRecXml(
-            // channels,
+                // channels,
             channel,
             strBarcode,
             1,
@@ -5320,7 +5320,7 @@ out strError);
             out string strError)
         {
             return GetReaderRecXmlByFrom(
-            // channels,
+                // channels,
             channel,
             strDisplayName,
             "显示名",
@@ -5332,7 +5332,7 @@ out strError);
 
         // 包装后的版本
         public int GetReaderRecXmlByFrom(
-    // RmsChannelCollection channels,
+            // RmsChannelCollection channels,
             RmsChannel channel,
     string strWord,
     string strFrom,
@@ -5342,7 +5342,7 @@ out strError);
     out string strError)
         {
             return GetReaderRecXmlByFrom(
-    // channels,
+                // channels,
     channel,
     null,
     strWord,
@@ -5872,7 +5872,7 @@ out strError);
                     + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
-                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
                 nCount++;
 
                 strQueryXml += strOneDbQuery;
@@ -5975,7 +5975,7 @@ out strError);
         + StringUtil.GetXmlStringSimple(strDbName + ":" + "显示名")
         + "'><item><word>"
         + StringUtil.GetXmlStringSimple(strDisplayName)
-        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
                 nCount++;
 
                 strQueryXml += strOneDbQuery;
@@ -6081,7 +6081,7 @@ out strError);
                     + StringUtil.GetXmlStringSimple(strDbName + ":" + "状态")
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strState)
-                    + "</word><match>"+strMatchStyle+"</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+                    + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
 
                 if (nDbCount > 0)
                 {
@@ -6124,7 +6124,7 @@ out strError);
             // not found
             if (lRet == 0)
             {
-                strError = "读者证状态 '" + strState + "' (匹配方式: "+strMatchStyle+") 没有命中";
+                strError = "读者证状态 '" + strState + "' (匹配方式: " + strMatchStyle + ") 没有命中";
                 return 0;
             }
 
@@ -6336,7 +6336,7 @@ out strError);
         ERROR1:
             return -1;
         }
-#endif 
+#endif
 
         // 2014/9/19 strBarcode 可以包含 @refID: 前缀了
         // 2012/1/5 改造为PiggyBack检索
@@ -6585,7 +6585,7 @@ out strError);
 
         // 包装后的版本
         public int GetItemRecXml(
-    // RmsChannelCollection channels,
+            // RmsChannelCollection channels,
             RmsChannel channel,
             string strBarcode,
             out string strXml,
@@ -6926,7 +6926,7 @@ out strError);
 
                 strQueryXml = "<target list='"
         + StringUtil.GetXmlStringSimple(targetList.ToString())
-        + "' "+strHint+"><item><word>"
+        + "' " + strHint + "><item><word>"
         + StringUtil.GetXmlStringSimple(strBarcode)
         + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
             }
@@ -7167,7 +7167,7 @@ out strError);
                 return -1;
 
             // 获得全部读者库名
-            List<string> dbnames =  this.GetCurrentReaderDbNameList("");
+            List<string> dbnames = this.GetCurrentReaderDbNameList("");
 
             StringUtil.RemoveDupNoSort(ref dbnames);
 
@@ -7191,13 +7191,13 @@ out strError);
                 }
 
                 bool bFound = false;
-                foreach(From from in db.Froms)
+                foreach (From from in db.Froms)
                 {
                     if (StringUtil.IsInList("borrowitem", from.Styles) == true)
                     {
                         bFound = true;
                         break;
-                    } 
+                    }
 #if NO
                     Caption caption = from.GetCaption("zh");
                     if (caption != null
@@ -7518,7 +7518,7 @@ out strError);
             }
 #endif
             if (channel == null)
-                throw new ArgumentException("channel 参数值不能为空","channel");
+                throw new ArgumentException("channel 参数值不能为空", "channel");
 
             Record[] records = null;
             long lRet = channel.DoSearchEx(strQueryXml,
@@ -7662,7 +7662,7 @@ out strError);
                     continue;
 
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID") 
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID")
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strRefID) + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
 
@@ -7783,7 +7783,7 @@ out strError);
                     + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
-                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
 
                 if (nDbCount > 0)
                 {
@@ -7895,14 +7895,14 @@ out strError);
             }
 
             string strKey = "";
-            
+
             if (string.IsNullOrEmpty(strBarcode) == false)
                 strKey = strLibraryCode + "|" + strBatchNo + "|" + strBarcode;
             else
                 strKey = strLibraryCode + "|" + strBatchNo + "|@refID:" + strRefID;
 
             // 构造检索式
-            string strQueryXml =  "<target list='"
+            string strQueryXml = "<target list='"
                     + StringUtil.GetXmlStringSimple(strInventoryDbName + ":" + "查重键")
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strKey)
@@ -8015,7 +8015,7 @@ out strError);
             out bool bTempPassword,
             out string strXml,
             out string strOutputPath,
-            out byte [] output_timestamp,
+            out byte[] output_timestamp,
             out string strToken,
             out string strError)
         {
@@ -8611,7 +8611,7 @@ out strError);
                     return -1;
                 if (nRet == 1)
                 {
-                    strError = "本次重设密码的操作距离上次操作间隔不足一小时，操作被拒绝。请在 "+end.ToShortTimeString()+" 以后再进行操作";
+                    strError = "本次重设密码的操作距离上次操作间隔不足一小时，操作被拒绝。请在 " + end.ToShortTimeString() + " 以后再进行操作";
                     return 0;
                 }
 
@@ -8803,7 +8803,7 @@ out strError);
             }
             if (nRet == 0)
             {
-                strError = "帐户 '"+strLoginName+"' 不存在";
+                strError = "帐户 '" + strLoginName + "' 不存在";
                 return 0;
             }
             if (nRet > 1)
@@ -8870,7 +8870,7 @@ out strError);
                 return -1;
             }
 
-            strToken = strHashed.Replace(",", "").Replace("=","") + "|||" + strTimeRange;
+            strToken = strHashed.Replace(",", "").Replace("=", "") + "|||" + strTimeRange;
             return 0;
         }
 
@@ -9023,7 +9023,7 @@ out strError);
                 }
             }
 
-            DO_LOGIN:
+        DO_LOGIN:
 
             bool bTempPassword = false;
             string strToken = "";
@@ -9072,8 +9072,8 @@ out strError);
                 strError = string.Format(this.GetString("以登录名s登录时, 检索读者帐户记录出错s"),  // "以登录名 '{0}' 登录时, 检索读者帐户记录出错: {1}";
                     strLoginName,
                     strError);
-                    
-                    // "以登录名 '" + strLoginName + "' 登录时, 检索读者帐户记录出错: " + strError;
+
+                // "以登录名 '" + strLoginName + "' 登录时, 检索读者帐户记录出错: " + strError;
                 return -1;
             }
 
@@ -9092,7 +9092,7 @@ out strError);
                     // text-level: 用户提示
                     strError = string.Format(this.GetString("以登录名s登录时, 因所匹配的帐户多于一个，无法登录"),  // "以登录名 '{0}' 登录时, 因所匹配的帐户多于一个，无法登录。可用证条码号作为登录名重新进行登录。"
                         strLoginName);
-                        // "以登录名 '" + strLoginName + "' 登录时, 因所匹配的帐户多于一个，无法登录。可用证条码号作为登录名重新进行登录。";
+                    // "以登录名 '" + strLoginName + "' 登录时, 因所匹配的帐户多于一个，无法登录。可用证条码号作为登录名重新进行登录。";
                     return nRet;
                 }
             }
@@ -9124,7 +9124,7 @@ out strError);
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("获得reader参考帐户时出错s"),    // "获得reader参考帐户时出错: {0}"
                     strError);
-                    // "获得reader参考帐户时出错: " + strError;
+                // "获得reader参考帐户时出错: " + strError;
                 return -1;
             }
 
@@ -9352,32 +9352,32 @@ out strError);
 
             long lRet = 0;
 
-                /*
-                // 保存读者记录
-                lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
-                    readerdom.OuterXml,
-                    false,
-                    "content",
-                    sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
-                    out strError);
-                */
-                string strExistingXml = "";
-                DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
-                LibraryServerResult result = this.SetReaderInfo(sessioninfo,
-                    "change",
-                    sessioninfo.Account.ReaderDomPath,
-                    readerdom.OuterXml,
-                    "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
-                    sessioninfo.Account.ReaderDomTimestamp,
-                    out strExistingXml,
-                    out strOutputXml,
-                    out strOutputPath,
-                    out output_timestamp,
-                    out kernel_errorcode);
-                strError = result.ErrorInfo;
-                lRet = result.Value;
+            /*
+            // 保存读者记录
+            lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
+                readerdom.OuterXml,
+                false,
+                "content",
+                sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
+                out output_timestamp,
+                out strOutputPath,
+                out strError);
+            */
+            string strExistingXml = "";
+            DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
+            LibraryServerResult result = this.SetReaderInfo(sessioninfo,
+                "change",
+                sessioninfo.Account.ReaderDomPath,
+                readerdom.OuterXml,
+                "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                sessioninfo.Account.ReaderDomTimestamp,
+                out strExistingXml,
+                out strOutputXml,
+                out strOutputPath,
+                out output_timestamp,
+                out kernel_errorcode);
+            strError = result.ErrorInfo;
+            lRet = result.Value;
 
 
 
@@ -9508,32 +9508,32 @@ out strError);
             long lRet = 0;
 
 
-                /*
-                // 保存读者记录
-                lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
-                    readerdom.OuterXml,
-                    false,
-                    "content",
-                    sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
-                    out strError);
-                 * */
-                string strExistingXml = "";
-                DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
-                LibraryServerResult result = this.SetReaderInfo(sessioninfo,
-                    "change",
-                    sessioninfo.Account.ReaderDomPath,
-                    readerdom.OuterXml,
-                    "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
-                    sessioninfo.Account.ReaderDomTimestamp,
-                    out strExistingXml,
-                    out strOutputXml,
-                    out strOutputPath,
-                    out output_timestamp,
-                    out kernel_errorcode);
-                strError = result.ErrorInfo;
-                lRet = result.Value;
+            /*
+            // 保存读者记录
+            lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
+                readerdom.OuterXml,
+                false,
+                "content",
+                sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
+                out output_timestamp,
+                out strOutputPath,
+                out strError);
+             * */
+            string strExistingXml = "";
+            DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
+            LibraryServerResult result = this.SetReaderInfo(sessioninfo,
+                "change",
+                sessioninfo.Account.ReaderDomPath,
+                readerdom.OuterXml,
+                "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                sessioninfo.Account.ReaderDomTimestamp,
+                out strExistingXml,
+                out strOutputXml,
+                out strOutputPath,
+                out output_timestamp,
+                out kernel_errorcode);
+            strError = result.ErrorInfo;
+            lRet = result.Value;
 
 
             if (lRet == -1)
@@ -9976,7 +9976,7 @@ out strError);
                     return 0;
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
                 strError = "临时密码失效期时间字符串 '" + strExpireTime + "' 格式不正确，应为 RFC1123 格式";
                 return -1;
@@ -10316,7 +10316,7 @@ out strError);
                 }
             }
 
-            GET_BIBLIO:
+        GET_BIBLIO:
 
             string strItemDbName = "";  // 实体库名
             string strBiblioRecID = ""; // 种记录id
@@ -10630,7 +10630,7 @@ out strError);
         #endregion
 
         // 包装版本
-                // 检查路径中的库名，是不是实体库名
+        // 检查路径中的库名，是不是实体库名
         // return:
         //      -1  error
         //      0   不是实体库名
@@ -10700,7 +10700,7 @@ out strError);
                         return 1;
                 }
             }
-            strError = "路径 '" + strItemRecPath + "' 中包含的数据库名 '" + strTempDbName + "' 不在已定义的类型 "+strDbTypeList+" 库名之列。";
+            strError = "路径 '" + strItemRecPath + "' 中包含的数据库名 '" + strTempDbName + "' 不在已定义的类型 " + strDbTypeList + " 库名之列。";
             return 0;
         }
 
@@ -10960,8 +10960,8 @@ out strError);
             string strReaderRecPath,
             ref XmlDocument readerdom,
             string strReaderNewPassword,
-            byte [] timestamp,
-            out byte [] output_timestamp,
+            byte[] timestamp,
+            out byte[] output_timestamp,
             out string strError)
         {
             strError = "";
@@ -10999,7 +10999,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
 
             // 修改读者密码
             // return:
@@ -11054,7 +11054,7 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                     catch (Exception ex)
                     {
-                        strError = "重新装载读者记录进入 XMLDOM 时出错: " +ex.Message;
+                        strError = "重新装载读者记录进入 XMLDOM 时出错: " + ex.Message;
                         goto ERROR1;
                     }
                     nRedoCount++;
@@ -11245,7 +11245,6 @@ strLibraryCode);    // 读者所在的馆代码
 
             // this.LoginCache.Remove(strReaderBarcode);   // 及时失效登录缓存
             this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
-
             return 0;
         ERROR1:
             return -1;
@@ -11500,7 +11499,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strDbName);
                 if (nodes.Count > 0)
                 {
-                    strError = "name为 '"+strName+"' dbname为 '"+strDbName+"' 的值列表事项已经存在";
+                    strError = "name为 '" + strName + "' dbname为 '" + strDbName + "' 的值列表事项已经存在";
                     return -1;
                 }
 
@@ -11618,9 +11617,9 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             if (results.Count == 0)
-                return new string [0];
+                return new string[0];
 
-            string [] array = new string[results.Count];
+            string[] array = new string[results.Count];
             results.CopyTo(array);
             return array;
         }
@@ -12040,7 +12039,7 @@ strLibraryCode);    // 读者所在的馆代码
                 strFilter = "[count(ancestor::library) = 0]";
             }
 
-            return (XmlElement)root.SelectSingleNode("item[text()='"+strPureName+"']" + strFilter);
+            return (XmlElement)root.SelectSingleNode("item[text()='" + strPureName + "']" + strFilter);
         }
 
         // 获得一个图书馆代码下的 <locationTypes> 内 <item> 值列表
@@ -12166,7 +12165,7 @@ strLibraryCode);    // 读者所在的馆代码
             if (nRet != -1)
                 strPath = strPath.Substring(0, nRet);
 
-            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//traceDTLP/origin[@serverAddr='"+strPath+"']");
+            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//traceDTLP/origin[@serverAddr='" + strPath + "']");
             if (node == null)
             {
                 strError = "不存在地址为 '" + strPath + "' 的DTLP服务器<origin>配置参数...";
@@ -12604,7 +12603,7 @@ strLibraryCode);    // 读者所在的馆代码
                         ItemDbCfg cfg = app.ItemDbs[j];
 
                         string strOneDbName = "";
-                        
+
                         if (strDbType == "item")
                             strOneDbName = cfg.DbName;
                         else if (strDbType == "comment")
@@ -12776,7 +12775,7 @@ strLibraryCode);    // 读者所在的馆代码
             return all_librarycodes;
         }
 
-                // 获得权限定义表HTML字符串
+        // 获得权限定义表HTML字符串
         // parameters:
         //      strSource   可能会包含<readerTypes>和<bookTypes>参数
         //      strLibraryCodeList  当前用户管辖的分馆代码列表
@@ -12954,7 +12953,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "写入资源 " + strResPath + " 被拒绝。读者库 '"+strDbName+"' 不在当前用户的管辖范围 '"+strLibraryCodeList+"' 内";
+                        strError = "写入资源 " + strResPath + " 被拒绝。读者库 '" + strDbName + "' 不在当前用户的管辖范围 '" + strLibraryCodeList + "' 内";
                         return 0;
                     }
                 }
@@ -13346,9 +13345,9 @@ strLibraryCode);    // 读者所在的馆代码
         // 对象是否允许被获取?
         public static bool CanGet(string strUserRights, string strObjectRights)
         {
-            string[] users = strUserRights.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            string[] users = strUserRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] objects = strObjectRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach(string o in objects)
+            foreach (string o in objects)
             {
                 if (IndexOf(users, o) != -1)
                     return true;
@@ -13363,7 +13362,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // strList 中是否包含了高于或者等于 strLevel 要求的字符串?
-        static bool HasLevel(string strLevel, string [] list)
+        static bool HasLevel(string strLevel, string[] list)
         {
             int level = GetLevelNumber(strLevel);
 
@@ -13458,7 +13457,7 @@ strLibraryCode);    // 读者所在的馆代码
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            var node = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='"+strObjectID+"']", 
+            var node = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='" + strObjectID + "']",
                 nsmgr) as XmlElement;
             if (node == null)
                 return 0;
@@ -13670,7 +13669,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         // 最原始的权限定义
         public string RightsOrigin
-        { 
+        {
             get
             {
                 return LibraryApplication.ExpandRightString(this.Rights);
@@ -13820,7 +13819,7 @@ strLibraryCode);    // 读者所在的馆代码
             DateTime curDay = start;
 
             //    DateTime curDay = Long8ToDateTime(lDay);
-            for (; ;)
+            for (; ; )
             {
                 bool bNon = IsNonWorkingDay(DateTimeUtil.DateTimeToLong8(curDay));
 

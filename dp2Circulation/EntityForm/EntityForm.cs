@@ -2181,6 +2181,11 @@ true);
 
         void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
         {
+            // return:
+            //      -1  出错。已经用MessageBox报错
+            //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
+            //      1   成功装载
+            //      2   通道被占用
             e.Result = this.LoadRecordOld(e.BiblioRecPath,
                 "",
                 false);
@@ -3005,7 +3010,7 @@ true);
         {
             strTotalError = "";
 
-            if (Progress.IsInLoop() == true)
+            if (Progress.IsInLoop == true && Progress.AllowNest == false)
             {
                 strTotalError = "种册窗正在执行长操作。装载书目记录 "
                     + strBiblioRecPath
@@ -3387,8 +3392,6 @@ true);
                             bError = true;
                         }
                     }
-
-
                 } // end of if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
 
                 if (string.IsNullOrEmpty(this.m_strUsedActiveItemPage) == false)
@@ -5228,7 +5231,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 BiblioInfo info = e.BiblioInfos[0];
                 Debug.Assert(info != null, "");
 
-                if (this.stop.IsInLoop() == true)
+                if (this.stop.IsInLoop == true)
                 {
                     this.AddToPendingList(info.RecPath, "");
                     return;
@@ -5254,7 +5257,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
             string strBiblioRecPath = e.Paths[0];
 
-            if (this.stop.IsInLoop() == true)
+            if (this.stop.IsInLoop == true)
             {
                 this.AddToPendingList(strBiblioRecPath, "");
                 return;
@@ -5668,50 +5671,56 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 return -1;
             }
 #endif
-            try
+            int nRet = 0;
+
+            // TODO: 外部调用时，要能自动把items page激活
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
             {
-
-                int nRet = 0;
-
-                // TODO: 外部调用时，要能自动把items page激活
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
+                if (bAutoSavePrev == false)
                 {
-                    if (bAutoSavePrev == false)
+                    // 警告尚未保存
+                    DialogResult result = MessageBox.Show(this,
+                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Cancel)
                     {
-                        // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        if (result == DialogResult.Cancel)
-                        {
-                            MessageBox.Show(this, "放弃装入册事项 (册记录路径为 '" + strItemRecPath + "' )");
-                            return -1;
-                        }
-                        if (result == DialogResult.Yes)
-                        {
-                            nRet = this.DoSaveAll();
-                            if (nRet == -1)
-                                return -1; // 放弃进一步操作
-
-                        }
+                        MessageBox.Show(this, "放弃装入册事项 (册记录路径为 '" + strItemRecPath + "' )");
+                        return -1;
                     }
-                    else
+                    if (result == DialogResult.Yes)
                     {
                         nRet = this.DoSaveAll();
                         if (nRet == -1)
                             return -1; // 放弃进一步操作
+
                     }
                 }
+                else
+                {
+                    nRet = this.DoSaveAll();
+                    if (nRet == -1)
+                        return -1; // 放弃进一步操作
+                }
+            }
 
+            string strMessage = "正在装载记录 " + strItemRecPath + " 所从属的书目记录 ...";
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial(strMessage);
+            Progress.BeginLoop();
+            bool bOldNest = Progress.SetAllowNest(true);
+            this.ShowMessage(strMessage);
+            this.EnableControls(false);
+            try
+            {
                 /*
                 if (strItemBarcode != this.textBox_itemBarcode.Text)
                     this.textBox_itemBarcode.Text = strItemBarcode;
@@ -5737,7 +5746,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 // 焦点切换到条码输入域
                 // this.SwitchFocus(ITEM_BARCODE);
                 this.SwitchFocus(ITEM_LIST);
-
                 return nRet;
             }
             finally
@@ -5745,6 +5753,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 #if NO
                 this.m_nChannelInUse--;
 #endif
+                this.EnableControls(true);
+
+                Progress.SetAllowNest(bOldNest);
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+                this.ClearMessage();
+                
             }
         }
 
@@ -7345,35 +7361,29 @@ MessageBoxDefaultButton.Button2);
             this.BiblioChanged = false; // 避免关闭窗口时警告有修改内容
             this.DeletedMode = true;
 
-
-
             string strMessage = "书目记录 '" + this.BiblioRecPath + "' ";
 
             if (nEntityCount != 0)
             {
                 // 册信息残留在listview中，还可以保存回去，所以不清除
-
                 strMessage += "和 下属的实体记录 ";
             }
 
             if (nIssueCount != 0)
             {
                 // 期信息残留在listview中，还可以保存回去，所以不清除
-
                 strMessage += "和 下属的期记录 ";
             }
 
             if (nOrderCount != 0)
             {
                 // 采购信息残留在listview中，还可以保存回去，所以不清除
-
                 strMessage += "和 下属的采购记录 ";
             }
 
             if (nCommentCount != 0)
             {
                 // 评注信息残留在listview中，还可以保存回去，所以不清除
-
                 strMessage += "和 下属的评注记录 ";
             }
 
@@ -7381,19 +7391,17 @@ MessageBoxDefaultButton.Button2);
             {
                 // 对象信息无法保存回去，所以清除
                 this.binaryResControl1.Clear();
-
                 strMessage += "和 从属的对象 ";
             }
 
             strMessage += "删除成功";
-
             this.MainForm.StatusBarMessage = strMessage;
-
             this.SetSaveAllButtonState(true);
+            this.ShowMessage(strMessage, "green", true);
             return;
-
         ERROR1:
-            MessageBox.Show(this, strError);
+            // MessageBox.Show(this, strError);
+            this.ShowMessage(strError, "red", true);
         }
 
         // 
@@ -7682,6 +7690,8 @@ MessageBoxDefaultButton.Button1);
             Progress.Initial("正在删除书目记录 ...");
             Progress.BeginLoop();
 
+            this.ShowMessage("正在删除书目记录");
+
             try
             {
                 string strOutputPath = "";
@@ -7710,6 +7720,8 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                this.ClearMessage();
+
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -10079,20 +10091,7 @@ merge_dlg.UiState);
             MessageBox.Show(this, strError);
         }
 
-
-
-
-
-
         #region 期 相关功能
-
-
-
-
-
-
-
-
 
         #endregion
 
