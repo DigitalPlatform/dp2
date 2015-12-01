@@ -4045,15 +4045,19 @@ true);
             out string strError)
         {
             LibraryChannel channel = this.GetChannel();
+
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在获取书目记录的局部 -- '" + strPartName + "'...");
             Progress.BeginLoop();
+#endif
+
             try
             {
-                // stop.SetMessage("正在装入书目记录 " + strBiblioRecPath + " ...");
-
+                Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " 的局部 ...");
+                channel.Timeout = new TimeSpan(0, 0, 5);
                 long lRet = channel.GetBiblioInfo(
-                    Progress,
+                    null,   // Progress.State == 0 ? Progress : null,
                     strBiblioRecPath,
                     strBiblioXml,
                     strPartName,    // 包含'@'符号
@@ -4063,9 +4067,11 @@ true);
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
                 this.ReturnChannel(channel);
             }
         }
@@ -9688,7 +9694,6 @@ merge_dlg.UiState);
             this.EnableControls(false);
             try
             {
-
                 // 看看输入的条码是否为ISBN条码
                 if (IsISBnBarcode(this.textBox_itemBarcode.Text) == true)
                 {
