@@ -600,8 +600,8 @@ this.splitContainer_lists,
                     dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
                     nRet = dlg.Initial(
                         this.MainForm,
-                        this.Channel,
-                        this.stop,
+                        //this.Channel,
+                        //this.stop,
                         StringUtil.SplitList(strOutputRecPath),
                         "请选择一个读者记录",
                         out strError);

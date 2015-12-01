@@ -453,8 +453,8 @@ MessageBoxDefaultButton.Button2);
                     dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
                     nRet = dlg.Initial(
                         this.MainForm,
-                        this.Channel,
-                        this.stop,
+                        //this.Channel,
+                        //this.stop,
                         StringUtil.SplitList(strRecPath),
                         "请选择一个读者记录",
                         out strError);

@@ -46,6 +46,9 @@
             this.label_colorBar = new System.Windows.Forms.Label();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
             this.tableLayoutPanel_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_rightMain)).BeginInit();
             this.splitContainer_rightMain.Panel1.SuspendLayout();
@@ -55,6 +58,7 @@
             this.splitContainer_itemInfoMain.Panel1.SuspendLayout();
             this.splitContainer_itemInfoMain.Panel2.SuspendLayout();
             this.splitContainer_itemInfoMain.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel_main
@@ -244,6 +248,37 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.toolStrip1.AutoSize = false;
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_stop,
+            this.toolStripLabel_message});
+            this.toolStrip1.Location = new System.Drawing.Point(9, 291);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(286, 25);
+            this.toolStrip1.TabIndex = 7;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_stop
+            // 
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_stop.Text = "停止";
+            // 
+            // toolStripLabel_message
+            // 
+            this.toolStripLabel_message.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel_message.Name = "toolStripLabel_message";
+            this.toolStripLabel_message.Size = new System.Drawing.Size(17, 22);
+            this.toolStripLabel_message.Text = "...";
+            // 
             // SelectPatronDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -251,6 +286,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(462, 325);
+            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -258,6 +294,7 @@
             this.Name = "SelectPatronDialog";
             this.ShowInTaskbar = false;
             this.Text = "请选择读者记录";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SelectPatronDialog_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SelectPatronDialog_FormClosed);
             this.Load += new System.EventHandler(this.SelectPatronDialog_Load);
             this.tableLayoutPanel_main.ResumeLayout(false);
@@ -270,6 +307,8 @@
             this.splitContainer_itemInfoMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_itemInfoMain)).EndInit();
             this.splitContainer_itemInfoMain.ResumeLayout(false);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -293,5 +332,8 @@
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.WebBrowser webBrowser_patron;
         private System.Windows.Forms.ColumnHeader columnHeader_idCardNumber;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_stop;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel_message;
     }
 }

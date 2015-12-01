@@ -20,12 +20,13 @@ namespace dp2Circulation
     /// <summary>
     /// 当命中多个读者记录时，供选择一个读者用的对话框
     /// </summary>
-    internal partial class SelectPatronDialog : Form
+    internal partial class SelectPatronDialog : MyForm
     {
         public bool NoBorrowHistory = false;
 
         WebExternalHost m_webExternalHost_patron = new WebExternalHost();
 
+#if NO
         MainForm MainForm = null;
 
         /// <summary>
@@ -33,20 +34,23 @@ namespace dp2Circulation
         /// </summary>
         LibraryChannel Channel = null;
 
-        Stop stop = null;
+        Stop _stop = null;
+#endif
 
-        const int WM_LOAD_ALL_DATA = API.WM_USER + 200;
+        DigitalPlatform.StopManager _stopManager = new DigitalPlatform.StopManager();
+
+        // const int WM_LOAD_ALL_DATA = API.WM_USER + 200;
 
         List<string> m_recpaths = new List<string>();
 
-        const int COLUMN_BARCODE =  0;
-        const int COLUMN_STATE =    1;
-        const int COLUMN_NAME =     2;
-        const int COLUMN_GENDER =   3;
+        const int COLUMN_BARCODE = 0;
+        const int COLUMN_STATE = 1;
+        const int COLUMN_NAME = 2;
+        const int COLUMN_GENDER = 3;
         const int COLUMN_DEPARTMENT = 4;
         const int COLUMN_IDCARDNUMBER = 5;
-        const int COLUMN_COMMENT =  6;
-        const int COLUMN_RECPATH =  7;
+        const int COLUMN_COMMENT = 6;
+        const int COLUMN_RECPATH = 7;
 
         public string SelectedRecPath = "";
 
@@ -75,6 +79,13 @@ namespace dp2Circulation
 
         private void SelectPatronDialog_Load(object sender, EventArgs e)
         {
+            _stopManager.Initial(this.toolStripButton_stop,
+(object)this.toolStripLabel_message,
+(object)null);
+
+            stop = new DigitalPlatform.Stop();
+            stop.Register(this._stopManager, true);	// 和容器关联
+
             FillRecPath();
 
             EnableControls(false);
@@ -84,13 +95,33 @@ namespace dp2Circulation
 
             MessageVisible = MessageVisible;
 
-            API.PostMessage(this.Handle, WM_LOAD_ALL_DATA, 0, 0);
+            // API.PostMessage(this.Handle, WM_LOAD_ALL_DATA, 0, 0);
+            this.BeginInvoke(new Action(Initial));
+        }
+
+        private void SelectPatronDialog_FormClosing(object sender, FormClosingEventArgs e)
+        {
+#if NO
+            if (this._processing > 0)
+            {
+                if (this._stopManager != null)
+                    this._stopManager.DoStopAll(null);
+                this.Stopped = true;
+                e.Cancel = true;
+            }
+#endif
         }
 
         private void SelectPatronDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (this.m_webExternalHost_patron != null)
                 this.m_webExternalHost_patron.Destroy();
+
+            if (stop != null) // 脱离关联
+            {
+                stop.Unregister();	// 和容器关联
+                stop = null;
+            }
         }
 
         // 在 listview 中填充路径列。不填充其他列
@@ -114,8 +145,8 @@ namespace dp2Circulation
         // 初始化数据成员
         public int Initial(
             MainForm mainform,
-            LibraryChannel channel,
-            Stop stop,
+            //LibraryChannel channel,
+            //Stop stop,
             List<string> paths,
             string strMessage,
             out string strError)
@@ -123,14 +154,41 @@ namespace dp2Circulation
             strError = "";
 
             this.MainForm = mainform;
-            this.Channel = channel;
-            this.stop = stop;
+            //this.Channel = channel;
+            //this._stop = stop;
             this.RecPaths = paths;
 
             this.textBox_message.Text = strMessage;
             return 0;
         }
 
+        void Initial()
+        {
+            string strError = "";
+            int nRet = LoadAllItemData(out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+
+            // 然后许可界面
+            EnableControls(true);
+
+            // 默认选中第一行
+            if (this.listView_items.Items.Count > 0
+                && this.listView_items.SelectedItems.Count == 0)
+                this.listView_items.Items[0].Selected = true;
+
+            // 去掉全选
+            this.textBox_message.Select(0, 0);
+            // 更换焦点
+            this.listView_items.Focus();
+
+            if (this.Overflow == true)
+            {
+                MessageBox.Show(this, "当前窗口内未能显示命中的全部相关读者记录，请使用读者查询窗甄别和选定读者记录");
+            }
+            return;
+        }
+#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -170,12 +228,13 @@ namespace dp2Circulation
             }
             base.DefWndProc(ref m);
         }
+#endif
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public void EnableControls(bool bEnable)
+        public override void EnableControls(bool bEnable)
         {
             this.listView_items.Enabled = bEnable;
 
@@ -233,7 +292,6 @@ namespace dp2Circulation
             string strComment = DomUtil.GetElementText(dom.DocumentElement,
                 "comment");
 
-
             ListViewUtil.ChangeItemText(item, COLUMN_BARCODE, strBarcode);
             // item.SubItems.Add(strBarcode);
             ListViewUtil.ChangeItemText(item, COLUMN_STATE, strState);
@@ -281,12 +339,6 @@ namespace dp2Circulation
             return 0;
         }
 
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-
         // 装载全部行的数据
         int LoadAllItemData(out string strError)
         {
@@ -312,7 +364,7 @@ namespace dp2Circulation
 
             // 检查是否有重复的证条码号
             List<string> barcodes = new List<string>();
-            foreach(ListViewItem item in this.listView_items.Items)
+            foreach (ListViewItem item in this.listView_items.Items)
             {
                 string strBarcde = ListViewUtil.GetItemText(item, COLUMN_BARCODE);
                 if (string.IsNullOrEmpty(strBarcde) == true)
@@ -341,14 +393,17 @@ namespace dp2Circulation
 
             strError = "";
 
+            // TODO: 要能获取暗黑风格的 HTML
             string strFormatList = "xml,html";
             if (this.NoBorrowHistory == true)
                 strFormatList += ":noborrowhistory";
 
-            string strRecPath = ListViewUtil.GetItemText(item ,COLUMN_RECPATH);
+            string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
             string strPatronXml = "";
             string strPatronHtml = "";
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获取路径为 '" + strRecPath + "' 的读者记录 ...");
@@ -360,7 +415,7 @@ namespace dp2Circulation
             try
             {
                 string[] results = null;
-                long lRet = Channel.GetReaderInfo(
+                long lRet = channel.GetReaderInfo(
                     stop,
                     "@path:" + strRecPath,
                     strFormatList,  // "xml,html",
@@ -386,11 +441,13 @@ namespace dp2Circulation
             }
             finally
             {
+                this.Cursor = oldCursor;
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
-                this.Cursor = oldCursor;
+                this.ReturnChannel(channel);
             }
 
             ItemInfo info = new ItemInfo();
@@ -490,7 +547,7 @@ namespace dp2Circulation
         void Window_Error(object sender, HtmlElementErrorEventArgs e)
         {
             // if (this.MainForm.SuppressScriptErrors == true)
-                e.Handled = true;
+            e.Handled = true;
         }
 
         public bool ColorBarVisible
