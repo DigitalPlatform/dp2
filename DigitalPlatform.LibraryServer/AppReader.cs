@@ -283,7 +283,6 @@ namespace DigitalPlatform.LibraryServer
                 RenameBirthday(domNew);
 
                 // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
-
                 for (int i = 0; i < element_names.Length; i++)
                 {
                     string strElementName = element_names[i];
@@ -2044,7 +2043,6 @@ strLibraryCode);    // 读者所在的馆代码
 
             if (bExist == true) // 2008/5/29 
             {
-
                 // 比较新旧记录的条码号是否有改变
                 // return:
                 //      -1  出错

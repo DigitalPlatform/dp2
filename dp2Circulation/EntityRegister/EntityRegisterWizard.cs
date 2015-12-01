@@ -2571,7 +2571,7 @@ MessageBoxDefaultButton.Button1);
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在下载配置文件 ...");
-            Progress.BeginLoop();
+            // Progress.BeginLoop();
 
             m_nInGetCfgFile++;
 
@@ -2608,7 +2608,7 @@ MessageBoxDefaultButton.Button1);
             {
                 _base.ReturnChannel(channel);
 
-                Progress.EndLoop();
+                // Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
@@ -2672,9 +2672,9 @@ MessageBoxDefaultButton.Button1);
                 this._channels.Add(current_channel);
             }
 
-            this.Progress.OnStop += new StopEventHandler(this.DoStop);
+            //this.Progress.OnStop += new StopEventHandler(this.DoStop);
             //this.Progress.Initial("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
-            this.Progress.BeginLoop();
+            //this.Progress.BeginLoop();
             try
             {
                 int nCount = 0;
@@ -2758,8 +2758,8 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
-                this.Progress.EndLoop();
-                this.Progress.OnStop -= new StopEventHandler(this.DoStop);
+                //this.Progress.EndLoop();
+                //this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
 
                 lock(this._channels)

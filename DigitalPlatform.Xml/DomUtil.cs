@@ -1442,7 +1442,6 @@ namespace DigitalPlatform.Xml
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
-
             if (nodeFound == null)
             {
                 string[] aNodeName = strXpath.Split(new Char[] { '/' });

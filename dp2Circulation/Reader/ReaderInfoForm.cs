@@ -533,7 +533,7 @@ MessageBoxDefaultButton.Button2);
                     string strOutputRecPath = "";
                     int nRedoCount = 0;
 
-                    REDO:
+                REDO:
                     stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
@@ -963,7 +963,8 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
-        /*public*/ void SetMenuItemState()
+        /*public*/
+        void SetMenuItemState()
         {
             // 菜单
 
@@ -1532,7 +1533,7 @@ MessageBoxDefaultButton.Button2);
 #endif
                     ClearReaderHtmlPage();
 
-                    
+
                     /*
                     this.SetXmlToWebbrowser(this.webBrowser_xml,
                         strNewDefault);
@@ -1840,7 +1841,7 @@ strNewDefault);
                 // 输入的条码格式不合法
                 if (nRet == 0)
                 {
-                    strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确("+strError+")。";
+                    strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确(" + strError + ")。";
                     goto ERROR1;
                 }
 
@@ -2258,7 +2259,7 @@ strSavedXml);
                 "personalLibrary");
             DomUtil.DeleteElement(dom.DocumentElement,
                 "friends");
-                
+
 #if NO
             // 清除<dprms:file>元素
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
@@ -2382,7 +2383,7 @@ strSavedXml);
                 // 需要消除password/displayName元素内容
                 if (this.m_strSetAction == "new")
                 {
-                            // 清除一些保留字段的内容
+                    // 清除一些保留字段的内容
                     nRet = ClearReserveFields(
             ref strNewXml,
             out strError);
@@ -3472,7 +3473,7 @@ MessageBoxDefaultButton.Button2);
                     finally
                     {
                         EnableToolStrip(true);
-                    } 
+                    }
                     return;
 
                 case WM_PREV_RECORD:
@@ -3667,7 +3668,7 @@ MessageBoxDefaultButton.Button2);
                 strActionName = "押金退费";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的"+strActionName+"记录 ...");
+            stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -3706,7 +3707,7 @@ MessageBoxDefaultButton.Button2);
             LoadRecord(this.readerEditControl1.Barcode,
                 false);
 
-            MessageBox.Show(this, "创建"+strActionName+"记录成功");
+            MessageBox.Show(this, "创建" + strActionName + "记录成功");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -4417,7 +4418,7 @@ MessageBoxDefaultButton.Button2);
 
             this.EnableControls(false);
             bool bOldSendKeyEnabled = true;
-            Image image = null; 
+            Image image = null;
             try
             {
                 int nRet = StartIdcardChannel(
@@ -4682,7 +4683,7 @@ MessageBoxDefaultButton.Button1);
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
                 }
-                
+
                 /*
                 this.SetXmlToWebbrowser(this.webBrowser_xml,
                     strReaderXml);
@@ -4811,7 +4812,7 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在移动读者记录 " + this.readerEditControl1.RecPath + " 到 "+saveto_dlg.RecPath+"...");
+            stop.Initial("正在移动读者记录 " + this.readerEditControl1.RecPath + " 到 " + saveto_dlg.RecPath + "...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -5074,7 +5075,7 @@ MessageBoxDefaultButton.Button2);
             Application.DoEvents();
             try
             {
-                REDO:
+            REDO:
                 // return:
                 //      -1  error
                 //      0   放弃输入
@@ -5093,11 +5094,15 @@ MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
                     if (temp_result == DialogResult.Retry)
                         goto REDO;
-
                 }
 
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
+
+#if NO
+                strFingerprint = "12345";   // test
+                strVersion = "test-version";
+#endif
 
                 this.readerEditControl1.Fingerprint = strFingerprint;
                 this.readerEditControl1.FingerprintVersion = strVersion;
@@ -5124,9 +5129,9 @@ MessageBoxDefaultButton.Button1);
             {
             }
              * */
-                this.readerEditControl1.FingerprintVersion = "";
-                this.readerEditControl1.Fingerprint = "";
-                this.readerEditControl1.Changed = true;
+            this.readerEditControl1.FingerprintVersion = "";
+            this.readerEditControl1.Fingerprint = "";
+            this.readerEditControl1.Changed = true;
         }
 
         // 导出在借册条码号到文本文件

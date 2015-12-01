@@ -25,14 +25,6 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace dp2Library
 {
-    /*
-    public static class GlobalVars
-    {
-        public static LibraryApplication LibraryApplication = null;
-        public static object LockObject = new object();
-    }
-     * */
-
     [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple,
         Namespace = "http://dp2003.com/dp2library/")]
     public class LibraryService : ILibraryService, ILibraryServiceREST, IDisposable
@@ -41,7 +33,7 @@ namespace dp2Library
         SessionInfo sessioninfo = null;
         bool RestMode = false;
 
-        int m_nStop = 0;   // 0 没有中断 1 提出中断 2 已经进行了中断
+        int _nStop = 0;   // 0 没有中断 1 提出中断 2 已经进行了中断
 
         string _ip = "";    // 没有 sessioninfo 的通道，记载 ip，便于最后释放计数
 
@@ -179,11 +171,11 @@ namespace dp2Library
         {
             strError = "";
 
+            string strIP = "";
+            string strVia = "";
+            GetClientAddress(out strIP, out strVia);
             try
             {
-                string strIP = "";
-                string strVia = "";
-                GetClientAddress(out strIP, out strVia);
 
                 // sessioninfo = new SessionInfo(app, GetClientAddress());
                 this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
@@ -193,6 +185,9 @@ namespace dp2Library
             }
             catch (OutofSessionException ex)
             {
+                // TODO: 注意防止错误日志文件耗费太多空间
+                // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
+                this.WriteDebugInfo("*** 前端 '" + strIP + "@" + strVia + "' 新分配通道的请求被拒绝:" + ex.Message);
                 // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
 
                 // 为了防止攻击，需要立即切断通道。否则 1000 个通道很快会被耗尽
@@ -287,12 +282,12 @@ namespace dp2Library
 
                     // TODO: 需要按照前端 IP 地址对 sessionid 个数进行管理。如果超过一定数目则限制这个 IP 创建新的 sessionid，但不影响到其他 IP 创建新的 sessionid
 
+                    string strIP = "";
+                    string strVia = "";
+                    GetClientAddress(out strIP, out strVia);
                     try
                     {
-                        string strIP = "";
-                        string strVia = "";
-                        GetClientAddress(out strIP, out strVia);
-                        this.sessioninfo = this.app.SessionTable.PrepareSession(this.app, 
+                        this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
                             strIP,
                             strVia);
@@ -313,6 +308,10 @@ namespace dp2Library
                         result.ErrorInfo = "dp2Library 初始化通道失败: " + ex.Message;
                         if (ex is OutofSessionException)
                         {
+                            // TODO: 注意防止错误日志文件耗费太多空间
+                            // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
+                            this.WriteDebugInfo("*** 前端 '" + strIP + "@" + strVia + "' 新分配通道的请求被拒绝:" + ex.Message);
+
                             result.ErrorCode = ErrorCode.OutofSession;
                             // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
 
@@ -938,7 +937,7 @@ namespace dp2Library
 
         public int BeginSearch()
         {
-            this.m_nStop = 0;
+            this._nStop = 0;
             lock (this.m_nInSearching)
             {
                 int v = (int)m_nInSearching;
@@ -954,7 +953,7 @@ namespace dp2Library
                 int v = (int)m_nInSearching;
                 m_nInSearching = v - 1;
             }
-            this.m_nStop = 1;
+            this._nStop = 1;
         }
 
         public void Stop()
@@ -967,7 +966,7 @@ namespace dp2Library
 
             if (this.InSearching > 0)
             {
-                this.m_nStop = 1;
+                this._nStop = 1;
 
                 WriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
             }
@@ -1788,7 +1787,7 @@ namespace dp2Library
                         + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)   // 2007/9/14 
                         + "'><option warning='0'/><item><word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>"+strRelation+"</relation><dataType>"+strDataType+"</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     if (i > 0)
                     {
@@ -2032,14 +2031,14 @@ namespace dp2Library
         // 如果通讯中断，则也切断和dp2Kernel的通讯。
         void channel_IdleEvent(object sender, IdleEventArgs e)
         {
-            if (this.m_nStop == 1)
+            if (this._nStop == 1)
             {
                 RmsChannel channel = (RmsChannel)sender;
                 channel.Abort();
-                this.m_nStop = 2;
+                this._nStop = 2;
                 WriteDebugInfo("channel call abort");
             }
-            else if (this.m_nStop == 2)
+            else if (this._nStop == 2)
             {
                 // 已经实施了中断，但是还没有来得及生效
                 Thread.Sleep(10);
@@ -2099,7 +2098,7 @@ namespace dp2Library
                 sessioninfo.LibraryCodeList) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "读者库 '"+strDbName+"' 不在当前用户管辖范围内";
+                            result.ErrorInfo = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
                             result.ErrorCode = ErrorCode.SystemError;
                             return result;
                         }
@@ -2606,8 +2605,8 @@ namespace dp2Library
                         {
                             string strDbName = ResPath.GetDbName(record.Path);
                             bool bIsReaderRecord = app.IsReaderDbName(strDbName);
-                            if ( (bIsReader == true || bHasGetReaderInfoRight == false)
-                                && bIsReaderRecord == true )
+                            if ((bIsReader == true || bHasGetReaderInfoRight == false)
+                                && bIsReaderRecord == true)
                             {
                                 record.Path = "";
                                 record.Cols = null;
@@ -2921,7 +2920,7 @@ namespace dp2Library
                 {
                     // 如果为范围式
                     if (String.IsNullOrEmpty(strQueryWord) == false // 2013/3/25
-                            && strQueryWord.IndexOfAny(new char [] {'-','~'}) != -1)
+                            && strQueryWord.IndexOfAny(new char[] { '-', '~' }) != -1)
                     {
                         strRelation = "range";
                         strDataType = "number";
@@ -3771,7 +3770,7 @@ namespace dp2Library
                             strMatchStyle = "exact";
                         }
                     }
-                        // 2014/8/28
+                    // 2014/8/28
                     else if (StringUtil.IsInList("_time", strFromStyle) == true)
                     {
                         // 如果为范围式
@@ -3805,7 +3804,7 @@ namespace dp2Library
                         + (bDesc == true ? "<order>DESC</order>" : "")
                     + "<word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>"+strRelation+"</relation><dataType>"+strDataType+"</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     if (i > 0)
                     {
@@ -4340,7 +4339,7 @@ namespace dp2Library
                 {
                     // 将册记录数据从XML格式转换为HTML格式
                     nRet = app.ConvertItemXmlToHtml(
-                        app.CfgDir + "\\"+strItemDbType+"xml2html.cs",
+                        app.CfgDir + "\\" + strItemDbType + "xml2html.cs",
                         app.CfgDir + "\\" + strItemDbType + "xml2html.cs.ref",
                         strXml,
                         strItemRecPath, // 2009/10/18 
@@ -5099,7 +5098,7 @@ namespace dp2Library
                 itemDatabase = null;
             else
             {
-                strError = "不支持的数据库类型 '"+strDbType+"'";
+                strError = "不支持的数据库类型 '" + strDbType + "'";
                 return -1;
             }
 
@@ -5342,9 +5341,9 @@ namespace dp2Library
                     //      1   命中1条
                     //      >1  命中多于1条
                     nRet = app.GetItemRecXml(
-                            // sessioninfo.Channels,
+                        // sessioninfo.Channels,
                             channel,
-                            // strDbType == "item" ? strRefID : "@refid:" + strRefID,
+                        // strDbType == "item" ? strRefID : "@refid:" + strRefID,
                             strRefID,
                             "withresmetadata",
                             out strXml,
@@ -5366,7 +5365,7 @@ namespace dp2Library
                         goto ERROR1;
 
                     nRet = itemDatabase.GetItemRecXml(
-                            // sessioninfo.Channels,
+                        // sessioninfo.Channels,
                             channel,
                             locateParam,
                             "withresmetadata",
@@ -5395,7 +5394,7 @@ namespace dp2Library
                 result.Value = nRet;    // 可能会多于1条
             }
 
-            GET_DOM_AND_BIBLIORECPATH:
+        GET_DOM_AND_BIBLIORECPATH:
 
             if (string.IsNullOrEmpty(strXml) == false)   // 是否有节省运算的办法?
             {
@@ -5546,11 +5545,11 @@ namespace dp2Library
                     return result;
                 }
 
-                        // 获得一条册、期、订购、评注记录
-        // return:
-        //      -1  出错
-        //      0   没有找到
-        //      1   找到
+                // 获得一条册、期、订购、评注记录
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
                 nRet = GetItemXml(
                     "issue",
                     strRefID,
@@ -6215,7 +6214,7 @@ namespace dp2Library
                         + (bDesc == true ? "<order>DESC</order>" : "")
                         + "<word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>"+strRelation+"</relation><dataType>"+strDataType+"</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     if (i > 0)
                     {
@@ -7287,7 +7286,7 @@ namespace dp2Library
                         + (bDesc == true ? "<order>DESC</order>" : "")
                     + "<word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>"+strRelation+"</relation><dataType>"+strDataType+"</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     if (i > 0)
                     {
@@ -7689,7 +7688,7 @@ namespace dp2Library
                             || app.AccessLogDatabase == null)
                             lHintNext = -1;
                         else
-                            lHintNext = app.AccessLogDatabase.GetItemCount(strFileName.Substring(0,8));
+                            lHintNext = app.AccessLogDatabase.GetItemCount(strFileName.Substring(0, 8));
                         result.Value = 1;
                         result.ErrorInfo = strError;
                         return result;
@@ -7987,8 +7986,8 @@ namespace dp2Library
                     result.ErrorInfo = "操作批处理任务 被拒绝。只有全局用户才能进行这样的操作";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
-                } 
-                
+                }
+
                 if (StringUtil.IsInList("batchtask", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
@@ -8682,7 +8681,7 @@ namespace dp2Library
 
             DirectoryInfo di = new DirectoryInfo(strDir);
             FileSystemInfo[] subs = di.GetFileSystemInfos();
-            
+
             for (int i = 0; i < subs.Length; i++)
             {
                 FileSystemInfo sub = subs[i];
@@ -8723,7 +8722,7 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
-            try 
+            try
             {
                 {
                     string strLibraryCode = ""; // 实际写入操作的读者库馆代码
@@ -8879,14 +8878,14 @@ namespace dp2Library
                         return result;
                     }
 
-                    strError = "未知的 strAction '"+strAction+"'";
+                    strError = "未知的 strAction '" + strAction + "'";
                     goto ERROR1;
                 }
                 else
                 {
                     result.ErrorCode = ErrorCode.SystemError;
                     result.Value = -1;
-                    result.ErrorInfo = "暂不支持 strCategory '"+strCategory+"'";
+                    result.ErrorInfo = "暂不支持 strCategory '" + strCategory + "'";
 
                     return result;
                 }
@@ -8922,7 +8921,7 @@ namespace dp2Library
             string strFileName,
             long lStart,
             long lLength,
-            out byte [] baContent,
+            out byte[] baContent,
             out string strFileTime)
         {
             string strError = "";
@@ -8933,102 +8932,102 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
-            try 
+            try
             {
-            // 权限判断
-            if (StringUtil.IsInList("getsystemparameter", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
-            {
-                result.Value = -1;
-                result.ErrorInfo = "获得系统文件的操作被拒绝。不具备order或getsystemparameter权限。";
-                result.ErrorCode = ErrorCode.AccessDenied;
-                return result;
-            }
-
-            if (strCategory == "cfgs")
-            {
-                int nMaxLength = 100 * 1024;
-                // TODO: 为了安全，将最后路径限定在特定子目录下
-                string strFilePath = app.DataDir + "/cfgs/" + strFileName;
-
-                if (lStart >= 0)
+                // 权限判断
+                if (StringUtil.IsInList("getsystemparameter", sessioninfo.RightsOrigin) == false
+                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                 {
-                    try
-                    {
-                        using (Stream stream = File.Open(
-                            strFilePath,
-                            FileMode.Open,
-                            FileAccess.ReadWrite,
-                            FileShare.ReadWrite))
-                        {
-                            if (lStart >= stream.Length)
-                            {
-                                strError = "lStart参数值 " + lStart.ToString() + " 超过文件长度 " + stream.Length.ToString();
-                                goto ERROR1;
-                            }
+                    result.Value = -1;
+                    result.ErrorInfo = "获得系统文件的操作被拒绝。不具备order或getsystemparameter权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
-                            if (lLength == -1)
-                                lLength = stream.Length - lStart;
-                            else
+                if (strCategory == "cfgs")
+                {
+                    int nMaxLength = 100 * 1024;
+                    // TODO: 为了安全，将最后路径限定在特定子目录下
+                    string strFilePath = app.DataDir + "/cfgs/" + strFileName;
+
+                    if (lStart >= 0)
+                    {
+                        try
+                        {
+                            using (Stream stream = File.Open(
+                                strFilePath,
+                                FileMode.Open,
+                                FileAccess.ReadWrite,
+                                FileShare.ReadWrite))
                             {
-                                if (lStart + lLength > stream.Length)
+                                if (lStart >= stream.Length)
                                 {
-                                    strError = "lLength参数值 "+lLength.ToString()+" 超过范围。(lStart参数值 " + lStart.ToString() + " ,文件长度 " + stream.Length.ToString() + ")";
+                                    strError = "lStart参数值 " + lStart.ToString() + " 超过文件长度 " + stream.Length.ToString();
                                     goto ERROR1;
                                 }
+
+                                if (lLength == -1)
+                                    lLength = stream.Length - lStart;
+                                else
+                                {
+                                    if (lStart + lLength > stream.Length)
+                                    {
+                                        strError = "lLength参数值 " + lLength.ToString() + " 超过范围。(lStart参数值 " + lStart.ToString() + " ,文件长度 " + stream.Length.ToString() + ")";
+                                        goto ERROR1;
+                                    }
+                                }
+
+                                // 每次传输限制在100K以内
+                                if (lLength > nMaxLength)
+                                    lLength = nMaxLength;
+
+                                baContent = new byte[lLength];
+
+                                stream.Seek(lStart, SeekOrigin.Begin);
+                                stream.Read(baContent, 0, (int)lLength);
+                                result.Value = stream.Length;
                             }
-
-                            // 每次传输限制在100K以内
-                            if (lLength > nMaxLength)
-                                lLength = nMaxLength;
-
-                            baContent = new byte [lLength];
-
-                            stream.Seek(lStart, SeekOrigin.Begin);
-                            stream.Read(baContent, 0, (int)lLength);
-                            result.Value = stream.Length;
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            strError = "文件 " + strFileName + "没有找到";
+                            goto ERROR1;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "打开文件 '" + strFileName + "' 时发生错误: " + ex.Message;
+                            goto ERROR1;
                         }
                     }
-                    catch (FileNotFoundException)
+
+
                     {
-                        strError = "文件 " + strFileName + "没有找到";
-                        goto ERROR1;
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "打开文件 '" + strFileName + "' 时发生错误: " + ex.Message;
-                        goto ERROR1;
+                        // 只获得文件长度和最后修改时间
+                        try
+                        {
+                            FileInfo fi = new FileInfo(strFilePath);
+                            result.Value = fi.Length;
+                            strFileTime = DateTimeUtil.Rfc1123DateTimeString(fi.LastWriteTimeUtc);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = ExceptionUtil.GetAutoText(ex);
+                            goto ERROR1;
+                        }
                     }
                 }
-
-
+                else
                 {
-                    // 只获得文件长度和最后修改时间
-                    try
-                    {
-                        FileInfo fi = new FileInfo(strFilePath);
-                        result.Value = fi.Length;
-                        strFileTime = DateTimeUtil.Rfc1123DateTimeString(fi.LastWriteTimeUtc);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = ExceptionUtil.GetAutoText(ex);
-                        goto ERROR1;
-                    }
+                    strError = "未知的 strCategory 值 '" + strCategory + "'";
+                    goto ERROR1;
                 }
-            }
-            else
-            {
-                strError = "未知的 strCategory 值 '" + strCategory + "'";
-                goto ERROR1;
-            }
 
-            return result;
-        ERROR1:
-            result.Value = -1;
-            result.ErrorCode = ErrorCode.SystemError;
-            result.ErrorInfo = strError;
-            return result;
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strError;
+                return result;
             }
             catch (Exception ex)
             {
@@ -9044,7 +9043,7 @@ namespace dp2Library
 
         static string MakeFileName(DirectoryInfo info)
         {
-            return info.Name + "|" + info.LastWriteTime.ToString("u") + "|dir"; 
+            return info.Name + "|" + info.LastWriteTime.ToString("u") + "|dir";
         }
 
         static string MakeFileName(FileInfo info)
@@ -10557,8 +10556,8 @@ namespace dp2Library
                         {
                             strError = "分馆用户不允许修改<dup>元素定义";
                             goto ERROR1;
-                        } 
-                        
+                        }
+
                         XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
                         if (root == null)
                         {
@@ -10897,7 +10896,7 @@ namespace dp2Library
                         || strAction == "repairitemside")
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修复借还信息的操作被拒绝。只有全局用户才能进行 strAction 为 '"+strAction+"' 的操作。";
+                        result.ErrorInfo = "修复借还信息的操作被拒绝。只有全局用户才能进行 strAction 为 '" + strAction + "' 的操作。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11847,7 +11846,7 @@ namespace dp2Library
                     {
                         result.ErrorCode = ErrorCode.NotFound;
                         result.Value = -1;
-                    } 
+                    }
                     else if (lRet == -1)
                     {
                         result.ErrorCode = ErrorCode.SystemError;
@@ -11927,7 +11926,7 @@ namespace dp2Library
                         out bReaderDbInCirculation,
                         out strLibraryCode) == true)
                     {
-                        if (bIsReader == true )
+                        if (bIsReader == true)
                         {
                             DigitalPlatform.LibraryServer.LibraryApplication.ResPathType type = LibraryApplication.GetResPathType(strResPath);
                             if (type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.Record || type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.CfgFile)
@@ -13485,7 +13484,7 @@ out strError);
                         + (bDesc == true ? "<order>DESC</order>" : "")
                         + "<word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>"+strRelation+"</relation><dataType>"+strDataType+"</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     if (i > 0)
                     {
@@ -13886,7 +13885,7 @@ out strError);
                 try
                 {
                     nRet = app.Exists(
-                        ref this.m_nStop,
+                        ref this._nStop,
         strDateRangeString,
         out dates,
         out strError);
@@ -13944,7 +13943,7 @@ out strError);
                     // 合并时间范围内的多个XML文件
                     nRet = app.MergeXmlFiles(
                         "", // sessioninfo.LibraryCodeList,
-                        ref this.m_nStop,
+                        ref this._nStop,
                         strDateRangeString,
                         strStyle,
                         strOutputFilename,

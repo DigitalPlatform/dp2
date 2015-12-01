@@ -939,13 +939,15 @@ out strError);
 
             if (bDoEvents == true)
             {
+                /*
                 try
                 {
-                    Application.DoEvents();	// 出让界面控制权
                 }
                 catch
                 {
                 }
+                 * */
+                    Application.DoEvents();	// 出让界面控制权
             }
 
             System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
@@ -1163,7 +1165,6 @@ out strError);
             {
                 this.EndSearch();
             }
-
         }
 
         /// <summary>
@@ -9245,7 +9246,6 @@ out strError);
                         this.m_bStoped = true;
                         return;
                     }
-
                     // 否则，就走到Abort()那里
                 }
             }
