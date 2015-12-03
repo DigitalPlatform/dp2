@@ -132,7 +132,7 @@ namespace DigitalPlatform.Script
         /// <param name="strMARC">MARC机内格式字符串</param>
         /// <param name="strPreferredType">优先使用何种大小类型</param>
         /// <returns>返回封面图像 URL。空表示没有找到</returns>
-        public static string GetCoverImageUrl(string strMARC, 
+        public static string GetCoverImageUrl(string strMARC,
             string strPreferredType = "MediumImage")
         {
             string strLargeUrl = "";
@@ -196,7 +196,7 @@ namespace DigitalPlatform.Script
         // 对象ID $8
         // 对象尺寸 $s
         // 公开注释 $z
-        public static string BuildObjectHtmlTable(string strMARC, 
+        public static string BuildObjectHtmlTable(string strMARC,
             string strRecPath,
             BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount)
         {
@@ -308,9 +308,9 @@ namespace DigitalPlatform.Script
                 text.Append("<td class='type'>" + HttpUtility.HtmlEncode(s_3 + " " + strType) + "</td>");
                 text.Append("<td class='hitcount' style='text-align: right;'>" + strHitCountImage + "</td>");
                 text.Append("<td class='link' style='word-break:break-all;'>" + urlTemp + "</td>");
-                text.Append("<td class='mime'>"+HttpUtility.HtmlEncode(s_q)+"</td>");
-                text.Append("<td class='size'>"+HttpUtility.HtmlEncode(strSize)+"</td>");
-                text.Append("<td class='bytes'>"+HttpUtility.HtmlEncode(s_s)+"</td>");
+                text.Append("<td class='mime'>" + HttpUtility.HtmlEncode(s_q) + "</td>");
+                text.Append("<td class='size'>" + HttpUtility.HtmlEncode(strSize) + "</td>");
+                text.Append("<td class='bytes'>" + HttpUtility.HtmlEncode(s_s) + "</td>");
                 text.Append("</tr>");
 
                 if (string.IsNullOrEmpty(s_z) == false)

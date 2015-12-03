@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.IO;
 using System.Xml;
@@ -8,20 +8,19 @@ using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.Script
 {
+    // å†…å­˜ä¸­çš„ä¸€ä¸ªæ–‡ä»¶
+    [Serializable()]
+    public class ProjectFile
+    {
+        public string PureName = "";	// çº¯æ–‡ä»¶å
 
-	// ÄÚ´æÖĞµÄÒ»¸öÎÄ¼ş
-	[Serializable()]
-	public class ProjectFile
-	{
-		public string PureName = "";	// ´¿ÎÄ¼şÃû
-
-		public byte[] Content = null;	// ÎÄ¼şÄÚÈİ
+        public byte[] Content = null;	// æ–‡ä»¶å†…å®¹
 
         // Exceptions:
-        //      Exception   ÎÄ¼şÌ«´óÊ±(>1024*1024)Å×³ö´ËÒì³£
-		public static ProjectFile MakeProjectFile(string strFileName)
-		{
-			ProjectFile file = new ProjectFile();
+        //      Exception   æ–‡ä»¶å¤ªå¤§æ—¶(>1024*1024)æŠ›å‡ºæ­¤å¼‚å¸¸
+        public static ProjectFile MakeProjectFile(string strFileName)
+        {
+            ProjectFile file = new ProjectFile();
 
             file.PureName = PathUtil.PureName(strFileName);
 
@@ -44,11 +43,11 @@ namespace DigitalPlatform.Script
             }
         }
 
-		// Ğ´ÈëÖ¸¶¨Ä¿Â¼
-		public void WriteToLocate(string strLocate,
+        // å†™å…¥æŒ‡å®šç›®å½•
+        public void WriteToLocate(string strLocate,
             bool bOverwrite)
-		{
-			string strFileName = strLocate + "\\" + this.PureName;
+        {
+            string strFileName = strLocate + "\\" + this.PureName;
 
             if (bOverwrite == true)
                 File.Delete(strFileName);
@@ -65,7 +64,7 @@ namespace DigitalPlatform.Script
                     fs.Write(this.Content, 0, this.Content.Length);
                 }
             }
-		}
+        }
 
         // 2011/11/25
         public MemoryStream GetMemoryStream()
@@ -80,51 +79,51 @@ namespace DigitalPlatform.Script
             fs.Seek(0, SeekOrigin.Begin);
             return fs;
         }
-	}
+    }
 
-	/// <summary>
-	/// ´æ´¢ºÍ½»»»ProjectĞÅÏ¢µÄ°ü×°Àà
-	/// </summary>
-	[Serializable()]
-	public class Project : ArrayList
-	{
-		public string NamePath = "";	// ´øÄ¿Â¼Â·¾¶µÄÃû×Ö
+    /// <summary>
+    /// å­˜å‚¨å’Œäº¤æ¢Projectä¿¡æ¯çš„åŒ…è£…ç±»
+    /// </summary>
+    [Serializable()]
+    public class Project : ArrayList
+    {
+        public string NamePath = "";	// å¸¦ç›®å½•è·¯å¾„çš„åå­—
 
-		public string Locate = "";		// ·½°¸ËùÔÚ´ÅÅÌÄ¿Â¼
+        public string Locate = "";		// æ–¹æ¡ˆæ‰€åœ¨ç£ç›˜ç›®å½•
 
-		public Project()
-		{
-		}
+        public Project()
+        {
+        }
 
-		// ¹¹ÔìÒ»¸öProject¶ÔÏó
-		// strLocate	·½°¸ËùÔÚ´ÅÅÌÄ¿Â¼
+        // æ„é€ ä¸€ä¸ªProjectå¯¹è±¡
+        // strLocate	æ–¹æ¡ˆæ‰€åœ¨ç£ç›˜ç›®å½•
         // Exceptions:
-        //      Exception   MakeProjectFile()¿ÉÄÜÅ×³ö´ËÒì³£
-		static public Project MakeProject(string strNamePath,
-			string strLocate)
-		{
-			Project project = new Project();
+        //      Exception   MakeProjectFile()å¯èƒ½æŠ›å‡ºæ­¤å¼‚å¸¸
+        static public Project MakeProject(string strNamePath,
+            string strLocate)
+        {
+            Project project = new Project();
 
-			project.NamePath = strNamePath;
-			project.Locate = strLocate;
+            project.NamePath = strNamePath;
+            project.Locate = strLocate;
 
-			// ½«Ä¿Â¼ÖĞËùÓĞÎÄ¼şÖğ¸ö´ò°ü
-			DirectoryInfo di = new DirectoryInfo(strLocate);
+            // å°†ç›®å½•ä¸­æ‰€æœ‰æ–‡ä»¶é€ä¸ªæ‰“åŒ…
+            DirectoryInfo di = new DirectoryInfo(strLocate);
 
-			FileInfo[] afi = di.GetFiles();
+            FileInfo[] afi = di.GetFiles();
 
-			for(int i=0;i<afi.Length;i++)
-			{
-				string strFileName = afi[i].Name;
-				if (strFileName.Length > 0
-					&& strFileName[0] == '~')
-					continue;	// ºöÂÔÁÙÊ±ÎÄ¼ş
+            for (int i = 0; i < afi.Length; i++)
+            {
+                string strFileName = afi[i].Name;
+                if (strFileName.Length > 0
+                    && strFileName[0] == '~')
+                    continue;	// å¿½ç•¥ä¸´æ—¶æ–‡ä»¶
 
-				project.Add(ProjectFile.MakeProjectFile(afi[i].FullName));
-			}
+                project.Add(ProjectFile.MakeProjectFile(afi[i].FullName));
+            }
 
-			return project;
-		}
+            return project;
+        }
 
         // 2011/11/25
         public string GetHostName()
@@ -166,34 +165,34 @@ namespace DigitalPlatform.Script
             return null;    // not found
         }
 
-		public void WriteToLocate(string strLocateParam,
+        public void WriteToLocate(string strLocateParam,
             bool bOverwrite)
-		{
-			string strLocate = null;
+        {
+            string strLocate = null;
 
-			if (strLocateParam != null)
-				strLocate = strLocateParam;
-			else
-				strLocate = this.Locate;
+            if (strLocateParam != null)
+                strLocate = strLocateParam;
+            else
+                strLocate = this.Locate;
 
-			// ÊÇ·ñÏÈÉ¾³ıÄ¿Â¼ÖĞÔ­À´µÄÈ«²¿ÎÄ¼ş?
+            // æ˜¯å¦å…ˆåˆ é™¤ç›®å½•ä¸­åŸæ¥çš„å…¨éƒ¨æ–‡ä»¶?
 
-			PathUtil.CreateDirIfNeed(strLocate);
+            PathUtil.CreateDirIfNeed(strLocate);
 
-			for(int i = 0;i<this.Count;i++)
-			{
-				ProjectFile file = (ProjectFile)this[i];
+            for (int i = 0; i < this.Count; i++)
+            {
+                ProjectFile file = (ProjectFile)this[i];
 
-				file.WriteToLocate(strLocate, bOverwrite);
-			}
-		}
-	}
+                file.WriteToLocate(strLocate, bOverwrite);
+            }
+        }
+    }
 
 
-	// ProjectÈİÆ÷
-	[Serializable()]
-	public class ProjectCollection : ArrayList
-	{
+    // Projectå®¹å™¨
+    [Serializable()]
+    public class ProjectCollection : ArrayList
+    {
 
-	}
+    }
 }

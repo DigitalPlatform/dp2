@@ -8,68 +8,68 @@ using System.Xml;
 
 namespace DigitalPlatform.Script
 {
-	/// <summary>
-	/// Summary description for SelPinyinDlg.
-	/// </summary>
-	public class SelPinyinDlg : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// Summary description for SelPinyinDlg.
+    /// </summary>
+    public class SelPinyinDlg : System.Windows.Forms.Form
+    {
         static string SelectedChar = "⁞";
 
         const int WM_FIRST_SETFOCUS = API.WM_USER + 200;
 
-		public string SampleText = "";
-		public int    Offset = -1;	// Hanzi这个汉字在SampleText中所在的偏移
-		public string Pinyins = "";
+        public string SampleText = "";
+        public int Offset = -1;	// Hanzi这个汉字在SampleText中所在的偏移
+        public string Pinyins = "";
 
         public string ActivePinyin = "";    // 列表中应该被首先选择的拼音
 
-		public string Hanzi = "";
+        public string Hanzi = "";
         public string ResultPinyin = "";
         public TextBox textBox_sampleText;
         private System.Windows.Forms.Label label_largeHanzi;
         public ListBox listBox_multiPinyin;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
         private Button button_stop;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public SelPinyinDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public SelPinyinDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SelPinyinDlg));
             this.textBox_sampleText = new System.Windows.Forms.TextBox();
             this.label_largeHanzi = new System.Windows.Forms.Label();
@@ -173,44 +173,44 @@ namespace DigitalPlatform.Script
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void SelPinyinDlg_Load(object sender, System.EventArgs e)
-		{
-			this.label_largeHanzi.Font = new Font("Arial", 
-				Math.Min(label_largeHanzi.Width,
-				label_largeHanzi.Height) - 8,
-				GraphicsUnit.Pixel);
-			
-			this.textBox_sampleText.Text = MakeShorterSampleText(this.SampleText,
-				this.Offset);
-			this.label_largeHanzi.Text = Hanzi;
-		
-			FillList();
+        private void SelPinyinDlg_Load(object sender, System.EventArgs e)
+        {
+            this.label_largeHanzi.Font = new Font("Arial",
+                Math.Min(label_largeHanzi.Width,
+                label_largeHanzi.Height) - 8,
+                GraphicsUnit.Pixel);
+
+            this.textBox_sampleText.Text = MakeShorterSampleText(this.SampleText,
+                this.Offset);
+            this.label_largeHanzi.Text = Hanzi;
+
+            FillList();
 
             API.PostMessage(this.Handle, WM_FIRST_SETFOCUS, 0, 0);
-			// this.listBox1.Focus();
-		}
+            // this.listBox1.Focus();
+        }
 
-		void FillList()
-		{
-			listBox_multiPinyin.Items.Clear();
+        void FillList()
+        {
+            listBox_multiPinyin.Items.Clear();
 
-			if (Pinyins == "")
-				return;
+            if (Pinyins == "")
+                return;
 
             int nActiveIndex = -1;
-			string[] aPart = Pinyins.Split(new char[]{';'});
-			for(int i=0;i<aPart.Length; i++)
-			{
-				string strOnePinyin = aPart[i].Trim();
-				if (strOnePinyin == "")
-					continue;
-				listBox_multiPinyin.Items.Add(strOnePinyin);
+            string[] aPart = Pinyins.Split(new char[] { ';' });
+            for (int i = 0; i < aPart.Length; i++)
+            {
+                string strOnePinyin = aPart[i].Trim();
+                if (strOnePinyin == "")
+                    continue;
+                listBox_multiPinyin.Items.Add(strOnePinyin);
                 if (strOnePinyin == this.ActivePinyin)
                     nActiveIndex = i;
-			}
+            }
 
             if (nActiveIndex != -1)
             {
@@ -221,27 +221,27 @@ namespace DigitalPlatform.Script
             }
             else
                 listBox_multiPinyin.SelectedIndex = 0;
-		}
+        }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (listBox_multiPinyin.SelectedIndex == -1) 
-			{
-				MessageBox.Show(this, "尚未选择事项...");
-				return;
-			}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (listBox_multiPinyin.SelectedIndex == -1)
+            {
+                MessageBox.Show(this, "尚未选择事项...");
+                return;
+            }
 
             this.ResultPinyin = ((string)listBox_multiPinyin.Items[listBox_multiPinyin.SelectedIndex]).Replace(SelectedChar, "");
-		
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
 #if NO
         public string FirstPinyin
@@ -269,65 +269,64 @@ namespace DigitalPlatform.Script
             return aPart[0].Trim();
         }
 
-		private void label_largeHanzi_SizeChanged(object sender, System.EventArgs e)
-		{
+        private void label_largeHanzi_SizeChanged(object sender, System.EventArgs e)
+        {
             float fFontSize = Math.Min(label_largeHanzi.Width,
-                label_largeHanzi.Height - (label_largeHanzi.Height/ 4));
+                label_largeHanzi.Height - (label_largeHanzi.Height / 4));
             fFontSize = Math.Max(fFontSize, 8);
-			this.label_largeHanzi.Font = new Font(this.Font.FontFamily,
+            this.label_largeHanzi.Font = new Font(this.Font.FontFamily,
                 fFontSize,
-				GraphicsUnit.Pixel);
-		}
+                GraphicsUnit.Pixel);
+        }
 
+        string MakeShorterSampleText(string strText,
+            int nOffset)
+        {
+            if (strText == "")
+                return "";
+            int nHalf = 20;
 
-		string MakeShorterSampleText(string strText,
-			int nOffset)
-		{
-			if (strText == "")
-				return "";
-			int nHalf = 20;
+            if (nOffset == -1)
+                return strText;
 
-			if (nOffset == -1)
-				return strText;
-
-			int nLeft = nOffset;
-			int nRight = strText.Length - nOffset - 1;
-			int nCenter = nOffset;
+            int nLeft = nOffset;
+            int nRight = strText.Length - nOffset - 1;
+            int nCenter = nOffset;
 
             strText = strText.Insert(nCenter + 1, " › ");
             strText = strText.Insert(nCenter, " ‹ ");
 
-			nCenter ++;
-			nLeft ++;
-			nRight ++;
+            nCenter++;
+            nLeft++;
+            nRight++;
 
-			bool bLeftTruncated = false;
-			bool bRightTruncated = false;
-			if (nLeft > nHalf)
-			{
-				strText = strText.Remove(0, nLeft - nHalf);
-				nCenter -= nLeft - nHalf;
-				bLeftTruncated = true;
-			}
+            bool bLeftTruncated = false;
+            bool bRightTruncated = false;
+            if (nLeft > nHalf)
+            {
+                strText = strText.Remove(0, nLeft - nHalf);
+                nCenter -= nLeft - nHalf;
+                bLeftTruncated = true;
+            }
 
-			if (nRight > nHalf)
-			{
-				strText = strText.Substring(0, nCenter + nHalf);
-				bRightTruncated = true;
-			}
+            if (nRight > nHalf)
+            {
+                strText = strText.Substring(0, nCenter + nHalf);
+                bRightTruncated = true;
+            }
 
-			if (bLeftTruncated == true)
-				strText = "... " + strText;
-			if (bRightTruncated == true)
-				strText =  strText + " ...";
+            if (bLeftTruncated == true)
+                strText = "... " + strText;
+            if (bRightTruncated == true)
+                strText = strText + " ...";
 
-			return strText;
-		}
+            return strText;
+        }
 
-		private void listBox_multiPinyin_DoubleClick(object sender, System.EventArgs e)
-		{
-			button_OK_Click(null, null);
-		}
+        private void listBox_multiPinyin_DoubleClick(object sender, System.EventArgs e)
+        {
+            button_OK_Click(null, null);
+        }
 
         private void button_stop_Click(object sender, EventArgs e)
         {
@@ -456,7 +455,7 @@ namespace DigitalPlatform.Script
                 }
             }
         }
-	}
+    }
 
     // 加拼音时的大小写风格
     public enum PinyinStyle

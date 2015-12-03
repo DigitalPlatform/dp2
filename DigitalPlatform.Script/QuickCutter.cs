@@ -399,7 +399,7 @@ namespace DigitalPlatform.Script
                     // 2012/12/8
                     if (result_node == null)
                     {
-                        strError = "著者字符串 '"+strAuthor+"' 比 '"+strCurrentText+"' 要小，缺乏号码定义";
+                        strError = "著者字符串 '" + strAuthor + "' 比 '" + strCurrentText + "' 要小，缺乏号码定义";
                         return 0;
                         // result_node = FirstChild(group);
                     }
@@ -446,7 +446,7 @@ namespace DigitalPlatform.Script
         static XmlNode PrevNode(XmlNode node)
         {
             node = node.PreviousSibling;
-            while(node != null && node.NodeType != XmlNodeType.Element )    // 2012/12/8 把 node != null 调整到前面了
+            while (node != null && node.NodeType != XmlNodeType.Element)    // 2012/12/8 把 node != null 调整到前面了
             {
                 node = node.PreviousSibling;
             }
@@ -463,7 +463,7 @@ namespace DigitalPlatform.Script
             strError = "";
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
-            foreach(XmlNode node in nodes)
+            foreach (XmlNode node in nodes)
             {
                 XmlAttribute attr = node.Attributes["n"];
                 if (attr != null)
@@ -485,7 +485,7 @@ namespace DigitalPlatform.Script
         {
             strError = "";
 
-            for(char ch = 'A'; ch <= 'Z'; ch++)
+            for (char ch = 'A'; ch <= 'Z'; ch++)
             {
                 XmlNode group = dom.DocumentElement.SelectSingleNode("group[@t='" + ch.ToString() + "']");
                 if (group == null)
@@ -543,7 +543,7 @@ namespace DigitalPlatform.Script
 
                     if (string.Compare(strPrevText, strCurrentText, true) >= 0)
                     {
-                        strError += "group "+ch.ToString()+" 下元素 "+node.OuterXml+" 中t属性值不正确，应当大于前一个元素的t属性值 " + strPrevText + "\r\n";
+                        strError += "group " + ch.ToString() + " 下元素 " + node.OuterXml + " 中t属性值不正确，应当大于前一个元素的t属性值 " + strPrevText + "\r\n";
                     }
 
                     if (string.Compare(strPrevNumber, strCurrentNumber, true) >= 0)

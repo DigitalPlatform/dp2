@@ -1,23 +1,23 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace DigitalPlatform.Script
 {
-    // ½Å±¾¹¦ÄÜÃû³Æ
+    // è„šæœ¬åŠŸèƒ½åç§°
     public class ScriptAction
     {
         public string Name = "";
         public string Comment = "";
-        public string ScriptEntry = "";	// ½Å±¾Èë¿Úº¯ÊıÃû
+        public string ScriptEntry = "";	// è„šæœ¬å…¥å£å‡½æ•°å
 
         public bool Active = false;
 
-        public char ShortcutKey = (char)0;  // ¿ì½İ¼ü 2011/8/3
+        public char ShortcutKey = (char)0;  // å¿«æ·é”® 2011/8/3
     }
 
     /// <summary>
-    /// Ctrl+A ¹¦ÄÜÃû³Æ¼¯ºÏ
+    /// Ctrl+A åŠŸèƒ½åç§°é›†åˆ
     /// </summary>
     public class ScriptActionCollection : List<ScriptAction>
     {
@@ -28,7 +28,7 @@ namespace DigitalPlatform.Script
             //
         }
 
-        // ¼ÓÈëÒ»¸öĞÂÊÂÏî
+        // åŠ å…¥ä¸€ä¸ªæ–°äº‹é¡¹
         public ScriptAction NewItem(string strName,
             string strComment,
             string strScriptEntry,
@@ -47,7 +47,7 @@ namespace DigitalPlatform.Script
         }
 
         // 2011/8/3
-        // ¼ÓÈëÒ»¸ö·Ö¸îĞĞ
+        // åŠ å…¥ä¸€ä¸ªåˆ†å‰²è¡Œ
         public ScriptAction NewSeperator()
         {
             ScriptAction item = new ScriptAction();
