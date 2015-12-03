@@ -306,6 +306,7 @@ namespace dp2Circulation
     class MyWebClient : WebClient
     {
         public int Timeout = -1;
+        public int ReadWriteTimeout = -1;
 
         HttpWebRequest _request = null;
 
@@ -319,6 +320,8 @@ namespace dp2Circulation
 #endif
             if (this.Timeout != -1)
                 _request.Timeout = this.Timeout;
+            if (this.ReadWriteTimeout != -1)
+                _request.ReadWriteTimeout = this.ReadWriteTimeout;
             return _request;
         }
 

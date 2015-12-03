@@ -28,8 +28,8 @@ namespace DigitalPlatform
      */
 
     // Stop事件
-	public delegate void StopEventHandler(object sender,
-	    StopEventArgs e);
+    public delegate void StopEventHandler(object sender,
+        StopEventArgs e);
 
     public class StopEventArgs : EventArgs
     {
@@ -125,8 +125,11 @@ namespace DigitalPlatform
 
         public void Unregister(bool bActive = true)
         {
-            m_manager.Remove(this, false);
-            m_manager = null;
+            if (m_manager != null)
+            {
+                m_manager.Remove(this, false);
+                m_manager = null;
+            }
         }
 
         int _inBeginLoop = 0;
@@ -168,36 +171,42 @@ namespace DigitalPlatform
         //      false   失败。BeginLoop() 发生了嵌套
         public void BeginLoop()
         {
+#if NO
             if (_inBeginLoop > 0 
                 && _allowNest == false)
                 throw new Exception("针对同一 Stop 对象，BeginLoop 不能嵌套调用");
+#endif
 
-            _inBeginLoop++;
-            nStop = 0;	// 正在处理
-
-            if (m_manager != null)
+            int nRet = Interlocked.Increment(ref _inBeginLoop);
+            // _inBeginLoop++;
+            if (nRet == 1)
             {
-                bool bIsActive = m_manager.IsActive(this);
+                nStop = 0;	// 正在处理
 
-                if (this.OnBeginLoop != null)
+                if (m_manager != null)
                 {
-                    BeginLoopEventArgs e = new BeginLoopEventArgs();
-                    e.IsActive = bIsActive;
-                    this.OnBeginLoop(this, e);
-                }
+                    bool bIsActive = m_manager.IsActive(this);
 
-                if (bIsActive == true)
-                {
-                    m_manager.ChangeState(this,
-                        StateParts.All | StateParts.SaveEnabledState,
-                        true);
-                }
-                else
-                {
-                    // 不在激活位置的stop，不要记忆原有的reversebutton状态。因为这样会记忆到别人的状态
-                    m_manager.ChangeState(this,
-                        StateParts.All ,
-                        true);
+                    if (this.OnBeginLoop != null)
+                    {
+                        BeginLoopEventArgs e = new BeginLoopEventArgs();
+                        e.IsActive = bIsActive;
+                        this.OnBeginLoop(this, e);
+                    }
+
+                    if (bIsActive == true)
+                    {
+                        m_manager.ChangeState(this,
+                            StateParts.All | StateParts.SaveEnabledState,
+                            true);
+                    }
+                    else
+                    {
+                        // 不在激活位置的stop，不要记忆原有的reversebutton状态。因为这样会记忆到别人的状态
+                        m_manager.ChangeState(this,
+                            StateParts.All,
+                            true);
+                    }
                 }
             }
         }
@@ -208,37 +217,42 @@ namespace DigitalPlatform
             if (_inBeginLoop == 0)
                 throw new Exception("针对同一 Stop 对象，调用 EndLoop() 不应超过 BeginLoop() 调用次数");
 
-            nStop = 2;	// 已经停止
+            int nRet = Interlocked.Decrement(ref _inBeginLoop);
 
-            if (m_manager != null)
+            if (nRet == 0)
             {
-                bool bIsActive = m_manager.IsActive(this);
+                nStop = 2;	// 转为 已经停止 状态
 
-                this.m_strMessage = "";
+                if (m_manager != null)
+                {
+                    bool bIsActive = m_manager.IsActive(this);
 
-                if (this.OnEndLoop != null)
-                {
-                    EndLoopEventArgs e = new EndLoopEventArgs();
-                    e.IsActive = bIsActive;
-                    this.OnEndLoop(this, e);
-                }
+                    this.m_strMessage = "";
 
-                if (bIsActive == true)
-                {
-                    m_manager.ChangeState(this,
-                        StateParts.All | StateParts.RestoreEnabledState,
-                        true);
-                }
-                else
-                {
-                    // 不在激活位置，不要恢复所谓旧状态
-                    m_manager.ChangeState(this,
-                        StateParts.All,
-                        true);
+                    if (this.OnEndLoop != null)
+                    {
+                        EndLoopEventArgs e = new EndLoopEventArgs();
+                        e.IsActive = bIsActive;
+                        this.OnEndLoop(this, e);
+                    }
+
+                    if (bIsActive == true)
+                    {
+                        m_manager.ChangeState(this,
+                            StateParts.All | StateParts.RestoreEnabledState,
+                            true);
+                    }
+                    else
+                    {
+                        // 不在激活位置，不要恢复所谓旧状态
+                        m_manager.ChangeState(this,
+                            StateParts.All,
+                            true);
+                    }
                 }
             }
 
-            _inBeginLoop--;
+            // _inBeginLoop--;
         }
 
         public void SetMessage(string strMessage)
@@ -471,7 +485,7 @@ namespace DigitalPlatform
                 }
             }
 
-            if (m_reverseButtons == null 
+            if (m_reverseButtons == null
                 || m_reverseButtons.Count == 0)
                 return;
 
@@ -807,14 +821,14 @@ string strText)
                 if (lStart >= 0)
                     progressbar.Minimum = (int)(this.progress_ratio * (double)lStart);
 
-                if (lValue >=0 )
-                    progressbar.Value = (int)(this.progress_ratio * (double)lValue); 
+                if (lValue >= 0)
+                    progressbar.Value = (int)(this.progress_ratio * (double)lValue);
             }
         }
 
         void SetRatio(long lEnd)
         {
-            this.progress_ratio =  (double)64000 / (double)lEnd;
+            this.progress_ratio = (double)64000 / (double)lEnd;
             if (this.progress_ratio > 1.0)
                 this.progress_ratio = 1.0;
         }
@@ -1352,9 +1366,9 @@ string strText)
                 stops.Remove(stop);
 
                 if (bChangeState == true)
-                ChangeState(null,
-                    StateParts.All,
-                    false); // false表示不加集合锁
+                    ChangeState(null,
+                        StateParts.All,
+                        false); // false表示不加集合锁
             }
             finally
             {

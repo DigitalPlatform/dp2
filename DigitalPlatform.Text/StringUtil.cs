@@ -112,7 +112,7 @@ namespace DigitalPlatform.Text
             string strPrefix)
         {
             List<string> results = new List<string>();
-            foreach(string s in list)
+            foreach (string s in list)
             {
                 if (s.StartsWith(strPrefix) == true)
                     results.Add(s);
@@ -2053,9 +2053,12 @@ namespace DigitalPlatform.Text
             return strText.Substring(0, nMaxLength) + "...";
         }
 
-        // 得到strPath的第一部分,以'/'作为间隔符,同时strPath缩短
+        // 得到strPath的第一部分,以'/'作为间隔符,同时 strPath 缩短
         public static string GetFirstPartPath(ref string strPath)
         {
+            if (string.IsNullOrEmpty(strPath) == true)
+                return "";
+
             string strResult = "";
 
             int nIndex = strPath.IndexOf('/');
@@ -2071,9 +2074,6 @@ namespace DigitalPlatform.Text
 
             return strResult;
         }
-
-
-
 
         // 修改字符串某一个位字符
         public static string SetAt(string strText, int index, char c)
@@ -2099,7 +2099,6 @@ namespace DigitalPlatform.Text
 
             return strText;
         }
-
 
         /*
         public static string Format(params string[] list)

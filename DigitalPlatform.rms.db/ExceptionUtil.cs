@@ -31,4 +31,13 @@ namespace DigitalPlatform.rms
             : base(strEx)
         { }
     }
+
+    // 2015/12/2
+    // 路径错误
+    public class PathErrorException : Exception
+    {
+        public PathErrorException(string strEx)
+            : base(strEx)
+        { }
+    }
 }

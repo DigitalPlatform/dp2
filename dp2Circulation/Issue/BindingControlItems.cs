@@ -201,7 +201,7 @@ namespace dp2Circulation
                     continue;
 
                 // 如果有合订册，是否允许删除？如果删除以后，重新装载时候能重建，可以允许删除
-                nCellCount ++;
+                nCellCount++;
             }
 
             if (nLockedCellCount > 0)
@@ -400,7 +400,7 @@ namespace dp2Circulation
                         continue;
                     if (cell.IsMember == true)
                         return true;
-                    if (cell.item != null &&  cell.item.IsParent == true)
+                    if (cell.item != null && cell.item.IsParent == true)
                         return true;
                 }
             }
@@ -1316,7 +1316,7 @@ namespace dp2Circulation
                                 if (nRet == -1)
                                     return -1;
                                  * */
-                            } 
+                            }
                             nArriveCount++;
                         }
 
@@ -1539,8 +1539,8 @@ namespace dp2Circulation
                             bExist = true;
                             break;
                         }
-                        if (info.Index+1 == index
-                            || info.Index+1 == index + 1)
+                        if (info.Index + 1 == index
+                            || info.Index + 1 == index + 1)
                         {
                             bExist = true;
                             break;
@@ -1549,7 +1549,7 @@ namespace dp2Circulation
                     }
                     Debug.Assert(nCellCount == 1, "");
                     if (info.Index == index
-                        || info.Index + 1== index)
+                        || info.Index + 1 == index)
                     {
                         bExist = true;
                         break;
@@ -1664,7 +1664,7 @@ namespace dp2Circulation
 
                 }
             }
-            
+
             int temp = GetRightUseableCol(infos);
             if (temp > index)
                 index = temp;
@@ -1695,11 +1695,11 @@ namespace dp2Circulation
 
             LocationCollection locations3 = new LocationCollection();
 
-            for(int i=0;i<locations2.Count;i++)
+            for (int i = 0; i < locations2.Count; i++)
             {
                 Location location2 = locations2[i];
                 Location location1 = null;
-                
+
                 if (locations1.Count > i)
                     location1 = locations1[i];
 
@@ -2464,7 +2464,7 @@ namespace dp2Circulation
 
             if (strPublishTime.IndexOf("-") != -1)
             {
-                strError = "strPublishTime时间字符串 '"+strPublishTime+"' 应当为单点形式，而不能用范围形式";
+                strError = "strPublishTime时间字符串 '" + strPublishTime + "' 应当为单点形式，而不能用范围形式";
                 throw new Exception(strError);
             }
 
@@ -4028,7 +4028,7 @@ this.Volume);
 
             if (x >= this.OrderItems.Count)
             {
-                Debug.Assert(false, "x >= this.OrderItems.Count["+this.OrderItems.Count.ToString()+"]");
+                Debug.Assert(false, "x >= this.OrderItems.Count[" + this.OrderItems.Count.ToString() + "]");
                 return -1;
             }
             OrderBindingItem order = this.OrderItems[x];
@@ -4166,7 +4166,7 @@ this.Volume);
             int nMax = this.Cells.Count - 1;
             int nFreeIndex = GetFirstFreeIndex();
 
-            for (int i = nFreeIndex; i <=nMax; i++)
+            for (int i = nFreeIndex; i <= nMax; i++)
             {
                 Cell cell = this.Cells[i];
                 if (IsBlankOrNullCell(cell) == true)
@@ -5498,7 +5498,7 @@ rectFrame);
             // 2010/9/21 add
             if (strPublishTime.IndexOf("-") != -1)
             {
-                strError = "出版日期 '"+strPublishTime+"' 应当为单册形态";
+                strError = "出版日期 '" + strPublishTime + "' 应当为单册形态";
                 return -1;
             }
 
@@ -5544,8 +5544,8 @@ rectFrame);
         public bool Locked = false;   // 是否超出当前用户管辖范围?
 
         // 采购信息关联
-            // 一个是<orderInfo>下的<root>偏移；一个是<root>中<distribute>里面的馆藏地点偏移
-        public Point OrderInfoPosition = new Point(-1,-1);  // -1 表示尚未初始化
+        // 一个是<orderInfo>下的<root>偏移；一个是<root>中<distribute>里面的馆藏地点偏移
+        public Point OrderInfoPosition = new Point(-1, -1);  // -1 表示尚未初始化
 
         // 是否为位于订购组中的单元
         public bool InGroup
@@ -5956,6 +5956,8 @@ rectFrame);
         {
             strError = "";
 
+            Debug.Assert(this.Container != null && this.Container.Container != null, "");
+
             if (this.Container.Container.CheckProcessingState(this) == false
                 && this.Calculated == false
                 && this.Deleted == false)   // 2010/4/13
@@ -5971,7 +5973,6 @@ rectFrame);
                 strError = "处于“锁定”状态";
                 return 0;
             }
-
 
             if (String.IsNullOrEmpty(this.Borrower) == false)
             {
@@ -6372,7 +6373,7 @@ rectFrame);
             if (this.IsParent == false)
             {
                 IssueBindingItem issue = this.Container;
-                if (issue != null 
+                if (issue != null
                     && String.IsNullOrEmpty(issue.PublishTime) == false)
                 {
                     if (this.PublishTime != issue.PublishTime)
@@ -7387,13 +7388,13 @@ rectFrame);
         {
             strError = "";
 
-                string strNewValue = "";
-                string strOldValue = "";
-                OrderDesignControl.ParseOldNewValue(this.Copy,
-                    out strOldValue,
-                    out strNewValue);
-                int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
-                int nNewCopy = IssueBindingItem.GetNumberValue(strNewValue);
+            string strNewValue = "";
+            string strOldValue = "";
+            OrderDesignControl.ParseOldNewValue(this.Copy,
+                out strOldValue,
+                out strNewValue);
+            int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
+            int nNewCopy = IssueBindingItem.GetNumberValue(strNewValue);
 
             string strDistribute = this.Distribute;
 
@@ -7578,7 +7579,7 @@ rectFrame);
 
             if (String.IsNullOrEmpty(location.RefID) == false)
             {
-                strError = "记到操作前，发现位置 "+nLocationIndex.ToString()+" 已经存在 refid ["+location.RefID+"]";
+                strError = "记到操作前，发现位置 " + nLocationIndex.ToString() + " 已经存在 refid [" + location.RefID + "]";
                 return -1;
             }
 

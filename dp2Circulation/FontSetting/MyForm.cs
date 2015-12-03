@@ -104,6 +104,8 @@ namespace dp2Circulation
             }
         }
 
+        internal int _processing = 0;   // 是否正在进行处理中
+
         string FormName
         {
             get
@@ -187,14 +189,14 @@ namespace dp2Circulation
             }
         }
 
-
         /// <summary>
         /// 窗口 Closing 时被触发
         /// </summary>
         /// <param name="e">事件参数</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
-            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            if ( (stop != null && stop.State == 0)    // 0 表示正在处理
+                || this._processing > 0)
             {
                 MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
                 e.Cancel = true;
@@ -573,8 +575,6 @@ string strUserName = ".")
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-
-
                 string strFontString = MainForm.AppInfo.GetString(
                     this.FormName,
                     "default_font",
@@ -848,6 +848,9 @@ string strUserName = ".")
 
             LibraryChannel channel = this.GetChannel();
             string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
 #if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在下载配置文件 ...");
@@ -864,7 +867,7 @@ string strUserName = ".")
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
-                long lRet = Channel.GetRes(Progress,
+                long lRet = channel.GetRes(Progress,
                     MainForm.cfgCache,
                     strCfgFilePath,
                     strStyle,
@@ -876,7 +879,7 @@ string strUserName = ".")
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == ErrorCode.NotFound)
+                    if (channel.ErrorCode == ErrorCode.NotFound)
                         return 0;
 
                     goto ERROR1;
@@ -891,6 +894,7 @@ string strUserName = ".")
 #endif
                 Progress.Initial(strOldMessage);
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 m_nInGetCfgFile--;
@@ -926,6 +930,8 @@ string strUserName = ".")
 
             LibraryChannel channel = this.GetChannel();
             string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
 
 #if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
@@ -945,7 +951,7 @@ string strUserName = ".")
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
-                long lRet = Channel.GetResLocalFile(Progress,
+                long lRet = channel.GetResLocalFile(Progress,
                     MainForm.cfgCache,
                     strPath,
                     strStyle,
@@ -956,7 +962,7 @@ string strUserName = ".")
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == ErrorCode.NotFound)
+                    if (channel.ErrorCode == ErrorCode.NotFound)
                         return 0;
 
                     goto ERROR1;
@@ -971,6 +977,8 @@ string strUserName = ".")
                 Progress.Initial("");
 #endif
                 Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 m_nInGetCfgFile--;
@@ -991,7 +999,9 @@ string strUserName = ".")
             strError = "";
 
             LibraryChannel channel = this.GetChannel();
-            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+            string strOldMessage = Progress.Initial("正在保存配置文件 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
 
 #if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
@@ -1008,7 +1018,7 @@ string strUserName = ".")
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                long lRet = Channel.WriteRes(
+                long lRet = channel.WriteRes(
                     Progress,
                     strPath,
                     strContent,
@@ -1030,6 +1040,8 @@ string strUserName = ".")
                 Progress.Initial("");
 #endif
                 Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
 
@@ -1267,7 +1279,6 @@ out string strError)
                 }
             }
         }
-
 
         // 获得当前用户能管辖的全部馆代码
         public List<string> GetOwnerLibraryCodes()

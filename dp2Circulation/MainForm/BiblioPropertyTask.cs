@@ -144,15 +144,23 @@ namespace dp2Circulation
 
         public override bool ShowData()
         {
+            if (this.Container == null
+    || this.Container.MainForm == null)
+                return false;
+
             if (this.Container.MainForm.InvokeRequired)
             {
                 return (bool)this.Container.MainForm.Invoke(new Func<bool>(ShowData));
             }
 
-            this.Container.MainForm.m_commentViewer.Text = "MARC内容 '" + this.BiblioInfo.RecPath + "'";
-            this.Container.MainForm.m_commentViewer.HtmlString = this.HTML;
-            this.Container.MainForm.m_commentViewer.XmlString = this.XML;
-            return true;
+            if (this.Container.MainForm.m_commentViewer != null)
+            {
+                this.Container.MainForm.m_commentViewer.Text = "MARC内容 '" + this.BiblioInfo.RecPath + "'";
+                this.Container.MainForm.m_commentViewer.HtmlString = this.HTML;
+                this.Container.MainForm.m_commentViewer.XmlString = this.XML;
+                return true;
+            }
+            return false;
         }
 
         public override bool Cancel()

@@ -267,7 +267,7 @@ namespace DigitalPlatform.CirculationClient
                 List<ListViewItem> items = new List<ListViewItem>();
                 // 第一阶段，把来自 XML 记录中的 <file> 元素信息填入。
                 // 这样就保证了至少可以在保存书目记录阶段能还原 XML 记录中的相关部分
-                foreach(XmlElement node in nodes)
+                foreach (XmlElement node in nodes)
                 {
                     string strID = DomUtil.GetAttr(node, "id");
                     string strUsage = DomUtil.GetAttr(node, "usage");
@@ -881,7 +881,7 @@ bool bChanged)
                 contextMenu.MenuItems.Add(menuItem);
             }
 
-            contextMenu.Show(this.ListView, new Point(e.X, e.Y));	
+            contextMenu.Show(this.ListView, new Point(e.X, e.Y));
         }
 
         /// <summary>
@@ -897,7 +897,7 @@ bool bChanged)
 
         void DeleteTempFiles()
         {
-            foreach(string filename in _tempFileNames)
+            foreach (string filename in _tempFileNames)
             {
                 File.Delete(filename);
             }
@@ -992,11 +992,12 @@ bool bChanged)
                 FileAttributes attr = File.GetAttributes(filename);
 
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    expanded_filenames.AddRange(PathUtil.GetFileNames(filename, 
-                        (fi) => {
-                        if (fi.Name.ToLower() == "desktop.ini")
-                            return false;
-                        return true;
+                    expanded_filenames.AddRange(PathUtil.GetFileNames(filename,
+                        (fi) =>
+                        {
+                            if (fi.Name.ToLower() == "desktop.ini")
+                                return false;
+                            return true;
                         }
                         ));
                 else
@@ -1092,7 +1093,7 @@ bool bChanged)
 
             if (old_state != LineState.New)
             {
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Changed);
                 SetResChanged(item, dlg.ResChanged);
@@ -1325,7 +1326,7 @@ bool bChanged)
 
             if (old_state != LineState.New)
             {
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Changed);
                 SetResChanged(item, true);
@@ -1466,7 +1467,7 @@ bool bChanged)
                 // 保存旧状态
                 SetOldLineState(item, state);
 
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Deleted);
 
@@ -1487,7 +1488,7 @@ bool bChanged)
             }
 
             DialogResult result = MessageBox.Show(this,
-                "确实要标记删除选定的 "+this.ListView.SelectedItems.Count.ToString()+" 个对象? ",
+                "确实要标记删除选定的 " + this.ListView.SelectedItems.Count.ToString() + " 个对象? ",
                 "BinaryResControl",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -1524,7 +1525,7 @@ bool bChanged)
                 // 保存旧状态
                 SetOldLineState(item, state);
 
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Deleted);
 
@@ -1564,7 +1565,7 @@ bool bChanged)
 
                 if (GetLineState(item) != LineState.Deleted)
                 {
-                    nNotDeleted ++;
+                    nNotDeleted++;
                     continue;
                 }
 
@@ -1669,6 +1670,9 @@ bool bChanged)
 
             LibraryChannel channel = this.CallGetChannel(true);
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
 #if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在下载对象 " + strResPath);
@@ -1707,6 +1711,7 @@ bool bChanged)
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
+                channel.Timeout = old_timeout;
 
                 this.CallReturnChannel(channel, true);
                 Stop.Initial("");
@@ -1950,7 +1955,7 @@ bool bChanged)
                             {
                                 if (dp2library_version < 2.59)
                                 {
-                                    strError = "单独修改对象 metadata 的操作需要连接的 dp2library 版本在 2.59 以上 (然而当前 dp2library 版本为 "+dp2library_version+")";
+                                    strError = "单独修改对象 metadata 的操作需要连接的 dp2library 版本在 2.59 以上 (然而当前 dp2library 版本为 " + dp2library_version + ")";
                                     return -1;
                                 }
                                 // 这种情况应该是 metadata 修改过
@@ -2008,9 +2013,9 @@ bool bChanged)
     out strError);
                         timestamp = output_timestamp;
                         if (timestamp != null)
-                        ListViewUtil.ChangeItemText(item,
-                            COLUMN_TIMESTAMP,
-                            ByteArray.GetHexTimeStampString(timestamp));
+                            ListViewUtil.ChangeItemText(item,
+                                COLUMN_TIMESTAMP,
+                                ByteArray.GetHexTimeStampString(timestamp));
                         if (lRet == -1)
                             goto ERROR1;
                         Debug.Assert(timestamp != null, "");
@@ -2078,17 +2083,27 @@ bool bChanged)
                                     + Convert.ToString(fi.Length)
                                     + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
 
-                            long lRet = channel.SaveResObject(
-                                Stop,
-                                strResPath,
-                                strLocalFilename,
-                                strLocalFilename,
-                                strMime,
-                                ranges[j],
-                                j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-                                timestamp,
-                                out output_timestamp,
-                                out strError);
+                            long lRet = 0;
+                            TimeSpan old_timeout = channel.Timeout;
+                            channel.Timeout = new TimeSpan(0, 5, 0);
+                            try
+                            {
+                                lRet = channel.SaveResObject(
+                                    Stop,
+                                    strResPath,
+                                    strLocalFilename,
+                                    strLocalFilename,
+                                    strMime,
+                                    ranges[j],
+                                    j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+                                    timestamp,
+                                    out output_timestamp,
+                                    out strError);
+                            }
+                            finally
+                            {
+                                channel.Timeout = old_timeout;
+                            }
                             timestamp = output_timestamp;
 
                             if (timestamp != null)
@@ -2150,7 +2165,7 @@ bool bChanged)
                         }
                     }
 
-                    SetLineInfo(item, 
+                    SetLineInfo(item,
                         // strUsage, 
                         LineState.Normal);
                     SetXmlChanged(item, false);

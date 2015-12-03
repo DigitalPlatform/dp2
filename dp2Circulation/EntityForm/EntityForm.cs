@@ -4412,6 +4412,7 @@ true);
                     && this.AutoVerifyData == true
                     && bVerified == false)
                 {
+                    // TODO: 注意中途关闭 EntityForm 会发生什么
                     API.PostMessage(this.Handle, WM_VERIFY_DATA, 0, 0);
                 }
 
@@ -5766,7 +5767,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
                 this.ClearMessage();
-                
+
             }
         }
 
@@ -8129,147 +8130,167 @@ MessageBoxDefaultButton.Button1);
             GenerateDataEventArgs e,
             bool bAutoVerify)
         {
-            // 库名部分路径
-            string strBiblioDbName = Global.GetDbName(this.BiblioRecPath);
-
             string strError = "";
-            string strCode = "";
-            string strRef = "";
-            string strOutputFilename = "";
-
-            // Debug.Assert(false, "");
-            this.m_strVerifyResult = "正在校验...";
-            // 自动校验的时候，如果没有发现错误，则不出现最后的对话框
-            if (bAutoVerify == false)
+            this._processing++;
+            try
             {
-                // 如果固定面板隐藏，就打开窗口
-                DoViewVerifyResult(this.MainForm.PanelFixedVisible == false ? true : false);
-
-                // 2011/8/17
-                if (this.MainForm.PanelFixedVisible == true)
-                    MainForm.ActivateVerifyResultPage();
-            }
-
-            VerifyHost host = new VerifyHost();
-            host.DetailForm = this;
-
-            string strCfgFileName = "dp2circulation_marc_verify.fltx";
-
-            byte[] baCfgOutputTimestamp = null;
-            // return:
-            //      -1  error
-            //      0   not found
-            //      1   found
-            int nRet = GetCfgFile(strBiblioDbName,
-                strCfgFileName,
-                out strOutputFilename,
-                out baCfgOutputTimestamp,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            if (nRet == 0)
-            {
-                // .cs 和 .cs.ref
-                strCfgFileName = "dp2circulation_marc_verify.cs";
-                nRet = GetCfgFileContent(strBiblioDbName,
-    strCfgFileName,
-    out strCode,
-    out baCfgOutputTimestamp,
-    out strError);
-                if (nRet == 0)
+                if (this.IsDisposed == true)
                 {
-                    strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件(或.fltx配置文件)，数据校验无法进行";
+                    strError = "VerifyData() 失败。因 EntityForm 窗口已经释放";
                     goto ERROR1;
                 }
-                if (nRet == -1 || nRet == 0)
-                    goto ERROR1;
-                strCfgFileName = "dp2circulation_marc_verify.cs.ref";
-                nRet = GetCfgFileContent(strBiblioDbName,
+
+                // test
+                //Thread.Sleep(10 * 1000);
+
+                // 库名部分路径
+                string strBiblioDbName = Global.GetDbName(this.BiblioRecPath);
+
+                string strCode = "";
+                string strRef = "";
+                string strOutputFilename = "";
+
+                // Debug.Assert(false, "");
+                this.m_strVerifyResult = "正在校验...";
+                // 自动校验的时候，如果没有发现错误，则不出现最后的对话框
+                if (bAutoVerify == false)
+                {
+                    // 如果固定面板隐藏，就打开窗口
+                    DoViewVerifyResult(this.MainForm.PanelFixedVisible == false ? true : false);
+
+                    // 2011/8/17
+                    if (this.MainForm.PanelFixedVisible == true)
+                        MainForm.ActivateVerifyResultPage();
+                }
+
+                VerifyHost host = new VerifyHost();
+                host.DetailForm = this;
+
+                string strCfgFileName = "dp2circulation_marc_verify.fltx";
+
+                byte[] baCfgOutputTimestamp = null;
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
+                int nRet = GetCfgFile(strBiblioDbName,
                     strCfgFileName,
-                    out strRef,
+                    out strOutputFilename,
                     out baCfgOutputTimestamp,
                     out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // test
+                //Thread.Sleep(10 * 1000);
+
                 if (nRet == 0)
                 {
-                    strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了.cs配置文件。数据校验无法进行";
-                    goto ERROR1;
-                }
-                if (nRet == -1 || nRet == 0)
-                    goto ERROR1;
+                    // .cs 和 .cs.ref
+                    strCfgFileName = "dp2circulation_marc_verify.cs";
+                    nRet = GetCfgFileContent(strBiblioDbName,
+        strCfgFileName,
+        out strCode,
+        out baCfgOutputTimestamp,
+        out strError);
+                    if (nRet == 0)
+                    {
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件(或.fltx配置文件)，数据校验无法进行";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1 || nRet == 0)
+                        goto ERROR1;
+                    strCfgFileName = "dp2circulation_marc_verify.cs.ref";
+                    nRet = GetCfgFileContent(strBiblioDbName,
+                        strCfgFileName,
+                        out strRef,
+                        out baCfgOutputTimestamp,
+                        out strError);
+                    if (nRet == 0)
+                    {
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了.cs配置文件。数据校验无法进行";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1 || nRet == 0)
+                        goto ERROR1;
 
-                try
+                    try
+                    {
+                        // 执行代码
+                        nRet = RunVerifyCsScript(
+                            sender,
+                            e,
+                            strCode,
+                            strRef,
+                            out host,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "执行脚本代码过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                        goto ERROR1;
+                    }
+                }
+                else
                 {
-                    // 执行代码
-                    nRet = RunVerifyCsScript(
-                        sender,
-                        e,
-                        strCode,
-                        strRef,
-                        out host,
+                    VerifyFilterDocument filter = null;
+
+                    nRet = this.PrepareMarcFilter(
+                        host,
+                        strOutputFilename,
+                        out filter,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = "编译文件 '" + strCfgFileName + "' 的过程中出错:\r\n" + strError;
                         goto ERROR1;
-                }
-                catch (Exception ex)
-                {
-                    strError = "执行脚本代码过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                    goto ERROR1;
-                }
-            }
-            else
-            {
-                VerifyFilterDocument filter = null;
+                    }
 
-                nRet = this.PrepareMarcFilter(
-                    host,
-                    strOutputFilename,
-                    out filter,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "编译文件 '" + strCfgFileName + "' 的过程中出错:\r\n" + strError;
-                    goto ERROR1;
-                }
-
-                try
-                {
-
-                    nRet = filter.DoRecord(null,
-                        this.GetMarc(),    //  this.m_marcEditor.Marc,
-                        0,
-                        out strError);
-                    if (nRet == -1)
+                    try
+                    {
+                        nRet = filter.DoRecord(null,
+                            this.GetMarc(),    //  this.m_marcEditor.Marc,
+                            0,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "filter.DoRecord error: " + ExceptionUtil.GetDebugText(ex);
                         goto ERROR1;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    strError = "filter.DoRecord error: " + ExceptionUtil.GetDebugText(ex);
-                    goto ERROR1;
-                }
-            }
 
-            bool bVerifyFail = false;
-            if (string.IsNullOrEmpty(host.ResultString) == true)
-            {
-                if (this.m_verifyViewer != null)
+                bool bVerifyFail = false;
+                if (string.IsNullOrEmpty(host.ResultString) == true)
                 {
-                    this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                    if (this.m_verifyViewer != null)
+                    {
+                        this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                    }
                 }
-            }
-            else
-            {
-                if (bAutoVerify == true)
+                else
                 {
-                    // 延迟打开窗口
-                    DoViewVerifyResult(this.MainForm.PanelFixedVisible == false ? true : false);
+                    if (bAutoVerify == true)
+                    {
+                        // 延迟打开窗口
+                        DoViewVerifyResult(this.MainForm.PanelFixedVisible == false ? true : false);
+                    }
+                    this.m_verifyViewer.ResultString = host.ResultString;
+                    this.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                    bVerifyFail = true;
                 }
-                this.m_verifyViewer.ResultString = host.ResultString;
-                this.MainForm.ActivateVerifyResultPage();   // 2014/7/3
-                bVerifyFail = true;
-            }
 
-            this.SetSaveAllButtonState(true);   // 2009/3/29 
-            return bVerifyFail == true ? 2 : 0;
+                this.SetSaveAllButtonState(true);   // 2009/3/29 
+                return bVerifyFail == true ? 2 : 0;
+            }
+            finally
+            {
+                this._processing--;
+            }
         ERROR1:
             MessageBox.Show(this, strError);
             if (this.m_verifyViewer != null)

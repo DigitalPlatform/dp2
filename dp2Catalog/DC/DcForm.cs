@@ -14,12 +14,12 @@ using System.Reflection;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
-
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 
 namespace dp2Catalog
 {
+    // TODO: 对象下载功能待实现。接管 BinaryResControl 的一个事件
     public partial class DcForm : Form
     {
         public LoginInfo LoginInfo = new LoginInfo();
@@ -127,7 +127,7 @@ namespace dp2Catalog
             this.binaryResControl1.ContentChanged -= new ContentChangedEventHandler(binaryResControl1_ContentChanged);
             this.binaryResControl1.ContentChanged += new ContentChangedEventHandler(binaryResControl1_ContentChanged);
 
-            this.binaryResControl1.Channel = null;
+            // this.binaryResControl1.Channel = null;
             this.binaryResControl1.Stop = this.stop;
 
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
@@ -183,12 +183,12 @@ namespace dp2Catalog
                 case WM_LOADSIZE:
                     LoadSize();
                     return;
-                    /*
-                case WM_ENABLE_UPDATE:
-                    MessageBox.Show(this, "end");
-                    this.DcEditor.EnableUpdate();
-                    return;
-                     * */
+                /*
+            case WM_ENABLE_UPDATE:
+                MessageBox.Show(this, "end");
+                this.DcEditor.EnableUpdate();
+                return;
+                 * */
             }
             base.DefWndProc(ref m);
         }
@@ -602,8 +602,9 @@ namespace dp2Catalog
                     EnableStateCollection save = this.MainForm.DisableToolButtons();
                     try
                     {
-                        this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+                        // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
                         nRet = this.binaryResControl1.LoadObject(
+                            dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
                             strLocalPath,
                             strRecordXml,
                             0,  // TODO
@@ -810,11 +811,12 @@ namespace dp2Catalog
             // 接着装入对象资源
             if (bLoadResObject == true)
             {
-                this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+                // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
                 nRet = this.binaryResControl1.LoadObject(
+                    dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
                     strLocalPath,
                     strRecordXml,
-                            0,  // TODO
+                    0,  // TODO
                     out strError);
                 if (nRet == -1)
                 {
@@ -1300,14 +1302,13 @@ namespace dp2Catalog
                     this.textBox_tempRecPath.Text = "";
                      * */
 
-
+                    string strServerName = "";
+                    string strLocalPath = "";
                     // 如果资源控件还没有设置path，或者为追加型，则补上
                     // TODO: 是不是干脆都作一次？
                     if (String.IsNullOrEmpty(this.binaryResControl1.BiblioRecPath) == true
                         || dp2SearchForm.IsAppendRecPath(this.binaryResControl1.BiblioRecPath) == true)
                     {
-                        string strServerName = "";
-                        string strLocalPath = "";
                         // 解析记录路径。
                         // 记录路径为如下形态 "中文图书/1 @服务器"
                         dp2SearchForm.ParseRecPath(strOutputPath,
@@ -1320,7 +1321,9 @@ namespace dp2Catalog
                     // return:
                     //		-1	error
                     //		>=0 实际上载的资源对象数
-                    nRet = this.binaryResControl1.Save(0,   // TODO: 要替换为 server_version
+                    nRet = this.binaryResControl1.Save(
+                        dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
+                        0,   // TODO: 要替换为 server_version
                         out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
@@ -1758,7 +1761,7 @@ namespace dp2Catalog
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "获取书目库 '" +strBiblioDbName+ "的数据格式时发生错误: " + strError;
+                    strError = "获取书目库 '" + strBiblioDbName + "的数据格式时发生错误: " + strError;
                     goto ERROR1;
                 }
 
@@ -1789,7 +1792,7 @@ namespace dp2Catalog
             SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
             GuiUtil.SetControlFont(tempdlg, this.Font);
             nRet = tempdlg.Initial(false,
-                strCode, 
+                strCode,
                 out strError);
             if (nRet == -1)
             {
@@ -1836,11 +1839,9 @@ namespace dp2Catalog
             // 接着装入对象资源
             {
                 this.binaryResControl1.Clear();
-                this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+                // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
                 this.binaryResControl1.BiblioRecPath = strBiblioDbName + "/?";
             }
-
-
 
             this.DcEditor.Xml = tempdlg.SelectedRecordXml;
             this.CurrentTimestamp = null;   // baCfgOutputTimestamp;
@@ -1997,21 +1998,22 @@ namespace dp2Catalog
                 goto ERROR1;
 
             tempdlg.Text = "请选择要修改的模板记录";
-			tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
-			tempdlg.ap = this.MainForm.AppInfo;
-			tempdlg.ApCfgTitle = "dcform_selecttemplatedlg";
-			tempdlg.ShowDialog(this);
+            tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
+            tempdlg.ap = this.MainForm.AppInfo;
+            tempdlg.ApCfgTitle = "dcform_selecttemplatedlg";
+            tempdlg.ShowDialog(this);
 
             if (tempdlg.DialogResult != DialogResult.OK)
                 return 0;
 
-			// 修改配置文件内容
-			if (tempdlg.textBox_name.Text != "")
-			{
+            // 修改配置文件内容
+            if (tempdlg.textBox_name.Text != "")
+            {
                 string strXml = "";
 
-                try {
-                strXml = this.DcEditor.Xml;
+                try
+                {
+                    strXml = this.DcEditor.Xml;
                 }
                 catch (Exception ex)
                 {
@@ -2019,20 +2021,20 @@ namespace dp2Catalog
                     goto ERROR1;
                 }
 
-				// 替换或者追加一个记录
-				nRet = tempdlg.ReplaceRecord(tempdlg.textBox_name.Text,
-					strXml,
-					out strError);
-				if (nRet == -1) 
-				{
-					goto ERROR1;
-				}
-			}
+                // 替换或者追加一个记录
+                nRet = tempdlg.ReplaceRecord(tempdlg.textBox_name.Text,
+                    strXml,
+                    out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
+            }
 
-			if (tempdlg.Changed == false)	// 没有必要保存回去
-				return 0;
+            if (tempdlg.Changed == false)	// 没有必要保存回去
+                return 0;
 
-   			string strOutputXml = tempdlg.OutputXml;
+            string strOutputXml = tempdlg.OutputXml;
 
             nRet = dp2_searchform.SaveCfgFile(
                 strCfgFilePath,

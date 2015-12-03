@@ -202,7 +202,6 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-
             XmlNode nodeCurrent = this.nodeRoot;
             // 循环下级
             for (int i = 0; i < paths.Length; i++)
@@ -222,8 +221,6 @@ namespace DigitalPlatform.rms
                         continue;
 
                     string strChildName = DomUtil.GetAttr(child, "name");
-
-
 
                     if (String.Compare(strName, strChildName, true) == 0)
                     {
@@ -289,15 +286,15 @@ namespace DigitalPlatform.rms
 
             strAllRights = this.CanonicalizeRightString(strAllRights);
 
-            string[] rights = strAllRights.Split(new char[] {','});
-            for (int i = rights.Length -1; i >= 0; i--)
+            string[] rights = strAllRights.Split(new char[] { ',' });
+            for (int i = rights.Length - 1; i >= 0; i--)
             {
                 string strOneRight = rights[i];
                 if (strOneRight == "")
                     continue;
 
                 string strFirstChar = strOneRight.Substring(0, 1);
-                
+
                 // 前面有+ , - 号的情况
                 if (strFirstChar == "+" || strFirstChar == "-")
                 {
@@ -314,7 +311,7 @@ namespace DigitalPlatform.rms
                 }
             }
 
-            return ResultType.None;            
+            return ResultType.None;
         }
 
         // 规范化权限字符串

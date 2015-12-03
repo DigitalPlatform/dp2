@@ -4857,14 +4857,6 @@ namespace DigitalPlatform.rms
             outputTimestamp = null;
             strError = "";
 
-            // 检查当前帐户对配置事项的权限，暂时不报权限的错，检查完对象是否存在，再报错
-            string strExistRights = "";
-            bool bHasRight = user.HasRights(strCfgItemPath,
-                ResType.File,
-                "read",
-                out strExistRights);
-
-
             if (bNeedLock == true)
             {
                 //**********对数据库集合加读锁**************
@@ -4876,6 +4868,12 @@ namespace DigitalPlatform.rms
 
             try
             {
+                // 检查当前帐户对配置事项的权限，暂时不报权限的错，检查完对象是否存在，再报错
+                string strExistRights = "";
+                bool bHasRight = user.HasRights(strCfgItemPath,
+                    ResType.File,
+                    "read",
+                    out strExistRights);
 
                 string strFilePath = "";//this.GetCfgItemLacalPath(strCfgItemPath);
                 // return:
@@ -4914,6 +4912,11 @@ namespace DigitalPlatform.rms
                     out strMetadata,
                     out outputTimestamp,
                     out strError);
+            }
+            catch (PathErrorException ex)
+            {
+                strError = ex.Message;
+                return -1;
             }
             finally
             {

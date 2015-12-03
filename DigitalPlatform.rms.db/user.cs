@@ -190,7 +190,7 @@ namespace DigitalPlatform.rms
         // 更新一下最后使用时间
         public void Activate()
         {
-             m_timeLastUse = DateTime.Now;
+            m_timeLastUse = DateTime.Now;
         }
 
         public bool Changed
@@ -343,6 +343,8 @@ namespace DigitalPlatform.rms
         // return:
         //		true	有
         //		false	无
+        // exception:
+        //      PathErrorException
         public bool HasRights(string strPath,
             ResType resType,
             string strQueryOneRight,
@@ -351,7 +353,6 @@ namespace DigitalPlatform.rms
             strExistRights = "";
 
             m_lock.AcquireReaderLock(m_nTimeOut);
-
             try
             {
                 ResultType resultType = new ResultType();
@@ -366,7 +367,8 @@ namespace DigitalPlatform.rms
                     out strError);
                 if (nRet == -1)
                 {
-                    throw new Exception("CheckRights()出错，原因：" + strError);
+                    throw new PathErrorException(// "CheckRights()出错，原因：" + 
+                        strError);
                 }
 
                 if (resultType == ResultType.Plus)
@@ -483,7 +485,7 @@ namespace DigitalPlatform.rms
             Database db = this.container.Dbs.GetDatabaseFromRecPathSafety(this.m_strRecPath);
             if (db == null)
             {
-                strError = "GetDatabaseFromRecPath()没有找到记录路径'"+this.m_strRecPath+"'对应的数据库对象";
+                strError = "GetDatabaseFromRecPath()没有找到记录路径'" + this.m_strRecPath + "'对应的数据库对象";
                 return -1;
             }
 
@@ -569,7 +571,7 @@ namespace DigitalPlatform.rms
         // 在Session失效或者Logout()时被调
         // 无需线程安全
         public void MinusOneUse()
-        {   
+        {
             // out string strError
             // strError = "";
 

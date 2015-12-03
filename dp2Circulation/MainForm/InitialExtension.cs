@@ -12,6 +12,13 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.ServiceProcess;
+using System.ComponentModel;
+using System.Web;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net;
+
+using Ionic.Zip;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -22,12 +29,6 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
-using System.ComponentModel;
-using System.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Net;
-using Ionic.Zip;
 
 namespace dp2Circulation
 {
@@ -36,7 +37,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
-        void ReportError(string strTitle,
+        public void ReportError(string strTitle,
     string strError)
         {
             // 发送给 dp2003.com
@@ -323,7 +324,7 @@ Stack:
             {
                 System.Diagnostics.Process.Start(strExePath, strParameters);
             }
-            catch(Win32Exception ex)
+            catch (Win32Exception ex)
             {
                 // 改为抛出包含 Win32 错误码的异常
                 // https://msdn.microsoft.com/en-us/library/ms681382(v=vs.85).aspx
@@ -331,7 +332,7 @@ Stack:
                 // 5 (0x5)
                 // Access is denied.
                 int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                throw new Exception("GetLastWin32Error ["+error.ToString()+"], ex.NativeErrorCode = "+ex.NativeErrorCode+", ex.ErrorCode=" +ex.ErrorCode, ex);
+                throw new Exception("GetLastWin32Error [" + error.ToString() + "], ex.NativeErrorCode = " + ex.NativeErrorCode + ", ex.ErrorCode=" + ex.ErrorCode, ex);
             }
 
             this._updatedGreenZipFileNames.Clear(); // 避免后面再次调用本函数
@@ -517,7 +518,8 @@ Stack:
 
             return;
         ERROR1:
-            ShowMessageBox(strError);
+            // ShowMessageBox(strError);
+            this.DisplayBackgroundText("绿色更新过程出错: " + strError + "\r\n");
             ReportError("dp2circulation GreenUpdate() 出错", strError);
         }
 
@@ -746,7 +748,7 @@ MessageBoxDefaultButton.Button1);
 
         void AddWebClient(MyWebClient webClient)
         {
-            lock(_webClients)
+            lock (_webClients)
             {
                 _webClients.Add(webClient);
             }
@@ -784,7 +786,8 @@ MessageBoxDefaultButton.Button1);
                 this.AddWebClient(webClient);
                 try
                 {
-                    webClient.Timeout = 5000;
+                    webClient.ReadWriteTimeout = 30 * 1000; // 30 秒，在读写之前 - 2015/12/3
+                    webClient.Timeout = 30 * 60 * 1000; // 30 分钟，整个下载过程 - 2015/12/3
                     webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
 
                     string strTempFileName = strLocalFileName + ".temp";
@@ -795,7 +798,6 @@ MessageBoxDefaultButton.Button1);
 
                         File.Delete(strLocalFileName);
                         File.Move(strTempFileName, strLocalFileName);
-
                         return 0;
                     }
                     catch (WebException ex)
@@ -964,9 +966,9 @@ MessageBoxDefaultButton.Button1);
             OpenBackgroundForm();
 
             string strDriveName = "";
-            if (GetUserDiskFreeSpace(out strDriveName) < 1024*1024*10)
+            if (GetUserDiskFreeSpace(out strDriveName) < 1024 * 1024 * 10)
             {
-                Program.PromptAndExit(this, "用户目录所在硬盘 "+strDriveName+" 剩余空间太小(已小于10M)。请先腾出足够空间，再重新启动 dp2circulation");
+                Program.PromptAndExit(this, "用户目录所在硬盘 " + strDriveName + " 剩余空间太小(已小于10M)。请先腾出足够空间，再重新启动 dp2circulation");
                 return;
             }
 
@@ -1742,7 +1744,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
             FileInfo[] fis = di.GetFiles("*.*");
-            foreach(FileInfo fi in fis)
+            foreach (FileInfo fi in fis)
             {
                 if (filenames.IndexOf(fi.Name.ToLower()) != -1)
                     filenames.Remove(fi.Name.ToLower());
@@ -1762,7 +1764,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         File.Copy(strSourceFileName, strTargetFileName, false);
                     }
-                    catch(IOException)
+                    catch (IOException)
                     {
                         // https://msdn.microsoft.com/en-us/library/ms681382(v=vs.85).aspx
                         // ERROR_FILE_EXISTS
@@ -1778,7 +1780,7 @@ MessageBoxDefaultButton.Button1);
 
             if (filenames.Count > 0)
             {
-                strError = "配置文件目录 '"+strDefaultDir+"' 中缺乏以下必备的配置文件: "+StringUtil.MakePathList(filenames)+"。\r\n\r\n建议尽量直接从 dp2003.com 以 ClickOnce 方式安装 dp2circulation，以避免绿色安装时复制配置文件不全带来的麻烦";
+                strError = "配置文件目录 '" + strDefaultDir + "' 中缺乏以下必备的配置文件: " + StringUtil.MakePathList(filenames) + "。\r\n\r\n建议尽量直接从 dp2003.com 以 ClickOnce 方式安装 dp2circulation，以避免绿色安装时复制配置文件不全带来的麻烦";
                 goto ERROR1;
             }
             return true;
@@ -1983,128 +1985,128 @@ AppInfo.GetString("config",
                 if (nRet == 1)
                 {
 #endif
-                    try
-                    {
-                        // 2013/6/18
-                        nRet = TouchServer(false);
-                        if (nRet == -1)
-                            goto END1;
+                try
+                {
+                    // 2013/6/18
+                    nRet = TouchServer(false);
+                    if (nRet == -1)
+                        goto END1;
 
-                        // 只有在前一步没有错出的情况下才探测版本号
-                        if (nRet == 0)
+                    // 只有在前一步没有错出的情况下才探测版本号
+                    if (nRet == 0)
+                    {
+                        // 检查dp2Library版本号
+                        // return:
+                        //      -2  出现严重错误，希望退出 Application
+                        //      -1  一般错误
+                        //      0   dp2Library的版本号过低。警告信息在strError中
+                        //      1   dp2Library版本号符合要求
+                        nRet = CheckVersion(false, out strError);
+                        if (nRet == -2)
                         {
-                            // 检查dp2Library版本号
-                            // return:
-                            //      -2  出现严重错误，希望退出 Application
-                            //      -1  一般错误
-                            //      0   dp2Library的版本号过低。警告信息在strError中
-                            //      1   dp2Library版本号符合要求
-                            nRet = CheckVersion(false, out strError);
-                            if (nRet == -2)
-                            {
-                                if (string.IsNullOrEmpty(strError) == false)
-                                    MessageBox.Show(this, strError);
-                                // Application.Exit();
-                                Program.PromptAndExit(null,
-                                    string.IsNullOrEmpty(strError) == false ? strError : "CheckVersion Fail...");
-                                return false;
-                            }
-                            if (nRet == -1)
-                            {
+                            if (string.IsNullOrEmpty(strError) == false)
                                 MessageBox.Show(this, strError);
-                                goto END1;
-                            }
-                            if (nRet == 0)
-                                MessageBox.Show(this, strError);
+                            // Application.Exit();
+                            Program.PromptAndExit(null,
+                                string.IsNullOrEmpty(strError) == false ? strError : "CheckVersion Fail...");
+                            return false;
                         }
-
-                        // 获得书目数据库From信息
-                        nRet = GetDbFromInfos(false);
                         if (nRet == -1)
-                            goto END1;
-
-                        // 获得全部数据库的定义
-                        nRet = GetAllDatabaseInfo(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得书目库属性列表
-                        nRet = InitialBiblioDbProperties(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得读者库名列表
-                        /*
-                        nRet = GetReaderDbNames();
-                        if (nRet == -1)
-                            goto END1;
-                         * */
-                        nRet = InitialReaderDbProperties(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        nRet = InitialArrivedDbProperties(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得实用库属性列表
-                        nRet = GetUtilDbProperties(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 2008/11/29 
-                        nRet = InitialNormalDbProperties(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得图书馆一般信息
-                        nRet = GetLibraryInfo(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得索取号配置信息
-                        // 2009/2/24 
-                        nRet = GetCallNumberInfo(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得前端交费接口配置信息
-                        // 2009/7/20 
-                        nRet = GetClientFineInterfaceInfo(false);
-                        if (nRet == -1)
-                            goto END1;
-
-                        // 获得服务器映射到本地的配置文件
-                        nRet = GetServerMappedFile(false);
-                        if (nRet == -1)
-                            goto END1;
-
-
-                        /*
-                        // 检查服务器端library.xml中<libraryserver url="???">配置是否正常
-                        // return:
-                        //      -1  error
-                        //      0   正常
-                        //      1   不正常
-                        nRet = CheckServerUrl(out strError);
-                        if (nRet != 0)
+                        {
                             MessageBox.Show(this, strError);
-                         * */
-
-
-                        // 核对本地和服务器时钟
-                        // return:
-                        //      -1  error
-                        //      0   没有问题
-                        //      1   本地时钟和服务器时钟偏差过大，超过10分钟 strError中有报错信息
-                        nRet = CheckServerClock(false, out strError);
-                        if (nRet != 0)
+                            goto END1;
+                        }
+                        if (nRet == 0)
                             MessageBox.Show(this, strError);
                     }
-                    finally
-                    {
-                        // EndSearch();
-                    }
+
+                    // 获得书目数据库From信息
+                    nRet = GetDbFromInfos(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得全部数据库的定义
+                    nRet = GetAllDatabaseInfo(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得书目库属性列表
+                    nRet = InitialBiblioDbProperties(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得读者库名列表
+                    /*
+                    nRet = GetReaderDbNames();
+                    if (nRet == -1)
+                        goto END1;
+                     * */
+                    nRet = InitialReaderDbProperties(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    nRet = InitialArrivedDbProperties(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得实用库属性列表
+                    nRet = GetUtilDbProperties(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 2008/11/29 
+                    nRet = InitialNormalDbProperties(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得图书馆一般信息
+                    nRet = GetLibraryInfo(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得索取号配置信息
+                    // 2009/2/24 
+                    nRet = GetCallNumberInfo(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得前端交费接口配置信息
+                    // 2009/7/20 
+                    nRet = GetClientFineInterfaceInfo(false);
+                    if (nRet == -1)
+                        goto END1;
+
+                    // 获得服务器映射到本地的配置文件
+                    nRet = GetServerMappedFile(false);
+                    if (nRet == -1)
+                        goto END1;
+
+
+                    /*
+                    // 检查服务器端library.xml中<libraryserver url="???">配置是否正常
+                    // return:
+                    //      -1  error
+                    //      0   正常
+                    //      1   不正常
+                    nRet = CheckServerUrl(out strError);
+                    if (nRet != 0)
+                        MessageBox.Show(this, strError);
+                     * */
+
+
+                    // 核对本地和服务器时钟
+                    // return:
+                    //      -1  error
+                    //      0   没有问题
+                    //      1   本地时钟和服务器时钟偏差过大，超过10分钟 strError中有报错信息
+                    nRet = CheckServerClock(false, out strError);
+                    if (nRet != 0)
+                        MessageBox.Show(this, strError);
+                }
+                finally
+                {
+                    // EndSearch();
+                }
 #if NO
                 }
 #endif
@@ -2152,11 +2154,11 @@ Culture=neutral, PublicKeyToken=null
                         + "\r\n\r\n既然您把软件安装到这个目录或者试图从这里运行软件，就该给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
                     Application.Exit();
 #endif
-                    Program.PromptAndExit(this, "在试图删除数据目录 '"+this.DataDir+"' 内临时文件时出错: " + ex.Message
+                    Program.PromptAndExit(this, "在试图删除数据目录 '" + this.DataDir + "' 内临时文件时出错: " + ex.Message
                         + "\r\n\r\n既然您把软件安装到这个目录或者试图从这里运行软件，就该给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
                     return false;
                 }
-                
+
                 try
                 {
                     DeleteAllTempFiles(this.UserTempDir);
@@ -2222,7 +2224,7 @@ Culture=neutral, PublicKeyToken=null
                     string strCssUrl = Path.Combine(this.DataDir, "history.css");
                     string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
                     Global.SetHtmlString(this.webBrowser_messageHub,
-                        "<html><head>" + strLink + "</head><body>" + "<p>需要安装 Windows 更新 KB2468871 以后才能使用消息相关功能</p>", 
+                        "<html><head>" + strLink + "</head><body>" + "<p>需要安装 Windows 更新 KB2468871 以后才能使用消息相关功能</p>",
                         this.DataDir,
                         "error");
                 }
@@ -3276,7 +3278,7 @@ Culture=neutral, PublicKeyToken=null
 
                 dbnames.Add("[inventory_item]");
 
-                foreach(string dbname in dbnames)
+                foreach (string dbname in dbnames)
                 {
                     NormalDbProperty normal = null;
                     normal = new NormalDbProperty();
@@ -3396,7 +3398,7 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // TODO: 是否缓存这些配置文件? 
                     // 获得 browse 配置文件
-                    foreach (NormalDbProperty normal in  this.NormalDbProperties)
+                    foreach (NormalDbProperty normal in this.NormalDbProperties)
                     {
                         // NormalDbProperty normal = this.NormalDbProperties[i];
                         if (string.IsNullOrEmpty(normal.DbName) == false
@@ -3619,7 +3621,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int InitialBiblioDbProperties(bool bPrepareSearch = true)
         {
-        //REDO:
+            //REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -4008,7 +4010,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int InitialReaderDbProperties(bool bPrepareSearch = true)
         {
-        //REDO:
+            //REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -4489,7 +4491,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetUtilDbProperties(bool bPrepareSearch = true)
         {
-        //REDO:
+            //REDO:
 #if NO
             if (bPrepareSearch == true)
             {

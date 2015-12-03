@@ -130,6 +130,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 this.MainForm.WriteErrorLog("PropertyTaskList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
+                this.MainForm.ReportError("dp2circulation 调试信息", "PropertyTaskList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
             }
         }
 

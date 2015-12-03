@@ -12673,7 +12673,6 @@ MessageBoxDefaultButton.Button1);
             TimeSpan old_timeout = channel.Timeout;
             try
             {
-
                 for (int j = 0; j < ranges.Length; j++)
                 {
                     Application.DoEvents();	// 出让界面控制权

@@ -143,7 +143,7 @@ namespace dp2Catalog
 
         ColumnPropertyCollection GetBrowseColumnNames(string strPrefix)
         {
-            string [] parts = strPrefix.Split(new char[] {'|'});
+            string[] parts = strPrefix.Split(new char[] { '|' });
             if (parts.Length < 2)
             {
                 // return new ColumnPropertyCollection();
@@ -248,13 +248,13 @@ namespace dp2Catalog
             string strSortTables = this.MainForm.AppInfo.GetString(
                "dp2_search",
                "sort_tables",
-               ""); 
+               "");
             this.dp2ResTree1.sort_tables = dp2ResTree.RestoreSortTables(strSortTables);
 
             this.dp2ResTree1.CheckBoxes = this.MainForm.AppInfo.GetBoolean(
                "dp2_search",
                "enable_checkboxes",
-               false); 
+               false);
 
             this.dp2ResTree1.Fill(null);
 
@@ -331,7 +331,7 @@ namespace dp2Catalog
             {
                 string strError = "";
                 string strTitle = "dp2 检索窗需要先设置序列号才能访问服务器 " + server.Name + " " + server.Url;
-                int nRet = this.MainForm.VerifySerialCode(strTitle, 
+                int nRet = this.MainForm.VerifySerialCode(strTitle,
                     "",
                     true,
                     out strError);
@@ -523,11 +523,11 @@ namespace dp2Catalog
         {
             switch (m.Msg)
             {
-                    /*
-                case WM_LOADSIZE:
-                    LoadSize();
-                    return;
-                     * */
+                /*
+            case WM_LOADSIZE:
+                LoadSize();
+                return;
+                 * */
                 case WM_INITIAL_FOCUS:
                     this.textBox_simple_queryWord.Focus();
                     return;
@@ -577,9 +577,9 @@ namespace dp2Catalog
                             }
                         }
 
-                            ListViewUtil.OnSelectedIndexChanged(this.listView_browse,
-                                0,
-                                null);
+                        ListViewUtil.OnSelectedIndexChanged(this.listView_browse,
+                            0,
+                            null);
 
                         if (this.m_biblioTable != null)
                         {
@@ -1169,15 +1169,11 @@ namespace dp2Catalog
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
-
 
                         TargetItem item = (TargetItem)targets[i];
 
@@ -1760,7 +1756,7 @@ namespace dp2Catalog
             string strError = "";
             int nRet = 0;
 
-            this._processing ++;
+            this._processing++;
             try
             {
 
@@ -2616,7 +2612,7 @@ namespace dp2Catalog
             {
                 if (index >= this.listView_browse.Items.Count)
                 {
-                    strError = "index ["+index.ToString()+"] 越过结果集尾部";
+                    strError = "index [" + index.ToString() + "] 越过结果集尾部";
                     return -1;
                 }
                 items.Add(this.listView_browse.Items[index]);
@@ -2665,7 +2661,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             this.Channel = this.Channels.GetChannel(strServerUrl);
@@ -2749,7 +2745,7 @@ namespace dp2Catalog
                     ListViewItem item = ListViewUtil.FindItem(this.listView_browse, strPath, 0);
                     if (item == null)
                     {
-                        strError = "路径为 '"+strPath+"' 的事项在列表中没有找到";
+                        strError = "路径为 '" + strPath + "' 的事项在列表中没有找到";
                         return -1;
                     }
 
@@ -3127,7 +3123,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             Stop temp_stop = this.stop;
@@ -3196,7 +3192,7 @@ namespace dp2Catalog
                             strText = "前一条";
                         else if (strDirection == "next")
                             strText = "后一条";
-                        strError = "路径为 '" + strPath + "' 的"+strText+"书目记录没有找到 ...";
+                        strError = "路径为 '" + strPath + "' 的" + strText + "书目记录没有找到 ...";
                     }
 
                     goto ERROR1;   // not found
@@ -3334,7 +3330,7 @@ namespace dp2Catalog
 
         private void listView_browse_DoubleClick(object sender, EventArgs e)
         {
-            this._processing ++;
+            this._processing++;
             try
             {
                 int nIndex = -1;
@@ -3401,7 +3397,7 @@ namespace dp2Catalog
                 out strServerName,
                 out strPurePath);
 
-            if (string.Compare(strServerName, "mem", true) == 0 
+            if (string.Compare(strServerName, "mem", true) == 0
                 || string.Compare(strServerName, "file", true) == 0)
             {
                 // 从 hashtable 中探得 MARC 格式
@@ -3411,7 +3407,7 @@ namespace dp2Catalog
                 info = (BiblioInfo)this.m_biblioTable[strPath];
                 if (info == null)
                 {
-                    strError = "路径在 '"+strPath+"' 的记录信息在 m_biblioTable 中没有找到";
+                    strError = "路径在 '" + strPath + "' 的记录信息在 m_biblioTable 中没有找到";
                     return -1;
                 }
 
@@ -3518,7 +3514,7 @@ namespace dp2Catalog
             return false;
         ERROR1:
             // MessageBox.Show(this, strError);
-        return false;
+            return false;
         }
 
         // parameters:
@@ -3713,12 +3709,12 @@ namespace dp2Catalog
                     stop = this.stop;
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在获得服务器 "+strServerUrl+" 的信息 ...");
+                stop.Initial("正在获得服务器 " + strServerUrl + " 的信息 ...");
                 stop.BeginLoop();
 
                 bInitialStop = true;
             }
-            
+
             dp2ServerInfo info = null;
 
             try
@@ -3842,7 +3838,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -3916,7 +3912,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -3990,7 +3986,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4065,7 +4061,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4174,7 +4170,7 @@ namespace dp2Catalog
 
         public int GetChannelRights(
             string strServerName,
-            out string strRights,               
+            out string strRights,
             out string strError)
         {
             strError = "";
@@ -4393,20 +4389,20 @@ namespace dp2Catalog
                 {
                     if (strOriginSyntax != strSyntax)
                     {
-                        strError = "拟保存的记录的 MARC 格式为 '"+strOriginSyntax+"'，和目标书目库 '"+strDbName+"' 的 MARC 格式 '"+strSyntax+"' 不符合，无法保存 ";
+                        strError = "拟保存的记录的 MARC 格式为 '" + strOriginSyntax + "'，和目标书目库 '" + strDbName + "' 的 MARC 格式 '" + strSyntax + "' 不符合，无法保存 ";
                         goto ERROR1;
                     }
                 }
-/*
-                nRet = MarcUtil.Marc2Xml(
-    strMARC,
-    strSyntax,
-    out strXml,
-    out strError);
+                /*
+                                nRet = MarcUtil.Marc2Xml(
+                    strMARC,
+                    strSyntax,
+                    out strXml,
+                    out strError);
 
-                if (nRet == -1)
-                    goto ERROR1;
- * */
+                                if (nRet == -1)
+                                    goto ERROR1;
+                 * */
                 XmlDocument domMarc = null;
                 nRet = MarcUtil.Marc2Xml(strMARC,
                     strSyntax,
@@ -4528,7 +4524,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             this.Channel = this.Channels.GetChannel(strServerUrl);
@@ -4633,7 +4629,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             Stop temp_stop = this.stop;
@@ -4732,7 +4728,7 @@ namespace dp2Catalog
             {
                 strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
-            } 
+            }
             string strServerUrl = server.Url;
 
             this.Channel = this.Channels.GetChannel(strServerUrl);
@@ -5059,7 +5055,7 @@ namespace dp2Catalog
                     if (nRet == -1)
                         goto ERROR1;
 
-                    foreach(string line in lines)
+                    foreach (string line in lines)
                     {
                         sw.WriteLine(line);
                     }
@@ -5140,12 +5136,12 @@ namespace dp2Catalog
             dlg.EncodingName =
                 (String.IsNullOrEmpty(MainForm.LastEncodingName) == true ? GetEncodingForm.GetEncodingName(preferredEncoding) : MainForm.LastEncodingName);
             dlg.EncodingComment = "注: 原始编码方式为 " + GetEncodingForm.GetEncodingName(preferredEncoding);
-            
+
             if (string.IsNullOrEmpty(strPreferedMarcSyntax) == false)
                 dlg.MarcSyntax = strPreferedMarcSyntax;
             else
                 dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
-            
+
             if (bControl == false)
                 dlg.EnableMarcSyntax = false;
             dlg.ShowDialog(this);
@@ -5940,23 +5936,23 @@ MessageBoxDefaultButton.Button2);
             {
 
                 // Initial
-            {
-                host.RecordPath = "";
-                host.MarcRecord = null;
-                host.MarcSyntax = "";
-                host.Changed = false;
-                host.UiItem = null;
-
-                StatisEventArgs args = new StatisEventArgs();
-                host.OnInitial(this, args);
-                if (args.Continue == ContinueType.SkipAll)
-                    return;
-                if (args.Continue == ContinueType.Error)
                 {
-                    strError = args.ParamString;
-                    goto ERROR1;
+                    host.RecordPath = "";
+                    host.MarcRecord = null;
+                    host.MarcSyntax = "";
+                    host.Changed = false;
+                    host.UiItem = null;
+
+                    StatisEventArgs args = new StatisEventArgs();
+                    host.OnInitial(this, args);
+                    if (args.Continue == ContinueType.SkipAll)
+                        return;
+                    if (args.Continue == ContinueType.Error)
+                    {
+                        strError = args.ParamString;
+                        goto ERROR1;
+                    }
                 }
-            }
 
 
                 if (stop != null)
@@ -6574,19 +6570,16 @@ MessageBoxDefaultButton.Button2);
 
             // 暂时禁止因为 listview 选择发生改变而频繁刷新状态行
             this.listView_browse.SelectedIndexChanged -= new System.EventHandler(this.listView_browse_SelectedIndexChanged);
-
+            this._processing++;
             try
             {
                 stop.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "已中断";
-                            goto ERROR1;
-                        }
+                        strError = "已中断";
+                        goto ERROR1;
                     }
 
                     ListViewItem item = items[i];
@@ -6636,7 +6629,7 @@ MessageBoxDefaultButton.Button2);
                             goto ERROR1;
                         if (result == System.Windows.Forms.DialogResult.No)
                             continue;
-                    } 
+                    }
                     if (lRet == -1 || lRet == 0)
                         goto ERROR1;
 
@@ -6663,6 +6656,7 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                this._processing--;
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -7173,7 +7167,7 @@ out string strError)
                         dup_table[strRecPath] = true;
 
                     if (nSkipDupCount > 0)
-                        stop.SetMessage("正在导入路径 " + strRecPath + " (已跳过重复记录 " + nSkipDupCount.ToString() + " 条)" );
+                        stop.SetMessage("正在导入路径 " + strRecPath + " (已跳过重复记录 " + nSkipDupCount.ToString() + " 条)");
                     else
                         stop.SetMessage("正在导入路径 " + strRecPath);
 
@@ -7225,7 +7219,7 @@ out string strError)
             }
 
             if (nSkipDupCount > 0)
-                MessageBox.Show(this, "装入成功。跳过重复记录 "+nSkipDupCount+" 条");
+                MessageBox.Show(this, "装入成功。跳过重复记录 " + nSkipDupCount + " 条");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -7250,7 +7244,7 @@ out string strError)
             dp2Server server = this.dp2ResTree1.Servers.GetServerByName(strServerName);
             if (server == null)
             {
-                strError = "名为 '"+strServerName+"' 的服务器在检索窗中尚未定义...";
+                strError = "名为 '" + strServerName + "' 的服务器在检索窗中尚未定义...";
                 return -1;
             }
             string strServerUrl = server.Url;
@@ -7512,7 +7506,7 @@ out string strError)
                             strMarcSyntax = "usmarc";
                         if (string.IsNullOrEmpty(strMarcSyntax) == true)
                         {
-                            strError = "记录 '"+strSourcePath+"' 不是MARC格式，无法保存到DTLP服务器";
+                            strError = "记录 '" + strSourcePath + "' 不是MARC格式，无法保存到DTLP服务器";
                             goto ERROR1;
                         }
 
@@ -7678,10 +7672,10 @@ out string strError)
                 bAppend = false;
 
             // 创建文件
-            using(StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8))
-            { 
+            {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
 
@@ -7823,8 +7817,8 @@ out string strError)
     MessageBoxDefaultButton.Button1);
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
-            } 
-            
+            }
+
             nRet = RefreshListViewLines(items,
                 out strError);
             if (nRet == -1)
@@ -8003,7 +7997,7 @@ out string strError)
 
         void menu_copyToClipboard_Click(object sender, EventArgs e)
         {
-            Global.CopyLinesToClipboard(this, 
+            Global.CopyLinesToClipboard(this,
                 "dp2SearchForm",
                 this.listView_browse,
                 false);
@@ -8013,7 +8007,7 @@ out string strError)
         {
             Global.CopyLinesToClipboard(this,
                 "dp2SearchForm",
-                this.listView_browse, 
+                this.listView_browse,
                 true);
         }
 
@@ -8229,7 +8223,7 @@ out string strError)
 
                 this.splitContainer_main.Panel2.Controls.Add(this.listView_browse);
             }
-            else 
+            else
             {
                 Debug.Assert(false, "");
             }
@@ -8362,7 +8356,7 @@ out string strError)
                     nRet = DomUtil.GetIndentXml(item.QueryXml, out strXml, out strError);
                     if (nRet == -1)
                     {
-                        strError = "XML检索式 '"+item.QueryXml+"' XML格式有错: " + strError;
+                        strError = "XML检索式 '" + item.QueryXml + "' XML格式有错: " + strError;
                         goto ERROR1;
                     }
                     sw.WriteLine(strXml);

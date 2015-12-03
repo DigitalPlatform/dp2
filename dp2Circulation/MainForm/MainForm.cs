@@ -408,7 +408,7 @@ Stack:
             {
                 base.OnMdiChildActivate(e);
             }
-            catch(System.ObjectDisposedException)
+            catch (System.ObjectDisposedException)
             {
 
             }
@@ -1421,7 +1421,7 @@ Stack:
             dlg.UiState = this.AppInfo.GetString(
                     "main_form",
                     "cfgdlg_uiState",
-                    ""); 
+                    "");
             this.AppInfo.LinkFormState(dlg,
                 "cfgdlg_state");
             dlg.ShowDialog(this);
@@ -1503,7 +1503,6 @@ Stack:
             form.Show();
 #endif
             OpenWindow<ChangePasswordForm>();
-
         }
 
         private void MenuItem_openAmerceForm_Click(object sender, EventArgs e)
@@ -1515,7 +1514,6 @@ Stack:
             form.Show();
 #endif
             OpenWindow<AmerceForm>();
-
         }
 
         private void MenuItem_openReaderManageForm_Click(object sender, EventArgs e)
@@ -1863,7 +1861,7 @@ Stack:
 
         private void MenuItem_accept_Click(object sender, EventArgs e)
         {
-            #if ACCEPT_MODE
+#if ACCEPT_MODE
 
             AcceptForm top = this.GetTopChildWindow<AcceptForm>();
             if (top != null)
@@ -1999,7 +1997,7 @@ Stack:
         internal void SetMenuItemState()
         {
             // 菜单
- 
+
             // 工具条按钮
             this.ToolStripMenuItem_loadReaderInfo.Enabled = true;
             this.ToolStripMenuItem_loadItemInfo.Enabled = true;
@@ -2172,7 +2170,7 @@ Stack:
         {
             List<Form> results = new List<Form>();
 
-            foreach(Form child in this.MdiChildren)
+            foreach (Form child in this.MdiChildren)
             {
                 if (child.GetType().Equals(type) == true)
                     results.Add(child);
@@ -2715,7 +2713,7 @@ string strUserName = ".")
             Stop stop,
             string strDbName,
             string strCfgFileName,
-            byte [] remote_timestamp,
+            byte[] remote_timestamp,
             out string strContent,
             out byte[] baOutputTimestamp,
             out string strError)
@@ -3052,7 +3050,7 @@ string strUserName = ".")
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
         void DoStop(object sender, StopEventArgs e)
         {
-            foreach(LibraryChannel channel in _channelList)
+            foreach (LibraryChannel channel in _channelList)
             {
                 if (channel != null)
                     channel.Abort();
@@ -3271,7 +3269,7 @@ string strUserName = ".")
         static string GetDisplayStyle(string strStyles,
             bool bRemove2 = false)
         {
-            string[] parts = strStyles.Split(new char[] {','});
+            string[] parts = strStyles.Split(new char[] { ',' });
             List<string> results = new List<string>();
             foreach (string part in parts)
             {
@@ -3422,19 +3420,16 @@ Stack:
         /// <returns>-1: 出错; 0: 成功</returns>
         public int GetValueTable(string strTableName,
             string strDbName,
-            out string [] values,
+            out string[] values,
             out string strError)
         {
             values = null;
             strError = "";
 
-            if (strTableName == null)
-                strTableName = "";
-
             // 先看看缓存里面是否已经有了
             string strName = strTableName + "~~~" + strDbName;
 
-            values = (string [])this.valueTableCache[strName];
+            values = (string[])this.valueTableCache[strName];
 
             if (values != null)
                 return 0;
@@ -3449,12 +3444,18 @@ Stack:
 #endif
             LibraryChannel channel = this.GetChannel();
 
+            if (Stop == null)
+            {
+                ReportError("dp2circulation 调试信息", "MainForm.GetValueTable() 中发现 Stop 为空");
+            }
+
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获取值列表 ...");
             Stop.BeginLoop();
 
             try
             {
+                channel.Timeout = new TimeSpan(0, 0, 10);
                 long lRet = channel.GetValueTable(
                     Stop,
                     strTableName,
@@ -3772,7 +3773,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-#endregion
+        #endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -4048,7 +4049,7 @@ Stack:
                 strError = "服务器端尚未提供条码号校验方法，因此无法分辨读者证条码号和册条码号";
                 goto ERROR1;
             }
-                
+
             if (nRet == 0)
             {
                 if (String.IsNullOrEmpty(strError) == true)
@@ -4191,7 +4192,7 @@ Stack:
                     nodeRel = dom.CreateElement("rel");
                     dom.DocumentElement.AppendChild(nodeRel);
 
-                    DomUtil.SetAttr(nodeRel, "name", strValue); 
+                    DomUtil.SetAttr(nodeRel, "name", strValue);
                 }
 
                 // weight 加 1
@@ -4263,7 +4264,7 @@ Stack:
             string strLang = "zh";
             string strQueryXml = "<target list='" + strDbName + ":" + "键" + "'><item><word>"
 + StringUtil.GetXmlStringSimple(strKey)
-+ "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMaxCount.ToString()+"</maxCount></item><lang>" + strLang + "</lang></target>";
++ "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMaxCount.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
 #if NO
             int nRet = PrepareSearch();
@@ -4448,7 +4449,7 @@ Stack:
             }
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在验证条码号 "+strBarcode+"...");
+            Stop.Initial("正在验证条码号 " + strBarcode + "...");
             Stop.BeginLoop();
 
             // EnableControls(false);
@@ -4791,7 +4792,7 @@ MessageBoxDefaultButton.Button1);
                     string strPassword = Cryptography.Decrypt(
         strEncryptedText,
         EncryptKey);
-                return strPassword;
+                    return strPassword;
                 }
                 catch
                 {
@@ -4940,8 +4941,8 @@ out strError);
                         return strError;
                     }
 
-                        Debug.Assert(results.Length > 0, "");
-                        strXml = results[0];
+                    Debug.Assert(results.Length > 0, "");
+                    strXml = results[0];
 
                     // 加入到缓存
                     this.SetReaderXmlCache(strPatronBarcode,
@@ -5524,7 +5525,7 @@ out strError);
                 // Debug.Assert(false, "SaveSplitterPos()应当在窗口为非Minimized状态下调用");
             }
 
-            float fValue = (float)container.SplitterDistance / 
+            float fValue = (float)container.SplitterDistance /
                 (
                 container.Orientation == Orientation.Horizontal ?
                 (float)container.Height
@@ -5559,7 +5560,7 @@ out strError);
                 (float)container.Height
                 :
                 (float)container.Width
-                ) 
+                )
                 * fValue);
             }
             catch
@@ -5909,7 +5910,7 @@ out strError);
                 return;
             }
 
-        // DELETE_FILES:
+            // DELETE_FILES:
             FileInfo[] fis = di.GetFiles();
             for (int i = 0; i < fis.Length; i++)
             {
@@ -7005,7 +7006,7 @@ out strError);
 
         public object InvokeScript(
             WebBrowser webBrowser,
-            string strFuncName, 
+            string strFuncName,
             object[] args)
         {
             try
@@ -7250,10 +7251,10 @@ Keys keyData)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-        if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
                 // strSha1 != GetCheckCode(strSerialCode)
-                MatchLocalString(strSerialCode) == false
-                || String.IsNullOrEmpty(strSerialCode) == true)
+                    MatchLocalString(strSerialCode) == false
+                    || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (bReinput == false)
                 {
@@ -7290,7 +7291,7 @@ Keys keyData)
         {
             Hashtable table = StringUtil.ParseParameters(strEnvString);
             string strFuncValue = (string)table["function"];
-            string[] parts = strFuncList.Split(new char[] {','});
+            string[] parts = strFuncList.Split(new char[] { ',' });
             foreach (string part in parts)
             {
                 if (string.IsNullOrEmpty(part) == true)
@@ -7391,7 +7392,7 @@ Keys keyData)
                     this.CopyrightKey);
             SerialCodeForm dlg = new SerialCodeForm();
             dlg.Font = this.Font;
-            dlg.DefaultCodes = new List<string>(new string[] {"community|社区版"});
+            dlg.DefaultCodes = new List<string>(new string[] { "community|社区版" });
             dlg.SerialCode = strOldSerialCode;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
@@ -7478,10 +7479,10 @@ Keys keyData)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-        if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
                 // strSha1 != GetCheckCode(strSerialCode) 
-                MatchLocalString(strSerialCode) == false
-                || String.IsNullOrEmpty(strSerialCode) == true)
+                    MatchLocalString(strSerialCode) == false
+                    || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (String.IsNullOrEmpty(strSerialCode) == false)
                     MessageBox.Show(this, "序列号无效。请重新输入");
@@ -7549,7 +7550,7 @@ Keys keyData)
 </root>";
 #endif
 
-                static string _baseCfg = @"
+        static string _baseCfg = @"
 <root>
   <server name='红泥巴.数字平台中心' type='dp2library' url='http://hnbclub.cn/dp2library' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
@@ -7718,7 +7719,7 @@ Keys keyData)
         //      0   不是同一个服务器
         //      1   是同一个服务器
         public int IsSameDp2libraryServer(string strUrl1,
-            string strUrl2, 
+            string strUrl2,
             out string strError)
         {
             strError = "";
@@ -7728,7 +7729,7 @@ Keys keyData)
             int nRet = GetDp2libraryServerUID(null, strUrl1, out strUID1, out strError);
             if (nRet == -1)
             {
-                strError = "获得服务器 "+strUrl1+" 的 UID 时出错: " + strError;
+                strError = "获得服务器 " + strUrl1 + " 的 UID 时出错: " + strError;
                 return -1;
             }
             if (string.IsNullOrEmpty(strUID1) == true)
@@ -7753,7 +7754,7 @@ Keys keyData)
             return 1;
         }
 
-        public static int GetDp2libraryServerUID(Stop stop, 
+        public static int GetDp2libraryServerUID(Stop stop,
             string strURL,
             out string strUID,
             out string strError)
@@ -7904,7 +7905,7 @@ Keys keyData)
         {
             get
             {
-                string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/","_"));
+                string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/", "_"));
                 string strDirectory = Path.Combine(this.UserDir, "servers\\" + strServerUrl);
                 PathUtil.CreateDirIfNeed(strDirectory);
                 return strDirectory;
@@ -7982,16 +7983,16 @@ Keys keyData)
                     this.UserDir,
                     strTempDir,
                     (strText) =>
-                        {
-                            Application.DoEvents();
+                    {
+                        Application.DoEvents();
 
-                            if (strText != null)
-                                this.Stop.SetMessage(strText);
+                        if (strText != null)
+                            this.Stop.SetMessage(strText);
 
-                            if (this.Stop != null && this.Stop.State != 0)
-                                return false;
-                            return true;
-                        },
+                        if (this.Stop != null && this.Stop.State != 0)
+                            return false;
+                        return true;
+                    },
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
