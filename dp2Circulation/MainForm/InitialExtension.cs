@@ -382,6 +382,50 @@ Stack:
             return Path.Combine(Path.GetDirectoryName(strBinDir), "~" + Path.GetFileName(strBinDir) + "_greenutility");
         }
 
+        // return:
+        //      true    探测到
+        //      false   没有探测到
+        bool DetectDp2003Site()
+        {
+            IPAddress[] address_list1 = null;
+            try
+            {
+                address_list1 = Dns.GetHostAddresses("dp2003.com");
+                if (address_list1.Length > 0)
+                    return true;
+            }
+            catch
+            {
+            }
+            return false;
+        }
+
+        static string _defaultDownloadBaseUrl = "http://dp2003.com/dp2circulation/v2/";
+
+        // 获得下载的基地址 URL。
+        // 在参数配置里面配置这个地址的时候，如果希望强制发生作用，可以在第一字符使用 '~'。否则，程序会优先看 dp2003.com 域名是否可以解析，如果能解析则还是优先使用 dp2003.com 的地址
+        string GetDownloadBaseUrl()
+        {
+            // 绿色安装包
+            string strBaseUrl = this.AppInfo.GetString("config",
+                "green_package_server_url",
+                "").Trim();
+            if (string.IsNullOrEmpty(strBaseUrl) == true)
+                return _defaultDownloadBaseUrl;
+
+            // 在 dp2003.com 域名有效的情况下，依然使用 dp2003.com 的发行目录
+            if (DetectDp2003Site() == true && strBaseUrl[0] != '~')
+                return _defaultDownloadBaseUrl;
+
+            if (strBaseUrl[0] == '~')
+                strBaseUrl.Substring(1);
+
+            if (strBaseUrl[strBaseUrl.Length - 1] != '/')
+                strBaseUrl += "/";
+
+            return strBaseUrl;
+        }
+
         void GreenUpdate()
         {
             int nRet = 0;
@@ -390,7 +434,7 @@ Stack:
             string strBinDir = GetBinDir();
             string strUtilDir = GetUtilDir();
 
-            this.DisplayBackgroundText("开始自动更新(绿色安装)\r\n");
+            this.DisplayBackgroundText("开始自动更新(绿色安装)\r\n这期间，您可继续进行其它操作\r\n");
 
             // 希望下载的文件。纯文件名
             List<string> filenames = new List<string>() {
@@ -409,7 +453,9 @@ Stack:
             {
                 foreach (string filename in filenames)
                 {
-                    string strUrl = "http://dp2003.com/dp2circulation/v2/" + filename;
+                    string strUrl = // "http://dp2003.com/dp2circulation/v2/"
+                        GetDownloadBaseUrl()
+                        + filename;
                     string strLocalFileName = Path.Combine(strBinDir, filename).ToLower();
 
                     if (File.Exists(strLocalFileName) == true)

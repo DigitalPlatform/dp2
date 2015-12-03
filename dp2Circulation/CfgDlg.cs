@@ -80,7 +80,13 @@ namespace dp2Circulation
             this.textBox_server_pinyin_gcatUrl.Text =
                 ap.GetString("config",
                 "pinyin_server_url",
-                "http://dp2003.com/gcatserver/");    // 
+                "http://dp2003.com/gcatserver/");
+
+            // 绿色安装包
+            this.textBox_server_greenPackage.Text =
+                ap.GetString("config",
+                "green_package_server_url",
+                "");
 
             // dp2MServer URL
             this.textBox_server_dp2MServerUrl.Text =
@@ -524,7 +530,7 @@ false);
             this.textBox_fingerprint_userName.Text =
     ap.GetString("fingerprint",
     "userName",
-    ""); 
+    "");
             // 指纹代理帐户 密码
             {
                 string strPassword = ap.GetString("fingerprint",
@@ -668,6 +674,11 @@ false);
                 "pinyin_server_url",
                 this.textBox_server_pinyin_gcatUrl.Text);
 
+            // 绿色安装包
+            ap.SetString("config",
+                "green_package_server_url",
+                this.textBox_server_greenPackage.Text);
+
             // dp2MServer URL
             ap.SetString("config",
                 "im_server_url",
@@ -755,18 +766,18 @@ false);
     "green_infodlg_not_occur",
     this.checkBox_charging_greenInfoDlgNotOccur.Checked);
 
-            
+
             ap.SetBoolean(
 "charging_form",
 "stop_filling_when_close_infodlg",
 this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
-          
+
             ap.SetBoolean(
                 "charging_form",
                 "no_biblio_and_item_info",
                 this.checkBox_charging_noBiblioAndItem.Checked);
 
-            
+
             ap.SetBoolean(
                 "charging_form",
                 "auto_switch_reader_barcode",
@@ -805,10 +816,10 @@ this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
                 this.checkBox_charging_noBorrowHistory.Checked);
 
             // 启用 ISBN 借书还书功能
-             ap.SetBoolean(
-                "charging_form",
-                "isbn_borrow",
-                this.checkBox_charging_isbnBorrow.Checked);
+            ap.SetBoolean(
+               "charging_form",
+               "isbn_borrow",
+               this.checkBox_charging_isbnBorrow.Checked);
 
             // 自动操作唯一事项
             ap.SetBoolean(
@@ -994,10 +1005,10 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
 
             // --- order
-             ap.SetInt(
-    "order_search_form",
-    "max_result_count",
-    (int)this.numericUpDown_search_maxOrderResultCount.Value);
+            ap.SetInt(
+   "order_search_form",
+   "max_result_count",
+   (int)this.numericUpDown_search_maxOrderResultCount.Value);
 
             ap.SetBoolean(
                 "order_search_form",
@@ -1330,7 +1341,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
         private void MenuItem_print_editCharingPrintCs_Click(object sender, EventArgs e)
         {
-            string strFileName = Path.Combine(this.MainForm.DataDir , "charging_print.cs");
+            string strFileName = Path.Combine(this.MainForm.DataDir, "charging_print.cs");
             System.Diagnostics.Process.Start("notepad.exe", strFileName);
         }
 
@@ -1449,7 +1460,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             string strDefaultValue = "ipc://FingerprintChannel/FingerprintServer";
 
             DialogResult result = MessageBox.Show(this,
-    "确实要将 指纹阅读器接口URL 的值设置为常用值\r\n \""+strDefaultValue+"\" ? ",
+    "确实要将 指纹阅读器接口URL 的值设置为常用值\r\n \"" + strDefaultValue + "\" ? ",
     "CfgDlg",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1498,7 +1509,7 @@ MessageBoxDefaultButton.Button2);
             string strDefaultValue = "ipc://IdcardChannel/IdcardServer";
 
             DialogResult result = MessageBox.Show(this,
-    "确实要将 身份证读卡器接口URL 的值设置为常用值\r\n \""+strDefaultValue+"\" ? ",
+    "确实要将 身份证读卡器接口URL 的值设置为常用值\r\n \"" + strDefaultValue + "\" ? ",
     "CfgDlg",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1541,7 +1552,7 @@ MessageBoxDefaultButton.Button2);
 
         private void checkBox_charging_isbnBorrow_CheckedChanged(object sender, EventArgs e)
         {
-                this.groupBox_charging_selectItemDialog.Enabled = this.checkBox_charging_isbnBorrow.Checked;
+            this.groupBox_charging_selectItemDialog.Enabled = this.checkBox_charging_isbnBorrow.Checked;
         }
 
         private void checkBox_quickCharging_isbnBorrow_CheckedChanged(object sender, EventArgs e)
