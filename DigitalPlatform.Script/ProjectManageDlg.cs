@@ -17,11 +17,11 @@ using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.Script
 {
-	/// <summary>
-	/// Summary description for ProjectManageDlg.
-	/// </summary>
-	public class ProjectManageDlg : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// Summary description for ProjectManageDlg.
+    /// </summary>
+    public class ProjectManageDlg : System.Windows.Forms.Form
+    {
         // projects.xml文件URL
         // "http://dp2003.com/dp2circulation/projects/projects.xml"
         // "http://dp2003.com/dp2batch/projects/projects.xml"
@@ -31,54 +31,54 @@ namespace DigitalPlatform.Script
 
         public event AutoCreateProjectXmlFileEventHandle CreateProjectXmlFile = null;
 
-		public ScriptManager scriptManager = null;
+        public ScriptManager scriptManager = null;
 
-		public ApplicationInfo	AppInfo = null;
+        public ApplicationInfo AppInfo = null;
 
         public string DataDir = ""; // 数据目录
 
-		string strRecentPackageFilePath = "";
+        string strRecentPackageFilePath = "";
 
-		private System.Windows.Forms.TreeView treeView1;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.ImageList imageList_projectNodeType;
-		private System.Windows.Forms.Button button_modify;
-		private System.Windows.Forms.Button button_new;
-		private System.Windows.Forms.Button button_delete;
-		private System.Windows.Forms.Button button_down;
-		private System.Windows.Forms.Button button_up;
-		private System.Windows.Forms.Button button_import;
-		private System.Windows.Forms.Button button_export;
+        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.ImageList imageList_projectNodeType;
+        private System.Windows.Forms.Button button_modify;
+        private System.Windows.Forms.Button button_new;
+        private System.Windows.Forms.Button button_delete;
+        private System.Windows.Forms.Button button_down;
+        private System.Windows.Forms.Button button_up;
+        private System.Windows.Forms.Button button_import;
+        private System.Windows.Forms.Button button_export;
         private Button button_updateProjects;
-		private System.ComponentModel.IContainer components;
+        private System.ComponentModel.IContainer components;
 
-		public ProjectManageDlg()
-		{
-			InitializeComponent();
-		}
+        public ProjectManageDlg()
+        {
+            InitializeComponent();
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProjectManageDlg));
             this.treeView1 = new System.Windows.Forms.TreeView();
@@ -234,59 +234,59 @@ namespace DigitalPlatform.Script
             this.Load += new System.EventHandler(this.ProjectManageDlg_Load);
             this.ResumeLayout(false);
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void ProjectManageDlg_Load(object sender, System.EventArgs e)
-		{
+        private void ProjectManageDlg_Load(object sender, System.EventArgs e)
+        {
             Debug.Assert(string.IsNullOrEmpty(this.HostName) == false, "");
 
-			if (AppInfo != null) 
-			{
-				AppInfo.LoadFormStates(this,
-					"projectman");
-			}
-			/*
-			if (applicationInfo != null) 
-			{
+            if (AppInfo != null)
+            {
+                AppInfo.LoadFormStates(this,
+                    "projectman");
+            }
+            /*
+            if (applicationInfo != null) 
+            {
 
-				this.Width = applicationInfo.GetInt(
-					"projectman", "width", 640);
-				this.Height = applicationInfo.GetInt(
-					"projectman", "height", 500);
+                this.Width = applicationInfo.GetInt(
+                    "projectman", "width", 640);
+                this.Height = applicationInfo.GetInt(
+                    "projectman", "height", 500);
 
-				this.Location = new Point(
-					applicationInfo.GetInt("projectman", "x", 0),
-					applicationInfo.GetInt("projectman", "y", 0));
+                this.Location = new Point(
+                    applicationInfo.GetInt("projectman", "x", 0),
+                    applicationInfo.GetInt("projectman", "y", 0));
 
-				this.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), applicationInfo.GetString(
-					"projectman", "window_state", "Normal"));
-			}
-			*/
+                this.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState), applicationInfo.GetString(
+                    "projectman", "window_state", "Normal"));
+            }
+            */
 
 
-			treeView1.ImageList = imageList_projectNodeType;
-			treeView1.PathSeparator = "/";
+            treeView1.ImageList = imageList_projectNodeType;
+            treeView1.PathSeparator = "/";
 
-			if (scriptManager != null)
-			{
-				bool bDone = false;
-			REDO:
-				try 
-				{
-					scriptManager.FillTree(this.treeView1);
-				}
-				catch(System.IO.FileNotFoundException ex) 
-				{
-					/*
-					MessageBox.Show("装载" + scriptManager.CfgFilePath + "文件失败，原因:"
-						+ ex.Message);
-					*/
-					// MessageBox.Show(ex.Message);
-					//return;
-					if (bDone == false) 
-					{
-						MessageBox.Show(this, "自动创建新文件 " + scriptManager.CfgFilePath);
+            if (scriptManager != null)
+            {
+                bool bDone = false;
+            REDO:
+                try
+                {
+                    scriptManager.FillTree(this.treeView1);
+                }
+                catch (System.IO.FileNotFoundException ex)
+                {
+                    /*
+                    MessageBox.Show("装载" + scriptManager.CfgFilePath + "文件失败，原因:"
+                        + ex.Message);
+                    */
+                    // MessageBox.Show(ex.Message);
+                    //return;
+                    if (bDone == false)
+                    {
+                        MessageBox.Show(this, "自动创建新文件 " + scriptManager.CfgFilePath);
 
                         // 触发事件
                         if (this.CreateProjectXmlFile != null)
@@ -296,820 +296,820 @@ namespace DigitalPlatform.Script
                             this.CreateProjectXmlFile(this, e1);
                         }
 
-						ScriptManager.CreateDefaultProjectsXmlFile(scriptManager.CfgFilePath,
-							"clientcfgs");
-						bDone = true;
-						goto REDO;
-					}
-					else 
-					{
+                        ScriptManager.CreateDefaultProjectsXmlFile(scriptManager.CfgFilePath,
+                            "clientcfgs");
+                        bDone = true;
+                        goto REDO;
+                    }
+                    else
+                    {
                         MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-						return;
-					}
-				}
-				catch(System.Xml.XmlException ex)
-				{
-					MessageBox.Show("装载" + scriptManager.CfgFilePath + "文件失败，原因:"
-						+ ex.Message);
-					return;
-				}
-			}
-			treeView1_AfterSelect(null,null);
+                        return;
+                    }
+                }
+                catch (System.Xml.XmlException ex)
+                {
+                    MessageBox.Show(this,
+                        "装载" + scriptManager.CfgFilePath + "文件失败，原因:"
+                        + ex.Message);
+                    return;
+                }
+            }
+            treeView1_AfterSelect(null, null);
 
-			TreeViewUtil.SelectTreeNode(treeView1, 
-				AppInfo.GetString(
-				"projectman",
-				"lastUsedProject",
-				""),
+            TreeViewUtil.SelectTreeNode(treeView1,
+                AppInfo.GetString(
+                "projectman",
+                "lastUsedProject",
+                ""),
                 '/');
 
-		}
+        }
 
-		private void ProjectManageDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			/*
-			if (scriptManager.Changed == true)
-			{
-				DialogResult msgResult = MessageBox.Show(this,
-					"是否放弃先前所作的修改而立即退出?",
-					"script",
-					MessageBoxButtons.OKCancel,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-				if (msgResult == DialogResult.Cancel) 
-				{
-					e.Cancel = true;
-					return;
-				}
-			}
-			*/
-
-
-
-		}
-
-		private void ProjectManageDlg_Closed(object sender, System.EventArgs e)
-		{
-
-			if (AppInfo != null) 
-			{
-				AppInfo.SetString(
-					"projectman",
-					"lastUsedProject",
-					TreeViewUtil.GetSelectedTreeNodePath(treeView1, '/')); // 2007/8/2 changed
-			}
-
-			if (AppInfo != null) 
-			{
-				AppInfo.SaveFormStates(this,
-					"projectman");
-			}
-
-			/*
-			if (applicationInfo != null) 
-			{
-				applicationInfo.SetString(
-					"projectman", "window_state", 
-					Enum.GetName(typeof(FormWindowState), this.WindowState));
-			}
-
-			if (applicationInfo != null) 
-			{
-				WindowState = FormWindowState.Normal;	// 是否先隐藏窗口?
-				applicationInfo.SetInt(
-					"projectman", "width", this.Width);
-				applicationInfo.SetInt(
-					"projectman", "height", this.Height);
-
-				applicationInfo.SetInt("projectman", "x", this.Location.X);
-				applicationInfo.SetInt("projectman", "y", this.Location.Y);
-			}
-			*/
+        private void ProjectManageDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            /*
+            if (scriptManager.Changed == true)
+            {
+                DialogResult msgResult = MessageBox.Show(this,
+                    "是否放弃先前所作的修改而立即退出?",
+                    "script",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (msgResult == DialogResult.Cancel) 
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            */
 
 
-		}
 
-		// 修改方案
-		private void button_modify_Click(object sender, System.EventArgs e)
-		{
-			int nRet;
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				MessageBox.Show("尚未选择方案或者目录");
-				return;
-			}
+        }
 
-			TreeNode node = treeView1.SelectedNode;
-			if (node.ImageIndex == 0) 
-			{
-				// 修改目录名
-				DirNameDlg namedlg = new DirNameDlg();
+        private void ProjectManageDlg_Closed(object sender, System.EventArgs e)
+        {
+
+            if (AppInfo != null)
+            {
+                AppInfo.SetString(
+                    "projectman",
+                    "lastUsedProject",
+                    TreeViewUtil.GetSelectedTreeNodePath(treeView1, '/')); // 2007/8/2 changed
+            }
+
+            if (AppInfo != null)
+            {
+                AppInfo.SaveFormStates(this,
+                    "projectman");
+            }
+
+            /*
+            if (applicationInfo != null) 
+            {
+                applicationInfo.SetString(
+                    "projectman", "window_state", 
+                    Enum.GetName(typeof(FormWindowState), this.WindowState));
+            }
+
+            if (applicationInfo != null) 
+            {
+                WindowState = FormWindowState.Normal;	// 是否先隐藏窗口?
+                applicationInfo.SetInt(
+                    "projectman", "width", this.Width);
+                applicationInfo.SetInt(
+                    "projectman", "height", this.Height);
+
+                applicationInfo.SetInt("projectman", "x", this.Location.X);
+                applicationInfo.SetInt("projectman", "y", this.Location.Y);
+            }
+            */
+
+
+        }
+
+        // 修改方案
+        private void button_modify_Click(object sender, System.EventArgs e)
+        {
+            int nRet;
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择方案或者目录");
+                return;
+            }
+
+            TreeNode node = treeView1.SelectedNode;
+            if (node.ImageIndex == 0)
+            {
+                // 修改目录名
+                DirNameDlg namedlg = new DirNameDlg();
                 GuiUtil.AutoSetDefaultFont(namedlg);
 
-				namedlg.textBox_dirName.Text = node.Text;
-				namedlg.StartPosition = FormStartPosition.CenterScreen;
-				namedlg.ShowDialog(this);
+                namedlg.textBox_dirName.Text = node.Text;
+                namedlg.StartPosition = FormStartPosition.CenterScreen;
+                namedlg.ShowDialog(this);
 
-				if (namedlg.DialogResult == DialogResult.OK) 
-				{
-					// return:
-					//	0	not found
-					//	1	found and changed
-					nRet = scriptManager.RenameDir(node.FullPath,
-						namedlg.textBox_dirName.Text);
-					if (nRet == 1) 
-					{
-						node.Text = namedlg.textBox_dirName.Text;	// 兑现视觉
-						scriptManager.Save();
-					}
-				}
+                if (namedlg.DialogResult == DialogResult.OK)
+                {
+                    // return:
+                    //	0	not found
+                    //	1	found and changed
+                    nRet = scriptManager.RenameDir(node.FullPath,
+                        namedlg.textBox_dirName.Text);
+                    if (nRet == 1)
+                    {
+                        node.Text = namedlg.textBox_dirName.Text;	// 兑现视觉
+                        scriptManager.Save();
+                    }
+                }
 
-				return ;
-			}
+                return;
+            }
 
-			string strProjectNamePath = node.FullPath;
+            string strProjectNamePath = node.FullPath;
 
-			string strLocate = "";
+            string strLocate = "";
 
-			// 获得方案参数
-			// strProjectNamePath	方案名，或者路径
-			// return:
-			//		-1	error
-			//		0	not found project
-			//		1	found
-			nRet = scriptManager.GetProjectData(
-				strProjectNamePath,
-				out strLocate);
-			if (nRet != 1) 
-			{
-				MessageBox.Show("方案 "+ strProjectNamePath + " 在ScriptManager中没有找到");
-				return ;
-			}
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            nRet = scriptManager.GetProjectData(
+                strProjectNamePath,
+                out strLocate);
+            if (nRet != 1)
+            {
+                MessageBox.Show(this, "方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
+                return;
+            }
 
-
-			OneProjectDialog dlg = new OneProjectDialog();
-            GuiUtil.AutoSetDefaultFont(dlg);
-
-            dlg.HostName = this.HostName;
-			dlg.scriptManager = scriptManager;
-			dlg.Initial(strProjectNamePath,
-				strLocate);
-
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
-
-
-			if (dlg.DialogResult == DialogResult.OK) 
-			{
-				if (dlg.ResultProjectNamePath != strProjectNamePath) 
-				{
-					/*
-					// 修改显示的Project名字
-					string strPath;
-					string strName;
-					ScriptManager.SplitProjectPathName(dlg.ResultProjectNamePath,
-						out strPath,
-						out strName);
-
-					string strError;
-
-					nRet = scriptManager.ChangeProjectData(strProjectNamePath,
-						strName,
-						null,
-						out strError);
-					if (nRet == -1) 
-					{
-						MessageBox.Show(this, strError);
-					}
-					else 
-					{
-						// 兑现显示?
-					}
-					*/
-					// XML DOM已经在ScriptDlg中修改，这里只是兑现显示
-					string strPath;
-					string strName;
-					ScriptManager.SplitProjectPathName(dlg.ResultProjectNamePath,
-						out strPath,
-						out strName);
-
-					node.Text = strName;
-
-				}
-
-				scriptManager.Save();
-			}
-
-		
-		}
-
-		// 在儿子中找到一个不重复的名字
-		string GetTempProjectName(TreeView treeView,
-			TreeNode parent,
-			string strPrefix,
-			ref int nPrefixNumber)
-		{
-			TreeNodeCollection nodes = null;
-
-			if (parent != null) 
-				nodes = parent.Nodes;
-			else
-				nodes = treeView.Nodes;
-
-			string strName = strPrefix;
-
-			for(;;nPrefixNumber ++) 
-			{
-				if (nPrefixNumber == -1)
-					strName = strPrefix;
-				else
-					strName = strPrefix + " " + Convert.ToString(nPrefixNumber);
-
-				bool bFound = false;
-				for(int i=0;i<nodes.Count; i++) 
-				{
-					string strText = nodes[i].Text;
-
-					if (String.Compare(strText, strName, true) == 0) 
-					{
-						bFound = true;
-						break;
-					}
-				}
-
-				if (bFound == false)
-					break;
-			}
-
-			return strName;
-
-		}
-
-		// 在儿子中找到一个不重复的名字
-		string GetTempDirName(TreeView treeView,
-			TreeNode parent,
-			string strPrefix,
-			ref int nPrefixNumber)
-		{
-			TreeNodeCollection nodes = null;
-
-			if (parent != null) 
-				nodes = parent.Nodes;
-			else
-				nodes = treeView.Nodes;
-
-			string strName = strPrefix;
-
-			for(;;nPrefixNumber ++) 
-			{
-				strName = strPrefix + " " +Convert.ToString(nPrefixNumber);
-
-				bool bFound = false;
-				for(int i=0;i<nodes.Count; i++) 
-				{
-					string strText = nodes[i].Text;
-
-					if (String.Compare(strText, strName, true) == 0) 
-					{
-						bFound = true;
-						break;
-					}
-				}
-
-				if (bFound == false)
-					break;
-			}
-
-			return strName;
-
-		}
-
-		// 新方案
-		private void button_newProject_Click(object sender, System.EventArgs e)
-		{
-			// 当前所在路径
-			string strProjectPath = "";
-			string strTempName = "new project 1";
-
-			TreeNode parent = null;
-
-			int nPrefixNumber = -1;	// 1
-
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				strProjectPath = "";
-			}
-			else 
-			{
-				// 如果当前选择的是dir类型节点，就在其下创建新project
-				// 否则，就在同一级创建新project
-				if (treeView1.SelectedNode.ImageIndex == 0)
-					parent = treeView1.SelectedNode;
-				else
-					parent = treeView1.SelectedNode.Parent;
-
-				strProjectPath = parent != null ? parent.FullPath : "";
-
-				strTempName = GetTempProjectName(treeView1,
-					parent,
-					"new project",
-					ref nPrefixNumber);
-
-				scriptManager.Save();
-
-			}
-
-			/*
-			StreamReader sr = new StreamReader(strTempName, true);
-			string strCode =sr.ReadToEnd();
-			sr.Close();
-			*/
-
-			string strNewLocate = scriptManager.NewProjectLocate(
-				"new project",
-				ref nPrefixNumber);
-
-			OneProjectDialog dlg = new OneProjectDialog();
+            OneProjectDialog dlg = new OneProjectDialog();
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.HostName = this.HostName;
             dlg.scriptManager = scriptManager;
-			dlg.New(strProjectPath,
-				strTempName,
-				strNewLocate);
+            dlg.Initial(strProjectNamePath,
+                strLocate);
 
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
 
-			// 实际插入project参数
-			XmlNode projNode = scriptManager.NewProjectNode(
-				dlg.ResultProjectNamePath,
-				dlg.ResultLocate,
-				false);	// false表示不需要创建目录和缺省文件
+            if (dlg.DialogResult == DialogResult.OK)
+            {
+                if (dlg.ResultProjectNamePath != strProjectNamePath)
+                {
+                    /*
+                    // 修改显示的Project名字
+                    string strPath;
+                    string strName;
+                    ScriptManager.SplitProjectPathName(dlg.ResultProjectNamePath,
+                        out strPath,
+                        out strName);
 
-			// 兑现显示?
-			scriptManager.FillOneLevel(treeView1, 
-				parent, 
-				projNode.ParentNode);
-			TreeViewUtil.SelectTreeNode(treeView1, 
-				scriptManager.GetNodePathName(projNode),
+                    string strError;
+
+                    nRet = scriptManager.ChangeProjectData(strProjectNamePath,
+                        strName,
+                        null,
+                        out strError);
+                    if (nRet == -1) 
+                    {
+                        MessageBox.Show(this, strError);
+                    }
+                    else 
+                    {
+                        // 兑现显示?
+                    }
+                    */
+                    // XML DOM已经在ScriptDlg中修改，这里只是兑现显示
+                    string strPath;
+                    string strName;
+                    ScriptManager.SplitProjectPathName(dlg.ResultProjectNamePath,
+                        out strPath,
+                        out strName);
+
+                    node.Text = strName;
+
+                }
+
+                scriptManager.Save();
+            }
+
+
+        }
+
+        // 在儿子中找到一个不重复的名字
+        string GetTempProjectName(TreeView treeView,
+            TreeNode parent,
+            string strPrefix,
+            ref int nPrefixNumber)
+        {
+            TreeNodeCollection nodes = null;
+
+            if (parent != null)
+                nodes = parent.Nodes;
+            else
+                nodes = treeView.Nodes;
+
+            string strName = strPrefix;
+
+            for (; ; nPrefixNumber++)
+            {
+                if (nPrefixNumber == -1)
+                    strName = strPrefix;
+                else
+                    strName = strPrefix + " " + Convert.ToString(nPrefixNumber);
+
+                bool bFound = false;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    string strText = nodes[i].Text;
+
+                    if (String.Compare(strText, strName, true) == 0)
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
+
+                if (bFound == false)
+                    break;
+            }
+
+            return strName;
+
+        }
+
+        // 在儿子中找到一个不重复的名字
+        string GetTempDirName(TreeView treeView,
+            TreeNode parent,
+            string strPrefix,
+            ref int nPrefixNumber)
+        {
+            TreeNodeCollection nodes = null;
+
+            if (parent != null)
+                nodes = parent.Nodes;
+            else
+                nodes = treeView.Nodes;
+
+            string strName = strPrefix;
+
+            for (; ; nPrefixNumber++)
+            {
+                strName = strPrefix + " " + Convert.ToString(nPrefixNumber);
+
+                bool bFound = false;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    string strText = nodes[i].Text;
+
+                    if (String.Compare(strText, strName, true) == 0)
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
+
+                if (bFound == false)
+                    break;
+            }
+
+            return strName;
+
+        }
+
+        // 新方案
+        private void button_newProject_Click(object sender, System.EventArgs e)
+        {
+            // 当前所在路径
+            string strProjectPath = "";
+            string strTempName = "new project 1";
+
+            TreeNode parent = null;
+
+            int nPrefixNumber = -1;	// 1
+
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                strProjectPath = "";
+            }
+            else
+            {
+                // 如果当前选择的是dir类型节点，就在其下创建新project
+                // 否则，就在同一级创建新project
+                if (treeView1.SelectedNode.ImageIndex == 0)
+                    parent = treeView1.SelectedNode;
+                else
+                    parent = treeView1.SelectedNode.Parent;
+
+                strProjectPath = parent != null ? parent.FullPath : "";
+
+                strTempName = GetTempProjectName(treeView1,
+                    parent,
+                    "new project",
+                    ref nPrefixNumber);
+
+                scriptManager.Save();
+
+            }
+
+            /*
+            StreamReader sr = new StreamReader(strTempName, true);
+            string strCode =sr.ReadToEnd();
+            sr.Close();
+            */
+
+            string strNewLocate = scriptManager.NewProjectLocate(
+                "new project",
+                ref nPrefixNumber);
+
+            OneProjectDialog dlg = new OneProjectDialog();
+            GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.HostName = this.HostName;
+            dlg.scriptManager = scriptManager;
+            dlg.New(strProjectPath,
+                strTempName,
+                strNewLocate);
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            // 实际插入project参数
+            XmlNode projNode = scriptManager.NewProjectNode(
+                dlg.ResultProjectNamePath,
+                dlg.ResultLocate,
+                false);	// false表示不需要创建目录和缺省文件
+
+            // 兑现显示?
+            scriptManager.FillOneLevel(treeView1,
+                parent,
+                projNode.ParentNode);
+            TreeViewUtil.SelectTreeNode(treeView1,
+                scriptManager.GetNodePathName(projNode),
                 '/');
 
-			/*
-			if (parent != null) 
-			{
-				parent.Expand();
-			}
-			*/
+            /*
+            if (parent != null) 
+            {
+                parent.Expand();
+            }
+            */
 
-			scriptManager.Save();
-		}
+            scriptManager.Save();
+        }
 
-		// 新目录
-		private void button_newDir_Click(object sender, System.EventArgs e)
-		{
-			// 当前所在路径
-			string strDirPath = "";
+        // 新目录
+        private void button_newDir_Click(object sender, System.EventArgs e)
+        {
+            // 当前所在路径
+            string strDirPath = "";
 
-			TreeNode parent = null;
+            TreeNode parent = null;
 
-			int nPrefixNumber = 1;
+            int nPrefixNumber = 1;
 
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				strDirPath = "";
-			}
-			else 
-			{
-				// project下不能创建子节点，但是可以创建兄弟?
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                strDirPath = "";
+            }
+            else
+            {
+                // project下不能创建子节点，但是可以创建兄弟?
 
-				if (treeView1.SelectedNode.ImageIndex == 0)
-					parent = treeView1.SelectedNode;
-				else
-					parent = treeView1.SelectedNode.Parent;
+                if (treeView1.SelectedNode.ImageIndex == 0)
+                    parent = treeView1.SelectedNode;
+                else
+                    parent = treeView1.SelectedNode.Parent;
 
-				strDirPath = parent != null ? parent.FullPath : "";
-			}
+                strDirPath = parent != null ? parent.FullPath : "";
+            }
 
-			string strTempName = GetTempDirName(treeView1,
-				parent,
-				"new dir",
-				ref nPrefixNumber);
+            string strTempName = GetTempDirName(treeView1,
+                parent,
+                "new dir",
+                ref nPrefixNumber);
 
-			DirNameDlg namedlg = new DirNameDlg();
+            DirNameDlg namedlg = new DirNameDlg();
             GuiUtil.AutoSetDefaultFont(namedlg);
 
-			namedlg.textBox_dirName.Text = strTempName;
-			namedlg.StartPosition = FormStartPosition.CenterScreen;
-			namedlg.ShowDialog(this);
+            namedlg.textBox_dirName.Text = strTempName;
+            namedlg.StartPosition = FormStartPosition.CenterScreen;
+            namedlg.ShowDialog(this);
 
-			if (namedlg.DialogResult == DialogResult.OK) 
-			{
-				string strDirNamePath = (strDirPath!="" ? strDirPath + "/" : "")
-					+ namedlg.textBox_dirName.Text;
+            if (namedlg.DialogResult == DialogResult.OK)
+            {
+                string strDirNamePath = (strDirPath != "" ? strDirPath + "/" : "")
+                    + namedlg.textBox_dirName.Text;
 
-				XmlNode dirNode = scriptManager.NewDirNode(strDirNamePath);
+                XmlNode dirNode = scriptManager.NewDirNode(strDirNamePath);
 
-				if (dirNode != null) 
-				{
-					scriptManager.Save();
+                if (dirNode != null)
+                {
+                    scriptManager.Save();
 
-					// 兑现显示?
-					scriptManager.FillOneLevel(treeView1, 
-						parent, 
-						dirNode.ParentNode);
+                    // 兑现显示?
+                    scriptManager.FillOneLevel(treeView1,
+                        parent,
+                        dirNode.ParentNode);
 
-					TreeViewUtil.SelectTreeNode(treeView1, 
-						scriptManager.GetNodePathName(dirNode),
+                    TreeViewUtil.SelectTreeNode(treeView1,
+                        scriptManager.GetNodePathName(dirNode),
                         '/');
 
-					/*
-					if (parent != null) 
-						parent.Expand();
-						*/
+                    /*
+                    if (parent != null) 
+                        parent.Expand();
+                        */
 
-				}
-			}
-		}
+                }
+            }
+        }
 
-		// 删除方案
-		private void button_delete_Click(object sender, System.EventArgs e)
-		{
-			string strError;
+        // 删除方案
+        private void button_delete_Click(object sender, System.EventArgs e)
+        {
+            string strError;
 
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				MessageBox.Show("尚未选择方案或目录");
-				return ;
-			}
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择方案或目录");
+                return;
+            }
 
-			TreeNode parent = treeView1.SelectedNode.Parent;
+            TreeNode parent = treeView1.SelectedNode.Parent;
 
-			int nRet;
-			XmlNode parentXmlNode = null;
-			DialogResult msgResult;
+            int nRet;
+            XmlNode parentXmlNode = null;
+            DialogResult msgResult;
 
-			TreeNode node = treeView1.SelectedNode;
-			if (node.ImageIndex == 0) 
-			{
-				node.ExpandAll();
-				msgResult = MessageBox.Show(this,
-					"确实要删除目录 " + node.FullPath + "和下级包含的全部目录和方案么?",
-					"script",
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-				if (msgResult == DialogResult.No)
-					return;
+            TreeNode node = treeView1.SelectedNode;
+            if (node.ImageIndex == 0)
+            {
+                node.ExpandAll();
+                msgResult = MessageBox.Show(this,
+                    "确实要删除目录 " + node.FullPath + "和下级包含的全部目录和方案么?",
+                    "script",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (msgResult == DialogResult.No)
+                    return;
 
-				// return:
-				//	-1	error
-				//	0	not found
-				//	1	found and changed
-				nRet = scriptManager.DeleteDir(node.FullPath,
-					out parentXmlNode,
-					out strError);
-				if (nRet == -1) 
-				{
-					MessageBox.Show(strError);
-					// return ;
-				}
+                // return:
+                //	-1	error
+                //	0	not found
+                //	1	found and changed
+                nRet = scriptManager.DeleteDir(node.FullPath,
+                    out parentXmlNode,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    // return ;
+                }
 
-				if (nRet == 1) 
-				{
-					if (parentXmlNode != null)
-					{
-						// 兑现显示?
-						scriptManager.FillOneLevel(treeView1, 
-							parent, 
-							parentXmlNode);
-					}
-					scriptManager.Save();
-				}
-				return ;
-			}
+                if (nRet == 1)
+                {
+                    if (parentXmlNode != null)
+                    {
+                        // 兑现显示?
+                        scriptManager.FillOneLevel(treeView1,
+                            parent,
+                            parentXmlNode);
+                    }
+                    scriptManager.Save();
+                }
+                return;
+            }
 
-			string strProjectNamePath = node.FullPath;
+            string strProjectNamePath = node.FullPath;
 
-			msgResult = MessageBox.Show(this,
-				"确实要删除方案 '" + node.FullPath + "' ?",
-				"script",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2);
-			if (msgResult == DialogResult.No)
-				return;
+            msgResult = MessageBox.Show(this,
+                "确实要删除方案 '" + node.FullPath + "' ?",
+                "script",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (msgResult == DialogResult.No)
+                return;
 
-			// 准备删除后，selection停靠的节点路径
-			TreeNode nodeNear = null;
-			if (node.PrevNode != null)
-				nodeNear = node.PrevNode;
-			else if (node.NextNode != null)
-				nodeNear = node.NextNode;
-			else 
-				nodeNear = parent;
-			string strPath = "";
-			if (nodeNear != null)
-				strPath = nodeNear.FullPath;
+            // 准备删除后，selection停靠的节点路径
+            TreeNode nodeNear = null;
+            if (node.PrevNode != null)
+                nodeNear = node.PrevNode;
+            else if (node.NextNode != null)
+                nodeNear = node.NextNode;
+            else
+                nodeNear = parent;
+            string strPath = "";
+            if (nodeNear != null)
+                strPath = nodeNear.FullPath;
 
-			// 删除一个方案
-			// return:
-			// -1	error
-			//	0	not found
-			//	1	found and deleted
-			//	2	canceld	因此project没有被删除
-			nRet = scriptManager.DeleteProject(
-				strProjectNamePath,
-				true,
-				out parentXmlNode,
-				out strError);
-			if (nRet == -1)
-				goto ERROR1;
+            // 删除一个方案
+            // return:
+            // -1	error
+            //	0	not found
+            //	1	found and deleted
+            //	2	canceld	因此project没有被删除
+            nRet = scriptManager.DeleteProject(
+                strProjectNamePath,
+                true,
+                out parentXmlNode,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
-			if (nRet == 0) 
-			{
-				strError = "方案 "+ strProjectNamePath + " 在ScriptManager中没有找到";
-				goto CANCEL1;
-			}
+            if (nRet == 0)
+            {
+                strError = "方案 " + strProjectNamePath + " 在ScriptManager中没有找到";
+                goto CANCEL1;
+            }
 
-			if (nRet == 2)
-			{
-				strError = "方案 "+ strProjectNamePath + " 放弃删除";
-				goto CANCEL1;
-			}
+            if (nRet == 2)
+            {
+                strError = "方案 " + strProjectNamePath + " 放弃删除";
+                goto CANCEL1;
+            }
 
-			if (parentXmlNode != null)
-			{
-				// 兑现显示?
-				scriptManager.FillOneLevel(treeView1, 
-					parent, 
-					parentXmlNode);
+            if (parentXmlNode != null)
+            {
+                // 兑现显示?
+                scriptManager.FillOneLevel(treeView1,
+                    parent,
+                    parentXmlNode);
 
-				TreeViewUtil.SelectTreeNode(treeView1, 
-					strPath,
+                TreeViewUtil.SelectTreeNode(treeView1,
+                    strPath,
                     '/');
 
-			}
+            }
 
 
-			scriptManager.Save();
-			return;
-			CANCEL1:
-				if (strError != "")
-					MessageBox.Show(strError);
-			return;
+            scriptManager.Save();
+            return;
+        CANCEL1:
+            if (string.IsNullOrEmpty(strError) == false)
+                MessageBox.Show(this, strError);
+            return;
 
-			ERROR1:
-				MessageBox.Show(strError);
-			return;
-		}
-
-
-		private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				button_modify.Enabled = false;
-				button_new.Enabled = true;
-				button_delete.Enabled = false;
-				button_up.Enabled = false;
-				button_down.Enabled = false;
-				button_export.Enabled = false;
-				return ;
-			}
-			
-
-			if (treeView1.SelectedNode.ImageIndex == 0) // 目录
-			{
-				button_modify.Enabled = true;
-				button_new.Enabled = true;
-				button_delete.Enabled = true;
-
-				if (treeView1.SelectedNode.PrevNode == null)
-					button_up.Enabled = false;
-				else
-					button_up.Enabled = true;
-				if (treeView1.SelectedNode.NextNode == null)
-					button_down.Enabled = false;
-				else
-					button_down.Enabled = true;
-
-				button_export.Enabled = false;
-				return;
-			}
-
-			if (treeView1.SelectedNode.ImageIndex == 1) // project
-			{
-				button_modify.Enabled = true;
-				button_new.Enabled = true;
-				button_delete.Enabled = true;
-				if (treeView1.SelectedNode.PrevNode == null)
-					button_up.Enabled = false;
-				else
-					button_up.Enabled = true;
-				if (treeView1.SelectedNode.NextNode == null)
-					button_down.Enabled = false;
-				else
-					button_down.Enabled = true;
-
-				button_export.Enabled = true;
-			}
-		}
-
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-
-			this.Close();
-			this.DialogResult = DialogResult.OK;
-		}
-
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.Close();
-			this.DialogResult = DialogResult.Cancel;
-		}
-
-		private void treeView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			if(e.Button != MouseButtons.Right)
-				return;
-
-			ContextMenu contextMenu = new ContextMenu();
-			MenuItem menuItem = null;
-
-			TreeNode node = treeView1.SelectedNode;
-
-			//
-			menuItem = new MenuItem("修改(&M)");
-			menuItem.Click += new System.EventHandler(this.button_modify_Click);
-			if (node == null) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
-
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
-
-			string strText;
-
-		{
-			TreeNode parent = null;
-
-			if (treeView1.SelectedNode != null) 
-			{
-				if (treeView1.SelectedNode.ImageIndex == 0)
-					parent = treeView1.SelectedNode;
-				else
-					parent = treeView1.SelectedNode.Parent;
-			}
-
-			if (parent == null)
-				strText = "在根下";
-			else
-				strText = "在目录 " + parent.Text + "下";
-		}
-
-			//
-			menuItem = new MenuItem("新增方案(" + strText + ") (&N)");
-			menuItem.Click += new System.EventHandler(this.button_newProject_Click);
-			contextMenu.MenuItems.Add(menuItem);
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+        }
 
 
-		{
-			TreeNode parent = null;
-
-			if (treeView1.SelectedNode != null) 
-			{
-				if (treeView1.SelectedNode.ImageIndex == 0)
-					parent = treeView1.SelectedNode;
-				else
-					parent = treeView1.SelectedNode.Parent;
-			}
-
-			if (parent == null)
-				strText = "在根下";
-			else
-				strText = "在目录 " + parent.Text + "下";
-		}
+        private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                button_modify.Enabled = false;
+                button_new.Enabled = true;
+                button_delete.Enabled = false;
+                button_up.Enabled = false;
+                button_down.Enabled = false;
+                button_export.Enabled = false;
+                return;
+            }
 
 
-			//
-			menuItem = new MenuItem("新增目录(" + strText + ") (&A)");
-			menuItem.Click += new System.EventHandler(this.button_newDir_Click);
-			contextMenu.MenuItems.Add(menuItem);
+            if (treeView1.SelectedNode.ImageIndex == 0) // 目录
+            {
+                button_modify.Enabled = true;
+                button_new.Enabled = true;
+                button_delete.Enabled = true;
 
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
+                if (treeView1.SelectedNode.PrevNode == null)
+                    button_up.Enabled = false;
+                else
+                    button_up.Enabled = true;
+                if (treeView1.SelectedNode.NextNode == null)
+                    button_down.Enabled = false;
+                else
+                    button_down.Enabled = true;
+
+                button_export.Enabled = false;
+                return;
+            }
+
+            if (treeView1.SelectedNode.ImageIndex == 1) // project
+            {
+                button_modify.Enabled = true;
+                button_new.Enabled = true;
+                button_delete.Enabled = true;
+                if (treeView1.SelectedNode.PrevNode == null)
+                    button_up.Enabled = false;
+                else
+                    button_up.Enabled = true;
+                if (treeView1.SelectedNode.NextNode == null)
+                    button_down.Enabled = false;
+                else
+                    button_down.Enabled = true;
+
+                button_export.Enabled = true;
+            }
+        }
+
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+
+            this.Close();
+            this.DialogResult = DialogResult.OK;
+        }
+
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.Close();
+            this.DialogResult = DialogResult.Cancel;
+        }
+
+        private void treeView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            TreeNode node = treeView1.SelectedNode;
+
+            //
+            menuItem = new MenuItem("修改(&M)");
+            menuItem.Click += new System.EventHandler(this.button_modify_Click);
+            if (node == null)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            string strText;
+
+            {
+                TreeNode parent = null;
+
+                if (treeView1.SelectedNode != null)
+                {
+                    if (treeView1.SelectedNode.ImageIndex == 0)
+                        parent = treeView1.SelectedNode;
+                    else
+                        parent = treeView1.SelectedNode.Parent;
+                }
+
+                if (parent == null)
+                    strText = "在根下";
+                else
+                    strText = "在目录 " + parent.Text + "下";
+            }
+
+            //
+            menuItem = new MenuItem("新增方案(" + strText + ") (&N)");
+            menuItem.Click += new System.EventHandler(this.button_newProject_Click);
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			// 
-			menuItem = new MenuItem("上移(&U)");
-			menuItem.Click += new System.EventHandler(this.button_up_Click);
-			if (treeView1.SelectedNode == null
-				|| treeView1.SelectedNode.PrevNode == null)
-				menuItem.Enabled = false;
-			else
-				menuItem.Enabled = true;
-			contextMenu.MenuItems.Add(menuItem);
+            {
+                TreeNode parent = null;
+
+                if (treeView1.SelectedNode != null)
+                {
+                    if (treeView1.SelectedNode.ImageIndex == 0)
+                        parent = treeView1.SelectedNode;
+                    else
+                        parent = treeView1.SelectedNode.Parent;
+                }
+
+                if (parent == null)
+                    strText = "在根下";
+                else
+                    strText = "在目录 " + parent.Text + "下";
+            }
 
 
+            //
+            menuItem = new MenuItem("新增目录(" + strText + ") (&A)");
+            menuItem.Click += new System.EventHandler(this.button_newDir_Click);
+            contextMenu.MenuItems.Add(menuItem);
 
-			// 
-			menuItem = new MenuItem("下移(&D)");
-			menuItem.Click += new System.EventHandler(this.button_down_Click);
-			if (treeView1.SelectedNode == null
-				|| treeView1.SelectedNode.NextNode == null)
-				menuItem.Enabled = false;
-			else
-				menuItem.Enabled = true;
-			contextMenu.MenuItems.Add(menuItem);
-
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
-
-			//
-			menuItem = new MenuItem("删除(&E)");
-			menuItem.Click += new System.EventHandler(this.button_delete_Click);
-			if (node == null) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
-
-			menuItem = new MenuItem("复制(&C)");
-			menuItem.Click += new System.EventHandler(this.button_CopyToClipboard_Click);
-			if (node == null || node.ImageIndex == 0) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
-
-			bool bHasClipboardObject = false;
-			IDataObject iData = Clipboard.GetDataObject();
-			if (iData == null
-				|| iData.GetDataPresent(typeof(Project)) == false)
-				bHasClipboardObject = false;
-			else
-				bHasClipboardObject = true;
+            // 
+            menuItem = new MenuItem("上移(&U)");
+            menuItem.Click += new System.EventHandler(this.button_up_Click);
+            if (treeView1.SelectedNode == null
+                || treeView1.SelectedNode.PrevNode == null)
+                menuItem.Enabled = false;
+            else
+                menuItem.Enabled = true;
+            contextMenu.MenuItems.Add(menuItem);
 
 
 
-			menuItem = new MenuItem("粘贴到当前目录 '" + GetCurTreeDir() + "' (&P)");
-			menuItem.Click += new System.EventHandler(this.button_PasteFromClipboard_Click);
-			if (bHasClipboardObject== false)
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            // 
+            menuItem = new MenuItem("下移(&D)");
+            menuItem.Click += new System.EventHandler(this.button_down_Click);
+            if (treeView1.SelectedNode == null
+                || treeView1.SelectedNode.NextNode == null)
+                menuItem.Enabled = false;
+            else
+                menuItem.Enabled = true;
+            contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("粘贴到原目录 '" + GetClipboardProjectDir() + "' (&O)");
-			menuItem.Click += new System.EventHandler(this.button_PasteFromClipboardToOriginDir_Click);
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
-			if (bHasClipboardObject== false)
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            //
+            menuItem = new MenuItem("删除(&E)");
+            menuItem.Click += new System.EventHandler(this.button_delete_Click);
+            if (node == null)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("导出(&E)");
-			menuItem.Click += new System.EventHandler(this.button_CopyToFile_Click);
-			if (node == null || node.ImageIndex == 0) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            menuItem = new MenuItem("复制(&C)");
+            menuItem.Click += new System.EventHandler(this.button_CopyToClipboard_Click);
+            if (node == null || node.ImageIndex == 0)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("导入(&I)");
-			menuItem.Click += new System.EventHandler(this.button_PasteFromFile_Click);
-			/*
-			if (node == null || node.ImageIndex == 0) 
-			{
-				menuItem.Enabled = false;
-			}
-			*/
-			contextMenu.MenuItems.Add(menuItem);
+            bool bHasClipboardObject = false;
+            IDataObject iData = Clipboard.GetDataObject();
+            if (iData == null
+                || iData.GetDataPresent(typeof(Project)) == false)
+                bHasClipboardObject = false;
+            else
+                bHasClipboardObject = true;
+
+
+
+            menuItem = new MenuItem("粘贴到当前目录 '" + GetCurTreeDir() + "' (&P)");
+            menuItem.Click += new System.EventHandler(this.button_PasteFromClipboard_Click);
+            if (bHasClipboardObject == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("粘贴到原目录 '" + GetClipboardProjectDir() + "' (&O)");
+            menuItem.Click += new System.EventHandler(this.button_PasteFromClipboardToOriginDir_Click);
+
+            if (bHasClipboardObject == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("导出(&E)");
+            menuItem.Click += new System.EventHandler(this.button_CopyToFile_Click);
+            if (node == null || node.ImageIndex == 0)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("导入(&I)");
+            menuItem.Click += new System.EventHandler(this.button_PasteFromFile_Click);
+            /*
+            if (node == null || node.ImageIndex == 0) 
+            {
+                menuItem.Enabled = false;
+            }
+            */
+            contextMenu.MenuItems.Add(menuItem);
 
             // ---
             menuItem = new MenuItem("-");
@@ -1151,8 +1151,8 @@ namespace DigitalPlatform.Script
             menuItem.Click += new System.EventHandler(this.button_installVisualStudioCode_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-			contextMenu.Show(treeView1, new Point(e.X, e.Y) );		
-		}
+            contextMenu.Show(treeView1, new Point(e.X, e.Y));
+        }
 
         void button_installVisualStudioCode_Click(object sender, System.EventArgs e)
         {
@@ -1419,573 +1419,559 @@ namespace DigitalPlatform.Script
             MessageBox.Show(this, strError);
         }
 
-		private void treeView1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			TreeNode curSelectedNode = treeView1.GetNodeAt(e.X, e.Y);
+        private void treeView1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            TreeNode curSelectedNode = treeView1.GetNodeAt(e.X, e.Y);
 
-			if (treeView1.SelectedNode != curSelectedNode) 
-			{
-				treeView1.SelectedNode = curSelectedNode;
+            if (treeView1.SelectedNode != curSelectedNode)
+            {
+                treeView1.SelectedNode = curSelectedNode;
 
-				if (treeView1.SelectedNode == null)
-					treeView1_AfterSelect(null, null);	// 补丁
-			}
+                if (treeView1.SelectedNode == null)
+                    treeView1_AfterSelect(null, null);	// 补丁
+            }
 
-		}
+        }
 
-		void MoveUpDown(bool bUp)
-		{
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				MessageBox.Show("尚未选择方案或目录");
-				return ;
-			}
+        void MoveUpDown(bool bUp)
+        {
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择方案或目录");
+                return;
+            }
 
-			TreeNode parent = treeView1.SelectedNode.Parent;
+            TreeNode parent = treeView1.SelectedNode.Parent;
 
-			string strPath = treeView1.SelectedNode.FullPath;
+            string strPath = treeView1.SelectedNode.FullPath;
 
-			int nRet;
-			XmlNode parentXmlNode = null;
+            int nRet;
+            XmlNode parentXmlNode = null;
 
-			TreeNode node = treeView1.SelectedNode;
+            TreeNode node = treeView1.SelectedNode;
 
-			// 上下移动节点
-			// return:
-			//	0	not found
-			//	1	found and moved
-			//	2	cant move
-			nRet =  scriptManager.MoveNode(node.FullPath,
-				bUp,
-				out parentXmlNode);
+            // 上下移动节点
+            // return:
+            //	0	not found
+            //	1	found and moved
+            //	2	cant move
+            nRet = scriptManager.MoveNode(node.FullPath,
+                bUp,
+                out parentXmlNode);
 
-			if (nRet == 1) 
-			{
-				if (parentXmlNode != null)
-				{
-					// 兑现显示?
-					scriptManager.FillOneLevel(treeView1, 
-						parent, 
-						parentXmlNode);
+            if (nRet == 1)
+            {
+                if (parentXmlNode != null)
+                {
+                    // 兑现显示?
+                    scriptManager.FillOneLevel(treeView1,
+                        parent,
+                        parentXmlNode);
 
-					TreeViewUtil.SelectTreeNode(treeView1, 
-						strPath,
+                    TreeViewUtil.SelectTreeNode(treeView1,
+                        strPath,
                         '/');
-				}
-				scriptManager.Save();
-			}
+                }
+                scriptManager.Save();
+            }
 
-			if (nRet == 2) 
-			{
-				MessageBox.Show("已经到头了，不能移动了...");
-			}
-			return ;
-		}
+            if (nRet == 2)
+            {
+                MessageBox.Show(this, "已经到头了，不能移动了...");
+            }
+            return;
+        }
 
-		private void button_up_Click(object sender, System.EventArgs e)
-		{
-			MoveUpDown(true);
-		}
+        private void button_up_Click(object sender, System.EventArgs e)
+        {
+            MoveUpDown(true);
+        }
 
-		private void button_down_Click(object sender, System.EventArgs e)
-		{
-			MoveUpDown(false);
-		}
+        private void button_down_Click(object sender, System.EventArgs e)
+        {
+            MoveUpDown(false);
+        }
 
-		/*
-		static void SelectTreeNode(TreeView treeView, 
-			string strPath)
-		{
-			string[] aName = strPath.Split(new Char [] {'/'});
+        /*
+        static void SelectTreeNode(TreeView treeView, 
+            string strPath)
+        {
+            string[] aName = strPath.Split(new Char [] {'/'});
 
-			TreeNode node = null;
-			TreeNode nodeThis = null;
-			for(int i=0;i<aName.Length;i++)
-			{
-				TreeNodeCollection nodes = null;
+            TreeNode node = null;
+            TreeNode nodeThis = null;
+            for(int i=0;i<aName.Length;i++)
+            {
+                TreeNodeCollection nodes = null;
 
-				if (node == null)
-					nodes = treeView.Nodes;
-				else 
-					nodes = node.Nodes;
+                if (node == null)
+                    nodes = treeView.Nodes;
+                else 
+                    nodes = node.Nodes;
 
-				bool bFound = false;
-				for(int j=0;j<nodes.Count;j++)
-				{
-					if (aName[i] == nodes[j].Text) 
-					{
-						bFound = true;
-						nodeThis = nodes[j];
-						break;
-					}
-				}
-				if (bFound == false)
-					break;
+                bool bFound = false;
+                for(int j=0;j<nodes.Count;j++)
+                {
+                    if (aName[i] == nodes[j].Text) 
+                    {
+                        bFound = true;
+                        nodeThis = nodes[j];
+                        break;
+                    }
+                }
+                if (bFound == false)
+                    break;
 
-				node = nodeThis;
+                node = nodeThis;
 
-			}
+            }
 
-			if (nodeThis!= null && nodeThis.Parent != null)
-				nodeThis.Parent.Expand();
+            if (nodeThis!= null && nodeThis.Parent != null)
+                nodeThis.Parent.Expand();
 
-			treeView.SelectedNode = nodeThis;
-		}
-		*/
+            treeView.SelectedNode = nodeThis;
+        }
+        */
 
-		private void treeView1_DoubleClick(object sender, System.EventArgs e)
-		{
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-				return ;
+        private void treeView1_DoubleClick(object sender, System.EventArgs e)
+        {
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+                return;
 
-			TreeNode node = treeView1.SelectedNode;
-			if (node.ImageIndex == 0) // 目录
-				return;
+            TreeNode node = treeView1.SelectedNode;
+            if (node.ImageIndex == 0) // 目录
+                return;
 
-			button_modify_Click(null, null);
-		}
+            button_modify_Click(null, null);
+        }
 
-		// 导入
-		private void button_import_Click(object sender, System.EventArgs e)
-		{
-			// 未按下Control键, 一般导入功能 -- 导入当前目录
-			if (!(Control.ModifierKeys == Keys.Control))
-			{
-				button_PasteFromFile_Click(null, null);
-				return;
-			}
+        // 导入
+        private void button_import_Click(object sender, System.EventArgs e)
+        {
+            // 未按下Control键, 一般导入功能 -- 导入当前目录
+            if (!(Control.ModifierKeys == Keys.Control))
+            {
+                button_PasteFromFile_Click(null, null);
+                return;
+            }
 
-			int nRet ;
-			string strError = "";
+            int nRet;
+            string strError = "";
 
-			// 询问project*.xml文件全路径
-			OpenFileDialog projectDefFileDlg = new OpenFileDialog();
+            // 询问project*.xml文件全路径
+            OpenFileDialog projectDefFileDlg = new OpenFileDialog();
 
-			projectDefFileDlg.FileName = "outer_projects.xml";
-			projectDefFileDlg.InitialDirectory = Environment.CurrentDirectory;
-			projectDefFileDlg.Filter = "projects files (outer*.xml)|outer*.xml|All files (*.*)|*.*" ;
-			//dlg.FilterIndex = 2 ;
-			projectDefFileDlg.RestoreDirectory = true ;
+            projectDefFileDlg.FileName = "outer_projects.xml";
+            projectDefFileDlg.InitialDirectory = Environment.CurrentDirectory;
+            projectDefFileDlg.Filter = "projects files (outer*.xml)|outer*.xml|All files (*.*)|*.*";
+            //dlg.FilterIndex = 2 ;
+            projectDefFileDlg.RestoreDirectory = true;
 
-			if(projectDefFileDlg.ShowDialog() != DialogResult.OK)
-			{
-				return;
-			}
+            if (projectDefFileDlg.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
 
-			ScriptManager newScriptManager = new ScriptManager();
-			newScriptManager.applicationInfo = null;	//applicationInfo;
-			newScriptManager.CfgFilePath = projectDefFileDlg.FileName;
-			newScriptManager.Load();
+            ScriptManager newScriptManager = new ScriptManager();
+            newScriptManager.applicationInfo = null;	//applicationInfo;
+            newScriptManager.CfgFilePath = projectDefFileDlg.FileName;
+            newScriptManager.Load();
 
-			// 选取要Import的Project名
+            // 选取要Import的Project名
 
-			GetProjectNameDlg nameDlg = new GetProjectNameDlg();
+            GetProjectNameDlg nameDlg = new GetProjectNameDlg();
             GuiUtil.AutoSetDefaultFont(nameDlg);
 
-			nameDlg.Text = "请选定要导入的外部方案名";
-			nameDlg.scriptManager = newScriptManager;
-			/*
-			nameDlg.textBox_projectName.Text = applicationInfo.GetString(
-				"projectmanagerdlg_import",
-				"lastUsedProject",
-				"");
-			*/
+            nameDlg.Text = "请选定要导入的外部方案名";
+            nameDlg.scriptManager = newScriptManager;
+            /*
+            nameDlg.textBox_projectName.Text = applicationInfo.GetString(
+                "projectmanagerdlg_import",
+                "lastUsedProject",
+                "");
+            */
 
-			nameDlg.StartPosition = FormStartPosition.CenterScreen;
-			nameDlg.ShowDialog(this);
+            nameDlg.StartPosition = FormStartPosition.CenterScreen;
+            nameDlg.ShowDialog(this);
 
-			if (nameDlg.DialogResult != DialogResult.OK)
-				return;
+            if (nameDlg.DialogResult != DialogResult.OK)
+                return;
 
-			string strSourceProjectName = nameDlg.ProjectName;
+            string strSourceProjectName = nameDlg.ProjectName;
 
-			string strSourceLocate = "";
+            string strSourceLocate = "";
 
-			// 获得源方案参数
-			// strProjectNamePath	方案名，或者路径
-			// return:
-			//		-1	error
-			//		0	not found project
-			//		1	found
-			nRet = newScriptManager.GetProjectData(
-				strSourceProjectName,
-				out strSourceLocate);
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, "source GetProjectData() "+ strSourceProjectName + " error...");
-				return ;
-			}
-			if (nRet == 0)
-			{
-				MessageBox.Show(this, "source project "+ strSourceProjectName + " not found error...");
-				return ;
-			}
-
-
-			/*
-			applicationInfo.SetString(
-				"projectmanagerdlg_import",
-				"lastUsedProject",
-				nameDlg.textBox_projectName.Text);
-			*/
-
-			REDOEXPORT:
-
-				string strTargetLocate = "";
-			// 获得目标方案参数
-			// strProjectNamePath	方案名，或者路径
-			// return:
-			//		-1	error
-			//		0	not found project
-			//		1	found
-			nRet = this.scriptManager.GetProjectData(
-				strSourceProjectName,
-				out strTargetLocate);
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, "target GetProjectData() "+ strSourceProjectName + " error...");
-				return ;
-			}
-
-			// 发现重名，询问是否覆盖
-			if (nRet == 1) 
-			{
-				string strText = "当前已经存在与源 '"
-					+ strSourceProjectName + "' 同名的目标方案(磁盘目录位于'"
-					+ strTargetLocate + "')。\r\n\r\n" 
-					+ "请问是否覆盖已有的目标方案?\r\n(Yes=覆盖; No=改名后导入；Cancel=放弃操作)";
+            // 获得源方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            nRet = newScriptManager.GetProjectData(
+                strSourceProjectName,
+                out strSourceLocate);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, "source GetProjectData() " + strSourceProjectName + " error...");
+                return;
+            }
+            if (nRet == 0)
+            {
+                MessageBox.Show(this, "source project " + strSourceProjectName + " not found error...");
+                return;
+            }
 
 
-				DialogResult msgResult = MessageBox.Show(this,
-					strText,
-					"script",
-					MessageBoxButtons.YesNoCancel,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
+            /*
+            applicationInfo.SetString(
+                "projectmanagerdlg_import",
+                "lastUsedProject",
+                nameDlg.textBox_projectName.Text);
+            */
 
-				
-				if (msgResult == DialogResult.Cancel) 
-					return;
+            REDOEXPORT:
 
+            string strTargetLocate = "";
+            // 获得目标方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            nRet = this.scriptManager.GetProjectData(
+                strSourceProjectName,
+                out strTargetLocate);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, "target GetProjectData() " + strSourceProjectName + " error...");
+                return;
+            }
 
-				if (msgResult == DialogResult.Yes) 
-				{	// 覆盖
-					// 拷贝目录
-					nRet = PathUtil.CopyDirectory(strSourceLocate,
-						strTargetLocate,
-						true,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
-					goto END1;
-				}
-				else 
-				{	// 改名
+            // 发现重名，询问是否覆盖
+            if (nRet == 1)
+            {
+                string strText = "当前已经存在与源 '"
+                    + strSourceProjectName + "' 同名的目标方案(磁盘目录位于'"
+                    + strTargetLocate + "')。\r\n\r\n"
+                    + "请问是否覆盖已有的目标方案?\r\n(Yes=覆盖; No=改名后导入；Cancel=放弃操作)";
 
-
-					// 询问新名字
-					nameDlg = new GetProjectNameDlg();
+                DialogResult msgResult = MessageBox.Show(this,
+                    strText,
+                    "script",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (msgResult == DialogResult.Cancel)
+                    return;
+                if (msgResult == DialogResult.Yes)
+                {	// 覆盖
+                    // 拷贝目录
+                    nRet = PathUtil.CopyDirectory(strSourceLocate,
+                        strTargetLocate,
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    goto END1;
+                }
+                else
+                {	// 改名
+                    // 询问新名字
+                    nameDlg = new GetProjectNameDlg();
                     GuiUtil.AutoSetDefaultFont(nameDlg);
 
-					nameDlg.Text = "请制定目标(系统内)新方案名";
-					nameDlg.scriptManager = this.scriptManager;
-					nameDlg.ProjectName = strSourceProjectName;
+                    nameDlg.Text = "请制定目标(系统内)新方案名";
+                    nameDlg.scriptManager = this.scriptManager;
+                    nameDlg.ProjectName = strSourceProjectName;
 
-					nameDlg.StartPosition = FormStartPosition.CenterScreen;
-					nameDlg.ShowDialog(this);
+                    nameDlg.StartPosition = FormStartPosition.CenterScreen;
+                    nameDlg.ShowDialog(this);
 
-					if (nameDlg.DialogResult != DialogResult.OK)
-						goto END2;
+                    if (nameDlg.DialogResult != DialogResult.OK)
+                        goto END2;
 
-					strSourceProjectName = nameDlg.ProjectName;
-					goto REDOEXPORT;
+                    strSourceProjectName = nameDlg.ProjectName;
+                    goto REDOEXPORT;
 
-				}
-
-
-
-			}
-			else // 不重名，直接复制
-			{
-				// 创建一个新的project，获得strTargetLocate
-				int nPrefixNumber = -1;	// 0
-				strTargetLocate = this.scriptManager.NewProjectLocate(
-					PathUtil.PureName(strSourceLocate),	// 尽量取和源相同的末级目录名
-					ref nPrefixNumber);
-
-				// 拷贝目录
-				nRet = PathUtil.CopyDirectory(strSourceLocate,
-					strTargetLocate,
-					true,
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
-
-				// 实际插入project参数
-				XmlNode projNode = this.scriptManager.NewProjectNode(
-					strSourceProjectName,	// 沿用原来的名字
-					strTargetLocate,
-					false);	// false表示不需要创建目录和缺省文件
-
-				// 兑现显示?
-				scriptManager.RefreshTree(treeView1);
-			}
-
-			END1:
-
-				this.scriptManager.Save();
+                }
 
 
 
-			TreeViewUtil.SelectTreeNode(treeView1, 
-				strSourceProjectName,
+            }
+            else // 不重名，直接复制
+            {
+                // 创建一个新的project，获得strTargetLocate
+                int nPrefixNumber = -1;	// 0
+                strTargetLocate = this.scriptManager.NewProjectLocate(
+                    PathUtil.PureName(strSourceLocate),	// 尽量取和源相同的末级目录名
+                    ref nPrefixNumber);
+
+                // 拷贝目录
+                nRet = PathUtil.CopyDirectory(strSourceLocate,
+                    strTargetLocate,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 实际插入project参数
+                XmlNode projNode = this.scriptManager.NewProjectNode(
+                    strSourceProjectName,	// 沿用原来的名字
+                    strTargetLocate,
+                    false);	// false表示不需要创建目录和缺省文件
+
+                // 兑现显示?
+                scriptManager.RefreshTree(treeView1);
+            }
+
+        END1:
+
+            this.scriptManager.Save();
+
+
+
+            TreeViewUtil.SelectTreeNode(treeView1,
+                strSourceProjectName,
                 '/');
 
-			MessageBox.Show(this, "外部方案 '" + strSourceProjectName + "' 已经成功导入本系统。");
+            MessageBox.Show(this, "外部方案 '" + strSourceProjectName + "' 已经成功导入本系统。");
+            return;
+        END2:
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+        }
 
-			return;
-			END2:
-				return;
-			ERROR1:
-				MessageBox.Show(this, strError);
-			return ;
-		}
+        // 导出
+        private void button_export_Click(object sender, System.EventArgs e)
+        {
+            // 未按下Control键, 一般导出功能
+            if (!(Control.ModifierKeys == Keys.Control))
+            {
+                button_CopyToFile_Click(null, null);
+                return;
+            }
 
-		// 导出
-		private void button_export_Click(object sender, System.EventArgs e)
-		{
-			// 未按下Control键, 一般导出功能
-			if (!(Control.ModifierKeys == Keys.Control))
-			{
-				button_CopyToFile_Click(null, null);
-				return;
-			}
+            // 特殊导出功能
+            int nRet;
+            string strError = "";
 
-			// 特殊导出功能
-			int nRet ;
-			string strError = "";
+            TreeNode node = treeView1.SelectedNode;
 
-			TreeNode node = treeView1.SelectedNode;
+            if (node == null)
+            {
+                MessageBox.Show(this, "请先选定要导出的方案...");
+                return;
+            }
 
-			if (node == null) 
-			{
-				MessageBox.Show(this,"请先选定要导出的方案...");
-				return;
-			}
+            string strSourceProjectName = node.FullPath;
 
-			string strSourceProjectName = node.FullPath;
+            string strSourceLocate = "";
 
-			string strSourceLocate = "";
-
-			// 获得源方案参数
-			// strProjectNamePath	方案名，或者路径
-			// return:
-			//		-1	error
-			//		0	not found project
-			//		1	found
-			nRet = scriptManager.GetProjectData(
-				strSourceProjectName,
-				out strSourceLocate);
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, "source GetProjectData() "+ strSourceProjectName + " error...");
-				return ;
-			}
-			if (nRet == 0)
-			{
-				MessageBox.Show(this, "source project "+ strSourceProjectName + " not found error...");
-				return ;
-			}
-
+            // 获得源方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            nRet = scriptManager.GetProjectData(
+                strSourceProjectName,
+                out strSourceLocate);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, "source GetProjectData() " + strSourceProjectName + " error...");
+                return;
+            }
+            if (nRet == 0)
+            {
+                MessageBox.Show(this, "source project " + strSourceProjectName + " not found error...");
+                return;
+            }
 
 
-			// 询问project*.xml文件全路径
-			SaveFileDialog projectDefFileDlg = new SaveFileDialog();
 
-			projectDefFileDlg.CreatePrompt = false;
-			projectDefFileDlg.FileName = "outer_projects.xml";
-			projectDefFileDlg.InitialDirectory = Environment.CurrentDirectory;
-			projectDefFileDlg.Filter = "projects files (outer*.xml)|outer*.xml|All files (*.*)|*.*" ;
-			//dlg.FilterIndex = 2 ;
-			projectDefFileDlg.RestoreDirectory = true ;
+            // 询问project*.xml文件全路径
+            SaveFileDialog projectDefFileDlg = new SaveFileDialog();
 
-			if(projectDefFileDlg.ShowDialog() != DialogResult.OK)
-			{
-				return;
-			}
+            projectDefFileDlg.CreatePrompt = false;
+            projectDefFileDlg.FileName = "outer_projects.xml";
+            projectDefFileDlg.InitialDirectory = Environment.CurrentDirectory;
+            projectDefFileDlg.Filter = "projects files (outer*.xml)|outer*.xml|All files (*.*)|*.*";
+            //dlg.FilterIndex = 2 ;
+            projectDefFileDlg.RestoreDirectory = true;
 
-			// 如果文件不存在，则创建之
-			if (File.Exists(projectDefFileDlg.FileName) == false)
-				ScriptManager.CreateDefaultProjectsXmlFile(projectDefFileDlg.FileName,
-					"outercfgs");
+            if (projectDefFileDlg.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
 
-			// 创建ScriptManager对象
-			ScriptManager newScriptManager = new ScriptManager();
-			newScriptManager.applicationInfo = null;	//applicationInfo;
-			newScriptManager.CfgFilePath = projectDefFileDlg.FileName;
-			newScriptManager.Load();
+            // 如果文件不存在，则创建之
+            if (File.Exists(projectDefFileDlg.FileName) == false)
+                ScriptManager.CreateDefaultProjectsXmlFile(projectDefFileDlg.FileName,
+                    "outercfgs");
 
-			// 查询Project路径+名是否已经在输出的projects.xml已经存在
+            // 创建ScriptManager对象
+            ScriptManager newScriptManager = new ScriptManager();
+            newScriptManager.applicationInfo = null;	//applicationInfo;
+            newScriptManager.CfgFilePath = projectDefFileDlg.FileName;
+            newScriptManager.Load();
 
-			REDOEXPORT:
+            // 查询Project路径+名是否已经在输出的projects.xml已经存在
 
-				string strTargetLocate = "";
-			// 获得方案参数
-			// strProjectNamePath	方案名，或者路径
-			// return:
-			//		-1	error
-			//		0	not found project
-			//		1	found
-			nRet = newScriptManager.GetProjectData(
-				strSourceProjectName,
-				out strTargetLocate);
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, "target GetProjectData() "+ strSourceProjectName + " error...");
-				return ;
-			}
+            REDOEXPORT:
 
-			// 发现重名，询问是否覆盖
-			if (nRet == 1) 
-			{
-				string strText = "外部方案集\r\n  (由文件 '" + projectDefFileDlg.FileName + "' 管理)\r\n已经存在一个与源 \r\n'"
-					+ strSourceProjectName + "'\r\n 同名的方案\r\n  (其磁盘目录位于 '"
-					+ strTargetLocate + "')。\r\n\r\n" 
-					+ "请问是否覆盖此方案?\r\n(Yes=覆盖; No=改名后导出；Cancel=放弃操作)\r\n\r\n注意：覆盖后无法还原。";
+            string strTargetLocate = "";
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            nRet = newScriptManager.GetProjectData(
+                strSourceProjectName,
+                out strTargetLocate);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, "target GetProjectData() " + strSourceProjectName + " error...");
+                return;
+            }
 
-
-				DialogResult msgResult = MessageBox.Show(this,
-					strText,
-					"script",
-					MessageBoxButtons.YesNoCancel,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-
-				
-				if (msgResult == DialogResult.Cancel) 
-					return;
+            // 发现重名，询问是否覆盖
+            if (nRet == 1)
+            {
+                string strText = "外部方案集\r\n  (由文件 '" + projectDefFileDlg.FileName + "' 管理)\r\n已经存在一个与源 \r\n'"
+                    + strSourceProjectName + "'\r\n 同名的方案\r\n  (其磁盘目录位于 '"
+                    + strTargetLocate + "')。\r\n\r\n"
+                    + "请问是否覆盖此方案?\r\n(Yes=覆盖; No=改名后导出；Cancel=放弃操作)\r\n\r\n注意：覆盖后无法还原。";
 
 
-				if (msgResult == DialogResult.Yes) 
-				{	// 覆盖
-					// 拷贝目录
-					nRet = PathUtil.CopyDirectory(strSourceLocate,
-						strTargetLocate,
-						true,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
-					goto END1;
-				}
-				else 
-				{	// 改名
+                DialogResult msgResult = MessageBox.Show(this,
+                    strText,
+                    "script",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (msgResult == DialogResult.Cancel)
+                    return;
+
+                if (msgResult == DialogResult.Yes)
+                {	// 覆盖
+                    // 拷贝目录
+                    nRet = PathUtil.CopyDirectory(strSourceLocate,
+                        strTargetLocate,
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    goto END1;
+                }
+                else
+                {	// 改名
 
 
-					// 询问新名字
-					GetProjectNameDlg nameDlg = new GetProjectNameDlg();
+                    // 询问新名字
+                    GetProjectNameDlg nameDlg = new GetProjectNameDlg();
                     GuiUtil.AutoSetDefaultFont(nameDlg);
 
-					nameDlg.Text = "请选定目标(外部)新方案名";
-					nameDlg.scriptManager = newScriptManager;
-					nameDlg.ProjectName = strSourceProjectName;
+                    nameDlg.Text = "请选定目标(外部)新方案名";
+                    nameDlg.scriptManager = newScriptManager;
+                    nameDlg.ProjectName = strSourceProjectName;
 
-					nameDlg.StartPosition = FormStartPosition.CenterScreen;
-					nameDlg.ShowDialog(this);
+                    nameDlg.StartPosition = FormStartPosition.CenterScreen;
+                    nameDlg.ShowDialog(this);
 
-					if (nameDlg.DialogResult != DialogResult.OK)
-						goto END2;
+                    if (nameDlg.DialogResult != DialogResult.OK)
+                        goto END2;
 
-					strSourceProjectName = nameDlg.ProjectName;
-					goto REDOEXPORT;
+                    strSourceProjectName = nameDlg.ProjectName;
+                    goto REDOEXPORT;
 
-				}
+                }
 
 
 
-			}
-			else // 不重名，直接复制
-			{
-				// 创建一个新的project，获得strTargetLocate
-				int nPrefixNumber = -1;	// 0
-				strTargetLocate = newScriptManager.NewProjectLocate(
-					PathUtil.PureName(strSourceLocate),	// 尽量取和源相同的末级目录名
-					ref nPrefixNumber);
+            }
+            else // 不重名，直接复制
+            {
+                // 创建一个新的project，获得strTargetLocate
+                int nPrefixNumber = -1;	// 0
+                strTargetLocate = newScriptManager.NewProjectLocate(
+                    PathUtil.PureName(strSourceLocate),	// 尽量取和源相同的末级目录名
+                    ref nPrefixNumber);
 
-				// 拷贝目录
-				nRet = PathUtil.CopyDirectory(strSourceLocate,
-					strTargetLocate,
-					true,
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                // 拷贝目录
+                nRet = PathUtil.CopyDirectory(strSourceLocate,
+                    strTargetLocate,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				// 实际插入project参数
-				XmlNode projNode = newScriptManager.NewProjectNode(
-					strSourceProjectName,	// 沿用原来的名字
-					strTargetLocate,
-					false);	// false表示不需要创建目录和缺省文件
+                // 实际插入project参数
+                XmlNode projNode = newScriptManager.NewProjectNode(
+                    strSourceProjectName,	// 沿用原来的名字
+                    strTargetLocate,
+                    false);	// false表示不需要创建目录和缺省文件
 
-			}
+            }
 
-			END1:
+        END1:
 
-				newScriptManager.Save();
-			MessageBox.Show(this, "方案 '" + strSourceProjectName
-				+ "' \r\n已经成功导出到文件 \r\n'" 
-				+ newScriptManager.CfgFilePath + "' \r\n所管理的外部方案集内。");
+            newScriptManager.Save();
+            MessageBox.Show(this, "方案 '" + strSourceProjectName
+                + "' \r\n已经成功导出到文件 \r\n'"
+                + newScriptManager.CfgFilePath + "' \r\n所管理的外部方案集内。");
+            return;
+        END2:
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+        }
 
-			return;
-			END2:
-				return;
-			ERROR1:
-				MessageBox.Show(this, strError);
-			return ;
-		}
+        // 复制
+        private void button_CopyToClipboard_Click(object sender, System.EventArgs e)
+        {
+            int nRet;
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择方案或者目录");
+                return;
+            }
 
-		// 复制
-		private void button_CopyToClipboard_Click(object sender, System.EventArgs e)
-		{
+            TreeNode node = treeView1.SelectedNode;
+            if (node.ImageIndex == 0) // 目录
+            {
 
-			int nRet;
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				MessageBox.Show("尚未选择方案或者目录");
-				return ;
-			}
+            }
+            else
+            {
+                string strProjectNamePath = node.FullPath;
 
-			TreeNode node = treeView1.SelectedNode;
-			if (node.ImageIndex == 0) // 目录
-			{
+                string strLocate = "";
 
-			}
-			else 
-			{
-				string strProjectNamePath = node.FullPath;
-
-				string strLocate = "";
-
-				// 获得方案参数
-				// strProjectNamePath	方案名，或者路径
-				// return:
-				//		-1	error
-				//		0	not found project
-				//		1	found
-				nRet = scriptManager.GetProjectData(
-					strProjectNamePath,
-					out strLocate);
-				if (nRet != 1) 
-				{
-					MessageBox.Show("方案 "+ strProjectNamePath + " 在ScriptManager中没有找到");
-					return ;
-				}
+                // 获得方案参数
+                // strProjectNamePath	方案名，或者路径
+                // return:
+                //		-1	error
+                //		0	not found project
+                //		1	found
+                nRet = scriptManager.GetProjectData(
+                    strProjectNamePath,
+                    out strLocate);
+                if (nRet != 1)
+                {
+                    MessageBox.Show(this, "方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
+                    return;
+                }
 
                 Project project = null;
                 try
                 {
-
                     project = Project.MakeProject(
                         strProjectNamePath,
                         strLocate);
@@ -1996,57 +1982,54 @@ namespace DigitalPlatform.Script
                     return;
                 }
 
-				Clipboard.SetDataObject(project);
+                Clipboard.SetDataObject(project);
+            }
+        }
 
-			}
+        // 打包, 即复制到文件
+        private void button_CopyToFile_Click(object sender, System.EventArgs e)
+        {
+            int nRet;
+            // 当前已选择的node
+            if (treeView1.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择方案或者目录");
+                return;
+            }
 
+            TreeNode node = treeView1.SelectedNode;
+            if (node.ImageIndex == 0) // 目录
+            {
 
-		}
+            }
+            else
+            {
+                string strProjectNamePath = node.FullPath;
 
-		// 打包, 即复制到文件
-		private void button_CopyToFile_Click(object sender, System.EventArgs e)
-		{
-			int nRet;
-			// 当前已选择的node
-			if (treeView1.SelectedNode == null) 
-			{
-				MessageBox.Show("尚未选择方案或者目录");
-				return ;
-			}
+                string strLocate = "";
 
-			TreeNode node = treeView1.SelectedNode;
-			if (node.ImageIndex == 0) // 目录
-			{
+                // 获得方案参数
+                // strProjectNamePath	方案名，或者路径
+                // return:
+                //		-1	error
+                //		0	not found project
+                //		1	found
+                nRet = scriptManager.GetProjectData(
+                    strProjectNamePath,
+                    out strLocate);
+                if (nRet != 1)
+                {
+                    MessageBox.Show(this, "方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
+                    return;
+                }
 
-			}
-			else 
-			{
-				string strProjectNamePath = node.FullPath;
+                string strPath;
+                string strName;
 
-				string strLocate = "";
-
-				// 获得方案参数
-				// strProjectNamePath	方案名，或者路径
-				// return:
-				//		-1	error
-				//		0	not found project
-				//		1	found
-				nRet = scriptManager.GetProjectData(
-					strProjectNamePath,
-					out strLocate);
-				if (nRet != 1) 
-				{
-					MessageBox.Show("方案 "+ strProjectNamePath + " 在ScriptManager中没有找到");
-					return ;
-				}
-
-				string strPath;
-				string strName;
-
-				// 从完整的方案"名字路径"中,析出路径和名
-				ScriptManager.SplitProjectPathName(strProjectNamePath,
-					out strPath,
-					out strName);
+                // 从完整的方案"名字路径"中,析出路径和名
+                ScriptManager.SplitProjectPathName(strProjectNamePath,
+                    out strPath,
+                    out strName);
 
                 Project project = null;
 
@@ -2067,48 +2050,67 @@ namespace DigitalPlatform.Script
                 if (string.IsNullOrEmpty(strHostName) == false
                     && strHostName != this.HostName)
                 {
-                    string strError = "拟导出的方案其(在metadata.xml定义的)宿主名为 '" + strHostName + "', 不符合当前窗口的宿主名 '" + this.HostName + "'。拒绝导出";
-                    MessageBox.Show(strError);
+                    string strError = "拟导出的方案其(在metadata.xml定义的)宿主名为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。拒绝导出";
+                    MessageBox.Show(this, strError);
                     return;
                 }
 
-				// 询问包文件全路径
-				SaveFileDialog dlg = new SaveFileDialog();
+                // 询问包文件全路径
+                SaveFileDialog dlg = new SaveFileDialog();
 
-				dlg.Title = "导出方案 -- 请指定要保存的文件名";
-				dlg.CreatePrompt = true;
-				dlg.FileName = strName + ".projpack";
-				dlg.InitialDirectory = strRecentPackageFilePath == "" ?
-					Environment.GetFolderPath(Environment.SpecialFolder.Personal)
-					: strRecentPackageFilePath; //Environment.CurrentDirectory;
-				dlg.Filter = "方案打包文件 (*.projpack)|*.projpack|All files (*.*)|*.*" ;
-				dlg.RestoreDirectory = true ;
+                dlg.Title = "导出方案 -- 请指定要保存的文件名";
+                dlg.CreatePrompt = true;
+                dlg.FileName = strName + ".projpack";
+                dlg.InitialDirectory = strRecentPackageFilePath == "" ?
+                    Environment.GetFolderPath(Environment.SpecialFolder.Personal)
+                    : strRecentPackageFilePath; //Environment.CurrentDirectory;
+                dlg.Filter = "方案打包文件 (*.projpack)|*.projpack|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
 
-				if(dlg.ShowDialog() != DialogResult.OK)
-				{
-					return;
-				}
+                if (dlg.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
 
-				strRecentPackageFilePath = dlg.FileName;
+                strRecentPackageFilePath = dlg.FileName;
 
+                // Clipboard.SetDataObject(project);
+                ProjectCollection array = new ProjectCollection();
 
-				// Clipboard.SetDataObject(project);
-				ProjectCollection array = new ProjectCollection();
+                array.Add(project);
 
-				array.Add(project);
-
-				///
-				//Opens a file and serializes the object into it in binary format.
+                ///
+                //Opens a file and serializes the object into it in binary format.
                 using (Stream stream = File.Open(dlg.FileName, FileMode.Create))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
 
                     formatter.Serialize(stream, array);
                 }
-			}
+            }
+        }
 
+        static string[] _hostNameTable = new string[] {
+            "OperLogStatisForm", "日志统计窗",
+            "ReaderStatisForm","读者统计窗",
+            "ItemStatisForm","册统计窗",
+            "OrderStatisForm","订购统计窗",
+            "BiblioStatisForm","书目统计窗",
+            "XmlStatisForm","XML统计窗",
+            "Iso2709StatisForm","ISO2709统计窗",
+        };
 
-		}
+        static string GetHostNameCaption(string strHostName)
+        {
+            for (int i = 0; i < _hostNameTable.Length / 2; i++)
+            {
+                string strName = _hostNameTable[i * 2];
+                if (string.Compare(strName, strHostName, true) == 0)
+                    return _hostNameTable[i * 2 + 1] + "(" + strHostName + ")";
+            }
+
+            return strHostName;
+        }
 
         /*
 发生未捕获的界面线程异常: 
@@ -2130,25 +2132,25 @@ Stack:
 在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
          * */
         // 解包, 即从文件复制到当前窗口 进入当前选定的目录
-		private void button_PasteFromFile_Click(object sender, System.EventArgs e)
-		{
+        private void button_PasteFromFile_Click(object sender, System.EventArgs e)
+        {
             string strError = "";
 
             // 询问包文件全路径
-			OpenFileDialog dlg = new OpenFileDialog();
+            OpenFileDialog dlg = new OpenFileDialog();
 
-			dlg.Title = "导入方案 -- 请指定要打开的文件名";
-			dlg.FileName = "";	// strName + ".projpack";
-			dlg.InitialDirectory = strRecentPackageFilePath == "" ?
-				Environment.GetFolderPath(Environment.SpecialFolder.Personal)
-				: strRecentPackageFilePath; //Environment.CurrentDirectory;
-			dlg.Filter = "方案打包文件 (*.projpack)|*.projpack|All files (*.*)|*.*";	// projects package files
-			dlg.RestoreDirectory = true ;
+            dlg.Title = "导入方案 -- 请指定要打开的文件名";
+            dlg.FileName = "";	// strName + ".projpack";
+            dlg.InitialDirectory = strRecentPackageFilePath == "" ?
+                Environment.GetFolderPath(Environment.SpecialFolder.Personal)
+                : strRecentPackageFilePath; //Environment.CurrentDirectory;
+            dlg.Filter = "方案打包文件 (*.projpack)|*.projpack|All files (*.*)|*.*";	// projects package files
+            dlg.RestoreDirectory = true;
 
-			if(dlg.ShowDialog() != DialogResult.OK)
-				return;
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
 
-			strRecentPackageFilePath = dlg.FileName;
+            strRecentPackageFilePath = dlg.FileName;
 
             ProjectCollection projects = null;
             try
@@ -2182,25 +2184,25 @@ Stack:
             FileInfo fi = new FileInfo(dlg.FileName);
             string strLastModified = DateTimeUtil.Rfc1123DateTimeString(fi.LastWriteTimeUtc);
 
-			for(int i=0;i<projects.Count;i++)
-			{
-				Project project = (Project)projects[i];
+            for (int i = 0; i < projects.Count; i++)
+            {
+                Project project = (Project)projects[i];
 
                 string strHostName = project.GetHostName();
                 if (string.IsNullOrEmpty(strHostName) == false
                 && strHostName != this.HostName)
                 {
-                    strError = "拟导入方案 '"+project.NamePath+"' 其宿主为 '" + strHostName + "', 不符合当前窗口的宿主名 '" + this.HostName + "'。被拒绝导入。";
-                    MessageBox.Show(strError);
+                    strError = "拟导入方案 '" + project.NamePath + "' 其宿主为 '" + GetHostNameCaption(strHostName)+ "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。被拒绝导入。";
+                    MessageBox.Show(this, strError);
                     continue;
                 }
 
-				int nRet = PasteProject(project,
+                int nRet = PasteProject(project,
                     strLastModified,
                     false,
                     out strError);
-				if (nRet == -1) 
-				    goto ERROR1;
+                if (nRet == -1)
+                    goto ERROR1;
             }
 
             return;
@@ -2208,194 +2210,194 @@ Stack:
             MessageBox.Show(this, strError);
         }
 
-		// 将Project对象Paste到管理界面中
-		// bRestoreOriginNamePath	是否恢复到原始名字路径。==false，表示恢复到treeview当前目录
-		private int PasteProject(Project project,
+        // 将Project对象Paste到管理界面中
+        // bRestoreOriginNamePath	是否恢复到原始名字路径。==false，表示恢复到treeview当前目录
+        private int PasteProject(Project project,
             string strLastModified,
-			bool bRestoreOriginNamePath,
-			out string strError)
-		{
-			strError = "";
+            bool bRestoreOriginNamePath,
+            out string strError)
+        {
+            strError = "";
 
-			string strPath;
-			string strName;
+            string strPath;
+            string strName;
 
-			// 纯Project名
-			ScriptManager.SplitProjectPathName(project.NamePath,
-				out strPath,
-				out strName);
+            // 纯Project名
+            ScriptManager.SplitProjectPathName(project.NamePath,
+                out strPath,
+                out strName);
 
-			string strCurPath = "";
+            string strCurPath = "";
 
-			// 插入的目录
+            // 插入的目录
 
-			int nRet;
-			TreeNode node = null;
-			TreeNode parent = null;
+            int nRet;
+            TreeNode node = null;
+            TreeNode parent = null;
 
 
-			// 恢复原始名字路径
-			if (bRestoreOriginNamePath == true)
-			{
-				if (strPath == "")
-					parent = null;
-				XmlNode xmlNode = scriptManager.LocateDirNode(
-					strPath);
-				if (xmlNode == null) 
-				{
-					xmlNode = scriptManager.NewDirNode(
-						strPath);
-					// 兑现显示?
-					scriptManager.RefreshTree(treeView1);
-					TreeViewUtil.SelectTreeNode(treeView1, 
-						strPath,
+            // 恢复原始名字路径
+            if (bRestoreOriginNamePath == true)
+            {
+                if (strPath == "")
+                    parent = null;
+                XmlNode xmlNode = scriptManager.LocateDirNode(
+                    strPath);
+                if (xmlNode == null)
+                {
+                    xmlNode = scriptManager.NewDirNode(
+                        strPath);
+                    // 兑现显示?
+                    scriptManager.RefreshTree(treeView1);
+                    TreeViewUtil.SelectTreeNode(treeView1,
+                        strPath,
                         '/');
-				}
-				else 
-				{
-					TreeViewUtil.SelectTreeNode(treeView1, 
-						strPath,
+                }
+                else
+                {
+                    TreeViewUtil.SelectTreeNode(treeView1,
+                        strPath,
                         '/');
-				}
+                }
 
-			}
+            }
 
-			// 恢复到当前目录
-		{
-			node = treeView1.SelectedNode;
-			// 当前已选择的node
-			if (node == null) 
-			{
-				// 根
-			}
-			else 
-			{
+            // 恢复到当前目录
+            {
+                node = treeView1.SelectedNode;
+                // 当前已选择的node
+                if (node == null)
+                {
+                    // 根
+                }
+                else
+                {
 
-				if (node.ImageIndex == 0) // 目录
-				{
-					parent = node;
-					strCurPath = node.FullPath;
-				}
-				else 
-				{
-					parent = node.Parent;
-					if (parent != null)
-						strCurPath = parent.FullPath;
-				}
-			}
-		}
+                    if (node.ImageIndex == 0) // 目录
+                    {
+                        parent = node;
+                        strCurPath = node.FullPath;
+                    }
+                    else
+                    {
+                        parent = node.Parent;
+                        if (parent != null)
+                            strCurPath = parent.FullPath;
+                    }
+                }
+            }
 
-			// 看看当前目录下是否已经存在同名Project
+            // 看看当前目录下是否已经存在同名Project
 
-			string strLocate;
-			// 获得方案参数
-			// strProjectNamePath	方案名，或者路径
-			// return:
-			//		-1	error
-			//		0	not found project
-			//		1	found
-			nRet = scriptManager.GetProjectData(
-				ScriptManager.MakeProjectPathName(strCurPath, strName),
-				out strLocate);
-			if (nRet == -1) 
-			{
-				strError = "GetProjectData "+ ScriptManager.MakeProjectPathName(strCurPath, strName) + " error";
-				return -1;
-			}
+            string strLocate;
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            nRet = scriptManager.GetProjectData(
+                ScriptManager.MakeProjectPathName(strCurPath, strName),
+                out strLocate);
+            if (nRet == -1)
+            {
+                strError = "GetProjectData " + ScriptManager.MakeProjectPathName(strCurPath, strName) + " error";
+                return -1;
+            }
 
-			int nPrefixNumber = 0;
+            int nPrefixNumber = 0;
 
-			if (nRet == 0) 
-			{
-				nPrefixNumber = -1;
-			}
-			else 
-			{
-				// 换名paste进入
+            if (nRet == 0)
+            {
+                nPrefixNumber = -1;
+            }
+            else
+            {
+                // 换名paste进入
 
-				// 在儿子中找到一个不重复的名字
-				strName = GetTempProjectName(treeView1,
-					parent,
-					strName,
-					ref nPrefixNumber);
-			}
+                // 在儿子中找到一个不重复的名字
+                strName = GetTempProjectName(treeView1,
+                    parent,
+                    strName,
+                    ref nPrefixNumber);
+            }
 
-			string strLocatePrefix = "";
-			if (project.Locate == "") 
-			{
-				strLocatePrefix = strName;
-			}
-			else 
-			{
-				strLocatePrefix = PathUtil.PureName(project.Locate);
-			}
+            string strLocatePrefix = "";
+            if (project.Locate == "")
+            {
+                strLocatePrefix = strName;
+            }
+            else
+            {
+                strLocatePrefix = PathUtil.PureName(project.Locate);
+            }
 
-			strLocate = scriptManager.NewProjectLocate(
-				strLocatePrefix,
-				ref nPrefixNumber);
+            strLocate = scriptManager.NewProjectLocate(
+                strLocatePrefix,
+                ref nPrefixNumber);
 
-			string strNamePath = ScriptManager.MakeProjectPathName(strCurPath, strName);
+            string strNamePath = ScriptManager.MakeProjectPathName(strCurPath, strName);
 
-			// 直接paste
-			project.WriteToLocate(strLocate,
+            // 直接paste
+            project.WriteToLocate(strLocate,
                 true);
 
-			// 实际插入project参数
-			XmlNode projNode = scriptManager.NewProjectNode(
-				strNamePath,
-				strLocate,
-				false);	// false表示不需要创建目录和缺省文件
+            // 实际插入project参数
+            XmlNode projNode = scriptManager.NewProjectNode(
+                strNamePath,
+                strLocate,
+                false);	// false表示不需要创建目录和缺省文件
 
             DomUtil.SetAttr(projNode, "lastModified",
 strLastModified);
 
-			// 兑现显示?
-			scriptManager.FillOneLevel(treeView1, 
-				parent, 
-				projNode.ParentNode);
-			TreeViewUtil.SelectTreeNode(treeView1, 
-				scriptManager.GetNodePathName(projNode),
+            // 兑现显示?
+            scriptManager.FillOneLevel(treeView1,
+                parent,
+                projNode.ParentNode);
+            TreeViewUtil.SelectTreeNode(treeView1,
+                scriptManager.GetNodePathName(projNode),
                 '/');
 
-			scriptManager.Save();
+            scriptManager.Save();
 
-			TreeViewUtil.SelectTreeNode(treeView1, 
-				strNamePath,
+            TreeViewUtil.SelectTreeNode(treeView1,
+                strNamePath,
                 '/');
 
-			return 0;
-		}
+            return 0;
+        }
 
-		// 粘贴，到当前目录
-		private void button_PasteFromClipboard_Click(object sender, System.EventArgs e)
-		{
+        // 粘贴，到当前目录
+        private void button_PasteFromClipboard_Click(object sender, System.EventArgs e)
+        {
             string strError = "";
 
-			IDataObject iData = Clipboard.GetDataObject();
-			if (iData == null
-				|| iData.GetDataPresent(typeof(Project)) == false)
-			{
-				strError = "剪贴板中尚不存在Project类型数据";
-                goto ERROR1;
-			}
-
-			Project project = (Project)iData.GetData(typeof(Project));
-
-			if (project == null) 
-			{
-				strError = "GetData error";
-				goto ERROR1;
-			}
-
-            string strHostName = project.GetHostName();
-            if (string.IsNullOrEmpty(strHostName) == false 
-                && strHostName != this.HostName)
+            IDataObject iData = Clipboard.GetDataObject();
+            if (iData == null
+                || iData.GetDataPresent(typeof(Project)) == false)
             {
-                strError = "警告：拟粘贴的方案其宿主为 '" + strHostName + "', 不符合当前窗口的宿主名 '" + this.HostName + "'。请注意在粘贴完成后修改其宿主名(位于metadata.xml中)";
-                MessageBox.Show(strError);
+                strError = "剪贴板中尚不存在Project类型数据";
+                goto ERROR1;
             }
 
-			int nRet = PasteProject(project,
+            Project project = (Project)iData.GetData(typeof(Project));
+
+            if (project == null)
+            {
+                strError = "GetData error";
+                goto ERROR1;
+            }
+
+            string strHostName = project.GetHostName();
+            if (string.IsNullOrEmpty(strHostName) == false
+                && strHostName != this.HostName)
+            {
+                strError = "警告：拟粘贴的方案其宿主为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。请注意在粘贴完成后修改其宿主名(位于metadata.xml中)";
+                MessageBox.Show(this, strError);
+            }
+
+            int nRet = PasteProject(project,
                 "",
                 false,
                 out strError);
@@ -2404,7 +2406,7 @@ strLastModified);
 
             return;
         ERROR1:
-            MessageBox.Show(strError);
+            MessageBox.Show(this, strError);
             return;
         }
 
@@ -2432,11 +2434,11 @@ strLastModified);
             if (string.IsNullOrEmpty(strHostName) == false
                 && strHostName != this.HostName)
             {
-                strError = "警告：拟粘贴的方案其宿主为 '" + strHostName + "', 不符合当前窗口的宿主名 '"+this.HostName+"'。请注意在粘贴完成后修改其宿主名(位于metadata.xml中)";
-                MessageBox.Show(strError);
+                strError = "警告：拟粘贴的方案其宿主为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。请注意在粘贴完成后修改其宿主名(位于metadata.xml中)";
+                MessageBox.Show(this, strError);
             }
 
-            int nRet = PasteProject(project, 
+            int nRet = PasteProject(project,
                 "",
                 true,
                 out strError);
@@ -2445,60 +2447,60 @@ strLastModified);
 
             return;
         ERROR1:
-            MessageBox.Show(strError);
+            MessageBox.Show(this, strError);
             return;
         }
 
-		// 得到剪贴板中Project对象的原始名字目录
-		string GetClipboardProjectDir()
-		{
-			IDataObject iData = Clipboard.GetDataObject();
-			if (iData == null
-				|| iData.GetDataPresent(typeof(Project)) == false)
-			{
-				// "剪贴板中尚不存在Project类型数据"
-				return "";
-			}
+        // 得到剪贴板中Project对象的原始名字目录
+        string GetClipboardProjectDir()
+        {
+            IDataObject iData = Clipboard.GetDataObject();
+            if (iData == null
+                || iData.GetDataPresent(typeof(Project)) == false)
+            {
+                // "剪贴板中尚不存在Project类型数据"
+                return "";
+            }
 
-			Project project = (Project)iData.GetData(typeof(Project));
+            Project project = (Project)iData.GetData(typeof(Project));
 
-			if (project == null) 
-			{
-				// GetData error;
-				return "";
-			}
+            if (project == null)
+            {
+                // GetData error;
+                return "";
+            }
 
-			string strPath;
-			string strName;
-			ScriptManager.SplitProjectPathName(project.NamePath, out strPath, out strName);
-			return strPath;
-		}
+            string strPath;
+            string strName;
+            ScriptManager.SplitProjectPathName(project.NamePath, out strPath, out strName);
+            return strPath;
+        }
 
-		string GetCurTreeDir()
-		{
-			TreeNode node = treeView1.SelectedNode;
-			// 当前已选择的node
-			if (node == null) 
-			{
-				// 根
-				return "";
-			}
-			else 
-			{
+        string GetCurTreeDir()
+        {
+            TreeNode node = treeView1.SelectedNode;
+            // 当前已选择的node
+            if (node == null)
+            {
+                // 根
+                return "";
+            }
+            else
+            {
 
-				if (node.ImageIndex == 0) // 目录
-				{
-					return node.FullPath;
-				}
-				else 
-				{
-					TreeNode parent = node.Parent;
-					if (parent != null)
-						return parent.FullPath;
-					return "";
-				}
-			}
-		}
+                if (node.ImageIndex == 0) // 目录
+                {
+                    return node.FullPath;
+                }
+                else
+                {
+                    TreeNode parent = node.Parent;
+                    if (parent != null)
+                        return parent.FullPath;
+                    return "";
+                }
+            }
+        }
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
@@ -2883,7 +2885,7 @@ strLastModified);
         }
 
 #endif
-	}
+    }
 
     public delegate void AutoCreateProjectXmlFileEventHandle(object sender,
 AutoCreateProjectXmlFileEventArgs e);
