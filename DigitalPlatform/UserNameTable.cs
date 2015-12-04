@@ -138,12 +138,19 @@ namespace DigitalPlatform
                 {
                     if (info.RetryTime == new DateTime(0))
                     {
-                        info.RetryTime = DateTime.Now.AddMinutes(10);
+                        info.RetryTime = DateTime.Now + this.PauseTime;
                     }
                     else
-                        info.RetryTime += this.PauseTime;    // 每错误一次，惩罚十分钟
+                    {
+                        // 每多错误一次，追加惩罚十分钟
+                        DateTime now = DateTime.Now;
+                        if (info.RetryTime > now)   // 上次的结束时间比当前时刻靠后，用上次的结束时间作为基准
+                            info.RetryTime += this.PauseTime;    
+                        else
+                            info.RetryTime = now + this.PauseTime;    // 否则用当前时间作为基准
+                    }
 
-                    strLogText = "前端 [" + strClientIP + "] 被暂时禁用登录功能，直到 " + info.RetryTime.ToString();
+                    strLogText = "前端 用户名 '"+strUserName+"' IP地址 '" + strClientIP + "' 从 "+info.AttackStart.ToString()+" 开始试探登录失败超过 "+info.AttackCount+" 次，被暂时禁用登录功能，直到 " + info.RetryTime.ToString();
                 }
                 Thread.Sleep(ShortPauseTicks);
             }

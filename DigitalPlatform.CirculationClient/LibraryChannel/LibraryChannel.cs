@@ -125,7 +125,7 @@ namespace DigitalPlatform.CirculationClient
                 }
             }
         }
-        
+
 #if BASIC_HTTP
         localhost.dp2libraryRESTClient m_ws = null;	// 拥有
 #else
@@ -408,9 +408,9 @@ out strError);
 #if BASIC_HTTP
         localhost.dp2libraryRESTClient 
 #else
-        localhost.dp2libraryClient 
-#endif 
-            ws
+        localhost.dp2libraryClient
+#endif
+ ws
         {
             get
             {
@@ -431,76 +431,76 @@ out strError);
                     }
                     else
 #endif
-                        
-                    if (uri.Scheme.ToLower() == "basic.http")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
+
+                        if (uri.Scheme.ToLower() == "basic.http")
+                        {
+                            EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
 
 #if BASIC_HTTP
                         this.m_ws = new localhost.dp2libraryRESTClient(CreateBasic0Binding(), address);
 #else
-                        throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
+                            throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
 
-                    }
+                        }
 #if !BASIC_HTTP
-                    else if (uri.Scheme.ToLower() == "net.tcp")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl);
-
-                        this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
-                    }
-                    else
-                    {
-                        if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
-                            bWs0 = true;
-
-                        if (bWs0 == false)
+                        else if (uri.Scheme.ToLower() == "net.tcp")
                         {
-                            // ws1 
-                            EndpointAddress address = null;
+                            EndpointAddress address = new EndpointAddress(strUrl);
 
+                            this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
+                        }
+                        else
+                        {
+                            if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
+                                bWs0 = true;
+
+                            if (bWs0 == false)
                             {
-                                address = new EndpointAddress(strUrl);
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+                                // ws1 
+                                EndpointAddress address = null;
 
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
-                new MyValidator();
+                                {
+                                    address = new EndpointAddress(strUrl);
+                                    this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
+                    new MyValidator();
 
 #if NO
                                 ////
                                 this.m_ws.ClientCredentials.UserName.UserName = "test";
                                 this.m_ws.ClientCredentials.UserName.Password = "";
 #endif
+                                }
+
+                                /*
+                                {
+
+                                    EndpointIdentity identity = EndpointIdentity.CreateDnsIdentity("DigitalPlatform");
+                                    address = new EndpointAddress(new Uri(strUrl),
+                                        identity, new AddressHeaderCollection());
+                                    this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                    // this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
+                    new MyValidator();
+                                }
+                                 * */
+
                             }
-                            
-                            /*
+                            else
                             {
+                                // ws0
+                                EndpointAddress address = new EndpointAddress(strUrl);
 
-                                EndpointIdentity identity = EndpointIdentity.CreateDnsIdentity("DigitalPlatform");
-                                address = new EndpointAddress(new Uri(strUrl),
-                                    identity, new AddressHeaderCollection());
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
-
-                                // this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
-                new MyValidator();
+                                this.m_ws = new localhost.dp2libraryClient(CreateWs0Binding(), address);
+                                this.m_ws.ClientCredentials.UserName.UserName = "test";
+                                this.m_ws.ClientCredentials.UserName.Password = "";
                             }
-                             * */
-
                         }
-                        else
-                        {
-                            // ws0
-                            EndpointAddress address = new EndpointAddress(strUrl);
-
-                            this.m_ws = new localhost.dp2libraryClient(CreateWs0Binding(), address);
-                            this.m_ws.ClientCredentials.UserName.UserName = "test";
-                            this.m_ws.ClientCredentials.UserName.Password = "";
-                        }
-                    }
 #endif
 
 #if BASIC_HTTP
@@ -542,7 +542,7 @@ out strError);
                     throw (new Exception("Url值此时应当不等于空"));
                 }
                 Debug.Assert(this.Url != "", "Url值此时应当不等于空");
-#endif 
+#endif
 
                 // m_ws.Url = this.Url;
                 // m_ws.CookieContainer = this.Cookies;
@@ -580,7 +580,7 @@ out strError);
         public static int CrashReport(
             string strSender,
             string strSubject,  // 一般为 "dp2circulation"
-            string strContent, 
+            string strContent,
             out string strError)
         {
             strError = "";
@@ -858,6 +858,7 @@ out strError);
             strOutputUserName = "";
             strLibraryCode = "";
 
+        REDO:
             try
             {
                 LibraryServerResult result = ws.Login(out strOutputUserName,
@@ -873,9 +874,16 @@ out strError);
             }
             catch (Exception ex)
             {
+#if NO
                 // TODO: 是否显示 InnerException? 本地时钟不对怎么办?
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
+#endif
+                // 2015/12/4
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
             }
         }
 
@@ -947,7 +955,7 @@ out strError);
                 {
                 }
                  * */
-                    Application.DoEvents();	// 出让界面控制权
+                Application.DoEvents();	// 出让界面控制权
             }
 
             System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
@@ -1696,7 +1704,7 @@ out strError);
             searchresults = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetSearchResult(
@@ -1855,7 +1863,7 @@ out strError);
             strXml = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetRecord(
@@ -2020,7 +2028,7 @@ out strError);
             DigitalPlatform.Stop stop,
             string strBarcode,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strError)
         {
             byte[] baTimestamp = null;
@@ -2057,9 +2065,9 @@ out strError);
             DigitalPlatform.Stop stop,
             string strBarcode,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strRecPath,
-            out byte [] baTimestamp,
+            out byte[] baTimestamp,
             out string strError)
         {
             results = null;
@@ -2067,11 +2075,11 @@ out strError);
             strRecPath = "";
             baTimestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetReaderInfo(
-                    strBarcode, 
+                    strBarcode,
                     strResultTypeList,
                     null,
                     null);
@@ -2296,7 +2304,7 @@ out strError);
             string strResultType,
             out string strResult,
             out string strItemRecPath,
-            out byte [] item_timestamp,
+            out byte[] item_timestamp,
             string strBiblioType,
             out string strBiblio,
             out string strBiblioRecPath,
@@ -2311,12 +2319,12 @@ out strError);
 
             item_timestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetItemInfo(
                     strItemDbType,
-                    strBarcode, 
+                    strBarcode,
                     strItemXml,
                     strResultType,
                     strBiblioType,
@@ -2398,12 +2406,12 @@ out strError);
             string strItemBarcode,
             string strConfirmItemRecPath,
             bool bForce,
-            string [] saBorrowedItemBarcode,
+            string[] saBorrowedItemBarcode,
             string strStyle,
             string strItemFormatList,
-            out string [] item_records,
+            out string[] item_records,
             string strReaderFormatList,
-            out string [] reader_records,
+            out string[] reader_records,
             string strBiblioFormatList,
             out string[] biblio_records,
             out string[] aDupPath,
@@ -2420,7 +2428,7 @@ out strError);
             strError = "";
 
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginBorrow(
@@ -2523,10 +2531,10 @@ out strError);
             string strItemFormatList,
             out string[] item_records,
             string strReaderFormatList,
-            out string [] reader_records,
+            out string[] reader_records,
             string strBiblioFormatList,
             out string[] biblio_records,
-            out string [] aDupPath,
+            out string[] aDupPath,
             out string strOutputReaderBarcode,
             out ReturnInfo return_info,
             out string strError)
@@ -2539,7 +2547,7 @@ out strError);
             strOutputReaderBarcode = "";
             return_info = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginReturn(
@@ -2706,7 +2714,7 @@ out strError);
             long lStart,
             long lCount,
             string strStyle,
-            string strLang, 
+            string strLang,
             out EntityInfo[] entityinfos,
             out string strError)
         {
@@ -2781,7 +2789,7 @@ out strError);
         public long SetEntities(
             DigitalPlatform.Stop stop,
             string strBiblioRecPath,
-            EntityInfo [] entityinfos,
+            EntityInfo[] entityinfos,
             out EntityInfo[] errorinfos,
             out string strError)
         {
@@ -3185,7 +3193,7 @@ out strError);
             values = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetValueTable(
@@ -3450,7 +3458,7 @@ out strError);
             string strName,
             int nStart,
             int nCount,
-            out CalenderInfo [] contents,
+            out CalenderInfo[] contents,
             out string strError)
         {
             strError = "";
@@ -3834,7 +3842,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetClock(
@@ -3896,7 +3904,7 @@ out strError);
             strTime = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetClock(
@@ -3961,7 +3969,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyReaderPassword(
@@ -4775,7 +4783,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyBarcode(
@@ -4826,7 +4834,7 @@ out strError);
             string strFileName,
             long lStart,
             long lLength,
-            out FileItemInfo [] infos,
+            out FileItemInfo[] infos,
             out string strError)
         {
             strError = "";
@@ -5450,7 +5458,7 @@ out strError);
             string strReaderBarcode,
             string strGateName,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strError)
         {
             strError = "";
@@ -5516,8 +5524,8 @@ out strError);
             out string strError)
         {
             strOutputReaderXml = "";
-            strOutputID = ""; 
-            
+            strOutputID = "";
+
             strError = "";
 
         REDO:
@@ -5576,7 +5584,7 @@ out strError);
             out string strError)
         {
             strOutputReaderXml = "";
-            strOutputID = ""; 
+            strOutputID = "";
             strError = "";
 
         REDO:
@@ -5628,7 +5636,7 @@ out strError);
         public long Settlement(
             DigitalPlatform.Stop stop,
             string strAction,
-            string [] ids,
+            string[] ids,
             out string strError)
         {
             strError = "";
@@ -5936,7 +5944,7 @@ out strError);
             {
                 IAsyncResult soapresult = this.ws.BeginSearchUsedZhongcihao(
                     strZhongcihaoGroupName,
-                    strClass, 
+                    strClass,
                     strResultSetName,
                     null,
                     null);
@@ -6159,7 +6167,7 @@ out strError);
             }
         }
 
-         // 查重
+        // 查重
         // parameters:
         //      strUsedProjectName  实际使用的查重方案名
         public long SearchDup(
@@ -6651,7 +6659,7 @@ out strError);
             CfgCache cache,
             string strPath,
             string strStyle,
-            byte [] remote_timestamp,
+            byte[] remote_timestamp,
             out string strResult,
             out string strMetaData,
             out byte[] baOutputTimeStamp,
@@ -7595,7 +7603,7 @@ out strError);
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetIssues(
-                    strBiblioRecPath, 
+                    strBiblioRecPath,
                     issueinfos,
                     null,
                     null);
@@ -8500,7 +8508,7 @@ out strError);
     out string strOutputBiblioRecPath,
     out string strError)
         {
-            return  GetCommentInfo(
+            return GetCommentInfo(
             stop,
             strRefID,
             "",
@@ -9106,7 +9114,7 @@ out strError);
         }
 
         public long ExistStatisInfo(string strDateRangeString,
-            out DateExist [] dates,
+            out DateExist[] dates,
             out string strError)
         {
             strError = "";
@@ -9344,7 +9352,7 @@ Stack:
         //             stop.OnStop += new StopEventHandler(this.DoStop);
         public void DoStop(object sender, StopEventArgs e)
         {
-             this.Abort();
+            this.Abort();
         }
     }
 
