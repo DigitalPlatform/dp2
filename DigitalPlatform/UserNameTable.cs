@@ -150,7 +150,7 @@ namespace DigitalPlatform
                             info.RetryTime = now + this.PauseTime;    // 否则用当前时间作为基准
                     }
 
-                    strLogText = "前端 用户名 '"+strUserName+"' IP地址 '" + strClientIP + "' 从 "+info.AttackStart.ToString()+" 开始试探登录失败超过 "+info.AttackCount+" 次，被暂时禁用登录功能，直到 " + info.RetryTime.ToString();
+                    strLogText = "前端 用户名 '"+strUserName+"' IP地址 '" + strClientIP + "' 从 "+info.AttackStart.ToString()+" 开始试探登录失败达 "+info.AttackCount+" 次，被暂时禁用登录功能，直到 " + info.RetryTime.ToString();
                 }
                 Thread.Sleep(ShortPauseTicks);
             }

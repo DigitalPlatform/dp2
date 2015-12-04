@@ -9081,7 +9081,7 @@ out strError);
             {
                 // text-level: 用户提示
                 strError = this.GetString("帐户不存在或密码不正确");    // "帐户不存在或密码不正确"
-                return -1;
+                return 0;   // 2015/12/4 注：这里不应返回 -1。因为返回 -1，会导致调主不去判断探测密码攻击
             }
 
             if (nRet > 1)
