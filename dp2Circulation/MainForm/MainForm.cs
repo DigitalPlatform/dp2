@@ -8059,6 +8059,7 @@ Keys keyData)
 
             List<string> args = StringUtil.GetCommandLineArgs();
             args.Add("newinstance");
+            args.Add("green");  // 不顾 Ctrl 键状态强制用绿色方式运行
 
             // 调试用 Program.ReleaseMutex();
 
@@ -8078,7 +8079,7 @@ Keys keyData)
         }
 
         // 启动 ClickOnce 方式安装的 dp2circulation
-        void StartClickOnceDp2circulation()
+        int StartClickOnceDp2circulation()
         {
             try
             {
@@ -8090,16 +8091,18 @@ Keys keyData)
                 string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
                 if (File.Exists(strShortcutFilePath) == false)
                 {
-                    return;
+                    return 0;
                 }
                 else
                 {
                     Process.Start(strShortcutFilePath);
+                    return 1;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(this, "dp2circulation 启动失败" + ex.Message);
+                return -1;
             }
         }
 

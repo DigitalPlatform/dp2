@@ -252,6 +252,41 @@ Stack:
             }
         }
 
+#if NO
+        public static void CreateShortcutToStartMenu(
+    string linkName,
+    string strAppPath,
+    bool bOverwriteExist = true)
+        {
+            string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
 
+            string strLnkFilePath = Path.Combine(deskDir, "DigitalPlatform\\" + linkName + ".lnk");
+
+            if (bOverwriteExist == false && File.Exists(strLnkFilePath) == true)
+                return;
+
+            Type t = Type.GetTypeFromCLSID(new Guid("72C24DD5-D70A-438B-8A42-98424B88AFB8")); //Windows Script Host Shell Object
+            dynamic shell = Activator.CreateInstance(t);
+            try
+            {
+                var lnk = shell.CreateShortcut(strLnkFilePath);
+                try
+                {
+                    lnk.TargetPath = strAppPath;    //  @"C:\something";
+                    lnk.IconLocation = strAppPath + ", 0";
+                    lnk.WorkingDirectory = Path.GetDirectoryName(strAppPath);
+                    lnk.Save();
+                }
+                finally
+                {
+                    Marshal.FinalReleaseComObject(lnk);
+                }
+            }
+            finally
+            {
+                Marshal.FinalReleaseComObject(shell);
+            }
+        }
+#endif
     }
 }

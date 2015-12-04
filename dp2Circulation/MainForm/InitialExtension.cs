@@ -1448,8 +1448,12 @@ MessageBoxDefaultButton.Button1);
 
                     doc = doc.OpenNew(true);
 
+                    string strBodyClass = " class='clickonce' ";
+                    if (ApplicationDeployment.IsNetworkDeployed == false)
+                        strBodyClass = " class='green' ";
+
                     Global.WriteHtml(m_backgroundForm.WebBrowser,
-                        "<html><head>" + strLink + "</head><body>");
+                        "<html><head>" + strLink + "</head><body"+strBodyClass+">");
                 }
                 catch (Exception ex)
                 {
@@ -1504,7 +1508,7 @@ MessageBoxDefaultButton.Button1);
                     m_backgroundForm.Invoke(new Action<string>(DisplayBackgroundText), strText);
                     return;
                 }
-                m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(strText) + "<br/>");
+                m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>"));
             }
         }
 

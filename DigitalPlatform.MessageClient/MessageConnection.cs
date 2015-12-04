@@ -455,7 +455,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 + "; queryWord=" + queryWord
                 + "; fromList=" + fromList
                 + "; matchStyle=" + matchStyle
-                + "; formatList=" + formatList 
+                + "; formatList=" + formatList
                 + "; maxResults=" + maxResults);
             try
             {
@@ -482,7 +482,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     // AddErrorLine(GetExceptionText(task.Exception));
                     strError = GetExceptionText(task.Exception);
                     AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
-    + "; return error=" + strError + " value=" 
+    + "; return error=" + strError + " value="
     + -1);
                     return -1;
                 }
@@ -623,6 +623,4 @@ errorInfo);
         public string Data { get; set; }
         public string Timestamp { get; set; }
     }
-
-
 }
