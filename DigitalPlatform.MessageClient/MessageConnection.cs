@@ -401,7 +401,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
         }
 #endif
-        static string GetExceptionText(AggregateException exception)
+        public static string GetExceptionText(AggregateException exception)
         {
             StringBuilder text = new StringBuilder();
             foreach (Exception ex in exception.InnerExceptions)
@@ -425,8 +425,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 #endif
             task.Wait();
         }
-
-
 
         #region 调用 Server 端函数
 
@@ -571,6 +569,25 @@ errorInfo);
 #endif
         }
 
+        public GetUserResult GetUsers(string userName, int start, int count)
+        {
+            var task = HubProxy.Invoke<GetUserResult>("GetUsers",
+                userName,
+                start,
+                count);
+            task.Wait();
+            return task.Result;
+        }
+
+        public MessageResult SetUsers(string action, List<UserItem> users)
+        {
+            var task = HubProxy.Invoke<MessageResult>("SetUsers",
+                action,
+                users);
+            task.Wait();
+            return task.Result;
+        }
+
         // 调用 server 端 Login
         public async void Login(
             string userName,
@@ -623,4 +640,22 @@ errorInfo);
         public string Data { get; set; }
         public string Timestamp { get; set; }
     }
+
+    public class GetUserResult : MessageResult
+    {
+        public List<UserItem> Users { get; set; }
+    }
+
+    public class UserItem
+    {
+        public string id { get; set; }
+
+        public string userName { get; set; } // 用户名
+        public string password { get; set; }  // 密码
+        public string rights { get; set; } // 权限
+        public string department { get; set; } // 部门名称
+        public string tel { get; set; }  // 电话号码
+        public string comment { get; set; }  // 注释
+    }
+
 }

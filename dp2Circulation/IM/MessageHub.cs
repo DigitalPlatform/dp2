@@ -559,5 +559,4 @@ strError);  // 出错信息大概为 not found。
         public IList<BiblioRecord> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
     }
-
 }

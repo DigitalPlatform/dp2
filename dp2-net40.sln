@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2LibraryXE", "dp2LibraryX
 		{47E73ADC-0C75-4018-A42F-C8CA68679F25} = {47E73ADC-0C75-4018-A42F-C8CA68679F25}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform", "DigitalPlatform\DigitalPlatform.csproj", "{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform", "DigitalPlatform\4.0\DigitalPlatform.csproj", "{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.AmazonInterface", "DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj", "{CEF0E01B-7F8F-4F0E-B687-C66659AB1403}"
 EndProject
@@ -146,13 +146,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2MServer", "dp2MServer\dp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2HotPoint", "dp2HotPoint\dp2HotPoint.csproj", "{92F4291A-C902-46D4-BCC9-982285719DD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MessageClient", "DigitalPlatform.MessageClient\DigitalPlatform.MessageClient.csproj", "{CA005349-028D-48A4-BA05-6023625CC9BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MessageClient", "DigitalPlatform.MessageClient\4.0\DigitalPlatform.MessageClient.csproj", "{CA005349-028D-48A4-BA05-6023625CC9BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2ClientSetup", "dp2ClientSetup\dp2ClientSetup.csproj", "{6D626FD9-EEA6-4767-9D15-6535904C9703}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZkFingerprint", "ZkFingerPrint\ZkFingerprint.csproj", "{FA0ADBE1-F007-4EF4-B635-5E840801D8C5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GreenUtility", "GreenUtility\GreenUtility.csproj", "{5785A2C2-5680-45A6-84FA-79233E56CFB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MessageClient.GUI", "DigitalPlatform.MessageClient.GUI\DigitalPlatform.MessageClient.GUI.csproj", "{5ADD6B7B-9DAD-4482-AA19-7B5846549630}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1184,6 +1186,21 @@ Global
 		{5785A2C2-5680-45A6-84FA-79233E56CFB1}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{5785A2C2-5680-45A6-84FA-79233E56CFB1}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{5785A2C2-5680-45A6-84FA-79233E56CFB1}.Test|x86.ActiveCfg = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Release|x86.ActiveCfg = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Test|Any CPU.Build.0 = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{5ADD6B7B-9DAD-4482-AA19-7B5846549630}.Test|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

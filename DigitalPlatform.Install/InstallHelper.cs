@@ -27,8 +27,6 @@ namespace DigitalPlatform.Install
 {
     public class InstallHelper
     {
-
-
         // parameters:
         //      lines   若干行参数。每行执行一次
         //      bOutputCmdLine  在输出中是否包含命令行? 如果为 false，表示不包含命令行，只有命令结果文字
@@ -94,7 +92,7 @@ namespace DigitalPlatform.Install
                     i++;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
@@ -820,7 +818,7 @@ MessageBoxDefaultButton.Button1);
 
         // 获得ServerBindings当前配置
         // 返回一个数组，每个元素形态为 ":80:" 或 "ip:80:hostname"
-        public static string [] GetServerBindings(string strTargetSite)
+        public static string[] GetServerBindings(string strTargetSite)
         {
             string strFolderPath = "IIS://localhost" + strTargetSite;
 
@@ -1041,7 +1039,7 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            if (strTargetSite.Length > 0 && strTargetSite[0]== '/')
+            if (strTargetSite.Length > 0 && strTargetSite[0] == '/')
                 strTargetSite = strTargetSite.Substring(1);
 
             string strVPath = strTargetSite + "/ROOT/" + strVDir;

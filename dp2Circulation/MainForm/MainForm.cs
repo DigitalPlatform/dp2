@@ -39,6 +39,7 @@ using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
+using DigitalPlatform.MessageClient;
 
 namespace dp2Circulation
 {
@@ -3064,6 +3065,7 @@ string strUserName = ".")
         public void EnableControls(bool bEnable)
         {
             this.menuStrip_main.Enabled = bEnable;
+            this.panel_fixed.Enabled = bEnable;
 
             this.toolStripDropDownButton_barcodeLoadStyle.Enabled = bEnable;
             this.toolStripTextBox_barcode.Enabled = bEnable;
@@ -8199,6 +8201,15 @@ Keys keyData)
                 // this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
                 this.m_commentViewer = null;
             }
+        }
+
+        // 点对点通讯的用户管理功能
+        private void toolStripButton_messageHub_userManage_Click(object sender, EventArgs e)
+        {
+            UserManageDialog dlg = new UserManageDialog();
+            MainForm.SetControlFont(dlg, this.DefaultFont);
+            dlg.Connection = this.MessageHub;
+            dlg.ShowDialog(this);
         }
     }
 
