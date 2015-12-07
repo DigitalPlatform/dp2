@@ -28,6 +28,23 @@ namespace dp2Circulation
         /// </summary>
         public event MessagePromptEventHandler Prompt = null;
 
+        LogType _logType = LogType.OperLog;
+        /// <summary>
+        /// 要获取的日志的类型。注意，只能用一种类型
+        /// </summary>
+        public LogType LogType
+        {
+            get
+            {
+                return _logType;
+            }
+            set
+            {
+                _logType = value;
+            }
+        }
+
+
         /// <summary>
         /// 日志文件名。
         /// 这是纯粹的文件名，没有冒号后面的范围部分。范围部分要放入 Range 中
@@ -110,7 +127,6 @@ namespace dp2Circulation
             set;
         }
 
-
         public string Format
         {
             get;
@@ -162,7 +178,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "装载metadata文件 '" + strCacheMetaDataFilename + "' 时出错: " + ex.Message;
+                    strError = "装载 metadata 文件 '" + strCacheMetaDataFilename + "' 时出错: " + ex.Message;
                     return -1;
                 }
 
@@ -520,6 +536,10 @@ FileShare.ReadWrite);
 
             long lRet = 0;
 
+            if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0
+                && (this.LogType & dp2Circulation.LogType.OperLog) != 0)
+                throw new ArgumentException("OperLogItemLoader 的 LogType 只能使用一种类型");
+
             this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录。"
                 + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
@@ -532,14 +552,18 @@ FileShare.ReadWrite);
             {
                 long _lServerFileSize = 0;
 
+                string strStyle = "level-" + nLevel.ToString();
+                if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
+                    strStyle += ",accessLog";
+
                 // 获得服务器端日志文件尺寸
                 lRet = this.Channel.GetOperLog(
                     this.Stop,
                     this.FileName,
                     -1,    // lIndex,
                     -1, // lHint,
-                        "level-" + nLevel.ToString(),
-                        "", // strFilter
+                    strStyle,
+                    "", // strFilter
                     out strXml,
                     out _lServerFileSize,
                     0,  // lAttachmentFragmentStart,
@@ -547,11 +571,16 @@ FileShare.ReadWrite);
                     out attachment_data,
                     out lAttachmentTotalLength,
                     out strError);
-
+                // 2015/11/25
+                if (lRet == -1)
+                    throw new Exception(strError);
                 this.lServerFileSize = _lServerFileSize;
 
                 if (lRet == 0)
                     yield break;
+                // 2015/11/25
+                if (_lServerFileSize == -1)
+                    yield break;    // 此类型的日志尚未启用
             }
 
             Stream stream = null;
@@ -562,9 +591,13 @@ FileShare.ReadWrite);
 
             if (bAutoCache == true)
             {
+                string strFileName = this.FileName;
+                if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
+                    strFileName = this.FileName + ".a";
+
                 nRet = PrepareCacheFile(
                     this.CacheDir,
-                    this.FileName,
+                    strFileName,    // this.FileName,
                     lServerFileSize,
                     out bCacheFileExist,
                     out stream,
@@ -614,7 +647,6 @@ FileShare.ReadWrite);
                             // yield break; ?
                         }
 
-
                         if (lIndex == ri.lStart)
                             lHint = -1;
                         else
@@ -657,7 +689,6 @@ FileShare.ReadWrite);
                             if (nRet == -1)
                                 throw new Exception(strError);
                             lHintNext = stream.Position;
-
                         }
                         else
                         {
@@ -669,6 +700,9 @@ FileShare.ReadWrite);
                                 else
                                     nCount = (int)ri.lLength;   // Math.Min(500, (int)ri.lLength);
 
+                                string strStyle = "level-" + nLevel.ToString();
+                                if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
+                                    strStyle += ",accessLog";
                             REDO:
                                 // 获得日志
                                 // return:
@@ -682,7 +716,7 @@ FileShare.ReadWrite);
                                     lIndex,
                                     lHint,
                                     nCount,
-                                    "level-" + nLevel.ToString(),
+                                    strStyle,
                                     this.Filter, // strFilter
                                     out records,
                                     out strError);
@@ -709,7 +743,7 @@ FileShare.ReadWrite);
                                     if (this.Prompt != null)
                                     {
                                         MessagePromptEventArgs e = new MessagePromptEventArgs();
-                                        e.MessageText = "获取日志信息 ("+this.FileName + " " +lIndex.ToString() + ") 的操作发生错误： " + strError;
+                                        e.MessageText = "获取 "+this._logType.ToString()+" 日志信息 ("+this.FileName + " " +lIndex.ToString() + ") 的操作发生错误： " + strError;
                                         e.Actions = "yes,no,cancel";
                                         this.Prompt(this, e);
                                         if (e.ResultAction == "cancel")
@@ -807,9 +841,13 @@ FileShare.ReadWrite);
                 // 创建本地缓存的日志文件的metadata文件
                 if (bCacheFileExist == false && stream != null)
                 {
+                    string strFileName = this.FileName;
+                    if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
+                        strFileName = this.FileName + ".a";
+
                     nRet = CreateCacheMetadataFile(
                         this.CacheDir,
-                        this.FileName,
+                        strFileName,    // this.FileName,
                         lServerFileSize,
                         out strError);
                     if (nRet == -1)
@@ -825,10 +863,14 @@ FileShare.ReadWrite);
 
                 if (bRemoveCacheFile == true)
                 {
+                    string strFileName = this.FileName;
+                    if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
+                        strFileName = this.FileName + ".a";
+
                     string strError1 = "";
                     nRet = DeleteCacheFile(
                         this.CacheDir,
-                        this.FileName,
+                        strFileName,    // this.FileName,
                         out strError1);
                     if (nRet == -1)
                     {
@@ -847,6 +889,4 @@ FileShare.ReadWrite);
             lProgressValue += lFileSize;
         }
     }
-
-
 }

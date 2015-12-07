@@ -142,7 +142,7 @@ namespace DigitalPlatform.LibraryServer
     public class CacheFileItem
     {
         public string FileName = "";
-        public Stream Stream = null;
+        public Stream Stream = null;    // !!! 谁来释放
         public bool Used = false;
         public DateTime LastTime = DateTime.Now;
     }

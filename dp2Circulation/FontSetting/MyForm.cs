@@ -90,7 +90,7 @@ namespace dp2Circulation
                 this.m_mainForm = value;
             }
         }
-        
+
         internal DigitalPlatform.Stop stop = null;
 
         /// <summary>
@@ -103,6 +103,8 @@ namespace dp2Circulation
                 return this.stop;
             }
         }
+
+        internal int _processing = 0;   // 是否正在进行处理中
 
         string FormName
         {
@@ -187,21 +189,18 @@ namespace dp2Circulation
             }
         }
 
-
         /// <summary>
         /// 窗口 Closing 时被触发
         /// </summary>
         /// <param name="e">事件参数</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
-            if (stop != null)
+            if ( (stop != null && stop.State == 0)    // 0 表示正在处理
+                || this._processing > 0)
             {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
+                MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
+                e.Cancel = true;
+                return;
             }
         }
 
@@ -220,12 +219,7 @@ namespace dp2Circulation
                 stop = null;
             }
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null
-                && Floating == false && this.SupressSizeSetting == false)
-            {
-                MainForm.AppInfo.SaveMdiChildFormStates(this,
-                    "mdi_form_state");
-            }
+            // 原来
 
             if (this.MainForm != null)
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
@@ -339,6 +333,30 @@ string strUserName = ".")
             }
         }
 
+        public string CurrentUserName
+        {
+            get
+            {
+                return this.MainForm._currentUserName;
+            }
+        }
+
+        public string CurrentLibraryCodeList
+        {
+            get
+            {
+                return this.MainForm._currentLibraryCodeList;
+            }
+        }
+
+        public string CurrentRights
+        {
+            get
+            {
+                return this.MainForm._currentUserRights;
+            }
+        }
+
         #endregion
 
         #region 旧风格的 Channel
@@ -426,7 +444,7 @@ string strUserName = ".")
         {
             if (this.MainForm != null)
             {
-                Size oldsize = this.Size; 
+                Size oldsize = this.Size;
                 if (this.MainForm.DefaultFont == null)
                     MainForm.SetControlFont(this, Control.DefaultFont);
                 else
@@ -557,8 +575,6 @@ string strUserName = ".")
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-
-
                 string strFontString = MainForm.AppInfo.GetString(
                     this.FormName,
                     "default_font",
@@ -632,6 +648,14 @@ string strUserName = ".")
         /// <param name="e">事件参数</param>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            // 在这里保存。如果靠后调用，可能会遇到 base.OnFormClosed() 里面相关事件被卸掉的问题
+            if (this.MainForm != null && this.MainForm.AppInfo != null
+    && Floating == false && this.SupressSizeSetting == false)
+            {
+                MainForm.AppInfo.SaveMdiChildFormStates(this,
+                    "mdi_form_state");
+            }
+
             base.OnFormClosed(e);
             this.OnMyFormClosed();  // 这里的顺序调整过 2015/11/10
 
@@ -666,7 +690,7 @@ string strUserName = ".")
         protected override void OnActivated(EventArgs e)
         {
             // if (this.stop != null)
-                this.MainForm.stopManager.Active(this.stop);
+            this.MainForm.stopManager.Active(this.stop);
 
             this.MainForm.MenuItem_font.Enabled = true;
             this.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
@@ -710,9 +734,12 @@ string strUserName = ".")
 
             // EnableControls(false);
 
+#if NO
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在验证条码号 " + strBarcode + "...");
             stop.BeginLoop();
+#endif
+            string strOldMessage = stop.Initial("正在验证条码号 " + strBarcode + "...");
 
             try
             {
@@ -726,9 +753,12 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+#endif
+                stop.Initial(strOldMessage);
 
                 // EnableControls(true);
             }
@@ -816,9 +846,16 @@ string strUserName = ".")
                 return -1;
             }
 
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在下载配置文件 ...");
             Progress.BeginLoop();
+#endif
 
             m_nInGetCfgFile++;
 
@@ -830,7 +867,7 @@ string strUserName = ".")
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
-                long lRet = Channel.GetRes(Progress,
+                long lRet = channel.GetRes(Progress,
                     MainForm.cfgCache,
                     strCfgFilePath,
                     strStyle,
@@ -842,7 +879,7 @@ string strUserName = ".")
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == ErrorCode.NotFound)
+                    if (channel.ErrorCode == ErrorCode.NotFound)
                         return 0;
 
                     goto ERROR1;
@@ -850,9 +887,15 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
+                Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 m_nInGetCfgFile--;
             }
@@ -885,9 +928,16 @@ string strUserName = ".")
                 return -1;
             }
 
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在下载配置文件 ...");
             Progress.BeginLoop();
+#endif
 
             m_nInGetCfgFile++;
 
@@ -901,7 +951,7 @@ string strUserName = ".")
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
-                long lRet = Channel.GetResLocalFile(Progress,
+                long lRet = channel.GetResLocalFile(Progress,
                     MainForm.cfgCache,
                     strPath,
                     strStyle,
@@ -912,7 +962,7 @@ string strUserName = ".")
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == ErrorCode.NotFound)
+                    if (channel.ErrorCode == ErrorCode.NotFound)
                         return 0;
 
                     goto ERROR1;
@@ -921,9 +971,15 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
+                Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 m_nInGetCfgFile--;
             }
@@ -942,9 +998,16 @@ string strUserName = ".")
         {
             strError = "";
 
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial("正在保存配置文件 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+#if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在保存配置文件 ...");
             Progress.BeginLoop();
+#endif
 
             try
             {
@@ -955,7 +1018,7 @@ string strUserName = ".")
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                long lRet = Channel.WriteRes(
+                long lRet = channel.WriteRes(
                     Progress,
                     strPath,
                     strContent,
@@ -971,9 +1034,15 @@ string strUserName = ".")
             }
             finally
             {
+#if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+#endif
+                Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
             }
 
             return 1;
@@ -1210,7 +1279,6 @@ out string strError)
                 }
             }
         }
-
 
         // 获得当前用户能管辖的全部馆代码
         public List<string> GetOwnerLibraryCodes()

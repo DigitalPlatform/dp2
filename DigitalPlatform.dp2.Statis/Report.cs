@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Text;
@@ -13,34 +13,34 @@ using System.IO;
 
 namespace DigitalPlatform.dp2.Statis
 {
-    // ±¨±í¸ñÊ½»¯Êä³öÓĞ¹ØµÄÀà
+    // æŠ¥è¡¨æ ¼å¼åŒ–è¾“å‡ºæœ‰å…³çš„ç±»
 
     /*
-	// ÁĞÊı¾İÀàĞÍ
+	// åˆ—æ•°æ®ç±»å‹
 	public enum DataType
 	{
 		Auto = 0,
 		String = 1,
 		Number = 2,
-		Price = 3,	// 100±¶½ğ¶îÕûÊı
+		Price = 3,	// 100å€é‡‘é¢æ•´æ•°
 	}
 	*/
 
-    // Ò»¸öÁĞµÄ¸ñÊ½Êä³öÊôĞÔ
+    // ä¸€ä¸ªåˆ—çš„æ ¼å¼è¾“å‡ºå±æ€§
     public class PrintColumn
     {
-        public string Title = "";	// ÁĞ±êÌâ
+        public string Title = "";	// åˆ—æ ‡é¢˜
 
         string m_strCssClass = "";
 
-        // CSSÑùÊ½Àà¡£2007/5/18
+        // CSSæ ·å¼ç±»ã€‚2007/5/18
         public string CssClass
         {
             get
             {
 #if NO
                 if (String.IsNullOrEmpty(m_strCssClass) == true)
-                    return Title;   // Èç¹ûÃ»ÓĞÉèÖÃcssÀà£¬ÔòÓÃÁĞ±êÌâÀ´´úÌæ
+                    return Title;   // å¦‚æœæ²¡æœ‰è®¾ç½®cssç±»ï¼Œåˆ™ç”¨åˆ—æ ‡é¢˜æ¥ä»£æ›¿
 #endif
                 return m_strCssClass;
             }
@@ -50,29 +50,29 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
-        public bool Hidden = false;	// ÁĞÊÇ·ñÔÚÊä³öÊ±Òş²Ø
-        public int ColumnNumber = -2;	// ÔÚtableÖĞµÄÕæÊµÁĞºÅ -1 ´ú±íĞĞ±êÌâ
+        public bool Hidden = false;	// åˆ—æ˜¯å¦åœ¨è¾“å‡ºæ—¶éšè—
+        public int ColumnNumber = -2;	// åœ¨tableä¸­çš„çœŸå®åˆ—å· -1 ä»£è¡¨è¡Œæ ‡é¢˜
 
-        public string DefaultValue = "";	// Êı¾İÈ±Ê¡Öµ
+        public string DefaultValue = "";	// æ•°æ®ç¼ºçœå€¼
 
-        public bool Sum = false;	// ±¾ÁĞÊÇ·ñĞèÒª¡°ºÏ¼Æ¡±
+        public bool Sum = false;	// æœ¬åˆ—æ˜¯å¦éœ€è¦â€œåˆè®¡â€
 
         public DataType DataType = DataType.Auto;
 
-        public int Width = -1;	// ÁĞ¿í¶È
+        public int Width = -1;	// åˆ—å®½åº¦
 
         public int Colspan = 1; // 2013/6/14
 
         public string Eval = "";    // 2014/6/1
     }
 
-    // ±¨±í¡£Êµ¼ÊÉÏÊÇÒ»¸ö¸ñÊ½Êä³öÊôĞÔÊı×é
+    // æŠ¥è¡¨ã€‚å®é™…ä¸Šæ˜¯ä¸€ä¸ªæ ¼å¼è¾“å‡ºå±æ€§æ•°ç»„
     public class Report : ArrayList
     {
         public event OutputLineEventHandler OutputLine = null;
         public event SumCellEventHandler SumCell = null;
 
-        public bool SumLine = false;	// ÊÇ·ñĞèÒªÔÚ×îºó Êä³ö ºÏ¼ÆĞĞ
+        public bool SumLine = false;	// æ˜¯å¦éœ€è¦åœ¨æœ€å è¾“å‡º åˆè®¡è¡Œ
 
 
         public new PrintColumn this[int nIndex]
@@ -89,12 +89,12 @@ namespace DigitalPlatform.dp2.Statis
 
 
 
-        // ¸ù¾İÒ»¸ö±í¸ñ°´ÕÕÈ±Ê¡ÌØĞÔ´´½¨Ò»¸öReport¶ÔÏó
+        // æ ¹æ®ä¸€ä¸ªè¡¨æ ¼æŒ‰ç…§ç¼ºçœç‰¹æ€§åˆ›å»ºä¸€ä¸ªReportå¯¹è±¡
         // parameters:
-        //		strDefaultValue	È«²¿ÁĞµÄÈ±Ê¡Öµ
-        //				null±íÊ¾²»¸Ä±äÈ±Ê¡Öµ""£¬·ñÔòÎªstrDefaultValueÖ¸¶¨µÄÖµ
-        //		bSum	ÊÇ·ñÈ«²¿ÁĞ¶¼Òª²Î¼ÓºÏ¼Æ
-        //      bContentColumn  ÊÇ·ñ¿¼ÂÇÄÚÈİĞĞÖĞ±ÈÖ¸¶¨µÄÀ¸Ä¿¶à³öÀ´µÄÀ¸Ä¿
+        //		strDefaultValue	å…¨éƒ¨åˆ—çš„ç¼ºçœå€¼
+        //				nullè¡¨ç¤ºä¸æ”¹å˜ç¼ºçœå€¼""ï¼Œå¦åˆ™ä¸ºstrDefaultValueæŒ‡å®šçš„å€¼
+        //		bSum	æ˜¯å¦å…¨éƒ¨åˆ—éƒ½è¦å‚åŠ åˆè®¡
+        //      bContentColumn  æ˜¯å¦è€ƒè™‘å†…å®¹è¡Œä¸­æ¯”æŒ‡å®šçš„æ ç›®å¤šå‡ºæ¥çš„æ ç›®
         public static Report BuildReport(Table table,
             string strColumnTitles,
             string strDefaultValue,
@@ -103,13 +103,13 @@ namespace DigitalPlatform.dp2.Statis
         {
             // Debug.Assert(false, "");
             if (table.Count == 0)
-                return null;	// ÎŞ·¨´´½¨¡£ÄÚÈİ±ØĞëÖÁÉÙÒ»ĞĞÒÔÉÏ
+                return null;	// æ— æ³•åˆ›å»ºã€‚å†…å®¹å¿…é¡»è‡³å°‘ä¸€è¡Œä»¥ä¸Š
 
             Report report = new Report();
 
-            Line line = table.FirstHashLine();	// Ëæ±ãµÃµ½Ò»ĞĞ¡£ÕâÑù²»ÒªÇótableÅÅ¹ıĞò
+            Line line = table.FirstHashLine();	// éšä¾¿å¾—åˆ°ä¸€è¡Œã€‚è¿™æ ·ä¸è¦æ±‚tableæ’è¿‡åº
 
-            // ÁĞ±êÌâ
+            // åˆ—æ ‡é¢˜
             {
                 PrintColumn column = new PrintColumn();
                 column.ColumnNumber = -1;
@@ -129,8 +129,8 @@ namespace DigitalPlatform.dp2.Statis
                 nColumnCount = Math.Max(line.Count + 1, nTitleCount);
 
 
-            // ¼ì²é±í¸ñµÚÒ»ĞĞ
-            // ÒòÎªÁĞ±êÌâcolumnÒÑ¾­¼ÓÈë£¬ËùÒÔÏÖÔÚ×î¶à¼ÓÈënTitleCount-1À¸
+            // æ£€æŸ¥è¡¨æ ¼ç¬¬ä¸€è¡Œ
+            // å› ä¸ºåˆ—æ ‡é¢˜columnå·²ç»åŠ å…¥ï¼Œæ‰€ä»¥ç°åœ¨æœ€å¤šåŠ å…¥nTitleCount-1æ 
             for (int i = 0; i < nColumnCount - 1; i++)
             {
                 PrintColumn column = new PrintColumn();
@@ -145,7 +145,7 @@ namespace DigitalPlatform.dp2.Statis
             }
 
 
-            // Ìí¼ÓÁĞ±êÌâ
+            // æ·»åŠ åˆ—æ ‡é¢˜
             if (strColumnTitles != null)
             {
                 string[] aName = strColumnTitles.Split(new Char[] { ',' });
@@ -153,7 +153,7 @@ namespace DigitalPlatform.dp2.Statis
                 /*
                 if (aName.Length < report.Count)
                 {
-                    string strError = "ÁĞ¶¨Òå '" + strColumnTitles + "' ÖĞµÄÁĞÊı " + aName.Length.ToString() + "Ğ¡ÓÚ±¨±íÊµ¼Ê×î´óÁĞÊı " + report.Count.ToString();
+                    string strError = "åˆ—å®šä¹‰ '" + strColumnTitles + "' ä¸­çš„åˆ—æ•° " + aName.Length.ToString() + "å°äºæŠ¥è¡¨å®é™…æœ€å¤§åˆ—æ•° " + report.Count.ToString();
                     throw new Exception(strError);
                 }*/
 
@@ -193,7 +193,7 @@ namespace DigitalPlatform.dp2.Statis
 
             report.SumLine = bSum;
 
-            // ¼ÆËã colspan
+            // è®¡ç®— colspan
             PrintColumn current = null;
             foreach (PrintColumn column in report)
             {
@@ -201,7 +201,7 @@ namespace DigitalPlatform.dp2.Statis
                     && column.Title[0] == '+'
                     && current != null)
                 {
-                    column.Colspan = 0; // ±íÊ¾ÕâÊÇÒ»¸ö´ÓÊôµÄÁĞ
+                    column.Colspan = 0; // è¡¨ç¤ºè¿™æ˜¯ä¸€ä¸ªä»å±çš„åˆ—
                     current.Colspan++;
                 }
                 else
@@ -228,11 +228,11 @@ namespace DigitalPlatform.dp2.Statis
             }
             catch (Exception ex)
             {
-                strError = "InnerXml ×°ÔØÊ±³ö´í: " + ex.Message;
+                strError = "InnerXml è£…è½½æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // TODO: Ö»ÓĞ <br /> ²Å·Ö¸ô£¬ÆäËûµÄÒªÁª³ÉÒ»Æ¬
+            // TODO: åªæœ‰ <br /> æ‰åˆ†éš”ï¼Œå…¶ä»–çš„è¦è”æˆä¸€ç‰‡
             foreach (XmlNode node in dom.DocumentElement.ChildNodes)
             {
                 if (node.NodeType == XmlNodeType.Text)
@@ -244,7 +244,7 @@ namespace DigitalPlatform.dp2.Statis
             return 0;
         }
 
-        // RML ¸ñÊ½×ª»»Îª Excel ÎÄ¼ş
+        // RML æ ¼å¼è½¬æ¢ä¸º Excel æ–‡ä»¶
         public static int RmlToExcel(string strRmlFileName,
     string strExcelFileName,
     out string strError)
@@ -252,8 +252,7 @@ namespace DigitalPlatform.dp2.Statis
             strError = "";
             int nRet = 0;
 
-            Stream stream = File.OpenRead(strRmlFileName);
-
+            using (Stream stream = File.OpenRead(strRmlFileName))
             using (XmlTextReader reader = new XmlTextReader(stream))
             {
                 while (true)
@@ -261,7 +260,7 @@ namespace DigitalPlatform.dp2.Statis
                     bool bRet = reader.Read();
                     if (bRet == false)
                     {
-                        strError = "ÎÄ¼ş " + strRmlFileName + " Ã»ÓĞ¸ùÔªËØ";
+                        strError = "æ–‡ä»¶ " + strRmlFileName + " æ²¡æœ‰æ ¹å…ƒç´ ";
                         return -1;
                     }
                     if (reader.NodeType == XmlNodeType.Element)
@@ -307,7 +306,7 @@ namespace DigitalPlatform.dp2.Statis
                             }
                             else if (reader.Name == "columns")
                             {
-                                // ´Ó RML ÎÄ¼şÖĞ¶ÁÈë <columns> ÔªËØ
+                                // ä» RML æ–‡ä»¶ä¸­è¯»å…¥ <columns> å…ƒç´ 
                                 nRet = ReadColumnStyle(reader,
             out col_defs,
             out strError);
@@ -327,11 +326,11 @@ namespace DigitalPlatform.dp2.Statis
            out strError);
                                 if (nRet == -1)
                                 {
-                                    strError = "½âÎö title ÄÚÈİ '" + strTitle + "' Ê±·¢Éú´íÎó: " + strError;
+                                    strError = "è§£æ title å†…å®¹ '" + strTitle + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                                     return -1;
                                 }
 
-                                // Êä³ö±êÌâÎÄ×Ö
+                                // è¾“å‡ºæ ‡é¢˜æ–‡å­—
                                 nColIndex = 0;
                                 foreach (string t in lines)
                                 {
@@ -346,7 +345,7 @@ out lines,
 out strError);
                                 if (nRet == -1)
                                 {
-                                    strError = "½âÎö comment ÄÚÈİ '" + strTitle + "' Ê±·¢Éú´íÎó: " + strError;
+                                    strError = "è§£æ comment å†…å®¹ '" + strTitle + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                                     return -1;
                                 }
                                 nColIndex = 0;
@@ -359,13 +358,13 @@ out strError);
                                     _lineIndex++;
                                 }
 
-                                // ¿ÕĞĞ
+                                // ç©ºè¡Œ
                                 _lineIndex++;
 
                             }
                             else if (reader.Name == "tr")
                             {
-                                // Êä³öÒ»ĞĞ
+                                // è¾“å‡ºä¸€è¡Œ
                                 List<CellData> cells = null;
                                 nRet = ReadLine(reader,
                                     col_defs,
@@ -386,7 +385,7 @@ out strError);
                     {
                         _lineIndex++;
                         List<CellData> cells = new List<CellData>();
-                        cells.Add(new CellData(0, "´´½¨Ê±¼ä"));
+                        cells.Add(new CellData(0, "åˆ›å»ºæ—¶é—´"));
                         cells.Add(new CellData(1, strCreateTime));
                         doc.WriteExcelLine(_lineIndex, cells);
 
@@ -404,7 +403,7 @@ out strError);
             return 0;
         }
 
-        // ´Ó RML ÎÄ¼şÖĞ¶ÁÈë <tr> ÔªËØ
+        // ä» RML æ–‡ä»¶ä¸­è¯»å…¥ <tr> å…ƒç´ 
         static int ReadLine(XmlTextReader reader,
             List<ColumnStyle> col_defs,
             out List<CellData> cells,
@@ -460,7 +459,7 @@ out strError);
             return 0;
         }
 
-        // ¼ì²â×Ö·û´®ÊÇ·ñÎª´¿Êı×Ö(Ç°Ãæ¿ÉÒÔ°üº¬Ò»¸ö'-'ºÅ)
+        // æ£€æµ‹å­—ç¬¦ä¸²æ˜¯å¦ä¸ºçº¯æ•°å­—(å‰é¢å¯ä»¥åŒ…å«ä¸€ä¸ª'-'å·)
         public static bool IsExcelNumber(string s)
         {
             if (string.IsNullOrEmpty(s) == true)
@@ -475,7 +474,7 @@ out strError);
                 }
                 if (s[i] == '%' && i == s.Length - 1)
                 {
-                    // ×îÄ©Ò»¸ö×Ö·ûÎª %
+                    // æœ€æœ«ä¸€ä¸ªå­—ç¬¦ä¸º %
                     continue;
                 }
                 if (s[i] > '9' || s[i] < '0')
@@ -492,7 +491,7 @@ out strError);
             public string Type = "";    // String/Currency/Auto/Number
         }
 
-        // ´Ó RML ÎÄ¼şÖĞ¶ÁÈë <columns> ÔªËØ
+        // ä» RML æ–‡ä»¶ä¸­è¯»å…¥ <columns> å…ƒç´ 
         static int ReadColumnStyle(XmlTextReader reader,
             out List<ColumnStyle> styles,
             out string strError)
@@ -524,7 +523,7 @@ out strError);
         }
 
 #if NO
-        // ¼Ù¶¨µ±Ç° node ÏÂÃæµÄ element Ã¿¸ö¶¼²»»áÌ«´ó
+        // å‡å®šå½“å‰ node ä¸‹é¢çš„ element æ¯ä¸ªéƒ½ä¸ä¼šå¤ªå¤§
         static void DumpNode(XmlTextReader reader,
             XmlWriter writer)
         {
@@ -543,9 +542,9 @@ out strError);
         }
 #endif
 
-        // RML ¸ñÊ½×ª»»Îª HTML ÎÄ¼ş
+        // RML æ ¼å¼è½¬æ¢ä¸º HTML æ–‡ä»¶
         // parameters:
-        //      strCssTemplate  CSS Ä£°å¡£ÀïÃæ %columns% ´ú±í¸÷ÁĞµÄÑùÊ½
+        //      strCssTemplate  CSS æ¨¡æ¿ã€‚é‡Œé¢ %columns% ä»£è¡¨å„åˆ—çš„æ ·å¼
         public static int RmlToHtml(string strRmlFileName,
             string strHtmlFileName,
             string strCssTemplate,
@@ -553,8 +552,7 @@ out strError);
         {
             strError = "";
             int nRet = 0;
-            Stream stream = File.OpenRead(strRmlFileName);
-
+            using (Stream stream = File.OpenRead(strRmlFileName))
             using (XmlTextReader reader = new XmlTextReader(stream))
             {
                 while (true)
@@ -562,7 +560,7 @@ out strError);
                     bool bRet = reader.Read();
                     if (bRet == false)
                     {
-                        strError = "ÎÄ¼ş "+strRmlFileName+" Ã»ÓĞ¸ùÔªËØ";
+                        strError = "æ–‡ä»¶ " + strRmlFileName + " æ²¡æœ‰æ ¹å…ƒç´ ";
                         return -1;
                     }
                     if (reader.NodeType == XmlNodeType.Element)
@@ -606,7 +604,7 @@ out strError);
                             }
                             else if (reader.Name == "columns")
                             {
-                                    // ´Ó RML ÎÄ¼şÖĞ¶ÁÈë <columns> ÔªËØ
+                                // ä» RML æ–‡ä»¶ä¸­è¯»å…¥ <columns> å…ƒç´ 
                                 nRet = ReadColumnStyle(reader,
             out styles,
             out strError);
@@ -630,7 +628,7 @@ out strError);
                                 // title
                                 {
                                     writer.WriteStartElement("title");
-                                    // TODO ¶ÁÈëµÄÊ±ºòÖ±½ÓĞÎ³É lines
+                                    // TODO è¯»å…¥çš„æ—¶å€™ç›´æ¥å½¢æˆ lines
                                     writer.WriteString(strTitle.Replace("<br />", " ").Replace("<br/>", " "));
                                     writer.WriteEndElement();
                                 }
@@ -645,7 +643,7 @@ out strError);
                                     writer.WriteEndElement();
                                 }
 
-                                // CSS Ä£°å
+                                // CSS æ¨¡æ¿
                                 else if (string.IsNullOrEmpty(strCssTemplate) == false)
                                 {
                                     StringBuilder text = new StringBuilder();
@@ -654,8 +652,8 @@ out strError);
                                         string strAlign = style.Align;
                                         if (string.IsNullOrEmpty(strAlign) == true)
                                             strAlign = "left";
-                                        text.Append("TABLE.table ."+style.Class+" {"
-                                            + "text-align: "+strAlign+"; }\r\n");
+                                        text.Append("TABLE.table ." + style.Class + " {"
+                                            + "text-align: " + strAlign + "; }\r\n");
                                     }
 
                                     writer.WriteStartElement("style");
@@ -693,7 +691,7 @@ out strError);
                                 {
                                     writer.WriteStartElement("div");
                                     writer.WriteAttributeString("class", "createtime");
-                                    writer.WriteString("´´½¨Ê±¼ä: " + strCreateTime);
+                                    writer.WriteString("åˆ›å»ºæ—¶é—´: " + strCreateTime);
                                     writer.WriteEndElement();
                                 }
 
@@ -712,10 +710,10 @@ out strError);
         static Jurassic.ScriptEngine engine = null;
 
 
-        // Êä³ö RML ¸ñÊ½µÄ±í¸ñ
-        // ±¾º¯Êı¸ºÔğĞ´Èë <table> ÔªËØ
+        // è¾“å‡º RML æ ¼å¼çš„è¡¨æ ¼
+        // æœ¬å‡½æ•°è´Ÿè´£å†™å…¥ <table> å…ƒç´ 
         // parameters:
-        //      nTopLines   ¶¥²¿Ô¤Áô¶àÉÙĞĞ
+        //      nTopLines   é¡¶éƒ¨é¢„ç•™å¤šå°‘è¡Œ
         public void OutputRmlTable(Table table,
             XmlTextWriter writer,
             int nMaxLines = -1)
@@ -732,7 +730,7 @@ out strError);
             writer.WriteStartElement("thead");
             writer.WriteStartElement("tr");
 
-            int nEvalCount = 0; // ¾ßÓĞ eval µÄÀ¸Ä¿¸öÊı
+            int nEvalCount = 0; // å…·æœ‰ eval çš„æ ç›®ä¸ªæ•°
             for (j = 0; j < this.Count; j++)
             {
                 PrintColumn column = (PrintColumn)this[j];
@@ -756,7 +754,7 @@ out strError);
             writer.WriteEndElement();   // </thead>
 
 
-            // ºÏ¼ÆÊı×é
+            // åˆè®¡æ•°ç»„
             object[] sums = null;   // 2008/12/1 new changed
 
             if (this.SumLine)
@@ -780,7 +778,7 @@ out strError);
                 engine.EnableExposedClrTypes = true;
             }
 
-            // ÄÚÈİĞĞÑ­»·
+            // å†…å®¹è¡Œå¾ªç¯
             for (i = 0; i < Math.Min(nMaxLines, table.Count); i++)
             {
                 Line line = table[i];
@@ -806,14 +804,14 @@ out strError);
                 writer.WriteStartElement("tr");
                 writer.WriteAttributeString("class", strLineCssClass);
 
-                // ÁĞÑ­»·
+                // åˆ—å¾ªç¯
                 for (j = 0; j < this.Count; j++)
                 {
                     PrintColumn column = (PrintColumn)this[j];
 
                     if (column.ColumnNumber < -1)
                     {
-                        throw (new Exception("PrintColumn¶ÔÏóColumnNumberÁĞÉĞÎ´³õÊ¼»¯£¬Î»ÖÃ" + Convert.ToString(j)));
+                        throw (new Exception("PrintColumnå¯¹è±¡ColumnNumberåˆ—å°šæœªåˆå§‹åŒ–ï¼Œä½ç½®" + Convert.ToString(j)));
                     }
 
                     string strText = "";
@@ -918,9 +916,9 @@ out strError);
                                 }
                             }
                         }
-                        catch (Exception ex)	// ·ı»ñ¿ÉÄÜÒò×Ö·û´®×ª»»ÎªÕûÊıÅ×³öµÄÒì³£
+                        catch (Exception ex)	// ä¿˜è·å¯èƒ½å› å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°æŠ›å‡ºçš„å¼‚å¸¸
                         {
-                            throw new Exception("ÔÚÀÛ¼Ó ĞĞ " + i.ToString() + " ÁĞ " + column.ColumnNumber.ToString() + " ÖµµÄÊ±ºò£¬Å×³öÒì³£: " + ex.Message);
+                            throw new Exception("åœ¨ç´¯åŠ  è¡Œ " + i.ToString() + " åˆ— " + column.ColumnNumber.ToString() + " å€¼çš„æ—¶å€™ï¼ŒæŠ›å‡ºå¼‚å¸¸: " + ex.Message);
                         }
                     }
                 }
@@ -936,7 +934,7 @@ out strError);
                 Line sum_line = null;
                 if (engine != null)
                 {
-                    // ×¼±¸ Line ¶ÔÏó
+                    // å‡†å¤‡ Line å¯¹è±¡
                     sum_line = new Line(0);
                     for (j = 1; j < this.Count; j++)
                     {
@@ -944,7 +942,7 @@ out strError);
                         if (column.Sum == true
                             && sums[j] != null)
                         {
-                            sum_line.SetValue(j-1, sums[j]);
+                            sum_line.SetValue(j - 1, sums[j]);
                         }
                     }
                     engine.SetGlobalValue("line", sum_line);
@@ -961,7 +959,7 @@ out strError);
                     string strText = "";
 
                     if (j == 0)
-                        strText = "ºÏ¼Æ";
+                        strText = "åˆè®¡";
                     else if (string.IsNullOrEmpty(column.Eval) == false)
                     {
                         strText = engine.Evaluate(column.Eval).ToString();
@@ -984,7 +982,7 @@ out strError);
                         {
                             string strSomPrice = "";
                             string strError = "";
-                            // »ã×Ü¼Û¸ñ
+                            // æ±‡æ€»ä»·æ ¼
                             int nRet = PriceUtil.SumPrices(strText,
             out strSomPrice,
             out strError);
@@ -1004,7 +1002,7 @@ out strError);
     strText,
     true);
 #endif
-                    writer.WriteStartElement(j == 0? "th" : "td");
+                    writer.WriteStartElement(j == 0 ? "th" : "td");
                     if (string.IsNullOrEmpty(column.CssClass) == false)
                         writer.WriteAttributeString("class", column.CssClass);
                     writer.WriteString(strText);
@@ -1019,9 +1017,9 @@ out strError);
             writer.WriteEndElement();   // </table>
         }
 
-        // Êä³ö Excel ¸ñÊ½µÄ±í¸ñ
+        // è¾“å‡º Excel æ ¼å¼çš„è¡¨æ ¼
         // parameters:
-        //      nTopLines   ¶¥²¿Ô¤Áô¶àÉÙĞĞ
+        //      nTopLines   é¡¶éƒ¨é¢„ç•™å¤šå°‘è¡Œ
         public void OutputExcelTable(Table table,
             ExcelDocument doc,
             int nTopLines,
@@ -1035,7 +1033,7 @@ out strError);
 
             int _lineIndex = nTopLines;
 
-            // ±í¸ñ±êÌâ
+            // è¡¨æ ¼æ ‡é¢˜
             // strResult.Append("<tr class='column'>\r\n");
 
             int nColIndex = 0;
@@ -1074,7 +1072,7 @@ true);
                 doc.WriteExcelLine(_lineIndex, cells);
 #endif
 
-            // ºÏ¼ÆÊı×é
+            // åˆè®¡æ•°ç»„
             object[] sums = null;   // 2008/12/1 new changed
 
             if (this.SumLine)
@@ -1089,7 +1087,7 @@ true);
             NumberFormatInfo nfi = new CultureInfo("zh-CN", false).NumberFormat;
             nfi.NumberDecimalDigits = 2;
 
-            // ÄÚÈİĞĞÑ­»·
+            // å†…å®¹è¡Œå¾ªç¯
             for (i = 0; i < Math.Min(nMaxLines, table.Count); i++)
             {
                 Line line = table[i];
@@ -1113,7 +1111,7 @@ true);
 
                 List<CellData> cells = new List<CellData>();
 
-                // ÁĞÑ­»·
+                // åˆ—å¾ªç¯
                 for (j = 0; j < this.Count; j++)
                 {
 
@@ -1121,7 +1119,7 @@ true);
 
                     if (column.ColumnNumber < -1)
                     {
-                        throw (new Exception("PrintColumn¶ÔÏóColumnNumberÁĞÉĞÎ´³õÊ¼»¯£¬Î»ÖÃ" + Convert.ToString(j)));
+                        throw (new Exception("PrintColumnå¯¹è±¡ColumnNumberåˆ—å°šæœªåˆå§‹åŒ–ï¼Œä½ç½®" + Convert.ToString(j)));
                     }
 
 
@@ -1246,9 +1244,9 @@ true);
                         }
                              * */
                         }
-                        catch (Exception ex)	// ·ı»ñ¿ÉÄÜÒò×Ö·û´®×ª»»ÎªÕûÊıÅ×³öµÄÒì³£
+                        catch (Exception ex)	// ä¿˜è·å¯èƒ½å› å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°æŠ›å‡ºçš„å¼‚å¸¸
                         {
-                            throw new Exception("ÔÚÀÛ¼Ó ĞĞ " + i.ToString() + " ÁĞ " + column.ColumnNumber.ToString() + " ÖµµÄÊ±ºò£¬Å×³öÒì³£: " + ex.Message);
+                            throw new Exception("åœ¨ç´¯åŠ  è¡Œ " + i.ToString() + " åˆ— " + column.ColumnNumber.ToString() + " å€¼çš„æ—¶å€™ï¼ŒæŠ›å‡ºå¼‚å¸¸: " + ex.Message);
                         }
                     }
 
@@ -1270,7 +1268,7 @@ true);
                     string strText = "";
 
                     if (j == 0)
-                        strText = "ºÏ¼Æ";
+                        strText = "åˆè®¡";
                     else if (column.Sum == true
                         && sums[j] != null)
                     {
@@ -1289,7 +1287,7 @@ true);
                         {
                             string strSomPrice = "";
                             string strError = "";
-                            // »ã×Ü¼Û¸ñ
+                            // æ±‡æ€»ä»·æ ¼
                             int nRet = PriceUtil.SumPrices(strText,
             out strSomPrice,
             out strError);
@@ -1310,7 +1308,7 @@ true);
     true);
 #endif
                     cells.Add(new CellData(j, strText));
-                    
+
                 }
 
                 // strResult.Append("</tr>\r\n");
@@ -1318,7 +1316,7 @@ true);
             }
         }
 
-        // Êä³öhtml¸ñÊ½µÄ±í¸ñ
+        // è¾“å‡ºhtmlæ ¼å¼çš„è¡¨æ ¼
         public string HtmlTable(Table table,
             int nMaxLines = -1)
         {
@@ -1330,7 +1328,7 @@ true);
 
             strResult.Append("<table class='table'>\r\n");    //  border='0' bgcolor=Gainsboro cellspacing='2' cellpadding='2'
 
-            // ±í¸ñ±êÌâ
+            // è¡¨æ ¼æ ‡é¢˜
             strResult.Append("<tr class='column'>\r\n");
 
             for (j = 0; j < this.Count; j++)
@@ -1343,15 +1341,15 @@ true);
                 string strColspan = "";
                 if (column.Colspan > 1)
                     strColspan = " colspan='" + column.Colspan.ToString() + "' ";
-                strResult.Append( "<td class='"
+                strResult.Append("<td class='"
                     + column.CssClass
                     + "'"
                     + strColspan + ">" + strText + "</td>\r\n");
             }
 
-            strResult.Append( "</tr>\r\n");
+            strResult.Append("</tr>\r\n");
 
-            // ºÏ¼ÆÊı×é
+            // åˆè®¡æ•°ç»„
             object[] sums = null;   // 2008/12/1 new changed
 
             if (this.SumLine)
@@ -1366,7 +1364,7 @@ true);
             NumberFormatInfo nfi = new CultureInfo("zh-CN", false).NumberFormat;
             nfi.NumberDecimalDigits = 2;
 
-            // ÄÚÈİĞĞÑ­»·
+            // å†…å®¹è¡Œå¾ªç¯
             for (i = 0; i < Math.Min(nMaxLines, table.Count); i++)
             {
                 Line line = table[i];
@@ -1387,7 +1385,7 @@ true);
 
                 strResult.Append("<tr class='" + strLineCssClass + "'>\r\n");
 
-                // ÁĞÑ­»·
+                // åˆ—å¾ªç¯
                 for (j = 0; j < this.Count; j++)
                 {
 
@@ -1395,7 +1393,7 @@ true);
 
                     if (column.ColumnNumber < -1)
                     {
-                        throw (new Exception("PrintColumn¶ÔÏóColumnNumberÁĞÉĞÎ´³õÊ¼»¯£¬Î»ÖÃ" + Convert.ToString(j)));
+                        throw (new Exception("PrintColumnå¯¹è±¡ColumnNumberåˆ—å°šæœªåˆå§‹åŒ–ï¼Œä½ç½®" + Convert.ToString(j)));
                     }
 
 
@@ -1456,7 +1454,7 @@ true);
                     }
 
 
-                    strResult.Append( "<td class='"
+                    strResult.Append("<td class='"
                         + column.CssClass
                         + "'>" + strText + "</td>\r\n");
 
@@ -1494,31 +1492,31 @@ true);
                                     // sums[j] = ((decimal)sums[j]) + v;
                                 }
                             }
-                                /*
-                            else
-                            {
-                                string v = line.GetString(column.ColumnNumber);
-                                if (this.SumCell != null)
-                                {
-                                    SumCellEventArgs e = new SumCellEventArgs();
-                                    e.DataType = column.DataType;
-                                    e.ColumnNumber = column.ColumnNumber;
-                                    e.LineIndex = i;
-                                    e.Line = line;
-                                    e.Value = v;
-                                    this.SumCell(this, e);
-                                    if (e.Value == null)
-                                        continue;
-                                    v = (string)e.Value;
-                                }
-                                sums[j] = PriceUtil.JoinPriceString((string)sums[j],
-                                    v);
-                            }
-                                 * */
-                        }
-                        catch (Exception ex)	// ·ı»ñ¿ÉÄÜÒò×Ö·û´®×ª»»ÎªÕûÊıÅ×³öµÄÒì³£
+                            /*
+                        else
                         {
-                            throw new Exception("ÔÚÀÛ¼Ó ĞĞ " + i.ToString() + " ÁĞ " + column.ColumnNumber.ToString() + " ÖµµÄÊ±ºò£¬Å×³öÒì³£: " + ex.Message );
+                            string v = line.GetString(column.ColumnNumber);
+                            if (this.SumCell != null)
+                            {
+                                SumCellEventArgs e = new SumCellEventArgs();
+                                e.DataType = column.DataType;
+                                e.ColumnNumber = column.ColumnNumber;
+                                e.LineIndex = i;
+                                e.Line = line;
+                                e.Value = v;
+                                this.SumCell(this, e);
+                                if (e.Value == null)
+                                    continue;
+                                v = (string)e.Value;
+                            }
+                            sums[j] = PriceUtil.JoinPriceString((string)sums[j],
+                                v);
+                        }
+                             * */
+                        }
+                        catch (Exception ex)	// ä¿˜è·å¯èƒ½å› å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°æŠ›å‡ºçš„å¼‚å¸¸
+                        {
+                            throw new Exception("åœ¨ç´¯åŠ  è¡Œ " + i.ToString() + " åˆ— " + column.ColumnNumber.ToString() + " å€¼çš„æ—¶å€™ï¼ŒæŠ›å‡ºå¼‚å¸¸: " + ex.Message);
                         }
                     }
                 }
@@ -1536,7 +1534,7 @@ true);
                     string strText = "";
 
                     if (j == 0)
-                        strText = "ºÏ¼Æ";
+                        strText = "åˆè®¡";
                     else if (column.Sum == true
                         && sums[j] != null)
                     {
@@ -1555,7 +1553,7 @@ true);
                         {
                             string strSomPrice = "";
                             string strError = "";
-                            // »ã×Ü¼Û¸ñ
+                            // æ±‡æ€»ä»·æ ¼
                             int nRet = PriceUtil.SumPrices(strText,
                                 out strSomPrice,
                                 out strError);
@@ -1603,7 +1601,7 @@ true);
                 if (o1 is string)
                     return (string)o1 + (string)o2;
 
-                throw new Exception("ÎŞ·¨Ö§³ÖµÄ Auto ÀàĞÍÀÛ¼Ó");
+                throw new Exception("æ— æ³•æ”¯æŒçš„ Auto ç±»å‹ç´¯åŠ ");
             }
             if (datatype == DataType.Number)
             {
@@ -1616,43 +1614,43 @@ true);
                 if (o1 is decimal)
                     return (decimal)o1 + (decimal)o2;
 
-                throw new Exception("ÎŞ·¨Ö§³ÖµÄ Number ÀàĞÍÀÛ¼Ó");
+                throw new Exception("æ— æ³•æ”¯æŒçš„ Number ç±»å‹ç´¯åŠ ");
             }
             if (datatype == DataType.String)
             {
                 if (o1 is string)
                     return (string)o1 + (string)o2;
 
-                throw new Exception("ÎŞ·¨Ö§³ÖµÄ String ÀàĞÍÀÛ¼Ó");
+                throw new Exception("æ— æ³•æ”¯æŒçš„ String ç±»å‹ç´¯åŠ ");
             }
-            if (datatype == DataType.Price) // 100±¶½ğ¶îÕûÊı
+            if (datatype == DataType.Price) // 100å€é‡‘é¢æ•´æ•°
             {
                 return (Int64)o1 + (Int64)o2;
             }
-            if (datatype == DataType.PriceDouble)  // double£¬ÓÃÀ´±íÊ¾½ğ¶î¡£Ò²¾ÍÊÇ×î¶àÖ»ÓĞÁ½Î»Ğ¡Êı²¿·Ö -- ×¢Òâ£¬ÓĞÀÛ¼ÆÎó²îÎÊÌâ£¬ÒÔºó½¨Òé·ÏÖ¹
+            if (datatype == DataType.PriceDouble)  // doubleï¼Œç”¨æ¥è¡¨ç¤ºé‡‘é¢ã€‚ä¹Ÿå°±æ˜¯æœ€å¤šåªæœ‰ä¸¤ä½å°æ•°éƒ¨åˆ† -- æ³¨æ„ï¼Œæœ‰ç´¯è®¡è¯¯å·®é—®é¢˜ï¼Œä»¥åå»ºè®®åºŸæ­¢
             {
                 return (double)o1 + (double)o2;
             }
-            if (datatype == DataType.PriceDecimal) // decimal£¬ÓÃÀ´±íÊ¾½ğ¶î¡£
+            if (datatype == DataType.PriceDecimal) // decimalï¼Œç”¨æ¥è¡¨ç¤ºé‡‘é¢ã€‚
             {
                 return (decimal)o1 + (decimal)o2;
             }
             if (datatype == DataType.Currency)
             {
-                // ÕâÒ»¾ÙÈİÒ×·¢ÏÖÁĞ Êı¾İÀàĞÍ µÄ´íÎó
+                // è¿™ä¸€ä¸¾å®¹æ˜“å‘ç°åˆ— æ•°æ®ç±»å‹ çš„é”™è¯¯
                 return PriceUtil.JoinPriceString((string)o1,
                     (string)o2);
 #if NO
-                // ÕâÒ»¾ä¸ü½¡×³Ò»Ğ©
+                // è¿™ä¸€å¥æ›´å¥å£®ä¸€äº›
                 return PriceUtil.JoinPriceString(Convert.ToString(o1),
                     Convert.ToString(o2));
 #endif
             }
-            throw new Exception("ÎŞ·¨Ö§³ÖµÄ "+datatype.ToString()+" ÀàĞÍÀÛ¼Ó");
+            throw new Exception("æ— æ³•æ”¯æŒçš„ " + datatype.ToString() + " ç±»å‹ç´¯åŠ ");
         }
 
 #if NO
-        // ºÏ²¢±ÈÂÊ
+        // åˆå¹¶æ¯”ç‡
         // 100% + 100% = 100%
         // 50% + 50% = 25%
         static string JoinPercentString(string s1, string s2)
@@ -1680,7 +1678,7 @@ true);
         }
 #endif
 
-        // Êä³ötext¸ñÊ½µÄ±í¸ñ
+        // è¾“å‡ºtextæ ¼å¼çš„è¡¨æ ¼
         public string TextTable(Table table,
             int nMaxLines = -1)
         {
@@ -1689,14 +1687,14 @@ true);
 
             if (nMaxLines == -1)
                 nMaxLines = table.Count;
-            // ±í¸ñ±êÌâ
+            // è¡¨æ ¼æ ‡é¢˜
             for (j = 0; j < this.Count; j++)
             {
                 PrintColumn column = (PrintColumn)this[j];
                 string strText = column.Title;
 
                 if (column.Colspan == 0)
-                    strText = "";   // tab ×Ö·û²»¼õÉÙ
+                    strText = "";   // tab å­—ç¬¦ä¸å‡å°‘
 
                 if (j != 0)
                     strResult.Append("\t");
@@ -1705,7 +1703,7 @@ true);
 
             strResult.Append("\r\n");
 
-            // ºÏ¼ÆÊı×é
+            // åˆè®¡æ•°ç»„
             object[] sums = null;
 
             if (this.SumLine)
@@ -1717,7 +1715,7 @@ true);
                 }
             }
 
-            // ÄÚÈİĞĞÑ­»·
+            // å†…å®¹è¡Œå¾ªç¯
             for (i = 0; i < Math.Min(nMaxLines, table.Count); i++)
             {
                 Line line = table[i];
@@ -1732,7 +1730,7 @@ true);
                         continue;
                 }
 
-                // ÁĞÑ­»·
+                // åˆ—å¾ªç¯
                 for (j = 0; j < this.Count; j++)
                 {
 
@@ -1740,7 +1738,7 @@ true);
 
                     if (column.ColumnNumber < -1)
                     {
-                        throw (new Exception("PrintColumn¶ÔÏóColumnNumberÁĞÉĞÎ´³õÊ¼»¯£¬Î»ÖÃ" + Convert.ToString(j)));
+                        throw (new Exception("PrintColumnå¯¹è±¡ColumnNumberåˆ—å°šæœªåˆå§‹åŒ–ï¼Œä½ç½®" + Convert.ToString(j)));
                     }
 
                     string strText = "";
@@ -1775,7 +1773,7 @@ true);
                         {
                             sums[j] += line.GetDouble(column.ColumnNumber);
                         }
-                        catch	// ·ı»ñ¿ÉÄÜÒò×Ö·û´®×ª»»ÎªÊıÖµÅ×³öµÄÒì³£
+                        catch	// ä¿˜è·å¯èƒ½å› å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•°å€¼æŠ›å‡ºçš„å¼‚å¸¸
                         {
                         }*/
 
@@ -1827,9 +1825,9 @@ true);
                              * */
 
                         }
-                        catch (Exception ex)	// ·ı»ñ¿ÉÄÜÒò×Ö·û´®×ª»»ÎªÕûÊıÅ×³öµÄÒì³£
+                        catch (Exception ex)	// ä¿˜è·å¯èƒ½å› å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°æŠ›å‡ºçš„å¼‚å¸¸
                         {
-                            throw new Exception("ÔÚÀÛ¼Ó ĞĞ " + i.ToString() + " ÁĞ " + column.ColumnNumber.ToString() + " ÖµµÄÊ±ºò£¬Å×³öÒì³£: " + ex.Message);
+                            throw new Exception("åœ¨ç´¯åŠ  è¡Œ " + i.ToString() + " åˆ— " + column.ColumnNumber.ToString() + " å€¼çš„æ—¶å€™ï¼ŒæŠ›å‡ºå¼‚å¸¸: " + ex.Message);
                         }
 
                     }
@@ -1849,7 +1847,7 @@ true);
                     string strText = "";
 
                     if (j == 0)
-                        strText = "ºÏ¼Æ";
+                        strText = "åˆè®¡";
                     else if (column.Sum == true
                         && sums[j] != null)
                     {
@@ -1862,7 +1860,7 @@ true);
                         {
                             string strSomPrice = "";
                             string strError = "";
-                                    // »ã×Ü¼Û¸ñ
+                            // æ±‡æ€»ä»·æ ¼
                             int nRet = PriceUtil.SumPrices(strText,
             out strSomPrice,
             out strError);
@@ -1888,28 +1886,28 @@ true);
 
     }
 
-    // ºÏ¼ÆÀÛ¼Ó½×¶ÎµÄ Ã¿Ò»´ÎÀÛ¼Ó
+    // åˆè®¡ç´¯åŠ é˜¶æ®µçš„ æ¯ä¸€æ¬¡ç´¯åŠ 
     public delegate void SumCellEventHandler(object sender,
         SumCellEventArgs e);
 
     public class SumCellEventArgs : EventArgs
     {
-        public int ColumnNumber = 0; // [in] ÁĞºÅ¡£´Ó0¿ªÊ¼±àºÅ
-        public object Value = 0;    // [in,out] µ¥ÔªÖµ¡£µ÷ÓÃÖĞĞŞ¸ÄÎª0£¬¿ÉÒÔÊµÏÖºöÂÔ¸Ãµ¥ÔªµÄ×÷ÓÃ
-        public long LineIndex = 0;  // [in]ĞĞºÅ
-        public Line Line = null;    // [in]ĞĞ¶ÔÏó¡£ÓÃLine.Entry¿ÉÒÔ»ñµÃÊÂÏîÃû
+        public int ColumnNumber = 0; // [in] åˆ—å·ã€‚ä»0å¼€å§‹ç¼–å·
+        public object Value = 0;    // [in,out] å•å…ƒå€¼ã€‚è°ƒç”¨ä¸­ä¿®æ”¹ä¸º0ï¼Œå¯ä»¥å®ç°å¿½ç•¥è¯¥å•å…ƒçš„ä½œç”¨
+        public long LineIndex = 0;  // [in]è¡Œå·
+        public Line Line = null;    // [in]è¡Œå¯¹è±¡ã€‚ç”¨Line.Entryå¯ä»¥è·å¾—äº‹é¡¹å
         public DataType DataType = DataType.Auto;
     }
 
-    // Êä³ö±í¸ñĞĞ Ã¿Ò»´Î
+    // è¾“å‡ºè¡¨æ ¼è¡Œ æ¯ä¸€æ¬¡
     public delegate void OutputLineEventHandler(object sender,
         OutputLineEventArgs e);
 
     public class OutputLineEventArgs : EventArgs
     {
-        public int Index = -1;      // [in] ĞĞµÄindex
-        public Line Line = null;    // [in] µ±Ç°×¼±¸Êä³ö²Ù×÷µÄĞĞ¶ÔÏó
-        public string LineCssClass = "";    // [in][out] ĞĞµÄcss classÄÚÈİ
-        public bool Output = true;  // [out] ÊÇ·ñĞèÒªÊä³ö
+        public int Index = -1;      // [in] è¡Œçš„index
+        public Line Line = null;    // [in] å½“å‰å‡†å¤‡è¾“å‡ºæ“ä½œçš„è¡Œå¯¹è±¡
+        public string LineCssClass = "";    // [in][out] è¡Œçš„css classå†…å®¹
+        public bool Output = true;  // [out] æ˜¯å¦éœ€è¦è¾“å‡º
     }
 }

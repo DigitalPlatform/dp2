@@ -17,6 +17,7 @@
 // 12) 2013/9/13 加拼音能根据 MainForm 的 AutoSelPinyin 参数变化效果
 // 13) 2014/11/4 从亚马逊加入封面图像功能
 // 14) 2014/12/30 从亚马逊加入封面图片 856 字段功能，增加了根据 ISBN 决定访问亚马逊服务器地址的功能
+// 15) 2015/12/2 注释掉和 905 字段有关的几个菜单项，以避免用户发生误会
 
 // #define TESTING
 
@@ -133,9 +134,9 @@ public class MyHost : DetailHost
             // 7*2$a <-- 200$g
             actions.NewItem("7*2$a <-- 200$g", "将200$g内容加入702/712字段$a", "Copy200gTo7x2a", false);
 
+#if NO
             // 905$d <-- 690$a
             actions.NewItem("905$d <-- 690$a", "将690$a内容加入905字段$d", "Copy690aTo905d", false);
-
 
             // 加入GCAT著者号
             actions.NewItem("加入GCAT著者号", "根据701/711/702/712$a内容, 创建905$e", "AddGcatAuthorNumber", false);
@@ -148,7 +149,7 @@ public class MyHost : DetailHost
 
             //  维护种次号
             actions.NewItem("维护种次号", "根据905$d内容中的类号, 出现维护种次号的界面", "ManageZhongcihao", false);
-
+#endif
 
             // 出版地
             actions.NewItem("210$a$c <-- 010$a", "根据010$a中ISBN出版社代码, 自动创建出版社子字段210$a$c", "AddPublisher", false);

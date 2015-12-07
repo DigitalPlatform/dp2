@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -9,7 +9,7 @@ using System.Collections;
 namespace DigitalPlatform.Script
 {
     /// <summary>
-    /// ¿ìËÙ²úÉúÆ´Òô
+    /// å¿«é€Ÿäº§ç”Ÿæ‹¼éŸ³
     /// </summary>
     public class QuickPinyin
     {
@@ -26,7 +26,7 @@ namespace DigitalPlatform.Script
         Hashtable _cacheTable = null;
 
         // 2014/10/21
-        // ½«ÄÚÈİÈ«²¿×°Èë Hashtable
+        // å°†å†…å®¹å…¨éƒ¨è£…å…¥ Hashtable
         public void LoadToCache()
         {
             this._cacheTable = new Hashtable();
@@ -38,10 +38,10 @@ namespace DigitalPlatform.Script
                 _cacheTable[strHanzi] = strPinyins;
             }
 
-            this._dom = null;    // ÊÍ·Å XmlDocument ËùÕ¼¿Õ¼ä
+            this._dom = null;    // é‡Šæ”¾ XmlDocument æ‰€å ç©ºé—´
         }
 
-        // »ñµÃÆ´Òô
+        // è·å¾—æ‹¼éŸ³
         // return:
         //      -1  error
         //      0   not found
@@ -64,7 +64,7 @@ namespace DigitalPlatform.Script
             {
                 if (_dom == null)
                 {
-                    strError = "ÉĞÎ´×°ÔØÆ´ÒôÎÄ¼şÄÚÈİ";
+                    strError = "å°šæœªè£…è½½æ‹¼éŸ³æ–‡ä»¶å†…å®¹";
                     return -1;
                 }
 

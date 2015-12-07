@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -10,16 +10,16 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.Script
 {
     /// <summary>
-    /// ISBNºÅ·ÖÎöÆ÷£¬°ïÖú²åÈë'-'
+    /// ISBNå·åˆ†æå™¨ï¼Œå¸®åŠ©æ’å…¥'-'
     /// </summary>
     public class IsbnSplitter
     {
         XmlDocument dom = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
-        /// <param name="strIsbnFileName">ISBN ¶¨ÒåÎÄ¼ş¡£XML ¸ñÊ½</param>
+        /// <param name="strIsbnFileName">ISBN å®šä¹‰æ–‡ä»¶ã€‚XML æ ¼å¼</param>
         public IsbnSplitter(string strIsbnFileName)
         {
             dom = new XmlDocument();
@@ -51,11 +51,11 @@ namespace DigitalPlatform.Script
 
 
         /// <summary>
-        ///  Ğ£Ñé ISBN µÚÒ»²¿·ÖÊÇ·ñÕıÈ·
+        ///  æ ¡éªŒ ISBN ç¬¬ä¸€éƒ¨åˆ†æ˜¯å¦æ­£ç¡®
         /// </summary>
-        /// <param name="strFirstPart">ISBN µÄµÚÒ»²¿·Ö</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ´íÎó; 0: ÕıÈ·</returns>
+        /// <param name="strFirstPart">ISBN çš„ç¬¬ä¸€éƒ¨åˆ†</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: é”™è¯¯; 0: æ­£ç¡®</returns>
         public static int VerifyIsbnFirstPart(string strFirstPart,
                         out string strError)
         {
@@ -63,14 +63,14 @@ namespace DigitalPlatform.Script
 
             if (IsNumber(strFirstPart) == false)
             {
-                strError = "ISBNµÚÒ»²¿·ÖÓ¦µ±Îª´¿Êı×Ö";
+                strError = "ISBNç¬¬ä¸€éƒ¨åˆ†åº”å½“ä¸ºçº¯æ•°å­—";
                 goto WRONG;
             }
 
 
             if (String.IsNullOrEmpty(strFirstPart) == true)
             {
-                strError = "ISBNµÚÒ»²¿·Ö×Ö·ûÊı²»ÄÜÎª0";
+                strError = "ISBNç¬¬ä¸€éƒ¨åˆ†å­—ç¬¦æ•°ä¸èƒ½ä¸º0";
                 goto WRONG;
             }
             if (strFirstPart.Length == 1)
@@ -79,7 +79,7 @@ namespace DigitalPlatform.Script
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª1×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 0-7";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º1å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 0-7";
                     goto WRONG;
                 }
             }
@@ -89,8 +89,8 @@ namespace DigitalPlatform.Script
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('"
-                        + strFirstPart + "')Îª2×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 80-94";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('"
+                        + strFirstPart + "')ä¸º2å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 80-94";
                     goto WRONG;
                 }
             }
@@ -101,7 +101,7 @@ namespace DigitalPlatform.Script
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª3×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 950-994";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º3å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 950-994";
                     goto WRONG;
                 }
             }
@@ -112,7 +112,7 @@ namespace DigitalPlatform.Script
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª4×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 9950-9989";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º4å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 9950-9989";
                     goto WRONG;
                 }
             }
@@ -123,24 +123,24 @@ namespace DigitalPlatform.Script
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª5×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 99900-99999";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º5å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 99900-99999";
                     goto WRONG;
                 }
             }
 
-            strError = "ISBNµÚÒ»²¿·Ö×Ö·ûÊı²»ÄÜ³¬¹ı5";
+            strError = "ISBNç¬¬ä¸€éƒ¨åˆ†å­—ç¬¦æ•°ä¸èƒ½è¶…è¿‡5";
         WRONG:
             return -1;
         CORRECT:
             return 0;
         }
 
-        // Ğ£Ñé ISBN ×Ö·û´®
-        // ×¢£º·µ»Ø -1 ºÍ ·µ»Ø 1 µÄÇø±ğ£º-1 ±íÊ¾µ÷ÓÃ¹ı³Ì³ö´í£¬°µÊ¾¶ÔÕâÑùµÄ ISBN ×Ö·û´®Ó¦µ±Ô¤ÏÈ¼ì²é£¬Èô²»·ûºÏ»ù±¾ĞÎÊ½ÒªÇóÔò±ÜÃâµ÷ÓÃ±¾º¯Êı
+        // æ ¡éªŒ ISBN å­—ç¬¦ä¸²
+        // æ³¨ï¼šè¿”å› -1 å’Œ è¿”å› 1 çš„åŒºåˆ«ï¼š-1 è¡¨ç¤ºè°ƒç”¨è¿‡ç¨‹å‡ºé”™ï¼Œæš—ç¤ºå¯¹è¿™æ ·çš„ ISBN å­—ç¬¦ä¸²åº”å½“é¢„å…ˆæ£€æŸ¥ï¼Œè‹¥ä¸ç¬¦åˆåŸºæœ¬å½¢å¼è¦æ±‚åˆ™é¿å…è°ƒç”¨æœ¬å‡½æ•°
         // return:
-        //      -1  ³ö´í
-        //      0   Ğ£ÑéÕıÈ·
-        //      1   Ğ£Ñé²»ÕıÈ·¡£ÌáÊ¾ĞÅÏ¢ÔÚstrErrorÖĞ
+        //      -1  å‡ºé”™
+        //      0   æ ¡éªŒæ­£ç¡®
+        //      1   æ ¡éªŒä¸æ­£ç¡®ã€‚æç¤ºä¿¡æ¯åœ¨strErrorä¸­
         public static int VerifyISBN(string strISBNParam,
             out string strError)
         {
@@ -148,28 +148,28 @@ namespace DigitalPlatform.Script
 
             if (string.IsNullOrEmpty(strISBNParam) == true)
             {
-                strError = "ISBN×Ö·û´®ÄÚÈİÎª¿Õ";
+                strError = "ISBNå­—ç¬¦ä¸²å†…å®¹ä¸ºç©º";
                 return -1;
             }
-            
+
             // 2015/9/7
             string strISBN = strISBNParam.Trim();
             if (string.IsNullOrEmpty(strISBN) == true)
             {
-                strError = "ISBN×Ö·û´®ÄÚÈİÎª¿Õ(1)";
+                strError = "ISBNå­—ç¬¦ä¸²å†…å®¹ä¸ºç©º(1)";
                 return -1;
             }
 
-            strISBN = strISBNParam.Replace("-", "").Replace(" ","");
+            strISBN = strISBNParam.Replace("-", "").Replace(" ", "");
             if (string.IsNullOrEmpty(strISBN) == true)
             {
-                strError = "ISBN×Ö·û´®ÄÚÈİÎª¿Õ";
+                strError = "ISBNå­—ç¬¦ä¸²å†…å®¹ä¸ºç©º";
                 return 1;
             }
 
             if (strISBN.Length != 10 && strISBN.Length != 13)
             {
-                strError = "(³ı×Ö·û'-'ºÍ¿Õ¸ñÍâ)ISBN×Ö·û´®µÄ³¤¶È¼È²»ÊÇ10Î»Ò²²»ÊÇ13Î»";
+                strError = "(é™¤å­—ç¬¦'-'å’Œç©ºæ ¼å¤–)ISBNå­—ç¬¦ä¸²çš„é•¿åº¦æ—¢ä¸æ˜¯10ä½ä¹Ÿä¸æ˜¯13ä½";
                 return 1;
             }
 
@@ -180,13 +180,13 @@ namespace DigitalPlatform.Script
                     char c = GetIsbn10VerifyChar(strISBN);
                     if (c != strISBN[9])
                     {
-                        strError = "ISBN '" + strISBN + "' Ğ£Ñé²»ÕıÈ·";
+                        strError = "ISBN '" + strISBN + "' æ ¡éªŒä¸æ­£ç¡®";
                         return 1;
                     }
                 }
-                catch(ArgumentException ex)
+                catch (ArgumentException ex)
                 {
-                    strError = "ISBN '" + strISBN + "' Ğ£Ñé²»ÕıÈ·: " + ex.Message;
+                    strError = "ISBN '" + strISBN + "' æ ¡éªŒä¸æ­£ç¡®: " + ex.Message;
                     return 1;
                 }
             }
@@ -197,7 +197,7 @@ namespace DigitalPlatform.Script
                 char c = GetIsbn13VerifyChar(strISBN);
                 if (c != strISBN[12])
                 {
-                    strError = "ISBN '" + strISBN + "' Ğ£Ñé²»ÕıÈ·";
+                    strError = "ISBN '" + strISBN + "' æ ¡éªŒä¸æ­£ç¡®";
                     return 1;
                 }
             }
@@ -206,10 +206,10 @@ namespace DigitalPlatform.Script
         }
 
         /// <summary>
-        /// ¼ÆËã³ö ISBN-10 Ğ£ÑéÎ»
+        /// è®¡ç®—å‡º ISBN-10 æ ¡éªŒä½
         /// </summary>
-        /// <param name="strISBN">ISBN ×Ö·û´®</param>
-        /// <returns>Ğ£ÑéÎ»×Ö·û</returns>
+        /// <param name="strISBN">ISBN å­—ç¬¦ä¸²</param>
+        /// <returns>æ ¡éªŒä½å­—ç¬¦</returns>
         public static char GetIsbn10VerifyChar(string strISBN)
         {
             strISBN = strISBN.Trim();
@@ -217,7 +217,7 @@ namespace DigitalPlatform.Script
             strISBN = strISBN.Replace(" ", "");
 
             if (strISBN.Length < 9)
-                throw new ArgumentException("ÓÃÓÚ¼ÆËãĞ£ÑéÎ»µÄISBN-10³¤¶ÈÖÁÉÙÒªÔÚ9Î»Êı×ÖÒÔÉÏ(²»°üÀ¨ºá¸ÜÔÚÄÚ)");
+                throw new ArgumentException("ç”¨äºè®¡ç®—æ ¡éªŒä½çš„ISBN-10é•¿åº¦è‡³å°‘è¦åœ¨9ä½æ•°å­—ä»¥ä¸Š(ä¸åŒ…æ‹¬æ¨ªæ åœ¨å†…)");
 
             int sum = 0;
             for (int i = 0; i < 9; i++)
@@ -233,10 +233,10 @@ namespace DigitalPlatform.Script
         }
 
         /// <summary>
-        /// ¼ÆËã³ö ISBN-13 Ğ£ÑéÎ»
+        /// è®¡ç®—å‡º ISBN-13 æ ¡éªŒä½
         /// </summary>
-        /// <param name="strISBN">ISBN ×Ö·û´®</param>
-        /// <returns>Ğ£ÑéÎ»×Ö·û</returns>
+        /// <param name="strISBN">ISBN å­—ç¬¦ä¸²</param>
+        /// <returns>æ ¡éªŒä½å­—ç¬¦</returns>
         public static char GetIsbn13VerifyChar(string strISBN)
         {
             strISBN = strISBN.Trim();
@@ -245,7 +245,7 @@ namespace DigitalPlatform.Script
 
 
             if (strISBN.Length < 12)
-                throw new Exception("ÓÃÓÚ¼ÆËãĞ£ÑéÎ»µÄISBN-13³¤¶ÈÖÁÉÙÒªÔÚ12Î»Êı×ÖÒÔÉÏ(²»°üÀ¨ºá¸ÜÔÚÄÚ)");
+                throw new Exception("ç”¨äºè®¡ç®—æ ¡éªŒä½çš„ISBN-13é•¿åº¦è‡³å°‘è¦åœ¨12ä½æ•°å­—ä»¥ä¸Š(ä¸åŒ…æ‹¬æ¨ªæ åœ¨å†…)");
 
             int m = 0;
             int sum = 0;
@@ -259,7 +259,7 @@ namespace DigitalPlatform.Script
                 sum += (strISBN[i] - '0') * m;
             }
 
-            // ×¢£ºÈç¹û²½Öè5ËùµÃÓàÊıÎª0£¬ÔòĞ£ÑéÂëÎª0¡£
+            // æ³¨ï¼šå¦‚æœæ­¥éª¤5æ‰€å¾—ä½™æ•°ä¸º0ï¼Œåˆ™æ ¡éªŒç ä¸º0ã€‚
             if ((sum % 10) == 0)
                 return '0';
 
@@ -270,14 +270,14 @@ namespace DigitalPlatform.Script
 
 
         /// <summary>
-        /// ÔÚ ISBN ×Ö·û´®ÖĞÊÊµ±µÄÎ»ÖÃ²åÈë'-'·ûºÅ
-        /// Èç¹ûÌá¹©µÄISBN×Ö·û´®±¾À´¾ÍÓĞ978Ç°×º£¬ÄÇÃ´½á¹ûÈÔ½«±£ÁôÇ°×º¡£Èç¹û±¾À´¾ÍÃ»ÓĞ£¬½á¹ûÀïÃæÒ²Ã»ÓĞ¡£
+        /// åœ¨ ISBN å­—ç¬¦ä¸²ä¸­é€‚å½“çš„ä½ç½®æ’å…¥'-'ç¬¦å·
+        /// å¦‚æœæä¾›çš„ISBNå­—ç¬¦ä¸²æœ¬æ¥å°±æœ‰978å‰ç¼€ï¼Œé‚£ä¹ˆç»“æœä»å°†ä¿ç•™å‰ç¼€ã€‚å¦‚æœæœ¬æ¥å°±æ²¡æœ‰ï¼Œç»“æœé‡Œé¢ä¹Ÿæ²¡æœ‰ã€‚
         /// </summary>
-        /// <param name="strISBN">ISBN ×Ö·û´®</param>
-        /// <param name="strStyle">´¦Àí·ç¸ñ¡£force10/force13/auto/remainverifychar/strict</param>
-        /// <param name="strTarget">·µ»Ø´¦Àí½á¹û</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1:³ö´í; 0:Î´ĞŞ¸ÄĞ£ÑéÎ»; 1:ĞŞ¸ÄÁËĞ£ÑéÎ»</returns>
+        /// <param name="strISBN">ISBN å­—ç¬¦ä¸²</param>
+        /// <param name="strStyle">å¤„ç†é£æ ¼ã€‚force10/force13/auto/remainverifychar/strict</param>
+        /// <param name="strTarget">è¿”å›å¤„ç†ç»“æœ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1:å‡ºé”™; 0:æœªä¿®æ”¹æ ¡éªŒä½; 1:ä¿®æ”¹äº†æ ¡éªŒä½</returns>
         public int IsbnInsertHyphen(
             string strISBN,
             string strStyle,
@@ -296,13 +296,13 @@ namespace DigitalPlatform.Script
             strSource = strISBN;
             strSource = strSource.Trim();
 
-            bool bHasRemovePrefix978 = false; // ÊÇ·ñÓĞ978Ç°×º
+            bool bHasRemovePrefix978 = false; // æ˜¯å¦æœ‰978å‰ç¼€
 
             bool bForce10 = StringUtil.IsInList("force10", strStyle);
             bool bForce13 = StringUtil.IsInList("force13", strStyle);
             bool bAuto = StringUtil.IsInList("auto", strStyle);
-            bool bRemainVerifyChar = StringUtil.IsInList("remainverifychar", strStyle); // ÊÇ·ñ²»ÒªÖØĞÂ¼ÆËãĞ£ÑéÎ»
-            bool bStrict = StringUtil.IsInList("strict", strStyle); // ÊÇ·ñÑÏ¸ñÒªÇóstrISBNÊäÈë²ÎÊıÎª10»ò13Î»
+            bool bRemainVerifyChar = StringUtil.IsInList("remainverifychar", strStyle); // æ˜¯å¦ä¸è¦é‡æ–°è®¡ç®—æ ¡éªŒä½
+            bool bStrict = StringUtil.IsInList("strict", strStyle); // æ˜¯å¦ä¸¥æ ¼è¦æ±‚strISBNè¾“å…¥å‚æ•°ä¸º10æˆ–13ä½
 
             int nCount = 0;
             if (bForce10 == true)
@@ -314,34 +314,34 @@ namespace DigitalPlatform.Script
 
             if (nCount > 1)
             {
-                strError = "strStyleÖµ '"+strStyle+"' ÖĞµÄforce10/force13/auto 3ÖÖ·ç¸ñÊÇ»¥ÏàÅÅ³â£¬²»ÄÜÍ¬Ê±¾ß±¸¡£";
+                strError = "strStyleå€¼ '" + strStyle + "' ä¸­çš„force10/force13/auto 3ç§é£æ ¼æ˜¯äº’ç›¸æ’æ–¥ï¼Œä¸èƒ½åŒæ—¶å…·å¤‡ã€‚";
                 return -1;
             }
 
             strSource = strSource.Replace("-", "");
             strSource = strSource.Replace(" ", "");
 
-            bool bAdjustLength = false; // ÊÇ·ñµ÷Õû¹ıÊäÈëµÄstrISBNµÄ³¤¶È
+            bool bAdjustLength = false; // æ˜¯å¦è°ƒæ•´è¿‡è¾“å…¥çš„strISBNçš„é•¿åº¦
 
             if (bStrict == false)
             {
                 if (strSource.Length == 9)
                 {
                     strSource += '0';
-                    bRemainVerifyChar = false;  // ±ØĞëÒªÖØĞÂ¼ÆËãĞ£ÑéÎ»ÁË
+                    bRemainVerifyChar = false;  // å¿…é¡»è¦é‡æ–°è®¡ç®—æ ¡éªŒä½äº†
                     bAdjustLength = true;
                 }
                 else if (strSource.Length == 12)
                 {
                     strSource += '0';
-                    bRemainVerifyChar = false;  // ±ØĞëÒªÖØĞÂ¼ÆËãĞ£ÑéÎ»ÁË
+                    bRemainVerifyChar = false;  // å¿…é¡»è¦é‡æ–°è®¡ç®—æ ¡éªŒä½äº†
                     bAdjustLength = true;
                 }
             }
 
             string strPrefix = "978";
 
-            // 13Î»¡¢ÎŞ-¡¢Ç°×ºÎª978
+            // 13ä½ã€æ— -ã€å‰ç¼€ä¸º978
             if (strSource.Length == 13
                 && strSource.IndexOf("-") == -1
                 && (strSource.Substring(0, 3) == "978" || strSource.Substring(0, 3) == "979")
@@ -350,7 +350,7 @@ namespace DigitalPlatform.Script
                 if (strSource.Length >= 3)
                     strPrefix = strSource.Substring(0, 3);
 
-                strSource = strSource.Substring(3, 10); // ¶ªÆúÇ°3Î»£¬µ«²»¶ªÆúĞ£ÑéÎ»
+                strSource = strSource.Substring(3, 10); // ä¸¢å¼ƒå‰3ä½ï¼Œä½†ä¸ä¸¢å¼ƒæ ¡éªŒä½
 
                 bHasRemovePrefix978 = true;
             }
@@ -358,24 +358,24 @@ namespace DigitalPlatform.Script
             if (strSource.Length != 10
                 && strSource.Length != 13)
             {
-                strError = "ISBNÖĞ(³ı'-'ÒÔÍâ)Ó¦Îª10Î»»ò13Î»ÓĞĞ§×Ö·û(" + strSource + " " + Convert.ToString(strSource.Length) + ")";
+                strError = "ISBNä¸­(é™¤'-'ä»¥å¤–)åº”ä¸º10ä½æˆ–13ä½æœ‰æ•ˆå­—ç¬¦(" + strSource + " " + Convert.ToString(strSource.Length) + ")";
                 return -1;
             }
 
             if (bForce10 && strPrefix == "979")
             {
-                strError = "979 Ç°×ºµÄ ISBN ²»ÄÜ±äÎª ISBN-10 ĞÎÌ¬";
+                strError = "979 å‰ç¼€çš„ ISBN ä¸èƒ½å˜ä¸º ISBN-10 å½¢æ€";
                 return -1;
             }
 
-            string strFirstPart = "";   // µÚÒ»²¿·Ö
+            string strFirstPart = "";   // ç¬¬ä¸€éƒ¨åˆ†
 
             XmlElement hit_prefix = null;
 
             XmlNodeList prefix_nodes = dom.DocumentElement.SelectNodes("RegistrationGroups/Group/Prefix");
             if (prefix_nodes.Count == 0)
             {
-                strError = "ISBN ¹æÔòÎÄ¼ş¸ñÊ½ÓĞÎó£¬ÎŞ·¨Ñ¡Ôñµ½ÈÎºÎ RegistrationGroups/Group/Prefix ÔªËØ";
+                strError = "ISBN è§„åˆ™æ–‡ä»¶æ ¼å¼æœ‰è¯¯ï¼Œæ— æ³•é€‰æ‹©åˆ°ä»»ä½• RegistrationGroups/Group/Prefix å…ƒç´ ";
                 return -1;
             }
             string strTemp = strPrefix + strSource;
@@ -393,29 +393,29 @@ namespace DigitalPlatform.Script
 
             if (hit_prefix == null)
             {
-                strError = "prefix ²¿·Ö¸ñÊ½´íÎó";    // ÊÇ·ñĞèÒª½âÊÍÒ»ÏÂ?
+                strError = "prefix éƒ¨åˆ†æ ¼å¼é”™è¯¯";    // æ˜¯å¦éœ€è¦è§£é‡Šä¸€ä¸‹?
                 return -1;
             }
 
             XmlNodeList nodes = hit_prefix.ParentNode.SelectNodes("Rules/Rule");
             if (nodes.Count == 0)
             {
-                strError = "ISBN Êı¾İÖĞ Ã»ÓĞÕÒµ½ prefix='" + strFirstPart + "'µÄ Rules/Rule ÔªËØ ...";
+                strError = "ISBN æ•°æ®ä¸­ æ²¡æœ‰æ‰¾åˆ° prefix='" + strFirstPart + "'çš„ Rules/Rule å…ƒç´  ...";
                 return -1;
             }
 
             string strSecondPart = "";
 
-            foreach(XmlElement node in nodes)
+            foreach (XmlElement node in nodes)
             {
                 Range range = GetRangeValue(node);
                 if (range == null)
-                    continue;   // TODO: ĞèÒª±¨´í
+                    continue;   // TODO: éœ€è¦æŠ¥é”™
 
 #if NO
                 if (strLeft.Length != strRight.Length)
                 {
-                    strError = "Êı¾İ½Úµã " + node.OuterXml + "¸ñÊ½´íÎó, valueÖµ'" + strValue + "'ÖĞÁ½¸öÊı×Ö¿í¶È²»µÈ¡£";
+                    strError = "æ•°æ®èŠ‚ç‚¹ " + node.OuterXml + "æ ¼å¼é”™è¯¯, valueå€¼'" + strValue + "'ä¸­ä¸¤ä¸ªæ•°å­—å®½åº¦ä¸ç­‰ã€‚";
                     return -1;
                 }
 #endif
@@ -423,7 +423,7 @@ namespace DigitalPlatform.Script
                 int nWidth = range.Left.Length;
 
                 if (nWidth == 0)
-                    continue;   // ¿ÉÄÜÊı¾İÓĞ´íÎó? 
+                    continue;   // å¯èƒ½æ•°æ®æœ‰é”™è¯¯? 
 
                 if (nWidth != strSecondPart.Length)
                     strSecondPart = strSource.Substring(strFirstPart.Length, nWidth);
@@ -436,14 +436,14 @@ namespace DigitalPlatform.Script
 
             }
 
-            strError = "µÚ¶ş²¿·Ö¸ñÊ½´íÎó nFirstLen=[" + Convert.ToString(strFirstPart.Length) + "]";
+            strError = "ç¬¬äºŒéƒ¨åˆ†æ ¼å¼é”™è¯¯ nFirstLen=[" + Convert.ToString(strFirstPart.Length) + "]";
             return -1;
 
         FINISH:
             strTarget = strSource;
 
-        strTarget = strTarget.Insert(strFirstPart.Length, "-");
-        strTarget = strTarget.Insert(strFirstPart.Length + nSecondLen + 1, "-");
+            strTarget = strTarget.Insert(strFirstPart.Length, "-");
+            strTarget = strTarget.Insert(strFirstPart.Length + nSecondLen + 1, "-");
             strTarget = strTarget.Insert(9 + 1 + 1, "-");
 
             if (bForce13 == true)
@@ -458,8 +458,8 @@ namespace DigitalPlatform.Script
 
             bool bVerifyChanged = false;
 
-            // ÖØĞÂ¼ÆËãĞ£ÑéÂë
-            // ÖØĞÂÌí¼ÓISBN-10µÄĞ£ÑéÎ»¡£ÒòÎªÌõÂëºÅÖĞISBN-13Ğ£ÑéÎ»Ëã·¨²»Í¬¡£
+            // é‡æ–°è®¡ç®—æ ¡éªŒç 
+            // é‡æ–°æ·»åŠ ISBN-10çš„æ ¡éªŒä½ã€‚å› ä¸ºæ¡ç å·ä¸­ISBN-13æ ¡éªŒä½ç®—æ³•ä¸åŒã€‚
             if (bRemainVerifyChar == false)
             {
                 if (strTarget.Length == 13)
@@ -487,12 +487,12 @@ namespace DigitalPlatform.Script
 
             if (bHasRemovePrefix978 == true
                 && bForce10 == true)
-                return 0;   // ÒÆ×ß978ºó£¬Ğ£ÑéÎ»¿Ï¶¨Òª·¢Éú±ä»¯¡£Òò´Ë²»Í¨ÖªÕâÖÖ±ä»¯
+                return 0;   // ç§»èµ°978åï¼Œæ ¡éªŒä½è‚¯å®šè¦å‘ç”Ÿå˜åŒ–ã€‚å› æ­¤ä¸é€šçŸ¥è¿™ç§å˜åŒ–
 
             if (bAdjustLength == false
                 && bForce13 == true
                 && strISBN.Trim().Replace("-", "").Length == 10)
-                return 0;   // ¼ÓÈëÁËÇ°×ººó£¬Ğ£ÑéÎ»¿Ï¶¨Òª·¢Éú±ä»¯£¬Òò´Ë²»Í¨ÖªÕâÖÖ±ä»¯
+                return 0;   // åŠ å…¥äº†å‰ç¼€åï¼Œæ ¡éªŒä½è‚¯å®šè¦å‘ç”Ÿå˜åŒ–ï¼Œå› æ­¤ä¸é€šçŸ¥è¿™ç§å˜åŒ–
 
             if (bVerifyChanged == true)
                 return 1;
@@ -538,11 +538,11 @@ namespace DigitalPlatform.Script
             return result;
         }
 
-        // ½«ISBNºÅ×Ö·û´®±ä»»ÎªÍ¼ÊéÌõÂëºÅĞÎÌ¬µÄISBN×Ö·û´®
-        // ²½Öè£º
-        // 1)È¥µôËùÓĞµÄ'-'
-        // 2)¿´ÊÇ²»ÊÇÓĞÇ°×º'978'£¬Èç¹ûÃ»ÓĞ£¬¾Í¼ÓÉÏ
-        // 3)ÖØĞÂ¼ÆËãĞ£ÑéÎ»
+        // å°†ISBNå·å­—ç¬¦ä¸²å˜æ¢ä¸ºå›¾ä¹¦æ¡ç å·å½¢æ€çš„ISBNå­—ç¬¦ä¸²
+        // æ­¥éª¤ï¼š
+        // 1)å»æ‰æ‰€æœ‰çš„'-'
+        // 2)çœ‹æ˜¯ä¸æ˜¯æœ‰å‰ç¼€'978'ï¼Œå¦‚æœæ²¡æœ‰ï¼Œå°±åŠ ä¸Š
+        // 3)é‡æ–°è®¡ç®—æ ¡éªŒä½
         public static string GetISBnBarcode(string strPureISBN)
         {
             string strText = strPureISBN.Replace("-", "");
@@ -582,10 +582,10 @@ namespace DigitalPlatform.Script
             if (string.IsNullOrEmpty(strSource) == true)
                 return false;
 
-            // 13Î»¡¢ÎŞ-¡¢Ç°×ºÎª978
+            // 13ä½ã€æ— -ã€å‰ç¼€ä¸º978
             if (strSource.Length == 13
                 && strSource.IndexOf("-") == -1
-                && ( strSource.Substring(0, 3) == "978" || strSource.Substring(0, 3) == "979")
+                && (strSource.Substring(0, 3) == "978" || strSource.Substring(0, 3) == "979")
                 )
                 return true;
 
@@ -596,7 +596,7 @@ namespace DigitalPlatform.Script
         {
             if (strSource.IndexOf("-") == -1)
             {
-                throw new Exception("ISBN '" + strSource + "' ÖĞÃ»ÓĞ·ûºÅ'-'£¬ÎŞ·¨È¡³ö°æÉçºÅÂë²¿·Ö¡£ÇëÏÈÎªISBN¼ÓÉÏ'-'");
+                throw new Exception("ISBN '" + strSource + "' ä¸­æ²¡æœ‰ç¬¦å·'-'ï¼Œæ— æ³•å–å‡ºç‰ˆç¤¾å·ç éƒ¨åˆ†ã€‚è¯·å…ˆä¸ºISBNåŠ ä¸Š'-'");
             }
 
             string[] parts = strSource.Split(new char[] { '-' });
@@ -611,7 +611,7 @@ namespace DigitalPlatform.Script
                     return parts[1].Trim();
             }
 
-            throw new Exception("ISBN '" + strSource + "' ¸ñÊ½²»ÕıÈ·£¬·ûºÅ'-'ÊıÄ¿²»×ã");
+            throw new Exception("ISBN '" + strSource + "' æ ¼å¼ä¸æ­£ç¡®ï¼Œç¬¦å·'-'æ•°ç›®ä¸è¶³");
         }
     }
 }

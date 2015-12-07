@@ -30,7 +30,7 @@ namespace DigitalPlatform.rms.Client
         public Encoding Encoding = Encoding.UTF8;   // ISO2709文件的 encoding。其他类型的文件暂时不设置这个属性
 
         public Stream Stream = null;
-        XmlTextReader reader = null;
+        XmlTextReader _reader = null;
 
         public int Index = 0;
 
@@ -89,33 +89,33 @@ namespace DigitalPlatform.rms.Client
     FileMode.Open,
     FileAccess.Read);
 
-                this.reader = new XmlTextReader(Stream);
+                this._reader = new XmlTextReader(Stream);
 
                 bool bRet = false;
 
                 // 移动到根元素
                 while (true)
                 {
-                    bRet = reader.Read();
+                    bRet = _reader.Read();
                     if (bRet == false)
                     {
                         strError = "没有根元素";
                         return -1;
                     }
-                    if (reader.NodeType == XmlNodeType.Element)
+                    if (_reader.NodeType == XmlNodeType.Element)
                         break;
                 }
 
                 // 移动到其下级第一个element
                 while (true)
                 {
-                    bRet = reader.Read();
+                    bRet = _reader.Read();
                     if (bRet == false)
                     {
                         strError = "没有第一个记录元素";
                         return -1;
                     }
-                    if (reader.NodeType == XmlNodeType.Element)
+                    if (_reader.NodeType == XmlNodeType.Element)
                         break;
                 }
             }
@@ -166,10 +166,10 @@ namespace DigitalPlatform.rms.Client
         {
             if (this.FileType == ExportFileType.XmlFile)
             {
-                if (reader != null)
+                if (_reader != null)
                 {
-                    reader.Close();
-                    reader = null;
+                    _reader.Close();
+                    _reader = null;
                 }
             }
 
@@ -1004,9 +1004,9 @@ namespace DigitalPlatform.rms.Client
 
             while (true)
             {
-                if (reader.NodeType == XmlNodeType.Element)
+                if (_reader.NodeType == XmlNodeType.Element)
                     break;
-                bool bRet = reader.Read();
+                bool bRet = _reader.Read();
                 if (bRet == false)
                     return 1;
             }
@@ -1015,23 +1015,23 @@ namespace DigitalPlatform.rms.Client
 
             // reader.ReadAttributeValue();
 
-            if (reader.HasAttributes == true)
+            if (_reader.HasAttributes == true)
             {
-                for (int i = 0; i < reader.AttributeCount; i++)
+                for (int i = 0; i < _reader.AttributeCount; i++)
                 {
-                    reader.MoveToAttribute(i);
-                    if (reader.NamespaceURI == DpNs.dprms)
+                    _reader.MoveToAttribute(i);
+                    if (_reader.NamespaceURI == DpNs.dprms)
                     {
-                        if (reader.LocalName == "path")
-                            strPath = reader.Value;
-                        else if (reader.LocalName == "timestamp")
-                            strTimestamp = reader.Value;
+                        if (_reader.LocalName == "path")
+                            strPath = _reader.Value;
+                        else if (_reader.LocalName == "timestamp")
+                            strTimestamp = _reader.Value;
                     }
                 }
-                reader.MoveToElement();
+                _reader.MoveToElement();
             }
 
-            strXml = reader.ReadOuterXml();
+            strXml = _reader.ReadOuterXml();
             return 0;
         }
 

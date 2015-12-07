@@ -1001,9 +1001,10 @@ MessageBoxDefaultButton.Button1);
                     {
                         using (Stream s = File.Open(cell_info.FileName, FileMode.Open))
                         {
-                            Image image = Image.FromStream(s);
-                            e.Height = image.Height;
-                            image.Dispose();
+                            using (Image image = Image.FromStream(s))
+                            {
+                                e.Height = image.Height;
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -1044,14 +1045,13 @@ MessageBoxDefaultButton.Button1);
                     {
                         using (Stream s = File.Open(cell_info.FileName, FileMode.Open))
                         {
-                            Image image = Image.FromStream(s);
-
-                            // 绘制图像
-                            e.pe.Graphics.DrawImage(image,
-                                (float)e.X,
-                                (float)e.Y);
-
-                            image.Dispose();
+                            using (Image image = Image.FromStream(s))
+                            {
+                                // 绘制图像
+                                e.pe.Graphics.DrawImage(image,
+                                    (float)e.X,
+                                    (float)e.Y);
+                            }
                         }
                     }
                     catch (Exception ex)

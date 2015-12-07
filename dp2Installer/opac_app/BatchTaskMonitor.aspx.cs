@@ -132,16 +132,15 @@ using DigitalPlatform.CirculationClient;
                 result_info.ResultVersion = info.ResultVersion;
 
             END1:
-
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ResultInfo));
 
-                MemoryStream ms = new MemoryStream();
-                ser.WriteObject(ms, result_info);
-                string strResult = Encoding.UTF8.GetString(ms.ToArray());
-                ms.Close();
-
-                this.Response.Write(strResult);
-                this.Response.End();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    ser.WriteObject(ms, result_info);
+                    string strResult = Encoding.UTF8.GetString(ms.ToArray());
+                    this.Response.Write(strResult);
+                    this.Response.End();
+                }
                 return;
             }
 

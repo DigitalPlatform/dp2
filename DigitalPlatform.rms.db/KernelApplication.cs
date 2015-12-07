@@ -11,12 +11,6 @@ using System.Runtime.Serialization;
 
 using System.ServiceModel;
 
-//using DigitalPlatform;
-//using DigitalPlatform.rms;
-//using DigitalPlatform.IO;
-//using DigitalPlatform.Xml;
-//using DigitalPlatform.Text;
-//using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
 using DigitalPlatform.ResultSet;
 
@@ -75,140 +69,152 @@ namespace DigitalPlatform.rms
             this.eventCommit.Set();
         }
 
-
         // 工作线程
         // TODO: 要确保所有异常都被捕获。否则线程会被退出，不再具备监控能力
         public void ThreadMain()
         {
-            WaitHandle[] events = new WaitHandle[3];
-
-            events[0] = eventClose;
-            events[1] = eventActive;
-            events[2] = eventCommit;
-
-            while (true)
+            try
             {
-                int index = WaitHandle.WaitAny(events, PerTime, false);
+                WaitHandle[] events = new WaitHandle[3];
 
-                if (index == WaitHandle.WaitTimeout)
+                events[0] = eventClose;
+                events[1] = eventActive;
+                events[2] = eventCommit;
+
+                while (true)
                 {
-                    // timeout
-                    eventActive.Reset();
-                    // 超时请况下做事
-                    if (this.Users != null)
-                    {
-                        try
-                        {
-                            this.Users.Shrink();
-                        }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程中 Users.Shrink() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
-                    }
+                    int index = WaitHandle.WaitAny(events, PerTime, false);
 
-                    if (this.Dbs != null)
+                    if (index == WaitHandle.WaitTimeout)
                     {
-                        try
-                        {
-                            this.Dbs.Commit();
-                        }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程中 Commmit() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
-                    }
+                        // timeout
+                        eventActive.Reset();
+                        // 超时请况下做事
+                        TryShrink();
 
+                        TryCommit();
 
-                    if (this.Dbs != null && this.Dbs.AllTailNoVerified == false)
-                    {
-                        try
+                        if (this.Dbs != null)
                         {
-                            string strError = "";
-                            int nRet = this.Dbs.CheckDbsTailNo(out strError);
-                            if (nRet == -1)
+                            // 定时保存一下databases.xml的修改
+                            try
                             {
-                                // 虽然发生错误，但是初始化过程继续进行
-                                this.WriteErrorLog("ERR002 重试校验数据库尾号发生错误:" + strError);
+                                this.Dbs.SaveXmlSafety(true);
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                this.WriteErrorLog("INF001 重试校验数据库尾号成功。");
+                                this.WriteErrorLog("管理线程 保存databases.xml文件时遇到异常:" + ExceptionUtil.GetDebugText(ex));
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程 重试校验数据库尾号时遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
-                    }
 
-                    if (this.Dbs != null)
-                    {
-                        // 定时保存一下databases.xml的修改
-                        try
+                        if (this.ResultSets != null)
                         {
-                            this.Dbs.SaveXmlSafety(true);
+                            try
+                            {
+                                this.ResultSets.Clean(new TimeSpan(1, 0, 0));   // 一个小时
+                                // this.ResultSets.Clean(new TimeSpan(0, 5, 0));   // 5 分钟
+                            }
+                            catch (Exception ex)
+                            {
+                                this.WriteErrorLog("管理线程中 ResultSets.Clean() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程 保存databases.xml文件时遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
-                    }
 
-                    if (this.ResultSets != null)
-                    {
-                        try
-                        {
-                            this.ResultSets.Clean(new TimeSpan(1, 0, 0));   // 一个小时
-                            // this.ResultSets.Clean(new TimeSpan(0, 5, 0));   // 5 分钟
-                        }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程中 ResultSets.Clean() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
+                        TryVerifyTailNumber();
                     }
-                }
-                else if (index == 0)
-                {
-                    // closing
-                    break;
-                }
-                else if (index == 2)
-                {
-                    if (this.Dbs != null)
+                    else if (index == 0)
                     {
-                        try
-                        {
-                            this.Dbs.Commit();
-                        }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程中 Commmit() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
+                        // closing
+                        break;
+                    }
+                    else if (index == 1)
+                    {
+                        // be activating
+                        eventActive.Reset();
+
+                        // 得到通知的情况下做事
+                        TryShrink();
+
+                        /// 
+                        TryVerifyTailNumber();
+                    }
+                    else if (index == 2)
+                    {
+                        eventCommit.Reset();
+
+                        TryCommit();
                     }
 
                 }
-                else
-                {
-                    // be activating
-                    eventActive.Reset();
 
-                    // 得到通知的情况下做事
-                    if (this.Users != null)
-                    {
-                        try
-                        {
-                            this.Users.Shrink();
-                        }
-                        catch (Exception ex)
-                        {
-                            this.WriteErrorLog("管理线程中 Users.Shrink() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
-                        }
-                    }
+                eventFinished.Set();
+            }
+            catch(Exception ex)
+            {
+                this.WriteErrorLog("管理线程异常(线程已退出):" + ExceptionUtil.GetDebugText(ex));
+            }
+        }
+
+        void TryCommit()
+        {
+            if (this.Dbs != null)
+            {
+                try
+                {
+                    this.Dbs.Commit();
+                }
+                catch (Exception ex)
+                {
+                    this.WriteErrorLog("管理线程中 Commmit() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
                 }
             }
+        }
 
-            eventFinished.Set();
+        void TryShrink()
+        {
+            if (this.Users != null)
+            {
+                try
+                {
+                    this.Users.Shrink();
+                }
+                catch (Exception ex)
+                {
+                    this.WriteErrorLog("管理线程中 Users.Shrink() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                }
+            }
+        }
+
+        DateTime _lastVerifyTime = new DateTime(0); // 最近一次重试校验尾号的时刻
+        int _retryVerifyCount = 0;  // 重试校验尾号的次数
+
+        void TryVerifyTailNumber()
+        {
+            // 重试10次以后，每次重试间隔拉长到 20 分钟以上
+            // 10次以内，是按需执行的
+            if (this._retryVerifyCount > 10
+                && DateTime.Now - this._lastVerifyTime < new TimeSpan(0, 20, 0))
+                return;
+
+            if (this.Dbs != null && this.Dbs.AllTailNoVerified == false)
+            {
+                try
+                {
+                    string strError = "";
+                    int nRet = this.Dbs.CheckDbsTailNo(out strError);
+                    if (nRet == -1)
+                        this.WriteErrorLog("ERR002 重试校验数据库尾号发生错误:" + strError);
+                    else
+                        this.WriteErrorLog("INF001 重试校验数据库尾号成功。");
+
+                    this._lastVerifyTime = DateTime.Now;
+                    this._retryVerifyCount++;
+                }
+                catch (Exception ex)
+                {
+                    this.WriteErrorLog("管理线程 重试校验数据库尾号时遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                }
+            }
         }
 
         #endregion
@@ -419,7 +425,6 @@ namespace DigitalPlatform.rms
 
             TimeSpan delta = DateTime.Now - start;
             this.WriteErrorLog("kernel application 成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
-
             return 0;
         }
 

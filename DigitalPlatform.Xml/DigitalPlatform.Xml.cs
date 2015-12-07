@@ -35,8 +35,8 @@ namespace DigitalPlatform.Xml
 	// 就无法体现了。可以考虑另行设计类中static函数实现同样功能。
 	public class XmlStringWriter
 	{
-		public XmlTextWriter xmlTextWriter = null;
-		public TextWriter textWrite = null;
+		public XmlTextWriter _xmlTextWriter = null;
+		public TextWriter _textWrite = null;
 
 		public XmlStringWriter()
 		{
@@ -45,48 +45,62 @@ namespace DigitalPlatform.Xml
 
 		public void ClearTextWriter()
 		{
-			textWrite = new StringWriter ();
-			xmlTextWriter = new XmlTextWriter(textWrite);
+            this.Close();
+
+			_textWrite = new StringWriter ();
+			_xmlTextWriter = new XmlTextWriter(_textWrite);
 			//xmlTextWriter.Formatting = Formatting.Indented ;
 		}
 
 		public void WriteElement(string strElementName,string strText)
 		{
-			xmlTextWriter.WriteStartElement (strElementName);
+			_xmlTextWriter.WriteStartElement (strElementName);
 
-			xmlTextWriter.WriteString (strText);
+			_xmlTextWriter.WriteString (strText);
 
-			xmlTextWriter.WriteEndElement ();
+			_xmlTextWriter.WriteEndElement ();
 		}
 
 		public string GetString(string strText)
 		{
-			xmlTextWriter.WriteString (strText);
-			return textWrite.ToString ();
+			_xmlTextWriter.WriteString (strText);
+			return _textWrite.ToString ();
 		}
-
-	
 
 		public void WriteString(string strText)
 		{
-			xmlTextWriter.WriteString (strText);
+			_xmlTextWriter.WriteString (strText);
 		}
-
 
 		public string GetString()
 		{
-			return textWrite.ToString ();
+			return _textWrite.ToString ();
 		}
 
 		public void FreeTextWrite()
 		{
-			textWrite = null;
-			xmlTextWriter = null;
+#if NO
+			_textWrite = null;
+			_xmlTextWriter = null;
+#endif
+            this.Close();
 		}
 
+        public void Close()
+        {
+            if (_xmlTextWriter != null)
+            {
+                _xmlTextWriter.Close();
+                _xmlTextWriter = null;
+            }
+            
+            if (_textWrite != null)
+            {
+                _textWrite.Close();
+                _textWrite = null;
+            }
+        }
 	}
-
-
 	//
 
 	// 设计意图:用于存放命名空间
@@ -195,7 +209,6 @@ namespace DigitalPlatform.Xml
 				AddNS(child);
 			}
 		}
-
 
 		//对于配置文件
 		public void CreateNSOfCfg(string strDataFileName,

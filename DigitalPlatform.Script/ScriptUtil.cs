@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
 using System.Collections;
 using System.Web;
 using System.Diagnostics;
+
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Script
 {
@@ -129,8 +130,10 @@ namespace DigitalPlatform.Script
         /// 优先选择中等大小的图片
         /// </summary>
         /// <param name="strMARC">MARC机内格式字符串</param>
+        /// <param name="strPreferredType">优先使用何种大小类型</param>
         /// <returns>返回封面图像 URL。空表示没有找到</returns>
-        public static string GetCoverImageUrl(string strMARC, string strPreferredType = "MediumImage")
+        public static string GetCoverImageUrl(string strMARC,
+            string strPreferredType = "MediumImage")
         {
             string strLargeUrl = "";
             string strMediumUrl = "";   // type:FrontCover.MediumImage
@@ -181,7 +184,8 @@ namespace DigitalPlatform.Script
         public enum BuildObjectHtmlTableStyle
         {
             None = 0,
-            HttpUrlHitCount = 0x01, 
+            HttpUrlHitCount = 0x01,     // 是否对 http:// 地址进行访问计数
+            FromCover = 0x02,   // 是否包含封面图像事项
         }
 
         // 创建 OPAC 详细页面中的对象资源显示局部 HTML。这是一个 <table> 片段
@@ -192,7 +196,7 @@ namespace DigitalPlatform.Script
         // 对象ID $8
         // 对象尺寸 $s
         // 公开注释 $z
-        public static string BuildObjectHtmlTable(string strMARC, 
+        public static string BuildObjectHtmlTable(string strMARC,
             string strRecPath,
             BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount)
         {
@@ -208,40 +212,59 @@ namespace DigitalPlatform.Script
 
             text.Append("<table class='object_table'>");
             text.Append("<tr class='column_title'>");
-            text.Append("<td>名称</td>");
-            text.Append("<td></td>");
-            text.Append("<td>链接</td>");
-            text.Append("<td>媒体类型</td>");
-            text.Append("<td>尺寸</td>");
-            text.Append("<td>字节数</td>");
+            text.Append("<td class='type' style='word-break:keep-all;'>名称</td>");
+            text.Append("<td class='hitcount'></td>");
+            text.Append("<td class='link' style='word-break:keep-all;'>链接</td>");
+            text.Append("<td class='mime' style='word-break:keep-all;'>媒体类型</td>");
+            text.Append("<td class='size' style='word-break:keep-all;'>尺寸</td>");
+            text.Append("<td class='bytes' style='word-break:keep-all;'>字节数</td>");
             text.Append("</tr>");
 
+            int nCount = 0;
             foreach (MarcField field in fields)
             {
                 string x = field.select("subfield[@name='x']").FirstContent;
 
                 Hashtable table = StringUtil.ParseParameters(x, ';', ':');
                 string strType = (string)table["type"];
+
+                if (string.IsNullOrEmpty(strType) == false
+                    && (style & BuildObjectHtmlTableStyle.FromCover) == 0
+                    && (strType == "FrontCover" || strType.StartsWith("FrontCover.") == true))
+                    continue;
+
                 string strSize = (string)table["size"];
+                string s_q = field.select("subfield[@name='q']").FirstContent;  // 注意， FirstContent 可能会返回 null
 
                 string u = field.select("subfield[@name='u']").FirstContent;
                 string strUri = MakeObjectUrl(strRecPath, u);
 
+                string strSaveAs = "";
+                if (StringUtil.MatchMIME(s_q, "text") == true
+                    || StringUtil.MatchMIME(s_q, "image") == true)
+                {
+
+                }
+                else
+                {
+                    strSaveAs = "&saveas=true";
+                }
                 string strHitCountImage = "";
                 string strObjectUrl = strUri;
                 if (StringUtil.HasHead(strUri, "http:") == false
                     && StringUtil.HasHead(strUri, "https:") == false)
                 {
-                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                    // 内部对象
+                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                     strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
                 }
                 else
                 {
-                    // http: 或 https: 的情形
+                    // http: 或 https: 的情形，即外部 URL
                     if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
                     {
-                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
-                        strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
+                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs + "&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath);
+                        strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath) + "' alt='hitcount'></img>";
                     }
                 }
 
@@ -255,6 +278,16 @@ namespace DigitalPlatform.Script
                     urlLabel = f;
                 if (string.IsNullOrEmpty(urlLabel) == true)
                     urlLabel = strType;
+
+                // 2015/11/26
+                string s_z = field.select("subfield[@name='z']").FirstContent;
+                if (string.IsNullOrEmpty(urlLabel) == true
+                    && string.IsNullOrEmpty(s_z) == false)
+                {
+                    urlLabel = s_z;
+                    s_z = "";
+                }
+
                 if (string.IsNullOrEmpty(urlLabel) == true)
                     urlLabel = strObjectUrl;
 
@@ -269,32 +302,32 @@ namespace DigitalPlatform.Script
                     urlTemp = urlLabel;
 
                 string s_3 = field.select("subfield[@name='3']").FirstContent;
-                string s_q = field.select("subfield[@name='q']").FirstContent;
                 string s_s = field.select("subfield[@name='s']").FirstContent;
-                string s_z = field.select("subfield[@name='z']").FirstContent;
 
                 text.Append("<tr class='content'>");
-                text.Append("<td>"+HttpUtility.HtmlEncode(s_3 + " " + strType)+"</td>");
-                text.Append("<td style='text-align: right;'>" + strHitCountImage + "</td>");
-                text.Append("<td>" + urlTemp + "</td>");
-                text.Append("<td>"+HttpUtility.HtmlEncode(s_q)+"</td>");
-                text.Append("<td>"+HttpUtility.HtmlEncode(strSize)+"</td>");
-                text.Append("<td>"+HttpUtility.HtmlEncode(s_s)+"</td>");
+                text.Append("<td class='type'>" + HttpUtility.HtmlEncode(s_3 + " " + strType) + "</td>");
+                text.Append("<td class='hitcount' style='text-align: right;'>" + strHitCountImage + "</td>");
+                text.Append("<td class='link' style='word-break:break-all;'>" + urlTemp + "</td>");
+                text.Append("<td class='mime'>" + HttpUtility.HtmlEncode(s_q) + "</td>");
+                text.Append("<td class='size'>" + HttpUtility.HtmlEncode(strSize) + "</td>");
+                text.Append("<td class='bytes'>" + HttpUtility.HtmlEncode(s_s) + "</td>");
                 text.Append("</tr>");
 
                 if (string.IsNullOrEmpty(s_z) == false)
                 {
                     text.Append("<tr class='comment'>");
-                    text.Append("<td colspan='5'>" + HttpUtility.HtmlEncode(s_z) + "</td>");
+                    text.Append("<td colspan='6'>" + HttpUtility.HtmlEncode(s_z) + "</td>");
                     text.Append("</tr>");
                 }
-
+                nCount++;
             }
+
+            if (nCount == 0)
+                return "";
+
             text.Append("</table>");
 
             return text.ToString();
         }
-
-    
     }
 }

@@ -1392,49 +1392,48 @@ namespace DigitalPlatform.Marc
             domMarc = null;
 
             // MARC控件中内容更新一些. 需要刷新到xml控件中
-            MemoryStream s = new MemoryStream();
-
-            MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8);
-
-            if (strMarcSyntax == "unimarc")
+            using(MemoryStream s = new MemoryStream())
+            using (MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8))
             {
-                writer.MarcNameSpaceUri = DpNs.unimarcxml;
-                writer.MarcPrefix = strMarcSyntax;
-            }
-            else if (strMarcSyntax == "usmarc")
-            {
-                writer.MarcNameSpaceUri = Ns.usmarcxml;
-                writer.MarcPrefix = strMarcSyntax;
-            }
-            else
-            {
-                writer.MarcNameSpaceUri = DpNs.unimarcxml;
-                writer.MarcPrefix = "unimarc";
-            }
+                if (strMarcSyntax == "unimarc")
+                {
+                    writer.MarcNameSpaceUri = DpNs.unimarcxml;
+                    writer.MarcPrefix = strMarcSyntax;
+                }
+                else if (strMarcSyntax == "usmarc")
+                {
+                    writer.MarcNameSpaceUri = Ns.usmarcxml;
+                    writer.MarcPrefix = strMarcSyntax;
+                }
+                else
+                {
+                    writer.MarcNameSpaceUri = DpNs.unimarcxml;
+                    writer.MarcPrefix = "unimarc";
+                }
 
-            int nRet = writer.WriteRecord(strMARC,
-                out strError);
-            if (nRet == -1)
-                return -1; ;
+                int nRet = writer.WriteRecord(strMARC,
+                    out strError);
+                if (nRet == -1)
+                    return -1; ;
 
-            writer.Flush();
-            s.Flush();
+                writer.Flush();
+                s.Flush();
 
-            s.Seek(0, SeekOrigin.Begin);
+                s.Seek(0, SeekOrigin.Begin);
 
-            domMarc = new XmlDocument();
-            try
-            {
-                domMarc.Load(s);
+                domMarc = new XmlDocument();
+                try
+                {
+                    domMarc.Load(s);
+                }
+                catch (Exception ex)
+                {
+                    strError = "Marc2Xml()中XML数据装入DOM时出错: " + ex.Message;
+                    return -1;
+                }
+
+                return 0;
             }
-            catch (Exception ex)
-            {
-                strError = "Marc2Xml()中XML数据装入DOM时出错: " + ex.Message;
-                return -1;
-            }
-
-            s.Close();
-            return 0;
         }
 
 #if NO
@@ -2119,21 +2118,21 @@ namespace DigitalPlatform.Marc
             strMarcSyntax = "";
             try
             {
-                XmlTextReader reader = new XmlTextReader(s);
-
-                while (reader.Read())
+                using (XmlTextReader reader = new XmlTextReader(s))
                 {
-                    if (reader.NodeType == XmlNodeType.Element)
+                    while (reader.Read())
                     {
-                        if (reader.Name == "MARCSyntax")
+                        if (reader.NodeType == XmlNodeType.Element)
                         {
-                            strMarcSyntax = reader.ReadString().ToLower();
-                            return 1;
+                            if (reader.Name == "MARCSyntax")
+                            {
+                                strMarcSyntax = reader.ReadString().ToLower();
+                                return 1;
+                            }
                         }
                     }
+                    return 0;
                 }
-
-                return 0;
             }
             catch (Exception ex)
             {

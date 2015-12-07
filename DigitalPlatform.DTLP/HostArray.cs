@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Diagnostics;
@@ -14,7 +14,7 @@ namespace DigitalPlatform.DTLP
 
 		public DtlpChannel Container = null;
 
-		// ´ÓiniÎÄ¼ş»òÕßregistry×°ÔØÒÑ¾­ÅäÖÃµÄËùÓĞÖ÷»úÊÂÏî
+		// ä»iniæ–‡ä»¶æˆ–è€…registryè£…è½½å·²ç»é…ç½®çš„æ‰€æœ‰ä¸»æœºäº‹é¡¹
 		public int InitialHostArray(ApplicationInfo appInfoParam)
 		{
 			int i, nMax;
@@ -22,7 +22,7 @@ namespace DigitalPlatform.DTLP
 
 			this.Clear();
 
-			appinfo = appInfoParam;	// ±£´æÏÂÀ´±¸ÓÃ
+			appinfo = appInfoParam;	// ä¿å­˜ä¸‹æ¥å¤‡ç”¨
 
             if (appInfoParam == null)   // 2006/11/21
                 return 0;
@@ -40,7 +40,7 @@ namespace DigitalPlatform.DTLP
 			return 0;
 		}
 
-		// ´ÓiniÎÄ¼ş»òÕßregistry×°ÔØÒÑ¾­ÅäÖÃµÄËùÓĞÖ÷»úÊÂÏî
+		// ä»iniæ–‡ä»¶æˆ–è€…registryè£…è½½å·²ç»é…ç½®çš„æ‰€æœ‰ä¸»æœºäº‹é¡¹
 		public static ArrayList LoadHosts(ApplicationInfo appInfo)
 		{
 			ArrayList saResult = new ArrayList();
@@ -60,7 +60,7 @@ namespace DigitalPlatform.DTLP
 			return saResult;
 		}
 
-		// ½«CStringArrayÖĞµÄÖ÷»úÊÂÏîĞ´ÈëiniÎÄ¼ş»òÕßregistry
+		// å°†CStringArrayä¸­çš„ä¸»æœºäº‹é¡¹å†™å…¥iniæ–‡ä»¶æˆ–è€…registry
 		public static void SaveHosts(ApplicationInfo appInfo,
 			ArrayList saHost)
 		{
@@ -79,7 +79,7 @@ namespace DigitalPlatform.DTLP
 					strValue);
 			}
 
-			// ×îºóÒ»´Î£¬½Ø¶Ï
+			// æœ€åä¸€æ¬¡ï¼Œæˆªæ–­
 			strEntry = "entry" + Convert.ToString(i+1);
 			appInfo.SetString("ServerAddress",
 				strEntry,
@@ -87,21 +87,21 @@ namespace DigitalPlatform.DTLP
 	
 		}
 
-		// ´İ»ÙÒ»¸öHostÊÂÏî
+		// æ‘§æ¯ä¸€ä¸ªHostäº‹é¡¹
 		public int DestroyHostEntry(HostEntry entry)
 		{
 			this.Remove(entry);
 			return 0; // not found
 		}
 
-		// ÒÔÖ÷»úÃû×Ö»òÕß±ğÃûÑ°ÕÒÖ÷»úÊÂÏî
+		// ä»¥ä¸»æœºåå­—æˆ–è€…åˆ«åå¯»æ‰¾ä¸»æœºäº‹é¡¹
 		public HostEntry MatchHostEntry(string strHostName)
 		{
 
 			for(int i=0;i<this.Count;i++) 
 			{
 				HostEntry entry = (HostEntry)this[i];
-				Debug.Assert(entry != null, "HostEntryÖĞ³öÏÖ¿ÕÔªËØ");
+				Debug.Assert(entry != null, "HostEntryä¸­å‡ºç°ç©ºå…ƒç´ ");
 
 				if ( (String.Compare(strHostName,entry.m_strHostName, true)==0)
 					|| (String.Compare(strHostName,entry.m_strAlias, true)==0) )
@@ -116,7 +116,7 @@ namespace DigitalPlatform.DTLP
 			for(int i=0;i<this.Count;i++) 
 			{
 				HostEntry entry = (HostEntry)this[i];
-				Debug.Assert(entry != null, "HostEntryÖĞ³öÏÖ¿ÕÔªËØ");
+				Debug.Assert(entry != null, "HostEntryä¸­å‡ºç°ç©ºå…ƒç´ ");
 
 				if (entry.client != null) 
 				{
@@ -140,8 +140,8 @@ namespace DigitalPlatform.DTLP
 
 		public TcpClient client = null;
 
-		public string		m_strHostName = "";	// IPµØÖ·»òÕßÓòÃû
-		public string		m_strAlias = "";		// ±ğÃû
+		public string		m_strHostName = "";	// IPåœ°å€æˆ–è€…åŸŸå
+		public string		m_strAlias = "";		// åˆ«å
 
 		public int			m_nDTLPCharset = DtlpChannel.CHARSET_DBCS;
 
@@ -151,7 +151,7 @@ namespace DigitalPlatform.DTLP
 		public int			m_lUsrID = 0;
 		public int			m_lChannel = -1;
 	
-//		int			m_nStatus = 0;	// 0:¿ÕÏĞ 1:·¢ËÍ 2:½ÓÊÕ
+//		int			m_nStatus = 0;	// 0:ç©ºé—² 1:å‘é€ 2:æ¥æ”¶
 
 
 		public HostArray	Container = null;
@@ -177,8 +177,8 @@ namespace DigitalPlatform.DTLP
 			}
 		}
 
-		// Ô¶³Ì½¨Á¢Í¨µÀ
-		// ·µ»Ø -1 ±íÊ¾Ê§°Ü
+		// è¿œç¨‹å»ºç«‹é€šé“
+		// è¿”å› -1 è¡¨ç¤ºå¤±è´¥
 		public int RmtCreateChannel(int usrid)
 		{
 
@@ -195,7 +195,7 @@ namespace DigitalPlatform.DTLP
 			int			nErrorNo = 0;
 
 			Debug.Assert(client != null,
-				"clientÎª¿Õ");
+				"clientä¸ºç©º");
 	
 			param.Clear();
 			param.ParaLong(usrid);
@@ -243,7 +243,7 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ×¢ÏúÔ¶³ÌÍ¨µÀ
+		// æ³¨é”€è¿œç¨‹é€šé“
 		public int RmtDestroyChannel()
 
 		{
@@ -261,7 +261,7 @@ namespace DigitalPlatform.DTLP
 			int			nErrorNo = 0;
 	
 			Debug.Assert(client != null,
-				"clientÎª¿Õ");
+				"clientä¸ºç©º");
 	
 			param.Clear();
 			param.ParaLong(m_lUsrID);
@@ -311,16 +311,16 @@ namespace DigitalPlatform.DTLP
 
 
 
-		// connect()µ½Ö÷»ú
-		// Ô­À´µÄÄ£¿é£¬ÊÇÏÈ¼ì²é¿Õ¸ñ£¬Èç¹ûÓĞ£¬È¥µô¿Õ¸ñÓÒ±ß¡£
-		// È»ºó£¬¿´ÊÇ·ñÓĞ"()"£¬Èç¹ûÓĞ£¬È¥µôÖĞ¼äµÄÄÚÈİ(°üÀ¨À¨ºÅ)¡£"()"¿ÉÒÔ¶à´Î³öÏÖ
+		// connect()åˆ°ä¸»æœº
+		// åŸæ¥çš„æ¨¡å—ï¼Œæ˜¯å…ˆæ£€æŸ¥ç©ºæ ¼ï¼Œå¦‚æœæœ‰ï¼Œå»æ‰ç©ºæ ¼å³è¾¹ã€‚
+		// ç„¶åï¼Œçœ‹æ˜¯å¦æœ‰"()"ï¼Œå¦‚æœæœ‰ï¼Œå»æ‰ä¸­é—´çš„å†…å®¹(åŒ…æ‹¬æ‹¬å·)ã€‚"()"å¯ä»¥å¤šæ¬¡å‡ºç°
 		public int ConnectSocket(string strHostName,
 			out int nErrorNo)
 		{
 			string strPort = "";
 			nErrorNo = 0;
 
-			m_strHostName = strHostName;	// ¼Ó¹¤Ç°µÄ×Ö·û´®
+			m_strHostName = strHostName;	// åŠ å·¥å‰çš„å­—ç¬¦ä¸²
 
 			int nRet = strHostName.IndexOf(":", 0);
 			if (nRet != -1) 
@@ -345,7 +345,7 @@ namespace DigitalPlatform.DTLP
 			catch (SocketException) 
 			{
 				nErrorNo = DtlpChannel.GL_CONNECT;
-				// ÊÇ·ñ·µ»Ø´íÎó×Ö·û´®? ¾«È·Çø·Ö´íÎóÀàĞÍ
+				// æ˜¯å¦è¿”å›é”™è¯¯å­—ç¬¦ä¸²? ç²¾ç¡®åŒºåˆ†é”™è¯¯ç±»å‹
 				return -1;
 			}
 
@@ -377,7 +377,7 @@ namespace DigitalPlatform.DTLP
 
 
 #if OLD
-		// ·¢³öÇëÇó°ü
+		// å‘å‡ºè¯·æ±‚åŒ…
 		public int SendTcpPackage(byte []baPackage,
 			int nLen,
 			out int nErrorNo)
@@ -444,7 +444,7 @@ namespace DigitalPlatform.DTLP
 		}
 #else
 
-        // ·¢³öÇëÇó°ü
+        // å‘å‡ºè¯·æ±‚åŒ…
         public int SendTcpPackage(byte[] baPackage,
             int nLen,
             out int nErrorNo)
@@ -458,6 +458,7 @@ namespace DigitalPlatform.DTLP
             try
             {
 
+                // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
                 NetworkStream stream = client.GetStream();
 
                 IAsyncResult result = stream.BeginWrite(baPackage, 0, nLen,
@@ -500,8 +501,8 @@ namespace DigitalPlatform.DTLP
 
 
 #if OLD
-		// ½ÓÊÕÏìÓ¦°ü
-		// ×îÉÙÊÕµ½4byte£¬¾ÍÖªµÀÁË°üµÄ³ß´ç
+		// æ¥æ”¶å“åº”åŒ…
+		// æœ€å°‘æ”¶åˆ°4byteï¼Œå°±çŸ¥é“äº†åŒ…çš„å°ºå¯¸
 		public int RecvTcpPackage(out byte []baPackage,
 			out int nLen,
 			out int nErrorNo)
@@ -514,7 +515,7 @@ namespace DigitalPlatform.DTLP
 			int l;
 			bool bInitialLen = false;
 
-			Debug.Assert(client != null, "clientÎª¿Õ");
+			Debug.Assert(client != null, "clientä¸ºç©º");
 	
 			baPackage = new byte [4096];
 			nInLen = 0;
@@ -550,7 +551,7 @@ namespace DigitalPlatform.DTLP
 					goto ERROR1;
 				}
 
-				// µÃµ½°üµÄ³¤¶È
+				// å¾—åˆ°åŒ…çš„é•¿åº¦
 		
 				if ((wRet>=4||nInLen>=4)
 					&& bInitialLen == false) 
@@ -562,11 +563,11 @@ namespace DigitalPlatform.DTLP
 
                     if (nLen >= (1000 * 1024))  // 2006/11/26
                     {
-                        // ³¤¶ÈÎ»³öÏÖÒì³£
+                        // é•¿åº¦ä½å‡ºç°å¼‚å¸¸
                         goto ERROR1;
                     }
 
-					// ÕıÊ½·ÖÅä»º³åÇø³ß´ç
+					// æ­£å¼åˆ†é…ç¼“å†²åŒºå°ºå¯¸
 					byte [] temp = new byte [nLen];
 					Array.Copy(baPackage, 0, temp, 0, nInLen + wRet);
 					baPackage = temp;
@@ -576,7 +577,7 @@ namespace DigitalPlatform.DTLP
 
 				nInLen += wRet;
 				if (nInLen >= baPackage.Length
-					&& bInitialLen == false) // ²»Ì«¿ÉÄÜ·¢Éú
+					&& bInitialLen == false) // ä¸å¤ªå¯èƒ½å‘ç”Ÿ
 				{
 					byte [] temp = new byte [baPackage.Length + 4096];
 					Array.Copy(baPackage, 0, temp, 0, nInLen);
@@ -584,7 +585,7 @@ namespace DigitalPlatform.DTLP
 				}
 			}
 
-			// ×îºó¹æÕû»º³åÇø³ß´ç£¬Èç¹û±ØÒªµÄ»°
+			// æœ€åè§„æ•´ç¼“å†²åŒºå°ºå¯¸ï¼Œå¦‚æœå¿…è¦çš„è¯
 			if (baPackage.Length > nLen) 
 			{
 				byte [] temp = new byte [nLen];
@@ -605,8 +606,8 @@ namespace DigitalPlatform.DTLP
 			return -1;
 		}
 #else  
-        // ½ÓÊÕÏìÓ¦°ü
-        // ×îÉÙÊÕµ½4byte£¬¾ÍÖªµÀÁË°üµÄ³ß´ç
+        // æ¥æ”¶å“åº”åŒ…
+        // æœ€å°‘æ”¶åˆ°4byteï¼Œå°±çŸ¥é“äº†åŒ…çš„å°ºå¯¸
         public int RecvTcpPackage(out byte[] baPackage,
             out int nLen,
             out int nErrorNo)
@@ -619,12 +620,13 @@ namespace DigitalPlatform.DTLP
             int l;
             bool bInitialLen = false;
 
-            Debug.Assert(client != null, "clientÎª¿Õ");
+            Debug.Assert(client != null, "clientä¸ºç©º");
 
             baPackage = new byte[4096];
             nInLen = 0;
             nLen = 4096; //COMM_BUFF_LEN;
 
+            // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
             NetworkStream stream = client.GetStream();
 
             while (nInLen < nLen)
@@ -680,7 +682,7 @@ namespace DigitalPlatform.DTLP
                     goto ERROR1;
                 }
 
-                // µÃµ½°üµÄ³¤¶È
+                // å¾—åˆ°åŒ…çš„é•¿åº¦
 
                 if ((wRet >= 4 || nInLen >= 4)
                     && bInitialLen == false)
@@ -692,11 +694,11 @@ namespace DigitalPlatform.DTLP
 
                     if (nLen >= (1000 * 1024))  // 2006/11/26
                     {
-                        // ³¤¶ÈÎ»³öÏÖÒì³£
+                        // é•¿åº¦ä½å‡ºç°å¼‚å¸¸
                         goto ERROR1;
                     }
 
-                    // ÕıÊ½·ÖÅä»º³åÇø³ß´ç
+                    // æ­£å¼åˆ†é…ç¼“å†²åŒºå°ºå¯¸
                     byte[] temp = new byte[nLen];
                     Array.Copy(baPackage, 0, temp, 0, nInLen + wRet);
                     baPackage = temp;
@@ -706,7 +708,7 @@ namespace DigitalPlatform.DTLP
 
                 nInLen += wRet;
                 if (nInLen >= baPackage.Length
-                    && bInitialLen == false) // ²»Ì«¿ÉÄÜ·¢Éú
+                    && bInitialLen == false) // ä¸å¤ªå¯èƒ½å‘ç”Ÿ
                 {
                     byte[] temp = new byte[baPackage.Length + 4096];
                     Array.Copy(baPackage, 0, temp, 0, nInLen);
@@ -714,7 +716,7 @@ namespace DigitalPlatform.DTLP
                 }
             }
 
-            // ×îºó¹æÕû»º³åÇø³ß´ç£¬Èç¹û±ØÒªµÄ»°
+            // æœ€åè§„æ•´ç¼“å†²åŒºå°ºå¯¸ï¼Œå¦‚æœå¿…è¦çš„è¯
             if (baPackage.Length > nLen)
             {
                 byte[] temp = new byte[nLen];

@@ -88,7 +88,7 @@ namespace dp2Circulation
         }
 
         // 作为模式对话框打开的时候，传递给 Process() 函数的 strStyle 值
-        string _defaultStyle = "auto_select,shangtu,exact_match"; 
+        string _defaultStyle = "auto_select,shangtu,expand_2"; // exact_match
         //                  shangtu 表示使用上图专用的算法
         //                  expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
         //                  exact_match 表示精确一致检索。当 exact_match 结合上 expand_all_search 时，中途都是前方一致的，最后一次才会精确一致
@@ -150,6 +150,8 @@ namespace dp2Circulation
             CloseFloatingMessage();
         }
 
+        #region FloatingMessage
+
         public void CloseFloatingMessage()
         {
             if (_floatingMessage != null)
@@ -206,20 +208,88 @@ bool bClickClose = false)
             }
         }
 
+        #endregion
+
         void EnableControls(bool bEnable)
         {
             foreach(ToolStripItem item in this.toolStrip1.Items)
             {
                 if (item != this.toolStripButton_stop
-                    && item != this.toolStripLabel_message)
+                    && item != this.toolStripLabel_message
+                    && item != this.toolStripButton_exact)
                     item.Enabled = bEnable;
             }
         }
 
+        #region 外部接口
+
+        public List<RelationControl> RelationControls
+        {
+            get
+            {
+                List<RelationControl> results = new List<RelationControl>();
+                foreach(RelationControl control in this.flowLayoutPanel_relationList.Controls)
+                {
+                    results.Add(control);
+                }
+
+                return results;
+            }
+        }
+
+        public static string BuildDebugInfo(RelationDialog dlg)
+        {
+            StringBuilder text = new StringBuilder();
+            List<RelationControl> controls = dlg.RelationControls;
+
+            // text.Append("*** 书目记录路径 " + strBiblioRecPath + "\r\n");
+
+            text.Append("* 位数调整 " + dlg.ExpandLevel + "\r\n\r\n");
+
+            int i = 0;
+            foreach(RelationControl control in controls)
+            {
+                RelationDialog.ControlInfo info = (RelationDialog.ControlInfo)control.Tag;
+
+                text.Append("* 关系"+(i+1)+":\r\n");
+                text.Append(" 库名=[" + info.Relation.DbName + "] \r\n");
+                text.Append(" 源分类号=[" + control.SourceTextOrigin + "] \r\n");
+                text.Append(" 源分类号(缩位后的)=[" + control.SourceText + "] \r\n");
+                text.Append(" 目标分类号(自动选定)=[" + control.TargetText + "] \r\n");
+
+                text.Append(" 命中事项("+info.Rows.Count+"):\r\n");
+                int j = 0;
+                foreach(DpRow row in info.Rows)
+                {
+                    text.Append(
+                        "   " + (j+1).ToString() + ") " + BuildRowLine(row) + "\r\n");
+                    j++;
+                }
+
+                i++;
+            }
+
+            text.Append("\r\n\r\n");
+
+            return text.ToString();
+        }
+
+        static string BuildRowLine(DpRow row)
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append("source_key 源=[" + row[RelationDialog.COLUMN_KEY].Text + "] ");
+            text.Append("target_key 目标=[" + row[RelationDialog.COLUMN_REL].Text + "] ");
+            text.Append("weight权值 =[" + row[RelationDialog.COLUMN_WEIGHT].Text + "] ");
+            text.Append("level级别 =[" + row[RelationDialog.COLUMN_LEVEL].Text + "] ");
+            return text.ToString();
+        }
+
+        #endregion
+
         int _processing = 0;
 
         // parameters:
-        //      strStyle auto_select/remove_dup/select_top_weight
+        //      strStyle auto_select/expand_1/expand_2
         public void Process(string strStyle 
             // = "auto_select,expand_all_search"
             )
@@ -241,10 +311,46 @@ bool bClickClose = false)
                 if (nRet == -1)
                     goto ERROR1;
 
-                // 针对所有关系，检索出事项，并存储起来备用
-                nRet = SearchAll(strStyle, out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                bool bExpand_2 = StringUtil.IsInList("expand_2", strStyle);
+
+                if (bExpand_2 == true)
+                {
+                    this.toolStripButton_expand_1.Checked = false;
+                    this.toolStripButton_expand_2.Checked = true;
+
+                    this.ExpandLevel = 2;
+                    // 针对所有关系，检索出事项，并存储起来备用
+                    // return:
+                    //      -2  key 已经截断到极限
+                    //      -1  出错
+                    //      >=0 命中总数
+                    nRet = SearchAll(strStyle, this.ExpandLevel, out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                else
+                {
+                    this.toolStripButton_expand_1.Checked = true;
+                    this.toolStripButton_expand_2.Checked = false;
+
+                    this.ExpandLevel = 1;  // 1 表示不截断的精确一致; 0 表示不截断的前方一致; -1 表示截断一个字符，前方一致
+                    while (true)
+                    {
+                        // 针对所有关系，检索出事项，并存储起来备用
+                        // return:
+                        //      -2  key 已经截断到极限
+                        //      -1  出错
+                        //      >=0 命中总数
+                        nRet = SearchAll(strStyle, this.ExpandLevel, out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == -2)
+                            break;
+                        if (nRet > 0)
+                            break;
+                        this.ExpandLevel--;
+                    }
+                }
 
                 // 选取第一个关系，填充事项列表
                 if (this.flowLayoutPanel_relationList.Controls.Count > 0)
@@ -283,6 +389,7 @@ bool bClickClose = false)
             public int Weight = 0;   // 权值之和
             public List<string> SourceClassTypes = new List<string>(); // 源分类号类型。例如 "DDC"
             public List<RowWrapper> Wrappers = new List<RowWrapper>();
+            public double ClusterWeight = 0;    // 聚集权重
         }
 
         /*
@@ -353,6 +460,7 @@ bool bClickClose = false)
                         else
                         {
                             current = new Merged();
+                            current.Rel = wrapper.Row[COLUMN_REL].Text;
                             merged_list.Add(current);
                         }
 
@@ -371,6 +479,7 @@ bool bClickClose = false)
                         Debug.Assert(item != null, "");
                     }
 #endif
+                    SetClusterWeight(merged_list);
 
                     // merged_list 按照 weight 排序。大在前
                     merged_list.Sort((x, y) =>
@@ -381,13 +490,13 @@ bool bClickClose = false)
                         // 来源于 LCC 的靠前
                         bool bRet1 = x.SourceClassTypes.IndexOf("LCC") != -1;
                         bool bRet2 = y.SourceClassTypes.IndexOf("LCC") != -1;
-                        if (bRet1 == true && bRet2 == true)
-                            return 0;
-                        if (bRet1 == true)
+                        if (bRet1 == true && bRet2 == false)
                             return -1;
-                        if (bRet2 == true)
+                        if (bRet2 == true && bRet1 == false)
                             return 1;
-                        return 0;
+                        Debug.Assert(bRet1 == bRet2, "");
+                        double ret = x.ClusterWeight - y.ClusterWeight;
+                        return -1*((int)ret);
                     });
 
                     // 选定第一个
@@ -402,6 +511,51 @@ bool bClickClose = false)
 
             RefreshAllTargetText();
             return 0;
+        }
+
+        // 为 Merged 队列里面的每个事项设置 聚集权重
+        // 所谓聚集权重，就是对一个事项，评估其余事项的偏向性。第一级字符每出现一次，增加 1，第二级字符每出现一次，增加 0.1；然后是 0.01 等，类推
+        static void SetClusterWeight(List<Merged> merged_list)
+        {
+            foreach(Merged current in merged_list)
+            {
+                SetClusterWeight(merged_list, current);
+            }
+        }
+
+        static void SetClusterWeight(List<Merged> merged_list, Merged start)
+        {
+            string strStartClass = start.Rel;
+            double total_weight = 0;
+            for (int key_length = 1; key_length<strStartClass.Length;key_length++ )
+            {
+                string strLead = strStartClass.Substring(0, key_length);
+                double weight_facter = GetWeightFacter(key_length);
+                int nHitCount = 0;
+                foreach (Merged current in merged_list)
+                {
+                    if (current == start)
+                        continue;
+                    if (current.Rel.StartsWith(strLead) == true)
+                    {
+                        total_weight += weight_facter;
+                        nHitCount++;
+                    }
+                }
+                if (nHitCount == 0)
+                    break;  // 某一轮一次也没有匹配的，就遁出
+            }
+            start.ClusterWeight = total_weight;
+        }
+
+        static double GetWeightFacter(int length)
+        {
+            double result = 10;
+            for(int i=0;i<length;i++)
+            {
+                result = result / 10;
+            }
+            return result;
         }
 
         static string GetSourceClassType(string strDbName)
@@ -657,6 +811,81 @@ bool bClickClose = false)
             SelectControl((RelationControl)sender);
         }
 
+#if NO
+        static string CanonicalizeLCC(string strText)
+        {
+            // 第一阶段，处理空格
+            int nRet = strText.IndexOf(" ");
+            if (nRet != -1)
+                strText = strText.Substring(0, nRet);
+
+            // 第二阶段，处理 点+字母
+            string[] parts = strText.Split(new char[] { '.' });
+            // 倒着找到 点+字母位置
+            int i = parts.Length - 1;
+            for (; i >= 0; i--)
+            {
+                string strPart = parts[i];
+                if (string.IsNullOrEmpty(strPart) == true)
+                    continue;
+
+                if (char.IsLetter(strPart[0]) == true)
+                    goto FOUND;
+            }
+            return strText;
+
+        FOUND:
+            if (i == 0)
+                return strText;
+
+            // 装配出结果
+            StringBuilder text = new StringBuilder();
+            for (int j = 0; j < i; j++)
+            {
+                if (j > 0)
+                    text.Append(".");
+                text.Append(parts[j]);
+            }
+            return text.ToString();
+        }
+#endif
+        static string CanonicalizeLCC(string strText)
+        {
+            // 第一阶段，处理空格
+            int nRet = strText.IndexOf(" ");
+            if (nRet != -1)
+                strText = strText.Substring(0, nRet);
+
+            // 第二阶段，处理 点+字母
+            string[] parts = strText.Split(new char[] { '.' });
+            // 从第二个片段开始找 点+字母位置
+            int i = 1;
+            for (; i < parts.Length; i++)
+            {
+                string strPart = parts[i];
+                if (string.IsNullOrEmpty(strPart) == true)
+                    continue;
+
+                if (char.IsLetter(strPart[0]) == true)
+                    goto FOUND;
+            }
+            return strText;
+
+        FOUND:
+            if (i == 0)
+                return strText;
+
+            // 装配出结果
+            StringBuilder text = new StringBuilder();
+            for (int j = 0; j < i; j++)
+            {
+                if (j > 0)
+                    text.Append(".");
+                text.Append(parts[j]);
+            }
+            return text.ToString();
+        }
+
         // 填充关系列表
         int FillRelationList(out string strError)
         {
@@ -674,12 +903,20 @@ bool bClickClose = false)
                     string strKey = key;
                     if (relation.DbName.StartsWith("DDC") == true)
                         strKey = strKey.Replace("/", "");
+                    else if (relation.DbName.StartsWith("LCC") == true)
+                    {
+                        //string strSave = strKey;
+                        strKey = CanonicalizeLCC(strKey);
+                        //if (strSave != strKey)
+                        //    MessageBox.Show(this, "old=" + strSave + ",new=" + strKey);
+                    }
 
                     RelationControl control = new RelationControl();
                     control.Tag = info;
                     control.TitleText = relation.DbName;
                     if (string.IsNullOrEmpty(relation.Color) == false)
                         control.TitleBackColor = ColorUtil.String2Color(relation.Color);
+                    control.SourceTextOrigin = strKey;
                     control.SourceText = strKey;
                     control.BackColor = SystemColors.Window;
                     AddEvents(control, true);
@@ -991,7 +1228,7 @@ bool bClickClose = false)
             if (nDelta != 0)
                 return -1 * nDelta; // 降序
 
-            // 级次一样的，还要看是否精确命中。
+            // 级次一样的，还要看是否精确命中。TODO: 这个要考虑到最后阶段
             string strKey1 = x[COLUMN_KEY].Text;
             string strKey2 = y[COLUMN_KEY].Text;
 
@@ -1024,12 +1261,21 @@ bool bClickClose = false)
             if (this.Channel != null)
                 this.Channel.Abort();
         }
+
+        public int ExpandLevel = 1; // 1 表示不截断的精确一致; 0 表示不截断的前方一致; -1 表示截断一个字符，前方一致
+
         // Hashtable _table = new Hashtable(); // RelationControl --> List<ResultItem>
 
         // 针对所有关系，检索出事项，并存储起来备用
         // parameters:
-        //      strStyle    expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
+        //      strStyle    
+        //      nExpandLevel    2 表示每个检索词独立自动截断探索; 1 表示不截断的精确一致; 0 表示不截断的前方一致; -1 表示截断一个字符，前方一致
+        // return:
+        //      -2  key 已经截断到极限
+        //      -1  出错
+        //      >=0 命中总数
         int SearchAll(string strStyle,
+            int nExpandLevel,
             out string strError)
         {
             strError = "";
@@ -1044,6 +1290,8 @@ bool bClickClose = false)
                 this.Channel.Timeout = new TimeSpan(0, 5, 0);   // 5 分钟
                 try
                 {
+                    int nCount = 0;
+                    int nKeyCount = 0;  // 实际参与检索的 key 个数
                     foreach (RelationControl control in this.flowLayoutPanel_relationList.Controls)
                     {
                         Application.DoEvents();
@@ -1054,8 +1302,32 @@ bool bClickClose = false)
                             return -1;
                         }
 
-                        string key = control.SourceText;
+                        string key = control.SourceTextOrigin;
                         ControlInfo info = (ControlInfo)control.Tag;
+
+                        // 如果必要，缩减 key 长度
+                        if (nExpandLevel < 0)
+                        {
+                            Debug.Assert(string.IsNullOrEmpty(key) == false, "");
+                            int nLength = key.Length + nExpandLevel;
+                            if (nLength < 1)
+                            {
+                                control.SourceText = "";
+                                info.Rows = new List<DpRow>();
+                                continue;
+                            }
+                            key = key.Substring(0, nLength);
+                        }
+
+                        nKeyCount++;
+
+                        string strOneStyle = "";
+                        if (nExpandLevel == 2)
+                            strOneStyle = "auto_expand";
+                        else if (nExpandLevel == 1)
+                            strOneStyle = "exact";
+                        else
+                            strOneStyle = "left";
 
                         string strOutputKey = "";
                         List<ResultItem> results = null;
@@ -1067,14 +1339,13 @@ bool bClickClose = false)
                         int nRet = SearchOneKey(
                     info.Relation,
                     key,
-                    strStyle,
+                    strOneStyle,
                     out strOutputKey,
                     out results,
                     out strError);
                         if (nRet == -1)
                             return -1;
 
-                        control.SourceTextOrigin = control.SourceText;
                         control.SourceText = strOutputKey;
 
                         List<DpRow> rows = null;
@@ -1086,9 +1357,12 @@ bool bClickClose = false)
                             return -1;
 
                         info.Rows = rows;
+                        nCount += rows.Count;
                     }
 
-                    return 0;
+                    if (nKeyCount == 0)
+                        return -2;
+                    return nCount;
                 }
                 finally
                 {
@@ -1107,7 +1381,7 @@ bool bClickClose = false)
         }
 
         // RelationControl 所携带的附加信息
-        class ControlInfo
+        public class ControlInfo
         {
             // 对照关系定义
             public Relation Relation = null;
@@ -1136,6 +1410,7 @@ bool bClickClose = false)
 
         // 针对一个 key 字符串进行检索
         // parameters:
+        //      strMatchStyle   auto_expand/exact/left 分别是自动截断探索/精确一致/前方一致
         //      strStyle    expand_all_search 表示需要扩展检索。即截断后面若干位以后检索。如果没有这个值，表示使用精确检索
         //                  exact_match 表示精确一致检索。当 exact_match 结合上 expand_all_search 时，中途都是前方一致的，最后一次才会精确一致
         //      strOutputKey    [out]经过加工后的 key。可能和 strKey 内容不同
@@ -1145,7 +1420,8 @@ bool bClickClose = false)
         int SearchOneKey(
             Relation relation,
             string strKey,
-            string strStyle,
+            // string strStyle,
+            string strMatchStyle,
             out string strOutputKey,
             out List<ResultItem> results,
             out string strError)
@@ -1161,20 +1437,6 @@ bool bClickClose = false)
             }
 
 #if NO
-                    //                  remove_slash 先移除 key 中的斜杠再进行检索
-
-            if (StringUtil.IsInList("remove_slash", strStyle) == true)
-            {
-                string strLeft = "";
-                string strRight = "";
-                StringUtil.ParseTwoPart(strKey, "/", out strLeft, out strRight);
-                strKey = strLeft.Trim();
-                if (string.IsNullOrEmpty(strKey) == true)
-                    return 0;
-                strOutputKey = strKey;
-            }
-#endif
-
             bool bExpandAllSearch = StringUtil.IsInList("expand_all_search", strStyle);
             bool bExpandSearch = StringUtil.IsInList("expand_search", strStyle);
             bool bExactMatch = StringUtil.IsInList("exact_match", strStyle);
@@ -1254,6 +1516,50 @@ bool bClickClose = false)
                     keys.Add(key);
                 }
             }
+#endif
+            List<SearchItem> keys = new List<SearchItem>();
+
+            if (strMatchStyle == "exact" || strMatchStyle == "left")
+            {
+                SearchItem key = new SearchItem();
+                key.Key = strKey;
+                key.MatchStyle = strMatchStyle; // "exact";
+                key.Style = "stop";
+                keys.Add(key);
+            }
+            else if (strMatchStyle == "auto_expand")
+            {
+                // 先检索较长的 key
+                for (int i = strKey.Length; i > 0; i--)
+                {
+                    if (i == strKey.Length)
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey;
+                        key.MatchStyle = "exact";
+                        key.Style = "stop";
+                        keys.Add(key);
+                    }
+
+                    {
+                        SearchItem key = new SearchItem();
+                        key.Key = strKey.Substring(0, i);
+
+                        key.MatchStyle = "left";
+                        if (i < strKey.Length)
+                            key.Style = "stop"; // 命中则停止探索
+                        else
+                            key.Style = ""; // 如果是最长的 key，则不精确检索即便命中也不停止后面的继续探索
+                        keys.Add(key);
+                    }
+
+                }
+            }
+            else
+            {
+                strError = "无法识别的 strMatchStyle ["+strMatchStyle+"]";
+                return -1;
+            }
 
             // 用于去重
             Hashtable recpath_table = new Hashtable();
@@ -1270,25 +1576,23 @@ bool bClickClose = false)
                         return -1;
                     }
 
-                    string strMatchStyle = key.MatchStyle;
-
                     // string strPartKey = strKey.Substring(0, i);
-                    List<string> temp = new List<string>();
+                    List<string> temp_results = new List<string>();
                     // return:
                     //      -1  出错
                     //      0   没有找到
                     //      >0  命中的条数
                     int nRet = Search(relation.DbName,
                         key.Key,
-                        strMatchStyle,  // "left",
+                        key.MatchStyle,  // "left",
                         MaxHitCount + 1,
-                        ref temp,
+                        ref temp_results,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
                     // 去重并加入最后集合
-                    foreach (string s in temp)
+                    foreach (string s in temp_results)
                     {
                         string strRecPath = "";
                         string strXml = "";
@@ -1303,7 +1607,10 @@ bool bClickClose = false)
                     }
 
                     if (key.Style == "stop" && nRet > 0)
+                    {
+                        strOutputKey = key.Key; // 实际命中的 key
                         break;
+                    }
 
 #if NO
                     // 在扩展检索情形下，如果一次检索命中结果超过极限，说明还需要继续检索下一个 key(这是担心结果集不足以概括更下级的类目)。继续检索下去直到一次检索的结果数量小于极限
@@ -1345,7 +1652,7 @@ bool bClickClose = false)
         {
             strError = "";
 
-            string strMessage = "正在针对数据库 " + strDbName + " 检索词条 '" + strKey + "' ...";
+            string strMessage = "检索 " + strDbName + " '" + strKey + "' ...";
             this.ShowMessage(strMessage);
             _stop.SetMessage(strMessage);
 
@@ -1604,11 +1911,17 @@ strHtml2 +
             }
         }
 
-        private void toolStripButton_expandAll_Click(object sender, EventArgs e)
+        private void toolStripButton_expand_1_Click(object sender, EventArgs e)
         {
+#if NO
             string strStyle = _defaultStyle;
             StringUtil.RemoveFromInList("expand_search", true, ref strStyle);
             StringUtil.SetInList(ref strStyle, "expand_all_search", true);
+            this.Process(strStyle);
+#endif
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_2", true, ref strStyle);
+            StringUtil.SetInList(ref strStyle, "expand_1", true);
             this.Process(strStyle);
         }
 
@@ -1620,11 +1933,17 @@ strHtml2 +
             this.Process(strStyle);
         }
 
-        private void toolStripButton_expand_search_Click(object sender, EventArgs e)
+        private void toolStripButton_expand_2_Click(object sender, EventArgs e)
         {
+#if NO
             string strStyle = _defaultStyle;
             StringUtil.RemoveFromInList("expand_all_search", true, ref strStyle);
             StringUtil.SetInList(ref strStyle, "expand_search", true);
+            this.Process(strStyle);
+#endif
+            string strStyle = _defaultStyle;
+            StringUtil.RemoveFromInList("expand_1", true, ref strStyle);
+            StringUtil.SetInList(ref strStyle, "expand_2", true);
             this.Process(strStyle);
         }
 

@@ -28,8 +28,8 @@ namespace DigitalPlatform
      */
 
     // Stop事件
-	public delegate void StopEventHandler(object sender,
-	    StopEventArgs e);
+    public delegate void StopEventHandler(object sender,
+        StopEventArgs e);
 
     public class StopEventArgs : EventArgs
     {
@@ -90,9 +90,10 @@ namespace DigitalPlatform
 
         // parameters:
         //      strMessage  要显示的消息。如果为 null，表示不显示消息
-        public void Initial(// Delegate_doStop doStopDelegate,
+        public string Initial(// Delegate_doStop doStopDelegate,
             string strMessage)
         {
+            string strOldMessage = m_strMessage;
             // m_doStopDelegate = doStopDelegate;
             if (strMessage != null)
             {
@@ -105,6 +106,8 @@ namespace DigitalPlatform
                         true);
                 }
             }
+
+            return strOldMessage;
         }
 
         // 注册，和管理对象建立联系
@@ -122,40 +125,134 @@ namespace DigitalPlatform
 
         public void Unregister(bool bActive = true)
         {
-            m_manager.Remove(this, false);
-            m_manager = null;
+            if (m_manager != null)
+            {
+                m_manager.Remove(this, false);
+                m_manager = null;
+            }
+        }
+
+        int _inBeginLoop = 0;
+
+        // 检查当前是否已经处于 BeginLoop() 之中
+        public bool IsInLoop
+        {
+            get
+            {
+                return _inBeginLoop > 0;
+            }
+        }
+
+        bool _allowNest = false;
+
+        public bool AllowNest
+        {
+            get
+            {
+                return _allowNest;
+            }
+            set
+            {
+                this._allowNest = value;
+            }
+        }
+
+        // 允许或者禁止嵌套 BeginLoop()
+        public bool SetAllowNest(bool bAllow)
+        {
+            bool bOldValue = this._allowNest;
+            this._allowNest = bAllow;
+            return bOldValue;
         }
 
         //准备做事情,被循环调，时面了调了Stopmanager的Enable()函数，修改父窗口的按钮状态
+        // return:
+        //      true 成功
+        //      false   失败。BeginLoop() 发生了嵌套
         public void BeginLoop()
         {
-            nStop = 0;	// 正在处理
+#if NO
+            if (_inBeginLoop > 0 
+                && _allowNest == false)
+                throw new Exception("针对同一 Stop 对象，BeginLoop 不能嵌套调用");
+#endif
 
-            if (m_manager != null)
+            int nRet = Interlocked.Increment(ref _inBeginLoop);
+            // _inBeginLoop++;
+            if (nRet == 1)
             {
-                bool bIsActive = m_manager.IsActive(this);
+                nStop = 0;	// 正在处理
 
-                if (this.OnBeginLoop != null)
+                if (m_manager != null)
                 {
-                    BeginLoopEventArgs e = new BeginLoopEventArgs();
-                    e.IsActive = bIsActive;
-                    this.OnBeginLoop(this, e);
-                }
+                    bool bIsActive = m_manager.IsActive(this);
 
-                if (bIsActive == true)
-                {
-                    m_manager.ChangeState(this,
-                        StateParts.All | StateParts.SaveEnabledState,
-                        true);
-                }
-                else
-                {
-                    // 不在激活位置的stop，不要记忆原有的reversebutton状态。因为这样会记忆到别人的状态
-                    m_manager.ChangeState(this,
-                        StateParts.All ,
-                        true);
+                    if (this.OnBeginLoop != null)
+                    {
+                        BeginLoopEventArgs e = new BeginLoopEventArgs();
+                        e.IsActive = bIsActive;
+                        this.OnBeginLoop(this, e);
+                    }
+
+                    if (bIsActive == true)
+                    {
+                        m_manager.ChangeState(this,
+                            StateParts.All | StateParts.SaveEnabledState,
+                            true);
+                    }
+                    else
+                    {
+                        // 不在激活位置的stop，不要记忆原有的reversebutton状态。因为这样会记忆到别人的状态
+                        m_manager.ChangeState(this,
+                            StateParts.All,
+                            true);
+                    }
                 }
             }
+        }
+
+        //事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮为发灰状态
+        public void EndLoop()
+        {
+            if (_inBeginLoop == 0)
+                throw new Exception("针对同一 Stop 对象，调用 EndLoop() 不应超过 BeginLoop() 调用次数");
+
+            int nRet = Interlocked.Decrement(ref _inBeginLoop);
+
+            if (nRet == 0)
+            {
+                nStop = 2;	// 转为 已经停止 状态
+
+                if (m_manager != null)
+                {
+                    bool bIsActive = m_manager.IsActive(this);
+
+                    this.m_strMessage = "";
+
+                    if (this.OnEndLoop != null)
+                    {
+                        EndLoopEventArgs e = new EndLoopEventArgs();
+                        e.IsActive = bIsActive;
+                        this.OnEndLoop(this, e);
+                    }
+
+                    if (bIsActive == true)
+                    {
+                        m_manager.ChangeState(this,
+                            StateParts.All | StateParts.RestoreEnabledState,
+                            true);
+                    }
+                    else
+                    {
+                        // 不在激活位置，不要恢复所谓旧状态
+                        m_manager.ChangeState(this,
+                            StateParts.All,
+                            true);
+                    }
+                }
+            }
+
+            // _inBeginLoop--;
         }
 
         public void SetMessage(string strMessage)
@@ -219,39 +316,6 @@ namespace DigitalPlatform
             }
         }
 
-        //事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮为发灰状态
-        public void EndLoop()
-        {
-            nStop = 2;	// 已经停止
-
-            if (m_manager != null)
-            {
-                bool bIsActive = m_manager.IsActive(this);
-
-                this.m_strMessage = "";
-
-                if (this.OnEndLoop != null)
-                {
-                    EndLoopEventArgs e = new EndLoopEventArgs();
-                    e.IsActive = bIsActive;
-                    this.OnEndLoop(this, e);
-                }
-
-                if (bIsActive == true)
-                {
-                    m_manager.ChangeState(this,
-                        StateParts.All | StateParts.RestoreEnabledState,
-                        true);
-                }
-                else
-                {
-                    // 不在激活位置，不要恢复所谓旧状态
-                    m_manager.ChangeState(this,
-                        StateParts.All,
-                        true);
-                }
-            }
-        }
 
         //查看是否结束,被StopManager调
         public virtual int State
@@ -421,7 +485,7 @@ namespace DigitalPlatform
                 }
             }
 
-            if (m_reverseButtons == null 
+            if (m_reverseButtons == null
                 || m_reverseButtons.Count == 0)
                 return;
 
@@ -757,14 +821,14 @@ string strText)
                 if (lStart >= 0)
                     progressbar.Minimum = (int)(this.progress_ratio * (double)lStart);
 
-                if (lValue >=0 )
-                    progressbar.Value = (int)(this.progress_ratio * (double)lValue); 
+                if (lValue >= 0)
+                    progressbar.Value = (int)(this.progress_ratio * (double)lValue);
             }
         }
 
         void SetRatio(long lEnd)
         {
-            this.progress_ratio =  (double)64000 / (double)lEnd;
+            this.progress_ratio = (double)64000 / (double)lEnd;
             if (this.progress_ratio > 1.0)
                 this.progress_ratio = 1.0;
         }
@@ -1302,9 +1366,9 @@ string strText)
                 stops.Remove(stop);
 
                 if (bChangeState == true)
-                ChangeState(null,
-                    StateParts.All,
-                    false); // false表示不加集合锁
+                    ChangeState(null,
+                        StateParts.All,
+                        false); // false表示不加集合锁
             }
             finally
             {

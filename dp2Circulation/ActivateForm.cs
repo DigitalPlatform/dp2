@@ -453,8 +453,8 @@ MessageBoxDefaultButton.Button2);
                     dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
                     nRet = dlg.Initial(
                         this.MainForm,
-                        this.Channel,
-                        this.stop,
+                        //this.Channel,
+                        //this.stop,
                         StringUtil.SplitList(strRecPath),
                         "请选择一个读者记录",
                         out strError);
@@ -471,7 +471,9 @@ MessageBoxDefaultButton.Button2);
                         return 0;
                     }
 
-                    strBarcode = dlg.SelectedBarcode;
+                    // strBarcode = dlg.SelectedBarcode;
+                    strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16
+
                     nRedoCount++;
                     goto REDO;
                 }

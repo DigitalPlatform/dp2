@@ -3783,11 +3783,28 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 DigitalPlatform.EasyMarc.EasyLine.SetLineColor(Boolean bSetAll)
+在 DigitalPlatform.EasyMarc.SubfieldLine.SetLineColor(Boolean bSetAll)
+在 DigitalPlatform.EasyMarc.EasyLine.set_State(ItemState value)
+在 DigitalPlatform.EasyMarc.EasyMarcControl.SelectItem(EasyLine element, Boolean bClearOld, Boolean bSetFocus)
+在 DigitalPlatform.EasyMarc.EasyLine.control_Enter(Object sender, EventArgs e)
+在 System.Windows.Forms.ContainerControl.UpdateFocusedControl()
+
+
+         * */
         // 设置事项左端label的颜色
         // parameters:
         //      bSetAll 是否要重设全部颜色？= false 表示仅重设和焦点变化有关的颜色; = true 表示要重设全部颜色，包括和焦点变化无关的那些颜色
         public virtual void SetLineColor(bool bSetAll = false)
         {
+            if (this.Container == null)
+                return;
+
             if (bSetAll == true)
             {
                 if (this.Container.BackColor != Color.Transparent)

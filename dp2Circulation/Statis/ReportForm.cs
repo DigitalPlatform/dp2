@@ -92,24 +92,26 @@ namespace dp2Circulation
             // DelaySetUploadButtonState();
             BeginUpdateUploadButtonText();
 
-            if (this.MainForm.ServerVersion < 2.31)
-                MessageBox.Show(this, "报表窗需要和 dp2library 2.31 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion.ToString() + ")\r\n\r\n请及时升级 dp2library 到最新版本");
+            double dp2library_version = 2.60;
+
+            if (this.MainForm.ServerVersion < dp2library_version)
+                MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion.ToString() + ")\r\n\r\n请及时升级 dp2library 到最新版本");
             else
             {
-                double version = 0;
+                double local_version = 0;
                 // 读入断点信息的版本号
                 // return:
                 //      -1  出错
                 //      0   文件不存在
                 //      1   成功
                 nRet = GetBreakPointVersion(
-                out version,
+                out local_version,
                 out strError);
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
                 else if (nRet == 1)
                 {
-                    if (version < _version)
+                    if (local_version < _local_version)
                     {
                         MessageBox.Show(this, "由于程序升级，本地存储的结构定义发生改变，请注意稍后重新从头创建本地存储");
                     }
@@ -169,13 +171,12 @@ namespace dp2Circulation
         string _connectionString = "";
         // const int INSERT_BATCH = 100;  // 300;
 
-
-
         // 根据日志文件创建本地 operlogxxx 表
         int DoCreateOperLogTable(
             long lProgressStart,
             string strStartDate,
             string strEndDate,
+            LogType logType,
             out string strLastDate,
             out long lLastIndex,
             out string strError)
@@ -208,6 +209,7 @@ namespace dp2Circulation
             {
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
 
+                // TODO: 对于 AccessLog 只删除它相关的一个索引
                 foreach (string type in OperLogTable.DbTypes)
                 {
                     nRet = OperLogTable.DeleteAdditionalIndex(
@@ -269,6 +271,7 @@ namespace dp2Circulation
                 loader.AutoCache = false;
                 loader.CacheDir = "";
                 loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";
+                loader.LogType = logType;
 
                 loader.ProgressStart = lProgressStart;
 
@@ -346,28 +349,6 @@ MessageBoxDefaultButton.Button1);
                             nRecCount = 0;
                         }
                         nRecCount++;
-#if NO
-                            if (circu_lines.Count >= INSERT_BATCH
-    || (circu_lines.Count > 0 && nCircuRecCount >= 1000))
-                            {
-                                // 写入数据库一次
-                                nRet = OperLogLine.AppendOperLogLines(
-                                    connection,
-                                    circu_lines,
-                                    true,
-                                    out strError);
-                                if (nRet == -1)
-                                    return -1;
-                                circu_lines.Clear();
-
-                                strLastDate = item.Date;
-                                lLastIndex = item.Index + 1;
-                                nCircuRecCount = 0;
-                            }
-
-                            nCircuRecCount++;
-#endif
-
                     }
                 }
                 catch (Exception ex)
@@ -376,23 +357,6 @@ MessageBoxDefaultButton.Button1);
                     return -1;
                 }
 
-#if NO
-                    if (circu_lines.Count > 0)
-                    {
-                        // 写入数据库一次
-                        nRet = OperLogLine.AppendOperLogLines(
-                            connection,
-                            circu_lines,
-                            true,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-
-                        // 表示处理完成
-                        strLastDate = "";
-                        lLastIndex = 0;
-                    }
-#endif
                 nRet = buffer.WriteToDb(connection,
                     true,
                     true,   // false,
@@ -844,6 +808,8 @@ MessageBoxDefaultButton.Button1);
 
                 string strQueryXml = "";
 
+                // 2015/11/25
+                this.Channel.Timeout = new TimeSpan(0, 5, 0);
                 long lRet = this.Channel.SearchBiblio(stop,
                     strBiblioDbNameParam,
                     "", // (lIndex + 1).ToString() + "-", // 
@@ -888,6 +854,8 @@ MessageBoxDefaultButton.Button1);
                         return -1;
                     }
 
+                    // 2015/11/25
+                    this.Channel.Timeout = new TimeSpan(0, 0, 30);
                     lRet = this.Channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
@@ -929,6 +897,9 @@ MessageBoxDefaultButton.Button1);
                     {
                         Debug.Assert(biblio_recpaths.Count == lines.Count, "");
 
+                        // 2015/11/25
+                        this.Channel.Timeout = new TimeSpan(0, 0, 30);
+
                         // 获得书目摘要
                         BiblioLoader loader = new BiblioLoader();
                         loader.Channel = this.Channel;
@@ -936,6 +907,9 @@ MessageBoxDefaultButton.Button1);
                         loader.Format = "summary";
                         loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                         loader.RecPaths = biblio_recpaths;
+
+                        loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                        loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                         try
                         {
@@ -5578,6 +5552,7 @@ MessageBoxDefaultButton.Button2);
             return results;
         }
 
+        // 本地库的版本号
         // 0.01 (2014/4/30) 第一个版本
         // 0.02 (2014/5/6) item 表 增加了两个 index: item_itemrecpath_index 和 item_biliorecpath_index
         // 0.03 (2014/5/29) item 表增加了 borrower borrowtime borrowperiod returningtime 等字段
@@ -5587,7 +5562,7 @@ MessageBoxDefaultButton.Button2);
         // 0.07 (2014/6/19) operlogitem 表增加了 itembarcode 字段
         // 0.08 (2014/11/6) reader 表增加了 state 字段 
         // 0.09 (2015/7/14) 增加了 operlogpassgate 和 operloggetres 表
-        static double _version = 0.09;
+        static double _local_version = 0.09;
 
         // TODO: 最好把第一次初始化本地 sql 表的动作也纳入 XML 文件中，这样做单项任务的时候，就不会毁掉其他的表
         // 创建批处理计划
@@ -5615,26 +5590,14 @@ MessageBoxDefaultButton.Button2);
                 // 开始处理时的日期
                 string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
 
-                // 获得日志文件中记录的总数
-                // parameters:
-                //      strDate 日志文件的日期，8 字符
-                // return:
-                //      -1  出错
-                //      0   日志文件不存在，或者记录数为 0
-                //      >0  记录数
-                long lCount = GetOperLogCount(strEndDate,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                DomUtil.SetAttr(task_dom.DocumentElement, "version", _version.ToString());
+                DomUtil.SetAttr(task_dom.DocumentElement, "version", _local_version.ToString());
 
                 DomUtil.SetAttr(task_dom.DocumentElement,
                     "state", "first");  // 表示首次创建尚未完成
 
                 // 记载首次创建的结束时间点
                 DomUtil.SetAttr(task_dom.DocumentElement, "end_date", strEndDate);
-                DomUtil.SetAttr(task_dom.DocumentElement, "index", lCount.ToString());
+                // DomUtil.SetAttr(task_dom.DocumentElement, "index", lCount.ToString());
 
                 // *** 创建用户表
                 if (strTypeList == "*"
@@ -5853,13 +5816,31 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错
                     //      0   没有找到
                     //      1   找到
-                    nRet = GetFirstOperLogDate(out strFirstDate,
+                    nRet = GetFirstOperLogDate(
+                        LogType.OperLog | LogType.AccessLog,
+                        out strFirstDate,
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "获得第一个日志文件日期时出错: " + strError;
+                        strError = "获得第一个操作日志文件日期时出错: " + strError;
                         return -1;
                     }
+
+                    // 获得日志文件中记录的总数
+                    // parameters:
+                    //      strDate 日志文件的日期，8 字符
+                    // return:
+                    //      -2  此类型的日志在 dp2library 端尚未启用
+                    //      -1  出错
+                    //      0   日志文件不存在，或者记录数为 0
+                    //      >0  记录数
+                    long lCount = GetOperLogCount(strEndDate,
+                        LogType.OperLog,
+                        out strError);
+                    if (lCount < 0)
+                        return -1;
+
+                    DomUtil.SetAttr(task_dom.DocumentElement, "index", lCount.ToString());
 
                     if (nRet == 1)
                     {
@@ -5873,6 +5854,54 @@ MessageBoxDefaultButton.Button2);
                             strFirstDate);
 
                         XmlNode node = task_dom.CreateElement("operlog");
+                        task_dom.DocumentElement.AppendChild(node);
+
+                        DomUtil.SetAttr(node, "start_date", strFirstDate);  // "20060101"
+                        DomUtil.SetAttr(node, "end_date", strEndDate + ":0-" + (lCount - 1).ToString());
+                    }
+                }
+
+                // *** 创建访问日志表
+                if (strTypeList == "*"
+                    || StringUtil.IsInList("accesslog", strTypeList) == true)
+                {
+                    string strFirstDate = "";
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = GetFirstOperLogDate(
+                        LogType.AccessLog,
+                        out strFirstDate,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "获得第一个访问日志文件日期时出错: " + strError;
+                        return -1;
+                    }
+
+                    // 获得日志文件中记录的总数
+                    // parameters:
+                    //      strDate 日志文件的日期，8 字符
+                    // return:
+                    //      -2  此类型的日志在 dp2library 端尚未启用
+                    //      -1  出错
+                    //      0   日志文件不存在，或者记录数为 0
+                    //      >0  记录数
+                    long lCount = GetOperLogCount(strEndDate,
+                        LogType.AccessLog,
+                        out strError);
+                    if (lCount == -1)
+                        return -1;
+
+                    if (nRet == 1 && lCount >= 0)
+                    {
+                        // 记载第一个访问日志文件日期
+                        DomUtil.SetAttr(task_dom.DocumentElement,
+                            "first_accesslog_date",
+                            strFirstDate);
+
+                        XmlNode node = task_dom.CreateElement("accesslog");
                         task_dom.DocumentElement.AppendChild(node);
 
                         DomUtil.SetAttr(node, "start_date", strFirstDate);  // "20060101"
@@ -5898,47 +5927,75 @@ MessageBoxDefaultButton.Button2);
         //      -1  出错
         //      0   没有找到
         //      1   找到
-        int GetFirstOperLogDate(out string strFirstDate,
+        int GetFirstOperLogDate(
+            LogType logType,
+            out string strFirstDate,
             out string strError)
         {
             strFirstDate = "";
             strError = "";
 
             DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records = null;
-            // 获得日志
-            // return:
-            //      -1  error
-            //      0   file not found
-            //      1   succeed
-            //      2   超过范围，本次调用无效
-            long lRet = this.Channel.GetOperLogs(
-                null,
-                "",
-                0,
-                -1,
-                1,
-                "getfilenames",
-                "", // strFilter
-                out records,
-                out strError);
-            if (lRet == -1)
+
+            List<string> dates = new List<string>();
+            List<string> styles = new List<string>();
+            if ((logType & LogType.OperLog) != 0)
+                styles.Add("getfilenames");
+            if ((logType & LogType.AccessLog) != 0)
+                styles.Add("getfilenames,accessLog");
+            if (styles.Count == 0)
+            {
+                strError = "logStyle 参数值中至少要包含一种类型";
                 return -1;
-            if (lRet == 0)
+            }
+
+            foreach (string style in styles)
+            {
+                // 获得日志
+                // return:
+                //      -1  error
+                //      0   file not found
+                //      1   succeed
+                //      2   超过范围，本次调用无效
+                long lRet = this.Channel.GetOperLogs(
+                    null,
+                    "",
+                    0,
+                    -1,
+                    1,
+                    style,  // "getfilenames",
+                    "", // strFilter
+                    out records,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
+                    continue;
+
+                if (records == null || records.Length < 1)
+                {
+                    strError = "records error";
+                    return -1;
+                }
+
+                if (string.IsNullOrEmpty(records[0].Xml) == true
+                    || records[0].Xml.Length < 8)
+                {
+                    strError = "records[0].Xml error";
+                    return -1;
+                }
+
+                dates.Add(records[0].Xml.Substring(0, 8));
+            }
+
+            if (dates.Count == 0)
                 return 0;
 
-            if (records == null || records.Length < 1)
-            {
-                strError = "records error";
-                return -1;
-            }
-
-            if (string.IsNullOrEmpty(records[0].Xml) == true
-                || records[0].Xml.Length < 8)
-            {
-                strError = "records[0].Xml error";
-            }
-
-            strFirstDate = records[0].Xml.Substring(0, 8);
+            // 取较小的一个
+            if (dates.Count > 1)
+                dates.Sort();
+            strFirstDate = dates[0];
             return 1;
         }
 
@@ -5971,14 +6028,6 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     return -1;
             }
-#if NO
-            int nRet = OperLogLine.CreateOperLogTable(
-this._connectionString,
-out strError);
-            if (nRet == -1)
-                return -1;
-#endif
-
             return 0;
         }
 
@@ -6292,6 +6341,66 @@ out strError);
                                 -1,
                                 strStartDate,
                                 strEndDate,
+                                LogType.OperLog,
+                                out strLastDate,
+                                out lLastIndex,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                if (string.IsNullOrEmpty(strLastDate) == false)
+                                    DomUtil.SetAttr(node, "start_date", strLastDate + ":" + lLastIndex.ToString() + "-");
+                                return -1;
+                            }
+                            DomUtil.SetAttr(node, "state", "finish");
+                        }
+                    }
+
+                    if (node.Name == "accesslog")
+                    {
+                        string strTableInitilized = DomUtil.GetAttr(node,
+    "initial_tables");
+
+                        string strStartDate = DomUtil.GetAttr(node, "start_date");
+                        string strEndDate = DomUtil.GetAttr(node, "end_date");
+                        string strState = DomUtil.GetAttr(node, "state");
+
+                        if (string.IsNullOrEmpty(strStartDate) == true)
+                        {
+                            strError = "start_date 属性值不应为空: " + node.OuterXml;
+                            return -1;
+                        }
+                        if (string.IsNullOrEmpty(strEndDate) == true)
+                        {
+                            strError = "end_date 属性值不应为空: " + node.OuterXml;
+                            return -1;
+                        }
+
+                        if (strTableInitilized != "finish")
+                        {
+#if NO
+                            stop.SetMessage("正在初始化本地数据库的日志表 ...");
+                            Application.DoEvents();
+
+                            nRet = CreateAccessLogTables(out strError);
+                            if (nRet == -1)
+                                return -1;
+#endif
+                            // 前面应该已经初始化过了
+                            DomUtil.SetAttr(node,
+                                "initial_tables", "finish");
+                        }
+
+                        if (strState != "finish")
+                        {
+                            string strLastDate = "";
+                            long lLastIndex = 0;
+                            // TODO: 中断时断点记载
+                            // TODO: 进度条应该是重新设置的
+                            nRet = DoCreateOperLogTable(
+                                -1,
+                                strStartDate,
+                                strEndDate,
+                                LogType.AccessLog,
                                 out strLastDate,
                                 out lLastIndex,
                                 out strError);
@@ -6412,10 +6521,6 @@ out strError);
 
             string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
 
-            // File.Delete(strBreakPointFileName);
-
-            // XmlDocument task_dom = null;
-
             XmlDocument task_dom = new XmlDocument();
             try
             {
@@ -6444,8 +6549,7 @@ out strError);
 
             try
             {
-                nRet = DoPlan(ref task_dom,
-                    out strError);
+                nRet = DoPlan(ref task_dom, out strError);
             }
             finally
             {
@@ -6521,6 +6625,7 @@ out strError);
 
         // 写入断点信息
         int WriteDailyBreakPoint(
+            LogType logType,
             string strEndDate,
             long lIndex,
             out string strError)
@@ -6543,9 +6648,12 @@ out strError);
                 return -1;
             }
 
+            string strPrefix = "";
+            if ((logType & LogType.AccessLog) != 0)
+                strPrefix = "accessLog_";
 
-            DomUtil.SetAttr(dom.DocumentElement, "end_date", strEndDate);
-            DomUtil.SetAttr(dom.DocumentElement, "index", lIndex.ToString());
+            DomUtil.SetAttr(dom.DocumentElement, strPrefix + "end_date", strEndDate);
+            DomUtil.SetAttr(dom.DocumentElement, strPrefix + "index", lIndex.ToString());
 
             dom.Save(strFileName);
             return 0;
@@ -6589,12 +6697,75 @@ out strError);
             return 1;
         }
 
+        // 读入两种断点信息，综合判断
+        // return:
+        //      -1  出错
+        //      0   正常
+        //      1   首次创建尚未完成
+        int LoadDailyBreakPoint(
+            out string strEndDate,
+            out long lIndex,
+            out string strState,
+            out string strError)
+        {
+            strError = "";
+            strEndDate = "";
+            lIndex = -1;
+            strState = "";
+
+            string strEndDate1 = "";
+            long lIndex1 = 0;
+            string strState1 = "";
+            int nRet1 = LoadDailyBreakPoint(
+                LogType.OperLog,
+                out strEndDate1,
+                out lIndex1,
+                out strState1,
+                out strError);
+            if (nRet1 == -1)
+                return -1;
+
+            string strEndDate2 = "";
+            long lIndex2 = 0;
+            string strState2 = "";
+            int nRet2 = LoadDailyBreakPoint(
+                LogType.OperLog,
+                out strEndDate2,
+                out lIndex2,
+                out strState2,
+                out strError);
+            if (nRet2 == -1)
+                return -1;
+
+            if (strState1 == "first" || strState2 == "first")
+                strState = "first";
+            else
+                strState = strState1;
+
+            if (nRet1 == 1 || nRet2 == 1)
+                return 1;
+
+            // 选小的一个做结束日期
+            if (string.Compare(strEndDate1, strEndDate2) > 0)
+            {
+                strEndDate = strEndDate2;
+                lIndex = lIndex2;
+            }
+            else
+            {
+                strEndDate = strEndDate1;
+                lIndex = lIndex1;
+            }
+            return 0;
+        }
+
         // 读入断点信息
         // return:
         //      -1  出错
         //      0   正常
         //      1   首次创建尚未完成
         int LoadDailyBreakPoint(
+            LogType logType,
             out string strEndDate,
             out long lIndex,
             out string strState,
@@ -6621,19 +6792,23 @@ out strError);
                 return -1;
             }
 
-            strEndDate = DomUtil.GetAttr(dom.DocumentElement, "end_date");
-            int nRet = DomUtil.GetIntegerParam(dom.DocumentElement, "index",
+            string strPrefix = "";
+            if ((logType & LogType.AccessLog) != 0)
+                strPrefix = "accessLog_";
+
+            strEndDate = DomUtil.GetAttr(dom.DocumentElement, strPrefix + "end_date");
+            int nRet = DomUtil.GetIntegerParam(dom.DocumentElement, strPrefix + "index",
                 0, 
                 out lIndex,
                 out strError);
             if (nRet == -1)
                 return -1;
 
+            // state 元素中的状态，是首次创建本地缓存后总体的状态，是操作日志和访问日志都复制过来以后，才会设置为 "daily" 
             strState = DomUtil.GetAttr(dom.DocumentElement,
                 "state");
             if (strState != "daily")
                 return 1;   // 首次创建尚未完成
-
             return 0;
         }
 
@@ -6668,6 +6843,7 @@ out strError);
         int DoReplication(
             string strStartDate,
             string strEndDate,
+            LogType logType,
             // long index,
             out string strLastDate,
             out long last_index,
@@ -6687,6 +6863,12 @@ out strError);
                 out strLeft,
                 out strRight);
             strStartDate = strLeft;
+
+            if (string.IsNullOrEmpty(strStartDate) == true)
+            {
+                strError = "DoReplication() 出错: strStartDate 参数值不应为空";
+                return -1;
+            }
 
             EnableControls(false);
 
@@ -6744,6 +6926,7 @@ out strError);
                     loader.nLevel = 2;  // this.MainForm.OperLogLevel;
                     loader.AutoCache = false;
                     loader.CacheDir = "";
+                    loader.LogType = logType;
 
                     loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                     loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -6771,7 +6954,6 @@ out strError);
                         if (string.IsNullOrEmpty(item.Xml) == true)
                             goto CONTINUE;
 
-
                         XmlDocument dom = new XmlDocument();
                         try
                         {
@@ -6779,7 +6961,7 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
+                            strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
                             DialogResult result = MessageBox.Show(this,
 strError + "\r\n\r\n是否跳过此条记录继续处理?",
 "ReportForm",
@@ -6881,14 +7063,12 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         // lProcessCount++;
-
                     CONTINUE:
                         // 便于循环外获得这些值
                         strLastItemDate = item.Date;
                         lLastItemIndex = item.Index + 1;
 
                         // index = 0;  // 第一个日志文件后面的，都从头开始了
-
                     }
 
                     // 缓存中尚未最后兑现的部分
@@ -6898,25 +7078,6 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         return -1;
 
-#if NO
-                    // 最后一批
-                    if (lines.Count > 0)
-                    {
-                        // 写入 operlog 表一次
-                        nRet = OperLogLine.AppendOperLogLines(
-                            connection,
-                            lines,
-                            true,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        lines.Clear();
-
-                        // 记忆
-                        strLastDate = strLastItemDate;
-                        last_index = lLastItemIndex;
-                    }
-#endif
                     // 最后一批
                     nRet = buffer.WriteToDb(connection,
     true,
@@ -8593,10 +8754,12 @@ strSourceRecPath);
         // parameters:
         //      strDate 日志文件的日期，8 字符
         // return:
+        //      -2  此类型的日志在 dp2library 端尚未启用
         //      -1  出错
         //      0   日志文件不存在，或者记录数为 0
         //      >0  记录数
         long GetOperLogCount(string strDate,
+            LogType logType,
             out string strError)
         {
             strError = "";
@@ -8606,6 +8769,10 @@ strSourceRecPath);
             byte[] attachment_data = null;
 
             long lRecCount = 0;
+
+            string strStyle = "getcount";
+            if ((logType & LogType.AccessLog) != 0)
+                strStyle += ",accessLog";
 
             // 获得日志文件尺寸
             // return:
@@ -8618,7 +8785,7 @@ strSourceRecPath);
                 strDate + ".log",
                 -1,    // lIndex,
                 -1, // lHint,
-                "getcount",
+                strStyle,
                 "", // strFilter
                 out strXml,
                 out lRecCount,
@@ -8634,17 +8801,45 @@ strSourceRecPath);
             }
             if (lRet != 1)
                 return -1;
+            if (lRecCount == -1)
+            {
+                strError = logType.ToString() + " 型的日志在 dp2library 中尚未启用";
+                return -2;
+            }
             Debug.Assert(lRecCount >= 0, "");
-
             return lRecCount;
         }
-
 
         // 执行每日同步任务
         // 从上次记忆的断点位置，开始同步
         private void button_start_dailyReplication_Click(object sender, EventArgs e)
         {
             string strError = "";
+            int nRet = 0;
+
+            nRet = DoDailyReplication(LogType.OperLog, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            nRet = DoDailyReplication(LogType.AccessLog, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "处理完成");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 执行每日同步任务
+        // 从上次记忆的断点位置，开始同步
+        // return:
+        //      -1  出错
+        //      0   没有必要进行同步。因为指定类型的日志在服务器端尚未启用
+        //      1   成功
+        int DoDailyReplication(
+            LogType logType,
+            out string strError)
+        {
+            strError = "";
             int nRet = 0;
 
             string strEndDate = "";
@@ -8656,16 +8851,24 @@ strSourceRecPath);
             //      0   正常
             //      1   首次创建尚未完成
             nRet = LoadDailyBreakPoint(
+                logType,
                 out strEndDate,
                 out lIndex,
                 out strState,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            if (strState != "daily")
+            if (nRet == 1 || strState != "daily")
             {
                 strError = "首次创建尚未完成。必须完成后才能进行每日同步";
                 goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(strEndDate) == true
+                && (logType & LogType.AccessLog) != 0)
+            {
+                strError = logType.ToString() + " 型的日志没有启用";
+                return 0;
             }
 
             // TODO: 如果 strEndDate 为空，则需要设定为一个较早的时间
@@ -8688,6 +8891,7 @@ strSourceRecPath);
                 nRet = DoReplication(
                     strEndDate + ":" + lIndex.ToString() + "-",
                     strToday,
+                    logType,
                     // long index,
                     out strLastDate,
                     out last_index,
@@ -8721,24 +8925,22 @@ strSourceRecPath);
                 {
                     string strError_1 = "";
                     nRet = WriteDailyBreakPoint(
+                        logType,
                         strLastDate,
                         last_index,
                         out strError_1);
                     if (nRet == -1)
                         MessageBox.Show(this, strError_1);
                 }
+
+                SetStartButtonStates();
+                SetDailyReportButtonState();
             }
 
-            SetStartButtonStates();
-            SetDailyReportButtonState();
-            MessageBox.Show(this, "处理完成");
-            return;
+            return 1;
         ERROR1:
-            SetStartButtonStates();
-            SetDailyReportButtonState();
-            MessageBox.Show(this, strError);
+            return -1;
         }
-
 
         /// <summary>
         /// 处理对话框键
@@ -8775,10 +8977,36 @@ strSourceRecPath);
 
         List<int> _resultColumnWidths = new List<int>();
 
+        /* 空 SQL 语句容易造成：
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 System.Data.SQLite.SQLiteDataReader.Read()
+在 dp2Circulation.ReportForm.SQLiteQuery()
+在 dp2Circulation.ReportForm.toolStripButton_query_do_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+         * */
         void SQLiteQuery()
         {
             string strError = "";
             // int nRet = 0;
+
+            if (string.IsNullOrEmpty(this.textBox_query_command.Text.Trim()) == true)
+            {
+                strError = "尚未输入 SQL 语句";
+                goto ERROR1;
+            }
 
             EnableControls(false);
 
@@ -8790,7 +9018,6 @@ strSourceRecPath);
             this.timer_qu.Start();
             try
             {
-
                 // 保留以前的列宽度
                 for (int i = 0; i < this.listView_query_results.Columns.Count; i++)
                 {
@@ -8818,6 +9045,12 @@ strSourceRecPath);
                                 if (dr == null
                                     || dr.HasRows == false)
                                     return;
+
+                                if (dr.FieldCount == 0)
+                                {
+                                    strError = "结果中不包含任何列";
+                                    goto ERROR1;
+                                }
 
                                 // 设置列标题
                                 for (int i = 0; i < dr.FieldCount; i++)
@@ -12440,7 +12673,6 @@ MessageBoxDefaultButton.Button1);
             TimeSpan old_timeout = channel.Timeout;
             try
             {
-
                 for (int j = 0; j < ranges.Length; j++)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -12606,7 +12838,7 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-
+        // TODO: 可以尝试用通用版本的 GetFileNames() 加上回调函数定制出本函数
         // 获得一个目录下的全部文件名。包括子目录中的
         static List<string> GetFileNames(string strDataDir,
             FileAttributes attr)
@@ -12676,6 +12908,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // TODO: 可以尝试用通用版本的 GetFileNames() 加上回调函数定制出本函数
         // 获得一个目录下的全部 .rml 文件名。包括子目录中的
         static List<string> GetRmlFileNames(string strDataDir)
         {

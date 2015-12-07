@@ -9,11 +9,11 @@ using System.Diagnostics;
 
 namespace DigitalPlatform.Xml
 {
-	// DomUtil类包含XML DOM的一些扩展功能函数
-	public class DomUtil
-	{
-        public static XmlNode RenameNode(XmlNode node, 
-            string namespaceURI, 
+    // DomUtil类包含XML DOM的一些扩展功能函数
+    public class DomUtil
+    {
+        public static XmlNode RenameNode(XmlNode node,
+            string namespaceURI,
             string qualifiedName)
         {
             if (node.NodeType == XmlNodeType.Element)
@@ -606,81 +606,86 @@ namespace DigitalPlatform.Xml
 
         // parameters:
         //      bHasProlog  是否prolog
-		public static int GetIndentXml(string strXml,
+        public static int GetIndentXml(string strXml,
             bool bHasProlog,
-			out string strOutXml,
-			out string strError)
-		{
-			strOutXml = "";
-			strError = "";
+            out string strOutXml,
+            out string strError)
+        {
+            strOutXml = "";
+            strError = "";
 
-			if (String.IsNullOrEmpty(strXml) == true)
-			{
-				return 0;
-			}
+            if (String.IsNullOrEmpty(strXml) == true)
+            {
+                return 0;
+            }
 
-			XmlDocument dom = new XmlDocument();
-			try 
-			{
-				dom.LoadXml(strXml);
-			}
-			catch (Exception ex)
-			{
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
                 strError = ex.Message;
-				return -1;
-			}
+                return -1;
+            }
 
             if (bHasProlog == true)
                 strOutXml = GetIndentXml(dom);
             else
-			    strOutXml = GetIndentXml(dom.DocumentElement);
+                strOutXml = GetIndentXml(dom.DocumentElement);
 
-			return 0;
-		}
-
-
+            return 0;
+        }
 
         // 获得缩进的XML源代码
         public static string GetIndentXml(XmlNode node)
         {
-            MemoryStream m = new MemoryStream();
+            using (MemoryStream m = new MemoryStream())
+            using (XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8))
+            {
+                w.Formatting = Formatting.Indented;
+                w.Indentation = 4;
+                node.WriteTo(w);
+                w.Flush();
 
-            XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8);
-            w.Formatting = Formatting.Indented;
-            w.Indentation = 4;
-            node.WriteTo(w);
-            w.Flush();
+                m.Seek(0, SeekOrigin.Begin);
 
-            m.Seek(0, SeekOrigin.Begin);
+                using (StreamReader sr = new StreamReader(m, Encoding.UTF8))
+                {
+                    string strText = sr.ReadToEnd();
 
-            StreamReader sr = new StreamReader(m, Encoding.UTF8);
-            string strText = sr.ReadToEnd();
-            sr.Close();
+                    //sr.Close();
+                    //w.Close();
 
-            w.Close();
-
-            return strText;
+                    return strText;
+                }
+                // 注意，此后 m 已经关闭
+            }
         }
 
         public static string GetIndentInnerXml(XmlNode node)
         {
-            MemoryStream m = new MemoryStream();
+            using (MemoryStream m = new MemoryStream())
+            using (XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8))
+            {
+                w.Formatting = Formatting.Indented;
+                w.Indentation = 4;
+                node.WriteContentTo(w);
+                w.Flush();
 
-            XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8);
-            w.Formatting = Formatting.Indented;
-            w.Indentation = 4;
-            node.WriteContentTo(w);
-            w.Flush();
+                m.Seek(0, SeekOrigin.Begin);
 
-            m.Seek(0, SeekOrigin.Begin);
+                using (StreamReader sr = new StreamReader(m, Encoding.UTF8))
+                {
+                    string strText = sr.ReadToEnd();
+                    //sr.Close();
+                    //w.Close();
 
-            StreamReader sr = new StreamReader(m, Encoding.UTF8);
-            string strText = sr.ReadToEnd();
-            sr.Close();
-
-            w.Close();
-
-            return strText;
+                    return strText;
+                }
+                // 注意，此后 m 已经关闭
+            }
         }
 
         public static string GetDomEncodingString(XmlDocument dom)
@@ -707,10 +712,10 @@ namespace DigitalPlatform.Xml
             return false;
         }
 
-		// 获得缩进的XML源代码
+        // 获得缩进的XML源代码
         // 注：包含prolog等。如果不想包含这些，请用GetIndentXml(XmlNode)版本
-		public static string GetIndentXml(XmlDocument dom)
-		{
+        public static string GetIndentXml(XmlDocument dom)
+        {
             string strEncoding = GetDomEncodingString(dom);
             Encoding encoding = Encoding.UTF8;
             if (string.IsNullOrEmpty(strEncoding) == false)
@@ -725,100 +730,103 @@ namespace DigitalPlatform.Xml
                 }
             }
 
-			// 
-			MemoryStream m = new MemoryStream();
+            // 
+            using (MemoryStream m = new MemoryStream())
+            using (XmlTextWriter w = new XmlTextWriter(m, encoding))
+            {
+                w.Formatting = Formatting.Indented;
+                w.Indentation = 4;
+                dom.Save(w);
+                w.Flush();
 
-            XmlTextWriter w = new XmlTextWriter(m, encoding);
-			w.Formatting = Formatting.Indented;
-			w.Indentation = 4;
-            dom.Save(w);
-			w.Flush();
+                m.Seek(0, SeekOrigin.Begin);
 
-			m.Seek(0, SeekOrigin.Begin);
+                using (StreamReader sr = new StreamReader(m, encoding))
+                {
+                    string strText = sr.ReadToEnd();
+                    //sr.Close();
+                    //w.Close();
 
-            StreamReader sr = new StreamReader(m, encoding);
-			string strText = sr.ReadToEnd();
-			sr.Close();
-
-			w.Close();
-
-			return strText;
-		}
+                    return strText;
+                }
+                // 注意，此后 m 已经关闭
+            }
+        }
 
 
-		// 得到一个节点在父亲的儿子集中的序号 从0开始
+        // 得到一个节点在父亲的儿子集中的序号 从0开始
         // parameters:
         //      node    儿子节点
         // return:
         //      返回在父亲的儿子集中的序号，-1没找到
-		// 编写者: 任延华
-		public static int GetIndex(XmlNode node)
-		{
+        // 编写者: 任延华
+        public static int GetIndex(XmlNode node)
+        {
             Debug.Assert(node != null, "GetIndex()调用出错，node参数值不能为null。");
 
-			XmlNode parentNode = node.ParentNode;
-			for(int i=0;i<parentNode.ChildNodes.Count;i++)
-			{
-				XmlNode curNode = parentNode.ChildNodes[i];
-				if (curNode == node)
-					return i;
-			}
+            XmlNode parentNode = node.ParentNode;
+            for (int i = 0; i < parentNode.ChildNodes.Count; i++)
+            {
+                XmlNode curNode = parentNode.ChildNodes[i];
+                if (curNode == node)
+                    return i;
+            }
             return -1;
-		}
+        }
 
 
-		// 得到parentNode的第一个element儿子节点
-		// parameter:
-		//		parentNode	父亲节点
-		// return:
-		//		第一个element儿子节点，未找到返回null
-		// 编写者: 任延华
-		public static XmlElement GetFirstElementChild(XmlNode parentNode)
-		{
+        // 得到parentNode的第一个element儿子节点
+        // parameter:
+        //		parentNode	父亲节点
+        // return:
+        //		第一个element儿子节点，未找到返回null
+        // 编写者: 任延华
+        public static XmlElement GetFirstElementChild(XmlNode parentNode)
+        {
             Debug.Assert(parentNode != null, "GetFirstElementChild()出错，parentNode参数值不能为null。");
 
-			for(int i=0;i<parentNode.ChildNodes.Count;i++)
-			{
-				XmlNode node = parentNode.ChildNodes[i];
-				if (node.NodeType == XmlNodeType.Element)
-					return (XmlElement)node;
-			}
-			return null;
-		}
+            for (int i = 0; i < parentNode.ChildNodes.Count; i++)
+            {
+                XmlNode node = parentNode.ChildNodes[i];
+                if (node.NodeType == XmlNodeType.Element)
+                    return (XmlElement)node;
+            }
+            return null;
+        }
 
-		// 得到parentNode的第一个CDATA儿子节点
-		// parameter:
-		//		parentNode	父亲节点
-		// return:
-		//		第一个XmlCDataSection儿子节点
-		// 编写者: 任延华
-		public static XmlCDataSection GetFirstCDATAChild(XmlNode parentNode)
-		{
+        // 得到parentNode的第一个CDATA儿子节点
+        // parameter:
+        //		parentNode	父亲节点
+        // return:
+        //		第一个XmlCDataSection儿子节点
+        // 编写者: 任延华
+        public static XmlCDataSection GetFirstCDATAChild(XmlNode parentNode)
+        {
             Debug.Assert(parentNode != null, "GetFirstCDATAChild()出错，parentNode参数值不能为null。");
 
-			for(int i=0;i<parentNode.ChildNodes.Count;i++)
-			{
-				XmlNode node = parentNode.ChildNodes[i];
-				if (node.NodeType == XmlNodeType.CDATA)
-					return (XmlCDataSection)node;
-			}
-			return null;
-		}
+            for (int i = 0; i < parentNode.ChildNodes.Count; i++)
+            {
+                XmlNode node = parentNode.ChildNodes[i];
+                if (node.NodeType == XmlNodeType.CDATA)
+                    return (XmlCDataSection)node;
+            }
+            return null;
+        }
 
 
-		// 从根节点开始，根据指定的元素节点xpath和属性名，得到属性值
+        // 从根节点开始，根据指定的元素节点xpath和属性名，得到属性值
         // 编写者：谢涛
-		public static string GetAttr(XmlNode nodeRoot, 
-			string strNodePath,
-			string strAttrName)
-		{
-			XmlNode node = nodeRoot.SelectSingleNode(strNodePath);
+        public static string GetAttr(XmlNode nodeRoot,
+            string strNodePath,
+            string strAttrName)
+        {
+            XmlNode node = nodeRoot.SelectSingleNode(strNodePath);
 
-			if (node == null)
-				return "";
+            if (node == null)
+                return "";
 
-			return GetAttr(node, strAttrName);
-		}
+            return GetAttr(node, strAttrName);
+        }
 
         // 探测XmlNode节点的指定属性是否存在
         // parameters:
@@ -840,7 +848,7 @@ namespace DigitalPlatform.Xml
             return true;
         }
 
-		// 得到XmlNode节点的指定属性的值
+        // 得到XmlNode节点的指定属性的值
         // TODO: 找属性使用的SelectSingleNode()函数，是否会浪费时间，可做测试与直接从node对应的属性集合中找属性用的时间比较。
         // parameters:
         //      node        XmlNode节点
@@ -848,12 +856,12 @@ namespace DigitalPlatform.Xml
         // return:
         //      返回属性值
         //      注：如何未找到指定的属性节点，返回""
-		public static string GetAttr(XmlNode node,
+        public static string GetAttr(XmlNode node,
             string strAttrName)
-		{
+        {
             Debug.Assert(node != null, "GetAttr()调用错误，node参数值不能为null。");
             Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()调用错误，strAttrName参数值不能为null或空字符串。");
-            
+
             // 2012/4/25 NodeType == Document的节点，其Attributes成员为null
             if (node.Attributes == null)
                 return "";
@@ -863,9 +871,9 @@ namespace DigitalPlatform.Xml
             if (attr == null)
                 return "";
             return attr.Value;
-		}
+        }
 
-		// 得到XmlNode节点指定名称空间的属性的值
+        // 得到XmlNode节点指定名称空间的属性的值
         // parameters:
         //      strNameSpaceUrl 属性的名字空间的url
         //      node            XmlNode节点
@@ -874,24 +882,24 @@ namespace DigitalPlatform.Xml
         //      指定属性的值
         //      注：如果未找到指定的属性节点，返回"";
         // ???找属性使用的SelectSingleNode()函数，是否会浪费时间，可做测试与直接从node对应的属性集合中找属性用的时间比较。
-		public static string GetAttr(string strAttrNameSpaceUri,
-			XmlNode node,
-			string strAttrName)
-		{
+        public static string GetAttr(string strAttrNameSpaceUri,
+            XmlNode node,
+            string strAttrName)
+        {
             Debug.Assert(node != null, "GetAttr()调用错误，node参数值不能为null。");
             Debug.Assert(strAttrName != null && strAttrName != "", "GetAttr()调用错误，strAttrName参数值不能为null或空字符串。");
             Debug.Assert(strAttrNameSpaceUri != null && strAttrNameSpaceUri != "",
                 "GetAttr()调用错误，strNameSpaceUri参数值不能为null或空字符串。");
 
-			XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("abc", strAttrNameSpaceUri);
             XmlNode nodeAttr = node.SelectSingleNode("@abc:" + strAttrName, nsmgr);
 
-			if (nodeAttr == null)
-				return "";
-			else
-				return nodeAttr.Value;
-		}
+            if (nodeAttr == null)
+                return "";
+            else
+                return nodeAttr.Value;
+        }
 
 
         // 得到XmlNode节点的指定属性的值
@@ -930,12 +938,12 @@ namespace DigitalPlatform.Xml
         }
 
         // 编写者：谢涛
-		public static string GetAttrOrDefault(XmlNode node,
+        public static string GetAttrOrDefault(XmlNode node,
             string strAttrName,
-			string strDefault)
-		{
-			if (node == null)
-				return strDefault;
+            string strDefault)
+        {
+            if (node == null)
+                return strDefault;
             /*
 			XmlNode nodeAttr = node.SelectSingleNode("@" + attrName);
 
@@ -958,7 +966,7 @@ namespace DigitalPlatform.Xml
                 return strDefault;
             return attr.Value;
 
-		}
+        }
 
 
         // 设置XmlNode节点指定属性的值
@@ -967,35 +975,35 @@ namespace DigitalPlatform.Xml
         //      node            XmlNode节点
         //      strAttrName     属性名称
         //      strAttrValue    属性值,可以为""或null,如果==null,表示删除这个属性
-		public static void SetAttr(XmlNode node,
-			string strAttrName,
-			string strAttrValue)
-		{
+        public static void SetAttr(XmlNode node,
+            string strAttrName,
+            string strAttrValue)
+        {
             Debug.Assert(node != null, "SetAttr()调用错误，node参数值不能为null。");
             Debug.Assert(strAttrName != null && strAttrName != "", "SetAttr()调用错误，strAttrName参数值不能为null或空字符串。");
 
             // 2012/4/25 NodeType == Document的节点，其Attributes成员为null
             Debug.Assert(node.Attributes != null, "");
 
-			XmlAttributeCollection listAttr = node.Attributes;
+            XmlAttributeCollection listAttr = node.Attributes;
             XmlAttribute attrFound = listAttr[strAttrName];
 
-            if (attrFound == null) 
-			{
+            if (attrFound == null)
+            {
                 if (strAttrValue == null)
-					return ;	// 本来就不存在
+                    return;	// 本来就不存在
 
-                XmlElement element = (XmlElement)node; 
+                XmlElement element = (XmlElement)node;
                 element.SetAttribute(strAttrName, strAttrValue);
-			}
-			else 
-			{
+            }
+            else
+            {
                 if (strAttrValue == null)
                     node.Attributes.Remove(attrFound);
-				else
+                else
                     attrFound.Value = strAttrValue;
-			}
-		}
+            }
+        }
 
         // 设置XmlNode元素节点的属性值，名字空间版本
         // parameters:
@@ -1003,11 +1011,11 @@ namespace DigitalPlatform.Xml
         //      strAttrName         属性名称
         //      strAttrNameSpaceURI 属性名字空间的URI
         //      strAttrValue        属性值,如果==null,则删除这个属性
-		public static void SetAttr(XmlNode node,
-			string strAttrName,
-			string strAttrNameSpaceURI,
-			string strAttrValue)
-		{
+        public static void SetAttr(XmlNode node,
+            string strAttrName,
+            string strAttrNameSpaceURI,
+            string strAttrValue)
+        {
             Debug.Assert(node != null, "SetAttr()调用错误，node参数值不能为null。");
             Debug.Assert(strAttrName != null && strAttrName != "", "SetAttr()调用错误，strAttrName参数值不能为null或空字符串。");
             Debug.Assert(strAttrNameSpaceURI != null && strAttrNameSpaceURI != "", "SetAttr()调用错误，strAttrNameSpaceURI参数值不能为null或空字符串。");
@@ -1015,8 +1023,8 @@ namespace DigitalPlatform.Xml
             // 2012/4/25 NodeType == Document的节点，其Attributes成员为null
             Debug.Assert(node.Attributes != null, "");
 
-			XmlAttributeCollection listAttr = node.Attributes;
-            XmlAttribute attrFound = listAttr[strAttrName,strAttrNameSpaceURI];
+            XmlAttributeCollection listAttr = node.Attributes;
+            XmlAttribute attrFound = listAttr[strAttrName, strAttrNameSpaceURI];
 
             if (attrFound == null)
             {
@@ -1033,7 +1041,7 @@ namespace DigitalPlatform.Xml
                 else
                     attrFound.Value = strAttrValue;
             }
-		}
+        }
 
         // 设置XmlNode元素节点的属性值，前缀和名字空间版本
         // parameters:
@@ -1078,44 +1086,44 @@ namespace DigitalPlatform.Xml
         }
 
         // 得到childNodes集合中，所有的CDATA节点
-		// parameters:
+        // parameters:
         //      childNodes: 儿子节点集合，里面有各种类型的节点
         // return:
         //      返回所有CDATA节点组成的数组,如果一个CDATA节点都没有，返回一个空集合
         // 编写者：任延华
-		public static ArrayList GetCdataNodes(XmlNodeList childNodes)
-		{
+        public static ArrayList GetCdataNodes(XmlNodeList childNodes)
+        {
             Debug.Assert(childNodes != null, "GetCdataNodes()调用错误，childNodes参数值不能为null。");
 
-			ArrayList aCDATA = new ArrayList();
-			foreach(XmlNode item in childNodes)
-			{
-				if (item.NodeType == XmlNodeType.CDATA)
-					aCDATA.Add(item);
-			}
-			return aCDATA;
-		}		
-			
+            ArrayList aCDATA = new ArrayList();
+            foreach (XmlNode item in childNodes)
+            {
+                if (item.NodeType == XmlNodeType.CDATA)
+                    aCDATA.Add(item);
+            }
+            return aCDATA;
+        }
 
-		// 通过strXpath路径逐级创建node，如果strXpath对应的节点已存在，则直接返回
-		// paramter:
+
+        // 通过strXpath路径逐级创建node，如果strXpath对应的节点已存在，则直接返回
+        // paramter:
         //		nodeRoot	根节点
-		//		strXpath	简单的xpath，最后一层可以是属性名称(即@属性名)
+        //		strXpath	简单的xpath，最后一层可以是属性名称(即@属性名)
         // return:
         //      返回strXpath对应的节点
         // 编写者：任延华
-		public static XmlNode CreateNodeByPath(XmlNode nodeRoot,
-			string strXpath)
-		{
+        public static XmlNode CreateNodeByPath(XmlNode nodeRoot,
+            string strXpath)
+        {
             Debug.Assert(nodeRoot != null, "CreateNodeByPath()调用错误，nodeRoot参数值不能为null。");
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
-			if (nodeFound != null)
-				return nodeFound;
+            if (nodeFound != null)
+                return nodeFound;
 
-			string[] aNodeName = strXpath.Split(new Char [] {'/'});
+            string[] aNodeName = strXpath.Split(new Char[] { '/' });
             return DomUtil.CreateNode(nodeRoot, aNodeName);
-		}
+        }
 
         // 根据名称数组逐级创建节点
         // parameters:
@@ -1204,35 +1212,35 @@ namespace DigitalPlatform.Xml
         //		node的第一个文本节点的字符串，左右去空白
         //      注：如果node下级不存在文本节点，返回null;
         // 编写者：任延华
-		public static string  GetNodeTextDiff(XmlNode node)
-		{
+        public static string GetNodeTextDiff(XmlNode node)
+        {
             Debug.Assert(node != null, "GetNodeTextDiff()调用出错，node参数值不能为null。");
 
             XmlNode nodeText = node.SelectSingleNode("text()");
-			if (nodeText == null)
-				return null;
-			else
-				return nodeText.Value;
-		}
+            if (nodeText == null)
+                return null;
+            else
+                return nodeText.Value;
+        }
 
-		
-		// 得到node节点的第一个文本节点的值
-		// parameter:
-		//		node    XmlNode节点
-		// result:
-		//		node的第一个文本节点的字符串，左右去空白
+
+        // 得到node节点的第一个文本节点的值
+        // parameter:
+        //		node    XmlNode节点
+        // result:
+        //		node的第一个文本节点的字符串，左右去空白
         //      注：如果node下级不存在文本节点，返回"";
-		// 编写者：任延华
-		public static string GetNodeFirstText(XmlNode node)
-		{
+        // 编写者：任延华
+        public static string GetNodeFirstText(XmlNode node)
+        {
             Debug.Assert(node != null, "GetNodeFirstText()调用出错，node参数值不能为null。");
 
-			XmlNode nodeText = node.SelectSingleNode("text()");
+            XmlNode nodeText = node.SelectSingleNode("text()");
             if (nodeText == null)
-				return "";
-			else
-				return nodeText.Value.Trim();
-		}
+                return "";
+            else
+                return nodeText.Value.Trim();
+        }
 
 #if NO
         // TODO: 逐渐废止这个函数
@@ -1434,7 +1442,6 @@ namespace DigitalPlatform.Xml
             }
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
-
             if (nodeFound == null)
             {
                 string[] aNodeName = strXpath.Split(new Char[] { '/' });
@@ -1782,8 +1789,8 @@ namespace DigitalPlatform.Xml
 
             return nodeFound;
         }
-		
-		// 得到node节点相对于nodeRoot节点的xpath路径
+
+        // 得到node节点相对于nodeRoot节点的xpath路径
         // parameters:
         //      nodeRoot    根节点
         //      node        指定的节点
@@ -1792,31 +1799,31 @@ namespace DigitalPlatform.Xml
         // return:
         //      -1  出错,当node不属于nodeRoot下级时
         //      0   成功
-		// 编写者: 任延华
-		public static int Node2Path(XmlNode nodeRoot,
+        // 编写者: 任延华
+        public static int Node2Path(XmlNode nodeRoot,
             XmlNode node,
             out string strXpath,
             out string strError)
-		{
+        {
             strXpath = "";
             strError = "";
 
             Debug.Assert(nodeRoot != null, "Node2Path()调用错误，nodeRoot参数值不能为null。");
             Debug.Assert(node != null, "Node2Path()调用错误，node参数值不能为null。");
 
-			//当node为属性节点时，加了属性xpath字符串
-			string strAttr = "";
-			if (node.NodeType == XmlNodeType.Attribute)
-			{
-				strAttr = "/@" + node.Name;
-				XmlAttribute AttrNode = (XmlAttribute)node;
-				node = AttrNode.OwnerElement;
-			}
+            //当node为属性节点时，加了属性xpath字符串
+            string strAttr = "";
+            if (node.NodeType == XmlNodeType.Attribute)
+            {
+                strAttr = "/@" + node.Name;
+                XmlAttribute AttrNode = (XmlAttribute)node;
+                node = AttrNode.OwnerElement;
+            }
 
             bool bBelongRoot = false;
 
-			while(node != null)
-			{
+            while (node != null)
+            {
                 if (node == nodeRoot)
                 {
                     bBelongRoot = true;
@@ -1825,28 +1832,28 @@ namespace DigitalPlatform.Xml
 
                 XmlNode nodeMyself = node;
 
-				node = node.ParentNode;
-				if (node == null)
-					break;
-				
-				XmlNode nodeTemp = node.FirstChild;
-				int nIndex = 1;
-				while(nodeTemp != null)
-				{
-					if (nodeTemp == nodeMyself) //Equals(nodeTemp,nodeMyself))
-					{
+                node = node.ParentNode;
+                if (node == null)
+                    break;
+
+                XmlNode nodeTemp = node.FirstChild;
+                int nIndex = 1;
+                while (nodeTemp != null)
+                {
+                    if (nodeTemp == nodeMyself) //Equals(nodeTemp,nodeMyself))
+                    {
                         if (strXpath != "")
                             strXpath = "/" + strXpath;
 
                         strXpath = nodeMyself.Name + "[" + System.Convert.ToString(nIndex) + "]" + strXpath;
-						break;
-					}
-					if (nodeTemp.Name == nodeMyself.Name)
-						nIndex += 1;
+                        break;
+                    }
+                    if (nodeTemp.Name == nodeMyself.Name)
+                        nIndex += 1;
 
                     nodeTemp = nodeTemp.NextSibling;
-				}
-			}
+                }
+            }
 
             if (bBelongRoot == false)
             {
@@ -1854,13 +1861,13 @@ namespace DigitalPlatform.Xml
                 return -1;
             }
 
-			strXpath = strXpath + strAttr;
+            strXpath = strXpath + strAttr;
             return 0;
-		}
+        }
 
 
 
-	} // DomUtil类结束
+    } // DomUtil类结束
 
 
 }

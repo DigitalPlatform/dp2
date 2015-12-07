@@ -269,18 +269,15 @@ namespace dp2Catalog
                 if (record.m_strSyntaxOID == "1.2.840.10003.5.101")
                     strTempFileName = MainForm.DataDir + "\\xml.txt";
 
-                Stream stream = File.Create(strTempFileName);
-
-                // 写入xml内容
-                byte[] buffer = Encoding.UTF8.GetBytes(strMARC);
-
-                stream.Write(buffer, 0, buffer.Length);
-
-                stream.Close();
+                using (Stream stream = File.Create(strTempFileName))
+                {
+                    // 写入xml内容
+                    byte[] buffer = Encoding.UTF8.GetBytes(strMARC);
+                    stream.Write(buffer, 0, buffer.Length);
+                }
 
                 this.webBrowser_xml.Navigate(strTempFileName);
             }
-
 
             this.CurrentRecord = record;
             if (this.CurrentRecord != null && this.DisplayOriginPage == true)
@@ -305,17 +302,13 @@ namespace dp2Catalog
                 this.textBox_originMarcSyntaxOID.Text = this.CurrentRecord.m_strSyntaxOID;
             }
 
-
             // 构造路径
-
             string strPath = searchform.CurrentProtocol + ":"
                 + searchform.CurrentResultsetPath
                 + "/" + (index + 1).ToString();
 
             this.textBox_tempRecPath.Text = strPath;
-
             this.textBox_xml.Focus();
-
             return 0;
         ERROR1:
             MessageBox.Show(this, strError);

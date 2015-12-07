@@ -663,7 +663,7 @@
       <Project>{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}</Project>
       <Name>DigitalPlatform.Z3950</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+    <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>

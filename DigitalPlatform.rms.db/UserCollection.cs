@@ -1,4 +1,4 @@
-// #define DEBUG_LOCK
+ï»¿// #define DEBUG_LOCK
 // rms
 
 using System;
@@ -18,18 +18,18 @@ using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms
 {
-    // ÓÃ»§¼¯ºÏ
+    // ç”¨æˆ·é›†åˆ
     public class UserCollection : List<User>
     {
         private MyReaderWriterLock m_lock = new MyReaderWriterLock();
         private static int m_nTimeOut = 5000;
 
         KernelApplication KernelApplication = null;
-        // internal DatabaseCollection m_dbs = null; // Êı¾İ¿â¼¯ºÏ
+        // internal DatabaseCollection m_dbs = null; // æ•°æ®åº“é›†åˆ
 
-        private int GreenMax = 10;   // ÂÌÉ«³ß´ç ÔÚÕâ¸ö³ß´çÒÔÏÂ, ²»Çå³ıUseCountÎª0µÄ¶ÔÏó; ÔÚÒÔÉÏ²ÅÆô¶¯Çå³ı
-        private int YellowMax = 50;  // »ÆÉ«³ß´ç ·²³¬¹ıÕâ¸ö³ß´ç, ¾Í¿ªÊ¼ÇåÀí²»³£ÓÃµÄ¶ÔÏó
-        private int RedMax = 100;   // ºìÉ«³ß´ç ¾ø¶Ô²»ÔÊĞí³¬¹ıÕâ¸ö³ß´ç¡£Èç¹ûÒÑ¾­´ïµ½Õâ¸ö³ß´ç£¬±ØÏÈÇå³ıµô³öÒ»¸ö¿ÕÎ»ºó£¬²ÅÄÜÔÊĞíĞÂ¶ÔÏó½øÈë¼¯ºÏ
+        private int GreenMax = 10;   // ç»¿è‰²å°ºå¯¸ åœ¨è¿™ä¸ªå°ºå¯¸ä»¥ä¸‹, ä¸æ¸…é™¤UseCountä¸º0çš„å¯¹è±¡; åœ¨ä»¥ä¸Šæ‰å¯åŠ¨æ¸…é™¤
+        private int YellowMax = 50;  // é»„è‰²å°ºå¯¸ å‡¡è¶…è¿‡è¿™ä¸ªå°ºå¯¸, å°±å¼€å§‹æ¸…ç†ä¸å¸¸ç”¨çš„å¯¹è±¡
+        private int RedMax = 100;   // çº¢è‰²å°ºå¯¸ ç»å¯¹ä¸å…è®¸è¶…è¿‡è¿™ä¸ªå°ºå¯¸ã€‚å¦‚æœå·²ç»è¾¾åˆ°è¿™ä¸ªå°ºå¯¸ï¼Œå¿…å…ˆæ¸…é™¤æ‰å‡ºä¸€ä¸ªç©ºä½åï¼Œæ‰èƒ½å…è®¸æ–°å¯¹è±¡è¿›å…¥é›†åˆ
 
         public TimeSpan MaxLastUse = new TimeSpan(0, 30, 0);
 
@@ -41,14 +41,14 @@ namespace DigitalPlatform.rms
             }
         }
 
-        // ³õÊ¼»¯ÓÃ»§¼¯ºÏ¶ÔÏó
+        // åˆå§‹åŒ–ç”¨æˆ·é›†åˆå¯¹è±¡
         // parameters:
-        //      userDbs     ÕÊ»§¿â¼¯ºÏ
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      userDbs     å¸æˆ·åº“é›†åˆ
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß£º°²È«µÄ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿ï¼šå®‰å…¨çš„
         public int Initial(
             KernelApplication app,
             //DatabaseCollection dbs,
@@ -59,22 +59,21 @@ namespace DigitalPlatform.rms
             // this.m_dbs = dbs;
             this.KernelApplication = app;
 
-            //*********¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø****************
+            //*********å¯¹å¸æˆ·é›†åˆåŠ å†™é”****************
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("Initial()£¬¶ÔÓÃ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+			this.m_dbs.WriteDebugInfo("Initial()ï¼Œå¯¹ç”¨æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
-                // Çå¿Õ³ÉÔ±
+                // æ¸…ç©ºæˆå‘˜
                 this.Clear();
-
             }
             finally
             {
-                m_lock.ReleaseWriterLock();  //½âĞ´Ëø
+                m_lock.ReleaseWriterLock();  //è§£å†™é”
 #if DEBUG_LOCK
-				this.m_dbs.WriteDebugInfo("Initial()£¬¶ÔÓÃ»§¼¯ºÏ½âĞ´Ëø¡£");
+				this.m_dbs.WriteDebugInfo("Initial()ï¼Œå¯¹ç”¨æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
 
@@ -84,24 +83,24 @@ namespace DigitalPlatform.rms
         public void Close()
         {
             /*
-            eventClose.Set();	// Áî¹¤×÷Ïß³ÌÍË³ö
+            eventClose.Set();	// ä»¤å·¥ä½œçº¿ç¨‹é€€å‡º
 
-            // µÈ´ı¹¤×÷Ïß³ÌÕæÕıÍË³ö
-            // ÒòÎª¿ÉÄÜÕıÔÚ»ØĞ´Êı¾İ¿â
+            // ç­‰å¾…å·¥ä½œçº¿ç¨‹çœŸæ­£é€€å‡º
+            // å› ä¸ºå¯èƒ½æ­£åœ¨å›å†™æ•°æ®åº“
             eventFinished.WaitOne(5000, false);
              */
         }
 
-        // Ö»´ÓÓÃ»§¼¯ºÏÖĞ²éÕÒÓÃ»§¶ÔÏó
+        // åªä»ç”¨æˆ·é›†åˆä¸­æŸ¥æ‰¾ç”¨æˆ·å¯¹è±¡
         // parameters:
-        //      strName     ÓÃ»§Ãû
-        //      user        out²ÎÊı£¬·µ»ØÓÃ»§¶ÔÏó
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      strName     ç”¨æˆ·å
+        //      user        outå‚æ•°ï¼Œè¿”å›ç”¨æˆ·å¯¹è±¡
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½
-        // Ïß£º°²È«
+        //      -1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°
+        // çº¿ï¼šå®‰å…¨
         private int GetUserFromCollection(string strName,
             out User user,
             out string strError)
@@ -109,10 +108,10 @@ namespace DigitalPlatform.rms
             user = null;
             strError = "";
 
-            //*********¶ÔÕÊ»§¼¯ºÏ¼Ó¶ÁËø*****************
-            this.m_lock.AcquireReaderLock(m_nTimeOut); //¼Ó¶ÁËø
+            //*********å¯¹å¸æˆ·é›†åˆåŠ è¯»é”*****************
+            this.m_lock.AcquireReaderLock(m_nTimeOut); //åŠ è¯»é”
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("GetUserFromCollection()£¬¶ÔÕÊ»§¼¯ºÏ¼Ó¶ÁËø¡£");
+			this.m_dbs.WriteDebugInfo("GetUserFromCollection()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ è¯»é”ã€‚");
 #endif
             try
             {
@@ -129,27 +128,27 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //*****¶ÔÕÊ»§¼¯ºÏ½â¶ÁËø*******
+                //*****å¯¹å¸æˆ·é›†åˆè§£è¯»é”*******
                 this.m_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
-                this.m_dbs.WriteDebugInfo("GetUserFromCollection()£¬¶ÔÕÊ»§¼¯ºÏ½â¶ÁËø¡£");
+                this.m_dbs.WriteDebugInfo("GetUserFromCollection()ï¼Œå¯¹å¸æˆ·é›†åˆè§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // »ñµÃÓÃ»§¶ÔÏó
-        // ÏÈ´ÓÓÃ»§¼¯ºÏÖĞÕÒ£¬Ã»ÓĞÔÙ´ÓÓÃ»§¿â¼¯ºÏÖĞËÑË÷
-        // ×¢Òâ,Èç¹û±¾º¯ÊıÕÒUser¶ÔÏó³É¹¦, ÄÇÒÑ¾­ÎªÒıÓÃ¼ÆÊı¼ÓÒ»,µ÷ÓÃÕßÒªÁôÒâÔÚÒÔºó²»ÓÃUser¶ÔÏóÊ±, ²»ÒªÍü¼Ç½«¶ÔÏóµÄÒıÓÃ¼ÆÊı¼õÒ»
+        // è·å¾—ç”¨æˆ·å¯¹è±¡
+        // å…ˆä»ç”¨æˆ·é›†åˆä¸­æ‰¾ï¼Œæ²¡æœ‰å†ä»ç”¨æˆ·åº“é›†åˆä¸­æœç´¢
+        // æ³¨æ„,å¦‚æœæœ¬å‡½æ•°æ‰¾Userå¯¹è±¡æˆåŠŸ, é‚£å·²ç»ä¸ºå¼•ç”¨è®¡æ•°åŠ ä¸€,è°ƒç”¨è€…è¦ç•™æ„åœ¨ä»¥åä¸ç”¨Userå¯¹è±¡æ—¶, ä¸è¦å¿˜è®°å°†å¯¹è±¡çš„å¼•ç”¨è®¡æ•°å‡ä¸€
         // parameters:
-        //      bIncreament ÊÇ·ñË³±ãÎª¼ÆÊıÆ÷¼ÓÒ»
-        //      strName     ÓÃ»§Ãû
-        //      user        out²ÎÊı£¬·µ»ØÓÃ»§¶ÔÏó
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      bIncreament æ˜¯å¦é¡ºä¾¿ä¸ºè®¡æ•°å™¨åŠ ä¸€
+        //      strName     ç”¨æˆ·å
+        //      user        outå‚æ•°ï¼Œè¿”å›ç”¨æˆ·å¯¹è±¡
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½
-        // Ïß£º°²È«
+        //      -1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°
+        // çº¿ï¼šå®‰å…¨
         public int GetUserSafety(
             bool bIncreament,
             string strName,
@@ -159,16 +158,16 @@ namespace DigitalPlatform.rms
             user = null;
             strError = "";
 
-            // Ö»´ÓÓÃ»§¼¯ºÏÖĞ²éÕÒÓÃ»§¶ÔÏó
+            // åªä»ç”¨æˆ·é›†åˆä¸­æŸ¥æ‰¾ç”¨æˆ·å¯¹è±¡
             // parameters:
-            //      strName     ÓÃ»§Ãû
-            //      user        out²ÎÊı£¬·µ»ØÓÃ»§¶ÔÏó
-            //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+            //      strName     ç”¨æˆ·å
+            //      user        outå‚æ•°ï¼Œè¿”å›ç”¨æˆ·å¯¹è±¡
+            //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
             // return:
-            //      -1  ³ö´í
-            //      0   Î´ÕÒµ½
-            //      1   ÕÒµ½
-            // Ïß£º°²È«
+            //      -1  å‡ºé”™
+            //      0   æœªæ‰¾åˆ°
+            //      1   æ‰¾åˆ°
+            // çº¿ï¼šå®‰å…¨
             int nRet = this.GetUserFromCollection(strName,
                 out user,
                 out strError);
@@ -180,15 +179,15 @@ namespace DigitalPlatform.rms
                 if (bIncreament == true)
                     user.PlusOneUse();
 
-                user.Activate();    // ¸üĞÂ×î½üÊ¹ÓÃÊ±¼ä
+                user.Activate();    // æ›´æ–°æœ€è¿‘ä½¿ç”¨æ—¶é—´
 
                 return 1;
             }
 
             // return:
-            //		-1	³ö´í
-            //		0	Î´ÕÒµ½ÕÊ»§
-            //		1	ÕÒµ½ÁË
+            //		-1	å‡ºé”™
+            //		0	æœªæ‰¾åˆ°å¸æˆ·
+            //		1	æ‰¾åˆ°äº†
             nRet = this.Dbs.ShearchUserSafety(strName,
                 out user,
                 out strError);
@@ -198,64 +197,64 @@ namespace DigitalPlatform.rms
             if (nRet == 0)
                 return 0;
 
-            Debug.Assert(user != null, "´ËÊ±user²»¿ÉÄÜÎªnull");
+            Debug.Assert(user != null, "æ­¤æ—¶userä¸å¯èƒ½ä¸ºnull");
 
-            // Èç¹û¼¯ºÏ¸ù±¾²»ÈÃ½øÈë
+            // å¦‚æœé›†åˆæ ¹æœ¬ä¸è®©è¿›å…¥
             if (this.RedMax <= 0)
             {
-                user.container = this;  // µ«ÊÇContainerÖ¸Õë»¹ÊÇÓĞÓÃµÄ
+                user.container = this;  // ä½†æ˜¯ContaineræŒ‡é’ˆè¿˜æ˜¯æœ‰ç”¨çš„
                 return 1;
             }
 
-            // ´ÓÊı¾İ¿âÖĞÕÒ, ²¢¼ÓÈë¼¯ºÏ
+            // ä»æ•°æ®åº“ä¸­æ‰¾, å¹¶åŠ å…¥é›†åˆ
 
-            //*********¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø****************
+            //*********å¯¹å¸æˆ·é›†åˆåŠ å†™é”****************
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-            this.m_dbs.WriteDebugInfo("GetUser()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+            this.m_dbs.WriteDebugInfo("GetUser()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
 
-                // ´ïµ½ºìÉ«³ß´ç
+                // è¾¾åˆ°çº¢è‰²å°ºå¯¸
                 if (this.Count >= this.RedMax)
                 {
-                    // ±ØĞëÏÈÇå³ı³ö¿ÕÎ»£¬²ÅÄÜÈÃĞÂ¶ÔÏó½øÈë
+                    // å¿…é¡»å…ˆæ¸…é™¤å‡ºç©ºä½ï¼Œæ‰èƒ½è®©æ–°å¯¹è±¡è¿›å…¥
                     int delta = this.Count - this.RedMax + 1;
 
                     this.RemoveUserObjects(delta);
                 }
 
                 this.Add(user);
-                user.PlusOneUse();  // ÒòÎªÕâÊÇ¶ÔÏóÖØ·µ¼¯ºÏ£¬ËùÒÔÎŞÂÛÈçºÎÒªÔö¼Ó¼ÆÊı¡£µ«ÊÇ±»¼·×ßÇ°µÄ¼ÆÊıÖµÒÑ¾­ÎŞ´Ó²é¿¼£¬ËùÒÔÏóÕ÷ĞÔ¸ø1
+                user.PlusOneUse();  // å› ä¸ºè¿™æ˜¯å¯¹è±¡é‡è¿”é›†åˆï¼Œæ‰€ä»¥æ— è®ºå¦‚ä½•è¦å¢åŠ è®¡æ•°ã€‚ä½†æ˜¯è¢«æŒ¤èµ°å‰çš„è®¡æ•°å€¼å·²ç»æ— ä»æŸ¥è€ƒï¼Œæ‰€ä»¥è±¡å¾æ€§ç»™1
                 user.container = this;
 
-                user.Activate();    // ¸üĞÂ×î½üÊ¹ÓÃÊ±¼ä
+                user.Activate();    // æ›´æ–°æœ€è¿‘ä½¿ç”¨æ—¶é—´
 
-                this.KernelApplication.ActivateWorker();  // Í¨Öª¹¤×÷Ïß³Ì£¬ĞèÒªÕûÀí³ß´çÁË
+                this.KernelApplication.ActivateWorker();  // é€šçŸ¥å·¥ä½œçº¿ç¨‹ï¼Œéœ€è¦æ•´ç†å°ºå¯¸äº†
 
                 return 1;
             }
             finally
             {
-                m_lock.ReleaseWriterLock();  //½âĞ´Ëø
+                m_lock.ReleaseWriterLock();  //è§£å†™é”
 #if DEBUG_LOCK
-                this.m_dbs.WriteDebugInfo("GetUser()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+                this.m_dbs.WriteDebugInfo("GetUser()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // µÇÂ¼
+        // ç™»å½•
         // parameters:
-        //      strUserName ÓÃ»§Ãû
-        //      strPassword ÃÜÂë
-        //      user        out²ÎÊı£¬·µ»ØÓÃ»§¶ÔÏó
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      strUserName ç”¨æˆ·å
+        //      strPassword å¯†ç 
+        //      user        outå‚æ•°ï¼Œè¿”å›ç”¨æˆ·å¯¹è±¡
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	³ö´í
-        //		0	ÓÃ»§Ãû²»´æÔÚ£¬»òÃÜÂë²»ÕıÈ·
-        //      1   ³É¹¦
-        // Ïß£º°²È«
+        //		-1	å‡ºé”™
+        //		0	ç”¨æˆ·åä¸å­˜åœ¨ï¼Œæˆ–å¯†ç ä¸æ­£ç¡®
+        //      1   æˆåŠŸ
+        // çº¿ï¼šå®‰å…¨
         public int Login(string strUserName,
             string strPassword,
             out User user,
@@ -264,12 +263,12 @@ namespace DigitalPlatform.rms
             user = null;
             strError = "";
 
-            // ÎªÒıÓÃ¼ÓÒ»
+            // ä¸ºå¼•ç”¨åŠ ä¸€
             // return:
-            //      -1  ³ö´í
-            //      0   Î´ÕÒµ½
-            //      1   ÕÒµ½
-            // Ïß£º°²È«
+            //      -1  å‡ºé”™
+            //      0   æœªæ‰¾åˆ°
+            //      1   æ‰¾åˆ°
+            // çº¿ï¼šå®‰å…¨
             int nRet = this.GetUserSafety(
                 true,
                 strUserName,
@@ -280,7 +279,7 @@ namespace DigitalPlatform.rms
 
             if (nRet == 1)
             {
-                Debug.Assert(user != null, "´ËÊ±user²»¿ÉÄÜÎªnull¡£");
+                Debug.Assert(user != null, "æ­¤æ—¶userä¸å¯èƒ½ä¸ºnullã€‚");
                 string strSHA1Password = Cryptography.GetSHA1(strPassword);
                 if (user.SHA1Password == strSHA1Password)
                 {
@@ -291,30 +290,30 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // µÇ³ö
+        // ç™»å‡º
         // return:
-        //      -1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½£¬²¢´Ó¼¯ºÏÖĞÇå³ı
+        //      -1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°ï¼Œå¹¶ä»é›†åˆä¸­æ¸…é™¤
         public int Logout(
             string strName,
             out string strError)
         {
             // return:
-            //      -1  ³ö´í
-            //      0   Î´ÕÒµ½
-            //      1   ÕÒµ½£¬²¢´Ó¼¯ºÏÖĞÇå³ı
+            //      -1  å‡ºé”™
+            //      0   æœªæ‰¾åˆ°
+            //      1   æ‰¾åˆ°ï¼Œå¹¶ä»é›†åˆä¸­æ¸…é™¤
             return ReleaseUser(
                 strName,
                 out strError);
         }
 
-        // ÊÍ·ÅÒ»´ÎÄÚ´æUser¶ÔÏóµÄÒıÓÃ¼ÆÊı
-        // Ïß£º°²È«
+        // é‡Šæ”¾ä¸€æ¬¡å†…å­˜Userå¯¹è±¡çš„å¼•ç”¨è®¡æ•°
+        // çº¿ï¼šå®‰å…¨
         // return:
-        //      -1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½£¬²¢´Ó¼¯ºÏÖĞÇå³ı
+        //      -1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°ï¼Œå¹¶ä»é›†åˆä¸­æ¸…é™¤
         public int ReleaseUser(
             string strName,
             out string strError)
@@ -322,16 +321,16 @@ namespace DigitalPlatform.rms
             User user = null;
             strError = "";
 
-            // Ö»´ÓÓÃ»§¼¯ºÏÖĞ²éÕÒÓÃ»§¶ÔÏó
+            // åªä»ç”¨æˆ·é›†åˆä¸­æŸ¥æ‰¾ç”¨æˆ·å¯¹è±¡
             // parameters:
-            //      strName     ÓÃ»§Ãû
-            //      user        out²ÎÊı£¬·µ»ØÓÃ»§¶ÔÏó
-            //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+            //      strName     ç”¨æˆ·å
+            //      user        outå‚æ•°ï¼Œè¿”å›ç”¨æˆ·å¯¹è±¡
+            //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
             // return:
-            //      -1  ³ö´í
-            //      0   Î´ÕÒµ½
-            //      1   ÕÒµ½
-            // Ïß£º°²È«
+            //      -1  å‡ºé”™
+            //      0   æœªæ‰¾åˆ°
+            //      1   æ‰¾åˆ°
+            // çº¿ï¼šå®‰å…¨
             int nRet = this.GetUserFromCollection(strName,
                 out user,
                 out strError);
@@ -340,22 +339,22 @@ namespace DigitalPlatform.rms
 
             if (nRet == 0)
             {
-                // ¼¯ºÏÖĞ²»´æÔÚ
+                // é›†åˆä¸­ä¸å­˜åœ¨
                 return 0;
             }
 
-            Debug.Assert(user != null, "´ËÊ±user²»¿ÉÄÜÎªnull");
+            Debug.Assert(user != null, "æ­¤æ—¶userä¸å¯èƒ½ä¸ºnull");
 
             user.MinusOneUse();
             this.KernelApplication.ActivateWorker();
 
             return 1;
 
-            /* Èç¹û±ØÒª, Á¢¼´´Ó¼¯ºÏÖĞÉ¾³ı?
-            //*********¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø****************
+            /* å¦‚æœå¿…è¦, ç«‹å³ä»é›†åˆä¸­åˆ é™¤?
+            //*********å¯¹å¸æˆ·é›†åˆåŠ å†™é”****************
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-            this.m_dbs.WriteDebugInfo("GetUser()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+            this.m_dbs.WriteDebugInfo("GetUser()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
@@ -365,28 +364,28 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                m_lock.ReleaseWriterLock();  //½âĞ´Ëø
+                m_lock.ReleaseWriterLock();  //è§£å†™é”
 #if DEBUG_LOCK
-                this.m_dbs.WriteDebugInfo("GetUser()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+                this.m_dbs.WriteDebugInfo("GetUser()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
              */
         }
 
-        // ¸üĞÂÄÚ´æÖĞµÄÕÊ»§¶ÔÏó¡£
-        // Ïß£º°²È«
+        // æ›´æ–°å†…å­˜ä¸­çš„å¸æˆ·å¯¹è±¡ã€‚
+        // çº¿ï¼šå®‰å…¨
         // parameters:
-        //      strRecPath  ÕÊ»§¼ÇÂ¼Â·¾¶
+        //      strRecPath  å¸æˆ·è®°å½•è·¯å¾„
         // return:
         //      0   not found
         //      1   found and removed
         public int RefreshUserSafety(
             string strRecPath)
         {
-            //***************¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø*****************
+            //***************å¯¹å¸æˆ·é›†åˆåŠ å†™é”*****************
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("RefreshUser()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+			this.m_dbs.WriteDebugInfo("RefreshUser()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
@@ -402,10 +401,10 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***********¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø*******************
+                //***********å¯¹å¸æˆ·é›†åˆè§£å†™é”*******************
                 m_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.m_dbs.WriteDebugInfo("RefreshUser()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+				this.m_dbs.WriteDebugInfo("RefreshUser()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
         }
@@ -413,7 +412,7 @@ namespace DigitalPlatform.rms
 
 
         /*
-        // ÌáÈ¡Êı¾İ¿âÖĞ¼ÇÂ¼£¬¸üĞÂUser¶ÔÏó
+        // æå–æ•°æ®åº“ä¸­è®°å½•ï¼Œæ›´æ–°Userå¯¹è±¡
         public int RefreshUser(
             string strRecordPath,
             User user,
@@ -421,18 +420,18 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            // ´´½¨Ò»¸öDpPsthÊµÀı
+            // åˆ›å»ºä¸€ä¸ªDpPsthå®ä¾‹
             DbPath path = new DbPath(strRecordPath);
 
-            // ÕÒµ½Ö¸¶¨ÕÊ»§Êı¾İ¿â,ÒòÎªÊı¾İ¿âÃûÓĞ¿ÉÄÜ²»ÊÇid£¬ËùÒÔÓÃDatabaseCollection.GetDatabase()
+            // æ‰¾åˆ°æŒ‡å®šå¸æˆ·æ•°æ®åº“,å› ä¸ºæ•°æ®åº“åæœ‰å¯èƒ½ä¸æ˜¯idï¼Œæ‰€ä»¥ç”¨DatabaseCollection.GetDatabase()
             Database db = this.m_dbs.GetDatabase(path.Name); //this.GetUserDatabaseByID(path.Name);
             if (db == null)
             {
-                strError = "Î´ÕÒµ½ÃûÎª'" + path.Name + "'ÕÊ»§¿â¡£";
+                strError = "æœªæ‰¾åˆ°åä¸º'" + path.Name + "'å¸æˆ·åº“ã€‚";
                 return -1;
             }
 
-            // ´ÓÕÊ»§¿âÖĞÕÒµ½¼ÇÂ¼
+            // ä»å¸æˆ·åº“ä¸­æ‰¾åˆ°è®°å½•
             string strXml;
             int nRet = db.GetXmlDataSafety(path.ID,
                 out strXml,
@@ -440,16 +439,16 @@ namespace DigitalPlatform.rms
             if (nRet <= -1)
                 return -1;
 
-            //¼ÓÔØµ½dom
+            //åŠ è½½åˆ°dom
             XmlDocument dom = new XmlDocument();
-            //dom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+            //dom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
             try
             {
                 dom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
-                strError = "¼ÓÔØÂ·¾¶Îª'" + strRecordPath + "'µÄÕÊ»§¼ÇÂ¼µ½domÊ±³ö´í,Ô­Òò:" + ex.Message;
+                strError = "åŠ è½½è·¯å¾„ä¸º'" + strRecordPath + "'çš„å¸æˆ·è®°å½•åˆ°domæ—¶å‡ºé”™,åŸå› :" + ex.Message;
                 return -1;
             }
 
@@ -468,21 +467,21 @@ namespace DigitalPlatform.rms
         }
          */
 
-        // Èç¹û±ØÒª£¬±£´æÄÚ´æÖĞµÄÕÊ»§¶ÔÏóµ½Êı¾İ¿â
-        // Ïß£º°²È«
+        // å¦‚æœå¿…è¦ï¼Œä¿å­˜å†…å­˜ä¸­çš„å¸æˆ·å¯¹è±¡åˆ°æ•°æ®åº“
+        // çº¿ï¼šå®‰å…¨
         // return:
-        //		-1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //		0   ³É¹¦
+        //		-1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //		0   æˆåŠŸ
         public int SaveUserIfNeed(string strRecPath,
             out string strError)
         {
             strError = "";
 
-            //***************¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø*****************
+            //***************å¯¹å¸æˆ·é›†åˆåŠ å†™é”*****************
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("SaveUserSafety()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+			this.m_dbs.WriteDebugInfo("SaveUserSafety()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
@@ -491,9 +490,9 @@ namespace DigitalPlatform.rms
                     if (user.RecPath == strRecPath)
                     {
                         // return:
-                        //		-1  ³ö´í
-                        //      -4  ¼ÇÂ¼²»´æÔÚ
-                        //		0   ³É¹¦
+                        //		-1  å‡ºé”™
+                        //      -4  è®°å½•ä¸å­˜åœ¨
+                        //		0   æˆåŠŸ
                         int nRet = user.SaveChanges(out strError);
                         if (nRet <= -1)
                             return nRet;
@@ -503,30 +502,30 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***********¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø*******************
+                //***********å¯¹å¸æˆ·é›†åˆè§£å†™é”*******************
                 m_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.m_dbs.WriteDebugInfo("SaveUserSafety()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+				this.m_dbs.WriteDebugInfo("SaveUserSafety()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // Èç¹ûÄÚ´æÓÃ»§Êı³¬³ö·¶Î§£¬ÔòÒÆ³öÖ¸¶¨µÄ¶ÔÏó¡£
+        // å¦‚æœå†…å­˜ç”¨æˆ·æ•°è¶…å‡ºèŒƒå›´ï¼Œåˆ™ç§»å‡ºæŒ‡å®šçš„å¯¹è±¡ã€‚
         // parameters:
-        //      user    ÓÃ »§¶ÔÏó
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
-        // Ïß£º°²È«
-        // Òì³££º¿ÉÄÜ»áÅ×³öÒì³£
+        //      user    ç”¨ æˆ·å¯¹è±¡
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
+        // çº¿ï¼šå®‰å…¨
+        // å¼‚å¸¸ï¼šå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public void Shrink()
         {
             if (this.Count < this.GreenMax)
-                return; // Ğ¡ÓÚÂÌÉ«³ß´ç£¬¸ù±¾²»±Ø½øÈë
+                return; // å°äºç»¿è‰²å°ºå¯¸ï¼Œæ ¹æœ¬ä¸å¿…è¿›å…¥
 
             int nCount = 0;
-            //***************¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø*****************
+            //***************å¯¹å¸æˆ·é›†åˆåŠ å†™é”*****************
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("Shrink()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+			this.m_dbs.WriteDebugInfo("Shrink()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
@@ -534,7 +533,7 @@ namespace DigitalPlatform.rms
                 {
                     User user = this[i];
 
-                    // usecount==0Çå³ı
+                    // usecount==0æ¸…é™¤
                     int nRet = Interlocked.Increment(ref user.m_nUseCount);
                     Interlocked.Decrement(ref user.m_nUseCount);
                     if (nRet <= 1)
@@ -543,7 +542,7 @@ namespace DigitalPlatform.rms
                         continue;
                     }
 
-                    // ¿´¿´×î½üÊ¹ÓÃÊ±¼äÊÇ·ñ³¬¹ı¼«ÏŞ
+                    // çœ‹çœ‹æœ€è¿‘ä½¿ç”¨æ—¶é—´æ˜¯å¦è¶…è¿‡æé™
                     TimeSpan delta = DateTime.Now - user.m_timeLastUse;
                     if (delta > this.MaxLastUse)
                     {
@@ -557,17 +556,17 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***********¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø*******************
+                //***********å¯¹å¸æˆ·é›†åˆè§£å†™é”*******************
                 m_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.m_dbs.WriteDebugInfo("Shrink()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+				this.m_dbs.WriteDebugInfo("Shrink()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
 
-            // ¿ØÖÆ×î´ó³ß´ç
+            // æ§åˆ¶æœ€å¤§å°ºå¯¸
             if (nCount > this.YellowMax)
             {
-                // ÌôÑ¡³ödelta¸öÇå³ı
+                // æŒ‘é€‰å‡ºdeltaä¸ªæ¸…é™¤
                 int delta = nCount - this.YellowMax;
 
                 this.RemoveUserObjects(delta);
@@ -575,7 +574,7 @@ namespace DigitalPlatform.rms
                 /*
                 m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("Shrink()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+			this.m_dbs.WriteDebugInfo("Shrink()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
                 try
                 {
@@ -586,10 +585,10 @@ namespace DigitalPlatform.rms
                 }
                 finally
                 {
-                    //***********¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø*******************
+                    //***********å¯¹å¸æˆ·é›†åˆè§£å†™é”*******************
                     m_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.m_dbs.WriteDebugInfo("Shrink()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+				this.m_dbs.WriteDebugInfo("Shrink()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
                 }
                  */
@@ -599,15 +598,15 @@ namespace DigitalPlatform.rms
 
         }
 
-        // Ìô³öÈô¸É¸ö×î²»³£ÓÃµÄUser¶ÔÏó´Ó¼¯ºÏÖĞÒÆ³ı
-        // Ïß³Ì°²È«
+        // æŒ‘å‡ºè‹¥å¹²ä¸ªæœ€ä¸å¸¸ç”¨çš„Userå¯¹è±¡ä»é›†åˆä¸­ç§»é™¤
+        // çº¿ç¨‹å®‰å…¨
         void RemoveUserObjects(int nRemoveCount)
         {
             List<User> users = this.SortRecentUse();
 
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.m_dbs.WriteDebugInfo("Shrink()£¬¶ÔÕÊ»§¼¯ºÏ¼ÓĞ´Ëø¡£");
+			this.m_dbs.WriteDebugInfo("Shrink()ï¼Œå¯¹å¸æˆ·é›†åˆåŠ å†™é”ã€‚");
 #endif
             try
             {
@@ -618,23 +617,23 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***********¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø*******************
+                //***********å¯¹å¸æˆ·é›†åˆè§£å†™é”*******************
                 m_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.m_dbs.WriteDebugInfo("Shrink()£¬¶ÔÕÊ»§¼¯ºÏ½âĞ´Ëø¡£");
+				this.m_dbs.WriteDebugInfo("Shrink()ï¼Œå¯¹å¸æˆ·é›†åˆè§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // ×îºóĞŞ¸ÄÊ±¼ä±È½ÏÆ÷
+        // æœ€åä¿®æ”¹æ—¶é—´æ¯”è¾ƒå™¨
         public class UserComparer : IComparer<User>
         {
             DateTime m_now = DateTime.Now;
 
-            // ÀÏµÄÔÚÇ°Ãæ
+            // è€çš„åœ¨å‰é¢
             int IComparer<User>.Compare(User x, User y)
             {
-                // ¸ù¾İ×î½üÊ¹ÓÃÊ±¼ä
+                // æ ¹æ®æœ€è¿‘ä½¿ç”¨æ—¶é—´
                 TimeSpan delta1 = m_now - x.m_timeLastUse;
                 TimeSpan delta2 = m_now - y.m_timeLastUse;
 
@@ -648,13 +647,13 @@ namespace DigitalPlatform.rms
 
         }
 
-        // ÎªÌÔÌ­Ëã·¨½øĞĞÅÅĞò
+        // ä¸ºæ·˜æ±°ç®—æ³•è¿›è¡Œæ’åº
         public List<User> SortRecentUse()
         {
-            // ¸´ÖÆ³ö¶ÔÏó
+            // å¤åˆ¶å‡ºå¯¹è±¡
             List<User> aItem = new List<User>();
 
-            // ¼Ó¶ÁËø
+            // åŠ è¯»é”
             this.m_lock.AcquireReaderLock(m_nTimeOut);
             try
             {
@@ -673,25 +672,25 @@ namespace DigitalPlatform.rms
         }
 
         /*
-        // ´ÓÓÃ»§¼¯ºÏÖĞÇå³ıÒ»¸öÓÃ»§
+        // ä»ç”¨æˆ·é›†åˆä¸­æ¸…é™¤ä¸€ä¸ªç”¨æˆ·
         // parameters:
-        //      user    ÓÃ»§¶ÔÏó
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      user    ç”¨æˆ·å¯¹è±¡
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß£º²»°²È«°²È«
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿ï¼šä¸å®‰å…¨å®‰å…¨
         public int RemoveUser(User user,
             out string strError)
         {
             strError = "";
 
-            Debug.Assert(user != null, "RemoveUser()µ÷ÓÃ´íÎó£¬user²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(user != null, "RemoveUser()è°ƒç”¨é”™è¯¯ï¼Œuserå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             int nIndex = this.IndexOf(user);
             if (nIndex == -1)
             {
-                strError = "RemoveUser()£¬user¾¹È»²»ÊÇ¼¯ºÏÖĞµÄ³ÉÔ±£¬Òì³£¡£";
+                strError = "RemoveUser()ï¼Œuserç«Ÿç„¶ä¸æ˜¯é›†åˆä¸­çš„æˆå‘˜ï¼Œå¼‚å¸¸ã€‚";
                 return -1;
             }
 
@@ -701,17 +700,17 @@ namespace DigitalPlatform.rms
         }
          */
 
-        // ÏµÍ³¹ÜÀíÔ±ĞŞ¸ÄÓÃ»§ÃÜÂë
+        // ç³»ç»Ÿç®¡ç†å‘˜ä¿®æ”¹ç”¨æˆ·å¯†ç 
         // parameters:
-        //      user        µ±Ç°ÕÊ»§
-        //      strChangedUserName  ±»ĞŞ¸ÄÓÃ»§Ãû
-        //      strNewPassword  ĞÂÃÜÂë
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      user        å½“å‰å¸æˆ·
+        //      strChangedUserName  è¢«ä¿®æ”¹ç”¨æˆ·å
+        //      strNewPassword  æ–°å¯†ç 
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -6  È¨ÏŞ²»¹»
-        //		0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -6  æƒé™ä¸å¤Ÿ
+        //		0   æˆåŠŸ
         public int ChangePassword(User user,
             string strChangedUserName,
             string strNewPassword,
@@ -722,10 +721,10 @@ namespace DigitalPlatform.rms
             User changedUser = null;
 
             // return:
-            //		-1	³ö´í
-            //		0	Î´ÕÒµ½ÕÊ»§
-            //		1	ÕÒµ½ÁË
-            // Ïß£º°²È«
+            //		-1	å‡ºé”™
+            //		0	æœªæ‰¾åˆ°å¸æˆ·
+            //		1	æ‰¾åˆ°äº†
+            // çº¿ï¼šå®‰å…¨
             int nRet = this.GetUserSafety(
                 false,
                 strChangedUserName,
@@ -736,21 +735,21 @@ namespace DigitalPlatform.rms
 
             if (nRet == 0)
             {
-                strError = "Ã»ÓĞÕÒµ½Ãû³ÆÎª'" + strChangedUserName + "'µÄÓÃ»§";
+                strError = "æ²¡æœ‰æ‰¾åˆ°åç§°ä¸º'" + strChangedUserName + "'çš„ç”¨æˆ·";
                 return -1;
             }
 
-            Debug.Assert(changedUser != null, "´ËÊ±userChanged¶ÔÏó²»¿ÉÄÜÎªnull,Çë¼ì²é·şÎñÆ÷µÄChangePassword()º¯Êı¡£");
+            Debug.Assert(changedUser != null, "æ­¤æ—¶userChangedå¯¹è±¡ä¸å¯èƒ½ä¸ºnull,è¯·æ£€æŸ¥æœåŠ¡å™¨çš„ChangePassword()å‡½æ•°ã€‚");
 
             DbPath path = new DbPath(changedUser.RecPath);
 
             Database db = this.Dbs.GetDatabase(path.Name);
             if (db == null)
             {
-                strError = "Î´ÕÒµ½ÕÊ»§'" + strChangedUserName + "'´ÓÊôµÄÊı¾İ¿â£¬Òì³£¡£";
+                strError = "æœªæ‰¾åˆ°å¸æˆ·'" + strChangedUserName + "'ä»å±çš„æ•°æ®åº“ï¼Œå¼‚å¸¸ã€‚";
                 return -1;
             }
-            // ???????ÈÏ²»ÈÏ¿âµÄÆäËüÓïÑÔ¿âÃû
+            // ???????è®¤ä¸è®¤åº“çš„å…¶å®ƒè¯­è¨€åº“å
             string strDbName = db.GetCaption("zh-CN");
 
             string strExistRights = "";
@@ -760,14 +759,14 @@ namespace DigitalPlatform.rms
                 out strExistRights);
             if (bHasRight == false)
             {
-                strError = "ÄúµÄÕÊ»§ÃûÎª'" + user.Name + "'£¬¶ÔÕÊ»§ÃûÎª'" + strChangedUserName + "'Ëù´ÓÊôµÄÊı¾İ¿â'" + strDbName + "'Ã»ÓĞ'ĞŞ¸Ä¼ÇÂ¼ÃÜÂë(changepassword)'µÄÈ¨ÏŞ£¬Ä¿Ç°µÄÈ¨ÏŞÖµÎª'" + strExistRights + "'¡£";
+                strError = "æ‚¨çš„å¸æˆ·åä¸º'" + user.Name + "'ï¼Œå¯¹å¸æˆ·åä¸º'" + strChangedUserName + "'æ‰€ä»å±çš„æ•°æ®åº“'" + strDbName + "'æ²¡æœ‰'ä¿®æ”¹è®°å½•å¯†ç (changepassword)'çš„æƒé™ï¼Œç›®å‰çš„æƒé™å€¼ä¸º'" + strExistRights + "'ã€‚";
                 return -6;
             }
 
             // return:
-            //      -1  ³ö´í
-            //      -4  ¼ÇÂ¼²»´æÔÚ
-            //		0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      -4  è®°å½•ä¸å­˜åœ¨
+            //		0   æˆåŠŸ
             return changedUser.ChangePassword(strNewPassword,
                 out strError);
         }

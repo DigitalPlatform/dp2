@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
@@ -17,28 +17,28 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.rms.Client
 {
 	/*
-	// ¶ÔÏó´æ´¢Ä£Ê½
+	// å¯¹è±¡å­˜å‚¨æ¨¡å¼
 	public enum StorageMode
 	{
-		None = 0,	// ÉĞÎ´¾ö¶¨
-		Real = 1,	// ÕæÊµ¶ÔÏó
-		Memory = 2,	// ÄÚ´æ¶ÔÏó
+		None = 0,	// å°šæœªå†³å®š
+		Real = 1,	// çœŸå®å¯¹è±¡
+		Memory = 2,	// å†…å­˜å¯¹è±¡
 	}
 	*/
 
 	/// <summary>
-	/// Êı¾İ¿âÏÂÊô¶ÔÏó¹ÜÀí µÄ Ê÷ ¿Ø¼ş
+	/// æ•°æ®åº“ä¸‹å±å¯¹è±¡ç®¡ç† çš„ æ ‘ æ§ä»¶
 	/// </summary>
 	public class DatabaseObjectTree : System.Windows.Forms.TreeView
 	{
         public bool EnableDefaultFileEditing = false;
 
-        public int DbStyle = 0;   // Êı¾İ¿âStyle
+        public int DbStyle = 0;   // æ•°æ®åº“Style
 		public ApplicationInfo applicationInfo = null;
 
 		public ObjEventCollection Log = new ObjEventCollection();
 
-		// public StorageMode StorageMode = StorageMode.None;	// ´æ´¢Ä£Ê½ÔİÊ±Ã»ÓĞ¶¨
+		// public StorageMode StorageMode = StorageMode.None;	// å­˜å‚¨æ¨¡å¼æš‚æ—¶æ²¡æœ‰å®š
 
 		public DigitalPlatform.StopManager stopManager = null;
 
@@ -46,7 +46,7 @@ namespace DigitalPlatform.rms.Client
 
 		public string Lang = "zh";
 
-		public ServerCollection Servers = null;	// ÒıÓÃ
+		public ServerCollection Servers = null;	// å¼•ç”¨
 		public RmsChannelCollection Channels = null;
 
 		public string ServerUrl = "";
@@ -56,7 +56,7 @@ namespace DigitalPlatform.rms.Client
 		public bool DisplayRoot = true;
 
 		//
-		public DatabaseObject Root = new DatabaseObject();	// ÄÚ´æ¶ÔÏóÊ÷µÄ¸ù¶ÔÏó¡£Ğé¸ù¡£
+		public DatabaseObject Root = new DatabaseObject();	// å†…å­˜å¯¹è±¡æ ‘çš„æ ¹å¯¹è±¡ã€‚è™šæ ¹ã€‚
 
 		public event GuiAppendMenuEventHandle OnSetMenu;
 
@@ -127,7 +127,7 @@ namespace DigitalPlatform.rms.Client
 					if (this.Nodes.Count != 0)
 					{
 						this.Nodes[0].Text = value;
-                        this.Root.Name = value; // ÄÚ´æ¶ÔÏóÃû×ÖÒ²Òª¸Ä±ä
+                        this.Root.Name = value; // å†…å­˜å¯¹è±¡åå­—ä¹Ÿè¦æ”¹å˜
 
 					}
 				}
@@ -149,7 +149,7 @@ namespace DigitalPlatform.rms.Client
             if (this.DbName != "")
             {
 
-                // »ñµÃÊı¾İ¿âStyle
+                // è·å¾—æ•°æ®åº“Style
                 string strError = "";
                 this.DbStyle = this.GetDbStyle(
                     this.DbName,
@@ -157,7 +157,7 @@ namespace DigitalPlatform.rms.Client
                 if (this.DbStyle == -1)
                     throw new Exception(strError);
 
-                // ÓÃ·şÎñÆ÷¶Ë»ñµÃµÄĞÅÏ¢Ìî³äÊ÷
+                // ç”¨æœåŠ¡å™¨ç«¯è·å¾—çš„ä¿¡æ¯å¡«å……æ ‘
                 Cursor save = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
                 FillAll(null);
@@ -187,7 +187,7 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
-		// Ìî³äÈ«²¿½Úµã
+		// å¡«å……å…¨éƒ¨èŠ‚ç‚¹
 		public void FillAll(TreeNode node)
 		{
 			string strError = "";
@@ -214,7 +214,7 @@ namespace DigitalPlatform.rms.Client
 			for(int i=0;i<children.Count;i++)
 			{
 				TreeNode child = children[i];
-				// ĞèÒªÕ¹¿ª
+				// éœ€è¦å±•å¼€
 				if (ResTree.IsLoading(child) == true) 
 				{
 					FillAll(child);
@@ -233,13 +233,13 @@ namespace DigitalPlatform.rms.Client
 			}
 			else
 			{
-				Debug.Assert(treenode != null, "ÔÚÏÔÊ¾¸ùÄ£Ê½ÏÂ, ²»ÄÜÓÃnullµ÷ÓÃ±¾º¯Êı");
+				Debug.Assert(treenode != null, "åœ¨æ˜¾ç¤ºæ ¹æ¨¡å¼ä¸‹, ä¸èƒ½ç”¨nullè°ƒç”¨æœ¬å‡½æ•°");
 				return TreeViewUtil.GetPath(treenode, '/');
 			}
 
 		}
 
-        // ¸ù¾İTreeNode½Úµã»ñµÃStyle
+        // æ ¹æ®TreeNodeèŠ‚ç‚¹è·å¾—Style
         public int GetNodeStyle(TreeNode node)
         {
             if (this.Root == null)
@@ -256,7 +256,7 @@ namespace DigitalPlatform.rms.Client
             return obj.Style;
         }
 
-		// µİ¹é
+		// é€’å½’
 		public int Fill(TreeNode node)
 		{
 			TreeNodeCollection children = null;
@@ -273,7 +273,7 @@ namespace DigitalPlatform.rms.Client
 			int i;
 
 
-			// Ìî³ä¸ù
+			// å¡«å……æ ¹
 			if (node == null) 
 			{
 				children.Clear();
@@ -310,21 +310,21 @@ namespace DigitalPlatform.rms.Client
 				if (parent == null)
 				{
 					Debug.Assert(false, "path not found" );
-					return -1;	// Â·¾¶Ã»ÓĞÕÒµ½
+					return -1;	// è·¯å¾„æ²¡æœ‰æ‰¾åˆ°
 				}
 
 				for(i=0;i<parent.Children.Count;i++) 
 				{
 					DatabaseObject child = (DatabaseObject)parent.Children[i];
 
-					// ºöÂÔfromÀàĞÍ½Úµã
+					// å¿½ç•¥fromç±»å‹èŠ‚ç‚¹
 					if (child.Type == ResTree.RESTYPE_FROM)
 						continue;
 
 					TreeNode nodeNew = new TreeNode(child.Name, child.Type, child.Type);
 
 
-					Debug.Assert(child.Type != -1, "ÀàĞÍÖµÉĞÎ´³õÊ¼»¯");
+					Debug.Assert(child.Type != -1, "ç±»å‹å€¼å°šæœªåˆå§‹åŒ–");
 
 					if (child.Type == ResTree.RESTYPE_FOLDER)
 						ResTree.SetLoading(nodeNew);
@@ -336,10 +336,10 @@ namespace DigitalPlatform.rms.Client
 
 		}
 
-		// ½«ÄÚ´æ¶ÔÏó²åÈëTreeViewÊ÷
-		// (Ôİ²»¸Ä±ä·şÎñÆ÷¶ËµÄÕæÕı¶ÔÏó)
+		// å°†å†…å­˜å¯¹è±¡æ’å…¥TreeViewæ ‘
+		// (æš‚ä¸æ”¹å˜æœåŠ¡å™¨ç«¯çš„çœŸæ­£å¯¹è±¡)
 		// parameters:
-		//		nodeInsertPos	²åÈë²Î¿¼½Úµã£¬ÔÚ´ËÇ°²åÈë¡£Èç¹û==null£¬±íÊ¾ÔÚparentÏÂ¼¶Ä©Î²×·¼Ó
+		//		nodeInsertPos	æ’å…¥å‚è€ƒèŠ‚ç‚¹ï¼Œåœ¨æ­¤å‰æ’å…¥ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºåœ¨parentä¸‹çº§æœ«å°¾è¿½åŠ 
 		public int InsertObject(TreeNode nodeParent,
 			TreeNode nodeInsertPos,
 			DatabaseObject obj,
@@ -377,8 +377,8 @@ namespace DigitalPlatform.rms.Client
 				TreeNode nodeNew = new TreeNode(perObj.Name,
 					perObj.Type, perObj.Type);
 
-				Debug.Assert(perObj.Type != -1, "ÀàĞÍÖµÉĞÎ´³õÊ¼»¯");
-				Debug.Assert(perObj.Type != ResTree.RESTYPE_DB, "²åÈëÀàĞÍ²»ÄÜÎªDB");
+				Debug.Assert(perObj.Type != -1, "ç±»å‹å€¼å°šæœªåˆå§‹åŒ–");
+				Debug.Assert(perObj.Type != ResTree.RESTYPE_DB, "æ’å…¥ç±»å‹ä¸èƒ½ä¸ºDB");
 
 				if (nodeInsertPos == null)
 					children.Add(nodeNew);
@@ -393,14 +393,14 @@ namespace DigitalPlatform.rms.Client
 
 				string strPath = this.GetPath(nodeNew);
 
-				// °ÑĞŞ¸Ä¼ÇÂ¼µ½ÈÕÖ¾
+				// æŠŠä¿®æ”¹è®°å½•åˆ°æ—¥å¿—
 				ObjEvent objevent = new ObjEvent();
 				objevent.Obj = perObj;
 				objevent.Oper = ObjEventOper.New;
 				objevent.Path = strPath;
 				this.Log.Add(objevent);
 				/*
-				// ÔÚ·şÎñÆ÷¶Ë¶ÒÏÖ
+				// åœ¨æœåŠ¡å™¨ç«¯å…‘ç°
 				if (this.StorageMode == StorageMode.Real)
 				{
 					MemoryStream stream = null;
@@ -422,7 +422,7 @@ namespace DigitalPlatform.rms.Client
 
 				if (perObj.Type == ResTree.RESTYPE_FOLDER)
 				{
-					// µİ¹é
+					// é€’å½’
 					// ResTree.SetLoading(nodeNew);
 					for(int j=0;j<perObj.Children.Count;j++)
 					{
@@ -445,7 +445,7 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 		
-		// »Øµ÷º¯Êı
+		// å›è°ƒå‡½æ•°
 		void DoStop(object sender, StopEventArgs e)
 		{
 			if (this.channel != null)
@@ -465,7 +465,7 @@ namespace DigitalPlatform.rms.Client
 			MenuItem menuItem = null;
 
 
-			menuItem = new MenuItem("±à¼­ÅäÖÃÎÄ¼ş(&E)");
+			menuItem = new MenuItem("ç¼–è¾‘é…ç½®æ–‡ä»¶(&E)");
 			menuItem.Click += new System.EventHandler(this.menu_editCfgFile);
 			if (nImageIndex != ResTree.RESTYPE_FILE)
 				menuItem.Enabled = false;
@@ -476,7 +476,7 @@ namespace DigitalPlatform.rms.Client
 			contextMenu.MenuItems.Add(menuItem);
 
 
-			menuItem = new MenuItem("ĞÂ¶ÔÏó [Í¬¼¶](&S)");
+			menuItem = new MenuItem("æ–°å¯¹è±¡ [åŒçº§](&S)");
 			menuItem.Click += new System.EventHandler(this.menu_newObjectSibling_Click);
 			if (nImageIndex == ResTree.RESTYPE_DB || this.Nodes.Count == 0)
 				menuItem.Enabled = false;
@@ -484,7 +484,7 @@ namespace DigitalPlatform.rms.Client
 				menuItem.Enabled = true;
 			contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("ĞÂ¶ÔÏó [ÏÂ¼¶](&H)");
+			menuItem = new MenuItem("æ–°å¯¹è±¡ [ä¸‹çº§](&H)");
 			menuItem.Click += new System.EventHandler(this.menu_newObjectChild_Click);
 			if (nImageIndex == ResTree.RESTYPE_FOLDER || nImageIndex == ResTree.RESTYPE_DB)
 				menuItem.Enabled = true;
@@ -505,11 +505,11 @@ namespace DigitalPlatform.rms.Client
 				bHasClipboardObject = true;
 
 
-			menuItem = new MenuItem("¸´ÖÆÊ÷(&T)");
+			menuItem = new MenuItem("å¤åˆ¶æ ‘(&T)");
 			menuItem.Click += new System.EventHandler(this.menu_copyTreeToClipboard_Click);
 			contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("Õ³ÌùÊ÷(&A)");
+			menuItem = new MenuItem("ç²˜è´´æ ‘(&A)");
 			menuItem.Click += new System.EventHandler(this.menu_pasteTreeFromClipboard_Click);
 			if (bHasClipboardObject== false)
 			{
@@ -521,11 +521,11 @@ namespace DigitalPlatform.rms.Client
 			menuItem = new MenuItem("-");
 			contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("¸´ÖÆ(&C)");
+			menuItem = new MenuItem("å¤åˆ¶(&C)");
 			menuItem.Click += new System.EventHandler(this.menu_copyObjectToClipboard_Click);
 			contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("Õ³Ìù[Ç°²å](&P)");
+			menuItem = new MenuItem("ç²˜è´´[å‰æ’](&P)");
 			menuItem.Click += new System.EventHandler(this.menu_pasteObjectFromClipboard_InsertBefore_Click);
 			if (bHasClipboardObject== false)
 			{
@@ -533,7 +533,7 @@ namespace DigitalPlatform.rms.Client
 			}
 			contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("Õ³Ìù[×·¼Óµ½ÏÂ¼¶Ä©Î²](&S)");
+			menuItem = new MenuItem("ç²˜è´´[è¿½åŠ åˆ°ä¸‹çº§æœ«å°¾](&S)");
 			menuItem.Click += new System.EventHandler(this.menu_pasteObjectFromClipboard_AppendChild_Click);
 			if (bHasClipboardObject== false)
 			{
@@ -546,7 +546,7 @@ namespace DigitalPlatform.rms.Client
 			contextMenu.MenuItems.Add(menuItem);
 
 
-			menuItem = new MenuItem("É¾³ı¶ÔÏó(&D)");
+			menuItem = new MenuItem("åˆ é™¤å¯¹è±¡(&D)");
 			menuItem.Click += new System.EventHandler(this.menu_deleteObject_Click);
 			if (this.SelectedNode == null || nImageIndex == ResTree.RESTYPE_DB)
 				menuItem.Enabled = false;
@@ -556,7 +556,7 @@ namespace DigitalPlatform.rms.Client
 			menuItem = new MenuItem("-");
 			contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("Ä£Ê½(&M)");
+			menuItem = new MenuItem("æ¨¡å¼(&M)");
 			menuItem.Click += new System.EventHandler(this.menu_displayMode_Click);
 			contextMenu.MenuItems.Add(menuItem);
 
@@ -578,7 +578,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ´´½¨ĞÂ¶ÔÏó
+		// åˆ›å»ºæ–°å¯¹è±¡
 		void DoNewObject(bool bInsertAsChild)
 		{
 			NewObjectDlg dlg = new NewObjectDlg();
@@ -604,22 +604,22 @@ namespace DigitalPlatform.rms.Client
 
 			if (bInsertAsChild == false)
 			{
-				// ²åÈëÍ¬¼¶
+				// æ’å…¥åŒçº§
 
 
-				// ²éÖØ
+				// æŸ¥é‡
 				TreeNode nodeDup = TreeViewUtil.FindNodeByText((TreeView)this,
 					this.SelectedNode != null ? this.SelectedNode.Parent : null,
                     dlg.textBox_objectName.Text);
 				if (nodeDup != null)
 				{
-					strError = "Í¬Ãû¶ÔÏóÒÑ¾­´æÔÚ¡£·ÅÆú²Ù×÷¡£";
+					strError = "åŒåå¯¹è±¡å·²ç»å­˜åœ¨ã€‚æ”¾å¼ƒæ“ä½œã€‚";
 					goto ERROR1;
 				}
 
                 if (this.SelectedNode == null)
                 {
-                    strError = "ÉĞÎ´Ñ¡Ôñ»ù×¼¶ÔÏó";
+                    strError = "å°šæœªé€‰æ‹©åŸºå‡†å¯¹è±¡";
                     goto ERROR1;
                 }
 
@@ -630,15 +630,15 @@ namespace DigitalPlatform.rms.Client
 			}
 			else
 			{
-				// ²åÈëÏÂ¼¶
+				// æ’å…¥ä¸‹çº§
 
-				// ²éÖØ
+				// æŸ¥é‡
 				TreeNode nodeDup = TreeViewUtil.FindNodeByText((TreeView)this,
 					this.SelectedNode,
 					dlg.textBox_objectName.Text);
 				if (nodeDup != null)
 				{
-					strError = "Í¬Ãû¶ÔÏóÒÑ¾­´æÔÚ¡£·ÅÆú²Ù×÷¡£";
+					strError = "åŒåå¯¹è±¡å·²ç»å­˜åœ¨ã€‚æ”¾å¼ƒæ“ä½œã€‚";
 					goto ERROR1;
 				}
 			
@@ -654,7 +654,7 @@ namespace DigitalPlatform.rms.Client
 			DatabaseObject objParent = this.Root.LocateObject(strPath);
 			if (objParent == null)
 			{
-				strError = "Â·¾¶Îª '" +strPath+ "' µÄÄÚ´æ¶ÔÏóÃ»ÓĞÕÒµ½...";
+				strError = "è·¯å¾„ä¸º '" +strPath+ "' çš„å†…å­˜å¯¹è±¡æ²¡æœ‰æ‰¾åˆ°...";
 				goto ERROR1;
 			}
 
@@ -663,7 +663,7 @@ namespace DigitalPlatform.rms.Client
 
             strPath = TreeViewUtil.GetPath(node, '/');
 
-			// °ÑĞŞ¸Ä¼ÇÂ¼µ½ÈÕÖ¾
+			// æŠŠä¿®æ”¹è®°å½•åˆ°æ—¥å¿—
 			ObjEvent objevent = new ObjEvent();
 			objevent.Obj = obj;
 			objevent.Oper = ObjEventOper.New;
@@ -679,7 +679,7 @@ namespace DigitalPlatform.rms.Client
 			if (nRet == -1)
 				goto ERROR1;
 
-			// Ë¢ĞÂ?
+			// åˆ·æ–°?
 			FillAll(null);
 			*/
 
@@ -689,11 +689,11 @@ namespace DigitalPlatform.rms.Client
 			return;
 		}
 
-		// ÔÚ·şÎñÆ÷¶Ë´´½¨¶ÔÏó
+		// åœ¨æœåŠ¡å™¨ç«¯åˆ›å»ºå¯¹è±¡
 		// return:
-		//		-1	´íÎó
-		//		1	ÒÔ¼°´æÔÚÍ¬Ãû¶ÔÏó
-		//		0	Õı³£·µ»Ø
+		//		-1	é”™è¯¯
+		//		1	ä»¥åŠå­˜åœ¨åŒåå¯¹è±¡
+		//		0	æ­£å¸¸è¿”å›
 		int NewServerSideObject(string strPath,
 			int nType,
 			Stream stream,
@@ -708,7 +708,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.channel = Channels.GetChannel(this.ServerUrl);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 			DigitalPlatform.Stop stop = null;
 
@@ -716,10 +716,10 @@ namespace DigitalPlatform.rms.Client
 			{
 				stop = new DigitalPlatform.Stop();
 
-                stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+                stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚ´´½¨ĞÂ¶ÔÏó: " + this.ServerUrl + "?" + strPath);
+				stop.Initial("æ­£åœ¨åˆ›å»ºæ–°å¯¹è±¡: " + this.ServerUrl + "?" + strPath);
 
 				stop.BeginLoop();
 
@@ -732,7 +732,7 @@ namespace DigitalPlatform.rms.Client
 				strStyle = "createdir";
 			/*
 			long lRet = channel.DoSaveTextRes(strPath,
-				"",	// content ÔİÊ±Îª¿Õ
+				"",	// content æš‚æ—¶ä¸ºç©º
 				true,	// bInlucdePreamble
 				strStyle,	// style
 				null,	// baTimeStamp,
@@ -765,19 +765,18 @@ namespace DigitalPlatform.rms.Client
                 stop.OnStop -= new StopEventHandler(this.DoStop);
 				stop.Initial("");
 
-				stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+				stop.Unregister();	// å’Œå®¹å™¨å…³è”
 			}
-
 
 			if (lRet == -1)
 			{
 				if (this.channel.ErrorCode == ChannelErrorCode.AlreadyExist) 
 				{
 					this.channel = null;
-					return 1;	// ÒÑ¾­´æÔÚÍ¬ÃûÍ¬ÀàĞÍ¶ÔÏó
+					return 1;	// å·²ç»å­˜åœ¨åŒååŒç±»å‹å¯¹è±¡
 				}
 				this.channel = null;
-				strError = "Ğ´Èë '" + strPath + "' ·¢Éú´íÎó: " + strError;
+				strError = "å†™å…¥ '" + strPath + "' å‘ç”Ÿé”™è¯¯: " + strError;
 				return -1;
 			}
 
@@ -785,18 +784,18 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
-		// ±à¼­ÅäÖÃÎÄ¼ş
+		// ç¼–è¾‘é…ç½®æ–‡ä»¶
 		void menu_editCfgFile(object sender, System.EventArgs e)
 		{
 			if (this.SelectedNode == null)
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒª±à¼­µÄÅäÖÃÎÄ¼ş½Úµã");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦ç¼–è¾‘çš„é…ç½®æ–‡ä»¶èŠ‚ç‚¹");
 				return;
 			}
 			
 			if (this.SelectedNode.ImageIndex != ResTree.RESTYPE_FILE)
 			{
-				MessageBox.Show(this, "ËùÑ¡ÔñµÄ½Úµã²»ÊÇÅäÖÃÎÄ¼şÀàĞÍ¡£ÇëÑ¡ÔñÒª±à¼­µÄÅäÖÃÎÄ¼ş½Úµã¡£");
+				MessageBox.Show(this, "æ‰€é€‰æ‹©çš„èŠ‚ç‚¹ä¸æ˜¯é…ç½®æ–‡ä»¶ç±»å‹ã€‚è¯·é€‰æ‹©è¦ç¼–è¾‘çš„é…ç½®æ–‡ä»¶èŠ‚ç‚¹ã€‚");
 				return;
 			}
 
@@ -805,18 +804,18 @@ namespace DigitalPlatform.rms.Client
             if (DatabaseObject.IsDefaultFile(strPath) == true
                 && EnableDefaultFileEditing == false)
             {
-                MessageBox.Show(this, "Êı¾İ¿âÈ±Ê¡µÄÅäÖÃÎÄ¼ş²»ÄÜÔÚ´Ë½øĞĞĞŞ¸Ä¡£");
+                MessageBox.Show(this, "æ•°æ®åº“ç¼ºçœçš„é…ç½®æ–‡ä»¶ä¸èƒ½åœ¨æ­¤è¿›è¡Œä¿®æ”¹ã€‚");
                 return;
             }
 
 			DatabaseObject obj = this.Root.LocateObject(strPath);
 			if (obj == null)
 			{
-				MessageBox.Show(this, "Â·¾¶Îª '" +strPath+ "' µÄÄÚ´æ¶ÔÏóÃ»ÓĞÕÒµ½...");
+				MessageBox.Show(this, "è·¯å¾„ä¸º '" +strPath+ "' çš„å†…å­˜å¯¹è±¡æ²¡æœ‰æ‰¾åˆ°...");
 				return;
 			}
 
-			// ±à¼­ÅäÖÃÎÄ¼ş
+			// ç¼–è¾‘é…ç½®æ–‡ä»¶
 			CfgFileEditDlg dlg = new CfgFileEditDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
@@ -837,7 +836,7 @@ namespace DigitalPlatform.rms.Client
 
 			if (dlg.DialogResult == DialogResult.OK)
 			{
-				// °ÑĞŞ¸Ä¼ÇÂ¼µ½ÈÕÖ¾
+				// æŠŠä¿®æ”¹è®°å½•åˆ°æ—¥å¿—
 				ObjEvent objevent = new ObjEvent();
 				objevent.Obj = obj;
 				objevent.Oper = ObjEventOper.Change;
@@ -846,28 +845,28 @@ namespace DigitalPlatform.rms.Client
 			}
 		}
 
-		// ÏÔÊ¾Ä£Ê½
+		// æ˜¾ç¤ºæ¨¡å¼
 		private void menu_displayMode_Click(object sender, System.EventArgs e)
 		{
 			/*
 			string strMode = "";
 			if (this.StorageMode == StorageMode.Real)
 			{
-				strMode = "ÕæÊµ";
+				strMode = "çœŸå®";
 			}
 			if (this.StorageMode == StorageMode.Memory)
 			{
-				strMode = "ÄÚ´æ¶ÔÏó";
+				strMode = "å†…å­˜å¯¹è±¡";
 			}
 
-			string strText = "µ±Ç°¶ÔÏó´æ´¢Ä£Ê½Îª '" + strMode + "' , Êı¾İ¿âÃûÎª '" + this.DbName + "'¡£";
+			string strText = "å½“å‰å¯¹è±¡å­˜å‚¨æ¨¡å¼ä¸º '" + strMode + "' , æ•°æ®åº“åä¸º '" + this.DbName + "'ã€‚";
 			MessageBox.Show(this, strText);
 			*/
 
 		}
 
 		
-		// ¸´ÖÆµ±Ç°Ñ¡ÔñµÄ¶ÔÏóµ½¼ôÌù°å
+		// å¤åˆ¶å½“å‰é€‰æ‹©çš„å¯¹è±¡åˆ°å‰ªè´´æ¿
 		private void menu_copyObjectToClipboard_Click(object sender, System.EventArgs e)
 		{
 			DatabaseObject root = null;
@@ -896,7 +895,7 @@ namespace DigitalPlatform.rms.Client
 				DatabaseObject parent = this.Root.LocateObject(strPath);
 				if (parent == null)
 				{
-					strError = "Â·¾¶ '" +strPath+ "'Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÄÚ´æ¶ÔÏó ...";
+					strError = "è·¯å¾„ '" +strPath+ "'æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„å†…å­˜å¯¹è±¡ ...";
 					MessageBox.Show(this, strError);
 					return ;
 				}
@@ -911,27 +910,27 @@ namespace DigitalPlatform.rms.Client
 				MessageBox.Show(this, root.Dump());
 		}
 
-		// ´Ó¼ôÌù°åÕ³ÌùÒ»¸ö¶ÔÏó(Ç°²å)
+		// ä»å‰ªè´´æ¿ç²˜è´´ä¸€ä¸ªå¯¹è±¡(å‰æ’)
 		private void menu_pasteObjectFromClipboard_InsertBefore_Click(object sender, System.EventArgs e)
 		{
 			DoPasteObject(true);
 		}
 
-		// ´Ó¼ôÌù°åÕ³ÌùÒ»¸ö¶ÔÏó(×·¼Óµ½ÏÂ¼¶Ä©Î²)
+		// ä»å‰ªè´´æ¿ç²˜è´´ä¸€ä¸ªå¯¹è±¡(è¿½åŠ åˆ°ä¸‹çº§æœ«å°¾)
 		private void menu_pasteObjectFromClipboard_AppendChild_Click(object sender, System.EventArgs e)
 		{
 			DoPasteObject(false);
 		}
 
 		// parameters:
-		//		bInsert	ÊÇ·ñÇ°²å true:Ç°²å false:×·¼Óµ½ÏÂ¼¶Ä©Î²
+		//		bInsert	æ˜¯å¦å‰æ’ true:å‰æ’ false:è¿½åŠ åˆ°ä¸‹çº§æœ«å°¾
 		void DoPasteObject(bool bInsert)
 		{
 			IDataObject iData = Clipboard.GetDataObject();
 			if (iData == null
 				|| iData.GetDataPresent(typeof(DatabaseObject)) == false)
 			{
-				MessageBox.Show(this, "¼ôÌù°åÖĞÉĞ²»´æÔÚDatabaseObjectÀàĞÍÊı¾İ");
+				MessageBox.Show(this, "å‰ªè´´æ¿ä¸­å°šä¸å­˜åœ¨DatabaseObjectç±»å‹æ•°æ®");
 				return;
 			}
 
@@ -958,7 +957,7 @@ namespace DigitalPlatform.rms.Client
 				if (this.Nodes.Count != 0)
 					nodeInsertPos = this.Nodes[0];
 
-				// ²åÈëµ½µÚÒ»¼¶µÄ×îÇ°Ãæ
+				// æ’å…¥åˆ°ç¬¬ä¸€çº§çš„æœ€å‰é¢
 				nRet = InsertObject(null,
 					nodeInsertPos,
 					root,
@@ -969,7 +968,7 @@ namespace DigitalPlatform.rms.Client
 			{
 				if (bInsert == true)
 				{
-					// ²åÈëµ±Ç°½ÚµãµÄÇ°Ãæ
+					// æ’å…¥å½“å‰èŠ‚ç‚¹çš„å‰é¢
 					nRet = InsertObject(this.SelectedNode.Parent,
 						this.SelectedNode,
 						root,
@@ -977,7 +976,7 @@ namespace DigitalPlatform.rms.Client
 				}
 				else 
 				{
-					// ²åÈëµ±Ç°½ÚµãµÄÏÂ¼¶Ä©Î²
+					// æ’å…¥å½“å‰èŠ‚ç‚¹çš„ä¸‹çº§æœ«å°¾
 					nRet = InsertObject(this.SelectedNode,
 						null,
 						root,
@@ -990,14 +989,14 @@ namespace DigitalPlatform.rms.Client
 				MessageBox.Show(this, strError);
 		}
 
-		// ´Ó¼ôÌù°åÕ³ÌùÕû¸öÊ÷
+		// ä»å‰ªè´´æ¿ç²˜è´´æ•´ä¸ªæ ‘
 		private void menu_pasteTreeFromClipboard_Click(object sender, System.EventArgs e)
 		{
 			IDataObject iData = Clipboard.GetDataObject();
 			if (iData == null
 				|| iData.GetDataPresent(typeof(DatabaseObject)) == false)
 			{
-				MessageBox.Show(this, "¼ôÌù°åÖĞÉĞ²»´æÔÚDatabaseObjectÀàĞÍÊı¾İ");
+				MessageBox.Show(this, "å‰ªè´´æ¿ä¸­å°šä¸å­˜åœ¨DatabaseObjectç±»å‹æ•°æ®");
 				return;
 			}
 
@@ -1011,7 +1010,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.Nodes.Clear();
 
-			// °ÑÒÔÇ°Ê÷ÉÏµÄÈ«²¿½Úµã¹éÄÉÎªÉ¾³ı²Ù×÷¼ÇÈëÈÕÖ¾
+			// æŠŠä»¥å‰æ ‘ä¸Šçš„å…¨éƒ¨èŠ‚ç‚¹å½’çº³ä¸ºåˆ é™¤æ“ä½œè®°å…¥æ—¥å¿—
 
 			PutAllObjToLog(ObjEventOper.Delete,
 				this.Root);
@@ -1027,7 +1026,7 @@ namespace DigitalPlatform.rms.Client
 			//this.Root = oldroot;
 			//this.StorageMode = oldmode;
 
-			// °ÑÏÖÔÚÊ÷ÉÏÈ«²¿½Úµã×÷ÎªĞÂÔö¼ÇÈëÈÕÖ¾
+			// æŠŠç°åœ¨æ ‘ä¸Šå…¨éƒ¨èŠ‚ç‚¹ä½œä¸ºæ–°å¢è®°å…¥æ—¥å¿—
 			PutAllObjToLog(ObjEventOper.New,
 				this.Root);
 		}
@@ -1036,7 +1035,7 @@ namespace DigitalPlatform.rms.Client
         {
             this.Nodes.Clear();
 
-            // °ÑÒÔÇ°Ê÷ÉÏµÄÈ«²¿½Úµã¹éÄÉÎªÉ¾³ı²Ù×÷¼ÇÈëÈÕÖ¾
+            // æŠŠä»¥å‰æ ‘ä¸Šçš„å…¨éƒ¨èŠ‚ç‚¹å½’çº³ä¸ºåˆ é™¤æ“ä½œè®°å…¥æ—¥å¿—
 
             PutAllObjToLog(ObjEventOper.Delete,
                 this.Root);
@@ -1046,14 +1045,14 @@ namespace DigitalPlatform.rms.Client
             this.FillAll(null);
 
 
-            // °ÑÏÖÔÚÊ÷ÉÏÈ«²¿½Úµã×÷ÎªĞÂÔö¼ÇÈëÈÕÖ¾
+            // æŠŠç°åœ¨æ ‘ä¸Šå…¨éƒ¨èŠ‚ç‚¹ä½œä¸ºæ–°å¢è®°å…¥æ—¥å¿—
             PutAllObjToLog(ObjEventOper.New,
                 this.Root);
         }
 
 		
 
-		// ½«Ê÷ÕûÌå¸´ÖÆµ½clipboard
+		// å°†æ ‘æ•´ä½“å¤åˆ¶åˆ°clipboard
 		private void menu_copyTreeToClipboard_Click(object sender, System.EventArgs e)
 		{
 			/*
@@ -1075,16 +1074,16 @@ namespace DigitalPlatform.rms.Client
 		}
 
 		/*
-		// ÇĞ»»ÎªÄÚ´æ¶ÔÏóÄ£Ê½
+		// åˆ‡æ¢ä¸ºå†…å­˜å¯¹è±¡æ¨¡å¼
 		public int SwitchToMemoryMode(out string strError)
 		{
-			Debug.Assert(false, "·ÏÖ¹");
+			Debug.Assert(false, "åºŸæ­¢");
 			strError = "";
 
 			if (this.DisplayRoot == true
 				&& this.Nodes.Count == 0)
 			{
-				strError = "Ê÷ÔÚÏÔÊ¾¸ùµÄÇé¿öÏÂ£¬µÚÒ»¼¶±ØĞëÓĞ¶øÇÒÖ»ÓĞÒ»¸ö½Úµã´æÔÚ...";
+				strError = "æ ‘åœ¨æ˜¾ç¤ºæ ¹çš„æƒ…å†µä¸‹ï¼Œç¬¬ä¸€çº§å¿…é¡»æœ‰è€Œä¸”åªæœ‰ä¸€ä¸ªèŠ‚ç‚¹å­˜åœ¨...";
 				return -1;
 			}
 
@@ -1109,31 +1108,31 @@ namespace DigitalPlatform.rms.Client
 		*/
 		
 
-		// ĞÂ¶ÔÏó(²åÈëÔÚÍ¬¼¶Ä©Î²)
+		// æ–°å¯¹è±¡(æ’å…¥åœ¨åŒçº§æœ«å°¾)
 		private void menu_newObjectSibling_Click(object sender, System.EventArgs e)
 		{
 			DoNewObject(false);
 		}
 
 
-		// ĞÂ¶ÔÏó(²åÈëÔÚÏÂ¼¶Ä©Î²)
+		// æ–°å¯¹è±¡(æ’å…¥åœ¨ä¸‹çº§æœ«å°¾)
 		private void menu_newObjectChild_Click(object sender, System.EventArgs e)
 		{
 			DoNewObject(true);
 		}
 		
-		// É¾³ı¶ÔÏó
+		// åˆ é™¤å¯¹è±¡
 		private void menu_deleteObject_Click(object sender, System.EventArgs e)
 		{
 			if (this.SelectedNode == null)
 			{
-				MessageBox.Show("ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄ¶ÔÏó...");
+				MessageBox.Show("å°šæœªé€‰æ‹©è¦åˆ é™¤çš„å¯¹è±¡...");
 				return;
 			}
 
 			if (this.SelectedNode.ImageIndex == ResTree.RESTYPE_DB)
 			{
-				MessageBox.Show("ÕâÀï²»ÄÜÉ¾³ıÊı¾İ¿â¶ÔÏó...");
+				MessageBox.Show("è¿™é‡Œä¸èƒ½åˆ é™¤æ•°æ®åº“å¯¹è±¡...");
 				return;
 			}
 
@@ -1141,14 +1140,14 @@ namespace DigitalPlatform.rms.Client
 			DatabaseObject obj = this.Root.LocateObject(strPath);
 			if (obj == null)
 			{
-				MessageBox.Show(this, "Â·¾¶Îª '" +strPath+ "' µÄÄÚ´æ¶ÔÏóÃ»ÓĞÕÒµ½...");
+				MessageBox.Show(this, "è·¯å¾„ä¸º '" +strPath+ "' çš„å†…å­˜å¯¹è±¡æ²¡æœ‰æ‰¾åˆ°...");
 				return;
 			}
 
 			/*
 			this.channel = Channels.GetChannel(this.ServerUrl);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+			Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 			DigitalPlatform.GUI.Stop stop = null;
 
@@ -1156,10 +1155,10 @@ namespace DigitalPlatform.rms.Client
 			{
 				stop = new DigitalPlatform.GUI.Stop();
 			
-				stop.Register(this.stopManager);	// ºÍÈİÆ÷¹ØÁª
+				stop.Register(this.stopManager);	// å’Œå®¹å™¨å…³è”
 
 				stop.Initial(new Delegate_doStop(this.DoStop),
-					"ÕıÔÚÉ¾³ı¶ÔÏó: " + this.ServerUrl + "?" + strPath);
+					"æ­£åœ¨åˆ é™¤å¯¹è±¡: " + this.ServerUrl + "?" + strPath);
 				stop.BeginLoop();
 
 			}
@@ -1171,7 +1170,7 @@ namespace DigitalPlatform.rms.Client
 
 
 			REDO:
-		// É¾³ıÊı¾İ¿â¶ÔÏó
+		// åˆ é™¤æ•°æ®åº“å¯¹è±¡
 
 			long lRet = channel.DoDeleteRecord(strPath,
 				baTimestamp,
@@ -1179,7 +1178,7 @@ namespace DigitalPlatform.rms.Client
 				out strError);
 			if (lRet == -1)
 			{
-				// Ê±¼ä´Á²»Æ¥Åä
+				// æ—¶é—´æˆ³ä¸åŒ¹é…
 				if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
 				{
 					baTimestamp = baOutputTimestamp;
@@ -1193,7 +1192,7 @@ namespace DigitalPlatform.rms.Client
 				stop.EndLoop();
 				stop.Initial(null, "");
 
-				stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+				stop.Unregister();	// å’Œå®¹å™¨å…³è”
 			}
 
 			this.channel = null;
@@ -1205,14 +1204,14 @@ namespace DigitalPlatform.rms.Client
 			}
 			*/
 
-			// °ÑĞŞ¸Ä¼ÇÂ¼µ½ÈÕÖ¾
+			// æŠŠä¿®æ”¹è®°å½•åˆ°æ—¥å¿—
 			ObjEvent objevent = new ObjEvent();
 			objevent.Obj = obj;
 			objevent.Oper = ObjEventOper.Delete;
 			objevent.Path = strPath;
 			this.Log.Add(objevent);
 
-			// Ë¢ĞÂ?
+			// åˆ·æ–°?
 			// FillAll(null);
 			this.SelectedNode.Remove();
 
@@ -1227,20 +1226,20 @@ namespace DigitalPlatform.rms.Client
 
 
 		/*
-		// °Ñµ±Ç°RealÄ£Ê½µÄ¶ÔÏóÈ«²¿¹¹ÔìÎªÄÚ´æÊ÷
+		// æŠŠå½“å‰Realæ¨¡å¼çš„å¯¹è±¡å…¨éƒ¨æ„é€ ä¸ºå†…å­˜æ ‘
 		public int BuildMemoryTree(
 			TreeNode treenode,
 			out DatabaseObject root,
 			out string strError)
 		{
-			Debug.Assert(false, "·ÏÖ¹");
+			Debug.Assert(false, "åºŸæ­¢");
 			root = null;
 			strError = "";
 
 			
 			//if (this.StorageMode != StorageMode.Real)
 			//{
-			//	strError = "±ØĞëÔÚReal´æ´¢Ä£Ê½ÏÂµ÷ÓÃº¯ÊıBuildMemoryTree()";
+			//	strError = "å¿…é¡»åœ¨Realå­˜å‚¨æ¨¡å¼ä¸‹è°ƒç”¨å‡½æ•°BuildMemoryTree()";
 			//	return -1;
 			//}
 			
@@ -1274,7 +1273,7 @@ namespace DigitalPlatform.rms.Client
 
 			//DatabaseObject newObj = null;
 
-			if (parentTreeNode != null)	// Êµ¸ù
+			if (parentTreeNode != null)	// å®æ ¹
 			{
 				TreeNode treenode = parentTreeNode;
 
@@ -1301,7 +1300,7 @@ namespace DigitalPlatform.rms.Client
 				{
 					this.channel = Channels.GetChannel(this.ServerUrl);
 
-					Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+					Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 					string strPath = "";
 					byte[] baTimeStamp = null;
@@ -1312,30 +1311,29 @@ namespace DigitalPlatform.rms.Client
 
                     // string strStyle = "attachment,data,timestamp,outputpath";
 					string strStyle = "content,data,timestamp,outputpath";
-					MemoryStream stream = new MemoryStream();
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        long lRet = channel.GetRes(strPath,
+                            stream,
+                            null,	// stop,
+                            strStyle,
+                            null,	// byte [] input_timestamp,
+                            out strMetaData,
+                            out baTimeStamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                            return -1;
 
-					long lRet = channel.GetRes(strPath,
-						stream,
-						null,	// stop,
-						strStyle,
-						null,	// byte [] input_timestamp,
-						out strMetaData,
-						out baTimeStamp,
-						out strOutputPath,
-						out strError);
-					if (lRet == -1)
-						return -1;
-
-					parentDatabaseObject.SetData(stream);
-					parentDatabaseObject.TimeStamp = baTimeStamp;
-					stream.Close();
-					stream = null;
+                        parentDatabaseObject.SetData(stream);
+                        parentDatabaseObject.TimeStamp = baTimeStamp;
+                    }
 
 					return 0;
 				}
 				else 
 				{
-					Debug.Assert(false, "ÒâÍâµÄ½ÚµãÀàĞÍ");
+					Debug.Assert(false, "æ„å¤–çš„èŠ‚ç‚¹ç±»å‹");
 				}
 
 			}
@@ -1363,7 +1361,7 @@ namespace DigitalPlatform.rms.Client
 
 
 		/*
-		// ½«ÄÚ´æ¶ÔÏó´´½¨ÎªÕæÕıµÄ·şÎñÆ÷¶Ë¶ÔÏó
+		// å°†å†…å­˜å¯¹è±¡åˆ›å»ºä¸ºçœŸæ­£çš„æœåŠ¡å™¨ç«¯å¯¹è±¡
 		public int BuildRealObjects(
 			string strDbName,
 			DatabaseObject root,
@@ -1373,14 +1371,14 @@ namespace DigitalPlatform.rms.Client
 
 			int nRet = 0;
 
-			// ´´½¨¸ù
+			// åˆ›å»ºæ ¹
 			if (root.Type != -1)
 			{
 				if (root.Type == ResTree.RESTYPE_DB)
-					goto DOCHILD;	// ºöÂÔ±¾½Úµã£¬µ«ÊÇ¼ÌĞø×÷ÏÂ¼¶½Úµã
+					goto DOCHILD;	// å¿½ç•¥æœ¬èŠ‚ç‚¹ï¼Œä½†æ˜¯ç»§ç»­ä½œä¸‹çº§èŠ‚ç‚¹
 
 
-				// È±Ê¡ÅäÖÃÎÄ¼ş£¬ºöÂÔ±£´æ
+				// ç¼ºçœé…ç½®æ–‡ä»¶ï¼Œå¿½ç•¥ä¿å­˜
 				if (root.IsDefaultFile() == true)
 					return 0;
 
@@ -1390,7 +1388,7 @@ namespace DigitalPlatform.rms.Client
 					stream = new MemoryStream(root.Content);
 
 				string strPath = root.MakePath(strDbName);
-// ÔÚ·şÎñÆ÷¶Ë´´½¨¶ÔÏó
+// åœ¨æœåŠ¡å™¨ç«¯åˆ›å»ºå¯¹è±¡
 				nRet = NewServerSideObject(strPath,
 					root.Type,
 					stream,
@@ -1401,7 +1399,7 @@ namespace DigitalPlatform.rms.Client
 			}
 
 			DOCHILD:
-			// µİ¹é
+			// é€’å½’
 			for(int i=0;i<root.Children.Count;i++)
 			{
 				DatabaseObject obj = (DatabaseObject)root.Children[i];
@@ -1420,7 +1418,7 @@ namespace DigitalPlatform.rms.Client
 		*/
 
 
-		// ¸ù¾İÂ·¾¶´´½¨ÄÚ´æ¶ÔÏó
+		// æ ¹æ®è·¯å¾„åˆ›å»ºå†…å­˜å¯¹è±¡
 		public int CreateObject(DatabaseObject obj,
 			string strPath,
 			out string strError)
@@ -1438,38 +1436,33 @@ namespace DigitalPlatform.rms.Client
 
 				this.channel = Channels.GetChannel(this.ServerUrl);
 
-				Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+				Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 
                 // string strStyle = "attachment,data,timestamp,outputpath";
                 string strStyle = "content,data,timestamp,outputpath";
-				MemoryStream stream = new MemoryStream();
+                using (MemoryStream stream = new MemoryStream())
+                {
 
-				long lRet = channel.GetRes(strPath,
-					stream,
-					null,	// stop,
-					strStyle,
-					null,	// byte [] input_timestamp,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
-				if (lRet == -1) 
-				{
-					// obj.SetData(null);
-					obj.TimeStamp = null;
-					stream.Close();
-					stream = null;
+                    long lRet = channel.GetRes(strPath,
+                        stream,
+                        null,	// stop,
+                        strStyle,
+                        null,	// byte [] input_timestamp,
+                        out strMetaData,
+                        out baTimeStamp,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        // obj.SetData(null);
+                        obj.TimeStamp = null;
+                        return 0;	// ç»§ç»­å¤„ç†
+                    }
 
-					return 0;	// ¼ÌĞø´¦Àí
-
-					//return -1;
-				}
-
-				obj.SetData(stream);
-				obj.TimeStamp = baTimeStamp;
-				stream.Close();
-				stream = null;
+                    obj.SetData(stream);
+                    obj.TimeStamp = baTimeStamp;
+                }
 			}
 
 			if (obj.Type == ResTree.RESTYPE_DB 
@@ -1478,7 +1471,7 @@ namespace DigitalPlatform.rms.Client
 
 				this.channel = Channels.GetChannel(this.ServerUrl);
 
-				Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+				Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 				ResInfoItem [] items = null;
 
@@ -1487,17 +1480,17 @@ namespace DigitalPlatform.rms.Client
 				if (stopManager != null) 
 				{
 					stop = new DigitalPlatform.Stop();
-                    stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+                    stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-					stop.Initial("ÕıÔÚÁĞÄ¿Â¼: " + this.ServerUrl + "?" + strPath);
+					stop.Initial("æ­£åœ¨åˆ—ç›®å½•: " + this.ServerUrl + "?" + strPath);
 
 					stop.BeginLoop();
 				}
 
 				long lRet = channel.DoDir(strPath,
 					this.Lang,
-                    null,   // ²»ĞèÒª·µ»ØÈ«²¿ÓïÑÔµÄÃû×Ö
+                    null,   // ä¸éœ€è¦è¿”å›å…¨éƒ¨è¯­è¨€çš„åå­—
 					out items,
 					out strError);
 
@@ -1507,7 +1500,7 @@ namespace DigitalPlatform.rms.Client
                     stop.OnStop -= new StopEventHandler(this.DoStop);
 					stop.Initial("");
 
-					stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+					stop.Unregister();	// å’Œå®¹å™¨å…³è”
 				}
 
 				this.channel = null;
@@ -1522,7 +1515,7 @@ namespace DigitalPlatform.rms.Client
 
 				for(int i=0;i<items.Length;i++) 
 				{
-					// ºöÂÔfromÀàĞÍ½Úµã
+					// å¿½ç•¥fromç±»å‹èŠ‚ç‚¹
 					if (items[i].Type == ResTree.RESTYPE_FROM)
 						continue;
 
@@ -1556,7 +1549,7 @@ namespace DigitalPlatform.rms.Client
 
             this.channel = Channels.GetChannel(this.ServerUrl);
 
-            Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+            Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
             ResInfoItem[] items = null;
 
@@ -1565,17 +1558,17 @@ namespace DigitalPlatform.rms.Client
             if (stopManager != null)
             {
                 stop = new DigitalPlatform.Stop();
-                stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+                stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ»ñµÃÊı¾İ¿â " + strDbName + "µÄ·ç¸ñ²ÎÊı");
+                stop.Initial("æ­£åœ¨è·å¾—æ•°æ®åº“ " + strDbName + "çš„é£æ ¼å‚æ•°");
 
                 stop.BeginLoop();
             }
 
-            long lRet = channel.DoDir("",   // ÁĞ³öÈ«²¿Êı¾İ¿â
+            long lRet = channel.DoDir("",   // åˆ—å‡ºå…¨éƒ¨æ•°æ®åº“
                 this.Lang,
-                null,   // ²»ĞèÒªÁĞ³öÈ«²¿ÓïÑÔµÄÃû×Ö
+                null,   // ä¸éœ€è¦åˆ—å‡ºå…¨éƒ¨è¯­è¨€çš„åå­—
                 out items,
                 out strError);
 
@@ -1585,7 +1578,7 @@ namespace DigitalPlatform.rms.Client
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
             }
 
             this.channel = null;
@@ -1594,11 +1587,11 @@ namespace DigitalPlatform.rms.Client
                 return -1;
 
             if (items == null)
-                return 0;   // Êı¾İ¿â²»´æÔÚ
+                return 0;   // æ•°æ®åº“ä¸å­˜åœ¨
 
             for (int i = 0; i < items.Length; i++)
             {
-                // ºöÂÔ·ÇÊı¾İ¿âÀàĞÍ½Úµã
+                // å¿½ç•¥éæ•°æ®åº“ç±»å‹èŠ‚ç‚¹
                 if (items[i].Type != ResTree.RESTYPE_DB)
                     continue;
 
@@ -1606,10 +1599,10 @@ namespace DigitalPlatform.rms.Client
                     return items[i].Style;
             }
 
-            return 0;   // Êı¾İ¿â²»´æÔÚ
+            return 0;   // æ•°æ®åº“ä¸å­˜åœ¨
         }
 
-		// ½«Ê÷ÉÏÈ«²¿¶ÔÏóÒÔÌØ¶¨ÀàĞÍ¼ÓÈëÈÕÖ¾ÖĞ
+		// å°†æ ‘ä¸Šå…¨éƒ¨å¯¹è±¡ä»¥ç‰¹å®šç±»å‹åŠ å…¥æ—¥å¿—ä¸­
 		public void PutAllObjToLog(ObjEventOper oper,
 			DatabaseObject root)
 		{
@@ -1623,9 +1616,9 @@ namespace DigitalPlatform.rms.Client
 
 			if (oper == ObjEventOper.Delete
 				&& root.Type == ResTree.RESTYPE_FOLDER)
-				return;	// É¾³ıÄ¿Â¼¶ÔÏó, Ö»ÒªÕâ¸ö¶ÔÏó½øÈëÁËÈÕÖ¾, ÆäÏÂ¼¶¾ù²»±ØÔÙ½øÈë
+				return;	// åˆ é™¤ç›®å½•å¯¹è±¡, åªè¦è¿™ä¸ªå¯¹è±¡è¿›å…¥äº†æ—¥å¿—, å…¶ä¸‹çº§å‡ä¸å¿…å†è¿›å…¥
 
-			// µİ¹é
+			// é€’å½’
 			for(int i=0;i<root.Children.Count;i++)
 			{
 				PutAllObjToLog(oper,
@@ -1634,7 +1627,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
         // 2012/4/18
-        // Ë¢ĞÂ¶ÓÁĞÖĞÖÆ¶¨Î»ÖÃÒÔºóµÄ¡¢Õë¶ÔÄ³¸ö¶ÔÏóµÄÈ«²¿²Ù×÷µÄÊ±¼ä´Á
+        // åˆ·æ–°é˜Ÿåˆ—ä¸­åˆ¶å®šä½ç½®ä»¥åçš„ã€é’ˆå¯¹æŸä¸ªå¯¹è±¡çš„å…¨éƒ¨æ“ä½œçš„æ—¶é—´æˆ³
         void RefreshTimestamp(
             int nStartIndex,
             string strPath,
@@ -1645,13 +1638,13 @@ namespace DigitalPlatform.rms.Client
             {
                 ObjEvent objevent = (ObjEvent)log[i];
 
-                if (objevent.Obj.Type == -1)    // ²»ÍêÕûµÄ¶ÔÏó
+                if (objevent.Obj.Type == -1)    // ä¸å®Œæ•´çš„å¯¹è±¡
                     continue;
 
                 if (objevent.Obj.Type == ResTree.RESTYPE_DB)
                     continue;
 
-                // È±Ê¡ÅäÖÃÎÄ¼ş£¬ºöÂÔ²Ù×÷
+                // ç¼ºçœé…ç½®æ–‡ä»¶ï¼Œå¿½ç•¥æ“ä½œ
                 if (objevent.Oper == ObjEventOper.New
                     || objevent.Oper == ObjEventOper.Change)
                 {
@@ -1680,13 +1673,13 @@ namespace DigitalPlatform.rms.Client
 			{
 				ObjEvent objevent = (ObjEvent)log[i];
 
-                if (objevent.Obj.Type == -1)    // ²»ÍêÕûµÄ¶ÔÏó
+                if (objevent.Obj.Type == -1)    // ä¸å®Œæ•´çš„å¯¹è±¡
                     continue;
 
 				if (objevent.Obj.Type == ResTree.RESTYPE_DB)
 					continue;
 
-				// È±Ê¡ÅäÖÃÎÄ¼ş£¬ºöÂÔ²Ù×÷
+				// ç¼ºçœé…ç½®æ–‡ä»¶ï¼Œå¿½ç•¥æ“ä½œ
 				if (objevent.Oper == ObjEventOper.New
 					|| objevent.Oper == ObjEventOper.Change)
 				{
@@ -1697,82 +1690,96 @@ namespace DigitalPlatform.rms.Client
 				if (objevent.Oper == ObjEventOper.New)
 				{
 					MemoryStream stream = null;
-					
-					if (objevent.Obj.Type == ResTree.RESTYPE_FILE
-						&& objevent.Obj.Content != null)
-						stream = new MemoryStream(objevent.Obj.Content);
+                    try
+                    {
+                        if (objevent.Obj.Type == ResTree.RESTYPE_FILE
+                            && objevent.Obj.Content != null)
+                            stream = new MemoryStream(objevent.Obj.Content);
 
-					string strPath = objevent.Path;
-                    byte[] baOutputTimestamp = null;
-					nRet = NewServerSideObject(strPath,
-						objevent.Obj.Type,
-						stream,
-						objevent.Obj.TimeStamp,
-                        out baOutputTimestamp,
-						out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "ĞÂ½¨¶ÔÏó '" + strPath + "' Ê±·¢Éú´íÎó: " + strError;
-                        MessageBox.Show(this, strError);
-                        strErrorText += strError + "\r\n";
-                        // return -1;
+                        string strPath = objevent.Path;
+                        byte[] baOutputTimestamp = null;
+                        nRet = NewServerSideObject(strPath,
+                            objevent.Obj.Type,
+                            stream,
+                            objevent.Obj.TimeStamp,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "æ–°å»ºå¯¹è±¡ '" + strPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
+                            MessageBox.Show(this, strError);
+                            strErrorText += strError + "\r\n";
+                            // return -1;
+                        }
+                        else
+                        {
+                            // å¦‚æœåˆ›å»ºæˆåŠŸï¼Œéœ€è¦æŠŠé˜Ÿåˆ—ä¸­åé¢çš„æ‰€æœ‰å³å°†æ“ä½œç›¸åŒå¯¹è±¡çš„åŠ¨ä½œä¿®æ”¹æ—¶é—´æˆ³
+                            // åˆ·æ–°é˜Ÿåˆ—ä¸­åˆ¶å®šä½ç½®ä»¥åçš„ã€é’ˆå¯¹æŸä¸ªå¯¹è±¡çš„å…¨éƒ¨æ“ä½œçš„æ—¶é—´æˆ³
+                            RefreshTimestamp(
+                                i + 1,
+                                strPath,
+                                baOutputTimestamp);
+                        }
                     }
-                    else
+                    finally
                     {
-                        // Èç¹û´´½¨³É¹¦£¬ĞèÒª°Ñ¶ÓÁĞÖĞºóÃæµÄËùÓĞ¼´½«²Ù×÷ÏàÍ¬¶ÔÏóµÄ¶¯×÷ĞŞ¸ÄÊ±¼ä´Á
-        // Ë¢ĞÂ¶ÓÁĞÖĞÖÆ¶¨Î»ÖÃÒÔºóµÄ¡¢Õë¶ÔÄ³¸ö¶ÔÏóµÄÈ«²¿²Ù×÷µÄÊ±¼ä´Á
-                        RefreshTimestamp(
-                            i + 1,
-                            strPath,
-                            baOutputTimestamp);
+                        if (stream != null)
+                            stream.Close();
                     }
 				}
 				if (objevent.Oper == ObjEventOper.Change)
 				{
 					MemoryStream stream = null;
-					
-					if (objevent.Obj.Type == ResTree.RESTYPE_FILE)
-						stream = new MemoryStream(objevent.Obj.Content);
-
-					string strPath = objevent.Path;
-                    byte[] baOutputTimestamp = null;
-                    nRet = NewServerSideObject(strPath,
-						objevent.Obj.Type,
-						stream,
-						objevent.Obj.TimeStamp,
-                        out baOutputTimestamp,
-						out strError);
-					if (nRet == -1)
-					{
-						strError = "ĞŞ¸Ä¶ÔÏó '" +strPath + "' Ê±·¢Éú´íÎó: " + strError;
-						MessageBox.Show(this, strError);
-						strErrorText += strError + "\r\n";
-					}
-                    else
+                    try
                     {
-                        // Èç¹û´´½¨³É¹¦£¬ĞèÒª°Ñ¶ÓÁĞÖĞºóÃæµÄËùÓĞ¼´½«²Ù×÷ÏàÍ¬¶ÔÏóµÄ¶¯×÷ĞŞ¸ÄÊ±¼ä´Á
-                        // Ë¢ĞÂ¶ÓÁĞÖĞÖÆ¶¨Î»ÖÃÒÔºóµÄ¡¢Õë¶ÔÄ³¸ö¶ÔÏóµÄÈ«²¿²Ù×÷µÄÊ±¼ä´Á
-                        RefreshTimestamp(
-                            i + 1,
-                            strPath,
-                            baOutputTimestamp);
+                        if (objevent.Obj.Type == ResTree.RESTYPE_FILE)
+                            stream = new MemoryStream(objevent.Obj.Content);
+
+                        string strPath = objevent.Path;
+                        byte[] baOutputTimestamp = null;
+                        nRet = NewServerSideObject(strPath,
+                            objevent.Obj.Type,
+                            stream,
+                            objevent.Obj.TimeStamp,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "ä¿®æ”¹å¯¹è±¡ '" + strPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
+                            MessageBox.Show(this, strError);
+                            strErrorText += strError + "\r\n";
+                        }
+                        else
+                        {
+                            // å¦‚æœåˆ›å»ºæˆåŠŸï¼Œéœ€è¦æŠŠé˜Ÿåˆ—ä¸­åé¢çš„æ‰€æœ‰å³å°†æ“ä½œç›¸åŒå¯¹è±¡çš„åŠ¨ä½œä¿®æ”¹æ—¶é—´æˆ³
+                            // åˆ·æ–°é˜Ÿåˆ—ä¸­åˆ¶å®šä½ç½®ä»¥åçš„ã€é’ˆå¯¹æŸä¸ªå¯¹è±¡çš„å…¨éƒ¨æ“ä½œçš„æ—¶é—´æˆ³
+                            RefreshTimestamp(
+                                i + 1,
+                                strPath,
+                                baOutputTimestamp);
+                        }
+                    }
+                    finally
+                    {
+                        if (stream != null)
+                            stream.Close();
                     }
 
 				}
 				else if (objevent.Oper == ObjEventOper.Delete)
 				{
-                    // TODO: ÏÖÔÚÒÑ¾­ÓĞÊ±¼ä´ÁÁË£¬¿ÉÒÔ²»±ØÖØÊÔ
+                    // TODO: ç°åœ¨å·²ç»æœ‰æ—¶é—´æˆ³äº†ï¼Œå¯ä»¥ä¸å¿…é‡è¯•
 
 					this.channel = Channels.GetChannel(this.ServerUrl);
 
-					Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
+					Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
 
 					byte [] baTimestamp = new byte [1];
 					byte [] baOutputTimestamp = null;
 					string strPath = objevent.Path;
 					// string strOutputPath = "";
 				REDO:
-					// É¾³ıÊı¾İ¿â¶ÔÏó
+					// åˆ é™¤æ•°æ®åº“å¯¹è±¡
 					long lRet = channel.DoDeleteRes(strPath,
 						baTimestamp,
                         "",
@@ -1780,13 +1787,13 @@ namespace DigitalPlatform.rms.Client
 						out strError);
 					if (lRet == -1)
 					{
-						// Ê±¼ä´Á²»Æ¥Åä
+						// æ—¶é—´æˆ³ä¸åŒ¹é…
 						if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
 						{
 							baTimestamp = baOutputTimestamp;
 							goto REDO;
 						}
-						strError = "É¾³ı¶ÔÏó '" +strPath + "' Ê±·¢Éú´íÎó: " + strError;
+						strError = "åˆ é™¤å¯¹è±¡ '" +strPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
 						MessageBox.Show(this, strError);
 						strErrorText += strError + "\r\n";
 					}
@@ -1809,7 +1816,7 @@ namespace DigitalPlatform.rms.Client
 	}
 
 
-	// ¶ÔÏó±»É¾³ı
+	// å¯¹è±¡è¢«åˆ é™¤
 	public delegate void OnObjectDeletedEventHandle(object sender,
 	OnObjectDeletedEventArgs e);
 

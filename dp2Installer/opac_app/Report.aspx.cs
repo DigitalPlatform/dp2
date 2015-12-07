@@ -33,7 +33,6 @@ ref app,
 ref sessioninfo) == false)
             return;
 
-
         this.TitleBarControl1.CurrentColumn = TitleColumn.Statis;
 
         this.SideBarControl1.LayoutStyle = SideBarLayoutStyle.Horizontal;
@@ -241,7 +240,6 @@ var data = [
 
             text.Append(" { \"label\" : " + BuildJSONString(strName) + " ");
 
-
             if (string.IsNullOrEmpty(strLink) == false
                 && string.IsNullOrEmpty(strBaseDir) == false)
             {
@@ -310,6 +308,7 @@ var data = [
 
     }
 
+#if NO
     public static bool GetWindowsMimeType(string ext, out string mime)
     {
         mime = "application/octet-stream";
@@ -330,6 +329,7 @@ var data = [
         }
         return false;
     }
+#endif
 
     // 获得显示用的馆代码形态
     static string GetDisplayLibraryCode(string strLibraryCode)
@@ -457,7 +457,7 @@ var data = [
         if (string.Compare(strRequestExt, ".rml", true) == 0)
             strMime = "text/xml";
         else
-            GetWindowsMimeType(strRequestExt, out strMime);
+            PathUtil.GetWindowsMimeType(strRequestExt, out strMime);
 
         if (string.IsNullOrEmpty(strMime) == true)
             this.Response.ContentType = "text/html";
@@ -567,12 +567,10 @@ DIV.createtime
             strFileName = strTempFileName;
         }
 
-
-        Stream stream = File.Open(strFileName,
+        using (Stream stream = File.Open(strFileName,
             FileMode.Open,
             FileAccess.ReadWrite,
-            FileShare.ReadWrite);
-        try
+            FileShare.ReadWrite))
         {
             this.Response.AddHeader("Content-Length", stream.Length.ToString());
 
@@ -582,10 +580,6 @@ DIV.createtime
 
             StreamUtil.DumpStream(stream, this.Response.OutputStream,
                 flushdelegate);
-        }
-        finally
-        {
-            stream.Close();
         }
 
         if (string.IsNullOrEmpty(strTempFileName) == false)

@@ -335,9 +335,7 @@ namespace DigitalPlatform.Drawing
             if (objBitmap != null)
                 objBitmap.Dispose();
             return 0;
-
         }
-
 
         static System.Drawing.Imaging.ImageFormat GetImageType(string strContentType)
         {

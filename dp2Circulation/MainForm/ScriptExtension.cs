@@ -956,35 +956,33 @@ namespace dp2Circulation
         /// <returns>0: 成功</returns>
         public static int CreateDefaultMainCsFile(string strFileName)
         {
+            using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("using System;");
+                sw.WriteLine("using System.Collections.Generic;");
+                sw.WriteLine("using System.Windows.Forms;");
+                sw.WriteLine("using System.IO;");
+                sw.WriteLine("using System.Text;");
+                sw.WriteLine("using System.Xml;");
+                sw.WriteLine("");
 
-            StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
-            sw.WriteLine("using System;");
-            sw.WriteLine("using System.Collections.Generic;");
-            sw.WriteLine("using System.Windows.Forms;");
-            sw.WriteLine("using System.IO;");
-            sw.WriteLine("using System.Text;");
-            sw.WriteLine("using System.Xml;");
-            sw.WriteLine("");
+                //sw.WriteLine("using DigitalPlatform.MarcDom;");
+                //sw.WriteLine("using DigitalPlatform.Statis;");
+                sw.WriteLine("using dp2Circulation;");
+                sw.WriteLine("");
+                sw.WriteLine("using DigitalPlatform.Xml;");
+                sw.WriteLine("");
 
-            //sw.WriteLine("using DigitalPlatform.MarcDom;");
-            //sw.WriteLine("using DigitalPlatform.Statis;");
-            sw.WriteLine("using dp2Circulation;");
-            sw.WriteLine("");
-            sw.WriteLine("using DigitalPlatform.Xml;");
-            sw.WriteLine("");
+                sw.WriteLine("public class MyStatis : MainFormHost");
 
-            sw.WriteLine("public class MyStatis : MainFormHost");
+                sw.WriteLine("{");
 
-            sw.WriteLine("{");
+                sw.WriteLine("	public override void Main(object sender, EventArgs e)");
+                sw.WriteLine("	{");
+                sw.WriteLine("	}");
 
-            sw.WriteLine("	public override void Main(object sender, EventArgs e)");
-            sw.WriteLine("	{");
-            sw.WriteLine("	}");
-
-
-            sw.WriteLine("}");
-            sw.Close();
-
+                sw.WriteLine("}");
+            }
             return 0;
         }
 

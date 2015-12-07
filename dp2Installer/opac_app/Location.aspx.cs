@@ -184,12 +184,10 @@ ref sessioninfo) == false)
 
         try
         {
-
-            Stream stream = File.Open(strImageFile,
+            using (Stream stream = File.Open(strImageFile,
                 FileMode.Open,
                 FileAccess.ReadWrite,
-                FileShare.ReadWrite);
-            try
+                FileShare.ReadWrite))
             {
                 page.Response.AddHeader("Content-Length", stream.Length.ToString());
 
@@ -199,10 +197,6 @@ ref sessioninfo) == false)
 
                 StreamUtil.DumpStream(stream, page.Response.OutputStream,
                     flushdelegate);
-            }
-            finally
-            {
-                stream.Close();
             }
         }
         catch (Exception ex)

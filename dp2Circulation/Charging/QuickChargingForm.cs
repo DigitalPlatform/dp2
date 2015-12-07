@@ -125,7 +125,7 @@ namespace dp2Circulation
             this._taskList.BeginThread();
 
             // this._summaryList.Channel = this._summaryChannel;
-            this._summaryList.stop = this.stop;
+            // this._summaryList.stop = this.stop;
             this._summaryList.Container = this;
             this._summaryList.BeginThread();
 #if NO
@@ -271,12 +271,12 @@ namespace dp2Circulation
                 this.dpTable_tasks.ColumnsBackColor = this.BackColor;
                 this.dpTable_tasks.ColumnsForeColor = this.ForeColor;
 
-                this.TaskBackColor = Color.FromArgb(255, 10,10,10);
+                this.TaskBackColor = Color.FromArgb(255, 10, 10, 10);
                 this.TaskForeColor = Color.FromArgb(255, 230, 230, 230);
 
                 this._cardStyle.BarcodeTextColor = Color.FromArgb(255, 10, 200, 10);
                 this._cardStyle.NameTextColor = this.TaskForeColor;
-                this._cardStyle.DepartmentTextColor = Color.FromArgb(255, 150,150,150);
+                this._cardStyle.DepartmentTextColor = Color.FromArgb(255, 150, 150, 150);
 
             }
             else if (strStyle == "light")
@@ -329,7 +329,7 @@ namespace dp2Circulation
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter) 
+            if (keyData == Keys.Enter)
             {
                 // MessageBox.Show(this, "test");
                 DoEnter();
@@ -407,8 +407,8 @@ namespace dp2Circulation
             dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
             int nRet = dlg.Initial(
                 this.MainForm,
-                this.Channel,
-                this.stop,
+                //this.Channel,
+                //this.stop,
                 StringUtil.SplitList(strRecPath),
                 "请选择一个读者记录",
                 out strError);
@@ -647,7 +647,7 @@ dlg.UiState);
 
             // 把摘要的书名部分朗读出来
             if (bSpeak
-                && this.SpeakBookTitle == true 
+                && this.SpeakBookTitle == true
                 && string.IsNullOrEmpty(strSummary) == false)
             {
                 string strTitle = "";
@@ -746,6 +746,7 @@ out strError);
             this._summaryChannel.PrepareSearch("正在获取书目摘要 ...");
             try
             {
+                this._summaryChannel.Channel.Timeout = new TimeSpan(0, 0, 5);
                 long lRet = this._summaryChannel.Channel.GetBiblioSummary(
                     this._summaryChannel.stop,
                     strItemBarcode,
@@ -930,7 +931,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         REDO:
             try
             {
-                this.m_webExternalHost_readerInfo.SetTextString(strText, "reader_text" );
+                this.m_webExternalHost_readerInfo.SetTextString(strText, "reader_text");
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
@@ -1083,7 +1084,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
 
         #endregion
 
-        delegate void Delegate_DisplayTask(string strAction, 
+        delegate void Delegate_DisplayTask(string strAction,
             ChargingTask task);
         //
         // 在显示列表中操作一个 Task 行
@@ -1463,7 +1464,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     {
                         // TODO: 语音提示
                         // TODO: 红色对话框
-                        MessageBox.Show(this, "'"+strText+"' 不是合法的条码号");
+                        MessageBox.Show(this, "'" + strText + "' 不是合法的条码号");
                         this.textBox_input.SelectAll();
                         this.textBox_input.Focus();
                         return;
@@ -1479,7 +1480,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                         if (this.WillLoadReaderInfo == true)
                         {
                             // TODO: 语音提示
-                            MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '"+strText+"' 是一个 册 条码号。\r\n\r\n请重新输入");
+                            MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
                             this.textBox_input.SelectAll();
                             return;
                         }
@@ -1516,7 +1517,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
                     this.textBox_input.SelectAll();
                     return;
-                } 
+                }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = strText;
                 task.Action = "borrow";
@@ -1580,7 +1581,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             this.textBox_input.SelectAll();
-            
+
             try
             {
                 this._taskList.AddTask(task);
@@ -2056,7 +2057,7 @@ false);
                 this.dpTable_tasks.Rows.Clear();
             else
             {
-                for(int i = 0; i<this.dpTable_tasks.Rows.Count ; i++)
+                for (int i = 0; i < this.dpTable_tasks.Rows.Count; i++)
                 {
                     DpRow row = this.dpTable_tasks.Rows[i];
                     if (tasks.IndexOf((ChargingTask)row.Tag) != -1)
@@ -2247,16 +2248,16 @@ false);
             // 清除 webbrowser 和任务列表
             if (bClearInfoWindow == true)
             {
-            //watch.Stop();
-            //Debug.WriteLine("---1  elapsed " + watch.Elapsed.TotalSeconds);
-            //watch.Restart();
+                //watch.Stop();
+                //Debug.WriteLine("---1  elapsed " + watch.Elapsed.TotalSeconds);
+                //watch.Restart();
 
                 if (ClearTaskByRows(null, true) == false)
                     return;
 
-            //watch.Stop();
-            //Debug.WriteLine("---2  elapsed " + watch.Elapsed.TotalSeconds);
-            //watch.Restart();
+                //watch.Stop();
+                //Debug.WriteLine("---2  elapsed " + watch.Elapsed.TotalSeconds);
+                //watch.Restart();
 
                 if (this.IsCardMode == true)
                     SetReaderCardString("");
@@ -2347,7 +2348,7 @@ false);
         {
             int i = 0;
             bool bFound = false;
-            foreach(DpRow row in this.dpTable_tasks.Rows)
+            foreach (DpRow row in this.dpTable_tasks.Rows)
             {
                 row.Selected = false;
                 ChargingTask task = (ChargingTask)row.Tag;
@@ -2358,11 +2359,11 @@ false);
                 if (i == index)
                 {
                     this.dpTable_tasks.FocusedItem = row;
-                    row.Selected = true; 
+                    row.Selected = true;
                     row.EnsureVisible();
                     bFound = true;
                 }
-                i ++;
+                i++;
             }
 
             return bFound;
@@ -2691,7 +2692,7 @@ false);
                 }
 
                 DialogResult result = MessageBox.Show(this,
-"当前有 " + strText + "。\r\n\r\n确实要清除选定的 "+rows.Count.ToString()+" 个事项?",
+"当前有 " + strText + "。\r\n\r\n确实要清除选定的 " + rows.Count.ToString() + " 个事项?",
 "QuickChargingForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -2838,7 +2839,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            foreach(DpRow row in this.dpTable_tasks.SelectedRows)
+            foreach (DpRow row in this.dpTable_tasks.SelectedRows)
             {
                 ChargingTask charging_task = (ChargingTask)row.Tag;
                 if (string.IsNullOrEmpty(charging_task.ItemBarcode) == true)
@@ -3293,7 +3294,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
         // 根据册条码号文件进行盘点操作
         // 调用前，要求设置好 BatchNo 和 FilterLocations。其中 FilterLocations 不是必须，如果为空则不对馆藏地进行检查
-        public int DoInventory(string strBarcodeFileName, 
+        public int DoInventory(string strBarcodeFileName,
             out string strError)
         {
             strError = "";
@@ -3327,7 +3328,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                             continue;
 
                         this.AsyncDoAction(this.SmartFuncState, strLine);
-
                     }
                 }
             }
@@ -3366,13 +3366,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
             try
             {
-                    foreach (string barcode in barcode_list)
-                    {
-                        if (string.IsNullOrEmpty(barcode) == true)
-                            continue;
+                foreach (string barcode in barcode_list)
+                {
+                    if (string.IsNullOrEmpty(barcode) == true)
+                        continue;
 
-                        this.AsyncDoAction(this.SmartFuncState, barcode);
-                    }
+                    this.AsyncDoAction(this.SmartFuncState, barcode);
+                }
             }
             catch (Exception ex)
             {

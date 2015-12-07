@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -92,7 +92,7 @@ namespace DigitalPlatform.Script
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 12);
             this.label1.TabIndex = 1;
-            this.label1.Text = "·½°¸Ãû:";
+            this.label1.Text = "æ–¹æ¡ˆå:";
             // 
             // textBox_projectName
             // 
@@ -111,7 +111,7 @@ namespace DigitalPlatform.Script
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(76, 23);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -122,7 +122,7 @@ namespace DigitalPlatform.Script
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(76, 23);
             this.button_Cancel.TabIndex = 4;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // imageList_projectNodeType
@@ -141,7 +141,7 @@ namespace DigitalPlatform.Script
             this.checkBox_noneProject.Name = "checkBox_noneProject";
             this.checkBox_noneProject.Size = new System.Drawing.Size(90, 16);
             this.checkBox_noneProject.TabIndex = 5;
-            this.checkBox_noneProject.Text = "ºöÂÔ·½°¸(&N)";
+            this.checkBox_noneProject.Text = "å¿½ç•¥æ–¹æ¡ˆ(&N)";
             this.checkBox_noneProject.CheckedChanged += new System.EventHandler(this.checkBox_noneProject_CheckedChanged);
             // 
             // GetProjectNameDlg
@@ -160,7 +160,7 @@ namespace DigitalPlatform.Script
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GetProjectNameDlg";
             this.ShowInTaskbar = false;
-            this.Text = "Ö¸¶¨·½°¸Ãû";
+            this.Text = "æŒ‡å®šæ–¹æ¡ˆå";
             this.Load += new System.EventHandler(this.GetProjectNameDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -183,7 +183,7 @@ namespace DigitalPlatform.Script
 				catch(System.IO.FileNotFoundException ex) 
 				{
 					/*
-					MessageBox.Show("×°ÔØ" + scriptManager.CfgFilePath + "ÎÄ¼şÊ§°Ü£¬Ô­Òò:"
+					MessageBox.Show("è£…è½½" + scriptManager.CfgFilePath + "æ–‡ä»¶å¤±è´¥ï¼ŒåŸå› :"
 						+ ex.Message);
 					*/
 					MessageBox.Show(ex.Message);
@@ -191,7 +191,7 @@ namespace DigitalPlatform.Script
 				}
 				catch(System.Xml.XmlException ex)
 				{
-					MessageBox.Show("×°ÔØ" + scriptManager.CfgFilePath + "ÎÄ¼şÊ§°Ü£¬Ô­Òò:"
+					MessageBox.Show("è£…è½½" + scriptManager.CfgFilePath + "æ–‡ä»¶å¤±è´¥ï¼ŒåŸå› :"
 						+ ex.Message);
 					return;
 				}
@@ -230,7 +230,7 @@ namespace DigitalPlatform.Script
 			if (textBox_projectName.Text == "" 
                 && this.checkBox_noneProject.Checked == false) 
 			{
-				MessageBox.Show("ÉĞÎ´Ö¸¶¨·½°¸Ãû");
+				MessageBox.Show("å°šæœªæŒ‡å®šæ–¹æ¡ˆå");
 				this.DialogResult = DialogResult.None;
 				return;
 			}
@@ -258,7 +258,7 @@ namespace DigitalPlatform.Script
 				this.textBox_projectName.Enabled = true;
 				this.treeView1.Enabled = true;
 
-                // ÈÃtextboxÖĞÖØĞÂ¾ßÓĞÄÚÈİ
+                // è®©textboxä¸­é‡æ–°å…·æœ‰å†…å®¹
                 if (this.treeView1.SelectedNode != null)
                 {
                     TreeNode node = this.treeView1.SelectedNode;

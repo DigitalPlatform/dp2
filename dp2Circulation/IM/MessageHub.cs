@@ -29,7 +29,7 @@ namespace dp2Circulation
 
         public MainForm MainForm = null;
 
-        public WebBrowser webBrowser1 = null; 
+        public WebBrowser webBrowser1 = null;
 
         internal LibraryChannelPool _channelPool = new LibraryChannelPool();
 
@@ -258,8 +258,6 @@ false);
 
         // bool tryingToReconnect = false;
 
-
-
         // 响应 server 发来的消息 SearchBiblio
         public override void OnSearchBiblioRecieved(
             string searchID,
@@ -438,7 +436,6 @@ strError);  // 出错信息大概为 not found。
                             break;
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -562,5 +559,4 @@ strError);  // 出错信息大概为 not found。
         public IList<BiblioRecord> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
     }
-
 }

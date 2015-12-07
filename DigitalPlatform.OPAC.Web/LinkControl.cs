@@ -24,6 +24,7 @@ namespace DigitalPlatform.OPAC.Web
         {
 
         }
+
         public override void RenderEndTag(HtmlTextWriter writer)
         {
 
@@ -32,7 +33,6 @@ namespace DigitalPlatform.OPAC.Web
         protected override void RenderContents(HtmlTextWriter output)
         {
             string strHref = this.Attributes["href"];
-
 
             string strStyleDirName = GetStyleDirName();
             if (this.IsNewStyle == true)
@@ -113,6 +113,7 @@ namespace DigitalPlatform.OPAC.Web
                 strError = "app == null";
                 goto ERROR1;
             }
+
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
             if (sessioninfo == null)
             {
@@ -193,7 +194,6 @@ namespace DigitalPlatform.OPAC.Web
 
             // return PreferenceControl.GetReaderSelectedStyleDir(readerdom);
             return MakeDir(strLibraryStyleDir, PreferenceControl.GetReaderSelectedStyleDir(readerdom));
-
         ERROR1:
             return "0";
         }

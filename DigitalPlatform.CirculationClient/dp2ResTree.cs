@@ -757,6 +757,7 @@ namespace DigitalPlatform.CirculationClient
                     return -1;
                 }
 
+                // 检查 dp2library 最低版本要求 2.60
                 if (version < 2.48) // 2.48
                 {
                     strError = "dp2 前端所连接的 dp2library 版本必须升级为 2.48 以上时才能使用 (当前 dp2library 版本为 " + version.ToString() + ")";

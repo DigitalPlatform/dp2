@@ -3130,11 +3130,11 @@ namespace dp2Circulation
             int nDupCount = 0;
 
             string strError = "";
-            StreamReader sr = null;
+            // StreamReader sr = null;
             try
             {
                 // 打开文件
-                sr = new StreamReader(dlg.FileName);
+                // sr = new StreamReader(dlg.FileName);
 
                 EnableControls(false);
 
@@ -3161,97 +3161,99 @@ namespace dp2Circulation
                          * */
                     }
 
-
-                    // this.m_nGreenItemCount = 0;
-
-                    // 逐行读入文件内容
-                    // 测算文件行数
-                    int nLineCount = 0;
-                    for (; ; )
+                    using (StreamReader sr = new StreamReader(dlg.FileName))
                     {
-                        if (stop != null)
+                        // this.m_nGreenItemCount = 0;
+
+                        // 逐行读入文件内容
+                        // 测算文件行数
+                        int nLineCount = 0;
+                        for (; ; )
                         {
-                            if (stop.State != 0)
+                            if (stop != null)
                             {
-                                strError = "用户中断1";
-                                goto ERROR1;
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断1";
+                                    goto ERROR1;
+                                }
                             }
+
+
+                            string strLine = "";
+                            strLine = sr.ReadLine();
+
+                            if (strLine == null)
+                                break;
+
+                            nLineCount++;
                         }
 
-
-                        string strLine = "";
-                        strLine = sr.ReadLine();
-
-                        if (strLine == null)
-                            break;
-
-                        nLineCount++;
+                        // 设置进度范围
+                        stop.SetProgressRange(0, nLineCount);
                     }
 
-                    // 设置进度范围
-                    stop.SetProgressRange(0, nLineCount);
-
-                    sr.Close();
-
-                    sr = new StreamReader(dlg.FileName);
-                    for (int i = 0; ; i++)
+                    using (StreamReader sr = new StreamReader(dlg.FileName))
                     {
-                        if (stop != null)
+                        for (int i = 0; ; i++)
                         {
-                            if (stop.State != 0)
+                            if (stop != null)
                             {
-                                strError = "用户中断1";
-                                goto ERROR1;
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断1";
+                                    goto ERROR1;
+                                }
                             }
+
+                            string strLine = "";
+                            strLine = sr.ReadLine();
+
+                            stop.SetProgressValue(i);
+
+                            if (strLine == null)
+                                break;
+
+                            strLine = strLine.Trim();
+                            if (String.IsNullOrEmpty(strLine) == true)
+                                continue;
+
+                            if (strLine[0] == '#')
+                                continue;   // 注释行
+
+                            // 检查路径所从属书目库是否为图书/期刊库？
+                            // return:
+                            //      -1  error
+                            //      0   不符合要求。提示信息在strError中
+                            //      1   符合要求
+                            nRet = CheckItemRecPath("连续出版物",
+                                strLine,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 0)
+                            {
+                                GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            }
+
+                            stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
+
+
+                            string strOutputItemRecPath = "";
+                            // 根据册条码号，装入册记录
+                            // return: 
+                            //      -2  册条码号已经在list中存在了
+                            //      -1  出错
+                            //      1   成功
+                            nRet = LoadOneItem(
+                                "@path:" + strLine,
+                                this.listView_parent,
+                                null,
+                                out strOutputItemRecPath,
+                                out strError);
+                            if (nRet == -2)
+                                nDupCount++;
                         }
-
-                        string strLine = "";
-                        strLine = sr.ReadLine();
-
-                        stop.SetProgressValue(i);
-
-                        if (strLine == null)
-                            break;
-
-                        strLine = strLine.Trim();
-                        if (String.IsNullOrEmpty(strLine) == true)
-                            continue;
-
-                        if (strLine[0] == '#')
-                            continue;   // 注释行
-
-                        // 检查路径所从属书目库是否为图书/期刊库？
-                        // return:
-                        //      -1  error
-                        //      0   不符合要求。提示信息在strError中
-                        //      1   符合要求
-                        nRet = CheckItemRecPath("连续出版物",
-                            strLine,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (nRet == 0)
-                        {
-                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
-                        }
-
-                        stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
-
-
-                        string strOutputItemRecPath = "";
-                        // 根据册条码号，装入册记录
-                        // return: 
-                        //      -2  册条码号已经在list中存在了
-                        //      -1  出错
-                        //      1   成功
-                        nRet = LoadOneItem(
-                            "@path:" + strLine,
-                            this.listView_parent,
-                            null,
-                            out strOutputItemRecPath,
-                            out strError);
-                        if (nRet == -2)
-                            nDupCount++;
                     }
                 }
                 finally
@@ -3271,7 +3273,7 @@ namespace dp2Circulation
             }
             finally
             {
-                sr.Close();
+                // sr.Close();
             }
 
             // 记忆文件名
@@ -3320,11 +3322,11 @@ namespace dp2Circulation
             int nDupCount = 0;
 
             string strError = "";
-            StreamReader sr = null;
+            //StreamReader sr = null;
             try
             {
                 // 打开文件
-                sr = new StreamReader(dlg.FileName);
+                // sr = new StreamReader(dlg.FileName);
 
 
                 EnableControls(false);
@@ -3352,94 +3354,98 @@ namespace dp2Circulation
                          * */
                     }
 
-                    // 逐行读入文件内容
-                    // 测算文件行数
-                    int nLineCount = 0;
-                    for (; ; )
+                    using (StreamReader sr = new StreamReader(dlg.FileName))
                     {
-                        if (stop != null)
+                        // 逐行读入文件内容
+                        // 测算文件行数
+                        int nLineCount = 0;
+                        for (; ; )
                         {
-                            if (stop.State != 0)
+                            if (stop != null)
                             {
-                                strError = "用户中断1";
-                                goto ERROR1;
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断1";
+                                    goto ERROR1;
+                                }
                             }
+
+
+                            string strLine = "";
+                            strLine = sr.ReadLine();
+
+                            if (strLine == null)
+                                break;
+
+                            nLineCount++;
                         }
 
+                        // 设置进度范围
+                        stop.SetProgressRange(0, nLineCount);
 
-                        string strLine = "";
-                        strLine = sr.ReadLine();
-
-                        if (strLine == null)
-                            break;
-
-                        nLineCount++;
                     }
 
-                    // 设置进度范围
-                    stop.SetProgressRange(0, nLineCount);
-
-                    sr.Close();
-
-                    sr = new StreamReader(dlg.FileName);
-
-                    for (int i = 0; ; i++)
+                    using (StreamReader sr = new StreamReader(dlg.FileName))
                     {
-                        if (stop != null)
+
+                        for (int i = 0; ; i++)
                         {
-                            if (stop.State != 0)
+                            if (stop != null)
                             {
-                                strError = "用户中断1";
-                                goto ERROR1;
+                                if (stop.State != 0)
+                                {
+                                    strError = "用户中断1";
+                                    goto ERROR1;
+                                }
                             }
-                        }
 
-                        string strLine = "";
-                        strLine = sr.ReadLine();
+                            string strLine = "";
+                            strLine = sr.ReadLine();
 
-                        stop.SetProgressValue(i);
+                            stop.SetProgressValue(i);
 
-                        if (strLine == null)
-                            break;
+                            if (strLine == null)
+                                break;
 
-                        strLine = strLine.Trim();
-                        if (String.IsNullOrEmpty(strLine) == true)
-                            continue;
+                            strLine = strLine.Trim();
+                            if (String.IsNullOrEmpty(strLine) == true)
+                                continue;
 
-                        if (strLine[0] == '#')
-                            continue;   // 注释行
+                            if (strLine[0] == '#')
+                                continue;   // 注释行
 
-                        stop.SetMessage("正在装入册条码号 " + strLine + " 对应的记录...");
+                            stop.SetMessage("正在装入册条码号 " + strLine + " 对应的记录...");
 
 
-                        string strOutputItemRecPath = "";
-                        // 根据册条码号，装入册记录
-                        // return: 
-                        //      -2  册条码号已经在list中存在了
-                        //      -1  出错
-                        //      1   成功
-                        nRet = LoadOneItem(
-                            strLine,
-                            this.listView_parent,
-                            null,
-                            out strOutputItemRecPath,
-                            out strError);
-                        if (nRet == -2)
-                            nDupCount++;
+                            string strOutputItemRecPath = "";
+                            // 根据册条码号，装入册记录
+                            // return: 
+                            //      -2  册条码号已经在list中存在了
+                            //      -1  出错
+                            //      1   成功
+                            nRet = LoadOneItem(
+                                strLine,
+                                this.listView_parent,
+                                null,
+                                out strOutputItemRecPath,
+                                out strError);
+                            if (nRet == -2)
+                                nDupCount++;
 
-                        // 检查路径所从属书目库是否为图书/期刊库？
-                        // return:
-                        //      -1  error
-                        //      0   不符合要求。提示信息在strError中
-                        //      1   符合要求
-                        nRet = CheckItemRecPath("连续出版物",
-                            strOutputItemRecPath,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (nRet == 0)
-                        {
-                            GetErrorInfoForm().WriteHtml("册条码号为 " + strLine + " 的册记录 " + strError + "\r\n");
+                            // 检查路径所从属书目库是否为图书/期刊库？
+                            // return:
+                            //      -1  error
+                            //      0   不符合要求。提示信息在strError中
+                            //      1   符合要求
+                            nRet = CheckItemRecPath("连续出版物",
+                                strOutputItemRecPath,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 0)
+                            {
+                                GetErrorInfoForm().WriteHtml("册条码号为 " + strLine + " 的册记录 " + strError + "\r\n");
+                            }
                         }
                     }
                 }
@@ -3460,7 +3466,7 @@ namespace dp2Circulation
             }
             finally
             {
-                sr.Close();
+                // sr.Close();
             }
 
             // 记忆文件名

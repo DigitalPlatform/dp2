@@ -1988,15 +1988,13 @@ this.splitContainer_queryAndResultInfo,
 
 #endif
 
-
         void DumpPackage(string strFileName,
             byte[] baPackage)
         {
-            Stream stream = File.Create(strFileName);
-
-            stream.Write(baPackage, 0, baPackage.Length);
-
-            stream.Close();
+            using (Stream stream = File.Create(strFileName))
+            {
+                stream.Write(baPackage, 0, baPackage.Length);
+            }
         }
 
         #region IZSearchForm 接口实现
@@ -4985,7 +4983,6 @@ MessageBoxDefaultButton.Button1);
                 else
                     this.MainForm.MessageText = connection.VirtualItems.SelectedIndices.Count.ToString()
                         + "条记录成功保存到新文件 " + this.MainForm.LastIso2709FileName + " 尾部";
-
             }
             catch (Exception ex)
             {

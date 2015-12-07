@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -19,7 +19,7 @@ namespace DigitalPlatform.Script
 	{
 		public ApplicationInfo	applicationInfo = null;
 
-		public bool IsFltx = false;	// ÊÇ·ñÎª.fltx.csÎÄ¼ş
+		public bool IsFltx = false;	// æ˜¯å¦ä¸º.fltx.csæ–‡ä»¶
 
         bool bFirst = true;
         public NoHasSelTextBox textBox_errorInfo;
@@ -155,7 +155,7 @@ namespace DigitalPlatform.Script
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CompileErrorDlg";
             this.ShowInTaskbar = false;
-            this.Text = "±àÒë´íÎó";
+            this.Text = "ç¼–è¯‘é”™è¯¯";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.CompileErrorDlg_Closing);
             this.Load += new System.EventHandler(this.CompileErrorDlg_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -171,7 +171,7 @@ namespace DigitalPlatform.Script
 
 		private void CompileErrorDlg_Load(object sender, System.EventArgs e)
 		{
-			// »Ö¸´´°¿Ú³ß´ç
+			// æ¢å¤çª—å£å°ºå¯¸
 			int nWindowWidth = applicationInfo.GetInt("code_editor",
 				"window_width",
 				-1);
@@ -218,12 +218,13 @@ namespace DigitalPlatform.Script
 			if (label_codeFileName.Text != "") 
 			{
 				bFirst = true;
-				// Ô´´úÂë±¾Éí
+				// æºä»£ç æœ¬èº«
 				try 
 				{
-					StreamReader sr = new StreamReader(label_codeFileName.Text, true);
-					textBox_code.Text = sr.ReadToEnd();
-					sr.Close();
+                    using (StreamReader sr = new StreamReader(label_codeFileName.Text, true))
+                    {
+                        textBox_code.Text = sr.ReadToEnd();
+                    }
 				}
 				catch
 				{
@@ -233,7 +234,7 @@ namespace DigitalPlatform.Script
 				bFirst = false;
 
 				/*
-				// tabstop ÎªÊ²Ã´²»Æğ×÷ÓÃ?
+				// tabstop ä¸ºä»€ä¹ˆä¸èµ·ä½œç”¨?
 
 				int [] tabstops = {8};
 				API.SetEditTabStops(textBox_code, tabstops);
@@ -265,7 +266,7 @@ namespace DigitalPlatform.Script
             if (textBox_errorInfo.Lines.Length == 0)
                 return;
 
-            // TODO: textboxÄÚÈİ²»ÄÜÕÛĞĞ
+            // TODO: textboxå†…å®¹ä¸èƒ½æŠ˜è¡Œ
 			int x =0;
 			int y = 0;
 			API.GetEditCurrentCaretPos(
@@ -275,7 +276,7 @@ namespace DigitalPlatform.Script
 
 			string strLine = textBox_errorInfo.Lines[y];
 
-			// Îö³ö"(ĞĞ£¬ÁĞ)"Öµ
+			// æå‡º"(è¡Œï¼Œåˆ—)"å€¼
 
 			int nRet = strLine.IndexOf("(");
 			if (nRet == -1)
@@ -286,7 +287,7 @@ namespace DigitalPlatform.Script
 				strLine = strLine.Substring(0, nRet);
 			strLine = strLine.Trim();
 
-			// ÕÒµ½','
+			// æ‰¾åˆ°','
 			nRet = strLine.IndexOf(",");
 			if (nRet == -1)
 				return;
@@ -315,15 +316,15 @@ namespace DigitalPlatform.Script
 
 				if (IsFltx == true)
 				{
-					MessageBox.Show(this, "¾¯¸æ: ÎÄ¼ş '" 
+					MessageBox.Show(this, "è­¦å‘Š: æ–‡ä»¶ '" 
 						+ label_codeFileName.Text +
-						"' ²»Ó¦ÔÚÕâÀïÖ±ĞŞ¸Ä(ÒòÎª¼´±ãĞŞ¸ÄÁË£¬ÏÂ´ÎÖØĞÂ±àÒëÊ±£¬´Ë.fltx.csÎÄ¼şÒ²»á±»³ÌĞò´Ó.fltxÎÄ¼şĞÂ´´½¨µÄÄÚÈİ¸²¸Çµô)¡£\r\n\r\nÇëĞŞ¸Ä¶ÔÓ¦µÄ .fltx ÎÄ¼ş");
+						"' ä¸åº”åœ¨è¿™é‡Œç›´ä¿®æ”¹(å› ä¸ºå³ä¾¿ä¿®æ”¹äº†ï¼Œä¸‹æ¬¡é‡æ–°ç¼–è¯‘æ—¶ï¼Œæ­¤.fltx.csæ–‡ä»¶ä¹Ÿä¼šè¢«ç¨‹åºä».fltxæ–‡ä»¶æ–°åˆ›å»ºçš„å†…å®¹è¦†ç›–æ‰)ã€‚\r\n\r\nè¯·ä¿®æ”¹å¯¹åº”çš„ .fltx æ–‡ä»¶");
 					return;
 				}
 
 
 				DialogResult msgResult = MessageBox.Show(this,
-					"Ô´´úÂëÒÑ¾­±»ĞŞ¸Ä¡£\r\nÊÇ·ñ±£´æµ½ÎÄ¼ş " + label_codeFileName.Text + "?",
+					"æºä»£ç å·²ç»è¢«ä¿®æ”¹ã€‚\r\næ˜¯å¦ä¿å­˜åˆ°æ–‡ä»¶ " + label_codeFileName.Text + "?",
 					"script",
 					MessageBoxButtons.YesNoCancel,
 					MessageBoxIcon.Question,
@@ -345,9 +346,9 @@ namespace DigitalPlatform.Script
 				"code_editor", "window_state", 
 				Enum.GetName(typeof(FormWindowState), this.WindowState));
 
-			WindowState = FormWindowState.Normal;	// ÊÇ·ñÏÈÒş²Ø´°¿Ú?
+			WindowState = FormWindowState.Normal;	// æ˜¯å¦å…ˆéšè—çª—å£?
 
-			// ±£´æ´°¿Ú³ß´ç
+			// ä¿å­˜çª—å£å°ºå¯¸
 			applicationInfo.SetInt("code_editor",
 				"window_width",
 				this.Size.Width);
@@ -366,11 +367,11 @@ namespace DigitalPlatform.Script
 		{
 			if (label_codeFileName.Text == "")
 				return;
-			StreamWriter sw = new StreamWriter(label_codeFileName.Text,
-				false, Encoding.UTF8);
-			sw.Write(textBox_code.Text);
-
-			sw.Close();
+            using (StreamWriter sw = new StreamWriter(label_codeFileName.Text,
+                false, Encoding.UTF8))
+            {
+                sw.Write(textBox_code.Text);
+            }
 			API.SetEditModify(textBox_code, false);
 		}
 
@@ -400,9 +401,9 @@ namespace DigitalPlatform.Script
 		{
 			if (IsFltx == true && bFirst == false)
 			{
-				MessageBox.Show(this, "¾¯¸æ: ÎÄ¼ş '" 
+				MessageBox.Show(this, "è­¦å‘Š: æ–‡ä»¶ '" 
 					+ label_codeFileName.Text 
-					+ "'ÎÄ¼ş²»ÄÜÔÚÕâÀïÖ±ĞŞ¸Ä(ÒòÎª¼´±ãĞŞ¸ÄÁË£¬ÏÂ´ÎÖØĞÂ±àÒëÊ±£¬´Ë.fltx.csÎÄ¼şÒ²»á±»³ÌĞò´Ó.fltxÎÄ¼şĞÂ´´½¨µÄÄÚÈİ¸²¸Çµô)¡£\r\n\r\nÇëĞŞ¸Ä¶ÔÓ¦µÄ .fltx ÎÄ¼ş");
+					+ "'æ–‡ä»¶ä¸èƒ½åœ¨è¿™é‡Œç›´ä¿®æ”¹(å› ä¸ºå³ä¾¿ä¿®æ”¹äº†ï¼Œä¸‹æ¬¡é‡æ–°ç¼–è¯‘æ—¶ï¼Œæ­¤.fltx.csæ–‡ä»¶ä¹Ÿä¼šè¢«ç¨‹åºä».fltxæ–‡ä»¶æ–°åˆ›å»ºçš„å†…å®¹è¦†ç›–æ‰)ã€‚\r\n\r\nè¯·ä¿®æ”¹å¯¹åº”çš„ .fltx æ–‡ä»¶");
 				return;
 			}
 		}

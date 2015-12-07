@@ -1449,11 +1449,10 @@ namespace dp2Circulation
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
+            using(StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
+                System.Text.Encoding.UTF8))
+            { 
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
 
@@ -1464,11 +1463,6 @@ namespace dp2Circulation
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";

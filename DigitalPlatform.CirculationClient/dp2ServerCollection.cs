@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -16,9 +16,9 @@ namespace DigitalPlatform.CirculationClient
     [Serializable()]
     public class dp2Server
     {
-        public string Name = "";    // ·şÎñÆ÷Ãû
+        public string Name = "";    // æœåŠ¡å™¨å
 
-        public string Url = "";	// ·şÎñÆ÷URL,Ó¦ÊÇwebservice endpoint
+        public string Url = "";	// æœåŠ¡å™¨URL,åº”æ˜¯webservice endpoint
 
         public string DefaultUserName = "";
 
@@ -28,13 +28,13 @@ namespace DigitalPlatform.CirculationClient
         public bool SavePassword = false;
 
         [NonSerialized]
-        public bool Verified = false;   // ÊÇÑéÖ¤¹ıĞòÁĞºÅ?
+        public bool Verified = false;   // æ˜¯éªŒè¯è¿‡åºåˆ—å·?
 
         public dp2Server()
         {
         }
 
-        // ¿½±´¹¹Ôìº¯Êı
+        // æ‹·è´æ„é€ å‡½æ•°
         public dp2Server(dp2Server refServer)
         {
             this.Name = refServer.Name;
@@ -62,8 +62,8 @@ namespace DigitalPlatform.CirculationClient
 
 
     /// <summary>
-    /// ´¢´æ·şÎñÆ÷ĞÅÏ¢µÄÈİÆ÷Àà
-    /// ´òËãÈ¡´úHostList
+    /// å‚¨å­˜æœåŠ¡å™¨ä¿¡æ¯çš„å®¹å™¨ç±»
+    /// æ‰“ç®—å–ä»£HostList
     /// </summary>
     [Serializable()]
     public class dp2ServerCollection : ArrayList
@@ -85,7 +85,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -111,7 +111,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        // Ë÷ÒıÆ÷ ×Ö·û´®×÷Ë÷Òı
+        // ç´¢å¼•å™¨ å­—ç¬¦ä¸²ä½œç´¢å¼•
         public dp2Server this[string strUrl]
         {
             get
@@ -122,10 +122,10 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ¸ù¾İ URL »ñµÃ dp2Server ¶ÔÏó
+        /// æ ¹æ® URL è·å¾— dp2Server å¯¹è±¡
         /// </summary>
-        /// <param name="strUrl">·şÎñÆ÷ URL</param>
-        /// <returns>dp2Server ¶ÔÏó</returns>
+        /// <param name="strUrl">æœåŠ¡å™¨ URL</param>
+        /// <returns>dp2Server å¯¹è±¡</returns>
         public dp2Server GetServer(string strUrl)
         {
             strUrl = StringUtil.CanonicalizeHostUrl(strUrl);
@@ -156,8 +156,8 @@ namespace DigitalPlatform.CirculationClient
             return null;
         }
 
-        // ¿ËÂ¡¡£
-        // ĞÂÊı×éÖĞµÄ¶ÔÏóÍêÈ«ÊÇĞÂ´´½¨µÄ¡£
+        // å…‹éš†ã€‚
+        // æ–°æ•°ç»„ä¸­çš„å¯¹è±¡å®Œå…¨æ˜¯æ–°åˆ›å»ºçš„ã€‚
         public dp2ServerCollection Dup()
         {
             dp2ServerCollection newServers = new dp2ServerCollection();
@@ -175,14 +175,14 @@ namespace DigitalPlatform.CirculationClient
             return newServers;
         }
 
-        // ½«ÁíÒ»¶ÔÏóµÄÊı×éÄÚÈİ¹àÈë±¾¶ÔÏó
+        // å°†å¦ä¸€å¯¹è±¡çš„æ•°ç»„å†…å®¹çŒå…¥æœ¬å¯¹è±¡
         public void Import(dp2ServerCollection servers)
         {
             this.Clear();
             this.AddRange(servers);
             this.m_bChanged = true;
 
-            // ĞÂÔö¼ÓµÄ¶¯×÷
+            // æ–°å¢åŠ çš„åŠ¨ä½œ
             dp2ServerChangedEventArgs e = new dp2ServerChangedEventArgs();
             e.Url = "";
             e.ServerChangeAction = dp2ServerChangeAction.Import;
@@ -190,18 +190,18 @@ namespace DigitalPlatform.CirculationClient
 
         }
 
-        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
         // return:
-        //		-1	³ö´í
-        //		0	¼ÓÈëÁË
-        //		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+        //		-1	å‡ºé”™
+        //		0	åŠ å…¥äº†
+        //		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
         public int NewServer(
             string strName,
             string strUrl,
             int nInsertPos)
         {
             dp2Server server = null;
-            // ÔİÊ±²»È¥ÖØ
+            // æš‚æ—¶ä¸å»é‡
 
             server = new dp2Server();
             server.Url = strUrl;
@@ -232,7 +232,7 @@ namespace DigitalPlatform.CirculationClient
 
         }
 
-        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
         // return:
         public dp2Server NewServer(int nInsertPos)
         {
@@ -249,13 +249,13 @@ namespace DigitalPlatform.CirculationClient
             return server;
         }
 
-        // ´ÓÎÄ¼şÖĞ×°ÔØ´´½¨Ò»¸öServerCollection¶ÔÏó
+        // ä»æ–‡ä»¶ä¸­è£…è½½åˆ›å»ºä¸€ä¸ªServerCollectionå¯¹è±¡
         // parameters:
-        //		bIgnorFileNotFound	ÊÇ·ñ²»Å×³öFileNotFoundExceptionÒì³£¡£
-        //							Èç¹û==true£¬º¯ÊıÖ±½Ó·µ»ØÒ»¸öĞÂµÄ¿ÕServerCollection¶ÔÏó
+        //		bIgnorFileNotFound	æ˜¯å¦ä¸æŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸ã€‚
+        //							å¦‚æœ==trueï¼Œå‡½æ•°ç›´æ¥è¿”å›ä¸€ä¸ªæ–°çš„ç©ºServerCollectionå¯¹è±¡
         // Exception:
-        //			FileNotFoundException	ÎÄ¼şÃ»ÕÒµ½
-        //			SerializationException	°æ±¾Ç¨ÒÆÊ±ÈİÒ×³öÏÖ
+        //			FileNotFoundException	æ–‡ä»¶æ²¡æ‰¾åˆ°
+        //			SerializationException	ç‰ˆæœ¬è¿ç§»æ—¶å®¹æ˜“å‡ºç°
         public static dp2ServerCollection Load(
             string strFileName,
             bool bIgnorFileNotFound)
@@ -281,14 +281,14 @@ namespace DigitalPlatform.CirculationClient
                 servers = new dp2ServerCollection();
                 servers.m_strFileName = strFileName;
 
-                // ÈÃµ÷Ö÷ÓĞÒ»¸öĞÂµÄ¿Õ¶ÔÏó¿ÉÓÃ
+                // è®©è°ƒä¸»æœ‰ä¸€ä¸ªæ–°çš„ç©ºå¯¹è±¡å¯ç”¨
                 return servers;
             }
         }
 
-        // ±£´æµ½ÎÄ¼ş
+        // ä¿å­˜åˆ°æ–‡ä»¶
         // parameters:
-        //		strFileName	ÎÄ¼şÃû¡£Èç¹û==null,±íÊ¾Ê¹ÓÃ×°ÔØÊ±±£´æµÄÄÇ¸öÎÄ¼şÃû
+        //		strFileName	æ–‡ä»¶åã€‚å¦‚æœ==null,è¡¨ç¤ºä½¿ç”¨è£…è½½æ—¶ä¿å­˜çš„é‚£ä¸ªæ–‡ä»¶å
         public void Save(string strFileName)
         {
             if (m_bChanged == false)
@@ -299,16 +299,15 @@ namespace DigitalPlatform.CirculationClient
 
             if (strFileName == null)
             {
-                throw (new Exception("ServerCollection.Save()Ã»ÓĞÖ¸¶¨±£´æÎÄ¼şÃû"));
+                throw (new Exception("ServerCollection.Save()æ²¡æœ‰æŒ‡å®šä¿å­˜æ–‡ä»¶å"));
             }
 
-            Stream stream = File.Open(strFileName,
-                FileMode.Create);
-
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            formatter.Serialize(stream, this);
-            stream.Close();
+            using (Stream stream = File.Open(strFileName,
+                FileMode.Create))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(stream, this);
+            }
         }
 
         public void SetAllVerified(bool bVerified)
@@ -321,7 +320,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /*
-        // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+        // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
         // return:
         //		2	already login succeed
         //		1	dialog return OK
@@ -369,21 +368,21 @@ namespace DigitalPlatform.CirculationClient
                 if (bAutoLogin == false && bFirst == true)
                     goto REDOINPUT;
 
-                // ÕÒµ½Channel
+                // æ‰¾åˆ°Channel
                 RmsChannel channel = e.Channels.GetChannel(dlg.textBox_serverAddr.Text);
 
-                Debug.Assert(channel != null, "Channels.GetChannel()Òì³£...");
+                Debug.Assert(channel != null, "Channels.GetChannel()å¼‚å¸¸...");
 
 
                 string strError;
-                // µÇÂ¼
+                // ç™»å½•
                 int nRet = channel.Login(dlg.textBox_userName.Text,
                     dlg.textBox_password.Text,
                     out strError);
 
                 if (nRet != 1)
                 {
-                    strError = "ÒÔÓÃ»§Ãû '" + dlg.textBox_userName.Text + "' µÇÂ¼µ½ '" + dlg.textBox_serverAddr.Text + "' Ê§°Ü: " + strError;
+                    strError = "ä»¥ç”¨æˆ·å '" + dlg.textBox_userName.Text + "' ç™»å½•åˆ° '" + dlg.textBox_serverAddr.Text + "' å¤±è´¥: " + strError;
 
                     if (this.ownerForm != null)
                     {
@@ -397,15 +396,15 @@ namespace DigitalPlatform.CirculationClient
 
                     goto REDOINPUT;
                 }
-                else // µÇÂ¼³É¹¦
+                else // ç™»å½•æˆåŠŸ
                 {
                     if (String.Compare(e.Url, dlg.textBox_serverAddr.Text, true) != 0)
                     {
-                        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+                        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
                         // return:
-                        //		-1	³ö´í
-                        //		0	¼ÓÈëÁË
-                        //		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+                        //		-1	å‡ºé”™
+                        //		0	åŠ å…¥äº†
+                        //		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
                         nRet = this.NewServer(dlg.textBox_serverAddr.Text, -1);
                         if (nRet == 0)
                             e.Url = channel.Url;
@@ -415,11 +414,11 @@ namespace DigitalPlatform.CirculationClient
 
                     if (server == null) // 2006/8/19 add
                     {
-                        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+                        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
                         // return:
-                        //		-1	³ö´í
-                        //		0	¼ÓÈëÁË
-                        //		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+                        //		-1	å‡ºé”™
+                        //		0	åŠ å…¥äº†
+                        //		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
                         nRet = this.NewServer(dlg.textBox_serverAddr.Text, -1);
                         if (nRet == 0)
                             e.Url = channel.Url;
@@ -428,7 +427,7 @@ namespace DigitalPlatform.CirculationClient
 
                     }
 
-                    Debug.Assert(server != null, "´ËÊ±server²»¿ÉÄÜÎªnull");
+                    Debug.Assert(server != null, "æ­¤æ—¶serverä¸å¯èƒ½ä¸ºnull");
 
                     server.DefaultUserName = dlg.textBox_userName.Text;
                     server.DefaultPassword = dlg.textBox_password.Text;
@@ -467,14 +466,14 @@ namespace DigitalPlatform.CirculationClient
         */
     }
 
-    // ÊÂ¼ş: ÔöÌí»òÕßÉ¾³ıÁË·şÎñÆ÷
+    // äº‹ä»¶: å¢æ·»æˆ–è€…åˆ é™¤äº†æœåŠ¡å™¨
     public delegate void dp2ServerChangedEventHandle(object sender,
     dp2ServerChangedEventArgs e);
 
     public class dp2ServerChangedEventArgs : EventArgs
     {
-        public string Url = ""; // ·şÎñÆ÷URL
-        public dp2ServerChangeAction ServerChangeAction = dp2ServerChangeAction.None; // Ëù·¢ÉúµÄ¸Ä±äÀàĞÍ
+        public string Url = ""; // æœåŠ¡å™¨URL
+        public dp2ServerChangeAction ServerChangeAction = dp2ServerChangeAction.None; // æ‰€å‘ç”Ÿçš„æ”¹å˜ç±»å‹
     }
 
     public enum dp2ServerChangeAction

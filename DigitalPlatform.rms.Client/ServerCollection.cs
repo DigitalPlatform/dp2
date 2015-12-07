@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Net;
 using System.Runtime.Serialization;
@@ -17,7 +17,7 @@ namespace DigitalPlatform.rms.Client
 	[Serializable()]
 	public class Server
 	{
-		public string Url = "";	// ·şÎñÆ÷URL,Ó¦ÊÇwebservice asmxÈ«³Æ
+		public string Url = "";	// æœåŠ¡å™¨URL,åº”æ˜¯webservice asmxå…¨ç§°
 
 		public string DefaultUserName = "";
 
@@ -32,7 +32,7 @@ namespace DigitalPlatform.rms.Client
 
   
 
-		// ¿½±´¹¹Ôìº¯Êı
+		// æ‹·è´æ„é€ å‡½æ•°
 		public Server(Server refServer)
 		{
 			this.Url = refServer.Url;
@@ -61,8 +61,8 @@ namespace DigitalPlatform.rms.Client
 
 
 	/// <summary>
-	/// ´¢´æ·şÎñÆ÷ĞÅÏ¢µÄÈİÆ÷Àà
-	/// ´òËãÈ¡´úHostList
+	/// å‚¨å­˜æœåŠ¡å™¨ä¿¡æ¯çš„å®¹å™¨ç±»
+	/// æ‰“ç®—å–ä»£HostList
 	/// </summary>
 	[Serializable()]
 	public class ServerCollection : ArrayList
@@ -107,7 +107,7 @@ namespace DigitalPlatform.rms.Client
 			}
 		}
 
-		// Ë÷ÒıÆ÷ ×Ö·û´®×÷Ë÷Òı
+		// ç´¢å¼•å™¨ å­—ç¬¦ä¸²ä½œç´¢å¼•
 		public Server this[string strUrl]
 		{
 			get 
@@ -130,8 +130,8 @@ namespace DigitalPlatform.rms.Client
 			return null;
 		}
 
-		// ¿ËÂ¡¡£
-		// ĞÂÊı×éÖĞµÄ¶ÔÏóÍêÈ«ÊÇĞÂ´´½¨µÄ¡£
+		// å…‹éš†ã€‚
+		// æ–°æ•°ç»„ä¸­çš„å¯¹è±¡å®Œå…¨æ˜¯æ–°åˆ›å»ºçš„ã€‚
 		public ServerCollection Dup()
 		{
 			ServerCollection newServers = new ServerCollection();
@@ -149,14 +149,14 @@ namespace DigitalPlatform.rms.Client
 			return newServers;
 		}
 
-        // ½«ÁíÒ»¶ÔÏóµÄÊı×éÄÚÈİ¹àÈë±¾¶ÔÏó
+        // å°†å¦ä¸€å¯¹è±¡çš„æ•°ç»„å†…å®¹çŒå…¥æœ¬å¯¹è±¡
         public void Import(ServerCollection servers)
         {
             this.Clear();
             this.AddRange(servers);
             this.m_bChanged = true;
 
-            // ĞÂÔö¼ÓµÄ¶¯×÷
+            // æ–°å¢åŠ çš„åŠ¨ä½œ
             ServerChangedEventArgs e = new ServerChangedEventArgs();
             e.Url = "";
             e.ServerChangeAction = ServerChangeAction.Import;
@@ -164,11 +164,11 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-		// ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+		// åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
 		// return:
-		//		-1	³ö´í
-		//		0	¼ÓÈëÁË
-		//		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+		//		-1	å‡ºé”™
+		//		0	åŠ å…¥äº†
+		//		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
 		public int NewServer(string strUrl,
 			int nInsertPos)
 		{
@@ -178,7 +178,7 @@ namespace DigitalPlatform.rms.Client
 
 			if (server != null)
 				return 1;
-			*/	// ÔİÊ±²»È¥ÖØ
+			*/	// æš‚æ—¶ä¸å»é‡
 
 			server = new Server();
 			server.Url = strUrl;
@@ -208,11 +208,11 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-		// ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+		// åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
 		// return:
-		//		-1	³ö´í
-		//		0	¼ÓÈëÁË
-		//		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+		//		-1	å‡ºé”™
+		//		0	åŠ å…¥äº†
+		//		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
 		public Server NewServer(int nInsertPos)
 		{
 			Server server = null;
@@ -228,50 +228,47 @@ namespace DigitalPlatform.rms.Client
 			return server;
 		}
 
-		// ´ÓÎÄ¼şÖĞ×°ÔØ´´½¨Ò»¸öServerCollection¶ÔÏó
+		// ä»æ–‡ä»¶ä¸­è£…è½½åˆ›å»ºä¸€ä¸ªServerCollectionå¯¹è±¡
 		// parameters:
-		//		bIgnorFileNotFound	ÊÇ·ñ²»Å×³öFileNotFoundExceptionÒì³£¡£
-		//							Èç¹û==true£¬º¯ÊıÖ±½Ó·µ»ØÒ»¸öĞÂµÄ¿ÕServerCollection¶ÔÏó
+		//		bIgnorFileNotFound	æ˜¯å¦ä¸æŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸ã€‚
+		//							å¦‚æœ==trueï¼Œå‡½æ•°ç›´æ¥è¿”å›ä¸€ä¸ªæ–°çš„ç©ºServerCollectionå¯¹è±¡
 		// Exception:
-		//			FileNotFoundException	ÎÄ¼şÃ»ÕÒµ½
-		//			SerializationException	°æ±¾Ç¨ÒÆÊ±ÈİÒ×³öÏÖ
+		//			FileNotFoundException	æ–‡ä»¶æ²¡æ‰¾åˆ°
+		//			SerializationException	ç‰ˆæœ¬è¿ç§»æ—¶å®¹æ˜“å‡ºç°
 		public static ServerCollection Load(
 			string strFileName,
 			bool bIgnorFileNotFound)
 		{
-			Stream stream = null;
 			ServerCollection servers = null;
 
 			try 
 			{
-				stream = File.Open(strFileName, FileMode.Open);
-			}
-			catch (FileNotFoundException ex)
-			{
-				if (bIgnorFileNotFound == false)
-					throw ex;
+                using (Stream stream = File.Open(strFileName, FileMode.Open))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
 
-				servers = new ServerCollection();
-				servers.m_strFileName = strFileName;
+                    servers = (ServerCollection)formatter.Deserialize(stream);
+                    servers.m_strFileName = strFileName;
 
-				// ÈÃµ÷Ö÷ÓĞÒ»¸öĞÂµÄ¿Õ¶ÔÏó¿ÉÓÃ
-				return servers;
-			}
+                    return servers;
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                if (bIgnorFileNotFound == false)
+                    throw ex;
 
+                servers = new ServerCollection();
+                servers.m_strFileName = strFileName;
 
-			BinaryFormatter formatter = new BinaryFormatter();
-
-			servers = (ServerCollection)formatter.Deserialize(stream);
-			stream.Close();
-			servers.m_strFileName = strFileName;
-
-
-			return servers;
+                // è®©è°ƒä¸»æœ‰ä¸€ä¸ªæ–°çš„ç©ºå¯¹è±¡å¯ç”¨
+                return servers;
+            }
 		}
 
-		// ±£´æµ½ÎÄ¼ş
+		// ä¿å­˜åˆ°æ–‡ä»¶
 		// parameters:
-		//		strFileName	ÎÄ¼şÃû¡£Èç¹û==null,±íÊ¾Ê¹ÓÃ×°ÔØÊ±±£´æµÄÄÇ¸öÎÄ¼şÃû
+		//		strFileName	æ–‡ä»¶åã€‚å¦‚æœ==null,è¡¨ç¤ºä½¿ç”¨è£…è½½æ—¶ä¿å­˜çš„é‚£ä¸ªæ–‡ä»¶å
 		public void Save(string strFileName)
 		{
 			if (m_bChanged == false)
@@ -282,19 +279,19 @@ namespace DigitalPlatform.rms.Client
 
 			if (strFileName == null) 
 			{
-				throw(new Exception("ServerCollection.Save()Ã»ÓĞÖ¸¶¨±£´æÎÄ¼şÃû"));
+				throw(new Exception("ServerCollection.Save()æ²¡æœ‰æŒ‡å®šä¿å­˜æ–‡ä»¶å"));
 			}
 
-			Stream stream = File.Open(strFileName,
-				FileMode.Create);
+            using (Stream stream = File.Open(strFileName,
+                FileMode.Create))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
 
-			BinaryFormatter formatter = new BinaryFormatter();
-
-			formatter.Serialize(stream, this);
-			stream.Close();
+                formatter.Serialize(stream, this);
+            }
 		}
 
-        // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+        // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
         // return:
         //		2	already login succeed
         //		1	dialog return OK
@@ -343,22 +340,22 @@ namespace DigitalPlatform.rms.Client
                 if (bAutoLogin == false && bFirst == true)
                     goto REDOINPUT;
 
-                // ÕÒµ½Channel
+                // æ‰¾åˆ°Channel
                 RmsChannel channel = e.Channel; // 2013/2/14
                 if (channel == null)
                     channel = e.Channels.GetChannel(dlg.textBox_serverAddr.Text);
 
-                Debug.Assert(channel != null, "Channels.GetChannel()Òì³£...");
+                Debug.Assert(channel != null, "Channels.GetChannel()å¼‚å¸¸...");
 
                 string strError;
-                // µÇÂ¼
+                // ç™»å½•
                 int nRet = channel.Login(dlg.textBox_userName.Text,
                     dlg.textBox_password.Text,
                     out strError);
 
                 if (nRet != 1)
                 {
-                    strError = "ÒÔÓÃ»§Ãû '" + dlg.textBox_userName.Text + "' µÇÂ¼µ½ '" + dlg.textBox_serverAddr.Text + "' Ê§°Ü: " + strError;
+                    strError = "ä»¥ç”¨æˆ·å '" + dlg.textBox_userName.Text + "' ç™»å½•åˆ° '" + dlg.textBox_serverAddr.Text + "' å¤±è´¥: " + strError;
 
                     if (this.ownerForm != null)
                     {
@@ -372,15 +369,15 @@ namespace DigitalPlatform.rms.Client
 
                     goto REDOINPUT;
                 }
-                else // µÇÂ¼³É¹¦
+                else // ç™»å½•æˆåŠŸ
                 {
                     if (String.Compare(e.Url, dlg.textBox_serverAddr.Text, true) != 0)
                     {
-                        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+                        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
                         // return:
-                        //		-1	³ö´í
-                        //		0	¼ÓÈëÁË
-                        //		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+                        //		-1	å‡ºé”™
+                        //		0	åŠ å…¥äº†
+                        //		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
                         nRet = this.NewServer(dlg.textBox_serverAddr.Text, -1);
                         if (nRet == 0)
                             e.Url = channel.Url;
@@ -390,11 +387,11 @@ namespace DigitalPlatform.rms.Client
 
                     if (server == null) // 2006/8/19 add
                     {
-                        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+                        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
                         // return:
-                        //		-1	³ö´í
-                        //		0	¼ÓÈëÁË
-                        //		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+                        //		-1	å‡ºé”™
+                        //		0	åŠ å…¥äº†
+                        //		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
                         nRet = this.NewServer(dlg.textBox_serverAddr.Text, -1);
                         if (nRet == 0)
                             e.Url = channel.Url;
@@ -403,7 +400,7 @@ namespace DigitalPlatform.rms.Client
 
                     }
 
-                    Debug.Assert(server != null, "´ËÊ±server²»¿ÉÄÜÎªnull");
+                    Debug.Assert(server != null, "æ­¤æ—¶serverä¸å¯èƒ½ä¸ºnull");
 
                     server.DefaultUserName = dlg.textBox_userName.Text;
                     server.DefaultPassword = dlg.textBox_password.Text;
@@ -441,7 +438,7 @@ namespace DigitalPlatform.rms.Client
         }
 
         /*
-		// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+		// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 		// return:
 		//		2	already login succeed
 		//		1	dialog return OK
@@ -452,7 +449,7 @@ namespace DigitalPlatform.rms.Client
 			string strUrl,
 			string strPath,
 			LoginStyle loginStyle,
-			out IWin32Window owner,	// Èç¹ûĞèÒª³öÏÖ¶Ô»°¿ò£¬ÕâÀï·µ»Ø¶Ô»°¿òµÄËŞÖ÷Form
+			out IWin32Window owner,	// å¦‚æœéœ€è¦å‡ºç°å¯¹è¯æ¡†ï¼Œè¿™é‡Œè¿”å›å¯¹è¯æ¡†çš„å®¿ä¸»Form
 			out string strUserName,
 			out string strPassword)
 		{
@@ -495,14 +492,14 @@ namespace DigitalPlatform.rms.Client
 				if (bAutoLogin == false && bFirst == true)
 					goto REDOINPUT;
 
-				// ÕÒµ½Channel
+				// æ‰¾åˆ°Channel
 				Channel channel = Channels.GetChannel(dlg.textBox_serverAddr.Text);
 
-				Debug.Assert(channel != null, "Channels.GetChannel()Òì³£...");
+				Debug.Assert(channel != null, "Channels.GetChannel()å¼‚å¸¸...");
 
 
 				string strError;
-				// µÇÂ¼
+				// ç™»å½•
 				int nRet = channel.Login(dlg.textBox_userName.Text,
 					dlg.textBox_password.Text,
 					out strError);
@@ -511,26 +508,26 @@ namespace DigitalPlatform.rms.Client
 				{
 					if (ownerForm != null) 
 					{
-						MessageBox.Show(ownerForm, "ÒÔÓÃ»§Ãû '" + dlg.textBox_userName.Text + "' µÇÂ¼µ½ '" + dlg.textBox_serverAddr.Text + "' Ê§°Ü: " + strError);
+						MessageBox.Show(ownerForm, "ä»¥ç”¨æˆ·å '" + dlg.textBox_userName.Text + "' ç™»å½•åˆ° '" + dlg.textBox_serverAddr.Text + "' å¤±è´¥: " + strError);
 					}
 
 					goto REDOINPUT;
 				}
-				else // µÇÂ¼³É¹¦
+				else // ç™»å½•æˆåŠŸ
 				{
 					if (String.Compare(strUrl, dlg.textBox_serverAddr.Text, true) != 0) 
 					{
-                        // ´´½¨Ò»¸öĞÂµÄServer¶ÔÏó
+                        // åˆ›å»ºä¸€ä¸ªæ–°çš„Serverå¯¹è±¡
                         // return:
-                        //		-1	³ö´í
-                        //		0	¼ÓÈëÁË
-                        //		1	·¢ÏÖÖØ¸´£¬Ã»ÓĞ¼ÓÈë
+                        //		-1	å‡ºé”™
+                        //		0	åŠ å…¥äº†
+                        //		1	å‘ç°é‡å¤ï¼Œæ²¡æœ‰åŠ å…¥
 						nRet = this.NewServer( dlg.textBox_serverAddr.Text, -1);
 					}
 
 					server = this[dlg.textBox_serverAddr.Text];
 
-					Debug.Assert(server != null, "´ËÊ±server²»¿ÉÄÜÎªnull");
+					Debug.Assert(server != null, "æ­¤æ—¶serverä¸å¯èƒ½ä¸ºnull");
 
 					server.DefaultUserName = dlg.textBox_userName.Text;
 					server.DefaultPassword = dlg.textBox_password.Text;
@@ -564,14 +561,14 @@ namespace DigitalPlatform.rms.Client
          */
 	}
 
-    // ÊÂ¼ş: ÔöÌí»òÕßÉ¾³ıÁË·şÎñÆ÷
+    // äº‹ä»¶: å¢æ·»æˆ–è€…åˆ é™¤äº†æœåŠ¡å™¨
     public delegate void ServerChangedEventHandle(object sender,
     ServerChangedEventArgs e);
 
     public class ServerChangedEventArgs : EventArgs
     {
-        public string Url = ""; // ·şÎñÆ÷URL
-        public ServerChangeAction ServerChangeAction = ServerChangeAction.None; // Ëù·¢ÉúµÄ¸Ä±äÀàĞÍ
+        public string Url = ""; // æœåŠ¡å™¨URL
+        public ServerChangeAction ServerChangeAction = ServerChangeAction.None; // æ‰€å‘ç”Ÿçš„æ”¹å˜ç±»å‹
     }
 
     public enum ServerChangeAction

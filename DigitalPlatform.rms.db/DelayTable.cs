@@ -209,8 +209,8 @@ namespace DigitalPlatform.rms
         public FileStream Stream = null;
         public string FileName = "";
 
-        XmlTextWriter writer = null;
-        XmlTextReader reader = null;
+        XmlTextWriter _writer = null;
+        XmlTextReader _reader = null;
 
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         int m_nLockTimeout = 5 * 1000;
@@ -238,12 +238,12 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
 
-                writer = new XmlTextWriter(Stream, Encoding.UTF8);
+                _writer = new XmlTextWriter(Stream, Encoding.UTF8);
                 //writer.Formatting = Formatting.Indented;
                 //writer.Indentation = 4;
 
-                writer.WriteStartDocument();
-                writer.WriteStartElement("collection");
+                _writer.WriteStartDocument();
+                _writer.WriteStartElement("collection");
 
 
                 this.FileName = strOutputFileName;
@@ -292,7 +292,7 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
 
-                reader = new XmlTextReader(Stream);
+                _reader = new XmlTextReader(Stream);
 
 #if NO
             bool bRet = false;
@@ -357,20 +357,20 @@ namespace DigitalPlatform.rms
             try
             {
 #endif
-                if (reader.NodeType != XmlNodeType.Element && reader.Name != "item")
+                if (_reader.NodeType != XmlNodeType.Element && _reader.Name != "item")
                 {
-                    if (reader.ReadToFollowing("item") == false)
+                    if (_reader.ReadToFollowing("item") == false)
                         return false;
                 }
 
-                while (reader.Read())
+                while (_reader.Read())
                 {
-                    while (reader.NodeType == XmlNodeType.Element)
+                    while (_reader.NodeType == XmlNodeType.Element)
                     {
-                        if (reader.Name == "item")
+                        if (_reader.Name == "item")
                             return true;
                         // 字段名
-                        table[reader.Name] = reader.ReadElementContentAsString();
+                        table[_reader.Name] = _reader.ReadElementContentAsString();
                     }
                 }
 
@@ -392,13 +392,13 @@ namespace DigitalPlatform.rms
             {
                 foreach (KeyItem item in keys)
                 {
-                    writer.WriteStartElement("item");
-                    writer.WriteElementString("keystring", item.Key);
+                    _writer.WriteStartElement("item");
+                    _writer.WriteElementString("keystring", item.Key);
                     // writer.WriteElementString("key1", item.KeyNoProcess);
-                    writer.WriteElementString("keystringnum", item.Num);
-                    writer.WriteElementString("fromstring", item.FromValue);
-                    writer.WriteElementString("idstring", item.RecordID);
-                    writer.WriteEndElement();
+                    _writer.WriteElementString("keystringnum", item.Num);
+                    _writer.WriteElementString("fromstring", item.FromValue);
+                    _writer.WriteElementString("idstring", item.RecordID);
+                    _writer.WriteEndElement();
                 }
             }
             finally
@@ -413,18 +413,18 @@ namespace DigitalPlatform.rms
                 throw new ApplicationException("为 DelayTable 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
             try
             {
-                if (writer != null)
+                if (_writer != null)
                 {
-                    writer.WriteEndElement();
-                    writer.WriteEndDocument();
-                    writer.Close();
-                    writer = null;
+                    _writer.WriteEndElement();
+                    _writer.WriteEndDocument();
+                    _writer.Close();
+                    _writer = null;
                 }
 
-                if (reader != null)
+                if (_reader != null)
                 {
-                    reader.Close();
-                    reader = null;
+                    _reader.Close();
+                    _reader = null;
                 }
 
                 if (this.Stream != null)
@@ -498,7 +498,7 @@ namespace DigitalPlatform.rms
         {
             get
             {
-                if (this.reader == null)
+                if (this._reader == null)
                     return false;
                 return true;
             }

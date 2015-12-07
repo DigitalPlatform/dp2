@@ -502,7 +502,6 @@ namespace dp2Circulation
         {
             using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
             {
-
                 sw.WriteLine("<?xml version='1.0' encoding='utf-8'?>");
                 sw.WriteLine("<filter>");
                 sw.WriteLine("<using>");

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
@@ -24,8 +24,8 @@ namespace dp2ZServer
 
         private Service m_service = null;    // 
         private string m_SessionID = "";      // Holds session ID.
-        private DateTime m_SessionStartTime;    // Session´´½¨µÄÊ±¼ä
-        private DateTime m_ActivateTime;    // ×î½üÒ»´ÎÊ¹ÓÃ¹ıµÄÊ±¼ä
+        private DateTime m_SessionStartTime;    // Sessionåˆ›å»ºçš„æ—¶é—´
+        private DateTime m_ActivateTime;    // æœ€è¿‘ä¸€æ¬¡ä½¿ç”¨è¿‡çš„æ—¶é—´
 
         public DateTime ActivateTime
         {
@@ -42,12 +42,12 @@ namespace dp2ZServer
         string strPassword = "";
 
 
-        // ¼ìË÷´ÊµÄ±àÂë·½Ê½
-        Encoding SearchTermEncoding = Encoding.GetEncoding(936);    // È±Ê¡ÎªGB2312±àÂë·½Ê½
-        // MARC¼ÇÂ¼µÄ±àÂë·½Ê½
-        Encoding MarcRecordEncoding = Encoding.GetEncoding(936);    // È±Ê¡ÎªGB2312±àÂë·½Ê½
+        // æ£€ç´¢è¯çš„ç¼–ç æ–¹å¼
+        Encoding SearchTermEncoding = Encoding.GetEncoding(936);    // ç¼ºçœä¸ºGB2312ç¼–ç æ–¹å¼
+        // MARCè®°å½•çš„ç¼–ç æ–¹å¼
+        Encoding MarcRecordEncoding = Encoding.GetEncoding(936);    // ç¼ºçœä¸ºGB2312ç¼–ç æ–¹å¼
 
-        bool m_bInitialized = false;    // ÊÇ·ñ±»Initial³õÊ¼»¯³É¹¦¡£Èç¹ûÎªfalse£¬ÔòInitial()ºóĞøµÄÇëÇó¶¼Òª±»¾Ü¾ø¡£
+        bool m_bInitialized = false;    // æ˜¯å¦è¢«Initialåˆå§‹åŒ–æˆåŠŸã€‚å¦‚æœä¸ºfalseï¼Œåˆ™Initial()åç»­çš„è¯·æ±‚éƒ½è¦è¢«æ‹’ç»ã€‚
         long m_lPreferredMessageSize = 500 * 1024;
         long m_lExceptionalRecordSize = 500 * 1024;
 
@@ -104,7 +104,7 @@ namespace dp2ZServer
                  * */
                 if (String.IsNullOrEmpty(e.UserName) == true)
                 {
-                    e.ErrorInfo = "Ã»ÓĞÖ¸¶¨ÓÃ»§Ãû£¬ÎŞ·¨×Ô¶¯µÇÂ¼";
+                    e.ErrorInfo = "æ²¡æœ‰æŒ‡å®šç”¨æˆ·åï¼Œæ— æ³•è‡ªåŠ¨ç™»å½•";
                     e.Failed = true;
                     return;
                 }
@@ -112,7 +112,7 @@ namespace dp2ZServer
                 return;
             }
 
-            e.ErrorInfo = "first tryÊ§°Üºó£¬ÎŞ·¨×Ô¶¯µÇÂ¼";
+            e.ErrorInfo = "first tryå¤±è´¥åï¼Œæ— æ³•è‡ªåŠ¨ç™»å½•";
             e.Failed = true;
             return;
         }
@@ -126,7 +126,7 @@ namespace dp2ZServer
         }
 
 
-        // ½ÓÊÕÇëÇó°ü
+        // æ¥æ”¶è¯·æ±‚åŒ…
         public int RecvTcpPackage(out byte[] baPackage,
             out int nLen,
             out string strError)
@@ -137,7 +137,7 @@ namespace dp2ZServer
             int wRet = 0;
             bool bInitialLen = false;
 
-            Debug.Assert(client != null, "clientÎª¿Õ");
+            Debug.Assert(client != null, "clientä¸ºç©º");
 
             baPackage = new byte[4096];
             nInLen = 0;
@@ -149,7 +149,7 @@ namespace dp2ZServer
             {
                 if (client == null)
                 {
-                    strError = "Í¨Ñ¶ÖĞ¶Ï";
+                    strError = "é€šè®¯ä¸­æ–­";
                     goto ERROR1;
                 }
 
@@ -168,12 +168,12 @@ namespace dp2ZServer
                         System.Threading.Thread.Sleep(100);
                         continue;
                     }
-                    strError = "recv³ö´í: " + ex.Message;
+                    strError = "recvå‡ºé”™: " + ex.Message;
                     goto ERROR1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "recv³ö´í: " + ex.Message;
+                    strError = "recvå‡ºé”™: " + ex.Message;
                     goto ERROR1;
                 }
 
@@ -183,7 +183,7 @@ namespace dp2ZServer
                     goto ERROR1;
                 }
 
-                // µÃµ½°üµÄ³¤¶È
+                // å¾—åˆ°åŒ…çš„é•¿åº¦
 
                 if ((wRet >= 1 || nInLen >= 1)
                     && bInitialLen == false)
@@ -196,7 +196,7 @@ namespace dp2ZServer
                     if (bRet == true)
                     {
                         /*
-                        // ÕıÊ½·ÖÅä»º³åÇø³ß´ç
+                        // æ­£å¼åˆ†é…ç¼“å†²åŒºå°ºå¯¸
                         byte[] temp = new byte[nLen];
                         Array.Copy(baPackage, 0, temp, 0, nInLen + wRet);
                         baPackage = temp;
@@ -212,7 +212,7 @@ namespace dp2ZServer
                 if (nInLen >= baPackage.Length
                     && bInitialLen == false)
                 {
-                    // À©´ó»º³åÇø
+                    // æ‰©å¤§ç¼“å†²åŒº
                     byte[] temp = new byte[baPackage.Length + 4096];
                     Array.Copy(baPackage, 0, temp, 0, nInLen);
                     baPackage = temp;
@@ -220,7 +220,7 @@ namespace dp2ZServer
                 }
             }
 
-            // ×îºó¹æÕû»º³åÇø³ß´ç£¬Èç¹û±ØÒªµÄ»°
+            // æœ€åè§„æ•´ç¼“å†²åŒºå°ºå¯¸ï¼Œå¦‚æœå¿…è¦çš„è¯
             if (baPackage.Length > nLen)
             {
                 byte[] temp = new byte[nLen];
@@ -236,11 +236,11 @@ namespace dp2ZServer
         }
 
 
-        // ·¢³öÏìÓ¦°ü
+        // å‘å‡ºå“åº”åŒ…
         // return:
-        //      -1  ³ö´í
-        //      0   ÕıÈ··¢³ö
-        //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+        //      -1  å‡ºé”™
+        //      0   æ­£ç¡®å‘å‡º
+        //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
         public int SendTcpPackage(byte[] baPackage,
             int nLen,
             out string strError)
@@ -249,7 +249,7 @@ namespace dp2ZServer
 
             if (client == null)
             {
-                strError = "clientÉĞÎ´³õÊ¼»¯";
+                strError = "clientå°šæœªåˆå§‹åŒ–";
                 return -1;
             }
 
@@ -257,7 +257,7 @@ namespace dp2ZServer
 
             if (this.client == null)
             {
-                strError = "ÓÃ»§ÖĞ¶Ï";
+                strError = "ç”¨æˆ·ä¸­æ–­";
                 return -1;
             }
 
@@ -268,8 +268,8 @@ namespace dp2ZServer
 
                 if (stream.DataAvailable == true)
                 {
-                    // Debug.Assert(false, "·¢ËÍÇ°¾ÓÈ»·¢ÏÖÓĞÎ´¶ÁµÄÊı¾İ" );
-                    strError = "·¢ËÍÇ°·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁµÄÊı¾İ";
+                    // Debug.Assert(false, "å‘é€å‰å±…ç„¶å‘ç°æœ‰æœªè¯»çš„æ•°æ®" );
+                    strError = "å‘é€å‰å‘ç°æµä¸­æœ‰æœªè¯»çš„æ•°æ®";
                     return 1;
                 }
 
@@ -279,7 +279,7 @@ namespace dp2ZServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "send³ö´í: " + ex.Message;
+                    strError = "sendå‡ºé”™: " + ex.Message;
                     this.CloseSocket();
                     return -1;
                 }
@@ -318,7 +318,7 @@ namespace dp2ZServer
         }
 		
 		/// <summary>
-		/// Session´¦ÀíÂÖ»Ø
+		/// Sessionå¤„ç†è½®å›
 		/// </summary>
 		public void Processing()
 		{
@@ -334,14 +334,14 @@ namespace dp2ZServer
                 for (; ; )
                 {
                     m_ActivateTime = DateTime.Now;
-                    // ½ÓÊÕÇ°¶ËÇëÇó
+                    // æ¥æ”¶å‰ç«¯è¯·æ±‚
                     nRet = RecvTcpPackage(out baPackage,
                         out nLen,
                         out strError);
                     if (nRet == -1)
                         goto ERROR_NOT_LOG;
 
-                    // ·ÖÎöÇëÇó°ü
+                    // åˆ†æè¯·æ±‚åŒ…
                     BerTree tree1 = new BerTree();
                     int nTotlen = 0;
 
@@ -366,15 +366,15 @@ namespace dp2ZServer
                                 if (nRet == -1)
                                     goto ERROR1;
 
-                                // ¿ÉÒÔÓÃgroupidÀ´±íÊ¾×Ö·û¼¯ĞÅÏ¢
+                                // å¯ä»¥ç”¨groupidæ¥è¡¨ç¤ºå­—ç¬¦é›†ä¿¡æ¯
 
                                 InitResponseInfo response_info = new InitResponseInfo();
 
-                                // ÅĞ¶ÏinfoÖĞµÄĞÅÏ¢£¬¾ö¶¨ÊÇ·ñ½ÓÊÜInitÇëÇó¡£
+                                // åˆ¤æ–­infoä¸­çš„ä¿¡æ¯ï¼Œå†³å®šæ˜¯å¦æ¥å—Initè¯·æ±‚ã€‚
 
                                 if (String.IsNullOrEmpty(info.m_strID) == true)
                                 {
-                                    // Èç¹û¶¨ÒåÁËÔÊĞíÄäÃûµÇÂ¼
+                                    // å¦‚æœå®šä¹‰äº†å…è®¸åŒ¿åç™»å½•
                                     if (String.IsNullOrEmpty(this.m_service.AnonymousUserName) == false)
                                     {
                                         info.m_strID = this.m_service.AnonymousUserName;
@@ -388,16 +388,16 @@ namespace dp2ZServer
                                         SetInitResponseUserInfo(response_info,
                                             "", // string strOID,
                                             0,  // long lErrorCode,
-                                            "²»ÔÊĞíÄäÃûµÇÂ¼");
+                                            "ä¸å…è®¸åŒ¿åç™»å½•");
                                         goto DO_RESPONSE;
                                     }
                                 }
 
-                                // ½øĞĞµÇÂ¼
+                                // è¿›è¡Œç™»å½•
                                 // return:
                                 //      -1  error
-                                //      0   µÇÂ¼Î´³É¹¦
-                                //      1   µÇÂ¼³É¹¦
+                                //      0   ç™»å½•æœªæˆåŠŸ
+                                //      1   ç™»å½•æˆåŠŸ
                                 nRet = DoLogin(info.m_strGroupID,
                                     info.m_strID,
                                     info.m_strPassword,
@@ -419,19 +419,19 @@ namespace dp2ZServer
                                 }
 
                             DO_RESPONSE:
-                                // Ìî³äresponse_infoµÄÆäËü½á¹¹
+                                // å¡«å……response_infoçš„å…¶å®ƒç»“æ„
                                 response_info.m_strReferenceId = info.m_strReferenceId;  // .m_strID; BUG!!! 2007/11/2
 
                                 if (info.m_lPreferredMessageSize != 0)
                                     this.m_lPreferredMessageSize = info.m_lPreferredMessageSize;
-                                // ¼«ÏŞ
+                                // æé™
                                 if (this.m_lPreferredMessageSize > MaxPreferredMessageSize)
                                     this.m_lPreferredMessageSize = MaxPreferredMessageSize;
                                 response_info.m_lPreferredMessageSize = this.m_lPreferredMessageSize;
 
                                 if (info.m_lExceptionalRecordSize != 0)
                                     this.m_lExceptionalRecordSize = info.m_lExceptionalRecordSize;
-                                // ¼«ÏŞ
+                                // æé™
                                 if (this.m_lExceptionalRecordSize > MaxExceptionalRecordSize)
                                     this.m_lExceptionalRecordSize = MaxExceptionalRecordSize;
                                 response_info.m_lExceptionalRecordSize = this.m_lExceptionalRecordSize;
@@ -477,7 +477,7 @@ namedResultSets        (14)
                                         this.SearchTermEncoding = Encoding.UTF8;
                                         if (info.m_charNego.RecordsInSelectedCharsets != -1)
                                         {
-                                            response_info.m_charNego.RecordsInSelectedCharsets = info.m_charNego.RecordsInSelectedCharsets; // ÒÀ´ÓÇ°¶ËµÄÇëÇó
+                                            response_info.m_charNego.RecordsInSelectedCharsets = info.m_charNego.RecordsInSelectedCharsets; // ä¾ä»å‰ç«¯çš„è¯·æ±‚
                                             if (response_info.m_charNego.RecordsInSelectedCharsets == 1)
                                                 this.MarcRecordEncoding = Encoding.UTF8;
                                         }
@@ -502,7 +502,7 @@ namedResultSets        (14)
                         case BerTree.z3950_searchRequest:
                             {
                                 SearchRequestInfo info = null;
-                                // ½âÂëSearchÇëÇó°ü
+                                // è§£ç Searchè¯·æ±‚åŒ…
                                 nRet = Decode_SearchRequest(
                                     root,
                                     out info,
@@ -514,7 +514,7 @@ namedResultSets        (14)
                                     goto ERROR_NOT_LOG;
 
 
-                                // ±àÂëSearchÏìÓ¦°ü
+                                // ç¼–ç Searchå“åº”åŒ…
                                 nRet = Encode_SearchResponse(info,
                                     out baResponsePackage,
                                     out strError);
@@ -527,7 +527,7 @@ namedResultSets        (14)
                         case BerTree.z3950_presentRequest:
                             {
                                 PresentRequestInfo info = null;
-                                // ½âÂëSearchÇëÇó°ü
+                                // è§£ç Searchè¯·æ±‚åŒ…
                                 nRet = Decode_PresentRequest(
                                     root,
                                     out info,
@@ -538,7 +538,7 @@ namedResultSets        (14)
                                 if (m_bInitialized == false)
                                     goto ERROR_NOT_LOG;
 
-                                // ±àÂëPresentÏìÓ¦°ü
+                                // ç¼–ç Presentå“åº”åŒ…
                                 nRet = Encode_PresentResponse(info,
                                     out baResponsePackage);
                                 if (nRet == -1)
@@ -551,11 +551,11 @@ namedResultSets        (14)
                     }
 
 
-                    // ·¢³öÏìÓ¦°ü
+                    // å‘å‡ºå“åº”åŒ…
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÕıÈ··¢³ö
-                    //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+                    //      -1  å‡ºé”™
+                    //      0   æ­£ç¡®å‘å‡º
+                    //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
                     nRet = SendTcpPackage(baResponsePackage,
                         baResponsePackage.Length,
                         out strError);
@@ -582,7 +582,7 @@ namedResultSets        (14)
 
 				}
                  * */
-                strError = "Session Processing()·ı»ñÒì³£: " + ExceptionUtil.GetDebugText(x);
+                strError = "Session Processing()ä¿˜è·å¼‚å¸¸: " + ExceptionUtil.GetDebugText(x);
                 goto ERROR1;
 			}
 			finally
@@ -592,11 +592,11 @@ namedResultSets        (14)
 			}
             return;
         ERROR1:
-            // ½«strErrorĞ´ÈëÈÕÖ¾
+            // å°†strErrorå†™å…¥æ—¥å¿—
             this.m_service.Log.WriteEntry(strError, EventLogEntryType.Error);
             return;
         ERROR_NOT_LOG:
-            // ²»Ğ´ÈëÈÕÖ¾
+            // ä¸å†™å…¥æ—¥å¿—
             return;
 		}
 
@@ -616,11 +616,11 @@ namedResultSets        (14)
             }
         }
 
-        // ½øĞĞµÇÂ¼
+        // è¿›è¡Œç™»å½•
         // return:
         //      -1  error
-        //      0   µÇÂ¼Î´³É¹¦
-        //      1   µÇÂ¼³É¹¦
+        //      0   ç™»å½•æœªæˆåŠŸ
+        //      1   ç™»å½•æˆåŠŸ
         int DoLogin(string strGroupId,
             string strUserName,
             string strPassword,
@@ -630,8 +630,8 @@ namedResultSets        (14)
 
             // return:
             //      -1  error
-            //      0   µÇÂ¼Î´³É¹¦
-            //      1   µÇÂ¼³É¹¦
+            //      0   ç™»å½•æœªæˆåŠŸ
+            //      1   ç™»å½•æˆåŠŸ
             long lRet = this.Channel.Login(strUserName,
                 strPassword,
                 "location=z39.50 server,type=worker",
@@ -643,7 +643,7 @@ namedResultSets        (14)
             if (lRet == -1)
                 return -1;
 
-            // ¼ÇÒäÏÂÀ´£¬¹©ÒÔºóÊ¹ÓÃ
+            // è®°å¿†ä¸‹æ¥ï¼Œä¾›ä»¥åä½¿ç”¨
             this.strGroupId = strGroupId;
             this.strUserName = strUserName;
             this.strPassword = strPassword;
@@ -653,9 +653,9 @@ namedResultSets        (14)
         }
 
 
-        #region BER°ü´¦Àí
+        #region BERåŒ…å¤„ç†
 
-        // ½âÂëInitialÇëÇó°ü
+        // è§£ç Initialè¯·æ±‚åŒ…
         public static int Decode_InitRequest(
             BerNode root,
             out InitRequestInfo info,
@@ -750,7 +750,7 @@ namedResultSets        (14)
         }
 
 
-        // ½âÂëSearchÇëÇó°ü
+        // è§£ç Searchè¯·æ±‚åŒ…
         public static int Decode_SearchRequest(
             BerNode root,
             out SearchRequestInfo info,
@@ -831,7 +831,7 @@ namedResultSets        (14)
             return 0;
         }
 
-        // ±àÂë(¹¹Ôì) SearchÏìÓ¦°ü
+        // ç¼–ç (æ„é€ ) Searchå“åº”åŒ…
         int Encode_SearchResponse(SearchRequestInfo info,
             out byte[] baPackage,
             out string strError)
@@ -846,11 +846,11 @@ namedResultSets        (14)
             BerTree tree = new BerTree();
             BerNode root = null;
 
-            long lSearchStatus = 0; // 0 Ê§°Ü£»1³É¹¦
+            long lSearchStatus = 0; // 0 å¤±è´¥ï¼›1æˆåŠŸ
             long lHitCount = 0;
 
             string strQueryXml = "";
-            // ¸ù¾İÄæ²¨À¼±í½øĞĞ¼ìË÷
+            // æ ¹æ®é€†æ³¢å…°è¡¨è¿›è¡Œæ£€ç´¢
 
             // return:
             //      -1  error
@@ -880,9 +880,9 @@ namedResultSets        (14)
                     out strError);
 
                 /*
-                // ²âÊÔ¼ìË÷Ê§°Ü
+                // æµ‹è¯•æ£€ç´¢å¤±è´¥
                 lRet = -1;
-                strError = "²âÊÔ¼ìË÷Ê§°Ü";
+                strError = "æµ‹è¯•æ£€ç´¢å¤±è´¥";
                  * */
 
                 if (lRet == -1)
@@ -930,7 +930,7 @@ namedResultSets        (14)
                 BitConverter.GetBytes((long)1/*info.m_lNextResultSetPosition*/));
 
 
-            // 2007/11/7 Ô­À´±¾ÏîÎ»ÖÃ²»¶Ô£¬ÏÖÔÚÒÆ¶¯µ½ÕâÀï
+            // 2007/11/7 åŸæ¥æœ¬é¡¹ä½ç½®ä¸å¯¹ï¼Œç°åœ¨ç§»åŠ¨åˆ°è¿™é‡Œ
             // bool
             // searchStatus
             root.NewChildIntegerNode(BerTree.z3950_searchStatus, // 22
@@ -946,7 +946,7 @@ namedResultSets        (14)
                 BitConverter.GetBytes((long)0));
 
 
-            // Õï¶Ï¼ÇÂ¼
+            // è¯Šæ–­è®°å½•
             if (diag != null)
             {
                 BerNode nodeDiagRoot = root.NewChildConstructedNode(BerTree.z3950_nonSurrogateDiagnostic,    // 130
@@ -961,7 +961,7 @@ namedResultSets        (14)
             return 0;
         }
 
-        // ½âÂëPresentÇëÇó°ü
+        // è§£ç Presentè¯·æ±‚åŒ…
         public static int Decode_PresentRequest(
             BerNode root,
             out PresentRequestInfo info,
@@ -1019,7 +1019,7 @@ namedResultSets        (14)
             return 0;
         }
 
-        // ÉèÖÃpresent responseÖĞµÄÕï¶Ï¼ÇÂ¼
+        // è®¾ç½®present responseä¸­çš„è¯Šæ–­è®°å½•
         static void SetPresentDiagRecord(ref DiagFormat diag,
             int nCondition,
             string strAddInfo)
@@ -1034,7 +1034,7 @@ namedResultSets        (14)
             diag.m_strAddInfo = strAddInfo;
         }
 
-        // ±àÂë(¹¹Ôì) PresentÏìÓ¦°ü
+        // ç¼–ç (æ„é€ ) Presentå“åº”åŒ…
         int Encode_PresentResponse(PresentRequestInfo info,
             out byte[] baPackage)
         {
@@ -1061,7 +1061,7 @@ namedResultSets        (14)
 
             int nPresentStatus = 5; // failed
 
-            // »ñÈ¡½á¹û¼¯ÖĞĞèÒª²¿·ÖµÄ¼ÇÂ¼path
+            // è·å–ç»“æœé›†ä¸­éœ€è¦éƒ¨åˆ†çš„è®°å½•path
             long lOffset = lStart;
             int nCount = 0;
             for (; ; )
@@ -1078,9 +1078,9 @@ namedResultSets        (14)
                     out searchresults,
                     out strError);
                 /*
-                // ²âÊÔ»ñÈ¡½á¹û¼¯Ê§°ÜµÄÇé¿ö£¬·µ»Ø·Ç´úÀíÕï¶Ï¼ÇÂ¼
+                // æµ‹è¯•è·å–ç»“æœé›†å¤±è´¥çš„æƒ…å†µï¼Œè¿”å›éä»£ç†è¯Šæ–­è®°å½•
                 lRet = -1;
-                strError = "²âÊÔ¼ìË÷´íÎóĞÅÏ¢£¡";
+                strError = "æµ‹è¯•æ£€ç´¢é”™è¯¯ä¿¡æ¯ï¼";
                  * */
 
                 if (lRet == -1)
@@ -1095,9 +1095,9 @@ namedResultSets        (14)
                     // goto ERROR1 ?
                 }
 
-                lHitCount = lRet;   // Ë³±ãµÃµ½ÃüÖĞ¼ÇÂ¼×ÜÌõÊı
+                lHitCount = lRet;   // é¡ºä¾¿å¾—åˆ°å‘½ä¸­è®°å½•æ€»æ¡æ•°
 
-                // ×ª´¢
+                // è½¬å‚¨
                 for (int i = 0; i < searchresults.Length; i++)
                 {
                     paths.Add(searchresults[i].Path);
@@ -1116,15 +1116,15 @@ namedResultSets        (14)
                 }
             }
 
-            // TODO: ĞèÒª×¢Òâ¶à¸ö´íÎóÊÇ·ñĞÎ³É¶à¸ödiag¼ÇÂ¼£¿V2²»ÔÊĞíÕâÑù£¬V3ÔÊĞíÕâÑù
+            // TODO: éœ€è¦æ³¨æ„å¤šä¸ªé”™è¯¯æ˜¯å¦å½¢æˆå¤šä¸ªdiagè®°å½•ï¼ŸV2ä¸å…è®¸è¿™æ ·ï¼ŒV3å…è®¸è¿™æ ·
             if (lHitCount < info.m_lResultSetStartPoint
                 && diag == null)
             {
-                strError = "start²ÎÊıÖµ "
+                strError = "startå‚æ•°å€¼ "
                     +info.m_lResultSetStartPoint
-                    +" ³¬¹ı½á¹û¼¯ÖĞ¼ÇÂ¼×ÜÊı "
+                    +" è¶…è¿‡ç»“æœé›†ä¸­è®°å½•æ€»æ•° "
                     + lHitCount;
-                // return -1;  // Èç¹û±íÊ¾´íÎó×´Ì¬£¿
+                // return -1;  // å¦‚æœè¡¨ç¤ºé”™è¯¯çŠ¶æ€ï¼Ÿ
                 SetPresentDiagRecord(ref diag,
                     13,  // Present request out-of-range
                     strError);
@@ -1132,7 +1132,7 @@ namedResultSets        (14)
 
             int MAX_PRESENT_RECORD = 100;
 
-            // ÏŞÖÆÃ¿´Î present µÄ¼ÇÂ¼ÊıÁ¿
+            // é™åˆ¶æ¯æ¬¡ present çš„è®°å½•æ•°é‡
             if (lNumber > MAX_PRESENT_RECORD)
                 lNumber = MAX_PRESENT_RECORD;
 
@@ -1141,7 +1141,7 @@ namedResultSets        (14)
             // 
             if (lHitCount < (lStart - 1) + lNumber)
             {
-                // ÊÇ present ´íÎó£¬µ«»¹¿ÉÒÔµ÷Õû lNumber
+                // æ˜¯ present é”™è¯¯ï¼Œä½†è¿˜å¯ä»¥è°ƒæ•´ lNumber
                 lNumber = lHitCount - (lStart - 1);
                 nNextResultSetPosition = 0;
             }
@@ -1165,37 +1165,37 @@ namedResultSets        (14)
 
             List<RetrivalRecord> records = new List<RetrivalRecord>();
 
-            // »ñÈ¡Òª·µ»ØµÄMARC¼ÇÂ¼
+            // è·å–è¦è¿”å›çš„MARCè®°å½•
             if (diag == null)
             {
 
-                // ¼ÇÂ¼±àÂë¸ñÊ½Îª GRS-1 (generic-record-syntax-1) :
+                // è®°å½•ç¼–ç æ ¼å¼ä¸º GRS-1 (generic-record-syntax-1) :
                 //		EXTERNAL 
                 //			--- OID (Object Identifier)
                 //			--- MARC (OCTET STRING)
                 //	m_strOID = _T("1.2.840.10003.5.1");  // OID of UNIMARC
                 //	m_strOID = _T("1.2.840.10003.5.10"); // OID of USMARC //
-                // ĞèÒª½¨Á¢Ò»¸öÊı¾İ¿âÃûºÍoidµÄ¶ÔÕÕ±í£¬·½Ãæ¿ìËÙÈ¡µÃÊı¾İ¿âMARC syntax OID
+                // éœ€è¦å»ºç«‹ä¸€ä¸ªæ•°æ®åº“åå’Œoidçš„å¯¹ç…§è¡¨ï¼Œæ–¹é¢å¿«é€Ÿå–å¾—æ•°æ®åº“MARC syntax OID
 
-                // TODO: ±àÂë¹ı³ÌÖĞ£¬¿ÉÄÜ»á·¢ÏÖ¼ÇÂ¼Ì«¶à£¬×Ü³ß´ç³¬¹ıInitialÖĞ¹æ¶¨µÄprefered message size¡£
-                // ÕâÑùĞèÒª¼õÉÙ·µ»ØµÄ¼ÇÂ¼ÊıÁ¿¡£ÕâÑù£¬¾ÍĞèÒªÏÈ×öÕâÀïµÄÑ­»·£¬ºó¹¹ÔìÁíÍâ¼¸¸ö²ÎÊı
+                // TODO: ç¼–ç è¿‡ç¨‹ä¸­ï¼Œå¯èƒ½ä¼šå‘ç°è®°å½•å¤ªå¤šï¼Œæ€»å°ºå¯¸è¶…è¿‡Initialä¸­è§„å®šçš„prefered message sizeã€‚
+                // è¿™æ ·éœ€è¦å‡å°‘è¿”å›çš„è®°å½•æ•°é‡ã€‚è¿™æ ·ï¼Œå°±éœ€è¦å…ˆåšè¿™é‡Œçš„å¾ªç¯ï¼Œåæ„é€ å¦å¤–å‡ ä¸ªå‚æ•°
                 int nSize = 0;
                 for (int i = 0; i < (int)lNumber; i++)
                 {
-                    // ±àÂë N Ìõ MARC ¼ÇÂ¼
+                    // ç¼–ç  N æ¡ MARC è®°å½•
                     //
                     // if (m_bStop) return false;
 
-                    // È¡³öÊı¾İ¿âÖ¸Õë
-                    // lStart ²»ÊÇ 0 ÆğµãµÄ
+                    // å–å‡ºæ•°æ®åº“æŒ‡é’ˆ
+                    // lStart ä¸æ˜¯ 0 èµ·ç‚¹çš„
                     string strPath = paths[i];
 
-                    // ½âÎö³öÊı¾İ¿âÃûºÍID
+                    // è§£æå‡ºæ•°æ®åº“åå’ŒID
                     string strDbName = Global.GetDbName(strPath);
                     string strRecID = Global.GetRecordID(strPath);
 
-                    // Èç¹ûÈ¡µÃµÄÊÇxml¼ÇÂ¼£¬Ôò¸ùÔªËØ¿ÉÒÔ¿´³ö¼ÇÂ¼µÄmarc syntax£¬½øÒ»²½¿ÉÒÔ»ñµÃoid£»
-                    // Èç¹ûÈ¡µÃµÄÊÇMARC¸ñÊ½¼ÇÂ¼£¬ÔòĞèÒª¸ù¾İÊı¾İ¿âÔ¤¶¨ÒåµÄmarc syntaxÀ´¿´³öoidÁË
+                    // å¦‚æœå–å¾—çš„æ˜¯xmlè®°å½•ï¼Œåˆ™æ ¹å…ƒç´ å¯ä»¥çœ‹å‡ºè®°å½•çš„marc syntaxï¼Œè¿›ä¸€æ­¥å¯ä»¥è·å¾—oidï¼›
+                    // å¦‚æœå–å¾—çš„æ˜¯MARCæ ¼å¼è®°å½•ï¼Œåˆ™éœ€è¦æ ¹æ®æ•°æ®åº“é¢„å®šä¹‰çš„marc syntaxæ¥çœ‹å‡ºoidäº†
                     string strMarcSyntaxOID = GetMarcSyntaxOID(strDbName);
 
                     byte[] baMARC = null;
@@ -1203,7 +1203,7 @@ namedResultSets        (14)
                     RetrivalRecord record = new RetrivalRecord();
                     record.m_strDatabaseName = strDbName;
 
-                    // ¸ù¾İÊéÄ¿¿âÃû»ñµÃÊéÄ¿¿âÊôĞÔ¶ÔÏó
+                    // æ ¹æ®ä¹¦ç›®åº“åè·å¾—ä¹¦ç›®åº“å±æ€§å¯¹è±¡
                     BiblioDbProperty prop = this.m_service.GetDbProperty(
                         strDbName,
                         false);
@@ -1215,11 +1215,11 @@ namedResultSets        (14)
                         out strError);
 
                     /*
-                    // ²âÊÔ¼ÇÂ¼ÈºÖĞ°üº¬Õï¶Ï¼ÇÂ¼
+                    // æµ‹è¯•è®°å½•ç¾¤ä¸­åŒ…å«è¯Šæ–­è®°å½•
                     if (i == 1)
                     {
                         nRet = -1;
-                        strError = "²âÊÔ»ñÈ¡¼ÇÂ¼´íÎó";
+                        strError = "æµ‹è¯•è·å–è®°å½•é”™è¯¯";
                     }*/
                     if (nRet == -1)
                     {
@@ -1237,11 +1237,11 @@ namedResultSets        (14)
                     }
                     else if (String.IsNullOrEmpty(strMarcSyntaxOID) == true)
                     {
-                        // ¸ù¾İÊı¾İ¿âÃûÎŞ·¨»ñµÃmarc syntax oid¡£¿ÉÄÜÊÇĞéÄâ¿â¼ìË÷ÃüÖĞ¼ÇÂ¼ËùÔÚµÄÎïÀí¿âÃ»ÓĞÔÚdp2zserver.xmlÖĞÅäÖÃ¡£
+                        // æ ¹æ®æ•°æ®åº“åæ— æ³•è·å¾—marc syntax oidã€‚å¯èƒ½æ˜¯è™šæ‹Ÿåº“æ£€ç´¢å‘½ä¸­è®°å½•æ‰€åœ¨çš„ç‰©ç†åº“æ²¡æœ‰åœ¨dp2zserver.xmlä¸­é…ç½®ã€‚
                         record.m_surrogateDiagnostic = new DiagFormat();
                         record.m_surrogateDiagnostic.m_strDiagSetID = "1.2.840.10003.4.1";
-                        record.m_surrogateDiagnostic.m_nDiagCondition = 109;  // database unavailable // ËÆºõ235:database dos not existÒ²¿ÉÒÔ
-                        record.m_surrogateDiagnostic.m_strAddInfo = "¸ù¾İÊı¾İ¿âÃû '" + strDbName + "' ÎŞ·¨»ñµÃmarc syntax oid";
+                        record.m_surrogateDiagnostic.m_nDiagCondition = 109;  // database unavailable // ä¼¼ä¹235:database dos not existä¹Ÿå¯ä»¥
+                        record.m_surrogateDiagnostic.m_strAddInfo = "æ ¹æ®æ•°æ®åº“å '" + strDbName + "' æ— æ³•è·å¾—marc syntax oid";
                     }
                     else
                     {
@@ -1254,13 +1254,13 @@ namedResultSets        (14)
 
                     if (i == 0)
                     {
-                        // Á¬Ò»Ìõ¼ÇÂ¼Ò²·Å²»ÏÂ
+                        // è¿ä¸€æ¡è®°å½•ä¹Ÿæ”¾ä¸ä¸‹
                         if (nSize > this.m_lExceptionalRecordSize)
                         {
                             Debug.Assert(diag == null, "");
                             SetPresentDiagRecord(ref diag,
                                 17, // record exceeds Exceptional_record_size
-                                "¼ÇÂ¼³ß´ç " + nSize.ToString() + " ³¬¹ı Exceptional_record_size " + this.m_lExceptionalRecordSize.ToString());
+                                "è®°å½•å°ºå¯¸ " + nSize.ToString() + " è¶…è¿‡ Exceptional_record_size " + this.m_lExceptionalRecordSize.ToString());
                             lNumber = 0;
                             break;
                         }
@@ -1269,7 +1269,7 @@ namedResultSets        (14)
                     {
                         if (nSize >= this.m_lPreferredMessageSize)
                         {
-                            // µ÷Õû·µ»ØµÄ¼ÇÂ¼Êı
+                            // è°ƒæ•´è¿”å›çš„è®°å½•æ•°
                             lNumber = i;
                             break;
                         }
@@ -1292,7 +1292,7 @@ namedResultSets        (14)
 
             // nextResultSetPosition
             // if 0, that's end of the result set
-            // else M+1, M is ×îºóÒ»´Î present response µÄ×îºóÒ»Ìõ¼ÇÂ¼ÔÚ result set ÖĞµÄ position
+            // else M+1, M is æœ€åä¸€æ¬¡ present response çš„æœ€åä¸€æ¡è®°å½•åœ¨ result set ä¸­çš„ position
             root.NewChildIntegerNode(BerTree.z3950_NextResultSetPosition, // 25
                 BerNode.ASN1_CONTEXT,   // ASN1_PRIMITIVE BUG!!!
                 BitConverter.GetBytes((long)nNextResultSetPosition));
@@ -1309,7 +1309,7 @@ namedResultSets        (14)
                BitConverter.GetBytes((long)nPresentStatus));
 
 
-            // Õï¶Ï¼ÇÂ¼
+            // è¯Šæ–­è®°å½•
             if (diag != null)
             {
                 BerNode nodeDiagRoot = root.NewChildConstructedNode(BerTree.z3950_nonSurrogateDiagnostic,    // 130
@@ -1336,13 +1336,13 @@ namedResultSets        (14)
             }
 
 
-            // Èç¹û present ÊÇ·Ç·¨µÄ£¬µ½ÕâÀï´ò°üÍê³É£¬¿ÉÒÔ·µ»ØÁË
+            // å¦‚æœ present æ˜¯éæ³•çš„ï¼Œåˆ°è¿™é‡Œæ‰“åŒ…å®Œæˆï¼Œå¯ä»¥è¿”å›äº†
             if (0 != nPresentStatus)
                 goto END1;
 
-            // ±àÂë¼ÇÂ¼BERÊ÷
+            // ç¼–ç è®°å½•BERæ ‘
 
-            // ÒÔÏÂÎª present ³É¹¦Ê±£¬´ò°ü·µ»Ø¼ÇÂ¼¡£
+            // ä»¥ä¸‹ä¸º present æˆåŠŸæ—¶ï¼Œæ‰“åŒ…è¿”å›è®°å½•ã€‚
             // present success
             // presRoot records child, constructed (choice of ... ... optional)
             // if present fail, then may be no records 'node'
@@ -1351,7 +1351,7 @@ namedResultSets        (14)
             //		nonSurrogateDiagnostic       [130]  IMPLICIT DefaultDiagFormat,
             //		multipleNonSurDiagnostics    [205]  IMPLICIT SEQUENCE OF DiagRec} 
 
-            // µ± present ³É¹¦Ê±£¬response Ñ¡ÔñÁË NamePlusRecord (Êı¾İ¿âÃû +¡¡¼ÇÂ¼)
+            // å½“ present æˆåŠŸæ—¶ï¼Œresponse é€‰æ‹©äº† NamePlusRecord (æ•°æ®åº“å +ã€€è®°å½•)
             BerNode node = root.NewChildConstructedNode(BerTree.z3950_dataBaseOrSurDiagnostics,    // 28
                             BerNode.ASN1_CONTEXT);
 
@@ -1383,9 +1383,9 @@ namedResultSets        (14)
             return null;
         }
 
-        // »ñµÃMARC¼ÇÂ¼
+        // è·å¾—MARCè®°å½•
         // parameters:
-        //      bAddField901    ÊÇ·ñ¼ÓÈë901×Ö¶Î£¿
+        //      bAddField901    æ˜¯å¦åŠ å…¥901å­—æ®µï¼Ÿ
         // return:
         //      -1  error
         //      0   not found
@@ -1419,7 +1419,7 @@ namedResultSets        (14)
             string strOutMarcSyntax = "";
             string strMarc = "";
 
-            // ×ª»»Îª»úÄÚ¸ñÊ½
+            // è½¬æ¢ä¸ºæœºå†…æ ¼å¼
             nRet = MarcUtil.Xml2Marc(strXml,
                 true,
                 strMarcSyntax,
@@ -1428,29 +1428,29 @@ namedResultSets        (14)
                 out strError);
             if (nRet == -1)
             {
-                strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
             if (bAddField901 == true)
             {
-                // 901  $p¼ÇÂ¼Â·¾¶$tÊ±¼ä´Á
+                // 901  $pè®°å½•è·¯å¾„$tæ—¶é—´æˆ³
                 string strField = "901  "
                     + new string(MarcUtil.SUBFLD, 1) + "p" + strPath
                     + new string(MarcUtil.SUBFLD, 1) + "t" + ByteArray.GetHexTimeStampString(timestamp);
 
-                // Ìæ»»¼ÇÂ¼ÖĞµÄ×Ö¶ÎÄÚÈİ¡£
-                // ÏÈÔÚ¼ÇÂ¼ÖĞÕÒÍ¬Ãû×Ö¶Î(µÚnIndex¸ö)£¬Èç¹ûÕÒµ½£¬ÔòÌæ»»£»Èç¹ûÃ»ÓĞÕÒµ½£¬
-                // ÔòÔÚË³ĞòÎ»ÖÃ²åÈëÒ»¸öĞÂ×Ö¶Î¡£
+                // æ›¿æ¢è®°å½•ä¸­çš„å­—æ®µå†…å®¹ã€‚
+                // å…ˆåœ¨è®°å½•ä¸­æ‰¾åŒåå­—æ®µ(ç¬¬nIndexä¸ª)ï¼Œå¦‚æœæ‰¾åˆ°ï¼Œåˆ™æ›¿æ¢ï¼›å¦‚æœæ²¡æœ‰æ‰¾åˆ°ï¼Œ
+                // åˆ™åœ¨é¡ºåºä½ç½®æ’å…¥ä¸€ä¸ªæ–°å­—æ®µã€‚
                 // parameters:
-                //		strMARC		[in][out]MARC¼ÇÂ¼¡£
-                //		strFieldName	ÒªÌæ»»µÄ×Ö¶ÎµÄÃû¡£Èç¹ûÎªnull»òÕß""£¬Ôò±íÊ¾ËùÓĞ×Ö¶ÎÖĞĞòºÅÎªnIndexÖĞµÄÄÇ¸ö±»Ìæ»»
-                //		nIndex		ÒªÌæ»»µÄ×Ö¶ÎµÄËùÔÚĞòºÅ¡£Èç¹ûÎª-1£¬½«Ê¼ÖÕÎªÔÚ¼ÇÂ¼ÖĞ×·¼ÓĞÂ×Ö¶ÎÄÚÈİ¡£
-                //		strField	ÒªÌæ»»³ÉµÄĞÂ×Ö¶ÎÄÚÈİ¡£°üÀ¨×Ö¶ÎÃû¡¢±ØÒªµÄ×Ö¶ÎÖ¸Ê¾·û¡¢×Ö¶ÎÄÚÈİ¡£ÕâÒâÎ¶×Å£¬²»µ«¿ÉÒÔÌæ»»Ò»¸ö×Ö¶ÎµÄÄÚÈİ£¬Ò²¿ÉÒÔÌæ»»ËüµÄ×Ö¶ÎÃûºÍÖ¸Ê¾·û²¿·Ö¡£
+                //		strMARC		[in][out]MARCè®°å½•ã€‚
+                //		strFieldName	è¦æ›¿æ¢çš„å­—æ®µçš„åã€‚å¦‚æœä¸ºnullæˆ–è€…""ï¼Œåˆ™è¡¨ç¤ºæ‰€æœ‰å­—æ®µä¸­åºå·ä¸ºnIndexä¸­çš„é‚£ä¸ªè¢«æ›¿æ¢
+                //		nIndex		è¦æ›¿æ¢çš„å­—æ®µçš„æ‰€åœ¨åºå·ã€‚å¦‚æœä¸º-1ï¼Œå°†å§‹ç»ˆä¸ºåœ¨è®°å½•ä¸­è¿½åŠ æ–°å­—æ®µå†…å®¹ã€‚
+                //		strField	è¦æ›¿æ¢æˆçš„æ–°å­—æ®µå†…å®¹ã€‚åŒ…æ‹¬å­—æ®µåã€å¿…è¦çš„å­—æ®µæŒ‡ç¤ºç¬¦ã€å­—æ®µå†…å®¹ã€‚è¿™æ„å‘³ç€ï¼Œä¸ä½†å¯ä»¥æ›¿æ¢ä¸€ä¸ªå­—æ®µçš„å†…å®¹ï¼Œä¹Ÿå¯ä»¥æ›¿æ¢å®ƒçš„å­—æ®µåå’ŒæŒ‡ç¤ºç¬¦éƒ¨åˆ†ã€‚
                 // return:
-                //		-1	³ö´í
-                //		0	Ã»ÓĞÕÒµ½Ö¸¶¨µÄ×Ö¶Î£¬Òò´Ë½«strFieldÄÚÈİ²åÈëµ½ÊÊµ±Î»ÖÃÁË¡£
-                //		1	ÕÒµ½ÁËÖ¸¶¨µÄ×Ö¶Î£¬²¢ÇÒÒ²³É¹¦ÓÃstrFieldÌæ»»µôÁË¡£
+                //		-1	å‡ºé”™
+                //		0	æ²¡æœ‰æ‰¾åˆ°æŒ‡å®šçš„å­—æ®µï¼Œå› æ­¤å°†strFieldå†…å®¹æ’å…¥åˆ°é€‚å½“ä½ç½®äº†ã€‚
+                //		1	æ‰¾åˆ°äº†æŒ‡å®šçš„å­—æ®µï¼Œå¹¶ä¸”ä¹ŸæˆåŠŸç”¨strFieldæ›¿æ¢æ‰äº†ã€‚
                 nRet = MarcUtil.ReplaceField(
                     ref strMarc,
                     "901",
@@ -1460,7 +1460,7 @@ namedResultSets        (14)
                     return -1;
             }
 
-            // ×ª»»ÎªISO2709
+            // è½¬æ¢ä¸ºISO2709
             nRet = MarcUtil.CvtJineiToISO2709(
                 strMarc,
                 strOutMarcSyntax,
@@ -1474,7 +1474,7 @@ namedResultSets        (14)
             return 1;
         }
 
-        // »ñµÃMARC XML¼ÇÂ¼
+        // è·å¾—MARC XMLè®°å½•
         // parameters:
         // return:
         //      -1  error
@@ -1525,7 +1525,7 @@ namedResultSets        (14)
         }
 
 
-        // ½âÎö³ösearchÇëÇóÖĞµÄ Êı¾İ¿âÃûÁĞ±í
+        // è§£æå‡ºsearchè¯·æ±‚ä¸­çš„ æ•°æ®åº“ååˆ—è¡¨
         static int DecodeElementSetNames(BerNode root,
             out List<string> elementset_names,
             out string strError)
@@ -1542,7 +1542,7 @@ namedResultSets        (14)
                     dbnames.Add(node.GetCharNodeData());
                 }
                  * */
-                // TODO: ÕâÀïĞèÒª¿´Ò»ÏÂPDU¶¨Òå£¬¿´¿´ÊÇ·ñĞèÒªÅĞ¶Ïm_uTag
+                // TODO: è¿™é‡Œéœ€è¦çœ‹ä¸€ä¸‹PDUå®šä¹‰ï¼Œçœ‹çœ‹æ˜¯å¦éœ€è¦åˆ¤æ–­m_uTag
                 elementset_names.Add(node.GetCharNodeData());
             }
 
@@ -1550,7 +1550,7 @@ namedResultSets        (14)
         }
 
 
-        // »ñµÃsearchÇëÇóÖĞµÄRPN¸ù½Úµã
+        // è·å¾—searchè¯·æ±‚ä¸­çš„RPNæ ¹èŠ‚ç‚¹
         static BerNode GetRPNStructureRoot(BerNode root,
             out string strError)
         {
@@ -1603,7 +1603,7 @@ namedResultSets        (14)
             return null;
         }
 
-        // ½âÎö³ösearchÇëÇóÖĞµÄ Êı¾İ¿âÃûÁĞ±í
+        // è§£æå‡ºsearchè¯·æ±‚ä¸­çš„ æ•°æ®åº“ååˆ—è¡¨
         static int DecodeDbnames(BerNode root,
             out List<string> dbnames,
             out string strError)
@@ -1624,7 +1624,7 @@ namedResultSets        (14)
         }
 
 
-        // ½âÎö³öinitÇëÇóÖĞµÄ ¼ø±ğĞÅÏ¢
+        // è§£æå‡ºinitè¯·æ±‚ä¸­çš„ é‰´åˆ«ä¿¡æ¯
         // parameters:
         //      nAuthentType 0: open(simple) 1:idPass(group)
         static int DecodeAuthentication(
@@ -1705,7 +1705,7 @@ namedResultSets        (14)
             return 0;
         }
 
-        // ½âÂëRPN½á¹¹ÖĞµÄAttribute + Term½á¹¹
+        // è§£ç RPNç»“æ„ä¸­çš„Attribute + Termç»“æ„
         static int DecodeAttributeAndTerm(
             Encoding term_encoding,
             BerNode pNode,
@@ -1806,10 +1806,10 @@ namedResultSets        (14)
             return -1;
         }
 
-        #endregion // BER°ü´¦Àí
+        #endregion // BERåŒ…å¤„ç†
 
-        // ¹¹ÔìÒ»¸ö¼ìË÷´ÊµÄXML¼ìË÷Ê½¾Ö²¿
-        // ±¾º¯Êı²»µİ¹é
+        // æ„é€ ä¸€ä¸ªæ£€ç´¢è¯çš„XMLæ£€ç´¢å¼å±€éƒ¨
+        // æœ¬å‡½æ•°ä¸é€’å½’
         int BuildOneXml(
             List<string> dbnames,
             string strTerm,
@@ -1822,23 +1822,23 @@ namedResultSets        (14)
 
             if (dbnames.Count == 0)
             {
-                strError = "Ò»¸öÊı¾İ¿âÃûÒ²Î´ÔøÖ¸¶¨";
+                strError = "ä¸€ä¸ªæ•°æ®åº“åä¹Ÿæœªæ›¾æŒ‡å®š";
                 return -1;
             }
 
-            // string strFrom = "";    // ¸ù¾İnAttributeType nAttributeValueµÃµ½¼ìË÷Í¾¾¶Ãû
+            // string strFrom = "";    // æ ¹æ®nAttributeType nAttributeValueå¾—åˆ°æ£€ç´¢é€”å¾„å
 
 
-            // ÏÈÆÀ¹ÀÒ»ÏÂ£¬ÊÇ²»ÊÇÃ¿¸öÊı¾İ¿â¶¼ÓĞÒ»ÑùµÄmaxResultCount²ÎÊı¡£
-            // Èç¹ûÊÇ£¬Ôò¿ÉÒÔ°ÑÕâĞ©Êı¾İ¿â¶¼×éºÏÎªÒ»¸ö<target>£»
-            // Èç¹û²»ÊÇ£¬Ôò°ÑÏàÍ¬µÄÌôÑ¡³öÀ´³ÉÎªÒ»¸ö<target>£¬È»ºó¶à¸ö<target>ÓÃOR×éºÏÆğÀ´
+            // å…ˆè¯„ä¼°ä¸€ä¸‹ï¼Œæ˜¯ä¸æ˜¯æ¯ä¸ªæ•°æ®åº“éƒ½æœ‰ä¸€æ ·çš„maxResultCountå‚æ•°ã€‚
+            // å¦‚æœæ˜¯ï¼Œåˆ™å¯ä»¥æŠŠè¿™äº›æ•°æ®åº“éƒ½ç»„åˆä¸ºä¸€ä¸ª<target>ï¼›
+            // å¦‚æœä¸æ˜¯ï¼Œåˆ™æŠŠç›¸åŒçš„æŒ‘é€‰å‡ºæ¥æˆä¸ºä¸€ä¸ª<target>ï¼Œç„¶åå¤šä¸ª<target>ç”¨ORç»„åˆèµ·æ¥
 
-            // Îª´Ë£¬¿ÉÒÔÏÈ°ÑÊı¾İ¿âÊôĞÔ¶ÔÏó°´ÕÕmaxResultCount²ÎÊıÅÅĞò£¬ÒÔ±ã¾ÛºÏÊÇÓÃ<target>¡£
-            // µ«ÊÇÕâ´øÀ´Ò»¸öÎÊÌâ£º×îºó·¢ÉúµÄ¼ìË÷¿âµÄÏÈºóË³Ğò£¬¾Í²»ÊÇÓÃ»§ÒªÇóµÄÄÇ¸öË³ĞòÁË¡£
-            // ¿´À´£¬»¹µÃ°´ÕÕÓÃ»§Ö¸¶¨µÄÊı¾İ¿âË³ĞòÀ´¹¹Ôì<item>¡£ÄÇÃ´£¬¾Í²»µÃ²»½µµÍ¾ÛºÏµÄ¿ÉÄÜ£¬
-            // ¶ø½ö½ö¾ÛºÏÏàÁÚµÄ¡¢maxResultCountÖµÏàÍ¬µÄÄÇĞ©
+            // ä¸ºæ­¤ï¼Œå¯ä»¥å…ˆæŠŠæ•°æ®åº“å±æ€§å¯¹è±¡æŒ‰ç…§maxResultCountå‚æ•°æ’åºï¼Œä»¥ä¾¿èšåˆæ˜¯ç”¨<target>ã€‚
+            // ä½†æ˜¯è¿™å¸¦æ¥ä¸€ä¸ªé—®é¢˜ï¼šæœ€åå‘ç”Ÿçš„æ£€ç´¢åº“çš„å…ˆåé¡ºåºï¼Œå°±ä¸æ˜¯ç”¨æˆ·è¦æ±‚çš„é‚£ä¸ªé¡ºåºäº†ã€‚
+            // çœ‹æ¥ï¼Œè¿˜å¾—æŒ‰ç…§ç”¨æˆ·æŒ‡å®šçš„æ•°æ®åº“é¡ºåºæ¥æ„é€ <item>ã€‚é‚£ä¹ˆï¼Œå°±ä¸å¾—ä¸é™ä½èšåˆçš„å¯èƒ½ï¼Œ
+            // è€Œä»…ä»…èšåˆç›¸é‚»çš„ã€maxResultCountå€¼ç›¸åŒçš„é‚£äº›
 
-            int nPrevMaxResultCount = -1;   // Ç°Ò»¸öMaxResultCount²ÎÊıÖµ
+            int nPrevMaxResultCount = -1;   // å‰ä¸€ä¸ªMaxResultCountå‚æ•°å€¼
             List<List<BiblioDbProperty>> prop_groups = new List<List<BiblioDbProperty>>();
 
             List<BiblioDbProperty> props = new List<BiblioDbProperty>();
@@ -1850,17 +1850,17 @@ namedResultSets        (14)
                     true);
                 if (prop == null)
                 {
-                    strError = "Êı¾İ¿â '" + strDbName + "' ²»´æÔÚ";
+                    strError = "æ•°æ®åº“ '" + strDbName + "' ä¸å­˜åœ¨";
                     return -1;
                 }
 
-                // Èç¹ûµ±Ç°¿âµÄMaxResultCount²ÎÊıºÍÇ°Ãæ½ôÁÚµÄ²»Ò»ÑùÁË£¬ÔòĞèÒªÍÆÈëµ±Ç°ÕıÔÚÊ¹ÓÃµÄprops£¬ĞÂÆğÒ»¸öprops
+                // å¦‚æœå½“å‰åº“çš„MaxResultCountå‚æ•°å’Œå‰é¢ç´§é‚»çš„ä¸ä¸€æ ·äº†ï¼Œåˆ™éœ€è¦æ¨å…¥å½“å‰æ­£åœ¨ä½¿ç”¨çš„propsï¼Œæ–°èµ·ä¸€ä¸ªprops
                 if (prop.MaxResultCount != nPrevMaxResultCount
                     && props.Count != 0)
                 {
-                    Debug.Assert(props.Count > 0, "²»Îª¿ÕµÄprops²ÅÄÜÍÆÈë (1)");
+                    Debug.Assert(props.Count > 0, "ä¸ä¸ºç©ºçš„propsæ‰èƒ½æ¨å…¥ (1)");
                     prop_groups.Add(props);
-                    props = new List<BiblioDbProperty>();   // ĞÂÔö¼ÓÒ»¸öprops
+                    props = new List<BiblioDbProperty>();   // æ–°å¢åŠ ä¸€ä¸ªprops
                 }
 
                 props.Add(prop);
@@ -1868,8 +1868,8 @@ namedResultSets        (14)
                 nPrevMaxResultCount = prop.MaxResultCount;
             }
 
-            Debug.Assert(props.Count > 0, "²»Îª¿ÕµÄprops²ÅÄÜÍÆÈë (2)");
-            prop_groups.Add(props); // ½«×îºóÒ»¸öprops¼ÓÈëµ½groupÊı×éÖĞ
+            Debug.Assert(props.Count > 0, "ä¸ä¸ºç©ºçš„propsæ‰èƒ½æ¨å…¥ (2)");
+            prop_groups.Add(props); // å°†æœ€åä¸€ä¸ªpropsåŠ å…¥åˆ°groupæ•°ç»„ä¸­
 
 
             for (int i = 0; i < prop_groups.Count; i++)
@@ -1886,12 +1886,12 @@ namedResultSets        (14)
 #if DEBUG
                     if (j != 0)
                     {
-                        Debug.Assert(prop.MaxResultCount == nMaxResultCount, "propsÄÚµÄÃ¿¸öÊı¾İ¿â¶¼Ó¦µ±ÓĞÏàÍ¬µÄMaxResultCount²ÎÊıÖµ");
+                        Debug.Assert(prop.MaxResultCount == nMaxResultCount, "propså†…çš„æ¯ä¸ªæ•°æ®åº“éƒ½åº”å½“æœ‰ç›¸åŒçš„MaxResultCountå‚æ•°å€¼");
                     }
 #endif
 
                     if (j == 0)
-                        nMaxResultCount = prop.MaxResultCount;  // Ö»È¡µÚÒ»¸öpropµÄÖµ¼´¿É
+                        nMaxResultCount = prop.MaxResultCount;  // åªå–ç¬¬ä¸€ä¸ªpropçš„å€¼å³å¯
 
                     string strOutputDbName = "";
                     string strFrom = this.m_service.GetFromName(strDbName,
@@ -1899,7 +1899,7 @@ namedResultSets        (14)
                         out strOutputDbName,
                         out strError);
                     if (strFrom == null)
-                        return -1;  // Ñ°ÕÒfromÃûµÄ¹ı³Ì·¢Éú´íÎó
+                        return -1;  // å¯»æ‰¾fromåçš„è¿‡ç¨‹å‘ç”Ÿé”™è¯¯
 
                     if (strTargetListValue != "")
                         strTargetListValue += ";";
@@ -1920,7 +1920,7 @@ namedResultSets        (14)
                 + "<lang>zh</lang></target>";
             }
 
-            // Èç¹ûÓĞ¶à¸öprops£¬ÔòĞèÒªÔÚ¼ìË÷XMLÍâÃæ°ü¹üÒ»¸ö<target>ÔªËØ£¬ÒÔ×÷ÎªÒ»¸öÕûÌåºÍÆäËû²¿¼ş½øĞĞÂß¼­²Ù×÷
+            // å¦‚æœæœ‰å¤šä¸ªpropsï¼Œåˆ™éœ€è¦åœ¨æ£€ç´¢XMLå¤–é¢åŒ…è£¹ä¸€ä¸ª<target>å…ƒç´ ï¼Œä»¥ä½œä¸ºä¸€ä¸ªæ•´ä½“å’Œå…¶ä»–éƒ¨ä»¶è¿›è¡Œé€»è¾‘æ“ä½œ
             if (prop_groups.Count > 1)
                 strQueryXml = "<target>" + strQueryXml + "</target>";
 
@@ -1928,7 +1928,7 @@ namedResultSets        (14)
         }
 
 #if NOOOOOOOOOOOOOOOOOOO
-        // ¹¹ÔìÒ»¸ö¼ìË÷´ÊµÄXML¼ìË÷Ê½¾Ö²¿
+        // æ„é€ ä¸€ä¸ªæ£€ç´¢è¯çš„XMLæ£€ç´¢å¼å±€éƒ¨
         int BuildOneXml(
             List<string> dbnames,
             string strTerm,
@@ -1941,23 +1941,23 @@ namedResultSets        (14)
 
             if (dbnames.Count == 0)
             {
-                strError = "Ò»¸öÊı¾İ¿âÃûÒ²Î´ÔøÖ¸¶¨";
+                strError = "ä¸€ä¸ªæ•°æ®åº“åä¹Ÿæœªæ›¾æŒ‡å®š";
                 return -1;
             }
 
-            // string strFrom = "";    // ¸ù¾İnAttributeType nAttributeValueµÃµ½¼ìË÷Í¾¾¶Ãû
+            // string strFrom = "";    // æ ¹æ®nAttributeType nAttributeValueå¾—åˆ°æ£€ç´¢é€”å¾„å
 
 
-            // ÏÈÆÀ¹ÀÒ»ÏÂ£¬ÊÇ²»ÊÇÃ¿¸öÊı¾İ¿â¶¼ÓĞÒ»ÑùµÄmaxResultCount²ÎÊı¡£
-            // Èç¹ûÊÇ£¬Ôò¿ÉÒÔ°ÑÕâĞ©Êı¾İ¿â¶¼×éºÏÎªÒ»¸ö<target>£»
-            // Èç¹û²»ÊÇ£¬Ôò°ÑÏàÍ¬µÄÌôÑ¡³öÀ´³ÉÎªÒ»¸ö<target>£¬È»ºó¶à¸ö<target>ÓÃOR×éºÏÆğÀ´
+            // å…ˆè¯„ä¼°ä¸€ä¸‹ï¼Œæ˜¯ä¸æ˜¯æ¯ä¸ªæ•°æ®åº“éƒ½æœ‰ä¸€æ ·çš„maxResultCountå‚æ•°ã€‚
+            // å¦‚æœæ˜¯ï¼Œåˆ™å¯ä»¥æŠŠè¿™äº›æ•°æ®åº“éƒ½ç»„åˆä¸ºä¸€ä¸ª<target>ï¼›
+            // å¦‚æœä¸æ˜¯ï¼Œåˆ™æŠŠç›¸åŒçš„æŒ‘é€‰å‡ºæ¥æˆä¸ºä¸€ä¸ª<target>ï¼Œç„¶åå¤šä¸ª<target>ç”¨ORç»„åˆèµ·æ¥
 
-            // Îª´Ë£¬¿ÉÒÔÏÈ°ÑÊı¾İ¿âÊôĞÔ¶ÔÏó°´ÕÕmaxResultCount²ÎÊıÅÅĞò£¬ÒÔ±ã¾ÛºÏÊÇÓÃ<target>¡£
-            // µ«ÊÇÕâ´øÀ´Ò»¸öÎÊÌâ£º×îºó·¢ÉúµÄ¼ìË÷¿âµÄÏÈºóË³Ğò£¬¾Í²»ÊÇÓÃ»§ÒªÇóµÄÄÇ¸öË³ĞòÁË¡£
-            // ¿´À´£¬»¹µÃ°´ÕÕÓÃ»§Ö¸¶¨µÄÊı¾İ¿âË³ĞòÀ´¹¹Ôì<item>¡£ÄÇÃ´£¬¾Í²»µÃ²»½µµÍ¾ÛºÏµÄ¿ÉÄÜ£¬
-            // ¶ø½ö½ö¾ÛºÏÏàÁÚµÄ¡¢maxResultCountÖµÏàÍ¬µÄÄÇĞ©
+            // ä¸ºæ­¤ï¼Œå¯ä»¥å…ˆæŠŠæ•°æ®åº“å±æ€§å¯¹è±¡æŒ‰ç…§maxResultCountå‚æ•°æ’åºï¼Œä»¥ä¾¿èšåˆæ˜¯ç”¨<target>ã€‚
+            // ä½†æ˜¯è¿™å¸¦æ¥ä¸€ä¸ªé—®é¢˜ï¼šæœ€åå‘ç”Ÿçš„æ£€ç´¢åº“çš„å…ˆåé¡ºåºï¼Œå°±ä¸æ˜¯ç”¨æˆ·è¦æ±‚çš„é‚£ä¸ªé¡ºåºäº†ã€‚
+            // çœ‹æ¥ï¼Œè¿˜å¾—æŒ‰ç…§ç”¨æˆ·æŒ‡å®šçš„æ•°æ®åº“é¡ºåºæ¥æ„é€ <item>ã€‚é‚£ä¹ˆï¼Œå°±ä¸å¾—ä¸é™ä½èšåˆçš„å¯èƒ½ï¼Œ
+            // è€Œä»…ä»…èšåˆç›¸é‚»çš„ã€maxResultCountå€¼ç›¸åŒçš„é‚£äº›
 
-            int nPrevMaxResultCount = -1;   // Ç°Ò»¸öMaxResultCount²ÎÊıÖµ
+            int nPrevMaxResultCount = -1;   // å‰ä¸€ä¸ªMaxResultCountå‚æ•°å€¼
             List<List<BiblioDbProperty>> prop_groups = new List<List<BiblioDbProperty>>();
 
             List<BiblioDbProperty> props = new List<BiblioDbProperty>();
@@ -1968,24 +1968,24 @@ namedResultSets        (14)
                 BiblioDbProperty prop = this.m_service.GetDbProperty(strDbName);
                 if (prop == null)
                 {
-                    strError = "Êı¾İ¿â '" + strDbName + "' ²»´æÔÚ";
+                    strError = "æ•°æ®åº“ '" + strDbName + "' ä¸å­˜åœ¨";
                     return -1;
                 }
 
-                // Èç¹ûµ±Ç°¿âµÄMaxResultCount²ÎÊıºÍÇ°Ãæ½ôÁÚµÄ²»Ò»ÑùÁË£¬ÔòĞèÒªÍÆÈëµ±Ç°ÕıÔÚÊ¹ÓÃµÄprops£¬ĞÂÆğÒ»¸öprops
+                // å¦‚æœå½“å‰åº“çš„MaxResultCountå‚æ•°å’Œå‰é¢ç´§é‚»çš„ä¸ä¸€æ ·äº†ï¼Œåˆ™éœ€è¦æ¨å…¥å½“å‰æ­£åœ¨ä½¿ç”¨çš„propsï¼Œæ–°èµ·ä¸€ä¸ªprops
                 if (prop.MaxResultCount != nPrevMaxResultCount
                     && props.Count != 0)
                 {
-                    Debug.Assert(props.Count > 0, "²»Îª¿ÕµÄprops²ÅÄÜÍÆÈë (1)");
+                    Debug.Assert(props.Count > 0, "ä¸ä¸ºç©ºçš„propsæ‰èƒ½æ¨å…¥ (1)");
                     prop_groups.Add(props);
-                    props = new List<BiblioDbProperty>();   // ĞÂÔö¼ÓÒ»¸öprops
+                    props = new List<BiblioDbProperty>();   // æ–°å¢åŠ ä¸€ä¸ªprops
                 }
 
                 props.Add(prop);
             }
 
-            Debug.Assert(props.Count > 0, "²»Îª¿ÕµÄprops²ÅÄÜÍÆÈë (2)");
-            prop_groups.Add(props); // ½«×îºóÒ»¸öprops¼ÓÈëµ½groupÊı×éÖĞ
+            Debug.Assert(props.Count > 0, "ä¸ä¸ºç©ºçš„propsæ‰èƒ½æ¨å…¥ (2)");
+            prop_groups.Add(props); // å°†æœ€åä¸€ä¸ªpropsåŠ å…¥åˆ°groupæ•°ç»„ä¸­
 
 
             for (int i = 0; i < prop_groups.Count; i++)
@@ -2005,7 +2005,7 @@ namedResultSets        (14)
                     BiblioDbProperty prop = this.m_service.GetDbProperty(strDbName);
                     if (prop == null)
                     {
-                        strError = "Êı¾İ¿â '" + strDbName + "' ²»´æÔÚ";
+                        strError = "æ•°æ®åº“ '" + strDbName + "' ä¸å­˜åœ¨";
                         return -1;
                     }
                      * */
@@ -2013,12 +2013,12 @@ namedResultSets        (14)
 #if DEBUG
                     if (j != 0)
                     {
-                        Debug.Assert(prop.MaxResultCount == nMaxResultCount, "propsÄÚµÄÃ¿¸öÊı¾İ¿â¶¼Ó¦µ±ÓĞÏàÍ¬µÄMaxResultCount²ÎÊıÖµ");
+                        Debug.Assert(prop.MaxResultCount == nMaxResultCount, "propså†…çš„æ¯ä¸ªæ•°æ®åº“éƒ½åº”å½“æœ‰ç›¸åŒçš„MaxResultCountå‚æ•°å€¼");
                     }
 #endif
 
                     if (j==0)
-                        nMaxResultCount = prop.MaxResultCount;  // Ö»È¡µÚÒ»¸öpropµÄÖµ¼´¿É
+                        nMaxResultCount = prop.MaxResultCount;  // åªå–ç¬¬ä¸€ä¸ªpropçš„å€¼å³å¯
 
                     string strOutputDbName = "";
                     string strFrom = this.m_service.GetFromName(strDbName,
@@ -2026,7 +2026,7 @@ namedResultSets        (14)
                         out strOutputDbName,
                         out strError);
                     if (strFrom == null)
-                        return -1;  // Ñ°ÕÒfromÃûµÄ¹ı³Ì·¢Éú´íÎó
+                        return -1;  // å¯»æ‰¾fromåçš„è¿‡ç¨‹å‘ç”Ÿé”™è¯¯
 
                     if (strTargetListValue != "")
                         strTargetListValue += ";";
@@ -2047,7 +2047,7 @@ namedResultSets        (14)
                 + "<lang>zh</lang></target>";
             }
 
-            // Èç¹ûÓĞ¶à¸öprops£¬ÔòĞèÒªÔÚ¼ìË÷XMLÍâÃæ°ü¹üÒ»¸ö<target>ÔªËØ£¬ÒÔ×÷ÎªÒ»¸öÕûÌåºÍÆäËû²¿¼ş½øĞĞÂß¼­²Ù×÷
+            // å¦‚æœæœ‰å¤šä¸ªpropsï¼Œåˆ™éœ€è¦åœ¨æ£€ç´¢XMLå¤–é¢åŒ…è£¹ä¸€ä¸ª<target>å…ƒç´ ï¼Œä»¥ä½œä¸ºä¸€ä¸ªæ•´ä½“å’Œå…¶ä»–éƒ¨ä»¶è¿›è¡Œé€»è¾‘æ“ä½œ
             if (prop_groups.Count > 1)
                 strQueryXml = "<target>" + strQueryXml + "</target>";
 
@@ -2056,11 +2056,11 @@ namedResultSets        (14)
 
 #endif
 
-        // ¸ù¾İRPN´´½¨XML¼ìË÷Ê½
-        // ±¾º¯ÊıÒªµİ¹éµ÷ÓÃ£¬¼ìË÷Êı¾İ¿â²¢·µ»Ø½á¹û¼¯
+        // æ ¹æ®RPNåˆ›å»ºXMLæ£€ç´¢å¼
+        // æœ¬å‡½æ•°è¦é€’å½’è°ƒç”¨ï¼Œæ£€ç´¢æ•°æ®åº“å¹¶è¿”å›ç»“æœé›†
         // parameters:
-        //		node    RPN ½á¹¹µÄ¸ù½áµã
-        //		strXml[out] ·µ»Ø¾Ö²¿XML¼ìË÷Ê½
+        //		node    RPN ç»“æ„çš„æ ¹ç»“ç‚¹
+        //		strXml[out] è¿”å›å±€éƒ¨XMLæ£€ç´¢å¼
         // return:
         //      -1  error
         //      0   succeed
@@ -2085,7 +2085,7 @@ namedResultSets        (14)
             {
                 // operand node
 
-                // ¼ìË÷µÃµ½ saRecordID
+                // æ£€ç´¢å¾—åˆ° saRecordID
                 if (node.ChildrenCollection.Count < 1)
                 {
                     strError = "bad RPN structure";
@@ -2123,19 +2123,19 @@ namedResultSets        (14)
                     return 0;
 
                     /*
-			// ÕæµÄÒªÈ¥¼ìË÷Êı¾İ¿âÀ²
+			// çœŸçš„è¦å»æ£€ç´¢æ•°æ®åº“å•¦
 			SearchDBMulti(pResult, nAttributeValue, strTerm);
                      * */
                 }
                 else if (31 == pChild.m_uTag)
                 {
-                    // ÊÇ½á¹û¼¯²ÎÔ¤ÁË¼ìË÷
+                    // æ˜¯ç»“æœé›†å‚é¢„äº†æ£€ç´¢
                     string strResultSetID = pChild.GetCharNodeData();
 
                     strQueryXml = "<item><resultSetName>" + strResultSetID + "</resultSetName></item>";
                     /*
                     //
-                    // ÎªÁË±ÜÃâÔÚµİ¹éÔËËãÊ±É¾³ıÁËÒÔÇ°±£ÁôµÄ½á¹û¼¯£¬copy Ò»·İ
+                    // ä¸ºäº†é¿å…åœ¨é€’å½’è¿ç®—æ—¶åˆ é™¤äº†ä»¥å‰ä¿ç•™çš„ç»“æœé›†ï¼Œcopy ä¸€ä»½
                     if (!FindAndCopyExistResultSet(strResultSetID, pResult)) {
                         throw_exception(0, _T("referred resultset not exist"));
                     }
@@ -2201,7 +2201,7 @@ namedResultSets        (14)
                         strQueryXml = "<group>" + strXmlLeft + "<operator value='SUB' />" + strXmlRight + "</group>";
                         break;
                     default:
-                        // ²»Ö§³ÖµÄ²Ù×÷·û
+                        // ä¸æ”¯æŒçš„æ“ä½œç¬¦
                         strError = "unsurported operator";
                         return -1;
                 }
@@ -2274,7 +2274,7 @@ namedResultSets        (14)
                 BerNode.ASN1_CONTEXT,
                 BitConverter.GetBytes((long)info.m_lExceptionalRecordSize));
 
-            // 2007/11/7 Ô­À´Õâ¸öÊÂÏîÔø¾­Î»ÖÃ²»¶Ô£¬ÏÖÔÚµ÷Õûµ½ÕâÀï
+            // 2007/11/7 åŸæ¥è¿™ä¸ªäº‹é¡¹æ›¾ç»ä½ç½®ä¸å¯¹ï¼Œç°åœ¨è°ƒæ•´åˆ°è¿™é‡Œ
             // bool
             root.NewChildIntegerNode(BerTree.z3950_result,  // 12
                 BerNode.ASN1_CONTEXT,
@@ -2315,7 +2315,7 @@ namedResultSets        (14)
 
     }
 
-    // InitÇëÇóĞÅÏ¢½á¹¹
+    // Initè¯·æ±‚ä¿¡æ¯ç»“æ„
     public class InitRequestInfo
     {
         public string m_strReferenceId = "";
@@ -2358,7 +2358,7 @@ namedResultSets        (14)
         public CharsetNeogatiation m_charNego = null;
     }
 
-    // SearchÇëÇóĞÅÏ¢½á¹¹
+    // Searchè¯·æ±‚ä¿¡æ¯ç»“æ„
     public class SearchRequestInfo
     {
         public string m_strReferenceId = "";
@@ -2376,7 +2376,7 @@ namedResultSets        (14)
         public BerNode m_rpnRoot = null;
     }
 
-    // SearchÏìÓ¦ĞÅÏ¢½á¹¹
+    // Searchå“åº”ä¿¡æ¯ç»“æ„
     public class SearchResponseInfo
     {
         public string m_strReferenceId = "";
@@ -2390,7 +2390,7 @@ namedResultSets        (14)
     }
 
 
-        // PresentÇëÇóĞÅÏ¢½á¹¹
+        // Presentè¯·æ±‚ä¿¡æ¯ç»“æ„
     public class PresentRequestInfo
     {
         public string m_strReferenceId = "";
@@ -2402,22 +2402,22 @@ namedResultSets        (14)
     }
 
     /*
-    // PresentÏìÓ¦ĞÅÏ¢½á¹¹
+    // Presentå“åº”ä¿¡æ¯ç»“æ„
     public class PresentResponseInfo
     {
         public string m_strReferenceId = "";
 
-        public string m_strResultSetID = "default"; // ½á¹û¼¯Ãû¡£´ÓpresentÇëÇó»ñµÃ
-        public long m_lNumberOfRecordReturned = 0;  // ¼ìË÷ÃüÖĞµÄ½á¹û×ÜÊı¡£´Ó½á¹û¼¯»ñµÃ
+        public string m_strResultSetID = "default"; // ç»“æœé›†åã€‚ä»presentè¯·æ±‚è·å¾—
+        public long m_lNumberOfRecordReturned = 0;  // æ£€ç´¢å‘½ä¸­çš„ç»“æœæ€»æ•°ã€‚ä»ç»“æœé›†è·å¾—
 
-        public long m_lResultSetStartPoint = 0; // Òª»ñÈ¡µÄ¿ªÊ¼Æ«ÒÆ¡£´ÓpresentÇëÇó»ñµÃ
-        public long m_lNumberOfRecordsRequested = 0;    // Òª»ñÈ¡µÄ¼ÇÂ¼Êı¡£´ÓpresentÇëÇó»ñµÃ
+        public long m_lResultSetStartPoint = 0; // è¦è·å–çš„å¼€å§‹åç§»ã€‚ä»presentè¯·æ±‚è·å¾—
+        public long m_lNumberOfRecordsRequested = 0;    // è¦è·å–çš„è®°å½•æ•°ã€‚ä»presentè¯·æ±‚è·å¾—
 
 
 
         // nextResultSetPosition
         // if 0, that's end of the result set
-        // else M+1, M is ×îºóÒ»´Î present response µÄ×îºóÒ»Ìõ¼ÇÂ¼ÔÚ result set ÖĞµÄ position
+        // else M+1, M is æœ€åä¸€æ¬¡ present response çš„æœ€åä¸€æ¡è®°å½•åœ¨ result set ä¸­çš„ position
         public long m_lNextResultSetPosition = 0;
 
         // presentStatus
@@ -2429,9 +2429,9 @@ namedResultSets        (14)
         // failure      (5).
         public long m_lPresentStatus = 0;
 
-        public List<string> m_paths = null; // Òª»ñµÃµÄ±¾Åú¼ÇÂ¼µÄÂ·¾¶
+        public List<string> m_paths = null; // è¦è·å¾—çš„æœ¬æ‰¹è®°å½•çš„è·¯å¾„
 
-        public List<string> m_elementSetNames = null;   // ÔªËØ¼¯ÃûÃÇ¡£´ÓpresentÇëÇó»ñµÃ
+        public List<string> m_elementSetNames = null;   // å…ƒç´ é›†åä»¬ã€‚ä»presentè¯·æ±‚è·å¾—
     }
      * */
 
@@ -2457,14 +2457,14 @@ Hope this helps!
 
 Ralph
      * */
-    // ¼ìË÷ÃüÖĞµÄ¼ÇÂ¼
+    // æ£€ç´¢å‘½ä¸­çš„è®°å½•
     public class RetrivalRecord
     {
         public string m_strDatabaseName = "";    //
         public External m_external = null;
         public DiagFormat m_surrogateDiagnostic = null;
 
-        // ¹ÀËãÊı¾İËùÕ¼µÄ°ü³ß´ç
+        // ä¼°ç®—æ•°æ®æ‰€å çš„åŒ…å°ºå¯¸
         public int GetPackageSize()
         {
             int nSize = 0;
@@ -2483,30 +2483,30 @@ Ralph
             return nSize;
         }
 
-        // ¹¹ÔìNamePlusRecord×ÓÊ÷
+        // æ„é€ NamePlusRecordå­æ ‘
         // parameters:
-        //      node    NamePlusRecordµÄÈİÆ÷½Úµã¡£Ò²¾ÍÊÇPresent ResponseµÄ¸ù½Úµã
+        //      node    NamePlusRecordçš„å®¹å™¨èŠ‚ç‚¹ã€‚ä¹Ÿå°±æ˜¯Present Responseçš„æ ¹èŠ‚ç‚¹
         public void BuildNamePlusRecord(BerNode node)
         {
             if (this.m_external == null
                 && this.m_surrogateDiagnostic == null)
-                throw new Exception("m_external ºÍ m_surrogateDiagnostic ²»ÄÜÍ¬Ê±Îª¿Õ");
+                throw new Exception("m_external å’Œ m_surrogateDiagnostic ä¸èƒ½åŒæ—¶ä¸ºç©º");
 
             if (this.m_external != null
                 && this.m_surrogateDiagnostic != null)
-                throw new Exception("m_external ºÍ m_surrogateDiagnostic ²»ÄÜÍ¬Ê±Îª·Ç¿Õ¡£Ö»ÄÜÓĞÒ»¸öÎª¿Õ");
+                throw new Exception("m_external å’Œ m_surrogateDiagnostic ä¸èƒ½åŒæ—¶ä¸ºéç©ºã€‚åªèƒ½æœ‰ä¸€ä¸ªä¸ºç©º");
 
 
             BerNode pSequence = node.NewChildConstructedNode(
                 BerNode.ASN1_SEQUENCE,    // 16
                 BerNode.ASN1_UNIVERSAL);
 
-            // Êı¾İ¿âÃû
+            // æ•°æ®åº“å
             pSequence.NewChildCharNode(0,
                 BerNode.ASN1_CONTEXT,   // ASN1_PRIMITIVE, BUG!!!
                 Encoding.UTF8.GetBytes(this.m_strDatabaseName));
 
-            // record(Ò»Ìõ¼ÇÂ¼)
+            // record(ä¸€æ¡è®°å½•)
             BerNode nodeRecord = pSequence.NewChildConstructedNode(
                 1,
                 BerNode.ASN1_CONTEXT);
@@ -2524,7 +2524,7 @@ Ralph
                     8,  // UNI_EXTERNAL
                     BerNode.ASN1_UNIVERSAL);
 
-                // TODO: ºÍÇ°Ò»ÌõÖØ¸´µÄ¿âÃûºÍmarc syntax oid¿ÉÒÔÊ¡ÂÔ£¿
+                // TODO: å’Œå‰ä¸€æ¡é‡å¤çš„åº“åå’Œmarc syntax oidå¯ä»¥çœç•¥ï¼Ÿ
 
                 Debug.Assert(String.IsNullOrEmpty(this.m_external.m_strDirectRefenerce) == false, "");
 
@@ -2532,13 +2532,13 @@ Ralph
                     BerNode.ASN1_UNIVERSAL,
                     this.m_external.m_strDirectRefenerce);
 
-                // 1 Ìõ MARC ¼ÇÂ¼
+                // 1 æ¡ MARC è®°å½•
                 nodeExternal.NewChildCharNode(1,
                     BerNode.ASN1_CONTEXT,
                     this.m_external.m_octectAligned);
             }
 
-            // Èç¹û»ñµÃMARC¼ÇÂ¼³ö´í£¬ÔòÕâÀïÒª´´½¨SurrogateDiagnostic record
+            // å¦‚æœè·å¾—MARCè®°å½•å‡ºé”™ï¼Œåˆ™è¿™é‡Œè¦åˆ›å»ºSurrogateDiagnostic record
             if (this.m_surrogateDiagnostic != null)
             {
                 BerNode nodeSurrogateDiag = nodeRecord.NewChildConstructedNode(

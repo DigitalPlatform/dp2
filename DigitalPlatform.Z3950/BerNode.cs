@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -12,15 +12,15 @@ namespace DigitalPlatform.Z3950
     {
         public List<BerNode> ChildrenCollection = new List<BerNode>();
 
-        public BerNode ParentNode = null;   /* ¸¸½áµã */
+        public BerNode ParentNode = null;   /* çˆ¶ç»“ç‚¹ */
 
         public byte [] m_baData = null;
 
         public string m_strDebugInfo = "";
 
-        public UInt16 m_uTag = 0;    /* ±êÊ¶ºÅ */
+        public UInt16 m_uTag = 0;    /* æ ‡è¯†å· */
 	    public char  m_cClass = (char)0; 
-        /* tag ÀàĞÍ:
+        /* tag ç±»å‹:
           00 = universal
           01 = application
           10 = context specific
@@ -30,7 +30,7 @@ namespace DigitalPlatform.Z3950
           0 = primitive
           1 = constructed */
 
-        #region ³£Á¿
+        #region å¸¸é‡
 
         public const char ASN1_UNIVERSAL   = (char)0;
         public const char ASN1_APPLICATION = (char)1;
@@ -93,11 +93,11 @@ namespace DigitalPlatform.Z3950
             return this.ParentNode.ChildrenCollection[nIndex + 1];
         }
 
-        // ÔÚµ±Ç°½áµãÏÂ·½¹¹ÔìÒ»¸öconstructed½á¹¹µÄ·ÇÒ¶×Ó½áµã
+        // åœ¨å½“å‰ç»“ç‚¹ä¸‹æ–¹æ„é€ ä¸€ä¸ªconstructedç»“æ„çš„éå¶å­ç»“ç‚¹
         // parameters:
         // return:
         //		null
-        //		ÆäËû
+        //		å…¶ä»–
         public BerNode NewChildConstructedNode(UInt16 uTag,
             char cClass)
         {
@@ -117,11 +117,11 @@ namespace DigitalPlatform.Z3950
             return node;
         }
 
-        // ÔÚµ±Ç°½áµãÏÂ·½¹¹ÔìÒ»¸ö´æ·Å×Ö·ûÊı¾İµÄ×Ó½áµã
+        // åœ¨å½“å‰ç»“ç‚¹ä¸‹æ–¹æ„é€ ä¸€ä¸ªå­˜æ”¾å­—ç¬¦æ•°æ®çš„å­ç»“ç‚¹
         // parameters:
         // return:
         //		null
-        //		ÆäËû
+        //		å…¶ä»–
         public BerNode NewChildCharNode(UInt16 uTag,
             char cClass,
             byte [] baData)
@@ -171,11 +171,11 @@ namespace DigitalPlatform.Z3950
             return node;
         }
 
-        // ÔÚµ±Ç°½áµãÏÂ·½¹¹ÔìÒ»¸ö´æ·ÅbitstringÊı¾İµÄ×Ó½áµã
+        // åœ¨å½“å‰ç»“ç‚¹ä¸‹æ–¹æ„é€ ä¸€ä¸ªå­˜æ”¾bitstringæ•°æ®çš„å­ç»“ç‚¹
         // parameters:
         // return:
         //		null
-        //		ÆäËû
+        //		å…¶ä»–
         public BerNode NewChildBitstringNode(UInt16 uTag,
             char cClass,
             string strValue)
@@ -221,7 +221,7 @@ namespace DigitalPlatform.Z3950
             return NewChildCharNode(uTag, cClass, temp);
         }
 
-        // ¸Ä±äÕûÊıµÄ¸ßµÍË³Ğò
+        // æ”¹å˜æ•´æ•°çš„é«˜ä½é¡ºåº
         static void ChangeIntegerOrder(ref List<byte> baData)
         {
             List<byte> baTemp = new List<byte>();
@@ -251,7 +251,7 @@ namespace DigitalPlatform.Z3950
             }
             else
             {
-                Debug.Assert(false, "²»Ö§³ÖµÄÕûÊı³¤¶È " + baData.Count);
+                Debug.Assert(false, "ä¸æ”¯æŒçš„æ•´æ•°é•¿åº¦ " + baData.Count);
                 return;
             }
 
@@ -270,11 +270,11 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        // ÔÚµ±Ç°½áµãÏÂ·½¹¹ÔìÒ»¸ö´æ·ÅÕûĞÍÊı¾İµÄ×Ó½áµã
+        // åœ¨å½“å‰ç»“ç‚¹ä¸‹æ–¹æ„é€ ä¸€ä¸ªå­˜æ”¾æ•´å‹æ•°æ®çš„å­ç»“ç‚¹
         // parameters:
         // return:
         //		null
-        //		ÆäËû
+        //		å…¶ä»–
         public BerNode NewChildIntegerNode(UInt16 uTag,
             char cClass,
             byte[] baData)
@@ -334,11 +334,11 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        // ÔÚµ±Ç°½áµãÏÂ·½¹¹ÔìÒ»¸ö´æ·ÅOIDsÊı¾İµÄ½áµã
+        // åœ¨å½“å‰ç»“ç‚¹ä¸‹æ–¹æ„é€ ä¸€ä¸ªå­˜æ”¾OIDsæ•°æ®çš„ç»“ç‚¹
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         public BerNode NewChildOIDsNode(UInt16 uTag,
             char cClass,
             string strValue)
@@ -441,7 +441,7 @@ namespace DigitalPlatform.Z3950
 
         //
 
-        // ÔÚ´Ë½áµãÏÂÔö¼ÓÒ»¿Ã×ÓÊ÷
+        // åœ¨æ­¤ç»“ç‚¹ä¸‹å¢åŠ ä¸€æ£µå­æ ‘
         // parameters:
         public void AddSubtree(BerNode sub)
         {
@@ -449,10 +449,10 @@ namespace DigitalPlatform.Z3950
             sub.ParentNode = this;
         }
 
-        // ½«±¾½áµãÒÔ¼°ËùÓĞ×Ó½áµã±àÂëÎªBER°ü
+        // å°†æœ¬ç»“ç‚¹ä»¥åŠæ‰€æœ‰å­ç»“ç‚¹ç¼–ç ä¸ºBERåŒ…
         public void EncodeBERPackage(ref byte[] baPackage)
         {
-            // 1.µÃµ½È«²¿×Ó½áµãµÄBER°ü
+            // 1.å¾—åˆ°å…¨éƒ¨å­ç»“ç‚¹çš„BERåŒ…
 
             BerNode node = null;
             byte[] baTempPackage = null;
@@ -466,13 +466,13 @@ namespace DigitalPlatform.Z3950
                     node = this.ChildrenCollection[i];
                     Debug.Assert(node != null);
 
-                    // µİ¹é
+                    // é€’å½’
                     baTempPackage = null;
                     node.EncodeBERPackage(ref baTempPackage);
 
                     if (baTempPackage == null)
                     {
-                        // ÊÇ·ñÓĞÎÊÌâ?
+                        // æ˜¯å¦æœ‰é—®é¢˜?
                         continue;   // 2008/12/17
                     }
 
@@ -487,20 +487,20 @@ namespace DigitalPlatform.Z3950
             }
 
 
-            // 2.¸ù¾İ1.²½µÃµ½µÄ°ü³¤¶È£¬×îÖÕ¼ÓÈë±¾½áµãĞèÒªµÄÊ¶±ğĞÅÏ¢
+            // 2.æ ¹æ®1.æ­¥å¾—åˆ°çš„åŒ…é•¿åº¦ï¼Œæœ€ç»ˆåŠ å…¥æœ¬ç»“ç‚¹éœ€è¦çš„è¯†åˆ«ä¿¡æ¯
             MakeHeadPart(ref baTempPackage, baPackage.Length);
 
             baPackage = ByteArray.Add(baTempPackage, baPackage);
         }
 
-        // ¸ù¾İËùÓĞÏÂ¼¶½áµã¹²Í¬¹¹³ÉµÄ°üµÄ×Ü³¤¶È£¬ ×îÖÕ¹¹Ôì³ö±¾½áµãµÄÍ·²¿
+        // æ ¹æ®æ‰€æœ‰ä¸‹çº§ç»“ç‚¹å…±åŒæ„æˆçš„åŒ…çš„æ€»é•¿åº¦ï¼Œ æœ€ç»ˆæ„é€ å‡ºæœ¬ç»“ç‚¹çš„å¤´éƒ¨
         void MakeHeadPart(ref byte[] baHead,
             int nDataSize)
         {
             baHead = null;
             byte[] baTempPackage = null;
 
-            // 1.¹¹Ôìtag + class + form°ü
+            // 1.æ„é€ tag + class + formåŒ…
             MakeTagClassFormPart(ref baTempPackage);
 
             Debug.Assert(baTempPackage.Length != 0, "");
@@ -508,7 +508,7 @@ namespace DigitalPlatform.Z3950
             baHead = baTempPackage;
 
 
-            // 2.¹¹Ôìlength
+            // 2.æ„é€ length
             baTempPackage = null;
             MakeLengthPart(ref baTempPackage, nDataSize);
 
@@ -517,7 +517,7 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        // ¹¹Ôìtag + class + form°ü
+        // æ„é€ tag + class + formåŒ…
         void MakeTagClassFormPart(ref byte[] baPart)
         {
             byte[] charray = new byte[3];
@@ -526,8 +526,8 @@ namespace DigitalPlatform.Z3950
             baPart = null;
 
             if (this.m_uTag < 31)
-            {	/* Èç¹û½áµãµÄtagÖµĞ¡ÓÚ31£¬ÔòÖ»ĞèÒ»¸ö×Ö½Ú
-								´æ·ÅcForm¡¢cClass¼°nTagÖµ */
+            {	/* å¦‚æœç»“ç‚¹çš„tagå€¼å°äº31ï¼Œåˆ™åªéœ€ä¸€ä¸ªå­—èŠ‚
+								å­˜æ”¾cFormã€cClassåŠnTagå€¼ */
                 charray[0] = (byte)
                 (this.m_uTag
                 + this.m_cClass * 64
@@ -535,7 +535,7 @@ namespace DigitalPlatform.Z3950
                 nBytes = 1;
             }
 
-            else						/* ·ñÔòĞèÒª2-3¸ö×Ö½Ú´æ·Å */
+            else						/* å¦åˆ™éœ€è¦2-3ä¸ªå­—èŠ‚å­˜æ”¾ */
             {
 
                 charray[nBytes] = (byte)
@@ -555,7 +555,7 @@ namespace DigitalPlatform.Z3950
                     charray[nBytes] = (byte)(this.m_uTag % 8);
                      * */
 
-                    // Ö»×öÁË < 16384 (128*128) µÄ²¿·Ö //zu
+                    // åªåšäº† < 16384 (128*128) çš„éƒ¨åˆ† //zu
 
                     if (this.m_uTag < 16384)
                     {
@@ -583,7 +583,7 @@ namespace DigitalPlatform.Z3950
 
 #if NOOOOOOOOOOOOOOOOOO
 
-        // ¹¹Ôìlength
+        // æ„é€ length
         void MakeLengthPart(ref byte[] baPart,
             int nDataSize)
         {
@@ -596,12 +596,12 @@ namespace DigitalPlatform.Z3950
             baPart = null;
 
             if (nDataSize < 128)
-            {			/* Ö»ĞèÒ»¸ö×Ö½Ú */
+            {			/* åªéœ€ä¸€ä¸ªå­—èŠ‚ */
 
                 charray[0] = (byte)nDataSize;
                 nBytes = 1;
             }
-            else						/* ĞèÒªLEN_LEN(struRoot)×Ö½Ú */
+            else						/* éœ€è¦LEN_LEN(struRoot)å­—èŠ‚ */
             {
                 int nWidth;
 
@@ -629,7 +629,7 @@ namespace DigitalPlatform.Z3950
 
 #endif
 
-        // ¹¹Ôìlength
+        // æ„é€ length
         void MakeLengthPart(ref byte[] baPart,
             int nDataSize)
         {
@@ -643,12 +643,12 @@ namespace DigitalPlatform.Z3950
 
             if (nDataSize < 128)
             {	
-                /* Ö»ĞèÒ»¸ö×Ö½Ú */
+                /* åªéœ€ä¸€ä¸ªå­—èŠ‚ */
                 baPart = new byte[1];
                 baPart[0] = (byte)nDataSize;
                 return;
             }
-            else						/* ĞèÒªLEN_LEN(struRoot)×Ö½Ú */
+            else						/* éœ€è¦LEN_LEN(struRoot)å­—èŠ‚ */
             {
                 List<byte> baTemp = new List<byte>();
 
@@ -671,11 +671,11 @@ namespace DigitalPlatform.Z3950
             }
         }
 
-        // BER°üÊÇ·ñÍêÕûµ½´ï
-        // ÒÉÎÊ£ºËäÈ»±¾º¯ÊıÄÜ¹»ÖªµÀBER°üÊÇ·ñÍêÕû£¬µ«ÊÇ£¬Èç¹û»º³åÇøÄÚÈİ±ÈÒ»¸öBER°ü
-        // »¹³¤£¬Ò²¾ÍÊÇËµ¶à¸öBER°ü¶Ñ»ıÆğÀ´£¬»¹ĞèÒªµÃÖªµ±Ç°ÒÑ¾­½áÊøµÄÕâ¸öBER°üÔÚºÎ´¦½áÊø
+        // BERåŒ…æ˜¯å¦å®Œæ•´åˆ°è¾¾
+        // ç–‘é—®ï¼šè™½ç„¶æœ¬å‡½æ•°èƒ½å¤ŸçŸ¥é“BERåŒ…æ˜¯å¦å®Œæ•´ï¼Œä½†æ˜¯ï¼Œå¦‚æœç¼“å†²åŒºå†…å®¹æ¯”ä¸€ä¸ªBERåŒ…
+        // è¿˜é•¿ï¼Œä¹Ÿå°±æ˜¯è¯´å¤šä¸ªBERåŒ…å †ç§¯èµ·æ¥ï¼Œè¿˜éœ€è¦å¾—çŸ¥å½“å‰å·²ç»ç»“æŸçš„è¿™ä¸ªBERåŒ…åœ¨ä½•å¤„ç»“æŸ
         // return:
-        //		TRUE	ÍêÕûµ½´ï
+        //		TRUE	å®Œæ•´åˆ°è¾¾
         public static bool IsCompleteBER(byte[] baBuffer,
             long start,
             long len_param,
@@ -691,7 +691,7 @@ namespace DigitalPlatform.Z3950
             if (len == 0)
                 return false;
 
-            // Ì½²âtagÕ¼¾İbyteÊı
+            // æ¢æµ‹tagå æ®byteæ•°
             taglen = get_tag(out tag, baBuffer, (int)start, len);
             if (taglen == 0)
             {
@@ -700,7 +700,7 @@ namespace DigitalPlatform.Z3950
                 return false;
             }
 
-            // Ì½²â³¤¶ÈÕ¼¾İbyteÊı
+            // æ¢æµ‹é•¿åº¦å æ®byteæ•°
             int temp = 0;
             lenlen = get_len(out temp, baBuffer, (int)start + taglen, (int)len - taglen);
             fieldlen = temp;
@@ -708,11 +708,11 @@ namespace DigitalPlatform.Z3950
             if (lenlen == 0)
                 return false;  /* no len yet */
 
-            // fieldlenÎªÄÚÈİ³¤¶È
+            // fieldlenä¸ºå†…å®¹é•¿åº¦
             long offs = start;
 
             headerlen = taglen + lenlen;
-            if (lenlen == 1 && fieldlen == -1)  /* indefinite ²»È·¶¨ length */
+            if (lenlen == 1 && fieldlen == -1)  /* indefinite ä¸ç¡®å®š length */
             {
                 long totlen = 0;
                 long fieldlen1 = 0;
@@ -726,7 +726,7 @@ namespace DigitalPlatform.Z3950
                         return false;
                     totlen += fieldlen1;
                 }
-                if (len > 1 && baBuffer[offs] == 0 && baBuffer[offs + 1] == 0)	// µ±·¢ÏÖÄ³¸ö²¿·Ö¿ªÍ·Á½¸ö×Ö·ûÎª0
+                if (len > 1 && baBuffer[offs] == 0 && baBuffer[offs + 1] == 0)	// å½“å‘ç°æŸä¸ªéƒ¨åˆ†å¼€å¤´ä¸¤ä¸ªå­—ç¬¦ä¸º0
                 {
                     remainder = headerlen + totlen + 2;  /* + 2 nulls at end */
                     Debug.Assert(remainder <= len_param, "");
@@ -747,13 +747,13 @@ namespace DigitalPlatform.Z3950
             return false;
         }
 
-        // µÃµ½tagÖµ
+        // å¾—åˆ°tagå€¼
         // parameters:
-        //		tag		[out]·µ»ØµÃµ½µÄtagÖµ
-        //		s		BER°ü¿ªÊ¼Î»ÖÃÖ¸Õë
+        //		tag		[out]è¿”å›å¾—åˆ°çš„tagå€¼
+        //		s		BERåŒ…å¼€å§‹ä½ç½®æŒ‡é’ˆ
         // return:
-        //		0	Ã»ÓĞµÃµ½ 
-        //		ÆäËû	tagÕ¼¾İbyteÊı
+        //		0	æ²¡æœ‰å¾—åˆ° 
+        //		å…¶ä»–	tagå æ®byteæ•°
         static int get_tag(out int tag,
             byte[] baBuffer,
             int nStart,
@@ -917,7 +917,7 @@ namespace DigitalPlatform.Z3950
             }
 
 
-            // Ì½²âtagÕ¼¾İbyteÊı
+            // æ¢æµ‹tagå æ®byteæ•°
             int taglen = get_tag(out tag, baBuffer, offs, nLen);
             if (taglen == 0)
             { /* no tag yet */
@@ -930,7 +930,7 @@ namespace DigitalPlatform.Z3950
 
             Debug.Assert(nLen != taglen, "");
 
-            // Ì½²â³¤¶ÈÕ¼¾İbyteÊı
+            // æ¢æµ‹é•¿åº¦å æ®byteæ•°
             int lenlen = get_len(out fieldlen, 
                 baBuffer,
                 offs + taglen,
@@ -942,19 +942,19 @@ namespace DigitalPlatform.Z3950
             }
 
             Debug.Assert(fieldlen < nLen - taglen, "");
-            // fieldlenÎªÄÚÈİ³¤¶È
+            // fieldlenä¸ºå†…å®¹é•¿åº¦
 
             headerlen = taglen + lenlen;
 
             nUsedLen += headerlen;
             Debug.Assert(nUsedLen <= nLenParam, "");
 
-            if (lenlen == 1 && fieldlen == -1)  /* indefinite ²»È·¶¨ length */
+            if (lenlen == 1 && fieldlen == -1)  /* indefinite ä¸ç¡®å®š length */
             {
                 int fieldlen1 = 0;
                 int totlen = 0;
 
-                // 1.¸ø´Ë½áµãµÄTag¡¢Class¡¢Form¸³Öµ
+                // 1.ç»™æ­¤ç»“ç‚¹çš„Tagã€Classã€Formèµ‹å€¼
                 SetTagClassForm(baBuffer, offs);
 
                 /* loop through the subfields and see if they are complete */
@@ -962,7 +962,7 @@ namespace DigitalPlatform.Z3950
                 nLen > 1 && (baBuffer[offs] != 0 || baBuffer[offs + 1] != 0);
                 offs += fieldlen1, nLen -= fieldlen1)
                 {
-                    node = new BerNode();	//Éú³É´Ë½áµãµÄÒ»¸ö×Ó½áµã
+                    node = new BerNode();	//ç”Ÿæˆæ­¤ç»“ç‚¹çš„ä¸€ä¸ªå­ç»“ç‚¹
                     node.ParentNode = this;
                     this.ChildrenCollection.Add(node);
                     if (node.BuildPartTree(baBuffer, offs, nLen, out nTempLen) == false)
@@ -973,7 +973,7 @@ namespace DigitalPlatform.Z3950
                     nUsedLen += nTempLen;
                     Debug.Assert(nUsedLen <= nLenParam, "");
                 }
-                if (nLen > 1 && baBuffer[offs] == 0 && baBuffer[offs + 1] == 0)	// µ±·¢ÏÖÄ³¸ö²¿·Ö¿ªÍ·Á½¸ö×Ö·ûÎª0
+                if (nLen > 1 && baBuffer[offs] == 0 && baBuffer[offs + 1] == 0)	// å½“å‘ç°æŸä¸ªéƒ¨åˆ†å¼€å¤´ä¸¤ä¸ªå­—ç¬¦ä¸º0
                 {
                     //*remainder=headerlen+totlen+2;  /* + 2 nulls at end */
                     nUsedLen += 2;
@@ -987,11 +987,11 @@ namespace DigitalPlatform.Z3950
 
             if (fieldlen + headerlen <= nLen)
             {
-                // 4.¸ø½áµãµÄÊı¾İ¸³Öµ
+                // 4.ç»™ç»“ç‚¹çš„æ•°æ®èµ‹å€¼
                 node = null;
                 int nMax, nSubLen;
 
-                // 1.¸ø´Ë½áµãµÄTag¡¢Class¡¢Form¸³Öµ
+                // 1.ç»™æ­¤ç»“ç‚¹çš„Tagã€Classã€Formèµ‹å€¼
                 SetTagClassForm(baBuffer, nHead);
 
                 //!!!!!!!!!!!!!
@@ -1002,7 +1002,7 @@ namespace DigitalPlatform.Z3950
                     nMax = fieldlen;
                     while (nMax > 0)
                     {
-                        node = new BerNode();	//Éú³É´Ë½áµãµÄÒ»¸ö×Ó½áµã
+                        node = new BerNode();	//ç”Ÿæˆæ­¤ç»“ç‚¹çš„ä¸€ä¸ªå­ç»“ç‚¹
                         node.ParentNode = this;
                         this.ChildrenCollection.Add(node);
 
@@ -1014,7 +1014,7 @@ namespace DigitalPlatform.Z3950
                         Debug.Assert(nSubLen <= fieldlen, "");
 
 
-                        // Èç¹ûnSubLenÓÀÔ¶Îª0ÔõÃ´°ì
+                        // å¦‚æœnSubLenæ°¸è¿œä¸º0æ€ä¹ˆåŠ
                         nMax -= nSubLen;
                         nStart += nSubLen;
                         nUsedLen += nSubLen;
@@ -1057,16 +1057,16 @@ namespace DigitalPlatform.Z3950
 
             int offs = nStart;
 
-            m_cClass = (char)(baBuffer[offs] >> 6);		// ¸øclass¸³Öµ
+            m_cClass = (char)(baBuffer[offs] >> 6);		// ç»™classèµ‹å€¼
             Debug.Assert(m_cClass >= 0 && m_cClass < 3, "");
 
-            m_cForm = (char)((baBuffer[offs] >> 5) & 1);    // ¸øform¸³Öµ 
+            m_cForm = (char)((baBuffer[offs] >> 5) & 1);    // ç»™formèµ‹å€¼ 
             nTaglen = 1;
 
             c = (byte)(baBuffer[offs] & 0x1f);
             Debug.Assert(c >= 0, "");
             nDelta++;
-            if (c < 0x1f)             //  tagÖµĞ¡ÓÚ31
+            if (c < 0x1f)             //  tagå€¼å°äº31
                 m_uTag = c;
             else
             {
@@ -1091,8 +1091,8 @@ namespace DigitalPlatform.Z3950
         }
 
 #if NOOOOOOOOO
- // Ó¦µ±ÓÃÎïÀí¸ùµ÷ÓÃ±¾º¯Êı¡£
-// ±¾º¯ÊıÒªµİ¹é¡£µÚÒ»´Îµ÷ÓÃ±¾º¯Êı¸ºÔğ´´½¨Âß¼­¸ù½áµã¡£
+ // åº”å½“ç”¨ç‰©ç†æ ¹è°ƒç”¨æœ¬å‡½æ•°ã€‚
+// æœ¬å‡½æ•°è¦é€’å½’ã€‚ç¬¬ä¸€æ¬¡è°ƒç”¨æœ¬å‡½æ•°è´Ÿè´£åˆ›å»ºé€»è¾‘æ ¹ç»“ç‚¹ã€‚
 // 
         int BuildTreeNode(byte [] baPackage,
             out int nDelta,
@@ -1122,16 +1122,16 @@ namespace DigitalPlatform.Z3950
 
 	nTotlen = 0;
 
-	// 1.¸ø´Ë½áµãµÄTag¡¢Class¡¢Form¸³Öµ
+	// 1.ç»™æ­¤ç»“ç‚¹çš„Tagã€Classã€Formèµ‹å€¼
 	ASSERT(nDelta<baPackage.GetSize());
 	nTaglen =GetTagClassForm(baPackage,nDelta);
 	
-	// 2.»ñÈ¡´Ë½áµãÊı¾İËùÕ¼µÄ×Ö½ÚÊı
+	// 2.è·å–æ­¤ç»“ç‚¹æ•°æ®æ‰€å çš„å­—èŠ‚æ•°
 	nLength = GetDataBytenum(baPackage.GetData()+nDelta,
 		baPackage.GetSize(),
 		nDatalen);
 
-	// 3.µ±¼ÇÂ¼µÄ³¤¶È²»È·¶¨Ê±£¬ÅĞ¶ÏÆäÊÇ·ñÎªÍêÕûµÄ¼ÇÂ¼
+	// 3.å½“è®°å½•çš„é•¿åº¦ä¸ç¡®å®šæ—¶ï¼Œåˆ¤æ–­å…¶æ˜¯å¦ä¸ºå®Œæ•´çš„è®°å½•
 	if (nDatalen==-1)
 	{
 		ASSERT(0);
@@ -1142,7 +1142,7 @@ namespace DigitalPlatform.Z3950
 		{
 			nTotlen += nRet;
 			nDatalen = nRet-(nTaglen+nLength);
-			nDatalen -= 2;  // È¥µô¼ÇÂ¼×îºóµÄÁ½¸öÁã×Ö½Ú 
+			nDatalen -= 2;  // å»æ‰è®°å½•æœ€åçš„ä¸¤ä¸ªé›¶å­—èŠ‚ 
 		}
 		else
 		{
@@ -1158,7 +1158,7 @@ namespace DigitalPlatform.Z3950
 
 	}
  
-	// 4.¸ø½áµãµÄÊı¾İ¸³Öµ
+	// 4.ç»™ç»“ç‚¹çš„æ•°æ®èµ‹å€¼
 	nRet = GetNodeData(baPackage,nDelta,nDatalen);
 	if (nRet==-1)
 		return -1;
@@ -1169,24 +1169,24 @@ namespace DigitalPlatform.Z3950
 #endif
 
 
-        // ¸ø´Ë½áµãµÄTag¡¢Class¡¢Form¸³Öµ
-        // parameters: lenÒÑ½ÓÊÕ×Ö½ÚÊıµÄÖ¸Õë
+        // ç»™æ­¤ç»“ç‚¹çš„Tagã€Classã€Formèµ‹å€¼
+        // parameters: lenå·²æ¥æ”¶å­—èŠ‚æ•°çš„æŒ‡é’ˆ
         // return:
-        // ´æ·Åtag¡¢form¡¢classÖµËùĞèµÄ×Ö½ÚÊı
+        // å­˜æ”¾tagã€formã€classå€¼æ‰€éœ€çš„å­—èŠ‚æ•°
         int GetTagClassForm(byte[] baPackage,
             ref int nDelta)
         {
             byte c;
             int nTaglen;
 
-            m_cClass = (char)(baPackage[nDelta] >> 6);		// ¸øclass¸³Öµ
-            m_cForm = (char)((baPackage[nDelta] >> 5) & 1);    // ¸øform¸³Öµ 
+            m_cClass = (char)(baPackage[nDelta] >> 6);		// ç»™classèµ‹å€¼
+            m_cForm = (char)((baPackage[nDelta] >> 5) & 1);    // ç»™formèµ‹å€¼ 
             nTaglen = 1;
 
             c = (byte)((baPackage[nDelta]) & 0x1f);
             Debug.Assert(c >= 0, "");
             nDelta++;
-            if (c < 0x1f)             //  tagÖµĞ¡ÓÚ31
+            if (c < 0x1f)             //  tagå€¼å°äº31
                 m_uTag = c;
             else
             {
@@ -1211,7 +1211,7 @@ namespace DigitalPlatform.Z3950
         }
 
 #if NOOOOOOOOOOOOO
-        // ¸ø½áµãµÄm_baData¸³Öµ
+        // ç»™ç»“ç‚¹çš„m_baDataèµ‹å€¼
         int GetNodeData(byte [] baPackage,
             ref int nDelta,
             ref int nFieldlen)
@@ -1224,7 +1224,7 @@ namespace DigitalPlatform.Z3950
 		int nMax = nFieldlen;
 		while (nMax>0)
 		{
-			node = new BerNode();	//Éú³É´Ë½áµãµÄÒ»¸ö×Ó½áµã
+			node = new BerNode();	//ç”Ÿæˆæ­¤ç»“ç‚¹çš„ä¸€ä¸ªå­ç»“ç‚¹
             node.ParentNode = this;
             this.ChildrenCollection.Add(node);
 
@@ -1251,7 +1251,7 @@ namespace DigitalPlatform.Z3950
 }
 #endif 
 
-        // »ñÈ¡OIDs½áµãµÄÊı¾İ
+        // è·å–OIDsç»“ç‚¹çš„æ•°æ®
         // parameters:
         // return:
         //		-1	error
@@ -1272,7 +1272,7 @@ namespace DigitalPlatform.Z3950
             len = this.m_baData.Length;
 
             offset = 0;
-            while (offset < len)		/* ½«±àÂëÖµ×ªÎª×Ö·û */
+            while (offset < len)		/* å°†ç¼–ç å€¼è½¬ä¸ºå­—ç¬¦ */
             {
                 value[nvals] = 0;
                 do
@@ -1301,40 +1301,40 @@ namespace DigitalPlatform.Z3950
         }
 
         // 2007/7/25
-        // »ñÈ¡octect-string½áµãµÄÊı¾İ
+        // è·å–octect-stringç»“ç‚¹çš„æ•°æ®
         public byte [] GetOctetsData()
         {
             return this.m_baData;
         }
 
 
-        // »ñÈ¡´Ëchar½áµãµÄÊı¾İ
-        // UTF-8°æ±¾
+        // è·å–æ­¤charç»“ç‚¹çš„æ•°æ®
+        // UTF-8ç‰ˆæœ¬
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         public string GetCharNodeData()
         {
             return Encoding.UTF8.GetString(this.m_baData);
         }
 
-        // »ñÈ¡´Ëchar½áµãµÄÊı¾İ
-        // ÄÜÖ¸¶¨±àÂë·½Ê½µÄ°æ±¾
+        // è·å–æ­¤charç»“ç‚¹çš„æ•°æ®
+        // èƒ½æŒ‡å®šç¼–ç æ–¹å¼çš„ç‰ˆæœ¬
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         public string GetCharNodeData(Encoding encoding)
         {
             return encoding.GetString(this.m_baData);
         }
 
-        // »ñÈ¡bitstring½áµãµÄÊı¾İ
+        // è·å–bitstringç»“ç‚¹çš„æ•°æ®
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         public string GetBitstringNodeData()
         {
             int nLastused;
@@ -1358,7 +1358,7 @@ namespace DigitalPlatform.Z3950
                     strResult += strTemp;
                 }
 
-            // ÓĞÎÊÌâ£¿
+            // æœ‰é—®é¢˜ï¼Ÿ
             if (i < this.m_baData.Length)   // 2007/7/16
             {
                 for (j = 0; j < nLastused; j++)
@@ -1372,11 +1372,11 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        // »ñÈ¡Integer½áµãµÄÊı¾İ
+        // è·å–Integerç»“ç‚¹çš„æ•°æ®
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         public long GetIntegerNodeData()
         {
             int count;
@@ -1385,7 +1385,7 @@ namespace DigitalPlatform.Z3950
 
             long lData = 0;
 
-            /* Êı¾İ·¶Î§²»ÄÜ³¬¹ı'long' */
+            /* æ•°æ®èŒƒå›´ä¸èƒ½è¶…è¿‡'long' */
             if (this.m_baData.Length > longlen)
             {
                 throw new Exception("m_baData.Length>" + longlen.ToString());
@@ -1414,14 +1414,13 @@ namespace DigitalPlatform.Z3950
 
         public void DumpToFile(string strFileName)
         {
-            Stream stream = File.Create(strFileName);
-
-            this.DumpToFile(stream);
-
-            stream.Close();
+            using (Stream stream = File.Create(strFileName))
+            {
+                this.DumpToFile(stream);
+            }
         }
 
-        // »ñµÃÒ»¸öÓÃÓÚµ÷ÊÔµÄÌØĞÔÏÔÊ¾×Ö·û´®
+        // è·å¾—ä¸€ä¸ªç”¨äºè°ƒè¯•çš„ç‰¹æ€§æ˜¾ç¤ºå­—ç¬¦ä¸²
         public string GetDebugString()
         {
             string strText = "";

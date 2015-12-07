@@ -1,10 +1,9 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections;
-
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
@@ -12,18 +11,18 @@ using DigitalPlatform.Text.SectionPropertyString;
 
 namespace DigitalPlatform.rms
 {
-    // ÅäÖÃÈ¨ÏŞ
+    // é…ç½®æƒé™
     public class CfgRights
     {
-        public XmlNode nodeRoot = null; // È¨ÏŞ¶¨Òå¸ùÔªËØ
-        public ArrayList MacroRights = null; // ºêÈ¨ÏŞÊı×é
+        public XmlNode nodeRoot = null; // æƒé™å®šä¹‰æ ¹å…ƒç´ 
+        public ArrayList MacroRights = null; // å®æƒé™æ•°ç»„
 
-        // ³õÊ¼»¯
+        // åˆå§‹åŒ–
         // parameters:
-        //      node   È¨ÏŞ¶¨Òå¸ù½Úµã 
+        //      node   æƒé™å®šä¹‰æ ¹èŠ‚ç‚¹ 
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int Initial(XmlNode node,
             out string strError)
         {
@@ -31,13 +30,13 @@ namespace DigitalPlatform.rms
 
             this.nodeRoot = node;
 
-            // ÉèºêÈ¨ÏŞÊı×é
+            // è®¾å®æƒé™æ•°ç»„
             this.InitialMacroRights();
 
             return 0;
         }
 
-        // ³õÊ¼»¯ºêÈ¨ÏŞÊı×é
+        // åˆå§‹åŒ–å®æƒé™æ•°ç»„
         private void InitialMacroRights()
         {
             MacroRights = new ArrayList();
@@ -59,20 +58,20 @@ namespace DigitalPlatform.rms
         }
 
 
-        // ¼ì²éÈ¨ÏŞ
+        // æ£€æŸ¥æƒé™
         // parameters:
-        //      strPath     ×ÊÔ´Â·¾¶
-        //      resType     ×ÊÔ´ÀàĞÍ
-        //      strRights   ±»²éÕÒµÄÈ¨ÏŞ
-        //      strExistRights  out²ÎÊı,·µ»ØÒÑ´æÔÚµÄÈ¨ÏŞ
-        //      resultType  out²ÎÊı,·µ»Ø²éÕÒ½á¹û
-        //                  Minus = -1, // ¼õ
-        //                  None = 0,   // Ã»ÓĞ¶¨Òå    
-        //                  Plus = 1,   // ¼Ó
-        //      strError    out²ÎÊı,·µ»Ø³ö´íĞÅÏ¢
+        //      strPath     èµ„æºè·¯å¾„
+        //      resType     èµ„æºç±»å‹
+        //      strRights   è¢«æŸ¥æ‰¾çš„æƒé™
+        //      strExistRights  outå‚æ•°,è¿”å›å·²å­˜åœ¨çš„æƒé™
+        //      resultType  outå‚æ•°,è¿”å›æŸ¥æ‰¾ç»“æœ
+        //                  Minus = -1, // å‡
+        //                  None = 0,   // æ²¡æœ‰å®šä¹‰    
+        //                  Plus = 1,   // åŠ 
+        //      strError    outå‚æ•°,è¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int CheckRights(
             string strPath,
             List<string> aOwnerDbName,
@@ -88,7 +87,7 @@ namespace DigitalPlatform.rms
 
             resultType = ResultType.None;
 
-            Debug.Assert(resType != ResType.None, "resType²ÎÊı²»ÄÜÎªResType.None");
+            Debug.Assert(resType != ResType.None, "resTypeå‚æ•°ä¸èƒ½ä¸ºResType.None");
 
             List<string> aRights = null;
             int nRet = this.BuildRightArray(
@@ -154,7 +153,7 @@ namespace DigitalPlatform.rms
                 }
 
 
-                // ¼ì²éµ±Ç°È¨ÏŞ×Ö·û´®ÖĞÊÇ·ñ´æÔÚÖ¸¶¨µÄÈ¨ÏŞ,¼Ó£¬¼õ¶¼·µ»Ø
+                // æ£€æŸ¥å½“å‰æƒé™å­—ç¬¦ä¸²ä¸­æ˜¯å¦å­˜åœ¨æŒ‡å®šçš„æƒé™,åŠ ï¼Œå‡éƒ½è¿”å›
                 resultType = this.CheckRights(strQueryRights,
                     strPureRights);
                 if (resultType != ResultType.None)
@@ -165,16 +164,16 @@ namespace DigitalPlatform.rms
         }
 
 
-        // ????Ä¿Ç°²»Ö§³ÖÊı¾İ¿âµÄ¶àÓïÑÔ°æ±¾
-        // ÎªCheckRights()·şÎñµÄµ×²ãº¯Êı
-        // ¸ù¾İ×ÊÔ´Â·¾¶´´½¨È¨ÏŞÊı×é
+        // ????ç›®å‰ä¸æ”¯æŒæ•°æ®åº“çš„å¤šè¯­è¨€ç‰ˆæœ¬
+        // ä¸ºCheckRights()æœåŠ¡çš„åº•å±‚å‡½æ•°
+        // æ ¹æ®èµ„æºè·¯å¾„åˆ›å»ºæƒé™æ•°ç»„
         // parameters:
-        //      strPath     ×ÊÔ´Â·¾¶
-        //      aRights     out²ÎÊı,·µ»ØÈ¨ÏŞÊı×é³É
-        //      strError    out²ÎÊı,·µ»Ø³ö´íĞÅÏ¢
+        //      strPath     èµ„æºè·¯å¾„
+        //      aRights     outå‚æ•°,è¿”å›æƒé™æ•°ç»„æˆ
+        //      strError    outå‚æ•°,è¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         private int BuildRightArray(
             string strPath,
             List<string> aOwnerDbName,
@@ -188,7 +187,7 @@ namespace DigitalPlatform.rms
 
             string strRights = "";
 
-            // °Ñ¸ù¶¨ÒåµÄÈ¨ÏŞ¼Óµ½Êı×éÀï
+            // æŠŠæ ¹å®šä¹‰çš„æƒé™åŠ åˆ°æ•°ç»„é‡Œ
             strRights = DomUtil.GetAttr(this.nodeRoot, "rights");
             aRights.Add(strRights);
 
@@ -196,16 +195,15 @@ namespace DigitalPlatform.rms
                 return 0;
 
             string[] paths = strPath.Split(new char[] { '/' });
-            Debug.Assert(paths.Length > 0, "´ËÊ±Êı×é³¤¶È²»¿ÉÄÜÎª0¡£");
+            Debug.Assert(paths.Length > 0, "æ­¤æ—¶æ•°ç»„é•¿åº¦ä¸å¯èƒ½ä¸º0ã€‚");
             if (paths[0] == "" || paths[paths.Length - 1] == "")
             {
-                strError = "Â·¾¶'" + strPath + "'²»ºÏ·¨£¬Ê×Î²²»ÄÜÎª'/'¡£";
+                strError = "è·¯å¾„'" + strPath + "'ä¸åˆæ³•ï¼Œé¦–å°¾ä¸èƒ½ä¸º'/'ã€‚";
                 return -1;
             }
 
-
             XmlNode nodeCurrent = this.nodeRoot;
-            // Ñ­»·ÏÂ¼¶
+            // å¾ªç¯ä¸‹çº§
             for (int i = 0; i < paths.Length; i++)
             {
                 string strName = paths[i];
@@ -224,8 +222,6 @@ namespace DigitalPlatform.rms
 
                     string strChildName = DomUtil.GetAttr(child, "name");
 
-
-
                     if (String.Compare(strName, strChildName, true) == 0)
                     {
                         bFound = true;
@@ -235,7 +231,7 @@ namespace DigitalPlatform.rms
                 }
 
                 bool bDbo = false;
-                if (i == 0)   // Êı¾İ¿â²ã´Î
+                if (i == 0)   // æ•°æ®åº“å±‚æ¬¡
                 {
                     if (aOwnerDbName.IndexOf(strName) != -1)
                         bDbo = true;
@@ -243,7 +239,7 @@ namespace DigitalPlatform.rms
 
                 strRights = "";
 
-                // ÎªdboÔö¼ÓÌØÊâÈ¨ÏŞ
+                // ä¸ºdboå¢åŠ ç‰¹æ®Šæƒé™
                 if (bDbo == true)
                 {
                     strRights += "this:management;children_database:management;children_directory:management;children_leaf:management;descendant_directory:management;descendant_record:management;descendant_leaf:management";
@@ -256,7 +252,7 @@ namespace DigitalPlatform.rms
                     continue;
                 }
 
-                // Êµ¼Ê¶¨ÒåµÄÈ¨ÏŞ
+                // å®é™…å®šä¹‰çš„æƒé™
                 if (nodeCurrent != null)
                 {
                     string strTemp = DomUtil.GetAttr(nodeCurrent, "rights");
@@ -273,15 +269,15 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ÎªCheckRights()·şÎñµÄµ×²ãº¯Êı
+        // ä¸ºCheckRights()æœåŠ¡çš„åº•å±‚å‡½æ•°
         // parameters:
-        //      strRights   ±»²éÕÒµÄÈ¨ÏŞ
-        //      strAllRights    ÒÑ´æÔÚµÄÈ«²¿È¨ÏŞ
+        //      strRights   è¢«æŸ¥æ‰¾çš„æƒé™
+        //      strAllRights    å·²å­˜åœ¨çš„å…¨éƒ¨æƒé™
         // return:
-        //      ResultType¶ÔÏó
-        //          Minus = -1, // ¼õ
-        //          None = 0,   // Ã»ÓĞ¶¨Òå    
-        //          Plus = 1,   // ¼Ó
+        //      ResultTypeå¯¹è±¡
+        //          Minus = -1, // å‡
+        //          None = 0,   // æ²¡æœ‰å®šä¹‰    
+        //          Plus = 1,   // åŠ 
         private ResultType CheckRights(string strRights,
             string strAllRights)
         {
@@ -290,16 +286,16 @@ namespace DigitalPlatform.rms
 
             strAllRights = this.CanonicalizeRightString(strAllRights);
 
-            string[] rights = strAllRights.Split(new char[] {','});
-            for (int i = rights.Length -1; i >= 0; i--)
+            string[] rights = strAllRights.Split(new char[] { ',' });
+            for (int i = rights.Length - 1; i >= 0; i--)
             {
                 string strOneRight = rights[i];
                 if (strOneRight == "")
                     continue;
 
                 string strFirstChar = strOneRight.Substring(0, 1);
-                
-                // Ç°ÃæÓĞ+ , - ºÅµÄÇé¿ö
+
+                // å‰é¢æœ‰+ , - å·çš„æƒ…å†µ
                 if (strFirstChar == "+" || strFirstChar == "-")
                 {
                     strOneRight = strOneRight.Substring(1);
@@ -315,10 +311,10 @@ namespace DigitalPlatform.rms
                 }
             }
 
-            return ResultType.None;            
+            return ResultType.None;
         }
 
-        // ¹æ·¶»¯È¨ÏŞ×Ö·û´®
+        // è§„èŒƒåŒ–æƒé™å­—ç¬¦ä¸²
         private string CanonicalizeRightString(string strRights)
         {
             for (int i = 0; i < this.MacroRights.Count; i++)
@@ -330,7 +326,7 @@ namespace DigitalPlatform.rms
             return strRights;
         }
 
-        // µÃµ½Ö¸¶¨Ğ¡½ÚµÄÈ¨ÏŞ
+        // å¾—åˆ°æŒ‡å®šå°èŠ‚çš„æƒé™
         private string GetSectionRights(string strRights,
             string strCategory)
         {
@@ -349,12 +345,12 @@ namespace DigitalPlatform.rms
 
     public enum ResultType
     {
-        Minus = -1, // ¼õ
-        None = 0,   // Ã»ÓĞ¶¨Òå    
-        Plus = 1,   // ¼Ó
+        Minus = -1, // å‡
+        None = 0,   // æ²¡æœ‰å®šä¹‰    
+        Plus = 1,   // åŠ 
     }
 
-    // ×ÊÔ´ÀàĞÍ
+    // èµ„æºç±»å‹
     public enum ResType
     {
         None = 0,
@@ -365,7 +361,7 @@ namespace DigitalPlatform.rms
         File = 5,
     }
 
-    // ºêÈ¨ÏŞ¶ÔÏó
+    // å®æƒé™å¯¹è±¡
     public class MacroRightItem
     {
         public string MacroRight = "";

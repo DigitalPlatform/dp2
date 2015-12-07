@@ -16,6 +16,20 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 将 strMime 的左边部分和 strLeftParam 进行比较
+        // return:
+        //      false   不匹配
+        //      true    匹配
+        public static bool MatchMIME(string strMime, string strLeftParam)
+        {
+            string strLeft = "";
+            string strRight = "";
+            ParseTwoPart(strMime, "/", out strLeft, out strRight);
+            if (string.Compare(strLeft, strLeftParam, true) == 0)
+                return true;
+            return false;
+        }
+
         // 
         /// <summary>
         /// 过滤掉最外面的 {} 字符
@@ -98,7 +112,7 @@ namespace DigitalPlatform.Text
             string strPrefix)
         {
             List<string> results = new List<string>();
-            foreach(string s in list)
+            foreach (string s in list)
             {
                 if (s.StartsWith(strPrefix) == true)
                     results.Add(s);
@@ -186,6 +200,13 @@ namespace DigitalPlatform.Text
                 return true;
 
             string strObject = StringUtil.GetFirstPartPath(ref strPath);
+
+            // 书目记录名下的外部 URL
+            if (strObject == "url")
+            {
+                strObjectID = strPath;
+                return true;
+            }
 
             // 对象资源
             if (strObject != "object")
@@ -359,12 +380,17 @@ namespace DigitalPlatform.Text
         // 从style字符串中得到 format:XXXX子串
         public static string GetStyleParam(string strStyle, string strParamName)
         {
-            string[] parts = strStyle.Split(new char[] { ',' });
+            string strHead = strParamName + ":";
+            string[] parts = strStyle.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string strPart in parts)
             {
                 string strText = strPart.Trim();
+                if (strText.StartsWith(strHead) == true)
+                    return strText.Substring(strHead.Length).Trim();
+#if NO
                 if (StringUtil.HasHead(strText, strParamName + ":") == true)
                     return strText.Substring((strParamName + ":").Length).Trim();
+#endif
             }
 
             return null;
@@ -2027,9 +2053,12 @@ namespace DigitalPlatform.Text
             return strText.Substring(0, nMaxLength) + "...";
         }
 
-        // 得到strPath的第一部分,以'/'作为间隔符,同时strPath缩短
+        // 得到strPath的第一部分,以'/'作为间隔符,同时 strPath 缩短
         public static string GetFirstPartPath(ref string strPath)
         {
+            if (string.IsNullOrEmpty(strPath) == true)
+                return "";
+
             string strResult = "";
 
             int nIndex = strPath.IndexOf('/');
@@ -2045,9 +2074,6 @@ namespace DigitalPlatform.Text
 
             return strResult;
         }
-
-
-
 
         // 修改字符串某一个位字符
         public static string SetAt(string strText, int index, char c)
@@ -2073,7 +2099,6 @@ namespace DigitalPlatform.Text
 
             return strText;
         }
-
 
         /*
         public static string Format(params string[] list)
@@ -2797,16 +2822,13 @@ namespace DigitalPlatform.Text
         // 得到xml中适用的字符串，这是替换了xml敏感符号为实体的字符串
         public static string GetXmlString(string strText)
         {
-            XmlTextWriter xmlTextWriter = null;
-            TextWriter textWrite = null;
-
-            textWrite = new StringWriter();
-            xmlTextWriter = new XmlTextWriter(textWrite);
-
-            xmlTextWriter.WriteString(strText);
-            return textWrite.ToString();
+            using (TextWriter textWrite = new StringWriter())
+            using (XmlTextWriter xmlTextWriter = new XmlTextWriter(textWrite))
+            {
+                xmlTextWriter.WriteString(strText);
+                return textWrite.ToString();
+            }
         }
-
 
         public static string GetVisualableStringSimple(string strText)
         {

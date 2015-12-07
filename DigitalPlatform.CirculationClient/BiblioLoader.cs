@@ -97,7 +97,7 @@ namespace DigitalPlatform.CirculationClient
                     string[] results = null;
                     byte[] timestamp = null;
                     string strError = "";
-                    Channel.Timeout = new TimeSpan(0, 0, 5);
+                    // Channel.Timeout = new TimeSpan(0, 0, 5); 应该让调主设置这个值
                     long lRet = Channel.GetBiblioInfos(
                         this.Stop,
                         strCommand,

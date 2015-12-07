@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -24,7 +24,7 @@ namespace DigitalPlatform.LibraryServer
 {
 
 #if NOOOOOOOOOOOOO
-    // Ò»¸ö±êÌâĞĞ
+    // ä¸€ä¸ªæ ‡é¢˜è¡Œ
     [Serializable()]
     public class Line
     {
@@ -37,21 +37,21 @@ namespace DigitalPlatform.LibraryServer
 
         // public string m_strParentID = "";
 
-        // public string m_strArticleState = "";	// Ìû×Ó×´Ì¬£º¾«»ª¡¢...¡£
-        // ´Óxml¼ÇÂ¼ÖĞ<state>ÔªËØ»ñµÃ
+        // public string m_strArticleState = "";	// å¸–å­çŠ¶æ€ï¼šç²¾åã€...ã€‚
+        // ä»xmlè®°å½•ä¸­<state>å…ƒç´ è·å¾—
 
-        // public string m_strArticleTitle = "";	// Ìû×Ó±êÌâ
-        // ´Óxml¼ÇÂ¼ÖĞ<title>ÔªËØ»ñµÃ
+        // public string m_strArticleTitle = "";	// å¸–å­æ ‡é¢˜
+        // ä»xmlè®°å½•ä¸­<title>å…ƒç´ è·å¾—
 
 
-        // public string m_strAuthor = "";	// ×÷Õß
-        // ´Óxml¼ÇÂ¼ÖĞ<author>ÔªËØ»ñµÃ
+        // public string m_strAuthor = "";	// ä½œè€…
+        // ä»xmlè®°å½•ä¸­<author>å…ƒç´ è·å¾—
 
-        public DateTime m_timeCreate;	// ¶¥²ãÌû×Ó´´½¨Ê±¼ä
+        public DateTime m_timeCreate;	// é¡¶å±‚å¸–å­åˆ›å»ºæ—¶é—´
 
-        // public string m_strLastUpdate = "";	// ËùÓĞ¸úÌûÖĞ£¬×îºó¸üĞÂÊ±¼ä
+        // public string m_strLastUpdate = "";	// æ‰€æœ‰è·Ÿå¸–ä¸­ï¼Œæœ€åæ›´æ–°æ—¶é—´
         public DateTime m_timeLastUpdate;
-        // ´Óxml¼ÇÂ¼ÖĞ£¬<tree>ÔªËØÏÂ¼¶ËùÓĞ<rec>ÔªËØÖĞµÄÈÕÆÚÊôĞÔ¼ÆËã¶øµÃ
+        // ä»xmlè®°å½•ä¸­ï¼Œ<tree>å…ƒç´ ä¸‹çº§æ‰€æœ‰<rec>å…ƒç´ ä¸­çš„æ—¥æœŸå±æ€§è®¡ç®—è€Œå¾—
 
         // public string m_strSummary = "";
 
@@ -63,13 +63,13 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ´Ó·şÎñÆ÷¶ËµÃµ½XMLÊı¾İ£¬³õÊ¼»¯Èô¸É±äÁ¿
+        // ä»æœåŠ¡å™¨ç«¯å¾—åˆ°XMLæ•°æ®ï¼Œåˆå§‹åŒ–è‹¥å¹²å˜é‡
         // parameters:
-        //		page	Èç¹û!=null£¬ÔÊĞíÁéÃôÖĞ¶Ï
+        //		page	å¦‚æœ!=nullï¼Œå…è®¸çµæ•ä¸­æ–­
         // return:
-        //		-1	³ö´í
-        //		0	Õı³£½áÊø
-        //		1	±»ÓÃ»§ÖĞ¶Ï
+        //		-1	å‡ºé”™
+        //		0	æ­£å¸¸ç»“æŸ
+        //		1	è¢«ç”¨æˆ·ä¸­æ–­
         public int InitialInfo(
             System.Web.UI.Page page,
             RmsChannel channel,
@@ -84,7 +84,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(this.m_strRecPath) == true)
             {
-                strError = "m_strRecPathÉĞÎ´³õÊ¼»¯";
+                strError = "m_strRecPathå°šæœªåˆå§‹åŒ–";
                 return -1;
             }
 
@@ -95,10 +95,10 @@ namespace DigitalPlatform.LibraryServer
             byte[] baTimeStamp;
             string strOutputPath;
 
-            Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+            Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
             if (page != null
-                && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 return 1;
 
 
@@ -111,15 +111,15 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "»ñÈ¡¼ÇÂ¼ '" + this.m_strRecPath + "' Ê±³ö´í: " + strError;
+                strError = "è·å–è®°å½• '" + this.m_strRecPath + "' æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
             if (page != null
-                && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 return 1;
 
-            // ´¦ÀíÊı¾İ
+            // å¤„ç†æ•°æ®
             nRet = line.ProcessXml(
                 page,
                 strContent,
@@ -134,13 +134,13 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // Îö³öxmlÖĞµÄÊı¾İ
+        // æå‡ºxmlä¸­çš„æ•°æ®
         // parameters:
-        //		page	Èç¹û!=null£¬ÔÊĞíÁéÃôÖĞ¶Ï
+        //		page	å¦‚æœ!=nullï¼Œå…è®¸çµæ•ä¸­æ–­
         // return:
-        //		-1	³ö´í
-        //		0	Õı³£½áÊø
-        //		1	±»ÓÃ»§ÖĞ¶Ï
+        //		-1	å‡ºé”™
+        //		0	æ­£å¸¸ç»“æŸ
+        //		1	è¢«ç”¨æˆ·ä¸­æ–­
         public int ProcessXml(
             System.Web.UI.Page page,
             string strXml,
@@ -149,7 +149,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             if (page != null
-                && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 return 1;
 
 
@@ -167,16 +167,16 @@ namespace DigitalPlatform.LibraryServer
 
             // this.m_strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
 
-            // Ìû×Ó×´Ì¬£º¾«»ª¡¢...¡£
+            // å¸–å­çŠ¶æ€ï¼šç²¾åã€...ã€‚
             // this.m_strArticleState = DomUtil.GetElementText(dom.DocumentElement, "state");
 
-            // Ìû×Ó±êÌâ
+            // å¸–å­æ ‡é¢˜
             // this.m_strArticleTitle = DomUtil.GetElementText(dom.DocumentElement, "title");
 
-            // ×÷Õß
+            // ä½œè€…
             // this.m_strAuthor = DomUtil.GetElementText(dom.DocumentElement, "creator");
 
-            // ÕªÒª
+            // æ‘˜è¦
             // this.m_strSummary = DomUtil.GetElementText(dom.DocumentElement, "description"); // ??
 
             XmlNode node = dom.DocumentElement.SelectSingleNode("operations/operation[@name='create']");
@@ -226,14 +226,14 @@ namespace DigitalPlatform.LibraryServer
 
         byte[] m_buffer = null;
 
-        long m_ticks = 0;	// ×¨ÃÅ´Óm_line³ÉÔ±ÖĞÌá³ö£¬±ãÓÚÅÅĞò
+        long m_ticks = 0;	// ä¸“é—¨ä»m_lineæˆå‘˜ä¸­æå‡ºï¼Œä¾¿äºæ’åº
         // internal long m_id = 0;
         internal string m_strRecPath = "";
 
         long m_bColumnTop = 0;
 
 
-        Line m_line = null;	// Line¶ÔÏó?
+        Line m_line = null;	// Lineå¯¹è±¡?
         public Line Line
         {
             get
@@ -244,7 +244,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 m_line = value;
 
-                // ³õÊ¼»¯¶ş½øÖÆÄÚÈİ
+                // åˆå§‹åŒ–äºŒè¿›åˆ¶å†…å®¹
                 MemoryStream s = new MemoryStream();
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(s, m_line);
@@ -267,7 +267,7 @@ namespace DigitalPlatform.LibraryServer
                 m_bColumnTop = 0;
 
                 if (this.m_ticks == 0)
-                    throw (new Exception("ticks²»ÄÜÎª0"));
+                    throw (new Exception("ticksä¸èƒ½ä¸º0"));
 
                 this.m_strRecPath = m_line.m_strRecPath;
             }
@@ -288,15 +288,15 @@ namespace DigitalPlatform.LibraryServer
         public override void ReadData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-            // ¶ÁÈëticks
+            // è¯»å…¥ticks
             byte[] ticksbuffer = new byte[8];
             stream.Read(ticksbuffer, 0, 8);
             this.m_ticks = BitConverter.ToInt64(ticksbuffer, 0);
 
             if (this.m_ticks == 0)
-                throw (new Exception("ticks²»ÄÜÎª0"));
+                throw (new Exception("ticksä¸èƒ½ä¸º0"));
 
             // 
             stream.Read(ticksbuffer, 0, 8);
@@ -315,11 +315,11 @@ namespace DigitalPlatform.LibraryServer
             this.m_strRecPath = System.Text.Encoding.UTF8.GetString(textbuffer);
 
 
-            // ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+            // è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
             byte[] buffer = new byte[this.Length - 8 * 2 - (nLength + 4)];
             stream.Read(buffer, 0, buffer.Length);
 
-            // »¹Ô­ÄÚ´æ¶ÔÏó
+            // è¿˜åŸå†…å­˜å¯¹è±¡
             MemoryStream s = new MemoryStream(buffer);
 
             BinaryFormatter formatter = new BinaryFormatter();
@@ -332,15 +332,15 @@ namespace DigitalPlatform.LibraryServer
         public override void ReadCompareData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-            // ¶ÁÈëticks
+            // è¯»å…¥ticks
             byte[] ticksbuffer = new byte[8];
             stream.Read(ticksbuffer, 0, 8);
             this.m_ticks = BitConverter.ToInt64(ticksbuffer, 0);
 
             if (this.m_ticks == 0)
-                throw (new Exception("ticks²»ÄÜÎª0"));
+                throw (new Exception("ticksä¸èƒ½ä¸º0"));
 
             // 
             stream.Read(ticksbuffer, 0, 8);
@@ -358,26 +358,26 @@ namespace DigitalPlatform.LibraryServer
 
             this.m_strRecPath = System.Text.Encoding.UTF8.GetString(textbuffer);
 
-            m_line = null;	// ±íÊ¾line¶ÔÏó²»¿ÉÓÃ
+            m_line = null;	// è¡¨ç¤ºlineå¯¹è±¡ä¸å¯ç”¨
         }
 
         public override void WriteData(Stream stream)
         {
             if (m_line == null)
             {
-                throw (new Exception("m_lineÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_lineå°šæœªåˆå§‹åŒ–"));
             }
 
             if (m_buffer == null)
             {
-                throw (new Exception("m_bufferÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_bufferå°šæœªåˆå§‹åŒ–"));
             }
 
             if (this.m_ticks == 0)
-                throw (new Exception("ticks²»ÄÜÎª0"));
+                throw (new Exception("ticksä¸èƒ½ä¸º0"));
 
 
-            // µ¥¶ÀĞ´ÈëÊ±¼äticks
+            // å•ç‹¬å†™å…¥æ—¶é—´ticks
             byte[] buffer = BitConverter.GetBytes(this.m_ticks);
             stream.Write(buffer, 0, buffer.Length);
 
@@ -395,28 +395,28 @@ namespace DigitalPlatform.LibraryServer
             stream.Write(bufferLength, 0, 4);
             stream.Write(bufferText, 0, bufferText.Length);
 
-            // Ğ´ÈëLength¸öbytesµÄÄÚÈİ
+            // å†™å…¥Lengthä¸ªbytesçš„å†…å®¹
             stream.Write(m_buffer, 0, this.Length - 8 * 2 - (bufferText.Length + 4));
         }
 
-        // ÊµÏÖIComparable½Ó¿ÚµÄCompareTo()·½·¨,
-        // ¸ù¾İID±È½ÏÁ½¸ö¶ÔÏóµÄ´óĞ¡£¬ÒÔ±ãÅÅĞò£¬
-        // °´ÓÒ¶ÔÆë·½Ê½±È½Ï
+        // å®ç°IComparableæ¥å£çš„CompareTo()æ–¹æ³•,
+        // æ ¹æ®IDæ¯”è¾ƒä¸¤ä¸ªå¯¹è±¡çš„å¤§å°ï¼Œä»¥ä¾¿æ’åºï¼Œ
+        // æŒ‰å³å¯¹é½æ–¹å¼æ¯”è¾ƒ
         // obj: An object to compare with this instance
-        // ·µ»ØÖµ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
+        // è¿”å›å€¼ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
         // Less than zero: This instance is less than obj.
         // Zero: This instance is equal to obj.
         // Greater than zero: This instance is greater than obj.
-        // Òì³£: ArgumentException,obj is not the same type as this instance.
+        // å¼‚å¸¸: ArgumentException,obj is not the same type as this instance.
         public override int CompareTo(object obj)
         {
             TopArticleItem item = (TopArticleItem)obj;
 
             if (this.m_ticks == 0)
-                throw (new Exception("this.ticks²»ÄÜÎª0"));
+                throw (new Exception("this.ticksä¸èƒ½ä¸º0"));
 
             if (item.m_ticks == 0)
-                throw (new Exception("item.ticks²»ÄÜÎª0"));
+                throw (new Exception("item.ticksä¸èƒ½ä¸º0"));
 
             if (this.m_bColumnTop != item.m_bColumnTop)
             {
@@ -454,7 +454,7 @@ namespace DigitalPlatform.LibraryServer
 
 
     /// <summary>
-    /// Ò»¸öÀ¸Ä¿µÄ´ÅÅÌÎïÀí´æ´¢½á¹¹
+    /// ä¸€ä¸ªæ ç›®çš„ç£ç›˜ç‰©ç†å­˜å‚¨ç»“æ„
     /// </summary>
     public class ColumnStorage : ItemFileBase
     {
@@ -469,7 +469,7 @@ namespace DigitalPlatform.LibraryServer
             return new TopArticleItem();
         }
 
-        // ÊÇ·ñ±»³É¹¦´ò¿ª?
+        // æ˜¯å¦è¢«æˆåŠŸæ‰“å¼€?
         public bool Opened
         {
             get
@@ -481,10 +481,10 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ¿ìËÙ»ñµÃÊÂÏîµÄ¼ÇÂ¼Â·¾¶
+        // å¿«é€Ÿè·å¾—äº‹é¡¹çš„è®°å½•è·¯å¾„
         public string GetItemRecPath(Int64 nIndex)
         {
-            // ¼Ó¶ÁËø
+            // åŠ è¯»é”
             this.m_lock.AcquireReaderLock(m_nLockTimeout);
             try
             {

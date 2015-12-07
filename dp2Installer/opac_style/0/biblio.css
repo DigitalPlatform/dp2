@@ -26,7 +26,7 @@ TABLE.biblio TR.content TD.name
 {
 	font-weight: bolder;
 	text-align: right;
-	vertical-align:bottom; 
+	vertical-align:text-top; 
 
 	border-width:0px;
 	border-right-width:1px;

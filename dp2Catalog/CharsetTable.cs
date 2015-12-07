@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -9,7 +9,7 @@ using DigitalPlatform.IO;
 namespace dp2Catalog
 {
     /// <summary>
-    /// ×Ö·û¼¯Âë±í
+    /// å­—ç¬¦é›†ç è¡¨
     /// </summary>
     public class CharsetTable : ItemFileBase
     {
@@ -24,8 +24,8 @@ namespace dp2Catalog
 			return new CharsetItem();
 		}
 
-        // ¶ş·Ö·¨
-        // ¸ù¾İ¸ø³öµÄKeyµÃµ½Value
+        // äºŒåˆ†æ³•
+        // æ ¹æ®ç»™å‡ºçš„Keyå¾—åˆ°Value
         // return:
         //      -1  not found
         public int Search(string strKeyParam,
@@ -33,9 +33,9 @@ namespace dp2Catalog
         {
             strValue = "";
 
-            int k;	// Çø¼ä×ó
-            int m;	// Çø¼äÓÒ
-            int j = -1;	// Çø¼äÖĞ
+            int k;	// åŒºé—´å·¦
+            int m;	// åŒºé—´å³
+            int j = -1;	// åŒºé—´ä¸­
             string strKey;
             int nComp;
 
@@ -44,7 +44,7 @@ namespace dp2Catalog
             while (k <= m)
             {
                 j = (k + m) / 2;
-                // È¡µÃjÎ»ÖÃµÄÖµ
+                // å–å¾—jä½ç½®çš„å€¼
 
                 CharsetItem item = (CharsetItem)this[j];
 
@@ -58,7 +58,7 @@ namespace dp2Catalog
                 }
 
                 if (nComp > 0)
-                {	// strKeyParam½ÏĞ¡
+                {	// strKeyParamè¾ƒå°
                     m = j - 1;
                 }
                 else
@@ -74,15 +74,15 @@ namespace dp2Catalog
             return j;
         }
 
-        // ½«EACC×Ö·û»º³åÇøÖĞµÄ×Ö·û×ª»»ÎªUnicode×Ö·û
+        // å°†EACCå­—ç¬¦ç¼“å†²åŒºä¸­çš„å­—ç¬¦è½¬æ¢ä¸ºUnicodeå­—ç¬¦
         // paramters:
-        //		pszEACC	Ô¤ÏÈ×°ÁËEACC×Ö·ûµÄ»º³åÇø(ÖĞ¼ä²»ÄÜÓĞ·ÇEACC×Ö·û)
-        //		nEACCBytes		×Ö½ÚÊı¡£×¢ÒâÓ¦µ±Îª3µÄ±¶Êı
-        //		pUnicode	ÓÃÓÚ´æ·Å½á¹ûUnicode×Ö·ûµÄ»º³åÇø
-        //		nMaxUnicodeBytes	»º³åÇø×î´ó³ß´ç
+        //		pszEACC	é¢„å…ˆè£…äº†EACCå­—ç¬¦çš„ç¼“å†²åŒº(ä¸­é—´ä¸èƒ½æœ‰éEACCå­—ç¬¦)
+        //		nEACCBytes		å­—èŠ‚æ•°ã€‚æ³¨æ„åº”å½“ä¸º3çš„å€æ•°
+        //		pUnicode	ç”¨äºå­˜æ”¾ç»“æœUnicodeå­—ç¬¦çš„ç¼“å†²åŒº
+        //		nMaxUnicodeBytes	ç¼“å†²åŒºæœ€å¤§å°ºå¯¸
         // return:
-        //		-1	Ê§°Ü
-        //		ÆäËü£¬×ª»»³ÉµÄUnicode×Ö·ûÊı
+        //		-1	å¤±è´¥
+        //		å…¶å®ƒï¼Œè½¬æ¢æˆçš„Unicodeå­—ç¬¦æ•°
         public int EACCToUnicode(string strEACC,
             out string strUnicode,
             out string strError)
@@ -106,7 +106,7 @@ namespace dp2Catalog
             int nEACCBytes = strEACC.Length;
             if (nEACCBytes % 3 != 0)
             {
-                strError = "²Î¼Ó×ª»»µÄ×Ö½ÚÊıÓ¦µ±Îª3µÄ±¶Êı(µ«ÊÇÎª " + nEACCBytes.ToString() + ")";
+                strError = "å‚åŠ è½¬æ¢çš„å­—èŠ‚æ•°åº”å½“ä¸º3çš„å€æ•°(ä½†æ˜¯ä¸º " + nEACCBytes.ToString() + ")";
                 return -1;
             }
 
@@ -178,7 +178,7 @@ namespace dp2Catalog
 
                     i++;
 
-                    // ¿´¿´strPartÖĞÊÇ·ñÓĞ»ıÀÛµÄÄÚÈİ
+                    // çœ‹çœ‹strPartä¸­æ˜¯å¦æœ‰ç§¯ç´¯çš„å†…å®¹
                     if (strPart != "")
                     {
                         if ((strPart.Length % 3) != 0)
@@ -189,7 +189,7 @@ namespace dp2Catalog
                         Debug.Assert((strPart.Length % 3) == 0, "");
 
                         string strTemp = "";
-                        // strPartÖĞ±ØĞë´æ·Å·ÇUnicode×Ö·û´®
+                        // strPartä¸­å¿…é¡»å­˜æ”¾éUnicodeå­—ç¬¦ä¸²
                         int nRet = EACCToUnicode(strPart,
                             out strTemp,
                             out strError);
@@ -219,12 +219,12 @@ namespace dp2Catalog
                 if (bInEsc && nEscCount == 2)
                 {
                     if (strSource[i] == 0x24 && bInMultiple == true)
-                    {	// ¹ú»áÍ¼Êé¹İ$$1Çé¿ö
+                    {	// å›½ä¼šå›¾ä¹¦é¦†$$1æƒ…å†µ
                         i++;
-                        continue;	// nEscCount²»±ä£¬¼ÌĞø´¦Àí
+                        continue;	// nEscCountä¸å˜ï¼Œç»§ç»­å¤„ç†
                     }
                     if (strSource[i] == 0x28 && bInMultiple == false)
-                    { // ¹ú»áÍ¼Êé¹İ((BÇé¿ö
+                    { // å›½ä¼šå›¾ä¹¦é¦†((Bæƒ…å†µ
                         i++;
                         continue;
                     }
@@ -258,7 +258,7 @@ namespace dp2Catalog
 
 
 
-            // ¿´¿´strPartÖĞÊÇ·ñÓĞ»ıÀÛµÄÄÚÈİ
+            // çœ‹çœ‹strPartä¸­æ˜¯å¦æœ‰ç§¯ç´¯çš„å†…å®¹
             if (strPart != "")
             {
                 if ((strPart.Length % 3) != 0)
@@ -270,7 +270,7 @@ namespace dp2Catalog
 
                 string strTemp = "";
 
-                // strPartÖĞ±ØĞë´æ·Å·ÇUnicode×Ö·û´®
+                // strPartä¸­å¿…é¡»å­˜æ”¾éUnicodeå­—ç¬¦ä¸²
                 int nRet = EACCToUnicode(strPart,
                     out strTemp,
                     out strError);
@@ -351,10 +351,9 @@ namespace dp2Catalog
         public override void ReadData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-
-            // ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+            // è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
             m_buffer = new byte[this.Length];
             stream.Read(m_buffer, 0, m_buffer.Length);
         }
@@ -363,10 +362,9 @@ namespace dp2Catalog
         public override void ReadCompareData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-
-            // ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+            // è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
             m_buffer = new byte[this.Length];
             stream.Read(m_buffer, 0, m_buffer.Length);
         }
@@ -375,23 +373,22 @@ namespace dp2Catalog
         {
             if (m_buffer == null)
             {
-                throw (new Exception("m_bufferÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_bufferå°šæœªåˆå§‹åŒ–"));
             }
 
-
-            // Ğ´ÈëLength¸öbytesµÄÄÚÈİ
+            // å†™å…¥Lengthä¸ªbytesçš„å†…å®¹
             stream.Write(m_buffer, 0, this.Length);
         }
 
-        // ÊµÏÖIComparable½Ó¿ÚµÄCompareTo()·½·¨,
-        // ¸ù¾İID±È½ÏÁ½¸ö¶ÔÏóµÄ´óĞ¡£¬ÒÔ±ãÅÅĞò£¬
-        // °´ÓÒ¶ÔÆë·½Ê½±È½Ï
+        // å®ç°IComparableæ¥å£çš„CompareTo()æ–¹æ³•,
+        // æ ¹æ®IDæ¯”è¾ƒä¸¤ä¸ªå¯¹è±¡çš„å¤§å°ï¼Œä»¥ä¾¿æ’åºï¼Œ
+        // æŒ‰å³å¯¹é½æ–¹å¼æ¯”è¾ƒ
         // obj: An object to compare with this instance
-        // ·µ»ØÖµ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
+        // è¿”å›å€¼ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
         // Less than zero: This instance is less than obj.
         // Zero: This instance is equal to obj.
         // Greater than zero: This instance is greater than obj.
-        // Òì³£: ArgumentException,obj is not the same type as this instance.
+        // å¼‚å¸¸: ArgumentException,obj is not the same type as this instance.
         public override int CompareTo(object obj)
         {
             CharsetItem item = (CharsetItem)obj;

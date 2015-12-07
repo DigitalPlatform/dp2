@@ -51,8 +51,8 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>42</ApplicationRevision>
-    <ApplicationVersion>2.5.0.%2a</ApplicationVersion>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>2.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -433,6 +433,7 @@
     <Compile Include="Label\SelectPaperDialog.Designer.cs">
       <DependentUpon>SelectPaperDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainForm\BiblioPropertyTask.cs" />
     <Compile Include="MainForm\DbNameExtension.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -452,10 +453,12 @@
     <Compile Include="MainForm\InitialExtension.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm\ItemPropertyTask.cs" />
     <Compile Include="MainForm\PackageEventLog.cs" />
     <Compile Include="MainForm\PinyinExtension.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm\PropertyTask.cs" />
     <Compile Include="MainForm\QrExtension.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -2718,7 +2721,11 @@
       <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.MessageClient\DigitalPlatform.MessageClient.csproj">
+    <ProjectReference Include="..\DigitalPlatform.MessageClient.GUI\DigitalPlatform.MessageClient.GUI.csproj">
+      <Project>{5add6b7b-9dad-4482-aa19-7b5846549630}</Project>
+      <Name>DigitalPlatform.MessageClient.GUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MessageClient\4.0\DigitalPlatform.MessageClient.csproj">
       <Project>{ca005349-028d-48a4-ba05-6023625cc9bb}</Project>
       <Name>DigitalPlatform.MessageClient</Name>
     </ProjectReference>
@@ -2746,7 +2753,7 @@
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
       <Name>DigitalPlatform.Xml</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+    <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>

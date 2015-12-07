@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -12,7 +12,7 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.rms.Client
 {
 	/// <summary>
-	/// µ¼ÈëÅäÖÃÎÄ¼şµÄ¶Ô»°¿ò
+	/// å¯¼å…¥é…ç½®æ–‡ä»¶çš„å¯¹è¯æ¡†
 	/// </summary>
 	public class OpenCfgFileDlg : System.Windows.Forms.Form
 	{
@@ -90,7 +90,7 @@ namespace DigitalPlatform.rms.Client
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 12);
             this.label3.TabIndex = 24;
-            this.label3.Text = "Ã½ÌåÀàĞÍ(&M):";
+            this.label3.Text = "åª’ä½“ç±»å‹(&M):";
             // 
             // button_Cancel
             // 
@@ -99,7 +99,7 @@ namespace DigitalPlatform.rms.Client
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 23;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_OK
@@ -108,7 +108,7 @@ namespace DigitalPlatform.rms.Client
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 22;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_size
@@ -126,7 +126,7 @@ namespace DigitalPlatform.rms.Client
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(53, 12);
             this.label5.TabIndex = 20;
-            this.label5.Text = "³ß´ç(&S):";
+            this.label5.Text = "å°ºå¯¸(&S):";
             // 
             // button_findLocalPath
             // 
@@ -151,7 +151,7 @@ namespace DigitalPlatform.rms.Client
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(101, 12);
             this.label4.TabIndex = 17;
-            this.label4.Text = "±¾µØÎïÀíÂ·¾¶(&P):";
+            this.label4.Text = "æœ¬åœ°ç‰©ç†è·¯å¾„(&P):";
             // 
             // OpenCfgFileDlg
             // 
@@ -171,7 +171,7 @@ namespace DigitalPlatform.rms.Client
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "OpenCfgFileDlg";
             this.ShowInTaskbar = false;
-            this.Text = "µ¼ÈëÅäÖÃÎÄ¼ş";
+            this.Text = "å¯¼å…¥é…ç½®æ–‡ä»¶";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -182,7 +182,7 @@ namespace DigitalPlatform.rms.Client
 		{
 			if (textBox_localPath.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÎÄ¼ş±¾µØÂ·¾¶");
+				MessageBox.Show(this, "å°šæœªæŒ‡å®šæ–‡ä»¶æœ¬åœ°è·¯å¾„");
 				return;
 			}
 		
@@ -202,7 +202,7 @@ namespace DigitalPlatform.rms.Client
 		private void button_findLocalPath_Click(object sender, System.EventArgs e)
 		{
 			OpenFileDialog dlg = new OpenFileDialog();
-			dlg.Title = "Ñ¡ÔñÎÄ¼ş";
+			dlg.Title = "é€‰æ‹©æ–‡ä»¶";
 			dlg.Filter = "All files (*.*)|*.*" ;
 			dlg.FilterIndex = 2 ;
 			dlg.RestoreDirectory = true ;
@@ -224,7 +224,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 #if NO
-		// ¶ÁÈ¡ÎÄ¼şÇ°256bytes
+		// è¯»å–æ–‡ä»¶å‰256bytes
 		byte[] ReadFirst256Bytes(string strFileName)
 		{
 			FileStream fileSource = File.Open(

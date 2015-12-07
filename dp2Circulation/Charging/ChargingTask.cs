@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Drawing;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
@@ -10,7 +11,6 @@ using DigitalPlatform.CirculationClient;
 using System.Diagnostics;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Drawing;
 using DigitalPlatform.CirculationClient.localhost;
 
 namespace dp2Circulation
@@ -341,17 +341,7 @@ namespace dp2Circulation
                         }
 
                         stop.SetMessage("");
-
-#if NO
-                    if (bStop == true)
-                    {
-                        this.m_bStopThread = true;
-                        this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
-                        return;
                     }
-#endif
-                    }
-
                 }
                 finally
                 {
@@ -697,7 +687,7 @@ out strError);
                 }
             }
 
-        // REDO:
+            // REDO:
             string[] aDupPath = null;
             string[] item_records = null;
             string[] reader_records = null;
@@ -983,7 +973,7 @@ end_time);
             {
                 strReaderBarcode = "";
             }
-        //REDO:
+            //REDO:
             string[] aDupPath = null;
             string[] item_records = null;
             string[] reader_records = null;

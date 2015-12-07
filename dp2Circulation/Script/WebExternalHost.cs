@@ -209,8 +209,8 @@ namespace dp2Circulation
             {
                 if (this.Channel.IsInSearching > 0)
                 {
-                    // this.Channel.Abort();
-                    this.Channel.AbortIt(); // 能立即切断通讯 2015/10/17
+                    this.Channel.Abort();
+                    // this.Channel.AbortIt(); // 能立即切断通讯。但会留下很多丢弃的通道，很快会突破服务器端对每个 IP 50 个通道的限制
                 }
             }
 #else

@@ -49,83 +49,6 @@ namespace DigitalPlatform.CirculationClient
         PasswordError = 2,  // 密码不正确
     }
 
-    /// <summary>
-    /// 登录前的事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void BeforeLoginEventHandle(object sender,
-    BeforeLoginEventArgs e);
-
-    /// <summary>
-    /// 登录前事件的参数
-    /// </summary>
-    public class BeforeLoginEventArgs : EventArgs
-    {
-        /// <summary>
-        /// [in] 是否为第一次触发
-        /// </summary>
-        public bool FirstTry = true;    // [in] 是否为第一次触发
-        /// <summary>
-        /// [in] 图书馆应用服务器 URL
-        /// </summary>
-        public string LibraryServerUrl = "";    // [in] 图书馆应用服务器URL
-        /// <summary>
-        /// [out] 用户名
-        /// </summary>
-        public string UserName = "";    // [out] 用户名
-        /// <summary>
-        /// [out] 密码
-        /// </summary>
-        public string Password = "";    // [out] 密码
-        /// <summary>
-        /// [out] 工作台号
-        /// </summary>
-        public string Parameters = "";    // [out] 工作台号
-        // public bool IsReader = false;   // [out] 登录者是否为读者
-        /// <summary>
-        /// [out] 短期保存密码
-        /// </summary>
-        public bool SavePasswordShort = false;  // [out] 短期保存密码
-        /// <summary>
-        /// [out] 长期保存密码
-        /// </summary>
-        public bool SavePasswordLong = false;   // [out] 长期保存密码
-        /// <summary>
-        /// [out] 事件调用是否失败
-        /// </summary>
-        public bool Failed = false; // [out] 事件调用是否失败
-        /// <summary>
-        /// [out] 事件调用是否被放弃
-        /// </summary>
-        public bool Cancel = false; // [out] 事件调用是否被放弃
-        /// <summary>
-        /// [in, out] 事件调用错误信息
-        /// </summary>
-        public string ErrorInfo = "";   // [in, out] 事件调用错误信息
-        /// <summary>
-        /// [in, out] 前次登录失败的原因，本次登录失败的原因
-        /// </summary>
-        public LoginFailCondition LoginFailCondition = LoginFailCondition.NormalError;  // [in, out] 前次登录失败的原因，本次登录失败的原因
-    }
-
-    /// <summary>
-    /// 登录后的事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void AfterLoginEventHandle(object sender,
-    AfterLoginEventArgs e);
-
-    /// <summary>
-    /// 登录后事件的参数
-    /// </summary>
-    public class AfterLoginEventArgs : EventArgs
-    {
-        public string ErrorInfo = "";
-        // public bool Canceled = false;
-    }
-
 #if NO
     public enum CertMode
     {
@@ -162,7 +85,7 @@ namespace DigitalPlatform.CirculationClient
         /// <summary>
         /// CloseTimeout
         /// </summary>
-        public TimeSpan CloseTimeout = new TimeSpan(0, 0, 30);
+        public TimeSpan CloseTimeout = new TimeSpan(0, 0, 5);
 
         /// <summary>
         /// OpenTimeout
@@ -202,7 +125,7 @@ namespace DigitalPlatform.CirculationClient
                 }
             }
         }
-        
+
 #if BASIC_HTTP
         localhost.dp2libraryRESTClient m_ws = null;	// 拥有
 #else
@@ -485,9 +408,9 @@ out strError);
 #if BASIC_HTTP
         localhost.dp2libraryRESTClient 
 #else
-        localhost.dp2libraryClient 
-#endif 
-            ws
+        localhost.dp2libraryClient
+#endif
+ ws
         {
             get
             {
@@ -508,76 +431,76 @@ out strError);
                     }
                     else
 #endif
-                        
-                    if (uri.Scheme.ToLower() == "basic.http")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
+
+                        if (uri.Scheme.ToLower() == "basic.http")
+                        {
+                            EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
 
 #if BASIC_HTTP
                         this.m_ws = new localhost.dp2libraryRESTClient(CreateBasic0Binding(), address);
 #else
-                        throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
+                            throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
 
-                    }
+                        }
 #if !BASIC_HTTP
-                    else if (uri.Scheme.ToLower() == "net.tcp")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl);
-
-                        this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
-                    }
-                    else
-                    {
-                        if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
-                            bWs0 = true;
-
-                        if (bWs0 == false)
+                        else if (uri.Scheme.ToLower() == "net.tcp")
                         {
-                            // ws1 
-                            EndpointAddress address = null;
+                            EndpointAddress address = new EndpointAddress(strUrl);
 
+                            this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
+                        }
+                        else
+                        {
+                            if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
+                                bWs0 = true;
+
+                            if (bWs0 == false)
                             {
-                                address = new EndpointAddress(strUrl);
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+                                // ws1 
+                                EndpointAddress address = null;
 
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
-                new MyValidator();
+                                {
+                                    address = new EndpointAddress(strUrl);
+                                    this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
+                    new MyValidator();
 
 #if NO
                                 ////
                                 this.m_ws.ClientCredentials.UserName.UserName = "test";
                                 this.m_ws.ClientCredentials.UserName.Password = "";
 #endif
+                                }
+
+                                /*
+                                {
+
+                                    EndpointIdentity identity = EndpointIdentity.CreateDnsIdentity("DigitalPlatform");
+                                    address = new EndpointAddress(new Uri(strUrl),
+                                        identity, new AddressHeaderCollection());
+                                    this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                    // this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
+                    new MyValidator();
+                                }
+                                 * */
+
                             }
-                            
-                            /*
+                            else
                             {
+                                // ws0
+                                EndpointAddress address = new EndpointAddress(strUrl);
 
-                                EndpointIdentity identity = EndpointIdentity.CreateDnsIdentity("DigitalPlatform");
-                                address = new EndpointAddress(new Uri(strUrl),
-                                    identity, new AddressHeaderCollection());
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
-
-                                // this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
-                new MyValidator();
+                                this.m_ws = new localhost.dp2libraryClient(CreateWs0Binding(), address);
+                                this.m_ws.ClientCredentials.UserName.UserName = "test";
+                                this.m_ws.ClientCredentials.UserName.Password = "";
                             }
-                             * */
-
                         }
-                        else
-                        {
-                            // ws0
-                            EndpointAddress address = new EndpointAddress(strUrl);
-
-                            this.m_ws = new localhost.dp2libraryClient(CreateWs0Binding(), address);
-                            this.m_ws.ClientCredentials.UserName.UserName = "test";
-                            this.m_ws.ClientCredentials.UserName.Password = "";
-                        }
-                    }
 #endif
 
 #if BASIC_HTTP
@@ -619,7 +542,7 @@ out strError);
                     throw (new Exception("Url值此时应当不等于空"));
                 }
                 Debug.Assert(this.Url != "", "Url值此时应当不等于空");
-#endif 
+#endif
 
                 // m_ws.Url = this.Url;
                 // m_ws.CookieContainer = this.Cookies;
@@ -657,7 +580,7 @@ out strError);
         public static int CrashReport(
             string strSender,
             string strSubject,  // 一般为 "dp2circulation"
-            string strContent, 
+            string strContent,
             out string strError)
         {
             strError = "";
@@ -935,6 +858,7 @@ out strError);
             strOutputUserName = "";
             strLibraryCode = "";
 
+        REDO:
             try
             {
                 LibraryServerResult result = ws.Login(out strOutputUserName,
@@ -950,9 +874,16 @@ out strError);
             }
             catch (Exception ex)
             {
+#if NO
                 // TODO: 是否显示 InnerException? 本地时钟不对怎么办?
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
+#endif
+                // 2015/12/4
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
             }
         }
 
@@ -1016,13 +947,15 @@ out strError);
 
             if (bDoEvents == true)
             {
+                /*
                 try
                 {
-                    Application.DoEvents();	// 出让界面控制权
                 }
                 catch
                 {
                 }
+                 * */
+                Application.DoEvents();	// 出让界面控制权
             }
 
             System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
@@ -1240,7 +1173,6 @@ out strError);
             {
                 this.EndSearch();
             }
-
         }
 
         /// <summary>
@@ -1772,7 +1704,7 @@ out strError);
             searchresults = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetSearchResult(
@@ -1931,7 +1863,7 @@ out strError);
             strXml = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetRecord(
@@ -2096,7 +2028,7 @@ out strError);
             DigitalPlatform.Stop stop,
             string strBarcode,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strError)
         {
             byte[] baTimestamp = null;
@@ -2133,9 +2065,9 @@ out strError);
             DigitalPlatform.Stop stop,
             string strBarcode,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strRecPath,
-            out byte [] baTimestamp,
+            out byte[] baTimestamp,
             out string strError)
         {
             results = null;
@@ -2143,11 +2075,11 @@ out strError);
             strRecPath = "";
             baTimestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetReaderInfo(
-                    strBarcode, 
+                    strBarcode,
                     strResultTypeList,
                     null,
                     null);
@@ -2372,7 +2304,7 @@ out strError);
             string strResultType,
             out string strResult,
             out string strItemRecPath,
-            out byte [] item_timestamp,
+            out byte[] item_timestamp,
             string strBiblioType,
             out string strBiblio,
             out string strBiblioRecPath,
@@ -2387,12 +2319,12 @@ out strError);
 
             item_timestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetItemInfo(
                     strItemDbType,
-                    strBarcode, 
+                    strBarcode,
                     strItemXml,
                     strResultType,
                     strBiblioType,
@@ -2474,12 +2406,12 @@ out strError);
             string strItemBarcode,
             string strConfirmItemRecPath,
             bool bForce,
-            string [] saBorrowedItemBarcode,
+            string[] saBorrowedItemBarcode,
             string strStyle,
             string strItemFormatList,
-            out string [] item_records,
+            out string[] item_records,
             string strReaderFormatList,
-            out string [] reader_records,
+            out string[] reader_records,
             string strBiblioFormatList,
             out string[] biblio_records,
             out string[] aDupPath,
@@ -2496,7 +2428,7 @@ out strError);
             strError = "";
 
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginBorrow(
@@ -2599,10 +2531,10 @@ out strError);
             string strItemFormatList,
             out string[] item_records,
             string strReaderFormatList,
-            out string [] reader_records,
+            out string[] reader_records,
             string strBiblioFormatList,
             out string[] biblio_records,
-            out string [] aDupPath,
+            out string[] aDupPath,
             out string strOutputReaderBarcode,
             out ReturnInfo return_info,
             out string strError)
@@ -2615,7 +2547,7 @@ out strError);
             strOutputReaderBarcode = "";
             return_info = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginReturn(
@@ -2782,7 +2714,7 @@ out strError);
             long lStart,
             long lCount,
             string strStyle,
-            string strLang, 
+            string strLang,
             out EntityInfo[] entityinfos,
             out string strError)
         {
@@ -2857,7 +2789,7 @@ out strError);
         public long SetEntities(
             DigitalPlatform.Stop stop,
             string strBiblioRecPath,
-            EntityInfo [] entityinfos,
+            EntityInfo[] entityinfos,
             out EntityInfo[] errorinfos,
             out string strError)
         {
@@ -3261,7 +3193,7 @@ out strError);
             values = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetValueTable(
@@ -3526,7 +3458,7 @@ out strError);
             string strName,
             int nStart,
             int nCount,
-            out CalenderInfo [] contents,
+            out CalenderInfo[] contents,
             out string strError)
         {
             strError = "";
@@ -3910,7 +3842,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetClock(
@@ -3972,7 +3904,7 @@ out strError);
             strTime = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetClock(
@@ -4037,7 +3969,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyReaderPassword(
@@ -4851,7 +4783,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyBarcode(
@@ -4902,7 +4834,7 @@ out strError);
             string strFileName,
             long lStart,
             long lLength,
-            out FileItemInfo [] infos,
+            out FileItemInfo[] infos,
             out string strError)
         {
             strError = "";
@@ -5526,7 +5458,7 @@ out strError);
             string strReaderBarcode,
             string strGateName,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strError)
         {
             strError = "";
@@ -5592,8 +5524,8 @@ out strError);
             out string strError)
         {
             strOutputReaderXml = "";
-            strOutputID = ""; 
-            
+            strOutputID = "";
+
             strError = "";
 
         REDO:
@@ -5652,7 +5584,7 @@ out strError);
             out string strError)
         {
             strOutputReaderXml = "";
-            strOutputID = ""; 
+            strOutputID = "";
             strError = "";
 
         REDO:
@@ -5704,7 +5636,7 @@ out strError);
         public long Settlement(
             DigitalPlatform.Stop stop,
             string strAction,
-            string [] ids,
+            string[] ids,
             out string strError)
         {
             strError = "";
@@ -6012,7 +5944,7 @@ out strError);
             {
                 IAsyncResult soapresult = this.ws.BeginSearchUsedZhongcihao(
                     strZhongcihaoGroupName,
-                    strClass, 
+                    strClass,
                     strResultSetName,
                     null,
                     null);
@@ -6235,7 +6167,7 @@ out strError);
             }
         }
 
-         // 查重
+        // 查重
         // parameters:
         //      strUsedProjectName  实际使用的查重方案名
         public long SearchDup(
@@ -6727,7 +6659,7 @@ out strError);
             CfgCache cache,
             string strPath,
             string strStyle,
-            byte [] remote_timestamp,
+            byte[] remote_timestamp,
             out string strResult,
             out string strMetaData,
             out byte[] baOutputTimeStamp,
@@ -6812,21 +6744,19 @@ out strError);
             {
                 Debug.Assert(strLocalName != "", "strLocalName不应为空");
 
-                StreamReader sr = null;
-
                 try
                 {
-                    sr = new StreamReader(strLocalName, Encoding.UTF8);
+                    using (StreamReader sr = new StreamReader(strLocalName, Encoding.UTF8))
+                    {
+                        strResult = sr.ReadToEnd();
+                        return 0;	// 以无错误姿态返回
+                    }
                 }
                 catch (Exception ex)
                 {
                     strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
-                strResult = sr.ReadToEnd();
-                sr.Close();
-
-                return 0;	// 以无错误姿态返回
             }
 
         GETDATA:
@@ -6850,12 +6780,12 @@ out strError);
             Debug.Assert(strLocalName != "", "PrepareLocalFile()返回的strLocalName为空");
 
             // 写入文件,以便以后从cache获取
-            StreamWriter sw = new StreamWriter(strLocalName,
+            using (StreamWriter sw = new StreamWriter(strLocalName,
                 false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strResult);
-            sw.Close();
-            sw = null;
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strResult);
+            }
 
             Debug.Assert(baOutputTimeStamp != null, "下层GetRes()返回的baOutputTimeStamp为空");
             nRet = cache.SetTimeStamp(strFullPath,
@@ -6985,12 +6915,12 @@ out strError);
             Debug.Assert(strLocalName != "", "PrepareLocalFile()返回的strLocalName为空");
 
             // 写入文件,以便以后从cache获取
-            StreamWriter sw = new StreamWriter(strLocalName,
+            using (StreamWriter sw = new StreamWriter(strLocalName,
                 false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strResult);
-            sw.Close();
-            sw = null;
+                System.Text.Encoding.UTF8))
+            {
+                sw.Write(strResult);
+            }
 
             Debug.Assert(baOutputTimeStamp != null, "下层GetRes()返回的baOutputTimeStamp为空");
             nRet = cache.SetTimeStamp(strFullPath,
@@ -7034,7 +6964,6 @@ out strError);
             {
                 Debug.Assert(false, "attachment style暂时不能使用");
             }
-
 
             // 检查参数
             if (StringUtil.IsInList("data", strStyle) == false)
@@ -7183,7 +7112,6 @@ out strError);
             } // end of for
 
             baOutputTimeStamp = timestamp;
-
             return 0;
         }
 
@@ -7226,7 +7154,6 @@ out strError);
                     out strOutputPath,
                     out strError);
             }
-
             finally
             {
                 if (fileTarget != null)
@@ -7303,9 +7230,6 @@ out strError);
                     return -1;
                 goto REDO;
             }
-
-
-
         }
 
         // 保存Xml记录。包装版本。用于保存文本类型的资源。
@@ -7504,6 +7428,7 @@ out strError);
         // 保存资源记录
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath
+        //      strObjectFileName   对象文件名。如果为空，表示本次调用仅根据 strLocalPath 和 strMime 修改 对象的 metadata 部分
         //		bTailHint	是否为最后一次写入操作。这是一个暗示参数，本函数将根据此参数为最后一次写入操作设置特殊的超时时间。
         //					假定有时整个资源尺寸很大，虽然每次局部写入耗时不多，但是最后一次写入因为服务器要执行整个资源转存
         //					的操作后API才返回，所以可能会耗费类似20分钟这样的长时间，导致WebService API超时失败。
@@ -7522,22 +7447,31 @@ out strError);
         {
             strError = "";
             output_timestamp = null;
-
-            FileInfo fi = new FileInfo(strObjectFileName);
-            if (fi.Exists == false)
-            {
-                strError = "文件 '" + strObjectFileName + "'不存在...";
-                return -1;
-            }
+            long lRet = 0;
 
             byte[] baTotal = null;
-            long lRet = RangeList.CopyFragment(
-                strObjectFileName,
-                strRange,
-                out baTotal,
-                out strError);
-            if (lRet == -1)
-                return -1;
+            long lTotalLength = 0;
+            if (string.IsNullOrEmpty(strObjectFileName) == false)
+            {
+                FileInfo fi = new FileInfo(strObjectFileName);
+                if (fi.Exists == false)
+                {
+                    strError = "文件 '" + strObjectFileName + "'不存在...";
+                    return -1;
+                }
+
+                lRet = RangeList.CopyFragment(
+                    strObjectFileName,
+                    strRange,
+                    out baTotal,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                lTotalLength = fi.Length;
+            }
+            else
+                lTotalLength = -1;
 
             // string strOutputPath = "";
 
@@ -7562,7 +7496,7 @@ out strError);
                 stop,
                 strPath,
                 strRange,
-                fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
+                lTotalLength,   // fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
                 baTotal,
                 strMetadata,
                 "", // strStyle,
@@ -7669,7 +7603,7 @@ out strError);
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetIssues(
-                    strBiblioRecPath, 
+                    strBiblioRecPath,
                     issueinfos,
                     null,
                     null);
@@ -8574,7 +8508,7 @@ out strError);
     out string strOutputBiblioRecPath,
     out string strError)
         {
-            return  GetCommentInfo(
+            return GetCommentInfo(
             stop,
             strRefID,
             "",
@@ -9180,7 +9114,7 @@ out strError);
         }
 
         public long ExistStatisInfo(string strDateRangeString,
-            out DateExist [] dates,
+            out DateExist[] dates,
             out string strError)
         {
             strError = "";
@@ -9233,6 +9167,7 @@ out strError);
 
         public long HitCounter(string strAction,
             string strName,
+            string strClientAddress,
             out long lValue,
             out string strError)
         {
@@ -9245,6 +9180,7 @@ out strError);
                 IAsyncResult soapresult = this.ws.BeginHitCounter(
                     strAction,
                     strName,
+                    strClientAddress,
                     null,
                     null);
 
@@ -9263,6 +9199,7 @@ out strError);
                 }
 
                 LibraryServerResult result = this.ws.EndHitCounter(
+                    out lValue,
                     soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
@@ -9270,7 +9207,6 @@ out strError);
                         goto REDO;
                     return -1;
                 }
-                lValue = result.Value;
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
@@ -9318,7 +9254,6 @@ out strError);
                         this.m_bStoped = true;
                         return;
                     }
-
                     // 否则，就走到Abort()那里
                 }
             }
@@ -9375,6 +9310,7 @@ Stack:
                     // TODO: Search()要单独处理
                     try
                     {
+                        // this.Timeout = new TimeSpan(0,0,4); // 2015/11/28
                         if (this.m_ws.State != CommunicationState.Faulted)
                             this.m_ws.Close();  // 如果长时间不返回怎么办？
                     }
@@ -9416,7 +9352,7 @@ Stack:
         //             stop.OnStop += new StopEventHandler(this.DoStop);
         public void DoStop(object sender, StopEventArgs e)
         {
-             this.Abort();
+            this.Abort();
         }
     }
 
@@ -9541,6 +9477,84 @@ Stack:
             get { return orgClaim; }
             set { orgClaim = value; }
         }
+    }
+
+
+    /// <summary>
+    /// 登录前的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void BeforeLoginEventHandle(object sender,
+    BeforeLoginEventArgs e);
+
+    /// <summary>
+    /// 登录前事件的参数
+    /// </summary>
+    public class BeforeLoginEventArgs : EventArgs
+    {
+        /// <summary>
+        /// [in] 是否为第一次触发
+        /// </summary>
+        public bool FirstTry = true;    // [in] 是否为第一次触发
+        /// <summary>
+        /// [in] 图书馆应用服务器 URL
+        /// </summary>
+        public string LibraryServerUrl = "";    // [in] 图书馆应用服务器URL
+        /// <summary>
+        /// [out] 用户名
+        /// </summary>
+        public string UserName = "";    // [out] 用户名
+        /// <summary>
+        /// [out] 密码
+        /// </summary>
+        public string Password = "";    // [out] 密码
+        /// <summary>
+        /// [out] 工作台号
+        /// </summary>
+        public string Parameters = "";    // [out] 工作台号
+        // public bool IsReader = false;   // [out] 登录者是否为读者
+        /// <summary>
+        /// [out] 短期保存密码
+        /// </summary>
+        public bool SavePasswordShort = false;  // [out] 短期保存密码
+        /// <summary>
+        /// [out] 长期保存密码
+        /// </summary>
+        public bool SavePasswordLong = false;   // [out] 长期保存密码
+        /// <summary>
+        /// [out] 事件调用是否失败
+        /// </summary>
+        public bool Failed = false; // [out] 事件调用是否失败
+        /// <summary>
+        /// [out] 事件调用是否被放弃
+        /// </summary>
+        public bool Cancel = false; // [out] 事件调用是否被放弃
+        /// <summary>
+        /// [in, out] 事件调用错误信息
+        /// </summary>
+        public string ErrorInfo = "";   // [in, out] 事件调用错误信息
+        /// <summary>
+        /// [in, out] 前次登录失败的原因，本次登录失败的原因
+        /// </summary>
+        public LoginFailCondition LoginFailCondition = LoginFailCondition.NormalError;  // [in, out] 前次登录失败的原因，本次登录失败的原因
+    }
+
+    /// <summary>
+    /// 登录后的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void AfterLoginEventHandle(object sender,
+    AfterLoginEventArgs e);
+
+    /// <summary>
+    /// 登录后事件的参数
+    /// </summary>
+    public class AfterLoginEventArgs : EventArgs
+    {
+        public string ErrorInfo = "";
+        // public bool Canceled = false;
     }
 
 }

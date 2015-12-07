@@ -52,24 +52,26 @@ namespace dp2Circulation
 
         List<SummaryTask> _tasks = new List<SummaryTask>();
 
+#if NO
         /// <summary>
         /// 通讯通道
         /// </summary>
         // public ExternalChannel Channel = null;
         public DigitalPlatform.Stop stop = null;
+#endif
 
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         static int m_nLockTimeout = 5000;	// 5000=5秒
 
         internal void DoStop(object sender, StopEventArgs e)
         {
-            
+
 #if NO
             if (this.Channel != null && this.Channel.Channel != null)
                 this.Channel.Channel.Abort();
 #endif
             if (this.Container != null
-                && this.Container._summaryChannel != null 
+                && this.Container._summaryChannel != null
                 && this.Container._summaryChannel.Channel != null)
                 this.Container._summaryChannel.Channel.Abort();
         }
@@ -99,9 +101,11 @@ namespace dp2Circulation
 
                 if (tasks.Count > 0)
                 {
+#if NO
                     stop.OnStop += new StopEventHandler(this.DoStop);
                     stop.Initial("进行一轮获取摘要的处理...");
                     stop.BeginLoop();
+#endif
                     try
                     {
                         foreach (SummaryTask task in tasks)
@@ -112,12 +116,14 @@ namespace dp2Circulation
                                 return;
                             }
 
+#if NO
                             if (stop != null && stop.State != 0)
                             {
                                 this.Stopped = true;
                                 // this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
                                 return;
                             }
+#endif
 
                             if (task.State == "finish")
                                 continue;
@@ -132,9 +138,11 @@ namespace dp2Circulation
                     }
                     finally
                     {
+#if NO
                         stop.EndLoop();
                         stop.OnStop -= new StopEventHandler(this.DoStop);
                         stop.Initial("");
+#endif
                     }
                 }
 
@@ -155,6 +163,7 @@ namespace dp2Circulation
                         this.m_lock.ExitWriteLock();
                     }
                 }
+
             }
             catch (Exception ex)
             {
@@ -236,11 +245,9 @@ namespace dp2Circulation
 
         public void Close(bool bForce = true)
         {
+#if NO
             if (stop != null)
                 stop.DoStop();
-#if NO
-            this.eventClose.Set();
-            Stopped = true;
 #endif
             this.StopThread(bForce);
         }
@@ -273,7 +280,7 @@ namespace dp2Circulation
                         remove_list.Add(task);
                 }
 
-                foreach(SummaryTask task in remove_list)
+                foreach (SummaryTask task in remove_list)
                 {
                     this._tasks.Remove(task);
                 }

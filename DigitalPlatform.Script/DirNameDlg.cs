@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -67,7 +67,7 @@ namespace DigitalPlatform.Script
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Ŀ¼��:";
+            this.label1.Text = "目录名:";
             // 
             // textBox_dirName
             // 
@@ -86,7 +86,7 @@ namespace DigitalPlatform.Script
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 2;
-            this.button_OK.Text = "ȷ��";
+            this.button_OK.Text = "确定";
             // 
             // button_Cancel
             // 
@@ -96,7 +96,7 @@ namespace DigitalPlatform.Script
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(74, 23);
             this.button_Cancel.TabIndex = 3;
-            this.button_Cancel.Text = "ȡ��";
+            this.button_Cancel.Text = "取消";
             // 
             // DirNameDlg
             // 
@@ -112,7 +112,7 @@ namespace DigitalPlatform.Script
             this.Name = "DirNameDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Ŀ¼��";
+            this.Text = "目录名";
             this.ResumeLayout(false);
             this.PerformLayout();
 

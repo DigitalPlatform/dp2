@@ -1,24 +1,42 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace DigitalPlatform.rms
 {
-    //×Ô¶¨ÒåµÄÒì³£ÀàĞÍ
-    //ReversePolishStackÕ»Pop()»òSeek()»òSeekType()Ê±¿ÉÄÜ»áÅ×³ö´ËÒì³£
+    //è‡ªå®šä¹‰çš„å¼‚å¸¸ç±»å‹
+    //ReversePolishStackæ ˆPop()æˆ–Seek()æˆ–SeekType()æ—¶å¯èƒ½ä¼šæŠ›å‡ºæ­¤å¼‚å¸¸
     public class StackUnderflowException : Exception
     {
-        //¹¹Ôìº¯Êı
-        //strEx: ĞÅÏ¢
+        //æ„é€ å‡½æ•°
+        //strEx: ä¿¡æ¯
         public StackUnderflowException(string strEx)
             : base(strEx)
         { }
     }
-    //×Ô¶¨ÒåµÄÒì³£ÀàĞÍ:¼ìË÷Ê±ÀàĞÍ²»ÇøÅäÅ×³öµÄÒì³£
+    //è‡ªå®šä¹‰çš„å¼‚å¸¸ç±»å‹:æ£€ç´¢æ—¶ç±»å‹ä¸åŒºé…æŠ›å‡ºçš„å¼‚å¸¸
     public class NoMatchException : Exception
     {
-        //¹¹Ôìº¯Êı
+        //æ„é€ å‡½æ•°
         public NoMatchException(string strEx)
+            : base(strEx)
+        { }
+    }
+
+    // 2015/11/19
+    // å°¾å·å°šæœªæ ¡éªŒ
+    public class TailNumberException : Exception
+    {
+        public TailNumberException(string strEx)
+            : base(strEx)
+        { }
+    }
+
+    // 2015/12/2
+    // è·¯å¾„é”™è¯¯
+    public class PathErrorException : Exception
+    {
+        public PathErrorException(string strEx)
             : base(strEx)
         { }
     }

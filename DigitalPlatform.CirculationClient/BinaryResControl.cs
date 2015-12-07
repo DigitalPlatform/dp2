@@ -24,6 +24,10 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public partial class BinaryResControl : UserControl
     {
+        public event GetChannelEventHandler GetChannel = null;
+
+        public event ReturnChannelEventHandler ReturnChannel = null;
+
         // Ctrl+A自动创建数据
         /// <summary>
         /// 自动创建数据
@@ -106,10 +110,12 @@ namespace DigitalPlatform.CirculationClient
         public const int TYPE_ERROR = 2;
          * */
 
+#if NO
         /// <summary>
         /// 通讯通道
         /// </summary>
         public LibraryChannel Channel = null;
+#endif
 
         /// <summary>
         /// 停止控制
@@ -159,7 +165,9 @@ namespace DigitalPlatform.CirculationClient
         //      -1  error
         //      0   没有装载
         //      1   已经装载
-        public int LoadObject(string strBiblioRecPath,
+        public int LoadObject(
+            LibraryChannel channel,
+            string strBiblioRecPath,
             string strXml,
             double dp2library_version,
             out string strError)
@@ -193,7 +201,9 @@ namespace DigitalPlatform.CirculationClient
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
 
-            return LoadObject(nodes,
+            return LoadObject(
+                channel,
+                nodes,
                 dp2library_version,
                 out strError);
         }
@@ -238,7 +248,9 @@ namespace DigitalPlatform.CirculationClient
         //      -1  error
         //      0   没有填充任何内容，列表为空
         //      1   已经填充了内容
-        public int LoadObject(XmlNodeList nodes,
+        public int LoadObject(
+            LibraryChannel channel,
+            XmlNodeList nodes,
             double dp2library_version,
             out string strError)
         {
@@ -255,7 +267,7 @@ namespace DigitalPlatform.CirculationClient
                 List<ListViewItem> items = new List<ListViewItem>();
                 // 第一阶段，把来自 XML 记录中的 <file> 元素信息填入。
                 // 这样就保证了至少可以在保存书目记录阶段能还原 XML 记录中的相关部分
-                foreach(XmlElement node in nodes)
+                foreach (XmlElement node in nodes)
                 {
                     string strID = DomUtil.GetAttr(node, "id");
                     string strUsage = DomUtil.GetAttr(node, "usage");
@@ -285,14 +297,17 @@ namespace DigitalPlatform.CirculationClient
                 if (dp2library_version >= 2.58)
                 {
                     // 新方法，速度快
+#if NO
                     Stop.OnStop += new StopEventHandler(this.DoStop);
                     Stop.Initial("正在下载对象的元数据");
                     Stop.BeginLoop();
+#endif
+                    Stop.Initial("正在下载对象的元数据");
 
                     try
                     {
                         BrowseLoader loader = new BrowseLoader();
-                        loader.Channel = this.Channel;
+                        loader.Channel = channel;
                         loader.Stop = this.Stop;
                         loader.RecPaths = recpaths;
                         loader.Format = "id,metadata,timestamp";
@@ -321,10 +336,10 @@ namespace DigitalPlatform.CirculationClient
                             }
 
                             string strMetadataXml = record.RecordBody.Metadata;
-                            Debug.Assert(string.IsNullOrEmpty(strMetadataXml) == false, "");
+                            //Debug.Assert(string.IsNullOrEmpty(strMetadataXml) == false, "");
 
                             byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
-                            Debug.Assert(baMetadataTimestamp != null, "");
+                            //Debug.Assert(baMetadataTimestamp != null, "");
 
                             // 取metadata值
                             Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
@@ -360,8 +375,11 @@ namespace DigitalPlatform.CirculationClient
                     }
                     finally
                     {
+#if NO
                         Stop.EndLoop();
                         Stop.OnStop -= new StopEventHandler(this.DoStop);
+                        Stop.Initial("");
+#endif
                         Stop.Initial("");
                     }
                 }
@@ -377,6 +395,7 @@ namespace DigitalPlatform.CirculationClient
                         byte[] baMetadataTimestamp = null;
                         // 获得一个对象资源的元数据
                         int nRet = GetOneObjectMetadata(
+                            channel,
                             this.BiblioRecPath,
                             strID,
                             out strMetadataXml,
@@ -384,7 +403,7 @@ namespace DigitalPlatform.CirculationClient
                             out strError);
                         if (nRet == -1)
                         {
-                            if (Channel.ErrorCode == localhost.ErrorCode.AccessDenied)
+                            if (channel.ErrorCode == localhost.ErrorCode.AccessDenied)
                             {
                                 return -1;
                             }
@@ -699,14 +718,17 @@ bool bChanged)
             info.LineState = state;
         }
 
+#if NO
         void DoStop(object sender, StopEventArgs e)
         {
             if (this.Channel != null)
                 this.Channel.Abort();
         }
+#endif
 
         // 获得一个对象资源的元数据
         int GetOneObjectMetadata(
+            LibraryChannel channel,
             string strBiblioRecPath,
             string strID,
             out string strMetadataXml,
@@ -720,9 +742,12 @@ bool bChanged)
 
             strResPath = strResPath.Replace(":", "/");
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在下载对象的元数据 " + strResPath);
             Stop.BeginLoop();
+#endif
+            Stop.Initial("正在下载对象的元数据 " + strResPath);
 
             try
             {
@@ -731,7 +756,7 @@ bool bChanged)
                 // EnableControlsInLoading(true);
                 string strResult = "";
                 // 只得到metadata
-                long lRet = this.Channel.GetRes(
+                long lRet = channel.GetRes(
                     Stop,
                     strResPath,
                     "metadata,timestamp,outputpath",
@@ -751,8 +776,11 @@ bool bChanged)
             finally
             {
                 // EnableControlsInLoading(false);
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
         }
@@ -853,7 +881,7 @@ bool bChanged)
                 contextMenu.MenuItems.Add(menuItem);
             }
 
-            contextMenu.Show(this.ListView, new Point(e.X, e.Y));	
+            contextMenu.Show(this.ListView, new Point(e.X, e.Y));
         }
 
         /// <summary>
@@ -869,7 +897,7 @@ bool bChanged)
 
         void DeleteTempFiles()
         {
-            foreach(string filename in _tempFileNames)
+            foreach (string filename in _tempFileNames)
             {
                 File.Delete(filename);
             }
@@ -932,6 +960,7 @@ bool bChanged)
         }
 
         // parameters:
+        //      filenames   文件名或目录名的列表
         //      strDefaultUsage usage 对话框中的起始值。如果为 null，表示不出现请求输入 usage 的对话框，此时加入的对象其 usage 值为空
         // return:
         //      -1  出错
@@ -957,10 +986,26 @@ bool bChanged)
                     return 0;
             }
 
+            List<string> expanded_filenames = new List<string>();
             foreach (string filename in filenames)
             {
-                // TODO: 如果遇到目录，是否自动获取其下的所有文件？最好出现一个对话框询问是否要这样做。
+                FileAttributes attr = File.GetAttributes(filename);
 
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    expanded_filenames.AddRange(PathUtil.GetFileNames(filename,
+                        (fi) =>
+                        {
+                            if (fi.Name.ToLower() == "desktop.ini")
+                                return false;
+                            return true;
+                        }
+                        ));
+                else
+                    expanded_filenames.Add(filename);
+            }
+
+            foreach (string filename in expanded_filenames)
+            {
                 ListViewItem item = null;
                 int nRet = this.AppendNewItem(
     filename,
@@ -1048,7 +1093,7 @@ bool bChanged)
 
             if (old_state != LineState.New)
             {
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Changed);
                 SetResChanged(item, dlg.ResChanged);
@@ -1281,7 +1326,7 @@ bool bChanged)
 
             if (old_state != LineState.New)
             {
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Changed);
                 SetResChanged(item, true);
@@ -1422,7 +1467,7 @@ bool bChanged)
                 // 保存旧状态
                 SetOldLineState(item, state);
 
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Deleted);
 
@@ -1443,7 +1488,7 @@ bool bChanged)
             }
 
             DialogResult result = MessageBox.Show(this,
-                "确实要标记删除选定的 "+this.ListView.SelectedItems.Count.ToString()+" 个对象? ",
+                "确实要标记删除选定的 " + this.ListView.SelectedItems.Count.ToString() + " 个对象? ",
                 "BinaryResControl",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -1480,7 +1525,7 @@ bool bChanged)
                 // 保存旧状态
                 SetOldLineState(item, state);
 
-                SetLineInfo(item, 
+                SetLineInfo(item,
                     // null, 
                     LineState.Deleted);
 
@@ -1520,7 +1565,7 @@ bool bChanged)
 
                 if (GetLineState(item) != LineState.Deleted)
                 {
-                    nNotDeleted ++;
+                    nNotDeleted++;
                     continue;
                 }
 
@@ -1546,6 +1591,28 @@ bool bChanged)
             // 需要看看listview中是不是至少有一个需要保存的事项？否则Changed设为false
             if (IsChanged() == false)
                 this.Changed = false;
+        }
+
+        LibraryChannel CallGetChannel(bool bBeginLoop)
+        {
+            if (this.GetChannel == null)
+                return null;
+            GetChannelEventArgs e = new GetChannelEventArgs();
+            e.BeginLoop = bBeginLoop;
+            this.GetChannel(this, e);
+            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                throw new Exception(e.ErrorInfo);
+            return e.Channel;
+        }
+
+        void CallReturnChannel(LibraryChannel channel, bool bEndLoop)
+        {
+            if (this.ReturnChannel == null)
+                return;
+            ReturnChannelEventArgs e = new ReturnChannelEventArgs();
+            e.Channel = channel;
+            e.EndLoop = bEndLoop;
+            this.ReturnChannel(this, e);
         }
 
         // 导出对象到文件
@@ -1588,7 +1655,6 @@ bool bChanged)
 
             strResPath = strResPath.Replace(":", "/");
 
-
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.Title = "请指定要保存的本地文件名";
@@ -1602,9 +1668,17 @@ bool bChanged)
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
+            LibraryChannel channel = this.CallGetChannel(true);
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在下载对象 " + strResPath);
             Stop.BeginLoop();
+#endif
+            Stop.Initial("正在下载对象 " + strResPath);
 
             try
             {
@@ -1615,7 +1689,7 @@ bool bChanged)
                 string strMetaData;
                 string strOutputPath = "";
 
-                long lRet = this.Channel.GetRes(
+                long lRet = channel.GetRes(
                     Stop,
                     strResPath,
                     dlg.FileName,
@@ -1632,8 +1706,14 @@ bool bChanged)
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
+                channel.Timeout = old_timeout;
+
+                this.CallReturnChannel(channel, true);
                 Stop.Initial("");
             }
             return;
@@ -1807,6 +1887,8 @@ bool bChanged)
         //		-1	error
         //		>=0 实际上载的资源对象数
         public int Save(
+            LibraryChannel channel,
+            double dp2library_version,
             out string strError)
         {
             strError = "";
@@ -1826,11 +1908,13 @@ bool bChanged)
                 return -1;
             }
 
+#if NO
             if (this.Channel == null)
             {
                 strError = "BinaryResControl尚未指定Channel";
                 return -1;
             }
+#endif
 
             StopStyle old_stop_style = StopStyle.None;
 
@@ -1839,9 +1923,12 @@ bool bChanged)
                 old_stop_style = Stop.Style;
                 Stop.Style = StopStyle.EnableHalfStop;
 
+#if NO
                 Stop.OnStop += new StopEventHandler(this.DoStop);
                 Stop.Initial("正在上载资源 ...");
                 Stop.BeginLoop();
+#endif
+                Stop.Initial("正在上载资源 ...");
             }
 
             int nUploadCount = 0;   // 实际上载的资源个数
@@ -1857,7 +1944,7 @@ bool bChanged)
                     // string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
 
                     LineState state = GetLineState(item);
-
+                    bool bOnlyChangeMetadata = false;
                     if (state == LineState.Changed ||
                         state == LineState.New)
                     {
@@ -1866,12 +1953,21 @@ bool bChanged)
                             if (info != null
                                 && info.ResChanged == false)
                             {
+                                if (dp2library_version < 2.59)
+                                {
+                                    strError = "单独修改对象 metadata 的操作需要连接的 dp2library 版本在 2.59 以上 (然而当前 dp2library 版本为 " + dp2library_version + ")";
+                                    return -1;
+                                }
+                                // 这种情况应该是 metadata 修改过
+                                bOnlyChangeMetadata = true;
+#if NO
                                 SetLineInfo(item,
                                     // strUsage, 
                                     LineState.Normal);
                                 SetXmlChanged(item, false);
                                 SetResChanged(item, false);
                                 continue;   // 资源没有修改的，则跳过上载
+#endif
                             }
                         }
                     }
@@ -1897,143 +1993,179 @@ bool bChanged)
                     string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
                     string strTimestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
 
-                    // 检测文件尺寸
-                    FileInfo fi = new FileInfo(strLocalFilename);
-
-                    if (fi.Exists == false)
-                    {
-                        strError = "文件 '" + strLocalFilename + "' 不存在...";
-                        return -1;
-                    }
-
-                    string[] ranges = null;
-
-                    if (fi.Length == 0)
-                    {
-                        // 空文件
-                        ranges = new string[1];
-                        ranges[0] = "";
-                    }
-                    else
-                    {
-                        string strRange = "";
-                        strRange = "0-" + Convert.ToString(fi.Length - 1);
-
-                        // 按照100K作为一个chunk
-                        // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
-                        ranges = RangeList.ChunkRange(strRange,
-                            500 * 1024);
-                    }
-
                     byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
                     byte[] output_timestamp = null;
 
                     nUploadCount++;
 
-                    // REDOWHOLESAVE:
-                    string strWarning = "";
-
-                    for (int j = 0; j < ranges.Length; j++)
+                    if (bOnlyChangeMetadata)
                     {
-                        // REDOSINGLESAVE:
-
-                        Application.DoEvents();	// 出让界面控制权
-
-                        if (Stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-
-                        string strWaiting = "";
-                        if (j == ranges.Length - 1)
-                            strWaiting = " 请耐心等待...";
-
-                        string strPercent = "";
-                        RangeList rl = new RangeList(ranges[j]);
-                        if (rl.Count >= 1)
-                        {
-                            double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
-                            strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
-                        }
-
-                        if (Stop != null)
-                            Stop.SetMessage("正在上载 " + ranges[j] + "/"
-                                + Convert.ToString(fi.Length)
-                                + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
-
-                        long lRet = this.Channel.SaveResObject(
-                            Stop,
-                            strResPath,
-                            strLocalFilename,
-                            strLocalFilename,
-                            strMime,
-                            ranges[j],
-                            j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-                            timestamp,
-                            out output_timestamp,
-                            out strError);
+                        long lRet = channel.SaveResObject(
+    Stop,
+    strResPath,
+    "",
+    strLocalFilename,
+    strMime,
+    "", // range
+    true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+    timestamp,
+    out output_timestamp,
+    out strError);
                         timestamp = output_timestamp;
-
-                        ListViewUtil.ChangeItemText(item,
-                            COLUMN_TIMESTAMP,
-                            ByteArray.GetHexTimeStampString(timestamp));
-
-                        strWarning = "";
-
+                        if (timestamp != null)
+                            ListViewUtil.ChangeItemText(item,
+                                COLUMN_TIMESTAMP,
+                                ByteArray.GetHexTimeStampString(timestamp));
                         if (lRet == -1)
-                        {
-                            /*
-                            if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
-                            {
-
-                                if (this.bNotAskTimestampMismatchWhenOverwrite == true)
-                                {
-                                    timestamp = new byte[output_timestamp.Length];
-                                    Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                    strWarning = " (时间戳不匹配, 自动重试)";
-                                    if (ranges.Length == 1 || j == 0)
-                                        goto REDOSINGLESAVE;
-                                    goto REDOWHOLESAVE;
-                                }
-
-
-                                DialogResult result = MessageDlg.Show(this,
-                                    "上载 '" + strLocalFilename + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(fi.Length)
-                                    + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                                    + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
-                                    "dp2batch",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxDefaultButton.Button1,
-                                    ref this.bNotAskTimestampMismatchWhenOverwrite);
-                                if (result == DialogResult.Yes)
-                                {
-                                    timestamp = new byte[output_timestamp.Length];
-                                    Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                    strWarning = " (时间戳不匹配, 应用户要求重试)";
-                                    if (ranges.Length == 1 || j == 0)
-                                        goto REDOSINGLESAVE;
-                                    goto REDOWHOLESAVE;
-                                }
-
-                                if (result == DialogResult.No)
-                                {
-                                    goto END1;	// 继续作后面的资源
-                                }
-
-                                if (result == DialogResult.Cancel)
-                                {
-                                    strError = "用户中断";
-                                    goto ERROR1;	// 中断整个处理
-                                }
-                            }
-                             * */
-
                             goto ERROR1;
+                        Debug.Assert(timestamp != null, "");
+                        // TODO: 出错的情况下是否要修改 timestamp 显示？是否应为非空才兑现显示
+                    }
+                    else
+                    {
+                        // 检测文件尺寸
+                        FileInfo fi = new FileInfo(strLocalFilename);
+
+                        if (fi.Exists == false)
+                        {
+                            strError = "文件 '" + strLocalFilename + "' 不存在...";
+                            return -1;
+                        }
+
+                        string[] ranges = null;
+
+                        if (fi.Length == 0)
+                        {
+                            // 空文件
+                            ranges = new string[1];
+                            ranges[0] = "";
+                        }
+                        else
+                        {
+                            string strRange = "";
+                            strRange = "0-" + Convert.ToString(fi.Length - 1);
+
+                            // 按照100K作为一个chunk
+                            // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
+                            ranges = RangeList.ChunkRange(strRange,
+                                500 * 1024);
+                        }
+
+                        // REDOWHOLESAVE:
+                        string strWarning = "";
+
+                        for (int j = 0; j < ranges.Length; j++)
+                        {
+                            // REDOSINGLESAVE:
+
+                            Application.DoEvents();	// 出让界面控制权
+
+                            if (Stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                goto ERROR1;
+                            }
+
+                            string strWaiting = "";
+                            if (j == ranges.Length - 1)
+                                strWaiting = " 请耐心等待...";
+
+                            string strPercent = "";
+                            RangeList rl = new RangeList(ranges[j]);
+                            if (rl.Count >= 1)
+                            {
+                                double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
+                                strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
+                            }
+
+                            if (Stop != null)
+                                Stop.SetMessage("正在上载 " + ranges[j] + "/"
+                                    + Convert.ToString(fi.Length)
+                                    + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
+
+                            long lRet = 0;
+                            TimeSpan old_timeout = channel.Timeout;
+                            channel.Timeout = new TimeSpan(0, 5, 0);
+                            try
+                            {
+                                lRet = channel.SaveResObject(
+                                    Stop,
+                                    strResPath,
+                                    strLocalFilename,
+                                    strLocalFilename,
+                                    strMime,
+                                    ranges[j],
+                                    j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+                                    timestamp,
+                                    out output_timestamp,
+                                    out strError);
+                            }
+                            finally
+                            {
+                                channel.Timeout = old_timeout;
+                            }
+                            timestamp = output_timestamp;
+
+                            if (timestamp != null)
+                                ListViewUtil.ChangeItemText(item,
+                                COLUMN_TIMESTAMP,
+                                ByteArray.GetHexTimeStampString(timestamp));
+
+                            strWarning = "";
+
+                            if (lRet == -1)
+                            {
+                                /*
+                                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                                {
+
+                                    if (this.bNotAskTimestampMismatchWhenOverwrite == true)
+                                    {
+                                        timestamp = new byte[output_timestamp.Length];
+                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
+                                        strWarning = " (时间戳不匹配, 自动重试)";
+                                        if (ranges.Length == 1 || j == 0)
+                                            goto REDOSINGLESAVE;
+                                        goto REDOWHOLESAVE;
+                                    }
+
+
+                                    DialogResult result = MessageDlg.Show(this,
+                                        "上载 '" + strLocalFilename + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(fi.Length)
+                                        + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
+                                        + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
+                                        "dp2batch",
+                                        MessageBoxButtons.YesNoCancel,
+                                        MessageBoxDefaultButton.Button1,
+                                        ref this.bNotAskTimestampMismatchWhenOverwrite);
+                                    if (result == DialogResult.Yes)
+                                    {
+                                        timestamp = new byte[output_timestamp.Length];
+                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
+                                        strWarning = " (时间戳不匹配, 应用户要求重试)";
+                                        if (ranges.Length == 1 || j == 0)
+                                            goto REDOSINGLESAVE;
+                                        goto REDOWHOLESAVE;
+                                    }
+
+                                    if (result == DialogResult.No)
+                                    {
+                                        goto END1;	// 继续作后面的资源
+                                    }
+
+                                    if (result == DialogResult.Cancel)
+                                    {
+                                        strError = "用户中断";
+                                        goto ERROR1;	// 中断整个处理
+                                    }
+                                }
+                                 * */
+                                goto ERROR1;
+                            }
                         }
                     }
 
-                    SetLineInfo(item, 
+                    SetLineInfo(item,
                         // strUsage, 
                         LineState.Normal);
                     SetXmlChanged(item, false);
@@ -2051,6 +2183,7 @@ bool bChanged)
             {
                 if (Stop != null)
                 {
+#if NO
                     Stop.EndLoop();
                     Stop.OnStop -= new StopEventHandler(this.DoStop);
                     if (nUploadCount > 0)
@@ -2058,6 +2191,11 @@ bool bChanged)
                     else
                         Stop.Initial("");
                     Stop.Style = old_stop_style;
+#endif
+                    if (nUploadCount > 0)
+                        Stop.Initial("上载资源完成");
+                    else
+                        Stop.Initial("");
                 }
             }
         }

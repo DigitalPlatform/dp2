@@ -157,7 +157,6 @@ namespace dp2Circulation
                 return -1;
 
             SetAutoScroll(this.label_param);
-
             return 0;
         }
 

@@ -28,9 +28,9 @@ namespace DigitalPlatform.Marc
     /// <summary>
     /// MARC 编辑器控件
     /// </summary>
-	[Designer("System.Windows.Forms.Design.ParentControlDesigner, System.Design", typeof(IDesigner))]
-	public class MarcEditor : System.Windows.Forms.Control//,IGetValueList //UserControl
-	{
+    [Designer("System.Windows.Forms.Design.ParentControlDesigner, System.Design", typeof(IDesigner))]
+    public class MarcEditor : System.Windows.Forms.Control//,IGetValueList //UserControl
+    {
         internal const int WM_LEFTRIGHT_MOVED = API.WM_USER + 201;
 
         /// <summary>
@@ -63,20 +63,20 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public bool EnterAsAutoGenerate = false;
 
-		#region 变量
+        #region 变量
 
         /// <summary>
         /// 当前记录的 MARC 类型。缺省为 "unimarc"
         /// </summary>
-		public string MarcSyntax = "unimarc";
+        public string MarcSyntax = "unimarc";
 
-		private Record record = null;
+        private Record record = null;
 
-		// 内容与控件边框上下左右的空白
+        // 内容与控件边框上下左右的空白
         /// <summary>
         /// 内容区域的顶部空白高度
         /// </summary>
-		public int TopBlank = 0;
+        public int TopBlank = 0;
         /// <summary>
         /// 内容区域的底部空白高度
         /// </summary>
@@ -90,15 +90,17 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public int RightBlank = 1;
 
-		// 文档坐标
-		/*public*/ int m_nDocumentOrgX = 0;
-		/*public*/ int m_nDocumentOrgY = 0;
+        // 文档坐标
+        /*public*/
+        int m_nDocumentOrgX = 0;
+        /*public*/
+        int m_nDocumentOrgY = 0;
 
-		// 控件边框
-		private BorderStyle m_borderStyle = BorderStyle.Fixed3D;
+        // 控件边框
+        private BorderStyle m_borderStyle = BorderStyle.Fixed3D;
 
 
-		// 各种颜色
+        // 各种颜色
 
         /*
 		// 文字的颜色
@@ -117,9 +119,9 @@ namespace DigitalPlatform.Marc
             }
         }
          */
-		
-		// 竖线条的颜色
-		internal Color defaultVertGridColor = Color.LightGray;
+
+        // 竖线条的颜色
+        internal Color defaultVertGridColor = Color.LightGray;
 
         /// <summary>
         /// 竖线条的颜色
@@ -137,7 +139,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 横线条的颜色
+        // 横线条的颜色
         internal Color defaultHorzGridColor = Color.LightGray;
 
         /// <summary>
@@ -175,7 +177,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 字段名提示的背景色
+        // 字段名提示的背景色
         internal Color defaultNameCaptionBackColor = SystemColors.Info;
 
         /// <summary>
@@ -213,7 +215,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 字段名的背景色
+        // 字段名的背景色
         internal Color defaultNameBackColor = SystemColors.Window;
 
         /// <summary>
@@ -251,7 +253,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 指示符的背景色
+        // 指示符的背景色
         internal Color defaultIndicatorBackColor = SystemColors.Window;//SystemColors.Control;
 
         /// <summary>
@@ -270,8 +272,8 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 不能编辑的指示符背景颜色
-		internal Color defaultIndicatorBackColorDisabled = SystemColors.Control;
+        // 不能编辑的指示符背景颜色
+        internal Color defaultIndicatorBackColorDisabled = SystemColors.Control;
 
         /// <summary>
         /// 不能编辑的指示符背景颜色
@@ -312,7 +314,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 内容的背景色
+        // 内容的背景色
         internal Color defaultContentBackColor = SystemColors.Window;
 
         /// <summary>
@@ -334,9 +336,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 新插入一个字段时的缺省字段名
         /// </summary>
-		public string DefaultFieldName = "***";
+        public string DefaultFieldName = "***";
 
-		// ---------------------------------------------
+        // ---------------------------------------------
 
         ToolTip toolTip1 = new ToolTip();
 
@@ -369,25 +371,25 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		// 小文本编辑控件
-		internal MyEdit curEdit = null;   // new MyEdit();	//edit控件
-		// private bool m_bEditInitialized = false;  //edit控件是否初始化
+        // 小文本编辑控件
+        internal MyEdit curEdit = null;   // new MyEdit();	//edit控件
+        // private bool m_bEditInitialized = false;  //edit控件是否初始化
 
-		// 选中的字段数组下标
+        // 选中的字段数组下标
         /// <summary>
         /// 当前选中的字段下标数组
         /// </summary>
         public List<int> SelectedFieldIndices = new List<int>();    // 2014/7/10 从 ArrayList 修改为 List<int>
 
-		// 当前获得焦点字段索引号与列号
+        // 当前获得焦点字段索引号与列号
         // 1: 字段名 2: 指示符 3:字段内容
         internal int m_nFocusCol = 2;
-		// public int m_nFocusedFieldIndex = -1;
+        // public int m_nFocusedFieldIndex = -1;
 
-		// Shift连续选择时的基准点
-		internal int nStartFieldIndex = -1;
+        // Shift连续选择时的基准点
+        internal int nStartFieldIndex = -1;
 
-		XmlDocument m_domMarcDef = null;
+        XmlDocument m_domMarcDef = null;
 
         string m_strMarcDomError = "";
 
@@ -396,7 +398,7 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 当前界面语言代码
         /// </summary>
-		public string Lang
+        public string Lang
         {
             get
             {
@@ -408,16 +410,16 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		int nDragCol = -1;	// -1表示当前没有按下鼠标左键。其余值，例如0,1,...，表示鼠标左键按下，数字表示按下拖动的位置
-		int nLastTrackerX = -1;
+        int nDragCol = -1;	// -1表示当前没有按下鼠标左键。其余值，例如0,1,...，表示鼠标左键按下，数字表示按下拖动的位置
+        int nLastTrackerX = -1;
 
         internal int m_nToolTipIndex = 1;
 
-		bool m_bChanged = false;
+        bool m_bChanged = false;
 
-		private System.ComponentModel.Container components = null;
+        private System.ComponentModel.Container components = null;
 
-		#endregion
+        #endregion
 
         // 2007/7/20
         /// <summary>
@@ -520,12 +522,12 @@ namespace DigitalPlatform.Marc
             }
         }
 
-		#region 事件
+        #region 事件
 
         /// <summary>
         /// 获得配置文件
         /// </summary>
-		public event GetConfigFileEventHandle GetConfigFile = null;
+        public event GetConfigFileEventHandle GetConfigFile = null;
         /// <summary>
         /// 获得配置文件的 XmlDocument 对象
         /// </summary>
@@ -569,13 +571,13 @@ namespace DigitalPlatform.Marc
             return false;
         }
 
-		internal void OnGetConfigFile(GetConfigFileEventArgs e)
-		{
-			if (this.GetConfigFile != null)
-			{
-				this.GetConfigFile(this, e);
-			}
-		}
+        internal void OnGetConfigFile(GetConfigFileEventArgs e)
+        {
+            if (this.GetConfigFile != null)
+            {
+                this.GetConfigFile(this, e);
+            }
+        }
 
         internal void OnGenerateData(GenerateDataEventArgs e)
         {
@@ -589,19 +591,19 @@ namespace DigitalPlatform.Marc
                 this.VerifyData(this, e);
         }
 
-		#endregion
-	
-		#region 构造函数
+        #endregion
+
+        #region 构造函数
 
         /// <summary>
         /// 构造函数
         /// </summary>
-		public MarcEditor()
-		{
+        public MarcEditor()
+        {
             this.DoubleBuffered = true;
 
-			// 该调用是 Windows.Forms 窗体设计器所必需的。
-			InitializeComponent();
+            // 该调用是 Windows.Forms 窗体设计器所必需的。
+            InitializeComponent();
 
             /*
             // 2008/11/26
@@ -634,24 +636,24 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="disposing">为 true 则释放托管资源和非托管资源；为 false 则仅释放非托管资源。</param>
         protected override void Dispose(bool disposing)
-		{
-			if( disposing )
-			{
-				if( components != null )
-					components.Dispose();
-			}
+        {
+            if (disposing)
+            {
+                if (components != null)
+                    components.Dispose();
+            }
             FreeFonts();
-			base.Dispose( disposing );
-		}
-		#endregion
+            base.Dispose(disposing);
+        }
+        #endregion
 
-		#region 组件设计器生成的代码
-		/// <summary>
-		/// 设计器支持所需的方法 - 不要使用代码编辑器 
-		/// 修改此方法的内容。
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region 组件设计器生成的代码
+        /// <summary>
+        /// 设计器支持所需的方法 - 不要使用代码编辑器 
+        /// 修改此方法的内容。
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.SuspendLayout();
             // 
             // MarcEditor
@@ -660,8 +662,8 @@ namespace DigitalPlatform.Marc
             this.EnabledChanged += new System.EventHandler(this.MarcEditor_EnabledChanged);
             this.ResumeLayout(false);
 
-		}
-		#endregion
+        }
+        #endregion
 
         // 2009/10/24
         internal bool m_bReadOnly = false;
@@ -764,7 +766,7 @@ namespace DigitalPlatform.Marc
             {
                 if (this.m_fixedSizeFont == null)
                 {
-                    this.m_fixedSizeFont = new Font(new FontFamily("Courier New"), 
+                    this.m_fixedSizeFont = new Font(new FontFamily("Courier New"),
                         this.Font != null ? this.Font.SizeInPoints : 9,
                         FontStyle.Bold,
                         GraphicsUnit.Point);
@@ -827,9 +829,9 @@ namespace DigitalPlatform.Marc
         }
 #endif
 
-		#region 让控件有边框
-	
-		// 重载CreateParams的目的是为了让控件有边框
+        #region 让控件有边框
+
+        // 重载CreateParams的目的是为了让控件有边框
         //
         // 摘要:
         //     获取创建控件句柄时所需要的创建参数。
@@ -840,91 +842,91 @@ namespace DigitalPlatform.Marc
         /// 获取创建控件句柄时所需要的创建参数。
         /// </summary>
         protected override CreateParams CreateParams
-		{
-			get 
-			{
-				CreateParams param = base.CreateParams;
+        {
+            get
+            {
+                CreateParams param = base.CreateParams;
 
-				if (this.m_borderStyle == BorderStyle.FixedSingle) 
-				{
-					param.Style |= API.WS_BORDER;
-				}
-				else if(this.m_borderStyle == BorderStyle.Fixed3D) 
-				{
-					param.ExStyle |= API.WS_EX_CLIENTEDGE;
-				}
-				return param;
-			}
-		}
+                if (this.m_borderStyle == BorderStyle.FixedSingle)
+                {
+                    param.Style |= API.WS_BORDER;
+                }
+                else if (this.m_borderStyle == BorderStyle.Fixed3D)
+                {
+                    param.ExStyle |= API.WS_EX_CLIENTEDGE;
+                }
+                return param;
+            }
+        }
 
         /// <summary>
         /// 边框风格
         /// </summary>
-		[Category("Appearance")]
-		[DescriptionAttribute("Border style of the control")]
+        [Category("Appearance")]
+        [DescriptionAttribute("Border style of the control")]
         [DefaultValue(typeof(System.Windows.Forms.BorderStyle), "Fixed3D")]
-		public BorderStyle BorderStyle 
-		{
-			get 
-			{
-				return this.m_borderStyle;
-			}
-			set 
-			{
-				this.m_borderStyle = value;
+        public BorderStyle BorderStyle
+        {
+            get
+            {
+                return this.m_borderStyle;
+            }
+            set
+            {
+                this.m_borderStyle = value;
 
-				// Get Styles using Win32 calls
-				int style = API.GetWindowLong(Handle, API.GWL_STYLE);
-				int exStyle = API.GetWindowLong(Handle, API.GWL_EXSTYLE);
+                // Get Styles using Win32 calls
+                int style = API.GetWindowLong(Handle, API.GWL_STYLE);
+                int exStyle = API.GetWindowLong(Handle, API.GWL_EXSTYLE);
 
-				// Modify Styles to match the selected border style
-				BorderStyleToWindowStyle(ref style, ref exStyle);
+                // Modify Styles to match the selected border style
+                BorderStyleToWindowStyle(ref style, ref exStyle);
 
-				// Set Styles using Win32 calls
-				API.SetWindowLong(Handle, API.GWL_STYLE, style);
-				API.SetWindowLong(Handle, API.GWL_EXSTYLE, exStyle);
+                // Set Styles using Win32 calls
+                API.SetWindowLong(Handle, API.GWL_STYLE, style);
+                API.SetWindowLong(Handle, API.GWL_EXSTYLE, exStyle);
 
-				// Tell Windows that the frame changed
-				API.SetWindowPos(this.Handle, IntPtr.Zero, 0, 0, 0, 0,
-					API.SWP_NOACTIVATE | API.SWP_NOMOVE | API.SWP_NOSIZE |
-					API.SWP_NOZORDER | API.SWP_NOOWNERZORDER |
-					API.SWP_FRAMECHANGED);
-			}
-		}
+                // Tell Windows that the frame changed
+                API.SetWindowPos(this.Handle, IntPtr.Zero, 0, 0, 0, 0,
+                    API.SWP_NOACTIVATE | API.SWP_NOMOVE | API.SWP_NOSIZE |
+                    API.SWP_NOZORDER | API.SWP_NOOWNERZORDER |
+                    API.SWP_FRAMECHANGED);
+            }
+        }
 
-		private void BorderStyleToWindowStyle(ref int style, ref int exStyle)
-		{
-			style &= ~API.WS_BORDER;
-			exStyle &= ~API.WS_EX_CLIENTEDGE;
-			switch(this.m_borderStyle)
-			{
-				case BorderStyle.Fixed3D:
-					exStyle |= API.WS_EX_CLIENTEDGE;
-					break;
+        private void BorderStyleToWindowStyle(ref int style, ref int exStyle)
+        {
+            style &= ~API.WS_BORDER;
+            exStyle &= ~API.WS_EX_CLIENTEDGE;
+            switch (this.m_borderStyle)
+            {
+                case BorderStyle.Fixed3D:
+                    exStyle |= API.WS_EX_CLIENTEDGE;
+                    break;
 
-				case BorderStyle.FixedSingle:
-					style |= API.WS_BORDER;
-					break;
+                case BorderStyle.FixedSingle:
+                    style |= API.WS_BORDER;
+                    break;
 
-				case BorderStyle.None:
-					// No border style values
-					break;
-			}
-		}
+                case BorderStyle.None:
+                    // No border style values
+                    break;
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region 关于卷滚条的代码
+        #region 关于卷滚条的代码
 
-        char m_chOldSubfieldName = (char)0; 
+        char m_chOldSubfieldName = (char)0;
 
-		// 重载DefWndProc函数的目的是为了处理卷滚条
+        // 重载DefWndProc函数的目的是为了处理卷滚条
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
         /// <param name="m">消息</param>
         protected override void DefWndProc(ref Message m)
-		{
+        {
             switch (m.Msg)
             {
                 case WM_LEFTRIGHT_MOVED:
@@ -1003,97 +1005,97 @@ namespace DigitalPlatform.Marc
                         }
                     }
                     break;
-                    /*
-                case API.WM_LBUTTONDBLCLK:
-                    {
-                        API.SendMessage(this.curEdit.Handle,
-                            m.Msg,
-                            m.WParam, 
-                            m.LParam);
-                        return;
-                    }
-                    break;
-                     */
-                    /*
-                    // 2008/11/26
-                case API.WM_GETDLGCODE:
-                    {
-                        m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
-                        return;
-                    }*/
+                /*
+            case API.WM_LBUTTONDBLCLK:
+                {
+                    API.SendMessage(this.curEdit.Handle,
+                        m.Msg,
+                        m.WParam, 
+                        m.LParam);
+                    return;
+                }
+                break;
+                 */
+                /*
+                // 2008/11/26
+            case API.WM_GETDLGCODE:
+                {
+                    m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
+                    return;
+                }*/
 
             }
             base.DefWndProc(ref m);
         }
 
-		// 设卷滚条
-		// parameter:
-		//		member	
-		private void SetScrollBars(ScrollBarMember member)
-		{
-			if (member == ScrollBarMember.Horz
-				|| member == ScrollBarMember.Both) 
-			{
+        // 设卷滚条
+        // parameter:
+        //		member	
+        private void SetScrollBars(ScrollBarMember member)
+        {
+            if (member == ScrollBarMember.Horz
+                || member == ScrollBarMember.Both)
+            {
 
-				// 水平方向
-				API.ScrollInfoStruct si = new API.ScrollInfoStruct();
+                // 水平方向
+                API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
-				si.cbSize = Marshal.SizeOf(si);
-				si.fMask = API.SIF_RANGE | API.SIF_POS | API.SIF_PAGE;
-				si.nMin = 0;
-				si.nMax = this.DocumentWidth;
-				si.nPage = this.ClientWidth;
-				si.nPos = - this.DocumentOrgX;
-				API.SetScrollInfo(this.Handle, API.SB_HORZ, ref si, true);
-			}
+                si.cbSize = Marshal.SizeOf(si);
+                si.fMask = API.SIF_RANGE | API.SIF_POS | API.SIF_PAGE;
+                si.nMin = 0;
+                si.nMax = this.DocumentWidth;
+                si.nPage = this.ClientWidth;
+                si.nPos = -this.DocumentOrgX;
+                API.SetScrollInfo(this.Handle, API.SB_HORZ, ref si, true);
+            }
 
 
-			if (member == ScrollBarMember.Vert
-				|| member == ScrollBarMember.Both) 
-			{
-				// 垂直方向
-				API.ScrollInfoStruct si = new API.ScrollInfoStruct();
+            if (member == ScrollBarMember.Vert
+                || member == ScrollBarMember.Both)
+            {
+                // 垂直方向
+                API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
-				si.cbSize = Marshal.SizeOf(si);
-				si.fMask = API.SIF_RANGE | API.SIF_POS | API.SIF_PAGE;
-				si.nMin = 0;
-				si.nMax = this.DocumentHeight;
-				si.nPage = this.ClientHeight;
-				si.nPos = -this.DocumentOrgY;
-				API.SetScrollInfo(this.Handle, API.SB_VERT, ref si, true);
-			}
-		}
-		
-		// 当文档尺寸和文档原点改变后，
-		// 更新卷滚条，小edit控件 等设施状态，和使文档某区域失效以便文档可见
-		// parameters:
-		//		scrollBarMember	卷滚条枚举值
-		//		iRect	失效区域 当为null，则不失效，如bAll等于true则全部区域
-		internal void AfterDocumentChanged(ScrollBarMember scrollBarMember,
-			InvalidateRect iRect)
-		{
-			// 设小edit控件
-			this.SetEditPos(false); // 2008/11/26 changed 单纯改变文档尺寸，不应变动小edit的focus特性。也就是说，原来如果没有focus，现在也应没有
+                si.cbSize = Marshal.SizeOf(si);
+                si.fMask = API.SIF_RANGE | API.SIF_POS | API.SIF_PAGE;
+                si.nMin = 0;
+                si.nMax = this.DocumentHeight;
+                si.nPage = this.ClientHeight;
+                si.nPos = -this.DocumentOrgY;
+                API.SetScrollInfo(this.Handle, API.SB_VERT, ref si, true);
+            }
+        }
 
-			// 设卷滚条信息
-			this.SetScrollBars(scrollBarMember);
+        // 当文档尺寸和文档原点改变后，
+        // 更新卷滚条，小edit控件 等设施状态，和使文档某区域失效以便文档可见
+        // parameters:
+        //		scrollBarMember	卷滚条枚举值
+        //		iRect	失效区域 当为null，则不失效，如bAll等于true则全部区域
+        internal void AfterDocumentChanged(ScrollBarMember scrollBarMember,
+            InvalidateRect iRect)
+        {
+            // 设小edit控件
+            this.SetEditPos(false); // 2008/11/26 changed 单纯改变文档尺寸，不应变动小edit的focus特性。也就是说，原来如果没有focus，现在也应没有
 
-			// 失效区域
-			if (iRect != null)
-			{
-				if (iRect.bAll == true)
-					this.Invalidate();
-				else
-					this.Invalidate(iRect.rect);
-			}
-		}
-		
-		#endregion
+            // 设卷滚条信息
+            this.SetScrollBars(scrollBarMember);
 
-		#region 关于小 edit 控件的一些函数
+            // 失效区域
+            if (iRect != null)
+            {
+                if (iRect.bAll == true)
+                    this.Invalidate();
+                else
+                    this.Invalidate(iRect.rect);
+            }
+        }
 
-		void InitialEditControl()
-		{
+        #endregion
+
+        #region 关于小 edit 控件的一些函数
+
+        void InitialEditControl()
+        {
             // 2009/11/20
             if (this.curEdit != null)
             {
@@ -1108,28 +1110,28 @@ namespace DigitalPlatform.Marc
             curEdit.ImeMode = ImeMode.NoControl;    // off
             curEdit.BorderStyle = BorderStyle.None;  // BorderStyle.FixedSingle;
             curEdit.MaxLength = 0;
-			curEdit.Multiline = true;
+            curEdit.Multiline = true;
             curEdit.WordWrap = true;
 
             // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)
                 curEdit.ReadOnly = this.ReadOnly;
 
-			this.Controls.Add(curEdit);
-		}
+            this.Controls.Add(curEdit);
+        }
 
-		// 为SetEditPos()编写的私有函数
-		// 修改小edit控件的大小，并移动位置
-		// parameter:
-		//		nFieldIndex	字段的行号
-		//		nCol	列号
-		private void ChangeEditSizeAndMove(int nFieldIndex,
-			int nCol)
-		{
-			Debug.Assert(nFieldIndex >=0 && nFieldIndex < this.record.Fields.Count,"nFieldIndex参数不合法。");
-			Debug.Assert(nCol == 1 || nCol==2 || nCol==3,"nCol只能为1,2,3");
+        // 为SetEditPos()编写的私有函数
+        // 修改小edit控件的大小，并移动位置
+        // parameter:
+        //		nFieldIndex	字段的行号
+        //		nCol	列号
+        private void ChangeEditSizeAndMove(int nFieldIndex,
+            int nCol)
+        {
+            Debug.Assert(nFieldIndex >= 0 && nFieldIndex < this.record.Fields.Count, "nFieldIndex参数不合法。");
+            Debug.Assert(nCol == 1 || nCol == 2 || nCol == 3, "nCol只能为1,2,3");
 
-			Field field = this.record.Fields[nFieldIndex];
+            Field field = this.record.Fields[nFieldIndex];
 
 
             // 如果是没有指示符的字段，需要调整
@@ -1154,12 +1156,12 @@ namespace DigitalPlatform.Marc
                 nDelta = 3;
              */
 
-			int x = 0;
-			int y = 0;
-			int nWidth = 0;
-			int nHeight = 0;
+            int x = 0;
+            int y = 0;
+            int nWidth = 0;
+            int nHeight = 0;
 
-			nHeight = field.PureHeight;
+            nHeight = field.PureHeight;
 
             /*
             if (nCol == 1 || nCol == 2)
@@ -1168,55 +1170,55 @@ namespace DigitalPlatform.Marc
             }
              */
 
-			int nFieldsHeight = this.record.GetFieldsHeight(0,
-				nFieldIndex);
+            int nFieldsHeight = this.record.GetFieldsHeight(0,
+                nFieldIndex);
 
 
-			y = this.DocumentOrgY 
-				+ this.TopBlank
-				+ nFieldsHeight
-				+ this.record.GridHorzLineHeight 
-				+ this.record.CellTopBlank;
+            y = this.DocumentOrgY
+                + this.TopBlank
+                + nFieldsHeight
+                + this.record.GridHorzLineHeight
+                + this.record.CellTopBlank;
 
-			// 字段名上
-			if (nCol == 1)
-			{
-				x = this.record.NameCaptionTotalWidth
-					+ this.record.GridVertLineWidthForSplit
-					+ this.record.CellLeftBlank;
-				nWidth = this.record.NamePureWidth + 1; //
+            // 字段名上
+            if (nCol == 1)
+            {
+                x = this.record.NameCaptionTotalWidth
+                    + this.record.GridVertLineWidthForSplit
+                    + this.record.CellLeftBlank;
+                nWidth = this.record.NamePureWidth + 1; //
                 this.curEdit.Multiline = false;
-				this.curEdit.MaxLength = 3;
+                this.curEdit.MaxLength = 3;
 
                 nHeight = this.record.NamePureHeight;
             }
-			else if (nCol == 2)
-			{
+            else if (nCol == 2)
+            {
 
-				// 字段指示符上
-				x = this.record.NameCaptionTotalWidth
-					+ this.record.NameTotalWidth 
-					+ this.record.GridVertLineWidth
-					+ this.record.CellLeftBlank;
+                // 字段指示符上
+                x = this.record.NameCaptionTotalWidth
+                    + this.record.NameTotalWidth
+                    + this.record.GridVertLineWidth
+                    + this.record.CellLeftBlank;
 
-				nWidth = this.record.IndicatorPureWidth + 1;    //
+                nWidth = this.record.IndicatorPureWidth + 1;    //
                 this.curEdit.Multiline = false;
-				this.curEdit.MaxLength = 2;
+                this.curEdit.MaxLength = 2;
 
                 nHeight = this.record.NamePureHeight;
-			}
-			else if (nCol == 3)
-			{
-				// 值上
-				x = this.record.NameCaptionTotalWidth
-					+ this.record.NameTotalWidth 
-					+ this.record.IndicatorTotalWidth
-					+ this.record.GridVertLineWidth
-					+ this.record.CellLeftBlank;
-				nWidth = this.record.ValuePureWidth;
+            }
+            else if (nCol == 3)
+            {
+                // 值上
+                x = this.record.NameCaptionTotalWidth
+                    + this.record.NameTotalWidth
+                    + this.record.IndicatorTotalWidth
+                    + this.record.GridVertLineWidth
+                    + this.record.CellLeftBlank;
+                nWidth = this.record.ValuePureWidth;
                 this.curEdit.Multiline = true;
-			}
-			x += this.DocumentOrgX + this.LeftBlank + nDelta;
+            }
+            x += this.DocumentOrgX + this.LeftBlank + nDelta;
 
             // 按照区域设置不同的字体
             if (nCol == 1 || nCol == 2)
@@ -1303,29 +1305,29 @@ namespace DigitalPlatform.Marc
                 }
             }
 
-           //  curEdit.AutoSize = false;
+            //  curEdit.AutoSize = false;
 
 
-			Size oldsize = curEdit.Size;
-			Size newsize = new System.Drawing.Size(
-				nWidth,
-				nHeight);
+            Size oldsize = curEdit.Size;
+            Size newsize = new System.Drawing.Size(
+                nWidth,
+                nHeight);
 
-			Point loc = new System.Drawing.Point(x,y);
+            Point loc = new System.Drawing.Point(x, y);
 
-			// 从小变大，先move然后改变size
-			if (oldsize.Height < newsize.Height)
-			{
-				curEdit.Location = loc;
-				curEdit.Size = newsize;
-			}
-			else 
-			{
-				// 从大变小，先size然后改变move
-   				curEdit.Size = newsize;
+            // 从小变大，先move然后改变size
+            if (oldsize.Height < newsize.Height)
+            {
+                curEdit.Location = loc;
+                curEdit.Size = newsize;
+            }
+            else
+            {
+                // 从大变小，先size然后改变move
+                curEdit.Size = newsize;
 
-			    curEdit.Location = loc;
-			}
+                curEdit.Location = loc;
+            }
 
             curEdit.Padding = new System.Windows.Forms.Padding(0);
             curEdit.AutoSize = false;
@@ -1333,7 +1335,7 @@ namespace DigitalPlatform.Marc
             // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)
                 curEdit.ReadOnly = this.ReadOnly;
-		}
+        }
 
         internal void InitialFonts()
         {
@@ -1352,31 +1354,31 @@ namespace DigitalPlatform.Marc
             this.SetEditPos(true);
         }
 
-		// 兑现edit控件位置大小到当前字段行上。
-		void SetEditPos(bool bFocus)
-		{
-			if (this.SelectedFieldIndices.Count != 1)
-				return;
+        // 兑现edit控件位置大小到当前字段行上。
+        void SetEditPos(bool bFocus)
+        {
+            if (this.SelectedFieldIndices.Count != 1)
+                return;
 
-			int nField = this.FocusedFieldIndex;
+            int nField = this.FocusedFieldIndex;
 
             if (this.curEdit == null)
                 InitialEditControl();
 
-			if (nField == -1 
+            if (nField == -1
                 || this.FocusedField == null)   // 2008/11/29
-			{
-				this.curEdit.Text = "";
-				this.curEdit.Hide();
-				this.curEdit.SelectionStart = 0;
-				return;
-			}
-			else
-			{
-				this.curEdit.Show();
+            {
+                this.curEdit.Text = "";
+                this.curEdit.Hide();
+                this.curEdit.SelectionStart = 0;
+                return;
+            }
+            else
+            {
+                this.curEdit.Show();
                 if (bFocus == true)
-				    this.curEdit.Focus();
-			}
+                    this.curEdit.Focus();
+            }
 
             Debug.Assert(nField >= 0 || nField < this.record.Fields.Count, "FocusedFieldIndex下标越界。");
 
@@ -1385,15 +1387,15 @@ namespace DigitalPlatform.Marc
 				InitialEditControl();
              * */
 
-			if (this.m_nFocusCol == 1 || this.m_nFocusCol == 2)
-				this.curEdit.Overwrite = true;
-			else
-			{
-				if (this.FocusedField.Name == "###")
-					this.curEdit.Overwrite = true;
-				else
-					this.curEdit.Overwrite = false;
-			}
+            if (this.m_nFocusCol == 1 || this.m_nFocusCol == 2)
+                this.curEdit.Overwrite = true;
+            else
+            {
+                if (this.FocusedField.Name == "###")
+                    this.curEdit.Overwrite = true;
+                else
+                    this.curEdit.Overwrite = false;
+            }
 
             // ???
             // controlfield的所在列有限制，需要调整
@@ -1415,16 +1417,16 @@ namespace DigitalPlatform.Marc
                 Debug.Assert(false, "头标区的列不能为1或2");
             }
 
-			ChangeEditSizeAndMove(nField,this.m_nFocusCol);
-		}
+            ChangeEditSizeAndMove(nField, this.m_nFocusCol);
+        }
 
         int m_nEditControlTextToItemNested = 0;
 
-		// 将Edit控件中的文字内容兑现到nCurLine指向的内存Field对象
-		// 不负责修改屏幕图像
+        // 将Edit控件中的文字内容兑现到nCurLine指向的内存Field对象
+        // 不负责修改屏幕图像
         // TODO: 把Edit内容送回内存对象后，应为Edit changed设置false，表示这以后没有额外的改变
-		internal void EditControlTextToItem()
-		{
+        internal void EditControlTextToItem()
+        {
 
             if (m_nEditControlTextToItemNested > 0)
                 return; // 防止递归
@@ -1491,44 +1493,44 @@ namespace DigitalPlatform.Marc
             {
                 m_nEditControlTextToItemNested--;
             }
-		}
+        }
 
-		// 将FocusedFieldIndex指向的内存Field对象中的文字内容兑现到Edit控件
-		// 不负责修改屏幕图像，Edit控件位置大小可能不正确
+        // 将FocusedFieldIndex指向的内存Field对象中的文字内容兑现到Edit控件
+        // 不负责修改屏幕图像，Edit控件位置大小可能不正确
         // TODO: 把内存对象内容送给Edit后，应为Edit changed设置false，表示这时候两者内容是一致的
         // 送以前要检查Edit changed是否已经为true，如果那样，表明上一次的eidt内容尚未兑现到内存
         internal void ItemTextToEditControl()
-		{
-			if (this.FocusedFieldIndex == -1)
-			{
-				this.curEdit.Text = "";
-				return;
-			}
+        {
+            if (this.FocusedFieldIndex == -1)
+            {
+                this.curEdit.Text = "";
+                return;
+            }
 
-			Debug.Assert(this.FocusedField != null,"此时FocusedField不可能为null");
+            Debug.Assert(this.FocusedField != null, "此时FocusedField不可能为null");
 
-			if (this.m_nFocusCol == 1)
-			{
-				if (this.FocusedField.m_strName != curEdit.Text)
-				{
-					curEdit.Text = this.FocusedField.m_strName;
-				}
-			}
-			else if (this.m_nFocusCol == 2)
-			{
-				if (this.FocusedField.m_strIndicator != curEdit.Text)
-				{
-					curEdit.Text = this.FocusedField.m_strIndicator;
-				}
-			}
-			else if (this.m_nFocusCol == 3)
-			{
+            if (this.m_nFocusCol == 1)
+            {
+                if (this.FocusedField.m_strName != curEdit.Text)
+                {
+                    curEdit.Text = this.FocusedField.m_strName;
+                }
+            }
+            else if (this.m_nFocusCol == 2)
+            {
+                if (this.FocusedField.m_strIndicator != curEdit.Text)
+                {
+                    curEdit.Text = this.FocusedField.m_strIndicator;
+                }
+            }
+            else if (this.m_nFocusCol == 3)
+            {
 #if BIDI_SUPPORT
                 string strNewValue = this.FocusedField.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
                 if (strNewValue != curEdit.Text)
-				{
+                {
                     curEdit.Text = strNewValue;
-				}
+                }
 #else
                 if (this.FocusedField.m_strValue != curEdit.Text)
                 {
@@ -1536,20 +1538,20 @@ namespace DigitalPlatform.Marc
                 }
 #endif
             }
-			else
-			{
-				Debug.Assert(false,"列号不正确。");
-			}
+            else
+            {
+                Debug.Assert(false, "列号不正确。");
+            }
 
             curEdit.ContentIsNull = false;
 
             // 为了避免在最后一个字段的字段名最后一个字符输入后，小edit转向指示符域的时候，当前焦点突然不在可视范围内了的一个bug
             curEdit.SelectionStart = 0; // 2006/5/27 xietao add
-		}
+        }
 
-		#endregion
+        #endregion
 
-		#region 重载的一些函数 HandleCreated paint
+        #region 重载的一些函数 HandleCreated paint
 
         //
         // 摘要:
@@ -1563,8 +1565,8 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="e">包含事件数据的 System.EventArgs。</param>
         protected override void OnHandleCreated(EventArgs e)
-		{
-			base.OnHandleCreated(e);
+        {
+            base.OnHandleCreated(e);
 
             /*
 			if (this.m_strDefaultNameCaptionBackColor != null && this.m_strDefaultNameCaptionBackColor != "")
@@ -1583,8 +1585,8 @@ namespace DigitalPlatform.Marc
 				this.DefaultValueBackColor = ColorUtil.String2Color(this.m_strDefaultValueBaceColor);
              */
 
-			this.record = new Record(this);
-		}
+            this.record = new Record(this);
+        }
 
         //
         // 摘要:
@@ -1598,21 +1600,21 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="e">包含事件数据的 System.EventArgs。</param>
         protected override void OnSizeChanged(System.EventArgs e)
-		{
-			base.OnSizeChanged(e);
+        {
+            base.OnSizeChanged(e);
 
-			if (this.record != null)
-			{
-				// 把所有字段的高度计算一下
-				this.record.CalculateFieldsHeight(0,-1,true);
+            if (this.record != null)
+            {
+                // 把所有字段的高度计算一下
+                this.record.CalculateFieldsHeight(0, -1, true);
 
-			// 客户区发生变化后，文档与发生变化
-			InvalidateRect iRect = new InvalidateRect();
-			iRect.bAll = true;
-			this.AfterDocumentChanged(ScrollBarMember.Both,
-				iRect);
-			}
-		}
+                // 客户区发生变化后，文档与发生变化
+                InvalidateRect iRect = new InvalidateRect();
+                iRect.bAll = true;
+                this.AfterDocumentChanged(ScrollBarMember.Both,
+                    iRect);
+            }
+        }
 
         //
         // 摘要:
@@ -1626,14 +1628,14 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="pe">包含事件数据的 System.Windows.Forms.PaintEventArgs。</param>
         protected override void OnPaint(PaintEventArgs pe)
-		{
+        {
             /*
             pe.Graphics.SmoothingMode =
 System.Drawing.Drawing2D.SmoothingMode.HighQuality;
              */
 
-			int x= this.LeftBlank + this.DocumentOrgX;
-			int y = this.TopBlank + this.DocumentOrgY;
+            int x = this.LeftBlank + this.DocumentOrgX;
+            int y = this.TopBlank + this.DocumentOrgY;
 
             /*
             // 2010/12/16
@@ -1643,8 +1645,8 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 this.m_captionFont = this.CreateCaptionFont();
             */
 
-			this.record.Paint(pe,x,y);
-		}
+            this.record.Paint(pe, x, y);
+        }
 
         /// <summary>
         /// 刷新字段名提示区域
@@ -1670,69 +1672,69 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         /// </summary>
         /// <param name="e">包含事件数据的 System.Windows.Forms.MouseEventArgs。</param>
         protected override void OnMouseDown(MouseEventArgs e)
-		{
+        {
 
-			//this.WriteErrorInfo("走到OnMouseDown里");
-			this.Capture = true;
+            //this.WriteErrorInfo("走到OnMouseDown里");
+            this.Capture = true;
 
 
-			Point p = new Point(e.X, e.Y);
+            Point p = new Point(e.X, e.Y);
 
-			int nCol, nField;
-			// 测算单击点的位置
-			// parameters:
-			//		p	输入位置点
-			//		nField	out参数，返回所在的字段
-			//		nCol	out参数，返回所在的列号
-			// return: 
-			//		-1	不在record上
-			//		0	在record内 
-			//		1	在缝隙上
-			// 注: 文档的上下左右空白不算record
-			int nRet = HitTest(p,
-				out nField,
-				out nCol);
-			if (nRet == 1) 
-			{
-				nDragCol = nCol;
-				// 第一次
-				nLastTrackerX = e.X;
-				DrawTraker();
-				goto END1;
-			}
-			if (nRet == 0) 
-			{
-				if (nField == -1 || nCol == -1)
-					Debug.Assert(false,"不可能的情况");
+            int nCol, nField;
+            // 测算单击点的位置
+            // parameters:
+            //		p	输入位置点
+            //		nField	out参数，返回所在的字段
+            //		nCol	out参数，返回所在的列号
+            // return: 
+            //		-1	不在record上
+            //		0	在record内 
+            //		1	在缝隙上
+            // 注: 文档的上下左右空白不算record
+            int nRet = HitTest(p,
+                out nField,
+                out nCol);
+            if (nRet == 1)
+            {
+                nDragCol = nCol;
+                // 第一次
+                nLastTrackerX = e.X;
+                DrawTraker();
+                goto END1;
+            }
+            if (nRet == 0)
+            {
+                if (nField == -1 || nCol == -1)
+                    Debug.Assert(false, "不可能的情况");
 
-				// 如果是右键菜单，且在选中项上单击，而且是第一列, 则跳过，不再做选中某项的事情
-				if (e.Button == MouseButtons.Right && nCol == 0)
-				{
+                // 如果是右键菜单，且在选中项上单击，而且是第一列, 则跳过，不再做选中某项的事情
+                if (e.Button == MouseButtons.Right && nCol == 0)
+                {
 
                     if (this.SelectedFieldIndices.IndexOf(nField) != -1)
                     {
                         PopupMenu(new Point(e.X, e.Y));
                         return;
                     }
-                    
-				}
 
-				// 如果当前选项为一项，且在自身上单击
-				if (this.SelectedFieldIndices.Count == 1
-					&& this.FocusedFieldIndex == nField)
-				{
-					if (this.m_nFocusCol != nCol)
-					{
-						this.SetActiveField(nField,nCol);
-					
-						// 下面这段代码是把插入符定位到单击的地方
-						int x = e.X - curEdit.Location.X;
-						int y = e.Y - curEdit.Location.Y;
+                }
 
-						API.SendMessage(curEdit.Handle, 
-							API.WM_LBUTTONDOWN, 
-							new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
-							API.MakeLParam(x, y));
+                // 如果当前选项为一项，且在自身上单击
+                if (this.SelectedFieldIndices.Count == 1
+                    && this.FocusedFieldIndex == nField)
+                {
+                    if (this.m_nFocusCol != nCol)
+                    {
+                        this.SetActiveField(nField, nCol);
+
+                        // 下面这段代码是把插入符定位到单击的地方
+                        int x = e.X - curEdit.Location.X;
+                        int y = e.Y - curEdit.Location.Y;
+
+                        API.SendMessage(curEdit.Handle,
+                            API.WM_LBUTTONDOWN,
+                            new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
+                            API.MakeLParam(x, y));
                         /*
                         // **
                         API.SendMessage(curEdit.Handle,
@@ -1740,67 +1742,67 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
     new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
     API.MakeLParam(x, y));
                          * */
-						if(e.Button == MouseButtons.Right)
-						{	
-							PopupMenu(new Point(e.X, e.Y) );
+                        if (e.Button == MouseButtons.Right)
+                        {
+                            PopupMenu(new Point(e.X, e.Y));
                             return; // add
-						}
+                        }
                         goto END1;  // changed
-						// return;
-					}
+                        // return;
+                    }
 
-					goto END1;
-				}
+                    goto END1;
+                }
 
 
-				// 如果同时按下control键
-				if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
-				{
-					this.nStartFieldIndex = nField;
+                // 如果同时按下control键
+                if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+                {
+                    this.nStartFieldIndex = nField;
 
-					// 如果已经存在选中项了，则隐藏小Edit控件
-					if (this.SelectedFieldIndices.Count > 0)
-					{
-						this.HideTextBox();
-					}
-					this.AddSelectedField(nField,nField,false);
-				}
-				else if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-				{
-					// 如果还没有设起始键，则设一下，如果已设则不能再设了
-					if (this.nStartFieldIndex == -1)
-					{
-						if (this.SelectedFieldIndices.Count > 0)
-							nStartFieldIndex = (int)this.SelectedFieldIndices[this.SelectedFieldIndices.Count -1];
-						else
-							nStartFieldIndex = nField;
-					}
+                    // 如果已经存在选中项了，则隐藏小Edit控件
+                    if (this.SelectedFieldIndices.Count > 0)
+                    {
+                        this.HideTextBox();
+                    }
+                    this.AddSelectedField(nField, nField, false);
+                }
+                else if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                {
+                    // 如果还没有设起始键，则设一下，如果已设则不能再设了
+                    if (this.nStartFieldIndex == -1)
+                    {
+                        if (this.SelectedFieldIndices.Count > 0)
+                            nStartFieldIndex = (int)this.SelectedFieldIndices[this.SelectedFieldIndices.Count - 1];
+                        else
+                            nStartFieldIndex = nField;
+                    }
 
-					// 如果已经存在选中项了，则隐藏小Edit控件
-					if (this.SelectedFieldIndices.Count > 0)
-					{
-						this.HideTextBox();
-					}
+                    // 如果已经存在选中项了，则隐藏小Edit控件
+                    if (this.SelectedFieldIndices.Count > 0)
+                    {
+                        this.HideTextBox();
+                    }
 
-					this.AddSelectedField(this.nStartFieldIndex,nField,true);
- 				}
-				else
-				{
-					nStartFieldIndex = nField;
+                    this.AddSelectedField(this.nStartFieldIndex, nField, true);
+                }
+                else
+                {
+                    nStartFieldIndex = nField;
                     /*
 					if (nCol == 0)
 						nCol = 3;
                      */
-					this.SetActiveField(nField,nCol);
+                    this.SetActiveField(nField, nCol);
 
-					// 下面这段代码是把插入符定位到单击的地方
-					int x = e.X - curEdit.Location.X;
-					int y = e.Y - curEdit.Location.Y;
+                    // 下面这段代码是把插入符定位到单击的地方
+                    int x = e.X - curEdit.Location.X;
+                    int y = e.Y - curEdit.Location.Y;
 
-					API.SendMessage(curEdit.Handle, 
-						API.WM_LBUTTONDOWN, 
-						new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
-						API.MakeLParam(x, y));
+                    API.SendMessage(curEdit.Handle,
+                        API.WM_LBUTTONDOWN,
+                        new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
+                        API.MakeLParam(x, y));
                     /*
                     // **
                     API.SendMessage(curEdit.Handle,
@@ -1808,34 +1810,34 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
     new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
     API.MakeLParam(x, y));
                      * */
-					if(e.Button == MouseButtons.Right)
-					{
-						PopupMenu(new Point(e.X, e.Y) );
+                    if (e.Button == MouseButtons.Right)
+                    {
+                        PopupMenu(new Point(e.X, e.Y));
                         return; // add
-					}
+                    }
 
                     goto END1;  // changed
-					// return;
-				}
-			}
-END1:
-			base.OnMouseDown(e);
-		}
- 
-		void DrawTraker()
-		{
-			Point p1 = new Point(nLastTrackerX,0);
-			p1 = this.PointToScreen(p1);
+                    // return;
+                }
+            }
+        END1:
+            base.OnMouseDown(e);
+        }
 
-			Point p2 = new Point(nLastTrackerX, this.ClientSize.Height);
-			p2 = this.PointToScreen(p2);
+        void DrawTraker()
+        {
+            Point p1 = new Point(nLastTrackerX, 0);
+            p1 = this.PointToScreen(p1);
 
-			ControlPaint.DrawReversibleLine(p1,
-				p2,
-				SystemColors.Control);
-		}
+            Point p2 = new Point(nLastTrackerX, this.ClientSize.Height);
+            p2 = this.PointToScreen(p2);
 
-		// 重载鼠标移动事件
+            ControlPaint.DrawReversibleLine(p1,
+                p2,
+                SystemColors.Control);
+        }
+
+        // 重载鼠标移动事件
         //
         // 摘要:
         //     引发 System.Windows.Forms.Control.MouseMove 事件。
@@ -1848,67 +1850,67 @@ END1:
         /// </summary>
         /// <param name="e">包含事件数据的 System.Windows.Forms.MouseEventArgs。</param>
         protected override void OnMouseMove(MouseEventArgs e)
-		{
-			if (nDragCol != -1) 
-			{
-				Cursor = Cursors.SizeWE;
+        {
+            if (nDragCol != -1)
+            {
+                Cursor = Cursors.SizeWE;
 
-				// 消上次残余的一根
-				DrawTraker();
+                // 消上次残余的一根
+                DrawTraker();
 
-				nLastTrackerX = e.X;
+                nLastTrackerX = e.X;
 
-				// 绘制本次的一根
-				DrawTraker();
-			}
-			else 
-			{
-				Point p = new Point(e.X, e.Y);
+                // 绘制本次的一根
+                DrawTraker();
+            }
+            else
+            {
+                Point p = new Point(e.X, e.Y);
 
-				int nCol, nField;
-				// parameters:
-				//		p	输入位置点
-				//		nField	out参数，返回所在的字段
-				//		nCol	out参数，返回所在的列号
-				//				0 字段说明;
-				//				1 字段名;
-				//				2 字段指示符
-				//				3 字段内容
-				// return: 
-				//		-1	不在record上
-				//		0	在record内 
-				//		1	在缝隙上
-				int nRet = HitTest(
-					p,
-					out nField,
-					out nCol);
-				if(nRet == 0)
-				{
-					if (nCol == 1 || nCol == 3)
-					{
-						Cursor = Cursors.IBeam;
-					}
-					else if (nCol == 2)
-					{
-						Field field = this.record.Fields[nField];
-						if (Record.IsControlFieldName(field.Name) == false)
-							Cursor = Cursors.IBeam;
-						else 
-							Cursor = Cursors.Arrow;
-					}
-					else
-					{
-						Cursor = Cursors.Arrow;
-					}
-				}
-				else if (nRet == 1)
-					Cursor = Cursors.SizeWE;
-				else
-					Cursor = Cursors.Arrow;
-			}
+                int nCol, nField;
+                // parameters:
+                //		p	输入位置点
+                //		nField	out参数，返回所在的字段
+                //		nCol	out参数，返回所在的列号
+                //				0 字段说明;
+                //				1 字段名;
+                //				2 字段指示符
+                //				3 字段内容
+                // return: 
+                //		-1	不在record上
+                //		0	在record内 
+                //		1	在缝隙上
+                int nRet = HitTest(
+                    p,
+                    out nField,
+                    out nCol);
+                if (nRet == 0)
+                {
+                    if (nCol == 1 || nCol == 3)
+                    {
+                        Cursor = Cursors.IBeam;
+                    }
+                    else if (nCol == 2)
+                    {
+                        Field field = this.record.Fields[nField];
+                        if (Record.IsControlFieldName(field.Name) == false)
+                            Cursor = Cursors.IBeam;
+                        else
+                            Cursor = Cursors.Arrow;
+                    }
+                    else
+                    {
+                        Cursor = Cursors.Arrow;
+                    }
+                }
+                else if (nRet == 1)
+                    Cursor = Cursors.SizeWE;
+                else
+                    Cursor = Cursors.Arrow;
+            }
 
-			base.OnMouseMove(e);
-		}
+            base.OnMouseMove(e);
+        }
 
         //
         // 摘要:
@@ -1922,64 +1924,64 @@ END1:
         /// </summary>
         /// <param name="e">包含事件数据的 System.Windows.Forms.MouseEventArgs。</param>
         protected override void OnMouseUp(MouseEventArgs e)
-		{
-			this.Capture = false;
+        {
+            this.Capture = false;
 
-			if (nDragCol != -1) 
-			{
-				// 消最后残余的一根
-				DrawTraker();
+            if (nDragCol != -1)
+            {
+                // 消最后残余的一根
+                DrawTraker();
 
-				// 做改变列宽度的事情
-				int x0 = 0;
-				int delta = 0;
+                // 做改变列宽度的事情
+                int x0 = 0;
+                int delta = 0;
 
-				// 把拖动的起点位置x折算成屏幕坐标形态
-				if (nDragCol == 0) 
-				{
-					x0 = this.DocumentOrgX + this.LeftBlank + this.record.NameCaptionTotalWidth;
-				}
-				else
-				{
-				}
+                // 把拖动的起点位置x折算成屏幕坐标形态
+                if (nDragCol == 0)
+                {
+                    x0 = this.DocumentOrgX + this.LeftBlank + this.record.NameCaptionTotalWidth;
+                }
+                else
+                {
+                }
 
-				// 计算差额
-				delta = nLastTrackerX - x0;
-				if (delta != 0) 
-				{
-					if (nDragCol == 0) 
-					{
-						this.record.NameCaptionPureWidth += delta;
-						if (this.record.NameCaptionTotalWidth >= this.ClientWidth)
-							this.record.NameCaptionPureWidth -= 20;
-						if (this.record.NameCaptionPureWidth < 0)
-							this.record.NameCaptionPureWidth = 0;
+                // 计算差额
+                delta = nLastTrackerX - x0;
+                if (delta != 0)
+                {
+                    if (nDragCol == 0)
+                    {
+                        this.record.NameCaptionPureWidth += delta;
+                        if (this.record.NameCaptionTotalWidth >= this.ClientWidth)
+                            this.record.NameCaptionPureWidth -= 20;
+                        if (this.record.NameCaptionPureWidth < 0)
+                            this.record.NameCaptionPureWidth = 0;
 
-					}
-					// 迫使每个单元重新测算高度
-					this.record.CalculateFieldsHeight(0,-1,true);
-				}
+                    }
+                    // 迫使每个单元重新测算高度
+                    this.record.CalculateFieldsHeight(0, -1, true);
+                }
 
-				nLastTrackerX = -1;
-				nDragCol = -1;
+                nLastTrackerX = -1;
+                nDragCol = -1;
 
-				this.DocumentOrgX = this.DocumentOrgX;
+                this.DocumentOrgX = this.DocumentOrgX;
 
-				// 客户区发生变化后，文档与发生变化
-				InvalidateRect iRect = new InvalidateRect();
-				iRect.bAll = true;
-				this.AfterDocumentChanged(ScrollBarMember.Both,
-					iRect);
-			}
+                // 客户区发生变化后，文档与发生变化
+                InvalidateRect iRect = new InvalidateRect();
+                iRect.bAll = true;
+                this.AfterDocumentChanged(ScrollBarMember.Both,
+                    iRect);
+            }
 
-			base.OnMouseUp(e);
+            base.OnMouseUp(e);
             /*
 			if(e.Button == MouseButtons.Right)
 			{	
 				PopupMenu(new Point(e.X, e.Y) );
 			}
              */
-		}
+        }
 
         /// <summary>
         ///字段名区域宽度
@@ -2005,8 +2007,8 @@ END1:
 					this.record.NameCaptionPureWidth -= 20;
                  * */
 
-				if (this.record.NameCaptionPureWidth < 0)
-					this.record.NameCaptionPureWidth = 0;
+                if (this.record.NameCaptionPureWidth < 0)
+                    this.record.NameCaptionPureWidth = 0;
 
                 // 迫使每个单元重新测算高度
                 this.record.CalculateFieldsHeight(0, -1, true);
@@ -2033,7 +2035,7 @@ END1:
             // 插入字段(询问字段名)
             menuItem = new MenuItem("插入新字段(询问字段名)");// + strName);
             menuItem.Click += new System.EventHandler(this.InsertField);
-            if (this.SelectedFieldIndices.Count > 1 
+            if (this.SelectedFieldIndices.Count > 1
                 || this.ReadOnly == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -2498,10 +2500,10 @@ END1:
             else
                 this.RightToLeft = RightToLeft.Yes;
         }
-		
-		// 右键弹出上下文菜单
-		private void PopupMenu(Point p)
-		{
+
+        // 右键弹出上下文菜单
+        private void PopupMenu(Point p)
+        {
             if (this.m_nFocusCol == 0 || this.SelectedFieldIndices.Count > 1)
             {
                 ContextMenu contextMenu = new ContextMenu();
@@ -2520,7 +2522,7 @@ END1:
 
             /*
              */
-		}
+        }
 
 
         //
@@ -2535,8 +2537,8 @@ END1:
         /// </summary>
         /// <param name="e">包含事件数据的 System.EventArgs。</param>
         protected override void OnFontChanged(
-			EventArgs e)
-		{
+            EventArgs e)
+        {
             /*
             // 防止残留的字体影响
             this.m_fixedSizeFont = null;
@@ -2544,15 +2546,15 @@ END1:
              * */
 
             if (this.record != null)
-			    this.record.InitializeWidth();
+                this.record.InitializeWidth();
 
             this.CalcuAllHeight();
 
             // 是不是还要注意改变curEdit的font?
             this.SetEditPos();
 
-			base.OnFontChanged(e);
-		}
+            base.OnFontChanged(e);
+        }
 
         //
         // 摘要:
@@ -2566,21 +2568,21 @@ END1:
         /// </summary>
         /// <param name="e">包含事件数据的 System.Windows.Forms.KeyEventArgs。</param>
         protected override void OnKeyDown(KeyEventArgs e)
-		{
-			base.OnKeyDown(e);
-			switch (e.KeyCode) 
-			{
-				case Keys.Delete:
-				{
-					if (this.SelectedFieldIndices.Count > 0)
-						this.DeleteFieldWithDlg();
-				}
-					break;
-				default:
-					break;
-			}
+        {
+            base.OnKeyDown(e);
+            switch (e.KeyCode)
+            {
+                case Keys.Delete:
+                    {
+                        if (this.SelectedFieldIndices.Count > 0)
+                            this.DeleteFieldWithDlg();
+                    }
+                    break;
+                default:
+                    break;
+            }
 
-		}
+        }
 
         //
         // 摘要:
@@ -2594,70 +2596,71 @@ END1:
         /// </summary>
         /// <param name="e">包含事件数据的 System.Windows.Forms.KeyEventArgs。</param>
         protected override void OnKeyUp(KeyEventArgs e)
-		{
-			int i= 0;
-			i++;
-			if (e.Shift == true)
-			{
-				//MessageBox.Show(this,"无shift");
-			}
-			else
-			{
-				this.nStartFieldIndex = -1;
-				//MessageBox.Show(this,"有shift");
-			}
-			base.OnKeyUp(e);
-		}
+        {
+            int i = 0;
+            i++;
+            if (e.Shift == true)
+            {
+                //MessageBox.Show(this,"无shift");
+            }
+            else
+            {
+                this.nStartFieldIndex = -1;
+                //MessageBox.Show(this,"有shift");
+            }
+            base.OnKeyUp(e);
+        }
 
-		#endregion
+        #endregion
 
-		#region 公共的属性 函数
+        #region 公共的属性 函数
 
-		// 当前获得焦点的字段
+        // 当前获得焦点的字段
         /// <summary>
         /// 当前具有输入焦点的字段对象
         /// </summary>
-		public Field FocusedField
-		{
-			get
-			{
+        public Field FocusedField
+        {
+            get
+            {
                 if (this.SelectedFieldIndices.Count > 1)
                     return null;    //
 
-				if (this.FocusedFieldIndex == -1)
-					return null;
-				Debug.Assert(this.FocusedFieldIndex >= 0,"不可能的情况1");
+                if (this.FocusedFieldIndex == -1)
+                    return null;
+                Debug.Assert(this.FocusedFieldIndex >= 0, "不可能的情况1");
 
                 // 2008/11/29
                 if (this.record.Fields.Count == 0)
                     return null;
 
-				Debug.Assert(this.record.Fields.Count > 0,"不可能的情况2");
-				Debug.Assert(this.FocusedFieldIndex < this.record.Fields.Count,"不可能的情况3");
-				return (Field)this.record.Fields[this.FocusedFieldIndex];
-			}
-			set
-			{
-				if (value == null)
-					return;
-				int nIndex = this.record.Fields.IndexOf(value);
+                Debug.Assert(this.record.Fields.Count > 0, "不可能的情况2");
+                Debug.Assert(this.FocusedFieldIndex < this.record.Fields.Count, "不可能的情况3");
+                return (Field)this.record.Fields[this.FocusedFieldIndex];
+            }
+            set
+            {
+                if (value == null)
+                    return;
+                int nIndex = this.record.Fields.IndexOf(value);
                 if (nIndex == -1)
                     return;
-				Debug.Assert(nIndex != -1,"不可能的情况");
-				this.SetActiveField(nIndex,3);
-			}
-		}
+                Debug.Assert(nIndex != -1, "不可能的情况");
+                this.SetActiveField(nIndex, 3);
+            }
+        }
 
-		// 当前获得焦点字段的索引号
+        // TODO: 注意测试当 字段被删除 .Marc 被清除等情况下，FocuedFieldIndex 不应下标越界
+        // 当前获得焦点字段的索引号
         /// <summary>
         /// 当前具有输入焦点字段(在全部字段集合中的)下标
         /// </summary>
-		public int FocusedFieldIndex
-		{
-			get 
-			{
-				if (this.SelectedFieldIndices.Count == 0)
-					return -1;
+        public int FocusedFieldIndex
+        {
+            get
+            {
+                if (this.SelectedFieldIndices.Count == 0)
+                    return -1;
 
 #if DEBUG
                 if (this.SelectedFieldIndices.Count > 1)
@@ -2666,8 +2669,8 @@ END1:
                 }
 #endif
 
-				return (int)this.SelectedFieldIndices[0];
-			}	
+                return (int)this.SelectedFieldIndices[0];
+            }
 
             // 2007/7/17 
             set
@@ -2714,7 +2717,7 @@ END1:
                     }
                 }
             }
-		}
+        }
 
         /*
         public Subfield FocuedSubfield
@@ -2787,14 +2790,14 @@ END1:
             return strText.Length;
         }
 
-		// value中的列号
+        // value中的列号
         /// <summary>
         /// 小编辑器中当前选定范围的开始位置
         /// </summary>
-		public int SelectionStart
-		{
-			get
-			{
+        public int SelectionStart
+        {
+            get
+            {
 #if BIDI_SUPPORT
                 if (this.curEdit != null)
                     return this.curEdit.SelectionStart - CountFillingChar(this.curEdit.Text, this.curEdit.SelectionStart);
@@ -2803,13 +2806,13 @@ END1:
 					return this.curEdit.SelectionStart;
 #endif
                 return -1;
-			}
-			set
-			{
-				if (value >= 0 && this.curEdit != null)
-				{
-					if (value < this.curEdit.Text.Length)
-					{
+            }
+            set
+            {
+                if (value >= 0 && this.curEdit != null)
+                {
+                    if (value < this.curEdit.Text.Length)
+                    {
 #if BIDI_SUPPORT
                         this.curEdit.SelectionStart = AdjustPos(this.curEdit.Text, value);
 #else
@@ -2817,64 +2820,64 @@ END1:
 #endif
 
 
-                        
-					}
-				}
-			}
-		}
 
-/*
-		// 选中的字段数组
-		public Field[] SelectedFields 
-		{
-			get
-			{
-				ArrayList aField = new ArrayList();
-				foreach(int i in this.SelectedFieldIndices)
-				{
-					int nIndex = (int)this.SelectedFieldIndices[i];
-					if (nIndex == -1)
-						continue;
-					Field field = (Field)this.record[nIndex];
-					aField.Add(field);
-				}
+                    }
+                }
+            }
+        }
 
-				Field[] fields = new Field[aField.Count];
-				for(int i=0;i<fields.Length;i++)
-				{
-					Field field = (Field)aField[i];
-					fields[i] = field;
-				}
+        /*
+                // 选中的字段数组
+                public Field[] SelectedFields 
+                {
+                    get
+                    {
+                        ArrayList aField = new ArrayList();
+                        foreach(int i in this.SelectedFieldIndices)
+                        {
+                            int nIndex = (int)this.SelectedFieldIndices[i];
+                            if (nIndex == -1)
+                                continue;
+                            Field field = (Field)this.record[nIndex];
+                            aField.Add(field);
+                        }
 
-				return fields;
-			}
-		}
-*/
+                        Field[] fields = new Field[aField.Count];
+                        for(int i=0;i<fields.Length;i++)
+                        {
+                            Field field = (Field)aField[i];
+                            fields[i] = field;
+                        }
+
+                        return fields;
+                    }
+                }
+        */
 
         /// <summary>
         /// 获得 Record 对象
         /// </summary>
-		public Record Record
-		{
-			get
-			{
-				return this.record;
-			}
-		}
+        public Record Record
+        {
+            get
+            {
+                return this.record;
+            }
+        }
 
-		// 设数据xml
+        // 设数据xml
         /// <summary>
         /// 当前 MARC 字符串(机内格式)
         /// </summary>
-		public string Marc
-		{
-			get 
-			{
-				return this.record.GetMarc();
-			}
-			set
-			{
-				string strError = "";
+        public string Marc
+        {
+            get
+            {
+                return this.record.GetMarc();
+            }
+            set
+            {
+                string strError = "";
 
                 if (this.curEdit != null)
                 {
@@ -2883,10 +2886,10 @@ END1:
                     this.curEdit = null;
                 }
                 // this.HideTextBox();
-                
-				int nRet = this.record.SetMarc(value,
+
+                int nRet = this.record.SetMarc(value,
                     true,
-					out strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     // MessageBox.Show("SetMarc()出错，原因：" + strError);
@@ -2895,8 +2898,8 @@ END1:
 
                 // 2014/7/10
                 AdjustOriginY();
-			}
-		}
+            }
+        }
 
 
         /// <summary>
@@ -2905,75 +2908,75 @@ END1:
         [Category("Content")]
         [DescriptionAttribute("Changed")]
         [DefaultValue(false)]
-		public bool Changed
-		{
-			get
-			{
-				if (this.SelectedFieldIndices.Count == 1)
-					this.EditControlTextToItem();   // 容易引起递归。已经解决
-				return this.m_bChanged;
-			}
-			set
-			{
-				this.m_bChanged = value;
-			}
-		}
+        public bool Changed
+        {
+            get
+            {
+                if (this.SelectedFieldIndices.Count == 1)
+                    this.EditControlTextToItem();   // 容易引起递归。已经解决
+                return this.m_bChanged;
+            }
+            set
+            {
+                this.m_bChanged = value;
+            }
+        }
 
         /// <summary>
         /// 将小编辑器中(暂时)的内容兑现到内存结构
         /// </summary>
-		public void Flush()
-		{
-			if (this.SelectedFieldIndices.Count == 1)
-			{
-				this.EditControlTextToItem();
-			}
-		}
+        public void Flush()
+        {
+            if (this.SelectedFieldIndices.Count == 1)
+            {
+                this.EditControlTextToItem();
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region 内部属性 函数
+        #region 内部属性 函数
 
-		// 隐藏小edit
-		internal void HideTextBox()
-		{
-			if (this.SelectedFieldIndices.Count == 1)
-			{
-				// 把旧内容送回内存对象
-				EditControlTextToItem();
-			}
-			
+        // 隐藏小edit
+        internal void HideTextBox()
+        {
+            if (this.SelectedFieldIndices.Count == 1)
+            {
+                // 把旧内容送回内存对象
+                EditControlTextToItem();
+            }
+
             if (this.curEdit != null)
-			    this.curEdit.Hide();
-		}
+                this.curEdit.Hide();
+        }
 
         /// <summary>
         /// 清除表示当前选定字段的若干下标
         /// </summary>
-		internal void ClearSelectFieldIndices()
-		{
-			// 把最新的内容保存到内存对象中
-			this.Flush();
+        internal void ClearSelectFieldIndices()
+        {
+            // 把最新的内容保存到内存对象中
+            this.Flush();
 
-			// 失效原来全部的字段
-			foreach(int nIndex in this.SelectedFieldIndices)
-			{
-				if (nIndex == -1 || nIndex >= this.record.Fields.Count)
-				{
-					// Debug.Assert(false,"SelectedFieldIndices数组中不应有'" + Convert.ToString(nIndex) + "'。");
-					continue;
-				}
-				Field field = this.record.Fields[nIndex];
-				field.Selected = false;
-				// 失效该行
-				Rectangle rect1 = this.GetItemBounds(nIndex,
-					1,
-					BoundsPortion.Field);
-				this.Invalidate(rect1);
-			} 
-			this.SelectedFieldIndices.Clear();
-			this.HideTextBox();
-		}
+            // 失效原来全部的字段
+            foreach (int nIndex in this.SelectedFieldIndices)
+            {
+                if (nIndex == -1 || nIndex >= this.record.Fields.Count)
+                {
+                    // Debug.Assert(false,"SelectedFieldIndices数组中不应有'" + Convert.ToString(nIndex) + "'。");
+                    continue;
+                }
+                Field field = this.record.Fields[nIndex];
+                field.Selected = false;
+                // 失效该行
+                Rectangle rect1 = this.GetItemBounds(nIndex,
+                    1,
+                    BoundsPortion.Field);
+                this.Invalidate(rect1);
+            }
+            this.SelectedFieldIndices.Clear();
+            this.HideTextBox();
+        }
 
         // 包装版本
         /// <summary>
@@ -2991,12 +2994,12 @@ END1:
         internal void SetActiveField(Field field,
             int nCol,
             bool bFocus)
-		{
-			int nIndex = this.record.Fields.IndexOf(field);
-			Debug.Assert(nIndex != -1,"field不可能不在record里");
+        {
+            int nIndex = this.record.Fields.IndexOf(field);
+            Debug.Assert(nIndex != -1, "field不可能不在record里");
 
-			this.SetActiveField(nIndex, nCol, bFocus);
-		}
+            this.SetActiveField(nIndex, nCol, bFocus);
+        }
 
         // 包装版本
         internal void SetActiveField(int nFieldIndex,
@@ -3024,7 +3027,6 @@ END1:
             // 清除原来选中的字段
             this.ClearSelectFieldIndices();
 
-
             // 设当前活动的行，列
             this.SelectedFieldIndices.Add(nFieldIndex);
 
@@ -3036,7 +3038,6 @@ END1:
                     this.curEdit.ContentIsNull = true;
                 }
             }
-
 
             Field fieldTemp = this.record.Fields[nFieldIndex];
             if (fieldTemp.Name == "###")
@@ -3115,231 +3116,231 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
          * 
          * */
         // 把一个字段设为当前活动的字段
-		internal void AddSelectedField(int nStartFieldIndex,
-			int nEndFieldIndex,
-			bool bClear)
-		{
-			int nIndex1 = 0;
-			int nIndex2 = 0;
+        internal void AddSelectedField(int nStartFieldIndex,
+            int nEndFieldIndex,
+            bool bClear)
+        {
+            int nIndex1 = 0;
+            int nIndex2 = 0;
 
-			if (nStartFieldIndex > nEndFieldIndex)
-			{
-				nIndex1 = nEndFieldIndex;
-				nIndex2 = nStartFieldIndex;
-			}
-			else
-			{
-				nIndex1 = nStartFieldIndex;
-				nIndex2 = nEndFieldIndex;
-			}
-			if (bClear == true)
-			{
-				this.ClearSelectFieldIndices();
-			}
+            if (nStartFieldIndex > nEndFieldIndex)
+            {
+                nIndex1 = nEndFieldIndex;
+                nIndex2 = nStartFieldIndex;
+            }
+            else
+            {
+                nIndex1 = nStartFieldIndex;
+                nIndex2 = nEndFieldIndex;
+            }
+            if (bClear == true)
+            {
+                this.ClearSelectFieldIndices();
+            }
 
-			for(int i = nIndex1;i<=nIndex2;i++)
-			{
+            for (int i = nIndex1; i <= nIndex2; i++)
+            {
                 // 2015/8/8
                 // 保护下标范围
                 if (i < 0 || i >= this.Record.Fields.Count)
                     continue;
-				this.SelectedFieldIndices.Add(i);
-				Field field = this.record.Fields[i];
-				field.Selected = true;
-				Rectangle rect2 = this.GetItemBounds(i,
-					1,
-					BoundsPortion.Field);
-				this.Invalidate(rect2);
-			}
+                this.SelectedFieldIndices.Add(i);
+                Field field = this.record.Fields[i];
+                field.Selected = true;
+                Rectangle rect2 = this.GetItemBounds(i,
+                    1,
+                    BoundsPortion.Field);
+                this.Invalidate(rect2);
+            }
 
             if (this.SelectedFieldChanged != null)
             {
                 this.SelectedFieldChanged(this, new EventArgs());
                 m_chOldSubfieldName = this.FocusedSubfieldName;
             }
-		}
+        }
 
-		// 文档横向编移量
+        // 文档横向编移量
         /// <summary>
         /// 当前文档横向编移量
         /// </summary>
-		public int DocumentOrgX
-		{
-			get 
-			{
-				return this.m_nDocumentOrgX;
-			}
-			set 
-			{
-				int nDocumentOrgX_old = this.m_nDocumentOrgX;
+        public int DocumentOrgX
+        {
+            get
+            {
+                return this.m_nDocumentOrgX;
+            }
+            set
+            {
+                int nDocumentOrgX_old = this.m_nDocumentOrgX;
 
-				// 视图大于文档
-				if (this.ClientWidth >= this.DocumentWidth)
-				{
-					this.m_nDocumentOrgX = 0;
-				}
-				else 
-				{
-					if (value <= - this.DocumentWidth + this.ClientWidth)
-						this.m_nDocumentOrgX = -this.DocumentWidth  + this.ClientWidth;
-					else
-						this.m_nDocumentOrgX = value;
+                // 视图大于文档
+                if (this.ClientWidth >= this.DocumentWidth)
+                {
+                    this.m_nDocumentOrgX = 0;
+                }
+                else
+                {
+                    if (value <= -this.DocumentWidth + this.ClientWidth)
+                        this.m_nDocumentOrgX = -this.DocumentWidth + this.ClientWidth;
+                    else
+                        this.m_nDocumentOrgX = value;
 
-					if (this.m_nDocumentOrgX > 0)
-						this.m_nDocumentOrgX = 0;
-				}
+                    if (this.m_nDocumentOrgX > 0)
+                        this.m_nDocumentOrgX = 0;
+                }
 
-				// 修改卷滚条
-				AfterDocumentChanged(ScrollBarMember.Both,
-					null);
+                // 修改卷滚条
+                AfterDocumentChanged(ScrollBarMember.Both,
+                    null);
 
-				// 卷屏
-				int nDelta = this.m_nDocumentOrgX - nDocumentOrgX_old;
-				if (nDelta != 0 ) 
-				{
-					RECT rect = new RECT();
-					rect.left = 0;
-					rect.top = 0;
-					rect.right = this.ClientWidth;
-					rect.bottom = this.ClientHeight;
+                // 卷屏
+                int nDelta = this.m_nDocumentOrgX - nDocumentOrgX_old;
+                if (nDelta != 0)
+                {
+                    RECT rect = new RECT();
+                    rect.left = 0;
+                    rect.top = 0;
+                    rect.right = this.ClientWidth;
+                    rect.bottom = this.ClientHeight;
 
-					API.ScrollWindowEx(this.Handle,
-						nDelta,
-						0,
-						ref rect,
-						IntPtr.Zero,	//	ref RECT lprcClip,
-						0,	// int hrgnUpdate,
-						IntPtr.Zero,	// ref RECT lprcUpdate,
-						API.SW_INVALIDATE );
-				}
-			}
-		}
-		
-		// 文档纵向偏移量
+                    API.ScrollWindowEx(this.Handle,
+                        nDelta,
+                        0,
+                        ref rect,
+                        IntPtr.Zero,	//	ref RECT lprcClip,
+                        0,	// int hrgnUpdate,
+                        IntPtr.Zero,	// ref RECT lprcUpdate,
+                        API.SW_INVALIDATE);
+                }
+            }
+        }
+
+        // 文档纵向偏移量
         /// <summary>
         /// 文档纵向偏移量
         /// </summary>
-		public int DocumentOrgY
-		{
-			get 
-			{
-				return this.m_nDocumentOrgY;
-			}
-			set 
-			{
-				int nDocumentOrgY_old = this.m_nDocumentOrgY;
-				if (this.ClientHeight >= this.DocumentHeight)
-				{
-					this.m_nDocumentOrgY = 0;
-				}
-				else 
-				{
-					if (value <= - this.DocumentHeight + this.ClientHeight)
-						this.m_nDocumentOrgY = -this.DocumentHeight + this.ClientHeight;
-					else
-						this.m_nDocumentOrgY = value;
+        public int DocumentOrgY
+        {
+            get
+            {
+                return this.m_nDocumentOrgY;
+            }
+            set
+            {
+                int nDocumentOrgY_old = this.m_nDocumentOrgY;
+                if (this.ClientHeight >= this.DocumentHeight)
+                {
+                    this.m_nDocumentOrgY = 0;
+                }
+                else
+                {
+                    if (value <= -this.DocumentHeight + this.ClientHeight)
+                        this.m_nDocumentOrgY = -this.DocumentHeight + this.ClientHeight;
+                    else
+                        this.m_nDocumentOrgY = value;
 
-					if (this.m_nDocumentOrgY > 0)
-						this.m_nDocumentOrgY = 0;
-				}
+                    if (this.m_nDocumentOrgY > 0)
+                        this.m_nDocumentOrgY = 0;
+                }
 
-				AfterDocumentChanged(ScrollBarMember.Both,
-					null);
+                AfterDocumentChanged(ScrollBarMember.Both,
+                    null);
 
 
-				// 屏幕需要卷滚的区域
-				int nDelta = this.m_nDocumentOrgY
-					- nDocumentOrgY_old;
-				if ( nDelta != 0 ) 
-				{
-					RECT rect = new RECT();
-					rect.left = 0;
-					rect.top = 0;
-					rect.right = this.ClientSize.Width;
-					rect.bottom = this.ClientSize.Height;
+                // 屏幕需要卷滚的区域
+                int nDelta = this.m_nDocumentOrgY
+                    - nDocumentOrgY_old;
+                if (nDelta != 0)
+                {
+                    RECT rect = new RECT();
+                    rect.left = 0;
+                    rect.top = 0;
+                    rect.right = this.ClientSize.Width;
+                    rect.bottom = this.ClientSize.Height;
 
-					API.ScrollWindowEx(this.Handle,
-						0,
-						nDelta,
-						ref rect,
-						IntPtr.Zero,	//	ref RECT lprcClip,
-						0,	// int hrgnUpdate,
-						IntPtr.Zero,	// ref RECT lprcUpdate,
-						API.SW_INVALIDATE );
-				}
-			}
-		}
+                    API.ScrollWindowEx(this.Handle,
+                        0,
+                        nDelta,
+                        ref rect,
+                        IntPtr.Zero,	//	ref RECT lprcClip,
+                        0,	// int hrgnUpdate,
+                        IntPtr.Zero,	// ref RECT lprcUpdate,
+                        API.SW_INVALIDATE);
+                }
+            }
+        }
 
-		// 文档宽度
-		internal int DocumentWidth
-		{
-			get 
-			{
-				return this.LeftBlank 
-					+ (this.record != null ? this.record.Width : 0)
-					+ this.RightBlank - 1/*微调*/;
-			}
-		}
+        // 文档宽度
+        internal int DocumentWidth
+        {
+            get
+            {
+                return this.LeftBlank
+                    + (this.record != null ? this.record.Width : 0)
+                    + this.RightBlank - 1/*微调*/;
+            }
+        }
 
-		// 文档高度
-		internal int DocumentHeight
-		{
-			get 
-			{
-				return this.TopBlank 
-					+ (this.record != null ? this.record.Height : 0)
-					+ this.BottomBlank;
-			}
-		}
+        // 文档高度
+        internal int DocumentHeight
+        {
+            get
+            {
+                return this.TopBlank
+                    + (this.record != null ? this.record.Height : 0)
+                    + this.BottomBlank;
+            }
+        }
 
-		// 客户区宽度
-		internal int ClientWidth
-		{
-			get 
-			{
-				return this.ClientSize.Width;
-			}
-			set 
-			{
-				Size newsize = new Size(value,ClientSize.Height);
-				this.ClientSize = newsize;
+        // 客户区宽度
+        internal int ClientWidth
+        {
+            get
+            {
+                return this.ClientSize.Width;
+            }
+            set
+            {
+                Size newsize = new Size(value, ClientSize.Height);
+                this.ClientSize = newsize;
 
-			}
-		}
+            }
+        }
 
-		// 客户区高度
-		internal int ClientHeight
-		{
-			get 
-			{
-				return this.ClientSize.Height;
-			}
-			set 
-			{
-				Size newsize = new Size(ClientSize.Width,value);
-				this.ClientSize = newsize;
-			}
-		}
-		
-		// 文档发生改变
-		internal void FireTextChanged()
-		{
-			this.Changed = true;
+        // 客户区高度
+        internal int ClientHeight
+        {
+            get
+            {
+                return this.ClientSize.Height;
+            }
+            set
+            {
+                Size newsize = new Size(ClientSize.Width, value);
+                this.ClientSize = newsize;
+            }
+        }
 
-			EventArgs e = new EventArgs();
-			this.OnTextChanged(e);
-		}
+        // 文档发生改变
+        internal void FireTextChanged()
+        {
+            this.Changed = true;
 
-		// 从配置信息中得到一个字段的指定语言版本的标签名称
-		// parameters:
-		//		strFieldName	字段名
-		//		strLang	语言版本
-		// return:
-		//		找不到返回"???"，找到返回具体的标签信息
-		internal string GetLabel(string strFieldName)
-		{
-			if (this.MarcDefDom == null)
-				return "????";
+            EventArgs e = new EventArgs();
+            this.OnTextChanged(e);
+        }
+
+        // 从配置信息中得到一个字段的指定语言版本的标签名称
+        // parameters:
+        //		strFieldName	字段名
+        //		strLang	语言版本
+        // return:
+        //		找不到返回"???"，找到返回具体的标签信息
+        internal string GetLabel(string strFieldName)
+        {
+            if (this.MarcDefDom == null)
+                return "????";
 
             XmlNode nodeProperty = this.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + strFieldName + "']/Property");
             if (nodeProperty == null)
@@ -3386,152 +3387,152 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
 			return DomUtil.GetNodeText(nodeLabel);
 #endif
-		}
-		
-		// 得到从起始行开始的行数的rectangle
-		// parameter:
-		//		nStartLine	起始行
-		//		nLength	行数 -1表示从起始行到末尾
-		//		BoundsPortion	区域 如为Field表示取整行，如为FieldAndBottom表示取行与控件底部
-		// return:
-		//		Rectangle对象
-		// 注意: 本函数包括的Rectangle对象永远不包含控件左上右的空白
-		//		 返回的Recatangle是实际的坐标
-		internal Rectangle GetItemBounds(int nStart,
-			int nLength,
-			BoundsPortion portion)
-		{
-			Rectangle rect = new Rectangle(0,0,0,0);
+        }
 
-			string strError = "";
-			int nRealLength = 0;
-			int nRet = Record.GetRealLength(nStart,
-				nLength,
-				this.record.Fields.Count,
-				-1,
-				out nRealLength,
-				out strError);
-			if (nRet == -1)
-			{
-				Debug.Assert(false,strError);
-				return rect;
-			}
+        // 得到从起始行开始的行数的rectangle
+        // parameter:
+        //		nStartLine	起始行
+        //		nLength	行数 -1表示从起始行到末尾
+        //		BoundsPortion	区域 如为Field表示取整行，如为FieldAndBottom表示取行与控件底部
+        // return:
+        //		Rectangle对象
+        // 注意: 本函数包括的Rectangle对象永远不包含控件左上右的空白
+        //		 返回的Recatangle是实际的坐标
+        internal Rectangle GetItemBounds(int nStart,
+            int nLength,
+            BoundsPortion portion)
+        {
+            Rectangle rect = new Rectangle(0, 0, 0, 0);
 
-			if (portion != BoundsPortion.Field
-				&& portion != BoundsPortion.FieldAndBottom)
-			{
-				Debug.Assert(false,"portion参数不合法，必须为Line或LineAndBottom");
-				return rect;
-			}
+            string strError = "";
+            int nRealLength = 0;
+            int nRet = Record.GetRealLength(nStart,
+                nLength,
+                this.record.Fields.Count,
+                -1,
+                out nRealLength,
+                out strError);
+            if (nRet == -1)
+            {
+                Debug.Assert(false, strError);
+                return rect;
+            }
 
-			rect.X = this.DocumentOrgX
-				+ this.LeftBlank;
+            if (portion != BoundsPortion.Field
+                && portion != BoundsPortion.FieldAndBottom)
+            {
+                Debug.Assert(false, "portion参数不合法，必须为Line或LineAndBottom");
+                return rect;
+            }
 
-			rect.Y =  this.DocumentOrgY
-				+ this.TopBlank
-				+ this.record.GetFieldsHeight(0, nStart);
+            rect.X = this.DocumentOrgX
+                + this.LeftBlank;
 
-			rect.Width = this.record.Width + 1 /*线条为1时的微调*/;
-			rect.Height = this.record.GetFieldsHeight(nStart, nRealLength);
+            rect.Y = this.DocumentOrgY
+                + this.TopBlank
+                + this.record.GetFieldsHeight(0, nStart);
 
-			if (portion == BoundsPortion.FieldAndBottom)
-			{
-				if (nStart + nRealLength != this.record.Fields.Count)
-				{
-					Debug.Assert(false,"调入错误，不取到末尾不可以用LineAndBottom参数");
-					return rect;
-				}
-				rect.Height += this.record.GridHorzLineHeight
-					+ this.BottomBlank;
-			}
+            rect.Width = this.record.Width + 1 /*线条为1时的微调*/;
+            rect.Height = this.record.GetFieldsHeight(nStart, nRealLength);
 
-			return rect;
-		}
+            if (portion == BoundsPortion.FieldAndBottom)
+            {
+                if (nStart + nRealLength != this.record.Fields.Count)
+                {
+                    Debug.Assert(false, "调入错误，不取到末尾不可以用LineAndBottom参数");
+                    return rect;
+                }
+                rect.Height += this.record.GridHorzLineHeight
+                    + this.BottomBlank;
+            }
 
-		// 事项高度因素变化后，善后、兑现显示的函数
-		// nOldHeightParam	事项原来的像素现实高度。如果==-1，表示不用此参数，
-		//		本函数自动把函数调用时刻的事项Height属性表示的高度当作旧高度，
-		//		而把CalcHeight()计算得到的高度当作新高度。
-		internal void AfterItemHeightChanged(int nField,
-			int nOldHeightParam)
-		{
-			Field field = this.record.Fields[nField];
+            return rect;
+        }
 
-			// 得到旧高度
-			int nOldHeight = 0;
-			if (nOldHeightParam == -1) 
-			{
-				nOldHeight = field.TotalHeight;
-				field.CalculateHeight(null, false);
-			}
-			else
-			{
-				nOldHeight = nOldHeightParam;
-			}
+        // 事项高度因素变化后，善后、兑现显示的函数
+        // nOldHeightParam	事项原来的像素现实高度。如果==-1，表示不用此参数，
+        //		本函数自动把函数调用时刻的事项Height属性表示的高度当作旧高度，
+        //		而把CalcHeight()计算得到的高度当作新高度。
+        internal void AfterItemHeightChanged(int nField,
+            int nOldHeightParam)
+        {
+            Field field = this.record.Fields[nField];
 
-			// 新高度
-			int nNewHeight = field.TotalHeight;
+            // 得到旧高度
+            int nOldHeight = 0;
+            if (nOldHeightParam == -1)
+            {
+                nOldHeight = field.TotalHeight;
+                field.CalculateHeight(null, false);
+            }
+            else
+            {
+                nOldHeight = nOldHeightParam;
+            }
 
-			// 新旧两高度的差距
-			int nDelta = nNewHeight - nOldHeight;
-			if (nDelta == 0)
-				return;
+            // 新高度
+            int nNewHeight = field.TotalHeight;
 
-			Rectangle rect = new Rectangle(0,0,0,0);
-			if (this.FocusedFieldIndex < this.record.Fields.Count-1) 
-			{	
-				// 得到本行以下的区域
+            // 新旧两高度的差距
+            int nDelta = nNewHeight - nOldHeight;
+            if (nDelta == 0)
+                return;
 
-				// 得到从起始行开始的行数的rectangle
-				// parameter:
-				//		nStartLine	起始行
-				//		nCount	行数
-				//		BoundsPortion	区域 如为line表示取整行，如为LineAndBottom表示取行与控件底部
-				// return:
-				//		Rectangle对象
-				// 注意: 本函数包括的Rectangle对象永远不包含控件左上右的空白
-				//		 返回的Recatangle是实际的坐标
-				rect = GetItemBounds(this.FocusedFieldIndex + 1, 
-					this.record.Fields.Count - (this.FocusedFieldIndex + 1), 
-					BoundsPortion.FieldAndBottom);
+            Rectangle rect = new Rectangle(0, 0, 0, 0);
+            if (this.FocusedFieldIndex < this.record.Fields.Count - 1)
+            {
+                // 得到本行以下的区域
 
-				// nDelta修正为edit控件尺寸增大以前的下方bounds
-				rect.Y = rect.Y - nDelta;
+                // 得到从起始行开始的行数的rectangle
+                // parameter:
+                //		nStartLine	起始行
+                //		nCount	行数
+                //		BoundsPortion	区域 如为line表示取整行，如为LineAndBottom表示取行与控件底部
+                // return:
+                //		Rectangle对象
+                // 注意: 本函数包括的Rectangle对象永远不包含控件左上右的空白
+                //		 返回的Recatangle是实际的坐标
+                rect = GetItemBounds(this.FocusedFieldIndex + 1,
+                    this.record.Fields.Count - (this.FocusedFieldIndex + 1),
+                    BoundsPortion.FieldAndBottom);
 
-				this.Update();
+                // nDelta修正为edit控件尺寸增大以前的下方bounds
+                rect.Y = rect.Y - nDelta;
 
-				// 不能直接用rect，因为ScrollWindowEx对rect为ref类型参数
-				RECT rect1 = new RECT();
-				rect1.left = rect.Left;
-				rect1.top = rect.Top;
-				rect1.right = rect.Right;
-				rect1.bottom = rect.Bottom;
-				API.ScrollWindowEx(this.Handle,
-					0,
-					nDelta,
-					ref rect1,
-					IntPtr.Zero,	//	ref RECT lprcClip,
-					0,	// int hrgnUpdate,
-					IntPtr.Zero,	// ref RECT lprcUpdate,
-					API.SW_INVALIDATE);
+                this.Update();
 
-				if (rect.Width == 0)
-				{
-					Debug.Assert(false,"width不可能为0");
-				}
-			}
+                // 不能直接用rect，因为ScrollWindowEx对rect为ref类型参数
+                RECT rect1 = new RECT();
+                rect1.left = rect.Left;
+                rect1.top = rect.Top;
+                rect1.right = rect.Right;
+                rect1.bottom = rect.Bottom;
+                API.ScrollWindowEx(this.Handle,
+                    0,
+                    nDelta,
+                    ref rect1,
+                    IntPtr.Zero,	//	ref RECT lprcClip,
+                    0,	// int hrgnUpdate,
+                    IntPtr.Zero,	// ref RECT lprcUpdate,
+                    API.SW_INVALIDATE);
 
-			InvalidateRect iRect = null;
-			if (this.FocusedFieldIndex == this.record.Fields.Count-1) 
-			{	
-				iRect = new InvalidateRect();
-				iRect.bAll = false;
-				iRect.rect = this.GetItemBounds(this.FocusedFieldIndex,
-					1,
-					BoundsPortion.FieldAndBottom);
-			}
-			else
-			{
+                if (rect.Width == 0)
+                {
+                    Debug.Assert(false, "width不可能为0");
+                }
+            }
+
+            InvalidateRect iRect = null;
+            if (this.FocusedFieldIndex == this.record.Fields.Count - 1)
+            {
+                iRect = new InvalidateRect();
+                iRect.bAll = false;
+                iRect.rect = this.GetItemBounds(this.FocusedFieldIndex,
+                    1,
+                    BoundsPortion.FieldAndBottom);
+            }
+            else
+            {
 
 
                 iRect = new InvalidateRect();
@@ -3553,107 +3554,107 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 					rect.Width,
 					nNewHeight);
  */
-			}
+            }
 
-			// 相应的文档变化了
-			AfterDocumentChanged(ScrollBarMember.Vert,
-				iRect);
+            // 相应的文档变化了
+            AfterDocumentChanged(ScrollBarMember.Vert,
+                iRect);
 
-		}
+        }
 
-		// 测算单击点的位置
-		// parameters:
-		//		p	输入位置点
-		//		nField	out参数，返回所在的字段
-		//		nCol	out参数，返回所在的列号
-		//				0 字段说明;
-		//				1 字段名;
-		//				2 字段指示符
-		//				3 字段内容
-		// return: 
-		//		-1	不在record上
-		//		0	在record内 
-		//		1	在缝隙上
-		// 注: 文档的上下左右空白不算record
-		internal int HitTest(Point p,
-			out int nField,
-			out int nCol)
-		{
-			nField = -1;
-			nCol = -1;
+        // 测算单击点的位置
+        // parameters:
+        //		p	输入位置点
+        //		nField	out参数，返回所在的字段
+        //		nCol	out参数，返回所在的列号
+        //				0 字段说明;
+        //				1 字段名;
+        //				2 字段指示符
+        //				3 字段内容
+        // return: 
+        //		-1	不在record上
+        //		0	在record内 
+        //		1	在缝隙上
+        // 注: 文档的上下左右空白不算record
+        internal int HitTest(Point p,
+            out int nField,
+            out int nCol)
+        {
+            nField = -1;
+            nCol = -1;
 
-			// 调整大小的区域宽度
-			int nResizeAreaWidth = 4;
-
-
-			int x = this.DocumentOrgX + this.LeftBlank;
-			int y = this.DocumentOrgY + this.TopBlank;
-			
-			// 不在record区域
-			if (p.Y < y || p.X < x) 
-				return -1;
-			if (p.X > x + this.record.Width)
-				return -1;
-			if (p.Y > y + this.record.Height)
-				return -1;
-
-			// 已确定在record区域，计算精确位置
-			for(int i=0;i<this.record.Fields.Count;i++) 
-			{
-				Field field = this.record.Fields[i];
-
-				if (p.Y >= y 
-					&& p.Y <= y + field.TotalHeight)
-				{
-					nField = i;
-
-					// 在名称标签与名称间的缝隙上
-					if (p.X >= x + this.record.NameCaptionTotalWidth - (nResizeAreaWidth/2)
-						&& p.X < x + this.record.NameCaptionTotalWidth + (nResizeAreaWidth/2)) 
-					{
-						nCol = 0;
-						return 1;
-					}
-
-					// 名字说明
-					if (p.X >= x + 0 
-						&& p.X <= x + this.record.NameCaptionTotalWidth) 
-					{
-						nCol = 0 ;
-						return 0;
-					}
+            // 调整大小的区域宽度
+            int nResizeAreaWidth = 4;
 
 
+            int x = this.DocumentOrgX + this.LeftBlank;
+            int y = this.DocumentOrgY + this.TopBlank;
 
-					// 名字
-					if (p.X >= x + this.record.NameCaptionTotalWidth 
-						&& p.X <= x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth) 
-					{
-						nCol = 1;
-						return 0;
-					}
+            // 不在record区域
+            if (p.Y < y || p.X < x)
+                return -1;
+            if (p.X > x + this.record.Width)
+                return -1;
+            if (p.Y > y + this.record.Height)
+                return -1;
 
-					// Indicator上
-					if (p.X > x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth
-						&& p.X <= x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth + this.record.IndicatorTotalWidth) 
-					{
-						nCol = 2;
-						return 0;
-					}
+            // 已确定在record区域，计算精确位置
+            for (int i = 0; i < this.record.Fields.Count; i++)
+            {
+                Field field = this.record.Fields[i];
 
-					// 最后一根线条可以考虑算在value上
-					// Value上
-					if (p.X > x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth + this.record.IndicatorTotalWidth /*+ this.record.Indicator2TotalWidth*/
-						&& p.X <= x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth + this.record.IndicatorTotalWidth/* + this.record.Indicator2TotalWidth*/ + this.record.ValueTotalWidth) 
-					{
-						nCol = 3;
-						return 0;
-					}
-				}
-				y += field.TotalHeight;
-			}
-			return -1;
-		}
+                if (p.Y >= y
+                    && p.Y <= y + field.TotalHeight)
+                {
+                    nField = i;
+
+                    // 在名称标签与名称间的缝隙上
+                    if (p.X >= x + this.record.NameCaptionTotalWidth - (nResizeAreaWidth / 2)
+                        && p.X < x + this.record.NameCaptionTotalWidth + (nResizeAreaWidth / 2))
+                    {
+                        nCol = 0;
+                        return 1;
+                    }
+
+                    // 名字说明
+                    if (p.X >= x + 0
+                        && p.X <= x + this.record.NameCaptionTotalWidth)
+                    {
+                        nCol = 0;
+                        return 0;
+                    }
+
+
+
+                    // 名字
+                    if (p.X >= x + this.record.NameCaptionTotalWidth
+                        && p.X <= x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth)
+                    {
+                        nCol = 1;
+                        return 0;
+                    }
+
+                    // Indicator上
+                    if (p.X > x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth
+                        && p.X <= x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth + this.record.IndicatorTotalWidth)
+                    {
+                        nCol = 2;
+                        return 0;
+                    }
+
+                    // 最后一根线条可以考虑算在value上
+                    // Value上
+                    if (p.X > x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth + this.record.IndicatorTotalWidth /*+ this.record.Indicator2TotalWidth*/
+                        && p.X <= x + this.record.NameCaptionTotalWidth + this.record.NameTotalWidth + this.record.IndicatorTotalWidth/* + this.record.Indicator2TotalWidth*/ + this.record.ValueTotalWidth)
+                    {
+                        nCol = 3;
+                        return 0;
+                    }
+                }
+                y += field.TotalHeight;
+            }
+            return -1;
+        }
 
 #if NO
 		// 把错误信息写到日志文件里
@@ -3674,211 +3675,211 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             if (this.curEdit != null)
                 this.curEdit.EnsureVisible();
         }
-		
-		// 使字段的某区域可见
-		// parameter:
-		//		nCol	列号 
-		//				0 字段说明;
-		//				1 字段名;
-		//				2 字段指示符
-		//				3 字段值
+
+        // 使字段的某区域可见
+        // parameter:
+        //		nCol	列号 
+        //				0 字段说明;
+        //				1 字段名;
+        //				2 字段指示符
+        //				3 字段值
         /// <summary>
         /// 如果必要滚动文档，让指定的位置处在可见位置
         /// </summary>
         /// <param name="nFieldIndex">字段下标</param>
         /// <param name="nCol">列号。列号的用法：0: 字段说明; 1: 字段名; 2: 字段指示符; 3: 字段值</param>
         /// <param name="rectCaret">插入符外围矩形</param>
-		public void EnsureVisible(int nFieldIndex, 
-			int nCol,
-			Rectangle rectCaret)
-		{
-			Debug.Assert(nFieldIndex >=0 && nFieldIndex < this.record.Fields.Count,"调入错误");
-			Debug.Assert(nCol == 0
-				|| nCol == 1
-				|| nCol == 2
-				|| nCol == 3,"nCol参数值无效");
-			
-			Field field = this.record.Fields[nFieldIndex];
+        public void EnsureVisible(int nFieldIndex,
+            int nCol,
+            Rectangle rectCaret)
+        {
+            Debug.Assert(nFieldIndex >= 0 && nFieldIndex < this.record.Fields.Count, "调入错误");
+            Debug.Assert(nCol == 0
+                || nCol == 1
+                || nCol == 2
+                || nCol == 3, "nCol参数值无效");
 
-			int nDelta = this.DocumentOrgY 
-				+ this.TopBlank 
-				+ this.record.GetFieldsHeight(0,nFieldIndex)
-				+ rectCaret.Y;
+            Field field = this.record.Fields[nFieldIndex];
 
-			if (nDelta + rectCaret.Height >= this.ClientHeight) 
-			{
-				if (rectCaret.Height >= this.ClientHeight) 
-					this.DocumentOrgX = this.DocumentOrgY - (nDelta + rectCaret.Height) + this.ClientHeight+ /*调整系数*/ (rectCaret.Height/2) - (this.ClientHeight/2);
-				else
-					this.DocumentOrgY = this.DocumentOrgY - (nDelta + rectCaret.Height) + this.ClientHeight;
-			}
-			else if (nDelta < 0)
-			{
-				if (rectCaret.Height >= this.ClientHeight) 
-					this.DocumentOrgY = this.DocumentOrgY - (nDelta) - /*调整系数*/ ( (rectCaret.Height/2) - (this.ClientHeight/2));
-				else 
-					this.DocumentOrgY = this.DocumentOrgY - (nDelta);
-			}
-			else 
-			{
-				// y不需要卷滚
-			}
+            int nDelta = this.DocumentOrgY
+                + this.TopBlank
+                + this.record.GetFieldsHeight(0, nFieldIndex)
+                + rectCaret.Y;
 
-			////
-			// 水平方向
-			nDelta = 0;
+            if (nDelta + rectCaret.Height >= this.ClientHeight)
+            {
+                if (rectCaret.Height >= this.ClientHeight)
+                    this.DocumentOrgX = this.DocumentOrgY - (nDelta + rectCaret.Height) + this.ClientHeight + /*调整系数*/ (rectCaret.Height / 2) - (this.ClientHeight / 2);
+                else
+                    this.DocumentOrgY = this.DocumentOrgY - (nDelta + rectCaret.Height) + this.ClientHeight;
+            }
+            else if (nDelta < 0)
+            {
+                if (rectCaret.Height >= this.ClientHeight)
+                    this.DocumentOrgY = this.DocumentOrgY - (nDelta) - /*调整系数*/ ((rectCaret.Height / 2) - (this.ClientHeight / 2));
+                else
+                    this.DocumentOrgY = this.DocumentOrgY - (nDelta);
+            }
+            else
+            {
+                // y不需要卷滚
+            }
 
-			if (nCol == 0) 
-			{
-				nDelta = this.DocumentOrgX 
-					+ this.LeftBlank 
-					+ rectCaret.X;
-			}
-			else if (nCol == 1)
-			{
-				nDelta = this.DocumentOrgX
-					+ this.LeftBlank 
-					+ this.record.NameCaptionTotalWidth
-					+ rectCaret.X;
-			}
-			else if (nCol == 2)
-			{
-				nDelta = this.DocumentOrgX
-					+ this.LeftBlank 
-					+ this.record.NameCaptionTotalWidth 
-					+ this.record.NameTotalWidth
-					+ rectCaret.X;
-			}
-			else if (nCol == 3)
-			{
-				nDelta = this.DocumentOrgX
-					+ this.LeftBlank 
-					+ this.record.NameCaptionTotalWidth 
-					+ this.record.NameTotalWidth
-					+ this.record.IndicatorTotalWidth
-					+ rectCaret.X;
-			}
-			
+            ////
+            // 水平方向
+            nDelta = 0;
 
-			if (nDelta + rectCaret.Width >= this.ClientWidth) 
-			{
-				if (rectCaret.Width >= this.ClientWidth) 
-					this.DocumentOrgX = this.DocumentOrgX - (nDelta + rectCaret.Width) + this.ClientWidth + /*调整系数*/ (rectCaret.Width/2) - (this.ClientWidth/2);
-				else
-					this.DocumentOrgX = this.DocumentOrgX - (nDelta + rectCaret.Width) + this.ClientWidth;
-			}
-			else if (nDelta < 0)
-			{
-				if (rectCaret.Width >= this.ClientWidth) 
-					this.DocumentOrgX = this.DocumentOrgX - (nDelta) - /*调整系数*/ ( (rectCaret.Width/2) - (this.ClientWidth/2));
-				else 
-					this.DocumentOrgX = this.DocumentOrgX - (nDelta);
-			}
-			else 
-			{
-				// x不需要卷滚
-			}
+            if (nCol == 0)
+            {
+                nDelta = this.DocumentOrgX
+                    + this.LeftBlank
+                    + rectCaret.X;
+            }
+            else if (nCol == 1)
+            {
+                nDelta = this.DocumentOrgX
+                    + this.LeftBlank
+                    + this.record.NameCaptionTotalWidth
+                    + rectCaret.X;
+            }
+            else if (nCol == 2)
+            {
+                nDelta = this.DocumentOrgX
+                    + this.LeftBlank
+                    + this.record.NameCaptionTotalWidth
+                    + this.record.NameTotalWidth
+                    + rectCaret.X;
+            }
+            else if (nCol == 3)
+            {
+                nDelta = this.DocumentOrgX
+                    + this.LeftBlank
+                    + this.record.NameCaptionTotalWidth
+                    + this.record.NameTotalWidth
+                    + this.record.IndicatorTotalWidth
+                    + rectCaret.X;
+            }
 
-		}
 
-		// 修改字段名后要变换说明信息
+            if (nDelta + rectCaret.Width >= this.ClientWidth)
+            {
+                if (rectCaret.Width >= this.ClientWidth)
+                    this.DocumentOrgX = this.DocumentOrgX - (nDelta + rectCaret.Width) + this.ClientWidth + /*调整系数*/ (rectCaret.Width / 2) - (this.ClientWidth / 2);
+                else
+                    this.DocumentOrgX = this.DocumentOrgX - (nDelta + rectCaret.Width) + this.ClientWidth;
+            }
+            else if (nDelta < 0)
+            {
+                if (rectCaret.Width >= this.ClientWidth)
+                    this.DocumentOrgX = this.DocumentOrgX - (nDelta) - /*调整系数*/ ((rectCaret.Width / 2) - (this.ClientWidth / 2));
+                else
+                    this.DocumentOrgX = this.DocumentOrgX - (nDelta);
+            }
+            else
+            {
+                // x不需要卷滚
+            }
+
+        }
+
+        // 修改字段名后要变换说明信息
         /// <summary>
         /// 修改字段名
         /// </summary>
         /// <param name="field">字段对象</param>
         /// <param name="strNewName">要修改成的字段名</param>
-		public void ChangeFieldName(Field field,
-			string strNewName)
-		{
-			// 此处应使用Name，让界面跟着改变
-			string strOldName = field.Name;
-			if (strOldName != strNewName)
-			{
-				// 旧字段名是控制字段，新字段名是非控制字段 的情况
-				if (Record.IsControlFieldName(strOldName) == true
-					&& Record.IsControlFieldName(strNewName) == false)
-				{
-					field.Name = strNewName;
-					string strAllValue = field.ValueKernel;
-					if (strAllValue.Length < 2)
-						strAllValue = strAllValue + new string(' ',2-strAllValue.Length);
+        public void ChangeFieldName(Field field,
+            string strNewName)
+        {
+            // 此处应使用Name，让界面跟着改变
+            string strOldName = field.Name;
+            if (strOldName != strNewName)
+            {
+                // 旧字段名是控制字段，新字段名是非控制字段 的情况
+                if (Record.IsControlFieldName(strOldName) == true
+                    && Record.IsControlFieldName(strNewName) == false)
+                {
+                    field.Name = strNewName;
+                    string strAllValue = field.ValueKernel;
+                    if (strAllValue.Length < 2)
+                        strAllValue = strAllValue + new string(' ', 2 - strAllValue.Length);
 
-					field.Indicator = strAllValue.Substring(0,2);
-					if (strAllValue.Length > 2)
-						field.Value = strAllValue.Substring(2);
-					else
-						field.Value = "";
-				}
-				else if (Record.IsControlFieldName(strOldName) == false
-					&& Record.IsControlFieldName(strNewName) == true)
-				{
-					// 旧字段名是非控制字段，新字段名是控制字段 的情况
+                    field.Indicator = strAllValue.Substring(0, 2);
+                    if (strAllValue.Length > 2)
+                        field.Value = strAllValue.Substring(2);
+                    else
+                        field.Value = "";
+                }
+                else if (Record.IsControlFieldName(strOldName) == false
+                    && Record.IsControlFieldName(strNewName) == true)
+                {
+                    // 旧字段名是非控制字段，新字段名是控制字段 的情况
 
-					field.Name = strNewName;
-					string strValue = this.FocusedField.Indicator + this.FocusedField.ValueKernel;
-					field.Indicator = "";
-					field.Value = strValue;	
-				}
-				else
-				{
-					field.Name = strNewName;
-					if (StringUtil.IsPureNumber(strNewName) == true)
-					{
-						if (Record.IsControlFieldName(strNewName) == true)
-						{
-							if(field.Indicator != "")
-								field.Indicator = "";
-						}
-						else
-						{
-							if (field.Indicator.Length != 2)
-							{
-								if (field.Indicator.Length > 2)
-									field.Indicator = field.Indicator.Substring(0,2);
-								else
-									field.Indicator = field.Indicator.PadRight(2,' ');
-							}
-						}
-					}
-				}
-			}
-		}
+                    field.Name = strNewName;
+                    string strValue = this.FocusedField.Indicator + this.FocusedField.ValueKernel;
+                    field.Indicator = "";
+                    field.Value = strValue;
+                }
+                else
+                {
+                    field.Name = strNewName;
+                    if (StringUtil.IsPureNumber(strNewName) == true)
+                    {
+                        if (Record.IsControlFieldName(strNewName) == true)
+                        {
+                            if (field.Indicator != "")
+                                field.Indicator = "";
+                        }
+                        else
+                        {
+                            if (field.Indicator.Length != 2)
+                            {
+                                if (field.Indicator.Length > 2)
+                                    field.Indicator = field.Indicator.Substring(0, 2);
+                                else
+                                    field.Indicator = field.Indicator.PadRight(2, ' ');
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region 处理右键菜单的函数
+        #region 处理右键菜单的函数
 
-		internal static void TextToClipboard(string strText)
-		{
+        internal static void TextToClipboard(string strText)
+        {
 #if BIDI_SUPPORT
             strText = strText.Replace("\x200e", "");
 #endif
             Clipboard.SetDataObject(strText);
-		}
+        }
 
-		internal static string ClipboardToText()
-		{
-			IDataObject ido = Clipboard.GetDataObject();
-			if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
-				return "";
+        internal static string ClipboardToText()
+        {
+            IDataObject ido = Clipboard.GetDataObject();
+            if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
+                return "";
 
-			return (string)ido.GetData(DataFormats.UnicodeText);
-		}
+            return (string)ido.GetData(DataFormats.UnicodeText);
+        }
 
-		private void Menu_SelectAll(object sender,
-			System.EventArgs e)
-		{
-			Debug.Assert(this.record.Fields.Count > 0,"");
+        private void Menu_SelectAll(object sender,
+            System.EventArgs e)
+        {
+            Debug.Assert(this.record.Fields.Count > 0, "");
 
-			this.AddSelectedField(0,
-				this.record.Fields.Count -1,
-				true);
-		}
+            this.AddSelectedField(0,
+                this.record.Fields.Count - 1,
+                true);
+        }
 
         // 属性
-		private void Property_menu(object sender,
-			System.EventArgs e)
-		{
+        private void Property_menu(object sender,
+            System.EventArgs e)
+        {
             /*
         // 测试用
 			//string strMessage = "SelectedFieldIndices.Count=" + Convert.ToString(this.SelectedFieldIndices.Count) + "\r\n";
@@ -3893,59 +3894,59 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             dlg.MarcEditor = this;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
-		}
+        }
 
-		// 剪切
-		private void menuItem_Cut(object sender,
-			System.EventArgs e)
-		{
-			if (this.SelectedFieldIndices.Count == 0)
-			{
-				Debug.Assert(false,"在'剪切'时，SelectedFieldIndices.Count不可能为0。");
-				return;
-			}
-			string strText = "";
-			
-			for(int i=0;i<this.SelectedFieldIndices.Count;i++)
-			{
-				int nIndex = (int)this.SelectedFieldIndices[i];
-				Field field = this.record.Fields[nIndex];
-				strText += field.GetFieldMarc(true);
-			}
-			
-			MarcEditor.TextToClipboard(strText);
+        // 剪切
+        private void menuItem_Cut(object sender,
+            System.EventArgs e)
+        {
+            if (this.SelectedFieldIndices.Count == 0)
+            {
+                Debug.Assert(false, "在'剪切'时，SelectedFieldIndices.Count不可能为0。");
+                return;
+            }
+            string strText = "";
 
-			
-			int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
-			for(int i=0;i<fieldIndices.Length;i++)
-			{
-				fieldIndices[i] = (int)this.SelectedFieldIndices[i];
-			}
-			this.record.Fields.RemoveAt(fieldIndices);
+            for (int i = 0; i < this.SelectedFieldIndices.Count; i++)
+            {
+                int nIndex = (int)this.SelectedFieldIndices[i];
+                Field field = this.record.Fields[nIndex];
+                strText += field.GetFieldMarc(true);
+            }
+
+            MarcEditor.TextToClipboard(strText);
+
+
+            int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
+            for (int i = 0; i < fieldIndices.Length; i++)
+            {
+                fieldIndices[i] = (int)this.SelectedFieldIndices[i];
+            }
+            this.record.Fields.RemoveAt(fieldIndices);
 
             // 2007/7/17
             AdjustOriginY();
 
-		}
+        }
 
-		// 复制
-		private void menuItem_Copy(object sender,
-			System.EventArgs e)
-		{
-			if (this.SelectedFieldIndices.Count == 0)
-			{
-				Debug.Assert(false,"在'复制'时，SelectedFieldIndices.Count不可能为0。");
-				return;
-			}
-			string strText = "";
-			for(int i=0;i<this.SelectedFieldIndices.Count;i++)
-			{
-				int nIndex = (int)this.SelectedFieldIndices[i];
-				Field field = this.record.Fields[nIndex];
-				strText += field.GetFieldMarc(true);
-			}
-			MarcEditor.TextToClipboard(strText);
-		}
+        // 复制
+        private void menuItem_Copy(object sender,
+            System.EventArgs e)
+        {
+            if (this.SelectedFieldIndices.Count == 0)
+            {
+                Debug.Assert(false, "在'复制'时，SelectedFieldIndices.Count不可能为0。");
+                return;
+            }
+            string strText = "";
+            for (int i = 0; i < this.SelectedFieldIndices.Count; i++)
+            {
+                int nIndex = (int)this.SelectedFieldIndices[i];
+                Field field = this.record.Fields[nIndex];
+                strText += field.GetFieldMarc(true);
+            }
+            MarcEditor.TextToClipboard(strText);
+        }
 
         /* http://z39.tcmarc.net/Index.asp?one=1
 001    012012004066
@@ -4085,13 +4086,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             return strResult;
         }
-		
+
         // 不支持在多选时粘贴覆盖，因为不明确在哪个字段上粘贴覆盖
-		// 粘贴覆盖
-		private void menuItem_PasteOverwrite(object sender,
-			System.EventArgs e)
-		{
-			Debug.Assert(this.SelectedFieldIndices.Count >= 1,"在粘贴覆盖时，SelectedFieldIndices必须>=1。");
+        // 粘贴覆盖
+        private void menuItem_PasteOverwrite(object sender,
+            System.EventArgs e)
+        {
+            Debug.Assert(this.SelectedFieldIndices.Count >= 1, "在粘贴覆盖时，SelectedFieldIndices必须>=1。");
 
 
             // 先删除选定的所有字段
@@ -4156,13 +4157,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 			this.AfterDocumentChanged(ScrollBarMember.Both,
 				iRect);
              * */
-		}
+        }
 
-		// 粘贴插入_末尾
-		private void menuItem_PasteInsert_AppendChild(object sender,
-			System.EventArgs e)
-		{
-			string strFieldsMarc = MarcEditor.ClipboardToText();
+        // 粘贴插入_末尾
+        private void menuItem_PasteInsert_AppendChild(object sender,
+            System.EventArgs e)
+        {
+            string strFieldsMarc = MarcEditor.ClipboardToText();
             if (this.record.Fields.Count == 0)
             {
                 string strError = "";
@@ -4170,121 +4171,121 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     false,
                     out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this,strError);
+                    MessageBox.Show(this, strError);
                 return;
             }
 
-			int nOldFocusFieldIndex = 0;
-			if (this.SelectedFieldIndices.Count == 1)
-				nOldFocusFieldIndex = this.FocusedFieldIndex;
+            int nOldFocusFieldIndex = 0;
+            if (this.SelectedFieldIndices.Count == 1)
+                nOldFocusFieldIndex = this.FocusedFieldIndex;
 
-			int nIndex = 0;
-			if (this.record.Fields.Count > 0)
-				nIndex = this.record.Fields.Count;
+            int nIndex = 0;
+            if (this.record.Fields.Count > 0)
+                nIndex = this.record.Fields.Count;
 
-			int nNewFieldsCount = 0;
-			this.record.Fields.InsertInternal(nIndex,
-				strFieldsMarc,
-				out nNewFieldsCount);
+            int nNewFieldsCount = 0;
+            this.record.Fields.InsertInternal(nIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
 
-			if (this.record.Fields.Count > 0)
-				this.SetActiveField(this.record.Fields.Count -1,3);
+            if (this.record.Fields.Count > 0)
+                this.SetActiveField(this.record.Fields.Count - 1, 3);
 
-			// 失效范围
-			InvalidateRect iRect = new InvalidateRect();
-			iRect.bAll = false;
-			iRect.rect = this.GetItemBounds(nOldFocusFieldIndex,
-				-1,
-				BoundsPortion.FieldAndBottom);
-			this.AfterDocumentChanged(ScrollBarMember.Both,
-				iRect);
+            // 失效范围
+            InvalidateRect iRect = new InvalidateRect();
+            iRect.bAll = false;
+            iRect.rect = this.GetItemBounds(nOldFocusFieldIndex,
+                -1,
+                BoundsPortion.FieldAndBottom);
+            this.AfterDocumentChanged(ScrollBarMember.Both,
+                iRect);
 
             this.EnsureVisible();   // 2009/3/6
-		}
+        }
 
-		// 粘贴插入_前插
-		private void menuItem_PasteInsert_InsertBefore(object sender,
-			System.EventArgs e)
-		{
-			Debug.Assert(this.SelectedFieldIndices.Count == 1,"在'粘贴插入/前插'时，SelectedFieldIndices必须为1。");
+        // 粘贴插入_前插
+        private void menuItem_PasteInsert_InsertBefore(object sender,
+            System.EventArgs e)
+        {
+            Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'粘贴插入/前插'时，SelectedFieldIndices必须为1。");
 
-			int nIndex = this.FocusedFieldIndex;
-			Debug.Assert(nIndex >=0 && nIndex < this.record.Fields.Count,"在'粘贴插入/前插'时，FocusFieldIndex越界。");
+            int nIndex = this.FocusedFieldIndex;
+            Debug.Assert(nIndex >= 0 && nIndex < this.record.Fields.Count, "在'粘贴插入/前插'时，FocusFieldIndex越界。");
 
-			string strFieldsMarc = MarcEditor.ClipboardToText();
+            string strFieldsMarc = MarcEditor.ClipboardToText();
 
-			// 这里要特别注意，把原来的焦点清空，以便在给新字段赋值时，不影响老字段
-			this.ClearSelectFieldIndices();
+            // 这里要特别注意，把原来的焦点清空，以便在给新字段赋值时，不影响老字段
+            this.ClearSelectFieldIndices();
 
-			int nNewFieldsCount = 0;
-			this.record.Fields.InsertInternal(nIndex,
-				strFieldsMarc,
-				out nNewFieldsCount);
+            int nNewFieldsCount = 0;
+            this.record.Fields.InsertInternal(nIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
 
-			// 这里要特别注意，把焦点设上新插入字段的第一个上面
-			this.SetActiveField(nIndex,this.m_nFocusCol);
+            // 这里要特别注意，把焦点设上新插入字段的第一个上面
+            this.SetActiveField(nIndex, this.m_nFocusCol);
 
-			// 失效范围
-			InvalidateRect iRect = new InvalidateRect();
-			iRect.bAll = false;
-			iRect.rect = this.GetItemBounds(nIndex,
-				-1,
-				BoundsPortion.FieldAndBottom);
-			this.AfterDocumentChanged(ScrollBarMember.Both,
-				iRect);
-		}
+            // 失效范围
+            InvalidateRect iRect = new InvalidateRect();
+            iRect.bAll = false;
+            iRect.rect = this.GetItemBounds(nIndex,
+                -1,
+                BoundsPortion.FieldAndBottom);
+            this.AfterDocumentChanged(ScrollBarMember.Both,
+                iRect);
+        }
 
-		// 粘贴插入_后插
-		private void menuItem_PasteInsert_InsertAfter(object sender,
-			System.EventArgs e)
-		{
-			Debug.Assert(this.SelectedFieldIndices.Count == 1,"在'粘贴插入/后插'时，SelectedFieldIndices必须为1。");
+        // 粘贴插入_后插
+        private void menuItem_PasteInsert_InsertAfter(object sender,
+            System.EventArgs e)
+        {
+            Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'粘贴插入/后插'时，SelectedFieldIndices必须为1。");
 
-			int nIndex = this.FocusedFieldIndex;
-			Debug.Assert(nIndex >=0 && nIndex < this.record.Fields.Count,"在'粘贴插入/后插'时，FocusFieldIndex越界。");
+            int nIndex = this.FocusedFieldIndex;
+            Debug.Assert(nIndex >= 0 && nIndex < this.record.Fields.Count, "在'粘贴插入/后插'时，FocusFieldIndex越界。");
 
-			string strFieldsMarc = MarcEditor.ClipboardToText();
+            string strFieldsMarc = MarcEditor.ClipboardToText();
 
-			int nStartIndex = nIndex + 1;
+            int nStartIndex = nIndex + 1;
 
-			int nNewFieldsCount = 0;
-			this.record.Fields.InsertInternal(nStartIndex,
-				strFieldsMarc,
-				out nNewFieldsCount);
+            int nNewFieldsCount = 0;
+            this.record.Fields.InsertInternal(nStartIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
 
-			// 把焦点设为最后一项上
-			Debug.Assert(nStartIndex + nNewFieldsCount <= this.record.Fields.Count,"不可能的情况");
+            // 把焦点设为最后一项上
+            Debug.Assert(nStartIndex + nNewFieldsCount <= this.record.Fields.Count, "不可能的情况");
 
-			// 把新字段中的最后一个字段设为当前字段
-			this.SetActiveField(nStartIndex + nNewFieldsCount-1,3);
+            // 把新字段中的最后一个字段设为当前字段
+            this.SetActiveField(nStartIndex + nNewFieldsCount - 1, 3);
 
-			InvalidateRect iRect = new InvalidateRect();
-			iRect.bAll = false;
-			iRect.rect = this.GetItemBounds(nStartIndex,
-				-1,
-				BoundsPortion.FieldAndBottom);
-			this.AfterDocumentChanged(ScrollBarMember.Both,
-				iRect);
-		}
+            InvalidateRect iRect = new InvalidateRect();
+            iRect.bAll = false;
+            iRect.rect = this.GetItemBounds(nStartIndex,
+                -1,
+                BoundsPortion.FieldAndBottom);
+            this.AfterDocumentChanged(ScrollBarMember.Both,
+                iRect);
+        }
 
-		// 显示Marc记录
-		private void ShowMarc(object sender,
-			System.EventArgs e)
-		{
-			MessageBox.Show("'" + this.Marc + "'");
-		}
+        // 显示Marc记录
+        private void ShowMarc(object sender,
+            System.EventArgs e)
+        {
+            MessageBox.Show("'" + this.Marc + "'");
+        }
 
-		// 前插字段
-		private void InsertBeforeFieldNoDlg(object sender,
-			System.EventArgs e)
-		{ 
-			Debug.Assert (this.SelectedFieldIndices.Count ==1,"在'前插'时，SelectedFieldIndices数量必须为1");
+        // 前插字段
+        private void InsertBeforeFieldNoDlg(object sender,
+            System.EventArgs e)
+        {
+            Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'前插'时，SelectedFieldIndices数量必须为1");
 
-			if (this.FocusedField.m_strName == "###")
-			{
-				MessageBox.Show(this,"在头标区前不能插入字段。");
-				return;
-			}
+            if (this.FocusedField.m_strName == "###")
+            {
+                MessageBox.Show(this, "在头标区前不能插入字段。");
+                return;
+            }
 
             bool bControlField = Record.IsControlFieldName(this.DefaultFieldName);
             string strDefaultValue = "";
@@ -4292,37 +4293,37 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 strDefaultValue = new string((char)31, 1) + "a";
 
 
-			this.record.Fields.Insert(this.FocusedFieldIndex,
-				this.DefaultFieldName,
-				"  ", //" " strIndicator
+            this.record.Fields.Insert(this.FocusedFieldIndex,
+                this.DefaultFieldName,
+                "  ", //" " strIndicator
                 strDefaultValue);
-		}
+        }
 
-		// 给当前字段的后面新增一个字段
-		internal void InsertAfterFieldWithoutDlg()
-		{
-			Debug.Assert (this.SelectedFieldIndices.Count ==1,"在'后插'时，SelectedFieldIndices数量必须为1");
+        // 给当前字段的后面新增一个字段
+        internal void InsertAfterFieldWithoutDlg()
+        {
+            Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'后插'时，SelectedFieldIndices数量必须为1");
 
             bool bControlField = Record.IsControlFieldName(this.DefaultFieldName);
             string strDefaultValue = "";
             if (bControlField == false)
                 strDefaultValue = new string((char)31, 1) + "a";
 
-			// 调InsertAfterField，把界面也管了
-			this.record.Fields.InsertAfter(this.FocusedFieldIndex,
-				this.DefaultFieldName,
-				"  ",//"  ",//指示符
+            // 调InsertAfterField，把界面也管了
+            this.record.Fields.InsertAfter(this.FocusedFieldIndex,
+                this.DefaultFieldName,
+                "  ",//"  ",//指示符
                 strDefaultValue);
             this.EnsureVisible();
 
-		}
+        }
 
-		// 后插字段
-		private void InsertAfterFieldWithoutDlg(object sender,
-			System.EventArgs e)
-		{
-			this.InsertAfterFieldWithoutDlg();
-		}
+        // 后插字段
+        private void InsertAfterFieldWithoutDlg(object sender,
+            System.EventArgs e)
+        {
+            this.InsertAfterFieldWithoutDlg();
+        }
 
         // 插入字段(有对话框提示)
         private void InsertField(object sender, EventArgs e)
@@ -4416,7 +4417,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             string strDefaultValue = "";
             string strIndicator = "  ";
             if (bControlField == false)
-                strDefaultValue = new string((char)31,1) + "a";
+                strDefaultValue = new string((char)31, 1) + "a";
 
             List<string> results = null;
             string strError = "";
@@ -4508,48 +4509,48 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             strContent = strText;
         }
-		
-		// 追加字段到末尾
-		private void AppendFieldNoDlg(object sender,
-			System.EventArgs e)
-		{
+
+        // 追加字段到末尾
+        private void AppendFieldNoDlg(object sender,
+            System.EventArgs e)
+        {
             bool bControlField = Record.IsControlFieldName(this.DefaultFieldName);
             string strDefaultValue = "";
             if (bControlField == false)
                 strDefaultValue = new string((char)31, 1) + "a";
 
 
-			this.record.Fields.Add(this.DefaultFieldName,
-				"  ",//strIndicator
+            this.record.Fields.Add(this.DefaultFieldName,
+                "  ",//strIndicator
                 strDefaultValue,
-				false);
+                false);
 
             this.EnsureVisible();
-		}
+        }
 
-		// 带对话框的删除字段
+        // 带对话框的删除字段
         // return:
         //      false   放弃
         //      true    已经处理
-		internal bool DeleteFieldWithDlg()
-		{
-			Debug.Assert (this.SelectedFieldIndices.Count > 0,"在'删除'时，SelectedFieldIndices个数必须大于0");
+        internal bool DeleteFieldWithDlg()
+        {
+            Debug.Assert(this.SelectedFieldIndices.Count > 0, "在'删除'时，SelectedFieldIndices个数必须大于0");
 
-			string strFieldInfo = "";
-			if (this.SelectedFieldIndices.Count == 1)
-			{
-				strFieldInfo = "'" + this.FocusedField.Name + "'";
-			}
-			else
-			{
-				strFieldInfo = "选中的'"
-					+ Convert.ToString(this.SelectedFieldIndices.Count)//this.FocusedField.m_strName 
-					+ "'个";
-			}
+            string strFieldInfo = "";
+            if (this.SelectedFieldIndices.Count == 1)
+            {
+                strFieldInfo = "'" + this.FocusedField.Name + "'";
+            }
+            else
+            {
+                strFieldInfo = "选中的'"
+                    + Convert.ToString(this.SelectedFieldIndices.Count)//this.FocusedField.m_strName 
+                    + "'个";
+            }
 
-			string strText = "确实要删除" 
-				+ strFieldInfo
-				+ "字段吗?";
+            string strText = "确实要删除"
+                + strFieldInfo
+                + "字段吗?";
             /*
 			DialogResult result = MessageBox.Show(this,
 				strText,
@@ -4570,18 +4571,18 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             if (dlg.DialogResult != DialogResult.Yes)
                 return false;
 
-			int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
-			for(int i=0;i<fieldIndices.Length;i++)
-			{
-				fieldIndices[i] = (int)this.SelectedFieldIndices[i];
-			}
-			this.record.Fields.RemoveAt(fieldIndices);
+            int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
+            for (int i = 0; i < fieldIndices.Length; i++)
+            {
+                fieldIndices[i] = (int)this.SelectedFieldIndices[i];
+            }
+            this.record.Fields.RemoveAt(fieldIndices);
 
             // 2007/7/17
             AdjustOriginY();
 
-			return true;
-		}
+            return true;
+        }
 
         // 删除大量内容(字段)后，窗口原点偏移量可能处在不合适的位置，令操作者看不到上面显示的内容
         // 这时需要改变原点偏移量
@@ -4601,12 +4602,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             this.SetScrollBars(ScrollBarMember.Vert);
         }
 
-		// 删除字段
-		internal void DeleteFieldWithDlg(object sender,
-			System.EventArgs e)
-		{ 
-			this.DeleteFieldWithDlg();
-		}
+        // 删除字段
+        internal void DeleteFieldWithDlg(object sender,
+            System.EventArgs e)
+        {
+            this.DeleteFieldWithDlg();
+        }
 
         private bool HasTemplateOrValueListDef(
             string strDefName,
@@ -5049,7 +5050,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 return null;
             }
 
-            List<string> results = new List<string>(); 
+            List<string> results = new List<string>();
 
             Debug.Assert(this.FocusedField != null, "FocusedField不可能为null");
 
@@ -5289,7 +5290,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 strOutputValue = strOutputValue.Replace("\n", "");
 
                 // 子字段符号
-                strOutputValue = strOutputValue.Replace("\\", new string((char)31,1));
+                strOutputValue = strOutputValue.Replace("\\", new string((char)31, 1));
 
                 ParseMacroEventArgs e = new ParseMacroEventArgs();
                 e.Macro = strOutputValue;
@@ -5450,7 +5451,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             strMacro = strMacro.Replace("%year%", Convert.ToString(time.Year).PadLeft(4, '0'));
 
             // 年 y2
-            strMacro = strMacro.Replace("%y2%", time.Year.ToString().PadLeft(4, '0').Substring(2,2));
+            strMacro = strMacro.Replace("%y2%", time.Year.ToString().PadLeft(4, '0').Substring(2, 2));
 
             // 月 month
             strMacro = strMacro.Replace("%month%", Convert.ToString(time.Month));
@@ -5493,13 +5494,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         }
 
         // 通过模板取固定字段的值
-		// parameter:
-		//		strFieldName	字段名称
+        // parameter:
+        //		strFieldName	字段名称
         //		strSubFieldName	子字段名称 如果为空表示获得字段的定长模板
-		// return:
-		//		-1	出错
+        // return:
+        //		-1	出错
         //		0	没找到 可能是模板文件不存在，或者对应的配置事项不存在
-		//		1	找到
+        //		1	找到
         private int GetValueFromTemplate(string strFieldName,
             string strSubFieldName,
             string strValue,
@@ -5570,7 +5571,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 foreach (XmlNode node in nodes)
                 {
                     string strType = DomUtil.GetAttr(node, "type");
-                    lines.Add((i+1).ToString() + ") " + strType);
+                    lines.Add((i + 1).ToString() + ") " + strType);
                     i++;
                 }
 
@@ -5666,7 +5667,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             // 替换子字段符号
             strOutputValue = strOutputValue.Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);   // $?
-            
+
             e.Value = strOutputValue;
             e.ErrorInfo = "";
 
@@ -5691,11 +5692,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         }
 
         // 菜单：定长模板
-		internal void GetValueFromTemplate(object sender,
-			System.EventArgs e)
-		{ 
-			this.GetValueFromTemplate();
-		}
+        internal void GetValueFromTemplate(object sender,
+            System.EventArgs e)
+        {
+            this.GetValueFromTemplate();
+        }
 
         // 菜单：值列表
         internal void GetValueFromValueList(object sender,
@@ -5799,71 +5800,71 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         /// <summary>
         /// 打开当前按位置的定长模板对话框
         /// </summary>
-		public void GetValueFromTemplate()
-		{
-			Debug.Assert(this.FocusedField != null,"在GetSubFieldValueWithDlg()时，FocusedField不可能为null");
+        public void GetValueFromTemplate()
+        {
+            Debug.Assert(this.FocusedField != null, "在GetSubFieldValueWithDlg()时，FocusedField不可能为null");
 
-			string strFieldName = this.FocusedField.Name;
-			string strFieldValue = this.FocusedField.ValueKernel;
+            string strFieldName = this.FocusedField.Name;
+            string strFieldValue = this.FocusedField.ValueKernel;
 
-			string strSubfieldName = "";
-			string strSubfieldValue = "";
-			int nSubfieldDupIndex = 0;
-			MarcEditor.GetCurrentSubfield(strFieldValue,
-				this.SelectionStart,
-				out strSubfieldName,
-				out nSubfieldDupIndex,
-				out strSubfieldValue);
+            string strSubfieldName = "";
+            string strSubfieldValue = "";
+            int nSubfieldDupIndex = 0;
+            MarcEditor.GetCurrentSubfield(strFieldValue,
+                this.SelectionStart,
+                out strSubfieldName,
+                out nSubfieldDupIndex,
+                out strSubfieldValue);
 
-			
 
-			string strError;
-			string strOutputValue;
-			int nRet = 0;
-			if (strSubfieldName == "")
-			{
+
+            string strError;
+            string strOutputValue;
+            int nRet = 0;
+            if (strSubfieldName == "")
+            {
                 // 获取字段的定长模板
-				nRet = this.GetValueFromTemplate(strFieldName,
-					"",
-					strFieldValue,
-					out strOutputValue,
-					out strError);
+                nRet = this.GetValueFromTemplate(strFieldName,
+                    "",
+                    strFieldValue,
+                    out strOutputValue,
+                    out strError);
 
-				if (nRet == -1)
-				{
-					MessageBox.Show(this,strError);
-					return;
-				}
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
 
-				if (nRet == 0)
-					return;
+                if (nRet == 0)
+                    return;
 
-				// 此处应使用Value
-				if (strFieldValue != strOutputValue)
-					this.FocusedField.Value = strOutputValue;
+                // 此处应使用Value
+                if (strFieldValue != strOutputValue)
+                    this.FocusedField.Value = strOutputValue;
 
-				// 不让小edit全选上
-				this.curEdit.SelectionLength = 0;
-			}
-			else
-			{
-				int nOldSelectionStart = this.SelectionStart;
+                // 不让小edit全选上
+                this.curEdit.SelectionLength = 0;
+            }
+            else
+            {
+                int nOldSelectionStart = this.SelectionStart;
 
-				nRet = this.GetValueFromTemplate(strFieldName,
-					strSubfieldName,
-					strSubfieldValue,
-					out strOutputValue,
-					out strError);
+                nRet = this.GetValueFromTemplate(strFieldName,
+                    strSubfieldName,
+                    strSubfieldValue,
+                    out strOutputValue,
+                    out strError);
 
-				if (nRet == -1)
-				{
-					MessageBox.Show(this,strError);
-					return;
-				}
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
 
-				// 不是定长子字段的情况
-				if (nRet == 0)
-				{
+                // 不是定长子字段的情况
+                if (nRet == 0)
+                {
                     /*
 					XmlNode valueListNode;
 					nRet = GetValueListNode(strFieldName,
@@ -5902,21 +5903,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 						strOutputValue = "";
                      */
                     return;
-				}
+                }
 
-				if (strSubfieldValue != strOutputValue)
-				{
-					Subfield subfield = this.FocusedField.Subfields[strSubfieldName,nSubfieldDupIndex];
-					subfield.Value = strOutputValue;
-				}
+                if (strSubfieldValue != strOutputValue)
+                {
+                    Subfield subfield = this.FocusedField.Subfields[strSubfieldName, nSubfieldDupIndex];
+                    subfield.Value = strOutputValue;
+                }
 
-				// 不让小edit全选上
-				if (nOldSelectionStart < this.curEdit.Text.Length)
-					this.curEdit.SelectionStart = nOldSelectionStart;
-				else
-					this.curEdit.SelectionLength = 0;
-			}
-		}
+                // 不让小edit全选上
+                if (nOldSelectionStart < this.curEdit.Text.Length)
+                    this.curEdit.SelectionStart = nOldSelectionStart;
+                else
+                    this.curEdit.SelectionLength = 0;
+            }
+        }
 
         /*
             <Field name='801'>
@@ -5936,7 +5937,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         //		-1	出错
         //		0	未找到对应的ValueList
         //		1	找到
-        /*public*/ int GetValueListNodes(string strFieldName,
+        /*public*/
+        int GetValueListNodes(string strFieldName,
             string strSubfieldName,
             out List<XmlNode> valueListNodes,
             out string strError)
@@ -5962,7 +5964,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 bool bFoundRef = false;
 
-                for(int i=0;i<valueListNodes.Count ; i++)
+                for (int i = 0; i < valueListNodes.Count; i++)
                 {
                     XmlNode node = valueListNodes[i];
                     //找ref
@@ -6021,17 +6023,17 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return 1;
         }
 
-		#endregion
+        #endregion
 
-		#region 关于小edit控件插入符的静态函数
+        #region 关于小edit控件插入符的静态函数
 
-		// 根据插入符位置，在字段值中得到当前子字段的信息
-		// parameters:
-		//		strFieldValue	字段值
-		//		nSelectionStart	当前插入符位置
-		//		strSubfieldName	out参数，返回当前子字段名称
-		//		nSubfieldDupIndex	out参数，返回当前子字段重复的序号
-		//		strSubfieldValue	out参数，返回当前子字段的值
+        // 根据插入符位置，在字段值中得到当前子字段的信息
+        // parameters:
+        //		strFieldValue	字段值
+        //		nSelectionStart	当前插入符位置
+        //		strSubfieldName	out参数，返回当前子字段名称
+        //		nSubfieldDupIndex	out参数，返回当前子字段重复的序号
+        //		strSubfieldValue	out参数，返回当前子字段的值
         /// <summary>
         /// 根据插入符位置，在字段值中得到当前子字段的信息
         /// </summary>
@@ -6040,61 +6042,61 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         /// <param name="strSubfieldName">返回当前子字段名称</param>
         /// <param name="nSubfieldDupIndex">返回当前子字段重复的序号</param>
         /// <param name="strSubfieldValue">返回当前子字段的值</param>
-		public static void GetCurrentSubfield(string strFieldValue,
-			int nSelectionStart,
-			out string strSubfieldName,
-			out int nSubfieldDupIndex,
-			out string strSubfieldValue)
-		{
-			strSubfieldName = "";
-			nSubfieldDupIndex = 0;
-			strSubfieldValue = "";
+        public static void GetCurrentSubfield(string strFieldValue,
+            int nSelectionStart,
+            out string strSubfieldName,
+            out int nSubfieldDupIndex,
+            out string strSubfieldValue)
+        {
+            strSubfieldName = "";
+            nSubfieldDupIndex = 0;
+            strSubfieldValue = "";
 
             strFieldValue = strFieldValue.Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);
-			
-			int nCurSubfieldX = -1;
-			for(int i=0;i<strFieldValue.Length;i++) 
-			{
-				if  (i >= nSelectionStart)
-					break;
 
-				char ch = strFieldValue[i];
-				
-				// 是子字段符号
-				if (ch == Record.SUBFLD)
-					nCurSubfieldX = i;
-			}
+            int nCurSubfieldX = -1;
+            for (int i = 0; i < strFieldValue.Length; i++)
+            {
+                if (i >= nSelectionStart)
+                    break;
 
-			if (nCurSubfieldX != -1 
-				&& strFieldValue.Length > nCurSubfieldX+1)
-			{
-				strSubfieldName = strFieldValue.Substring(nCurSubfieldX+1,1);
+                char ch = strFieldValue[i];
 
-				//???
-				string strLeft = strFieldValue.Substring(0,nCurSubfieldX);
-				for(;;)
-				{
-					int nTempIndex = strLeft.IndexOf(Record.SUBFLD.ToString() + strSubfieldName);
-					if (nTempIndex == -1)
-						break;
-					nSubfieldDupIndex++;
+                // 是子字段符号
+                if (ch == Record.SUBFLD)
+                    nCurSubfieldX = i;
+            }
 
-					strLeft = strLeft.Substring(nTempIndex+2);
-				}
+            if (nCurSubfieldX != -1
+                && strFieldValue.Length > nCurSubfieldX + 1)
+            {
+                strSubfieldName = strFieldValue.Substring(nCurSubfieldX + 1, 1);
+
+                //???
+                string strLeft = strFieldValue.Substring(0, nCurSubfieldX);
+                for (; ; )
+                {
+                    int nTempIndex = strLeft.IndexOf(Record.SUBFLD.ToString() + strSubfieldName);
+                    if (nTempIndex == -1)
+                        break;
+                    nSubfieldDupIndex++;
+
+                    strLeft = strLeft.Substring(nTempIndex + 2);
+                }
 
 
 
-				if (strFieldValue.Length > nCurSubfieldX+1+1)
-				{
-					strSubfieldValue = strFieldValue.Substring(nCurSubfieldX+1+1);
-					int nPosition = strSubfieldValue.IndexOf(Record.SUBFLD);
-					if (nPosition != -1)
-						strSubfieldValue = strSubfieldValue.Substring(0,nPosition);
-				}
-			}
+                if (strFieldValue.Length > nCurSubfieldX + 1 + 1)
+                {
+                    strSubfieldValue = strFieldValue.Substring(nCurSubfieldX + 1 + 1);
+                    int nPosition = strSubfieldValue.IndexOf(Record.SUBFLD);
+                    if (nPosition != -1)
+                        strSubfieldValue = strSubfieldValue.Substring(0, nPosition);
+                }
+            }
 
-		}
-		#endregion
+        }
+        #endregion
 
         void CalcuAllHeight()
         {
@@ -6121,7 +6123,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     this.curEdit.Show();
                 }
             }
-                
+
             this.Invalidate();  // 失效窗口，重新显示
             // this.Update();   // 优化
         }
@@ -6178,35 +6180,35 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
     }
 
-	internal class InvalidateRect
-	{
-		public bool bAll = false;
-		public Rectangle rect = new Rectangle(0,0,0,0);
-	}
+    internal class InvalidateRect
+    {
+        public bool bAll = false;
+        public Rectangle rect = new Rectangle(0, 0, 0, 0);
+    }
 
-	// 行中的各部分
-	internal enum LinePart
-	{
-		Entire = 0,	// 全部
-		Name = 1,	// 名称部分
-		Indicator = 2,	// 指示符部分
-		Value = 3,	// 值部分
-	}
+    // 行中的各部分
+    internal enum LinePart
+    {
+        Entire = 0,	// 全部
+        Name = 1,	// 名称部分
+        Indicator = 2,	// 指示符部分
+        Value = 3,	// 值部分
+    }
 
-	// 卷滚条枚举值
-	internal enum ScrollBarMember 
-	{
-		Vert = 0,
-		Horz = 1,
-		Both = 2,
-		None = 3,
-	}
+    // 卷滚条枚举值
+    internal enum ScrollBarMember
+    {
+        Vert = 0,
+        Horz = 1,
+        Both = 2,
+        None = 3,
+    }
 
-	internal enum BoundsPortion 
-	{
-		Field = 0,  //一行，包括左上的线条,不包括右下的线条
-		FieldAndBottom, //行和底部(lines底部的线条 和 控件底部的空白)
-	}
+    internal enum BoundsPortion
+    {
+        Field = 0,  //一行，包括左上的线条,不包括右下的线条
+        FieldAndBottom, //行和底部(lines底部的线条 和 控件底部的空白)
+    }
 
     /// <summary>
     /// MARC 编辑器控件

@@ -161,19 +161,18 @@ namespace DigitalPlatform.LibraryServer
             string strCode = "";    // c#代码
 
             // 装入code?
-            StreamReader sr = null;
-
             try
             {
-                sr = new StreamReader(strCodeFileName, true);
+                using (StreamReader sr = new StreamReader(strCodeFileName, true))
+                {
+                    strCode = sr.ReadToEnd();
+                }
             }
             catch (Exception ex)
             {
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
-            strCode = sr.ReadToEnd();
-            sr.Close();
 
             string[] saAddRef1 = {
 

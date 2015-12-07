@@ -158,49 +158,47 @@ namespace DigitalPlatform.IO
         FileMode.Open,
         FileAccess.Read,
         FileShare.ReadWrite))
+                // TODO: 这里的自动探索文件编码方式功能不正确，
+                // 需要专门编写一个函数来探测文本文件的编码方式
+                // 目前只能用UTF-8编码方式
+                using (StreamReader sr = new StreamReader(file, encoding))
                 {
-                    // TODO: 这里的自动探索文件编码方式功能不正确，
-                    // 需要专门编写一个函数来探测文本文件的编码方式
-                    // 目前只能用UTF-8编码方式
-                    using (StreamReader sr = new StreamReader(file, encoding))
+                    if (lMaxLength == -1)
                     {
-                        if (lMaxLength == -1)
-                        {
-                            strContent = sr.ReadToEnd();
-                        }
-                        else
-                        {
-                            long lLoadedLength = 0;
-                            StringBuilder temp = new StringBuilder(4096);
-                            for (; ; )
-                            {
-                                string strLine = sr.ReadLine();
-                                if (strLine == null)
-                                    break;
-                                if (lLoadedLength + strLine.Length > lMaxLength)
-                                {
-                                    strLine = strLine.Substring(0, (int)(lMaxLength - lLoadedLength));
-                                    temp.Append(strLine + " ...");
-                                    bExceed = true;
-                                    break;
-                                }
-
-                                temp.Append(strLine + "\r\n");
-                                lLoadedLength += strLine.Length + 2;
-                                if (lLoadedLength > lMaxLength)
-                                {
-                                    temp.Append(strLine + " ...");
-                                    bExceed = true;
-                                    break;
-                                }
-                            }
-                            strContent = temp.ToString();
-                        }
-                        /*
-                    sr.Close();
-                    sr = null;
-                         * */
+                        strContent = sr.ReadToEnd();
                     }
+                    else
+                    {
+                        long lLoadedLength = 0;
+                        StringBuilder temp = new StringBuilder(4096);
+                        for (; ; )
+                        {
+                            string strLine = sr.ReadLine();
+                            if (strLine == null)
+                                break;
+                            if (lLoadedLength + strLine.Length > lMaxLength)
+                            {
+                                strLine = strLine.Substring(0, (int)(lMaxLength - lLoadedLength));
+                                temp.Append(strLine + " ...");
+                                bExceed = true;
+                                break;
+                            }
+
+                            temp.Append(strLine + "\r\n");
+                            lLoadedLength += strLine.Length + 2;
+                            if (lLoadedLength > lMaxLength)
+                            {
+                                temp.Append(strLine + " ...");
+                                bExceed = true;
+                                break;
+                            }
+                        }
+                        strContent = temp.ToString();
+                    }
+                    /*
+                sr.Close();
+                sr = null;
+                     * */
                 }
 
                 if (bExceed == true)
@@ -236,8 +234,10 @@ namespace DigitalPlatform.IO
                 if (fi.Exists == false)
                 {
                     // 创建一个0 byte的文件
-                    FileStream f = File.Create(strFileName);
-                    f.Close();
+                    using(FileStream f = File.Create(strFileName))
+                    {
+
+                    }
                     return strFileName;
                 }
             }
@@ -251,16 +251,11 @@ namespace DigitalPlatform.IO
         public static void WriteByteArray(string strFileName,
             byte[] data)
         {
-            FileStream s = File.Create(strFileName);
-            try
-            {
+            using(FileStream s = File.Create(strFileName))
+            { 
                 s.Write(data,
                     0,
                     data.Length);
-            }
-            finally
-            {
-                s.Close();
             }
         }
 
@@ -278,20 +273,20 @@ namespace DigitalPlatform.IO
         // 文件是否存在并且是非空
         public static bool IsFileExsitAndNotNull(string strFilename)
         {
-
+            // TODO: 可以用 FileInfo 改写
             try
             {
-                FileStream file = File.Open(
+                using (FileStream file = File.Open(
                     strFilename,
                     FileMode.Open,
                     FileAccess.Read,
-                    FileShare.ReadWrite);
+                    FileShare.ReadWrite))
+                {
+                    if (file.Length == 0)
+                        return false;
 
-                if (file.Length == 0)
-                    return false;
-
-                file.Close();
-                return true;
+                    return true;
+                }
             }
             catch (FileNotFoundException)
             {
@@ -315,17 +310,11 @@ namespace DigitalPlatform.IO
         public static void String2File(string strContent,
             string strFileName)
         {
-            StreamWriter s = File.CreateText(strFileName);
-            try
+            using (StreamWriter s = File.CreateText(strFileName))
             {
                 s.Write(strContent);
             }
-            finally
-            {
-                s.Close();
-            }
         }
-
 
         // 功能:文件到字符串，使用直接读到尾的方法
         // strFileName: 文件名
@@ -334,11 +323,11 @@ namespace DigitalPlatform.IO
             if (strFileName == null
                 || strFileName == "")
                 return "";
-            StreamReader sr = new StreamReader(strFileName, true);
-            string strText = sr.ReadToEnd();
-            sr.Close();
-
-            return strText;
+            using (StreamReader sr = new StreamReader(strFileName, true))
+            {
+                string strText = sr.ReadToEnd();
+                return strText;
+            }
         }
 
         // 如果未能探测出来，则当作 936
@@ -362,19 +351,16 @@ UTF-32 little-endian byte order: FF FE 00 00
         public static Encoding DetectTextFileEncoding(string strFilename,
             Encoding default_encoding)
         {
-
             byte[] buffer = new byte[4];
 
             try
             {
-                FileStream file = File.Open(
+                using (FileStream file = File.Open(
         strFilename,
         FileMode.Open,
         FileAccess.Read,
-        FileShare.ReadWrite);
-                try
+        FileShare.ReadWrite))
                 {
-
                     if (file.Length >= 2)
                     {
                         file.Read(buffer, 0, 2);    // 1, 2 BUG
@@ -417,11 +403,6 @@ UTF-32 little-endian byte order: FF FE 00 00
                             return Encoding.GetEncoding(65006);    // UTF-32 big-endian
                         }
                     }
-
-                }
-                finally
-                {
-                    file.Close();
                 }
             }
             catch

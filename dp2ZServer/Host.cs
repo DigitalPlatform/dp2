@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,43 +31,43 @@ namespace dp2ZServer
         bool m_bConsoleRun = false;
 
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
-        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// ¼¤»îĞÅºÅ
+        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// æ¿€æ´»ä¿¡å·
 
         private TcpListener Listener = null;
 
         private string m_IPAddress = "ALL";   // Holds IP Address, which to listen incoming calls.
-        private int m_port = 210;      // ¶Ë¿ÚºÅ
+        private int m_port = 210;      // ç«¯å£å·
         private int m_nMaxThreads = -1;      // Holds maximum allowed Worker Threads.
 
         private Hashtable m_SessionTable = null;
 
 
-        public XmlDocument CfgDom = null;   // z.xmlÅäÖÃÎÄ¼şÄÚÈİ
+        public XmlDocument CfgDom = null;   // z.xmlé…ç½®æ–‡ä»¶å†…å®¹
         public string LibraryServerUrl = "";
-        public string ManagerUserName = ""; // ¹ÜÀíÔ±ÓÃµÄÓÃ»§Ãû
-        public string ManagerPassword = ""; // ¹ÜÀíÔ±ÓÃµÄÃÜÂë
+        public string ManagerUserName = ""; // ç®¡ç†å‘˜ç”¨çš„ç”¨æˆ·å
+        public string ManagerPassword = ""; // ç®¡ç†å‘˜ç”¨çš„å¯†ç 
 
-        public string AnonymousUserName = "";   // ÄäÃûµÇÂ¼ÓÃµÄÓÃ»§Ãû
-        public string AnonymousPassword = "";   // ÄäÃûµÇÂ¼ÓÃµÄÃÜÂë
+        public string AnonymousUserName = "";   // åŒ¿åç™»å½•ç”¨çš„ç”¨æˆ·å
+        public string AnonymousPassword = "";   // åŒ¿åç™»å½•ç”¨çš„å¯†ç 
 
         string EncryptKey = "dp2zserver_password_key";
 
         public EventLog Log = null;
 
 
-        // ×¨ÓÃÀ´»ñµÃÏµÍ³ĞÅÏ¢µÄdp2libraryÍ¨µÀ
+        // ä¸“ç”¨æ¥è·å¾—ç³»ç»Ÿä¿¡æ¯çš„dp2libraryé€šé“
         public LibraryChannel Channel = new LibraryChannel();
 
         public List<BiblioDbProperty> BiblioDbProperties = null;
 
-        // ËùÓĞ¿âµÄ×Ü¹²¼ìË÷ÃüÖĞ¼ÇÂ¼ÌõÊı¼«ÏŞ
+        // æ‰€æœ‰åº“çš„æ€»å…±æ£€ç´¢å‘½ä¸­è®°å½•æ¡æ•°æé™
         public int MaxResultCount = -1;
 
         public Service()
         {
             InitializeComponent();
 
-            // ³õÊ¼»¯ÊÂ¼şÈÕÖ¾
+            // åˆå§‹åŒ–äº‹ä»¶æ—¥å¿—
             this.Log = new EventLog();
             this.Log.Source = "dp2ZServer";
 
@@ -126,7 +126,7 @@ namespace dp2ZServer
                     EventLogEntryType.Error);
             }
             /*
-¹ØÓÚdp2Zserver×Ô¶¯Æô¶¯ÔÚÏµÍ³ÈÕÖ¾ÖĞ±¨´íµÄÎÊÌâ£º
+å…³äºdp2Zserverè‡ªåŠ¨å¯åŠ¨åœ¨ç³»ç»Ÿæ—¥å¿—ä¸­æŠ¥é”™çš„é—®é¢˜ï¼š
              * 
 http://www.devnewsgroups.net/group/microsoft.public.dotnet.framework.windowsforms/topic15625.aspx
 ...
@@ -142,7 +142,7 @@ services are being started simultaneously, so sometimes the default
 timeout of 30 seconds is not enough :(
 
 The solution was quite simple: we increased the timeout in registry
-(HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\ServicesPipeTimeout) ×¢ÒâÕâÊÇÒ»¸öDWORDÀàĞÍÊÂÏî
+(HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\ServicesPipeTimeout) æ³¨æ„è¿™æ˜¯ä¸€ä¸ªDWORDç±»å‹äº‹é¡¹
 and since then our service starts without problems :)
              * */
 
@@ -203,7 +203,7 @@ EventLogEntryType.Information);
             if (bRet == false)
             {
                 /*
-                this.Log.WriteEntry("dp2ZServer OnStart() Ê±·¢Éú´íÎó: ×¢²á±íÖĞÕÒ²»µ½instanceĞÅÏ¢",
+                this.Log.WriteEntry("dp2ZServer OnStart() æ—¶å‘ç”Ÿé”™è¯¯: æ³¨å†Œè¡¨ä¸­æ‰¾ä¸åˆ°instanceä¿¡æ¯",
 EventLogEntryType.Error);
                  * */
                 return;
@@ -213,7 +213,7 @@ EventLogEntryType.Error);
             if (string.IsNullOrEmpty(strHttpHostUrl) == true)
             {
                 string strUrls = string.Join(";", existing_urls);
-                this.Log.WriteEntry("dp2ZServer OnStart() Ê±·¢Éú´íÎó: Ğ­Òé°ó¶¨ '"+strUrls+"' ÖĞ£¬Ã»ÓĞ°üº¬httpĞ­Òé£¬Òò´ËÃ»ÓĞÆô¶¯UnionCatalogService",
+                this.Log.WriteEntry("dp2ZServer OnStart() æ—¶å‘ç”Ÿé”™è¯¯: åè®®ç»‘å®š '"+strUrls+"' ä¸­ï¼Œæ²¡æœ‰åŒ…å«httpåè®®ï¼Œå› æ­¤æ²¡æœ‰å¯åŠ¨UnionCatalogService",
 EventLogEntryType.Error);
                 return;
             }
@@ -231,7 +231,7 @@ EventLogEntryType.Error);
                     strHttpHostUrl);
             }
 
-            // metadataÄÜÁ¦
+            // metadataèƒ½åŠ›
             if (this.m_hostUnionCatalog.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
             {
                 string strMetadataUrl = strHttpHostUrl;
@@ -277,11 +277,11 @@ EventLogEntryType.Error);
             }
             catch (Exception ex)
             {
-                // ÈÃµ÷ÊÔÆ÷ÄÜ¸Ğ¾õµ½
+                // è®©è°ƒè¯•å™¨èƒ½æ„Ÿè§‰åˆ°
                 if (this.m_bConsoleRun == true)
                     throw ex;
 
-                this.Log.WriteEntry("dp2ZServer OnStart() host.Open() Ê±·¢Éú´íÎó: " + ex.Message,
+                this.Log.WriteEntry("dp2ZServer OnStart() host.Open() æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message,
 EventLogEntryType.Error);
                 return;
             }
@@ -315,17 +315,17 @@ EventLogEntryType.Information);
             quotas.MaxStringContentLength = 1024 * 1024;
             binding.ReaderQuotas = quotas;
             binding.SendTimeout = new TimeSpan(0, 20, 0);
-            binding.ReceiveTimeout = new TimeSpan(0, 20, 0);    // ¾ö¶¨Session´æ»î
+            binding.ReceiveTimeout = new TimeSpan(0, 20, 0);    // å†³å®šSessionå­˜æ´»
 
             return binding;
         }
 
-        // »ñµÃinstanceĞÅÏ¢
+        // è·å¾—instanceä¿¡æ¯
         // parameters:
-        //      urls »ñµÃ°ó¶¨µÄUrls
+        //      urls è·å¾—ç»‘å®šçš„Urls
         // return:
-        //      false   instanceÃ»ÓĞÕÒµ½
-        //      true    ÕÒµ½
+        //      false   instanceæ²¡æœ‰æ‰¾åˆ°
+        //      true    æ‰¾åˆ°
         public static bool GetInstanceInfo(string strProductName,
             int nIndex,
             out string strInstanceName,
@@ -367,7 +367,7 @@ EventLogEntryType.Information);
             }
         }
 
-        // ¸ù¾İĞ­ÒéÃûÕÒµ½Ò»¸öURL
+        // æ ¹æ®åè®®åæ‰¾åˆ°ä¸€ä¸ªURL
         public static string FindUrl(string strProtocol,
             string[] urls)
         {
@@ -394,7 +394,7 @@ EventLogEntryType.Information);
 
         #endregion
 
-        // ×°ÔØÅäÖÃÎÄ¼şdp2zserver.xml
+        // è£…è½½é…ç½®æ–‡ä»¶dp2zserver.xml
         int LoadCfgDom(out string strError)
         {
             lock (this)
@@ -422,22 +422,22 @@ EventLogEntryType.Information);
                 }
                 catch (Exception ex)
                 {
-                    strError = "½«ÅäÖÃÎÄ¼ş '" + strFileName + "' ×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                    strError = "å°†é…ç½®æ–‡ä»¶ '" + strFileName + "' è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
 
-                // È¡µÃÍøÂç²ÎÊı
+                // å–å¾—ç½‘ç»œå‚æ•°
                 XmlNode nodeNetwork = this.CfgDom.DocumentElement.SelectSingleNode("//network");
                 if (nodeNetwork != null)
                 {
                     // port
 
-                    // »ñµÃÕûÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+                    // è·å¾—æ•´æ•°å‹çš„å±æ€§å‚æ•°å€¼
                     // return:
-                    //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                    //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                    //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                    //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                    //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                    //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                     nRet = DomUtil.GetIntegerParam(nodeNetwork,
                         "port",
                         210,
@@ -445,17 +445,17 @@ EventLogEntryType.Information);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "<network>ÔªËØ" + strError;
+                        strError = "<network>å…ƒç´ " + strError;
                         return -1;
                     }
 
                     // maxSessions
 
-                    // »ñµÃÕûÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+                    // è·å¾—æ•´æ•°å‹çš„å±æ€§å‚æ•°å€¼
                     // return:
-                    //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                    //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                    //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                    //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                    //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                    //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                     nRet = DomUtil.GetIntegerParam(nodeNetwork,
                         "maxSessions",
                         -1,
@@ -463,16 +463,16 @@ EventLogEntryType.Information);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "<network>ÔªËØ" + strError;
+                        strError = "<network>å…ƒç´ " + strError;
                         return -1;
                     }
 
                 }
 
-                // È¡³öÒ»Ğ©³£ÓÃµÄÖ¸±ê
+                // å–å‡ºä¸€äº›å¸¸ç”¨çš„æŒ‡æ ‡
 
-                // 1) Í¼Êé¹İÓ¦ÓÃ·şÎñÆ÷URL
-                // 2) ¹ÜÀíÔ±ÓÃµÄÕÊ»§ºÍÃÜÂë
+                // 1) å›¾ä¹¦é¦†åº”ç”¨æœåŠ¡å™¨URL
+                // 2) ç®¡ç†å‘˜ç”¨çš„å¸æˆ·å’Œå¯†ç 
                 XmlNode node = this.CfgDom.DocumentElement.SelectSingleNode("//libraryserver");
                 if (node != null)
                 {
@@ -498,7 +498,7 @@ EventLogEntryType.Information);
                 }
 
 
-                // ×¼±¸Í¨µÀ
+                // å‡†å¤‡é€šé“
                 this.Channel.Url = this.LibraryServerUrl;
 
                 this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -511,11 +511,11 @@ EventLogEntryType.Information);
                 {
                     // maxResultCount
 
-                    // »ñµÃÕûÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+                    // è·å¾—æ•´æ•°å‹çš„å±æ€§å‚æ•°å€¼
                     // return:
-                    //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                    //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                    //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                    //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                    //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                    //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                     nRet = DomUtil.GetIntegerParam(nodeDatabases,
                         "maxResultCount",
                         -1,
@@ -523,7 +523,7 @@ EventLogEntryType.Information);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "<databases>ÔªËØ" + strError;
+                        strError = "<databases>å…ƒç´ " + strError;
                         return -1;
                     }
 
@@ -533,11 +533,11 @@ EventLogEntryType.Information);
             }
         }
 
-        // »ñµÃÒ»Ğ©±È½ÏºÄÊ±µÄÅäÖÃ²ÎÊı¡£
+        // è·å¾—ä¸€äº›æ¯”è¾ƒè€—æ—¶çš„é…ç½®å‚æ•°ã€‚
         // return:
-        //      -2  ³ö´í¡£µ«ºóÃæ¿ÉÒÔÖØÊÔ
-        //      -1  ³ö´í£¬ºóÃæ²»ÔÙÖØÊÔ
-        //      0   ³É¹¦
+        //      -2  å‡ºé”™ã€‚ä½†åé¢å¯ä»¥é‡è¯•
+        //      -1  å‡ºé”™ï¼Œåé¢ä¸å†é‡è¯•
+        //      0   æˆåŠŸ
         int GetSlowCfgInfo(out string strError)
         {
             lock (this)
@@ -545,12 +545,12 @@ EventLogEntryType.Information);
                 strError = "";
                 int nRet = 0;
 
-                // Ô¤ÏÈ»ñµÃ±àÄ¿¿âÊôĞÔÁĞ±í
+                // é¢„å…ˆè·å¾—ç¼–ç›®åº“å±æ€§åˆ—è¡¨
                 nRet = GetBiblioDbProperties(out strError);
                 if (nRet == -1)
                     return -2;
 
-                // ÎªÊı¾İ¿âÊôĞÔ¼¯ºÏÖĞÔö²¹ĞèÒª´ÓxmlÎÄ¼şÖĞ»ñµÃµÄÆäËûÊôĞÔ
+                // ä¸ºæ•°æ®åº“å±æ€§é›†åˆä¸­å¢è¡¥éœ€è¦ä»xmlæ–‡ä»¶ä¸­è·å¾—çš„å…¶ä»–å±æ€§
                 nRet = AppendDbProperties(out strError);
                 if (nRet == -1)
                     return -1;
@@ -572,7 +572,7 @@ EventLogEntryType.Information);
                  * */
                 if (String.IsNullOrEmpty(e.UserName) == true)
                 {
-                    e.ErrorInfo = "Ã»ÓĞÖ¸¶¨¹ÜÀíÓÃ»§Ãû£¬ÎŞ·¨×Ô¶¯µÇÂ¼";
+                    e.ErrorInfo = "æ²¡æœ‰æŒ‡å®šç®¡ç†ç”¨æˆ·åï¼Œæ— æ³•è‡ªåŠ¨ç™»å½•";
                     e.Failed = true;
                     return;
                 }
@@ -580,7 +580,7 @@ EventLogEntryType.Information);
                 return;
             }
 
-            e.ErrorInfo = "z39.50 service first tryÊ§°Üºó£¬ÎŞ·¨×Ô¶¯µÇÂ¼";
+            e.ErrorInfo = "z39.50 service first tryå¤±è´¥åï¼Œæ— æ³•è‡ªåŠ¨ç™»å½•";
             e.Failed = true;
             return;
         }
@@ -612,7 +612,7 @@ EventLogEntryType.Information);
         }
 
         DateTime m_lastRetryTime = DateTime.Now;
-        int m_nRetryAfterMinutes = 5;   // Ã¿¼ä¸ô¶àÉÙ·ÖÖÓÒÔºóÖØÊÔÒ»´Î
+        int m_nRetryAfterMinutes = 5;   // æ¯é—´éš”å¤šå°‘åˆ†é’Ÿä»¥åé‡è¯•ä¸€æ¬¡
 
         private void ManagerRun()
         {
@@ -638,7 +638,7 @@ EventLogEntryType.Information);
 
                     if (index == WaitHandle.WaitTimeout)
                     {
-                        // ³¬Ê±
+                        // è¶…æ—¶
                         eventActive.Reset();
                     }
                     else if (index == 0)
@@ -648,13 +648,13 @@ EventLogEntryType.Information);
                     }
                     else
                     {
-                        // µÃµ½¼¤»îĞÅºÅ
+                        // å¾—åˆ°æ¿€æ´»ä¿¡å·
                         eventActive.Reset();
                     }
 
                     List<String> keys = new List<string>();
 
-                    // Ëø¶¨µÄÊ±¼äÒª¶Ì
+                    // é”å®šçš„æ—¶é—´è¦çŸ­
                     lock (this.m_SessionTable)
                     {
                         foreach (string key in this.m_SessionTable.Keys)
@@ -663,7 +663,7 @@ EventLogEntryType.Information);
                         }
                     }
 
-                    // ÔÚËø¶¨·¶Î§Íâ´ÓÈİ´¦Àí
+                    // åœ¨é”å®šèŒƒå›´å¤–ä»å®¹å¤„ç†
                     foreach (string key in keys)
                     {
                         Session session = (Session)this.m_SessionTable[key];
@@ -676,22 +676,22 @@ EventLogEntryType.Information);
                     }
 
                     if (this.BiblioDbProperties == null
-                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)  // Ã¿¼ä¸ôÎå·ÖÖÓÒÔÉÏÔÙÖØÊÔÒ»´Î
+                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)  // æ¯é—´éš”äº”åˆ†é’Ÿä»¥ä¸Šå†é‡è¯•ä¸€æ¬¡
                     {
                         string strError = "";
                         // return:
-                        //      -2  ³ö´í¡£µ«ºóÃæ¿ÉÒÔÖØÊÔ
-                        //      -1  ³ö´í£¬ºóÃæ²»ÔÙÖØÊÔ
-                        //      0   ³É¹¦
+                        //      -2  å‡ºé”™ã€‚ä½†åé¢å¯ä»¥é‡è¯•
+                        //      -1  å‡ºé”™ï¼Œåé¢ä¸å†é‡è¯•
+                        //      0   æˆåŠŸ
                         int nRet = GetSlowCfgInfo(out strError);
                         if (nRet == -1 || nRet == -2)
                         {
-                            Log.WriteEntry("ERR003 ³õÊ¼»¯ĞÅÏ¢Ê§°Ü(ÏµÍ³½«¶¨ÆÚÖØÊÔ): " + strError,
+                            Log.WriteEntry("ERR003 åˆå§‹åŒ–ä¿¡æ¯å¤±è´¥(ç³»ç»Ÿå°†å®šæœŸé‡è¯•): " + strError,
                                 EventLogEntryType.Error);
                         }
 
                         m_lastRetryTime = DateTime.Now;
-                        m_nRetryAfterMinutes++; // ½«ÖØÊÔµÄ¼ä¸ôÊ±Öğ½¥±ä³¤¡£´Ë¾Ù¿ÉÒÔÔÚÖØÊÔ¶à´Î²»³É¹¦µÄÇé¿öÏÂ£¬±ÜÃâÔÚÈÕÖ¾ÎÄ¼şÖĞĞ´Èë¹ı¶àµÄÌõÄ¿
+                        m_nRetryAfterMinutes++; // å°†é‡è¯•çš„é—´éš”æ—¶é€æ¸å˜é•¿ã€‚æ­¤ä¸¾å¯ä»¥åœ¨é‡è¯•å¤šæ¬¡ä¸æˆåŠŸçš„æƒ…å†µä¸‹ï¼Œé¿å…åœ¨æ—¥å¿—æ–‡ä»¶ä¸­å†™å…¥è¿‡å¤šçš„æ¡ç›®
                     }
 
                 }
@@ -713,7 +713,7 @@ EventLogEntryType.Information);
 
                 // Log.WriteEntry("dp2ZServer service start step 1");
 
-                // ×°ÔØÅäÖÃÎÄ¼ş
+                // è£…è½½é…ç½®æ–‡ä»¶
                 int nRet = LoadCfgDom(out strError);
                 if (nRet == -1)
                 {
@@ -723,19 +723,19 @@ EventLogEntryType.Information);
                 }
 
                 // return:
-                //      -2  ³ö´í¡£µ«ºóÃæ¿ÉÒÔÖØÊÔ
-                //      -1  ³ö´í£¬ºóÃæ²»ÔÙÖØÊÔ
-                //      0   ³É¹¦
+                //      -2  å‡ºé”™ã€‚ä½†åé¢å¯ä»¥é‡è¯•
+                //      -1  å‡ºé”™ï¼Œåé¢ä¸å†é‡è¯•
+                //      0   æˆåŠŸ
                 nRet = GetSlowCfgInfo(out strError);
                 if (nRet == -1)
                 {
-                    Log.WriteEntry("ERR001 Ê×´Î³õÊ¼»¯ĞÅÏ¢Ê§°Ü(ÏµÍ³²»ÔÙÖØÊÔ): " + strError,
+                    Log.WriteEntry("ERR001 é¦–æ¬¡åˆå§‹åŒ–ä¿¡æ¯å¤±è´¥(ç³»ç»Ÿä¸å†é‡è¯•): " + strError,
                         EventLogEntryType.Error);
                     return;
                 } 
                 if (nRet == -2)
                 {
-                    Log.WriteEntry("ERR002 Ê×´Î³õÊ¼»¯ĞÅÏ¢Ê§°Ü(ÏµÍ³½«¶¨ÆÚÖØÊÔ): " + strError,
+                    Log.WriteEntry("ERR002 é¦–æ¬¡åˆå§‹åŒ–ä¿¡æ¯å¤±è´¥(ç³»ç»Ÿå°†å®šæœŸé‡è¯•): " + strError,
                         EventLogEntryType.Error);
                 }
 
@@ -795,7 +795,7 @@ EventLogEntryType.Information);
             }
             catch (Exception x)
             {
-                // Ò»¸ö·âËø²Ù×÷±»¶Ô WSACancelBlockingCall µÄµ÷ÓÃÖĞ¶Ï
+                // ä¸€ä¸ªå°é”æ“ä½œè¢«å¯¹ WSACancelBlockingCall çš„è°ƒç”¨ä¸­æ–­
                 if (x.Message != "A blocking operation was interrupted by a call to WSACancelBlockingCall")
                 {
 
@@ -863,7 +863,7 @@ EventLogEntryType.Information);
         }
 
 
-        // »ñµÃ±àÄ¿¿âÊôĞÔÁĞ±í
+        // è·å¾—ç¼–ç›®åº“å±æ€§åˆ—è¡¨
         int GetBiblioDbProperties(out string strError)
         {
             strError = "";
@@ -879,7 +879,7 @@ EventLogEntryType.Information);
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "Õë¶Ô·şÎñÆ÷ " + Channel.Url + " »ñµÃ±àÄ¿¿âÃûÁĞ±í¹ı³Ì·¢Éú´íÎó£º" + strError;
+                    strError = "é’ˆå¯¹æœåŠ¡å™¨ " + Channel.Url + " è·å¾—ç¼–ç›®åº“ååˆ—è¡¨è¿‡ç¨‹å‘ç”Ÿé”™è¯¯ï¼š" + strError;
                     goto ERROR1;
                 }
 
@@ -892,7 +892,7 @@ EventLogEntryType.Information);
                     this.BiblioDbProperties.Add(property);
                 }
 
-                // »ñµÃÓï·¨¸ñÊ½
+                // è·å¾—è¯­æ³•æ ¼å¼
                 lRet = Channel.GetSystemParameter(null,
                     "biblio",
                     "syntaxs",
@@ -900,7 +900,7 @@ EventLogEntryType.Information);
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "Õë¶Ô·şÎñÆ÷ " + Channel.Url + " »ñµÃ±àÄ¿¿âÊı¾İ¸ñÊ½ÁĞ±í¹ı³Ì·¢Éú´íÎó£º" + strError;
+                    strError = "é’ˆå¯¹æœåŠ¡å™¨ " + Channel.Url + " è·å¾—ç¼–ç›®åº“æ•°æ®æ ¼å¼åˆ—è¡¨è¿‡ç¨‹å‘ç”Ÿé”™è¯¯ï¼š" + strError;
                     goto ERROR1;
                 }
 
@@ -908,11 +908,11 @@ EventLogEntryType.Information);
 
                 if (syntaxs.Length != this.BiblioDbProperties.Count)
                 {
-                    strError = "Õë¶Ô·şÎñÆ÷ " + Channel.Url + " »ñµÃ±àÄ¿¿âÃûÎª " + this.BiblioDbProperties.Count.ToString() + " ¸ö£¬¶øÊı¾İ¸ñÊ½Îª " + syntaxs.Length.ToString() + " ¸ö£¬ÊıÁ¿²»Ò»ÖÂ";
+                    strError = "é’ˆå¯¹æœåŠ¡å™¨ " + Channel.Url + " è·å¾—ç¼–ç›®åº“åä¸º " + this.BiblioDbProperties.Count.ToString() + " ä¸ªï¼Œè€Œæ•°æ®æ ¼å¼ä¸º " + syntaxs.Length.ToString() + " ä¸ªï¼Œæ•°é‡ä¸ä¸€è‡´";
                     goto ERROR1;
                 }
 
-                // Ôö²¹Êı¾İ¸ñÊ½
+                // å¢è¡¥æ•°æ®æ ¼å¼
                 for (int i = 0; i < this.BiblioDbProperties.Count; i++)
                 {
                     this.BiblioDbProperties[i].Syntax = syntaxs[i];
@@ -921,7 +921,7 @@ EventLogEntryType.Information);
 
                 ///
 
-                // »ñµÃ¶ÔÓ¦µÄÊµÌå¿âÃû
+                // è·å¾—å¯¹åº”çš„å®ä½“åº“å
                 lRet = Channel.GetSystemParameter(null,
                     "item",
                     "dbnames",
@@ -929,7 +929,7 @@ EventLogEntryType.Information);
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "Õë¶Ô·şÎñÆ÷ " + Channel.Url + " »ñµÃÊµÌå¿âÃûÁĞ±í¹ı³Ì·¢Éú´íÎó£º" + strError;
+                    strError = "é’ˆå¯¹æœåŠ¡å™¨ " + Channel.Url + " è·å¾—å®ä½“åº“ååˆ—è¡¨è¿‡ç¨‹å‘ç”Ÿé”™è¯¯ï¼š" + strError;
                     goto ERROR1;
                 }
 
@@ -937,18 +937,18 @@ EventLogEntryType.Information);
 
                 if (itemdbnames.Length != this.BiblioDbProperties.Count)
                 {
-                    strError = "Õë¶Ô·şÎñÆ÷ " + Channel.Url + " »ñµÃ±àÄ¿¿âÃûÎª " + this.BiblioDbProperties.Count.ToString() + " ¸ö£¬¶øÊµÌå¿âÃûÎª " + itemdbnames.Length.ToString() + " ¸ö£¬ÊıÁ¿²»Ò»ÖÂ";
+                    strError = "é’ˆå¯¹æœåŠ¡å™¨ " + Channel.Url + " è·å¾—ç¼–ç›®åº“åä¸º " + this.BiblioDbProperties.Count.ToString() + " ä¸ªï¼Œè€Œå®ä½“åº“åä¸º " + itemdbnames.Length.ToString() + " ä¸ªï¼Œæ•°é‡ä¸ä¸€è‡´";
                     goto ERROR1;
                 }
 
-                // Ôö²¹Êı¾İ¸ñÊ½
+                // å¢è¡¥æ•°æ®æ ¼å¼
                 for (int i = 0; i < this.BiblioDbProperties.Count; i++)
                 {
                     this.BiblioDbProperties[i].ItemDbName = itemdbnames[i];
                 }
 
 
-                // »ñµÃĞéÄâÊı¾İ¿âÃû
+                // è·å¾—è™šæ‹Ÿæ•°æ®åº“å
                 lRet = Channel.GetSystemParameter(null,
                     "virtual",
                     "dbnames",
@@ -956,7 +956,7 @@ EventLogEntryType.Information);
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "Õë¶Ô·şÎñÆ÷ " + Channel.Url + " »ñµÃĞéÄâ¿âÃûÁĞ±í¹ı³Ì·¢Éú´íÎó£º" + strError;
+                    strError = "é’ˆå¯¹æœåŠ¡å™¨ " + Channel.Url + " è·å¾—è™šæ‹Ÿåº“ååˆ—è¡¨è¿‡ç¨‹å‘ç”Ÿé”™è¯¯ï¼š" + strError;
                     goto ERROR1;
                 }
                 string[] virtualDbNames = strValue.Split(new char[] { ',' });
@@ -981,15 +981,15 @@ EventLogEntryType.Information);
             return -1;
         }
 
-        // ÎªÊı¾İ¿âÊôĞÔ¼¯ºÏÖĞÔö²¹ĞèÒª´ÓxmlÎÄ¼şÖĞ»ñµÃµÄÆäËûÊôĞÔ
+        // ä¸ºæ•°æ®åº“å±æ€§é›†åˆä¸­å¢è¡¥éœ€è¦ä»xmlæ–‡ä»¶ä¸­è·å¾—çš„å…¶ä»–å±æ€§
         int AppendDbProperties(out string strError)
         {
             strError = "";
 
-            // Ôö²¹MaxResultCount
+            // å¢è¡¥MaxResultCount
             if (this.CfgDom == null)
             {
-                strError = "µ÷ÓÃ GetBiblioDbProperties()ÒÔÇ°£¬ĞèÒªÏÈ³õÊ¼»¯ºÍ×°ÔØCfgDom";
+                strError = "è°ƒç”¨ GetBiblioDbProperties()ä»¥å‰ï¼Œéœ€è¦å…ˆåˆå§‹åŒ–å’Œè£…è½½CfgDom";
                 return -1;
             }
 
@@ -1007,11 +1007,11 @@ EventLogEntryType.Information);
 
                 // maxResultCount
 
-                // »ñµÃÕûÊıĞÍµÄÊôĞÔ²ÎÊıÖµ
+                // è·å¾—æ•´æ•°å‹çš„å±æ€§å‚æ•°å€¼
                 // return:
-                //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                 int nRet = DomUtil.GetIntegerParam(nodeDatabase,
                     "maxResultCount",
                     -1,
@@ -1019,7 +1019,7 @@ EventLogEntryType.Information);
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "ÎªÊı¾İ¿â '" + strDbName + "' ÅäÖÃµÄ<databases/database>ÔªËØµÄ" + strError;
+                    strError = "ä¸ºæ•°æ®åº“ '" + strDbName + "' é…ç½®çš„<databases/database>å…ƒç´ çš„" + strError;
                     return -1;
                 }
 
@@ -1036,7 +1036,7 @@ EventLogEntryType.Information);
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "ÎªÊı¾İ¿â '" + strDbName + "' ÅäÖÃµÄ<databases/database>ÔªËØµÄ" + strError;
+                    strError = "ä¸ºæ•°æ®åº“ '" + strDbName + "' é…ç½®çš„<databases/database>å…ƒç´ çš„" + strError;
                     return -1;
                 }
             }
@@ -1045,7 +1045,7 @@ EventLogEntryType.Information);
             return 0;
         }
 
-        // ¸ù¾İÊéÄ¿¿âÃû»ñµÃÊéÄ¿¿âÊôĞÔ¶ÔÏó
+        // æ ¹æ®ä¹¦ç›®åº“åè·å¾—ä¹¦ç›®åº“å±æ€§å¯¹è±¡
         public BiblioDbProperty GetDbProperty(string strBiblioDbName,
             bool bSearchAlias)
         {
@@ -1070,7 +1070,7 @@ EventLogEntryType.Information);
         }
 
 
-        // ¸ù¾İÊéÄ¿¿âÃû»ñµÃMARC¸ñÊ½Óï·¨Ãû
+        // æ ¹æ®ä¹¦ç›®åº“åè·å¾—MARCæ ¼å¼è¯­æ³•å
         public string GetMarcSyntax(string strBiblioDbName)
         {
             for (int i = 0; i < this.BiblioDbProperties.Count; i++)
@@ -1079,13 +1079,13 @@ EventLogEntryType.Information);
                 {
                     string strResult = this.BiblioDbProperties[i].Syntax;
                     if (String.IsNullOrEmpty(strResult) == true)
-                        strResult = "unimarc";  // È±Ê¡Îªunimarc
+                        strResult = "unimarc";  // ç¼ºçœä¸ºunimarc
                     return strResult;
                 }
             }
 
             // 2007/8/9
-            // Èç¹ûÔÚthis.BiblioDbPropertiesÀïÃæÕÒ²»µ½£¬¿ÉÒÔÖ±½ÓÔÚxmlÅäÖÃµÄ<database>ÔªËØÖĞÕÒ
+            // å¦‚æœåœ¨this.BiblioDbPropertiesé‡Œé¢æ‰¾ä¸åˆ°ï¼Œå¯ä»¥ç›´æ¥åœ¨xmlé…ç½®çš„<database>å…ƒç´ ä¸­æ‰¾
             XmlNode nodeDatabase = this.CfgDom.DocumentElement.SelectSingleNode("//databases/database[@name='" + strBiblioDbName + "']");
             if (nodeDatabase == null)
                 return null;
@@ -1093,9 +1093,9 @@ EventLogEntryType.Information);
             return DomUtil.GetAttr(nodeDatabase, "marcSyntax");
         }
 
-        // ¸ù¾İÊéÄ¿¿âÃû(»òÕß±ğÃû)»ñµÃ¼ìË÷Í¾¾¶Ãû
+        // æ ¹æ®ä¹¦ç›®åº“å(æˆ–è€…åˆ«å)è·å¾—æ£€ç´¢é€”å¾„å
         // parameters:
-        //      strOutputDbName Êä³öµÄÊı¾İ¿âÃû¡£²»ÊÇZ39.50·şÎñÆ÷¶¨ÒåµÄ±ğÃû£¬¶øÊÇÕı¹æÊı¾İ¿âÃû¡£
+        //      strOutputDbName è¾“å‡ºçš„æ•°æ®åº“åã€‚ä¸æ˜¯Z39.50æœåŠ¡å™¨å®šä¹‰çš„åˆ«åï¼Œè€Œæ˜¯æ­£è§„æ•°æ®åº“åã€‚
         public string GetFromName(string strDbNameOrAlias,
             long lAttributeValue,
             out string strOutputDbName,
@@ -1104,12 +1104,12 @@ EventLogEntryType.Information);
             strError = "";
             strOutputDbName = "";
 
-            // ÒòÎªXMLDOMÖĞÎŞ·¨½øĞĞ´óĞ¡Ğ´²»Ãô¸ĞµÄËÑË÷£¬ËùÒÔ°ÑËÑË÷±ğÃûµÄÕâ¸öÈÎÎñ½»¸øproperties
+            // å› ä¸ºXMLDOMä¸­æ— æ³•è¿›è¡Œå¤§å°å†™ä¸æ•æ„Ÿçš„æœç´¢ï¼Œæ‰€ä»¥æŠŠæœç´¢åˆ«åçš„è¿™ä¸ªä»»åŠ¡äº¤ç»™properties
             Debug.Assert(this.CfgDom != null, "");
             BiblioDbProperty prop = this.GetDbProperty(strDbNameOrAlias, true);
             if (prop == null)
             {
-                strError = "Ãû×Ö»òÕß±ğÃûÎª '" + strDbNameOrAlias + "' µÄÊı¾İ¿â²»´æÔÚ";
+                strError = "åå­—æˆ–è€…åˆ«åä¸º '" + strDbNameOrAlias + "' çš„æ•°æ®åº“ä¸å­˜åœ¨";
                 return null;
             }
 
@@ -1120,20 +1120,20 @@ EventLogEntryType.Information);
 
             if (nodeDatabase == null)
             {
-                strError = "Ãû×ÖÎª '" + strOutputDbName + "' µÄÊı¾İ¿â²»´æÔÚ";
+                strError = "åå­—ä¸º '" + strOutputDbName + "' çš„æ•°æ®åº“ä¸å­˜åœ¨";
             }
 
             XmlNode nodeUse = nodeDatabase.SelectSingleNode("use[@value='"+lAttributeValue.ToString()+"']");
             if (nodeUse == null)
             {
-                strError = "Êı¾İ¿â '" + strDbNameOrAlias + "' ÖĞÃ»ÓĞÕÒµ½¹ØÓÚ '" + lAttributeValue.ToString() + "' µÄ¼ìË÷Í¾¾¶¶¨Òå";
+                strError = "æ•°æ®åº“ '" + strDbNameOrAlias + "' ä¸­æ²¡æœ‰æ‰¾åˆ°å…³äº '" + lAttributeValue.ToString() + "' çš„æ£€ç´¢é€”å¾„å®šä¹‰";
                 return null;
             }
 
             string strFrom =  DomUtil.GetAttr(nodeUse, "from");
             if (String.IsNullOrEmpty(strFrom) == true)
             {
-                strError = "Êı¾İ¿â '" + strDbNameOrAlias + "' <database>ÔªËØÖĞ¹ØÓÚ '" + lAttributeValue.ToString() + "' µÄ<use>ÅäÖÃÈ±·¦fromÊôĞÔÖµ";
+                strError = "æ•°æ®åº“ '" + strDbNameOrAlias + "' <database>å…ƒç´ ä¸­å…³äº '" + lAttributeValue.ToString() + "' çš„<use>é…ç½®ç¼ºä¹fromå±æ€§å€¼";
                 return null;
             }
 
@@ -1142,20 +1142,20 @@ EventLogEntryType.Information);
     }
 
 
-    // ÊéÄ¿¿âÊôĞÔ
+    // ä¹¦ç›®åº“å±æ€§
     public class BiblioDbProperty
     {
-        // dp2library¶¨ÒåµÄÌØĞÔ
-        public string DbName = "";  // ÊéÄ¿¿âÃû
-        public string Syntax = "";  // ¸ñÊ½Óï·¨
-        public string ItemDbName = "";  // ¶ÔÓ¦µÄÊµÌå¿âÃû
+        // dp2libraryå®šä¹‰çš„ç‰¹æ€§
+        public string DbName = "";  // ä¹¦ç›®åº“å
+        public string Syntax = "";  // æ ¼å¼è¯­æ³•
+        public string ItemDbName = "";  // å¯¹åº”çš„å®ä½“åº“å
 
-        public bool IsVirtual = false;  // ÊÇ·ñÎªĞéÄâ¿â
+        public bool IsVirtual = false;  // æ˜¯å¦ä¸ºè™šæ‹Ÿåº“
 
-        // ÔÚdp2zserver.xmlÖĞ¶¨ÒåµÄÌØĞÔ
-        public int MaxResultCount = -1; // ¼ìË÷ÃüÖĞµÄ×î¶àÌõÊı
-        public string DbNameAlias = ""; // Êı¾İ¿â±ğÃû
+        // åœ¨dp2zserver.xmlä¸­å®šä¹‰çš„ç‰¹æ€§
+        public int MaxResultCount = -1; // æ£€ç´¢å‘½ä¸­çš„æœ€å¤šæ¡æ•°
+        public string DbNameAlias = ""; // æ•°æ®åº“åˆ«å
 
-        public bool AddField901 = false;    // ÊÇ·ñÔÚMARC×Ö¶ÎÖĞ¼ÓÈë±íÊ¾¼ÇÂ¼Â·¾¶ºÍÊ±¼ä´ÁµÄµÄ901×Ö¶Î
+        public bool AddField901 = false;    // æ˜¯å¦åœ¨MARCå­—æ®µä¸­åŠ å…¥è¡¨ç¤ºè®°å½•è·¯å¾„å’Œæ—¶é—´æˆ³çš„çš„901å­—æ®µ
     }
 }

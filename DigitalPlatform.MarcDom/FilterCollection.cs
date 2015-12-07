@@ -19,7 +19,6 @@ namespace DigitalPlatform.MarcDom
 
         public int Max = 100;   // 每个List中对象数上限
 
-
         public FilterDocument GetFilter(string strName)
         {
             if (IgnoreCase == true)
@@ -48,7 +47,6 @@ namespace DigitalPlatform.MarcDom
             }
 
             FilterDocument filter = filterlist.GetFilter();
-
             return filter;
         }
 
@@ -203,7 +201,6 @@ namespace DigitalPlatform.MarcDom
 
                         return true;
                     }
-
                 }
             }
             finally
@@ -232,9 +229,7 @@ namespace DigitalPlatform.MarcDom
                         } 
                         return;
                     }
-
                 }
-
             }
             finally
             {
@@ -271,7 +266,6 @@ namespace DigitalPlatform.MarcDom
             }
         }
 
-
         public string Dump()
         {
             string strResult = "";
@@ -282,11 +276,9 @@ namespace DigitalPlatform.MarcDom
         }
     }
 
-
     public class FilterHolder
     {
         public FilterDocument FilterDocument = null;
         public int UsedCount = 0;
     }
-
 }

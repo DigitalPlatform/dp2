@@ -44,11 +44,13 @@ namespace DigitalPlatform.LibraryServer
 
             string strFileName = this.LogDir + "\\" + strTaskName.Replace(" ", "_") + ".breakpoint";
 
-            StreamReader sr = null;
-
             try
             {
-                sr = new StreamReader(strFileName, Encoding.UTF8);
+                using (StreamReader sr = new StreamReader(strFileName, Encoding.UTF8))
+                {
+                    sr.ReadLine();  // 读入时间行
+                    strText = sr.ReadToEnd();// 读入其余
+                }
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -58,15 +60,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 strError = "open file '" +strFileName+ "' error : " + ex.Message;
                 return -1;
-            }
-            try
-            {
-                sr.ReadLine();  // 读入时间行
-                strText = sr.ReadToEnd();// 读入其余
-            }
-            finally
-            {
-                sr.Close();
             }
 
             return 1;
@@ -174,6 +167,12 @@ namespace DigitalPlatform.LibraryServer
             if (this.PauseBatchTask == true)
             {
                 strError = "当前所有批处理任务均处在暂停状态，无法启动新的批处理任务";
+                return -1;
+            }
+
+            if (this.BatchTasks == null)
+            {
+                strError = "this.AppTasks == null";
                 return -1;
             }
 

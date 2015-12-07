@@ -54,23 +54,21 @@ namespace DigitalPlatform.OPAC.Server
             if (assembly != null)
                 return 1;
 
-
             string strCode = "";    // c#代码
 
             // 装入code?
-            StreamReader sr = null;
-
             try
             {
-                sr = new StreamReader(strCodeFileName, true);
+                using (StreamReader sr = new StreamReader(strCodeFileName, true))
+                {
+                    strCode = sr.ReadToEnd();
+                }
             }
             catch (Exception ex)
             {
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
-            strCode = sr.ReadToEnd();
-            sr.Close();
 
             string[] saAddRef1 = {
 										 strBinDir + "\\digitalplatform.marcdom.dll",
@@ -233,7 +231,6 @@ namespace DigitalPlatform.OPAC.Server
             // 为RecordConverter派生类设置参数
             obj.App = app;
             obj.RecPath = strRecPath;
-
 
             // 调用关键函数Convert
             try
@@ -457,7 +454,6 @@ namespace DigitalPlatform.OPAC.Server
 
             try
             {
-
                 // 将种记录数据从XML格式转换为HTML格式
                 // 需要从内核映射过来文件
                 // string strScriptFileName = "./cfgs/loan_biblio.fltx";
@@ -508,12 +504,10 @@ namespace DigitalPlatform.OPAC.Server
                     bFltx = true;
                 }
 
-
                 if (bFltx == true)
                     return 1;   // 为.fltx文件
 
                 return 0;
-
             ERROR1:
                 return -1;
             }

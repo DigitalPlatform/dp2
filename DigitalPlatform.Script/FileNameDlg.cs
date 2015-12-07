@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -72,7 +72,7 @@ namespace DigitalPlatform.Script
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(74, 23);
             this.button_Cancel.TabIndex = 7;
-            this.button_Cancel.Text = "»°œ˚";
+            this.button_Cancel.Text = "ÂèñÊ∂à";
             // 
             // button_OK
             // 
@@ -82,7 +82,7 @@ namespace DigitalPlatform.Script
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 6;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_fileName
@@ -101,7 +101,7 @@ namespace DigitalPlatform.Script
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 12);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Œƒº˛√˚:";
+            this.label1.Text = "Êñá‰ª∂Âêç:";
             // 
             // label2
             // 
@@ -110,7 +110,7 @@ namespace DigitalPlatform.Script
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
             this.label2.TabIndex = 8;
-            this.label2.Text = "Œƒº˛¿‡–Õ:";
+            this.label2.Text = "Êñá‰ª∂Á±ªÂûã:";
             // 
             // comboBox_fileType
             // 
@@ -145,7 +145,7 @@ namespace DigitalPlatform.Script
             this.Name = "FileNameDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Œƒº˛√˚";
+            this.Text = "Êñá‰ª∂Âêç";
             this.Load += new System.EventHandler(this.FileNameDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -155,7 +155,7 @@ namespace DigitalPlatform.Script
 
 		private void FileNameDlg_Load(object sender, System.EventArgs e)
 		{
-			// Ω´combobox∫ÕtextboxÕ¨≤Ω
+			// Â∞ÜcomboboxÂíåtextboxÂêåÊ≠•
 			for(int i =0;i< comboBox_fileType.Items.Count; i++) 
 			{
 				if (String.Compare(textBox_fileName.Text,
@@ -188,7 +188,7 @@ namespace DigitalPlatform.Script
 		{
 			if (textBox_fileName.Text == "")
 			{
-				MessageBox.Show(this, "…–Œ¥÷∏∂®Œƒº˛√˚");
+				MessageBox.Show(this, "Â∞öÊú™ÊåáÂÆöÊñá‰ª∂Âêç");
 				this.DialogResult = DialogResult.None;
 				return;
 			}

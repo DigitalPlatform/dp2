@@ -157,124 +157,124 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="api.cs">
+    <Compile Include="..\api.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AssemblyInfo.cs">
+    <Compile Include="..\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AutoCloseMessageBox.cs">
+    <Compile Include="..\AutoCloseMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AutoSizeLabel.cs">
+    <Compile Include="..\AutoSizeLabel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ClipboardMonitor.cs">
+    <Compile Include="..\ClipboardMonitor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ClipboardMonitor.Designer.cs">
+    <Compile Include="..\ClipboardMonitor.Designer.cs">
       <DependentUpon>ClipboardMonitor.cs</DependentUpon>
     </Compile>
-    <Compile Include="ClipboardUtil.cs" />
-    <Compile Include="DigitalPlatform.cs">
+    <Compile Include="..\ClipboardUtil.cs" />
+    <Compile Include="..\DigitalPlatform.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Editor.cs" />
-    <Compile Include="events.cs" />
-    <Compile Include="ExceptionUtil.cs" />
-    <Compile Include="FixedTabControl.cs">
+    <Compile Include="..\Editor.cs" />
+    <Compile Include="..\events.cs" />
+    <Compile Include="..\ExceptionUtil.cs" />
+    <Compile Include="..\FixedTabControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GetSqlServerDlg.cs">
+    <Compile Include="..\GetSqlServerDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GetSqlServerDlg.Designer.cs">
+    <Compile Include="..\GetSqlServerDlg.Designer.cs">
       <DependentUpon>GetSqlServerDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="GraphicsUtil.cs" />
-    <Compile Include="gui.cs">
+    <Compile Include="..\GraphicsUtil.cs" />
+    <Compile Include="..\gui.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="InputDlg.cs">
+    <Compile Include="..\InputDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InstanceManager.cs">
+    <Compile Include="..\InstanceManager.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ListViewControl.cs">
+    <Compile Include="..\ListViewControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ListViewControl.designer.cs">
+    <Compile Include="..\ListViewControl.designer.cs">
       <DependentUpon>ListViewControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="ListViewNF.cs">
+    <Compile Include="..\ListViewNF.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ListViewQU.cs">
+    <Compile Include="..\ListViewQU.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ListViewUtil.cs" />
-    <Compile Include="LocationCollection.cs" />
-    <Compile Include="LoginDlg.cs">
+    <Compile Include="..\ListViewUtil.cs" />
+    <Compile Include="..\LocationCollection.cs" />
+    <Compile Include="..\LoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MessageBalloon.cs" />
-    <Compile Include="MessageBar.cs">
+    <Compile Include="..\MessageBalloon.cs" />
+    <Compile Include="..\MessageBar.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MessageBar.Designer.cs">
+    <Compile Include="..\MessageBar.Designer.cs">
       <DependentUpon>MessageBar.cs</DependentUpon>
     </Compile>
-    <Compile Include="MessageDlg.cs">
+    <Compile Include="..\MessageDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MyReaderWriterLock.cs" />
-    <Compile Include="NoHasSelTextBox.cs">
+    <Compile Include="..\MyReaderWriterLock.cs" />
+    <Compile Include="..\NoHasSelTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ProgressEstimate.cs" />
-    <Compile Include="RecordLock.cs" />
-    <Compile Include="SerialCodeForm.cs">
+    <Compile Include="..\ProgressEstimate.cs" />
+    <Compile Include="..\RecordLock.cs" />
+    <Compile Include="..\SerialCodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SerialCodeForm.designer.cs">
+    <Compile Include="..\SerialCodeForm.designer.cs">
       <DependentUpon>SerialCodeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SortColumns.cs" />
-    <Compile Include="Stop.cs" />
-    <Compile Include="ThreadBase.cs" />
-    <Compile Include="TransparentToolStripRenderer.cs" />
-    <Compile Include="TreeViewUtil.cs" />
-    <Compile Include="UserNameTable.cs" />
-    <Compile Include="WebCamera.cs" />
-    <Compile Include="WizardPages.cs">
+    <Compile Include="..\SortColumns.cs" />
+    <Compile Include="..\Stop.cs" />
+    <Compile Include="..\ThreadBase.cs" />
+    <Compile Include="..\TransparentToolStripRenderer.cs" />
+    <Compile Include="..\TreeViewUtil.cs" />
+    <Compile Include="..\UserNameTable.cs" />
+    <Compile Include="..\WebCamera.cs" />
+    <Compile Include="..\WizardPages.cs">
       <SubType>Component</SubType>
     </Compile>
-    <EmbeddedResource Include="AutoCloseMessageBox.resx">
+    <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="GetSqlServerDlg.resx">
+    <EmbeddedResource Include="..\GetSqlServerDlg.resx">
       <SubType>Designer</SubType>
       <DependentUpon>GetSqlServerDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="InputDlg.resx">
+    <EmbeddedResource Include="..\InputDlg.resx">
       <DependentUpon>InputDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoginDlg.resx">
+    <EmbeddedResource Include="..\LoginDlg.resx">
       <DependentUpon>LoginDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="MessageBar.resx">
+    <EmbeddedResource Include="..\MessageBar.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MessageBar.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MessageDlg.resx">
+    <EmbeddedResource Include="..\MessageDlg.resx">
       <DependentUpon>MessageDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SerialCodeForm.resx">
+    <EmbeddedResource Include="..\SerialCodeForm.resx">
       <DependentUpon>SerialCodeForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

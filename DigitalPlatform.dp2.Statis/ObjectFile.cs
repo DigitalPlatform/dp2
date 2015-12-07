@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ namespace DigitalPlatform.dp2.Statis
             this.Data = data;
         }
     }
-    // ĞĞ¶ÔÏó
+    // è¡Œå¯¹è±¡
     public class ObjectLineItem : Item
     {
         int m_nLength = 0;
@@ -30,7 +30,7 @@ namespace DigitalPlatform.dp2.Statis
 
         byte[] m_buffer = null;
 
-        string m_strLineKey = "";	// ×¨ÃÅ´Óm_line³ÉÔ±ÖĞÌá³ö£¬±ãÓÚÅÅĞò
+        string m_strLineKey = "";	// ä¸“é—¨ä»m_lineæˆå‘˜ä¸­æå‡ºï¼Œä¾¿äºæ’åº
         /*
         long m_nKeyBytes = 0;
          * */
@@ -49,17 +49,18 @@ namespace DigitalPlatform.dp2.Statis
                 byte[] baKey = Encoding.UTF8.GetBytes(this.m_strLineKey);
                 int nKeyBytes = baKey.Length;
 
-                // ³õÊ¼»¯¶ş½øÖÆÄÚÈİ
-                MemoryStream s = new MemoryStream();
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(s, m_line);
+                // åˆå§‹åŒ–äºŒè¿›åˆ¶å†…å®¹
+                using (MemoryStream s = new MemoryStream())
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(s, m_line);
 
-                this.Length = (int)s.Length + 4 + nKeyBytes;	// ËãÉÏÁËlengthËùÕ¼bytes
+                    this.Length = (int)s.Length + 4 + nKeyBytes;	// ç®—ä¸Šäº†lengthæ‰€å bytes
 
-                m_buffer = new byte[(int)s.Length];
-                s.Seek(0, SeekOrigin.Begin);
-                s.Read(m_buffer, 0, m_buffer.Length);
-                s.Close();
+                    m_buffer = new byte[(int)s.Length];
+                    s.Seek(0, SeekOrigin.Begin);
+                    s.Read(m_buffer, 0, m_buffer.Length);
+                }
             }
         }
 
@@ -78,88 +79,87 @@ namespace DigitalPlatform.dp2.Statis
         public override void ReadData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-            // ¶ÁÈëm_lKeyBytes
+            // è¯»å…¥m_lKeyBytes
             byte[] bytesbuffer = new byte[4];
             stream.Read(bytesbuffer, 0, 4);
             int nKeyBytes = BitConverter.ToInt32(bytesbuffer, 0);
 
-            // ¶ÁÈëm_strLineKey
+            // è¯»å…¥m_strLineKey
             byte[] keybuffer = new byte[nKeyBytes];
             stream.Read(keybuffer, 0, keybuffer.Length);
 
             this.m_strLineKey = Encoding.UTF8.GetString(keybuffer);
 
-            // ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+            // è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
             byte[] buffer = new byte[this.Length - 4 - keybuffer.Length];
             stream.Read(buffer, 0, buffer.Length);
 
-            // »¹Ô­ÄÚ´æ¶ÔÏó
-            MemoryStream s = new MemoryStream(buffer);
+            // è¿˜åŸå†…å­˜å¯¹è±¡
+            using (MemoryStream s = new MemoryStream(buffer))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
 
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            m_line = (ObjectItem)formatter.Deserialize(s);
-            s.Close();
+                m_line = (ObjectItem)formatter.Deserialize(s);
+            }
         }
-
 
         public override void ReadCompareData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-            // ¶ÁÈëm_nKeyBytes
+            // è¯»å…¥m_nKeyBytes
             byte[] bytesbuffer = new byte[4];
             stream.Read(bytesbuffer, 0, bytesbuffer.Length);
             int nKeyBytes = BitConverter.ToInt32(bytesbuffer, 0);
 
-            // ¶ÁÈëm_strLineKey
+            // è¯»å…¥m_strLineKey
             byte[] keybuffer = new byte[nKeyBytes];
             stream.Read(keybuffer, 0, keybuffer.Length);
             this.m_strLineKey = Encoding.UTF8.GetString(keybuffer);
 
-            m_line = null;	// ±íÊ¾line¶ÔÏó²»¿ÉÓÃ
+            m_line = null;	// è¡¨ç¤ºlineå¯¹è±¡ä¸å¯ç”¨
         }
 
         public override void WriteData(Stream stream)
         {
             if (m_line == null)
             {
-                throw (new Exception("m_lineÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_lineå°šæœªåˆå§‹åŒ–"));
             }
 
             if (m_buffer == null)
             {
-                throw (new Exception("m_bufferÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_bufferå°šæœªåˆå§‹åŒ–"));
             }
 
             Debug.Assert(this.m_strLineKey == m_line.Key, "");
             byte[] keybytes = Encoding.UTF8.GetBytes(this.m_strLineKey);
             int nKeyBytes = keybytes.Length;
 
-            // µ¥¶ÀĞ´Èë
+            // å•ç‹¬å†™å…¥
             byte[] buffer = BitConverter.GetBytes(nKeyBytes);
             stream.Write(buffer, 0, buffer.Length);
 
-            // key±¾Éí
+            // keyæœ¬èº«
             stream.Write(keybytes, 0, keybytes.Length);
 
 
-            // Ğ´ÈëLength¸öbytesµÄÄÚÈİ
+            // å†™å…¥Lengthä¸ªbytesçš„å†…å®¹
             stream.Write(m_buffer, 0, this.Length - 4 - nKeyBytes);
         }
 
-        // ÊµÏÖIComparable½Ó¿ÚµÄCompareTo()·½·¨,
-        // ¸ù¾İID±È½ÏÁ½¸ö¶ÔÏóµÄ´óĞ¡£¬ÒÔ±ãÅÅĞò£¬
-        // °´ÓÒ¶ÔÆë·½Ê½±È½Ï
+        // å®ç°IComparableæ¥å£çš„CompareTo()æ–¹æ³•,
+        // æ ¹æ®IDæ¯”è¾ƒä¸¤ä¸ªå¯¹è±¡çš„å¤§å°ï¼Œä»¥ä¾¿æ’åºï¼Œ
+        // æŒ‰å³å¯¹é½æ–¹å¼æ¯”è¾ƒ
         // obj: An object to compare with this instance
-        // ·µ»ØÖµ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
+        // è¿”å›å€¼ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
         // Less than zero: This instance is less than obj.
         // Zero: This instance is equal to obj.
         // Greater than zero: This instance is greater than obj.
-        // Òì³£: ArgumentException,obj is not the same type as this instance.
+        // å¼‚å¸¸: ArgumentException,obj is not the same type as this instance.
         public override int CompareTo(object obj)
         {
             ObjectLineItem item = (ObjectLineItem)obj;
@@ -188,9 +188,10 @@ namespace DigitalPlatform.dp2.Statis
                 string strFilename = PathUtil.MergePath(this.TempDir, "~tempfile_" + i.ToString() + ".tmp");
                 if (File.Exists(strFilename) == false)
                 {
-                    // Õ¼¾İÕâ¸öÎÄ¼ş
-                    FileStream f = File.Create(strFilename);
-                    f.Close();
+                    // å æ®è¿™ä¸ªæ–‡ä»¶
+                    using (FileStream f = File.Create(strFilename))
+                    {
+                    }
                     return strFilename;
                 }
             }
@@ -201,7 +202,7 @@ namespace DigitalPlatform.dp2.Statis
             return new ObjectLineItem();
         }
 
-        // »ñµÃÅÅĞòºóµÄ·ÇÖØ¸´ÊÂÏîÊı
+        // è·å¾—æ’åºåçš„éé‡å¤äº‹é¡¹æ•°
         public long GetNoDupCount()
         {
             long lResult = 0;
@@ -224,8 +225,8 @@ namespace DigitalPlatform.dp2.Statis
             return lResult;
         }
 
-        // ¶ş·Ö·¨
-        // ¸ù¾İ¸ø³öµÄKeyµÃµ½Value
+        // äºŒåˆ†æ³•
+        // æ ¹æ®ç»™å‡ºçš„Keyå¾—åˆ°Value
         // return:
         //      -1  not found
         public int Search(string strKeyParam,
@@ -233,9 +234,9 @@ namespace DigitalPlatform.dp2.Statis
         {
             data = null;
 
-            int k;	// Çø¼ä×ó
-            int m;	// Çø¼äÓÒ
-            int j = -1;	// Çø¼äÖĞ
+            int k;	// åŒºé—´å·¦
+            int m;	// åŒºé—´å³
+            int j = -1;	// åŒºé—´ä¸­
             string strKey;
             int nComp;
 
@@ -244,7 +245,7 @@ namespace DigitalPlatform.dp2.Statis
             while (k <= m)
             {
                 j = (k + m) / 2;
-                // È¡µÃjÎ»ÖÃµÄÖµ
+                // å–å¾—jä½ç½®çš„å€¼
 
                 ObjectLineItem item = (ObjectLineItem)this[j];
 
@@ -258,7 +259,7 @@ namespace DigitalPlatform.dp2.Statis
                 }
 
                 if (nComp > 0)
-                {	// strKeyParam½ÏĞ¡
+                {	// strKeyParamè¾ƒå°
                     m = j - 1;
                 }
                 else

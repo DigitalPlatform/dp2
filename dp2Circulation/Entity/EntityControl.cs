@@ -670,7 +670,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 if (nRet == 0 || info == null)
                 {
-                    strError = "馆藏地点 '"+strLocation+"' 没有定义对应的排架体系";
+                    strError = "馆藏地点 '" + strLocation + "' 没有定义对应的排架体系";
                     goto ERROR1;
                 }
 
@@ -682,7 +682,7 @@ namespace dp2Circulation
 
             if (arrangement_names.Count > 1)
             {
-                strError = "您所选定的 "+this.listView.SelectedItems.Count.ToString()+" 个事项中，包含了多于一个的排架体系： " + StringUtil.MakePathList(arrangement_names) + "。请将选定的范围约束在仅包含一个排架体系，然后再使用本功能";
+                strError = "您所选定的 " + this.listView.SelectedItems.Count.ToString() + " 个事项中，包含了多于一个的排架体系： " + StringUtil.MakePathList(arrangement_names) + "。请将选定的范围约束在仅包含一个排架体系，然后再使用本功能";
                 goto ERROR1;
             }
 
@@ -1341,6 +1341,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             if (edit.DialogResult != DialogResult.OK)
                 return;
 
+            LibraryChannel channel = this.MainForm.GetChannel();
+
             // BookItem对象已经被修改
             this.EnableControls(false);
             this.ParentShowMessage("正在对册条码号 '" + bookitem.Barcode + "' 进行查重 ...", "green", false);
@@ -1379,7 +1381,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         //      -1  error
                         //      0   not dup
                         //      1   dup
-                        nRet = SearchEntityBarcodeDup(bookitem.Barcode,
+                        nRet = SearchEntityBarcodeDup(
+                            channel,
+                            bookitem.Barcode,
                             bookitem.RecPath,
                             out paths,
                             out strError);
@@ -1408,6 +1412,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             {
                 this.ParentShowMessage("", "", false);
                 this.EnableControls(true);
+
+                this.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -1486,19 +1492,29 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     strOriginRecPath = myself.RecPath;
 
                 string[] paths = null;
-                // 册条码号查重。用于(可能是)旧条码号查重。
-                // parameters:
-                //      strBarcode  册条码号。
-                //      strOriginRecPath    出发记录的路径。
-                //      paths   所有命中的路径
-                // return:
-                //      -1  error
-                //      0   not dup
-                //      1   dup
-                nRet = SearchEntityBarcodeDup(strBarcode,
-                    strOriginRecPath,
-                    out paths,
-                    out strError);
+                LibraryChannel channel = this.MainForm.GetChannel();
+                try
+                {
+                    // 册条码号查重。用于(可能是)旧条码号查重。
+                    // parameters:
+                    //      strBarcode  册条码号。
+                    //      strOriginRecPath    出发记录的路径。
+                    //      paths   所有命中的路径
+                    // return:
+                    //      -1  error
+                    //      0   not dup
+                    //      1   dup
+                    nRet = SearchEntityBarcodeDup(
+                        channel,
+                        strBarcode,
+                        strOriginRecPath,
+                        out paths,
+                        out strError);
+                }
+                finally
+                {
+                    this.MainForm.ReturnChannel(channel);
+                }
                 if (nRet == -1)
                 {
                     strError = "对册条码 '" + strBarcode + "' 进行查重的过程中发生错误: " + strError;
@@ -1564,19 +1580,30 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
                     string[] paths = null;
                     string strTempError = "";
-                    // 册条码号查重。用于(可能是)旧条码号查重。
-                    // parameters:
-                    //      strBarcode  册条码号。
-                    //      strOriginRecPath    出发记录的路径。
-                    //      paths   所有命中的路径
-                    // return:
-                    //      -1  error
-                    //      0   not dup
-                    //      1   dup
-                    nRet = SearchEntityBarcodeDup(strBarcode,
-                        strOriginRecPath,
-                        out paths,
-                        out strTempError);
+
+                    LibraryChannel channel = this.MainForm.GetChannel();
+                    try
+                    {
+                        // 册条码号查重。用于(可能是)旧条码号查重。
+                        // parameters:
+                        //      strBarcode  册条码号。
+                        //      strOriginRecPath    出发记录的路径。
+                        //      paths   所有命中的路径
+                        // return:
+                        //      -1  error
+                        //      0   not dup
+                        //      1   dup
+                        nRet = SearchEntityBarcodeDup(
+                            channel,
+                            strBarcode,
+                            strOriginRecPath,
+                            out paths,
+                            out strTempError);
+                    }
+                    finally
+                    {
+                        this.MainForm.ReturnChannel(channel);
+                    }
                     if (nRet == -1)
                     {
                         strError = "对册条码号 '" + strBarcode + "' 进行查重的过程中发生错误: " + strTempError;
@@ -1608,7 +1635,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         {
             int nRet = 0;
             string strError = "";
-            // bool bOldChanged = this.Changed;
+        // bool bOldChanged = this.Changed;
 
         REDO_INPUT:
             string strNumber = InputDlg.GetInput(
@@ -1707,13 +1734,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             EntityEditForm edit = null;
             BookItem bookitem = null;
 
+            LibraryChannel channel = this.MainForm.GetChannel();
             this.ParentShowMessage("正在对册条码号 '" + strBarcode + "' 进行查重 ...", "green", false);
             try
             {
-
                 if (String.IsNullOrEmpty(strBarcode) == false)
                 {
-
                     // 对当前窗口内进行条码查重
                     BookItem dupitem = this.Items.GetItemByBarcode(strBarcode);
                     if (dupitem != null)
@@ -1754,7 +1780,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     {
                         string strItemText = "";
                         string strBiblioText = "";
-                        nRet = SearchEntityBarcode(strBarcode,
+                        nRet = SearchEntityBarcode(
+                            channel,
+                            strBarcode,
                             out strItemText,
                             out strBiblioText,
                             out strError);
@@ -1832,6 +1860,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             finally
             {
                 this.ParentShowMessage("", "", false);
+                this.MainForm.ReturnChannel(channel);
             }
             //REDO:
             this.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
@@ -1899,7 +1928,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public override int SaveItems(out string strError)
+        public override int SaveItems(
+            LibraryChannel channel,
+            out string strError)
         {
             // TODO: 是否要先保存以前的选择，功能执行完以后恢复以前的选择?
 
@@ -1929,7 +1960,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 }
             }
 
-            return base.SaveItems(out strError);
+            return base.SaveItems(channel, out strError);
         }
 
         // 外部调用，设置一个实体记录。
@@ -1943,6 +1974,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         /// <summary>
         /// 设置一个实体记录
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="bWarningBarcodeDup">是否仅仅警告条码重的情况？==true，仅警告，但是依然创建记录；==false，当作出错立即从函数中返回</param>
         /// <param name="strAction">动作。为 new change delete neworchange 之一</param>
         /// <param name="strRefID">参考 ID</param>
@@ -1951,6 +1983,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 保存或者修改、删除成功，没有发现册条码重复; 1: 保存成功，但是发现了册条码重复</returns>
         public int DoSetEntity(
+            LibraryChannel channel,
             bool bWarningBarcodeDup,
             string strAction,
             string strRefID,
@@ -2085,15 +2118,17 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 }
             }
 
-            SKIP1:
+        SKIP1:
 
             // 对所有实体记录进行条码查重
-            if (String.IsNullOrEmpty(strBarcode) == false 
+            if (String.IsNullOrEmpty(strBarcode) == false
                 && strAction == "new")
             {
                 string strItemText = "";
                 string strBiblioText = "";
-                nRet = SearchEntityBarcode(strBarcode,
+                nRet = SearchEntityBarcode(
+                    channel,
+                    strBarcode,
                     out strItemText,
                     out strBiblioText,
                     out strError);
@@ -2309,10 +2344,20 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     string strItemText = "";
                     string strBiblioText = "";
                     // string strError = "";
-                    nRet = SearchEntityBarcode(strBarcode,
-                        out strItemText,
-                        out strBiblioText,
-                        out strError);
+                    LibraryChannel channel = this.MainForm.GetChannel();
+                    try
+                    {
+                        nRet = SearchEntityBarcode(
+                            channel,
+                            strBarcode,
+                            out strItemText,
+                            out strBiblioText,
+                            out strError);
+                    }
+                    finally
+                    {
+                        this.MainForm.ReturnChannel(channel);
+                    }
                     if (nRet == -1)
                     {
                         strError = "对册条码号 '" + strBarcode + "' 进行查重的过程中发生错误: " + strError;
@@ -2366,14 +2411,11 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             bookitem.HilightListViewItem(true);
 
             this.EnableControls(true);
-
             return 1;
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return -1;
         }
-
-
 
         // 撤销删除一个或多个实体
         void menu_undoDeleteEntity_Click(object sender, EventArgs e)
@@ -2554,7 +2596,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     strText += "共直接删除 " + nDeleteCount.ToString() + " 项。";
                 else if (nDeleteCount - deleted_recpaths.Count == 0)
                     strText += "共标记删除 "
-                        +deleted_recpaths.Count.ToString()
+                        + deleted_recpaths.Count.ToString()
                         + " 项。\r\n\r\n(注：所标记删除的事项，要到“提交”后才会真正从服务器删除)";
                 else
                     strText += "共标记删除 "
@@ -2574,7 +2616,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
 
         // 检索册条码号。用于新条码号查重。
-        int SearchEntityBarcode(string strBarcode,
+        int SearchEntityBarcode(
+            LibraryChannel channel,
+            string strBarcode,
             out string strItemText,
             out string strBiblioText,
             out string strError)
@@ -2583,13 +2627,16 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             strItemText = "";
             strBiblioText = "";
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在对册条码号 '" + strBarcode + "' 进行查重 ...");
             Stop.BeginLoop();
+#endif
+            Stop.SetMessage("正在对册条码号 '" + strBarcode + "' 进行查重 ...");
 
             try
             {
-                long lRet = Channel.GetItemInfo(
+                long lRet = channel.GetItemInfo(
                     Stop,
                     strBarcode,
                     "html",
@@ -2605,9 +2652,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
+#endif
+                Stop.SetMessage("");
             }
 
             return 1;   // found
@@ -2675,7 +2725,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             return 1;   // found
         }
 #endif
-        int SearchEntityBarcodeDup(string strBarcode,
+        int SearchEntityBarcodeDup(
+            LibraryChannel channel,
+            string strBarcode,
     string strOriginRecPath,
     out string[] paths,
     out string strError)
@@ -2689,13 +2741,16 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 return -1;
             }
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在对册条码号 '" + strBarcode + "' 进行查重 ...");
             Stop.BeginLoop();
+#endif
+            Stop.SetMessage("正在对册条码号 '" + strBarcode + "' 进行查重 ...");
 
             try
             {
-                long lRet = Channel.SearchItem(
+                long lRet = channel.SearchItem(
     Stop,
     "<全部>",
     strBarcode,
@@ -2716,7 +2771,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 long lHitCount = lRet;
 
                 List<string> aPath = null;
-                lRet = Channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(Stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -2746,9 +2801,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
+#endif
+                Stop.SetMessage("");
             }
 
             return 1;   // found
@@ -3279,7 +3337,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             if (StringUtil.HasHead(strPublishTime, "refids:") == true)
             {
                 string strList = strPublishTime.Substring("refids:".Length);
-                string[] parts = strList.Split(new char[] {','});
+                string[] parts = strList.Split(new char[] { ',' });
                 for (int i = 0; i < parts.Length; i++)
                 {
                     string strRefID = parts[i];
@@ -3331,7 +3389,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     if (nRet == -1)
                         continue;
                 }
-                else 
+                else
                 {
                     /*
                     try
@@ -3567,9 +3625,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         /// </summary>
         public string ErrorInfo = "";
 
-                // return:
-                //      -2  服务器没有配置校验方法，无法校验
-                //      -1  error
+        // return:
+        //      -2  服务器没有配置校验方法，无法校验
+        //      -1  error
         //      0   不是合法的条码号
         //      1   是合法的读者证条码号
         //      2   是合法的册条码号

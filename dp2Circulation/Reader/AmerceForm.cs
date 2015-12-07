@@ -254,7 +254,7 @@ namespace dp2Circulation
                 true);
 
             if (this.LayoutMode == "左右分布")
-                this.splitContainer_main.Orientation = Orientation.Vertical; 
+                this.splitContainer_main.Orientation = Orientation.Vertical;
         }
 
         void commander_IsBusy(object sender, IsBusyEventArgs e)
@@ -262,7 +262,8 @@ namespace dp2Circulation
             e.IsBusy = this.m_webExternalHost.ChannelInUse;
         }
 
-        /*public*/ void LoadSize()
+        /*public*/
+        void LoadSize()
         {
 #if NO
             // 设置窗口尺寸状态
@@ -320,7 +321,8 @@ this.splitContainer_lists,
             // this.PerformLayout();
         }
 
-        /*public*/ void SaveSize()
+        /*public*/
+        void SaveSize()
         {
             if (this.MainForm != null)
             {
@@ -545,12 +547,14 @@ this.splitContainer_lists,
                 goto ERROR1;
             }
 
+#if NO
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在初始化浏览器组件 ...");
             stop.BeginLoop();
+#endif
 
-            this.Update();
-            this.MainForm.Update();
+            //this.Update();
+            //this.MainForm.Update();
 
             int nRecordCount = 0;
 
@@ -580,7 +584,7 @@ this.splitContainer_lists,
                 {
                     // Global.SetHtmlString(this.webBrowser_readerInfo, "证条码号为 '" + strBarcode + "' 的读者记录没有找到 ...");
                     this.m_webExternalHost.SetTextString("证条码号为 '" + strBarcode + "' 的读者记录没有找到 ...");
-                    
+
                     return 0;   // not found
                 }
 
@@ -596,8 +600,8 @@ this.splitContainer_lists,
                     dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
                     nRet = dlg.Initial(
                         this.MainForm,
-                        this.Channel,
-                        this.stop,
+                        //this.Channel,
+                        //this.stop,
                         StringUtil.SplitList(strOutputRecPath),
                         "请选择一个读者记录",
                         out strError);
@@ -614,7 +618,9 @@ this.splitContainer_lists,
                         return 0;
                     }
 
-                    strBarcode = dlg.SelectedBarcode;
+                    // strBarcode = dlg.SelectedBarcode;
+                    strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16
+
                     nRedoCount++;
                     goto REDO;
                 }
@@ -655,9 +661,11 @@ this.splitContainer_lists,
             }
             finally
             {
+#if NO
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+#endif
             }
 
             return nRecordCount;
@@ -722,7 +730,6 @@ this.splitContainer_lists,
             StopFillAmercing(false);
             StopFillAmerced(false);
 
-
             this.m_nChannelInUse++;
             if (this.m_nChannelInUse > 1)
             {
@@ -732,14 +739,16 @@ this.splitContainer_lists,
             }
             try
             {
-
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
                     this.textBox_readerBarcode.Text = strReaderBarcode;
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在装载读者信息 ...");
+                stop.BeginLoop();
 
                 EnableControls(false);
                 try
                 {
-
                     // 搜索出记录，显示在窗口中
                     ClearAllDisplay();
 
@@ -819,6 +828,10 @@ this.splitContainer_lists,
                 finally
                 {
                     EnableControls(true);
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
                 }
             }
             finally
@@ -831,7 +844,7 @@ this.splitContainer_lists,
             MessageBox.Show(this, strError);
             return -1;
         }
- 
+
 
         private void button_load_Click(object sender, EventArgs e)
         {
@@ -1197,7 +1210,8 @@ this.splitContainer_lists,
         }
 
 
-        /*public*/ void ThreadFillAmercedMain()
+        /*public*/
+        void ThreadFillAmercedMain()
         {
             string strError = "";
             m_bStopFillAmerced = false;
@@ -1636,7 +1650,8 @@ this.splitContainer_lists,
             this.Invoke(d, new object[] { list, strError });
         }
 
-        /*public*/ void ThreadFillAmercingMain()
+        /*public*/
+        void ThreadFillAmercingMain()
         {
             string strError = "";
             m_bStopFillAmercing = false;
@@ -2394,7 +2409,7 @@ this.splitContainer_lists,
                     continue;
 
                 count++;
-                
+
                 string strPrice = ListViewUtil.GetItemText(item, COLUMN_AMERCED_PRICE);
 
                 // 去掉字符串后面可能有的注释部分
@@ -2575,17 +2590,17 @@ this.splitContainer_lists,
 
                 OverdueItemInfo info = new OverdueItemInfo();
                 info.Price = strPrice;
-                info.ItemBarcode = ListViewUtil.GetItemText(item, 
+                info.ItemBarcode = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_ITEMBARCODE);
                 info.RecPath = ""; // recPath
-                info.Reason = ListViewUtil.GetItemText(item, 
+                info.Reason = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_REASON);
 
-                info.BorrowDate = ListViewUtil.GetItemText(item, 
+                info.BorrowDate = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_BORROWDATE);
-                info.BorrowPeriod = ListViewUtil.GetItemText(item, 
+                info.BorrowPeriod = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_BORROWPERIOD);
-                info.ReturnDate = ListViewUtil.GetItemText(item, 
+                info.ReturnDate = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_RETURNDATE);
                 info.BorrowOperator = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_BORROWOPERATOR);  // borrowOperator
@@ -2634,7 +2649,7 @@ this.splitContainer_lists,
 
                 string strID = ListViewUtil.GetItemText(item, COLUMN_AMERCING_ID);  // listview.Items[i].SubItems[8].Text;
                 string strPrice = ListViewUtil.GetItemText(item, COLUMN_AMERCING_PRICE);  // listview.Items[i].SubItems[2].Text;
-                string strComment = ListViewUtil.GetItemText(item, COLUMN_AMERCING_COMMENT); 
+                string strComment = ListViewUtil.GetItemText(item, COLUMN_AMERCING_COMMENT);
 
                 if (String.IsNullOrEmpty(strID) == true)
                 {
@@ -2717,7 +2732,7 @@ this.splitContainer_lists,
 
 
                 if (bChanged == true)
-                    nChangedCount ++;
+                    nChangedCount++;
             }
 
             return nChangedCount;
@@ -2823,7 +2838,7 @@ this.splitContainer_lists,
                 {
                     amerceItem.NewPrice = strNewPrice;
                     if (bCommentChanged == true || bAppendComment == true)
-                        amerceItem.NewComment = BuildCommitComment( 
+                        amerceItem.NewComment = BuildCommitComment(
                             bCommentChanged,
                             strExistComment,
                             bAppendComment,
@@ -2986,7 +3001,6 @@ this.splitContainer_lists,
                     goto ERROR1;
             }
 
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2998,7 +3012,7 @@ this.splitContainer_lists,
         //      -1  error
         //      0   succeed
         //      1   partial succeed (strError中没有信息，中途已经MessageBox()报错了)
-        internal int Submit(AmerceItem [] amerce_items,
+        internal int Submit(AmerceItem[] amerce_items,
             List<OverdueItemInfo> overdue_infos,
             bool bRefreshAll,
             out string strError)
@@ -3735,7 +3749,7 @@ COLUMN_AMERCED_STATE);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_overdues, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_overdues, new Point(e.X, e.Y));
         }
 
         void menu_viewAmercing_Click(object sender, EventArgs e)
@@ -4719,7 +4733,7 @@ out string strError)
             if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 return "";
             string strCommand = "P:" + strReaderBarcode;
-                return strCommand;
+            return strCommand;
         }
 
         private void listView_amerced_MouseUp(object sender, MouseEventArgs e)
@@ -4736,7 +4750,7 @@ out string strError)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_amerced, new Point(e.X, e.Y));	
+            contextMenu.Show(this.listView_amerced, new Point(e.X, e.Y));
         }
 
         private void toolStripButton_amerced_selectAll_Click(object sender, EventArgs e)

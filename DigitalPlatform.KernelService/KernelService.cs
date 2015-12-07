@@ -9,6 +9,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 // using System.ServiceProcess;
+using System.ServiceModel.Channels;
 
 using DigitalPlatform;
 using DigitalPlatform.rms;
@@ -16,7 +17,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
-using System.ServiceModel.Channels;
 
 namespace dp2Kernel
 {
@@ -320,11 +320,12 @@ namespace dp2Kernel
         //      2.60 2015/9/26 WriteXml() 对整个操作超过一秒的情况，会将时间构成详情写入错误日志
         //      2.61 2015/11/8 Search() 和 SearchEx() 中，XML 检索式的 target 元素增加了 hint 属性。如果 hint 属性包含 first 子串，则当 target 元素的 list 属性包含多个数据库时，顺次检索的过程中只要有一次命中，就立即停止检索返回。此方式能提高检索速度，但不保证能检索全命中结果。比较适合用于册条码号等特定的检索途径进行借书还书操作
         //      2.62 2015/11/14 GetBrowse() API 允许获得对象记录的 metadata 和 timestamp
+        //      2.63 2015/11/16 WriteRes() API WriteRes() API 允许通过 lTotalLength 为 -1 调用，作用是仅修改 metadata
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.62";
+            result.ErrorString = "2.63";
             return result;
         }
 
@@ -1573,7 +1574,7 @@ namespace dp2Kernel
         //						部分记录体: 库名/记录/xpath/<locate>hitcount</locate><action>AddInteger</action> 或者 库名/记录/xpath/@hitcount
         //		lStart	起始长度
         //		lLength	总长度,-1:从start到最后
-        //		strStyle	取资源的风格，以逗豆间隔的字符串
+        //		strStyle	取资源的风格，以逗号间隔的字符串
         /*
         strStyle用法
 
@@ -2015,6 +2016,7 @@ namespace dp2Kernel
                     return result;
                 }
 
+#if NO
                 // 检查输入参数是否合法，并做规范化处理
                 if (strResPath == null
                     || strResPath == "")
@@ -2031,6 +2033,7 @@ namespace dp2Kernel
                     result.ErrorString = "WriteRes()，lTotalLength不能为'" + Convert.ToString(lTotalLength) + "'，必须>=0。";
                     return result;
                 }
+#endif
 
                 // 得到要写入的字节数组,并且判断给定的范围是否合法
                 //Microsoft.Web.Services2.Attachments.Attachment attachment = null;
@@ -2106,6 +2109,9 @@ namespace dp2Kernel
             }
             catch (Exception ex)
             {
+                if (ex is TailNumberException)
+                    app.ActivateWorker();
+
                 string strErrorText = "WriteRes() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
 

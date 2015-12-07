@@ -609,7 +609,7 @@ namespace dp2Circulation
             else
                 this.toolStripButton_monitoring.Enabled = true;
 
-            if (this.MonitorTaskName != "")
+            if (this.MonitorTaskName != this.comboBox_taskName.Text)    // 2015/11/26
             {
                 this.MonitorTaskName = this.comboBox_taskName.Text;
                 this.CurResultOffs = 0;
@@ -801,13 +801,10 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                         }
 
                     COINTINU1:
-
                         // 如果本次并没有“触底”，需要立即循环获取新的信息。但是循环有一个最大次数，以应对服务器疯狂发生信息的情形。
                         if (resultInfo.ResultOffset >= resultInfo.ResultTotalLength)
                             break;
                     }
-                    
-
                 }
                 finally
                 {
@@ -901,8 +898,11 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
         // 一直显示进度
         private void toolStripButton_monitoring_CheckedChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_taskName.Text == "")
+            if (string.IsNullOrEmpty(this.comboBox_taskName.Text) == true)
+            {
+                this.ShowMessage("尚未选定任务名", "red", true);
                 return;
+            }
 
             StartMonitor(this.comboBox_taskName.Text,
                 this.toolStripButton_monitoring.Checked);

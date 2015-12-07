@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -11,8 +11,8 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.rms.Client
 {
 	/// <summary>
-	/// ¹ÜÀíÒ»¸ö×ÊÔ´µÄ¶Ô»°¿ò
-	/// ¹ÜÀíÉÏ´«ºÍÏÂÔØ.ÏÂÔØÊÇÁ¢¼´µÄ.ÉÏ´«ÊÇÖÍºóµÄ.
+	/// ç®¡ç†ä¸€ä¸ªèµ„æºçš„å¯¹è¯æ¡†
+	/// ç®¡ç†ä¸Šä¼ å’Œä¸‹è½½.ä¸‹è½½æ˜¯ç«‹å³çš„.ä¸Šä¼ æ˜¯æ»åçš„.
 	/// </summary>
 	public class ResObjectDlg : System.Windows.Forms.Form
 	{
@@ -95,7 +95,7 @@ namespace DigitalPlatform.rms.Client
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(71, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "×ÊÔ´ID (&I):";
+            this.label1.Text = "èµ„æºID (&I):";
             // 
             // textBox_serverName
             // 
@@ -113,7 +113,7 @@ namespace DigitalPlatform.rms.Client
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(53, 12);
             this.label2.TabIndex = 2;
-            this.label2.Text = "×´Ì¬(&S):";
+            this.label2.Text = "çŠ¶æ€(&S):";
             // 
             // textBox_state
             // 
@@ -130,7 +130,7 @@ namespace DigitalPlatform.rms.Client
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(101, 12);
             this.label4.TabIndex = 6;
-            this.label4.Text = "±¾µØÎïÀíÂ·¾¶(&P):";
+            this.label4.Text = "æœ¬åœ°ç‰©ç†è·¯å¾„(&P):";
             // 
             // textBox_localPath
             // 
@@ -158,7 +158,7 @@ namespace DigitalPlatform.rms.Client
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(53, 12);
             this.label5.TabIndex = 9;
-            this.label5.Text = "³ß´ç(&S):";
+            this.label5.Text = "å°ºå¯¸(&S):";
             // 
             // textBox_size
             // 
@@ -175,7 +175,7 @@ namespace DigitalPlatform.rms.Client
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 11;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -186,7 +186,7 @@ namespace DigitalPlatform.rms.Client
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 12;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // label3
@@ -196,7 +196,7 @@ namespace DigitalPlatform.rms.Client
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 12);
             this.label3.TabIndex = 13;
-            this.label3.Text = "Ã½ÌåÀàĞÍ(&M):";
+            this.label3.Text = "åª’ä½“ç±»å‹(&M):";
             // 
             // textBox_mime
             // 
@@ -220,7 +220,7 @@ namespace DigitalPlatform.rms.Client
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
             this.label6.TabIndex = 15;
-            this.label6.Text = "Ê±¼ä´Á(&T):";
+            this.label6.Text = "æ—¶é—´æˆ³(&T):";
             // 
             // ResObjectDlg
             // 
@@ -246,7 +246,7 @@ namespace DigitalPlatform.rms.Client
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ResObjectDlg";
             this.ShowInTaskbar = false;
-            this.Text = "×ÊÔ´ÎÄ¼ş";
+            this.Text = "èµ„æºæ–‡ä»¶";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -257,7 +257,7 @@ namespace DigitalPlatform.rms.Client
 		{
 			if (textBox_localPath.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÎÄ¼ş±¾µØÂ·¾¶");
+				MessageBox.Show(this, "å°šæœªæŒ‡å®šæ–‡ä»¶æœ¬åœ°è·¯å¾„");
 				return;
 			}
 		
@@ -275,7 +275,7 @@ namespace DigitalPlatform.rms.Client
 		private void button_findLocalPath_Click(object sender, System.EventArgs e)
 		{
 			OpenFileDialog dlg = new OpenFileDialog();
-			dlg.Title = "Ñ¡ÔñÎÄ¼ş";
+			dlg.Title = "é€‰æ‹©æ–‡ä»¶";
 			//dlg.InitialDirectory = "c:\\" ;
 			//dlg.FileName = itemSelected.Text ;
 			dlg.Filter = "All files (*.*)|*.*" ;
@@ -289,7 +289,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.textBox_localPath.Text = fileInfo.FullName;
 			this.textBox_size.Text = Convert.ToString(fileInfo.Length);
-			this.textBox_state.Text = "ÉĞÎ´ÉÏÔØ";
+			this.textBox_state.Text = "å°šæœªä¸Šè½½";
 
 #if NO
 			textBox_mime.Text = API.MimeTypeFrom(ReadFirst256Bytes(dlg.FileName),
@@ -299,7 +299,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 #if NO
-		// ¶ÁÈ¡ÎÄ¼şÇ°256bytes
+		// è¯»å–æ–‡ä»¶å‰256bytes
 		byte[] ReadFirst256Bytes(string strFileName)
 		{
 			FileStream fileSource = File.Open(

@@ -14,6 +14,7 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -90,7 +91,6 @@ namespace dp2Circulation
             stop = new DigitalPlatform.Stop();
             stop.Register(stopManager, true);	// 和容器关联
 
-
             if (this.AutoSearch == true
                 && string.IsNullOrEmpty(this.textBox_queryWord.Text) == false)
             {
@@ -99,7 +99,7 @@ namespace dp2Circulation
 
             if (this.MainForm.ServerVersion < 2.33)
             {
-                MessageBox.Show(this, "选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 "+this.MainForm.ServerVersion.ToString()+"，请及时升级");
+                MessageBox.Show(this, "选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 " + this.MainForm.ServerVersion.ToString() + "，请及时升级");
             }
         }
 
@@ -115,7 +115,7 @@ namespace dp2Circulation
             string strText)
         {
             if (strColor == "waiting")
-                this._floatingMessage.RectColor = Color.FromArgb(80,80,80);
+                this._floatingMessage.RectColor = Color.FromArgb(80, 80, 80);
             else
                 this._floatingMessage.RectColor = Color.Purple;
 
@@ -158,6 +158,8 @@ namespace dp2Circulation
 
             this._biblioRecPaths.Clear();
             this.dpTable_items.Rows.Clear();
+
+            LibraryChannel channel = this.GetChannel();
 
             Progress.Style = StopStyle.EnableHalfStop;
             Progress.OnStop += new StopEventHandler(this.DoStop);
@@ -222,9 +224,8 @@ namespace dp2Circulation
 
                 string strQueryWord = GetBiblioQueryString();
 
-
                 string strQueryXml = "";
-                long lRet = Channel.SearchBiblio(Progress,
+                long lRet = channel.SearchBiblio(Progress,
                     this.GetBiblioDbNames(),    // "<全部>",
                     strQueryWord,   // this.textBox_queryWord.Text,
                     1000,
@@ -272,7 +273,7 @@ namespace dp2Circulation
 
                     Progress.SetMessage("正在装入书目记录ID " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         Progress,
                         null,   // strResultSetName
                         lStart,
@@ -314,15 +315,17 @@ namespace dp2Circulation
                 Progress.SetProgressRange(0, this._biblioRecPaths.Count);
                 // 将每条书目记录下属的册记录装入
                 int i = 0;
-                foreach(string strBiblioRecPath in this._biblioRecPaths)
+                foreach (string strBiblioRecPath in this._biblioRecPaths)
                 {
                     Application.DoEvents();
 
                     if (Progress.State != 0)
                         break;
 
-                    nRet = LoadBiblioSubItems(strBiblioRecPath,
-            out strError);
+                    nRet = LoadBiblioSubItems(
+                        channel,
+                        strBiblioRecPath,
+                        out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     Progress.SetProgressValue(++i);
@@ -338,6 +341,8 @@ namespace dp2Circulation
 
                 // this.button_search.Enabled = true;
                 this.EnableControls(true);
+
+                this.ReturnChannel(channel);
 
                 m_nInSearching--;
             }
@@ -412,12 +417,14 @@ namespace dp2Circulation
         //      -2  用户中断
         //      -1  出错
         //      >=0 装入的册记录条数
-        int LoadBiblioSubItems(string strBiblioRecPath,
+        int LoadBiblioSubItems(
+            LibraryChannel channel,
+            string strBiblioRecPath,
             out string strError)
         {
             strError = "";
 
-            Progress.SetMessage("正在装入书目记录 '"+strBiblioRecPath+"' 下属的册记录 ...");
+            Progress.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
 
             int nCount = 0;
 
@@ -435,7 +442,7 @@ namespace dp2Circulation
 
                 EntityInfo[] entities = null;
 
-                long lRet = Channel.GetEntities(
+                long lRet = channel.GetEntities(
          Progress,
          strBiblioRecPath,
          lStart,
@@ -651,7 +658,7 @@ namespace dp2Circulation
             return strText;
         }
 
-                /// <summary>
+        /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>

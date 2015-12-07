@@ -33,6 +33,16 @@ namespace DigitalPlatform.OPAC.Server
 {
     public partial class OpacApplication
     {
+        /// <summary>
+        /// 读用途的日志，启用了哪些具体功能
+        /// hitcount,log
+        /// </summary>
+        public string SearchLogEnable
+        {
+            get;
+            set;
+        }
+
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
         public double dp2LibraryVersion = 0;
@@ -172,7 +182,7 @@ namespace DigitalPlatform.OPAC.Server
                 XmlNode node = this.WebUiDom.DocumentElement.SelectSingleNode("titleBarControl");
                 if (node != null)
                 {
-                    string strValue =  DomUtil.GetAttr(node, "limitLibraryCode");
+                    string strValue = DomUtil.GetAttr(node, "limitLibraryCode");
                     if (strValue == null)
                         return "";
                     return strValue;
@@ -590,6 +600,7 @@ namespace DigitalPlatform.OPAC.Server
                 XmlElement nodeSearchLog = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog") as XmlElement;
                 if (nodeSearchLog != null)
                 {
+#if NO
                     string strEnable = nodeSearchLog.GetAttribute("enable");
                     // TODO: 如果以前已经有这个对象，需要先关闭它
                     // TODO: 如果因为MongoDB启动落后于dp2OPAC怎么办？ 是否需要重试?
@@ -600,6 +611,8 @@ namespace DigitalPlatform.OPAC.Server
                         app.WriteErrorLog("启动 SearchLog 时出错：" + strError);
                         this.SearchLog = null;
                     }
+#endif
+                    this.SearchLogEnable = nodeSearchLog.GetAttribute("enable");
                 }
 
                 // chat room
@@ -834,7 +847,7 @@ namespace DigitalPlatform.OPAC.Server
             if (root == null)
                 return 0;
 
-            XmlElement library = root.SelectSingleNode("library[@code='"+strLibraryCode+"']") as XmlElement;
+            XmlElement library = root.SelectSingleNode("library[@code='" + strLibraryCode + "']") as XmlElement;
             if (library == null)
                 library = root.SelectSingleNode("library[@style='" + strLibraryCode + "']") as XmlElement;
             if (library == null)
@@ -1076,7 +1089,6 @@ namespace DigitalPlatform.OPAC.Server
                 }
 
                 PathUtil.CreateDirIfNeed(strTargetDir);
-
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
@@ -1469,7 +1481,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
 
                 // 在<virtualDatabases>下找
-                XmlNode node = node_virtual.SelectSingleNode("database[@name='"+strName+"']");
+                XmlNode node = node_virtual.SelectSingleNode("database[@name='" + strName + "']");
                 if (node == null)
                 {
                     database.ParentNode.RemoveChild(database);
@@ -1513,11 +1525,10 @@ namespace DigitalPlatform.OPAC.Server
             try
             {
                 // 往bin目录中写一个临时文件
-                Stream stream = File.Open(this.BinDir + "\\temp.temp",
-                    FileMode.Create);
-
-                stream.Close();
-
+                using (Stream stream = File.Open(this.BinDir + "\\temp.temp",
+                    FileMode.Create))
+                {
+                }
                 this.WriteErrorLog("opac service 被重新启动。");
             }
             catch (Exception ex)
@@ -1597,7 +1608,6 @@ System.Text.Encoding.UTF8))
             }
 
             page.Response.Write(HttpUtility.HtmlEncode("--- 文件 " + strFileName + " 内容如下 ---\r\n"));
-
             page.Response.Write(HttpUtility.HtmlEncode(strText));
         }
 
@@ -1738,155 +1748,150 @@ System.Text.Encoding.UTF8))
                     this.WriteErrorLog("开始 从内存写入 " + strFileName);
                 }
 
-                XmlTextWriter writer = new XmlTextWriter(strFileName,
-                    Encoding.UTF8);
-
-                // 缩进
-                writer.Formatting = Formatting.Indented;
-                writer.Indentation = 4;
-
-                writer.WriteStartDocument();
-
-                writer.WriteStartElement("root");
-                if (this.DebugMode == true)
-                    writer.WriteAttributeString("debugMode", "true");
-
-                // <version>
+                using (XmlTextWriter writer = new XmlTextWriter(strFileName,
+                    Encoding.UTF8))
                 {
-                    XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("version");
-                    if (node != null)
+                    // 缩进
+                    writer.Formatting = Formatting.Indented;
+                    writer.Indentation = 4;
+
+                    writer.WriteStartDocument();
+
+                    writer.WriteStartElement("root");
+                    if (this.DebugMode == true)
+                        writer.WriteAttributeString("debugMode", "true");
+
+                    // <version>
                     {
-                        node.WriteTo(writer);
+                        XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("version");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
                     }
+
+                    // 内核参数
+                    // 元素<libraryServer>
+                    // 属性url/username/password
+                    writer.WriteStartElement("libraryServer");
+                    writer.WriteAttributeString("url", this.WsUrl);
+                    writer.WriteAttributeString("username", this.ManagerUserName);
+                    writer.WriteAttributeString("password",
+                        Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
+                        );
+                    if (string.IsNullOrEmpty(this.ReportDir) == false)
+                        writer.WriteAttributeString("reportDir", this.ReportDir);
+                    writer.WriteEndElement();
+
+                    // 图书馆业务服务器
+                    // 元素<opacServer>
+                    // 属性url
+                    writer.WriteStartElement("opacServer");
+                    writer.WriteAttributeString("url", this.OpacServerUrl);
+                    writer.WriteAttributeString("useTransfer", this.UseTransfer ? "true" : "false");
+                    writer.WriteEndElement();
+
+                    // mongoDB 服务器
+                    // 元素<mongoDB>
+                    // 属性connectionString
+                    writer.WriteStartElement("mongoDB");
+                    writer.WriteAttributeString("connectionString", this.MongoDbConnStr);
+                    writer.WriteAttributeString("instancePrefix", this.MongoDbInstancePrefix);
+                    writer.WriteEndElement();
+
+                    // 没有进入内存属性的其他XML片断
+                    if (this.OpacCfgDom != null)
+                    {
+                        // 2009/9/23
+                        XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//yczb");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <monitors>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("monitors");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // TODO: 暂时没有任何地方用到这个信息
+                        // <libraryInfo>
+                        // 注: <libraryName>元素在此里面
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <biblioDbGroup>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <arrived>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <browseformats>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("browseformats");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <virtualDatabases>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <externalSsoInterface>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("externalSsoInterface");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // chat room
+                        string strError = "";
+                        string strXml = "";
+                        this.ChatRooms.GetDef(out strXml, out strError);
+                        if (string.IsNullOrEmpty(strXml) == false)
+                            writer.WriteRaw("\r\n" + strXml + "\r\n");
+
+                        // 2012/5/23
+                        // <dp2sso>
+                        /*
+        <dp2sso>
+            <domain name='dp2bbs' loginUrl='http://dp2003.com/dp2bbs/login.aspx?redirect=%redirect%'  logoutUrl='' />
+        </dp2sso>
+                         * */
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//dp2sso");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <searchLog>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                    }
+
+                    writer.WriteEndElement();
+
+                    writer.WriteEndDocument();
                 }
-
-                // 内核参数
-                // 元素<libraryServer>
-                // 属性url/username/password
-                writer.WriteStartElement("libraryServer");
-                writer.WriteAttributeString("url", this.WsUrl);
-                writer.WriteAttributeString("username", this.ManagerUserName);
-                writer.WriteAttributeString("password",
-                    Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
-                    );
-                if (string.IsNullOrEmpty(this.ReportDir) == false)
-                    writer.WriteAttributeString("reportDir", this.ReportDir);
-                writer.WriteEndElement();
-
-
-                // 图书馆业务服务器
-                // 元素<opacServer>
-                // 属性url
-                writer.WriteStartElement("opacServer");
-                writer.WriteAttributeString("url", this.OpacServerUrl);
-                writer.WriteAttributeString("useTransfer", this.UseTransfer ? "true" : "false" );
-                writer.WriteEndElement();
-
-                // mongoDB 服务器
-                // 元素<mongoDB>
-                // 属性connectionString
-                writer.WriteStartElement("mongoDB");
-                writer.WriteAttributeString("connectionString", this.MongoDbConnStr);
-                writer.WriteAttributeString("instancePrefix", this.MongoDbInstancePrefix);
-                writer.WriteEndElement();
-
-
-                // 没有进入内存属性的其他XML片断
-                if (this.OpacCfgDom != null)
-                {
-                    // 2009/9/23
-                    XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//yczb");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <monitors>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("monitors");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-
-                    // TODO: 暂时没有任何地方用到这个信息
-                    // <libraryInfo>
-                    // 注: <libraryName>元素在此里面
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <biblioDbGroup>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <arrived>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <browseformats>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("browseformats");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <virtualDatabases>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // <externalSsoInterface>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("externalSsoInterface");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-                    // chat room
-                    string strError = "";
-                    string strXml = "";
-                    this.ChatRooms.GetDef(out strXml, out strError);
-                    if (string.IsNullOrEmpty(strXml) == false)
-                        writer.WriteRaw("\r\n" + strXml + "\r\n");
-
-                    // 2012/5/23
-                    // <dp2sso>
-                    /*
-	<dp2sso>
-		<domain name='dp2bbs' loginUrl='http://dp2003.com/dp2bbs/login.aspx?redirect=%redirect%'  logoutUrl='' />
-	</dp2sso>
-                     * */
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//dp2sso");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-
-
-                    // <searchLog>
-                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
-                    if (node != null)
-                    {
-                        node.WriteTo(writer);
-                    }
-                }
-
-                writer.WriteEndElement();
-
-                writer.WriteEndDocument();
-
-                writer.Close();
 
                 if (bFlush == false)
                     this.WriteErrorLog("完成 从内存写入 " + strFileName);
@@ -1897,7 +1902,6 @@ System.Text.Encoding.UTF8))
                 {
                     watcher.EnableRaisingEvents = bOldState;
                 }
-
             }
             finally
             {
@@ -2292,7 +2296,7 @@ System.Text.Encoding.UTF8))
                     }
                     if (strFrom == null)
                     {
-                        strWarning += "虚拟库 '" + vdb.GetName(null) + "' 中针对物理库 '" + strDbName + "'(length="+strDbName.Length+") 中对虚拟From '" + strVirtualFromName + "'(length="+strVirtualFromName.Length+") 未找到对应的物理From名; ";
+                        strWarning += "虚拟库 '" + vdb.GetName(null) + "' 中针对物理库 '" + strDbName + "'(length=" + strDbName.Length + ") 中对虚拟From '" + strVirtualFromName + "'(length=" + strVirtualFromName.Length + ") 未找到对应的物理From名; ";
                         // strError = "虚拟库 '" + vdb.GetName(null) + " '中针对物理库 '" + strDbName + "' 中对虚拟From '" + strVirtualFromName + "' 未找到对应的物理From名";
                         // return -1;
                         continue;
@@ -2563,7 +2567,7 @@ System.Text.Encoding.UTF8))
                     + strTargetList
                     + "'><item>"
                     + (bDesc == true ? "<order>DESC</order>" : "")
-                    +"<word>"
+                    + "<word>"
                     + StringUtil.GetXmlStringSimple(strWord)
                     + "</word><match>"
                     + StringUtil.GetXmlStringSimple(strMatchStyle)
@@ -2633,7 +2637,7 @@ System.Text.Encoding.UTF8))
         //      strFromList     检索途径名列表。用逗号间隔每个From名
         static int BuildTargetList(
             OpacApplication app,
-            string strDbNameList, 
+            string strDbNameList,
             string strFromList,
             out string strTargetList,
             out string strError)
@@ -2641,7 +2645,7 @@ System.Text.Encoding.UTF8))
             strError = "";
             strTargetList = "";
 
-            string[] dbnames = strDbNameList.Split(new char [] {','});
+            string[] dbnames = strDbNameList.Split(new char[] { ',' });
             for (int i = 0; i < dbnames.Length; i++)
             {
                 string strDbName = dbnames[i].Trim();
@@ -2886,7 +2890,7 @@ System.Text.Encoding.UTF8))
             long lRet = sessioninfo.Channel.GetCommentInfo(
 null,
 "@path:" + strCommentRecPath,
-// null,
+                // null,
 "xml", // strResultType
 out strItemXml,
 out strOutputItemPath,
@@ -3191,7 +3195,7 @@ out strError);
                 string strResultTypeList = "xml";
                 string[] results = null;
                 long lRet = session.Channel.GetReaderInfo(null,
-                    this.dp2LibraryVersion >= 2.22 ? 
+                    this.dp2LibraryVersion >= 2.22 ?
                     "@barcode:" + strReaderBarcode // dp2Library V2.22 及以后可以使用这个方法
                     : strReaderBarcode,
                     strResultTypeList,
@@ -3404,6 +3408,10 @@ out string strError)
                 using (Stream t = File.Create(strLocalFileName))
                 {
                     // 缩小尺寸
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要缩放(oTarget未处理)
+                    //      1   已经缩放
                     int nRet = GraphicsUtil.ShrinkPic(postedFile.InputStream,
                             postedFile.ContentType,
                             nLogoLimitW,
@@ -3497,7 +3505,7 @@ stop,
 strResPath,
                         strLocalFileName,
                         strLocalPath,
-                        postedFile.ContentType, 
+                        postedFile.ContentType,
                         ranges[j],
 j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
 timestamp,
@@ -3551,6 +3559,85 @@ out strError);
             {
                 // 不要忘记删除临时文件
                 File.Delete(strLocalFileName);
+            }
+        }
+
+        // 获得计数器值
+        // parameters:
+        //      strName 名字。为 书目记录路径 + '|' + URL
+        public long GetHitCount(LibraryChannel channel,
+            string strName,
+            out long lValue,
+            out string strError)
+        {
+            lValue = 0;
+            strError = "";
+
+            SessionInfo session = null;
+            if (channel == null)
+            {
+                // 临时的SessionInfo对象
+                // 用管理员身份
+                session = new SessionInfo(this);
+                session.UserID = this.ManagerUserName;
+                session.Password = this.ManagerPassword;
+                session.IsReader = false;
+                channel = session.Channel;
+            }
+            try
+            {
+                return channel.HitCounter("get",
+                    strName,
+                    "",
+                    out lValue,
+                    out strError);
+            }
+            finally
+            {
+                if (session != null)
+                    session.CloseSession();
+            }
+        }
+
+        // 增量计数器值
+        // parameters:
+        //      strName 名字。为 书目记录路径 + '|' + URL
+        // return:
+        //      -1  出错
+        //      0   mongodb 没有启用
+        //      1   成功
+        public long IncHitCount(LibraryChannel channel,
+            string strName,
+            string strClientAddress,
+            bool bLog,
+            out string strError)
+        {
+            strError = "";
+
+            SessionInfo session = null;
+            if (channel == null)
+            {
+                // 临时的SessionInfo对象
+                // 用管理员身份
+                session = new SessionInfo(this);
+                session.UserID = this.ManagerUserName;
+                session.Password = this.ManagerPassword;
+                session.IsReader = false;
+                channel = session.Channel;
+            }
+            try
+            {
+                long lValue = 0;
+                return channel.HitCounter(bLog ? "inc_and_log" : "inc",
+                    strName,
+                    strClientAddress,
+                    out lValue,
+                    out strError);
+            }
+            finally
+            {
+                if (session != null)
+                    session.CloseSession();
             }
         }
 
@@ -3615,7 +3702,6 @@ out strError);
             if (nHeight <= 0)
                 nHeight = 300;
 
-
             if (bSaveAs == true)
             {
                 string strEncodedFileName = HttpUtility.UrlEncode("qr.png", Encoding.UTF8);
@@ -3647,7 +3733,7 @@ out strError);
                 }
             };
 
-            using(var bitmap = writer.Write(strCode))
+            using (var bitmap = writer.Write(strCode))
             {
                 bitmap.Save(Page.Response.OutputStream, ImageFormat.Jpeg);
             }
@@ -3656,6 +3742,8 @@ out strError);
         }
 
         // 下载对象资源
+        // parameters:
+        //      strStyle    如果包含 hitcount，表示希望获取访问计数的数字，返回图像格式。否则是希望返回对象本身
         // return:
         //      -1  出错
         //      0   304返回
@@ -3668,6 +3756,15 @@ out strError);
             out string strError)
         {
             strError = "";
+
+            if (StringUtil.IsInList("hitcount", strStyle) == true
+                && StringUtil.IsInList("hitcount", this.SearchLogEnable) == false)
+            {
+                OpacApplication.OutputImage(Page,
+                    Color.FromArgb(200, Color.Blue),
+                    "*"); // 星号表示尚未启用内部对象计数功能
+                return 1;
+            }
 
             WebPageStop stop = new WebPageStop(Page);
 
@@ -3862,12 +3959,18 @@ Value data: HEX 0x1
             if (Page.Response.IsClientConnected == false)
                 return -1;
 
+            string strGetStyle = "content,data,incReadCount";
+            if (StringUtil.IsInList("log", this.SearchLogEnable) == false)
+                strGetStyle += ",skipLog";
+            else
+                strGetStyle += ",clientAddress:" + Page.Request.UserHostAddress;
+
             // 传输数据
             lRet = channel.GetRes(
                 stop,
                 strPath,
                 Page.Response.OutputStream,
-                "content,data,incReadCount",
+                strGetStyle,
                 null,	// byte [] input_timestamp,
                 out strMetaData,
                 out baOutputTimeStamp,
@@ -3875,12 +3978,14 @@ Value data: HEX 0x1
                 out strError);
             if (lRet == -1)
             {
+                Page.Response.ContentType = "text/plain";
                 strError = "GetRes() (for res) Error : " + strError;
                 return -1;
             }
             return 1;
         }
 
+        // 输出 计数数字 图像
         public static void OutputImage(Page Page,
             Color text_color,
             string strReadCount)
@@ -3914,7 +4019,6 @@ Value data: HEX 0x1
 
                 image.Seek(0, SeekOrigin.Begin);
                 StreamUtil.DumpStream(image, Page.Response.OutputStream/*, flushdelegate*/);
-
             }
             Page.Response.Flush();
         }
@@ -4188,7 +4292,7 @@ out string strError)
 
             // 如果没有提供photourl，说明是本系统，这里负责创建URL
             if (string.IsNullOrEmpty(strPhotoUrl) == true
-                && bGuest == false )
+                && bGuest == false)
             {
                 if (String.IsNullOrEmpty(strDisplayName) == true)
                     strPhotoUrl = "./getphoto.aspx?userid=" + HttpUtility.UrlEncode(strUserID);
@@ -4197,12 +4301,12 @@ out string strError)
             }
 
             room.AppendText(strRefID,
-                "<div class='"+strStyle+"'>"
+                "<div class='" + strStyle + "'>"
                 + "<div class='userid'"
-                + (string.IsNullOrEmpty(strDisplayName) == false ? " displayName='"+HttpUtility.HtmlEncode(strDisplayName)+"' " : "")
+                + (string.IsNullOrEmpty(strDisplayName) == false ? " displayName='" + HttpUtility.HtmlEncode(strDisplayName) + "' " : "")
                 + (string.IsNullOrEmpty(strPhotoUrl) == false ? " photo='" + HttpUtility.HtmlEncode(strPhotoUrl) + "' " : "")
                 + ">" + HttpUtility.HtmlEncode(strUserID) + "</div>"
-                + (string.IsNullOrEmpty(strIpAddress) == false ? 
+                + (string.IsNullOrEmpty(strIpAddress) == false ?
                 "<div class='ip'>" + HttpUtility.HtmlEncode(strIpAddress) + "</div>" : "")
                 + "<div class='time'>" + DateTime.Now.ToString("u") + "</div>"
                 + "<div class='text'>" + HttpUtility.HtmlEncode(strText).Replace("\n", "<br/>") + "</div>"
@@ -4222,6 +4326,8 @@ out string strError)
         Backup = 2, // 大备份
         Normal = 3, // 普通维护
         OperLogError = 4,   // 操作日志错误（例如日志空间满）
+        Exit = 5,  // 系统正在退出
+        Expire = 6, // 因长期没有升级版本，当前版本已经失效
     }
 
     public class WebPageStop : Stop

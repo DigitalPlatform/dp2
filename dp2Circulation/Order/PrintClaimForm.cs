@@ -562,7 +562,6 @@ false);
 
             try
             {
-
                 long lRet = 0;
 
                 lRet = Channel.SearchOrder(stop,
@@ -789,10 +788,8 @@ false);
             StreamWriter sw = new StreamWriter(strRecPathFilename,
                 false,	// append
                 System.Text.Encoding.UTF8);
-
             try
             {
-
                 long lRet = 0;
                 string strQueryXml = "";
 

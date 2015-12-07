@@ -68,6 +68,13 @@ ref sessioninfo) == false)
             //this.Session["lang"] = Thread.CurrentThread.CurrentUICulture.Name;
         }
 
+#if NO
+        // test
+        this.Response.Write("test");
+        this.Response.End();
+        return;
+#endif
+
         if (StringUtil.HasHead(strBarcode, "biblio_html:") == true)
         {
             string strBiblioRecPath = strBarcode.Substring("biblio_html:".Length);

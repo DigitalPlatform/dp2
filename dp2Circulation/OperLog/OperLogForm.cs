@@ -35,6 +35,8 @@ namespace dp2Circulation
     /// </summary>
     public partial class OperLogForm : MyForm
     {
+        public bool AccessLog = false;  // 当前列表中是否为 accessLog 风格
+
         WebExternalHost m_webExternalHost = null;
         /// <summary>
         /// 获得摘要
@@ -312,6 +314,9 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            bool bControl = Control.ModifierKeys == Keys.Control;
+            this.AccessLog = bControl;
+
             this.tabControl_main.SelectedTab = this.tabPage_logRecords;
 
             EnableControls(false);
@@ -319,7 +324,6 @@ namespace dp2Circulation
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在初始化浏览器组件 ...");
             stop.BeginLoop();
-
 
             this.Update();
             this.MainForm.Update();
@@ -351,6 +355,8 @@ namespace dp2Circulation
                 string strStyle = "";
                 if (this.MainForm.AutoCacheOperlogFile == true)
                     strStyle = "autocache";
+                if (bControl)
+                    StringUtil.SetInList(ref strStyle, "accessLog", true);
 
                 int nRet = ProcessFiles(this,
     stop,
@@ -365,7 +371,6 @@ namespace dp2Circulation
     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
             }
             finally
             {
@@ -3311,6 +3316,10 @@ out string strError)
 
                 if (info.InCacheFile == false)
                 {
+                    string strStyle = "level-" + this.MainForm.OperLogLevel.ToString();
+                    if (this.AccessLog)
+                        strStyle += ",accessLog";
+
                     // 从服务器获取
                     long lHintNext = -1;
                     long lAttachmentTotalLength = 0;
@@ -3326,7 +3335,7 @@ out string strError)
                         strLogFileName,
                         lIndex,
                         info.Hint,
-                        "level-" + this.MainForm.OperLogLevel.ToString(),
+                        strStyle,
                         "", // strFilter
                         out strXml,
                         out lHintNext,
@@ -3342,7 +3351,9 @@ out string strError)
                 }
                 else
                 {
-                    string strCacheFilename = PathUtil.MergePath(this.MainForm.OperLogCacheDir, strLogFileName);
+                    string strCacheFilename = Path.Combine(
+                        this.MainForm.OperLogCacheDir, 
+                        strLogFileName);
                     using (Stream stream = File.Open(
 strCacheFilename,
 FileMode.Open,
@@ -3611,13 +3622,12 @@ FileShare.ReadWrite))
             {
                 // 创建临时文件
                 string strTempFileName = Path.GetTempFileName();
-                Stream stream = File.Create(strTempFileName);
-
-                // 写入xml内容
-                byte[] buffer = Encoding.UTF8.GetBytes(strXml);
-                stream.Write(buffer, 0, buffer.Length);
-
-                stream.Close();
+                using (Stream stream = File.Create(strTempFileName))
+                {
+                    // 写入xml内容
+                    byte[] buffer = Encoding.UTF8.GetBytes(strXml);
+                    stream.Write(buffer, 0, buffer.Length);
+                }
 
                 m_tempFileNames.Add(strTempFileName);
                 info.IndexOfTempFilename = m_tempFileNames.Count - 1;
@@ -3651,6 +3661,9 @@ FileShare.ReadWrite))
         {
             string strError = "";
             int nRet = 0;
+
+            bool bControl = Control.ModifierKeys == Keys.Control;
+            this.AccessLog = bControl;
 
             this.tabControl_main.SelectedTab = this.tabPage_logRecords;
 
@@ -3704,6 +3717,8 @@ FileShare.ReadWrite))
                 string strStyle = "";
                 if (this.MainForm.AutoCacheOperlogFile == true)
                     strStyle = "autocache";
+                if (bControl)
+                    StringUtil.SetInList(ref strStyle, "accessLog", true);
 
                 nRet = ProcessFiles(this,
                     stop,
@@ -4074,6 +4089,8 @@ FileShare.ReadWrite))
                 string strStyle = "";
                 if (this.MainForm.AutoCacheOperlogFile == true)
                     strStyle = "autocache";
+                if (this.AccessLog)
+                    strStyle += ",accessLog";
 
                 nRet = ProcessFiles(this,
     stop,
@@ -4203,111 +4220,114 @@ FileShare.ReadWrite))
 
             Stream target = null;
             Stream source = null;
-
             try
             {
-                source = File.Open(
-                    strSourceFilename,
-                    FileMode.Open,
-                    FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
-                    FileShare.ReadWrite);
-            }
-            catch (FileNotFoundException /*ex*/)
-            {
-                strError = "源日志文件 " + strSourceFilename + "没有找到";
-                return -1;   // file not found
-            }
-            catch (Exception ex)
-            {
-                strError = "打开源日志文件 '" + strSourceFilename + "' 时发生错误: " + ex.Message;
-                return -1;
-            }
-
-            try
-            {
-                // 如果文件存在，就打开，如果文件不存在，就创建一个新的
-                target = File.Open(
-                    strTargetFilename,
-                    FileMode.OpenOrCreate,
-                    FileAccess.ReadWrite,
-                    FileShare.ReadWrite);
-            }
-            catch (Exception ex)
-            {
-                strError = "打开或创建文件 '" + strTargetFilename + "' 时发生错误: " + ex.Message;
-                return -1;
-            }
-
-            stop.SetProgressRange(0, source.Length);
-
-            bool bTry = false;
-            // TODO: 要汇报丢弃的段数
-            for (; ; )
-            {
-                Application.DoEvents();
-
-                if (stop != null)
+                try
                 {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        return -1;
-                    }
+                    source = File.Open(
+                        strSourceFilename,
+                        FileMode.Open,
+                        FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
+                        FileShare.ReadWrite);
+                }
+                catch (FileNotFoundException /*ex*/)
+                {
+                    strError = "源日志文件 " + strSourceFilename + "没有找到";
+                    return -1;   // file not found
+                }
+                catch (Exception ex)
+                {
+                    strError = "打开源日志文件 '" + strSourceFilename + "' 时发生错误: " + ex.Message;
+                    return -1;
                 }
 
-                long lStart = source.Position;
-
-                nRet = VerifyLogRecord(
-                    source,
-                    out strError);
-                if (nRet == -1)
+                try
                 {
-                    if (source.Length <= lStart + 1)
-                        break;
-                    source.Seek(lStart + 1, SeekOrigin.Begin);
-                    bTry = true;
-                    continue;
+                    // 如果文件存在，就打开，如果文件不存在，就创建一个新的
+                    target = File.Open(
+                        strTargetFilename,
+                        FileMode.OpenOrCreate,
+                        FileAccess.ReadWrite,
+                        FileShare.ReadWrite);
+                }
+                catch (Exception ex)
+                {
+                    strError = "打开或创建文件 '" + strTargetFilename + "' 时发生错误: " + ex.Message;
+                    return -1;
                 }
 
-                if (bTry == true)
-                {
-                    nTryCount++;
-                    bTry = false;
-                }
+                stop.SetProgressRange(0, source.Length);
 
-                stop.SetProgressValue(source.Position);
-
-                long lBodyLength = source.Position - lStart;
-                // 写入目标文件
-                source.Seek(lStart, SeekOrigin.Begin);
-
-                int chunk_size = 4096;
-                byte[] chunk = new byte[chunk_size];
-                long writed_length = 0;
+                bool bTry = false;
+                // TODO: 要汇报丢弃的段数
                 for (; ; )
                 {
-                    int nThisSize = Math.Min(chunk_size, (int)(lBodyLength - writed_length));
-                    int nReaded = source.Read(chunk, 0, nThisSize);
-                    if (nReaded < nThisSize)
+                    Application.DoEvents();
+
+                    if (stop != null)
                     {
-                        strError = "读入不足";
-                        return -1;
+                        if (stop.State != 0)
+                        {
+                            strError = "用户中断1";
+                            return -1;
+                        }
                     }
 
-                    target.Write(chunk, 0, nReaded);
+                    long lStart = source.Position;
 
-                    writed_length += nReaded;
-                    if (writed_length >= lBodyLength)
+                    nRet = VerifyLogRecord(
+                        source,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (source.Length <= lStart + 1)
+                            break;
+                        source.Seek(lStart + 1, SeekOrigin.Begin);
+                        bTry = true;
+                        continue;
+                    }
+
+                    if (bTry == true)
+                    {
+                        nTryCount++;
+                        bTry = false;
+                    }
+
+                    stop.SetProgressValue(source.Position);
+
+                    long lBodyLength = source.Position - lStart;
+                    // 写入目标文件
+                    source.Seek(lStart, SeekOrigin.Begin);
+
+                    int chunk_size = 4096;
+                    byte[] chunk = new byte[chunk_size];
+                    long writed_length = 0;
+                    for (; ; )
+                    {
+                        int nThisSize = Math.Min(chunk_size, (int)(lBodyLength - writed_length));
+                        int nReaded = source.Read(chunk, 0, nThisSize);
+                        if (nReaded < nThisSize)
+                        {
+                            strError = "读入不足";
+                            return -1;
+                        }
+
+                        target.Write(chunk, 0, nReaded);
+
+                        writed_length += nReaded;
+                        if (writed_length >= lBodyLength)
+                            break;
+                    }
+
+                    if (source.Position >= source.Length)
                         break;
                 }
-
-                if (source.Position >= source.Length)
-                    break;
             }
-
-
-            source.Close();
-            target.Close();
+            finally
+            {
+                source.Close();
+                target.Close();
+            }
 
             return nTryCount;
         }
@@ -4320,7 +4340,6 @@ FileShare.ReadWrite))
             strError = "";
 
             long lStart = stream.Position;	// 记忆起始位置
-
 
             byte[] length = new byte[8];
 
@@ -4807,16 +4826,57 @@ FileShare.ReadWrite))
                 return -1;
             }
 
-
-            Stream source = null;
-
             try
             {
-                source = File.Open(
-                    strSourceFilename,
-                    FileMode.Open,
-                    FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
-                    FileShare.ReadWrite);
+                using (Stream source = File.Open(
+                        strSourceFilename,
+                        FileMode.Open,
+                        FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
+                        FileShare.ReadWrite))
+                {
+
+                    stop.SetMessage("正在验证日志文件 " + strSourceFilename + " ...");
+                    stop.SetProgressRange(0, source.Length);
+
+                    bool bTry = false;
+                    // TODO: 要汇报丢弃的段数
+                    for (; ; )
+                    {
+                        Application.DoEvents();
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断1";
+                            return -1;
+                        }
+
+                        long lStart = source.Position;
+
+                        nRet = VerifyLogRecord(
+                            source,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (source.Length <= lStart + 1)
+                                break;
+                            source.Seek(lStart + 1, SeekOrigin.Begin);
+                            bTry = true;
+                            continue;
+                        }
+
+                        if (bTry == true)
+                        {
+                            nTryCount++;
+                            bTry = false;
+                        }
+
+                        stop.SetProgressValue(source.Position);
+
+                        if (source.Position >= source.Length)
+                            break;
+                    }
+
+                }
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -4828,53 +4888,6 @@ FileShare.ReadWrite))
                 strError = "打开源日志文件 '" + strSourceFilename + "' 时发生错误: " + ex.Message;
                 return -1;
             }
-
-            stop.SetMessage("正在验证日志文件 " + strSourceFilename + " ...");
-            stop.SetProgressRange(0, source.Length);
-
-            bool bTry = false;
-            // TODO: 要汇报丢弃的段数
-            for (; ; )
-            {
-                Application.DoEvents();
-
-                if (stop != null)
-                {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        return -1;
-                    }
-                }
-
-                long lStart = source.Position;
-
-                nRet = VerifyLogRecord(
-                    source,
-                    out strError);
-                if (nRet == -1)
-                {
-                    if (source.Length <= lStart + 1)
-                        break;
-                    source.Seek(lStart + 1, SeekOrigin.Begin);
-                    bTry = true;
-                    continue;
-                }
-
-                if (bTry == true)
-                {
-                    nTryCount++;
-                    bTry = false;
-                }
-
-                stop.SetProgressValue(source.Position);
-
-                if (source.Position >= source.Length)
-                    break;
-            }
-
-
-            source.Close();
 
             return nTryCount;
         }
@@ -5704,6 +5717,8 @@ Keys keyData)
             strError = "";
             int nRet = 0;
 
+            bool bAccessLog = StringUtil.IsInList("accessLog", strStyle);
+
             if (string.IsNullOrEmpty(strCacheDir) == false)
                 PathUtil.CreateDirIfNeed(strCacheDir);
 
@@ -5724,6 +5739,7 @@ Keys keyData)
                     channel,
                     strCacheDir,
                     "20121001.log",
+                    bAccessLog,
                     out lServerFileSize,
                     out lCacheFileSize,
                     out strError);
@@ -5764,7 +5780,6 @@ Keys keyData)
                     if (nRet == -1)
                         return -1;
                 }
-
             }
 
             long lTotalSize = 0;
@@ -5820,6 +5835,7 @@ Keys keyData)
                     channel,
                     strCacheDir,
                     strLogFilename,
+                    bAccessLog,
                     out lServerFileSize,
                     out lCacheFileSize,
                     out strError);
@@ -5951,6 +5967,7 @@ MessageBoxDefaultButton.Button1);
             LibraryChannel channel,
             string strCacheDir,
             string strLogFileName,
+            bool bAccessLog,
             out long lServerFileSize,
             out long lCacheFileSize,
             out string strError)
@@ -5971,6 +5988,10 @@ MessageBoxDefaultButton.Button1);
             long lAttachmentTotalLength = 0;
             byte[] attachment_data = null;
 
+            string strStyle = "level-0";
+            if (bAccessLog == true)
+                strStyle += ",accessLog";
+
             // 获得日志文件尺寸
             // return:
             //      -1  error
@@ -5982,8 +6003,8 @@ MessageBoxDefaultButton.Button1);
                 strLogFileName,
                 -1,    // lIndex,
                 -1, // lHint,
-                "level-0",
-                        "", // strFilter
+                strStyle,
+                "", // strFilter
                 out strXml,
                 out lServerFileSize,
                 0,  // lAttachmentFragmentStart,
@@ -5999,8 +6020,15 @@ MessageBoxDefaultButton.Button1);
             }
             if (lRet != 1)
                 return -1;
+            if (lServerFileSize == -1)
+            {
+                if (bAccessLog)
+                    strError = "dp2library 访问日志尚未启用";
+                else
+                    strError = "dp2library 操作日志尚未启用";
+                return -1;
+            }
             Debug.Assert(lServerFileSize >= 0, "");
-
             return 1;
         }
 
@@ -6461,10 +6489,12 @@ FileShare.ReadWrite);
 
         // 装入一个日志文件中的若干记录
         // parameters:
+        //      strStyle    如果包含 accessLog，表示这是需要获取只读日志
         //      strCacheDir 存储本地缓存文件的目录
         //      lServerFileSize 服务器端日志文件的尺寸。如果为-1，表示函数内会自动获取
         //      lSize   进度条所采用的最大尺寸。如果必要，可能会被本函数推动
         // return:
+        //      -2  此类型的日志尚未启用
         //      -1  error
         //      0   正常结束
         //      1   用户中断
@@ -6492,6 +6522,8 @@ FileShare.ReadWrite);
             stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录。"
                 + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
+            bool bAccessLog = StringUtil.IsInList("accessLog", strStyle);
+
             string strXml = "";
             long lAttachmentTotalLength = 0;
             byte[] attachment_data = null;
@@ -6501,14 +6533,18 @@ FileShare.ReadWrite);
             {
                 lServerFileSize = 0;
 
+                string strTempStyle = "level-" + nLevel.ToString();
+                if (bAccessLog)
+                    strTempStyle += ",accessLog";
+
                 // 获得服务器端日志文件尺寸
                 lRet = channel.GetOperLog(
                     stop,
                     strLogFileName,
                     -1,    // lIndex,
                     -1, // lHint,
-                        "level-" + nLevel.ToString(),
-                        "", // strFilter
+                    strTempStyle,
+                    "", // strFilter
                     out strXml,
                     out lServerFileSize,
                     0,  // lAttachmentFragmentStart,
@@ -6516,9 +6552,17 @@ FileShare.ReadWrite);
                     out attachment_data,
                     out lAttachmentTotalLength,
                     out strError);
+                // 2015/11/25
+                if (lRet == -1)
+                    return -1;
                 // 2010/12/13
                 if (lRet == 0)
                     return 0;
+                if (lServerFileSize == -1)
+                {
+                    strError = "日志尚未启用";
+                    return -2;
+                }
             }
 
             Stream stream = null;
@@ -6531,7 +6575,7 @@ FileShare.ReadWrite);
             {
                 nRet = PrepareCacheFile(
                     strCacheDir,
-                    strLogFileName,
+                    bAccessLog ? strLogFileName + ".a" : strLogFileName,
                     lServerFileSize,
                     out bCacheFileExist,
                     out stream,
@@ -6633,6 +6677,9 @@ FileShare.ReadWrite);
                                 else
                                     nCount = (int)ri.lLength;
 
+                                string strTempStyle = "level-" + nLevel.ToString();
+                                if (bAccessLog)
+                                    strTempStyle += ",accessLog";
                                 // 获得日志
                                 // return:
                                 //      -1  error
@@ -6645,7 +6692,7 @@ FileShare.ReadWrite);
                                     lIndex,
                                     lHint,
                                     nCount,
-                                    "level-" + nLevel.ToString(),
+                                    strTempStyle,
                                     "", // strFilter
                                     out records,
                                     out strError);
@@ -6763,7 +6810,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     nRet = CreateCacheMetadataFile(
                         strCacheDir,
-                        strLogFileName,
+                        bAccessLog ? strLogFileName + ".a" : strLogFileName,
                         lServerFileSize,
                         out strError);
                     if (nRet == -1)
@@ -6782,7 +6829,7 @@ MessageBoxDefaultButton.Button1);
                     string strError1 = "";
                     nRet = DeleteCacheFile(
                         strCacheDir,
-                        strLogFileName,
+                        bAccessLog ? strLogFileName + ".a" : strLogFileName,
                         out strError1);
                     if (nRet == -1)
                         MessageBox.Show(owner, strError1);

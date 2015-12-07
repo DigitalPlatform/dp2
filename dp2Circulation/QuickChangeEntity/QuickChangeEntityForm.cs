@@ -1182,9 +1182,10 @@ namespace dp2Circulation
                 return;
             }
 
-            StreamWriter sw = new StreamWriter(dlg.FileName);
-            sw.Write(this.textBox_outputBarcodes.Text);
-            sw.Close();
+            using (StreamWriter sw = new StreamWriter(dlg.FileName))
+            {
+                sw.Write(this.textBox_outputBarcodes.Text);
+            }
         }
 
         void SwitchFocus(int target)

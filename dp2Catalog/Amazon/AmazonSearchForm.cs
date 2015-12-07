@@ -457,14 +457,17 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 输出到的地方
-            TextWriter tw = new StringWriter();
-            XmlTextWriter xw = new XmlTextWriter(tw);
+            string strResultXml = "";
+            using (TextWriter tw = new StringWriter())
+            using (XmlTextWriter xw = new XmlTextWriter(tw))
+            {
+                //执行转换 
+                xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
 
-            //执行转换 
-            xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
-
-            tw.Close();
-            string strResultXml = tw.ToString();
+                // tw.Close();
+                tw.Flush();
+                strResultXml = tw.ToString();
+            }
 
             string strMarcSyntax = "";
             string strOutMarcSyntax = "";
@@ -518,7 +521,7 @@ MessageBoxDefaultButton.Button1);
             this.amazonSimpleQueryControl_simple.Initial();
             this.amazonSimpleQueryControl_simple.SetContentString(
                 this.MainForm.AppInfo.GetString("amazonsearchform",
-                "simple_query_content", 
+                "simple_query_content",
                 "")
                 );
 
@@ -688,14 +691,14 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             strUrl = "";
 
-                string strText = "";
-                int nRet = this.amazonSimpleQueryControl_simple.BuildQueryString(out strText, out strError);
-                if (nRet == -1)
-                    return -1;
+            string strText = "";
+            int nRet = this.amazonSimpleQueryControl_simple.BuildQueryString(out strText, out strError);
+            if (nRet == -1)
+                return -1;
 
-                AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-//MY_AWS_ACCESS_KEY_ID,
-//MY_AWS_SECRET_KEY,
+            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+                //MY_AWS_ACCESS_KEY_ID,
+                //MY_AWS_SECRET_KEY,
 this.CurrentServer);
 
             // IDictionary<string, string> r1 = this.amazonQueryControl1.ParameterTable;   // new Dictionary<string, String>();
@@ -738,8 +741,8 @@ this.CurrentServer);
             }
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-//MY_AWS_ACCESS_KEY_ID,
-//MY_AWS_SECRET_KEY,
+                //MY_AWS_ACCESS_KEY_ID,
+                //MY_AWS_SECRET_KEY,
 this.m_strCurrentSearchedServer);    //  this.CurrentServer
 
             if (this.m_nCurrentPageNo == -1)
@@ -766,8 +769,8 @@ this.m_strCurrentSearchedServer);    //  this.CurrentServer
             strUrl = "";
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-//MY_AWS_ACCESS_KEY_ID,
-//MY_AWS_SECRET_KEY,
+                //MY_AWS_ACCESS_KEY_ID,
+                //MY_AWS_SECRET_KEY,
 this.CurrentServer);
 
             if (items == null || items.Count == 0)
@@ -1072,16 +1075,16 @@ MessageBoxDefaultButton.Button1);
             text.Append("检索 " + (this.m_multiSearchInfo.HitWords.Count + this.m_multiSearchInfo.NotHitWords.Count).ToString() + " 行用时 " + delta.ToString() + "\r\n");
             if (this.m_multiSearchInfo.HitWords.Count > 0)
             {
-                text.Append("*** 以下 ("+this.m_multiSearchInfo.HitWords.Count+" 个) 检索词共命中 "+this.m_multiSearchInfo.HitCount+" 条:\r\n");
-                foreach(string s in this.m_multiSearchInfo.HitWords)
+                text.Append("*** 以下 (" + this.m_multiSearchInfo.HitWords.Count + " 个) 检索词共命中 " + this.m_multiSearchInfo.HitCount + " 条:\r\n");
+                foreach (string s in this.m_multiSearchInfo.HitWords)
                 {
                     text.Append(s + "\r\n");
                 }
             }
             if (this.m_multiSearchInfo.NotHitWords.Count > 0)
             {
-                text.Append("*** 以下 ("+this.m_multiSearchInfo.NotHitWords.Count+" 个) 检索词没有命中:\r\n");
-                foreach(string s in this.m_multiSearchInfo.NotHitWords)
+                text.Append("*** 以下 (" + this.m_multiSearchInfo.NotHitWords.Count + " 个) 检索词没有命中:\r\n");
+                foreach (string s in this.m_multiSearchInfo.NotHitWords)
                 {
                     text.Append(s + "\r\n");
                 }
@@ -1116,8 +1119,8 @@ MessageBoxDefaultButton.Button1);
                 return -1;
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-//MY_AWS_ACCESS_KEY_ID,
-//MY_AWS_SECRET_KEY,
+                //MY_AWS_ACCESS_KEY_ID,
+                //MY_AWS_SECRET_KEY,
 this.CurrentServer);
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
@@ -1289,7 +1292,7 @@ this.CurrentServer);
             if (this.m_reloadInfo != null)
                 this.m_reloadInfo.Cancel = true;
 
-        this.DeleteTempFile();
+            this.DeleteTempFile();
 
             if (strError == "AWS.ECommerceService.NoExactMatches")
             {
@@ -1356,7 +1359,7 @@ this.CurrentServer);
 
         void webClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            this.stop.SetProgressValue( e.ProgressPercentage );
+            this.stop.SetProgressValue(e.ProgressPercentage);
         }
 
         void webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -1603,27 +1606,27 @@ this.CurrentServer);
 
             m_reloadInfo = null;
 
-            this.BeginLoop("正在获取下一批记录 (" + ((this.m_nCurrentPageNo + 1 + 1)*10 + 1).ToString() + "- ) ...");
+            this.BeginLoop("正在获取下一批记录 (" + ((this.m_nCurrentPageNo + 1 + 1) * 10 + 1).ToString() + "- ) ...");
             this.m_bErrorBox = true;
 
             this.PrepareTempFile();
             webClient = new WebClient();
 
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(webClient_DownloadFileCompleted);
+            webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(webClient_DownloadFileCompleted);
             if (m_bSetProgress == true)
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(webClient_DownloadProgressChanged);
-                try
-                {
-                    webClient.DownloadFileAsync(new Uri(strUrl, UriKind.Absolute),
-                        this.TempFilename, null);
-                }
-                catch (Exception ex)
-                {
-                    this.EndLoop();
-                    strError = ExceptionUtil.GetAutoText(ex);
-                    this.m_bError = true;
-                    return -1;
-                }
+            try
+            {
+                webClient.DownloadFileAsync(new Uri(strUrl, UriKind.Absolute),
+                    this.TempFilename, null);
+            }
+            catch (Exception ex)
+            {
+                this.EndLoop();
+                strError = ExceptionUtil.GetAutoText(ex);
+                this.m_bError = true;
+                return -1;
+            }
 
 
             return 0;
@@ -1687,7 +1690,7 @@ this.CurrentServer);
             if (nRet == -1)
                 return -1;
 
-            this.BeginLoop("正在重新装载记录 "+ (nStartIndex+1).ToString() + " / " +items.Count.ToString()+" ...", false);
+            this.BeginLoop("正在重新装载记录 " + (nStartIndex + 1).ToString() + " / " + items.Count.ToString() + " ...", false);
 
             this.PrepareTempFile();
             webClient = new WebClient();
@@ -1718,13 +1721,13 @@ this.CurrentServer);
             this.Invoke(d, args);
 
             // 如果没有完成，还要继续做
-            if (this.m_reloadInfo.Cancel  == false && 
+            if (this.m_reloadInfo.Cancel == false &&
                 this.m_reloadInfo.StartIndex + this.m_reloadInfo.CurrentItems.Count < this.m_reloadInfo.TotalItems.Count)
             {
                 string strError = "";
                 int nRedoCount = 0;
                 Thread.Sleep(1000);
-            REDO: 
+            REDO:
                 int nRet = ReloadItems(this.m_reloadInfo.TotalItems,
                     this.m_reloadInfo.StartIndex + this.m_reloadInfo.CurrentItems.Count,
                     this.m_reloadInfo.ElementSet,
@@ -2190,7 +2193,7 @@ true);
             this.amazonSimpleQueryControl_simple.Comment = "";
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach(ListViewItem item in this.listView_browse.SelectedItems)
+            foreach (ListViewItem item in this.listView_browse.SelectedItems)
             {
                 items.Add(item);
             }
@@ -2487,7 +2490,7 @@ value);
         {
             Global.PasteLinesFromClipboard(this,
                 "AmazonSearchForm",
-                this.listView_browse, 
+                this.listView_browse,
                 true);
         }
 
@@ -2495,7 +2498,7 @@ value);
         {
             Global.PasteLinesFromClipboard(this,
                 "AmazonSearchForm",
-                this.listView_browse, 
+                this.listView_browse,
                 false);
         }
 
@@ -2937,7 +2940,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-#endregion
+        #endregion
 
         void dlg_GetEncoding(object sender, GetEncodingEventArgs e)
         {

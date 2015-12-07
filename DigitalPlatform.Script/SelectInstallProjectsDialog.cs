@@ -157,7 +157,7 @@ namespace DigitalPlatform.Script
 
         static bool MatchCategory(string s1, string s2)
         {
-            string[] parts1 = s1.Split(new char[] {','});
+            string[] parts1 = s1.Split(new char[] { ',' });
             string[] parts2 = s2.Split(new char[] { ',' });
 
             foreach (string part1 in parts1)

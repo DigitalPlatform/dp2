@@ -482,6 +482,7 @@ namespace DigitalPlatform.Marc
         {
             return select(strXPath, -1);
         }
+
         // 针对DOM树进行 XPath 筛选
         // parameters:
         //      nMaxCount    至多选择开头这么多个元素。-1表示不限制

@@ -139,7 +139,7 @@ namespace DigitalPlatform.LibraryServer
 
 
             // 观察是否有应急写入的内容?
-            byte [] length = new byte[8];
+            byte[] length = new byte[8];
             int nRet = m_streamSpare.Read(length, 0, 8);
             if (nRet != 8)
             {
@@ -1004,7 +1004,7 @@ namespace DigitalPlatform.LibraryServer
             long lXmlBodyLength = WriteEntry(
                 stream,
                 null,
-                strXmlBody, 
+                strXmlBody,
                 false,
                 0);
             // 获得 attachment 部分的长度
@@ -1143,7 +1143,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        static void WriteClientAddress(XmlDocument dom,
+        public static void WriteClientAddress(XmlDocument dom,
             string strClientAddress)
         {
             if (string.IsNullOrEmpty(strClientAddress) == true)
@@ -1193,6 +1193,7 @@ namespace DigitalPlatform.LibraryServer
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
         // return:
         //      -1  error
         //      0   file not found
@@ -1207,7 +1208,8 @@ namespace DigitalPlatform.LibraryServer
             string strFilter,
             out long lHintNext,
             out string strXml,
-            ref Stream attachment,
+            // ref Stream attachment,
+            Stream attachment,
             out string strError)
         {
             strError = "";
@@ -1233,7 +1235,7 @@ namespace DigitalPlatform.LibraryServer
                     strFilePath,
                     FileMode.Open,
                     FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
-                    FileShare.ReadWrite);   
+                    FileShare.ReadWrite);
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -1276,45 +1278,45 @@ namespace DigitalPlatform.LibraryServer
                         ////Debug.WriteLine("end read lock 1");
                     }
                 }
-                    // lIndex == -1表示希望获得文件整个的尺寸
-                    if (lIndex == -1)
-                    {
-                        lHintNext = lFileSize;  //  stream.Length;
-                        return 1;   // 成功
-                    }
+                // lIndex == -1表示希望获得文件整个的尺寸
+                if (lIndex == -1)
+                {
+                    lHintNext = lFileSize;  //  stream.Length;
+                    return 1;   // 成功
+                }
 
-                    // 没有暗示，只能从头开始找
-                    if (lHint == -1 || lIndex == 0)
-                    {
-                        // return:
-                        //      -1  error
-                        //      0   成功
-                        //      1   到达文件末尾或者超出
-                        nRet = LocationRecord(stream,
-                            lFileSize,
-                            lIndex,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        if (nRet == 1)
-                            return 2;
-                    }
-                    else
-                    {
-                        // 根据暗示找到
-                        if (lHint == stream.Length)
-                            return 2;
+                // 没有暗示，只能从头开始找
+                if (lHint == -1 || lIndex == 0)
+                {
+                    // return:
+                    //      -1  error
+                    //      0   成功
+                    //      1   到达文件末尾或者超出
+                    nRet = LocationRecord(stream,
+                        lFileSize,
+                        lIndex,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return 2;
+                }
+                else
+                {
+                    // 根据暗示找到
+                    if (lHint == stream.Length)
+                        return 2;
 
-                        if (lHint > stream.Length)
-                        {
-                            strError = "lHint参数值不正确";
-                            return -1;
-                        }
-                        if (stream.Position != lHint)
-                            stream.Seek(lHint, SeekOrigin.Begin);
+                    if (lHint > stream.Length)
+                    {
+                        strError = "lHint参数值不正确";
+                        return -1;
                     }
+                    if (stream.Position != lHint)
+                        stream.Seek(lHint, SeekOrigin.Begin);
+                }
 
-                    //////
+                //////
 
                 // MemoryStream attachment = null; // new MemoryStream();
                 // TODO: 是否可以优化为，先读出XML部分，如果需要再读出attachment? 并且attachment可以按需读出分段
@@ -1325,7 +1327,8 @@ namespace DigitalPlatform.LibraryServer
                 nRet = ReadEnventLog(
                     stream,
                     out strXml,
-                    ref attachment,
+                    // ref attachment,
+                    attachment,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -1391,7 +1394,7 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strStyle) == true)
                 return 0;
 
-            string [] parts = strStyle.Split(new char [] {','}, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = strStyle.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in parts)
             {
                 if (StringUtil.HasHead(s, "level-") == true)
@@ -1603,7 +1606,7 @@ out strTargetLibraryCode);
                         nLevel,
                         ref dom);
                     strXml = dom.DocumentElement.OuterXml;
-                } 
+                }
                 return 1;
             }
 
@@ -1794,7 +1797,7 @@ out strTargetLibraryCode);
         }
 
         // 订购 期 评注
-        static void RemoveItemRecord(int nLevel, 
+        static void RemoveItemRecord(int nLevel,
             string strElementName,
             ref XmlDocument dom)
         {
@@ -2083,43 +2086,43 @@ out strTargetLibraryCode);
                         ////Debug.WriteLine("end read lock 2");
                     }
                 }
-                    // lIndex == -1表示希望获得文件整个的尺寸
-                    if (lIndex == -1)
-                    {
-                        lHintNext = lFileSize;  // stream.Length;
-                        return 1;   // 成功
-                    }
+                // lIndex == -1表示希望获得文件整个的尺寸
+                if (lIndex == -1)
+                {
+                    lHintNext = lFileSize;  // stream.Length;
+                    return 1;   // 成功
+                }
 
-                    // 没有暗示，只能从头开始找
-                    if (lHint == -1 || lIndex == 0)
-                    {
-                        // return:
-                        //      -1  error
-                        //      0   成功
-                        //      1   到达文件末尾或者超出
-                        nRet = LocationRecord(stream,
-                            lFileSize,
-                            lIndex,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        if (nRet == 1)
-                            return 2;
-                    }
-                    else
-                    {
-                        // 根据暗示找到
-                        if (lHint == stream.Length)
-                            return 2;
+                // 没有暗示，只能从头开始找
+                if (lHint == -1 || lIndex == 0)
+                {
+                    // return:
+                    //      -1  error
+                    //      0   成功
+                    //      1   到达文件末尾或者超出
+                    nRet = LocationRecord(stream,
+                        lFileSize,
+                        lIndex,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return 2;
+                }
+                else
+                {
+                    // 根据暗示找到
+                    if (lHint == stream.Length)
+                        return 2;
 
-                        if (lHint > stream.Length)
-                        {
-                            strError = "lHint参数值不正确";
-                            return -1;
-                        }
-                        if (stream.Position != lHint)
-                            stream.Seek(lHint, SeekOrigin.Begin);
+                    if (lHint > stream.Length)
+                    {
+                        strError = "lHint参数值不正确";
+                        return -1;
                     }
+                    if (stream.Position != lHint)
+                        stream.Seek(lHint, SeekOrigin.Begin);
+                }
 
 
                 // return:
@@ -2129,7 +2132,7 @@ out strTargetLibraryCode);
                     stream,
                     lAttachmentFragmentStart,
                     nAttachmentFragmentLength,
-                    out attachment_data, 
+                    out attachment_data,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2170,7 +2173,7 @@ out strTargetLibraryCode);
             strError = "";
             List<OperLogInfo> results = new List<OperLogInfo>();
 
-            if (strStyle == "getfilenames")
+            if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
                 FileInfo[] fis = di.GetFiles("????????.log");
@@ -2202,7 +2205,7 @@ out strTargetLibraryCode);
 
                 records = new OperLogInfo[results.Count];
                 results.CopyTo(records);
-                return 1;
+                return fis.Length;  // 返回事项总数
             }
 
             int nPackageLength = 0;
@@ -2252,7 +2255,6 @@ out strTargetLibraryCode);
                 info.AttachmentLength = lAttachmentLength;
                 results.Add(info);
 
-
                 lIndex++;
                 lHint = lHintNext;
             }
@@ -2261,7 +2263,6 @@ out strTargetLibraryCode);
             results.CopyTo(records);
             return 1;
         }
-
 
         // 获得一个日志记录
         // parameters:
@@ -2300,7 +2301,7 @@ out strTargetLibraryCode);
             {
                 strError = "日志目录 m_strDirectory 尚未初始化";
                 return -1;
-            } 
+            }
             Debug.Assert(this.m_strDirectory != "", "");
 
             string strFilePath = this.m_strDirectory + "\\" + strFileName;
@@ -2360,62 +2361,61 @@ out strTargetLibraryCode);
                     }
                 }
 
-
-                    // lIndex == -1表示希望获得文件整个的尺寸
-                    if (lIndex == -1)
+                // lIndex == -1表示希望获得文件整个的尺寸
+                if (lIndex == -1)
+                {
+                    if (bGetCount == false)
                     {
-                        if (bGetCount == false)
-                        {
-                            lHintNext = lFileSize;  // cache_item.Stream.Length;
-                            return 1;   // 成功
-                        }
-
-                        // 获得记录总数
-                        // parameters:
-                        // return:
-                        //      -1  error
-                        //      >=0 记录总数
-                        lHintNext = GetRecordCount(cache_item.Stream,
-                            lFileSize,
-                            out strError);
-                        if (lHintNext == -1)
-                            return -1;
-
+                        lHintNext = lFileSize;  // cache_item.Stream.Length;
                         return 1;   // 成功
                     }
 
-                    // 没有暗示，只能从头开始找
-                    if (lHint == -1 || lIndex == 0)
-                    {
-                        // return:
-                        //      -1  error
-                        //      0   成功
-                        //      1   到达文件末尾或者超出
-                        nRet = LocationRecord(cache_item.Stream,
-                            lFileSize,
-                            lIndex,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        if (nRet == 1)
-                            return 2;
-                    }
-                    else
-                    {
-                        // 根据暗示找到
-                        if (lHint == cache_item.Stream.Length)
-                            return 2;
+                    // 获得记录总数
+                    // parameters:
+                    // return:
+                    //      -1  error
+                    //      >=0 记录总数
+                    lHintNext = GetRecordCount(cache_item.Stream,
+                        lFileSize,
+                        out strError);
+                    if (lHintNext == -1)
+                        return -1;
 
-                        if (lHint > cache_item.Stream.Length)
-                        {
-                            strError = "lHint参数值不正确";
-                            return -1;
-                        }
-                        if (cache_item.Stream.Position != lHint)
-                            cache_item.Stream.Seek(lHint, SeekOrigin.Begin);
-                    }
+                    return 1;   // 成功
+                }
 
-                    /////
+                // 没有暗示，只能从头开始找
+                if (lHint == -1 || lIndex == 0)
+                {
+                    // return:
+                    //      -1  error
+                    //      0   成功
+                    //      1   到达文件末尾或者超出
+                    nRet = LocationRecord(cache_item.Stream,
+                        lFileSize,
+                        lIndex,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return 2;
+                }
+                else
+                {
+                    // 根据暗示找到
+                    if (lHint == cache_item.Stream.Length)
+                        return 2;
+
+                    if (lHint > cache_item.Stream.Length)
+                    {
+                        strError = "lHint参数值不正确";
+                        return -1;
+                    }
+                    if (cache_item.Stream.Position != lHint)
+                        cache_item.Stream.Seek(lHint, SeekOrigin.Begin);
+                }
+
+                /////
 
                 // MemoryStream attachment = null; // new MemoryStream();
                 // TODO: 是否可以优化为，先读出XML部分，如果需要再读出attachment? 并且attachment可以按需读出分段
@@ -2498,7 +2498,7 @@ out strTargetLibraryCode);
                     }
                 }
 
-            // END1:
+                // END1:
                 lHintNext = cache_item.Stream.Position;
 
                 return 1;
@@ -2554,7 +2554,7 @@ out strTargetLibraryCode);
             {
                 if (lMaxFileSize != -1
     && stream.Position >= lMaxFileSize)
-                    return 1; 
+                    return 1;
 
                 byte[] length = new byte[8];
 
@@ -2572,7 +2572,7 @@ out strTargetLibraryCode);
 
             if (lMaxFileSize != -1
 && stream.Position >= lMaxFileSize)
-                return 1; 
+                return 1;
             if (stream.Position >= stream.Length)
                 return 1;
 
@@ -2599,8 +2599,8 @@ out strTargetLibraryCode);
             {
                 if (lMaxFileSize != -1
                     && stream.Position >= lMaxFileSize)
-                    return i; 
-                
+                    return i;
+
                 byte[] length = new byte[8];
 
                 int nRet = stream.Read(length, 0, 8);
@@ -2621,6 +2621,8 @@ out strTargetLibraryCode);
 
         // 从日志文件当前位置读出一条日志记录
         // 要读出附件
+        // parameters:
+        //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
         // return:
         //      1   出错
         //      0   成功
@@ -2628,7 +2630,8 @@ out strTargetLibraryCode);
         public static int ReadEnventLog(
             Stream stream,
             out string strXmlBody,
-            ref Stream attachment,
+            // ref Stream attachment,
+            Stream attachment,
             out string strError)
         {
             strError = "";
@@ -2643,7 +2646,7 @@ out strTargetLibraryCode);
                 return 1;
             if (nRet < 8)
             {
-                strError = "ReadEnventLog()从偏移量 "+lStart.ToString()+" 开始试图读入8个byte，但是只读入了 "+nRet.ToString()+" 个。起始位置不正确";
+                strError = "ReadEnventLog()从偏移量 " + lStart.ToString() + " 开始试图读入8个byte，但是只读入了 " + nRet.ToString() + " 个。起始位置不正确";
                 return -1;
             }
 
@@ -2672,7 +2675,8 @@ out strTargetLibraryCode);
             nRet = ReadEntry(
                 stream,
                 out strMetaData,
-                ref attachment,
+                // ref attachment,
+                attachment,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -2726,7 +2730,7 @@ out strTargetLibraryCode);
                 return 1;
             if (lMaxFileSize != -1
     && stream.Position >= lMaxFileSize)
-                return 1; 
+                return 1;
             if (nRet < 8)
             {
                 strError = "ReadEnventLog()从偏移量 " + lStart.ToString() + " 开始试图读入8个byte，但是只读入了 " + nRet.ToString() + " 个。起始位置不正确";
@@ -2975,10 +2979,13 @@ out strTargetLibraryCode);
         }
 
         // 读出一个事项(Stream类型)
+        // parameters:
+        //      streamBody  承载输出的 body 部分的 Stream 对象。如果为 null，表示不输出这部分
         public static int ReadEntry(
             Stream stream,
             out string strMetaData,
-            ref Stream streamBody,
+            // ref Stream streamBody,
+            Stream streamBody,
             out string strError)
         {
             strError = "";
@@ -3074,7 +3081,6 @@ out strTargetLibraryCode);
                             break;
                     }
                 }
-
             }
 
             // 文件指针此时自然在末尾
@@ -3099,7 +3105,7 @@ out strTargetLibraryCode);
             out string strMetaData,
             long lAttachmentFragmentStart,
             int nAttachmentFragmentLength,
-            out byte[] attachment_data, 
+            out byte[] attachment_data,
             out string strError)
         {
             strError = "";
@@ -3543,7 +3549,7 @@ out strTargetLibraryCode);
                             if (bRepair == true)
                             {
                                 source.SetLength(lStart);
-                                strError = "文件 "+strSourceFilename+" "+strError+" 已经将文件在位置 " + lStart.ToString() + " 截断。";
+                                strError = "文件 " + strSourceFilename + " " + strError + " 已经将文件在位置 " + lStart.ToString() + " 截断。";
                             }
                             return 1;   // TODO: 两个以上文件都坏了的可能性很小?
                         }
@@ -3658,7 +3664,7 @@ out strTargetLibraryCode);
                     // 通知系统挂起
                     this.App.HangupReason = HangupReason.OperLogError;
 
-                    this.App.WriteErrorLog("系统启动时，试图合并临时日志文件，但是这一努力失败了 ["+strError+"]。请试着为数据目录腾出更多富余磁盘空间，然后重新启动系统。");
+                    this.App.WriteErrorLog("系统启动时，试图合并临时日志文件，但是这一努力失败了 [" + strError + "]。请试着为数据目录腾出更多富余磁盘空间，然后重新启动系统。");
                     return -1;
                 }
             }

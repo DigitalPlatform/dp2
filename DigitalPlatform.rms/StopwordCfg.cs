@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,12 +10,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-
-
 namespace DigitalPlatform.rms
 {
-
-    // stopword¶ÔÓ¦µÄÀà
+    // stopwordå¯¹åº”çš„ç±»
 	public class StopwordCfg
 	{
 		//public XmlDocument dom = null;
@@ -25,7 +22,7 @@ namespace DigitalPlatform.rms
 		public StopwordCfg()
 		{
 			//
-			// TODO: ÔÚ´Ë´¦Ìí¼Ó¹¹Ôìº¯ÊıÂß¼­
+			// TODO: åœ¨æ­¤å¤„æ·»åŠ æ„é€ å‡½æ•°é€»è¾‘
 			//
 		}
 /*
@@ -34,15 +31,15 @@ namespace DigitalPlatform.rms
 		{
 			strError = "";
 
-			Debug.Assert(strStopwordFileName != "" && strStopwordFileName != null,"strStopwordFileName²ÎÊı²»ÄÜÎªnull»ò¿Õ¡£");
+			Debug.Assert(strStopwordFileName != "" && strStopwordFileName != null,"strStopwordFileNameå‚æ•°ä¸èƒ½ä¸ºnullæˆ–ç©ºã€‚");
 
 
 			if (File.Exists(strStopwordFileName) == false)
 			{
-				strError = "stopword½ÇÉ«¶ÔÓ¦µÄÎïÀíÎÄ¼ş²»´æÔÚ";
+				strError = "stopwordè§’è‰²å¯¹åº”çš„ç‰©ç†æ–‡ä»¶ä¸å­˜åœ¨";
 				return -1;
 			}
-			// Èç¹ûstopwordÎÄ¼şµÄÄÚÈİÎª¿Õ£¬ÔòÃ»ÓĞ¿ÉÈ¥µÄ·ÇÓÃ×Ö£¬Õı³£½áÊø
+			// å¦‚æœstopwordæ–‡ä»¶çš„å†…å®¹ä¸ºç©ºï¼Œåˆ™æ²¡æœ‰å¯å»çš„éç”¨å­—ï¼Œæ­£å¸¸ç»“æŸ
 			StreamReader sw = new StreamReader(strStopwordFileName,Encoding.UTF8);
 			string strStopwordText = sw.ReadToEnd();
 			sw.Close();
@@ -57,7 +54,7 @@ namespace DigitalPlatform.rms
 			}
 			catch(Exception ex)
 			{
-				strError = "¼ÓÔØstopwordÅäÖÃÎÄ¼ş'" + strStopwordFileName + "'µ½domÊ±³ö´í£º" + ex.Message;
+				strError = "åŠ è½½stopwordé…ç½®æ–‡ä»¶'" + strStopwordFileName + "'åˆ°domæ—¶å‡ºé”™ï¼š" + ex.Message;
 				return -1;
 			}
 
@@ -76,7 +73,7 @@ namespace DigitalPlatform.rms
 				{
 					this.tableStopwordTable[""] = stopwordTable;
 				}
-				// ¼Óµ½HashtableÊı×éÀï
+				// åŠ åˆ°Hashtableæ•°ç»„é‡Œ
 				this.tableStopwordTable[strName] = stopwordTable;
 			}
 
@@ -90,7 +87,7 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            Debug.Assert(nodeRoot != null, "nodeRoot²ÎÊı²»ÄÜÎªnull»ò¿Õ¡£");
+            Debug.Assert(nodeRoot != null, "nodeRootå‚æ•°ä¸èƒ½ä¸ºnullæˆ–ç©ºã€‚");
 
 
             string strXpath = "//stopwordTable";
@@ -105,25 +102,25 @@ namespace DigitalPlatform.rms
 
                 if (i == 0)
                 {
-                    // µÚÒ»¸ö¶à´æ´¢Ò»´Î£¬±ãÓÚ½«À´ÓÃ¿ÕÃû×ÖÖµÀ´»ñµÃ
+                    // ç¬¬ä¸€ä¸ªå¤šå­˜å‚¨ä¸€æ¬¡ï¼Œä¾¿äºå°†æ¥ç”¨ç©ºåå­—å€¼æ¥è·å¾—
                     this.tableStopwordTable[""] = stopwordTable;
                 }
-                // ¼Óµ½HashtableÊı×éÀï
+                // åŠ åˆ°Hashtableæ•°ç»„é‡Œ
                 this.tableStopwordTable[strName] = stopwordTable;
             }
 
             return 0;
         }
 		
-		// ¶ÔÒ»¸ö×Ö·û´®Êı×é½øĞĞÈ¥·ÇÓÃ×Ö
+		// å¯¹ä¸€ä¸ªå­—ç¬¦ä¸²æ•°ç»„è¿›è¡Œå»éç”¨å­—
 		// parameter:
-		//		texts	´ı¼Ó¹¤µÄ×Ö·û´®Êı×é
-		//		strStopwordFileName	·Ç×ÖÓÃÎÄ¼şÃû
-		//		strStopwordTable	¾ßÌåÊ¹ÓÃ·ÇÓÃ×ÖÄÄ¸ö±í Îª""»ònull±íÊ¾È¡µÚÒ»¸ö±í
-		//		strError	out ³ö´íĞÅÏ¢
+		//		texts	å¾…åŠ å·¥çš„å­—ç¬¦ä¸²æ•°ç»„
+		//		strStopwordFileName	éå­—ç”¨æ–‡ä»¶å
+		//		strStopwordTable	å…·ä½“ä½¿ç”¨éç”¨å­—å“ªä¸ªè¡¨ ä¸º""æˆ–nullè¡¨ç¤ºå–ç¬¬ä¸€ä¸ªè¡¨
+		//		strError	out å‡ºé”™ä¿¡æ¯
 		// return:
-		//		-1	³ö´í
-		//		0	³É¹¦
+		//		-1	å‡ºé”™
+		//		0	æˆåŠŸ
 		public int DoStopword(string strStopwordTableName,
 			ref List<string> texts,
 			out string strError)
@@ -136,7 +133,7 @@ namespace DigitalPlatform.rms
 			StopwordTable stopwordTable = (StopwordTable)this.tableStopwordTable[strStopwordTableName];
 			if (stopwordTable == null)
 			{
-				strError = "Ã»ÕÒµ½ÃûÎª'" + strStopwordTableName + "'µÄ<stopwordTable>ÔªËØ¡£";
+				strError = "æ²¡æ‰¾åˆ°åä¸º'" + strStopwordTableName + "'çš„<stopwordTable>å…ƒç´ ã€‚";
 				return -1;
 			}
 
@@ -148,17 +145,17 @@ namespace DigitalPlatform.rms
 			return 0;
 		}
 
-		// ¶ÔÒ»¸ö×Ö·û´®É¾³ı·ÇÓÃ×Ö
+		// å¯¹ä¸€ä¸ªå­—ç¬¦ä¸²åˆ é™¤éç”¨å­—
 		// parameter:
-		//		strText	´ı¼Ó¹¤µÄ×Ö·û´®
-		//		aSeparator	¼ä¸ô·ûÊı×é
-		//		aWord	·ÇÓÃ×ÖÊı×é
+		//		strText	å¾…åŠ å·¥çš„å­—ç¬¦ä¸²
+		//		aSeparator	é—´éš”ç¬¦æ•°ç»„
+		//		aWord	éç”¨å­—æ•°ç»„
 		// return:
-		//		string È¥·ÇÓÃ×ÖºóµÄ×Ö·û´®
+		//		string å»éç”¨å­—åçš„å­—ç¬¦ä¸²
 		public string DeleteStopword(string strText,
 			StopwordTable stopwordTable)
 		{
-			// -----------------½«¼ä¸ô·û×ª»»Îª'^'---------------
+			// -----------------å°†é—´éš”ç¬¦è½¬æ¢ä¸º'^'---------------
 			string strResult = strText;
 			for(int i=0; i< stopwordTable.aSeparator.Count ; i++)
 			{
@@ -167,7 +164,7 @@ namespace DigitalPlatform.rms
 			}
 			strResult = "^" + strResult + "^";
 	
-			//---------------------È¥·ÇÓÃ×Ö------------
+			//---------------------å»éç”¨å­—------------
 			int nPosition;
 			int nLength;
 			for(int i=0;i<stopwordTable.aWord.Count;i++)
@@ -181,7 +178,7 @@ namespace DigitalPlatform.rms
 						strOneWord,
 						nStart);
                      * */
-                    // 2012/2/20 ÊÔÍ¼ĞŞ¸Ä£¬Î´¾­²âÊÔ£¬ËÙ¶ÈÊÇ·ñÄÜ¿ìµãÒ²Î´Öª
+                    // 2012/2/20 è¯•å›¾ä¿®æ”¹ï¼Œæœªç»æµ‹è¯•ï¼Œé€Ÿåº¦æ˜¯å¦èƒ½å¿«ç‚¹ä¹ŸæœªçŸ¥
                     nPosition = strResult.IndexOf(strOneWord,
                         nStart,
                         StringComparison.InvariantCultureIgnoreCase);
@@ -224,7 +221,7 @@ namespace DigitalPlatform.rms
 			StopwordTable stopwordTable = (StopwordTable)this.tableStopwordTable[strStopwordTableName];
 			if (stopwordTable == null)
 			{
-				strError = "Ã»ÕÒµ½ÃûÎª'" + strStopwordTableName + "'µÄ<stopwordTable>ÔªËØ¡£";
+				strError = "æ²¡æ‰¾åˆ°åä¸º'" + strStopwordTableName + "'çš„<stopwordTable>å…ƒç´ ã€‚";
 				return -1;
 			}
 
@@ -267,7 +264,7 @@ namespace DigitalPlatform.rms
 
 		public void Initial(XmlNode node)
 		{
-            Debug.Assert(node != null, "Initial()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "Initial()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 			this.m_node = node;
 			string strName = DomUtil.GetAttr(node,"name");
 			this.Name = strName;
@@ -275,7 +272,7 @@ namespace DigitalPlatform.rms
 
 			string strXpath = "";
 			
-			// »ñµÃ·Ö¸ô·ûÊı×é
+			// è·å¾—åˆ†éš”ç¬¦æ•°ç»„
 			strXpath = "separator/t";
 			XmlNodeList listSeparator =	this.m_node.SelectNodes(strXpath);
 			foreach(XmlNode nodeSeparator in listSeparator)
@@ -290,7 +287,7 @@ namespace DigitalPlatform.rms
 				}
 			}
 	
-			// »ñµÃ·ÇÓÃ×ÖÊı×é
+			// è·å¾—éç”¨å­—æ•°ç»„
 			strXpath = "word/t";
 			XmlNodeList listWord = this.m_node.SelectNodes(strXpath);;
 			foreach(XmlNode nodeWord in listWord)

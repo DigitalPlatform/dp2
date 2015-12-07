@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.rms.Client
 {
 	/// <summary>
-	/// Êı¾İ¿âÅäÖÃ¶ÔÏó¡£ÓÃÓÚÇ°¶Ë´æ´¢ºÍ¹ÜÀí
+	/// æ•°æ®åº“é…ç½®å¯¹è±¡ã€‚ç”¨äºå‰ç«¯å­˜å‚¨å’Œç®¡ç†
 	/// </summary>
 	[Serializable()]
 	public class DatabaseObject
@@ -18,11 +18,11 @@ namespace DigitalPlatform.rms.Client
 		public DatabaseObject Parent = null;
 		public ArrayList Children = new ArrayList();
 		public string Name = "";
-		public int Type = -1;	// -1 ÎªÎ´¶¨Òå
-        public int Style = 0;   // 0ÎªÎ´¶¨Òå
-		public byte[] Content = null;	// ÎÄ¼şÄÚÈİ
-		public byte[] TimeStamp = null;	// Ê±¼ä´Á
-		public string Metadata = "";	// ÔªÊı¾İ
+		public int Type = -1;	// -1 ä¸ºæœªå®šä¹‰
+        public int Style = 0;   // 0ä¸ºæœªå®šä¹‰
+		public byte[] Content = null;	// æ–‡ä»¶å†…å®¹
+		public byte[] TimeStamp = null;	// æ—¶é—´æˆ³
+		public string Metadata = "";	// å…ƒæ•°æ®
 		public bool Changed = false;
 
 		public static bool IsDefaultFile(string strPath)
@@ -56,7 +56,7 @@ namespace DigitalPlatform.rms.Client
 			return false;
 		}
 
-		// ¹¹ÔìÊı¾İ¿â¶ÔÏóÂ·¾¶
+		// æ„é€ æ•°æ®åº“å¯¹è±¡è·¯å¾„
 		public string MakePath(string strDbName)
 		{
 			string strPath = "";
@@ -67,7 +67,7 @@ namespace DigitalPlatform.rms.Client
 			{
 				if (cur.Type == -1)
 				{
-					Debug.Assert( cur.Parent == null , "Ö»ÓĞĞé¸ù²ÅÄÜtype==-1");
+					Debug.Assert( cur.Parent == null , "åªæœ‰è™šæ ¹æ‰èƒ½type==-1");
 					goto CONTINUE;
 				}
 
@@ -97,7 +97,7 @@ namespace DigitalPlatform.rms.Client
 			return strPath;
 		}
 
-		// ¿ËÂ¡
+		// å…‹éš†
 		public DatabaseObject Clone()
 		{
 			DatabaseObject newObj = new DatabaseObject();
@@ -107,7 +107,7 @@ namespace DigitalPlatform.rms.Client
 			newObj.Content = ByteArray.GetCopy(this.Content);
 			newObj.TimeStamp = ByteArray.GetCopy(this.TimeStamp);
 
-			// µİ¹é
+			// é€’å½’
 			for(int i=0;i<this.Children.Count;i++)
 			{
 				DatabaseObject newChild = ((DatabaseObject)this.Children[i]).Clone();
@@ -141,7 +141,7 @@ namespace DigitalPlatform.rms.Client
 			{
 				strText += "\r\n" + strTab + "{\r\n";
 
-				// µİ¹é
+				// é€’å½’
 				for(int i=0;i<this.Children.Count;i++)
 				{
 					DatabaseObject child = (DatabaseObject)this.Children[i];
@@ -163,7 +163,7 @@ namespace DigitalPlatform.rms.Client
 			string[] aName = strPath.Split(new Char [] {'/'});
 
 			if (this.Name != aName[0])
-				return null;	// µÚÒ»¼¶²»Æ¥Åä
+				return null;	// ç¬¬ä¸€çº§ä¸åŒ¹é…
 
 			if (aName.Length == 1)
 				return this;
@@ -204,35 +204,35 @@ namespace DigitalPlatform.rms.Client
 			}
 		}
 
-		// ¹¹ÔìÒ»¸öÅäÖÃÎÄ¼şÀàĞÍµÄ¶ÔÏó
+		// æ„é€ ä¸€ä¸ªé…ç½®æ–‡ä»¶ç±»å‹çš„å¯¹è±¡
 		public static DatabaseObject BuildFileObject(
 			string strName,
 			string strFileName)
 		{
 			DatabaseObject obj = new DatabaseObject();
 
-			FileStream fs = File.Open(strFileName, FileMode.Open);
+            using (FileStream fs = File.Open(strFileName, FileMode.Open))
+            {
+                if (fs.Length > 1024 * 1024)
+                {
+                    throw (new Exception("obj " + strFileName + " too larg"));
+                }
 
-			if (fs.Length > 1024*1024)
-			{
-				throw(new Exception("obj " +strFileName+ " too larg"));
-			}
+                obj.Content = new byte[fs.Length];
+                obj.Name = strName;
+                obj.Type = ResTree.RESTYPE_FILE;
 
-			obj.Content = new byte[fs.Length];
-			obj.Name = strName;
-			obj.Type = ResTree.RESTYPE_FILE;
+                int nRet = fs.Read(obj.Content, 0, (int)fs.Length);
+                if (nRet != fs.Length)
+                {
+                    throw (new Exception("read obj " + strFileName + " error"));
+                }
 
-			int nRet =  fs.Read(obj.Content, 0, (int)fs.Length);
-			if (nRet != fs.Length) 
-			{
-				throw(new Exception("read obj " +strFileName+ " error"));
-			}
-			fs.Close();
-
-			return obj;
+                return obj;
+            }
 		}
 
-		// ¹¹ÔìÒ»¸öÅäÖÃÎÄ¼şÀàĞÍµÄ¶ÔÏó
+		// æ„é€ ä¸€ä¸ªé…ç½®æ–‡ä»¶ç±»å‹çš„å¯¹è±¡
 		public static DatabaseObject BuildFileObject(
 			string strName,
 			Stream fs)
@@ -255,7 +255,7 @@ namespace DigitalPlatform.rms.Client
 		}
 
 
-		// ¹¹ÔìÒ»¸öÄ¿Â¼ÀàĞÍµÄ¶ÔÏó
+		// æ„é€ ä¸€ä¸ªç›®å½•ç±»å‹çš„å¯¹è±¡
 		public static DatabaseObject BuildDirObject(
 			string strName)
 		{
@@ -279,18 +279,18 @@ namespace DigitalPlatform.rms.Client
 	public enum ObjEventOper
 	{
 		None = 0,
-		New = 1,	// ĞÂ´´½¨
-		Change = 2,	// ĞŞ¸ÄÄÚÈİ
-		Delete = 3,	// É¾³ı
+		New = 1,	// æ–°åˆ›å»º
+		Change = 2,	// ä¿®æ”¹å†…å®¹
+		Delete = 3,	// åˆ é™¤
 	}
 
-	// ¶ÔÏóĞŞ¸ÄÈÕÖ¾
+	// å¯¹è±¡ä¿®æ”¹æ—¥å¿—
 	public class ObjEvent
 	{
 		public DatabaseObject Obj = null;
 
 		public ObjEventOper Oper = ObjEventOper.None;
 
-		public string Path = "";	// ¶ÔÏóÂ·¾¶
+		public string Path = "";	// å¯¹è±¡è·¯å¾„
 	}
 }

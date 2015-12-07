@@ -27,8 +27,6 @@ namespace DigitalPlatform.CommonControl
 
         string m_strTempFileName = "";
         Stream m_stream = null;
-
-
         ///
 
         BorderStyle borderStyle = BorderStyle.Fixed3D;

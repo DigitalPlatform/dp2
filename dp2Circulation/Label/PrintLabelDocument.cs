@@ -13,7 +13,7 @@ namespace dp2Circulation
 {
     internal class PrintLabelDocument : PrintDocument
     {
-        StreamReader sr = null;
+        StreamReader _sr = null;
 
         int m_nPageNo = 0;  // 0表示没有初始化
 
@@ -22,7 +22,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            sr = reader;
+            _sr = reader;
             this.m_nPageNo = 0;
             return 0;
         }
@@ -34,7 +34,7 @@ namespace dp2Circulation
 
             try
             {
-                sr = new StreamReader(strLabelFilename, Encoding.GetEncoding(936));
+                _sr = new StreamReader(strLabelFilename, Encoding.GetEncoding(936));
             }
             catch (Exception ex)
             {
@@ -54,10 +54,10 @@ namespace dp2Circulation
 
         public void Rewind()
         {
-            if (this.sr != null)
+            if (this._sr != null)
             {
-                this.sr.ReadToEnd();    // 必须有这一句，否则下次会读出缓冲区中的内容
-                this.sr.BaseStream.Seek(0, SeekOrigin.Begin);
+                this._sr.ReadToEnd();    // 必须有这一句，否则下次会读出缓冲区中的内容
+                this._sr.BaseStream.Seek(0, SeekOrigin.Begin);
             }
             this.m_nPageNo = 0;
         }
@@ -70,10 +70,10 @@ namespace dp2Circulation
 
         public void Close()
         {
-            if (sr != null)
+            if (_sr != null)
             {
-                sr.Close();
-                sr = null;
+                _sr.Close();
+                _sr = null;
             }
         }
 
@@ -90,13 +90,13 @@ namespace dp2Circulation
             lines = new List<string>();
             for (; ; )
             {
-                string strLine = sr.ReadLine();
+                string strLine = _sr.ReadLine();
                 if (strLine == null)
                     return 1;
 
                 if (strLine == "***")
                 {
-                    if (sr.EndOfStream == true)
+                    if (_sr.EndOfStream == true)
                         return 1;
                     return 0;
                 }

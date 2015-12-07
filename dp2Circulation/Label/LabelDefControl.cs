@@ -156,11 +156,12 @@ namespace dp2Circulation
             {
                 string strText = BuildSampleLabelText();
 
-                Stream stream = new MemoryStream(Encoding.Default.GetBytes(strText));
-                StreamReader sr = new StreamReader(stream, Encoding.Default);
-
-                string strError = "";
-                this.labelDesignControl1.SetLabelFile(sr, out strError);
+                using (Stream stream = new MemoryStream(Encoding.Default.GetBytes(strText)))
+                using (StreamReader sr = new StreamReader(stream, Encoding.Default))
+                {
+                    string strError = "";
+                    this.labelDesignControl1.SetLabelFile(sr, out strError);
+                }
             }
 
             this.labelDesignControl1.Invalidate();
@@ -273,13 +274,13 @@ namespace dp2Circulation
                 font = Control.DefaultFont;
             }
 #endif
-                string strFontString = this.textBox_labelFont.Text;
-                if (Global.IsVirtualBarcodeFont(ref strFontString) == true)
-                    param.IsBarcodeFont = true;
-                else
-                    param.IsBarcodeFont = false;
+            string strFontString = this.textBox_labelFont.Text;
+            if (Global.IsVirtualBarcodeFont(ref strFontString) == true)
+                param.IsBarcodeFont = true;
+            else
+                param.IsBarcodeFont = false;
 
-                param.Font = Global.BuildFont(strFontString);
+            param.Font = Global.BuildFont(strFontString);
 
 
             param.LineFormats.Clear();
@@ -419,7 +420,7 @@ namespace dp2Circulation
                 store.UniversalOffset = GetOffsetString(GraphicsUnit.Display, line.OffsetX, line.OffsetY);
                 item.Tag = store;
 
-                ListViewUtil.ChangeItemText(item, COLUMN_FORECOLOR, line.ForeColor); 
+                ListViewUtil.ChangeItemText(item, COLUMN_FORECOLOR, line.ForeColor);
                 ListViewUtil.ChangeItemText(item, COLUMN_BACKCOLOR, line.BackColor);
                 this.listView_lineFormats.Items.Add(item);
             }
@@ -599,7 +600,7 @@ namespace dp2Circulation
             }
             catch
             {
-                
+
             }
             _panelVersion++;
             SetChanged();
@@ -715,7 +716,7 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_lineFormats, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_lineFormats, new Point(e.X, e.Y));
 
         }
 
@@ -785,7 +786,7 @@ namespace dp2Circulation
 
             ListViewUtil.ChangeItemText(item, COLUMN_FONT, dlg.FontString);
             ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, dlg.Align);
-            ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start); 
+            ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
 
             store.UniversalStart = dlg.UniversalStart;
@@ -939,8 +940,8 @@ namespace dp2Circulation
 
                 this.textBox_xml.Text = DomUtil.GetIndentXml(dom);  // dom.OuterXml;
 
-               _xmlVersion = 0;
-               _panelVersion = 0;
+                _xmlVersion = 0;
+                _panelVersion = 0;
             }
             else if (_xmlVersion > _panelVersion)
             {
@@ -1277,8 +1278,8 @@ namespace dp2Circulation
 
             bool bDisplayPrinterDialog = false;
             PrintDocument document = this.labelDesignControl1.PrintDocument;
-                
-                // new System.Drawing.Printing.PrintDocument();
+
+            // new System.Drawing.Printing.PrintDocument();
 
             printDialog1.Document = document;
 
@@ -1445,11 +1446,12 @@ out strError);
         private void textBox_sampleText_DelayTextChanged(object sender, EventArgs e)
         {
             // 将样本内容兑现到 labelDesignControl1 显示
-            Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text));
-            StreamReader sr = new StreamReader(stream, Encoding.Default);
-
-            string strError = "";
-            this.labelDesignControl1.SetLabelFile(sr, out strError);
+            using (Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text)))
+            using (StreamReader sr = new StreamReader(stream, Encoding.Default))
+            {
+                string strError = "";
+                this.labelDesignControl1.SetLabelFile(sr, out strError);
+            }
             this.labelDesignControl1.Invalidate();
         }
 

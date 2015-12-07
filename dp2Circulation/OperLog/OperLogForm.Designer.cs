@@ -39,6 +39,7 @@ namespace dp2Circulation
             this.columnHeader_operType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operator = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_seconds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_attachment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_record = new System.Windows.Forms.Panel();
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
@@ -74,7 +75,6 @@ namespace dp2Circulation
             this.button_repair_findSourceFilename = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_repair_sourceFilename = new System.Windows.Forms.TextBox();
-            this.columnHeader_seconds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_logRecords)).BeginInit();
             this.splitContainer_logRecords.Panel1.SuspendLayout();
             this.splitContainer_logRecords.Panel2.SuspendLayout();
@@ -186,6 +186,11 @@ namespace dp2Circulation
             // 
             this.columnHeader_operTime.Text = "操作时间";
             this.columnHeader_operTime.Width = 200;
+            // 
+            // columnHeader_seconds
+            // 
+            this.columnHeader_seconds.Text = "耗时(秒)";
+            this.columnHeader_seconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // columnHeader_attachment
             // 
@@ -608,11 +613,6 @@ namespace dp2Circulation
             this.textBox_repair_sourceFilename.Name = "textBox_repair_sourceFilename";
             this.textBox_repair_sourceFilename.Size = new System.Drawing.Size(183, 21);
             this.textBox_repair_sourceFilename.TabIndex = 4;
-            // 
-            // columnHeader_seconds
-            // 
-            this.columnHeader_seconds.Text = "耗时(秒)";
-            this.columnHeader_seconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // OperLogForm
             // 

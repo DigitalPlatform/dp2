@@ -21,8 +21,8 @@ namespace dp2Circulation
     /// <typeparam name="T">事项类型。例如 BookItem IssueItem OrderItem CommentItem</typeparam>
     /// <typeparam name="TC">事项集合类型。例如 BookItemCollection IssueItemCollection OrderItemCollection CommentItemCollection</typeparam>
     public class ItemControlBase<T, TC> : UserControl
-        where T : BookItemBase, new ()
-        where TC : BookItemCollectionBase, new ()
+        where T : BookItemBase, new()
+        where TC : BookItemCollectionBase, new()
     {
         /// <summary>
         /// 界面许可 / 禁止状态发生改变
@@ -42,11 +42,14 @@ namespace dp2Circulation
 
         internal bool m_bRemoveDeletedItem = false;   // 在删除事项时, 是否从视觉上抹除这些事项(实际上内存里面还保留有即将提交的事项)?
 
+#if NO
         /// <summary>
         /// 通讯通道
         /// </summary>
         public LibraryChannel Channel = null;
+#endif
 
+#if NO
         /// <summary>
         /// 当前通道的(已登录使用)用户的权限字符串
         /// </summary>
@@ -59,6 +62,7 @@ namespace dp2Circulation
                 return this.Channel.Rights;
             }
         }
+#endif
 
         /// <summary>
         /// 停止控制
@@ -207,11 +211,14 @@ namespace dp2Circulation
             this.Items = new TC();
         }
 
+#if NO
         internal void DoStop(object sender, StopEventArgs e)
         {
             if (this.Channel != null)
                 this.Channel.Abort();
         }
+#endif
+
         /// <summary>
         /// 获得全部事项的数目
         /// </summary>
@@ -429,7 +436,7 @@ namespace dp2Circulation
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     string strText = nodes[i].InnerText;
-                    if (strText.Length > 0 
+                    if (strText.Length > 0
                         && (strText[0] == '@' || strText.IndexOf("%") != -1))
                     {
                         // 兑现宏
@@ -502,23 +509,29 @@ namespace dp2Circulation
         /// <summary>
         /// 装载 Item 记录
         /// </summary>
+        /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strStyle">装载风格</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public virtual int LoadItemRecords(
+            LibraryChannel channel_param,
             string strBiblioRecPath,
             // bool bDisplayOtherLibraryItem,
             string strStyle,
             out string strError)
         {
             strError = "";
+
+            LibraryChannel channel = channel_param;
+            if (channel == null)
+                channel = this.MainForm.GetChannel();
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在装入"+this.ItemTypeName+"信息 ...");
             Stop.BeginLoop();
-
-            // this.Update();   // 优化
-            // this.MainForm.Update();
+#endif
+            Stop.Initial("正在装入" + this.ItemTypeName + "信息 ...");
 
             try
             {
@@ -544,7 +557,7 @@ namespace dp2Circulation
 
                     if (this.ItemType == "item")
                     {
-                        lRet = Channel.GetEntities(
+                        lRet = channel.GetEntities(
                              Stop,
                              strBiblioRecPath,
                              lStart,
@@ -558,7 +571,7 @@ namespace dp2Circulation
                     }
                     else if (this.ItemType == "order")
                     {
-                        lRet = Channel.GetOrders(
+                        lRet = channel.GetOrders(
     Stop,
     strBiblioRecPath,
     lStart,
@@ -572,7 +585,7 @@ namespace dp2Circulation
                     }
                     else if (this.ItemType == "issue")
                     {
-                        lRet = Channel.GetIssues(
+                        lRet = channel.GetIssues(
             Stop,
     strBiblioRecPath,
         lStart,
@@ -586,7 +599,7 @@ namespace dp2Circulation
                     }
                     else if (this.ItemType == "comment")
                     {
-                        lRet = Channel.GetComments(
+                        lRet = channel.GetComments(
     Stop,
     strBiblioRecPath,
     lStart,
@@ -600,7 +613,7 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        strError = "未知的事项类型 '"+this.ItemType+"'";
+                        strError = "未知的事项类型 '" + this.ItemType + "'";
                         goto ERROR1;
                     }
 
@@ -643,7 +656,6 @@ namespace dp2Circulation
 
                             this.Items.Add(bookitem);
 
-
                             bookitem.AddToListView(this.m_listView);
                         }
                     }
@@ -665,8 +677,13 @@ namespace dp2Circulation
             }
             finally
             {
+                if (channel_param == null)
+                    this.MainForm.ReturnChannel(channel);
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
 
@@ -927,7 +944,9 @@ namespace dp2Circulation
         //      -2  部分成功，部分失败
         //      -1  出错
         //      0   保存成功，没有错误和警告
-        internal int SaveEntities(EntityInfo[] entities,
+        internal int SaveEntities(
+            LibraryChannel channel,
+            EntityInfo[] entities,
             out string strError)
         {
             strError = "";
@@ -942,7 +961,9 @@ namespace dp2Circulation
                 int nCurrentCount = Math.Min(nBatch, entities.Length - i * nBatch);
                 EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
 
-                int nRet = SaveEntityRecords(this.BiblioRecPath,
+                int nRet = SaveEntityRecords(
+                    channel,
+                    this.BiblioRecPath,
                     current,
                     out errorinfos,
                     out strError);
@@ -993,7 +1014,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
                 {
                     strWarning += " 服务器返回的EntityInfo结构中RefID为空";
-                    // MessageBox.Show(ForegroundWindow.Instance, "服务器返回的EntityInfo结构中RefID为空");
+                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, "服务器返回的EntityInfo结构中RefID为空");
                     return true;
                 }
 
@@ -1017,7 +1038,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1 || nRet == 0)
                 {
-                    // MessageBox.Show(ForegroundWindow.Instance, "定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError);
+                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, "定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError);
                     strWarning += " 定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError;
                     continue;
                 }
@@ -1028,7 +1049,7 @@ namespace dp2Circulation
                     bookitem.RegisterNo,
                     errorinfos[i].NewRecPath,
                     errorinfos[i].RefID);
-#endif                
+#endif
                 string strLocationSummary = GetLocationSummary(bookitem);
 
                 // 正常信息处理
@@ -1049,7 +1070,7 @@ namespace dp2Circulation
                             out strError);
                         if (nRet == -1)
                         {
-                            // MessageBox.Show(ForegroundWindow.Instance, strError);
+                            // MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
                             strWarning += " " + strError;
                         }
                     }
@@ -1065,7 +1086,7 @@ namespace dp2Circulation
                             out strError);
                         if (nRet == -1)
                         {
-                            // MessageBox.Show(ForegroundWindow.Instance, strError);
+                            // MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
                             strWarning += " " + strError;
 
                         }
@@ -1083,7 +1104,7 @@ namespace dp2Circulation
                         if (string.IsNullOrEmpty(strTempBiblioDbName) == true)
                         {
                             strWarning += " " + this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名";
-                            //// MessageBox.Show(ForegroundWindow.Instance, this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名");
+                            //// MessageBox.Show(this/*ForegroundWindow.Instance*/, this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名");
                             return true;
                         }
 #if NO
@@ -1097,7 +1118,7 @@ namespace dp2Circulation
                             strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromCommentDbName(strTempItemDbName);
                         else
                         {
-                            MessageBox.Show(ForegroundWindow.Instance, "未知的 ItemType 类型 '"+this.ItemType+"'");
+                            MessageBox.Show(this/*ForegroundWindow.Instance*/, "未知的 ItemType 类型 '"+this.ItemType+"'");
                             return true;
                         }
 
@@ -1150,7 +1171,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strWarning += "\r\n请注意修改后重新提交保存";
-                //// MessageBox.Show(ForegroundWindow.Instance, strWarning);
+                //// MessageBox.Show(this/*ForegroundWindow.Instance*/, strWarning);
                 return true;
             }
 
@@ -1240,7 +1261,9 @@ namespace dp2Circulation
 
         // 保存实体记录
         // 不负责刷新界面和报错
-        int SaveEntityRecords(string strBiblioRecPath,
+        int SaveEntityRecords(
+            LibraryChannel channel,
+            string strBiblioRecPath,
             EntityInfo[] entities,
             out EntityInfo[] errorinfos,
             out string strError)
@@ -1248,12 +1271,15 @@ namespace dp2Circulation
             errorinfos = null;
             strError = "";
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在保存"+this.ItemTypeName+"信息 ...");
             Stop.BeginLoop();
 
             this.Update();
             this.MainForm.Update();
+#endif
+            Stop.Initial("正在保存" + this.ItemTypeName + "信息 ...");
 
             try
             {
@@ -1261,7 +1287,7 @@ namespace dp2Circulation
 
                 if (this.ItemType == "item")
                 {
-                    lRet = Channel.SetEntities(
+                    lRet = channel.SetEntities(
                          Stop,
                          strBiblioRecPath,
                          entities,
@@ -1272,7 +1298,7 @@ namespace dp2Circulation
                 }
                 else if (this.ItemType == "order")
                 {
-                    lRet = Channel.SetOrders(
+                    lRet = channel.SetOrders(
     Stop,
     strBiblioRecPath,
     entities,
@@ -1283,7 +1309,7 @@ namespace dp2Circulation
                 }
                 else if (this.ItemType == "issue")
                 {
-                    lRet = Channel.SetIssues(
+                    lRet = channel.SetIssues(
     Stop,
     strBiblioRecPath,
     entities,
@@ -1294,7 +1320,7 @@ namespace dp2Circulation
                 }
                 else if (this.ItemType == "comment")
                 {
-                    lRet = Channel.SetComments(
+                    lRet = channel.SetComments(
     Stop,
     strBiblioRecPath,
     entities,
@@ -1311,8 +1337,11 @@ namespace dp2Circulation
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
 
@@ -1332,7 +1361,9 @@ namespace dp2Circulation
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public virtual int SaveItems(out string strError)
+        public virtual int SaveItems(
+            LibraryChannel channel,
+            out string strError)
         {
             strError = "";
             if (this.Items == null)
@@ -1396,7 +1427,10 @@ namespace dp2Circulation
                     //      -2  部分成功，部分失败
                     //      -1  出错
                     //      0   保存成功，没有错误和警告
-                    nRet = SaveEntities(entities, out strError);
+                    nRet = SaveEntities(
+                        channel,
+                        entities,
+                        out strError);
                     if (nRet != 0)
                         goto ERROR1;
 
@@ -1404,7 +1438,7 @@ namespace dp2Circulation
                     this.MainForm.StatusBarMessage = this.ItemTypeName + "信息 提交 / 保存 成功";
                     return 1;
                 ERROR1:
-                    // MessageBox.Show(ForegroundWindow.Instance, strError);
+                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
                     return -1;
                 }
                 finally
@@ -1418,7 +1452,6 @@ namespace dp2Circulation
             }
         }
 
-
         // 原名 DoSaveEntities
         // 提交实体保存请求
         // return:
@@ -1429,14 +1462,14 @@ namespace dp2Circulation
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public virtual int DoSaveItems()
+        public virtual int DoSaveItems(LibraryChannel channel)
         {
             string strError = "";
-            int nRet = SaveItems(out strError);
+            int nRet = SaveItems(channel, out strError);
 
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);    // ForegroundWindow.Instance
+                MessageBox.Show(this, strError);    // this/*ForegroundWindow.Instance*/
                 return -1;
             }
 
@@ -1479,7 +1512,7 @@ namespace dp2Circulation
             DisplayKeys(strRecPath, strXml);
             return;
         ERROR1:
-            MessageBox.Show(ForegroundWindow.Instance, strError);
+            MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
         }
 
 
@@ -1526,7 +1559,7 @@ namespace dp2Circulation
             this.MainForm.StatusBarMessage = this.ItemTypeName + "信息 修改归属 成功";
             return;
         ERROR1:
-            MessageBox.Show(ForegroundWindow.Instance, strError);
+            MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
         }
 
         // 改变归属
@@ -1614,14 +1647,22 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 #endif
-            // 分批进行保存
-            // return:
-            //      -2  部分成功，部分失败
-            //      -1  出错
-            //      0   保存成功，没有错误和警告
-            nRet = SaveEntities(entities, out strError);
-            if (nRet != 0)
-                goto ERROR1;
+            LibraryChannel channel = this.MainForm.GetChannel();
+            try
+            {
+                // 分批进行保存
+                // return:
+                //      -2  部分成功，部分失败
+                //      -1  出错
+                //      0   保存成功，没有错误和警告
+                nRet = SaveEntities(channel, entities, out strError);
+                if (nRet != 0)
+                    goto ERROR1;
+            }
+            finally
+            {
+                this.MainForm.ReturnChannel(channel);
+            }
 
             return 0;
         ERROR1:
@@ -1651,7 +1692,7 @@ namespace dp2Circulation
             string strRecPath = cur.RecPath;
             if (string.IsNullOrEmpty(strRecPath) == true)
             {
-                strError = "所选定的"+this.ItemTypeName+"记录路径为空，尚未在数据库中建立";
+                strError = "所选定的" + this.ItemTypeName + "记录路径为空，尚未在数据库中建立";
                 goto ERROR1;
             }
 
@@ -1669,7 +1710,7 @@ namespace dp2Circulation
                 ItemInfoForm form = this.MainForm.GetTopChildWindow<ItemInfoForm>();
                 if (form == null)
                 {
-                    strError = "当前并没有已经打开的"+this.ItemTypeName+"窗";
+                    strError = "当前并没有已经打开的" + this.ItemTypeName + "窗";
                     goto ERROR1;
                 }
                 form.DbType = this.ItemType;
@@ -1820,7 +1861,7 @@ namespace dp2Circulation
                     dupitem.HilightListViewItem(true);
 
                     if (bDisplayWarning == true)
-                        MessageBox.Show(ForegroundWindow.Instance, strText);
+                        MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
                     return 1;
                 }
             }
@@ -1836,25 +1877,45 @@ namespace dp2Circulation
 
 
             // 根据事项记录路径检索，检索出其从属的书目记录路径。
-            nRet = SearchBiblioRecPath(strIndex,
-                out strOutputItemRecPath,
-                out strBiblioRecPath,
-                out strError);
+            LibraryChannel channel = this.MainForm.GetChannel();
+            try
+            {
+                nRet = SearchBiblioRecPath(
+                    channel,
+                    strIndex,
+                    out strOutputItemRecPath,
+                    out strBiblioRecPath,
+                    out strError);
+            }
+            finally
+            {
+                this.MainForm.ReturnChannel(channel);
+            }
             if (nRet == -1)
             {
-                MessageBox.Show(ForegroundWindow.Instance, "对"+this.ItemTypeName+"-"+strFromCaption+" '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "对" + this.ItemTypeName + "-" + strFromCaption + " '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
                 return -1;
             }
             else if (nRet == 0)
             {
 
-                MessageBox.Show(ForegroundWindow.Instance, "没有找到"+strFromCaption+"为 '" + strSearchText + "' 的" + this.ItemTypeName + "记录。");
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到" + strFromCaption + "为 '" + strSearchText + "' 的" + this.ItemTypeName + "记录。");
                 return 0;
             }
             else if (nRet == 1)
             {
                 Debug.Assert(strBiblioRecPath != "", "");
-                this.TriggerLoadRecord(strBiblioRecPath);
+                // return:
+                //      -1  出错。已经用MessageBox报错
+                //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
+                //      1   成功装载
+                //      2   通道被占用
+                nRet = this.TriggerLoadRecord(strBiblioRecPath);
+                if (nRet != 1)
+                {
+                    MessageBox.Show(this, "TriggerLoadRecord 出错。错误码 " + nRet.ToString());
+                    return -1;
+                }
 
                 // 选上事项
                 result_item = HilightLineByItemRecPath(strOutputItemRecPath, true); // BUG strSearchText 2013/10/22 修改
@@ -1863,8 +1924,8 @@ namespace dp2Circulation
             else if (nRet > 1) // 命中发生重复
             {
                 // Debug.Assert(false, "用" + this.ItemTypeName + "记录路径检索绝对不会发生重复现象");
-                Debug.Assert(false, "用" + this.ItemTypeName + "记录 "+strSearchPrefix+" 检索应当不会发生重复现象");
-                MessageBox.Show(ForegroundWindow.Instance, "用 '" + strIndex + "' 检索" + this.ItemTypeName + "记录命中多于一条，为 " + nRet.ToString() + " 条");
+                Debug.Assert(false, "用" + this.ItemTypeName + "记录 " + strSearchPrefix + " 检索应当不会发生重复现象");
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "用 '" + strIndex + "' 检索" + this.ItemTypeName + "记录命中多于一条，为 " + nRet.ToString() + " 条");
                 return -1;
             }
 
@@ -1913,7 +1974,7 @@ namespace dp2Circulation
                     dupitem.HilightListViewItem(true);
 
                     if (bDisplayWarning == true)
-                        MessageBox.Show(ForegroundWindow.Instance, strText);
+                        MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
                     return 1;
                 }
             }
@@ -1928,12 +1989,12 @@ namespace dp2Circulation
                 out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(ForegroundWindow.Instance, "对期记录路径 '" + strItemRecPath + "' 进行检索的过程中发生错误: " + strError);
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "对期记录路径 '" + strItemRecPath + "' 进行检索的过程中发生错误: " + strError);
                 return -1;
             }
             else if (nRet == 0)
             {
-                MessageBox.Show(ForegroundWindow.Instance, "没有找到路径为 '" + strItemRecPath + "' 的期记录。");
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到路径为 '" + strItemRecPath + "' 的期记录。");
                 return 0;
             }
             else if (nRet == 1)
@@ -1959,16 +2020,26 @@ namespace dp2Circulation
             string strError = "";
 
             string strResultXml = "";
-            int nRet = GetKeys(strRecPath,
-                strXml,
-                out strResultXml,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            LibraryChannel channel = this.MainForm.GetChannel();
+            try
+            {
+                int nRet = GetKeys(
+                    channel,
+                    strRecPath,
+                    strXml,
+                    out strResultXml,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                this.MainForm.ReturnChannel(channel);
+            }
 
             XmlViewerForm dlg = new XmlViewerForm();
 
-            dlg.Text = this.ItemTypeName + "记录 "+strRecPath+" 的检索点";
+            dlg.Text = this.ItemTypeName + "记录 " + strRecPath + " 的检索点";
             dlg.MainForm = this.MainForm;
             dlg.XmlString = strResultXml;
             dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -1978,7 +2049,9 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        int GetKeys(string strRecPath,
+        int GetKeys(
+            LibraryChannel channel,
+            string strRecPath,
     string strXml,
     out string strResultXml,
     out string strError)
@@ -1992,9 +2065,12 @@ namespace dp2Circulation
                 return -1;
             }
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得记录 " + strRecPath + " 的检索点 ...");
             Stop.BeginLoop();
+#endif
+            Stop.Initial("正在获得记录 " + strRecPath + " 的检索点 ...");
 
             try
             {
@@ -2004,7 +2080,7 @@ namespace dp2Circulation
                 byte[] timestamp = null;
                 long lRet = 0;
 
-                lRet = Channel.GetItemInfo(
+                lRet = channel.GetItemInfo(
  Stop,
  this.ItemType,
   "@path:" + strRecPath,
@@ -2024,8 +2100,11 @@ namespace dp2Circulation
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
 
@@ -2035,7 +2114,9 @@ namespace dp2Circulation
         // 根据事项记录路径，检索出其从属的书目记录路径。
         // parameters:
         //      strIndex    注意使用的时候用 @path @refID 引导
-        int SearchBiblioRecPath(string strIndex,
+        int SearchBiblioRecPath(
+            LibraryChannel channel,
+            string strIndex,
             out string strOutputItemRecPath,
             out string strBiblioRecPath,
             out string strError)
@@ -2049,9 +2130,12 @@ namespace dp2Circulation
 
             byte[] item_timestamp = null;
 
+#if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在检索" + this.ItemTypeName + "记录 '" + strIndex + "' 所从属的书目记录路径 ...");
             Stop.BeginLoop();
+#endif
+            Stop.Initial("正在检索" + this.ItemTypeName + "记录 '" + strIndex + "' 所从属的书目记录路径 ...");
 
             try
             {
@@ -2062,7 +2146,7 @@ namespace dp2Circulation
 
                 if (this.ItemType == "item")
                 {
-                    lRet = Channel.GetItemInfo(
+                    lRet = channel.GetItemInfo(
     Stop,
     strIndex,
     null,
@@ -2078,7 +2162,7 @@ namespace dp2Circulation
                 }
                 else if (this.ItemType == "order")
                 {
-                    lRet = Channel.GetOrderInfo(
+                    lRet = channel.GetOrderInfo(
     Stop,
     strIndex,
                         // "", // strBiblioRecPath,
@@ -2095,7 +2179,7 @@ namespace dp2Circulation
                 }
                 else if (this.ItemType == "issue")
                 {
-                    lRet = Channel.GetIssueInfo(
+                    lRet = channel.GetIssueInfo(
                          Stop,
                          strIndex,
                         // "", // strBiblioRecPath,
@@ -2112,7 +2196,7 @@ namespace dp2Circulation
                 }
                 else if (this.ItemType == "comment")
                 {
-                    lRet = Channel.GetCommentInfo(
+                    lRet = channel.GetCommentInfo(
     Stop,
     strIndex,
                         // "", // strBiblioRecPath,
@@ -2131,14 +2215,17 @@ namespace dp2Circulation
                 {
                     strError = "未知的事项类型 '" + this.ItemType + "'";
                     return -1;
-                } 
-                
+                }
+
                 return (int)lRet;   // not found
             }
             finally
             {
+#if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+#endif
                 Stop.Initial("");
             }
         }
@@ -2180,7 +2267,7 @@ namespace dp2Circulation
 
                     dupitem.HilightListViewItem(true);
 
-                    MessageBox.Show(ForegroundWindow.Instance, strText);
+                    MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
                     return 1;
                 }
             }
@@ -2195,12 +2282,12 @@ namespace dp2Circulation
                 out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(ForegroundWindow.Instance, "对"+this.ItemTypeName+"记录的参考ID '" + strItemRefID + "' 进行检索的过程中发生错误: " + strError);
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "对"+this.ItemTypeName+"记录的参考ID '" + strItemRefID + "' 进行检索的过程中发生错误: " + strError);
                 return -1;
             }
             else if (nRet == 0)
             {
-                MessageBox.Show(ForegroundWindow.Instance, "没有找到参考 ID 为 '" + strItemRefID + "' 的"+this.ItemTypeName+"记录。");
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到参考 ID 为 '" + strItemRefID + "' 的"+this.ItemTypeName+"记录。");
                 return 0;
             }
             else if (nRet == 1)
@@ -2214,7 +2301,7 @@ namespace dp2Circulation
             else if (nRet > 1) // 命中发生重复
             {
                 Debug.Assert(false, "用"+this.ItemTypeName+"记录参考 ID 检索应当不会发生重复现象");
-                MessageBox.Show(ForegroundWindow.Instance, "用参考ID '" + strItemRefID + "' 检索"+this.ItemTypeName+"记录命中多于一条，为 " + nRet.ToString() + " 条");
+                MessageBox.Show(this/*ForegroundWindow.Instance*/, "用参考ID '" + strItemRefID + "' 检索"+this.ItemTypeName+"记录命中多于一条，为 " + nRet.ToString() + " 条");
                 return -1;
             }
 

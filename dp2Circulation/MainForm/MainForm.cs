@@ -39,6 +39,7 @@ using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
+using DigitalPlatform.MessageClient;
 
 namespace dp2Circulation
 {
@@ -47,6 +48,10 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm : Form
     {
+        public PropertyTaskList PropertyTaskList = new PropertyTaskList();
+
+        internal CommentViewerForm m_commentViewer = null;
+
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
         // 2014/10/3
@@ -404,7 +409,7 @@ Stack:
             {
                 base.OnMdiChildActivate(e);
             }
-            catch(System.ObjectDisposedException)
+            catch (System.ObjectDisposedException)
             {
 
             }
@@ -706,6 +711,11 @@ Stack:
 
             RemoveBarcodeFont();
 
+            this.PropertyTaskList.Close();
+
+            if (this.m_commentViewer != null)
+                this.m_commentViewer.Close();
+
             if (this.MessageHub != null)
                 this.MessageHub.Destroy();
 
@@ -788,7 +798,7 @@ Stack:
             if (Stop != null) // 脱离关联
             {
                 Stop.Unregister(true);
-                Stop = null;
+                // Stop = null;
             }
 
             if (this._channelPool != null)
@@ -1412,7 +1422,7 @@ Stack:
             dlg.UiState = this.AppInfo.GetString(
                     "main_form",
                     "cfgdlg_uiState",
-                    ""); 
+                    "");
             this.AppInfo.LinkFormState(dlg,
                 "cfgdlg_state");
             dlg.ShowDialog(this);
@@ -1494,7 +1504,6 @@ Stack:
             form.Show();
 #endif
             OpenWindow<ChangePasswordForm>();
-
         }
 
         private void MenuItem_openAmerceForm_Click(object sender, EventArgs e)
@@ -1506,7 +1515,6 @@ Stack:
             form.Show();
 #endif
             OpenWindow<AmerceForm>();
-
         }
 
         private void MenuItem_openReaderManageForm_Click(object sender, EventArgs e)
@@ -1711,6 +1719,7 @@ Stack:
             }
         }
 
+#if NO
         // 登出
         private void MenuItem_logout_Click(object sender, EventArgs e)
         {
@@ -1719,6 +1728,7 @@ Stack:
                 ((EntityForm)this.ActiveMdiChild).Logout();
             }
         }
+#endif
 
         // 打开数据目录文件夹
         private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
@@ -1852,7 +1862,7 @@ Stack:
 
         private void MenuItem_accept_Click(object sender, EventArgs e)
         {
-            #if ACCEPT_MODE
+#if ACCEPT_MODE
 
             AcceptForm top = this.GetTopChildWindow<AcceptForm>();
             if (top != null)
@@ -1988,7 +1998,7 @@ Stack:
         internal void SetMenuItemState()
         {
             // 菜单
- 
+
             // 工具条按钮
             this.ToolStripMenuItem_loadReaderInfo.Enabled = true;
             this.ToolStripMenuItem_loadItemInfo.Enabled = true;
@@ -2161,7 +2171,7 @@ Stack:
         {
             List<Form> results = new List<Form>();
 
-            foreach(Form child in this.MdiChildren)
+            foreach (Form child in this.MdiChildren)
             {
                 if (child.GetType().Equals(type) == true)
                     results.Add(child);
@@ -2493,9 +2503,9 @@ Stack:
             }
         }
 
-        string _currentUserName = "";
-        string _currentUserRights = "";
-        string _currentLibraryCodeList = "";
+        internal string _currentUserName = "";
+        internal string _currentUserRights = "";
+        internal string _currentLibraryCodeList = "";
 
         internal void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
@@ -2704,7 +2714,7 @@ string strUserName = ".")
             Stop stop,
             string strDbName,
             string strCfgFileName,
-            byte [] remote_timestamp,
+            byte[] remote_timestamp,
             out string strContent,
             out byte[] baOutputTimestamp,
             out string strError)
@@ -3041,7 +3051,7 @@ string strUserName = ".")
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
         void DoStop(object sender, StopEventArgs e)
         {
-            foreach(LibraryChannel channel in _channelList)
+            foreach (LibraryChannel channel in _channelList)
             {
                 if (channel != null)
                     channel.Abort();
@@ -3055,6 +3065,7 @@ string strUserName = ".")
         public void EnableControls(bool bEnable)
         {
             this.menuStrip_main.Enabled = bEnable;
+            this.panel_fixed.Enabled = bEnable;
 
             this.toolStripDropDownButton_barcodeLoadStyle.Enabled = bEnable;
             this.toolStripTextBox_barcode.Enabled = bEnable;
@@ -3260,7 +3271,7 @@ string strUserName = ".")
         static string GetDisplayStyle(string strStyles,
             bool bRemove2 = false)
         {
-            string[] parts = strStyles.Split(new char[] {','});
+            string[] parts = strStyles.Split(new char[] { ',' });
             List<string> results = new List<string>();
             foreach (string part in parts)
             {
@@ -3385,6 +3396,20 @@ string strUserName = ".")
             }
         }
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 dp2Circulation.MainForm.GetValueTable(String strTableName, String strDbName, String[]& values, String& strError)
+在 dp2Circulation.ChangeItemActionDialog.dlg_GetValueTable(Object sender, GetValueTableEventArgs e)
+在 dp2Circulation.OneActionDialog.FillDropDown(ComboBox combobox)
+在 dp2Circulation.OneActionDialog.comboBox_fieldValue_DropDown(Object sender, EventArgs e)
+在 System.Windows.Forms.ComboBox.WmReflectCommand(Message& m)
+在 System.Windows.Forms.ComboBox.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+         * */
         // 获得值列表
         // 带有cache功能
         /// <summary>
@@ -3397,7 +3422,7 @@ string strUserName = ".")
         /// <returns>-1: 出错; 0: 成功</returns>
         public int GetValueTable(string strTableName,
             string strDbName,
-            out string [] values,
+            out string[] values,
             out string strError)
         {
             values = null;
@@ -3406,7 +3431,7 @@ string strUserName = ".")
             // 先看看缓存里面是否已经有了
             string strName = strTableName + "~~~" + strDbName;
 
-            values = (string [])this.valueTableCache[strName];
+            values = (string[])this.valueTableCache[strName];
 
             if (values != null)
                 return 0;
@@ -3421,8 +3446,10 @@ string strUserName = ".")
 #endif
             LibraryChannel channel = this.GetChannel();
 
-
-            // this.Update();
+            if (Stop == null)
+            {
+                ReportError("dp2circulation 调试信息", "MainForm.GetValueTable() 中发现 Stop 为空");
+            }
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获取值列表 ...");
@@ -3430,6 +3457,7 @@ string strUserName = ".")
 
             try
             {
+                channel.Timeout = new TimeSpan(0, 0, 10);
                 long lRet = channel.GetValueTable(
                     Stop,
                     strTableName,
@@ -3747,7 +3775,7 @@ string strUserName = ".")
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-#endregion
+        #endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -4023,7 +4051,7 @@ string strUserName = ".")
                 strError = "服务器端尚未提供条码号校验方法，因此无法分辨读者证条码号和册条码号";
                 goto ERROR1;
             }
-                
+
             if (nRet == 0)
             {
                 if (String.IsNullOrEmpty(strError) == true)
@@ -4166,7 +4194,7 @@ string strUserName = ".")
                     nodeRel = dom.CreateElement("rel");
                     dom.DocumentElement.AppendChild(nodeRel);
 
-                    DomUtil.SetAttr(nodeRel, "name", strValue); 
+                    DomUtil.SetAttr(nodeRel, "name", strValue);
                 }
 
                 // weight 加 1
@@ -4238,7 +4266,7 @@ string strUserName = ".")
             string strLang = "zh";
             string strQueryXml = "<target list='" + strDbName + ":" + "键" + "'><item><word>"
 + StringUtil.GetXmlStringSimple(strKey)
-+ "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMaxCount.ToString()+"</maxCount></item><lang>" + strLang + "</lang></target>";
++ "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMaxCount.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
 #if NO
             int nRet = PrepareSearch();
@@ -4423,7 +4451,7 @@ string strUserName = ".")
             }
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在验证条码号 "+strBarcode+"...");
+            Stop.Initial("正在验证条码号 " + strBarcode + "...");
             Stop.BeginLoop();
 
             // EnableControls(false);
@@ -4766,7 +4794,7 @@ MessageBoxDefaultButton.Button1);
                     string strPassword = Cryptography.Decrypt(
         strEncryptedText,
         EncryptKey);
-                return strPassword;
+                    return strPassword;
                 }
                 catch
                 {
@@ -4915,8 +4943,8 @@ out strError);
                         return strError;
                     }
 
-                        Debug.Assert(results.Length > 0, "");
-                        strXml = results[0];
+                    Debug.Assert(results.Length > 0, "");
+                    strXml = results[0];
 
                     // 加入到缓存
                     this.SetReaderXmlCache(strPatronBarcode,
@@ -5499,7 +5527,7 @@ out strError);
                 // Debug.Assert(false, "SaveSplitterPos()应当在窗口为非Minimized状态下调用");
             }
 
-            float fValue = (float)container.SplitterDistance / 
+            float fValue = (float)container.SplitterDistance /
                 (
                 container.Orientation == Orientation.Horizontal ?
                 (float)container.Height
@@ -5534,7 +5562,7 @@ out strError);
                 (float)container.Height
                 :
                 (float)container.Width
-                ) 
+                )
                 * fValue);
             }
             catch
@@ -5884,7 +5912,7 @@ out strError);
                 return;
             }
 
-        // DELETE_FILES:
+            // DELETE_FILES:
             FileInfo[] fis = di.GetFiles();
             for (int i = 0; i < fis.Length; i++)
             {
@@ -6980,7 +7008,7 @@ out strError);
 
         public object InvokeScript(
             WebBrowser webBrowser,
-            string strFuncName, 
+            string strFuncName,
             object[] args)
         {
             try
@@ -7225,10 +7253,10 @@ Keys keyData)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-        if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
                 // strSha1 != GetCheckCode(strSerialCode)
-                MatchLocalString(strSerialCode) == false
-                || String.IsNullOrEmpty(strSerialCode) == true)
+                    MatchLocalString(strSerialCode) == false
+                    || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (bReinput == false)
                 {
@@ -7265,7 +7293,7 @@ Keys keyData)
         {
             Hashtable table = StringUtil.ParseParameters(strEnvString);
             string strFuncValue = (string)table["function"];
-            string[] parts = strFuncList.Split(new char[] {','});
+            string[] parts = strFuncList.Split(new char[] { ',' });
             foreach (string part in parts)
             {
                 if (string.IsNullOrEmpty(part) == true)
@@ -7366,7 +7394,7 @@ Keys keyData)
                     this.CopyrightKey);
             SerialCodeForm dlg = new SerialCodeForm();
             dlg.Font = this.Font;
-            dlg.DefaultCodes = new List<string>(new string[] {"community|社区版"});
+            dlg.DefaultCodes = new List<string>(new string[] { "community|社区版" });
             dlg.SerialCode = strOldSerialCode;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
@@ -7453,10 +7481,10 @@ Keys keyData)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-        if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
                 // strSha1 != GetCheckCode(strSerialCode) 
-                MatchLocalString(strSerialCode) == false
-                || String.IsNullOrEmpty(strSerialCode) == true)
+                    MatchLocalString(strSerialCode) == false
+                    || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (String.IsNullOrEmpty(strSerialCode) == false)
                     MessageBox.Show(this, "序列号无效。请重新输入");
@@ -7524,7 +7552,7 @@ Keys keyData)
 </root>";
 #endif
 
-                static string _baseCfg = @"
+        static string _baseCfg = @"
 <root>
   <server name='红泥巴.数字平台中心' type='dp2library' url='http://hnbclub.cn/dp2library' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
@@ -7693,7 +7721,7 @@ Keys keyData)
         //      0   不是同一个服务器
         //      1   是同一个服务器
         public int IsSameDp2libraryServer(string strUrl1,
-            string strUrl2, 
+            string strUrl2,
             out string strError)
         {
             strError = "";
@@ -7703,7 +7731,7 @@ Keys keyData)
             int nRet = GetDp2libraryServerUID(null, strUrl1, out strUID1, out strError);
             if (nRet == -1)
             {
-                strError = "获得服务器 "+strUrl1+" 的 UID 时出错: " + strError;
+                strError = "获得服务器 " + strUrl1 + " 的 UID 时出错: " + strError;
                 return -1;
             }
             if (string.IsNullOrEmpty(strUID1) == true)
@@ -7728,7 +7756,7 @@ Keys keyData)
             return 1;
         }
 
-        public static int GetDp2libraryServerUID(Stop stop, 
+        public static int GetDp2libraryServerUID(Stop stop,
             string strURL,
             out string strUID,
             out string strError)
@@ -7879,7 +7907,7 @@ Keys keyData)
         {
             get
             {
-                string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/","_"));
+                string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/", "_"));
                 string strDirectory = Path.Combine(this.UserDir, "servers\\" + strServerUrl);
                 PathUtil.CreateDirIfNeed(strDirectory);
                 return strDirectory;
@@ -7957,16 +7985,16 @@ Keys keyData)
                     this.UserDir,
                     strTempDir,
                     (strText) =>
-                        {
-                            Application.DoEvents();
+                    {
+                        Application.DoEvents();
 
-                            if (strText != null)
-                                this.Stop.SetMessage(strText);
+                        if (strText != null)
+                            this.Stop.SetMessage(strText);
 
-                            if (this.Stop != null && this.Stop.State != 0)
-                                return false;
-                            return true;
-                        },
+                        if (this.Stop != null && this.Stop.State != 0)
+                            return false;
+                        return true;
+                    },
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -8033,6 +8061,7 @@ Keys keyData)
 
             List<string> args = StringUtil.GetCommandLineArgs();
             args.Add("newinstance");
+            args.Add("green");  // 不顾 Ctrl 键状态强制用绿色方式运行
 
             // 调试用 Program.ReleaseMutex();
 
@@ -8052,7 +8081,7 @@ Keys keyData)
         }
 
         // 启动 ClickOnce 方式安装的 dp2circulation
-        void StartClickOnceDp2circulation()
+        int StartClickOnceDp2circulation()
         {
             try
             {
@@ -8064,16 +8093,18 @@ Keys keyData)
                 string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
                 if (File.Exists(strShortcutFilePath) == false)
                 {
-                    return;
+                    return 0;
                 }
                 else
                 {
                     Process.Start(strShortcutFilePath);
+                    return 1;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(this, "dp2circulation 启动失败" + ex.Message);
+                return -1;
             }
         }
 
@@ -8103,6 +8134,83 @@ Keys keyData)
     "</head>";
         }
 
+        // 打开 CommentViewer 窗口
+        public void OpenCommentViewer(bool bOpenWindow)
+        {
+            // 优化，避免无谓地进行服务器调用
+            if (bOpenWindow == false)
+            {
+                if (this.PanelFixedVisible == false
+                    && (m_commentViewer == null || m_commentViewer.Visible == false))
+                    return;
+                // 2013/3/7
+                if (this.CanDisplayItemProperty() == false)
+                    return;
+            }
+
+            bool bNew = false;
+            if (this.m_commentViewer == null
+                || (bOpenWindow == true && this.m_commentViewer.Visible == false))
+            {
+                bNew = true;
+                m_commentViewer = new CommentViewerForm();
+                m_commentViewer.MainForm = this;  // 必须是第一句
+
+                m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
+                m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
+
+                MainForm.SetControlFont(m_commentViewer, this.Font, false);
+                m_commentViewer.InitialWebBrowser();
+            }
+
+            if (bOpenWindow == true)
+            {
+                if (m_commentViewer.Visible == false)
+                {
+                    this.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                    m_commentViewer.Show(this);
+                    m_commentViewer.Activate();
+
+                    this.CurrentPropertyControl = null;
+                }
+                else
+                {
+                    if (m_commentViewer.WindowState == FormWindowState.Minimized)
+                        m_commentViewer.WindowState = FormWindowState.Normal;
+                    m_commentViewer.Activate();
+                }
+            }
+            else
+            {
+                if (m_commentViewer.Visible == true)
+                {
+
+                }
+                else
+                {
+                    if (this.CurrentPropertyControl != m_commentViewer.MainControl)
+                        m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
+                }
+            }
+        }
+
+        void marc_viewer_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (m_commentViewer != null)
+            {
+                // this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
+                this.m_commentViewer = null;
+            }
+        }
+
+        // 点对点通讯的用户管理功能
+        private void toolStripButton_messageHub_userManage_Click(object sender, EventArgs e)
+        {
+            UserManageDialog dlg = new UserManageDialog();
+            MainForm.SetControlFont(dlg, this.DefaultFont);
+            dlg.Connection = this.MessageHub;
+            dlg.ShowDialog(this);
+        }
     }
 
     /// <summary>

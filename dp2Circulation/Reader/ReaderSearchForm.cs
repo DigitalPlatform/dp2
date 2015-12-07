@@ -37,12 +37,10 @@ namespace dp2Circulation
     /// </summary>
     public partial class ReaderSearchForm : SearchFormBase
     {
-
         /// <summary>
         /// 是否为指纹模式？如果为指纹模式，需要采用代理帐户登录
         /// </summary>
         public bool FingerPrintMode = false;    // 是否为指纹模式？如果为指纹模式，需要采用代理帐户登录
-
 
         /*
         // 参与排序的列号数组
@@ -228,7 +226,7 @@ namespace dp2Circulation
             else
                 owner = this;
 
-            string strComment = "为初始化指纹缓存，需要用户 "+this.MainForm.FingerprintUserName+" 亲自进行登录";
+            string strComment = "为初始化指纹缓存，需要用户 " + this.MainForm.FingerprintUserName + " 亲自进行登录";
 
             CirculationLoginDlg dlg = SetFingerprintAccount(
                 e.LibraryServerUrl,
@@ -933,7 +931,6 @@ out strError);
         void LoadRecordToReaderInfoForm(string strOpenStyle,
             string strIdType)
         {
-
             if (this.listView_records.SelectedItems.Count == 0)
             {
                 MessageBox.Show(this, "尚未选定要装入读者窗的事项");
@@ -1149,7 +1146,7 @@ out strError);
             MenuItem menuItem = null;
 
             ListViewItem selected_item = null;
-            
+
             string strBarcode = "";
             string strRecPath = "";
 
@@ -1454,7 +1451,7 @@ out strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
         // 修改宏定义
@@ -1634,7 +1631,6 @@ out strError);
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导入条码号 ...");
             stop.BeginLoop();
-
 
             try
             {
@@ -2019,8 +2015,6 @@ out strError);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
-
 
 #if NO
         // 调用前，记录路径列已经有值
@@ -2972,7 +2966,7 @@ MessageBoxDefaultButton.Button1);
 
                     string strTargetRecPath = saveto_dlg.RecPath;
 
-                    stop.SetMessage("正在移动读者记录 '"+strCurrentRecPath+"' ...");
+                    stop.SetMessage("正在移动读者记录 '" + strCurrentRecPath + "' ...");
 
                     byte[] target_timestamp = null;
                     long lRet = Channel.MoveReaderInfo(
@@ -3003,7 +2997,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
             }
-            MessageBox.Show(this, "成功移动读者记录 "+nCount.ToString()+" 条");
+            MessageBox.Show(this, "成功移动读者记录 " + nCount.ToString() + " 条");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -3081,10 +3075,9 @@ MessageBoxDefaultButton.Button1);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
+                System.Text.Encoding.UTF8))
             {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
@@ -3095,11 +3088,6 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";
@@ -3154,10 +3142,9 @@ MessageBoxDefaultButton.Button1);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
+                System.Text.Encoding.UTF8))
             {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
@@ -3168,11 +3155,6 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";
@@ -3454,7 +3436,7 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-        
+
         // parameters:
         //      bDelayShow  延迟显示当前窗口。如果为 false，表示不操心显示的事儿
         // return:
@@ -3621,7 +3603,7 @@ out strError);
                 if (lRet == -1)
                 {
                     if (Channel.ErrorCode == ErrorCode.AccessDenied)
-                        strError = "用户 "+Channel.UserName+" 权限不足: " + strError;
+                        strError = "用户 " + Channel.UserName + " 权限不足: " + strError;
                     return -1;
                 }
 
@@ -4083,7 +4065,7 @@ out strError);
             strBarcode = "";
             strFingerprint = "";
 
-            string[] parts = strText.Split(new char[] {'|'});
+            string[] parts = strText.Split(new char[] { '|' });
             if (parts.Length > 0)
                 strTimestamp = parts[0];
             if (parts.Length > 1)
@@ -4309,8 +4291,7 @@ out strFingerprint);
     "</head>";
         }
 
-
-        internal override int GetXmlHtml(BiblioInfo info,
+        internal static int GetXmlHtml(BiblioInfo info,
     out string strXml,
     out string strHtml2,
     out string strError)
@@ -4356,10 +4337,8 @@ out strFingerprint);
             }
 
             strXml = MergeXml(strOldXml, strNewXml);
-
             return 0;
         }
-
 
         #endregion
 
@@ -5388,7 +5367,7 @@ out strFingerprint);
 
                 List<string> subcols = new List<string>();
                 subcols.Add(strState);
-                subcols.Add(strCreateDate+"~"+strExpireDate);
+                subcols.Add(strCreateDate + "~" + strExpireDate);
                 subcols.Add(strReaderType);
                 subcols.Add(strComment);
 
@@ -5596,7 +5575,7 @@ XLColor.DarkGreen,
             rngData = sheet.Range(cell_no, cells[cells.Count - 1]);
             rngData.FirstRow().Style.Border.TopBorder = XLBorderStyleValues.Medium;
 #endif
-            sheet.Rows(nStartRow + 1, nRowIndex-1).Group();
+            sheet.Rows(nStartRow + 1, nRowIndex - 1).Group();
         }
 
         public delegate int Delegate_GetBiblioSummary(string strItemBarcode,
@@ -5917,7 +5896,7 @@ out strError);
                 {
                     if (m_loader.Stop != null)
                     {
-                        m_loader.Stop.SetMessage("正在获取"+this.DbTypeCaption+"记录 " + strRecPath);
+                        m_loader.Stop.SetMessage("正在获取" + this.DbTypeCaption + "记录 " + strRecPath);
                     }
                     bool bRet = enumerator.MoveNext();
                     if (bRet == false)

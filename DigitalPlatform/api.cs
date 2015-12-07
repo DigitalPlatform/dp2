@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
@@ -162,7 +162,7 @@ namespace DigitalPlatform
             string strMime = MimeTypeFrom(ReadFirst256Bytes(strFileName),
                 "");
 
-            // Èç¹ûÍ¨¹ýÄÚÈÝÎÞ·¨ÅÐ¶Ï£¬Ôò½øÒ»²½ÓÃÎÄ¼þÀ©Õ¹ÃûÅÐ¶Ï
+            // å¦‚æžœé€šè¿‡å†…å®¹æ— æ³•åˆ¤æ–­ï¼Œåˆ™è¿›ä¸€æ­¥ç”¨æ–‡ä»¶æ‰©å±•ååˆ¤æ–­
             if (strMime == "application/octet-stream")
             {
                 string strFileExtension = Path.GetExtension(strFileName).ToLower();
@@ -179,26 +179,20 @@ namespace DigitalPlatform
                 "");
         }
 
-		// ¶ÁÈ¡ÎÄ¼þÇ°256bytes
+		// è¯»å–æ–‡ä»¶å‰256bytes
 		static byte[] ReadFirst256Bytes(string strFileName)
 		{
-			FileStream fileSource = File.Open(
+			using(FileStream fileSource = File.Open(
 				strFileName,
 				FileMode.Open,
 				FileAccess.Read, 
-				FileShare.ReadWrite);
-			try 
-			{
+				FileShare.ReadWrite))
+            { 
 				byte[] result = new byte[Math.Min(256, fileSource.Length)];
 				fileSource.Read(result, 0, result.Length);
 
 				return result;
 			}
-			finally 
-			{
-				fileSource.Close();
-			}
-
 		}
 
 		static string MimeTypeFrom(
@@ -243,9 +237,9 @@ namespace DigitalPlatform
 		public static extern int GetShortPathName(
 			[MarshalAs(UnmanagedType.LPTStr)]
 			string path,
-¡¡			[MarshalAs(UnmanagedType.LPTStr)]
-¡¡			StringBuilder shortPath,
-¡¡			int shortPathLength);  
+ã€€			[MarshalAs(UnmanagedType.LPTStr)]
+ã€€			StringBuilder shortPath,
+ã€€			int shortPathLength);  
 
 		[ DllImport ( "kernel32" ) ]
 		public static extern int GetPrivateProfileString (
@@ -354,7 +348,7 @@ namespace DigitalPlatform
             IntPtr wparam,
             IntPtr lparam);
 
-		#region EM_?? ÏûÏ¢¶¨Òå ºÍ Windows Edit ¿Ø¼þÏà¹Ø¹¦ÄÜ
+		#region EM_?? æ¶ˆæ¯å®šä¹‰ å’Œ Windows Edit æŽ§ä»¶ç›¸å…³åŠŸèƒ½
 
 		// EM_???
 		public const int EM_GETSEL			= 0x00b0;
@@ -407,7 +401,7 @@ namespace DigitalPlatform
 				EM_GETFIRSTVISIBLELINE, 0, 0);
 		}
 
-		// µÃµ½editÖÐÐÐ×ÜÊý
+		// å¾—åˆ°editä¸­è¡Œæ€»æ•°
 		public static int GetEditLines(TextBox edit)
 		{
 			
@@ -460,7 +454,7 @@ namespace DigitalPlatform
 		}
 
 
-		// µÃµ½edit caretµ±Ç°ÐÐÁÐÎ»ÖÃ
+		// å¾—åˆ°edit caretå½“å‰è¡Œåˆ—ä½ç½®
 		public static void GetEditCurrentCaretPos(
 			TextBox edit,
 			out int x,
@@ -764,7 +758,7 @@ namespace DigitalPlatform
 			IntPtr hWnd);
 
 		/*
-		 * Ô­ÐÍ
+		 * åŽŸåž‹
 DNS_STATUS WINAPI DnsQueryConfig(
   DNS_CONFIG_TYPE Config,
   DWORD Flag,
@@ -936,7 +930,7 @@ DNS_STATUS WINAPI DnsQueryConfig(
 
 		}
 
-        // »ñµÃ.netÏµÍ³Ä¿Â¼
+        // èŽ·å¾—.netç³»ç»Ÿç›®å½•
         // http://msdn.microsoft.com/msdnmag/issues/04/04/NETMatters/default.aspx
         [DllImport("mscoree.dll")]
         public static extern int GetCORSystemDirectory(
@@ -1066,23 +1060,23 @@ ref int lpdwSize
         private const int IME_CMODE_FULLSHAPE = 0x8;
         private const int IME_CHOTKEY_SHAPE_TOGGLE = 0x11;
 
-        // ½«ÊäÈë·¨×ª»»Îª°ë½Ç×´Ì¬
+        // å°†è¾“å…¥æ³•è½¬æ¢ä¸ºåŠè§’çŠ¶æ€
         // 2008/6/4
         public static void SetImeHalfShape(Control control)
         {
             IntPtr hImc = ImmGetContext(control.Handle);
-            //Èç¹ûÊäÈë·¨´¦ÓÚ´ò¿ª×´Ì¬
+            //å¦‚æžœè¾“å…¥æ³•å¤„äºŽæ‰“å¼€çŠ¶æ€
             if (ImmGetOpenStatus(hImc))
             {
                 int iMode = 0;
                 int iSentence = 0;
-                //¼ìË÷ÊäÈë·¨ÐÅÏ¢
+                //æ£€ç´¢è¾“å…¥æ³•ä¿¡æ¯
                 bool bSuccess = ImmGetConversionStatus(hImc,
                     ref   iMode,
                     ref   iSentence);
                 if (bSuccess)
                 {
-                    //Èç¹ûÊÇÈ«½Ç,×ª»»³É°ë½Ç
+                    //å¦‚æžœæ˜¯å…¨è§’,è½¬æ¢æˆåŠè§’
                     if ((iMode & IME_CMODE_FULLSHAPE) > 0)
                         ImmSimulateHotKey(control.Handle, IME_CHOTKEY_SHAPE_TOGGLE);
                 }

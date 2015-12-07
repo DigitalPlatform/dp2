@@ -10,80 +10,80 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.Script
 {
-	/// <summary>
-	/// 管理一个 Project 的对话框
-	/// </summary>
-	public class OneProjectDialog : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// 管理一个 Project 的对话框
+    /// </summary>
+    public class OneProjectDialog : System.Windows.Forms.Form
+    {
         public string HostName = "";
-		public ScriptManager scriptManager = null;
-		bool m_bNew = false;
+        public ScriptManager scriptManager = null;
+        bool m_bNew = false;
 
-		public string strTempLocate = "";
+        public string strTempLocate = "";
 
-		public string ResultProjectNamePath = "";
-		public string ResultLocate = "";
-		//public string[] ResultRefs = null;
+        public string ResultProjectNamePath = "";
+        public string ResultLocate = "";
+        //public string[] ResultRefs = null;
 
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox textBox_projectName;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox_projectName;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Label label5;
         private DigitalPlatform.GUI.ListViewNF listView_files;
-		private System.Windows.Forms.ColumnHeader columnHeader_fileName;
-		private System.Windows.Forms.ColumnHeader columnHeader_comment;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.TextBox textBox_projectPathOfName;
-		private System.Windows.Forms.TextBox textBox_projectLocate;
-		private System.Windows.Forms.Button button_editFile;
-		private System.Windows.Forms.Button button_newFile;
-		private System.Windows.Forms.Button button_deleteFile;
-		private System.Windows.Forms.Button button_changeProjectLocation;
-		private System.Windows.Forms.Button button_changeProjectName;
-		private System.Windows.Forms.CheckBox checkBox_displayTempFile;
+        private System.Windows.Forms.ColumnHeader columnHeader_fileName;
+        private System.Windows.Forms.ColumnHeader columnHeader_comment;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox_projectPathOfName;
+        private System.Windows.Forms.TextBox textBox_projectLocate;
+        private System.Windows.Forms.Button button_editFile;
+        private System.Windows.Forms.Button button_newFile;
+        private System.Windows.Forms.Button button_deleteFile;
+        private System.Windows.Forms.Button button_changeProjectLocation;
+        private System.Windows.Forms.Button button_changeProjectName;
+        private System.Windows.Forms.CheckBox checkBox_displayTempFile;
         private Button button_openProjectFolder;
         private Button button_openInCode;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public OneProjectDialog()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public OneProjectDialog()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OneProjectDialog));
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_projectName = new System.Windows.Forms.TextBox();
@@ -118,7 +118,7 @@ namespace DigitalPlatform.Script
             // 
             // textBox_projectName
             // 
-            this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectName.Location = new System.Drawing.Point(121, 9);
             this.textBox_projectName.Name = "textBox_projectName";
@@ -159,7 +159,7 @@ namespace DigitalPlatform.Script
             // 
             // textBox_projectPathOfName
             // 
-            this.textBox_projectPathOfName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_projectPathOfName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectPathOfName.Location = new System.Drawing.Point(121, 33);
             this.textBox_projectPathOfName.Name = "textBox_projectPathOfName";
@@ -178,8 +178,8 @@ namespace DigitalPlatform.Script
             // 
             // listView_files
             // 
-            this.listView_files.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.listView_files.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_files.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_fileName,
@@ -208,7 +208,7 @@ namespace DigitalPlatform.Script
             // 
             // textBox_projectLocate
             // 
-            this.textBox_projectLocate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_projectLocate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectLocate.Location = new System.Drawing.Point(121, 58);
             this.textBox_projectLocate.Name = "textBox_projectLocate";
@@ -342,359 +342,359 @@ namespace DigitalPlatform.Script
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void ScriptDlg_Load(object sender, System.EventArgs e)
-		{
-			// textBox_scriptCode.Font = new Font("Courier New",9);
-			listView_files_SelectedIndexChanged(null, null);
-		
-		}
+        private void ScriptDlg_Load(object sender, System.EventArgs e)
+        {
+            // textBox_scriptCode.Font = new Font("Courier New",9);
+            listView_files_SelectedIndexChanged(null, null);
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (textBox_projectName.Text == "")
-			{
-				MessageBox.Show("尚未指定方案名");
-				return;
-			}
+        }
 
-			// 方案名 + 路径
-			ResultProjectNamePath = textBox_projectPathOfName.Text;
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (textBox_projectName.Text == "")
+            {
+                MessageBox.Show("尚未指定方案名");
+                return;
+            }
 
-			if (ResultProjectNamePath != "")
-				ResultProjectNamePath += "/";
-			
-			ResultProjectNamePath += textBox_projectName.Text;
+            // 方案名 + 路径
+            ResultProjectNamePath = textBox_projectPathOfName.Text;
 
-			ResultLocate = textBox_projectLocate.Text;
-			// 避免有用目录和文件被OnClosed()自动删除
-			this.strTempLocate = "";	
+            if (ResultProjectNamePath != "")
+                ResultProjectNamePath += "/";
 
-			/*
-			// 源代码文件名
-			ResultCodeFileName = textBox_codeFileName.Text;
+            ResultProjectNamePath += textBox_projectName.Text;
 
-			// refs
-			string strTemp = textBox_refs.Text;
-			strTemp = strTemp.Replace("\r\n", ",");	// 注意去掉空行?
-			ResultRefs = strTemp.Split(new Char [] {','});
+            ResultLocate = textBox_projectLocate.Text;
+            // 避免有用目录和文件被OnClosed()自动删除
+            this.strTempLocate = "";
 
-			// 避免有用文件被OnClosed()自动删除
-			this.strTempCodeFileName = "";	
-			*/
+            /*
+            // 源代码文件名
+            ResultCodeFileName = textBox_codeFileName.Text;
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            // refs
+            string strTemp = textBox_refs.Text;
+            strTemp = strTemp.Replace("\r\n", ",");	// 注意去掉空行?
+            ResultRefs = strTemp.Split(new Char [] {','});
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.Close();
-			this.DialogResult = DialogResult.Cancel;
-		}
+            // 避免有用文件被OnClosed()自动删除
+            this.strTempCodeFileName = "";	
+            */
 
-		// 初始化参数
-		public void Initial(string strProjectNamePath,
-			string strLocate)
-		{
-			// 析出路径和名
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-			/*
-			int nRet = strProjectNamePath.LastIndexOf("/");
-			if (nRet == -1) 
-			{
-				this.textBox_projectName.Text = strProjectNamePath;
-				this.textBox_projectPathOfName.Text = "";
-			}
-			else 
-			{
-				this.textBox_projectName.Text = strProjectNamePath.Substring(nRet+1);
-				this.textBox_projectPathOfName.Text = strProjectNamePath.Substring(0,nRet);
-			}
-			*/
-			string strPath;
-			string strName;
-			ScriptManager.SplitProjectPathName(strProjectNamePath,
-				out strPath,
-				out strName);
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.Close();
+            this.DialogResult = DialogResult.Cancel;
+        }
 
-			this.textBox_projectName.Text = strName;
-			this.textBox_projectPathOfName.Text = strPath;
+        // 初始化参数
+        public void Initial(string strProjectNamePath,
+            string strLocate)
+        {
+            // 析出路径和名
 
-			// 文件目录
-			textBox_projectLocate.Text = strLocate;
+            /*
+            int nRet = strProjectNamePath.LastIndexOf("/");
+            if (nRet == -1) 
+            {
+                this.textBox_projectName.Text = strProjectNamePath;
+                this.textBox_projectPathOfName.Text = "";
+            }
+            else 
+            {
+                this.textBox_projectName.Text = strProjectNamePath.Substring(nRet+1);
+                this.textBox_projectPathOfName.Text = strProjectNamePath.Substring(0,nRet);
+            }
+            */
+            string strPath;
+            string strName;
+            ScriptManager.SplitProjectPathName(strProjectNamePath,
+                out strPath,
+                out strName);
 
-			LoadFileInfo();
+            this.textBox_projectName.Text = strName;
+            this.textBox_projectPathOfName.Text = strPath;
 
-			/*
-			// refs
-			//string[] aName = strList.Split(new Char [] {','});
-			// 每行一个ref事项
-			textBox_refs.Text = "";
-			for(int i=0;i<refs.Length;i++)
-			{
-				if (textBox_refs.Text != "")
-					textBox_refs.Text += "\r\n";
-				textBox_refs.Text += refs[i];
-			}
-			*/
+            // 文件目录
+            textBox_projectLocate.Text = strLocate;
 
-		}
+            LoadFileInfo();
 
-		class FileInfoCompare : IComparer  
-		{
+            /*
+            // refs
+            //string[] aName = strList.Split(new Char [] {','});
+            // 每行一个ref事项
+            textBox_refs.Text = "";
+            for(int i=0;i<refs.Length;i++)
+            {
+                if (textBox_refs.Text != "")
+                    textBox_refs.Text += "\r\n";
+                textBox_refs.Text += refs[i];
+            }
+            */
 
-			// Calls CaseInsensitiveComparer.Compare with the parameters reversed.
-			int IComparer.Compare( Object x, Object y )  
-			{
-				return( (new CaseInsensitiveComparer()).Compare( ((FileInfo)x).Name, ((FileInfo)y).Name     ) );
-			}
+        }
 
-		}
+        class FileInfoCompare : IComparer
+        {
 
-		// 填充文件信息
-		void LoadFileInfo()
-		{
+            // Calls CaseInsensitiveComparer.Compare with the parameters reversed.
+            int IComparer.Compare(Object x, Object y)
+            {
+                return ((new CaseInsensitiveComparer()).Compare(((FileInfo)x).Name, ((FileInfo)y).Name));
+            }
 
-			listView_files.Items.Clear();
+        }
 
-			DirectoryInfo di = null;
-			
-			try 
-			{
-				di = new DirectoryInfo(textBox_projectLocate.Text);
-			}
-			catch (Exception ex) 
-			{
+        // 填充文件信息
+        void LoadFileInfo()
+        {
+
+            listView_files.Items.Clear();
+
+            DirectoryInfo di = null;
+
+            try
+            {
+                di = new DirectoryInfo(textBox_projectLocate.Text);
+            }
+            catch (Exception ex)
+            {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-				return;
-			}
+                return;
+            }
 
-			FileInfo[] afi = null;
-			try 
-			{
-				afi = di.GetFiles();
-			}
-			catch (DirectoryNotFoundException ex)
-			{
-				MessageBox.Show(this, ex.Message);
-				return;
-			}
+            FileInfo[] afi = null;
+            try
+            {
+                afi = di.GetFiles();
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                MessageBox.Show(this, ex.Message);
+                return;
+            }
 
-			Array.Sort(afi, new FileInfoCompare());
+            Array.Sort(afi, new FileInfoCompare());
 
-			for(int i=0;i<afi.Length;i++) 
-			{
-				string strName = afi[i].Name;
+            for (int i = 0; i < afi.Length; i++)
+            {
+                string strName = afi[i].Name;
 
-				if (strName.Length == 0)
-					continue;
-				if (strName[0] == '~'
-					&& checkBox_displayTempFile.Checked == false)
-					continue;	// 不显示 '~'打头的临时文件
+                if (strName.Length == 0)
+                    continue;
+                if (strName[0] == '~'
+                    && checkBox_displayTempFile.Checked == false)
+                    continue;	// 不显示 '~'打头的临时文件
 
-				ListViewItem item =
-					new ListViewItem(strName,
-					0);
+                ListViewItem item =
+                    new ListViewItem(strName,
+                    0);
 
-				item.SubItems.Add(GetComment(strName));
+                item.SubItems.Add(GetComment(strName));
 
-				listView_files.Items.Add(item);
+                listView_files.Items.Add(item);
 
-			}
+            }
 
-		}
+        }
 
-		string GetComment(string strFileName)
-		{
-			string strResult = "";
+        string GetComment(string strFileName)
+        {
+            string strResult = "";
 
-			if (String.Compare(strFileName, 
-				"main.cs",
-				true) == 0)
-				strResult = "主程序";
-			else if (String.Compare(strFileName, 
-				"marcfilter.fltx",
-				true) == 0)
-				strResult = "MARC记录过滤器";
-			else if (String.Compare(strFileName, 
-				"references.xml",
-				true) == 0)
-				strResult = "references配置";
+            if (String.Compare(strFileName,
+                "main.cs",
+                true) == 0)
+                strResult = "主程序";
+            else if (String.Compare(strFileName,
+                "marcfilter.fltx",
+                true) == 0)
+                strResult = "MARC记录过滤器";
+            else if (String.Compare(strFileName,
+                "references.xml",
+                true) == 0)
+                strResult = "references配置";
             else if (String.Compare(strFileName,
     "metadata.xml",
     true) == 0)
                 strResult = "元数据";
 
-			return strResult;
-		}
+            return strResult;
+        }
 
 
-		/*
-		void LoadCode()
-		{
-			// 源代码本身
-			try 
-			{
-				StreamReader sr = new StreamReader(textBox_codeFileName.Text, true);
-				textBox_scriptCode.Text = sr.ReadToEnd();
-				sr.Close();
-			}
-			catch
-			{
-				textBox_scriptCode.Text = "";
-			}
-		}
-		*/
+        /*
+        void LoadCode()
+        {
+            // 源代码本身
+            try 
+            {
+                StreamReader sr = new StreamReader(textBox_codeFileName.Text, true);
+                textBox_scriptCode.Text = sr.ReadToEnd();
+                sr.Close();
+            }
+            catch
+            {
+                textBox_scriptCode.Text = "";
+            }
+        }
+        */
 
-		// 为新建一个Script准备参数
-		public void New(string strProjectPath,
-			string strTempName,
-			string strNewLocate)
-		{
-			m_bNew = true;
+        // 为新建一个Script准备参数
+        public void New(string strProjectPath,
+            string strTempName,
+            string strNewLocate)
+        {
+            m_bNew = true;
 
-			this.textBox_projectName.Text = strTempName;
-			this.textBox_projectPathOfName.Text = strProjectPath;
+            this.textBox_projectName.Text = strTempName;
+            this.textBox_projectPathOfName.Text = strProjectPath;
 
-			this.strTempLocate = strNewLocate;
+            this.strTempLocate = strNewLocate;
 
-			textBox_projectLocate.Text = strNewLocate;
+            textBox_projectLocate.Text = strNewLocate;
 
-			if (strNewLocate != null)
-				scriptManager.CreateDefault(strNewLocate, this.HostName);
+            if (strNewLocate != null)
+                scriptManager.CreateDefault(strNewLocate, this.HostName);
 
-			LoadFileInfo();
-		}
+            LoadFileInfo();
+        }
 
-		private void ScriptDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
+        private void ScriptDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
 
-			if (this.DialogResult != DialogResult.OK
-				&& m_bNew == true) 
-			{
-				DialogResult msgResult = MessageBox.Show(this,
-					"确实要放弃保存新方案 '" + textBox_projectName.Text + "' ?",
-					"script",
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-				if (msgResult == DialogResult.No) 
-				{
-					e.Cancel = true;
-					return;
-				}
-			}
-		}
+            if (this.DialogResult != DialogResult.OK
+                && m_bNew == true)
+            {
+                DialogResult msgResult = MessageBox.Show(this,
+                    "确实要放弃保存新方案 '" + textBox_projectName.Text + "' ?",
+                    "script",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (msgResult == DialogResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+        }
 
-		private void ScriptDlg_Closed(object sender, System.EventArgs e)
-		{
-			// 删除临时代码文件
-			if (this.strTempLocate != "") 
-			{
-				try 
-				{
-					Directory.Delete(this.strTempLocate, true);
-				}
-				catch
-				{
-				}
-			}
-		
-		}
+        private void ScriptDlg_Closed(object sender, System.EventArgs e)
+        {
+            // 删除临时代码文件
+            if (this.strTempLocate != "")
+            {
+                try
+                {
+                    Directory.Delete(this.strTempLocate, true);
+                }
+                catch
+                {
+                }
+            }
 
-		private void listView_files_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			if(e.Button != MouseButtons.Right)
-				return;
+        }
 
-			ContextMenu contextMenu = new ContextMenu();
-			MenuItem menuItem = null;
+        private void listView_files_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
 
-			bool bSelected = listView_files.SelectedItems.Count > 0;
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
 
-			//
-			menuItem = new MenuItem("编辑(&E)");
-			menuItem.Click += new System.EventHandler(this.button_editFile_Click);
-			if (bSelected == false) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            bool bSelected = listView_files.SelectedItems.Count > 0;
 
-			//
-			menuItem = new MenuItem("新增(&N)");
-			menuItem.Click += new System.EventHandler(this.button_newFile_Click);
-			contextMenu.MenuItems.Add(menuItem);
+            //
+            menuItem = new MenuItem("编辑(&E)");
+            menuItem.Click += new System.EventHandler(this.button_editFile_Click);
+            if (bSelected == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
 
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
+            //
+            menuItem = new MenuItem("新增(&N)");
+            menuItem.Click += new System.EventHandler(this.button_newFile_Click);
+            contextMenu.MenuItems.Add(menuItem);
 
-			//
-			menuItem = new MenuItem("删除(&D)");
-			menuItem.Click += new System.EventHandler(this.button_deleteFile_Click);
-			if (bSelected == false) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
-			contextMenu.Show(listView_files, new Point(e.X, e.Y) );		
-			
-		}
+            //
+            menuItem = new MenuItem("删除(&D)");
+            menuItem.Click += new System.EventHandler(this.button_deleteFile_Click);
+            if (bSelected == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
 
-		private void button_editFile_Click(object sender, System.EventArgs e)
-		{
-			foreach(ListViewItem item in listView_files.SelectedItems) 
-			{
-				string strFileName = textBox_projectLocate.Text + "\\" + item.Text;
+            contextMenu.Show(listView_files, new Point(e.X, e.Y));
 
-				System.Diagnostics.Process.Start("notepad.exe", strFileName);
-			}
-		}
+        }
 
-		private void button_newFile_Click(object sender, System.EventArgs e)
-		{
-			FileNameDlg dlg = new FileNameDlg();
+        private void button_editFile_Click(object sender, System.EventArgs e)
+        {
+            foreach (ListViewItem item in listView_files.SelectedItems)
+            {
+                string strFileName = textBox_projectLocate.Text + "\\" + item.Text;
+
+                System.Diagnostics.Process.Start("notepad.exe", strFileName);
+            }
+        }
+
+        private void button_newFile_Click(object sender, System.EventArgs e)
+        {
+            FileNameDlg dlg = new FileNameDlg();
             GuiUtil.AutoSetDefaultFont(dlg);
 
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			// 看看文件名是否重复创建
-			if (GetFileNameItemIndex(dlg.textBox_fileName.Text) != -1) 
-			{
-				MessageBox.Show(this, "文件" + dlg.textBox_fileName.Text + "已经存在，不能重复创建...");
-				return ;
-			}
+            // 看看文件名是否重复创建
+            if (GetFileNameItemIndex(dlg.textBox_fileName.Text) != -1)
+            {
+                MessageBox.Show(this, "文件" + dlg.textBox_fileName.Text + "已经存在，不能重复创建...");
+                return;
+            }
 
 
-			string strFileName = textBox_projectLocate.Text + "\\" + dlg.textBox_fileName.Text;
+            string strFileName = textBox_projectLocate.Text + "\\" + dlg.textBox_fileName.Text;
 
-			if (String.Compare(dlg.textBox_fileName.Text,
-				"main.cs", true) == 0)
-			{
-				// ScriptManager.CreateDefaultMainCsFile(strFileName);
-				scriptManager.OnCreateDefaultContent(strFileName);
-			}
-			else if (String.Compare(dlg.textBox_fileName.Text,
-				"marcfilter.fltx", true) == 0)
-			{
-				// ScriptManager.CreateDefaultMarcFilterFile(strFileName);
-				scriptManager.OnCreateDefaultContent(strFileName);
-			}
-			else if (String.Compare(dlg.textBox_fileName.Text,
-				"references.xml", true) == 0)
-			{
+            if (String.Compare(dlg.textBox_fileName.Text,
+                "main.cs", true) == 0)
+            {
+                // ScriptManager.CreateDefaultMainCsFile(strFileName);
+                scriptManager.OnCreateDefaultContent(strFileName);
+            }
+            else if (String.Compare(dlg.textBox_fileName.Text,
+                "marcfilter.fltx", true) == 0)
+            {
+                // ScriptManager.CreateDefaultMarcFilterFile(strFileName);
+                scriptManager.OnCreateDefaultContent(strFileName);
+            }
+            else if (String.Compare(dlg.textBox_fileName.Text,
+                "references.xml", true) == 0)
+            {
                 // TODO: 应修改为事件驱动
-				ScriptManager.CreateDefaultReferenceXmlFile(strFileName);
-			}
+                ScriptManager.CreateDefaultReferenceXmlFile(strFileName);
+            }
             else if (String.Compare(dlg.textBox_fileName.Text,
                 "metadata.xml", true) == 0)
             {
@@ -702,45 +702,46 @@ namespace DigitalPlatform.Script
                 // TODO: 应修改为事件驱动
                 ScriptManager.CreateDefaultMetadataXmlFile(strFileName, this.HostName);
             }
-            else 
-			{
-				StreamWriter sw = new StreamWriter(strFileName);
-				sw.WriteLine("");
-				sw.Close();
-			}
+            else
+            {
+                using (StreamWriter sw = new StreamWriter(strFileName))
+                {
+                    sw.WriteLine("");
+                }
+            }
 
-			// 装入listview
-			LoadFileInfo();
+            // 装入listview
+            LoadFileInfo();
 
-			int nIndex = GetFileNameItemIndex(dlg.textBox_fileName.Text);
-			if (nIndex != -1) 
-			{
+            int nIndex = GetFileNameItemIndex(dlg.textBox_fileName.Text);
+            if (nIndex != -1)
+            {
 
-				listView_files.SelectedItems.Clear();
-				listView_files.Items[nIndex].Selected = true;
-			}
-		}
+                listView_files.SelectedItems.Clear();
+                listView_files.Items[nIndex].Selected = true;
+            }
+        }
 
-		int GetFileNameItemIndex(string strFileName)
-		{
-			for(int i=0;i<listView_files.Items.Count;i++)
-			{
-				if (String.Compare(strFileName, 
-					listView_files.Items[i].Text,
-					true) == 0)
-					return i;
-			}
+        int GetFileNameItemIndex(string strFileName)
+        {
+            for (int i = 0; i < listView_files.Items.Count; i++)
+            {
+                if (String.Compare(strFileName,
+                    listView_files.Items[i].Text,
+                    true) == 0)
+                    return i;
+            }
 
-			return -1;
-		}
+            return -1;
+        }
 
-		private void button_deleteFile_Click(object sender, System.EventArgs e)
-		{
-			if (listView_files.SelectedItems.Count == 0) 
-			{
-				MessageBox.Show(this, "尚未选择要删除的文件...");
-				return;
-			}
+        private void button_deleteFile_Click(object sender, System.EventArgs e)
+        {
+            if (listView_files.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选择要删除的文件...");
+                return;
+            }
 
             string strFileNames = ListViewUtil.GetItemNameList(listView_files.SelectedItems, "\r\n");
 
@@ -751,190 +752,190 @@ namespace DigitalPlatform.Script
 			}
              * */
 
-			// 警告
-			DialogResult msgResult = MessageBox.Show(this,
-				"确实要删除下列文件?\r\n---\r\n" + strFileNames + "---",
-				"script",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2);
-			if (msgResult == DialogResult.No) 
-			{
-				return;
-			}
+            // 警告
+            DialogResult msgResult = MessageBox.Show(this,
+                "确实要删除下列文件?\r\n---\r\n" + strFileNames + "---",
+                "script",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (msgResult == DialogResult.No)
+            {
+                return;
+            }
 
-			// 删除实际文件
-			foreach(ListViewItem item in listView_files.SelectedItems)
-			{
-				string strFileName = textBox_projectLocate.Text + "\\" 
-					+item.Text;
+            // 删除实际文件
+            foreach (ListViewItem item in listView_files.SelectedItems)
+            {
+                string strFileName = textBox_projectLocate.Text + "\\"
+                    + item.Text;
 
-				try 
-				{
-					File.Delete(strFileName);
-				}
-				catch (Exception ex)
-				{
+                try
+                {
+                    File.Delete(strFileName);
+                }
+                catch (Exception ex)
+                {
                     MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-				}
-			}
+                }
+            }
 
-			// 删除listview中事项
-			for(int i=listView_files.SelectedIndices.Count-1;i>=0;i--)
-			{
-				listView_files.Items.RemoveAt(listView_files.SelectedIndices[i]);
-			}
-		
-		}
+            // 删除listview中事项
+            for (int i = listView_files.SelectedIndices.Count - 1; i >= 0; i--)
+            {
+                listView_files.Items.RemoveAt(listView_files.SelectedIndices[i]);
+            }
 
-		private void listView_files_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			if (listView_files.SelectedItems.Count == 0) 
-			{
-				button_editFile.Enabled = false;
-				button_newFile.Enabled = true;
-				button_deleteFile.Enabled = false;
-			}
-			else 
-			{
-				button_editFile.Enabled = true;
-				button_newFile.Enabled = true;
-				button_deleteFile.Enabled = true;
-			}
+        }
 
-		}
+        private void listView_files_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            if (listView_files.SelectedItems.Count == 0)
+            {
+                button_editFile.Enabled = false;
+                button_newFile.Enabled = true;
+                button_deleteFile.Enabled = false;
+            }
+            else
+            {
+                button_editFile.Enabled = true;
+                button_newFile.Enabled = true;
+                button_deleteFile.Enabled = true;
+            }
 
-		private void button_changeProjectLocation_Click(object sender, System.EventArgs e)
-		{
-			DirNameDlg dlg = new DirNameDlg();
+        }
+
+        private void button_changeProjectLocation_Click(object sender, System.EventArgs e)
+        {
+            DirNameDlg dlg = new DirNameDlg();
             GuiUtil.AutoSetDefaultFont(dlg);
 
-			DirectoryInfo di = new DirectoryInfo(textBox_projectLocate.Text);
+            DirectoryInfo di = new DirectoryInfo(textBox_projectLocate.Text);
 
-			dlg.textBox_dirName.Text = di.Name;
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
-
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
-
-			// 改名
-			string strNewLocation = di.Parent.FullName + "\\" + dlg.textBox_dirName.Text;
-
-			if (di.Exists == true) 
-			{
-				try 
-				{
-					Directory.Move(textBox_projectLocate.Text, strNewLocation);
-				}
-				catch (IOException ex)
-				{
-					MessageBox.Show(this, ex.Message);
-					return;
-				}
-				catch (Exception ex)
-				{
-                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-					return;
-				}
-			}
-		
-
-			// 方案名 + 路径
-			ResultProjectNamePath = textBox_projectPathOfName.Text;
-
-			if (ResultProjectNamePath != "")
-				ResultProjectNamePath += "/";
-
-			ResultProjectNamePath += textBox_projectName.Text;
-
-			string strError;
-
-			Debug.Assert(scriptManager != null, "调用本对话框以前，scriptManager指针应初始化...");
-
-			if (m_bNew == false) 
-			{
-				int nRet = scriptManager.ChangeProjectData(
-					ResultProjectNamePath,
-					null,
-					strNewLocation,
-					out strError);
-				if (nRet == -1) 
-				{
-					MessageBox.Show(this, strError);
-					return;
-				}
-
-				scriptManager.Save();
-			}
-
-			textBox_projectLocate.Text = strNewLocation;
-
-			// 重新装载文件名?
-			LoadFileInfo();
-
-		}
-
-		private void listView_files_DoubleClick(object sender, System.EventArgs e)
-		{
-			button_editFile_Click(null, null);
-		
-		}
-
-		private void button_changeProjectName_Click(object sender, System.EventArgs e)
-		{
-
-			ProjectNameDlg dlg = new ProjectNameDlg();
-            GuiUtil.AutoSetDefaultFont(dlg);
-
-			dlg.textBox_projectName.Text = textBox_projectName.Text;
+            dlg.textBox_dirName.Text = di.Name;
             dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			if (dlg.textBox_projectName.Text == textBox_projectName.Text)
-				return;	// 没有必要修改
+            // 改名
+            string strNewLocation = di.Parent.FullName + "\\" + dlg.textBox_dirName.Text;
 
-			if (m_bNew == true) 
-			{
-				textBox_projectName.Text = dlg.textBox_projectName.Text;
-				return;
-			}
+            if (di.Exists == true)
+            {
+                try
+                {
+                    Directory.Move(textBox_projectLocate.Text, strNewLocation);
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show(this, ex.Message);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                    return;
+                }
+            }
 
-			// 方案名 + 路径
-			ResultProjectNamePath = textBox_projectPathOfName.Text;
 
-			if (ResultProjectNamePath != "")
-				ResultProjectNamePath += "/";
-			
-			ResultProjectNamePath += textBox_projectName.Text;
+            // 方案名 + 路径
+            ResultProjectNamePath = textBox_projectPathOfName.Text;
 
-			string strError;
+            if (ResultProjectNamePath != "")
+                ResultProjectNamePath += "/";
 
-			int nRet = scriptManager.ChangeProjectData(ResultProjectNamePath,
-				dlg.textBox_projectName.Text,
-				null,
-				out strError);
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, strError);
-			}
-			else 
-			{
-				// 兑现显示遗留给对话框退出以后再做
-				// node.Text = dlg.textBox_projectName.Text;
-				textBox_projectName.Text = dlg.textBox_projectName.Text;
-				scriptManager.Save();
-			}
+            ResultProjectNamePath += textBox_projectName.Text;
 
-		}
+            string strError;
 
-		private void checkBox_displayTempFile_CheckedChanged(object sender, System.EventArgs e)
-		{
-			LoadFileInfo();
-		}
+            Debug.Assert(scriptManager != null, "调用本对话框以前，scriptManager指针应初始化...");
+
+            if (m_bNew == false)
+            {
+                int nRet = scriptManager.ChangeProjectData(
+                    ResultProjectNamePath,
+                    null,
+                    strNewLocation,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+
+                scriptManager.Save();
+            }
+
+            textBox_projectLocate.Text = strNewLocation;
+
+            // 重新装载文件名?
+            LoadFileInfo();
+
+        }
+
+        private void listView_files_DoubleClick(object sender, System.EventArgs e)
+        {
+            button_editFile_Click(null, null);
+
+        }
+
+        private void button_changeProjectName_Click(object sender, System.EventArgs e)
+        {
+
+            ProjectNameDlg dlg = new ProjectNameDlg();
+            GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.textBox_projectName.Text = textBox_projectName.Text;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            if (dlg.textBox_projectName.Text == textBox_projectName.Text)
+                return;	// 没有必要修改
+
+            if (m_bNew == true)
+            {
+                textBox_projectName.Text = dlg.textBox_projectName.Text;
+                return;
+            }
+
+            // 方案名 + 路径
+            ResultProjectNamePath = textBox_projectPathOfName.Text;
+
+            if (ResultProjectNamePath != "")
+                ResultProjectNamePath += "/";
+
+            ResultProjectNamePath += textBox_projectName.Text;
+
+            string strError;
+
+            int nRet = scriptManager.ChangeProjectData(ResultProjectNamePath,
+                dlg.textBox_projectName.Text,
+                null,
+                out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+            else
+            {
+                // 兑现显示遗留给对话框退出以后再做
+                // node.Text = dlg.textBox_projectName.Text;
+                textBox_projectName.Text = dlg.textBox_projectName.Text;
+                scriptManager.Save();
+            }
+
+        }
+
+        private void checkBox_displayTempFile_CheckedChanged(object sender, System.EventArgs e)
+        {
+            LoadFileInfo();
+        }
 
         private void button_openProjectFolder_Click(object sender, EventArgs e)
         {
@@ -984,10 +985,10 @@ namespace DigitalPlatform.Script
                 startInfo.WorkingDirectory = this.textBox_projectLocate.Text;
                 Process p = Process.Start(startInfo);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(this, "启动 Vusual Studio Code 时发生异常(可能是 Code 尚未安装):" + ex.Message);
             }
         }
-	}
+    }
 }

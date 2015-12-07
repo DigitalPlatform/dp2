@@ -196,17 +196,9 @@ namespace dp2Catalog
                             nParseStart += nTotlen;
                             if (nParseStart >= baPackage.Length)
                                 break;
-
                         }
-
-
                     }
-
-
-
-
                 }
-
             }
             finally
             {
@@ -286,32 +278,23 @@ namespace dp2Catalog
 
                 string strLogFilename = this.textBox_logFilename.Text;
 
-                Stream stream = null;
                 try
                 {
-                    stream = File.OpenRead(strLogFilename);
+                    using (Stream stream = File.OpenRead(strLogFilename))
+                    {
+                        if (info.Offs != this.CurrentRightStartOffs)
+                        {
+                            this.binaryEditor_onePackage.SetData(stream, info.Offs, info.Length);
+                            this.CurrentRightStartOffs = info.Offs;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
                     strError = "file '" + strLogFilename + "'open error: " + ex.Message;
                     goto ERROR1;
                 }
-                try
-                {
-                    if (info.Offs != this.CurrentRightStartOffs)
-                    {
-                        this.binaryEditor_onePackage.SetData(stream, info.Offs, info.Length);
-                        this.CurrentRightStartOffs = info.Offs;
-                    }
-                }
-                finally
-                {
-                    stream.Close();
-                }
-
-
             }
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);

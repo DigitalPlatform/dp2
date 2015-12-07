@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Xml;
+using System.Reflection;
+using System.Web;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -20,10 +23,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient.localhost;
-using System.Reflection;
 using DigitalPlatform.Script;
-using System.Web;
-using System.Threading;
 using DigitalPlatform.dp2.Statis;
 
 // 2013/3/16 添加 XML 注释
@@ -164,17 +164,17 @@ namespace dp2Circulation
              * */
             this.FillFromList();
 
-            string strDefaulFrom = "";
+            string strDefaultFrom = "";
             if (this.DbType == "item")
-                strDefaulFrom = "册条码";
+                strDefaultFrom = "册条码";
             else if (this.DbType == "comment")
-                strDefaulFrom = "标题";
+                strDefaultFrom = "标题";
             else if (this.DbType == "order")
-                strDefaulFrom = "书商";
+                strDefaultFrom = "书商";
             else if (this.DbType == "issue")
-                strDefaulFrom = "期号";
+                strDefaultFrom = "期号";
             else if (this.DbType == "arrive")
-                strDefaulFrom = "册条码号";
+                strDefaultFrom = "册条码号";
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
@@ -182,7 +182,7 @@ namespace dp2Circulation
             this.comboBox_from.Text = this.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "from",
-                strDefaulFrom);
+                strDefaultFrom);
 
             this.comboBox_entityDbName.Text = this.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
@@ -3131,7 +3131,6 @@ this.MainForm.DefaultFont);
     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
-
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -3252,7 +3251,6 @@ this.MainForm.DefaultFont);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         // 快速修改记录
         void menu_quickChangeItemRecords_Click(object sender, EventArgs e)
@@ -3975,12 +3973,10 @@ this.MainForm.DefaultFont);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(strFilename,
+            using(StreamWriter sw = new StreamWriter(strFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
-
+                System.Text.Encoding.UTF8))
+            { 
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在导出已验收的册记录路径 ...");
@@ -4024,15 +4020,7 @@ this.MainForm.DefaultFont);
 
                     this.EnableControls(true);
                 }
-
             }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
-            }
-
-
             return nCount;
         }
 
@@ -4388,7 +4376,9 @@ this.MainForm.DefaultFont);
                     {
                         nCount++;
                         // form.DoSaveAll();
-                        nRet = form.EntityControl.SaveItems(out strError);
+                        nRet = form.EntityControl.SaveItems(
+                            this.Channel,
+                            out strError);
                         if (nRet == -1)
                             goto ERROR;
 
@@ -5271,7 +5261,6 @@ MessageBoxDefaultButton.Button1);
                         continue;
                     sw.WriteLine(strBarcode);   // BUG!!!
                 }
-
             }
             finally
             {
@@ -5817,8 +5806,6 @@ out strError);
                     i++;
                     // biblio_recpath_table[strBiblioRecPath] = 1;
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -6096,11 +6083,10 @@ out strError);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(strFilename,
+            using(StreamWriter sw = new StreamWriter(strFilename,
     bAppend,	// append
-    System.Text.Encoding.UTF8);
-            try
-            {
+    System.Text.Encoding.UTF8))
+            { 
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在导出记录路径 ...");
@@ -6129,11 +6115,6 @@ out strError);
 
                     this.EnableControls(true);
                 }
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             return nCount;
@@ -6261,11 +6242,10 @@ out strError);
                 bAppend = false;
 
             // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportTextFilename,
+            using(StreamWriter sw = new StreamWriter(this.ExportTextFilename,
                 bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
+                System.Text.Encoding.UTF8))
+            { 
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
 
@@ -6276,11 +6256,6 @@ out strError);
                 }
 
                 this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
             }
 
             string strExportStyle = "导出";
@@ -6717,11 +6692,6 @@ out strError);
             }
         }
 
-
-
-
-
-
         static string MergeXml(string strXml1,
     string strXml2)
         {
@@ -6753,8 +6723,7 @@ out strError);
     "</head>";
         }
 
-
-        internal override int GetXmlHtml(BiblioInfo info,
+        internal static int GetXmlHtml(BiblioInfo info,
     out string strXml,
     out string strHtml2,
     out string strError)
@@ -6800,10 +6769,8 @@ out strError);
             }
 
             strXml = MergeXml(strOldXml, strNewXml);
-
             return 0;
         }
-
 
         // 获得一条记录
         //return:

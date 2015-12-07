@@ -210,6 +210,7 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strClientAddress" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -217,6 +218,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q25="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="HitCounterResult" nillable="true" type="q25:LibraryServerResult" />
+        <xs:element minOccurs="0" name="Value" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

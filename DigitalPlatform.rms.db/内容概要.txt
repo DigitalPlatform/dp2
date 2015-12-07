@@ -1,122 +1,122 @@
-database.cs
+ï»¿database.cs
 
-Ò».namespace DigitalPlatform.rms
+ä¸€.namespace DigitalPlatform.rms
 	
 	1.public delegate bool IsConnected(string strText)
 	
-	2.//´¦ÀíÊı¾İµÄÀà
+	2.//å¤„ç†æ•°æ®çš„ç±»
 	public class DatabaseCommandTask
 	
-	3.//Êı¾İ¿â¼¯ºÏ
+	3.//æ•°æ®åº“é›†åˆ
 	public class DatabaseCollection : ArrayList
 	
-	4.//Êı¾İ¿â»ùÀà
+	4.//æ•°æ®åº“åŸºç±»
 	public class Database
 	
-	5.//SQL¿âÅÉÉúÀà
+	5.//SQLåº“æ´¾ç”Ÿç±»
 	public class SqlDatabase : Database
 	
-	6.//ÎÄ¼ş¿âÅÉÉúÀà
+	6.//æ–‡ä»¶åº“æ´¾ç”Ÿç±»
 	public class FileDatabase : Database
 	
-	7.// Éè¼ÆÒâÍ¼:Éè¼Ækeys±í¼¯ºÏÀà£¬ÓÃÓÚ´¦Àí±íµÄÏà¹ØĞÅÏ¢
+	7.// è®¾è®¡æ„å›¾:è®¾è®¡keysè¡¨é›†åˆç±»ï¼Œç”¨äºå¤„ç†è¡¨çš„ç›¸å…³ä¿¡æ¯
 	public class TableCollection:ArrayList
 	
-	8.// tableItemÀà£¬×÷ÎªtableCollectionµÄ³ÉÔ±
+	8.// tableItemç±»ï¼Œä½œä¸ºtableCollectionçš„æˆå‘˜
 	public class tableItem
 	
-	9.//Éè¼ÆÒâÍ¼:Á¬½Ó»ùÀà£¬¿âµÄÁ¬½Ó·ÖÎªÁ½ÖÖ£¬SQL serverÏµÍ³ºÍÎÄ¼şÏµÍ³£¬´Ó¸ÃÀàÅÉÉú
-	//ÀıÓÃÀàµÄ¶àÌ¬ĞÔ
+	9.//è®¾è®¡æ„å›¾:è¿æ¥åŸºç±»ï¼Œåº“çš„è¿æ¥åˆ†ä¸ºä¸¤ç§ï¼ŒSQL serverç³»ç»Ÿå’Œæ–‡ä»¶ç³»ç»Ÿï¼Œä»è¯¥ç±»æ´¾ç”Ÿ
+	//ä¾‹ç”¨ç±»çš„å¤šæ€æ€§
 	public class DpConnection
 	
-	10.//ÅÉÉúÓÚDpConnection£¬DpSqlConnection:¶ÔÓ¦SQLserverÊı¾İ¿â
+	10.//æ´¾ç”ŸäºDpConnectionï¼ŒDpSqlConnection:å¯¹åº”SQLserveræ•°æ®åº“
 	public class DpSqlConnection:DpConnection
 	
-	11.//DpFileConnection:¶ÔÓ¦ÎÄ¼şÏµÍ³
+	11.//DpFileConnection:å¯¹åº”æ–‡ä»¶ç³»ç»Ÿ
 	public class DpFileConnection:DpConnection
 	
-	12.//Éè¼ÆÒâÍ¼£º
-	//ÎªÁËÍ¨¹ı¹Ø¼ü×Ö¼ìË÷¼ÇÂ¼£¬ĞèÒª½«Ò»Ìõ¼ÇÂ¼µÄËùÓĞ¹Ø¼ü×ÖÌáÈ¡³öÀ´´æ·Åµ½Êı¾İ¿âkeys±íÖĞ.
-	//¼ÇÂ¼Óë¹Ø¼ü×ÖÊÇÓµÓĞµÄ¹ØÏµ£¬¼´´æ¼ÇÂ¼Ê±Í¬Ê±´æ¹Ø¼ü×Ö£¬É¾¼ÇÂ¼Ê±Í¬Ê±É¾¹Ø¼ü×Ö
-	//Êı¾İ¿âÖĞÃ¿¸ö¹Ø¼ü×Ö°üº¬ÈıÏîÄÚÈİ£º
-	//keystring: ¾ßÌåµÄÎÄ±¾
-	//fromstring: ÏÖÔÚ»¹Ã»ÓĞÓÃµ½
-	//idstring: ¶ÔÓ¦µÄÊı¾İ¼ÇÂ¼ID
-	//¸ù¾İÊı¾İ¼ÇÂ¼ºÍkeysÅäÖÃÎÄ¼ş´´½¨DpKeys¼¯ºÏ
-	//¹Ø¼ü×ÖÅäÖÃÎÄ¼ş°üÀ¨ËÄÏî:
+	12.//è®¾è®¡æ„å›¾ï¼š
+	//ä¸ºäº†é€šè¿‡å…³é”®å­—æ£€ç´¢è®°å½•ï¼Œéœ€è¦å°†ä¸€æ¡è®°å½•çš„æ‰€æœ‰å…³é”®å­—æå–å‡ºæ¥å­˜æ”¾åˆ°æ•°æ®åº“keysè¡¨ä¸­.
+	//è®°å½•ä¸å…³é”®å­—æ˜¯æ‹¥æœ‰çš„å…³ç³»ï¼Œå³å­˜è®°å½•æ—¶åŒæ—¶å­˜å…³é”®å­—ï¼Œåˆ è®°å½•æ—¶åŒæ—¶åˆ å…³é”®å­—
+	//æ•°æ®åº“ä¸­æ¯ä¸ªå…³é”®å­—åŒ…å«ä¸‰é¡¹å†…å®¹ï¼š
+	//keystring: å…·ä½“çš„æ–‡æœ¬
+	//fromstring: ç°åœ¨è¿˜æ²¡æœ‰ç”¨åˆ°
+	//idstring: å¯¹åº”çš„æ•°æ®è®°å½•ID
+	//æ ¹æ®æ•°æ®è®°å½•å’Œkeysé…ç½®æ–‡ä»¶åˆ›å»ºDpKeysé›†åˆ
+	//å…³é”®å­—é…ç½®æ–‡ä»¶åŒ…æ‹¬å››é¡¹:
 	// <key>
-	//   <xpath>/description/title</xpath>    :Í¨¹ıxpath´ÓÊı¾İdomÖĞÕÒµ½¾ßÌåÄÚÈİ´æ·Åµ½keystring
-	//   <from>title</from>                   :Ö±½ÓÌáÈ¡ÄÚÈİ´æÈëfromstring
-	//   <table name="title"/>                :ÊôÓÚÄÄ¸ö±í
+	//   <xpath>/description/title</xpath>    :é€šè¿‡xpathä»æ•°æ®domä¸­æ‰¾åˆ°å…·ä½“å†…å®¹å­˜æ”¾åˆ°keystring
+	//   <from>title</from>                   :ç›´æ¥æå–å†…å®¹å­˜å…¥fromstring
+	//   <table name="title"/>                :å±äºå“ªä¸ªè¡¨
 	// </key>
-	// DpKeys´ÓArrayList¼Ì³Ğ£¬³ÉÔ±ÎªDpKeys¶ÔÏó¡£ÓÃÓÚ´¦Àí¹Ø¼ü×Ö²¿·Ö¡£
+	// DpKeysä»ArrayListç»§æ‰¿ï¼Œæˆå‘˜ä¸ºDpKeyså¯¹è±¡ã€‚ç”¨äºå¤„ç†å…³é”®å­—éƒ¨åˆ†ã€‚
 	public class DpKeys:ArrayList
 	
-	13.//Éè¼ÆÒâÍ¼:±íÊ¾µ¥¸ökey
-	//¼Ì³ĞIComparable½Ó¿Ú
+	13.//è®¾è®¡æ„å›¾:è¡¨ç¤ºå•ä¸ªkey
+	//ç»§æ‰¿IComparableæ¥å£
 	public class DpKey:IComparable
 	
-	14.//Éè¼ÆÒâÍ¼:
-	//´ÓFileNameHolder¼Ì³Ğ£¬¼¯ºÏÀàĞÍ£¬
-	//ÎªÁË´¦Àí¸úÊı¾İ¿âÓĞ¹ØµÄ²Ù×÷£¬Ôö¼ÓÁËÌáÈ¡ºÍ±£´æÒ»ÌõÔªÊı¾İ¶ÔÓ¦µÄ¶ÔÏó×ÊÔ´µÄ·½·¨
+	14.//è®¾è®¡æ„å›¾:
+	//ä»FileNameHolderç»§æ‰¿ï¼Œé›†åˆç±»å‹ï¼Œ
+	//ä¸ºäº†å¤„ç†è·Ÿæ•°æ®åº“æœ‰å…³çš„æ“ä½œï¼Œå¢åŠ äº†æå–å’Œä¿å­˜ä¸€æ¡å…ƒæ•°æ®å¯¹åº”çš„å¯¹è±¡èµ„æºçš„æ–¹æ³•
 	public class DpResHolder:FileNameHolder
 	
-	15.//Éè¼ÆÒâÍ¼:
-	//ÎªÁËÔÚä¯ÀÀ¸ñÊ½Ê±È·¶¨×î´óÁĞÊı£¬
-	//Éè¼ÆÁËBrowseColumnMaxÀà£¬ÅÉÉúÓÚDictionaryBaseÀà£¬
-	//ÊÇ¹Ø¼ü×Ö/ÖµÀàĞÍ£¬´æ·Å¿âÃû/×î´óÁĞÊı
+	15.//è®¾è®¡æ„å›¾:
+	//ä¸ºäº†åœ¨æµè§ˆæ ¼å¼æ—¶ç¡®å®šæœ€å¤§åˆ—æ•°ï¼Œ
+	//è®¾è®¡äº†BrowseColumnMaxç±»ï¼Œæ´¾ç”ŸäºDictionaryBaseç±»ï¼Œ
+	//æ˜¯å…³é”®å­—/å€¼ç±»å‹ï¼Œå­˜æ”¾åº“å/æœ€å¤§åˆ—æ•°
 	public class BrowseColumnMax:DictionaryBase
 	
 Query.cs///////////////////////////////////////////
 
-Ò».DigitalPlatform.rms
+ä¸€.DigitalPlatform.rms
 
-	1.//×¨ÃÅµÄÂß¼­¼ìË÷Àà,²¢²»ÓÃ¿¼ÂÇ¼ÓËøµÄÎÊÌâ£¬
-	//ÒòÎªÔÚDatabaseCollectionÀïµÄDoSearch()º¯ÊıÀï×ö¶ÑÕ»±äÁ¿
+	1.//ä¸“é—¨çš„é€»è¾‘æ£€ç´¢ç±»,å¹¶ä¸ç”¨è€ƒè™‘åŠ é”çš„é—®é¢˜ï¼Œ
+	//å› ä¸ºåœ¨DatabaseCollectioné‡Œçš„DoSearch()å‡½æ•°é‡Œåšå †æ ˆå˜é‡
 	public class Query
 	
-	2.//ReversePolishItemÀà£¬ÊÇReversePolishStackµÄ³ÉÔ±
+	2.//ReversePolishItemç±»ï¼Œæ˜¯ReversePolishStackçš„æˆå‘˜
 	public class ReversePolishItem
 	
-	3.//ÔÚProceedRPNº¯ÊıÀï£¬ÓÃµ½µÄÄæ²¨À¼Õ»£¬×¢ÒâÕâ¸öÕ»Ö»´æ·ÅÖµ£¬³ÉÔ±ÊÇReversePolishItem
+	3.//åœ¨ProceedRPNå‡½æ•°é‡Œï¼Œç”¨åˆ°çš„é€†æ³¢å…°æ ˆï¼Œæ³¨æ„è¿™ä¸ªæ ˆåªå­˜æ”¾å€¼ï¼Œæˆå‘˜æ˜¯ReversePolishItem
 	public class ReversePolishStack:ArrayList
 	
 user.cs/////////////////////////////////////////////
 
-Ò». DigitalPlatform.rms
+ä¸€. DigitalPlatform.rms
 	
-	1.//Éè¼ÆÒâÍ¼:ÕÊ»§¿â¼¯ºÏ
+	1.//è®¾è®¡æ„å›¾:å¸æˆ·åº“é›†åˆ
 	public class AccountDbCollection:ArrayList
 	
-	2.//ÓÃ»§¼¯ºÏ
+	2.//ç”¨æˆ·é›†åˆ
 	public class UserCollection:ArrayList
 	
-	3.//ÓÃ»§Àà
+	3.//ç”¨æˆ·ç±»
 	public class User		
 
 
 	~~~
 	2012/2/23
-	Commit()ÔÚÃ»ÓĞ²ÉÓÃ m_db_lock ¼ÓËøµÄÇé¿öÏÂ£¬»á³öÏÖÈçÏÂ±¨´í
+	Commit()åœ¨æ²¡æœ‰é‡‡ç”¨ m_db_lock åŠ é”çš„æƒ…å†µä¸‹ï¼Œä¼šå‡ºç°å¦‚ä¸‹æŠ¥é”™
 
-	ÔÚ System.AccessViolationException ÖĞµÚÒ»´ÎÅ¼È»³öÏÖµÄ¡°System.Data.SQLite.dll¡±ÀàĞÍµÄÒì³£
+	åœ¨ System.AccessViolationException ä¸­ç¬¬ä¸€æ¬¡å¶ç„¶å‡ºç°çš„â€œSystem.Data.SQLite.dllâ€ç±»å‹çš„å¼‚å¸¸
 
-	¼ÓËøºó¾ÍÏûÊ§ÁË
+	åŠ é”åå°±æ¶ˆå¤±äº†
 
 
 	~~~~~~~~~
-	±ÜÃâ Oracle 11g ÃÜÂëÊ§Ğ§
+	é¿å… Oracle 11g å¯†ç å¤±æ•ˆ
 
 	connect system/test;
-×¢£ºtestÊÇsystemÕÊ»§µÄÃÜÂë£¬ÔÚExpress°æ°²×°Ê±ºòÖ¸¶¨µÄ
+æ³¨ï¼štestæ˜¯systemå¸æˆ·çš„å¯†ç ï¼Œåœ¨Expressç‰ˆå®‰è£…æ—¶å€™æŒ‡å®šçš„
 
 	SQL> ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
 
-ÅäÖÃÎÄ¼şÒÑ¸ü¸Ä
+é…ç½®æ–‡ä»¶å·²æ›´æ”¹
 
 SQL> alter user xietao identified by test;
 
-ÓÃ»§ÒÑ¸ü¸Ä¡£
+ç”¨æˆ·å·²æ›´æ”¹ã€‚
 
 SQL>
 

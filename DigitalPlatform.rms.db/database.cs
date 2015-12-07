@@ -1,4 +1,4 @@
-//#define DEBUG_LOCK
+ï»¿//#define DEBUG_LOCK
 
 using System;
 using System.Xml;
@@ -20,30 +20,30 @@ using DigitalPlatform.Range;
 
 namespace DigitalPlatform.rms
 {
-    // Êı¾İ¿â»ùÀà
+    // æ•°æ®åº“åŸºç±»
     public class Database
     {
         public RecordIDStorage RebuildIDs = null;
 
-        internal bool m_bTailNoVerified = false; // Êı¾İ¿âÎ²ºÅÊÇ·ñ±»Ğ£Ñé¹ı£¿
-        // Êı¾İ¿âËø
-        protected MyReaderWriterLock m_db_lock = new MyReaderWriterLock();            // ¶¨Òå¿âËøm_lock
+        internal bool m_bTailNoVerified = false; // æ•°æ®åº“å°¾å·æ˜¯å¦è¢«æ ¡éªŒè¿‡ï¼Ÿ
+        // æ•°æ®åº“é”
+        protected MyReaderWriterLock m_db_lock = new MyReaderWriterLock();            // å®šä¹‰åº“é”m_lock
 
-        // Î²ºÅËø,ÔÚGetNewTailNo() ºÍ SetIfGreaten
+        // å°¾å·é”,åœ¨GetNewTailNo() å’Œ SetIfGreaten
         protected MyReaderWriterLock m_TailNolock = new MyReaderWriterLock();
 
-        // ¼ÇÂ¼Ëø
+        // è®°å½•é”
         internal RecordLockCollection m_recordLockColl = new RecordLockCollection();
 
-        // Ëø³¬Ê±µÄÊ±¼ä
-        internal int m_nTimeOut = 5 * 1000; //5Ãë 
+        // é”è¶…æ—¶çš„æ—¶é—´
+        internal int m_nTimeOut = 5 * 1000; //5ç§’ 
 
-        internal DatabaseCollection container; // ÈİÆ÷
+        internal DatabaseCollection container; // å®¹å™¨
 
-        // Êı¾İ¿â¸ù½Úµã
+        // æ•°æ®åº“æ ¹èŠ‚ç‚¹
         internal XmlNode m_selfNode = null;
 
-        // Êı¾İ¿âÊôĞÔ½Úµã
+        // æ•°æ®åº“å±æ€§èŠ‚ç‚¹
         XmlNode m_propertyNode = null;
         Hashtable m_captionTable = new Hashtable();
         public XmlNode PropertyNode
@@ -59,7 +59,7 @@ namespace DigitalPlatform.rms
             }
         }
 
-        //´¿¾»Êı¾İ¿âID,Ç°·½²»´ø@
+        //çº¯å‡€æ•°æ®åº“ID,å‰æ–¹ä¸å¸¦@
         public string PureID = "";
 
         internal int KeySize = 0;
@@ -72,23 +72,23 @@ namespace DigitalPlatform.rms
         Hashtable browse_table = new Hashtable();
 
 
-        public bool InRebuildingKey = false;   // ÊÇ·ñ´¦ÔÚÖØ½¨¼ìË÷µãµÄ×´Ì¬
+        public bool InRebuildingKey = false;   // æ˜¯å¦å¤„åœ¨é‡å»ºæ£€ç´¢ç‚¹çš„çŠ¶æ€
 
-        public int FastAppendTaskCount = 0; // Æô¶¯ fast mode µÄÇ¶Ì×´ÎÊı
-        // public bool IsDelayWriteKey = false;    // ÊÇ·ñ´¦ÔÚÑÓ³ÙĞ´ÈëkeysµÄ×´Ì¬ 2013/2/16
+        public int FastAppendTaskCount = 0; // å¯åŠ¨ fast mode çš„åµŒå¥—æ¬¡æ•°
+        // public bool IsDelayWriteKey = false;    // æ˜¯å¦å¤„åœ¨å»¶è¿Ÿå†™å…¥keysçš„çŠ¶æ€ 2013/2/16
 
         internal Database(DatabaseCollection container)
         {
             this.container = container;
         }
 
-        // ³õÊ¼»¯Êı¾İ¿âÏó
+        // åˆå§‹åŒ–æ•°æ®åº“è±¡
         // parameters:
-        //      node    Êı¾İ¿âÅäÖÃ½Úµã<database>
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      node    æ•°æ®åº“é…ç½®èŠ‚ç‚¹<database>
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         internal virtual int Initial(XmlNode node,
             out string strError)
         {
@@ -96,23 +96,24 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ¹Ø±ÕÊı¾İ¿â¶ÔÏó
+        // å…³é—­æ•°æ®åº“å¯¹è±¡
         internal virtual void Close()
         {
         }
 
-        // ½«ConnectionµÄTransaction Commit
+        // å°†Connectionçš„Transaction Commit
         internal virtual void Commit()
         {
         }
 
-        // ¼ì²éÊı¾İ¿âÎ²ºÅ
+        // æ£€æŸ¥æ•°æ®åº“å°¾å·
         // parameters:
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß£º°²È«µÄ
+        //      -2  è¿æ¥é”™è¯¯
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿ï¼šå®‰å…¨çš„
         public int CheckTailNo(out string strError)
         {
             strError = "";
@@ -123,75 +124,78 @@ namespace DigitalPlatform.rms
             string strRealTailNo = "";
             int nRet = 0;
 
-            //********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("CheckTailNo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("CheckTailNo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
+                // return:
+                //      -1  ä¸€èˆ¬é”™è¯¯
+                //      -2  è¿æ¥é”™è¯¯
+                //      0   æˆåŠŸ
                 nRet = this.UpdateStructure(out strError);
-                if (nRet == -1)
-                    return -1;
+                if (nRet < 0)
+                    return nRet;
 
                 // return:
-                //		-1  ³ö´í
-                //      0   Î´ÕÒµ½
-                //      1   ÕÒµ½
+                //		-1  å‡ºé”™
+                //      0   æœªæ‰¾åˆ°
+                //      1   æ‰¾åˆ°
                 nRet = this.GetRecordID("-1",
                     "prev",
                     out strRealTailNo,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "»ñµÃÊı¾İ¿â '" + this.GetCaption("zh") + "' µÄ×î´ó¼ÇÂ¼ºÅÊ±³ö´í: " + strError;
+                    strError = "è·å¾—æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„æœ€å¤§è®°å½•å·æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
             }
             catch (Exception ex)
             {
-                // ???ÓĞ¿ÉÄÜ»¹Î´³õÊ¼»¯Êı¾İ¿â
-                strError = "»ñµÃÊı¾İ¿â '"+this.GetCaption("zh")+"' µÄ×î´ó¼ÇÂ¼ºÅÊ±·¢ÉúÒì³££º" + ex.Message;
+                // ???æœ‰å¯èƒ½è¿˜æœªåˆå§‹åŒ–æ•°æ®åº“
+                strError = "è·å¾—æ•°æ®åº“ '"+this.GetCaption("zh")+"' çš„æœ€å¤§è®°å½•å·æ—¶å‘ç”Ÿå¼‚å¸¸ï¼š" + ex.Message;
                 return -1;
             }
             finally
             {
-                //***********¶ÔÊı¾İ¿â½â¶ÁËø***************
+                //***********å¯¹æ•°æ®åº“è§£è¯»é”***************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("CheckTailNo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("CheckTailNo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
 
-            //this.container.WriteErrorLog("×ßµ½'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âµÄCheckTailNo()º¯ÊıÀï£¬²éµ½×î´ó¼ÇÂ¼ºÅÎª'" + strRealTailNo + "'¡£");
+            //this.container.WriteErrorLog("èµ°åˆ°'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“çš„CheckTailNo()å‡½æ•°é‡Œï¼ŒæŸ¥åˆ°æœ€å¤§è®°å½•å·ä¸º'" + strRealTailNo + "'ã€‚");
 
             if (nRet == 1)
             {
-                //µ÷SetIfGreaten()º¯Êı£¬Èç¹û±¾¼ÇÂ¼ºÅ´óÓÚÎ²ºÅ,×Ô¶¯ÍÆ¶¯Î²ºÅÎª×î´ó
-                //ÕâÖÖÇé¿ö·¢ÉúÔÚÎÒÃÇ¸øµÄ¼ÇÂ¼ºÅ³¬¹ıÎ²ºÅÊ±
+                //è°ƒSetIfGreaten()å‡½æ•°ï¼Œå¦‚æœæœ¬è®°å½•å·å¤§äºå°¾å·,è‡ªåŠ¨æ¨åŠ¨å°¾å·ä¸ºæœ€å¤§
+                //è¿™ç§æƒ…å†µå‘ç”Ÿåœ¨æˆ‘ä»¬ç»™çš„è®°å½•å·è¶…è¿‡å°¾å·æ—¶
                 bool bPushTailNo = false;
                 bPushTailNo = this.AdjustTailNo(Convert.ToInt32(strRealTailNo),
                     false);
             }
 
             this.m_bTailNoVerified = true;
-
             return 0;
         }
 
-        // ¸ù¾İstrStyle·ç¸ñ,µÃµ½ÏàÓ¦µÄ¼ÇÂ¼ºÅ
-        // prev:Ç°Ò»Ìõ,next:ÏÂÒ»Ìõ,Èç¹ûstrID == ? ÔòprevÎªµÚÒ»Ìõ,nextÎª×îºóÒ»Ìõ
-        // Èç¹û²»°üº¬prevºÍnextÔò²»ÄÜµ÷´Ëº¯Êı
+        // æ ¹æ®strStyleé£æ ¼,å¾—åˆ°ç›¸åº”çš„è®°å½•å·
+        // prev:å‰ä¸€æ¡,next:ä¸‹ä¸€æ¡,å¦‚æœstrID == ? åˆ™prevä¸ºç¬¬ä¸€æ¡,nextä¸ºæœ€åä¸€æ¡
+        // å¦‚æœä¸åŒ…å«prevå’Œnextåˆ™ä¸èƒ½è°ƒæ­¤å‡½æ•°
         // parameter:
-        //		strCurrentRecordID	µ±Ç°¼ÇÂ¼ID
-        //		strStyle	        ·ç¸ñ
-        //      strOutputRecordID   out²ÎÊı£¬·µ»ØÕÒµ½µÄ¼ÇÂ¼ºÅ
-        //      strError            out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strCurrentRecordID	å½“å‰è®°å½•ID
+        //		strStyle	        é£æ ¼
+        //      strOutputRecordID   outå‚æ•°ï¼Œè¿”å›æ‰¾åˆ°çš„è®°å½•å·
+        //      strError            outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½
-        // Ïß£º²»°²È«
+        //		-1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°
+        // çº¿ï¼šä¸å®‰å…¨
         internal virtual int GetRecordID(string strCurrentRecordID,
             string strStyle,
             out string strOutputRecordID,
@@ -202,22 +206,22 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // Éı¼¶Êı¾İ¿â½á¹¹£¬Èç¹û±ØÒª
+        // å‡çº§æ•°æ®åº“ç»“æ„ï¼Œå¦‚æœå¿…è¦
         internal virtual int UpdateStructure(out string strError)
         {
             strError = "";
             return 0;
         }
 
-        // µÃµ½¼ìË÷µãÄÚ´æ¶ÔÏó
-        // µ±·µ»Ø0Ê±£¬keysCfg¿ÉÄÜÎªnull
+        // å¾—åˆ°æ£€ç´¢ç‚¹å†…å­˜å¯¹è±¡
+        // å½“è¿”å›0æ—¶ï¼ŒkeysCfgå¯èƒ½ä¸ºnull
         public int GetKeysCfg(out KeysCfg keysCfg,
             out string strError)
         {
             strError = "";
             keysCfg = null;
 
-            // ÒÑ´æÔÚÊ±
+            // å·²å­˜åœ¨æ—¶
             if (this.m_keysCfg != null)
             {
                 keysCfg = this.m_keysCfg;
@@ -230,21 +234,21 @@ namespace DigitalPlatform.rms
      
             string strDbName = this.GetCaption("zh");
             // return:
-            //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-            //		-2	Ã»ÕÒµ½½Úµã
-            //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-            //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-            //		-5	´æÔÚ¶à¸ö½Úµã
-            //		0	³É¹¦
+            //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+            //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+            //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+            //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+            //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+            //		0	æˆåŠŸ
             nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
                 out strKeysFileName,
                 out strError);
 
-            // Î´¶¨Òåkeys¶ÔÏó£¬°´Õı³£Çé¿ö´¦Àí
+            // æœªå®šä¹‰keyså¯¹è±¡ï¼ŒæŒ‰æ­£å¸¸æƒ…å†µå¤„ç†
             if (nRet == -2)
                 return 0;
 
-            // keysÎÄ¼şÔÚ±¾µØ²»´æÔÚ£¬°´Õı³£Çé¿ö´¦Àí
+            // keysæ–‡ä»¶åœ¨æœ¬åœ°ä¸å­˜åœ¨ï¼ŒæŒ‰æ­£å¸¸æƒ…å†µå¤„ç†
             if (nRet == -4)
                 return 0;
 
@@ -267,10 +271,10 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // µÃµ½ä¯ÀÀ¸ñÊ½ÄÚ´æ¶ÔÏó
+        // å¾—åˆ°æµè§ˆæ ¼å¼å†…å­˜å¯¹è±¡
         // parameters:
-        //      strBrowseName   ä¯ÀÀÎÄ¼şµÄÎÄ¼şÃû»òÕßÈ«Â·¾¶
-        //                      ÀıÈç cfgs/browse ¡£ÒòÎªÒÑ¾­ÊÇÔÚÌØ¶¨µÄÊı¾İ¿âÖĞ»ñµÃÅäÖÃÎÄ¼ş£¬ËùÒÔÎŞĞèÖ¸¶¨¿âÃû²¿·Ö
+        //      strBrowseName   æµè§ˆæ–‡ä»¶çš„æ–‡ä»¶åæˆ–è€…å…¨è·¯å¾„
+        //                      ä¾‹å¦‚ cfgs/browse ã€‚å› ä¸ºå·²ç»æ˜¯åœ¨ç‰¹å®šçš„æ•°æ®åº“ä¸­è·å¾—é…ç½®æ–‡ä»¶ï¼Œæ‰€ä»¥æ— éœ€æŒ‡å®šåº“åéƒ¨åˆ†
         // return:
         //      -1  error
         //      0   not found
@@ -290,7 +294,7 @@ namespace DigitalPlatform.rms
              * */
 
             /*
-            // ÒÑ´æÔÚÊ±
+            // å·²å­˜åœ¨æ—¶
             if (this.m_browseCfg != null)
             {
                 browseCfg = this.m_browseCfg;
@@ -312,12 +316,12 @@ namespace DigitalPlatform.rms
 
             string strBrowseFileName = "";
             // return:
-            //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-            //		-2	Ã»ÕÒµ½½Úµã
-            //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-            //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-            //		-5	´æÔÚ¶à¸ö½Úµã
-            //		0	³É¹¦
+            //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+            //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+            //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+            //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+            //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+            //		0	æˆåŠŸ
             int nRet = this.container.GetFileCfgItemLocalPath(strBrowsePath,
                 out strBrowseFileName,
                 out strError);
@@ -351,16 +355,16 @@ namespace DigitalPlatform.rms
             return 1;
         }
 
-        // Ê±¼ä´ÁÖÖ×Ó
+        // æ—¶é—´æˆ³ç§å­
         public long GetTimestampSeed()
         {
             return this.m_nTimestampSeed++;
         }
 
-        // µÃµ½Êı¾İ¿âID£¬×¢ÒâÇ°Ãæ´ø"@"
+        // å¾—åˆ°æ•°æ®åº“IDï¼Œæ³¨æ„å‰é¢å¸¦"@"
         // return:
-        //		Êı¾İ¿âID,¸ñÊ½Îª:@ID
-        // Ïß: ²»°²È«
+        //		æ•°æ®åº“ID,æ ¼å¼ä¸º:@ID
+        // çº¿: ä¸å®‰å…¨
         public string FullID
         {
             get
@@ -369,7 +373,7 @@ namespace DigitalPlatform.rms
             }
         }
 
-        // µÃµ½Êı¾İ¿âµÄËùÓĞÂß¼­Ãû£¬·Åµ½Ò»¸ö×Ö·û´®Êı×éÀï
+        // å¾—åˆ°æ•°æ®åº“çš„æ‰€æœ‰é€»è¾‘åï¼Œæ”¾åˆ°ä¸€ä¸ªå­—ç¬¦ä¸²æ•°ç»„é‡Œ
         public LogicNameItem[] GetLogicNames()
         {
             ArrayList aLogicName = new ArrayList();
@@ -380,7 +384,7 @@ namespace DigitalPlatform.rms
                 string strLang = DomUtil.GetAttr(captionNode, "lang");
                 string strValue = captionNode.InnerText.Trim(); // 2012/2/16
 
-                // ÓĞ¿ÉÒÔÎ´¶¨ÒåÓïÑÔ£¬»òÎ´¶¨ÒåÖµ£¬¸ÃÔõÃ´´¦Àí£¿£¿£¿
+                // æœ‰å¯ä»¥æœªå®šä¹‰è¯­è¨€ï¼Œæˆ–æœªå®šä¹‰å€¼ï¼Œè¯¥æ€ä¹ˆå¤„ç†ï¼Ÿï¼Ÿï¼Ÿ
                 LogicNameItem item = new LogicNameItem();
                 item.Lang = strLang;
                 item.Value = strValue;
@@ -397,7 +401,7 @@ namespace DigitalPlatform.rms
             return logicNames;
         }
 
-        // ÓĞ»º´æµÄ°æ±¾
+        // æœ‰ç¼“å­˜çš„ç‰ˆæœ¬
         public string GetCaption(string strLang)
         {
             string strResult = (string)this.m_captionTable[strLang == null ? "<null>" : strLang];
@@ -409,9 +413,9 @@ namespace DigitalPlatform.rms
             return strResult;
         }
 
-        // µÃµ½Ä³ÓïÑÔµÄÊı¾İ¿âÃû
+        // å¾—åˆ°æŸè¯­è¨€çš„æ•°æ®åº“å
         // parameters:
-        //      strLang Èç¹û==null£¬±íÊ¾Ê¹ÓÃÊı¾İ¿â¶ÔÏóÊµ¼Ê¶¨ÒåµÄµÚÒ»ÖÖÓïÑÔ
+        //      strLang å¦‚æœ==nullï¼Œè¡¨ç¤ºä½¿ç”¨æ•°æ®åº“å¯¹è±¡å®é™…å®šä¹‰çš„ç¬¬ä¸€ç§è¯­è¨€
         string GetCaptionInternal(string strLang)
         {
             XmlNode nodeCaption = null;
@@ -424,7 +428,7 @@ namespace DigitalPlatform.rms
             if (String.IsNullOrEmpty(strLang) == true)
                 goto END1;
 
-            // 1.°´ÓïÑÔ°æ±¾¾«È·ÕÒ
+            // 1.æŒ‰è¯­è¨€ç‰ˆæœ¬ç²¾ç¡®æ‰¾
             nodeCaption = this.PropertyNode.SelectSingleNode("logicname/caption[@lang='" + strLang + "']");
             if (nodeCaption != null)
             {
@@ -434,12 +438,12 @@ namespace DigitalPlatform.rms
                     return strCaption;
             }
 
-            // ½«ÓïÑÔ°æ±¾½Ø³ÉÁ½×Ö·ûÕÒ
+            // å°†è¯­è¨€ç‰ˆæœ¬æˆªæˆä¸¤å­—ç¬¦æ‰¾
             if (strLang.Length >= 2)
             {
                 string strShortLang = strLang.Substring(0, 2);//
 
-                // 2. ¾«È·ÕÒ2×Ö·ûµÄ
+                // 2. ç²¾ç¡®æ‰¾2å­—ç¬¦çš„
                 nodeCaption = this.PropertyNode.SelectSingleNode("logicname/caption[@lang='" + strShortLang + "']");
                 if (nodeCaption != null)
                 {
@@ -449,8 +453,8 @@ namespace DigitalPlatform.rms
                         return strCaption;
                 }
 
-                // 3. ÕÒÖ»ÊÇÇ°Á½¸ö×Ö·ûÏàÍ¬µÄ
-                // xpathÊ½×Ó¾­¹ıÁËÑéÖ¤¡£xpathÏÂ±êÏ°¹ß´Ó1¿ªÊ¼
+                // 3. æ‰¾åªæ˜¯å‰ä¸¤ä¸ªå­—ç¬¦ç›¸åŒçš„
+                // xpathå¼å­ç»è¿‡äº†éªŒè¯ã€‚xpathä¸‹æ ‡ä¹ æƒ¯ä»1å¼€å§‹
                 nodeCaption = this.PropertyNode.SelectSingleNode("logicname/caption[(substring(@lang,1,2)='" + strShortLang + "')]");
                 if (nodeCaption != null)
                 {
@@ -463,7 +467,7 @@ namespace DigitalPlatform.rms
             }
 
         END1:
-            // 4.×îºóÕÒÅÅÔÚµÚÒ»Î»µÄcaption
+            // 4.æœ€åæ‰¾æ’åœ¨ç¬¬ä¸€ä½çš„caption
             nodeCaption = this.PropertyNode.SelectSingleNode("logicname/caption");
             if (nodeCaption != null)
             {
@@ -475,23 +479,23 @@ namespace DigitalPlatform.rms
                 return strCaption;
 
 
-            // 5.×îºóÒ»¸öÓïÑÔ°æ±¾ĞÅÏ¢¶¼Ã»ÓĞÊ±£¬·µ»ØÊı¾İ¿âµÄid
-            return this.FullID; // TODO: ÊÇ²»ÊÇ»¹Òª¼ÓÉÏ·½À¨ºÅÖ®Àà?
+            // 5.æœ€åä¸€ä¸ªè¯­è¨€ç‰ˆæœ¬ä¿¡æ¯éƒ½æ²¡æœ‰æ—¶ï¼Œè¿”å›æ•°æ®åº“çš„id
+            return this.FullID; // TODO: æ˜¯ä¸æ˜¯è¿˜è¦åŠ ä¸Šæ–¹æ‹¬å·ä¹‹ç±»?
         }
 
-        // ¸ù¾İÓïÑÔ£¬µÃµ½Êı¾İµÄ±êÇ©Ãû
+        // æ ¹æ®è¯­è¨€ï¼Œå¾—åˆ°æ•°æ®çš„æ ‡ç­¾å
         // parameter:
-        //		strLang ÓïÑÔ°æ±¾
+        //		strLang è¯­è¨€ç‰ˆæœ¬
         // return:
-        //		ÕÒµ½£¬·µ»Ø×Ö·û´®
-        //		Ã»ÕÒµ½,»á·µ»Ø¿Õ×Ö·û´®""
-        // Ïß: °²È«µÄ
+        //		æ‰¾åˆ°ï¼Œè¿”å›å­—ç¬¦ä¸²
+        //		æ²¡æ‰¾åˆ°,ä¼šè¿”å›ç©ºå­—ç¬¦ä¸²""
+        // çº¿: å®‰å…¨çš„
         public string GetCaptionSafety(string strLang)
         {
-            //***********¶ÔÊı¾İ¿â¼Ó¶ÁËø******GetCaption¿ÉÄÜ»áÅ×³öÒì³££¬ËùÒÔÓÃtry,catch
+            //***********å¯¹æ•°æ®åº“åŠ è¯»é”******GetCaptionå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸ï¼Œæ‰€ä»¥ç”¨try,catch
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("GetCaptionSafety(strLang)£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetCaptionSafety(strLang)ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
@@ -501,15 +505,15 @@ namespace DigitalPlatform.rms
             finally
             {
                 m_db_lock.ReleaseReaderLock();
-                //*****************¶ÔÊı¾İ¿â½â¶ÁËø*********
+                //*****************å¯¹æ•°æ®åº“è§£è¯»é”*********
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetCaptionSafety(strLang)£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetCaptionSafety(strLang)ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
 
-        // µÃµ½È«²¿ÓïÑÔµÄcaption¡£Ã¿¸öÔªËØÄÚµÄ¸ñÊ½ ÓïÑÔ´úÂë:ÄÚÈİ
+        // å¾—åˆ°å…¨éƒ¨è¯­è¨€çš„captionã€‚æ¯ä¸ªå…ƒç´ å†…çš„æ ¼å¼ è¯­è¨€ä»£ç :å†…å®¹
         public List<string> GetAllLangCaption()
         {
             List<string> result = new List<string>();
@@ -527,13 +531,13 @@ namespace DigitalPlatform.rms
             return result;
         }
 
-        // Ïß: °²È«µÄ
+        // çº¿: å®‰å…¨çš„
         public List<string> GetAllLangCaptionSafety()
         {
-            //***********¶ÔÊı¾İ¿â¼Ó¶ÁËø******GetCaption¿ÉÄÜ»áÅ×³öÒì³££¬ËùÒÔÓÃtry,catch
+            //***********å¯¹æ•°æ®åº“åŠ è¯»é”******GetCaptionå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸ï¼Œæ‰€ä»¥ç”¨try,catch
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK		
-			this.container.WriteDebugInfo("GetAllLangCaptionSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetAllLangCaptionSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
@@ -542,14 +546,14 @@ namespace DigitalPlatform.rms
             finally
             {
                 m_db_lock.ReleaseReaderLock();
-                //*****************¶ÔÊı¾İ¿â½â¶ÁËø*********
+                //*****************å¯¹æ•°æ®åº“è§£è¯»é”*********
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetAllLangCaptionSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetAllLangCaptionSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // µÃµ½È«²¿µÄcaption£¬¶à¸öÖµÖ®¼äÓÃ·ÖºÅ(?)·Ö¸ô
+        // å¾—åˆ°å…¨éƒ¨çš„captionï¼Œå¤šä¸ªå€¼ä¹‹é—´ç”¨åˆ†å·(?)åˆ†éš”
         public string GetAllCaption()
         {
             StringBuilder strResult = new StringBuilder(4096);
@@ -564,14 +568,14 @@ namespace DigitalPlatform.rms
             return strResult.ToString();
         }
 
-        // µÃµ½ËùÓĞcaptionµÄÖµ,ÒÔ¶ººÅ·Ö¸ô
-        // Ïß: °²È«µÄ
+        // å¾—åˆ°æ‰€æœ‰captionçš„å€¼,ä»¥é€—å·åˆ†éš”
+        // çº¿: å®‰å…¨çš„
         public string GetCaptionsSafety()
         {
-            //***********¶ÔÊı¾İ¿â¼Ó¶ÁËø******GetCaption¿ÉÄÜ»áÅ×³öÒì³££¬ËùÒÔÓÃtry,catch
+            //***********å¯¹æ•°æ®åº“åŠ è¯»é”******GetCaptionå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸ï¼Œæ‰€ä»¥ç”¨try,catch
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK		
-			this.container.WriteDebugInfo("GetCaptionSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetCaptionSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
@@ -580,21 +584,21 @@ namespace DigitalPlatform.rms
             finally
             {
                 m_db_lock.ReleaseReaderLock();
-                //*****************¶ÔÊı¾İ¿â½â¶ÁËø*********
+                //*****************å¯¹æ•°æ®åº“è§£è¯»é”*********
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetCaptionSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetCaptionSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // µÃµ½ËùÓĞcaptionµÄÖµ¼°ID,ÒÔ¶ººÅ·Ö¸ô
-        // Ïß: °²È«µÄ
+        // å¾—åˆ°æ‰€æœ‰captionçš„å€¼åŠID,ä»¥é€—å·åˆ†éš”
+        // çº¿: å®‰å…¨çš„
         public string GetAllNameSafety()
         {
-            //***********¶ÔÊı¾İ¿â¼Ó¶ÁËø******GetCaption¿ÉÄÜ»áÅ×³öÒì³££¬ËùÒÔÓÃtry,catch
+            //***********å¯¹æ•°æ®åº“åŠ è¯»é”******GetCaptionå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸ï¼Œæ‰€ä»¥ç”¨try,catch
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("GetAllNameSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetAllNameSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
@@ -607,17 +611,17 @@ namespace DigitalPlatform.rms
             finally
             {
                 m_db_lock.ReleaseReaderLock();
-                //*****************¶ÔÊı¾İ¿â½â¶ÁËø********
+                //*****************å¯¹æ•°æ®åº“è§£è¯»é”********
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetAllNameSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetAllNameSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // ·µ»ØÊı¾İ¿âdbo
+        // è¿”å›æ•°æ®åº“dbo
         // return:
-        //		stringÀàĞÍ£¬dboÓÃ»§Ãû
-        // Ïß: ²»°²È«µÄ
+        //		stringç±»å‹ï¼Œdboç”¨æˆ·å
+        // çº¿: ä¸å®‰å…¨çš„
         internal string GetDbo()
         {
             string strDboValue = "";
@@ -626,15 +630,15 @@ namespace DigitalPlatform.rms
             return strDboValue;
         }
 
-        // Ïß: °²È«µÄ  ¼ÓËøÔ­Òò:´ÓÊı¾İ¿âÅäÖÃ¸ù½Úµã¶ÁÊı¾İ
+        // çº¿: å®‰å…¨çš„  åŠ é”åŸå› :ä»æ•°æ®åº“é…ç½®æ ¹èŠ‚ç‚¹è¯»æ•°æ®
         public string DboSafety
         {
             get
             {
-                //***********¶ÔÊı¾İ¿â¼Ó¶ÁËø******GetDbo²»»áÅ×Òì£¬ËùÒÔ²»ÓÃ¼Ótry,catch
+                //***********å¯¹æ•°æ®åº“åŠ è¯»é”******GetDboä¸ä¼šæŠ›å¼‚ï¼Œæ‰€ä»¥ä¸ç”¨åŠ try,catch
                 m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("TypeSafetyÊôĞÔ£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("TypeSafetyå±æ€§ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
                 try
                 {
@@ -642,20 +646,20 @@ namespace DigitalPlatform.rms
                 }
                 finally
                 {
-                    //**********¶ÔÊı¾İ¿â½â¶ÁËø************
+                    //**********å¯¹æ•°æ®åº“è§£è¯»é”************
                     m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
-					this.container.WriteDebugInfo("TypeSafetyÊôĞÔ£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+					this.container.WriteDebugInfo("TypeSafetyå±æ€§ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 
 #endif
                 }
             }
         }
 
-        // Ë½ÓĞGetType·½·¨: ·µ»ØÊı¾İ¿âÀàĞÍ
+        // ç§æœ‰GetTypeæ–¹æ³•: è¿”å›æ•°æ®åº“ç±»å‹
         // return:
-        //		stringÀàĞÍ£¬Êı¾İ¿âÀàĞÍ
-        // Ïß: ²»°²È«µÄ
+        //		stringç±»å‹ï¼Œæ•°æ®åº“ç±»å‹
+        // çº¿: ä¸å®‰å…¨çš„
         internal string GetDbType()
         {
             string strType = "";
@@ -666,15 +670,15 @@ namespace DigitalPlatform.rms
 
 
 
-        // Ïß: °²È«µÄ  ¼ÓËøÔ­Òò:´ÓÊı¾İ¿âÅäÖÃ¸ù½Úµã¶ÁÊı¾İ
+        // çº¿: å®‰å…¨çš„  åŠ é”åŸå› :ä»æ•°æ®åº“é…ç½®æ ¹èŠ‚ç‚¹è¯»æ•°æ®
         public string TypeSafety
         {
             get
             {
-                //***********¶ÔÊı¾İ¿â¼Ó¶ÁËø******GetDbType²»»áÅ×Òì£¬ËùÒÔ²»ÓÃ¼Ótry,catch
+                //***********å¯¹æ•°æ®åº“åŠ è¯»é”******GetDbTypeä¸ä¼šæŠ›å¼‚ï¼Œæ‰€ä»¥ä¸ç”¨åŠ try,catch
                 m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("TypeSafetyÊôĞÔ£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("TypeSafetyå±æ€§ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
                 try
                 {
@@ -682,48 +686,48 @@ namespace DigitalPlatform.rms
                 }
                 finally
                 {
-                    //**********¶ÔÊı¾İ¿â½â¶ÁËø************
+                    //**********å¯¹æ•°æ®åº“è§£è¯»é”************
                     m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
-					this.container.WriteDebugInfo("TypeSafetyÊôĞÔ£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+					this.container.WriteDebugInfo("TypeSafetyå±æ€§ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 
 #endif
                 }
             }
         }
 
-        // Êı¾İ¿â¸Õ´ò¿ªµÄÊ±ºò£¬ÒòÎªĞ£Ñé¹ıÎ²ºÅ£¬ËùÒÔÖªµÀÊı¾İ¿âµÄÊµ¼ÊÎ²ºÅÊÇÊ²Ã´
-        // Èç¹ûÔÚÃ¿¸ö´´½¨Êı¾İ¿â¼ÇÂ¼µÄÎ»ÖÃ¶¼Î¬³ÖºÃÒ»¸öÄÚ´æµÄÊµ¼ÊÎ²ºÅ£¬ÄÇÃ´¾Í¿ÉÒÔÓÃÀ´ºóÃæ½øĞĞÄÚ´æ±È½Ï£¬
-        // ×÷Îª select ´Ó records ±í»ñµÃÒÑÓĞĞĞµÄÒ»¸ö³õÉ¸¡£Ö»ÓĞµ±Ğ¡ÓÚÕâ¸öÊµ¼ÊÎ²ºÅµÄ¼ÇÂ¼²ÅÓĞ±ØÒªÈ¥ select£¬ÕâÑù¾ÍÌá¸ßÁËËÙ¶È
-        // »¹ÓĞÁíÍâÒ»¸ö°ì·¨£¬¾ÍÊÇÕë¶ÔËùÓĞ×·¼ÓµÄ£¬Ò²¾ÍÊÇÎÊºÅË÷ÒıºÅµÄÇé¿ö£¬¶¼ÓÅÏÈÈ¥ insert records ±í£¬ µÈ³öÏÖÁË±¨´í£¬²Å¸ÄÎª¸²¸Ç´¦Àí
+        // æ•°æ®åº“åˆšæ‰“å¼€çš„æ—¶å€™ï¼Œå› ä¸ºæ ¡éªŒè¿‡å°¾å·ï¼Œæ‰€ä»¥çŸ¥é“æ•°æ®åº“çš„å®é™…å°¾å·æ˜¯ä»€ä¹ˆ
+        // å¦‚æœåœ¨æ¯ä¸ªåˆ›å»ºæ•°æ®åº“è®°å½•çš„ä½ç½®éƒ½ç»´æŒå¥½ä¸€ä¸ªå†…å­˜çš„å®é™…å°¾å·ï¼Œé‚£ä¹ˆå°±å¯ä»¥ç”¨æ¥åé¢è¿›è¡Œå†…å­˜æ¯”è¾ƒï¼Œ
+        // ä½œä¸º select ä» records è¡¨è·å¾—å·²æœ‰è¡Œçš„ä¸€ä¸ªåˆç­›ã€‚åªæœ‰å½“å°äºè¿™ä¸ªå®é™…å°¾å·çš„è®°å½•æ‰æœ‰å¿…è¦å» selectï¼Œè¿™æ ·å°±æé«˜äº†é€Ÿåº¦
+        // è¿˜æœ‰å¦å¤–ä¸€ä¸ªåŠæ³•ï¼Œå°±æ˜¯é’ˆå¯¹æ‰€æœ‰è¿½åŠ çš„ï¼Œä¹Ÿå°±æ˜¯é—®å·ç´¢å¼•å·çš„æƒ…å†µï¼Œéƒ½ä¼˜å…ˆå» insert records è¡¨ï¼Œ ç­‰å‡ºç°äº†æŠ¥é”™ï¼Œæ‰æ”¹ä¸ºè¦†ç›–å¤„ç†
         // 
-        // ÒòÎªÊı¾İ¿â´ò¿ªµÄÊ±ºòĞ£Ñé¹ıÎ²ºÅ£¬ËùÒÔ×·¼ÓµÄÊ±ºò£¬ÔÚ»ñµÃµÄÎ²ºÅÎ»ÖÃ»¹ÓĞÍ»È»³öÏÖµÄÒÑ¾­´æÔÚµÄĞĞµÄ¼¸ÂÊÌ«Ğ¡ÁË
-        // Èç¹ûÔÚÅú´¦Àí¹ı³ÌÖĞ°ÑÕû¸öÊı¾İ¿âËø¶¨£¬ÔòÕâÑùµÄ¼¸ÂÊ¾Í¸üĞ¡ÁË
-        // ¿ÉÒÔÑĞ¾¿Ò»ÏÂÔÚÒ»´ÎĞÔÌá½»µÄÈô¸É insert Óï¾äÖĞ£¬µ½µ×ÊÇÄÄĞ©Åöµ½ÁËÒÑ¾­´æÔÚµÄ¼ÇÂ¼£¬È»ºóºÃ½øĞĞÖØÊÔ
+        // å› ä¸ºæ•°æ®åº“æ‰“å¼€çš„æ—¶å€™æ ¡éªŒè¿‡å°¾å·ï¼Œæ‰€ä»¥è¿½åŠ çš„æ—¶å€™ï¼Œåœ¨è·å¾—çš„å°¾å·ä½ç½®è¿˜æœ‰çªç„¶å‡ºç°çš„å·²ç»å­˜åœ¨çš„è¡Œçš„å‡ ç‡å¤ªå°äº†
+        // å¦‚æœåœ¨æ‰¹å¤„ç†è¿‡ç¨‹ä¸­æŠŠæ•´ä¸ªæ•°æ®åº“é”å®šï¼Œåˆ™è¿™æ ·çš„å‡ ç‡å°±æ›´å°äº†
+        // å¯ä»¥ç ”ç©¶ä¸€ä¸‹åœ¨ä¸€æ¬¡æ€§æäº¤çš„è‹¥å¹² insert è¯­å¥ä¸­ï¼Œåˆ°åº•æ˜¯å“ªäº›ç¢°åˆ°äº†å·²ç»å­˜åœ¨çš„è®°å½•ï¼Œç„¶åå¥½è¿›è¡Œé‡è¯•
 
 
-        // µÃµ½ÖÖ×ÓÖµ
+        // å¾—åˆ°ç§å­å€¼
         // return
-        //      ¼ÇÂ¼Î²ºÅ
-        // Ïß: ²»°²È«
-        // Òì³££ºÈç¹û×Ö·û´®¸ñÊ½²»¶Ô¿ÉÄÜ»áÅ×³öÒì³£
+        //      è®°å½•å°¾å·
+        // çº¿: ä¸å®‰å…¨
+        // å¼‚å¸¸ï¼šå¦‚æœå­—ç¬¦ä¸²æ ¼å¼ä¸å¯¹å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         private int GetTailNo()
         {
             XmlNode nodeSeed =
                 this.PropertyNode.SelectSingleNode("seed");
             if (nodeSeed == null)
             {
-                throw new Exception("·şÎñÆ÷ÅäÖÃÎÄ¼ş´íÎó,Î´ÕÒµ½<seed>ÔªËØ¡£");
+                throw new Exception("æœåŠ¡å™¨é…ç½®æ–‡ä»¶é”™è¯¯,æœªæ‰¾åˆ°<seed>å…ƒç´ ã€‚");
             }
 
             return System.Convert.ToInt32(nodeSeed.InnerText.Trim()); // 2012/2/16
         }
 
-        // ĞŞ¸ÄÊı¾İ¿âµÄÎ²ºÅ
+        // ä¿®æ”¹æ•°æ®åº“çš„å°¾å·
         // parameter:
-        //		 nSeed  ´«ÈëµÄÎ²ºÅÊı
-        // Ïß: ²»°²È«
-        protected void ChangeTailNo(int nSeed)  //ÉèÎªprotectedÊÇÒòÎªÔÚ³õÊ¼»¯Ê±±»·ÃÎÊ
+        //		 nSeed  ä¼ å…¥çš„å°¾å·æ•°
+        // çº¿: ä¸å®‰å…¨
+        protected void ChangeTailNo(int nSeed)  //è®¾ä¸ºprotectedæ˜¯å› ä¸ºåœ¨åˆå§‹åŒ–æ—¶è¢«è®¿é—®
         {
             XmlNode nodeSeed =
                 this.PropertyNode.SelectSingleNode("seed");
@@ -734,17 +738,17 @@ namespace DigitalPlatform.rms
             this.container.Changed = true;
         }
 
-        // ÓĞÌõ¼şµØ¼õÁ¿Êı¾İ¿â¼ÇÒäµÄÎ²ºÅ
-        // ËùÎ½Ìõ¼şÊÇ£ºstrDeletedID Õâ¸öºÅÂë¸ÕºÃÊÇµ±Ç°×îÎ²Ò»¸öºÅÂë
+        // æœ‰æ¡ä»¶åœ°å‡é‡æ•°æ®åº“è®°å¿†çš„å°¾å·
+        // æ‰€è°“æ¡ä»¶æ˜¯ï¼šstrDeletedID è¿™ä¸ªå·ç åˆšå¥½æ˜¯å½“å‰æœ€å°¾ä¸€ä¸ªå·ç 
         internal bool TryRecycleTailNo(string strDeletedID)
         {
             if (this.m_bTailNoVerified == false)
                 return false;
 
-            //****************¶ÔÊı¾İ¿âÎ²ºÅ¼ÓĞ´Ëø***********
+            //****************å¯¹æ•°æ®åº“å°¾å·åŠ å†™é”***********
             this.m_TailNolock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("TryDecreaseTailNo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("TryDecreaseTailNo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·åŠ å†™é”ã€‚");
 #endif
             try
             {
@@ -752,7 +756,7 @@ namespace DigitalPlatform.rms
                 if (Int32.TryParse(strDeletedID, out nNumber) == false)
                     return false;
 
-                int nTemp = GetTailNo();   //±ØĞë²ÉÓÃÕâÖÖ·½·¨£¬²»ÄÜÖ±½ÓÓÃSeed++
+                int nTemp = GetTailNo();   //å¿…é¡»é‡‡ç”¨è¿™ç§æ–¹æ³•ï¼Œä¸èƒ½ç›´æ¥ç”¨Seed++
                 if (nNumber == nTemp)
                 {
                     ChangeTailNo(nTemp - 1);
@@ -763,57 +767,57 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***************¶ÔÊı¾İ¿âÎ²ºÅ½âĞ´Ëø************
+                //***************å¯¹æ•°æ®åº“å°¾å·è§£å†™é”************
                 this.m_TailNolock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("TryDecreaseTailNo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("TryDecreaseTailNo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·è§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // µÃµ½¼ÇÂ¼µÄIDÎ²ºÅ£¨ÏÈ¼Ó1ÔÙ·µ»Ø£©,
-        // Ïß: °²È«
-        // ¼ÓËøÔ­Òò£¬¼ÓĞ´Ëø£¬ĞŞ¸ÄÁËnodeSeedÄÚÈİ£¬²¢Ê¼ÖÕ±£³ÖÔö¼Ó£¬ËùÒÔ´ËÊ±Ëû´¦²»ÄÜÔÙ¶ÁºÍĞ´
+        // å¾—åˆ°è®°å½•çš„IDå°¾å·ï¼ˆå…ˆåŠ 1å†è¿”å›ï¼‰,
+        // çº¿: å®‰å…¨
+        // åŠ é”åŸå› ï¼ŒåŠ å†™é”ï¼Œä¿®æ”¹äº†nodeSeedå†…å®¹ï¼Œå¹¶å§‹ç»ˆä¿æŒå¢åŠ ï¼Œæ‰€ä»¥æ­¤æ—¶ä»–å¤„ä¸èƒ½å†è¯»å’Œå†™
         // return:
-        //      -1  ³ö´í¡£Ô­ÒòÊÇµ±Ç°Êı¾İ¿â¼ÇÒäµÄÎ²ºÅÉĞÎ´¾­¹ıĞ£Ñé
-        //      ÆäËû  ·µ»ØÕûÊıID
+        //      -1  å‡ºé”™ã€‚åŸå› æ˜¯å½“å‰æ•°æ®åº“è®°å¿†çš„å°¾å·å°šæœªç»è¿‡æ ¡éªŒ
+        //      å…¶ä»–  è¿”å›æ•´æ•°ID
         protected int GetNewTailNo()
         {
-            //****************¶ÔÊı¾İ¿âÎ²ºÅ¼ÓĞ´Ëø***********
+            //****************å¯¹æ•°æ®åº“å°¾å·åŠ å†™é”***********
             this.m_TailNolock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("GetNewTailNo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("GetNewTailNo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·åŠ å†™é”ã€‚");
 #endif
             try
             {
                 if (this.m_bTailNoVerified == false)
                     return -1;
 
-                int nTemp = GetTailNo();   //±ØĞë²ÉÓÃÕâÖÖ·½·¨£¬²»ÄÜÖ±½ÓÓÃSeed++
+                int nTemp = GetTailNo();   //å¿…é¡»é‡‡ç”¨è¿™ç§æ–¹æ³•ï¼Œä¸èƒ½ç›´æ¥ç”¨Seed++
                 nTemp++;
                 ChangeTailNo(nTemp);
                 return nTemp; //GetTailNo();
             }
             finally
             {
-                //***************¶ÔÊı¾İ¿âÎ²ºÅ½âĞ´Ëø************
+                //***************å¯¹æ•°æ®åº“å°¾å·è§£å†™é”************
                 this.m_TailNolock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetNewTailNo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("GetNewTailNo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·è§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // ÍÆ¶¯Êı¾İ¿â¼ÇÒäµÄÎ²ºÅ£¬Èç¹û±ØÒª
-        // Èç¹ûÓÃ»§ÊÖ¼ÓÊäÈëµÄ¼ÇÂ¼ºÅ´óÓÚµÄÊı¾İ¿âµÄÎ²ºÅ£¬
-        // ÔòÒªĞŞ¸ÄÎ²ºÅ£¬´ËÊ±½«¶ÁËøÉı¼¶ÎªĞ´Ëø£¬
-        // ĞŞ¸ÄÍêºóÔÙ½µ¼¶Îª¶ÁËø
+        // æ¨åŠ¨æ•°æ®åº“è®°å¿†çš„å°¾å·ï¼Œå¦‚æœå¿…è¦
+        // å¦‚æœç”¨æˆ·æ‰‹åŠ è¾“å…¥çš„è®°å½•å·å¤§äºçš„æ•°æ®åº“çš„å°¾å·ï¼Œ
+        // åˆ™è¦ä¿®æ”¹å°¾å·ï¼Œæ­¤æ—¶å°†è¯»é”å‡çº§ä¸ºå†™é”ï¼Œ
+        // ä¿®æ”¹å®Œåå†é™çº§ä¸ºè¯»é”
         // parameter:
-        //		nID         ´«ÈëID
-        //		isExistReaderLock   ÊÇ·ñÒÑ´æÔÚ¶ÁËø¡£ÈôÒÑ¾­´æÔÚÔò±¾º¯Êı¾Í²»¼ÓËøÁË
-        // Ïß: °²È«µÄ
+        //		nID         ä¼ å…¥ID
+        //		isExistReaderLock   æ˜¯å¦å·²å­˜åœ¨è¯»é”ã€‚è‹¥å·²ç»å­˜åœ¨åˆ™æœ¬å‡½æ•°å°±ä¸åŠ é”äº†
+        // çº¿: å®‰å…¨çš„
         // return:
-        //      ÊÇ·ñ·¢ÉúÁËÍÆ¶¯Î²ºÅµÄÇé¿ö
+        //      æ˜¯å¦å‘ç”Ÿäº†æ¨åŠ¨å°¾å·çš„æƒ…å†µ
         protected bool AdjustTailNo(int nID,
             bool isExistReaderLock)
         {
@@ -821,17 +825,17 @@ namespace DigitalPlatform.rms
 
             if (isExistReaderLock == false)
             {
-                //*********¶ÔÊı¾İ¿âÎ²ºÅ¼Ó¶ÁËø*************
+                //*********å¯¹æ•°æ®åº“å°¾å·åŠ è¯»é”*************
                 // this.m_TailNolock.AcquireReaderLock(m_nTimeOut);
                 this.m_TailNolock.AcquireUpgradeableReaderLock(m_nTimeOut);
 
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("SetIfGreaten()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("SetIfGreaten()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·åŠ è¯»é”ã€‚");
 #endif
             }
             else
             {
-                // ÍâÎ§ÒÑ¾­¼ÓËø£¬×¢ÒâÓ¦µ±ÊÇ AcquireUpgradeableReaderLock()
+                // å¤–å›´å·²ç»åŠ é”ï¼Œæ³¨æ„åº”å½“æ˜¯ AcquireUpgradeableReaderLock()
             }
 
             try
@@ -839,15 +843,15 @@ namespace DigitalPlatform.rms
                 int nSavedNo = GetTailNo();
                 if (nID > nSavedNo)
                 {
-                    // 2006/12/8 ×¢ÊÍµô
-                    // Ğ´ÈÕÖ¾
-                    // this.container.WriteErrorLog("·¢ÏÖÊı¾İ¿â'" + this.GetCaption("zh-CN") + "'µÄÊµ¼ÊÎ²ºÅ'" + Convert.ToString(nID) + "'´óÓÚ±£´æµÄÎ²ºÅ'" + Convert.ToString(nSavedNo) + "'£¬ÍÆ¶¯Î²ºÅ¡£");
+                    // 2006/12/8 æ³¨é‡Šæ‰
+                    // å†™æ—¥å¿—
+                    // this.container.WriteErrorLog("å‘ç°æ•°æ®åº“'" + this.GetCaption("zh-CN") + "'çš„å®é™…å°¾å·'" + Convert.ToString(nID) + "'å¤§äºä¿å­˜çš„å°¾å·'" + Convert.ToString(nSavedNo) + "'ï¼Œæ¨åŠ¨å°¾å·ã€‚");
                     bTailNoChanged = true;
 
-                    //*********ÉÏÉı¶ÁËøÎªĞ´Ëø************
+                    //*********ä¸Šå‡è¯»é”ä¸ºå†™é”************
                     LockCookie lc = m_TailNolock.UpgradeToWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-					this.container.WriteDebugInfo("SetIfGreaten()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ¶ÁËøÉÏÉıÎªĞ´Ëø¡£");
+					this.container.WriteDebugInfo("SetIfGreaten()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·è¯»é”ä¸Šå‡ä¸ºå†™é”ã€‚");
 #endif
                     try
                     {
@@ -855,10 +859,10 @@ namespace DigitalPlatform.rms
                     }
                     finally
                     {
-                        //*************½µĞ´ËøÎª¶ÁËø*************
+                        //*************é™å†™é”ä¸ºè¯»é”*************
                         m_TailNolock.DowngradeFromWriterLock(ref lc);
 #if DEBUG_LOCK
-						this.container.WriteDebugInfo("SetIfGreaten()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅĞ´ËøÏÂ½µÎª¶ÁËø¡£");
+						this.container.WriteDebugInfo("SetIfGreaten()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·å†™é”ä¸‹é™ä¸ºè¯»é”ã€‚");
 #endif
                     }
                 }
@@ -869,29 +873,29 @@ namespace DigitalPlatform.rms
             {
                 if (isExistReaderLock == false)
                 {
-                    //*******¶ÔÊı¾İ¿âÎ²ºÅ½â¶ÁËø********
+                    //*******å¯¹æ•°æ®åº“å°¾å·è§£è¯»é”********
                     // this.m_TailNolock.ReleaseReaderLock();
                     this.m_TailNolock.ReleaseUpgradeableReaderLock();
 
 #if DEBUG_LOCK					
-					this.container.WriteDebugInfo("SetIfGreaten()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿âÎ²ºÅ½â¶ÁËø¡£");
+					this.container.WriteDebugInfo("SetIfGreaten()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“å°¾å·è§£è¯»é”ã€‚");
 #endif
                 }
             }
         }
 
 #if  NO
-        // ½«Êı¾İ¿â¶à¸ö±íµÄ±êÇ©ĞÅÏ¢£¬×ª»»³ÉTableInfo¶ÔÏóÊı×é
-        // ²¢¼ì²é¼ìË÷Í¾¾¶ÖĞÊÇ·ñ°üº¬id£¬Èç¹û¼ìË÷Í¾¾¶Îª¿Õ£¬±íÊ¾°´È«²¿¼ìË÷µã½øĞĞ¼ìË÷(²»°üº¬id)
+        // å°†æ•°æ®åº“å¤šä¸ªè¡¨çš„æ ‡ç­¾ä¿¡æ¯ï¼Œè½¬æ¢æˆTableInfoå¯¹è±¡æ•°ç»„
+        // å¹¶æ£€æŸ¥æ£€ç´¢é€”å¾„ä¸­æ˜¯å¦åŒ…å«idï¼Œå¦‚æœæ£€ç´¢é€”å¾„ä¸ºç©ºï¼Œè¡¨ç¤ºæŒ‰å…¨éƒ¨æ£€ç´¢ç‚¹è¿›è¡Œæ£€ç´¢(ä¸åŒ…å«id)
         // parameter:
-        //		strTableNames   ¼ìË÷Í¾¾¶Ãû³Æ£¬Ö®¼äÓÃ¶ººÅ·Ö¸ô
-        //      bHasID          out²ÎÊı£¬·µ»ØÍ¾¾¶ÖĞÊÇ·ñÓĞid
-        //      aTableInfo      out²ÎÊı£¬·µ»ØTableInfoÊı×é
-        //      strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strTableNames   æ£€ç´¢é€”å¾„åç§°ï¼Œä¹‹é—´ç”¨é€—å·åˆ†éš”
+        //      bHasID          outå‚æ•°ï¼Œè¿”å›é€”å¾„ä¸­æ˜¯å¦æœ‰id
+        //      aTableInfo      outå‚æ•°ï¼Œè¿”å›TableInfoæ•°ç»„
+        //      strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // returns:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß: ²»°²È«
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿: ä¸å®‰å…¨
         protected int TableNames2aTableInfo(string strTableNames,
             out bool bHasID,
             out List<TableInfo> aTableInfo,
@@ -912,7 +916,7 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-            //Èç¹ûstrTableListÎª¿Õ,Ôò·µ»ØËùÓĞµÄ±í,µ«²»°üº¬Í¨¹ıid¼ìË÷
+            //å¦‚æœstrTableListä¸ºç©º,åˆ™è¿”å›æ‰€æœ‰çš„è¡¨,ä½†ä¸åŒ…å«é€šè¿‡idæ£€ç´¢
             if (strTableNames == "")
             {
                 if (keysCfg != null)
@@ -956,18 +960,18 @@ namespace DigitalPlatform.rms
         }
 #endif
 
-        // 2007/9/14¸ÄÔìºó°æ±¾
-        // ½«Êı¾İ¿â¶à¸ö±íµÄ±êÇ©ĞÅÏ¢£¬×ª»»³ÉTableInfo¶ÔÏóÊı×é
-        // ²¢¼ì²é¼ìË÷Í¾¾¶ÖĞÊÇ·ñ°üº¬id£¬Èç¹û¼ìË÷Í¾¾¶Îª¿Õ£¬±íÊ¾°´È«²¿¼ìË÷µã½øĞĞ¼ìË÷(²»°üº¬id)
+        // 2007/9/14æ”¹é€ åç‰ˆæœ¬
+        // å°†æ•°æ®åº“å¤šä¸ªè¡¨çš„æ ‡ç­¾ä¿¡æ¯ï¼Œè½¬æ¢æˆTableInfoå¯¹è±¡æ•°ç»„
+        // å¹¶æ£€æŸ¥æ£€ç´¢é€”å¾„ä¸­æ˜¯å¦åŒ…å«idï¼Œå¦‚æœæ£€ç´¢é€”å¾„ä¸ºç©ºï¼Œè¡¨ç¤ºæŒ‰å…¨éƒ¨æ£€ç´¢ç‚¹è¿›è¡Œæ£€ç´¢(ä¸åŒ…å«id)
         // parameter:
-        //		strTableNames   ¼ìË÷Í¾¾¶Ãû³Æ£¬Ö®¼äÓÃ¶ººÅ·Ö¸ô¡£Èç¹ûÎª¿Õ,Ôò±íÊ¾ÀûÓÃËùÓĞµÄ±í½øĞĞ¼ìË÷(µ«²»°üº¬Í¨¹ıidÍ¾¾¶¼ìË÷)
-        //      bHasID          out²ÎÊı£¬·µ»ØÍ¾¾¶ÖĞÊÇ·ñÓĞid
-        //      aTableInfo      out²ÎÊı£¬·µ»ØTableInfoÊı×é
-        //      strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strTableNames   æ£€ç´¢é€”å¾„åç§°ï¼Œä¹‹é—´ç”¨é€—å·åˆ†éš”ã€‚å¦‚æœä¸ºç©º,åˆ™è¡¨ç¤ºåˆ©ç”¨æ‰€æœ‰çš„è¡¨è¿›è¡Œæ£€ç´¢(ä½†ä¸åŒ…å«é€šè¿‡idé€”å¾„æ£€ç´¢)
+        //      bHasID          outå‚æ•°ï¼Œè¿”å›é€”å¾„ä¸­æ˜¯å¦æœ‰id
+        //      aTableInfo      outå‚æ•°ï¼Œè¿”å›TableInfoæ•°ç»„
+        //      strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // returns:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß: ²»°²È«
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿: ä¸å®‰å…¨
         protected int TableNames2aTableInfo(string strTableNames,
             out bool bHasID,
             out List<TableInfo> aTableInfo,
@@ -988,10 +992,10 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-            //Èç¹ûstrTableNamesÎª¿Õ,Ôò·µ»ØËùÓĞµÄ±í,µ«²»°üº¬Í¨¹ıid¼ìË÷
+            //å¦‚æœstrTableNamesä¸ºç©º,åˆ™è¿”å›æ‰€æœ‰çš„è¡¨,ä½†ä¸åŒ…å«é€šè¿‡idæ£€ç´¢
             if (strTableNames == ""
                 || strTableNames.ToLower() == "<all>"
-                || strTableNames == "<È«²¿>")
+                || strTableNames == "<å…¨éƒ¨>")
             {
                 if (keysCfg != null)
                 {
@@ -1004,7 +1008,7 @@ namespace DigitalPlatform.rms
                 return 0;
             }
 
-            // 2007/9/14 ĞÂÔö£¬ÌáÉıÖ´ĞĞËÙ¶È
+            // 2007/9/14 æ–°å¢ï¼Œæå‡æ‰§è¡Œé€Ÿåº¦
             List<TableInfo> ref_table_infos = new List<TableInfo>();
             nRet = keysCfg.GetTableInfosRemoveDup(out ref_table_infos,
                 out strError);
@@ -1029,7 +1033,7 @@ namespace DigitalPlatform.rms
                 {
                     TableInfo tableInfo = null;
                     nRet = keysCfg.GetTableInfo(strTableName,
-                        ref_table_infos, // 2007/9/14 ĞÂÔö£¬ÌáÉıÖ´ĞĞËÙ¶È
+                        ref_table_infos, // 2007/9/14 æ–°å¢ï¼Œæå‡æ‰§è¡Œé€Ÿåº¦
                         out tableInfo,
                         out strError);
                     if (nRet == 0)
@@ -1043,19 +1047,19 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ¼ìË÷
+        // æ£€ç´¢
         // parameter:
-        //      strOutpuStyle   Êä³öµÄ·ç¸ñ¡£Èç¹ûÎªkeycount£¬ÔòÊä³ö¹é²¢Í³¼ÆºóµÄkey+count£»·ñÔò£¬»òÕßÈ±Ê¡£¬Îª´«Í³µÄÊä³ö¼ÇÂ¼id
-        //		searchItem  SearchItem¶ÔÏó
-        //		isConnected IsConnection¶ÔÏó£¬ÓÃÓÚÅĞ¶ÏÍ¨Ñ¶ÊÇ·ñÁ¬½Ó
-        //      resultSet   ½á¹û¼¯¶ÔÏó£¬´æ·ÅÃüÖĞ¼ÇÂ¼¡£±¾º¯Êı²¢²»ÔÚ¼ìË÷Ç°Çå¿Õ½á¹û¼¯£¬Òò´Ë£¬¶ÔÍ¬Ò»½á¹û¼¯¶ÔÏó¶à´ÎÖ´ĞĞ±¾º¯Êı£¬Ôò¿ÉÒÔ°ÑÃüÖĞ½á¹û×·¼ÓÔÚÒ»Æğ
-        //		nWarningLevel   ´¦Àí¾¯¸æ¼¶±ğ 0£º±íÊ¾ÌØ±ğÇ¿ÁÒ£¬³öÏÖ¾¯¸æÒ²µ±×÷³ö´í£»1£º±íÊ¾²»Ç¿ÁÒ£¬²»·µ»Ø³ö´í£¬¼ÌĞøÖ´ĞĞ
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
-        //		strWarning  out²ÎÊı£¬·µ»Ø¾¯¸æĞÅÏ¢
+        //      strOutpuStyle   è¾“å‡ºçš„é£æ ¼ã€‚å¦‚æœä¸ºkeycountï¼Œåˆ™è¾“å‡ºå½’å¹¶ç»Ÿè®¡åçš„key+countï¼›å¦åˆ™ï¼Œæˆ–è€…ç¼ºçœï¼Œä¸ºä¼ ç»Ÿçš„è¾“å‡ºè®°å½•id
+        //		searchItem  SearchItemå¯¹è±¡
+        //		isConnected IsConnectionå¯¹è±¡ï¼Œç”¨äºåˆ¤æ–­é€šè®¯æ˜¯å¦è¿æ¥
+        //      resultSet   ç»“æœé›†å¯¹è±¡ï¼Œå­˜æ”¾å‘½ä¸­è®°å½•ã€‚æœ¬å‡½æ•°å¹¶ä¸åœ¨æ£€ç´¢å‰æ¸…ç©ºç»“æœé›†ï¼Œå› æ­¤ï¼Œå¯¹åŒä¸€ç»“æœé›†å¯¹è±¡å¤šæ¬¡æ‰§è¡Œæœ¬å‡½æ•°ï¼Œåˆ™å¯ä»¥æŠŠå‘½ä¸­ç»“æœè¿½åŠ åœ¨ä¸€èµ·
+        //		nWarningLevel   å¤„ç†è­¦å‘Šçº§åˆ« 0ï¼šè¡¨ç¤ºç‰¹åˆ«å¼ºçƒˆï¼Œå‡ºç°è­¦å‘Šä¹Ÿå½“ä½œå‡ºé”™ï¼›1ï¼šè¡¨ç¤ºä¸å¼ºçƒˆï¼Œä¸è¿”å›å‡ºé”™ï¼Œç»§ç»­æ‰§è¡Œ
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
+        //		strWarning  outå‚æ•°ï¼Œè¿”å›è­¦å‘Šä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		>=0 ÃüÖĞ¼ÇÂ¼Êı
-        // Ïß: °²È«µÄ
+        //		-1  å‡ºé”™
+        //		>=0 å‘½ä¸­è®°å½•æ•°
+        // çº¿: å®‰å…¨çš„
         internal virtual int SearchByUnion(
             string strOutputStyle,
             SearchItem searchItem,
@@ -1071,13 +1075,13 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ³õÊ¼»¯Êı¾İ¿â£¬×¢ÒâĞéº¯Êı²»ÄÜÎªprivate
+        // åˆå§‹åŒ–æ•°æ®åº“ï¼Œæ³¨æ„è™šå‡½æ•°ä¸èƒ½ä¸ºprivate
         // parameter:
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ,ÔÚÅÉÉúÀàÀï¼ÓËø
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„,åœ¨æ´¾ç”Ÿç±»é‡ŒåŠ é”
         public virtual int InitialPhysicalDatabase(out string strError)
         {
             strError = "";
@@ -1085,13 +1089,13 @@ namespace DigitalPlatform.rms
         }
 
         // 2008/11/14
-        // Ë¢ĞÂÊı¾İ¿â(SQL±í)¶¨Òå£¬×¢ÒâĞéº¯Êı²»ÄÜÎªprivate
+        // åˆ·æ–°æ•°æ®åº“(SQLè¡¨)å®šä¹‰ï¼Œæ³¨æ„è™šå‡½æ•°ä¸èƒ½ä¸ºprivate
         // parameter:
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ,ÔÚÅÉÉúÀàÀï¼ÓËø
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„,åœ¨æ´¾ç”Ÿç±»é‡ŒåŠ é”
         public virtual int RefreshPhysicalDatabase(
             bool bClearAllKeyTables,
             out string strError)
@@ -1110,37 +1114,37 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // É¾³ıÊı¾İ¿â
+        // åˆ é™¤æ•°æ®åº“
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public virtual int Delete(out string strError)
         {
             strError = "";
             return 0;
         }
 
-        // °´Ö¸¶¨·¶Î§¶ÁXml
+        // æŒ‰æŒ‡å®šèŒƒå›´è¯»Xml
         // parameter:
-        //		strID				¼ÇÂ¼ID
-        //		nStart				´ÓÄ¿±ê¶ÁµÄ¿ªÊ¼Î»ÖÃ
-        //		nLength				³¤¶È -1:¿ªÊ¼µ½½áÊø
-        //		nMaxLength			ÏŞÖÆµÄ×î´ó³¤¶È
-        //		strStyle			·ç¸ñ,data:È¡Êı¾İ prev:Ç°Ò»Ìõ¼ÇÂ¼ next:ºóÒ»Ìõ¼ÇÂ¼
-        //							withresmetadataÊôĞÔ±íÊ¾°Ñ×ÊÔ´µÄÔªÊı¾İÌîµ½bodyÌåÀï£¬
-        //							Í¬Ê±×¢ÒâÊ±¼ä´ÁÊÇÁ½ÕßºÏ²¢ºóµÄÊ±¼ä´Á
-        //		destBuffer			out²ÎÊı£¬·µ»Ø×Ö½ÚÊı×é
-        //		strMetadata			out²ÎÊı£¬·µ»ØÔªÊı¾İ
-        //		strOutputResPath	out²ÎÊı£¬·µ»ØÏà¹Ø¼ÇÂ¼µÄÂ·¾¶
-        //		outputTimestamp		out²ÎÊı£¬·µ»ØÊ±¼ä´Á
-        //		strError			out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strID				è®°å½•ID
+        //		nStart				ä»ç›®æ ‡è¯»çš„å¼€å§‹ä½ç½®
+        //		nLength				é•¿åº¦ -1:å¼€å§‹åˆ°ç»“æŸ
+        //		nMaxLength			é™åˆ¶çš„æœ€å¤§é•¿åº¦
+        //		strStyle			é£æ ¼,data:å–æ•°æ® prev:å‰ä¸€æ¡è®°å½• next:åä¸€æ¡è®°å½•
+        //							withresmetadataå±æ€§è¡¨ç¤ºæŠŠèµ„æºçš„å…ƒæ•°æ®å¡«åˆ°bodyä½“é‡Œï¼Œ
+        //							åŒæ—¶æ³¨æ„æ—¶é—´æˆ³æ˜¯ä¸¤è€…åˆå¹¶åçš„æ—¶é—´æˆ³
+        //		destBuffer			outå‚æ•°ï¼Œè¿”å›å­—èŠ‚æ•°ç»„
+        //		strMetadata			outå‚æ•°ï¼Œè¿”å›å…ƒæ•°æ®
+        //		strOutputResPath	outå‚æ•°ï¼Œè¿”å›ç›¸å…³è®°å½•çš„è·¯å¾„
+        //		outputTimestamp		outå‚æ•°ï¼Œè¿”å›æ—¶é—´æˆ³
+        //		strError			outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		-4  Î´ÕÒµ½¼ÇÂ¼
-        //      -10 ¼ÇÂ¼¾Ö²¿Î´ÕÒµ½
-        //		>=0 ×ÊÔ´×Ü³¤¶È
-        //      nAdditionError -50 ÓĞÒ»¸öÒÔÉÏÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ
-        // Ïß: °²È«µÄ
+        //		-1  å‡ºé”™
+        //		-4  æœªæ‰¾åˆ°è®°å½•
+        //      -10 è®°å½•å±€éƒ¨æœªæ‰¾åˆ°
+        //		>=0 èµ„æºæ€»é•¿åº¦
+        //      nAdditionError -50 æœ‰ä¸€ä¸ªä»¥ä¸Šä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨
+        // çº¿: å®‰å…¨çš„
         public virtual long GetXml(string strID,
             string strXPath,
             long lStart,
@@ -1166,11 +1170,11 @@ namespace DigitalPlatform.rms
         }
 
 
-        // °´Ö¸¶¨·¶Î§¶Á¶ÔÏó
-        // strRecordID  ´ÓÊôµÄ¼ÇÂ¼ID
-        // strObjectID  ×ÊÔ´¶ÔÏóID
-        // ÆäËü²ÎÊıGetXml(),ÎŞstrOutputResPath²ÎÊı
-        // Ïß: °²È«µÄ
+        // æŒ‰æŒ‡å®šèŒƒå›´è¯»å¯¹è±¡
+        // strRecordID  ä»å±çš„è®°å½•ID
+        // strObjectID  èµ„æºå¯¹è±¡ID
+        // å…¶å®ƒå‚æ•°GetXml(),æ— strOutputResPathå‚æ•°
+        // çº¿: å®‰å…¨çš„
         public virtual long GetObject(string strRecordID,
             string strObjectID,
             long lStart,
@@ -1189,12 +1193,12 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // µÃµ½xmlÊı¾İ
-        // Ïß:°²È«µÄ,¹©Íâ²¿µ÷
+        // å¾—åˆ°xmlæ•°æ®
+        // çº¿:å®‰å…¨çš„,ä¾›å¤–éƒ¨è°ƒ
         // return:
-        //      -1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      0   ÕıÈ·
+        //      -1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      0   æ­£ç¡®
         public int GetXmlDataSafety(string strRecordID,
             out string strXml,
             out string strError)
@@ -1202,56 +1206,56 @@ namespace DigitalPlatform.rms
             strXml = "";
             strError = "";
 
-            //********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             this.m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("GetXmlDataSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetXmlDataSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
                 strRecordID = DbPath.GetID10(strRecordID);
-                //*******************¶Ô¼ÇÂ¼¼Ó¶ÁËø************************
+                //*******************å¯¹è®°å½•åŠ è¯»é”************************
                 m_recordLockColl.LockForRead(strRecordID,
                     m_nTimeOut);
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetXmlDataSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetXmlDataSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•åŠ è¯»é”ã€‚");
 #endif
 
                 try
                 {
                     // return:
-                    //      -1  ³ö´í
-                    //      -4  ¼ÇÂ¼²»´æÔÚ
-                    //      0   ÕıÈ·
+                    //      -1  å‡ºé”™
+                    //      -4  è®°å½•ä¸å­˜åœ¨
+                    //      0   æ­£ç¡®
                     return this.GetXmlData(strRecordID,
                         out strXml,
                         out strError);
                 }
                 finally
                 {
-                    //************¶Ô¼ÇÂ¼½â¶ÁËø*************
+                    //************å¯¹è®°å½•è§£è¯»é”*************
                     m_recordLockColl.UnlockForRead(strRecordID);
 #if DEBUG_LOCK
-					this.container.WriteDebugInfo("GetXmlDataSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼½â¶ÁËø¡£");
+					this.container.WriteDebugInfo("GetXmlDataSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•è§£è¯»é”ã€‚");
 #endif
                 }
             }
 
             finally
             {
-                //*********¶ÔÊı¾İ¿â½â¶ÁËø****************
+                //*********å¯¹æ•°æ®åº“è§£è¯»é”****************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetXmlDataSafety()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetXmlDataSafety()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // »ñÈ¡¼ÇÂ¼µÄxmlÄÚÈİ
+        // è·å–è®°å½•çš„xmlå†…å®¹
         // return:
-        //      -1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      0   ÕıÈ·
+        //      -1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      0   æ­£ç¡®
         public virtual int GetXmlData(string strRecordID,
             out string strXml,
             out string strError)
@@ -1262,12 +1266,12 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ¸ù¾İ»º´æµÄ ID ÁĞ±í£¬ÖØ½¨ÕâĞ©¼ÇÂ¼µÄ¼ìË÷µã
-        //      strStyle    "fastmode,deletekeys" ÒâË¼ÊÇ¸üĞÂÊı¾İ¿âÖĞÒ»²¿·Ö¼ÇÂ¼µÄ¼ìË÷µã£¬Òò´ËĞèÒªÖğÌõÉ¾³ı keys£¬Òò´ËÒªÇó¿ªÊ¼½×¶Îkeys±íµÄ B+ Ê÷²»ÒªÉ¾³ı¡£ºóÃæÎªÁË buikcopy ¿ÉÒÔÉ¾³ı B+ Ê÷
-        //                  ""  ÒâË¼ÊÇÂıËÙÄ£Ê½¡£±¾º¯Êı·µ»Øºó²»ĞèÒªÈÎºÎºóĞø¹¤×÷
+        // æ ¹æ®ç¼“å­˜çš„ ID åˆ—è¡¨ï¼Œé‡å»ºè¿™äº›è®°å½•çš„æ£€ç´¢ç‚¹
+        //      strStyle    "fastmode,deletekeys" æ„æ€æ˜¯æ›´æ–°æ•°æ®åº“ä¸­ä¸€éƒ¨åˆ†è®°å½•çš„æ£€ç´¢ç‚¹ï¼Œå› æ­¤éœ€è¦é€æ¡åˆ é™¤ keysï¼Œå› æ­¤è¦æ±‚å¼€å§‹é˜¶æ®µkeysè¡¨çš„ B+ æ ‘ä¸è¦åˆ é™¤ã€‚åé¢ä¸ºäº† buikcopy å¯ä»¥åˆ é™¤ B+ æ ‘
+        //                  ""  æ„æ€æ˜¯æ…¢é€Ÿæ¨¡å¼ã€‚æœ¬å‡½æ•°è¿”å›åä¸éœ€è¦ä»»ä½•åç»­å·¥ä½œ
         // return:
-        //      -1  ³ö´í
-        //      >=0 ´¦ÀíµÄ keys ĞĞÊı
+        //      -1  å‡ºé”™
+        //      >=0 å¤„ç†çš„ keys è¡Œæ•°
         public virtual int RebuildKeys(
             string strStyle,
             out string strError)
@@ -1284,10 +1288,10 @@ namespace DigitalPlatform.rms
                 strSubStyle += ",deletekeys";
 
             if (string.IsNullOrEmpty(strStyle) == false)
-                strSubStyle += "," + strStyle;  // Èç¹û strStyle ÖĞ±¾À´¾ÍÓĞ deletekeys£¬Ò²»á´ø¹ıÀ´
+                strSubStyle += "," + strStyle;  // å¦‚æœ strStyle ä¸­æœ¬æ¥å°±æœ‰ deletekeysï¼Œä¹Ÿä¼šå¸¦è¿‡æ¥
 
-            this.RebuildIDs.Seek(0);    // °ÑÖ¸Õë·Åµ½¿ªÍ·Î»ÖÃ
-            // TODO: Ó¦µ±Ëø¶¨¶ÔÏó£¬ÈÃÎÄ¼şÖ¸Õë²»ÔÙ¸Ä±ä ?
+            this.RebuildIDs.Seek(0);    // æŠŠæŒ‡é’ˆæ”¾åˆ°å¼€å¤´ä½ç½®
+            // TODO: åº”å½“é”å®šå¯¹è±¡ï¼Œè®©æ–‡ä»¶æŒ‡é’ˆä¸å†æ”¹å˜ ?
 
             // List<string> ids = new List<string>();
             List<RecordBody> records = new List<RecordBody>();
@@ -1298,7 +1302,7 @@ namespace DigitalPlatform.rms
             while (this.RebuildIDs.Read(out strID))
             {
                 if (string.IsNullOrEmpty(strID) == true)
-                    continue;   // Ìø¹ıÒÑ¾­±ê¼ÇÉ¾³ıµÄ ID
+                    continue;   // è·³è¿‡å·²ç»æ ‡è®°åˆ é™¤çš„ ID
 
                 if (records.Count > 100)
                 {
@@ -1312,9 +1316,9 @@ namespace DigitalPlatform.rms
                         out strError);
                     if (nRet == -1)
                         return -1;
-                    // TODO: ÍêÉÆ´íÎó´¦Àí¡£Ò»°ãÓ¦µ±¾¡¿ÉÄÜ¼ÌĞø´¦ÀíÏÂÈ¥¡£»òÕßÖØÊÔÒ»´Î(Èç¹ûÊÇBulkcopy£¬ĞèÒª¿¼ÂÇÖØÊÔÊÇ·ñ»áÖØ¸´²úÉúkeysĞÅÏ¢ĞĞµÄÎÊÌâ)
+                    // TODO: å®Œå–„é”™è¯¯å¤„ç†ã€‚ä¸€èˆ¬åº”å½“å°½å¯èƒ½ç»§ç»­å¤„ç†ä¸‹å»ã€‚æˆ–è€…é‡è¯•ä¸€æ¬¡(å¦‚æœæ˜¯Bulkcopyï¼Œéœ€è¦è€ƒè™‘é‡è¯•æ˜¯å¦ä¼šé‡å¤äº§ç”Ÿkeysä¿¡æ¯è¡Œçš„é—®é¢˜)
 
-                    // TODO: ÊÇ·ñ¼°Ê±Çå¿ÕÄÇĞ©ÒÑ¾­´¦ÀíµÄ ID?
+                    // TODO: æ˜¯å¦åŠæ—¶æ¸…ç©ºé‚£äº›å·²ç»å¤„ç†çš„ ID?
 
                     nTotalCount += nRet;
                     records.Clear();
@@ -1325,7 +1329,7 @@ namespace DigitalPlatform.rms
                 records.Add(record);
             }
 
-            // ×îºóÒ»Åú
+            // æœ€åä¸€æ‰¹
             if (records.Count > 0)
             {
                 List<RecordBody> outputs = null;
@@ -1338,8 +1342,8 @@ namespace DigitalPlatform.rms
                     out strError);
                 if (nRet == -1)
                     return -1;
-                // TODO: ÍêÉÆ´íÎó´¦Àí¡£Ò»°ãÓ¦µ±¾¡¿ÉÄÜ¼ÌĞø´¦ÀíÏÂÈ¥¡£»òÕßÖØÊÔÒ»´Î(Èç¹ûÊÇBulkcopy£¬ĞèÒª¿¼ÂÇÖØÊÔÊÇ·ñ»áÖØ¸´²úÉúkeysĞÅÏ¢ĞĞµÄÎÊÌâ)
-                // TODO: ÊÇ·ñ¼°Ê±Çå¿ÕÄÇĞ©ÒÑ¾­´¦ÀíµÄ ID?
+                // TODO: å®Œå–„é”™è¯¯å¤„ç†ã€‚ä¸€èˆ¬åº”å½“å°½å¯èƒ½ç»§ç»­å¤„ç†ä¸‹å»ã€‚æˆ–è€…é‡è¯•ä¸€æ¬¡(å¦‚æœæ˜¯Bulkcopyï¼Œéœ€è¦è€ƒè™‘é‡è¯•æ˜¯å¦ä¼šé‡å¤äº§ç”Ÿkeysä¿¡æ¯è¡Œçš„é—®é¢˜)
+                // TODO: æ˜¯å¦åŠæ—¶æ¸…ç©ºé‚£äº›å·²ç»å¤„ç†çš„ ID?
                 nTotalCount += nRet;
                 records.Clear();
             }
@@ -1362,11 +1366,11 @@ namespace DigitalPlatform.rms
             public string XPath = "";
         }
 
-        // Ğ´ÈëÒ»Åú XML ¼ÇÂ¼
-        // ÕâÀïÀûÓÃ WriteXml ÊµÏÖÁË»ù±¾¹¦ÄÜ£¬µ«ËÙ¶ÈÃ»ÓĞµÃµ½ÓÅ»¯¡£ÅÉÉúÀà¿ÉÒÔÖØĞ´´Ëº¯Êı£¬ÒÔÇóµÃ×î¿ìµÄËÙ¶È
+        // å†™å…¥ä¸€æ‰¹ XML è®°å½•
+        // è¿™é‡Œåˆ©ç”¨ WriteXml å®ç°äº†åŸºæœ¬åŠŸèƒ½ï¼Œä½†é€Ÿåº¦æ²¡æœ‰å¾—åˆ°ä¼˜åŒ–ã€‚æ´¾ç”Ÿç±»å¯ä»¥é‡å†™æ­¤å‡½æ•°ï¼Œä»¥æ±‚å¾—æœ€å¿«çš„é€Ÿåº¦
         // return:
-        //      -1  ³ö´í
-        //      >=0 Èç¹ûÊÇ rebuildkeys£¬Ôò·µ»Ø×Ü¹²´¦ÀíµÄ keys ĞĞÊı
+        //      -1  å‡ºé”™
+        //      >=0 å¦‚æœæ˜¯ rebuildkeysï¼Œåˆ™è¿”å›æ€»å…±å¤„ç†çš„ keys è¡Œæ•°
         public virtual int WriteRecords(
             // SessionInfo sessininfo,
             User oUser,
@@ -1380,13 +1384,13 @@ namespace DigitalPlatform.rms
 
             if (StringUtil.IsInList("rebuildkeys", strStyle) == true)
             {
-                strError = "Ä¿Ç° Database::WriteRecords() ÉĞÎ´ÊµÏÖÖØ½¨¼ìË÷µãµÄ¹¦ÄÜ";
+                strError = "ç›®å‰ Database::WriteRecords() å°šæœªå®ç°é‡å»ºæ£€ç´¢ç‚¹çš„åŠŸèƒ½";
                 return -1;
             }
 
             foreach (RecordBody record in records)
             {
-                string strPath = record.Path;   // °üÀ¨Êı¾İ¿âÃûµÄÂ·¾¶
+                string strPath = record.Path;   // åŒ…æ‹¬æ•°æ®åº“åçš„è·¯å¾„
 
                 string strDbName = StringUtil.GetFirstPartPath(ref strPath);
 
@@ -1396,10 +1400,10 @@ namespace DigitalPlatform.rms
                 string strXPath = "";
 
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
-                //***********³ÔµôµÚ2²ã*************
-                // µ½´ËÎªÖ¹£¬strPath²»º¬¼ÇÂ¼ºÅ²ãÁË£¬ÏÂ¼¶·ÖÇé¿öÅĞ¶Ï
+                //***********åƒæ‰ç¬¬2å±‚*************
+                // åˆ°æ­¤ä¸ºæ­¢ï¼ŒstrPathä¸å«è®°å½•å·å±‚äº†ï¼Œä¸‹çº§åˆ†æƒ…å†µåˆ¤æ–­
                 strRecordID = strFirstPart;
-                // Ö»µ½¼ÇÂ¼ºÅ²ãµÄÂ·¾¶
+                // åªåˆ°è®°å½•å·å±‚çš„è·¯å¾„
                 if (strPath == "")
                 {
                     bObject = false;
@@ -1407,21 +1411,21 @@ namespace DigitalPlatform.rms
                 else
                 {
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
-                    //***********³ÔµôµÚ2²ã*************
-                    // µ½´ËÎªÖ¹£¬strPath²»º¬object»òxpath²ã strFirstPart¿ÉÄÜÊÇobject »ò xpath
+                    //***********åƒæ‰ç¬¬2å±‚*************
+                    // åˆ°æ­¤ä¸ºæ­¢ï¼ŒstrPathä¸å«objectæˆ–xpathå±‚ strFirstPartå¯èƒ½æ˜¯object æˆ– xpath
 
                     if (strFirstPart != "object"
         && strFirstPart != "xpath")
                     {
                         record.Result.Value = -1;
-                        record.Result.ErrorString = "×ÊÔ´Â·¾¶ '" + record.Path + "' ²»ºÏ·¨, µÚ3¼¶±ØĞëÊÇ 'object' »ò 'xpath' ";
+                        record.Result.ErrorString = "èµ„æºè·¯å¾„ '" + record.Path + "' ä¸åˆæ³•, ç¬¬3çº§å¿…é¡»æ˜¯ 'object' æˆ– 'xpath' ";
                         record.Result.ErrorCode = ErrorCodeValue.PathError; // -7;
                         continue;
                     }
-                    if (string.IsNullOrEmpty(strPath) == true)  //object»òxpathÏÂ¼¶±ØĞëÓĞÖµ
+                    if (string.IsNullOrEmpty(strPath) == true)  //objectæˆ–xpathä¸‹çº§å¿…é¡»æœ‰å€¼
                     {
                         record.Result.Value = -1;
-                        record.Result.ErrorString = "×ÊÔ´Â·¾¶ '" + record.Path + "' ²»ºÏ·¨,µ±µÚ3¼¶ÊÇ 'object' »ò 'xpath' Ê±£¬µÚ4¼¶±ØĞëÓĞÄÚÈİ";
+                        record.Result.ErrorString = "èµ„æºè·¯å¾„ '" + record.Path + "' ä¸åˆæ³•,å½“ç¬¬3çº§æ˜¯ 'object' æˆ– 'xpath' æ—¶ï¼Œç¬¬4çº§å¿…é¡»æœ‰å†…å®¹";
                         record.Result.ErrorCode = ErrorCodeValue.PathError; // -7;
                         continue;
                     }
@@ -1441,7 +1445,7 @@ namespace DigitalPlatform.rms
                 if (bObject == true)
                 {
                     record.Result.Value = -1;
-                    record.Result.ErrorString = "Ä¿Ç°²»ÔÊĞíÓÃ WriteRecords Ğ´Èë¶ÔÏó×ÊÔ´";
+                    record.Result.ErrorString = "ç›®å‰ä¸å…è®¸ç”¨ WriteRecords å†™å…¥å¯¹è±¡èµ„æº";
                     record.Result.ErrorCode = ErrorCodeValue.CommonError;
                     continue;
                 }
@@ -1494,26 +1498,26 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // Ğ´xmlÊı¾İ
+        // å†™xmlæ•°æ®
         // parameter:
-        //		strRecordID     ¼ÇÂ¼ID
-        //		strRanges       Ğ´ÈëµÄÆ¬¶Ï·¶Î§
-        //		nTotalLength    Êı¾İ×Ü³¤¶È
-        //		sourceBuffer    Ğ´ÈëµÄÊı¾İ×Ö½ÚÊı×é
-        //		strMetadata     ÔªÊı¾İ
-        //		intputTimestamp ÊäÈëµÄÊ±¼ä´Á
-        //		outputTimestamp out²ÎÊı£¬·µ»ØµÄÊ±¼ä´Á,³ö´íÊ±,Ò²·µ»ØÊ±¼ä´Á
-        //		strOutputID     out²ÎÊı£¬·µ»ØµÄ¼ÇÂ¼ID,×·¼Ó¼ÇÂ¼Ê±,ÓĞÓÃ
-        //		strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strRecordID     è®°å½•ID
+        //		strRanges       å†™å…¥çš„ç‰‡æ–­èŒƒå›´
+        //		nTotalLength    æ•°æ®æ€»é•¿åº¦
+        //		sourceBuffer    å†™å…¥çš„æ•°æ®å­—èŠ‚æ•°ç»„
+        //		strMetadata     å…ƒæ•°æ®
+        //		intputTimestamp è¾“å…¥çš„æ—¶é—´æˆ³
+        //		outputTimestamp outå‚æ•°ï¼Œè¿”å›çš„æ—¶é—´æˆ³,å‡ºé”™æ—¶,ä¹Ÿè¿”å›æ—¶é—´æˆ³
+        //		strOutputID     outå‚æ•°ï¼Œè¿”å›çš„è®°å½•ID,è¿½åŠ è®°å½•æ—¶,æœ‰ç”¨
+        //		strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
         // return:
-        //		-1  ³ö´í
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -6  È¨ÏŞ²»¹»
-        //		0   ³É¹¦
-        // ËµÃ÷,×Ü³¤¶ÈÓëÔ´Á÷Èç¹û != null,¾ÍĞ´µ½¿âÀï,Æ¬¶ÏºÏ²¢ºó»á°ÑĞÂÆ¬¶Ï¼Çµ½¿âÀï,Èç¹ûÒÑÂú,ÔòĞÂÆ¬¶ÏÎª¿Õ×Ö·û´®
-        // Ïß: °²È«µÄ
+        //		-1  å‡ºé”™
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -6  æƒé™ä¸å¤Ÿ
+        //		0   æˆåŠŸ
+        // è¯´æ˜,æ€»é•¿åº¦ä¸æºæµå¦‚æœ != null,å°±å†™åˆ°åº“é‡Œ,ç‰‡æ–­åˆå¹¶åä¼šæŠŠæ–°ç‰‡æ–­è®°åˆ°åº“é‡Œ,å¦‚æœå·²æ»¡,åˆ™æ–°ç‰‡æ–­ä¸ºç©ºå­—ç¬¦ä¸²
+        // çº¿: å®‰å…¨çš„
         public virtual int WriteXml(User oUser,
             string strID,
             string strXPath,
@@ -1540,16 +1544,16 @@ namespace DigitalPlatform.rms
 
 
         // parameters:
-        //      strRecordID  ¼ÇÂ¼ID
-        //      strObjectID  ¶ÔÏóID
-        //      ÆäËüÍ¬WriteXml,ÎŞstrOutputID²ÎÊı
+        //      strRecordID  è®°å½•ID
+        //      strObjectID  å¯¹è±¡ID
+        //      å…¶å®ƒåŒWriteXml,æ— strOutputIDå‚æ•°
         // return:
-        //		-1  ³ö´í
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  ¼ÇÂ¼»ò¶ÔÏó×ÊÔ´²»´æÔÚ
-        //      -6  È¨ÏŞ²»¹»
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ
+        //		-1  å‡ºé”™
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  è®°å½•æˆ–å¯¹è±¡èµ„æºä¸å­˜åœ¨
+        //      -6  æƒé™ä¸å¤Ÿ
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„
         public virtual int WriteObject(User user,
             string strRecordID,
             string strObjectID,
@@ -1568,20 +1572,20 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // É¾³ı¼ÇÂ¼
-        // º¯ÊıÀï,µ±ÆÕÍ¨ÎŞ·¨É¾³ıÊ±,Ê¹ÓÃÇ¿ÖÆ·½·¨
+        // åˆ é™¤è®°å½•
+        // å‡½æ•°é‡Œ,å½“æ™®é€šæ— æ³•åˆ é™¤æ—¶,ä½¿ç”¨å¼ºåˆ¶æ–¹æ³•
         // parameter:
-        //		strRecordID     ¼ÇÂ¼ID
-        //      strStyle        ¿É°üº¬ fastmode
-        //		inputTimestamp  ÊäÈëµÄÊ±¼ä´Á
-        //		outputTimestamp out²ÎÊı£¬·µ»ØÊ±¼ä´Á,µ±²»ÕıÈ·Ê±ÓĞĞ§
-        //		strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strRecordID     è®°å½•ID
+        //      strStyle        å¯åŒ…å« fastmode
+        //		inputTimestamp  è¾“å…¥çš„æ—¶é—´æˆ³
+        //		outputTimestamp outå‚æ•°ï¼Œè¿”å›æ—¶é—´æˆ³,å½“ä¸æ­£ç¡®æ—¶æœ‰æ•ˆ
+        //		strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  Ò»°ãĞÔ´íÎó
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  Î´ÕÒµ½¼ÇÂ¼
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ,¼ÓĞ´Ëø,ÔÚÅÉÉúÀàÀï¼ÓËø
+        //		-1  ä¸€èˆ¬æ€§é”™è¯¯
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  æœªæ‰¾åˆ°è®°å½•
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„,åŠ å†™é”,åœ¨æ´¾ç”Ÿç±»é‡ŒåŠ é”
         public virtual int DeleteRecord(
             string strID,
             byte[] timestamp,
@@ -1595,19 +1599,19 @@ namespace DigitalPlatform.rms
         }
 
         // 2008/11/14
-        // ÖØ½¨¼ÇÂ¼µÄkeys
+        // é‡å»ºè®°å½•çš„keys
         // parameter:
-        //		strRecordID     ¼ÇÂ¼ID
+        //		strRecordID     è®°å½•ID
         //      strStyle    next prev outputpath forcedeleteoldkeys
-        //                  forcedeleteoldkeys ÒªÔÚ´´½¨ĞÂkeysÇ°Ç¿ÖÆÉ¾³ıÒ»ÏÂ¾ÉÓĞµÄkeys? Èç¹ûÎª°üº¬£¬ÔòÇ¿ÖÆÉ¾³ıÔ­ÓĞµÄkeys£»Èç¹ûÎª²»°üº¬£¬ÔòÊÔÌ½×Å´´½¨ĞÂµÄkeys£¬Èç¹ûÓĞ¾ÉµÄkeysºÍĞÂ´òËã´´½¨µÄkeysÖØºÏ£¬ÄÇ¾Í²»ÖØ¸´´´½¨£»Èç¹û¾ÉµÄkeysÓĞ²ĞÓàÃ»ÓĞ±»É¾³ı£¬Ò²²»¹ÜËüÃÇÁË
-        //                          °üº¬ Ò»°ãÓÃÔÚµ¥Ìõ¼ÇÂ¼µÄ´¦Àí£»²»°üº¬ Ò»°ãÓÃÔÚÔ¤ÏÈÉ¾³ıÁËËùÓĞkeys±íµÄÄÚÈİĞĞÒÔºóÔÚÑ­»·ÖØ½¨¿âÖĞÃ¿Ìõ¼ÇÂ¼µÄÅú´¦Àí·½Ê½
-        //		strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //                  forcedeleteoldkeys è¦åœ¨åˆ›å»ºæ–°keyså‰å¼ºåˆ¶åˆ é™¤ä¸€ä¸‹æ—§æœ‰çš„keys? å¦‚æœä¸ºåŒ…å«ï¼Œåˆ™å¼ºåˆ¶åˆ é™¤åŸæœ‰çš„keysï¼›å¦‚æœä¸ºä¸åŒ…å«ï¼Œåˆ™è¯•æ¢ç€åˆ›å»ºæ–°çš„keysï¼Œå¦‚æœæœ‰æ—§çš„keyså’Œæ–°æ‰“ç®—åˆ›å»ºçš„keysé‡åˆï¼Œé‚£å°±ä¸é‡å¤åˆ›å»ºï¼›å¦‚æœæ—§çš„keysæœ‰æ®‹ä½™æ²¡æœ‰è¢«åˆ é™¤ï¼Œä¹Ÿä¸ç®¡å®ƒä»¬äº†
+        //                          åŒ…å« ä¸€èˆ¬ç”¨åœ¨å•æ¡è®°å½•çš„å¤„ç†ï¼›ä¸åŒ…å« ä¸€èˆ¬ç”¨åœ¨é¢„å…ˆåˆ é™¤äº†æ‰€æœ‰keysè¡¨çš„å†…å®¹è¡Œä»¥ååœ¨å¾ªç¯é‡å»ºåº“ä¸­æ¯æ¡è®°å½•çš„æ‰¹å¤„ç†æ–¹å¼
+        //		strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  Ò»°ãĞÔ´íÎó
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  Î´ÕÒµ½¼ÇÂ¼
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ,¼ÓĞ´Ëø,ÔÚÅÉÉúÀàÀï¼ÓËø
+        //		-1  ä¸€èˆ¬æ€§é”™è¯¯
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  æœªæ‰¾åˆ°è®°å½•
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„,åŠ å†™é”,åœ¨æ´¾ç”Ÿç±»é‡ŒåŠ é”
         public virtual int RebuildRecordKeys(string strRecordID,
             string strStyle,
             out string strOutputRecordID,
@@ -1621,18 +1625,18 @@ namespace DigitalPlatform.rms
 
         Hashtable m_xpath_table = null;
 
-        // µÃµ½Ò»Ìõ¼ÇÂ¼µÄä¯ÀÀ¸ñÊ½£¬Ò»¸ö×Ö·û´®Êı×é
+        // å¾—åˆ°ä¸€æ¡è®°å½•çš„æµè§ˆæ ¼å¼ï¼Œä¸€ä¸ªå­—ç¬¦ä¸²æ•°ç»„
         // parameter:
-        //      strFormat   ä¯ÀÀ¸ñÊ½¶¨Òå¡£Èç¹ûÎª¿Õ£¬±íÊ¾ Ïàµ±ÓÚ cfgs/browse
-        //                  Èç¹ûÓĞ @coldef: Òıµ¼£¬±íÊ¾Îª XPath ĞÎÌ¬µÄÁĞ¶¨Òå£¬ÀıÈç @def://parent|//title £¬ÊúÏß±íÊ¾ÁĞµÄ¼ä¸ô
-        //                  ·ñÔò±íÊ¾ browse ÅäÖÃÎÄ¼şµÄÃû³Æ£¬ÀıÈç cfgs/browse_temp Ö®Àà
-        //		strRecordID	Ò»°ã×ÔÓÉÎ»ÊıµÄ¼ÇÂ¼ºÅ£¬»ò10Î»Êı×ÖµÄ¼ÇÂ¼ºÅ
-        //      strXml  ¼ÇÂ¼Ìå¡£Èç¹ûÎª¿Õ£¬±¾º¯Êı»á×Ô¶¯»ñÈ¡¼ÇÂ¼Ìå
-        //      nStartCol   ¿ªÊ¼µÄÁĞºÅ¡£Ò»°ãÎª0
-        //		cols	out²ÎÊı£¬·µ»Øä¯ÀÀ¸ñÊ½Êı×é
-        // µ±³ö´íÊ±,´íÎóĞÅÏ¢Ò²±£´æÔÚÁĞÀï
+        //      strFormat   æµè§ˆæ ¼å¼å®šä¹‰ã€‚å¦‚æœä¸ºç©ºï¼Œè¡¨ç¤º ç›¸å½“äº cfgs/browse
+        //                  å¦‚æœæœ‰ @coldef: å¼•å¯¼ï¼Œè¡¨ç¤ºä¸º XPath å½¢æ€çš„åˆ—å®šä¹‰ï¼Œä¾‹å¦‚ @def://parent|//title ï¼Œç«–çº¿è¡¨ç¤ºåˆ—çš„é—´éš”
+        //                  å¦åˆ™è¡¨ç¤º browse é…ç½®æ–‡ä»¶çš„åç§°ï¼Œä¾‹å¦‚ cfgs/browse_temp ä¹‹ç±»
+        //		strRecordID	ä¸€èˆ¬è‡ªç”±ä½æ•°çš„è®°å½•å·ï¼Œæˆ–10ä½æ•°å­—çš„è®°å½•å·
+        //      strXml  è®°å½•ä½“ã€‚å¦‚æœä¸ºç©ºï¼Œæœ¬å‡½æ•°ä¼šè‡ªåŠ¨è·å–è®°å½•ä½“
+        //      nStartCol   å¼€å§‹çš„åˆ—å·ã€‚ä¸€èˆ¬ä¸º0
+        //		cols	outå‚æ•°ï¼Œè¿”å›æµè§ˆæ ¼å¼æ•°ç»„
+        // å½“å‡ºé”™æ—¶,é”™è¯¯ä¿¡æ¯ä¹Ÿä¿å­˜åœ¨åˆ—é‡Œ
         // return:
-        //      colsÖĞ°üº¬µÄ×Ö·û×ÜÊı
+        //      colsä¸­åŒ…å«çš„å­—ç¬¦æ€»æ•°
         public int GetCols(
             string strFormat,
             string strRecordID,
@@ -1646,10 +1650,10 @@ namespace DigitalPlatform.rms
             if (string.IsNullOrEmpty(strFormat) == true)
                 strFormat = "cfgs/browse";
 
-            //**********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //**********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             this.m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("GetCols()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetCols()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
@@ -1657,23 +1661,23 @@ namespace DigitalPlatform.rms
                 BrowseCfg browseCfg = null;
                 string strColDef = "";
 
-                // ÁĞ¶¨Òå
+                // åˆ—å®šä¹‰
                 if (strFormat[0] == '@')
                 {
                     if (StringUtil.HasHead(strFormat, "@coldef:") == true)
                         strColDef = strFormat.Substring("@coldef:".Length).Trim();
                     else
                     {
-                        strError = "ÎŞ·¨Ê¶±ğµÄä¯ÀÀ¸ñÊ½ '" + strFormat + "'";
+                        strError = "æ— æ³•è¯†åˆ«çš„æµè§ˆæ ¼å¼ '" + strFormat + "'";
                         goto ERROR1;
                     }
                 }
                 else
                 {
-                    // ä¯ÀÀ¸ñÊ½ÅäÖÃÎÄ¼ş
+                    // æµè§ˆæ ¼å¼é…ç½®æ–‡ä»¶
 
-                    // string strBrowseName = this.GetCaption("zh") + "/" + strFormat; // TODO: Ó¦µ±Ö§³Ö./cfgs/xxxx µÈ
-                    string strBrowseName = strFormat; // ÀıÈç cfgs/browse ¡£ÒòÎªÒÑ¾­ÊÇÔÚÌØ¶¨µÄÊı¾İ¿âÖĞ»ñµÃÅäÖÃÎÄ¼ş£¬ËùÒÔÎŞĞèÖ¸¶¨¿âÃû²¿·Ö
+                    // string strBrowseName = this.GetCaption("zh") + "/" + strFormat; // TODO: åº”å½“æ”¯æŒ./cfgs/xxxx ç­‰
+                    string strBrowseName = strFormat; // ä¾‹å¦‚ cfgs/browse ã€‚å› ä¸ºå·²ç»æ˜¯åœ¨ç‰¹å®šçš„æ•°æ®åº“ä¸­è·å¾—é…ç½®æ–‡ä»¶ï¼Œæ‰€ä»¥æ— éœ€æŒ‡å®šåº“åéƒ¨åˆ†
                     // return:
                     //      -1  error
                     //      0   not found
@@ -1698,21 +1702,21 @@ namespace DigitalPlatform.rms
 
                 // string strXml;
                 
-                // »ñµÃ¼ÇÂ¼Ìå
+                // è·å¾—è®°å½•ä½“
                 if (string.IsNullOrEmpty(strXml) == true)   // 2012/1/5
                 {
                     strRecordID = DbPath.GetID10(strRecordID);
-                    //*******************¶Ô¼ÇÂ¼¼Ó¶ÁËø************************
+                    //*******************å¯¹è®°å½•åŠ è¯»é”************************
                     m_recordLockColl.LockForRead(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetCols()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetCols()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•åŠ è¯»é”ã€‚");
 #endif
                     try
                     {
                         // return:
-                        //      -1  ³ö´í
-                        //      -4  ¼ÇÂ¼²»´æÔÚ
-                        //      0   ÕıÈ·
+                        //      -1  å‡ºé”™
+                        //      -4  è®°å½•ä¸å­˜åœ¨
+                        //      0   æ­£ç¡®
                         nRet = this.GetXmlData(strRecordID,
                             out strXml,
                             out strError);
@@ -1721,10 +1725,10 @@ namespace DigitalPlatform.rms
                     }
                     finally
                     {
-                        //*******************¶Ô¼ÇÂ¼½â¶ÁËø************************
+                        //*******************å¯¹è®°å½•è§£è¯»é”************************
                         m_recordLockColl.UnlockForRead(strRecordID);
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("GetCols()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetCols()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•è§£è¯»é”ã€‚");
 #endif
                     }
                 }
@@ -1736,15 +1740,15 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "¼ÓÔØ'" + this.GetCaption("zh-CN") + "'¿âµÄ'" + strRecordID + "'¼ÇÂ¼µ½domÊ±³ö´í,Ô­Òò: " + ex.Message;
+                    strError = "åŠ è½½'" + this.GetCaption("zh-CN") + "'åº“çš„'" + strRecordID + "'è®°å½•åˆ°domæ—¶å‡ºé”™,åŸå› : " + ex.Message;
                     goto ERROR1;
                 }
 
                 if (browseCfg != null)
                 {
                     // return:
-                    //		-1	³ö´í
-                    //		>=0	³É¹¦¡£Êı×ÖÖµ´ú±íÃ¿¸öÁĞ°üº¬µÄ×Ö·ûÊıÖ®ºÍ
+                    //		-1	å‡ºé”™
+                    //		>=0	æˆåŠŸã€‚æ•°å­—å€¼ä»£è¡¨æ¯ä¸ªåˆ—åŒ…å«çš„å­—ç¬¦æ•°ä¹‹å’Œ
                     nRet = browseCfg.BuildCols(domData,
                         nStartCol,
                         out cols,
@@ -1754,9 +1758,9 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    // ÁĞ¶¨Òå
+                    // åˆ—å®šä¹‰
 
-                    // Ô¤·À Hashtable ±äµÃ¹ı´ó
+                    // é¢„é˜² Hashtable å˜å¾—è¿‡å¤§
                     if (m_xpath_table != null && m_xpath_table.Count > 1000)
                     {
                         lock (m_xpath_table)
@@ -1785,20 +1789,20 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //****************¶ÔÊı¾İ¿â½â¶ÁËø**************
+                //****************å¯¹æ•°æ®åº“è§£è¯»é”**************
                 this.m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK		
-				this.container.WriteDebugInfo("GetCols()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetCols()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
 #if NO
-        // µÃµ½¼ÇÂ¼µÄÊ±¼ä´Á
+        // å¾—åˆ°è®°å½•çš„æ—¶é—´æˆ³
         // return:
-        //		-1  ³ö´í
-        //		-4  Î´ÕÒµ½¼ÇÂ¼
-        //      0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		-4  æœªæ‰¾åˆ°è®°å½•
+        //      0   æˆåŠŸ
         public virtual int GetTimestampFromDb(string strID,
             out byte[] baOutputTimestamp,
             out string strError)
@@ -1811,16 +1815,16 @@ namespace DigitalPlatform.rms
         }
 #endif
 
-        // TODO: XPathExpression¿ÉÒÔ»º´æÆğÀ´£¬¼Ó¿ìËÙ¶È
-        // ´´½¨Ö¸¶¨¼ÇÂ¼µÄä¯ÀÀ¸ñÊ½¼¯ºÏ
+        // TODO: XPathExpressionå¯ä»¥ç¼“å­˜èµ·æ¥ï¼ŒåŠ å¿«é€Ÿåº¦
+        // åˆ›å»ºæŒ‡å®šè®°å½•çš„æµè§ˆæ ¼å¼é›†åˆ
         // parameters:
-        //		domData	    ¼ÇÂ¼Êı¾İdom ²»ÄÜÎªnull
-        //      nStartCol   ¿ªÊ¼µÄÁĞºÅ¡£Ò»°ãÎª0
-        //      cols        ä¯ÀÀ¸ñÊ½Êı×é
-        //		strError	out²ÎÊı£¬³ö´íĞÅÏ¢
+        //		domData	    è®°å½•æ•°æ®dom ä¸èƒ½ä¸ºnull
+        //      nStartCol   å¼€å§‹çš„åˆ—å·ã€‚ä¸€èˆ¬ä¸º0
+        //      cols        æµè§ˆæ ¼å¼æ•°ç»„
+        //		strError	outå‚æ•°ï¼Œå‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	³ö´í
-        //		>=0	³É¹¦¡£Êı×ÖÖµ´ú±íÃ¿¸öÁĞ°üº¬µÄ×Ö·ûÊıÖ®ºÍ
+        //		-1	å‡ºé”™
+        //		>=0	æˆåŠŸã€‚æ•°å­—å€¼ä»£è¡¨æ¯ä¸ªåˆ—åŒ…å«çš„å­—ç¬¦æ•°ä¹‹å’Œ
         static int BuildCols(
             ref Hashtable xpath_table,
             string strColDef,
@@ -1832,7 +1836,7 @@ namespace DigitalPlatform.rms
             strError = "";
             cols = new string[0];
 
-            Debug.Assert(domData != null, "BuildCols()µ÷ÓÃ´íÎó£¬domData²ÎÊı²»ÄÜÎªnull¡£");
+            Debug.Assert(domData != null, "BuildCols()è°ƒç”¨é”™è¯¯ï¼ŒdomDataå‚æ•°ä¸èƒ½ä¸ºnullã€‚");
 
             if (xpath_table == null)
                 xpath_table = new Hashtable();
@@ -1853,7 +1857,7 @@ namespace DigitalPlatform.rms
                 StringUtil.ParseTwoPart(strSegment, "->", out strXpath, out strConvert);
                 if (string.IsNullOrEmpty(strXpath) == true)
                 {
-                    col_array.Add("");  // ¿ÕµÄ XPath ²úÉú¿ÕµÄÒ»ÁĞ
+                    col_array.Add("");  // ç©ºçš„ XPath äº§ç”Ÿç©ºçš„ä¸€åˆ—
                     continue;
                 }
 
@@ -1861,7 +1865,7 @@ namespace DigitalPlatform.rms
 
                 if (expr == null)
                 {
-                    // ´´½¨Cache
+                    // åˆ›å»ºCache
                     expr = nav.Compile(strXpath);
                         /*
                         if (nsmgr != null)
@@ -1906,7 +1910,7 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    strError = "XPathExpressionµÄReturnTypeÎª'" + expr.ReturnType.ToString() + "'ÎŞĞ§";
+                    strError = "XPathExpressionçš„ReturnTypeä¸º'" + expr.ReturnType.ToString() + "'æ— æ•ˆ";
                     return -1;
                 }
 
@@ -1916,29 +1920,29 @@ namespace DigitalPlatform.rms
                     strText = BrowseCfg.ConvertText(convert_methods, strText);
                 }
 
-                // ¿ÕÄÚÈİÒ²ÒªËã×÷Ò»ÁĞ
+                // ç©ºå†…å®¹ä¹Ÿè¦ç®—ä½œä¸€åˆ—
                 col_array.Add(strText);
                 nResultLength += strText.Length;
             }
 
-            // °Ñcol_array×ªµ½colsÀï
+            // æŠŠcol_arrayè½¬åˆ°colsé‡Œ
             cols = new string[col_array.Count + nStartCol];
             col_array.CopyTo(cols, nStartCol);
             return nResultLength;
         }
 
-        // ¼ÙĞ´xmlÊı¾İ£¬µÃµ½¼ìË÷µã¼¯ºÏ
+        // å‡å†™xmlæ•°æ®ï¼Œå¾—åˆ°æ£€ç´¢ç‚¹é›†åˆ
         // parameter:
-        //		strXml	xmlÊı¾İ
-        //		strID	¼ÇÂ¼ID,¹¹Ôì¼ìË÷µãÓÃ
-        //		strLang	ÓïÑÔ°æ±¾
-        //		strStyle	·ç¸ñ£¬¿ØÖÆ·µ»ØÖµ
-        //		keyColl	    out²ÎÊı,·µ»Ø¼ìË÷µã¼¯ºÏµÄ
-        //		strError	out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strXml	xmlæ•°æ®
+        //		strID	è®°å½•ID,æ„é€ æ£€ç´¢ç‚¹ç”¨
+        //		strLang	è¯­è¨€ç‰ˆæœ¬
+        //		strStyle	é£æ ¼ï¼Œæ§åˆ¶è¿”å›å€¼
+        //		keyColl	    outå‚æ•°,è¿”å›æ£€ç´¢ç‚¹é›†åˆçš„
+        //		strError	outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦
-        // Ïß: °²È«µÄ
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
+        // çº¿: å®‰å…¨çš„
         public int API_PretendWrite(string strXml,
             string strRecordID,
             string strLang,
@@ -1948,25 +1952,25 @@ namespace DigitalPlatform.rms
         {
             keys = null;
             strError = "";
-            //**********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //**********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             this.m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
 
-			this.container.WriteDebugInfo("PretendWrite()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("PretendWrite()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 
 #endif
             try
             {
-                //¼ÓÔØÊı¾İµ½DOM
+                //åŠ è½½æ•°æ®åˆ°DOM
                 XmlDocument domData = new XmlDocument();
-                domData.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                domData.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
                 try
                 {
                     domData.LoadXml(strXml);
                 }
                 catch (Exception ex)
                 {
-                    strError = "PretendWrite()Àï£¬¼ÓÔØ²ÎÊıÖĞµÄxmlÊı¾İ³ö´í¡£Ô­Òò:" + ex.Message;
+                    strError = "PretendWrite()é‡Œï¼ŒåŠ è½½å‚æ•°ä¸­çš„xmlæ•°æ®å‡ºé”™ã€‚åŸå› :" + ex.Message;
                     return -1;
                 }
 
@@ -1978,7 +1982,7 @@ namespace DigitalPlatform.rms
 
                 if (keysCfg != null)
                 {
-                    //´´½¨¼ìË÷µã
+                    //åˆ›å»ºæ£€ç´¢ç‚¹
                     keys = new KeyCollection();
                     nRet = keysCfg.BuildKeys(domData,
                         strRecordID,
@@ -1990,7 +1994,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    //ÅÅĞòÈ¥ÖØ
+                    //æ’åºå»é‡
                     keys.Sort();
                     keys.RemoveDup();
                 }
@@ -1998,22 +2002,22 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //****************¶ÔÊı¾İ¿â½â¶ÁËø**************
+                //****************å¯¹æ•°æ®åº“è§£è¯»é”**************
                 this.m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK		
-				this.container.WriteDebugInfo("PretendWrite()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("PretendWrite()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // ºÏ²¢¼ìË÷µã
+        // åˆå¹¶æ£€ç´¢ç‚¹
         // parameters:
-        //      strNewXml   ĞÂ¼ÇÂ¼µÄXML¡£¿ÉÒÔÎª""»òÕßnull
-        //      strOldXml   ¾É¼ÇÂ¼µÄXML¡£¿ÉÒÔÎª""»òÕßnull
-        //      bOutputDom  ÊÇ·ñÀûÓÃnewDom/oldDomË³±ãÊä³öDOM?
+        //      strNewXml   æ–°è®°å½•çš„XMLã€‚å¯ä»¥ä¸º""æˆ–è€…null
+        //      strOldXml   æ—§è®°å½•çš„XMLã€‚å¯ä»¥ä¸º""æˆ–è€…null
+        //      bOutputDom  æ˜¯å¦åˆ©ç”¨newDom/oldDomé¡ºä¾¿è¾“å‡ºDOM?
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int MergeKeys(string strID,
             string strNewXml,
             string strOldXml,
@@ -2040,13 +2044,13 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-            // ¸ù¾İĞÂxml´´½¨¼ìË÷µã
+            // æ ¹æ®æ–°xmlåˆ›å»ºæ£€ç´¢ç‚¹
             newKeys = new KeyCollection();
 
             if (String.IsNullOrEmpty(strNewXml) == false)
             {
                 newDom = new XmlDocument();
-                newDom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                newDom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
                 try
                 {
@@ -2054,7 +2058,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "¼ÓÔØĞÂÊı¾İµ½domÊ±³ö´í¡£" + ex.Message;
+                    strError = "åŠ è½½æ–°æ•°æ®åˆ°domæ—¶å‡ºé”™ã€‚" + ex.Message;
                     return -1;
                 }
 
@@ -2080,7 +2084,7 @@ namespace DigitalPlatform.rms
                 && strOldXml.Length > 1)    // 2012/1/31
             {
                 oldDom = new XmlDocument();
-                oldDom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                oldDom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
                 try
                 {
@@ -2088,7 +2092,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "¼ÓÔØ¾ÉÊı¾İµ½domÊ±³ö´í¡£" + ex.Message;
+                    strError = "åŠ è½½æ—§æ•°æ®åˆ°domæ—¶å‡ºé”™ã€‚" + ex.Message;
                     return -1;
                 }
 
@@ -2108,7 +2112,7 @@ namespace DigitalPlatform.rms
                 }
             }
 
-            // ĞÂ¾É¼ìË÷µãÅö
+            // æ–°æ—§æ£€ç´¢ç‚¹ç¢°
             KeyCollection dupKeys = new KeyCollection();
             dupKeys = KeyCollection.Merge(newKeys,
                 oldKeys);
@@ -2121,7 +2125,7 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ÎªÊı¾İ¿âÖĞµÄ¼ÇÂ¼´´½¨Ê±¼ä´Á
+        // ä¸ºæ•°æ®åº“ä¸­çš„è®°å½•åˆ›å»ºæ—¶é—´æˆ³
         public string CreateTimestampForDb()
         {
             long lTicks = System.DateTime.UtcNow.Ticks;
@@ -2146,67 +2150,67 @@ namespace DigitalPlatform.rms
         }
 
 
-        // »ñµÃ¿ÉÓÃµÄ ID£¬²¢ÍÆ¶¯ÏµÍ³¼ÇÔØµÄÎ²ºÅ
+        // è·å¾—å¯ç”¨çš„ IDï¼Œå¹¶æ¨åŠ¨ç³»ç»Ÿè®°è½½çš„å°¾å·
         // parameters:
-        //      strID   ÊäÈëµÄ ID Èç¹ûÎª "-1"£¬±íÊ¾Ï£ÍûÏµÍ³¸ù¾İµ±Ç°¿â¼ÇÒäµÄÎ²ºÅ¸ø³öÒ»¸ö¿ÉÓÃµÄ ID¡£
+        //      strID   è¾“å…¥çš„ ID å¦‚æœä¸º "-1"ï¼Œè¡¨ç¤ºå¸Œæœ›ç³»ç»Ÿæ ¹æ®å½“å‰åº“è®°å¿†çš„å°¾å·ç»™å‡ºä¸€ä¸ªå¯ç”¨çš„ IDã€‚
         // exceptions:
-        //      Exception   Êı¾İ¿âÎ²ºÅÎ´¾­¹ıĞ£Ñé£»·¢ÉúµÄĞÂÎ²ºÅ²»ºÏ·¨
+        //      Exception   æ•°æ®åº“å°¾å·æœªç»è¿‡æ ¡éªŒï¼›å‘ç”Ÿçš„æ–°å°¾å·ä¸åˆæ³•
         public bool EnsureID(ref string strID)
         {
-            // bool bTailNoChanged = false;    // Êı¾İ¿â¼ÇÒäµÄÎ²ºÅÊÇ·ñ·¢ÉúÁË±ä»¯?
+            // bool bTailNoChanged = false;    // æ•°æ®åº“è®°å¿†çš„å°¾å·æ˜¯å¦å‘ç”Ÿäº†å˜åŒ–?
             if (this.m_bTailNoVerified == false)
-                throw (new Exception("Êı¾İ¿â '" + this.GetCaption("zh") + "' ÒòÆäÎ²ºÅÉĞÎ´¾­¹ıĞ£Ñé£¬ÎŞ·¨½øĞĞĞ´Èë²Ù×÷"));
+                throw (new TailNumberException("æ•°æ®åº“ '" + this.GetCaption("zh") + "' å› å…¶å°¾å·å°šæœªç»è¿‡æ ¡éªŒï¼Œæ— æ³•è¿›è¡Œå†™å…¥æ“ä½œ"));
 
-            if (strID == "-1") // ×·¼Ó¼ÇÂ¼,GetNewTailNo()ÊÇ°²È«µÄ
+            if (strID == "-1") // è¿½åŠ è®°å½•,GetNewTailNo()æ˜¯å®‰å…¨çš„
             {
-                strID = Convert.ToString(GetNewTailNo());// ¼ÓµÃ¿âĞ´Ëø
+                strID = Convert.ToString(GetNewTailNo());// åŠ å¾—åº“å†™é”
                 if (strID == "-1")
-                    throw (new Exception("Êı¾İ¿â '" + this.GetCaption("zh") + "' ÒòÆäÎ²ºÅÉĞÎ´¾­¹ıĞ£Ñé£¬ÎŞ·¨½øĞĞ×·¼ÓĞÂ¼ÇÂ¼µÄĞ´Èë²Ù×÷"));
+                    throw (new Exception("æ•°æ®åº“ '" + this.GetCaption("zh") + "' å› å…¶å°¾å·å°šæœªç»è¿‡æ ¡éªŒï¼Œæ— æ³•è¿›è¡Œè¿½åŠ æ–°è®°å½•çš„å†™å…¥æ“ä½œ"));
 
                 strID = DbPath.GetID10(strID);
                 return true;
             }
 
-            //*******¶ÔÊı¾İ¿â¼Ó¶ÁËø**********************
+            //*******å¯¹æ•°æ®åº“åŠ è¯»é”**********************
             m_TailNolock.AcquireUpgradeableReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("EnsureID()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("EnsureID()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
                 strID = DbPath.GetID10(strID);
                 if (StringUtil.RegexCompare(@"\B[0123456789]+", strID) == false)
                 {
-                    throw (new Exception("¼ÇÂ¼ºÅ '" + strID + "' ²»ºÏ·¨"));
+                    throw (new Exception("è®°å½•å· '" + strID + "' ä¸åˆæ³•"));
                 }
 
-                // µ÷SetIfGreaten()º¯Êı£¬Èç¹û±¾¼ÇÂ¼ºÅ´óÓÚÎ²ºÅ,×Ô¶¯ÍÆ¶¯Î²ºÅÎª×î´ó
-                // ÕâÖÖÇé¿ö·¢ÉúÔÚÎÒÃÇ¸øµÄ¼ÇÂ¼ºÅ³¬¹ıÎ²ºÅÊ±
+                // è°ƒSetIfGreaten()å‡½æ•°ï¼Œå¦‚æœæœ¬è®°å½•å·å¤§äºå°¾å·,è‡ªåŠ¨æ¨åŠ¨å°¾å·ä¸ºæœ€å¤§
+                // è¿™ç§æƒ…å†µå‘ç”Ÿåœ¨æˆ‘ä»¬ç»™çš„è®°å½•å·è¶…è¿‡å°¾å·æ—¶
                 return AdjustTailNo(Convert.ToInt32(strID),
                     true);
             }
             finally
             {
-                //***********¶ÔÊı¾İ¿â½â¶ÁËø**********
+                //***********å¯¹æ•°æ®åº“è§£è¯»é”**********
                 this.m_TailNolock.ReleaseUpgradeableReaderLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("EnsureID()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("EnsureID()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
-        // µÃµ½Ò»¸ö¿âµÄĞÅÏ¢
+        // å¾—åˆ°ä¸€ä¸ªåº“çš„ä¿¡æ¯
         // parameters:
-        //      strStyle            »ñµÃÄÇĞ©Êä³ö²ÎÊı? all±íÊ¾È«²¿ ·Ö±ğÖ¸¶¨ÔòÊÇlogicnames/type/sqldbname/keystext/browsetext
-        //		logicNames	    Âß¼­¿âÃûÊı×é
-        //		strType	        Êı¾İ¿âÀàĞÍ ÒÔ¶ººÅ·Ö¸ôµÄ×Ö·û´®
-        //		strSqlDbName	Êı¾İ¿âÎïÀíÃû³Æ£¬Èç¹ûÊı¾İ¿âÎªÎÄÎªÎÄ¼şĞÍÊı¾İ¿â£¬Ôò·µ»ØÊı¾İÔ´Ä¿Â¼µÄÃû³Æ
-        //		strKeyText	    ¼ìË÷µãÎÄ¼şÄÚÈİ
-        //		strBrowseText	·ÇÓÃ×ÖÎÄ¼şÄÚÈİ
-        //		strError	    ³ö´íĞÅÏ¢
+        //      strStyle            è·å¾—é‚£äº›è¾“å‡ºå‚æ•°? allè¡¨ç¤ºå…¨éƒ¨ åˆ†åˆ«æŒ‡å®šåˆ™æ˜¯logicnames/type/sqldbname/keystext/browsetext
+        //		logicNames	    é€»è¾‘åº“åæ•°ç»„
+        //		strType	        æ•°æ®åº“ç±»å‹ ä»¥é€—å·åˆ†éš”çš„å­—ç¬¦ä¸²
+        //		strSqlDbName	æ•°æ®åº“ç‰©ç†åç§°ï¼Œå¦‚æœæ•°æ®åº“ä¸ºæ–‡ä¸ºæ–‡ä»¶å‹æ•°æ®åº“ï¼Œåˆ™è¿”å›æ•°æ®æºç›®å½•çš„åç§°
+        //		strKeyText	    æ£€ç´¢ç‚¹æ–‡ä»¶å†…å®¹
+        //		strBrowseText	éç”¨å­—æ–‡ä»¶å†…å®¹
+        //		strError	    å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	³ö´í
-        //		0	Õı³£
+        //		-1	å‡ºé”™
+        //		0	æ­£å¸¸
         public int GetInfo(
             string strStyle,
             out LogicNameItem[] logicNames,
@@ -2223,30 +2227,30 @@ namespace DigitalPlatform.rms
             strBrowseText = "";
             strError = "";
 
-            // Õı¹æ»¯strStyleµÄÄÚÈİ,±ãÓÚºóÃæ´¦Àí
+            // æ­£è§„åŒ–strStyleçš„å†…å®¹,ä¾¿äºåé¢å¤„ç†
             if (String.IsNullOrEmpty(strStyle) == true
                 || StringUtil.IsInList("all", strStyle) == true)
             {
                 strStyle = "logicnames,type,sqldbname,keystext,browsetext";
             }
 
-            //**********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //**********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             this.m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("GetInfo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetInfo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
                 logicNames = this.GetLogicNames();
 
-                // »ñµÃtype
+                // è·å¾—type
                 if (StringUtil.IsInList("type", strStyle) == true)
                     strType = this.GetDbType();
 
-                // »ñµÃsqldbname
+                // è·å¾—sqldbname
                 if (StringUtil.IsInList("sqldbname", strStyle) == true)
                 {
-                    // µ÷Èë¾ßÌåµÄº¯Êı£¬µÃµ½Êı¾İÔ´ĞÅÏ¢£¬²»°üÀ¨ÊµÀıÃû³Æ
+                    // è°ƒå…¥å…·ä½“çš„å‡½æ•°ï¼Œå¾—åˆ°æ•°æ®æºä¿¡æ¯ï¼Œä¸åŒ…æ‹¬å®ä¾‹åç§°
                     strSqlDbName = this.GetSourceName();
 
                     if (this.container.InstanceName != "" && strSqlDbName.Length > this.container.InstanceName.Length)
@@ -2262,19 +2266,19 @@ namespace DigitalPlatform.rms
                 string strDbName = "";
                 int nRet = 0;
 
-                // »ñµÃkeystext
+                // è·å¾—keystext
                 if (StringUtil.IsInList("keystext", strStyle) == true)
                 {
                     string strKeysFileName = "";
                     strDbName = this.GetCaption("zh");
 
                     // return:
-                    //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-                    //		-2	Ã»ÕÒµ½½Úµã
-                    //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-                    //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-                    //		-5	´æÔÚ¶à¸ö½Úµã
-                    //		0	³É¹¦
+                    //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+                    //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+                    //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+                    //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+                    //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+                    //		0	æˆåŠŸ
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
                         out strKeysFileName,
                         out strError);
@@ -2286,14 +2290,15 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strKeysFileName) == true)
                     {
-                        StreamReader sr = new StreamReader(strKeysFileName,
-                            Encoding.UTF8);
-                        strKeysText = sr.ReadToEnd();
-                        sr.Close();
+                        using (StreamReader sr = new StreamReader(strKeysFileName,
+                            Encoding.UTF8))
+                        {
+                            strKeysText = sr.ReadToEnd();
+                        }
                     }
 
                     /*
-                                    // keysÎÄ¼ş
+                                    // keysæ–‡ä»¶
                                     KeysCfg keysCfg = null;
                                     int nRet = this.GetKeysCfg(out keysCfg,
                                         out strError);
@@ -2313,18 +2318,18 @@ namespace DigitalPlatform.rms
 
                 }
 
-                // »ñµÃbrowsetext
+                // è·å¾—browsetext
                 if (StringUtil.IsInList("browsetext", strStyle) == true)
                 {
                     string strBrowseFileName = "";
                     strDbName = this.GetCaption("zh");
                     // return:
-                    //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-                    //		-2	Ã»ÕÒµ½½Úµã
-                    //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-                    //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-                    //		-5	´æÔÚ¶à¸ö½Úµã
-                    //		0	³É¹¦
+                    //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+                    //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+                    //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+                    //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+                    //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+                    //		0	æˆåŠŸ
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/browse",
                         out strBrowseFileName,
                         out strError);
@@ -2336,13 +2341,14 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strBrowseFileName) == true)
                     {
-                        StreamReader sr = new StreamReader(strBrowseFileName,
-                            Encoding.UTF8);
-                        strBrowseText = sr.ReadToEnd();
-                        sr.Close();
+                        using (StreamReader sr = new StreamReader(strBrowseFileName,
+                            Encoding.UTF8))
+                        {
+                            strBrowseText = sr.ReadToEnd();
+                        }
                     }
                     /*
-                                    // browseÎÄ¼ş
+                                    // browseæ–‡ä»¶
                                     BrowseCfg browseCfg = null;
                                     nRet = this.GetBrowseCfg(out browseCfg,
                                         out strError);
@@ -2365,10 +2371,10 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //****************¶ÔÊı¾İ¿â½â¶ÁËø**************
+                //****************å¯¹æ•°æ®åº“è§£è¯»é”**************
                 this.m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK		
-				this.container.WriteDebugInfo("GetInfo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetInfo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
@@ -2379,9 +2385,9 @@ namespace DigitalPlatform.rms
         }
 
         // 2008/5/7
-        // Ë¢ĞÂ×ÜdomÖĞµÄlogicnameÆ¬¶Î
-        // TODO£º¿ÉÒÔ¸Ä½øÎª£¬ÏÈË¢ĞÂ×ÜDOMÖĞµÄÆ¬¶Î£¬È»ºóÖØĞÂÉèÖÃm_propertyNode£¨ºÍselfNode?£©
-        // ²âÊÔ£º°Ñ±¾¶ÎÉ¾³ıºó£¬Ì½Ë÷µÃµ½Ò»¸ö×ãÒÔ³öÏÖ´íÎóµÄ¹Ì¶¨²âÊÔÁ÷³Ì£¬È»ºóÖØĞÂ¼ÓÈë±¾¶Î£¬¿´ÎÊÌâÊÇ·ñÏûÊ§
+        // åˆ·æ–°æ€»domä¸­çš„logicnameç‰‡æ®µ
+        // TODOï¼šå¯ä»¥æ”¹è¿›ä¸ºï¼Œå…ˆåˆ·æ–°æ€»DOMä¸­çš„ç‰‡æ®µï¼Œç„¶åé‡æ–°è®¾ç½®m_propertyNodeï¼ˆå’ŒselfNode?ï¼‰
+        // æµ‹è¯•ï¼šæŠŠæœ¬æ®µåˆ é™¤åï¼Œæ¢ç´¢å¾—åˆ°ä¸€ä¸ªè¶³ä»¥å‡ºç°é”™è¯¯çš„å›ºå®šæµ‹è¯•æµç¨‹ï¼Œç„¶åé‡æ–°åŠ å…¥æœ¬æ®µï¼Œçœ‹é—®é¢˜æ˜¯å¦æ¶ˆå¤±
         int RefreshLognames(string strID,
             string strLogicNames,
             out string strError)
@@ -2391,14 +2397,14 @@ namespace DigitalPlatform.rms
             XmlNode nodeDatabase = this.container.NodeDbs.SelectSingleNode("database[@id='"+strID+"']");
             if (nodeDatabase == null)
             {
-                strError = "idÎª'" + strID + "' µÄ<database>ÔªËØÃ»ÓĞÕÒµ½";
+                strError = "idä¸º'" + strID + "' çš„<database>å…ƒç´ æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
             XmlNode nodeLogicName = nodeDatabase.SelectSingleNode("property/logicname");
             if (nodeLogicName == null)
             {
-                strError = "idÎª'" + strID + "' µÄ<database>ÔªËØÏÂÃ»ÓĞÕÒµ½property/logicnameÔªËØ";
+                strError = "idä¸º'" + strID + "' çš„<database>å…ƒç´ ä¸‹æ²¡æœ‰æ‰¾åˆ°property/logicnameå…ƒç´ ";
                 return -1;
             }
 
@@ -2408,17 +2414,17 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ÉèÖÃÊı¾İ¿âµÄ»ù±¾ĞÅÏ¢
+        // è®¾ç½®æ•°æ®åº“çš„åŸºæœ¬ä¿¡æ¯
         // parameters:
-        //		logicNames	        LogicNameItemÊı×é£¬ÓÃĞÂµÄÂß¼­¿âÃûÊı×éÌæ»»Ô­À´µÄÂß¼­¿âÃûÊı×é
-        //		strType	            Êı¾İ¿âÀàĞÍ,ÒÔ¶ººÅ·Ö¸ô£¬¿ÉÒÔÊÇfile,accout£¬Ä¿Ç°ÎŞĞ§£¬ÒòÎªÉæ¼°µ½ÊÇÎÄ¼ş¿â£¬»¹ÊÇsql¿âµÄÎÊÌâ
-        //		strSqlDbName	    Ö¸¶¨µÄĞÂSqlÊı¾İ¿âÃû³Æ£¬Ä¿Ç°ÎŞĞ§£¬£¬Èç¹ûÊı¾İ¿âÎªÎÄÎªÎÄ¼şĞÍÊı¾İ¿â£¬Ôò·µ»ØÊı¾İÔ´Ä¿Â¼µÄÃû³Æ
-        //		strkeysDefault	    keysÅäÖÃĞÅÏ¢¡£Èç¹ûÎªnull£¬±íÊ¾´ËÏîÎŞĞ§¡£(×¢£ºÈç¹ûÎª""Ôò±íÊ¾Òª°ÑÎÄ¼şÄÚÈİÇå¿Õ)
-        //		strBrowseDefault	browseÅäÖÃĞÅÏ¢¡£Èç¹ûÎªnull£¬±íÊ¾´ËÏîÎŞĞ§¡£(×¢£ºÈç¹ûÎª""Ôò±íÊ¾Òª°ÑÎÄ¼şÄÚÈİÇå¿Õ)
+        //		logicNames	        LogicNameItemæ•°ç»„ï¼Œç”¨æ–°çš„é€»è¾‘åº“åæ•°ç»„æ›¿æ¢åŸæ¥çš„é€»è¾‘åº“åæ•°ç»„
+        //		strType	            æ•°æ®åº“ç±»å‹,ä»¥é€—å·åˆ†éš”ï¼Œå¯ä»¥æ˜¯file,accoutï¼Œç›®å‰æ— æ•ˆï¼Œå› ä¸ºæ¶‰åŠåˆ°æ˜¯æ–‡ä»¶åº“ï¼Œè¿˜æ˜¯sqlåº“çš„é—®é¢˜
+        //		strSqlDbName	    æŒ‡å®šçš„æ–°Sqlæ•°æ®åº“åç§°ï¼Œç›®å‰æ— æ•ˆï¼Œï¼Œå¦‚æœæ•°æ®åº“ä¸ºæ–‡ä¸ºæ–‡ä»¶å‹æ•°æ®åº“ï¼Œåˆ™è¿”å›æ•°æ®æºç›®å½•çš„åç§°
+        //		strkeysDefault	    keysé…ç½®ä¿¡æ¯ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºæ­¤é¡¹æ— æ•ˆã€‚(æ³¨ï¼šå¦‚æœä¸º""åˆ™è¡¨ç¤ºè¦æŠŠæ–‡ä»¶å†…å®¹æ¸…ç©º)
+        //		strBrowseDefault	browseé…ç½®ä¿¡æ¯ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºæ­¤é¡¹æ— æ•ˆã€‚(æ³¨ï¼šå¦‚æœä¸º""åˆ™è¡¨ç¤ºè¦æŠŠæ–‡ä»¶å†…å®¹æ¸…ç©º)
         // return:
-        //		-1	³ö´í
-        //      -2  ÒÑ´æÔÚÍ¬ÃûµÄÊı¾İ¿â
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //      -2  å·²å­˜åœ¨åŒåçš„æ•°æ®åº“
+        //		0	æˆåŠŸ
         public int SetInfo(LogicNameItem[] logicNames,
             string strType,
             string strSqlDbName,
@@ -2428,16 +2434,16 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            //****************¶ÔÊı¾İ¿â¼ÓĞ´Ëø***********
+            //****************å¯¹æ•°æ®åº“åŠ å†™é”***********
             m_TailNolock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("SetInfo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("SetInfo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 
 #endif
             try
             {
                 // 2008/4/30 changed
-                // "" ºÍ nullº¬Òå²»Í¬¡£ºóÕß±íÊ¾²»Ê¹ÓÃÕâ¸ö²ÎÊı
+                // "" å’Œ nullå«ä¹‰ä¸åŒã€‚åè€…è¡¨ç¤ºä¸ä½¿ç”¨è¿™ä¸ªå‚æ•°
                 /*
                 if (strKeysText == null)
                     strKeysText = "";
@@ -2454,7 +2460,7 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "¼ÓÔØkeysÅäÖÃÎÄ¼şÄÚÈİµ½dom³ö´í(1)£¬Ô­Òò:" + ex.Message;
+                        strError = "åŠ è½½keysé…ç½®æ–‡ä»¶å†…å®¹åˆ°domå‡ºé”™(1)ï¼ŒåŸå› :" + ex.Message;
                         return -1;
                     }
                 }
@@ -2468,12 +2474,12 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "¼ÓÔØbrowseÅäÖÃÎÄ¼şÄÚÈİµ½dom³ö´í£¬Ô­Òò:" + ex.Message;
+                        strError = "åŠ è½½browseé…ç½®æ–‡ä»¶å†…å®¹åˆ°domå‡ºé”™ï¼ŒåŸå› :" + ex.Message;
                         return -1;
                     }
                 }
 
-                // ¿ÉÒÔÒ»¸öÂß¼­¿âÃûÒ²Ã»ÓĞ£¬²»³ö´í
+                // å¯ä»¥ä¸€ä¸ªé€»è¾‘åº“åä¹Ÿæ²¡æœ‰ï¼Œä¸å‡ºé”™
                 string strLogicNames = "";
                 for (int i = 0; i < logicNames.Length; i++)
                 {
@@ -2483,19 +2489,19 @@ namespace DigitalPlatform.rms
                     if (strLang.Length != 2
                         && strLang.Length != 5)
                     {
-                        strError = "ÓïÑÔ°æ±¾×Ö·û´®³¤¶ÈÖ»ÄÜÊÇ2Î»»òÕß5Î»,'" + strLang + "'ÓïÑÔ°æ±¾²»ºÏ·¨";
+                        strError = "è¯­è¨€ç‰ˆæœ¬å­—ç¬¦ä¸²é•¿åº¦åªèƒ½æ˜¯2ä½æˆ–è€…5ä½,'" + strLang + "'è¯­è¨€ç‰ˆæœ¬ä¸åˆæ³•";
                         return -1;
                     }
 
                     if (this.container.IsExistLogicName(strLogicName, this) == true)
                     {
-                        strError = "Êı¾İ¿âÖĞÒÑ´æÔÚ'" + strLogicName + "'Âß¼­¿âÃû";
+                        strError = "æ•°æ®åº“ä¸­å·²å­˜åœ¨'" + strLogicName + "'é€»è¾‘åº“å";
                         return -2;
                     }
                     strLogicNames += "<caption lang='" + strLang + "'>" + strLogicName + "</caption>";
                 }
 
-                // ĞŞ¸ÄLogicName£¬Ê¹ÓÃÈ«²¿Ìæ»»µÄ·½Ê½
+                // ä¿®æ”¹LogicNameï¼Œä½¿ç”¨å…¨éƒ¨æ›¿æ¢çš„æ–¹å¼
                 XmlNode nodeLogicName = this.PropertyNode.SelectSingleNode("logicname");
                 nodeLogicName.InnerXml = strLogicNames;
 
@@ -2508,7 +2514,7 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                // Ä¿Ç°²»Ö§³ÖĞŞ¸ÄstrType,strSqlDbName
+                // ç›®å‰ä¸æ”¯æŒä¿®æ”¹strType,strSqlDbName
 
                 if (strKeysText != null)  // 2008/4/30
                 {
@@ -2518,12 +2524,12 @@ namespace DigitalPlatform.rms
                     // string strDbName = this.GetCaption("zh");
 
                     // return:
-                    //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-                    //		-2	Ã»ÕÒµ½½Úµã
-                    //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-                    //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-                    //		-5	´æÔÚ¶à¸ö½Úµã
-                    //		0	³É¹¦
+                    //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+                    //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+                    //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+                    //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+                    //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+                    //		0	æˆåŠŸ
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
                         out strKeysFileName,
                         out strError);
@@ -2534,8 +2540,8 @@ namespace DigitalPlatform.rms
                         else if (nRet == -2)
                         {
                             // return:
-                            //		-1	³ö´í
-                            //		0	³É¹¦
+                            //		-1	å‡ºé”™
+                            //		0	æˆåŠŸ
                             nRet = this.container.SetFileCfgItem(
                                 false,
                                 this.GetCaption("zh") + "/cfgs",
@@ -2546,12 +2552,12 @@ namespace DigitalPlatform.rms
                                 return -1;
 
                             // return:
-                            //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-                            //		-2	Ã»ÕÒµ½½Úµã
-                            //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-                            //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-                            //		-5	´æÔÚ¶à¸ö½Úµã
-                            //		0	³É¹¦
+                            //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+                            //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+                            //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+                            //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+                            //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+                            //		0	æˆåŠŸ
                             nRet = this.container.GetFileCfgItemLocalPath(this.GetCaption("zh") + "/cfgs/keys",
                                 out strKeysFileName,
                                 out strError);
@@ -2565,8 +2571,10 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strKeysFileName) == false)
                     {
-                        Stream s = File.Create(strKeysFileName);
-                        s.Close();
+                        using(Stream s = File.Create(strKeysFileName))
+                        {
+
+                        }
                     }
 
                     nRet = DatabaseUtil.CreateXmlFile(strKeysFileName,
@@ -2575,7 +2583,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // °Ñ»º³åÇå¿Õ
+                    // æŠŠç¼“å†²æ¸…ç©º
                     this.m_keysCfg = null;
                 }
 
@@ -2586,12 +2594,12 @@ namespace DigitalPlatform.rms
                     string strBrowseFileName = "";
 
                     // return:
-                    //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-                    //		-2	Ã»ÕÒµ½½Úµã
-                    //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-                    //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-                    //		-5	´æÔÚ¶à¸ö½Úµã
-                    //		0	³É¹¦
+                    //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+                    //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+                    //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+                    //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+                    //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+                    //		0	æˆåŠŸ
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/browse",
                         out strBrowseFileName,
                         out strError);
@@ -2602,8 +2610,8 @@ namespace DigitalPlatform.rms
                         else if (nRet == -2)
                         {
                             // return:
-                            //		-1	³ö´í
-                            //		0	³É¹¦
+                            //		-1	å‡ºé”™
+                            //		0	æˆåŠŸ
                             nRet = this.container.SetFileCfgItem(
                                 false,
                                 this.GetCaption("zh") + "/cfgs",
@@ -2614,12 +2622,12 @@ namespace DigitalPlatform.rms
                                 return -1;
 
                             // return:
-                            //		-1	Ò»°ãĞÔ´íÎó£¬±ÈÈçµ÷ÓÃ´íÎó£¬²ÎÊı²»ºÏ·¨µÈ
-                            //		-2	Ã»ÕÒµ½½Úµã
-                            //		-3	localnameÊôĞÔÎ´¶¨Òå»òÎªÖµ¿Õ
-                            //		-4	localnameÔÚ±¾µØ²»´æÔÚ
-                            //		-5	´æÔÚ¶à¸ö½Úµã
-                            //		0	³É¹¦
+                            //		-1	ä¸€èˆ¬æ€§é”™è¯¯ï¼Œæ¯”å¦‚è°ƒç”¨é”™è¯¯ï¼Œå‚æ•°ä¸åˆæ³•ç­‰
+                            //		-2	æ²¡æ‰¾åˆ°èŠ‚ç‚¹
+                            //		-3	localnameå±æ€§æœªå®šä¹‰æˆ–ä¸ºå€¼ç©º
+                            //		-4	localnameåœ¨æœ¬åœ°ä¸å­˜åœ¨
+                            //		-5	å­˜åœ¨å¤šä¸ªèŠ‚ç‚¹
+                            //		0	æˆåŠŸ
                             nRet = this.container.GetFileCfgItemLocalPath(this.GetCaption("zh") + "/cfgs/browse",
                                 out strBrowseFileName,
                                 out strError);
@@ -2633,8 +2641,10 @@ namespace DigitalPlatform.rms
 
                     if (File.Exists(strBrowseFileName) == false)
                     {
-                        Stream s = File.Create(strBrowseFileName);
-                        s.Close();
+                        using(Stream s = File.Create(strBrowseFileName))
+                        {
+
+                        }
                     }
 
                     nRet = DatabaseUtil.CreateXmlFile(strBrowseFileName,
@@ -2643,9 +2653,9 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // °Ñ»º³åÇå¿Õ
+                    // æŠŠç¼“å†²æ¸…ç©º
                     // this.m_browseCfg = null;
-                    // this.m_bHasBrowse = true; // È±Ê¡Öµ
+                    // this.m_bHasBrowse = true; // ç¼ºçœå€¼
                     this.browse_table.Clear();
                 }
 
@@ -2653,24 +2663,24 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***************¶ÔÊı¾İ¿â½âĞ´Ëø************
+                //***************å¯¹æ•°æ®åº“è§£å†™é”************
                 m_TailNolock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("SetInfo()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("SetInfo()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // µÃµ½Êı¾İ¿â¿ÉÒÔÏÔÊ¾µÄÏÂ¼¶
+        // å¾—åˆ°æ•°æ®åº“å¯ä»¥æ˜¾ç¤ºçš„ä¸‹çº§
         // parameters:
-        //		oUser	ÕÊ»§¶ÔÏó
-        //		db	Êı¾İ¿â¶ÔÏó
-        //		strLang	ÓïÑÔ°æ±¾
-        //		aItem	out²ÎÊı£¬·µ»ØÊı¾İ¿â¿ÉÒÔÏÔÊ¾µÄÏÂ¼¶
-        //		strError	out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		oUser	å¸æˆ·å¯¹è±¡
+        //		db	æ•°æ®åº“å¯¹è±¡
+        //		strLang	è¯­è¨€ç‰ˆæœ¬
+        //		aItem	outå‚æ•°ï¼Œè¿”å›æ•°æ®åº“å¯ä»¥æ˜¾ç¤ºçš„ä¸‹çº§
+        //		strError	outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         public int GetDirableChildren(User user,
             string strLang,
             string strStyle,
@@ -2680,15 +2690,15 @@ namespace DigitalPlatform.rms
             aItem = new ArrayList();
             strError = "";
 
-            //**********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //**********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             this.m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("Dir()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("Dir()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                // 1.ÅäÖÃÊÂÏî
+                // 1.é…ç½®äº‹é¡¹
 
                 foreach (XmlNode child in this.m_selfNode.ChildNodes)
                 {
@@ -2719,7 +2729,7 @@ namespace DigitalPlatform.rms
                             continue;
 
                         resInfoItem.HasChildren = true;
-                        resInfoItem.Type = 4;   // Ä¿Â¼
+                        resInfoItem.Type = 4;   // ç›®å½•
 
                         resInfoItem.TypeString = DomUtil.GetAttr(child, "type");    // xietao 2006/6/5
                     }
@@ -2732,7 +2742,7 @@ namespace DigitalPlatform.rms
                         if (bHasRight == false)
                             continue;
                         resInfoItem.HasChildren = false;
-                        resInfoItem.Type = 5;   // ÎÄ¼ş
+                        resInfoItem.Type = 5;   // æ–‡ä»¶
 
                         resInfoItem.TypeString = DomUtil.GetAttr(child, "type"); // xietao 2006/6/5 add
 
@@ -2742,7 +2752,7 @@ namespace DigitalPlatform.rms
 
 
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                // 2.¼ìË÷Í¾¾¶
+                // 2.æ£€ç´¢é€”å¾„
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -2759,11 +2769,11 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // ¶ÔÓÚ¼ìË÷Í¾¾¶£¬È«²¿¶¼ÓĞÈ¨ÏŞ
+                    // å¯¹äºæ£€ç´¢é€”å¾„ï¼Œå…¨éƒ¨éƒ½æœ‰æƒé™
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
-                        Debug.Assert(tableInfo.Dup == false, "²»¿ÉÄÜÔÙÓĞÖØ¸´µÄÁË¡£");
+                        Debug.Assert(tableInfo.Dup == false, "ä¸å¯èƒ½å†æœ‰é‡å¤çš„äº†ã€‚");
 
                         ResInfoItem resInfoItem = new ResInfoItem();
                         resInfoItem.Type = 1;
@@ -2781,7 +2791,7 @@ namespace DigitalPlatform.rms
                             resInfoItem.TypeString += tableInfo.ExtTypeString;
                         }
 
-                        // Èç¹ûĞèÒª, ÁĞ³öËùÓĞÓïÑÔÏÂµÄÃû×Ö
+                        // å¦‚æœéœ€è¦, åˆ—å‡ºæ‰€æœ‰è¯­è¨€ä¸‹çš„åå­—
                         if (StringUtil.IsInList("alllang", strStyle) == true)
                         {
                             List<string> results = tableInfo.GetAllLangCaption();
@@ -2794,7 +2804,7 @@ namespace DigitalPlatform.rms
                     }
                 }
 
-                // ¼Ó__id
+                // åŠ __id
                 ResInfoItem resInfoItemID = new ResInfoItem();
                 resInfoItemID.Type = 1;
                 resInfoItemID.Name = "__id";
@@ -2807,24 +2817,24 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //***************¶ÔÊı¾İ¿â½â¶ÁËø************
+                //***************å¯¹æ•°æ®åº“è§£è¯»é”************
                 this.m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
-				this.container.WriteDebugInfo("Dir()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("Dir()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
 
         }
 
 
-        // Ğ´ÅäÖÃÎÄ¼ş
+        // å†™é…ç½®æ–‡ä»¶
         // parameters:
-        //      strCfgItemPath  È«Â·¾¶£¬´ø¿âÃû
+        //      strCfgItemPath  å…¨è·¯å¾„ï¼Œå¸¦åº“å
         // return:
-        //		-1  Ò»°ãĞÔ´íÎó
-        //      -2  Ê±¼ä´Á²»Æ¥Åä
-        //		0	³É¹¦
-        // Ïß³Ì£¬¶Ô¿â¼¯ºÏÊÇ²»°²È«µÄ
+        //		-1  ä¸€èˆ¬æ€§é”™è¯¯
+        //      -2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //		0	æˆåŠŸ
+        // çº¿ç¨‹ï¼Œå¯¹åº“é›†åˆæ˜¯ä¸å®‰å…¨çš„
         internal int WriteFileForCfgItem(
             bool bNeedLock,
             string strCfgItemPath,
@@ -2842,18 +2852,18 @@ namespace DigitalPlatform.rms
 
             if (bNeedLock == true)
             {
-                //**********¶ÔÊı¾İ¿â¼ÓĞ´Ëø**************
+                //**********å¯¹æ•°æ®åº“åŠ å†™é”**************
                 this.m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("Dir()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("Dir()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
             }
             try
             {
                 // return:
-                //		-1	Ò»°ãĞÔ´íÎó
-                //		-2	Ê±¼ä´Á²»Æ¥Åä
-                //		0	³É¹¦
+                //		-1	ä¸€èˆ¬æ€§é”™è¯¯
+                //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+                //		0	æˆåŠŸ
                 int nRet = this.container.WriteFileForCfgItem(strFilePath,
                     strRanges,
                     lTotalLength,
@@ -2870,27 +2880,27 @@ namespace DigitalPlatform.rms
                 int nPosition = strCfgItemPath.IndexOf("/");
                 if (nPosition == -1)
                 {
-                    strError = "'" + strCfgItemPath + "'Â·¾¶²»°üÀ¨'/'£¬²»ºÏ·¨¡£";
+                    strError = "'" + strCfgItemPath + "'è·¯å¾„ä¸åŒ…æ‹¬'/'ï¼Œä¸åˆæ³•ã€‚";
                     return -1;
                 }
                 if (nPosition == strCfgItemPath.Length - 1)
                 {
-                    strError = "'" + strCfgItemPath + "'Â·¾¶×îºóÊÇ'/'£¬²»ºÏ·¨¡£";
+                    strError = "'" + strCfgItemPath + "'è·¯å¾„æœ€åæ˜¯'/'ï¼Œä¸åˆæ³•ã€‚";
                     return -1;
                 }
                 string strPathWithoutDbName = strCfgItemPath.Substring(nPosition + 1);
-                // Èç¹ûÎªkeys¶ÔÏó£¬Ôò°Ñ¸Ã¿âµÄKeysCfgÖĞµÄdomÇå¿Õ
+                // å¦‚æœä¸ºkeyså¯¹è±¡ï¼Œåˆ™æŠŠè¯¥åº“çš„KeysCfgä¸­çš„domæ¸…ç©º
                 if (strPathWithoutDbName == "cfgs/keys")
                 {
                     this.m_keysCfg = null;
                 }
 
-                // Èç¹ûÎªbrowse¶ÔÏó
+                // å¦‚æœä¸ºbrowseå¯¹è±¡
                 /*
                 if (strPathWithoutDbName == "cfgs/browse")
                 {
                     this.m_browseCfg = null;
-                    this.m_bHasBrowse = true; // È±Ê¡Öµ
+                    this.m_bHasBrowse = true; // ç¼ºçœå€¼
                 }
                  * */
                 if (this.browse_table[strPathWithoutDbName.ToLower()] != null)
@@ -2905,10 +2915,10 @@ namespace DigitalPlatform.rms
                 if (bNeedLock == true)
                 {
 
-                    //**********¶ÔÊı¾İ¿â½âĞ´Ëø**************
+                    //**********å¯¹æ•°æ®åº“è§£å†™é”**************
                     this.m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-			this.container.WriteDebugInfo("Dir()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+			this.container.WriteDebugInfo("Dir()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
                 }
             }
@@ -2916,13 +2926,13 @@ namespace DigitalPlatform.rms
         }
 
 
-        // ¹æ·¶»¯¼ÇÂ¼ºÅ
+        // è§„èŒƒåŒ–è®°å½•å·
         // parameters:
-        //      strInputRecordID    ÊäÈëµÄ¼ÇÂ¼ºÅ£¬Ö»ÄÜÎª '-1','?'»òÕß´¿Êı×Ö(ÇÒĞ¡ÓÚµÈÓÚ10Î»)
-        //      strOututRecordID    out²ÎÊı£¬·µ»Ø¹æ·¶»¯ºóµÄ¼ÇÂ¼ºÅ
+        //      strInputRecordID    è¾“å…¥çš„è®°å½•å·ï¼Œåªèƒ½ä¸º '-1','?'æˆ–è€…çº¯æ•°å­—(ä¸”å°äºç­‰äº10ä½)
+        //      strOututRecordID    outå‚æ•°ï¼Œè¿”å›è§„èŒƒåŒ–åçš„è®°å½•å·
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int CanonicalizeRecordID(string strInputRecordID,
             out string strOutputRecordID,
             out string strError)
@@ -2932,7 +2942,7 @@ namespace DigitalPlatform.rms
 
             if (strInputRecordID.Length > 10)
             {
-                strError = "¼ÇÂ¼ºÅ²»ºÏ·¨£¬³¤¶È³¬¹ı10Î»¡£";
+                strError = "è®°å½•å·ä¸åˆæ³•ï¼Œé•¿åº¦è¶…è¿‡10ä½ã€‚";
                 return -1;
             }
 
@@ -2944,7 +2954,7 @@ namespace DigitalPlatform.rms
 
             if (StringUtil.IsPureNumber(strInputRecordID) == false)
             {
-                strError = "¼ÇÂ¼ºÅ '" + strInputRecordID + "' ²»ºÏ·¨¡£";
+                strError = "è®°å½•å· '" + strInputRecordID + "' ä¸åˆæ³•ã€‚";
                 return -1;
             }
 

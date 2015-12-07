@@ -274,6 +274,7 @@ FormWindowState.Normal);
 
             GetMaxClients();
             GetLicenseType();
+            GetFunction();
 #else
             this.MenuItem_resetSerialCode.Visible = false;
 #endif
@@ -596,6 +597,24 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
         }
 
+        // 许可的功能列表
+        string _function = "";
+        public string Function
+        {
+            get
+            {
+                return _function;
+            }
+            set
+            {
+                if (_function != value)
+                {
+                    _function = value;
+                    // this.SetTitle();
+                }
+            }
+        }
+
 #if SN
         void GetLicenseType()
         {
@@ -606,6 +625,13 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             this.LicenseType = (string)table["licensetype"];
 
             // this.SetTitle();
+        }
+
+        void GetFunction()
+        {
+            string strLocalString = GetEnvironmentString(this.IsServer, "");
+            Hashtable table = StringUtil.ParseParameters(strLocalString);
+            this.Function = (string)table["function"];
         }
 
         // 获得 xxx|||xxxx 的左边部分
@@ -793,6 +819,10 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                     if (string.IsNullOrEmpty(strLicenseType) == false)
                         table["licensetype"] = strLicenseType;
 
+                    // 2015/11/17
+                    string strFunction = (string)ext_table["function"];
+                    if (string.IsNullOrEmpty(strFunction) == false)
+                        table["function"] = strFunction;
                 }
             }
 
@@ -1683,6 +1713,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 else
                     this.library_host.SetMaxClients(this.MaxClients);
                 this.library_host.SetLicenseType(this.LicenseType);
+                this.library_host.SetFunction(this.Function);
             }
 
             return 1;
@@ -2943,10 +2974,12 @@ miniServer	-- enterprise mini
                 if (strMode != strSerialCode)
                     this.AppInfo.SetString("sn", "sn", strMode);
 
+#if NO
                 Debug.Assert(strMode == "test"
                     || strMode == "miniTest"
                     || strMode == "standard"
                     || strMode == "miniServer", "");
+#endif
 
                 if (strMode == "test" || strMode == "miniTest")
                 {
@@ -3022,6 +3055,7 @@ miniServer	-- enterprise mini
             {
                 GetMaxClients();
                 GetLicenseType();
+                GetFunction();
                 // 重新启动
                 RestartDp2libraryIfNeed();
             }
@@ -3236,30 +3270,6 @@ this.Font);
             MessageBox.Show(this, strError);
         }
 
-        // 获得一个目录下的全部文件名。包括子目录中的
-        static List<string> GetFileNames(string strDataDir)
-        {
-            // Application.DoEvents();
-
-            DirectoryInfo di = new DirectoryInfo(strDataDir);
-
-            List<string> result = new List<string>();
-
-            FileInfo[] fis = di.GetFiles();
-            foreach (FileInfo fi in fis)
-            {
-                        result.Add(fi.FullName);
-            }
-
-            // 处理下级目录，递归
-            DirectoryInfo[] dis = di.GetDirectories();
-            foreach (DirectoryInfo subdir in dis)
-            {
-                result.AddRange(GetFileNames(subdir.FullName));
-            }
-
-            return result;
-        }
 
 #if NO
         // 记忆配置文件的版本

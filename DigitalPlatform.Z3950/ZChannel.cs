@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
@@ -24,7 +24,7 @@ namespace DigitalPlatform.Z3950
 
         public event CommIdleEventHandle CommIdle = null;
 
-        // Òì²½·¢ËÍºÍ½ÓÊÕ
+        // å¼‚æ­¥å‘é€å’Œæ¥æ”¶
         public byte[] baSend = null;
         public byte[] baRecv = null;
         public string strErrorString = "";
@@ -33,11 +33,11 @@ namespace DigitalPlatform.Z3950
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
-        public int Timeout = 60*1000;   // 60Ãë
+        public int Timeout = 60*1000;   // 60ç§’
 
 
         /// <summary>
-        /// ÊÇ·ñ±»Z39.50³õÊ¼»¯
+        /// æ˜¯å¦è¢«Z39.50åˆå§‹åŒ–
         /// </summary>
         public bool Initialized
         {
@@ -86,7 +86,7 @@ namespace DigitalPlatform.Z3950
         }
 
 #if NOOOOOOOOOOOOOOO
-        // ÀûÓÃÏÖÓĞÏß³ÌµÄSendAndRecv
+        // åˆ©ç”¨ç°æœ‰çº¿ç¨‹çš„SendAndRecv
         public int SendAndRecv(byte[] baSend,
             out byte[] baRecv,
             out int nRecvLength,
@@ -109,7 +109,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (System.Threading.ThreadAbortException ex)
             {
-                strError = "Ïß³Ì±»É±ËÀ";
+                strError = "çº¿ç¨‹è¢«æ€æ­»";
                 goto ERROR1;
             }
 
@@ -133,7 +133,7 @@ namespace DigitalPlatform.Z3950
         }
 #endif
 
-        // ĞÂÆô¶¯Ò»¸öÏß³ÌµÄSendAndRecv
+        // æ–°å¯åŠ¨ä¸€ä¸ªçº¿ç¨‹çš„SendAndRecv
         public int SendAndRecv(byte[] baSend,
             out byte [] baRecv,
             out int nRecvLength,
@@ -153,7 +153,7 @@ namespace DigitalPlatform.Z3950
             Thread clientThread = new Thread(new ThreadStart(SendAndRecvThread));
             clientThread.Start();
 
-            // µÈ´ıÏß³Ì½áÊø
+            // ç­‰å¾…çº¿ç¨‹ç»“æŸ
             WaitHandle[] events = new WaitHandle[2];
 
             events[0] = this.eventClose;
@@ -173,7 +173,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (System.Threading.ThreadAbortException ex)
             {
-                strError = "Ïß³Ì±»É±ËÀ";
+                strError = "çº¿ç¨‹è¢«æ€æ­»";
                 goto ERROR1;
             }
 
@@ -183,8 +183,8 @@ namespace DigitalPlatform.Z3950
 
                 if (nIdleTicks >= this.Timeout)
                 {
-                    // ³¬Ê±
-                    strError = "³¬Ê± (" + this.Timeout + "ºÁÃë)";
+                    // è¶…æ—¶
+                    strError = "è¶…æ—¶ (" + this.Timeout + "æ¯«ç§’)";
                     return -1;
                 }
 
@@ -192,13 +192,13 @@ namespace DigitalPlatform.Z3950
             }
             else if (index == 0)
             {
-                // µÃµ½CloseĞÅºÅ
-                strError = "Í¨µÀ±»ÇĞ¶Ï";
+                // å¾—åˆ°Closeä¿¡å·
+                strError = "é€šé“è¢«åˆ‡æ–­";
                 goto ERROR1;
             }
             else
             {
-                // µÃµ½finishĞÅºÅ
+                // å¾—åˆ°finishä¿¡å·
                 if (nErrorCode != 0)
                 {
                     if (nErrorCode == -1)
@@ -260,11 +260,11 @@ namespace DigitalPlatform.Z3950
             return;
         }
 
-        // ·¢³öÇëÇó°ü
+        // å‘å‡ºè¯·æ±‚åŒ…
         // return:
-        //      -1  ³ö´í
-        //      0   ÕıÈ··¢³ö
-        //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+        //      -1  å‡ºé”™
+        //      0   æ­£ç¡®å‘å‡º
+        //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
         public int SimpleSendTcpPackage(byte[] baPackage,
             int nLen,
             out string strError)
@@ -273,23 +273,23 @@ namespace DigitalPlatform.Z3950
 
             if (client == null)
             {
-                strError = "clientÉĞÎ´³õÊ¼»¯¡£ÇëÖØĞÂÁ¬½ÓºÍ¼ìË÷¡£";
+                strError = "clientå°šæœªåˆå§‹åŒ–ã€‚è¯·é‡æ–°è¿æ¥å’Œæ£€ç´¢ã€‚";
                 return -1;
             }
 
             if (this.client == null)
             {
-                strError = "ÓÃ»§ÖĞ¶Ï";
+                strError = "ç”¨æˆ·ä¸­æ–­";
                 return -1;
             }
 
-
+            // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
             NetworkStream stream = client.GetStream();
 
             if (stream.DataAvailable == true)
             {
-                // Debug.Assert(false, "·¢ËÍÇ°¾ÓÈ»·¢ÏÖÓĞÎ´¶ÁµÄÊı¾İ" );
-                strError = "·¢ËÍÇ°·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁµÄÊı¾İ";
+                // Debug.Assert(false, "å‘é€å‰å±…ç„¶å‘ç°æœ‰æœªè¯»çš„æ•°æ®" );
+                strError = "å‘é€å‰å‘ç°æµä¸­æœ‰æœªè¯»çš„æ•°æ®";
                 return 1;
             }
 
@@ -299,7 +299,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)
             {
-                strError = "send³ö´í: " + ex.Message;
+                strError = "sendå‡ºé”™: " + ex.Message;
                 // this.CloseSocket();
                 return -1;
             }
@@ -307,7 +307,7 @@ namespace DigitalPlatform.Z3950
             return 0;
         }
 
-        // ½ÓÊÕÏìÓ¦°ü
+        // æ¥æ”¶å“åº”åŒ…
         public int SimpleRecvTcpPackage(out byte[] baPackage,
             out int nLen,
             out string strError)
@@ -318,7 +318,7 @@ namespace DigitalPlatform.Z3950
             int wRet = 0;
             bool bInitialLen = false;
 
-            Debug.Assert(client != null, "clientÎª¿Õ");
+            Debug.Assert(client != null, "clientä¸ºç©º");
 
             baPackage = new byte[4096];
             nInLen = 0;
@@ -328,7 +328,7 @@ namespace DigitalPlatform.Z3950
             {
                 if (client == null)
                 {
-                    strError = "Í¨Ñ¶ÖĞ¶Ï";
+                    strError = "é€šè®¯ä¸­æ–­";
                     goto ERROR1;
                 }
 
@@ -346,12 +346,12 @@ namespace DigitalPlatform.Z3950
                         System.Threading.Thread.Sleep(100);
                         continue;
                     }
-                    strError = "recv³ö´í: " + ex.Message;
+                    strError = "recvå‡ºé”™: " + ex.Message;
                     goto ERROR1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "recv³ö´í: " + ex.Message;
+                    strError = "recvå‡ºé”™: " + ex.Message;
                     goto ERROR1;
                 }
 
@@ -361,7 +361,7 @@ namespace DigitalPlatform.Z3950
                     goto ERROR1;
                 }
 
-                // µÃµ½°üµÄ³¤¶È
+                // å¾—åˆ°åŒ…çš„é•¿åº¦
 
                 if ((wRet >= 1 || nInLen >= 1)
                     && bInitialLen == false)
@@ -382,7 +382,7 @@ namespace DigitalPlatform.Z3950
                 if (nInLen >= baPackage.Length
                     && bInitialLen == false)
                 {
-                    // À©´ó»º³åÇø
+                    // æ‰©å¤§ç¼“å†²åŒº
                     byte[] temp = new byte[baPackage.Length + 4096];
                     Array.Copy(baPackage, 0, temp, 0, nInLen);
                     baPackage = temp;
@@ -390,7 +390,7 @@ namespace DigitalPlatform.Z3950
                 }
             }
 
-            // ×îºó¹æÕû»º³åÇø³ß´ç£¬Èç¹û±ØÒªµÄ»°
+            // æœ€åè§„æ•´ç¼“å†²åŒºå°ºå¯¸ï¼Œå¦‚æœå¿…è¦çš„è¯
             if (baPackage.Length > nLen)
             {
                 byte[] temp = new byte[nLen];
@@ -405,7 +405,7 @@ namespace DigitalPlatform.Z3950
             return -1;
         }
 
-        // Ïß³Ìconnect()µ½Ö÷»ú
+        // çº¿ç¨‹connect()åˆ°ä¸»æœº
         public int NewConnectSocket(string strHostName,
             int nPort,
             out string strError)
@@ -416,7 +416,7 @@ namespace DigitalPlatform.Z3950
             this.m_nPort = nPort;
 
 
-            // ÔÚÏß³ÌÖ®Ç°ÊÔÌ½Close();
+            // åœ¨çº¿ç¨‹ä¹‹å‰è¯•æ¢Close();
             this.CloseSocket();
 
             this.eventClose.Reset();
@@ -429,7 +429,7 @@ namespace DigitalPlatform.Z3950
             Thread clientThread = new Thread(new ThreadStart(ConnectThread));
             clientThread.Start();
 
-            // µÈ´ıÏß³Ì½áÊø
+            // ç­‰å¾…çº¿ç¨‹ç»“æŸ
             WaitHandle[] events = new WaitHandle[2];
             events[0] = this.eventClose;
             events[1] = this.eventFinished;
@@ -447,7 +447,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (System.Threading.ThreadAbortException ex)
             {
-                strError = "Ïß³Ì±»É±ËÀ";
+                strError = "çº¿ç¨‹è¢«æ€æ­»";
                 return -1;
             }
 
@@ -457,8 +457,8 @@ namespace DigitalPlatform.Z3950
 
                 if (nIdleTicks >= this.Timeout)
                 {
-                    // ³¬Ê±
-                    strError = "³¬Ê± (" + this.Timeout + "ºÁÃë)";
+                    // è¶…æ—¶
+                    strError = "è¶…æ—¶ (" + this.Timeout + "æ¯«ç§’)";
                     return -1;
                 }
 
@@ -466,13 +466,13 @@ namespace DigitalPlatform.Z3950
             }
             else if (index == 0)
             {
-                // µÃµ½CloseĞÅºÅ
-                strError = "Í¨µÀ±»ÇĞ¶Ï";
+                // å¾—åˆ°Closeä¿¡å·
+                strError = "é€šé“è¢«åˆ‡æ–­";
                 return -1;
             }
             else
             {
-                // µÃµ½finishĞÅºÅ
+                // å¾—åˆ°finishä¿¡å·
                 if (nErrorCode != 0)
                 {
                     strError = this.strErrorString;
@@ -495,7 +495,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)  // SocketException
             {
-                strError = "Connect³ö´í: " + ex.Message;
+                strError = "Connectå‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -508,7 +508,7 @@ namespace DigitalPlatform.Z3950
             return;
         }
 
-        #region ×îĞÂÒì²½¹¦ÄÜ
+        #region æœ€æ–°å¼‚æ­¥åŠŸèƒ½
 
         byte[] m_baSend = null;
         byte[] m_baRecv = null;
@@ -536,10 +536,10 @@ namespace DigitalPlatform.Z3950
         public event EventHandler SendRecvComplete = null;
         public event EventHandler ConnectComplete = null;
 
-        // Á¬½Ó
+        // è¿æ¥
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦Æô¶¯
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸå¯åŠ¨
         public int ConnectAsync(string strHostName,
             int nPort)
         {
@@ -558,7 +558,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)  // SocketException
             {
-                m_strAsycError = "Á¬½Ó "+this.m_strHostName + ":" + this.m_nPort.ToString()+" ³ö´í: " + ex.Message;
+                m_strAsycError = "è¿æ¥ "+this.m_strHostName + ":" + this.m_nPort.ToString()+" å‡ºé”™: " + ex.Message;
                 ClearHostNameAndPort();
                 if (this.ConnectComplete != null)
                     this.ConnectComplete(this, new EventArgs());
@@ -580,7 +580,7 @@ namespace DigitalPlatform.Z3950
 
             if (client == null)
             {
-                m_strAsycError = "Á¬½Ó²Ù×÷±»ÓÃ»§ÖĞ¶Ï";
+                m_strAsycError = "è¿æ¥æ“ä½œè¢«ç”¨æˆ·ä¸­æ–­";
                 ClearHostNameAndPort();
                 goto END1;
             }
@@ -591,7 +591,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)  // SocketException
             {
-                m_strAsycError = "Á¬½Ó " + this.m_strHostName + ":" + this.m_nPort.ToString() + " ³ö´í: " + ex.Message;
+                m_strAsycError = "è¿æ¥ " + this.m_strHostName + ":" + this.m_nPort.ToString() + " å‡ºé”™: " + ex.Message;
                 ClearHostNameAndPort();
             }
             END1:
@@ -601,35 +601,36 @@ namespace DigitalPlatform.Z3950
             }
         }
 
-        // ·¢³öÇëÇó°ü£¬½ÓÊÕÏìÓ¦°ü
+        // å‘å‡ºè¯·æ±‚åŒ…ï¼Œæ¥æ”¶å“åº”åŒ…
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦Æô¶¯
-        //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸå¯åŠ¨
+        //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
         public int SendRecvAsync(byte[] baPackage)
         {
             m_strAsycError = "";
 
             if (client == null)
             {
-                m_strAsycError = "clientÉĞÎ´³õÊ¼»¯¡£ÇëÖØĞÂÁ¬½ÓºÍ¼ìË÷¡£";
+                m_strAsycError = "clientå°šæœªåˆå§‹åŒ–ã€‚è¯·é‡æ–°è¿æ¥å’Œæ£€ç´¢ã€‚";
                 return -1;
             }
 
             if (this.client == null)
             {
-                m_strAsycError = "ÓÃ»§ÖĞ¶Ï";
+                m_strAsycError = "ç”¨æˆ·ä¸­æ–­";
                 return -1;
             }
 
             this.m_baRecv = null;
             this.m_baSend = baPackage;
 
+            // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
             NetworkStream stream = client.GetStream();
 
             if (stream.DataAvailable == true)
             {
-                m_strAsycError = "·¢ËÍÇ°·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁµÄÊı¾İ";
+                m_strAsycError = "å‘é€å‰å‘ç°æµä¸­æœ‰æœªè¯»çš„æ•°æ®";
                 return 1;
             }
 
@@ -643,7 +644,7 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)
             {
-                m_strAsycError = "·¢ËÍ³ö´í: " + ex.Message;
+                m_strAsycError = "å‘é€å‡ºé”™: " + ex.Message;
                 // this.CloseSocket();
                 return -1;
             }
@@ -655,6 +656,7 @@ namespace DigitalPlatform.Z3950
         {
             m_strAsycError = "";
 
+            // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
             NetworkStream stream = client.GetStream();
 
             stream.EndWrite(ar);
@@ -670,9 +672,9 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)
             {
-                m_strAsycError = "½ÓÊÕ³ö´í: " + ex.Message;
+                m_strAsycError = "æ¥æ”¶å‡ºé”™: " + ex.Message;
                 // this.CloseSocket();
-                // ·¢ËÍºÍ½ÓÊÕÍê³É
+                // å‘é€å’Œæ¥æ”¶å®Œæˆ
                 if (SendRecvComplete != null)
                     SendRecvComplete(this, new EventArgs());
                 return;
@@ -685,17 +687,19 @@ namespace DigitalPlatform.Z3950
             {
                 if (client == null)
                 {
-                    m_strAsycError = "ÓÃ»§ÖĞ¶Ï";
+                    m_strAsycError = "ç”¨æˆ·ä¸­æ–­";
                     goto ERROR1;
                 }
                 Debug.Assert(client != null, "");
+
+                // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
                 NetworkStream stream = client.GetStream();
                 Debug.Assert(stream != null, "");
 
                 int nReaded = stream.EndRead(ar);
                 if (nReaded == 0)
                 {
-                    m_strAsycError = "Í¨µÀ±»¶Ô·½ÇĞ¶Ï";
+                    m_strAsycError = "é€šé“è¢«å¯¹æ–¹åˆ‡æ–­";
                     goto ERROR1;
                 }
 
@@ -709,14 +713,14 @@ namespace DigitalPlatform.Z3950
         out remainder);
                 if (bRet == true)
                 {
-                    // ·¢ËÍºÍ½ÓÊÕÍê³É
+                    // å‘é€å’Œæ¥æ”¶å®Œæˆ
                     if (SendRecvComplete != null)
                         SendRecvComplete(this, new EventArgs());
                     return;
                 }
 
 
-                // ·ñÔò¼ÌĞø½ÓÊÕ
+                // å¦åˆ™ç»§ç»­æ¥æ”¶
                 try
                 {
                     m_baTempRecv = new byte[4096];
@@ -729,7 +733,7 @@ namespace DigitalPlatform.Z3950
                 }
                 catch (Exception ex)
                 {
-                    m_strAsycError = "½ÓÊÕ³ö´í: " + ex.Message;
+                    m_strAsycError = "æ¥æ”¶å‡ºé”™: " + ex.Message;
 
                     goto ERROR1;
                 }
@@ -737,13 +741,13 @@ namespace DigitalPlatform.Z3950
             // System.ObjectDisposedException
             catch (Exception ex)
             {
-                m_strAsycError = "RecvCallback()³ö´í: " + ExceptionUtil.GetDebugText(ex);
+                m_strAsycError = "RecvCallback()å‡ºé”™: " + ExceptionUtil.GetDebugText(ex);
 
                 goto ERROR1;
             }
             return;
         ERROR1:
-            // ·¢ËÍºÍ½ÓÊÕÍê³É
+            // å‘é€å’Œæ¥æ”¶å®Œæˆ
             if (SendRecvComplete != null)
                 SendRecvComplete(this, new EventArgs());
             return;
@@ -753,7 +757,7 @@ namespace DigitalPlatform.Z3950
 
         ////
 
-        // connect()µ½Ö÷»ú
+        // connect()åˆ°ä¸»æœº
         public int ConnectSocket(string strHostName,
             int nPort,
             out string strError)
@@ -776,14 +780,14 @@ namespace DigitalPlatform.Z3950
             }
             catch (Exception ex)  // SocketException
             {
-                strError = "Connect³ö´í: " + ex.Message;
+                strError = "Connectå‡ºé”™: " + ex.Message;
                 return -1;
             }
 
             return 0;
         }
 
-        // ´¥·¢Ïß³ÌÖĞ¶ÏĞÅºÅ
+        // è§¦å‘çº¿ç¨‹ä¸­æ–­ä¿¡å·
         public void Stop()
         {
             this.eventClose.Set();
@@ -826,7 +830,7 @@ namespace DigitalPlatform.Z3950
             this.eventClose.Set();
         }
 
-        // Á÷ÖĞÊÇ·ñ»¹ÓĞÎ´¶ÁÈëµÄÊı¾İ
+        // æµä¸­æ˜¯å¦è¿˜æœ‰æœªè¯»å…¥çš„æ•°æ®
         public bool DataAvailable
         {
             get
@@ -834,6 +838,7 @@ namespace DigitalPlatform.Z3950
                 if (client == null)
                     return false;
 
+                // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
                 NetworkStream stream = client.GetStream();
 
                 if (stream == null)
@@ -854,11 +859,11 @@ namespace DigitalPlatform.Z3950
             }
         }
 
-        // ·¢³öÇëÇó°ü
+        // å‘å‡ºè¯·æ±‚åŒ…
         // return:
-        //      -1  ³ö´í
-        //      0   ÕıÈ··¢³ö
-        //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+        //      -1  å‡ºé”™
+        //      0   æ­£ç¡®å‘å‡º
+        //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
         public int SendTcpPackage(byte[] baPackage,
             int nLen,
             out string strError)
@@ -867,7 +872,7 @@ namespace DigitalPlatform.Z3950
 
             if (client == null)
             {
-                strError = "clientÉĞÎ´³õÊ¼»¯¡£ÇëÖØĞÂÁ¬½ÓºÍ¼ìË÷¡£";
+                strError = "clientå°šæœªåˆå§‹åŒ–ã€‚è¯·é‡æ–°è¿æ¥å’Œæ£€ç´¢ã€‚";
                 return -1;
             }
 
@@ -875,7 +880,7 @@ namespace DigitalPlatform.Z3950
 
             if (this.client == null)
             {
-                strError = "ÓÃ»§ÖĞ¶Ï";
+                strError = "ç”¨æˆ·ä¸­æ–­";
                 return -1;
             }
 
@@ -884,12 +889,13 @@ namespace DigitalPlatform.Z3950
             try
             {
 
+                // TODO: æ˜¯å¦è¦å…³é—­ NetworkStream !!!
                 NetworkStream stream = client.GetStream();
 
                 if (stream.DataAvailable == true)
                 {
-                    // Debug.Assert(false, "·¢ËÍÇ°¾ÓÈ»·¢ÏÖÓĞÎ´¶ÁµÄÊı¾İ" );
-                    strError = "·¢ËÍÇ°·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁµÄÊı¾İ";
+                    // Debug.Assert(false, "å‘é€å‰å±…ç„¶å‘ç°æœ‰æœªè¯»çš„æ•°æ®" );
+                    strError = "å‘é€å‰å‘ç°æµä¸­æœ‰æœªè¯»çš„æ•°æ®";
                     return 1;
                 }
 
@@ -899,7 +905,7 @@ namespace DigitalPlatform.Z3950
                 }
                 catch (Exception ex)
                 {
-                    strError = "send³ö´í: " + ex.Message;
+                    strError = "sendå‡ºé”™: " + ex.Message;
                     this.CloseSocket();
                     return -1;
                 }
@@ -927,7 +933,7 @@ namespace DigitalPlatform.Z3950
             return false;
         }
 
-        // ½ÓÊÕÏìÓ¦°ü
+        // æ¥æ”¶å“åº”åŒ…
         public int RecvTcpPackage(out byte[] baPackage,
             out int nLen,
             out string strError)
@@ -938,7 +944,7 @@ namespace DigitalPlatform.Z3950
             int wRet = 0;
             bool bInitialLen = false;
 
-            Debug.Assert(client != null, "clientÎª¿Õ");
+            Debug.Assert(client != null, "clientä¸ºç©º");
 
             baPackage = new byte[4096];
             nInLen = 0;
@@ -953,14 +959,14 @@ namespace DigitalPlatform.Z3950
                     /*
                     if (client.Client.Poll(-1, SelectMode.SelectError))
                     {
-                        strError = "Í¨Ñ¶ÖĞ¶Ï0";
+                        strError = "é€šè®¯ä¸­æ–­0";
                         goto ERROR1;
                     }
 
 
                     if (client.Client.Connected == false)
                     {
-                        strError = "Í¨Ñ¶ÖĞ¶Ï0";
+                        strError = "é€šè®¯ä¸­æ–­0";
                         goto ERROR1;
                     }
                      * */
@@ -980,7 +986,7 @@ namespace DigitalPlatform.Z3950
                     {
                         if (ex.ErrorCode == 0)
                         {
-                            strError = "Í¨Ñ¶ÖĞ¶Ï0";
+                            strError = "é€šè®¯ä¸­æ–­0";
                             goto ERROR1;
                         }
 
@@ -1002,7 +1008,7 @@ namespace DigitalPlatform.Z3950
 
                 if (client == null)
                 {
-                    strError = "Í¨Ñ¶ÖĞ¶Ï";
+                    strError = "é€šè®¯ä¸­æ–­";
                     goto ERROR1;
                 }
 
@@ -1035,12 +1041,12 @@ namespace DigitalPlatform.Z3950
                         System.Threading.Thread.Sleep(100);
                         continue;
                     }
-                    strError = "recv³ö´í: " + ex.Message;
+                    strError = "recvå‡ºé”™: " + ex.Message;
                     goto ERROR1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "recv³ö´í: " + ex.Message;
+                    strError = "recvå‡ºé”™: " + ex.Message;
                     goto ERROR1;
                 }
 
@@ -1050,7 +1056,7 @@ namespace DigitalPlatform.Z3950
                     goto ERROR1;
                 }
 
-                // µÃµ½°üµÄ³¤¶È
+                // å¾—åˆ°åŒ…çš„é•¿åº¦
 
                 if ((wRet >= 1 || nInLen >= 1)
                     && bInitialLen == false)
@@ -1063,7 +1069,7 @@ namespace DigitalPlatform.Z3950
                     if (bRet == true)
                     {
                         /*
-                        // ÕıÊ½·ÖÅä»º³åÇø³ß´ç
+                        // æ­£å¼åˆ†é…ç¼“å†²åŒºå°ºå¯¸
                         byte[] temp = new byte[nLen];
                         Array.Copy(baPackage, 0, temp, 0, nInLen + wRet);
                         baPackage = temp;
@@ -1079,7 +1085,7 @@ namespace DigitalPlatform.Z3950
                 if (nInLen >= baPackage.Length
                     && bInitialLen == false)
                 {
-                    // À©´ó»º³åÇø
+                    // æ‰©å¤§ç¼“å†²åŒº
                     byte[] temp = new byte[baPackage.Length + 4096];
                     Array.Copy(baPackage, 0, temp, 0, nInLen);
                     baPackage = temp;
@@ -1087,7 +1093,7 @@ namespace DigitalPlatform.Z3950
                 }
             }
 
-            // ×îºó¹æÕû»º³åÇø³ß´ç£¬Èç¹û±ØÒªµÄ»°
+            // æœ€åè§„æ•´ç¼“å†²åŒºå°ºå¯¸ï¼Œå¦‚æœå¿…è¦çš„è¯
             if (baPackage.Length > nLen)
             {
                 byte[] temp = new byte[nLen];
@@ -1105,7 +1111,7 @@ namespace DigitalPlatform.Z3950
     }
 
 
-    // ÊÂ¼ş: Í¨Ñ¶¿ÕÏĞ
+    // äº‹ä»¶: é€šè®¯ç©ºé—²
     public delegate void CommIdleEventHandle(object sender,
     CommIdleEventArgs e);
 

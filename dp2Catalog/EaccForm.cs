@@ -96,12 +96,8 @@ namespace dp2Catalog
         {
             strError = "";
 
-
             CharsetTable charsettable_e2u = new CharsetTable();
-
             charsettable_e2u.Open(true);
-
-
             if (this.textBox_unihanFilenames.Text == "")
             {
                 strError = "尚未指定输入文件名";
@@ -149,8 +145,6 @@ namespace dp2Catalog
                     this.MainForm.ToolStripProgressBar.Minimum = 0;
                     this.MainForm.ToolStripProgressBar.Maximum = (int)sr.BaseStream.Length;
                     this.MainForm.ToolStripProgressBar.Value = 0;
-
-
 
                     try
                     {
@@ -218,7 +212,7 @@ namespace dp2Catalog
 
                             if (strStyle == "6+4")
                             {
-                                nRet = strLine.IndexOfAny(new char [] {'\t',' '}, 0);
+                                nRet = strLine.IndexOfAny(new char[] { '\t', ' ' }, 0);
                                 if (nRet == -1)
                                     goto CONTINUE;	// 格式有问题
 
@@ -255,7 +249,6 @@ namespace dp2Catalog
 
                 }
 
-
                 stop.SetMessage("正在复制和排序...");
                 this.Update();
                 this.MainForm.Update();
@@ -265,7 +258,6 @@ namespace dp2Catalog
 
                 if (String.IsNullOrEmpty(this.textBox_e2uFilename.Text) == false)
                 {
-
                     charsettable_e2u.Sort();
                     charsettable_e2u.Detach(out strDataFileName,
                         out strIndexFileName);
@@ -287,7 +279,6 @@ namespace dp2Catalog
                 stop.Initial("");
 
                 EnableControls(true);
-
             }
 
             return 0;

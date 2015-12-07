@@ -224,29 +224,29 @@ namespace dp2Circulation
         // 创建缺省的main.cs文件
         static void CreateDefaultMainCsFile(string strFileName)
         {
-            StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
-            sw.WriteLine("using System;");
-            sw.WriteLine("using System.Windows.Forms;");
-            sw.WriteLine("using System.IO;");
-            sw.WriteLine("using System.Text;");
-            sw.WriteLine("using System.Xml;");
-            sw.WriteLine("");
+            using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                sw.WriteLine("using System;");
+                sw.WriteLine("using System.Windows.Forms;");
+                sw.WriteLine("using System.IO;");
+                sw.WriteLine("using System.Text;");
+                sw.WriteLine("using System.Xml;");
+                sw.WriteLine("");
 
-            sw.WriteLine("using dp2Circulation;");
+                sw.WriteLine("using dp2Circulation;");
 
-            sw.WriteLine("using DigitalPlatform.Xml;");
+                sw.WriteLine("using DigitalPlatform.Xml;");
 
+                sw.WriteLine("public class MyStatis : XmlStatis");
 
-            sw.WriteLine("public class MyStatis : XmlStatis");
+                sw.WriteLine("{");
 
-            sw.WriteLine("{");
+                sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
+                sw.WriteLine("	{");
+                sw.WriteLine("	}");
 
-            sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
-            sw.WriteLine("	{");
-            sw.WriteLine("	}");
-
-            sw.WriteLine("}");
-            sw.Close();
+                sw.WriteLine("}");
+            }
         }
 
         private void button_projectManage_Click(object sender, EventArgs e)

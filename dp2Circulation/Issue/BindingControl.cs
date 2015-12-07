@@ -256,7 +256,7 @@ namespace dp2Circulation
         // 拖动开始时的鼠标位置，view坐标
         Point DragStartMousePosition = new Point(0, 0);
         //
-                // 鼠标在拖动开始时的位置 整体文档坐标
+        // 鼠标在拖动开始时的位置 整体文档坐标
         PointF m_DragStartPointOnDoc = new PointF(0, 0);
 
         // 鼠标在拖动中途时的位置 整体文档坐标
@@ -402,7 +402,7 @@ namespace dp2Circulation
         internal Padding CellPadding = new Padding(8);
 
         // internal Padding LeftTextMargin = new Padding(6);
-        internal Padding LeftTextMargin {get;set;}
+        internal Padding LeftTextMargin { get; set; }
 
         internal Padding LeftTextPadding = new Padding(0);
 
@@ -514,7 +514,7 @@ namespace dp2Circulation
                     for (int j = 0; j < issue.Cells.Count; j++)
                     {
                         Cell cell = issue.Cells[j];
-                        if (cell != null 
+                        if (cell != null
                             && !(cell is GroupCell)
                             && cell.item != null
                             && cell.item.Deleted == false
@@ -968,7 +968,7 @@ namespace dp2Circulation
                             Debug.Assert(nRet != 1, "");
                         }
                         else
-                            issue.RemoveSingleIndex(nCol+1);
+                            issue.RemoveSingleIndex(nCol + 1);
                     }
 
                     bChanged = true;
@@ -1598,7 +1598,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "CreateIssues() error, xmlrecord index = "+i.ToString()+" : " + strError;
+                    strError = "CreateIssues() error, xmlrecord index = " + i.ToString() + " : " + strError;
                     return -1;
                 }
 
@@ -1626,7 +1626,7 @@ namespace dp2Circulation
                     continue;
                 if (issue.PublishTime == strPrevPublishTime)
                 {
-                    strError = "出现了重复出版日期 '"+issue.PublishTime+"' 的多个期记录";
+                    strError = "出现了重复出版日期 '" + issue.PublishTime + "' 的多个期记录";
                     return -1;
                 }
 
@@ -2114,7 +2114,7 @@ namespace dp2Circulation
                 {
                     if (String.IsNullOrEmpty(strError) == false)
                         strError += ";";
-                    strError += "期 '" + issue.Caption + "' 的refID值 '"+issue.RefID+"' 和其他期发生了重复";
+                    strError += "期 '" + issue.Caption + "' 的refID值 '" + issue.RefID + "' 和其他期发生了重复";
                 }
 
                 issue_refids.Add(issue.RefID);
@@ -2296,7 +2296,7 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "未知的布局模式 '"+strLayoutMode+"'";
+                strError = "未知的布局模式 '" + strLayoutMode + "'";
                 return -1;
             }
 
@@ -4344,7 +4344,7 @@ namespace dp2Circulation
                 {
                     throw new Exception("FocusObject必须为类型Cell/NullCell/IssueBindingItem之一");
                 }
-                
+
                 if (this.m_lastFocusObj == value)
                     return;
 
@@ -5218,7 +5218,7 @@ namespace dp2Circulation
                 }
 
 
-            // END1:
+                // END1:
                 this.DragStartObject = obj;
                 this.DragLastEndObject = null;  // 清除
 
@@ -5893,7 +5893,7 @@ namespace dp2Circulation
             {
                 strError =
                     "所选定的 " + nOldCount.ToString() + " 个成员册中，有下列册记录不能删除:\r\n\r\n" + strWarning;
-                    goto ERROR1;
+                goto ERROR1;
             }
 
             strWarning = "";
@@ -5962,7 +5962,7 @@ namespace dp2Circulation
             {
                 strError =
                     "所选定的 " + nOldCount.ToString() + " 个合订册中，有下列成员册记录不能删除:\r\n\r\n" + strWarning;
-                    goto ERROR1;
+                goto ERROR1;
             }
 
             // 删除合订册下属的成员册记录
@@ -6100,7 +6100,7 @@ namespace dp2Circulation
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-        // REDO_INPUT:
+            // REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -6669,7 +6669,7 @@ issue.Volume);
 
             if (ref_issue == null)
                 ref_issue = GetTailIssue();
-            REDO:
+        REDO:
             // 找到最后一期。如果找不到，则先出现对话框询问第一期
             if (ref_issue == null)
             {
@@ -7069,7 +7069,7 @@ issue.Volume);
                     {
                         if (cell.item.Locked == true)
                         {
-                                locked_librarycodes.Add(Global.GetLibraryCode(cell.item.LocationString));
+                            locked_librarycodes.Add(Global.GetLibraryCode(cell.item.LocationString));
                         }
                     }
                 }
@@ -7474,7 +7474,7 @@ issue.Volume);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-        // REDO_INPUT:
+            // REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -7585,7 +7585,7 @@ issue.Volume);
             if (tail == null)
                 return null;
 
-            return first; 
+            return first;
         }
 
         // 查重
@@ -8005,7 +8005,7 @@ issue.Volume);
             return cross_infos.Count;
         }
 
-                // 检查一个期对象的纵向所在位置是否穿越了现有的合订时间范围
+        // 检查一个期对象的纵向所在位置是否穿越了现有的合订时间范围
         internal bool IsIssueInExistingBoundRange(IssueBindingItem issueTest)
         {
             List<ItemAndCol> infos = null;
@@ -8289,7 +8289,7 @@ issue.Volume);
                     new DateTime(time.Year, time.Month, 1),
                     new DateTime(time.Year, time.Month, 15)
                     )
-                    ); 
+                    );
                 // 16-end
                 results.Add(
                     new PartOfMonth(
@@ -8357,7 +8357,7 @@ issue.Volume);
                 return results;
             }
 
-            throw new Exception("暂不支持一个月内 "+nCount.ToString()+" 个分割");
+            throw new Exception("暂不支持一个月内 " + nCount.ToString() + " 个分割");
         }
 
         // 包装后的版本
@@ -8753,7 +8753,7 @@ issue.Volume);
                 int nRet = strRange.IndexOf("-");
                 if (nRet == -1)
                 {
-                    strError = "时间范围字符串 '"+strRange+"' 格式不正确";
+                    strError = "时间范围字符串 '" + strRange + "' 格式不正确";
                     return -1;
                 }
 
@@ -8850,7 +8850,7 @@ issue.Volume);
                     // 要检查这些册里面是否有借阅信息
                     if (String.IsNullOrEmpty(cell.item.Borrower) == false)
                     {
-                        strError = "册 " +cell.item.RefID+ "(册条码为'"+cell.item.Barcode+"') 中包含有借阅信息，不能删除。操作被取消";
+                        strError = "册 " + cell.item.RefID + "(册条码为'" + cell.item.Barcode + "') 中包含有借阅信息，不能删除。操作被取消";
                         goto ERROR1;
                     }
                     nOldRecordCount++;
@@ -8872,7 +8872,7 @@ issue.Volume);
 
             string strMessage = "";
             if (nOldRecordCount > 0)
-                strMessage = "撤销记到的操作将导致以前创建的 "+nOldRecordCount.ToString()+" 个册记录被删除。\r\n\r\n";
+                strMessage = "撤销记到的操作将导致以前创建的 " + nOldRecordCount.ToString() + " 个册记录被删除。\r\n\r\n";
 
             // 警告
             DialogResult dialog_result = MessageBox.Show(this,
@@ -9003,7 +9003,7 @@ MessageBoxDefaultButton.Button2);
 
             if (calculated_cells.Count == 0)
             {
-                strError = "所选定的 " + this.SelectedCells.Count.ToString()+ " 个格子中，没有处于预测状态的格子";
+                strError = "所选定的 " + this.SelectedCells.Count.ToString() + " 个格子中，没有处于预测状态的格子";
                 goto ERROR1;
             }
 
@@ -9577,6 +9577,10 @@ MessageBoxDefaultButton.Button2);
             {
                 Cell parent_cell = parent_cells[i];
 
+                // 2015/12/2
+                if (parent_cell.item == null)
+                    continue;
+
                 if (CheckProcessingState(parent_cell.item) == false)
                 {
                     if (String.IsNullOrEmpty(strWarning) == false)
@@ -9695,7 +9699,7 @@ MessageBoxDefaultButton.Button2);
                     // 不是"加工中"状态
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "册 '"+cell.item.RefID+"' 不是“加工中”状态";
+                    strWarning += "册 '" + cell.item.RefID + "' 不是“加工中”状态";
                     nErrorCount++;
                     mono_cells.RemoveAt(i);
                     i--;
@@ -9761,7 +9765,7 @@ MessageBoxDefaultButton.Button2);
 
                 // 从属于所选合订册的成员册，要避免重复删除
                 bool bFound = false;
-                for (int j=0;j<parent_cells.Count;j++)
+                for (int j = 0; j < parent_cells.Count; j++)
                 {
                     Cell parent_cell = parent_cells[j];
 
@@ -9803,26 +9807,29 @@ MessageBoxDefaultButton.Button2);
                 {
                     // 从属的合订册 不是“加工中”状态
                     Cell parent_cell = cell.ParentItem.ContainerCell;
-                    if (CheckProcessingState(parent_cell.item) == false)
+                    if (parent_cell.item != null)
                     {
-                        // 不是"加工中"状态
-                        if (String.IsNullOrEmpty(strWarning) == false)
-                            strWarning += ";\r\n";
-                        strWarning += "册 '" + cell.item.RefID + "' 所从属的合订册处于固化状态";
-                        nErrorCount++;
-                        member_cells.RemoveAt(i);
-                        i--;
-                    }
+                        if (CheckProcessingState(parent_cell.item) == false)
+                        {
+                            // 不是"加工中"状态
+                            if (String.IsNullOrEmpty(strWarning) == false)
+                                strWarning += ";\r\n";
+                            strWarning += "册 '" + cell.item.RefID + "' 所从属的合订册处于固化状态";
+                            nErrorCount++;
+                            member_cells.RemoveAt(i);
+                            i--;
+                        }
 
-                    if (parent_cell.item.Locked == true)
-                    {
-                        // 不是"加工中"状态
-                        if (String.IsNullOrEmpty(strWarning) == false)
-                            strWarning += ";\r\n";
-                        strWarning += "册 '" + cell.item.RefID + "' 所从属的合订册处于锁定状态";
-                        nErrorCount++;
-                        member_cells.RemoveAt(i);
-                        i--;
+                        if (parent_cell.item.Locked == true)
+                        {
+                            // 不是"加工中"状态
+                            if (String.IsNullOrEmpty(strWarning) == false)
+                                strWarning += ";\r\n";
+                            strWarning += "册 '" + cell.item.RefID + "' 所从属的合订册处于锁定状态";
+                            nErrorCount++;
+                            member_cells.RemoveAt(i);
+                            i--;
+                        }
                     }
                 }
             }
@@ -10046,7 +10053,7 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 goto ERROR1;
 
-            this.AfterWidthChanged(true); 
+            this.AfterWidthChanged(true);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -10142,7 +10149,12 @@ MessageBoxDefaultButton.Button2);
             for (int i = 0; i < parent_items.Count; i++)
             {
                 ItemBindingItem parent_item = parent_items[i];
-
+                // 2015/12/2
+                if (parent_item == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
                 if (CheckProcessingState(parent_item) == false)
                 {
                     if (String.IsNullOrEmpty(strWarning) == false)
@@ -10155,8 +10167,8 @@ MessageBoxDefaultButton.Button2);
             // 警告固化册
             if (String.IsNullOrEmpty(strWarning) == false)
             {
-                strError = 
-                    "所选定的 " + parent_items.Count.ToString() + " 合订册中，有下列册处于固化状态，不能拆分:\r\n\r\n"+strWarning;
+                strError =
+                    "所选定的 " + parent_items.Count.ToString() + " 合订册中，有下列册处于固化状态，不能拆分:\r\n\r\n" + strWarning;
 
                 if (parent_items.Count > nFixedCount)
                 {
@@ -10181,7 +10193,12 @@ MessageBoxDefaultButton.Button2);
             for (int i = 0; i < parent_items.Count; i++)
             {
                 ItemBindingItem parent_item = parent_items[i];
-
+                // 2015/12/2
+                if (parent_item == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
                 string strPublishTime = parent_item.PublishTime;
 
                 if (CheckProcessingState(parent_item) == false)
@@ -10451,7 +10468,7 @@ MessageBoxDefaultButton.Button2);
 
                 // TODO: 检查数组中单元的一致性：要么都属于未装订的单册，要么都属于已经装订的成员册
             }
-            else 
+            else
             {
                 // 源单元不属于已经选择的范围
                 source_cells.Add(source);
@@ -10526,7 +10543,7 @@ MessageBoxDefaultButton.Button2);
                     Debug.Assert(this.ParentItems.IndexOf(source_parent.item) != -1, "源合订册应该是this.BindItems内元素");
 
                     // 进行检查，要求source_cells中所有成员都是成员册
-                    for (int i = 0; i < source_cells.Count;i++)
+                    for (int i = 0; i < source_cells.Count; i++)
                     {
                         Cell temp = source_cells[i];
                         Cell temp_parent = null;
@@ -10631,18 +10648,21 @@ MessageBoxDefaultButton.Button2);
 
                     }
 
-                    // 检查目标是否为固化状态
-                    if (CheckProcessingState(target_parent.item) == false)
+                    if (target_parent.item != null)
                     {
-                        strError = "目标合订册 '" + target_parent.item.PublishTime + "' 为固化状态，不能再拖入单册";
-                        goto ERROR1;
-                    }
+                        // 检查目标是否为固化状态
+                        if (CheckProcessingState(target_parent.item) == false)
+                        {
+                            strError = "目标合订册 '" + target_parent.item.PublishTime + "' 为固化状态，不能再拖入单册";
+                            goto ERROR1;
+                        }
 
-                    // 检查目标是否为锁定状态
-                    if (target_parent.item.Locked == true)
-                    {
-                        strError = "目标合订册 '" + target_parent.item.PublishTime + "' 为锁定状态，不能再拖入单册";
-                        goto ERROR1;
+                        // 检查目标是否为锁定状态
+                        if (target_parent.item.Locked == true)
+                        {
+                            strError = "目标合订册 '" + target_parent.item.PublishTime + "' 为锁定状态，不能再拖入单册";
+                            goto ERROR1;
+                        }
                     }
 
                     // 将合订成员册从合订册中移出，成为临时对象
@@ -10735,7 +10755,7 @@ MessageBoxDefaultButton.Button2);
                         IssueBindingItem issue = target.Container;
                         Debug.Assert(issue != null, "");
                         int nTargetCol = issue.IndexOfCell(target);
-                        Debug.Assert( nTargetCol != -1, "");
+                        Debug.Assert(nTargetCol != -1, "");
                         int nSourceCol = source_cells[0].Container.IndexOfCell(source_cells[0]);
                         Debug.Assert(nSourceCol != -1, "");
 
@@ -10806,7 +10826,7 @@ MessageBoxDefaultButton.Button2);
                                 && cell.Container == this.FreeIssue)
                             {
                                 DialogResult result = MessageBox.Show(this,
-"来自于自由期的合订册格子 " + cell.item.PublishTime + "(参考ID:"+cell.item.RefID+") 若被拖入其他期，将被改变为单册性质。\r\n\r\n是否继续?",
+"来自于自由期的合订册格子 " + cell.item.PublishTime + "(参考ID:" + cell.item.RefID + ") 若被拖入其他期，将被改变为单册性质。\r\n\r\n是否继续?",
 "BindingControls",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -10883,7 +10903,7 @@ MessageBoxDefaultButton.Button2);
                                 this.AfterWidthChanged(true);
                         }
 
-                    } 
+                    }
                     return;
                 }
             }
@@ -10941,14 +10961,14 @@ MessageBoxDefaultButton.Button2);
             target_issue.Zong,
             target_issue.Volume);
 
-            string strMessage = "是否要将期 " 
-                + source_issue.PublishTime 
-                + " 中的格子移动到 期 " 
-                + target_issue.PublishTime 
+            string strMessage = "是否要将期 "
+                + source_issue.PublishTime
+                + " 中的格子移动到 期 "
+                + target_issue.PublishTime
                 + " 中？\r\n\r\n这样格子除了出版日期会改变为 "
-                +target_issue.PublishTime
-                +" 以外，卷期号也将从 '"
-                + strOldVolumeString 
+                + target_issue.PublishTime
+                + " 以外，卷期号也将从 '"
+                + strOldVolumeString
                 + "' 改为 '" + strNewVolumeString + "'。";
 
             DialogResult result = MessageBox.Show(this,
@@ -11058,7 +11078,7 @@ MessageBoxDefaultButton.Button2);
                 target_group = target_issue.BelongToGroup(nInsertIndex);
 
             bool bSourceHasOrderInfo = false;
-            
+
             if (source_cell.item != null)
                 bSourceHasOrderInfo = source_cell.item.OrderInfoPosition.X != -1;
 
@@ -11151,6 +11171,7 @@ MessageBoxDefaultButton.Button2);
             out string strError)
         {
             strError = "";
+            Debug.Assert(parent != null && parent.item != null, "");
 
             if (CheckProcessingState(parent.item) == false
                 && parent.item.Calculated == false   // 预测格子除外
@@ -11334,7 +11355,7 @@ MessageBoxDefaultButton.Button2);
                             return -1;
                         if (nRet == 0)
                         {
-                            strError = "册 "+member_cell.item.RefID+" 不能被删除: " + strError;
+                            strError = "册 " + member_cell.item.RefID + " 不能被删除: " + strError;
                             return -1;
                         }
                     }
@@ -12072,7 +12093,7 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(cell.Container != null, "");
 
                 ItemBindingItem item = cell.item;
-                for (int j = i+1; j < cells.Count; j++)
+                for (int j = i + 1; j < cells.Count; j++)
                 {
                     Cell cell1 = cells[j];
 
@@ -12080,7 +12101,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (cell.Container == cell1.Container)
                     {
-                        strError = "有同属于一期 ("+cell.Container.PublishTime+") 的多册";
+                        strError = "有同属于一期 (" + cell.Container.PublishTime + ") 的多册";
                         return 1;
                     }
                 }
@@ -12505,7 +12526,7 @@ MessageBoxDefaultButton.Button2);
 
                 // int nIssueLineNo = this.Issues.IndexOf(issue);
 
-                issue.GetBlankDoubleIndex(nCol - 1, 
+                issue.GetBlankDoubleIndex(nCol - 1,
                     parent_cell.item,
                     item);
 
@@ -13735,7 +13756,7 @@ Color.FromArgb(100, color)
                 graphics.DrawPath(pen, path);
             }
         }
-        
+
         void DoEndRectSelecting()
         {
             bool bControl = (Control.ModifierKeys == Keys.Control);
@@ -14347,7 +14368,7 @@ Color.FromArgb(100, color)
                 {
                     Cell cell = issue.GetCell(j);
                     if (cell == null)
-                        results.Add( new NullCell(j, i));
+                        results.Add(new NullCell(j, i));
                     else
                         results.Add(cell);
                 }
@@ -14571,7 +14592,7 @@ Color.FromArgb(100, color)
 
                 RectangleF rect = new RectangleF(0,
                     0,
-                    this.m_nLeftTextWidth  +this.m_nCellWidth * this.m_nMaxItemCountOfOneIssue, // 只包括左侧标题部分
+                    this.m_nLeftTextWidth + this.m_nCellWidth * this.m_nMaxItemCountOfOneIssue, // 只包括左侧标题部分
                     this.m_nCellHeight);
 
                 // 变换为内容文档坐标
@@ -14668,7 +14689,7 @@ Color.FromArgb(100, color)
                 strPublishTime = strPublishTime.Insert(8, ":");
 
             if (nLength > 6)
-                strPublishTime = strPublishTime.Insert(6,"-");
+                strPublishTime = strPublishTime.Insert(6, "-");
             if (nLength > 4)
                 strPublishTime = strPublishTime.Insert(4, "-");
 
@@ -14782,6 +14803,8 @@ Color.FromArgb(100, color)
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
+
+                Debug.Assert(parent_item != null, "");
 
                 if (parent_item.Container == null)
                     continue;
@@ -14928,7 +14951,7 @@ Color.FromArgb(100, color)
             int nLargeCircleWidth = 16; // 第一个大圈圈的直径
             int nCircleWidth = 10;  // 其他小圈圈的直径
 
-            using(Pen pen = new Pen(colorBorder))
+            using (Pen pen = new Pen(colorBorder))
             using (Brush brush = new SolidBrush(Color.White))
             {
                 for (int i = 0; i < points.Length; i++)
@@ -14967,7 +14990,7 @@ Color.FromArgb(100, color)
         {
             results = new PointF[0];
             rectBound = new RectangleF();
-            List<PointF>  points = new List<PointF>();
+            List<PointF> points = new List<PointF>();
             IssueBindingItem parent_issue = parent_item.Container; // 假装属于这个期
             Debug.Assert(parent_issue != null, "");
 
@@ -14992,7 +15015,7 @@ Color.FromArgb(100, color)
 
                 rectBound = new RectangleF(
                     x - m_nCellWidth / 2,
-                    y - m_nCellHeight/2,
+                    y - m_nCellHeight / 2,
                     m_nCellWidth,
                     m_nCellHeight);
             }
@@ -15355,7 +15378,7 @@ Color.FromArgb(100, color)
                     return;
                 case API.WM_VSCROLL:
                     {
-                        int CellWidth = this.m_nCellHeight/2;
+                        int CellWidth = this.m_nCellHeight / 2;
                         switch (API.LoWord(m.WParam.ToInt32()))
                         {
                             case API.SB_BOTTOM:
@@ -15391,7 +15414,7 @@ Color.FromArgb(100, color)
                 case API.WM_HSCROLL:
                     {
 
-                        int CellWidth = this.m_nCellWidth/2;
+                        int CellWidth = this.m_nCellWidth / 2;
                         switch (API.LoWord(m.WParam.ToInt32()))
                         {
                             case API.SB_THUMBPOSITION:

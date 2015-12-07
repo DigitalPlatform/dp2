@@ -57,10 +57,31 @@ namespace DigitalPlatform.LibraryServer
 
                 _hitCountCollection = db.GetCollection<HitCountItem>("hitcount");
                 if (_hitCountCollection.GetIndexes().Count == 0)
-                    _hitCountCollection.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
-                        IndexOptions.SetUnique(true));
+                    CreateIndex();
             }
 
+            return 0;
+        }
+
+        public void CreateIndex()
+        {
+            _hitCountCollection.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
+                IndexOptions.SetUnique(true));
+        }
+
+        // 清除集合内的全部内容
+        public int Clear(out string strError)
+        {
+            strError = "";
+
+            if (_hitCountCollection == null)
+            {
+                strError = "访问计数 mongodb 集合尚未初始化";
+                return -1;
+            }
+
+            WriteConcernResult result = _hitCountCollection.RemoveAll();
+            CreateIndex();
             return 0;
         }
 
@@ -73,11 +94,14 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 增加一次访问计数
-        public void IncHitCount(string strURL)
+        // return:
+        //      false   没有成功。通常因为 mongodb 无法打开等原因
+        //      true    成功
+        public bool IncHitCount(string strURL)
         {
             MongoCollection<HitCountItem> collection = this.HitCountCollection;
             if (collection == null)
-                return;
+                return false;
 
             var query = new QueryDocument("URL", strURL);
             var update = Update.Inc("HitCount", 1);
@@ -85,6 +109,7 @@ namespace DigitalPlatform.LibraryServer
     query,
     update,
     UpdateFlags.Upsert);
+            return true;
         }
 
         public long GetHitCount(string strURL)

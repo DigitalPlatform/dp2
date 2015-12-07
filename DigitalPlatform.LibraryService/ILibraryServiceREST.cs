@@ -805,7 +805,9 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult HitCounter(string strAction,
-            string strName);
+            string strName,
+            string strClientAddress,
+            out long Value);
 
     }
 }

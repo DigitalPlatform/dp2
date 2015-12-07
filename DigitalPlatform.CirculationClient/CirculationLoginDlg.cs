@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -46,9 +46,9 @@ namespace DigitalPlatform.CirculationClient
         private ToolStripSeparator toolStripSeparator1;
 
         public bool SetDefaultMode = false;
-        private ComboBox comboBox_serverAddr; // ÊÇ·ñÎª ÉèÖÃÈ±Ê¡ÕÊ»§ ×´Ì¬£¿ µÚÒ»´Î½øÈë³ÌĞòÊ±ºòÊÇÕâ¸ö×´Ì¬£¬ÆäËûµÇÂ¼Ê§°ÜºóÖØĞÂÊäÈëÒÔ±ãµÇÂ¼µÄÊ±ºò²»ÊÇÕâ¸ö×´Ì¬
+        private ComboBox comboBox_serverAddr; // æ˜¯å¦ä¸º è®¾ç½®ç¼ºçœå¸æˆ· çŠ¶æ€ï¼Ÿ ç¬¬ä¸€æ¬¡è¿›å…¥ç¨‹åºæ—¶å€™æ˜¯è¿™ä¸ªçŠ¶æ€ï¼Œå…¶ä»–ç™»å½•å¤±è´¥åé‡æ–°è¾“å…¥ä»¥ä¾¿ç™»å½•çš„æ—¶å€™ä¸æ˜¯è¿™ä¸ªçŠ¶æ€
 
-        public bool SupervisorMode = false; // ÊÇ·ñÎª supervisor Ä£Ê½¡£Ò²¾ÍÊÇ¹ÜÀíÔ±Ä£Ê½¡£ÔÚÕâ¸öÄ£Ê½ÏÂ£¬ ÎŞ·¨ĞŞ¸Ä URL £¬ÎŞ·¨Ñ¡Ôñ¶ÁÕßÀàĞÍ£¬²»³öÏÖ ºìÄà°ÍÊı×ÖÆ½Ì¨·şÎñÆ÷°´Å¥
+        public bool SupervisorMode = false; // æ˜¯å¦ä¸º supervisor æ¨¡å¼ã€‚ä¹Ÿå°±æ˜¯ç®¡ç†å‘˜æ¨¡å¼ã€‚åœ¨è¿™ä¸ªæ¨¡å¼ä¸‹ï¼Œ æ— æ³•ä¿®æ”¹ URL ï¼Œæ— æ³•é€‰æ‹©è¯»è€…ç±»å‹ï¼Œä¸å‡ºç° çº¢æ³¥å·´æ•°å­—å¹³å°æœåŠ¡å™¨æŒ‰é’®
 
 		public CirculationLoginDlg()
 		{
@@ -114,7 +114,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordShort.Name = "checkBox_savePasswordShort";
             this.checkBox_savePasswordShort.Size = new System.Drawing.Size(111, 16);
             this.checkBox_savePasswordShort.TabIndex = 7;
-            this.checkBox_savePasswordShort.Text = "¶ÌÆÚ±£³ÖÃÜÂë(&S)";
+            this.checkBox_savePasswordShort.Text = "çŸ­æœŸä¿æŒå¯†ç (&S)";
             this.checkBox_savePasswordShort.CheckedChanged += new System.EventHandler(this.checkBox_savePasswordShort_CheckedChanged);
             this.checkBox_savePasswordShort.Click += new System.EventHandler(this.controls_Click);
             // 
@@ -155,7 +155,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(78, 24);
             this.button_cancel.TabIndex = 11;
-            this.button_cancel.Text = "È¡Ïû";
+            this.button_cancel.Text = "å–æ¶ˆ";
             this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
             // 
             // label3
@@ -166,7 +166,7 @@ namespace DigitalPlatform.CirculationClient
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 12);
             this.label3.TabIndex = 5;
-            this.label3.Text = "ÃÜÂë(&P):";
+            this.label3.Text = "å¯†ç (&P):";
             // 
             // label_userName
             // 
@@ -176,7 +176,7 @@ namespace DigitalPlatform.CirculationClient
             this.label_userName.Name = "label_userName";
             this.label_userName.Size = new System.Drawing.Size(65, 12);
             this.label_userName.TabIndex = 2;
-            this.label_userName.Text = "ÓÃ»§Ãû(&U):";
+            this.label_userName.Text = "ç”¨æˆ·å(&U):";
             // 
             // label1
             // 
@@ -186,7 +186,7 @@ namespace DigitalPlatform.CirculationClient
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(149, 12);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Í¼Êé¹İÓ¦ÓÃ·şÎñÆ÷µØÖ·(&H):";
+            this.label1.Text = "å›¾ä¹¦é¦†åº”ç”¨æœåŠ¡å™¨åœ°å€(&H):";
             // 
             // button_OK
             // 
@@ -196,7 +196,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(78, 24);
             this.button_OK.TabIndex = 10;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_comment
@@ -206,7 +206,7 @@ namespace DigitalPlatform.CirculationClient
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_comment.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_comment.Font = new System.Drawing.Font("ËÎÌå", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox_comment.Font = new System.Drawing.Font("å®‹ä½“", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBox_comment.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.textBox_comment.Location = new System.Drawing.Point(12, 12);
             this.textBox_comment.Multiline = true;
@@ -238,7 +238,7 @@ namespace DigitalPlatform.CirculationClient
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(77, 12);
             this.label4.TabIndex = 8;
-            this.label4.Text = "¹¤×÷Ì¨ºÅ(&W):";
+            this.label4.Text = "å·¥ä½œå°å·(&W):";
             // 
             // checkBox_isReader
             // 
@@ -249,7 +249,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_isReader.Name = "checkBox_isReader";
             this.checkBox_isReader.Size = new System.Drawing.Size(63, 16);
             this.checkBox_isReader.TabIndex = 4;
-            this.checkBox_isReader.Text = "¶ÁÕß(&R)";
+            this.checkBox_isReader.Text = "è¯»è€…(&R)";
             this.checkBox_isReader.UseVisualStyleBackColor = true;
             this.checkBox_isReader.CheckedChanged += new System.EventHandler(this.checkBox_isReader_CheckedChanged);
             this.checkBox_isReader.Click += new System.EventHandler(this.controls_Click);
@@ -263,7 +263,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordLong.Name = "checkBox_savePasswordLong";
             this.checkBox_savePasswordLong.Size = new System.Drawing.Size(111, 16);
             this.checkBox_savePasswordLong.TabIndex = 12;
-            this.checkBox_savePasswordLong.Text = "³¤ÆÚ±£³ÖÃÜÂë(&L)";
+            this.checkBox_savePasswordLong.Text = "é•¿æœŸä¿æŒå¯†ç (&L)";
             this.checkBox_savePasswordLong.UseVisualStyleBackColor = true;
             this.checkBox_savePasswordLong.CheckedChanged += new System.EventHandler(this.checkBox_savePasswordLong_CheckedChanged);
             this.checkBox_savePasswordLong.Click += new System.EventHandler(this.controls_Click);
@@ -293,8 +293,8 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setXeServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_server_setXeServer.Name = "toolStripButton_server_setXeServer";
             this.toolStripButton_server_setXeServer.Size = new System.Drawing.Size(84, 22);
-            this.toolStripButton_server_setXeServer.Text = "µ¥»ú°æ·şÎñÆ÷";
-            this.toolStripButton_server_setXeServer.ToolTipText = "ÉèÎªµ¥»ú°æ·şÎñÆ÷";
+            this.toolStripButton_server_setXeServer.Text = "å•æœºç‰ˆæœåŠ¡å™¨";
+            this.toolStripButton_server_setXeServer.ToolTipText = "è®¾ä¸ºå•æœºç‰ˆæœåŠ¡å™¨";
             this.toolStripButton_server_setXeServer.Click += new System.EventHandler(this.toolStripButton_server_setXeServer_Click);
             // 
             // toolStripSeparator1
@@ -310,8 +310,8 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setHongnibaServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_server_setHongnibaServer.Name = "toolStripButton_server_setHongnibaServer";
             this.toolStripButton_server_setHongnibaServer.Size = new System.Drawing.Size(135, 22);
-            this.toolStripButton_server_setHongnibaServer.Text = "ºìÄà°Í.Êı×ÖÆ½Ì¨·şÎñÆ÷";
-            this.toolStripButton_server_setHongnibaServer.ToolTipText = "ÉèÎªºìÄà°Í.Êı×ÖÆ½Ì¨·şÎñÆ÷";
+            this.toolStripButton_server_setHongnibaServer.Text = "çº¢æ³¥å·´.æ•°å­—å¹³å°æœåŠ¡å™¨";
+            this.toolStripButton_server_setHongnibaServer.ToolTipText = "è®¾ä¸ºçº¢æ³¥å·´.æ•°å­—å¹³å°æœåŠ¡å™¨";
             this.toolStripButton_server_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_server_setHongnibaServer_Click);
             // 
             // comboBox_serverAddr
@@ -354,7 +354,7 @@ namespace DigitalPlatform.CirculationClient
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CirculationLoginDlg";
             this.ShowInTaskbar = false;
-            this.Text = "µÇÂ¼";
+            this.Text = "ç™»å½•";
             this.Load += new System.EventHandler(this.LoginDlg_Load);
             this.toolStrip_server.ResumeLayout(false);
             this.toolStrip_server.PerformLayout();
@@ -384,12 +384,12 @@ namespace DigitalPlatform.CirculationClient
 				// && textBox_serverAddr.Enabled == true
                 && this.ServerAddrEnabled == true)
 			{
-				MessageBox.Show(this, "ÉĞÎ´ÊäÈë·şÎñÆ÷µØÖ·");
+				MessageBox.Show(this, "å°šæœªè¾“å…¥æœåŠ¡å™¨åœ°å€");
 				return;
 			}
 			if (textBox_userName.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´ÊäÈëÓÃ»§Ãû");
+				MessageBox.Show(this, "å°šæœªè¾“å…¥ç”¨æˆ·å");
 				return;
 			}
 
@@ -421,9 +421,9 @@ namespace DigitalPlatform.CirculationClient
 		}
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -588,9 +588,9 @@ namespace DigitalPlatform.CirculationClient
         {
             m_firstUseBalloon = new MessageBalloon();
             m_firstUseBalloon.Parent = this.checkBox_savePasswordShort;
-            m_firstUseBalloon.Title = "Ğ¡¼¼ÇÉ";
+            m_firstUseBalloon.Title = "å°æŠ€å·§";
             m_firstUseBalloon.TitleIcon = TooltipIcon.Info;
-            m_firstUseBalloon.Text = "¹´Ñ¡ ¡°¶ÌÆÚ±£´æÃÜÂë¡± Ïî£¬¿ÉÒÔÈÃÄÚÎñÇ°¶ËÔÚÔËĞĞÆÚ¼ä¼Ç×¡ÄúÓÃ¹ıµÄÃÜÂë£¬²»ÔÙ·´¸´³öÏÖ±¾¶Ô»°¿ò";
+            m_firstUseBalloon.Text = "å‹¾é€‰ â€œçŸ­æœŸä¿å­˜å¯†ç â€ é¡¹ï¼Œå¯ä»¥è®©å†…åŠ¡å‰ç«¯åœ¨è¿è¡ŒæœŸé—´è®°ä½æ‚¨ç”¨è¿‡çš„å¯†ç ï¼Œä¸å†åå¤å‡ºç°æœ¬å¯¹è¯æ¡†";
 
             m_firstUseBalloon.Align = BalloonAlignment.BottomRight;
             m_firstUseBalloon.CenterStem = false;
@@ -622,10 +622,10 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ´¦Àí¶Ô»°¿ò¼ü
+        /// å¤„ç†å¯¹è¯æ¡†é”®
         /// </summary>
-        /// <param name="keyData">System.Windows.Forms.Keys ÖµÖ®Ò»£¬Ëü±íÊ¾Òª´¦ÀíµÄ¼ü¡£</param>
-        /// <returns>Èç¹û¿Ø¼ş´¦Àí²¢Ê¹ÓÃ»÷¼ü£¬ÔòÎª true£»·ñÔòÎª false£¬ÒÔÔÊĞí½øÒ»²½´¦Àí</returns>
+        /// <param name="keyData">System.Windows.Forms.Keys å€¼ä¹‹ä¸€ï¼Œå®ƒè¡¨ç¤ºè¦å¤„ç†çš„é”®ã€‚</param>
+        /// <returns>å¦‚æœæ§ä»¶å¤„ç†å¹¶ä½¿ç”¨å‡»é”®ï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ä¸º falseï¼Œä»¥å…è®¸è¿›ä¸€æ­¥å¤„ç†</returns>
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
@@ -645,7 +645,7 @@ Keys keyData)
 
         private void checkBox_savePasswordShort_CheckedChanged(object sender, EventArgs e)
         {
-            // ÔÚÉèÖÃÈ±Ê¡ÕÊ»§µÄÇé¿öÏÂ£¬Èç¹ûÈ¥µô¶ÌÆÚ±£³ÖÃÜÂëµÄÑ¡Ôñ£¬±ØĞëÍ¬Ê±Çå³ıÒÑ¾­ÊäÈëµÄÃÜÂë×Ö·û£¬ÕâÑù¿ÉÒÔÌáĞÑÓÃ»§£¬ÕâÑù(unchecked)Çé¿öÏÂ£¬Ö»ÄÜÓÃ¿ÕÃÜÂë¼ÌĞø±¾¶Ô»°¿òºóÃæµÄ²Ù×÷
+            // åœ¨è®¾ç½®ç¼ºçœå¸æˆ·çš„æƒ…å†µä¸‹ï¼Œå¦‚æœå»æ‰çŸ­æœŸä¿æŒå¯†ç çš„é€‰æ‹©ï¼Œå¿…é¡»åŒæ—¶æ¸…é™¤å·²ç»è¾“å…¥çš„å¯†ç å­—ç¬¦ï¼Œè¿™æ ·å¯ä»¥æé†’ç”¨æˆ·ï¼Œè¿™æ ·(unchecked)æƒ…å†µä¸‹ï¼Œåªèƒ½ç”¨ç©ºå¯†ç ç»§ç»­æœ¬å¯¹è¯æ¡†åé¢çš„æ“ä½œ
             if (this.SetDefaultMode == true)
             {
                 if (this.checkBox_savePasswordShort.Checked == false)
@@ -657,7 +657,7 @@ Keys keyData)
 
         private void textBox_password_TextChanged(object sender, EventArgs e)
         {
-            // ÔÚÉèÖÃÈ±Ê¡ÕÊ»§µÄÇé¿öÏÂ£¬Ö»ÒªÊäÈëÁËÃÜÂë×Ö·û£¬¾Í±íÊ¾Òª¶ÌÆÚÎ¬³ÖÃÜÂë¡£·ñÔòÈİÒ×Ôì³ÉºóÃæ×Ô¶¯ÓÃ¿ÕÃÜÂëÊÔÌ½µÇÂ¼(²¢¿ÉÄÜ»áµÇÂ¼³É¹¦)£¬ÈİÒ×Ôì³ÉÎó»á
+            // åœ¨è®¾ç½®ç¼ºçœå¸æˆ·çš„æƒ…å†µä¸‹ï¼Œåªè¦è¾“å…¥äº†å¯†ç å­—ç¬¦ï¼Œå°±è¡¨ç¤ºè¦çŸ­æœŸç»´æŒå¯†ç ã€‚å¦åˆ™å®¹æ˜“é€ æˆåé¢è‡ªåŠ¨ç”¨ç©ºå¯†ç è¯•æ¢ç™»å½•(å¹¶å¯èƒ½ä¼šç™»å½•æˆåŠŸ)ï¼Œå®¹æ˜“é€ æˆè¯¯ä¼š
             if (this.SetDefaultMode == true)
             {
                 if (string.IsNullOrEmpty(this.textBox_password.Text) == false)
@@ -669,7 +669,7 @@ Keys keyData)
         {
             if (this.comboBox_serverAddr.Text != ServerDlg.HnbUrl)
             {
-                // this.textBox_serverName.Text = "ºìÄà°Í.Êı×ÖÆ½Ì¨·şÎñÆ÷";
+                // this.textBox_serverName.Text = "çº¢æ³¥å·´.æ•°å­—å¹³å°æœåŠ¡å™¨";
                 this.comboBox_serverAddr.Text = ServerDlg.HnbUrl;
 
                 this.textBox_userName.Text = "";
@@ -683,7 +683,7 @@ Keys keyData)
         {
             if (this.comboBox_serverAddr.Text != dp2LibraryXEServerUrl)
             {
-                // this.textBox_serverName.Text = "µ¥»ú°æ·şÎñÆ÷";
+                // this.textBox_serverName.Text = "å•æœºç‰ˆæœåŠ¡å™¨";
                 this.comboBox_serverAddr.Text = dp2LibraryXEServerUrl;
 
                 this.textBox_userName.Text = "supervisor";
@@ -695,14 +695,14 @@ Keys keyData)
         {
             if (this.checkBox_isReader.Checked == false)
             {
-                this.label_userName.Text = "ÓÃ»§Ãû(&U):";
+                this.label_userName.Text = "ç”¨æˆ·å(&U):";
                 this.BackColor = SystemColors.ControlDark;
                 this.ForeColor = SystemColors.ControlText;
                 this.toolStrip_server.BackColor = SystemColors.ControlDark;
             }
             else
             {
-                this.label_userName.Text = "¶ÁÕßÖ¤ÌõÂëºÅ(&B):";
+                this.label_userName.Text = "è¯»è€…è¯æ¡ç å·(&B):";
                 this.BackColor = Color.DarkGreen;
                 this.ForeColor = Color.White;
                 this.toolStrip_server.BackColor = this.BackColor;
@@ -732,7 +732,7 @@ Keys keyData)
             }
         }
 
-        // Ìî³ä×éºÏ¿ò¡£×éºÏ¿òÄÚÏÔÊ¾ URL ÁĞ±í
+        // å¡«å……ç»„åˆæ¡†ã€‚ç»„åˆæ¡†å†…æ˜¾ç¤º URL åˆ—è¡¨
         void FillList(List<OneUrl> urlList)
         {
             this.comboBox_serverAddr.Items.Clear();
@@ -742,10 +742,10 @@ Keys keyData)
             }
         }
 
-        // ½«Ò»¸ö URL Ïà¹ØµÄÊı¾İÉè¶¨µ½Ãæ°å
+        // å°†ä¸€ä¸ª URL ç›¸å…³çš„æ•°æ®è®¾å®šåˆ°é¢æ¿
         void SetPanel(string strURL)
         {
-            // Çå³ıÃæ°å
+            // æ¸…é™¤é¢æ¿
             this.ClearPanel();
 
             OneUrl url = FindUrl(strURL);
@@ -756,7 +756,7 @@ Keys keyData)
             this.UiState = url.UiState;
         }
 
-        // ½«µ±Ç°Ãæ°åÊı¾İ±£´æÆğÀ´
+        // å°†å½“å‰é¢æ¿æ•°æ®ä¿å­˜èµ·æ¥
         void SavePannel()
         {
             if (string.IsNullOrEmpty(this.comboBox_serverAddr.Text) == true)
@@ -772,7 +772,7 @@ Keys keyData)
 
             url.UiState = this.UiState;
 
-            // TODO: ÊÇ·ñ¸üĞÂ×éºÏ¿òÁĞ±íÏÔÊ¾?
+            // TODO: æ˜¯å¦æ›´æ–°ç»„åˆæ¡†åˆ—è¡¨æ˜¾ç¤º?
         }
 
         void ClearPanel()

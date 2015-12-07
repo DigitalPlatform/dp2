@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -11,7 +11,7 @@ namespace DigitalPlatform.rms
 {
     public class TableInfo : IComparable
     {
-        private XmlNode m_node = null;	// XmlNode½Úµã
+        private XmlNode m_node = null;	// XmlNodeèŠ‚ç‚¹
         Hashtable m_captionTable = new Hashtable();
         public XmlNode Node
         {
@@ -26,30 +26,30 @@ namespace DigitalPlatform.rms
             }
         }
 
-        public string SqlTableName = "";	// Sql±íÃû
-        public string ID = "";			// ±íID
-        public string TypeString = "";        // ±íÀàĞÍ£¬·ç¸ñ
-        public string ExtTypeString = "";       // _time µÈ¼ìË÷ÌØĞÔ
+        public string SqlTableName = "";	// Sqlè¡¨å
+        public string ID = "";			// è¡¨ID
+        public string TypeString = "";        // è¡¨ç±»å‹ï¼Œé£æ ¼
+        public string ExtTypeString = "";       // _time ç­‰æ£€ç´¢ç‰¹æ€§
 
-        public XmlNode nodeConvertQueryString = null;	// ´¦Àí¼ìË÷´ÊµÄ×Ö·û´®ĞÎÌ¬µÄÅäÖÃ½Úµã 
-        public XmlNode nodeConvertQueryNumber = null;	// ´¦Àí¼ìË÷´ÊµÄÊı×ÖĞÎÌ¬µÄÅäÖÃ½Úµã
+        public XmlNode nodeConvertQueryString = null;	// å¤„ç†æ£€ç´¢è¯çš„å­—ç¬¦ä¸²å½¢æ€çš„é…ç½®èŠ‚ç‚¹ 
+        public XmlNode nodeConvertQueryNumber = null;	// å¤„ç†æ£€ç´¢è¯çš„æ•°å­—å½¢æ€çš„é…ç½®èŠ‚ç‚¹
 
-        public XmlNode nodeConvertKeyString = null;		// ´¦Àí¼ìË÷µãµÄ×Ö·û´®ĞÎÌ¬ÅäÖÃ½Úµã
-        public XmlNode nodeConvertKeyNumber = null;		// ´¦Àí¼ìË÷µãµÄÊı×ÖĞÎÌ¬µÄÅäÖÃ½Úµã
+        public XmlNode nodeConvertKeyString = null;		// å¤„ç†æ£€ç´¢ç‚¹çš„å­—ç¬¦ä¸²å½¢æ€é…ç½®èŠ‚ç‚¹
+        public XmlNode nodeConvertKeyNumber = null;		// å¤„ç†æ£€ç´¢ç‚¹çš„æ•°å­—å½¢æ€çš„é…ç½®èŠ‚ç‚¹
 
         public bool Dup = false;
 
-        public int OriginPosition = -1;  //Î´³õÊ¼»¯
+        public int OriginPosition = -1;  //æœªåˆå§‹åŒ–
         public bool m_bQuery = false;
 
         // parameters:
-        //		node	<table>½Úµã
-        //      strKeysTableNamePrefix  ±íÃûÇ°×º×Ö·û´®£¬Èç¹û == null£¬±íÊ¾Ê¹ÓÃ"keys_"¡£Èç¹û²»ÒªÇ°×º£¬Ó¦¸ÃÊÇ""
+        //		node	<table>èŠ‚ç‚¹
+        //      strKeysTableNamePrefix  è¡¨åå‰ç¼€å­—ç¬¦ä¸²ï¼Œå¦‚æœ == nullï¼Œè¡¨ç¤ºä½¿ç”¨"keys_"ã€‚å¦‚æœä¸è¦å‰ç¼€ï¼Œåº”è¯¥æ˜¯""
         public int Initial(XmlNode node,
             string strKeysTableNamePrefix,
             out string strError)
         {
-            Debug.Assert(node != null, "Initial()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "Initial()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
             strError = "";
 
             this.Node = node;
@@ -57,13 +57,13 @@ namespace DigitalPlatform.rms
             string strPartSqlTableName = DomUtil.GetAttr(this.m_node, "name").Trim();
             if (strPartSqlTableName == "")
             {
-                strError = "Î´¶¨Òå 'name' ÊôĞÔ¡£";
+                strError = "æœªå®šä¹‰ 'name' å±æ€§ã€‚";
                 return -1;
             }
 
             if (string.Compare(strPartSqlTableName, "records", true) == 0)
             {
-                strError = "'name' ÊôĞÔÖĞµÄ±íÃû²»ÄÜÎª 'records'¡£ÒòÎªÕâÊÇÒ»¸öÏµÍ³µÄ±£Áô×Ö¡£";
+                strError = "'name' å±æ€§ä¸­çš„è¡¨åä¸èƒ½ä¸º 'records'ã€‚å› ä¸ºè¿™æ˜¯ä¸€ä¸ªç³»ç»Ÿçš„ä¿ç•™å­—ã€‚";
                 return -1;
             }
 
@@ -80,7 +80,7 @@ namespace DigitalPlatform.rms
 
             if (this.ID == "")
             {
-                strError = "Î´¶¨Òå'id'ÊôĞÔ¡£";
+                strError = "æœªå®šä¹‰'id'å±æ€§ã€‚";
                 return -1;
             }
 
@@ -90,7 +90,7 @@ namespace DigitalPlatform.rms
                 string strStopwordTable = DomUtil.GetAttrDiff(nodeConvert, "stopwordTable");
                 if (strStopwordTable != null)
                 {
-                    strError = "keysÅäÖÃÎÄ¼şÊÇ¾É°æ±¾£¬¶øÄ¿Ç°<convert>ÔªËØÒÑ¾­²»Ö§³Ö'stopwordTable'ÊôĞÔ¡£ÇëĞŞ¸ÄÅäÖÃÎÄ¼ş";
+                    strError = "keysé…ç½®æ–‡ä»¶æ˜¯æ—§ç‰ˆæœ¬ï¼Œè€Œç›®å‰<convert>å…ƒç´ å·²ç»ä¸æ”¯æŒ'stopwordTable'å±æ€§ã€‚è¯·ä¿®æ”¹é…ç½®æ–‡ä»¶";
                     return -1;
                 }
             }
@@ -101,7 +101,7 @@ namespace DigitalPlatform.rms
                 string strStopwordTable = DomUtil.GetAttrDiff(nodeConvertQuery, "stopwordTable");
                 if (strStopwordTable != null)
                 {
-                    strError = "keysÅäÖÃÎÄ¼şÊÇ¾É°æ±¾£¬¶øÄ¿Ç°<convertquery>ÔªËØÒÑ¾­²»Ö§³Ö'stopwordTable'ÊôĞÔ¡£ÇëĞŞ¸ÄÅäÖÃÎÄ¼ş";
+                    strError = "keysé…ç½®æ–‡ä»¶æ˜¯æ—§ç‰ˆæœ¬ï¼Œè€Œç›®å‰<convertquery>å…ƒç´ å·²ç»ä¸æ”¯æŒ'stopwordTable'å±æ€§ã€‚è¯·ä¿®æ”¹é…ç½®æ–‡ä»¶";
                     return -1;
                 }
             }
@@ -148,7 +148,7 @@ namespace DigitalPlatform.rms
         }
 
 
-        // µÃµ½ÒÔ¶ººÅ·Ö¸ôµÄËùÓĞÓïÑÔ°æ±¾ĞÅÏ¢
+        // å¾—åˆ°ä»¥é€—å·åˆ†éš”çš„æ‰€æœ‰è¯­è¨€ç‰ˆæœ¬ä¿¡æ¯
         public string GetAllCaption()
         {
             string strCaptions = "";
@@ -167,8 +167,8 @@ namespace DigitalPlatform.rms
             return strCaptions;
         }
 
-        // »ñµÃËùÓĞÓïÑÔ´úÂëµÄ±êÇ©
-        // Ã¿¸ö×Ö·û´®, ×ó±ßÊÇÓïÑÔ´úÂë, ¼ä¸ôÒ»¸öÃ°ºÅ, ÓÒ±ßÊÇÎÄ×ÖÄÚÈİ
+        // è·å¾—æ‰€æœ‰è¯­è¨€ä»£ç çš„æ ‡ç­¾
+        // æ¯ä¸ªå­—ç¬¦ä¸², å·¦è¾¹æ˜¯è¯­è¨€ä»£ç , é—´éš”ä¸€ä¸ªå†’å·, å³è¾¹æ˜¯æ–‡å­—å†…å®¹
         public List<string> GetAllLangCaption()
         {
             List<string> results = new List<string>();
@@ -187,7 +187,7 @@ namespace DigitalPlatform.rms
             return results;
         }
 
-        // ÓĞ»º´æµÄ°æ±¾
+        // æœ‰ç¼“å­˜çš„ç‰ˆæœ¬
         public string GetCaption(string strLang)
         {
             string strResult = (string)this.m_captionTable[strLang == null ? "<null>" : strLang];
@@ -199,7 +199,7 @@ namespace DigitalPlatform.rms
             return strResult;
         }
 
-        // È¡Ò»¸ö½ÚµãÖ¸¶¨µÄÄ³ÖÖÓïÑÔ´úÂëµÄ±êÇ©ĞÅÏ¢
+        // å–ä¸€ä¸ªèŠ‚ç‚¹æŒ‡å®šçš„æŸç§è¯­è¨€ä»£ç çš„æ ‡ç­¾ä¿¡æ¯
         public string GetCaptionInternal(string strLang)
         {
             XmlNode node = this.m_node;
@@ -215,7 +215,7 @@ namespace DigitalPlatform.rms
             if (strLang == "")
                 goto END1;
 
-            // 1.ÏÈ¾«È·ÕÒ
+            // 1.å…ˆç²¾ç¡®æ‰¾
             strXPath = "caption[@lang='" + strLang + "']";
             nodeCaption = node.SelectSingleNode(strXPath);
             if (nodeCaption != null)
@@ -224,7 +224,7 @@ namespace DigitalPlatform.rms
                 return strCaption;
 
 
-            // 2.½«ÓïÑÔ°æ±¾½Ø³ÉÁ½×Ö·û¾«È·ÕÒ
+            // 2.å°†è¯­è¨€ç‰ˆæœ¬æˆªæˆä¸¤å­—ç¬¦ç²¾ç¡®æ‰¾
             if (strLang.Length >= 2)
             {
                 string strShortLang = strLang.Substring(0, 2);
@@ -235,7 +235,7 @@ namespace DigitalPlatform.rms
                 if (string.IsNullOrEmpty(strCaption) == false)
                     return strCaption;
 
-                // 3.ÕÒÇ°Á½¸ö×Ö·ûÏàÍ¬µÄÅÅÔÚµÚÒ»°æ±¾
+                // 3.æ‰¾å‰ä¸¤ä¸ªå­—ç¬¦ç›¸åŒçš„æ’åœ¨ç¬¬ä¸€ç‰ˆæœ¬
                 strXPath = "caption[(substring(@lang,1,2)='" + strShortLang + "')]";
                 nodeCaption = node.SelectSingleNode(strXPath);
                 if (nodeCaption != null)
@@ -246,7 +246,7 @@ namespace DigitalPlatform.rms
             }
 
         END1:
-            // 4.ÕÒÅÅÔÚµÚÒ»Î»µÄcaption
+            // 4.æ‰¾æ’åœ¨ç¬¬ä¸€ä½çš„caption
             strXPath = "caption";
             nodeCaption = node.SelectSingleNode(strXPath);
             if (nodeCaption != null)
@@ -255,12 +255,12 @@ namespace DigitalPlatform.rms
                 return strCaption;
 
 
-            // 5.×îºó·µ»Ø@id
+            // 5.æœ€åè¿”å›@id
             string strID = "";
             if (node != null)
                 strID = DomUtil.GetAttr(node, "id");
             if (strID == "")
-                throw new Exception("¼ìË÷µã±íµÄid²»¿ÉÄÜÎªnull¡£");
+                throw new Exception("æ£€ç´¢ç‚¹è¡¨çš„idä¸å¯èƒ½ä¸ºnullã€‚");
 
             return "@" + strID;
 
@@ -314,7 +314,7 @@ namespace DigitalPlatform.rms
                     return 1;
             }
 
-            // ??? ĞòºÅÓÀÔ¶ÊÇ²»µÈµÄ
+            // ??? åºå·æ°¸è¿œæ˜¯ä¸ç­‰çš„
             return this.OriginPosition - tableInfo.OriginPosition;
         }
     }

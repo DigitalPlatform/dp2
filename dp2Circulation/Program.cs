@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.IO;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -35,6 +37,28 @@ namespace dp2Circulation
         static void Main()
         {
             List<string> args = StringUtil.GetCommandLineArgs();
+
+            // 如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动
+            if (ApplicationDeployment.IsNetworkDeployed == false
+                && Control.ModifierKeys != Keys.Control
+                && args.IndexOf("green") == -1
+                && StringUtil.IsDevelopMode() == false)
+            {
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
+                if (File.Exists(strShortcutFilePath) == true)
+                {
+                    try
+                    {
+                        Process.Start(strShortcutFilePath);
+                        return;
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+
 #if NO
             if (ApplicationDeployment.IsNetworkDeployed &&
         ApplicationDeployment.CurrentDeployment.ActivationUri != null)

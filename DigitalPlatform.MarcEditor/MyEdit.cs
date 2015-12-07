@@ -1786,7 +1786,6 @@ API.MakeLParam(x, y));
                         if (this.m_marcEditor.m_nFocusCol == 2)
                         {
                             // 当目前输入框是字段指示符时
-
                             if (this.SelectionStart == 2)
                             {
                                 Debug.Assert(Record.IsControlFieldName(this.MarcEditor.FocusedField.Name) == false, "列号为2时,不应为控制字段");
@@ -1796,7 +1795,6 @@ API.MakeLParam(x, y));
                         else if (this.m_marcEditor.m_nFocusCol == 3)
                         {
                             // 当目前输入框是字段值时
-
                             bool bChangedHeight = false;
                             API.SendMessage(this.Handle,
                                 API.EM_LINESCROLL,

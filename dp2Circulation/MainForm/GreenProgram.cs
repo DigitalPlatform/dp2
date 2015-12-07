@@ -78,6 +78,7 @@ namespace dp2Circulation
 
         public delegate bool FileNameFilterProc(FileSystemInfo fi);
 
+        // TODO: 可改用 PathUtil 中同名函数
         /*
 Type: System.IO.IOException
 Message: 文件“c:\dp2circulation\DigitalPlatform.CirculationClient.dll”正由另一进程使用，因此该进程无法访问此文件。
@@ -251,6 +252,41 @@ Stack:
             }
         }
 
+#if NO
+        public static void CreateShortcutToStartMenu(
+    string linkName,
+    string strAppPath,
+    bool bOverwriteExist = true)
+        {
+            string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
 
+            string strLnkFilePath = Path.Combine(deskDir, "DigitalPlatform\\" + linkName + ".lnk");
+
+            if (bOverwriteExist == false && File.Exists(strLnkFilePath) == true)
+                return;
+
+            Type t = Type.GetTypeFromCLSID(new Guid("72C24DD5-D70A-438B-8A42-98424B88AFB8")); //Windows Script Host Shell Object
+            dynamic shell = Activator.CreateInstance(t);
+            try
+            {
+                var lnk = shell.CreateShortcut(strLnkFilePath);
+                try
+                {
+                    lnk.TargetPath = strAppPath;    //  @"C:\something";
+                    lnk.IconLocation = strAppPath + ", 0";
+                    lnk.WorkingDirectory = Path.GetDirectoryName(strAppPath);
+                    lnk.Save();
+                }
+                finally
+                {
+                    Marshal.FinalReleaseComObject(lnk);
+                }
+            }
+            finally
+            {
+                Marshal.FinalReleaseComObject(shell);
+            }
+        }
+#endif
     }
 }

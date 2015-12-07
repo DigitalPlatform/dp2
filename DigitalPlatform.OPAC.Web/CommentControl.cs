@@ -350,7 +350,7 @@ namespace DigitalPlatform.OPAC.Web
                 long lRet = sessioninfo.Channel.GetCommentInfo(
 null,
 "@path:" + strCommentRecPath,
-// null,
+                    // null,
 "xml", // strResultType
 out strOldXml,
 out strOutputPath,
@@ -416,7 +416,7 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            END1:
+        END1:
             // 修改评注记录后，更新栏目存储结构
             // parameters:
             //      strAction   动作。change/delete/new
@@ -1145,7 +1145,7 @@ string strText)
             long lRet = sessioninfo.Channel.GetCommentInfo(
 null,
 "@path:" + strCommentRecPath,
-// null,
+                // null,
 "xml", // strResultType
 out strOldXml,
 out strOutputPath,
@@ -1482,7 +1482,7 @@ out strError);
                 long lRet = sessioninfo.Channel.GetCommentInfo(
 null,
 "@path:" + strCommentRecPath,
-// null,
+                    // null,
 "xml", // strResultType
 out strOldXml,
 out strOutputPath,
@@ -1674,7 +1674,6 @@ out strError);
                         }
                     }
 
-
                     if (String.IsNullOrEmpty(strFileID) == true)
                     {
                         strFileID = FindNewFileID(dom);
@@ -1687,7 +1686,6 @@ out strError);
                         DomUtil.SetAttr(node, "usage", "uploadimage");
                         // bXmlRecordChanged = true;
                     }
-
                 }
             }
 
@@ -2831,7 +2829,7 @@ string strWrapperClass)
     + "<a href='" + strUserInfoUrl + "' target='_blank'><img border='0' width='64' height='64' src='" + strImageUrl + "' /></a>"
     + "</div>");
                 // 
-                strResult.Append( "<div class='title_and_creator'>");
+                strResult.Append("<div class='title_and_creator'>");
 
                 if (String.IsNullOrEmpty(strTitle) == false)
                 {
@@ -2854,17 +2852,17 @@ string strWrapperClass)
             + "</div>");
                 }
 
-                strResult.Append( "<div class='operinfo' title='" + this.GetString("记录路径") + ": " + strRecPath + "'>"
+                strResult.Append("<div class='operinfo' title='" + this.GetString("记录路径") + ": " + strRecPath + "'>"
                     + strOperInfo
                     + "</div>");
 
                 strResult.Append("</div>");  // of title_and_creator
 
-                strResult.Append( "<div class='path' title='" + this.GetString("记录路径") + "'>"
+                strResult.Append("<div class='path' title='" + this.GetString("记录路径") + "'>"
 + "<a href='./book.aspx?CommentRecPath=" + HttpUtility.UrlEncode(strRecPath) + "#active' target='_blank'>" + strRecPath + "</a>"
 + "</div>");
 
-                strResult.Append( "<div class='clear'> </div>");
+                strResult.Append("<div class='clear'> </div>");
 
                 strResult.Append("</div>");  // of headbar
 
@@ -2873,7 +2871,7 @@ string strWrapperClass)
             // 屏蔽原因
             if (String.IsNullOrEmpty(strDisplayState) == false)
             {
-                strResult.Append( "<div class='forbidden' title='" + this.GetString("屏蔽原因") + "'>"
+                strResult.Append("<div class='forbidden' title='" + this.GetString("屏蔽原因") + "'>"
                     + strStateImage
                     + (string.IsNullOrEmpty(strXml) == false ? string.Format(this.GetString("本评注目前为X状态"), strDisplayState) : strDisplayState)
                     + (strOriginCreator == sessioninfo.UserID ? "，" + this.GetString("其他人(非管理员)看不到下列内容") : "")
@@ -2895,7 +2893,7 @@ string strWrapperClass)
                 if (StringUtil.IsInList("锁定", strState) == true)
                 {
                     strImage = "<img src='" + MyWebPage.GetStylePath(app, "locked.gif") + "'/>";
-                    strResult.Append( "<div class='locked' title='锁定'>"
+                    strResult.Append("<div class='locked' title='锁定'>"
                         + strImage
     + this.GetString("锁定")
     + "</div>");
@@ -2916,7 +2914,7 @@ string strWrapperClass)
                         strOrderSuggestionText = this.GetString("建议订购本书");
                         strYesOrNo = "yes";
                     }
-                    strResult.Append( "<div class='order_suggestion " + strYesOrNo + "' title='" + this.GetString("订购建议") + "'>"
+                    strResult.Append("<div class='order_suggestion " + strYesOrNo + "' title='" + this.GetString("订购建议") + "'>"
                         + HttpUtility.HtmlEncode(strOrderSuggestionText)
                         + "</div>");
                 }
@@ -2951,7 +2949,7 @@ string strWrapperClass)
                         continue;   // 只关注图像文件
 
                     string strID = DomUtil.GetAttr(node, "id");
-                    string strUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strRecPath)+ "/object/" + strID;
+                    string strUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strRecPath) + "/object/" + strID;
                     strResult.Append("<div class='image' title='" + this.GetString("图像文件") + "'>"
                         + "<img src='" + strUrl + "' />"
                         + "</div>");
@@ -2964,7 +2962,7 @@ string strWrapperClass)
             {
                 string strText = GetStateModifiedHistory(dom);
                 if (String.IsNullOrEmpty(strText) == false)
-                    strResult.Append( "<div class='historytitle'>" + this.GetString("状态修改史") + ":</div>"
+                    strResult.Append("<div class='historytitle'>" + this.GetString("状态修改史") + ":</div>"
                         + strText);
             }
 
@@ -3118,7 +3116,7 @@ string strWrapperClass)
             long lRet = sessioninfo.Channel.GetCommentInfo(
 null,
 "@path:" + strRecPath,
-// null,
+                // null,
 "xml", // strResultType
 out strXml,
 out strOutputPath,
