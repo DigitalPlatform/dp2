@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using DigitalPlatform.Text;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -17,11 +18,27 @@ namespace dp2Circulation
 
         int m_nPageNo = 0;  // 0表示没有初始化
 
+        /// <summary> 
+        /// 清理所有正在使用的资源。
+        /// </summary>
+        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.Close();
+            }
+            base.Dispose(disposing);
+        }
+
+        // parameters:
+        //      reader  注意，本函数的调用者*不要*释放这个 reader
         public int Open(StreamReader reader,
             out string strError)
         {
             strError = "";
 
+            this.Close();
             _sr = reader;
             this.m_nPageNo = 0;
             return 0;
@@ -32,6 +49,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+            this.Close();
             try
             {
                 _sr = new StreamReader(strLabelFilename, Encoding.GetEncoding(936));
@@ -62,7 +80,7 @@ namespace dp2Circulation
             this.m_nPageNo = 0;
         }
 
-        void PrintLabelDocument_BeginPrint(object sender, 
+        void PrintLabelDocument_BeginPrint(object sender,
             System.Drawing.Printing.PrintEventArgs e)
         {
             // this.PrintController = new NewPrintController(this.PrintController);
@@ -76,7 +94,6 @@ namespace dp2Circulation
                 _sr = null;
             }
         }
-
 
         // return:
         //      -1  error
@@ -125,7 +142,7 @@ namespace dp2Circulation
         // TODO: 用 DrawLines ，转弯的部分接头?
         static void DrawFourAngel(
             Graphics g,
-            Pen pen, 
+            Pen pen,
             float x,
             float y,
             float w,
@@ -142,8 +159,8 @@ namespace dp2Circulation
 
             // 竖线
             g.DrawLine(pen,
-                new PointF(x+1, y+1),
-                new PointF(x+1, y+1 + line_length)
+                new PointF(x + 1, y + 1),
+                new PointF(x + 1, y + 1 + line_length)
                 );
 
             // *** 右上
@@ -254,7 +271,7 @@ namespace dp2Circulation
             return new RectangleF(rect.Y,
                 rect.X,
                 rect.Height,
-                rect.Width); 
+                rect.Width);
         }
 
         // 旋转后中心归位
@@ -342,7 +359,7 @@ namespace dp2Circulation
             if (PageHeight != 0)
                 nPageHeight = (int)PageHeight;
 
-            DecimalPadding PageMargins = RotatePadding(label_param.PageMargins, 
+            DecimalPadding PageMargins = RotatePadding(label_param.PageMargins,
                 e.PageSettings.Landscape);  // label_param.Landscape
 #if NO
             // 垂直方向的个数
@@ -616,7 +633,7 @@ namespace dp2Circulation
                     if (nRet == 1)
                         bEOF = true;
 
-                    if (bOutput == true  && bDisplay == true)
+                    if (bOutput == true && bDisplay == true)
                     {
                         // 标签
                         RectangleF rectLabel = new RectangleF(
@@ -848,7 +865,7 @@ namespace dp2Circulation
                     x += (float)label_param.LabelWidth;
                 }
 
-            //CONTINUE_LINE:
+                //CONTINUE_LINE:
                 y += (float)label_param.LabelHeight;
             }
 

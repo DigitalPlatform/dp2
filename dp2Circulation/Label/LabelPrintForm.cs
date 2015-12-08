@@ -532,7 +532,7 @@ namespace dp2Circulation
 
                     if (lRet > 1)
                     {
-                        strError = "{" + strRecPath + "} 对应数据记录多于一条(为 "+lRet.ToString()+" 条)。";
+                        strError = "{" + strRecPath + "} 对应数据记录多于一条(为 " + lRet.ToString() + " 条)。";
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
@@ -550,7 +550,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "册记录 {"+strRecPath+"} XML装入DOM发生错误: " + ex.Message;
+                        strError = "册记录 {" + strRecPath + "} XML装入DOM发生错误: " + ex.Message;
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
@@ -719,16 +719,24 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            int nRet = Print(
-                this.textBox_labelDefFilename.Text,
-                this.textBox_labelFile_labelFilename.Text,
-                bDisplayPrinterDialog,
-                true,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            this._processing++;
+            try
+            {
+                int nRet = Print(
+                    this.textBox_labelDefFilename.Text,
+                    this.textBox_labelFile_labelFilename.Text,
+                    bDisplayPrinterDialog,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-            return 0;
+                return 0;
+            }
+            finally
+            {
+                this._processing--;
+            }
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -1081,7 +1089,7 @@ namespace dp2Circulation
 
             this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印"
                 + (bPrintPreview == true ? "预览" : "")
-                +"</div>");
+                + "</div>");
 
             try
             {
@@ -1179,7 +1187,7 @@ namespace dp2Circulation
                         {
                             bCustomPaper = true;
 
-                            PaperSize paper_size = new PaperSize("Custom Label", 
+                            PaperSize paper_size = new PaperSize("Custom Label",
                                 (int)label_param.PageWidth,
                                 (int)label_param.PageHeight);
                             this.document.DefaultPageSettings.PaperSize = paper_size;
@@ -1344,6 +1352,7 @@ namespace dp2Circulation
 
             this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印预览</div>");
 
+            this._processing++;
             try
             {
                 this.textBox_errorInfo.Text = "当前索取号来源: " + this.AccessNoSource + "\r\n\r\n";
@@ -1398,7 +1407,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, "删除临时标签文件 '"+strLabelFilename+"' 时出错: " + ex.Message);
+                        MessageBox.Show(this, "删除临时标签文件 '" + strLabelFilename + "' 时出错: " + ex.Message);
                     }
                 }
                 if (String.IsNullOrEmpty(strErrorFilename) == false)
@@ -1413,6 +1422,7 @@ namespace dp2Circulation
                     }
                 }
 
+                this._processing--;
                 // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印预览</div>");
             }
 
@@ -1421,7 +1431,6 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
             return -1;
         }
-
 
         // parameters:
         //      strLabelFilename    标签文件名
@@ -1438,7 +1447,6 @@ namespace dp2Circulation
                 strError = "尚未指定标签定义文件名";
                 return -1;
             }
-
 
             if (String.IsNullOrEmpty(strLabelFilename) == true)
             {
@@ -1533,16 +1541,24 @@ namespace dp2Circulation
         public int PrintFromLabelFile(bool bDisplayPrinterDialog = true)
         {
             string strError = "";
-            int nRet = this.Print(
-                this.textBox_labelDefFilename.Text,
-                this.textBox_labelFile_labelFilename.Text,
-                bDisplayPrinterDialog,
-                false,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            this._processing++;
+            try
+            {
+                int nRet = this.Print(
+                    this.textBox_labelDefFilename.Text,
+                    this.textBox_labelFile_labelFilename.Text,
+                    bDisplayPrinterDialog,
+                    false,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-            return 0;
+                return 0;
+            }
+            finally
+            {
+                this._processing--;
+            }
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -1566,6 +1582,7 @@ namespace dp2Circulation
     "temp_labelfiles",
     "~error_");
 
+            this._processing++;
             try
             {
                 this.textBox_errorInfo.Text = "";
@@ -1634,6 +1651,7 @@ namespace dp2Circulation
                     }
                 }
 
+                this._processing--;
                 // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印</div>");
             }
 
@@ -1642,7 +1660,6 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
             return -1;
         }
-
 
         // 
         /// <summary>
@@ -1694,7 +1711,6 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strFirstColumn) == false)
             {
-
                 string strRecPath = "";
                 if (bSelected == true)
                     strRecPath = this.listView_records.SelectedItems[0].Text;
@@ -1702,7 +1718,6 @@ namespace dp2Circulation
                 string strOpenStyle = "新开的";
                 if (this.LoadToExistDetailWindow == true)
                     strOpenStyle = "已打开的";
-
 
                 menuItem = new MenuItem("打开 [根据册记录路径 '" + strRecPath + "' 装入到" + strOpenStyle + "种册窗](&O)");
                 menuItem.DefaultItem = true;
@@ -1799,9 +1814,7 @@ namespace dp2Circulation
                     || bExistEntityForm == false)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
-
             }
-
 
             // // //
 
@@ -1853,7 +1866,6 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("全选(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAllLines_Click);
             contextMenu.MenuItems.Add(menuItem);
@@ -1867,7 +1879,6 @@ namespace dp2Circulation
             if (nPathItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             menuItem = new MenuItem("导出到记录路径文件 [" + nPathItemCount.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.menu_saveToRecordPathFile_Click);
@@ -1914,7 +1925,7 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));	
+            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
         void menu_selectAllLines_Click(object sender, EventArgs e)
@@ -3057,7 +3068,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            string strRecPath = strLine.Substring(nRet+1).Trim();
+            string strRecPath = strLine.Substring(nRet + 1).Trim();
             nRet = strRecPath.IndexOf("}");
             if (nRet != -1)
                 strRecPath = strRecPath.Substring(0, nRet).Trim();
