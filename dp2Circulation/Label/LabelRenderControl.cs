@@ -18,9 +18,9 @@ namespace dp2Circulation
     /// </summary>
     public partial class LabelRenderControl : UserControl
     {
-        LabelParam label_param = null;
+        LabelParam _label_param = null;
 
-        PrintLabelDocument document = null;
+        PrintLabelDocument _document = null;
 
         string m_strPrintStyle = "";    // "TestingGrid";    // 打印风格
 
@@ -40,11 +40,11 @@ namespace dp2Circulation
         {
             get
             {
-                return this.label_param;
+                return this._label_param;
             }
             set
             {
-                this.label_param = value;
+                this._label_param = value;
                 if (value != null)
                 {
 #if NO
@@ -84,11 +84,11 @@ namespace dp2Circulation
             }
 
 
-            if (this.document != null && bPrinter == true)
-                nWidth = Math.Max(nWidth, this.document.DefaultPageSettings.Bounds.Width);    // this.document.DefaultPageSettings.PaperSize.Width
+            if (this._document != null && bPrinter == true)
+                nWidth = Math.Max(nWidth, this._document.DefaultPageSettings.Bounds.Width);    // this.document.DefaultPageSettings.PaperSize.Width
 
-            if (this.document != null && bPrinter == true)
-                nHeight = Math.Max(nHeight, this.document.DefaultPageSettings.Bounds.Height);    // this.document.DefaultPageSettings.PaperSize.Height
+            if (this._document != null && bPrinter == true)
+                nHeight = Math.Max(nHeight, this._document.DefaultPageSettings.Bounds.Height);    // this.document.DefaultPageSettings.PaperSize.Height
 
 #if NO
             bool bLandscape = false;
@@ -129,34 +129,35 @@ namespace dp2Circulation
         {
             strError = "";
 
-            if (this.document == null)
-                this.document = new PrintLabelDocument();
+            if (this._document == null)
+                this._document = new PrintLabelDocument();
 
-            int nRet = this.document.Open(strLabelFilename,
+            int nRet = this._document.Open(strLabelFilename,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            SetAutoScroll(this.label_param);
+            SetAutoScroll(this._label_param);
 
             return 0;
         }
 
         // 设置标签内容文件
+        // 注：StreamReader 由 PrintLabelDocument 负责释放
         public int SetLabelFile(StreamReader sr,
             out string strError)
         {
             strError = "";
 
-            if (this.document == null)
-                this.document = new PrintLabelDocument();
+            if (this._document == null)
+                this._document = new PrintLabelDocument();
 
-            int nRet = this.document.Open(sr,
+            int nRet = this._document.Open(sr,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            SetAutoScroll(this.label_param);
+            SetAutoScroll(this._label_param);
             return 0;
         }
 
@@ -164,12 +165,12 @@ namespace dp2Circulation
         {
             get
             {
-                return this.document;
+                return this._document;
             }
             set
             {
-                this.document = value as PrintLabelDocument;
-                SetAutoScroll(this.label_param);
+                this._document = value as PrintLabelDocument;
+                SetAutoScroll(this._label_param);
             }
         }
 
@@ -182,13 +183,13 @@ namespace dp2Circulation
         {
             base.OnPaint(e);
 
-            if (this.document != null
-                && label_param != null)
+            if (this._document != null
+                && _label_param != null)
             {
-                this.document.PreviewMode = true;
-                this.document.IsDesignMode = true;
-                this.document.OriginPoint = new Point(this.DisplayRectangle.X, this.DisplayRectangle.Y);
-                this.document.Rewind();
+                this._document.PreviewMode = true;
+                this._document.IsDesignMode = true;
+                this._document.OriginPoint = new Point(this.DisplayRectangle.X, this.DisplayRectangle.Y);
+                this._document.Rewind();
                 // TODO: 要求 <page> 元素的 width 和 height 属性必须具备
                 // PageSettings pageSettings = new PageSettings();
 #if NO
@@ -203,12 +204,12 @@ namespace dp2Circulation
                     pageBounds.Height - this.label_param.PageMargins.Top - this.label_param.PageMargins.Bottom);
 
 #endif
-                PageSettings settings = this.document.DefaultPageSettings.Clone() as PageSettings;
-                if (string.IsNullOrEmpty(label_param.DefaultPrinter) == true)
+                PageSettings settings = this._document.DefaultPageSettings.Clone() as PageSettings;
+                if (string.IsNullOrEmpty(_label_param.DefaultPrinter) == true)
                 {
                     PaperSize paper_size = new PaperSize("Custom Label", 
-                        (int)label_param.PageWidth,
-                        (int)label_param.PageHeight);
+                        (int)_label_param.PageWidth,
+                        (int)_label_param.PageHeight);
                     settings.PaperSize = paper_size;
                 }
 
@@ -242,8 +243,8 @@ namespace dp2Circulation
                     pageBounds,
                     settings);  // 
                 // e1.HasMorePages = false;
-                this.document.DoPrintPage(this,
-        this.label_param,
+                this._document.DoPrintPage(this,
+        this._label_param,
         this.m_strPrintStyle,
         e1);
             }

@@ -38,7 +38,7 @@ namespace dp2Circulation
         {
             List<string> args = StringUtil.GetCommandLineArgs();
 
-            // 如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动
+            // 绿色安装方式下，如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动
             if (ApplicationDeployment.IsNetworkDeployed == false
                 && Control.ModifierKeys != Keys.Control
                 && args.IndexOf("green") == -1

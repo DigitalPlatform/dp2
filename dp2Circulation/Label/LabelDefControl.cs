@@ -1445,6 +1445,7 @@ out strError);
 
         private void textBox_sampleText_DelayTextChanged(object sender, EventArgs e)
         {
+#if NO
             // 将样本内容兑现到 labelDesignControl1 显示
             using (Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text)))
             using (StreamReader sr = new StreamReader(stream, Encoding.Default))
@@ -1452,6 +1453,15 @@ out strError);
                 string strError = "";
                 this.labelDesignControl1.SetLabelFile(sr, out strError);
             }
+#endif
+            // 注：StreamReader 由 LabelDesignControl 负责释放
+            Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text));
+            StreamReader sr = new StreamReader(stream, Encoding.Default);
+            {
+                string strError = "";
+                this.labelDesignControl1.SetLabelFile(sr, out strError);
+            }
+
             this.labelDesignControl1.Invalidate();
         }
 
