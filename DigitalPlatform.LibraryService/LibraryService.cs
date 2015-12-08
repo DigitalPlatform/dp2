@@ -4679,6 +4679,7 @@ namespace dp2Library
             try
             {
 #if NO
+                // test
                 Random random = new Random();
                 Thread.Sleep(random.Next(0, 10000)); // test
 #endif

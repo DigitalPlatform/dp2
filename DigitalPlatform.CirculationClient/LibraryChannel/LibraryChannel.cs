@@ -383,7 +383,7 @@ out strError);
 
             version = value;
 
-            double base_version = 2.12; // 2.33;
+            double base_version = 2.60; // 2.60 2015/12/8 开始
             if (value < base_version)   // 2.12
             {
                 strError = "dp2 前端需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + strVersion + " )。\r\n\r\n请尽快升级 dp2Library 到最新版本。";
@@ -859,6 +859,8 @@ out strError);
             strLibraryCode = "";
 
         REDO:
+            TimeSpan old_timeout = this.Timeout;
+            this.Timeout = new TimeSpan(0, 0, 15);
             try
             {
                 LibraryServerResult result = ws.Login(out strOutputUserName,
@@ -884,6 +886,10 @@ out strError);
                 if (nRet == 0)
                     return -1;
                 goto REDO;
+            }
+            finally
+            {
+                this.Timeout = old_timeout;
             }
         }
 

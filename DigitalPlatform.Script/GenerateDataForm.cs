@@ -111,7 +111,7 @@ namespace DigitalPlatform.Script
         {
             if (container == null)
                 return null;
-            foreach(Control control in container.Controls)
+            foreach (Control control in container.Controls)
             {
                 if (control.GetType().Equals(type) == true)
                     return control;
@@ -379,7 +379,7 @@ namespace DigitalPlatform.Script
             this.SelectedIndex = this.Actions.IndexOf(this.SelectedAction);
 
             if (this.CloseWhenComplete == true)
-                this.Close();
+                this.Hide();
 
             if (this.SelectedAction != null
                 && this.TriggerAction != null)
@@ -398,6 +398,9 @@ namespace DigitalPlatform.Script
                     EndProcess();
                 }
             }
+
+            if (this.CloseWhenComplete == true)
+                this.Close();
         }
 
         public bool AutoRun
@@ -419,7 +422,7 @@ namespace DigitalPlatform.Script
                 // 旁路
                 return false;
             }
-            
+
             // 自动执行
             if (this.checkBox_autoRun.Checked == true
                 && this.ActionTable.SelectedRows.Count == 1)
@@ -446,7 +449,7 @@ namespace DigitalPlatform.Script
             DpRow first_selected_row = null;
             DpRow last_selected_row = null;
 
-            for (int i=0;i<this.ActionTable.Rows.Count; i++)
+            for (int i = 0; i < this.ActionTable.Rows.Count; i++)
             {
                 DpRow row = this.ActionTable.Rows[i];
 
@@ -551,7 +554,7 @@ Keys keyData)
                         this.SelectedAction = action;
 
                         if (this.CloseWhenComplete == true)
-                            this.Close();
+                            this.Hide();
 
                         if (this.SelectedAction != null
                             && this.TriggerAction != null)
@@ -576,13 +579,16 @@ Keys keyData)
                                 EndProcess();
                             }
                         }
+
+                        if (this.CloseWhenComplete == true)
+                            this.Close();
+
                         return;
                     }
                 }
 
                 // Console.Beep();
             }
-
         }
 
         /// <summary>
@@ -611,7 +617,7 @@ Keys keyData)
             else
             {
                 if (nCount > 1)
-                    this.button_excute.Text = "执行("+nCount.ToString()+"项)";
+                    this.button_excute.Text = "执行(" + nCount.ToString() + "项)";
                 else
                     this.button_excute.Text = "执行";
 
@@ -636,15 +642,14 @@ Keys keyData)
                 return;
             }
 
-            if (this.CloseWhenComplete == true)
-                this.Close();
-
             this.ActionTable.Focus();   // 如果没有这个语句, 功能执行完后会把书目查询窗给翻起来
+
+            if (this.CloseWhenComplete == true)
+                this.Hide();
 
             BeginProcess();
             try
             {
-
                 List<DpRow> selections = new List<DpRow>();
                 selections.AddRange(this.ActionTable.SelectedRows);
 
@@ -668,6 +673,9 @@ Keys keyData)
             {
                 EndProcess();
             }
+
+            if (this.CloseWhenComplete == true)
+                this.Close();
         }
     }
 

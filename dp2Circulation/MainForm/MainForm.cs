@@ -2401,11 +2401,24 @@ Stack:
                 {
                     string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
                     Program.PromptAndExit(this, strError);
+                    e.Cancel = true;
                     return;
                 }
                 _expireVersionChecked = true;
             }
 #endif
+            {
+                double base_version = 2.60;
+
+                if (this.ServerVersion < base_version
+                    && this.ServerVersion != 0)
+                {
+                    string strError = "dp2 前端所连接的 dp2library 版本必须升级为 " + base_version + " 以上时才能使用 (当前 dp2library 版本为 " + this.ServerVersion.ToString() + ")";
+                    Program.PromptAndExit(this, strError);
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
             if (e.FirstTry == true)
             {
