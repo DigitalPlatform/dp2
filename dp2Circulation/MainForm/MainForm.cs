@@ -2413,7 +2413,7 @@ Stack:
                 if (this.ServerVersion < base_version
                     && this.ServerVersion != 0)
                 {
-                    string strError = "dp2 前端所连接的 dp2library 版本必须升级为 " + base_version + " 以上时才能使用 (当前 dp2library 版本为 " + this.ServerVersion.ToString() + ")";
+                    string strError = "dp2 前端所连接的 dp2library 版本必须升级为 " + base_version + " 以上时才能使用 (当前 dp2library 版本为 " + this.ServerVersion.ToString() + ")\r\n\r\n注：升级服务器的操作非常容易：\r\n1) 若是 dp2 标准版，请系统管理员在服务器机器上，运行 dp2installer(dp2服务器安装工具) 即可。这个模块的安装页面是 http://dp2003.com/dp2installer/v1/publish.htm 。\r\n2) 若是单机版或小型版，反复重启 dp2libraryxe 模块多次即可自动升级。\r\n\r\n亲，若有任何问题，请及时联系数字平台哟 ~";
                     Program.PromptAndExit(this, strError);
                     e.Cancel = true;
                     return;
@@ -7970,12 +7970,12 @@ Keys keyData)
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            Stop Stop = new DigitalPlatform.Stop();
-            Stop.Register(stopManager, true);	// 和容器关联
+            Stop temp_stop = new DigitalPlatform.Stop();
+            temp_stop.Register(stopManager, true);	// 和容器关联
 
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在打包事件日志信息 ...");
-            Stop.BeginLoop();
+            temp_stop.OnStop += new StopEventHandler(this.DoStop);
+            temp_stop.Initial("正在打包事件日志信息 ...");
+            temp_stop.BeginLoop();
             this.EnableControls(false);
 
             try
@@ -8002,9 +8002,9 @@ Keys keyData)
                         Application.DoEvents();
 
                         if (strText != null)
-                            this.Stop.SetMessage(strText);
+                            temp_stop.SetMessage(strText);
 
-                        if (this.Stop != null && this.Stop.State != 0)
+                        if (temp_stop != null && temp_stop.State != 0)
                             return false;
                         return true;
                     },
@@ -8024,14 +8024,14 @@ Keys keyData)
             finally
             {
                 this.EnableControls(true);
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
+                temp_stop.EndLoop();
+                temp_stop.OnStop -= new StopEventHandler(this.DoStop);
+                temp_stop.Initial("");
 
-                if (Stop != null) // 脱离关联
+                if (temp_stop != null) // 脱离关联
                 {
-                    Stop.Unregister(true);
-                    Stop = null;
+                    temp_stop.Unregister(true);
+                    temp_stop = null;
                 }
             }
             return;

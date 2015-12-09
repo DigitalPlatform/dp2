@@ -316,7 +316,6 @@ namespace DigitalPlatform
             }
         }
 
-
         //查看是否结束,被StopManager调
         public virtual int State
         {

@@ -702,6 +702,13 @@ dlg.UiState);
                 return 1;
             }
 
+            // 2015/12/9
+            if (strBarcode == "_testreader")
+            {
+                strError = "这是一个测试用的读者证号";
+                return 1;
+            }
+
             this._barcodeChannel.PrepareSearch("正在验证条码号 " + strBarcode + "...");
             try
             {

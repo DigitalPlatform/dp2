@@ -46,7 +46,7 @@ namespace DigitalPlatform.EasyMarc
 
         Font _fixedFont = null;
 
-        internal Font FixedFont 
+        internal Font FixedFont
         {
             get
             {
@@ -170,7 +170,7 @@ namespace DigitalPlatform.EasyMarc
                 if (this._hideIndicator != value)
                 {
                     this._hideIndicator = value;
-                    foreach(EasyLine line in this.Items)
+                    foreach (EasyLine line in this.Items)
                     {
                         if (line is FieldLine)
                         {
@@ -206,7 +206,7 @@ namespace DigitalPlatform.EasyMarc
             {
                 List<EasyLine> results = new List<EasyLine>();
 
-                foreach(EasyLine cur_element in this.Items)
+                foreach (EasyLine cur_element in this.Items)
                 {
                     if ((cur_element.State & ItemState.Selected) != 0)
                         results.Add(cur_element);
@@ -260,11 +260,11 @@ namespace DigitalPlatform.EasyMarc
 
         internal void Verify()
         {
-            for (int i = 0; i < this.Items.Count;i++ )
+            for (int i = 0; i < this.Items.Count; i++)
             {
                 EasyLine start = this.Items[i];
 
-                for(int j=i+1;j<this.Items.Count;j++)
+                for (int j = i + 1; j < this.Items.Count; j++)
                 {
                     EasyLine current = this.Items[j];
 
@@ -337,7 +337,7 @@ namespace DigitalPlatform.EasyMarc
             bool bOn = false;
             if (ref_line == null)
                 bOn = true;
-            foreach(EasyLine item in this.Items)
+            foreach (EasyLine item in this.Items)
             {
                 if (bOn == false && ref_line == item)
                 {
@@ -395,7 +395,7 @@ namespace DigitalPlatform.EasyMarc
                 return this.tableLayoutPanel_content;
             }
         }
-        
+
         /// <summary>
         /// 确保一个事项处在可见范围
         /// </summary>
@@ -753,7 +753,7 @@ namespace DigitalPlatform.EasyMarc
         /// </summary>
         public void SelectFirstItem()
         {
-            foreach(EasyLine element in this.Items)
+            foreach (EasyLine element in this.Items)
             {
                 if (element.textBox_content.Visible == true)
                 {
@@ -870,23 +870,23 @@ namespace DigitalPlatform.EasyMarc
             if (strMatchCase == "")	// 如果strMatchCase为空，表示无论什么名字都匹配
                 return 1;
 
-			// Regular expression
-			if (strMatchCase.Length >= 1 
-				&& strMatchCase[0] == '@') 
-			{
-				if (StringUtil.RegexCompare(strMatchCase.Substring(1),
-					RegexOptions.None,
-					strName) == true)
-					return 1;
-				return 0;
-			}
-			else // 原来的*模式
-			{
-				if (CmpName(strName, strMatchCase) == 0)
-					return 1;
-				return 0;
-			}
-		}
+            // Regular expression
+            if (strMatchCase.Length >= 1
+                && strMatchCase[0] == '@')
+            {
+                if (StringUtil.RegexCompare(strMatchCase.Substring(1),
+                    RegexOptions.None,
+                    strName) == true)
+                    return 1;
+                return 0;
+            }
+            else // 原来的*模式
+            {
+                if (CmpName(strName, strMatchCase) == 0)
+                    return 1;
+                return 0;
+            }
+        }
 
         // t的长度可以是s的整倍数
         public static int CmpName(string s, string t)
@@ -896,7 +896,7 @@ namespace DigitalPlatform.EasyMarc
 
             if ((t.Length % s.Length) != 0)
             {
-                throw new Exception("t '"+t+"'的长度 "+t.Length.ToString()+" 应当为s '"+s+"' 的长度 "+s.Length.ToString()+"  的整倍数");
+                throw new Exception("t '" + t + "'的长度 " + t.Length.ToString() + " 应当为s '" + s + "' 的长度 " + s.Length.ToString() + "  的整倍数");
             }
             int nCount = t.Length / s.Length;
             for (int i = 0; i < nCount; i++)
@@ -1178,7 +1178,7 @@ namespace DigitalPlatform.EasyMarc
             // 留在最后统一 Dispose()，速度较快
             if (bDispose)
             {
-                foreach(Control control in results)
+                foreach (Control control in results)
                 {
                     if (control != null)
                         control.Dispose();
@@ -1384,7 +1384,7 @@ namespace DigitalPlatform.EasyMarc
         public FieldLine NewField(int index)
         {
             EasyLine ref_line = null;
-            
+
             if (index < this.Items.Count)
                 ref_line = this.Items[index];
 
@@ -1393,7 +1393,7 @@ namespace DigitalPlatform.EasyMarc
                 ref_line = GetFieldLine(ref_line as SubfieldLine);
                 if (ref_line == null)
                 {
-                    throw new Exception("index 为 "+index.ToString()+" 的子字段行没有找到字段行");
+                    throw new Exception("index 为 " + index.ToString() + " 的子字段行没有找到字段行");
                 }
                 index = this.Items.IndexOf(ref_line);
                 Debug.Assert(index != -1, "");
@@ -1812,7 +1812,7 @@ namespace DigitalPlatform.EasyMarc
                     FieldLine field = line as FieldLine;
 
                     MarcField field_node = null;
-                    
+
                     if (field.IsControlField == true)
                         field_node = new MarcField(field.Name, "", field.Content);
                     else
@@ -1953,7 +1953,7 @@ namespace DigitalPlatform.EasyMarc
                 return strDefault;
 
             XmlNode nodeProperty = null;
-            
+
             if (string.IsNullOrEmpty(strSubfieldName) == true)
                 nodeProperty = this.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + strFieldName + "']/Property");
             else
@@ -2054,7 +2054,7 @@ namespace DigitalPlatform.EasyMarc
             this.DisableUpdate();   // 防止闪动
             try
             {
-                foreach(EasyLine item in this.Items)
+                foreach (EasyLine item in this.Items)
                 {
                     if (item.textBox_content.Visible == true)
                     {
@@ -2147,9 +2147,9 @@ namespace DigitalPlatform.EasyMarc
                 int nLineLength = 0;
 
                 // 字段背景颜色
-                using(Brush brush = new SolidBrush(this.FieldBackColor)) // Color.FromArgb(230, 230, 230)
+                using (Brush brush = new SolidBrush(this.FieldBackColor)) // Color.FromArgb(230, 230, 230)
                 // 子字段背景颜色
-                using(Brush brushSubfield = new SolidBrush(this.SubfieldBackColor)) // Color.FromArgb(240, 240, 240)
+                using (Brush brushSubfield = new SolidBrush(this.SubfieldBackColor)) // Color.FromArgb(240, 240, 240)
                 using (Pen pen = new Pen(this.LeftBackColor)) // Color.FromArgb(225, 225, 225)
                 {
 
@@ -2652,7 +2652,8 @@ namespace DigitalPlatform.EasyMarc
     // 字段行
     public class FieldLine : EasyLine
     {
-        public FieldLine(EasyMarcControl container) : base(container)
+        public FieldLine(EasyMarcControl container)
+            : base(container)
         {
             // this.textBox_content.ReadOnly = true;
 
@@ -2897,7 +2898,7 @@ namespace DigitalPlatform.EasyMarc
         void DisposeChildControls()
         {
             List<Control> controls = RemoveControls();
-            foreach(Control control in controls)
+            foreach (Control control in controls)
             {
                 if (control != null)
                     control.Dispose();
@@ -3122,7 +3123,7 @@ namespace DigitalPlatform.EasyMarc
                 table.RowCount--;
                 table.RowStyles.RemoveAt(nRow);
 
-                foreach(Control control in hidden_controls)
+                foreach (Control control in hidden_controls)
                 {
                     control.Visible = false;
                 }
@@ -3506,7 +3507,7 @@ namespace DigitalPlatform.EasyMarc
                 "template",
                 out strCurName);
 
-            menuItem = new MenuItem("模板编辑 ["+strCurName+"] (&T)");
+            menuItem = new MenuItem("模板编辑 [" + strCurName + "] (&T)");
             menuItem.Click += new System.EventHandler(this.menu_templateDialog_Click);
             menuItem.Enabled = bEnable;
             contextMenu.MenuItems.Add(menuItem);
@@ -3556,7 +3557,7 @@ namespace DigitalPlatform.EasyMarc
 
             int nHideCount = this.Container.GetHideFieldCount();
             //
-            menuItem = new MenuItem("恢复显示隐藏的字段 [" + nHideCount.ToString()+ "] (&E)");
+            menuItem = new MenuItem("恢复显示隐藏的字段 [" + nHideCount.ToString() + "] (&E)");
             menuItem.Click += new System.EventHandler(this.menu_unHideAllFields_Click);
             if (nHideCount == 0)
                 menuItem.Enabled = false;
@@ -3739,7 +3740,7 @@ namespace DigitalPlatform.EasyMarc
             try
             {
 #endif
-                this.Container.DeleteElements(selected_lines);
+            this.Container.DeleteElements(selected_lines);
 #if NO
             }
             finally
@@ -3861,7 +3862,6 @@ Stack:
 
             this.label_color.BackColor = this.Container.LeftBackColor;  //  SystemColors.Window;
         }
-
 
         bool m_bReadOnly = false;
 

@@ -60,7 +60,7 @@ namespace dp2Circulation
             this.NativeTabControl1.AssignHandle(this.tabControl_main.Handle);
 
             _biblio = new BiblioAndEntities(this,
-                easyMarcControl1, 
+                easyMarcControl1,
                 flowLayoutPanel1);
             _biblio.GetValueTable += _biblio_GetValueTable;
             _biblio.DeleteEntity += _biblio_DeleteEntity;
@@ -511,7 +511,7 @@ MessageBoxDefaultButton.Button1);
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
                 this.MainForm.AppInfo.SetString(
-                    "entityRegisterWizard", 
+                    "entityRegisterWizard",
                     "uistate",
                     this.UiState);
 
@@ -666,7 +666,7 @@ MessageBoxDefaultButton.Button1);
             {
                 if (this._keyboardForm == null
     || this._inWizardControl > 0)
-                { 
+                {
                 }
                 else
                     SetKeyboardFormStep(KeyboardForm.Step.None, "dont_hilight");
@@ -735,7 +735,7 @@ MessageBoxDefaultButton.Button1);
 
         // parameters:
         //      bAutoFocus  是否要自动设置控件输入焦点?
-        public void DoSearch(string strQueryWord, 
+        public void DoSearch(string strQueryWord,
             string strFrom,
             bool bAutoSetFocus = true)
         {
@@ -784,7 +784,7 @@ MessageBoxDefaultButton.Button1);
                     AccountInfo account = EntityRegisterBase.GetAccountInfo(server);
                     if (account == null)
                     {
-                        strError = "GetAccountInfo() error. server='"+server.OuterXml+"'";
+                        strError = "GetAccountInfo() error. server='" + server.OuterXml + "'";
                         goto ERROR1;
                     }
                     Debug.Assert(account != null, "");
@@ -902,11 +902,11 @@ MessageBoxDefaultButton.Button1);
             else if (strFrom == "装订")
                 strFrom = "binding";
 
-/* 还可以使用:
-            "ISBN",
-            "EISBN",
-            "ASIN"
-*/
+            /* 还可以使用:
+                        "ISBN",
+                        "EISBN",
+                        "ASIN"
+            */
 
             this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...",
                 "progress", false);
@@ -1134,27 +1134,29 @@ MessageBoxDefaultButton.Button1);
             this.ShowMessage("正在针对 共享网络\r\n检索 " + strQueryWord + " ...",
                 "progress", false);
 
-                string strSearchID = Guid.NewGuid().ToString();
-                _searchParam = new SearchParam();
-                _searchParam._searchID = strSearchID;
-                _searchParam._autoSetFocus = bAutoSetFocus;
-                _searchParam._searchComplete = false;
-                _searchParam._searchCount = 0;
-                this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
+            string strSearchID = Guid.NewGuid().ToString();
+            _searchParam = new SearchParam();
+            _searchParam._searchID = strSearchID;
+            _searchParam._autoSetFocus = bAutoSetFocus;
+            _searchParam._searchComplete = false;
+            _searchParam._searchCount = 0;
+            this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
 
             try
             {
                 string strOutputSearchID = "";
                 nRet = this.MainForm.MessageHub.BeginSearchBiblio(
-                    strSearchID,
-                    "<全部>",
-    strQueryWord,
-    strFromStyle,
-    strMatchStyle,
-    "",
-    1000,
-    out strOutputSearchID,
-    out strError);
+                    "*",
+                    new SearchRequest(strSearchID,
+                        "searchBiblio",
+                        "<全部>",
+                        strQueryWord,
+                        strFromStyle,
+                        strMatchStyle,
+                        "",
+                        1000),
+                    out strOutputSearchID,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == 0)
@@ -1162,7 +1164,7 @@ MessageBoxDefaultButton.Button1);
 
                 // 装入浏览记录
                 {
-                    TimeSpan timeout = new TimeSpan(0,1,0);
+                    TimeSpan timeout = new TimeSpan(0, 1, 0);
                     DateTime start_time = DateTime.Now;
                     while (_searchParam._searchComplete == false)
                     {
@@ -1226,7 +1228,7 @@ MessageBoxDefaultButton.Button1);
             // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
             // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
             // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
-            foreach(BiblioRecord record in e.Records)
+            foreach (BiblioRecord record in e.Records)
             {
                 string strXml = record.Data;
 
@@ -1247,7 +1249,7 @@ out strError);
                 RegisterBiblioInfo info = new RegisterBiblioInfo();
                 info.OldXml = strXml;   // strMARC;
                 info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
-                info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false? record.LibraryName : record.LibraryUID);
+                info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
                 info.MarcSyntax = strMarcSyntax;
                 AddBiblioBrowseLine(
                     image_index,    // -1,
@@ -1388,7 +1390,7 @@ out strError);
 
                 //if (line != null)
                 //    line.BiblioSummary = "正在获取服务器 " + account.ServerName + " 的配置信息 ...";
-                this.ShowMessage("正在获取服务器 " + account.ServerName + " 的配置信息 ...", 
+                this.ShowMessage("正在获取服务器 " + account.ServerName + " 的配置信息 ...",
                     "progress", false);
 
                 // 准备服务器信息
@@ -1575,7 +1577,7 @@ out strError);
             }
             finally
             {
-                lock(this._channels)
+                lock (this._channels)
                 {
                     this._channels.Remove(current_channel);
                 }
@@ -1757,7 +1759,7 @@ out strError);
             get
             {
                 int count = 0;
-                foreach(DpRow row in this.dpTable_browseLines.Rows)
+                foreach (DpRow row in this.dpTable_browseLines.Rows)
                 {
                     DpCell cell = row[0];
                     if (cell.Tag != null)
@@ -1904,7 +1906,7 @@ out strError);
         // 准备特定浏览行的封面图像
         // parameters:
         //      bRetry  是否为重试？如果为 true，表示即便 info.CoverImageRquested == true 也要重做
-        void PrepareCoverImage(DpRow row, 
+        void PrepareCoverImage(DpRow row,
             bool bRetry = false)
         {
             Debug.Assert(row != null, "");
@@ -2132,7 +2134,7 @@ out strError);
 
         #endregion
 
-        int SetBiblio(RegisterBiblioInfo info, 
+        int SetBiblio(RegisterBiblioInfo info,
             bool bAutoSetFocus,
             out string strError)
         {
@@ -2667,7 +2669,7 @@ MessageBoxDefaultButton.Button1);
                 strError = "GetChannel() error";
                 return -1;
             }
-            lock(this._channels)
+            lock (this._channels)
             {
                 this._channels.Add(current_channel);
             }
@@ -2752,7 +2754,7 @@ MessageBoxDefaultButton.Button1);
                         lCount = lResultCount - lStart;
                 }
 
-                END1:
+            END1:
                 this._biblio.AddPlus();
                 return nCount;
             }
@@ -2762,7 +2764,7 @@ MessageBoxDefaultButton.Button1);
                 //this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
 
-                lock(this._channels)
+                lock (this._channels)
                 {
                     this._channels.Remove(current_channel);
                 }
@@ -2828,7 +2830,7 @@ MessageBoxDefaultButton.Button1);
             SetEditErrorInfo(edit, strError);
             //line._biblioRegister.BarColor = "R";   // 红色
             //this.SetColorList();
-        this.ShowMessage(strError, "red", true);
+            this.ShowMessage(strError, "red", true);
         }
 
         // return:
@@ -2955,7 +2957,7 @@ int nCount)
         {
             string strError = "";
             EntityEditControl control = null;
-            int nRet = this._biblio.AddNewEntity(strBarcode, 
+            int nRet = this._biblio.AddNewEntity(strBarcode,
                 bAutoSetFocus,
                 out control,
                 out strError);
@@ -3337,7 +3339,7 @@ int nCount)
                 if (Global.IsAppendRecPath(strPath) == true)
                     strAction = "new";
 
-            //REDO:
+                //REDO:
                 long lRet = current_channel.SetBiblioInfo(
                     Progress,
                     strAction,
@@ -3395,7 +3397,7 @@ int nCount)
                     bool bAppend = Global.IsAppendRecPath(strEditBiblioRecPath);
                     if (bAppend == true && StringUtil.IsInList("append", strAccess) == true)
                         return true;
-                    if (bAppend == false 
+                    if (bAppend == false
                         && (StringUtil.IsInList("overwrite", strAccess) == true || StringUtil.IsInList("partial_overwrite", strAccess) == true)
                         )
                         return true;
@@ -3627,7 +3629,7 @@ int nCount)
         int DeleteBiblioRecordFromDatabase(
     string strServerName,
     string strPath,
-    // string strXml,
+            // string strXml,
     byte[] baTimestamp,
     out byte[] baNewTimestamp,
     out string strError)
@@ -3658,12 +3660,12 @@ int nCount)
 
                 if (Global.IsAppendRecPath(strPath) == true)
                 {
-                    strError = "路径 '"+strPath+"' 不能用于删除操作";
+                    strError = "路径 '" + strPath + "' 不能用于删除操作";
                     return -1;
                 }
 
                 string strOutputPath = "";
-            //REDO:
+                //REDO:
                 long lRet = current_channel.SetBiblioInfo(
                     Progress,
                     strAction,
@@ -3844,7 +3846,7 @@ MessageBoxDefaultButton.Button1);
             SaveBiblioAndItems();
         }
 
-                // 装入一条空白书目记录
+        // 装入一条空白书目记录
         private void toolStripButton_new_Click(object sender, EventArgs e)
         {
             NewBiblio();
@@ -4009,8 +4011,8 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRecord) == true)
             {
                 record.add(new MarcField('$', "010  $a" + strISBN + "$dCNY??"));
-                record.add(new MarcField('$', "2001 $a"+strTitle+"$f"+strAuthor));
-                record.add(new MarcField('$', "210  $a$c"+strPublisher+"$d"));
+                record.add(new MarcField('$', "2001 $a" + strTitle + "$f" + strAuthor));
+                record.add(new MarcField('$', "210  $a$c" + strPublisher + "$d"));
                 record.add(new MarcField('$', "215  $a$d??cm"));
                 record.add(new MarcField('$', "690  $a"));
                 record.add(new MarcField('$', "701  $a" + strAuthor));
@@ -4262,7 +4264,7 @@ MessageBoxDefaultButton.Button2);
             {
                 if (this.MainForm != null && this.MainForm.AppInfo != null)
                     return this.MainForm.AppInfo.GetBoolean("entityRegisterWizard", "keyboardFormFloating", true);
-                return true;            
+                return true;
             }
             set
             {
@@ -4903,7 +4905,7 @@ out strError);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString("entityRegisterWizard", 
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard",
                     "unimarcBiblioDefault",
                     "010  $a$dCNY??\r\n2001 $a$f\r\n210  $a$c$d\r\n215  $a??页$d??cm\r\n690  $a\r\n701  $a");
             }
@@ -5008,7 +5010,7 @@ out strError);
             // GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.UnimarcDefault = this.UnimarcBiblioDefault;
-            dlg.UnimarcHiddenFields = this.UnimarcBiblioHiddenFields.Replace(",","\r\n");
+            dlg.UnimarcHiddenFields = this.UnimarcBiblioHiddenFields.Replace(",", "\r\n");
             dlg.Marc21Default = this.Marc21BiblioDefault;
             dlg.Marc21HiddenFields = this.Marc21BiblioHiddenFields.Replace(",", "\r\n");
 

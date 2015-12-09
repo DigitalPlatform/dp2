@@ -1186,6 +1186,15 @@ namespace dp2Circulation
                             strError = "中断";
                             break;
                         }
+
+                        if (strItemBarcode.StartsWith("_testitem") == true)
+                        {
+                            lRet = 1;
+                            strBiblioRecPath = "_测试书目库/1";
+                            strSummary = "测试书名/测试作者. -- ISBN 978-7-5397-3818-5";
+                            break;
+                        }
+
                         // 注: Channel.Timeout 在 GetBiblioSummary() 函数中会自动设置
                         lRet = this.Channel.GetBiblioSummary(
                             stop,

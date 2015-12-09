@@ -1195,7 +1195,7 @@ namespace DigitalPlatform.LibraryServer
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "获取种摘要信息被拒绝。不具备order、getbibliosummary权限。";
+                result.ErrorInfo = "获取种摘要信息被拒绝。不具备 order 或 getbibliosummary 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }

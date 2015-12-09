@@ -4900,13 +4900,15 @@ true);
 
             string strOutputSearchID = "";
             int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
-                strSearchID,
+                "*",
+                new SearchRequest(strSearchID,
+                    "searchBiblio",
                 "<全部>",
 strQueryWord,
 strFromStyle,
 strMatchStyle,
 "",
-1000,
+1000),
 out strOutputSearchID,
 out strError);
             if (nRet == -1)

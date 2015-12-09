@@ -2357,6 +2357,7 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 string strTime = "";
+                channel.Timeout = new TimeSpan(0, 1, 0);
                 long lRet = channel.GetClock(Stop,
                     out strTime,
                     out strError);

@@ -260,13 +260,17 @@ false);
 
         // 响应 server 发来的消息 SearchBiblio
         public override void OnSearchBiblioRecieved(
+#if NO
             string searchID,
             string dbNameList,
              string queryWord,
              string fromList,
              string matchStyle,
              string formatList,
-             long maxResults)
+             long maxResults
+#endif
+SearchRequest searchParam
+            )
         {
             // 单独给一个线程来执行
 #if NO
@@ -304,27 +308,114 @@ false);
             task.Dispose();
 #endif
             Task.Factory.StartNew(() => SearchAndResponse(
+#if NO
         searchID,
         dbNameList,
         queryWord,
         fromList,
         matchStyle,
         formatList,
-        maxResults));
+        maxResults
+#endif
+searchParam
+        ));
         }
 
+        void GetPatronInfo(SearchRequest searchParam)
+        {
+            IList<BiblioRecord> records = new List<BiblioRecord>();
+
+            LibraryChannel channel = GetChannel();
+            try
+            {
+                string strError = "";
+                string[] results = null;
+                string strRecPath = "";
+                byte[] baTimestamp= null;
+
+                long lRet = channel.GetReaderInfo(null,
+                    searchParam.QueryWord,
+                    searchParam.FormatList,
+                    out results,
+                    out strRecPath,
+                    out baTimestamp,
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                {
+                    if (lRet == 0
+                        || (lRet == -1 && channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound))
+                    {
+                        // 没有命中
+                        Response(
+searchParam.SearchID,
+0,
+0,
+records,
+strError);  // 出错信息大概为 not found。
+                        return;
+                    }
+                    Response(
+        searchParam.SearchID,
+        -1,
+        0,
+        records,
+        strError);
+                    return;
+                }
+
+                records.Clear();
+                string[] formats = searchParam.FormatList.Split(new char[] {','});
+                int i = 0;
+                foreach(string result in results)
+                {
+                    BiblioRecord biblio = new BiblioRecord();
+                    biblio.RecPath = strRecPath;
+                    biblio.Data = result;
+                    biblio.Format = formats[i];
+                    records.Add(biblio);
+                    i++;
+                }
+
+                Response(
+                    searchParam.SearchID,
+                    records.Count,  // lHitCount,
+                    0, // lStart,
+                    records,
+                    "");
+            }
+            catch (Exception ex)
+            {
+                AddErrorLine("SearchAndResponse() 出现异常: " + ex.Message);
+            }
+            finally
+            {
+                this._channelPool.ReturnChannel(channel);
+            }
+
+            this.AddInfoLine("search and response end");
+        }
 
         // TODO: 本函数最好放在一个工作线程内执行
         // Form Close 的时候要及时中断工作线程
         public void SearchAndResponse(
+#if NO
             string searchID,
             string dbNameList,
             string queryWord,
             string fromList,
             string matchStyle,
             string formatList,
-            long maxResults)
+            long maxResults
+#endif
+SearchRequest searchParam
+            )
         {
+            if (searchParam.Operation == "getPatronInfo")
+            {
+                GetPatronInfo(searchParam);
+                return;
+            }
+
             IList<BiblioRecord> records = new List<BiblioRecord>();
 
             string strResultSetName = "default";
@@ -334,18 +425,37 @@ false);
             {
                 string strError = "";
                 string strQueryXml = "";
-                long lRet = channel.SearchBiblio(null,
-                    dbNameList,
-                    queryWord,
-                    (int)maxResults,
-                    fromList,
-                    matchStyle,
-                    "zh",
-                    strResultSetName,
-                    "", // strSearchStyle
-                    "", // strOutputStyle
-                    out strQueryXml,
-                    out strError);
+                long lRet = 0;
+
+                if (searchParam.Operation == "searchBiblio")
+                {
+                    lRet = channel.SearchBiblio(null,
+                         searchParam.DbNameList,
+                         searchParam.QueryWord,
+                         (int)searchParam.MaxResults,
+                         searchParam.UseList,
+                         searchParam.MatchStyle,
+                         "zh",
+                         strResultSetName,
+                         "", // strSearchStyle
+                         "", // strOutputStyle
+                         out strQueryXml,
+                         out strError);
+                }
+                else if (searchParam.Operation == "searchPatron")
+                {
+                    lRet = channel.SearchReader(null,
+                        searchParam.DbNameList,
+                        searchParam.QueryWord,
+                        (int)searchParam.MaxResults,
+                        searchParam.UseList,
+                        searchParam.MatchStyle,
+                        "zh",
+                        strResultSetName,
+                        "",
+                        out strError);
+                }
+
                 if (lRet == -1 || lRet == 0)
                 {
                     if (lRet == 0
@@ -353,7 +463,7 @@ false);
                     {
                         // 没有命中
                         Response(
-searchID,
+searchParam.SearchID,
 0,
 0,
 records,
@@ -361,7 +471,7 @@ strError);  // 出错信息大概为 not found。
                         return;
                     }
                     Response(
-        searchID,
+        searchParam.SearchID,
         -1,
         0,
         records,
@@ -394,7 +504,7 @@ strError);  // 出错信息大概为 not found。
                         {
                             // 报错
                             Response(
-                searchID,
+                searchParam.SearchID,
                 -1,
                 0,
                 records,
@@ -406,7 +516,7 @@ strError);  // 出错信息大概为 not found。
                         {
                             // 报错
                             Response(
-                searchID,
+                searchParam.SearchID,
                 -1,
                 0,
                 records,
@@ -424,7 +534,7 @@ strError);  // 出错信息大概为 not found。
                         }
 
                         Response(
-                            searchID,
+                            searchParam.SearchID,
                             lHitCount,
                             lStart,
                             records,

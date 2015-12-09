@@ -468,6 +468,12 @@ namespace dp2Library
                 string strError = "";
                 int nRet = 0;
 
+                if (string.IsNullOrEmpty(strUserName) == true)
+                {
+                    strError = "用户名不能为空";
+                    goto ERROR1;
+                }
+
                 nRet = app.UserNameTable.BeforeLogin(strUserName,
                     sessioninfo.ClientIP,
                     out strError);
@@ -1270,7 +1276,6 @@ namespace dp2Library
                 return result;
             }
         }
-
 
         // 修改读者记录
         // 需要一并发来旧记录的原因, 是为了和数据库中当前可能已经变化了的记录进行比较，
