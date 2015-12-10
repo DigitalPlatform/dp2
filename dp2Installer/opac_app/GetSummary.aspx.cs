@@ -242,6 +242,7 @@ ref sessioninfo) == false)
 
     protected void Page_Unload(object sender, EventArgs e)
     {
-        sessioninfo.Channel.Close();
+        if (sessioninfo != null && sessioninfo.Channel != null)
+            sessioninfo.Channel.Close();
     }
 }

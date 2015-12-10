@@ -629,7 +629,7 @@ namespace dp2Library
                                         sessioninfo.ClientIP,
                                         nRet);
                                     if (string.IsNullOrEmpty(strLogText) == false)
-                                        app.WriteErrorLog("!!! " + strLogText);
+                                        app.WriteErrorLog("!!!(simulate 1) " + strLogText);
                                 }
                                 goto ERROR1;
                             }
@@ -723,7 +723,7 @@ namespace dp2Library
                                         sessioninfo.ClientIP,
                                         nRet);
                                     if (string.IsNullOrEmpty(strLogText) == false)
-                                        app.WriteErrorLog("!!! " + strLogText);
+                                        app.WriteErrorLog("!!!(simulate 2) " + strLogText);
                                 }
                                 goto ERROR1;
                             }

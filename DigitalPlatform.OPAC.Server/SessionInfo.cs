@@ -190,6 +190,8 @@ namespace DigitalPlatform.OPAC.Server
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
             LibraryChannel channel = sender as LibraryChannel;
+            if (string.IsNullOrEmpty(channel.UserName) == true)
+                throw new Exception("Channel_AfterLogin() channel.UserName 为空 (此时 SessionInfo.m_strUserName 为 '"+this.m_strUserName+"')");
             this.m_strUserName = channel.UserName;
         }
 
@@ -347,6 +349,12 @@ namespace DigitalPlatform.OPAC.Server
         {
             strError = "";
 
+            if (string.IsNullOrEmpty(strUserName) == true)
+            {
+                strError = "SessionInfo.Login() 的 strUserName 参数不应为空";
+                return -1;
+            }
+
             if (String.IsNullOrEmpty(this.ChannelLang) == false)
             {
 #if NO
@@ -381,6 +389,9 @@ namespace DigitalPlatform.OPAC.Server
                 out strError);
             if (lRet == 1)
             {
+                if (string.IsNullOrEmpty(this.Channel.UserName) == true)
+                    throw new Exception("SessionInfo.Login() this.Channel.UserName 为空 (此时 SessionInfo.m_strUserName 为 '" + this.m_strUserName + "')");
+
                 this.m_strUserName = this.Channel.UserName; // 2011/7/29
                 this.m_strPassword = strPassword;
 

@@ -339,7 +339,6 @@ namespace DigitalPlatform.OPAC.Server
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-
             if (e.FirstTry == false)
             {
                 e.Cancel = true;

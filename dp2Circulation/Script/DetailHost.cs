@@ -318,7 +318,7 @@ namespace dp2Circulation
                     string strCreator = this.GetFirstSubfield("998", "z");
                     if (string.IsNullOrEmpty(strCreator) == true)
                     {
-                        strCreator = this.DetailForm.Channel.UserName;
+                        strCreator = this.DetailForm.CurrentUserName;   // this.DetailForm.Channel.UserName;
                         this.SetFirstSubfield("998", "z", strCreator);
                         bChanged = true;
                     }
