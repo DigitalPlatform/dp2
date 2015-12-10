@@ -860,7 +860,7 @@ out strError);
 
         REDO:
             TimeSpan old_timeout = this.Timeout;
-            this.Timeout = new TimeSpan(0, 0, 15);
+            this.Timeout = new TimeSpan(0, 0, 10);
             try
             {
                 LibraryServerResult result = ws.Login(out strOutputUserName,

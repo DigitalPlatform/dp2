@@ -4478,6 +4478,8 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
                 try
                 {
+                    int nRedoCount = 0;
+                    REDO:
                     // return:
                     //      -1  error
                     //      0   登录未成功
@@ -4487,7 +4489,15 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                         "type=worker",
                         out strError);
                     if (lRet == -1)
+                    {
+                        if (Channel.WcfException is System.TimeoutException
+                            && nRedoCount < 3)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
                         return -1;
+                    }
 
                     if (lRet == 0)
                     {
