@@ -659,7 +659,7 @@ namespace DigitalPlatform.OPAC.Server
                     app.WriteErrorLog("opac service结束重新装载 " + this.m_strFileName);
                 else
                 {
-                    var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
+                    // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
                     app.WriteErrorLog("opac service 成功启动。版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString());
 
