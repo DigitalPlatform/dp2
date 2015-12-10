@@ -596,19 +596,19 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strRecID) == true
                 || strRecID == "?")
                 return 0;
-                                // if (StringUtil.IsPureNumber(strID) == false)
+            // if (StringUtil.IsPureNumber(strID) == false)
 
 
             long id = 0;
             if (long.TryParse(strRecID, out id) == false)
             {
-                strError = "检查评估模式记录路径的过程出错，路经 '"+strPath+"' 中的记录ID '"+strRecID+"' 不是数字";
+                strError = "检查评估模式记录路径的过程出错，路经 '" + strPath + "' 中的记录ID '" + strRecID + "' 不是数字";
                 return -1;
             }
 
             if (id >= 1 && id <= 1000)
                 return 0;
-            strError = "评估模式只能使用ID 在 1-1000 范围内的记录 (当前记录路径为 '"+strPath+"')";
+            strError = "评估模式只能使用ID 在 1-1000 范围内的记录 (当前记录路径为 '" + strPath + "')";
             return 1;
         }
 
@@ -639,9 +639,9 @@ namespace DigitalPlatform.LibraryServer
             string[] saBorrowedItemBarcode,
             string strStyle,
             string strItemFormatList,
-            out string [] item_records,
+            out string[] item_records,
             string strReaderFormatList,
-            out string [] reader_records,
+            out string[] reader_records,
 
             string strBiblioFormatList, // 2008/5/9
             out string[] biblio_records, // 2008/5/9
@@ -968,11 +968,11 @@ namespace DigitalPlatform.LibraryServer
                         if (aPath.Count > 1)
                         {
                             if (this.Statis != null)
-                            this.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                "出纳",
-                                "借书遇册条码号重复次数",
-                                1);
+                                this.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "出纳",
+                                    "借书遇册条码号重复次数",
+                                    1);
 
                             result.Value = -1;
                             // text-level: 用户提示
@@ -1100,7 +1100,7 @@ namespace DigitalPlatform.LibraryServer
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_read_item, 
+                        start_time_read_item,
                         "Borrow() 中读取册记录 耗时 ");
 
                     DateTime start_time_process = DateTime.Now;
@@ -1119,7 +1119,7 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "根据实体库名 '"+strItemDbName+"' 获得书目库名时出错: " + strError;
+                            strError = "根据实体库名 '" + strItemDbName + "' 获得书目库名时出错: " + strError;
                             goto ERROR1;
                         }
 
@@ -1145,7 +1145,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (bRenew == false)
                         {
-                            strError = "必须提供 strReaderBarcode 参数值才能进行 " +strActionName+ " 操作";
+                            strError = "必须提供 strReaderBarcode 参数值才能进行 " + strActionName + " 操作";
                             goto ERROR1;
                         }
 
@@ -1166,7 +1166,7 @@ namespace DigitalPlatform.LibraryServer
 
                         if (nRet == 0 || string.IsNullOrEmpty(strOutputReaderBarcode) == true)
                         {
-                            strError = "册 '"+strItemBarcode+"' 当前未曾被任何读者借阅，所以无法进行"+strActionName+"操作";
+                            strError = "册 '" + strItemBarcode + "' 当前未曾被任何读者借阅，所以无法进行" + strActionName + "操作";
                             goto ERROR1;
                         }
 #if NO
@@ -1623,7 +1623,7 @@ namespace DigitalPlatform.LibraryServer
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_write_operlog, 
+                        start_time_write_operlog,
                         "Borrow() 中写操作日志 耗时 ");
 
                     DateTime start_time_write_statis = DateTime.Now;
@@ -1887,7 +1887,7 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 } // end of for
-                
+
                 WriteTimeUsed(
     time_lines,
     start_time_1,
@@ -2108,12 +2108,12 @@ start_time_1,
             }
 
             // 如果创建输出数据的时间超过一秒，则需要计入操作日志
-            if (DateTime.Now - output_start_time > new TimeSpan(0,0,1))
+            if (DateTime.Now - output_start_time > new TimeSpan(0, 0, 1))
             {
                 WriteLongTimeOperLog(
                     sessioninfo,
                     strAction,
-                    output_start_time, 
+                    output_start_time,
                     "output 阶段耗时超过 1 秒",
                     strOperLogUID,
                     out strError);
@@ -2131,7 +2131,7 @@ start_time_1,
         int WriteLongTimeOperLog(
             SessionInfo sessioninfo,
             string strAction,
-            DateTime start_time, 
+            DateTime start_time,
             string strComment,
             string strLinkUID,
             out string strError)
@@ -2148,7 +2148,7 @@ start_time_1,
     "linkUID",
     strLinkUID);
             DomUtil.SetElementText(domOperLog.DocumentElement,
-                "comment", 
+                "comment",
                 strComment);
             string strOutputUID = "";
             int nRet = this.OperLog.WriteOperLog(domOperLog,
@@ -2744,7 +2744,7 @@ start_time_1,
                 strOperName = this.GetString("续借");
 
             string strRefID = DomUtil.GetElementText(itemdom.DocumentElement,
-"refID"); 
+"refID");
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
             string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
@@ -3078,7 +3078,7 @@ start_time_1,
                 if (nRet == -1)
                 {
                     // text-level: 用户提示
-                    strError = "在获取馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 可借总册数 参数过程中出错: "+strError+"。因此拒绝" + strOperName + "操作";
+                    strError = "在获取馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 可借总册数 参数过程中出错: " + strError + "。因此拒绝" + strOperName + "操作";
                     return -1;
                 }
                 if (nRet < 3)
@@ -3179,7 +3179,7 @@ start_time_1,
                 out strError);
             if (nRet == -1)
             {
-                strError = "汇总读者押金余额字符串 '"+ strForegift + "' 的过程发生错误: " + strError;
+                strError = "汇总读者押金余额字符串 '" + strForegift + "' 的过程发生错误: " + strError;
                 return -1;
             }
 
@@ -3191,7 +3191,7 @@ start_time_1,
 
             if (foregift_results.Count > 1)
             {
-                strError = "读者押金余额字符串 '" + strForegift + "' 经汇总后发现有多种货币(共"+foregift_results.Count.ToString()+"种)，无法参与册价格比较，因此不能借书。";
+                strError = "读者押金余额字符串 '" + strForegift + "' 经汇总后发现有多种货币(共" + foregift_results.Count.ToString() + "种)，无法参与册价格比较，因此不能借书。";
                 return -1;
             }
 
@@ -3535,7 +3535,7 @@ start_time_1,
                 return "丢失声明";
             else if (strAction == "inventory")
                 return "盘点";
-            else 
+            else
                 return strAction;
         }
 
@@ -3558,7 +3558,7 @@ start_time_1,
             out string[] item_records,  // 2008/5/9
 
             string strReaderFormatList,
-            out string [] reader_records,
+            out string[] reader_records,
 
             string strBiblioFormatList, // 2008/5/9
             out string[] biblio_records,    // 2008/5/9
@@ -3626,7 +3626,7 @@ start_time_1,
             }
             else
             {
-                strError = "无法识别的 strAction 参数值 '"+strAction+"'。";
+                strError = "无法识别的 strAction 参数值 '" + strAction + "'。";
                 goto ERROR1;
             }
 
@@ -3764,7 +3764,7 @@ start_time_1,
                 {
                     WriteTimeUsed(
                         time_lines,
-                        start_time, 
+                        start_time,
                         "Return() 中前期检查和锁定 耗时 ");
 
                     DateTime start_time_read_item = DateTime.Now;
@@ -4046,7 +4046,7 @@ start_time_1,
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_read_item, 
+                        start_time_read_item,
                         "Return() 中读取册记录 耗时 ");
 
                     DateTime start_time_lock = DateTime.Now;
@@ -4231,7 +4231,7 @@ start_time_1,
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_lock, 
+                        start_time_lock,
                         "Return() 中补充锁定 耗时 ");
 
                     // 读入读者记录
@@ -4362,7 +4362,7 @@ start_time_1,
                         }
                     }
 
-                    SKIP0:
+                SKIP0:
 
                     if (strAction == "inventory")
                     {
@@ -4409,7 +4409,7 @@ start_time_1,
                         }
 
                         strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
-                        if (this.IsReaderDbName(strReaderDbName, 
+                        if (this.IsReaderDbName(strReaderDbName,
                             out bReaderDbInCirculation,
                             out strLibraryCode) == false)
                         {
@@ -4441,7 +4441,7 @@ start_time_1,
                     }
                     WriteTimeUsed(
                         time_lines,
-                        start_time_read_reader, 
+                        start_time_read_reader,
                         "Return() 中读取读者记录 耗时 ");
 
                     // string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
@@ -4614,7 +4614,7 @@ start_time_1,
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_process, 
+                        start_time_process,
                         "Return() 中进行各种数据处理 耗时 ");
 
                     // 原来创建输出xml或html格式的代码在此
@@ -4644,7 +4644,7 @@ start_time_1,
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_reservation_check, 
+                        start_time_reservation_check,
                         "Return() 中进行预约检查 耗时 ");
 
                     // 写回读者、册记录
@@ -4697,7 +4697,7 @@ start_time_1,
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_write_reader, 
+                        start_time_write_reader,
                         "Return() 中写回读者记录 耗时 ");
 
                     DateTime start_time_write_item = DateTime.Now;
@@ -4713,7 +4713,7 @@ start_time_1,
                     if (lRet == -1)
                     {
                         // 2015/9/2
-                        this.WriteErrorLog("Return() 写入册记录 '"+strOutputItemRecPath+"' 时出错: " + strError);
+                        this.WriteErrorLog("Return() 写入册记录 '" + strOutputItemRecPath + "' 时出错: " + strError);
 
                         // 要Undo刚才对读者记录的写入
                         string strError1 = "";
@@ -4748,7 +4748,7 @@ start_time_1,
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '"+strReaderName+"') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
+                                    strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '" + strReaderName + "') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
@@ -4770,7 +4770,7 @@ start_time_1,
 
 
                             // 以下为 不是时间戳冲突的其他错误情形
-                            strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '"+strReaderName+"') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
+                            strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '" + strReaderName + "') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
                             // strError = strError + ", 并且Undo写回旧读者记录也失败: " + strError1;
                             this.WriteErrorLog(strError);
                             goto ERROR1;
@@ -4793,7 +4793,7 @@ start_time_1,
 
                     WriteTimeUsed(
                         time_lines,
-                        start_time_write_item, 
+                        start_time_write_item,
                         "Return() 中写回册记录 耗时 ");
 
                     DateTime start_time_write_operlog = DateTime.Now;
@@ -4885,7 +4885,7 @@ start_time_1,
                     }
                     WriteTimeUsed(
                         time_lines,
-                        start_time_write_statis, 
+                        start_time_write_statis,
                         "Return() 中写统计指标 耗时 ");
 
                     result.ErrorInfo = strActionName + "操作成功。" + result.ErrorInfo;  // 2013/11/13
@@ -4926,7 +4926,7 @@ start_time_1,
                     {
                         if (String.IsNullOrEmpty(result.ErrorInfo) == false)
                             result.ErrorInfo += "\r\n";
-                        result.ErrorInfo += "***警告***: "+strActionName+"操作过程中发现下列册记录它们的册条码号发生了重复: " + strDupBarcodeList + "。请通知系统管理员纠正此数据错误。";
+                        result.ErrorInfo += "***警告***: " + strActionName + "操作过程中发现下列册记录它们的册条码号发生了重复: " + strDupBarcodeList + "。请通知系统管理员纠正此数据错误。";
                         result.Value = 1;
                     }
 
@@ -5045,7 +5045,7 @@ start_time_1,
                 // 最好超期和保留两种状态码可以并存?
             }
 
-            END3:
+        END3:
 
 
             // 输出数据
@@ -5498,14 +5498,14 @@ start_time_1,
             // 获得册记录的馆代码，检查是否在当前用户管辖范围内
 
             string strLibraryCode = "";
-                    // 检查一个册记录的馆藏地点是否符合馆代码列表要求
-        // parameters:
-        //      strLibraryCodeList  当前用户管辖的馆代码列表
-        //      strLibraryCode  [out]册记录中的馆代码
-        // return:
-        //      -1  检查过程出错
-        //      0   符合要求
-        //      1   不符合要求
+            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+            // parameters:
+            //      strLibraryCodeList  当前用户管辖的馆代码列表
+            //      strLibraryCode  [out]册记录中的馆代码
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
             nRet = CheckItemLibraryCode(itemdom,
                 sessioninfo.LibraryCodeList,
                 out strLibraryCode,
@@ -5620,7 +5620,7 @@ start_time_1,
 
             DomUtil.SetElementText(inventory_dom.DocumentElement, "itemBarcode", strItemBarcode);
             DomUtil.SetElementText(inventory_dom.DocumentElement, "itemRefID", strItemRefID);   // 册记录的参考 ID
-            DomUtil.SetElementText(inventory_dom.DocumentElement, "itemRecPath", strItemRecPath);   
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "itemRecPath", strItemRecPath);
 
             DomUtil.SetElementText(inventory_dom.DocumentElement, "batchNo", strBatchNo);
             DomUtil.SetElementText(inventory_dom.DocumentElement, "location", strLocation);
@@ -5891,7 +5891,7 @@ start_time_1,
                 out strError);
             if (nRet == -1)
             {
-                strError = "获得 馆代码 '"+strLibraryCode+"' 中 读者类型 '" + strReaderType + "' 的 工作日历名 参数时发生错误: " + strError;
+                strError = "获得 馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 工作日历名 参数时发生错误: " + strError;
                 return -1;
             }
 
@@ -6520,7 +6520,7 @@ out string strError)
                     continue;
                 if (strCode.IndexOf(" ") != -1)
                 {
-                    strError = "<library>元素的code属性值 '"+strCode+"' 中不应包含空格字符";
+                    strError = "<library>元素的code属性值 '" + strCode + "' 中不应包含空格字符";
                     return 1;
                 }
                 if (strCode.IndexOf(",") != -1)
@@ -6730,12 +6730,12 @@ out string strError)
                 string strName = DomUtil.GetAttr(node, "name");
                 if (string.IsNullOrEmpty(strName) == true)
                 {
-                    strError = "排架体系名不能为空。'"+node.OuterXml+"'";
+                    strError = "排架体系名不能为空。'" + node.OuterXml + "'";
                     return -1;
                 }
                 if (old_names.IndexOf(strName) != -1)
                 {
-                    strError = "排架体系名 '"+strName+"' 不应重复使用";
+                    strError = "排架体系名 '" + strName + "' 不应重复使用";
                     return -1;
                 }
                 old_names.Add(strName);
@@ -6762,10 +6762,10 @@ out string strError)
 
             foreach (string strName in common_names)
             {
-                XmlNode node = old_root.SelectSingleNode("group[@name='"+strName+"']");
+                XmlNode node = old_root.SelectSingleNode("group[@name='" + strName + "']");
                 if (node == null)
                 {
-                    strError = "很奇怪 old_root 下没有找到 name 属性为 '"+strName+"' 的<group>元素";
+                    strError = "很奇怪 old_root 下没有找到 name 属性为 '" + strName + "' 的<group>元素";
                     return -1;
                 }
                 remain_nodes.Add(node);
@@ -6817,7 +6817,7 @@ out string strError)
             attrs1.Sort();
             attrs2.Sort();
 
-            for(int i=0;i<attrs1.Count; i++)
+            for (int i = 0; i < attrs1.Count; i++)
             {
                 if (attrs1[i] != attrs2[i])
                     return false;
@@ -6923,7 +6923,7 @@ out string strError)
 
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "要删除的name属性值为 '"+DomUtil.GetAttr(group_node, "name")+"' 的<group>元素因其下属的<location>元素name属性中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                        strError = "要删除的name属性值为 '" + DomUtil.GetAttr(group_node, "name") + "' 的<group>元素因其下属的<location>元素name属性中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
                         return -1;
                     }
                 }
@@ -6936,10 +6936,10 @@ out string strError)
                 // 注意 node 来自 old_nodes 集合
                 string strGroupName = DomUtil.GetAttr(group_node, "name");
 
-                XmlNode new_group = source_root.SelectSingleNode("group[@name='"+strGroupName+"']");
+                XmlNode new_group = source_root.SelectSingleNode("group[@name='" + strGroupName + "']");
                 if (new_group == null)
                 {
-                    strError = "name属性值为 '"+strGroupName+"' 的<group>元素在新提交的<callNumber> XML片断中居然没有找到";
+                    strError = "name属性值为 '" + strGroupName + "' 的<group>元素在新提交的<callNumber> XML片断中居然没有找到";
                     return -1;
                 }
 
@@ -6983,7 +6983,7 @@ out string strError)
 
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "name属性值为 '"+strGroupName+"' 的<group>元素下，拟新增的<location>元素name属性值中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                        strError = "name属性值为 '" + strGroupName + "' 的<group>元素下，拟新增的<location>元素name属性值中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
                         return -1;
                     }
                 }
@@ -7259,7 +7259,7 @@ out string strError)
             }
             else
 #endif
-                strXPath = "//locationTypes/library[@code='" + strLibraryCode + "']/item";
+            strXPath = "//locationTypes/library[@code='" + strLibraryCode + "']/item";
 
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
             foreach (XmlElement item in nodes)
@@ -7284,7 +7284,7 @@ out string strError)
                     strXPath = "//locationTypes/item[@canborrow='yes'][count(ancestor::library) = 0]";
                 else
 #endif
-                    strXPath = "//locationTypes/item[count(ancestor::library) = 0]";
+                strXPath = "//locationTypes/item[count(ancestor::library) = 0]";
                 nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
                 foreach (XmlElement item in nodes)
                 {
@@ -7400,7 +7400,7 @@ out string strError)
                 strError = string.Format(this.GetString("借阅期限值s格式错误s"),    // "借阅期限 值 '{0}' 格式错误: {1}" 
                     strPeriod,
                     strError);
-                    // "借阅期限 值 '" + strPeriod + "' 格式错误: " + strError;
+                // "借阅期限 值 '" + strPeriod + "' 格式错误: " + strError;
                 return -1;
             }
 
@@ -7501,8 +7501,8 @@ out string strError)
                         timeEnd.ToLongDateString(),
                         Convert.ToString(lDelta),
                         GetDisplayTimeUnitLang(strPeriodUnit));
-                        
-                        // "已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。";
+
+                    // "已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。";
                     lOver = lDelta;    // 2009/8/5
                     return 1;
                 }
@@ -7515,19 +7515,19 @@ out string strError)
                     // text-level: 用户提示
                     strError += string.Format(this.GetString("今天就是还书的最后期限"), // "今天就是还书的最后期限 ({0})。"
                         timeEnd.ToLongDateString());
-                        // "今天就是还书的最后期限 (" + timeEnd.ToLongDateString() + ")。";
+                    // "今天就是还书的最后期限 (" + timeEnd.ToLongDateString() + ")。";
                 }
                 else if (strPeriodUnit == "hour")
                 {
                     // text-level: 用户提示
                     strError += this.GetString("当前这个小时就是还书的最后期限");
-                        // "当前这个小时就是还书的最后期限。";
+                    // "当前这个小时就是还书的最后期限。";
                 }
                 else
                 {
                     // text-level: 用户提示
                     strError += this.GetString("现在就是还书的最后期限");
-                        // "现在就是还书的最后期限。";
+                    // "现在就是还书的最后期限。";
                 }
 
                 if (bEndInNonWorkingDay && lDelta1 < 0)
@@ -7559,10 +7559,10 @@ out string strError)
                         timeEnd.ToLongDateString(),
                         Convert.ToString(lDelta),
                         GetDisplayTimeUnitLang(strPeriodUnit));
-                        
-                        // "本已超过借阅期限 ({0}) {1}{2}。但";
 
-                        // "本已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。但";
+                    // "本已超过借阅期限 ({0}) {1}{2}。但";
+
+                    // "本已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。但";
                     bOverdue = true;
 
                     lOver = lDelta;    // 2009/8/5
@@ -7576,7 +7576,7 @@ out string strError)
                         GetDisplayTimeUnitLang(strPeriodUnit));
                     // "距最后期限 ({0}) 还有 {1}{2}。";
 
-                        // "距最后期限 (" + timeEnd.ToLongDateString() + ") 还有 " + Convert.ToString(-lDelta1) + GetDisplayTimeUnit(strPeriodUnit) + "。";
+                    // "距最后期限 (" + timeEnd.ToLongDateString() + ") 还有 " + Convert.ToString(-lDelta1) + GetDisplayTimeUnit(strPeriodUnit) + "。";
 
                     lOver = lDelta1;    // 2009/8/5
                 }
@@ -7590,7 +7590,7 @@ out string strError)
                         nextWorkingDay.ToLongDateString());
                     // "根据 '{0}' 得知，还书截止日 ({1}) 恰逢图书馆非工作日，您可以选择最迟在截止日后的第一个工作日 ({2}) 去图书馆还书。";
 
-                        // "根据 '" + calendar.Name + "' 得知，还书截止日 (" + timeEnd.ToLongDateString() + ") 恰逢图书馆非工作日，您可以选择最迟在截止日后的第一个工作日 (" + nextWorkingDay.ToLongDateString() + ") 去图书馆还书。";
+                    // "根据 '" + calendar.Name + "' 得知，还书截止日 (" + timeEnd.ToLongDateString() + ") 恰逢图书馆非工作日，您可以选择最迟在截止日后的第一个工作日 (" + nextWorkingDay.ToLongDateString() + ") 去图书馆还书。";
                 }
 
                 if (bOverdue == true)
@@ -8052,13 +8052,13 @@ out string strError)
                 float v = 0;
                 if (float.TryParse(strValue, out v) == false)
                 {
-                    strError = "检查点定义 '"+strCheckPoint+"' 格式错误，其中 '"+strValue+"' 部分应该为数值形态";
+                    strError = "检查点定义 '" + strCheckPoint + "' 格式错误，其中 '" + strValue + "' 部分应该为数值形态";
                     return -1;
                 }
 
                 // 计算出时间点
                 if (bReverse == true)
-                    point = end - new TimeSpan((long)((end - start).Ticks * (v / 100))); 
+                    point = end - new TimeSpan((long)((end - start).Ticks * (v / 100)));
                 else
                     point = start + new TimeSpan((long)((end - start).Ticks * (v / 100)));
 
@@ -8158,7 +8158,7 @@ out string strError)
         // 根据strPeriod中的时间单位(day/hour)，返回本地日期或者时间字符串
         // parameters:
         //      strPeriod   原始格式的时间长度字符串。也就是说，时间单位不和语言相关，是"day"或"hour"
-        public static string LocalDateOrTime(string strTimeString, 
+        public static string LocalDateOrTime(string strTimeString,
             string strPeriod)
         {
             string strError = "";
@@ -8317,7 +8317,7 @@ out string strError)
             return 0;
         }
 
-        
+
         // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
         /// <summary>
         /// 按照时间基本单位，去掉零头，便于互相计算(整单位的)差额。
@@ -8990,7 +8990,7 @@ out string strError)
 
                     {
                         string strPrice = "";
-                            // 取出违约金记录中的金额数字
+                        // 取出违约金记录中的金额数字
                         nRet = GetAmerceRecordPrice(strAmercedXml,
                             out strPrice,
                             out strError);
@@ -9093,7 +9093,7 @@ out string strError)
                 failed_items = new AmerceItem[failed_list.Count];
                 failed_list.CopyTo(failed_items);
 
-                strError = "操作部分成功。(共提交了 " + amerce_items.Length + " 个事项，发生错误的有 "+nErrorCount+" 个) \r\n" + strError;
+                strError = "操作部分成功。(共提交了 " + amerce_items.Length + " 个事项，发生错误的有 " + nErrorCount + " 个) \r\n" + strError;
                 return 1;
             }
 
@@ -9113,7 +9113,7 @@ out string strError)
             SessionInfo sessioninfo,
             string strFunction,
             string strReaderBarcode,
-            AmerceItem [] amerce_items,
+            AmerceItem[] amerce_items,
             out AmerceItem[] failed_items,
             out string strReaderXml)
         {
@@ -9781,10 +9781,10 @@ out string strError)
                 }
 
                 // 通过id值在读者记录中找到对应的<overdue>元素
-                XmlNode nodeOverdue = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='"+item.ID+"']");
+                XmlNode nodeOverdue = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='" + item.ID + "']");
                 if (nodeOverdue == null)
                 {
-                    strError = "ID为 '"+item.ID+"' 的<overdues/overdue>元素没有找到...";
+                    strError = "ID为 '" + item.ID + "' 的<overdues/overdue>元素没有找到...";
                     return -1;
                 }
 
@@ -10419,7 +10419,7 @@ out string strError)
                         "comment",
                         strText);
                 }
-                else  
+                else
                 {
                     Debug.Assert(bAppend == false, "");
 
@@ -10835,7 +10835,7 @@ out string strError)
             for (int i = 0; i < nodes.Count; i++)
             {
                 node = nodes[i];
-            string strPauseStart = "";
+                string strPauseStart = "";
                 strPauseStart = DomUtil.GetAttr(node, "pauseStart");
                 if (String.IsNullOrEmpty(strPauseStart) == false)
                 {
@@ -10923,7 +10923,7 @@ out string strError)
                     // text-level: 用户提示
                     strMessage = string.Format(this.GetString("有s项未启动的以停代金事项"), // "有 {0} 项未启动的以停代金事项"
                         nTotalCount.ToString());
-                        // "有 " + nTotalCount.ToString() + " 项未启动的以停代金事项";
+                    // "有 " + nTotalCount.ToString() + " 项未启动的以停代金事项";
                     return 1;
                 }
 
@@ -11003,7 +11003,7 @@ out string strError)
                     pause_start.ToString("s"),
                     lTotalOverduePeriod.ToString() + GetDisplayTimeUnitLang(strTotalUnit),
                     timeEnd.ToString("s"));
-                    // "共有 " + nTotalCount.ToString() + " 项以停代金事项，从 " + pause_start.ToString("s") + " 开始，总计应暂停借阅 " + lTotalOverduePeriod.ToString() + GetDisplayTimeUnitLang(strTotalUnit) + ", 于 " + timeEnd.ToString("s") + " 结束。";
+                // "共有 " + nTotalCount.ToString() + " 项以停代金事项，从 " + pause_start.ToString("s") + " 开始，总计应暂停借阅 " + lTotalOverduePeriod.ToString() + GetDisplayTimeUnitLang(strTotalUnit) + ", 于 " + timeEnd.ToString("s") + " 结束。";
             }
             else
             {
@@ -11630,7 +11630,7 @@ out string strError)
             }
             catch
             {
-                strError = "违约金因子配置字符串 '"+strPriceCfgString+"' 格式错误。应该为一个小数。";
+                strError = "违约金因子配置字符串 '" + strPriceCfgString + "' 格式错误。应该为一个小数。";
                 return -1;
             }
 
@@ -11668,7 +11668,7 @@ out string strError)
 
             double fItemPrice = 0.0F;
             string strPrefix = "";
-            string strPostfix = "";   
+            string strPostfix = "";
 
             // 最好能够同时处理前缀和后缀
             nRet = ParsePriceUnit(strItemPrice,
@@ -11782,8 +11782,8 @@ out string strError)
 
             // 既然一个册记录已经被允许借了，那就无条件要允许还，不管册的馆藏地点是否属于这个读者所在的馆藏地点。如果发现不一致，需要警告
             // 检查册所属的馆藏地点是否合读者所在的馆藏地点吻合
-                string strCode = "";
-                string strRoom = "";
+            string strCode = "";
+            string strRoom = "";
             {
 
                 // 解析
@@ -11826,7 +11826,7 @@ out string strError)
 
                 if (bFound == false)
                 {
-                    strError = strActionName + "操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不在当前用户存取定义规定的 "+strActionName+" 操作的馆藏地许可范围 '" + strAccessParameters + "' 之内";
+                    strError = strActionName + "操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不在当前用户存取定义规定的 " + strActionName + " 操作的馆藏地许可范围 '" + strAccessParameters + "' 之内";
                     return -1;
                 }
             }
@@ -12476,7 +12476,7 @@ out string strError)
             return_info.OverdueString = strOverdueString;
             // string strNo = DomUtil.GetElementText(itemdom.DocumentElement, "no");
             return_info.BorrowCount = 0;
-     
+
             // 2012/3/28
             if (string.IsNullOrEmpty(strNo) == false)
                 Int64.TryParse(strNo, out return_info.BorrowCount);
@@ -12761,15 +12761,14 @@ out string strError)
 
             try
             {
-
-            // System.Net.Mail 新名字空间
-            MailMessage message = new MailMessage(
-                strManagerEmail,
-                strUserEmail,
-                strSubject,
-                strBody);
-            if (strMime == "html")
-                message.IsBodyHtml = true;
+                // System.Net.Mail 新名字空间
+                MailMessage message = new MailMessage(
+                    strManagerEmail,
+                    strUserEmail,
+                    strSubject,
+                    strBody);
+                if (strMime == "html")
+                    message.IsBodyHtml = true;
 
                 SmtpClient client = new SmtpClient(strSmtpServerAddress);
                 // Credentials are necessary if the server requires the client 
@@ -12779,14 +12778,14 @@ out string strError)
             }
             catch (Exception ex/*System.Web.HttpException ehttp*/)
             {
-                strError = GetInnerMessage(ex);
+                strError = ExceptionUtil.GetDebugText(ex);  // GetInnerMessage(ex);
                 return -1;
             }
-
 
             return 1;
         }
 
+#if NO
         public static string GetInnerMessage(Exception ex)
         {
             string strResult = "";
@@ -12798,7 +12797,7 @@ out string strError)
                     return strResult;
             }
         }
-
+#endif
 
         // 获得邮件模板
         int GetMailTemplate(
@@ -12810,7 +12809,7 @@ out string strError)
             strError = "";
             strText = "";
 
-            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("mailTemplates/template[@name='"+strTemplateName+"']");
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("mailTemplates/template[@name='" + strTemplateName + "']");
             if (nodes.Count == 0)
                 return 0;   // not found
 
@@ -12938,7 +12937,7 @@ out string strError)
                         strError = string.Format(this.GetString("续借操作被拒绝。因册s当前已被s位读者预约"),    // "续借操作被拒绝。因 册 {0} 当前已被 {1} 位读者预约。为方便他人，请尽早还回此书，谢谢。"
                             strItemBarcodeParam,
                             nodesReservationRequest.Count.ToString());
-                            // "续借操作被拒绝。因 册 " + strItemBarcode + " 当前已被 " + nodesReservationRequest.Count.ToString() + " 位读者预约。为方便他人，请尽早还回此书，谢谢。";
+                        // "续借操作被拒绝。因 册 " + strItemBarcode + " 当前已被 " + nodesReservationRequest.Count.ToString() + " 位读者预约。为方便他人，请尽早还回此书，谢谢。";
                     }
                     else
                     {
@@ -12946,7 +12945,7 @@ out string strError)
                         strError = string.Format(this.GetString("续借操作被拒绝。因册s当前已被下列读者预约s"),  // "续借操作被拒绝。因 册 {0} 当前已被下列读者预约: {1}。为方便他人，请尽早还回此书，谢谢。"
                             strItemBarcodeParam,
                             strList);
-                            // "续借操作被拒绝。因 册 " + strItemBarcode + " 当前已被下列读者预约: " + strList + "。为方便他人，请尽早还回此书，谢谢。";
+                        // "续借操作被拒绝。因 册 " + strItemBarcode + " 当前已被下列读者预约: " + strList + "。为方便他人，请尽早还回此书，谢谢。";
                     }
                     // 当前持有此书的读者无法续借，则只好在到期前归还图书馆。
                     return 2;
@@ -13087,7 +13086,7 @@ out string strError)
                             // "借阅操作被拒绝。因为 册 {0} 为读者 {1} 所(在架)预约，已处于保留和通知取书状态。\r\n图书馆员请注意：虽然本次借阅操作被拒绝，但此册地点信息已被软件自动修改为在预约保留架(而不是在原来的普通架)，请收下此书后放入预约保留架(的特定位置，例如“曾在架”部分)。"
                             strItemBarcodeParam,
                             strNotifyReaderBarcode);
-                            // "借阅操作被拒绝。因为 册 " + strItemBarcode + " 为读者 " + strNotifyReaderBarcode + " 所(在架)预约，已处于保留和通知取书状态。\r\n图书馆员请注意：虽然本次借阅操作被拒绝，但此册地点信息已被软件自动修改为在预约保留架(而不是在原来的普通架)，请收下此书后放入预约保留架(的特定位置，例如“曾在架”部分)。";
+                        // "借阅操作被拒绝。因为 册 " + strItemBarcode + " 为读者 " + strNotifyReaderBarcode + " 所(在架)预约，已处于保留和通知取书状态。\r\n图书馆员请注意：虽然本次借阅操作被拒绝，但此册地点信息已被软件自动修改为在预约保留架(而不是在原来的普通架)，请收下此书后放入预约保留架(的特定位置，例如“曾在架”部分)。";
                         return 3;
                     }
 
@@ -13096,7 +13095,7 @@ out string strError)
                         // "借阅操作被拒绝。因为 册 {0} 为读者 {1} 所预约，已处于保留和通知取书状态。"
                         strItemBarcodeParam,
                         strNotifyReaderBarcode);
-                        // "借阅操作被拒绝。因为 册 " + strItemBarcode + " 为读者 " + strNotifyReaderBarcode + " 所预约，已处于保留和通知取书状态。";
+                    // "借阅操作被拒绝。因为 册 " + strItemBarcode + " 为读者 " + strNotifyReaderBarcode + " 所预约，已处于保留和通知取书状态。";
                     return 1;
                 }
             }
@@ -13242,7 +13241,7 @@ out string strError)
                     strError = string.Format(this.GetString("该读者未曾借阅过册s，因此无法续借"),
                         // "该读者未曾借阅过册 '{0}'，因此无法续借。"
                         strItemBarcode);
-                        // "该读者未曾借阅过册 '" + strItemBarcode + "'，因此无法续借。";
+                    // "该读者未曾借阅过册 '" + strItemBarcode + "'，因此无法续借。";
                     return -1;
                 }
 
@@ -13393,12 +13392,12 @@ out string strError)
                             strBookType,
                             strBorrowPeriodList,
                             Convert.ToString(aPeriod.Length - 1));
-                            // "续借失败。读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数值 '" + strBorrowPeriodList + "' 规定，只能续借 " + Convert.ToString(aPeriod.Length - 1) + " 次。";
+                        // "续借失败。读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数值 '" + strBorrowPeriodList + "' 规定，只能续借 " + Convert.ToString(aPeriod.Length - 1) + " 次。";
                     }
                     return -1;
                 }
                 strThisBorrowPeriod = aPeriod[nNo].Trim();
-                strLastBorrowPeriod = aPeriod[nNo-1].Trim();
+                strLastBorrowPeriod = aPeriod[nNo - 1].Trim();
 
                 if (String.IsNullOrEmpty(strThisBorrowPeriod) == true)
                 {
@@ -13629,7 +13628,7 @@ out string strError)
 
             // 2014/11/14
             // lastReturningDate
-            
+
             if (nNo > 0)
                 DomUtil.SetAttr(nodeBorrow, "lastReturningDate",
                     strLastReturningDate);
@@ -13702,7 +13701,7 @@ out string strError)
             if (nNo > 0)
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "lastReturningDate",
-                    strLastReturningDate);  
+                    strLastReturningDate);
 
             if (string.IsNullOrEmpty(strRenewComment) == false) // 2013/12/23
                 DomUtil.SetElementText(itemdom.DocumentElement,
@@ -13884,7 +13883,7 @@ strBookPrice);    // 图书价格
                         Convert.ToString(nOverCount),
                         strOverdueItemBarcodeList);
 
-                        // "该读者当前有 " + Convert.ToString(nOverCount) + " 个未还超期册: " + strOverdueItemBarcodeList + ""; // ，因此借阅(或续借)操作被拒绝。请读者尽快将这些已超期册履行还书手续。
+                    // "该读者当前有 " + Convert.ToString(nOverCount) + " 个未还超期册: " + strOverdueItemBarcodeList + ""; // ，因此借阅(或续借)操作被拒绝。请读者尽快将这些已超期册履行还书手续。
                     return 1;
                 }
             }
@@ -13919,7 +13918,7 @@ strBookPrice);    // 图书价格
                     strError = string.Format(this.GetString("借阅证失效期值s格式错误"), // "借阅证失效期<expireDate>值 '{0}' 格式错误"
                         strExpireDate);
 
-                        // "借阅证失效期<expireDate>值 '" + strExpireDate + "' 格式错误";
+                    // "借阅证失效期<expireDate>值 '" + strExpireDate + "' 格式错误";
                     return -1;
                 }
 
@@ -13931,7 +13930,7 @@ strBookPrice);    // 图书价格
                     strError = string.Format(this.GetString("今天s已经超过借阅证失效期s"),  // "今天({0})已经超过借阅证失效期({1})。"
                         now.ToLocalTime().ToLongDateString(),
                         expireDate.ToLocalTime().ToLongDateString());
-                        // "今天(" + now.ToLocalTime().ToLongDateString() + ")已经超过借阅证失效期(" + expireDate.ToLocalTime().ToLongDateString() + ")。";
+                    // "今天(" + now.ToLocalTime().ToLongDateString() + ")已经超过借阅证失效期(" + expireDate.ToLocalTime().ToLongDateString() + ")。";
                     return 1;
                 }
 
@@ -13943,7 +13942,7 @@ strBookPrice);    // 图书价格
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("借阅证的状态为s"), // "借阅证的状态为 '{0}'。"
                     strState);
-                    // "借阅证的状态为 '" + strState + "'。";
+                // "借阅证的状态为 '" + strState + "'。";
                 return 2;
             }
 
@@ -14380,7 +14379,7 @@ strBookPrice);    // 图书价格
                         domOperLog.LoadXml("<root />");
                         DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strSourceLibraryCode + "," + strTargetLibraryCode );    // 读者所在的馆代码
+    strSourceLibraryCode + "," + strTargetLibraryCode);    // 读者所在的馆代码
                         DomUtil.SetElementText(domOperLog.DocumentElement,
                             "operation", "devolveReaderInfo");
 
@@ -14471,7 +14470,7 @@ strBookPrice);    // 图书价格
 
                             // 应当先保存target读者记录。因为如果此后中断，还原的可能性要大一些
 
-                        // REDO_WRITE_TARGET:
+                            // REDO_WRITE_TARGET:
                             lRet = channel.DoSaveTextRes(strTargetOutputReaderRecPath,
                                 target_readerdom.OuterXml,
                                 false,
@@ -14655,7 +14654,7 @@ strBookPrice);    // 图书价格
                 }
             }
 
-            for (int i = 0; i<nodesSourceBorrow.Count; i++)
+            for (int i = 0; i < nodesSourceBorrow.Count; i++)
             {
                 XmlNode source = nodesSourceBorrow[i];
 
@@ -14763,7 +14762,7 @@ strBookPrice);    // 图书价格
                 XmlNode target = nodeTargetOverdues.AppendChild(fragment);
 
                 // 增加一个注释元素
-                DomUtil.SetAttr(target, "devolveComment", "从读者 " +strSourceReaderBarcode+ " 转移而来，操作时间 " + strOperTimeString);
+                DomUtil.SetAttr(target, "devolveComment", "从读者 " + strSourceReaderBarcode + " 转移而来，操作时间 " + strOperTimeString);
             }
 
             // 源记录中根下创建一个注释元素
@@ -14772,9 +14771,9 @@ strBookPrice);    // 图书价格
             source_dom.DocumentElement.AppendChild(nodeComment);
             nodeComment.InnerXml = nodeSourceOverdues.InnerXml;
 
-            DomUtil.SetAttr(nodeComment, "comment", "已于 " 
-                +strOperTimeString
-                + " 将下列超期信息转移到读者 " +strTargetReaderBarcode+ " 名下");
+            DomUtil.SetAttr(nodeComment, "comment", "已于 "
+                + strOperTimeString
+                + " 将下列超期信息转移到读者 " + strTargetReaderBarcode + " 名下");
 
             // 创建日志记录信息要素
             if (domOperLog != null)
@@ -14852,7 +14851,7 @@ strBookPrice);    // 图书价格
                 }
                 if (nRet == -1)
                 {
-                    strError = "读入册记录 '"+strEntityBarcode+"' 时发生错误: " + strError;
+                    strError = "读入册记录 '" + strEntityBarcode + "' 时发生错误: " + strError;
                     goto ERROR1;
                 }
 
@@ -14977,7 +14976,7 @@ strBookPrice);    // 图书价格
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "devolveComment",
                     "本册原为读者 " + strOldReaderBarcode + " 所借阅，后于 "
-                    +strOperTimeString+" 被转移到读者 "+strNewReaderBarcode+" 名下");
+                    + strOperTimeString + " 被转移到读者 " + strNewReaderBarcode + " 名下");
 
 #if NO
                 if (channel == null)
@@ -15034,12 +15033,12 @@ strBookPrice);    // 图书价格
                         // 保存附件序号
                         DomUtil.SetAttr(nodeLogRecord, "attachmentIndex", nAttachmentIndex.ToString());
 
-                        byte [] content = Encoding.UTF8.GetBytes(itemdom.OuterXml);
+                        byte[] content = Encoding.UTF8.GetBytes(itemdom.OuterXml);
                         byte[] length = BitConverter.GetBytes((long)content.LongLength);
                         attachment.Write(length, 0, length.Length);
                         attachment.Write(content, 0, content.Length);
 
-                        nAttachmentIndex ++;
+                        nAttachmentIndex++;
                     }
                 }
             }
@@ -15160,7 +15159,7 @@ strBookPrice);    // 图书价格
                     string strOutputReaderBarcode_0 = "";
 
                     string[] aDupPath = null;
-                   // 检查一个实体记录的借还信息是否异常。
+                    // 检查一个实体记录的借还信息是否异常。
                     LibraryServerResult result_1 = CheckItemBorrowInfo(
                         // Channels,
                         channel,
@@ -15270,7 +15269,7 @@ strBookPrice);    // 图书价格
                 result.Value = 1;
                 result.ErrorInfo = strCheckError;
             }
-            else 
+            else
                 result.Value = 0;
 
             return result;
@@ -15510,7 +15509,7 @@ strBookPrice);    // 图书价格
                     strOutputReaderRecPath = strExistReaderRecPath;
                 }
 
-                XmlNodeList nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@barcode='"+strItemBarcode+"']");
+                XmlNodeList nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@barcode='" + strItemBarcode + "']");
                 if (nodesBorrow.Count == 0)
                 {
                     strCheckError += "虽然册记录 " + strOutputItemRecPath + " 中表明了被读者 '" + strOutputReaderBarcode + "' 借阅，但是读者记录 " + strOutputReaderRecPath + " 中并没有关于册条码号 '" + strItemBarcode + "' 的借阅记录。";
@@ -15559,7 +15558,7 @@ strBookPrice);    // 图书价格
             string strReaderBarcode,
             string strItemBarcode,
             string strConfirmItemRecPath,
-            out string [] aDupPath)
+            out string[] aDupPath)
         {
             string strError = "";
             aDupPath = null;
@@ -15580,12 +15579,12 @@ strBookPrice);    // 图书价格
                 strError = "册条码号不能为空。";
                 goto ERROR1;
             }
-REDO_REPAIR:
+        REDO_REPAIR:
 
-    /*
-            string strOutputReaderXml = "";
-            string strOutputItemXml = "";
-     * */
+            /*
+                    string strOutputReaderXml = "";
+                    string strOutputItemXml = "";
+             * */
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -15653,10 +15652,10 @@ REDO_REPAIR:
                     goto ERROR1;
                 }
 
-                XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='"+strItemBarcode+"']");
+                XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
                 if (nodeBorrow == null)
                 {
-                    strError = "修复操作被拒绝。读者记录 "+strReaderBarcode+" 中并不存在有关册 "+strItemBarcode+" 的借阅信息。";
+                    strError = "修复操作被拒绝。读者记录 " + strReaderBarcode + " 中并不存在有关册 " + strItemBarcode + " 的借阅信息。";
                     goto ERROR1;
                 }
 
@@ -15796,7 +15795,7 @@ REDO_REPAIR:
                         goto ERROR1;
                     }
 
-                    DELETE_CHAIN:
+                DELETE_CHAIN:
 
                     // 移除读者记录侧的链
                     nodeBorrow.ParentNode.RemoveChild(nodeBorrow);
@@ -16136,7 +16135,7 @@ REDO_REPAIR:
 
                     if (strBorrower != strReaderBarcode)
                     {
-                        strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 "+strReaderBarcode+"。";
+                        strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 " + strReaderBarcode + "。";
                         goto ERROR1;
                     }
 
@@ -16151,7 +16150,7 @@ REDO_REPAIR:
                         }
                     }
 
-                // DELETE_CHAIN:
+                    // DELETE_CHAIN:
 
                     // 移除册记录侧的链
                     DomUtil.SetElementText(itemdom.DocumentElement,
@@ -16384,7 +16383,7 @@ REDO_REPAIR:
                 if (this.Statis != null)
                     nResultValue = this.Statis.IncreaseEntryValue(
                     strLibraryCode,
-                    "入馆人次", 
+                    "入馆人次",
                     String.IsNullOrEmpty(strGateName) == true ? "(blank)" : strGateName,
                     (int)1);
 
@@ -16566,7 +16565,7 @@ REDO_REPAIR:
                     return result;
                 }
             }
-            else 
+            else
             {
                 strError = "未知的strAction值 '" + strAction + "'";
                 goto ERROR1;
@@ -16718,7 +16717,7 @@ REDO_REPAIR:
                 if (this.Statis != null)
                     this.Statis.IncreaseEntryValue(
                     strLibraryCode,
-                    "押金", 
+                    "押金",
                     "创建交费请求次",
                     1);
                 // TODO: 增加价格量?
@@ -16814,7 +16813,7 @@ REDO_REPAIR:
 
             string strExistPrice = nodeForegift.InnerText;
 
-            string strCurrentDate = strOperTime; 
+            string strCurrentDate = strOperTime;
             DateTime current_date = DateTimeUtil.FromRfc1123DateTimeString(strCurrentDate);
 
             if (strAction == "foregift")
@@ -16847,7 +16846,7 @@ REDO_REPAIR:
                     return -1;
                 }
             }
-            else 
+            else
             {
                 strError = "未知的strAction值 '" + strAction + "'";
                 goto ERROR1;
@@ -17162,7 +17161,7 @@ REDO_REPAIR:
 #endif
             }
 
-        // END1:
+            // END1:
             result.Value = 1;
             return result;
         ERROR1:
@@ -17337,11 +17336,11 @@ REDO_REPAIR:
 
             // 如果租金失效期大于证失效期，或者读者记录中现有失效期为空
             if (hire_expiredate > reader_expiredate
-                || String.IsNullOrEmpty(DomUtil.GetElementText(readerdom.DocumentElement,"expireDate")) == true
+                || String.IsNullOrEmpty(DomUtil.GetElementText(readerdom.DocumentElement, "expireDate")) == true
                 )
             {
                 DomUtil.SetElementText(readerdom.DocumentElement,
-                    "expireDate", 
+                    "expireDate",
                     DateTimeUtil.Rfc1123DateTimeStringEx(hire_expiredate.ToLocalTime()));
             }
 
@@ -17381,7 +17380,7 @@ REDO_REPAIR:
         public LibraryServerResult Settlement(
             SessionInfo sessioninfo,
             string strAction,
-            string [] ids)
+            string[] ids)
         {
             string strError = "";
             int nRet = 0;
@@ -17532,7 +17531,7 @@ REDO_REPAIR:
                     // 遇到一般出错应当继续处理
                     if (nRet == -1)
                     {
-                        strError += strAction + "违约金记录 '" +strPath+ "' 时发生错误: " + strCurrentError + "\r\n";
+                        strError += strAction + "违约金记录 '" + strPath + "' 时发生错误: " + strCurrentError + "\r\n";
                     }
                     // 但是遇到日志空间满这样的错误就不能继续处理了
                     if (nRet == -2)
@@ -17626,7 +17625,7 @@ REDO_REPAIR:
             {
                 if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                 {
-                    strError = "当前用户未能管辖违约金记录 '"+strAmercedRecPath+"' 所在的馆代码 '"+strLibraryCode+"'";
+                    strError = "当前用户未能管辖违约金记录 '" + strAmercedRecPath + "' 所在的馆代码 '" + strLibraryCode + "'";
                     return -1;
                 }
             }
@@ -17967,10 +17966,10 @@ REDO_REPAIR:
                 }
 
                 Page.Response.AddHeader("Last-Modified", DateTimeUtil.Rfc1123DateTimeString(lastmodified.ToUniversalTime()));
-/*
-                Page.Response.Cache.SetLastModified(lastmodified);
-                Page.Response.Cache.SetCacheability(HttpCacheability.Public);
- * */
+                /*
+                                Page.Response.Cache.SetLastModified(lastmodified);
+                                Page.Response.Cache.SetCacheability(HttpCacheability.Public);
+                 * */
             }
 
             string strMime = (string)values["mimetype"];

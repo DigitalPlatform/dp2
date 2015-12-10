@@ -25,7 +25,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
-        /// <summary>
+    /// <summary>
     /// 本部分是编目业务相关的代码
     /// </summary>
     public partial class LibraryApplication
@@ -177,7 +177,7 @@ namespace DigitalPlatform.LibraryServer
                     biblio_records = StringUtil.SplitList(strBiblioXmlParam.Replace("<!-->", new string((char)0x01, 1)), (char)0x01);
                     if (commands.Count != biblio_records.Count)
                     {
-                        strError = "strBiblioXml 参数中包含的子串个数 "+biblio_records.Count.ToString()+" 和 strBiblioRecPath 中包含记录路径子串个数 "+commands.Count.ToString()+" 应该相等才对";
+                        strError = "strBiblioXml 参数中包含的子串个数 " + biblio_records.Count.ToString() + " 和 strBiblioRecPath 中包含记录路径子串个数 " + commands.Count.ToString() + " 应该相等才对";
                         goto ERROR1;
                     }
                 }
@@ -515,7 +515,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioXml,
             string strOutputPath,   // 记录的路径
             string strMetadata,     // 记录的metadata
-            byte [] timestamp,
+            byte[] timestamp,
             string[] formats,
             out List<String> result_strings,
             out string strErrorText)
@@ -759,7 +759,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     strBiblio = strResultXml;
                 }
-                    // 2014/3/17
+                // 2014/3/17
                 else if (IsResultType(strBiblioType, "subcount") == true)
                 {
                     string strType = "";
@@ -814,7 +814,7 @@ namespace DigitalPlatform.LibraryServer
 
                         lTotalCount += lTemp;
                     }
-                    if (strSubType == "order" 
+                    if (strSubType == "order"
                         || string.IsNullOrEmpty(strSubType) == true
                         || strSubType == "all")
                     {
@@ -2009,7 +2009,7 @@ return result;
     && string.IsNullOrEmpty(strList) == false)
                 return false;
 
-            string[] subs = strSubList.Split(new char [] {','}, StringSplitOptions.RemoveEmptyEntries);
+            string[] subs = strSubList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] parts = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string sub in subs)
@@ -2690,7 +2690,7 @@ nsmgr);
                     delete_fields.Add(field);
             }
 
-            foreach(MarcField field in delete_fields)
+            foreach (MarcField field in delete_fields)
             {
                 field.detach();
             }
@@ -2717,7 +2717,7 @@ nsmgr);
             {
                 if (FullyContainIn(strLibraryCodeList, sessioninfo.LibraryCodeList) == false)
                 {
-                    strError = "所请求的馆代码 '" + strLibraryCodeList + "' 不是完全包含于当前用户的管辖范围馆代码 '"+sessioninfo.LibraryCodeList+"' 中";
+                    strError = "所请求的馆代码 '" + strLibraryCodeList + "' 不是完全包含于当前用户的管辖范围馆代码 '" + sessioninfo.LibraryCodeList + "' 中";
                     goto ERROR1;
                 }
             }
@@ -3294,7 +3294,7 @@ nsmgr);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "发送email出错: " + strError;
+                        strError = "发送 email 到 '" + strReaderEmailAddress + "' 出错: " + strError;
                         if (this.Statis != null)
                             this.Statis.IncreaseEntryValue(
                             strLibraryCode,
@@ -3548,7 +3548,7 @@ nsmgr);
                 }
             }
 
-            CHECK_RIGHTS_2:
+        CHECK_RIGHTS_2:
             if (bRightVerified == false)
             {
                 // 权限字符串
@@ -3673,7 +3673,7 @@ nsmgr);
             bool bBiblioNotFound = false;
 
             string strRights = "";
-            
+
             if (sessioninfo.Account != null)
                 strRights = sessioninfo.Account.Rights;
 
@@ -3808,7 +3808,7 @@ out strError);
                         // 非工作库。要求原来记录不存在
                         if (String.IsNullOrEmpty(strExistingXml) == false)
                         {
-                            strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 change 功能修改已经存在的书目记录 '"+strBiblioRecPath+"'";
+                            strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 change 功能修改已经存在的书目记录 '" + strBiblioRecPath + "'";
                             goto ERROR1;
                         }
                     }
@@ -4182,7 +4182,7 @@ out strError);
             string strAction,
             string strBiblioRecPath,
             string strExistingXml,
-            byte [] baTimestamp,
+            byte[] baTimestamp,
             ref bool bBiblioNotFound,
             ref string strBiblio,
             ref byte[] baOutputTimestamp,
@@ -4625,7 +4625,7 @@ out strError);
 
             if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
             {
-                strError = "册记录的 '"+strRecPath+"' 的馆藏地点 '"+strLocation+"' 不在当前用户管辖范围 '"+strLibraryCodeList+"' 内，操作被拒绝";
+                strError = "册记录的 '" + strRecPath + "' 的馆藏地点 '" + strLocation + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，操作被拒绝";
                 return -1;
             }
 
@@ -4906,7 +4906,7 @@ out strError);
             // bool bBiblioNotFound = false;
 
             string strRights = "";
-            
+
             if (sessioninfo.Account != null)
                 strRights = sessioninfo.Account.Rights;
 
@@ -5318,11 +5318,11 @@ out strError);
                     if (nBorrowInfoCount > 0
                         && strAction == "move")
                     {
-                        strError = "目标书目库 '" + strTargetBiblioDbName + "' 没有下属的实体库，(移动操作)将丢失来自源书目库下属的 " + entityinfos.Count + " 条实体记录。但这些实体记录中已经存在有 "+nBorrowInfoCount.ToString()+" 个流通信息，这意味着这些实体记录不能消失。因此移动操作被迫放弃";
+                        strError = "目标书目库 '" + strTargetBiblioDbName + "' 没有下属的实体库，(移动操作)将丢失来自源书目库下属的 " + entityinfos.Count + " 条实体记录。但这些实体记录中已经存在有 " + nBorrowInfoCount.ToString() + " 个流通信息，这意味着这些实体记录不能消失。因此移动操作被迫放弃";
                         goto ERROR1;
                     }
 
-                    strWarning += "目标书目库 '"+strTargetBiblioDbName+"' 没有下属的实体库，已丢失来自源书目库下属的 "+entityinfos.Count+" 条实体记录; ";
+                    strWarning += "目标书目库 '" + strTargetBiblioDbName + "' 没有下属的实体库，已丢失来自源书目库下属的 " + entityinfos.Count + " 条实体记录; ";
                 }
             }
 
