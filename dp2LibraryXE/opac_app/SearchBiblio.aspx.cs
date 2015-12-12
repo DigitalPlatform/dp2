@@ -611,7 +611,7 @@ ref sessioninfo) == false)
         }
 
         string strParameters = this.filter.SelectedNodePath;
-        string [] parameters = strParameters.Split(new char [] {','});
+        string[] parameters = strParameters.Split(new char[] { ',' });
         string strNode = "";
         int nStart = 0;
         if (parameters.Length >= 1)

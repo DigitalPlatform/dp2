@@ -100,7 +100,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.59 (2015/11/16) WriteRes() API 允许通过 lTotalLength 为 -1 调用，作用是仅修改 metadata。这个版本要求 dp2kernel 为 V2.63 以上
         //      2.60 (2015/11/25) GetOperLogs() 和 GetOperLog() API 开始支持两种日志类型。
         //      2.61 (2015/12/9) GetReaderInfo() 允许使用 _testreader 获得测试用的读者记录信息
-        public static string Version = "2.61";
+        //      2.62 (2015/12/11) Login() API 增加了检查前端最低版本号的功能。如果用户权限中有 checkclientversion，就进行这项检查
+        public static string Version = "2.62";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -129,6 +130,11 @@ namespace DigitalPlatform.LibraryServer
         /// 是否为评估状态
         /// </summary>
         public bool TestMode = false;
+
+        /// <summary>
+        /// 在登录阶段是否强制检查前端的版本号？(对几个特殊的代理账户不做此项检查)
+        /// </summary>
+        public bool CheckClientVersion = false;
 
         // 存储各种参数信息
         // 为C#脚本所准备
@@ -740,6 +746,19 @@ namespace DigitalPlatform.LibraryServer
                 else
                 {
                     app.NotifyDef = "";
+                }
+
+                // <login>
+                node = dom.DocumentElement.SelectSingleNode("login") as XmlElement;
+                if (node != null)
+                {
+                    this.CheckClientVersion = DomUtil.GetBooleanParam(node,
+                        "checkClientVersion",
+                        false);
+                }
+                else
+                {
+                    this.CheckClientVersion = false;
                 }
 
                 // <circulation>
@@ -3044,6 +3063,13 @@ namespace DigitalPlatform.LibraryServer
                         // <libraryInfo>
                         // 注: <libraryName>元素在此里面
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <login>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("login");
                         if (node != null)
                         {
                             node.WriteTo(writer);

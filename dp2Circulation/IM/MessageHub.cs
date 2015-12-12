@@ -106,6 +106,8 @@ false);
                     e.Parameters += ",expire=" + strExpire;
 #endif
 
+                e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
             }

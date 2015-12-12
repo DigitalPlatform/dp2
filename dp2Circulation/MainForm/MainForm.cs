@@ -2407,6 +2407,8 @@ Stack:
                 _expireVersionChecked = true;
             }
 #endif
+
+#if NO
             {
                 double base_version = 2.60;
 
@@ -2419,6 +2421,7 @@ Stack:
                     return;
                 }
             }
+#endif
 
             if (e.FirstTry == true)
             {
@@ -2459,6 +2462,8 @@ Stack:
                 // 2014/10/23
                 if (this.TestMode == true)
                     e.Parameters += ",testmode=true";
+
+                e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -2507,6 +2512,8 @@ Stack:
             // 2014/10/23
             if (this.TestMode == true)
                 e.Parameters += ",testmode=true";
+
+            e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)

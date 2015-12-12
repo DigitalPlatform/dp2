@@ -68,8 +68,6 @@ ref this.sessioninfo) == false)
         if (this.LoginControl1.KeepLogin == false)
             this.SetCookiesLogin(null, null, -1, 0);
 #endif
-        throw new Exception("test exception");
-
         if (WebUtil.PrepareEnvironment(this,
     ref app,
     ref sessioninfo) == false)

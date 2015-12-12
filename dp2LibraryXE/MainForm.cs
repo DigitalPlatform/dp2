@@ -2120,6 +2120,8 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 string strLocation = "manager";
                 e.Parameters = "location=" + strLocation;
 
+                e.Parameters += ",client=dp2libraryxe|" + Program.ClientVersion;
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
 
@@ -2172,6 +2174,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             if (this.TestMode == true)
                 e.Parameters += ",testmode=true";
 #endif
+            e.Parameters += ",client=dp2libraryxe|" + Program.ClientVersion;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)

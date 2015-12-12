@@ -5,11 +5,12 @@ using System.Web;
 using System.Web.SessionState;
 using System.Diagnostics;
 using System.Web.Routing;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
-using System.IO;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2OPAC
 {
@@ -87,7 +88,7 @@ namespace dp2OPAC
 
                     // string strHostDir = this.Server.MapPath(".");
                     string strHostDir = Path.GetDirectoryName(this.Server.MapPath("~/start.xml"));  // 2015/7/20
-                    
+
                     nRet = app.Load(
                         false,
                         strDataDir,
@@ -214,7 +215,29 @@ namespace dp2OPAC
 
         protected void Application_Error(Object sender, EventArgs e)
         {
+            // OpacApplication app = (OpacApplication)Application["app"];
 
+            Exception ex = HttpContext.Current.Server.GetLastError();
+
+            string strText = ExceptionUtil.GetDebugText(ex)
+                + "\r\n\r\n版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString();
+
+            string strError = "";
+            try
+            {
+                string strSender = HttpContext.Current.Server.MachineName;
+                // 崩溃报告
+                int nRet = LibraryChannel.CrashReport(
+                    strSender,
+                    "dp2OPAC",
+                    strText,
+                    out strError);
+            }
+            catch (Exception ex0)
+            {
+                strError = "CrashReport() 过程出现异常: " + ExceptionUtil.GetDebugText(ex0);
+                // nRet = -1;
+            }
         }
 
         protected void Session_End(Object sender, EventArgs e)
@@ -254,7 +277,6 @@ namespace dp2OPAC
                     strErrorInfo = app.GlobalErrorInfo;
                 else
                     strErrorInfo = (string)Application["errorinfo"];
-
 
                 // 系统错误字符串为空时才保存.xml配置文件
                 if (String.IsNullOrEmpty(strErrorInfo) == true)
@@ -301,7 +323,6 @@ namespace dp2OPAC
                 "stylenew/{librarycode}/{style}/{filename}",
                 "~/css.aspx");
         }
-
 
         #region Web Form Designer generated code
         /// <summary>

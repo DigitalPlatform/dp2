@@ -16,6 +16,11 @@ namespace dp2Circulation
 {
     static class Program
     {
+        /// <summary>
+        /// 前端，也就是 dp2circulation.exe 的版本号
+        /// </summary>
+        public static string ClientVersion { get; set; }
+
 #if NO
         static ExecutionContext context = ExecutionContext.Capture();
         static Mutex mutex = new Mutex(true, "{A810CFB4-D932-4821-91D4-4090C84C5C68}");
@@ -36,6 +41,8 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
+            ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
+
             List<string> args = StringUtil.GetCommandLineArgs();
 
             // 绿色安装方式下，如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动

@@ -421,6 +421,10 @@ namespace DigitalPlatform.LibraryServer
                     strRights += ",token:" + strToken;
             }
 
+            if (this.App.CheckClientVersion == true
+                && strUserID != "reader" && strUserID != "public" && strUserID != "opac")
+                strRights += ",checkclientversion";
+
             return 1;
         }
 

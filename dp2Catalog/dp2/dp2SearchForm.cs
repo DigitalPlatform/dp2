@@ -397,6 +397,8 @@ namespace dp2Catalog
                 if (this.MainForm.TestMode == true)
                     e.Parameters += ",testmode=true";
 
+                e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
             }
@@ -414,7 +416,6 @@ namespace dp2Catalog
                 e.Cancel = true;
                 return;
             }
-
 
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
@@ -436,6 +437,8 @@ namespace dp2Catalog
             // 2014/11/10
             if (this.MainForm.TestMode == true)
                 e.Parameters += ",testmode=true";
+
+            e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
 
             e.SavePasswordLong = true;
             e.LibraryServerUrl = dlg.ServerUrl;

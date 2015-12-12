@@ -12,6 +12,11 @@ namespace dp2Catalog
 {
     static class Program
     {
+        /// <summary>
+        /// 前端，也就是 dp2catalog.exe 的版本号
+        /// </summary>
+        public static string ClientVersion { get; set; }
+
         static bool bExiting = false;
 
         static MainForm _mainForm = null;
@@ -25,6 +30,7 @@ namespace dp2Catalog
         [STAThread]
         static void Main()
         {
+            ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
 #if NO
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

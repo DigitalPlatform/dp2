@@ -4223,7 +4223,6 @@ start_time_1,
                             itemdom = temp_itemdom;
                             item_timestamp = temp_timestamp;
                             strItemXml = strTempItemXml;
-
                         }
 
                         // 如果时间戳没有发生过改变，则不必刷新任何参数
@@ -4532,6 +4531,10 @@ start_time_1,
                     // 处理册记录
                     string strOverdueString = "";
                     string strLostComment = "";
+                    // return:
+                    //      -1  出错
+                    //      0   正常
+                    //      1   超期还书或者丢失处理的情况
                     nRet = DoReturnItemXml(
                         strAction,
                         sessioninfo,    // sessioninfo.Account,
@@ -4585,7 +4588,6 @@ start_time_1,
                         strOverdueInfo = strError;
                     }
 
-
                     // 处理读者记录
                     // string strNewReaderXml = "";
                     string strDeletedBorrowFrag = "";
@@ -4594,7 +4596,7 @@ start_time_1,
                         ref readerdom,
                         strItemBarcodeParam,
                         strItemBarcode,
-                        strOverdueString,
+                        strOverdueString.StartsWith("!") ? "" : strOverdueString,
                         sessioninfo.UserID, // 还书操作者
                         strOperTime,
                         sessioninfo.ClientAddress,  // 前端触发
@@ -4744,7 +4746,7 @@ start_time_1,
                                     strReaderBarcode,
                                     strItemBarcodeParam,
                                     strDeletedBorrowFrag,
-                                    strOverdueString,
+                                    strOverdueString.StartsWith("!") ? "" : strOverdueString,
                                     out strError);
                                 if (nRet == -1)
                                 {
@@ -4804,7 +4806,8 @@ start_time_1,
                     if (String.IsNullOrEmpty(strOverdueString) == false)
                     {
                         DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "overdues", strOverdueString);
+                            "overdues", 
+                            strOverdueString.StartsWith("!") ? strOverdueString.Substring(1) : strOverdueString);
                     }
 
                     // 确认册路径
@@ -11711,7 +11714,6 @@ out string strError)
             return 0;
         }
 
-
         // 在册记录中删除借书信息
         // parameters:
         //      strOverdueString    表示超期信息的字符串。borrowOperator属性表示借阅操作者；operator属性表示还书操作者
@@ -11720,10 +11722,8 @@ out string strError)
         //      0   正常
         //      1   超期还书或者丢失处理的情况
         int DoReturnItemXml(
-            // bool bLost,
             string strAction,
             SessionInfo sessioninfo,
-            // Account account,
             Calendar calendar,
             string strReaderType,
             string strLibraryCode,
@@ -12025,108 +12025,127 @@ out string strError)
 
             if (lDelta1 > 0)
             {
-                string strOverduePrice = "";
-
-
                 // 获得 '超期违约金因子' 配置参数
+                bool bComputePrice = true;
                 string strPriceCfgString = "";
-                MatchResult matchresult;
-                // return:
-                //      reader和book类型均匹配 算4分
-                //      只有reader类型匹配，算3分
-                //      只有book类型匹配，算2分
-                //      reader和book类型都不匹配，算1分
-                nRet = app.GetLoanParam(
-                    //null,
-                    strLibraryCode,
-                    strReaderType,
-                    strBookType,
-                    "超期违约金因子",
-                    out strPriceCfgString,
-                    out matchresult,
-                    out strError);
+                {
+                    MatchResult matchresult;
+                    // return:
+                    //      reader和book类型均匹配 算4分
+                    //      只有reader类型匹配，算3分
+                    //      只有book类型匹配，算2分
+                    //      reader和book类型都不匹配，算1分
+                    nRet = app.GetLoanParam(
+                        //null,
+                        strLibraryCode,
+                        strReaderType,
+                        strBookType,
+                        "超期违约金因子",
+                        out strPriceCfgString,
+                        out matchresult,
+                        out strError);
+                }
+
                 if (nRet == -1)
                 {
                     if (bForce == true)
-                        goto CONTINUE_OVERDUESTRING;
-                    strError = "还书失败。获得 馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数时发生错误: " + strError;
-                    return -1;
+                        bComputePrice = false;  // goto CONTINUE_OVERDUESTRING;
+                    else
+                    {
+                        strError = "还书失败。获得 馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数时发生错误: " + strError;
+                        return -1;
+                    }
                 }
                 if (nRet < 4) // nRet == 0
                 {
                     if (bForce == true)
-                        goto CONTINUE_OVERDUESTRING;
-
-                    strError = "还书失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数无法获得: " + strError;
-                    return -1;
+                        bComputePrice = false;  // goto CONTINUE_OVERDUESTRING;
+                    else
+                    {
+                        strError = "还书失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数无法获得: " + strError;
+                        return -1;
+                    }
                 }
 
-                // long lOver = 0;
-                // 如果<amerce overdueStyle="...">中包含了includeNoneworkingDay，表示超期天数按照包含了末尾非工作日的算法。否则，就是不包含末尾非工作日，从第一个工作日开始后面的超过天数。
-                if (StringUtil.IsInList("includeNoneworkingDay", this.OverdueStyle) == true)
-                    lOver = lDelta;
-                else
-                    lOver = lDelta1;
-
-                nRet = ComputeOverduePrice(
-                    strPriceCfgString,
-                    lDelta1,    // 按照调整后的差额计算
-                    strPeriodUnit,
-                    out strOverduePrice,
-                    out strError);
-                if (nRet == -1)
+                // 注: '超期违约金因子' 参数值如果为空，表明不对超期做违约金处理(方法是在 strOverdueString 第一字符添加一个 '!' )。但需要记入日志
                 {
-                    if (bForce == true)
-                        goto CONTINUE_OVERDUESTRING;
+                    // long lOver = 0;
+                    // 如果<amerce overdueStyle="...">中包含了includeNoneworkingDay，表示超期天数按照包含了末尾非工作日的算法。否则，就是不包含末尾非工作日，从第一个工作日开始后面的超过天数。
+                    if (StringUtil.IsInList("includeNoneworkingDay", this.OverdueStyle) == true)
+                        lOver = lDelta;
+                    else
+                        lOver = lDelta1;
 
-                    strError = "还书失败。计算超期违约金价格时出错: " + strError;
-                    return -1;
+                    string strOverduePrice = "";
+                    if (bComputePrice == true && string.IsNullOrEmpty(strPriceCfgString) == false)
+                    {
+                        nRet = ComputeOverduePrice(
+                            strPriceCfgString,
+                            lDelta1,    // 按照调整后的差额计算
+                            strPeriodUnit,
+                            out strOverduePrice,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (bForce == true)
+                            {
+                                // goto CONTINUE_OVERDUESTRING;
+                            }
+                            else
+                            {
+                                strError = "还书失败。计算超期违约金价格时出错: " + strError;
+                                return -1;
+                            }
+                        }
+                    }
+
+                    // CONTINUE_OVERDUESTRING:
+                    strOverdueMessage += "还书时已超过借阅期限 " + Convert.ToString(lOver) + GetDisplayTimeUnitLang(strPeriodUnit) + "。请履行超期手续。";
+
+                    // 最好用XmlTextWriter或者DOM来构造strOverdueString
+                    XmlDocument tempdom = new XmlDocument();
+                    tempdom.LoadXml("<overdue />");
+                    DomUtil.SetAttr(tempdom.DocumentElement, "barcode", strItemBarcode);
+
+                    if (bItemBarcodeDup == true)
+                    {
+                        // 若条码号足以定位，则不记载实体记录路径
+                        DomUtil.SetAttr(tempdom.DocumentElement, "recPath", strItemRecPath);
+                    }
+
+                    string strReason = "超期。超 " + (lOver).ToString() + GetDisplayTimeUnitLang(strPeriodUnit) + "; 违约金因子: " + strPriceCfgString;
+                    DomUtil.SetAttr(tempdom.DocumentElement, "reason", strReason);
+
+                    // 超期时间长度 2007/12/17
+                    DomUtil.SetAttr(tempdom.DocumentElement, "overduePeriod", (lOver).ToString() + strPeriodUnit);
+
+                    DomUtil.SetAttr(tempdom.DocumentElement, "price", strOverduePrice);
+                    DomUtil.SetAttr(tempdom.DocumentElement, "borrowDate", strBorrowDate);
+                    DomUtil.SetAttr(tempdom.DocumentElement, "borrowPeriod", strPeriod);
+                    DomUtil.SetAttr(tempdom.DocumentElement, "returnDate", DateTimeUtil.Rfc1123DateTimeStringEx(now.ToLocalTime()));
+                    DomUtil.SetAttr(tempdom.DocumentElement, "borrowOperator", strBorrowOperator);
+                    DomUtil.SetAttr(tempdom.DocumentElement, "operator", strReturnOperator);
+                    // id属性是唯一的, 为交违约金C/S界面创造了有利条件
+                    string strOverdueID = GetOverdueID();
+                    DomUtil.SetAttr(tempdom.DocumentElement, "id", strOverdueID);
+
+                    strOverdueString = tempdom.DocumentElement.OuterXml;
+
+                    /*
+                    strOverdueString = "<overdue barcode='" + strItemBarcode
+                        + "' over='" + Convert.ToString(lOver) + strPeriodUnit
+                        + "' borrowDate='" + strBorrowDate
+                        + "' borrowPeriod='" + strPeriod 
+                        + "' returnDate='" + DateTimeUtil.Rfc1123DateTimeString(now) 
+                        + "' operator='" + strOperator
+                        + "' id='" + GetOverdueID() + "'/>";
+                     */
+
+                    if (string.IsNullOrEmpty(strPriceCfgString) == false)
+                        bOverdue = true;
+                    else
+                        strOverdueString = "!" + strOverdueString;  // 表示后面不写入读者记录，但需记入日志
                 }
-
-            CONTINUE_OVERDUESTRING:
-
-                strOverdueMessage += "还书时已超过借阅期限 " + Convert.ToString(lOver) + GetDisplayTimeUnitLang(strPeriodUnit) + "。请履行超期手续。";
-
-                // 最好用XmlTextWriter或者DOM来构造strOverdueString
-                XmlDocument tempdom = new XmlDocument();
-                tempdom.LoadXml("<overdue />");
-                DomUtil.SetAttr(tempdom.DocumentElement, "barcode", strItemBarcode);
-
-                if (bItemBarcodeDup == true)
-                {
-                    // 若条码号足以定位，则不记载实体记录路径
-                    DomUtil.SetAttr(tempdom.DocumentElement, "recPath", strItemRecPath);
-                }
-
-                string strReason = "超期。超 " + (lOver).ToString() + GetDisplayTimeUnitLang(strPeriodUnit) + "; 违约金因子: " + strPriceCfgString;
-                DomUtil.SetAttr(tempdom.DocumentElement, "reason", strReason);
-
-                // 超期时间长度 2007/12/17
-                DomUtil.SetAttr(tempdom.DocumentElement, "overduePeriod", (lOver).ToString() + strPeriodUnit);
-
-                DomUtil.SetAttr(tempdom.DocumentElement, "price", strOverduePrice);
-                DomUtil.SetAttr(tempdom.DocumentElement, "borrowDate", strBorrowDate);
-                DomUtil.SetAttr(tempdom.DocumentElement, "borrowPeriod", strPeriod);
-                DomUtil.SetAttr(tempdom.DocumentElement, "returnDate", DateTimeUtil.Rfc1123DateTimeStringEx(now.ToLocalTime()));
-                DomUtil.SetAttr(tempdom.DocumentElement, "borrowOperator", strBorrowOperator);
-                DomUtil.SetAttr(tempdom.DocumentElement, "operator", strReturnOperator);
-                // id属性是唯一的, 为交违约金C/S界面创造了有利条件
-                string strOverdueID = GetOverdueID();
-                DomUtil.SetAttr(tempdom.DocumentElement, "id", strOverdueID);
-
-                strOverdueString = tempdom.DocumentElement.OuterXml;
-
-                /*
-                strOverdueString = "<overdue barcode='" + strItemBarcode
-                    + "' over='" + Convert.ToString(lOver) + strPeriodUnit
-                    + "' borrowDate='" + strBorrowDate
-                    + "' borrowPeriod='" + strPeriod 
-                    + "' returnDate='" + DateTimeUtil.Rfc1123DateTimeString(now) 
-                    + "' operator='" + strOperator
-                    + "' id='" + GetOverdueID() + "'/>";
-                 */
-
-                bOverdue = true;
             }
 
             if (strAction == "lost")
@@ -12224,7 +12243,6 @@ out string strError)
                         strError = "还书失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 丢失违约金因子 参数无法获得: " + strError;
                         return -1;
                     }
-
 
                     nRet = ComputeLostPrice(
                         strPriceCfgString,
@@ -12380,7 +12398,6 @@ out string strError)
             DomUtil.DeleteElement(itemdom.DocumentElement,
 "operator");
 
-
             // item中原operator元素值表示借阅操作者，此时应转入历史中的borrowOperator元素中
             if (nodeOldBorrower != null)
                 DomUtil.SetAttr(nodeOldBorrower,
@@ -12467,7 +12484,6 @@ out string strError)
                         "当日内立即还册",
                         1);
                 }
-
             }
 
             // return_info
