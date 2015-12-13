@@ -16,7 +16,7 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Web
 {

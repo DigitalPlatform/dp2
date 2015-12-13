@@ -9,16 +9,17 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Diagnostics;
 using System.Xml;
+using System.Web;
+using System.IO;
+using System.Drawing;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
-using System.Web;
-using System.IO;
-using System.Drawing;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

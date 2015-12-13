@@ -8,10 +8,11 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 /*
  * 1) 需要输出一个纯文本文件，里面详细描述了每种期刊的期分布情况，和探测出缺期的原理，便于调试。要区分已经建立的期节点和(根据订购信息)预测的期节点
@@ -213,7 +214,7 @@ out strError);
             long lHitCount = lRet;
             long lStart = 0;
             long lCount = lHitCount;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             // 获取命中结果
             for (; ; )
@@ -241,7 +242,7 @@ out strError);
 
                 for (int i = 0; i < searchresults.Length; i++)
                 {
-                    DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                    DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                     string strIssueRecPath = searchresult.Path;
 

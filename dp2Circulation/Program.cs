@@ -5,12 +5,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using System.IO;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using System.IO;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.Diagnostics;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -63,7 +64,7 @@ namespace DigitalPlatform.CirculationClient
                     string[] paths = new string[batch.Count];
                     batch.CopyTo(paths);
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     string strError = "";
 
                     long lRet = Channel.GetBrowseRecords(
@@ -81,7 +82,7 @@ namespace DigitalPlatform.CirculationClient
                         {
                             foreach (string path in batch)
                             {
-                                DigitalPlatform.CirculationClient.localhost.Record record = new DigitalPlatform.CirculationClient.localhost.Record();
+                                DigitalPlatform.LibraryClient.localhost.Record record = new DigitalPlatform.LibraryClient.localhost.Record();
                                 record.Path = path;
                                 // TODO: 是否需要设置 ErrorCode ?
                                 yield return record;
@@ -109,7 +110,7 @@ namespace DigitalPlatform.CirculationClient
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
                         Debug.Assert(batch[i] == record.Path, "");
                         yield return record;
                     }

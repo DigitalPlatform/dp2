@@ -9,7 +9,7 @@ using System.Xml;
 using System.Collections;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 
 // 2013/3/16 添加 XML 注释

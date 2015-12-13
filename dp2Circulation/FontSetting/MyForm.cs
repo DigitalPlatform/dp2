@@ -14,12 +14,14 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MarcDom;
+using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 // 2013/3/16 添加 XML 注释
 

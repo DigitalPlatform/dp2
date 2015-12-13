@@ -26,7 +26,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private string ActionField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.ErrorCodeValue ErrorCodeField;
+        private DigitalPlatform.LibraryClient.localhost.ErrorCodeValue ErrorCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ErrorInfoField;
@@ -79,7 +79,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.ErrorCodeValue ErrorCode {
+        public DigitalPlatform.LibraryClient.localhost.ErrorCodeValue ErrorCode {
             get {
                 return this.ErrorCodeField;
             }
@@ -293,7 +293,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.ErrorCode ErrorCodeField;
+        private DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ErrorInfoField;
@@ -312,7 +312,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.ErrorCode ErrorCode {
+        public DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCode {
             get {
                 return this.ErrorCodeField;
             }
@@ -1002,13 +1002,13 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private string[] ColsField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.KeyFrom[] KeysField;
+        private DigitalPlatform.LibraryClient.localhost.KeyFrom[] KeysField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string PathField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.RecordBody RecordBodyField;
+        private DigitalPlatform.LibraryClient.localhost.RecordBody RecordBodyField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -1034,7 +1034,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.KeyFrom[] Keys {
+        public DigitalPlatform.LibraryClient.localhost.KeyFrom[] Keys {
             get {
                 return this.KeysField;
             }
@@ -1060,7 +1060,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.RecordBody RecordBody {
+        public DigitalPlatform.LibraryClient.localhost.RecordBody RecordBody {
             get {
                 return this.RecordBodyField;
             }
@@ -1098,7 +1098,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private string PathField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.Result ResultField;
+        private DigitalPlatform.LibraryClient.localhost.Result ResultField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private byte[] TimestampField;
@@ -1143,7 +1143,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.Result Result {
+        public DigitalPlatform.LibraryClient.localhost.Result Result {
             get {
                 return this.ResultField;
             }
@@ -1278,7 +1278,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.ErrorCodeValue ErrorCodeField;
+        private DigitalPlatform.LibraryClient.localhost.ErrorCodeValue ErrorCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ErrorStringField;
@@ -1297,7 +1297,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.ErrorCodeValue ErrorCode {
+        public DigitalPlatform.LibraryClient.localhost.ErrorCodeValue ErrorCode {
             get {
                 return this.ErrorCodeField;
             }
@@ -1966,7 +1966,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private long ResultVersionField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.CirculationClient.localhost.BatchTaskStartInfo StartInfoField;
+        private DigitalPlatform.LibraryClient.localhost.BatchTaskStartInfo StartInfoField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string StateField;
@@ -2073,7 +2073,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.CirculationClient.localhost.BatchTaskStartInfo StartInfo {
+        public DigitalPlatform.LibraryClient.localhost.BatchTaskStartInfo StartInfo {
             get {
                 return this.StartInfoField;
             }
@@ -2876,132 +2876,132 @@ namespace DigitalPlatform.CirculationClient.localhost {
     public interface dp2libraryREST {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCommentsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCommentsResponse")]
-        System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentInfoResponse")]
         System.IAsyncResult BeginGetCommentInfo(string strRefID, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentDupResponse")]
         System.IAsyncResult BeginSearchCommentDup(string strIndex, string strBiblioRecPath, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchComment", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchComment", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentResponse")]
         System.IAsyncResult BeginSearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetMessage", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetMessageResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetMessage", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetMessageResponse")]
-        System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListMessage", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListMessageResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListMessage", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListMessageResponse")]
-        System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetMessage", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetMessageResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetMessage", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetMessageResponse")]
-        System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetStatisInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetStatisInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetStatisInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetStatisInfoResponse")]
         System.IAsyncResult BeginGetStatisInfo(string strDateRangeString, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ExistStatisInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ExistStatisInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, string strDateRangeString);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, string strDateRangeString);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ExistStatisInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ExistStatisInfoResponse")]
         System.IAsyncResult BeginExistStatisInfo(string strDateRangeString, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFile", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFileResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFile", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFileResponse")]
         System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFile", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFileResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFile", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFileResponse")]
         System.IAsyncResult BeginListFile(string strAction, string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounterResponse")]
         System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         System.IAsyncResult BeginGetVersion(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Login", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/LoginResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Login", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/LoginResponse")]
         System.IAsyncResult BeginLogin(string strUserName, string strPassword, string strParameters, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Logout", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/LogoutResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Logout();
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Logout();
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Logout", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/LogoutResponse")]
         System.IAsyncResult BeginLogout(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetLang", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetLangResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetLang", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetLangResponse")]
         System.IAsyncResult BeginSetLang(string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Stop")]
         void Stop();
@@ -3012,195 +3012,195 @@ namespace DigitalPlatform.CirculationClient.localhost {
         void EndStop(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyReaderPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyReaderPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyReaderPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyReaderPasswordResponse")]
         System.IAsyncResult BeginVerifyReaderPassword(string strReaderBarcode, string strReaderPassword, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeReaderPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeReaderPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeReaderPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeReaderPasswordResponse")]
         System.IAsyncResult BeginChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetReaderInfoResponse")]
         System.IAsyncResult BeginGetReaderInfo(string strBarcode, string strResultTypeList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfoResponse")]
         System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfoResponse")]
         System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/DevolveReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/DevolveReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/DevolveReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/DevolveReaderInfoResponse")]
         System.IAsyncResult BeginDevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchReader", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchReaderResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchReader", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchReaderResponse")]
         System.IAsyncResult BeginSearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetFriends", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetFriendsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetFriends", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetFriendsResponse")]
         System.IAsyncResult BeginSetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneDb", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneDbResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneDb", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneDbResponse")]
         System.IAsyncResult BeginSearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Search", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Search", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchResponse")]
         System.IAsyncResult BeginSearch(string strQueryXml, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSearchResultResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSearchResultResponse")]
         System.IAsyncResult BeginGetSearchResult(string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRecord", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRecordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRecord", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRecordResponse")]
         System.IAsyncResult BeginGetRecord(string strPath, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBrowseRecords", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBrowseRecordsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBrowseRecords", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBrowseRecordsResponse")]
         System.IAsyncResult BeginGetBrowseRecords(string[] paths, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListBiblioDbFroms", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListBiblioDbFromsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListBiblioDbFroms", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListBiblioDbFromsResponse")]
         System.IAsyncResult BeginListBiblioDbFroms(string strDbType, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblioResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblioResponse")]
         System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfoResponse")]
         System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/CopyBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/CopyBiblioInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/CopyBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/CopyBiblioInfoResponse")]
         System.IAsyncResult BeginCopyBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfoResponse")]
         System.IAsyncResult BeginGetBiblioInfo(string strBiblioRecPath, string strBiblioXml, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfosResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfosResponse")]
         System.IAsyncResult BeginGetBiblioInfos(string strBiblioRecPath, string strBiblioXml, string[] formats, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItem", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItem", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemResponse")]
         System.IAsyncResult BeginSearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetItemInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetItemInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetItemInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetItemInfoResponse")]
         System.IAsyncResult BeginGetItemInfo(string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemDupResponse")]
         System.IAsyncResult BeginSearchItemDup(string strBarcode, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioSummary", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioSummaryResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioSummary", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioSummaryResponse")]
         System.IAsyncResult BeginGetBiblioSummary(string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Borrow", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BorrowResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Borrow(
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Borrow(
                     out string[] item_records, 
                     out string[] reader_records, 
                     out string[] biblio_records, 
-                    out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, 
+                    out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, 
                     out string[] aDupPath, 
                     out string strOutputReaderBarcode, 
                     bool bRenew, 
@@ -3217,465 +3217,465 @@ namespace DigitalPlatform.CirculationClient.localhost {
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Borrow", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BorrowResponse")]
         System.IAsyncResult BeginBorrow(bool bRenew, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, bool bForce, string[] saBorrowedItemBarcode, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Return", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ReturnResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Return", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ReturnResponse")]
         System.IAsyncResult BeginReturn(string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Reservation", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ReservationResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Reservation", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ReservationResponse")]
         System.IAsyncResult BeginReservation(string strFunction, string strReaderBarcode, string strItemBarcodeList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Amerce", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/AmerceResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Amerce", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/AmerceResponse")]
-        System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssues", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssuesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssues", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssuesResponse")]
         System.IAsyncResult BeginGetIssues(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetIssues", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetIssuesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetIssues", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetIssuesResponse")]
-        System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssueInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssueInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssueInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssueInfoResponse")]
         System.IAsyncResult BeginGetIssueInfo(string strRefID, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueDupResponse")]
         System.IAsyncResult BeginSearchIssueDup(string strPublishTime, string strBiblioRecPath, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssue", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssue", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueResponse")]
         System.IAsyncResult BeginSearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetEntities", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetEntitiesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetEntities", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetEntitiesResponse")]
         System.IAsyncResult BeginGetEntities(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetEntities", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetEntitiesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetEntities", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetEntitiesResponse")]
-        System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrders", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrdersResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrders", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrdersResponse")]
         System.IAsyncResult BeginGetOrders(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOrders", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOrdersResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOrders", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOrdersResponse")]
-        System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrderInfoResponse")]
         System.IAsyncResult BeginGetOrderInfo(string strRefID, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderDupResponse")]
         System.IAsyncResult BeginSearchOrderDup(string strIndex, string strBiblioRecPath, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrder", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrder", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderResponse")]
         System.IAsyncResult BeginSearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetClock", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetClockResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetClock(string strTime);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetClock(string strTime);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetClock", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetClockResponse")]
         System.IAsyncResult BeginSetClock(string strTime, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetClock", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetClockResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetClock(out string strTime);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetClock(out string strTime);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetClock", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetClockResponse")]
         System.IAsyncResult BeginGetClock(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPasswordResponse")]
         System.IAsyncResult BeginResetPassword(string strParameters, string strMessageTemplate, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTable", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTableResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTable", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTableResponse")]
         System.IAsyncResult BeginGetValueTable(string strTableName, string strDbName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogs", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogs", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogsResponse")]
         System.IAsyncResult BeginGetOperLogs(string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLog", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLog", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogResponse")]
         System.IAsyncResult BeginGetOperLog(string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCalendar", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCalendarResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCalendar", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCalendarResponse")]
         System.IAsyncResult BeginGetCalendar(string strAction, string strName, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCalendar", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCalendarResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCalendar", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCalendarResponse")]
-        System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchTask", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchTaskResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchTask", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchTaskResponse")]
-        System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ClearAllDbs", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ClearAllDbsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ClearAllDbs();
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ClearAllDbs();
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ClearAllDbs", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ClearAllDbsResponse")]
         System.IAsyncResult BeginClearAllDbs(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabaseResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabaseResponse")]
         System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUser", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUserResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUser", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUserResponse")]
         System.IAsyncResult BeginGetUser(string strAction, string strName, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUser", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUserResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUser", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUserResponse")]
-        System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetChannelInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetChannelInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetChannelInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetChannelInfoResponse")]
         System.IAsyncResult BeginGetChannelInfo(string strQuery, string strStyle, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageChannel", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageChannelResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageChannel", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageChannelResponse")]
-        System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeUserPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeUserPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeUserPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeUserPasswordResponse")]
         System.IAsyncResult BeginChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcodeResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcodeResponse")]
         System.IAsyncResult BeginVerifyBarcode(string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameterResponse")]
         System.IAsyncResult BeginGetSystemParameter(string strCategory, string strName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetSystemParameter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetSystemParameterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetSystemParameter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetSystemParameterResponse")]
         System.IAsyncResult BeginSetSystemParameter(string strCategory, string strName, string strValue, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecover", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecoverResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult UrgentRecover(string strXML);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult UrgentRecover(string strXML);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecover", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecoverResponse")]
         System.IAsyncResult BeginUrgentRecover(string strXML, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse")]
         System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse")]
         System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse")]
         System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse")]
         System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse")]
         System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" +
             "")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" +
             "")]
         System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultRespons" +
             "e")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultRespons" +
             "e")]
         System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse")]
         System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse")]
         System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse")]
         System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultRespons" +
             "e")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultRespons" +
             "e")]
         System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse")]
         System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse")]
         System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse")]
         System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse")]
         System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse")]
         System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse")]
         System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse")]
         System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse")]
         System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse")]
         System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
         System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface dp2libraryRESTChannel : DigitalPlatform.CirculationClient.localhost.dp2libraryREST, System.ServiceModel.IClientChannel {
+    public interface dp2libraryRESTChannel : DigitalPlatform.LibraryClient.localhost.dp2libraryREST, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -3689,17 +3689,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -3750,10 +3750,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -3776,10 +3776,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -3795,10 +3795,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -3814,17 +3814,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.MessageData[] messages {
+        public DigitalPlatform.LibraryClient.localhost.MessageData[] messages {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.MessageData[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.MessageData[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -3847,17 +3847,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.MessageData[] messages {
+        public DigitalPlatform.LibraryClient.localhost.MessageData[] messages {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.MessageData[])(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.MessageData[])(this.results[1]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -3873,17 +3873,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages {
+        public DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.MessageData[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.MessageData[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -3899,10 +3899,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info {
+        public DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.RangeStatisInfo)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.RangeStatisInfo)(this.results[0]));
             }
         }
         
@@ -3913,10 +3913,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -3932,17 +3932,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.DateExist[] dates {
+        public DigitalPlatform.LibraryClient.localhost.DateExist[] dates {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.DateExist[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.DateExist[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -3972,10 +3972,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -3991,17 +3991,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos {
+        public DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.FileItemInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.FileItemInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4024,10 +4024,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4050,10 +4050,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4090,10 +4090,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[3]));
             }
         }
     }
@@ -4109,10 +4109,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4135,10 +4135,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4154,10 +4154,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4173,10 +4173,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4213,10 +4213,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[3]));
             }
         }
     }
@@ -4260,17 +4260,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode {
+        public DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ErrorCodeValue)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.ErrorCodeValue)(this.results[4]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -4300,10 +4300,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -4319,10 +4319,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4338,10 +4338,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4357,10 +4357,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4376,10 +4376,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4395,10 +4395,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4414,17 +4414,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.Record[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.Record[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.Record[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.Record[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4454,10 +4454,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -4473,17 +4473,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.Record[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.Record[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.Record[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.Record[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4499,17 +4499,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos {
+        public DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4532,10 +4532,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4565,10 +4565,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -4605,10 +4605,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[3]));
             }
         }
     }
@@ -4631,10 +4631,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4664,10 +4664,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[2]));
             }
         }
     }
@@ -4683,10 +4683,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4737,10 +4737,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -4763,10 +4763,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -4796,10 +4796,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -4836,10 +4836,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info {
+        public DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.BorrowInfo)(this.results[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.BorrowInfo)(this.results[3]));
             }
         }
         
@@ -4857,10 +4857,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[6]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[6]));
             }
         }
     }
@@ -4911,17 +4911,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info {
+        public DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ReturnInfo)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.ReturnInfo)(this.results[5]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[6]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[6]));
             }
         }
     }
@@ -4937,10 +4937,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -4956,10 +4956,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items {
+        public DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.AmerceItem[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.AmerceItem[])(this.results[0]));
             }
         }
         
@@ -4970,10 +4970,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -4989,17 +4989,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5015,17 +5015,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5076,10 +5076,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -5102,10 +5102,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5121,10 +5121,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5140,17 +5140,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5166,17 +5166,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5192,17 +5192,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5218,17 +5218,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5279,10 +5279,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -5305,10 +5305,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5324,10 +5324,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5343,10 +5343,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5369,10 +5369,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5388,10 +5388,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5414,10 +5414,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5433,17 +5433,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records {
+        public DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.OperLogInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.OperLogInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5487,10 +5487,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
             }
         }
     }
@@ -5506,17 +5506,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents {
+        public DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.CalenderInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.CalenderInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5532,10 +5532,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5551,17 +5551,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo {
+        public DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.BatchTaskInfo)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.BatchTaskInfo)(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5577,10 +5577,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5603,10 +5603,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5622,17 +5622,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.UserInfo[] contents {
+        public DigitalPlatform.LibraryClient.localhost.UserInfo[] contents {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.UserInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.UserInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5648,10 +5648,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5667,17 +5667,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents {
+        public DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ChannelInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.ChannelInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5693,17 +5693,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results1 = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results {
+        public DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ChannelInfo[])(this.results1[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.ChannelInfo[])(this.results1[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -5719,10 +5719,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5738,10 +5738,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5764,10 +5764,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -5783,10 +5783,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5802,10 +5802,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5849,10 +5849,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
             }
         }
     }
@@ -5875,10 +5875,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -5908,10 +5908,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -5941,10 +5941,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -5960,10 +5960,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -5986,10 +5986,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6005,17 +6005,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6038,10 +6038,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6064,10 +6064,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6090,10 +6090,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6109,17 +6109,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6142,10 +6142,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6168,10 +6168,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6194,10 +6194,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6213,17 +6213,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.DupSearchResult[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.DupSearchResult[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6239,17 +6239,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results1 = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results {
+        public DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.DupProjectInfo[])(this.results1[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.DupProjectInfo[])(this.results1[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -6272,10 +6272,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -6291,10 +6291,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -6338,10 +6338,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
             }
         }
     }
@@ -6371,10 +6371,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -6390,24 +6390,24 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class dp2libraryRESTClient : System.ServiceModel.ClientBase<DigitalPlatform.CirculationClient.localhost.dp2libraryREST>, DigitalPlatform.CirculationClient.localhost.dp2libraryREST {
+    public partial class dp2libraryRESTClient : System.ServiceModel.ClientBase<DigitalPlatform.LibraryClient.localhost.dp2libraryREST>, DigitalPlatform.LibraryClient.localhost.dp2libraryREST {
         
         private BeginOperationDelegate onBeginSetCommentsDelegate;
         
@@ -7204,29 +7204,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         public event System.EventHandler<GetCommentsCompletedEventArgs> GetCommentsCompleted;
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             return base.Channel.SetComments(out errorinfos, strBiblioRecPath, commentinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetComments(strBiblioRecPath, commentinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetComments(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetComments(strBiblioRecPath, commentinfos, callback, asyncState);
         }
         
         private object[] OnEndSetComments(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetComments(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetComments(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -7239,11 +7239,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos) {
+        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             this.SetCommentsAsync(strBiblioRecPath, commentinfos, null);
         }
         
-        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, object userState) {
+        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, object userState) {
             if ((this.onBeginSetCommentsDelegate == null)) {
                 this.onBeginSetCommentsDelegate = new BeginOperationDelegate(this.OnBeginSetComments);
             }
@@ -7258,7 +7258,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         commentinfos}, this.onEndSetCommentsDelegate, this.onSetCommentsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, strRefID, strItemXml, strResultType, strBiblioType);
         }
         
@@ -7268,7 +7268,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
         }
         
@@ -7286,7 +7286,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] comment_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strCommentRecPath,
@@ -7324,7 +7324,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetCommentInfoDelegate, this.onGetCommentInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
             return base.Channel.SearchCommentDup(out paths, strIndex, strBiblioRecPath, nMax);
         }
         
@@ -7334,7 +7334,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchCommentDup(out paths, result);
         }
         
@@ -7347,7 +7347,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchCommentDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchCommentDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchCommentDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -7380,7 +7380,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchCommentDupDelegate, this.onSearchCommentDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchComment(strCommentDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -7390,7 +7390,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result) {
             return base.Channel.EndSearchComment(result);
         }
         
@@ -7408,7 +7408,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchComment(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchComment(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchComment(result);
             return new object[] {
                     retVal};
         }
@@ -7446,29 +7446,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchCommentDelegate, this.onSearchCommentCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel) {
             return base.Channel.GetMessage(out messages, message_ids, messagelevel);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginGetMessage(message_ids, messagelevel, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result) {
             return base.Channel.EndGetMessage(out messages, result);
         }
         
         private System.IAsyncResult OnBeginGetMessage(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string[] message_ids = ((string[])(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.CirculationClient.localhost.MessageLevel)(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.LibraryClient.localhost.MessageLevel)(inValues[1]));
             return this.BeginGetMessage(message_ids, messagelevel, callback, asyncState);
         }
         
         private object[] OnEndGetMessage(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.MessageData[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetMessage(out messages, result);
+            DigitalPlatform.LibraryClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.MessageData[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetMessage(out messages, result);
             return new object[] {
                     messages,
                     retVal};
@@ -7481,11 +7481,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void GetMessageAsync(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel) {
+        public void GetMessageAsync(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel) {
             this.GetMessageAsync(message_ids, messagelevel, null);
         }
         
-        public void GetMessageAsync(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, object userState) {
+        public void GetMessageAsync(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, object userState) {
             if ((this.onBeginGetMessageDelegate == null)) {
                 this.onBeginGetMessageDelegate = new BeginOperationDelegate(this.OnBeginGetMessage);
             }
@@ -7500,17 +7500,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         messagelevel}, this.onEndGetMessageDelegate, this.onGetMessageCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
             return base.Channel.ListMessage(out nTotalCount, out messages, strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginListMessage(strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result) {
             return base.Channel.EndListMessage(out nTotalCount, out messages, result);
         }
         
@@ -7518,7 +7518,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strStyle = ((string)(inValues[0]));
             string strResultsetName = ((string)(inValues[1]));
             string strBoxType = ((string)(inValues[2]));
-            DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.CirculationClient.localhost.MessageLevel)(inValues[3]));
+            DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.LibraryClient.localhost.MessageLevel)(inValues[3]));
             int nStart = ((int)(inValues[4]));
             int nCount = ((int)(inValues[5]));
             return this.BeginListMessage(strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount, callback, asyncState);
@@ -7526,8 +7526,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndListMessage(System.IAsyncResult result) {
             int nTotalCount = this.GetDefaultValueForInitialization<int>();
-            DigitalPlatform.CirculationClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.MessageData[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListMessage(out nTotalCount, out messages, result);
+            DigitalPlatform.LibraryClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.MessageData[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListMessage(out nTotalCount, out messages, result);
             return new object[] {
                     nTotalCount,
                     messages,
@@ -7541,11 +7541,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
+        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
             this.ListMessageAsync(strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount, null);
         }
         
-        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount, object userState) {
+        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount, object userState) {
             if ((this.onBeginListMessageDelegate == null)) {
                 this.onBeginListMessageDelegate = new BeginOperationDelegate(this.OnBeginListMessage);
             }
@@ -7564,30 +7564,30 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndListMessageDelegate, this.onListMessageCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages) {
             return base.Channel.SetMessage(out output_messages, strAction, strStyle, messages);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetMessage(strAction, strStyle, messages, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, System.IAsyncResult result) {
             return base.Channel.EndSetMessage(out output_messages, result);
         }
         
         private System.IAsyncResult OnBeginSetMessage(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
             string strStyle = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.MessageData[] messages = ((DigitalPlatform.CirculationClient.localhost.MessageData[])(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.MessageData[] messages = ((DigitalPlatform.LibraryClient.localhost.MessageData[])(inValues[2]));
             return this.BeginSetMessage(strAction, strStyle, messages, callback, asyncState);
         }
         
         private object[] OnEndSetMessage(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.MessageData[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetMessage(out output_messages, result);
+            DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.MessageData[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetMessage(out output_messages, result);
             return new object[] {
                     output_messages,
                     retVal};
@@ -7600,11 +7600,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages) {
+        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages) {
             this.SetMessageAsync(strAction, strStyle, messages, null);
         }
         
-        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages, object userState) {
+        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages, object userState) {
             if ((this.onBeginSetMessageDelegate == null)) {
                 this.onBeginSetMessageDelegate = new BeginOperationDelegate(this.OnBeginSetMessage);
             }
@@ -7620,7 +7620,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         messages}, this.onEndSetMessageDelegate, this.onSetMessageCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle) {
             return base.Channel.GetStatisInfo(out info, out strXml, strDateRangeString, strStyle);
         }
         
@@ -7630,7 +7630,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result) {
             return base.Channel.EndGetStatisInfo(out info, out strXml, result);
         }
         
@@ -7641,9 +7641,9 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetStatisInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.RangeStatisInfo>();
+            DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.RangeStatisInfo>();
             string strXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetStatisInfo(out info, out strXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetStatisInfo(out info, out strXml, result);
             return new object[] {
                     info,
                     strXml,
@@ -7676,7 +7676,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndGetStatisInfoDelegate, this.onGetStatisInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, string strDateRangeString) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, string strDateRangeString) {
             return base.Channel.ExistStatisInfo(out dates, strDateRangeString);
         }
         
@@ -7686,7 +7686,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, System.IAsyncResult result) {
             return base.Channel.EndExistStatisInfo(out dates, result);
         }
         
@@ -7696,8 +7696,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndExistStatisInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.DateExist[] dates = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.DateExist[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndExistStatisInfo(out dates, result);
+            DigitalPlatform.LibraryClient.localhost.DateExist[] dates = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DateExist[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndExistStatisInfo(out dates, result);
             return new object[] {
                     dates,
                     retVal};
@@ -7728,7 +7728,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strDateRangeString}, this.onEndExistStatisInfoDelegate, this.onExistStatisInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength) {
             return base.Channel.GetFile(out baContent, out strFileTime, strCategory, strFileName, lStart, lLength);
         }
         
@@ -7738,7 +7738,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result) {
             return base.Channel.EndGetFile(out baContent, out strFileTime, result);
         }
         
@@ -7753,7 +7753,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetFile(System.IAsyncResult result) {
             byte[] baContent = this.GetDefaultValueForInitialization<byte[]>();
             string strFileTime = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetFile(out baContent, out strFileTime, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetFile(out baContent, out strFileTime, result);
             return new object[] {
                     baContent,
                     strFileTime,
@@ -7788,7 +7788,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndGetFileDelegate, this.onGetFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength) {
             return base.Channel.ListFile(out infos, strAction, strCategory, strFileName, lStart, lLength);
         }
         
@@ -7798,7 +7798,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, System.IAsyncResult result) {
             return base.Channel.EndListFile(out infos, result);
         }
         
@@ -7812,8 +7812,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndListFile(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.FileItemInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListFile(out infos, result);
+            DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.FileItemInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListFile(out infos, result);
             return new object[] {
                     infos,
                     retVal};
@@ -7848,7 +7848,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress) {
             return base.Channel.HitCounter(out Value, strAction, strName, strClientAddress);
         }
         
@@ -7858,7 +7858,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result) {
             return base.Channel.EndHitCounter(out Value, result);
         }
         
@@ -7871,7 +7871,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndHitCounter(System.IAsyncResult result) {
             long Value = this.GetDefaultValueForInitialization<long>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(out Value, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHitCounter(out Value, result);
             return new object[] {
                     Value,
                     retVal};
@@ -7904,7 +7904,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strClientAddress}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
             return base.Channel.GetVersion(out uid);
         }
         
@@ -7914,7 +7914,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result) {
             return base.Channel.EndGetVersion(out uid, result);
         }
         
@@ -7924,7 +7924,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetVersion(System.IAsyncResult result) {
             string uid = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetVersion(out uid, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetVersion(out uid, result);
             return new object[] {
                     uid,
                     retVal};
@@ -7954,7 +7954,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginGetVersionDelegate, null, this.onEndGetVersionDelegate, this.onGetVersionCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters) {
             return base.Channel.Login(out strOutputUserName, out strRights, out strLibraryCode, strUserName, strPassword, strParameters);
         }
         
@@ -7964,7 +7964,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result) {
             return base.Channel.EndLogin(out strOutputUserName, out strRights, out strLibraryCode, result);
         }
         
@@ -7979,7 +7979,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strOutputUserName = this.GetDefaultValueForInitialization<string>();
             string strRights = this.GetDefaultValueForInitialization<string>();
             string strLibraryCode = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndLogin(out strOutputUserName, out strRights, out strLibraryCode, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndLogin(out strOutputUserName, out strRights, out strLibraryCode, result);
             return new object[] {
                     strOutputUserName,
                     strRights,
@@ -8014,7 +8014,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strParameters}, this.onEndLoginDelegate, this.onLoginCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Logout() {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Logout() {
             return base.Channel.Logout();
         }
         
@@ -8024,7 +8024,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result) {
             return base.Channel.EndLogout(result);
         }
         
@@ -8033,7 +8033,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndLogout(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndLogout(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndLogout(result);
             return new object[] {
                     retVal};
         }
@@ -8062,7 +8062,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginLogoutDelegate, null, this.onEndLogoutDelegate, this.onLogoutCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang) {
             return base.Channel.SetLang(out strOldLang, strLang);
         }
         
@@ -8072,7 +8072,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result) {
             return base.Channel.EndSetLang(out strOldLang, result);
         }
         
@@ -8083,7 +8083,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSetLang(System.IAsyncResult result) {
             string strOldLang = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetLang(out strOldLang, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetLang(out strOldLang, result);
             return new object[] {
                     strOldLang,
                     retVal};
@@ -8161,7 +8161,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginStopDelegate, null, this.onEndStopDelegate, this.onStopCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword) {
             return base.Channel.VerifyReaderPassword(strReaderBarcode, strReaderPassword);
         }
         
@@ -8171,7 +8171,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result) {
             return base.Channel.EndVerifyReaderPassword(result);
         }
         
@@ -8182,7 +8182,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndVerifyReaderPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndVerifyReaderPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyReaderPassword(result);
             return new object[] {
                     retVal};
         }
@@ -8213,7 +8213,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderPassword}, this.onEndVerifyReaderPasswordDelegate, this.onVerifyReaderPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword) {
             return base.Channel.ChangeReaderPassword(strReaderBarcode, strReaderOldPassword, strReaderNewPassword);
         }
         
@@ -8223,7 +8223,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result) {
             return base.Channel.EndChangeReaderPassword(result);
         }
         
@@ -8235,7 +8235,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndChangeReaderPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndChangeReaderPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndChangeReaderPassword(result);
             return new object[] {
                     retVal};
         }
@@ -8267,7 +8267,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderNewPassword}, this.onEndChangeReaderPasswordDelegate, this.onChangeReaderPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList) {
             return base.Channel.GetReaderInfo(out results, out strRecPath, out baTimestamp, strBarcode, strResultTypeList);
         }
         
@@ -8277,7 +8277,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result) {
             return base.Channel.EndGetReaderInfo(out results, out strRecPath, out baTimestamp, result);
         }
         
@@ -8291,7 +8291,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string[] results = this.GetDefaultValueForInitialization<string[]>();
             string strRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetReaderInfo(out results, out strRecPath, out baTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetReaderInfo(out results, out strRecPath, out baTimestamp, result);
             return new object[] {
                     results,
                     strRecPath,
@@ -8325,7 +8325,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultTypeList}, this.onEndGetReaderInfoDelegate, this.onGetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
             return base.Channel.SetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp);
         }
         
@@ -8335,7 +8335,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result) {
             return base.Channel.EndSetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, result);
         }
         
@@ -8353,8 +8353,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strSavedXml = this.GetDefaultValueForInitialization<string>();
             string strSavedRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baNewTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ErrorCodeValue>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, result);
+            DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ErrorCodeValue>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, result);
             return new object[] {
                     strExistingXml,
                     strSavedXml,
@@ -8393,7 +8393,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         baOldTimestamp}, this.onEndSetReaderInfoDelegate, this.onSetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp) {
             return base.Channel.MoveReaderInfo(strSourceRecPath, ref strTargetRecPath, out target_timestamp);
         }
         
@@ -8403,7 +8403,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result) {
             return base.Channel.EndMoveReaderInfo(ref strTargetRecPath, out target_timestamp, result);
         }
         
@@ -8416,7 +8416,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndMoveReaderInfo(System.IAsyncResult result) {
             string strTargetRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] target_timestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndMoveReaderInfo(ref strTargetRecPath, out target_timestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndMoveReaderInfo(ref strTargetRecPath, out target_timestamp, result);
             return new object[] {
                     strTargetRecPath,
                     target_timestamp,
@@ -8449,7 +8449,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTargetRecPath}, this.onEndMoveReaderInfoDelegate, this.onMoveReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode) {
             return base.Channel.DevolveReaderInfo(strSourceReaderBarcode, strTargetReaderBarcode);
         }
         
@@ -8459,7 +8459,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result) {
             return base.Channel.EndDevolveReaderInfo(result);
         }
         
@@ -8470,7 +8470,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndDevolveReaderInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndDevolveReaderInfo(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndDevolveReaderInfo(result);
             return new object[] {
                     retVal};
         }
@@ -8501,7 +8501,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTargetReaderBarcode}, this.onEndDevolveReaderInfoDelegate, this.onDevolveReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle) {
             return base.Channel.SearchReader(strReaderDbNames, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strOutputStyle);
         }
         
@@ -8511,7 +8511,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result) {
             return base.Channel.EndSearchReader(result);
         }
         
@@ -8528,7 +8528,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchReader(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchReader(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchReader(result);
             return new object[] {
                     retVal};
         }
@@ -8565,7 +8565,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchReaderDelegate, this.onSearchReaderCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle) {
             return base.Channel.SetFriends(strAction, strReaderBarcode, strComment, strStyle);
         }
         
@@ -8575,7 +8575,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result) {
             return base.Channel.EndSetFriends(result);
         }
         
@@ -8588,7 +8588,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetFriends(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetFriends(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetFriends(result);
             return new object[] {
                     retVal};
         }
@@ -8621,7 +8621,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndSetFriendsDelegate, this.onSetFriendsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle) {
             return base.Channel.SearchOneDb(strQueryWord, strDbName, strFrom, strMatchStyle, strLang, lMaxCount, strResultSetName, strOutputStyle);
         }
         
@@ -8631,7 +8631,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result) {
             return base.Channel.EndSearchOneDb(result);
         }
         
@@ -8648,7 +8648,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchOneDb(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOneDb(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneDb(result);
             return new object[] {
                     retVal};
         }
@@ -8685,7 +8685,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchOneDbDelegate, this.onSearchOneDbCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle) {
             return base.Channel.Search(strQueryXml, strResultSetName, strOutputStyle);
         }
         
@@ -8695,7 +8695,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result) {
             return base.Channel.EndSearch(result);
         }
         
@@ -8707,7 +8707,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearch(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearch(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearch(result);
             return new object[] {
                     retVal};
         }
@@ -8739,7 +8739,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchDelegate, this.onSearchCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
             return base.Channel.GetSearchResult(out searchresults, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
         }
         
@@ -8749,7 +8749,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetSearchResult(out searchresults, result);
         }
         
@@ -8763,8 +8763,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.Record[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.Record[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -8799,7 +8799,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetSearchResultDelegate, this.onGetSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath) {
             return base.Channel.GetRecord(out timestamp, out strXml, strPath);
         }
         
@@ -8809,7 +8809,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result) {
             return base.Channel.EndGetRecord(out timestamp, out strXml, result);
         }
         
@@ -8821,7 +8821,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetRecord(System.IAsyncResult result) {
             byte[] timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetRecord(out timestamp, out strXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRecord(out timestamp, out strXml, result);
             return new object[] {
                     timestamp,
                     strXml,
@@ -8853,7 +8853,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strPath}, this.onEndGetRecordDelegate, this.onGetRecordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle) {
             return base.Channel.GetBrowseRecords(out searchresults, paths, strBrowseInfoStyle);
         }
         
@@ -8863,7 +8863,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetBrowseRecords(out searchresults, result);
         }
         
@@ -8874,8 +8874,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetBrowseRecords(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.Record[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBrowseRecords(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.Record[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBrowseRecords(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -8907,7 +8907,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBrowseInfoStyle}, this.onEndGetBrowseRecordsDelegate, this.onGetBrowseRecordsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang) {
             return base.Channel.ListBiblioDbFroms(out infos, strDbType, strLang);
         }
         
@@ -8917,7 +8917,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result) {
             return base.Channel.EndListBiblioDbFroms(out infos, result);
         }
         
@@ -8928,8 +8928,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndListBiblioDbFroms(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListBiblioDbFroms(out infos, result);
+            DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListBiblioDbFroms(out infos, result);
             return new object[] {
                     infos,
                     retVal};
@@ -8961,7 +8961,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndListBiblioDbFromsDelegate, this.onListBiblioDbFromsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchBiblio(out strQueryXml, strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -8971,7 +8971,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result) {
             return base.Channel.EndSearchBiblio(out strQueryXml, result);
         }
         
@@ -8990,7 +8990,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchBiblio(System.IAsyncResult result) {
             string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchBiblio(out strQueryXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchBiblio(out strQueryXml, result);
             return new object[] {
                     strQueryXml,
                     retVal};
@@ -9029,7 +9029,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
             return base.Channel.SetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment);
         }
         
@@ -9039,7 +9039,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndSetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, result);
         }
         
@@ -9056,7 +9056,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndSetBiblioInfo(System.IAsyncResult result) {
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, result);
             return new object[] {
                     strOutputBiblioRecPath,
                     baOutputTimestamp,
@@ -9093,7 +9093,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strComment}, this.onEndSetBiblioInfoDelegate, this.onSetBiblioInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle) {
             return base.Channel.CopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strNewBiblioRecPath, strNewBiblio, strMergeStyle);
         }
         
@@ -9103,7 +9103,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndCopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, result);
         }
         
@@ -9123,7 +9123,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strOutputBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndCopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndCopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, result);
             return new object[] {
                     strOutputBiblio,
                     strOutputBiblioRecPath,
@@ -9163,7 +9163,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strMergeStyle}, this.onEndCopyBiblioInfoDelegate, this.onCopyBiblioInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType) {
             return base.Channel.GetBiblioInfo(out strBiblio, strBiblioRecPath, strBiblioXml, strBiblioType);
         }
         
@@ -9173,7 +9173,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result) {
             return base.Channel.EndGetBiblioInfo(out strBiblio, result);
         }
         
@@ -9186,7 +9186,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetBiblioInfo(System.IAsyncResult result) {
             string strBiblio = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfo(out strBiblio, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfo(out strBiblio, result);
             return new object[] {
                     strBiblio,
                     retVal};
@@ -9219,7 +9219,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetBiblioInfoDelegate, this.onGetBiblioInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats) {
             return base.Channel.GetBiblioInfos(out results, out baTimestamp, strBiblioRecPath, strBiblioXml, formats);
         }
         
@@ -9229,7 +9229,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result) {
             return base.Channel.EndGetBiblioInfos(out results, out baTimestamp, result);
         }
         
@@ -9243,7 +9243,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetBiblioInfos(System.IAsyncResult result) {
             string[] results = this.GetDefaultValueForInitialization<string[]>();
             byte[] baTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfos(out results, out baTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfos(out results, out baTimestamp, result);
             return new object[] {
                     results,
                     baTimestamp,
@@ -9277,7 +9277,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         formats}, this.onEndGetBiblioInfosDelegate, this.onGetBiblioInfosCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchItem(strItemDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -9287,7 +9287,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result) {
             return base.Channel.EndSearchItem(result);
         }
         
@@ -9305,7 +9305,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchItem(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchItem(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchItem(result);
             return new object[] {
                     retVal};
         }
@@ -9343,7 +9343,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchItemDelegate, this.onSearchItemCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, strItemDbType, strBarcode, strItemXml, strResultType, strBiblioType);
         }
         
@@ -9353,7 +9353,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, result);
         }
         
@@ -9372,7 +9372,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] item_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strItemRecPath,
@@ -9411,7 +9411,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetItemInfoDelegate, this.onGetItemInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax) {
             return base.Channel.SearchItemDup(out paths, strBarcode, nMax);
         }
         
@@ -9421,7 +9421,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchItemDup(out paths, result);
         }
         
@@ -9433,7 +9433,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchItemDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchItemDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchItemDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -9465,7 +9465,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchItemDupDelegate, this.onSearchItemDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude) {
             return base.Channel.GetBiblioSummary(out strBiblioRecPath, out strSummary, strItemBarcode, strConfirmItemRecPath, strBiblioRecPathExclude);
         }
         
@@ -9475,7 +9475,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result) {
             return base.Channel.EndGetBiblioSummary(out strBiblioRecPath, out strSummary, result);
         }
         
@@ -9489,7 +9489,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetBiblioSummary(System.IAsyncResult result) {
             string strBiblioRecPath = this.GetDefaultValueForInitialization<string>();
             string strSummary = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBiblioSummary(out strBiblioRecPath, out strSummary, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBiblioSummary(out strBiblioRecPath, out strSummary, result);
             return new object[] {
                     strBiblioRecPath,
                     strSummary,
@@ -9523,11 +9523,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioRecPathExclude}, this.onEndGetBiblioSummaryDelegate, this.onGetBiblioSummaryCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Borrow(
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Borrow(
                     out string[] item_records, 
                     out string[] reader_records, 
                     out string[] biblio_records, 
-                    out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, 
+                    out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, 
                     out string[] aDupPath, 
                     out string strOutputReaderBarcode, 
                     bool bRenew, 
@@ -9549,7 +9549,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result) {
             return base.Channel.EndBorrow(out item_records, out reader_records, out biblio_records, out borrow_info, out aDupPath, out strOutputReaderBarcode, result);
         }
         
@@ -9571,10 +9571,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string[] item_records = this.GetDefaultValueForInitialization<string[]>();
             string[] reader_records = this.GetDefaultValueForInitialization<string[]>();
             string[] biblio_records = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.BorrowInfo>();
+            DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BorrowInfo>();
             string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
             string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndBorrow(out item_records, out reader_records, out biblio_records, out borrow_info, out aDupPath, out strOutputReaderBarcode, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBorrow(out item_records, out reader_records, out biblio_records, out borrow_info, out aDupPath, out strOutputReaderBarcode, result);
             return new object[] {
                     item_records,
                     reader_records,
@@ -9619,7 +9619,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioFormatList}, this.onEndBorrowDelegate, this.onBorrowCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList) {
             return base.Channel.Return(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, strAction, strReaderBarcode, strItemBarcode, strComfirmItemRecPath, bForce, strStyle, strItemFormatList, strReaderFormatList, strBiblioFormatList);
         }
         
@@ -9629,7 +9629,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, System.IAsyncResult result) {
             return base.Channel.EndReturn(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, result);
         }
         
@@ -9652,8 +9652,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string[] biblio_records = this.GetDefaultValueForInitialization<string[]>();
             string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
             string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ReturnInfo>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndReturn(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, result);
+            DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ReturnInfo>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndReturn(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, result);
             return new object[] {
                     item_records,
                     reader_records,
@@ -9697,7 +9697,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioFormatList}, this.onEndReturnDelegate, this.onReturnCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList) {
             return base.Channel.Reservation(strFunction, strReaderBarcode, strItemBarcodeList);
         }
         
@@ -9707,7 +9707,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result) {
             return base.Channel.EndReservation(result);
         }
         
@@ -9719,7 +9719,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndReservation(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndReservation(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndReservation(result);
             return new object[] {
                     retVal};
         }
@@ -9751,31 +9751,31 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strItemBarcodeList}, this.onEndReservationDelegate, this.onReservationCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items) {
             return base.Channel.Amerce(out failed_items, out strReaderXml, strFunction, strReaderBarcode, amerce_items);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginAmerce(strFunction, strReaderBarcode, amerce_items, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result) {
             return base.Channel.EndAmerce(out failed_items, out strReaderXml, result);
         }
         
         private System.IAsyncResult OnBeginAmerce(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strFunction = ((string)(inValues[0]));
             string strReaderBarcode = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items = ((DigitalPlatform.CirculationClient.localhost.AmerceItem[])(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items = ((DigitalPlatform.LibraryClient.localhost.AmerceItem[])(inValues[2]));
             return this.BeginAmerce(strFunction, strReaderBarcode, amerce_items, callback, asyncState);
         }
         
         private object[] OnEndAmerce(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.AmerceItem[]>();
+            DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.AmerceItem[]>();
             string strReaderXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndAmerce(out failed_items, out strReaderXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndAmerce(out failed_items, out strReaderXml, result);
             return new object[] {
                     failed_items,
                     strReaderXml,
@@ -9789,11 +9789,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items) {
+        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items) {
             this.AmerceAsync(strFunction, strReaderBarcode, amerce_items, null);
         }
         
-        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items, object userState) {
+        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items, object userState) {
             if ((this.onBeginAmerceDelegate == null)) {
                 this.onBeginAmerceDelegate = new BeginOperationDelegate(this.OnBeginAmerce);
             }
@@ -9809,7 +9809,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         amerce_items}, this.onEndAmerceDelegate, this.onAmerceCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetIssues(out issueinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -9819,7 +9819,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result) {
             return base.Channel.EndGetIssues(out issueinfos, result);
         }
         
@@ -9833,8 +9833,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetIssues(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetIssues(out issueinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetIssues(out issueinfos, result);
             return new object[] {
                     issueinfos,
                     retVal};
@@ -9869,29 +9869,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetIssuesDelegate, this.onGetIssuesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos) {
             return base.Channel.SetIssues(out errorinfos, strBiblioRecPath, issueinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetIssues(strBiblioRecPath, issueinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetIssues(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetIssues(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetIssues(strBiblioRecPath, issueinfos, callback, asyncState);
         }
         
         private object[] OnEndSetIssues(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetIssues(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetIssues(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -9904,11 +9904,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos) {
+        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos) {
             this.SetIssuesAsync(strBiblioRecPath, issueinfos, null);
         }
         
-        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, object userState) {
+        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, object userState) {
             if ((this.onBeginSetIssuesDelegate == null)) {
                 this.onBeginSetIssuesDelegate = new BeginOperationDelegate(this.OnBeginSetIssues);
             }
@@ -9923,7 +9923,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         issueinfos}, this.onEndSetIssuesDelegate, this.onSetIssuesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, strRefID, strItemXml, strResultType, strBiblioType);
         }
         
@@ -9933,7 +9933,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
         }
         
@@ -9951,7 +9951,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] issue_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strIssueRecPath,
@@ -9989,7 +9989,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetIssueInfoDelegate, this.onGetIssueInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax) {
             return base.Channel.SearchIssueDup(out paths, strPublishTime, strBiblioRecPath, nMax);
         }
         
@@ -9999,7 +9999,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchIssueDup(out paths, result);
         }
         
@@ -10012,7 +10012,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchIssueDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchIssueDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchIssueDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -10045,7 +10045,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchIssueDupDelegate, this.onSearchIssueDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchIssue(strIssueDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -10055,7 +10055,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result) {
             return base.Channel.EndSearchIssue(result);
         }
         
@@ -10073,7 +10073,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchIssue(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchIssue(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchIssue(result);
             return new object[] {
                     retVal};
         }
@@ -10111,7 +10111,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchIssueDelegate, this.onSearchIssueCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetEntities(out entityinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -10121,7 +10121,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result) {
             return base.Channel.EndGetEntities(out entityinfos, result);
         }
         
@@ -10135,8 +10135,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetEntities(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetEntities(out entityinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetEntities(out entityinfos, result);
             return new object[] {
                     entityinfos,
                     retVal};
@@ -10171,29 +10171,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetEntitiesDelegate, this.onGetEntitiesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos) {
             return base.Channel.SetEntities(out errorinfos, strBiblioRecPath, entityinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetEntities(strBiblioRecPath, entityinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetEntities(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetEntities(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetEntities(strBiblioRecPath, entityinfos, callback, asyncState);
         }
         
         private object[] OnEndSetEntities(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetEntities(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetEntities(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -10206,11 +10206,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos) {
+        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos) {
             this.SetEntitiesAsync(strBiblioRecPath, entityinfos, null);
         }
         
-        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, object userState) {
+        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, object userState) {
             if ((this.onBeginSetEntitiesDelegate == null)) {
                 this.onBeginSetEntitiesDelegate = new BeginOperationDelegate(this.OnBeginSetEntities);
             }
@@ -10225,7 +10225,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         entityinfos}, this.onEndSetEntitiesDelegate, this.onSetEntitiesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetOrders(out orderinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -10235,7 +10235,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result) {
             return base.Channel.EndGetOrders(out orderinfos, result);
         }
         
@@ -10249,8 +10249,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetOrders(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOrders(out orderinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOrders(out orderinfos, result);
             return new object[] {
                     orderinfos,
                     retVal};
@@ -10285,29 +10285,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetOrdersDelegate, this.onGetOrdersCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos) {
             return base.Channel.SetOrders(out errorinfos, strBiblioRecPath, orderinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetOrders(strBiblioRecPath, orderinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetOrders(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetOrders(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetOrders(strBiblioRecPath, orderinfos, callback, asyncState);
         }
         
         private object[] OnEndSetOrders(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetOrders(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOrders(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -10320,11 +10320,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos) {
+        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos) {
             this.SetOrdersAsync(strBiblioRecPath, orderinfos, null);
         }
         
-        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, object userState) {
+        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, object userState) {
             if ((this.onBeginSetOrdersDelegate == null)) {
                 this.onBeginSetOrdersDelegate = new BeginOperationDelegate(this.OnBeginSetOrders);
             }
@@ -10339,7 +10339,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         orderinfos}, this.onEndSetOrdersDelegate, this.onSetOrdersCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, strRefID, strItemXml, strResultType, strBiblioType);
         }
         
@@ -10349,7 +10349,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
         }
         
@@ -10367,7 +10367,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] order_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strOrderRecPath,
@@ -10405,7 +10405,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetOrderInfoDelegate, this.onGetOrderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
             return base.Channel.SearchOrderDup(out paths, strIndex, strBiblioRecPath, nMax);
         }
         
@@ -10415,7 +10415,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchOrderDup(out paths, result);
         }
         
@@ -10428,7 +10428,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchOrderDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOrderDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOrderDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -10461,7 +10461,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchOrderDupDelegate, this.onSearchOrderDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchOrder(strOrderDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -10471,7 +10471,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result) {
             return base.Channel.EndSearchOrder(result);
         }
         
@@ -10489,7 +10489,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchOrder(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOrder(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOrder(result);
             return new object[] {
                     retVal};
         }
@@ -10527,7 +10527,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchOrderDelegate, this.onSearchOrderCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetClock(string strTime) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetClock(string strTime) {
             return base.Channel.SetClock(strTime);
         }
         
@@ -10537,7 +10537,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result) {
             return base.Channel.EndSetClock(result);
         }
         
@@ -10547,7 +10547,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetClock(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetClock(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetClock(result);
             return new object[] {
                     retVal};
         }
@@ -10577,7 +10577,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTime}, this.onEndSetClockDelegate, this.onSetClockCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetClock(out string strTime) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetClock(out string strTime) {
             return base.Channel.GetClock(out strTime);
         }
         
@@ -10587,7 +10587,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result) {
             return base.Channel.EndGetClock(out strTime, result);
         }
         
@@ -10597,7 +10597,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetClock(System.IAsyncResult result) {
             string strTime = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetClock(out strTime, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetClock(out strTime, result);
             return new object[] {
                     strTime,
                     retVal};
@@ -10627,7 +10627,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginGetClockDelegate, null, this.onEndGetClockDelegate, this.onGetClockCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate) {
             return base.Channel.ResetPassword(strParameters, strMessageTemplate);
         }
         
@@ -10637,7 +10637,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result) {
             return base.Channel.EndResetPassword(result);
         }
         
@@ -10648,7 +10648,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndResetPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndResetPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndResetPassword(result);
             return new object[] {
                     retVal};
         }
@@ -10679,7 +10679,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strMessageTemplate}, this.onEndResetPasswordDelegate, this.onResetPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName) {
             return base.Channel.GetValueTable(out values, strTableName, strDbName);
         }
         
@@ -10689,7 +10689,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result) {
             return base.Channel.EndGetValueTable(out values, result);
         }
         
@@ -10701,7 +10701,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetValueTable(System.IAsyncResult result) {
             string[] values = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetValueTable(out values, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetValueTable(out values, result);
             return new object[] {
                     values,
                     retVal};
@@ -10733,7 +10733,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strDbName}, this.onEndGetValueTableDelegate, this.onGetValueTableCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter) {
             return base.Channel.GetOperLogs(out records, strFileName, lIndex, lHint, nCount, strStyle, strFilter);
         }
         
@@ -10743,7 +10743,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, System.IAsyncResult result) {
             return base.Channel.EndGetOperLogs(out records, result);
         }
         
@@ -10758,8 +10758,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetOperLogs(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.OperLogInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOperLogs(out records, result);
+            DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.OperLogInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOperLogs(out records, result);
             return new object[] {
                     records,
                     retVal};
@@ -10795,7 +10795,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strFilter}, this.onEndGetOperLogsDelegate, this.onGetOperLogsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength) {
             return base.Channel.GetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, strFileName, lIndex, lHint, strStyle, strFilter, lAttachmentFragmentStart, nAttachmentFragmentLength);
         }
         
@@ -10805,7 +10805,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result) {
             return base.Channel.EndGetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, result);
         }
         
@@ -10825,7 +10825,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             long lHintNext = this.GetDefaultValueForInitialization<long>();
             byte[] attachment_data = this.GetDefaultValueForInitialization<byte[]>();
             long lAttachmentTotalLength = this.GetDefaultValueForInitialization<long>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, result);
             return new object[] {
                     strXml,
                     lHintNext,
@@ -10865,7 +10865,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nAttachmentFragmentLength}, this.onEndGetOperLogDelegate, this.onGetOperLogCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount) {
             return base.Channel.GetCalendar(out contents, strAction, strName, nStart, nCount);
         }
         
@@ -10875,7 +10875,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, System.IAsyncResult result) {
             return base.Channel.EndGetCalendar(out contents, result);
         }
         
@@ -10888,8 +10888,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetCalendar(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.CalenderInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetCalendar(out contents, result);
+            DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CalenderInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCalendar(out contents, result);
             return new object[] {
                     contents,
                     retVal};
@@ -10923,28 +10923,28 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndGetCalendarDelegate, this.onGetCalendarCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info) {
             return base.Channel.SetCalendar(strAction, info);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetCalendar(strAction, info, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result) {
             return base.Channel.EndSetCalendar(result);
         }
         
         private System.IAsyncResult OnBeginSetCalendar(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.CalenderInfo info = ((DigitalPlatform.CirculationClient.localhost.CalenderInfo)(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.CalenderInfo info = ((DigitalPlatform.LibraryClient.localhost.CalenderInfo)(inValues[1]));
             return this.BeginSetCalendar(strAction, info, callback, asyncState);
         }
         
         private object[] OnEndSetCalendar(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetCalendar(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetCalendar(result);
             return new object[] {
                     retVal};
         }
@@ -10956,11 +10956,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetCalendarAsync(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info) {
+        public void SetCalendarAsync(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info) {
             this.SetCalendarAsync(strAction, info, null);
         }
         
-        public void SetCalendarAsync(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info, object userState) {
+        public void SetCalendarAsync(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info, object userState) {
             if ((this.onBeginSetCalendarDelegate == null)) {
                 this.onBeginSetCalendarDelegate = new BeginOperationDelegate(this.OnBeginSetCalendar);
             }
@@ -10975,30 +10975,30 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         info}, this.onEndSetCalendarDelegate, this.onSetCalendarCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info) {
             return base.Channel.BatchTask(out resultInfo, strName, strAction, info);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginBatchTask(strName, strAction, info, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result) {
             return base.Channel.EndBatchTask(out resultInfo, result);
         }
         
         private System.IAsyncResult OnBeginBatchTask(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strName = ((string)(inValues[0]));
             string strAction = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info = ((DigitalPlatform.CirculationClient.localhost.BatchTaskInfo)(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info = ((DigitalPlatform.LibraryClient.localhost.BatchTaskInfo)(inValues[2]));
             return this.BeginBatchTask(strName, strAction, info, callback, asyncState);
         }
         
         private object[] OnEndBatchTask(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.BatchTaskInfo>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndBatchTask(out resultInfo, result);
+            DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BatchTaskInfo>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBatchTask(out resultInfo, result);
             return new object[] {
                     resultInfo,
                     retVal};
@@ -11011,11 +11011,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info) {
+        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info) {
             this.BatchTaskAsync(strName, strAction, info, null);
         }
         
-        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info, object userState) {
+        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info, object userState) {
             if ((this.onBeginBatchTaskDelegate == null)) {
                 this.onBeginBatchTaskDelegate = new BeginOperationDelegate(this.OnBeginBatchTask);
             }
@@ -11031,7 +11031,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         info}, this.onEndBatchTaskDelegate, this.onBatchTaskCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ClearAllDbs() {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ClearAllDbs() {
             return base.Channel.ClearAllDbs();
         }
         
@@ -11041,7 +11041,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result) {
             return base.Channel.EndClearAllDbs(result);
         }
         
@@ -11050,7 +11050,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndClearAllDbs(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndClearAllDbs(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndClearAllDbs(result);
             return new object[] {
                     retVal};
         }
@@ -11079,7 +11079,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginClearAllDbsDelegate, null, this.onEndClearAllDbsDelegate, this.onClearAllDbsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo) {
             return base.Channel.ManageDatabase(out strOutputInfo, strAction, strDatabaseName, strDatabaseInfo);
         }
         
@@ -11089,7 +11089,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result) {
             return base.Channel.EndManageDatabase(out strOutputInfo, result);
         }
         
@@ -11102,7 +11102,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndManageDatabase(System.IAsyncResult result) {
             string strOutputInfo = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndManageDatabase(out strOutputInfo, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndManageDatabase(out strOutputInfo, result);
             return new object[] {
                     strOutputInfo,
                     retVal};
@@ -11135,7 +11135,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strDatabaseInfo}, this.onEndManageDatabaseDelegate, this.onManageDatabaseCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount) {
             return base.Channel.GetUser(out contents, strAction, strName, nStart, nCount);
         }
         
@@ -11145,7 +11145,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, System.IAsyncResult result) {
             return base.Channel.EndGetUser(out contents, result);
         }
         
@@ -11158,8 +11158,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetUser(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.UserInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.UserInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetUser(out contents, result);
+            DigitalPlatform.LibraryClient.localhost.UserInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.UserInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUser(out contents, result);
             return new object[] {
                     contents,
                     retVal};
@@ -11193,28 +11193,28 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndGetUserDelegate, this.onGetUserCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info) {
             return base.Channel.SetUser(strAction, info);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetUser(strAction, info, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result) {
             return base.Channel.EndSetUser(result);
         }
         
         private System.IAsyncResult OnBeginSetUser(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.UserInfo info = ((DigitalPlatform.CirculationClient.localhost.UserInfo)(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.UserInfo info = ((DigitalPlatform.LibraryClient.localhost.UserInfo)(inValues[1]));
             return this.BeginSetUser(strAction, info, callback, asyncState);
         }
         
         private object[] OnEndSetUser(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetUser(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUser(result);
             return new object[] {
                     retVal};
         }
@@ -11226,11 +11226,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetUserAsync(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info) {
+        public void SetUserAsync(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info) {
             this.SetUserAsync(strAction, info, null);
         }
         
-        public void SetUserAsync(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info, object userState) {
+        public void SetUserAsync(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info, object userState) {
             if ((this.onBeginSetUserDelegate == null)) {
                 this.onBeginSetUserDelegate = new BeginOperationDelegate(this.OnBeginSetUser);
             }
@@ -11245,7 +11245,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         info}, this.onEndSetUserDelegate, this.onSetUserCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount) {
             return base.Channel.GetChannelInfo(out contents, strQuery, strStyle, nStart, nCount);
         }
         
@@ -11255,7 +11255,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, System.IAsyncResult result) {
             return base.Channel.EndGetChannelInfo(out contents, result);
         }
         
@@ -11268,8 +11268,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetChannelInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ChannelInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetChannelInfo(out contents, result);
+            DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ChannelInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetChannelInfo(out contents, result);
             return new object[] {
                     contents,
                     retVal};
@@ -11303,30 +11303,30 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndGetChannelInfoDelegate, this.onGetChannelInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests) {
             return base.Channel.ManageChannel(out results, strAction, strStyle, requests);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginManageChannel(strAction, strStyle, requests, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, System.IAsyncResult result) {
             return base.Channel.EndManageChannel(out results, result);
         }
         
         private System.IAsyncResult OnBeginManageChannel(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
             string strStyle = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests = ((DigitalPlatform.CirculationClient.localhost.ChannelInfo[])(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests = ((DigitalPlatform.LibraryClient.localhost.ChannelInfo[])(inValues[2]));
             return this.BeginManageChannel(strAction, strStyle, requests, callback, asyncState);
         }
         
         private object[] OnEndManageChannel(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ChannelInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndManageChannel(out results, result);
+            DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ChannelInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndManageChannel(out results, result);
             return new object[] {
                     results,
                     retVal};
@@ -11339,11 +11339,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests) {
+        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests) {
             this.ManageChannelAsync(strAction, strStyle, requests, null);
         }
         
-        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests, object userState) {
+        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests, object userState) {
             if ((this.onBeginManageChannelDelegate == null)) {
                 this.onBeginManageChannelDelegate = new BeginOperationDelegate(this.OnBeginManageChannel);
             }
@@ -11359,7 +11359,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         requests}, this.onEndManageChannelDelegate, this.onManageChannelCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword) {
             return base.Channel.ChangeUserPassword(strUserName, strOldPassword, strNewPassword);
         }
         
@@ -11369,7 +11369,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result) {
             return base.Channel.EndChangeUserPassword(result);
         }
         
@@ -11381,7 +11381,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndChangeUserPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndChangeUserPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndChangeUserPassword(result);
             return new object[] {
                     retVal};
         }
@@ -11413,7 +11413,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strNewPassword}, this.onEndChangeUserPasswordDelegate, this.onChangeUserPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode) {
             return base.Channel.VerifyBarcode(strLibraryCode, strBarcode);
         }
         
@@ -11423,7 +11423,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result) {
             return base.Channel.EndVerifyBarcode(result);
         }
         
@@ -11434,7 +11434,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndVerifyBarcode(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(result);
             return new object[] {
                     retVal};
         }
@@ -11465,7 +11465,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBarcode}, this.onEndVerifyBarcodeDelegate, this.onVerifyBarcodeCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName) {
             return base.Channel.GetSystemParameter(out strValue, strCategory, strName);
         }
         
@@ -11475,7 +11475,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result) {
             return base.Channel.EndGetSystemParameter(out strValue, result);
         }
         
@@ -11487,7 +11487,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetSystemParameter(System.IAsyncResult result) {
             string strValue = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetSystemParameter(out strValue, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetSystemParameter(out strValue, result);
             return new object[] {
                     strValue,
                     retVal};
@@ -11519,7 +11519,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strName}, this.onEndGetSystemParameterDelegate, this.onGetSystemParameterCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue) {
             return base.Channel.SetSystemParameter(strCategory, strName, strValue);
         }
         
@@ -11529,7 +11529,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result) {
             return base.Channel.EndSetSystemParameter(result);
         }
         
@@ -11541,7 +11541,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetSystemParameter(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetSystemParameter(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetSystemParameter(result);
             return new object[] {
                     retVal};
         }
@@ -11573,7 +11573,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strValue}, this.onEndSetSystemParameterDelegate, this.onSetSystemParameterCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult UrgentRecover(string strXML) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult UrgentRecover(string strXML) {
             return base.Channel.UrgentRecover(strXML);
         }
         
@@ -11583,7 +11583,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result) {
             return base.Channel.EndUrgentRecover(result);
         }
         
@@ -11593,7 +11593,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndUrgentRecover(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndUrgentRecover(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndUrgentRecover(result);
             return new object[] {
                     retVal};
         }
@@ -11623,7 +11623,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strXML}, this.onEndUrgentRecoverDelegate, this.onUrgentRecoverCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
             return base.Channel.RepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount);
         }
         
@@ -11633,7 +11633,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
             return base.Channel.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
         }
         
@@ -11652,7 +11652,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             int nTotalBorrowItems = this.GetDefaultValueForInitialization<int>();
             string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
             string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
             return new object[] {
                     nProcessedBorrowItems,
                     nTotalBorrowItems,
@@ -11691,7 +11691,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndRepairBorrowInfoDelegate, this.onRepairBorrowInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
             return base.Channel.PassGate(out results, strReaderBarcode, strGateName, strResultTypeList);
         }
         
@@ -11701,7 +11701,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
             return base.Channel.EndPassGate(out results, result);
         }
         
@@ -11714,7 +11714,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndPassGate(System.IAsyncResult result) {
             string[] results = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
             return new object[] {
                     results,
                     retVal};
@@ -11747,7 +11747,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultTypeList}, this.onEndPassGateDelegate, this.onPassGateCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
             return base.Channel.Foregift(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
         }
         
@@ -11757,7 +11757,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
             return base.Channel.EndForegift(out strOutputReaderXml, out strOutputID, result);
         }
         
@@ -11770,7 +11770,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndForegift(System.IAsyncResult result) {
             string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
             string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
             return new object[] {
                     strOutputReaderXml,
                     strOutputID,
@@ -11803,7 +11803,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderBarcode}, this.onEndForegiftDelegate, this.onForegiftCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
             return base.Channel.Hire(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
         }
         
@@ -11813,7 +11813,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
             return base.Channel.EndHire(out strOutputReaderXml, out strOutputID, result);
         }
         
@@ -11826,7 +11826,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndHire(System.IAsyncResult result) {
             string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
             string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
             return new object[] {
                     strOutputReaderXml,
                     strOutputID,
@@ -11859,7 +11859,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderBarcode}, this.onEndHireDelegate, this.onHireCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
             return base.Channel.Settlement(strAction, ids);
         }
         
@@ -11869,7 +11869,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
             return base.Channel.EndSettlement(result);
         }
         
@@ -11880,7 +11880,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSettlement(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
             return new object[] {
                     retVal};
         }
@@ -11911,7 +11911,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         ids}, this.onEndSettlementDelegate, this.onSettlementCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
             return base.Channel.SearchOneClassCallNumber(out strQueryXml, strArrangeGroupName, strClass, strResultSetName);
         }
         
@@ -11921,7 +11921,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
             return base.Channel.EndSearchOneClassCallNumber(out strQueryXml, result);
         }
         
@@ -11934,7 +11934,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchOneClassCallNumber(System.IAsyncResult result) {
             string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
             return new object[] {
                     strQueryXml,
                     retVal};
@@ -11967,7 +11967,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultSetName}, this.onEndSearchOneClassCallNumberDelegate, this.onSearchOneClassCallNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
             return base.Channel.GetCallNumberSearchResult(out searchresults, strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
         }
         
@@ -11977,7 +11977,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetCallNumberSearchResult(out searchresults, result);
         }
         
@@ -11992,8 +11992,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetCallNumberSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -12029,7 +12029,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetCallNumberSearchResultDelegate, this.onGetCallNumberSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
             return base.Channel.GetOneClassTailNumber(out strTailNumber, strArrangeGroupName, strClass);
         }
         
@@ -12039,7 +12039,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
             return base.Channel.EndGetOneClassTailNumber(out strTailNumber, result);
         }
         
@@ -12051,7 +12051,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetOneClassTailNumber(System.IAsyncResult result) {
             string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
             return new object[] {
                     strTailNumber,
                     retVal};
@@ -12083,7 +12083,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strClass}, this.onEndGetOneClassTailNumberDelegate, this.onGetOneClassTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
             return base.Channel.SetOneClassTailNumber(out strOutputNumber, strAction, strArrangeGroupName, strClass, strTestNumber);
         }
         
@@ -12093,7 +12093,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
             return base.Channel.EndSetOneClassTailNumber(out strOutputNumber, result);
         }
         
@@ -12107,7 +12107,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSetOneClassTailNumber(System.IAsyncResult result) {
             string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
             return new object[] {
                     strOutputNumber,
                     retVal};
@@ -12141,7 +12141,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTestNumber}, this.onEndSetOneClassTailNumberDelegate, this.onSetOneClassTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
             return base.Channel.SearchUsedZhongcihao(out strQueryXml, strZhongcihaoGroupName, strClass, strResultSetName);
         }
         
@@ -12151,7 +12151,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
             return base.Channel.EndSearchUsedZhongcihao(out strQueryXml, result);
         }
         
@@ -12164,7 +12164,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchUsedZhongcihao(System.IAsyncResult result) {
             string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
             return new object[] {
                     strQueryXml,
                     retVal};
@@ -12197,7 +12197,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultSetName}, this.onEndSearchUsedZhongcihaoDelegate, this.onSearchUsedZhongcihaoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
             return base.Channel.GetZhongcihaoSearchResult(out searchresults, strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
         }
         
@@ -12207,7 +12207,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetZhongcihaoSearchResult(out searchresults, result);
         }
         
@@ -12222,8 +12222,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetZhongcihaoSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -12259,7 +12259,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetZhongcihaoSearchResultDelegate, this.onGetZhongcihaoSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
             return base.Channel.GetZhongcihaoTailNumber(out strTailNumber, strZhongcihaoGroupName, strClass);
         }
         
@@ -12269,7 +12269,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
             return base.Channel.EndGetZhongcihaoTailNumber(out strTailNumber, result);
         }
         
@@ -12281,7 +12281,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetZhongcihaoTailNumber(System.IAsyncResult result) {
             string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
             return new object[] {
                     strTailNumber,
                     retVal};
@@ -12313,7 +12313,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strClass}, this.onEndGetZhongcihaoTailNumberDelegate, this.onGetZhongcihaoTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
             return base.Channel.SetZhongcihaoTailNumber(out strOutputNumber, strAction, strZhongcihaoGroupName, strClass, strTestNumber);
         }
         
@@ -12323,7 +12323,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
             return base.Channel.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
         }
         
@@ -12337,7 +12337,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSetZhongcihaoTailNumber(System.IAsyncResult result) {
             string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
             return new object[] {
                     strOutputNumber,
                     retVal};
@@ -12371,7 +12371,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTestNumber}, this.onEndSetZhongcihaoTailNumberDelegate, this.onSetZhongcihaoTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
             return base.Channel.SearchDup(out strUsedProjectName, strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle);
         }
         
@@ -12381,7 +12381,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
             return base.Channel.EndSearchDup(out strUsedProjectName, result);
         }
         
@@ -12395,7 +12395,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchDup(System.IAsyncResult result) {
             string strUsedProjectName = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
             return new object[] {
                     strUsedProjectName,
                     retVal};
@@ -12429,7 +12429,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndSearchDupDelegate, this.onSearchDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
             return base.Channel.GetDupSearchResult(out searchresults, lStart, lCount, strBrowseInfoStyle);
         }
         
@@ -12439,7 +12439,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetDupSearchResult(out searchresults, result);
         }
         
@@ -12451,8 +12451,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetDupSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.DupSearchResult[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -12485,7 +12485,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBrowseInfoStyle}, this.onEndGetDupSearchResultDelegate, this.onGetDupSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
             return base.Channel.ListDupProjectInfos(out results, strOriginBiblioDbName);
         }
         
@@ -12495,7 +12495,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
             return base.Channel.EndListDupProjectInfos(out results, result);
         }
         
@@ -12505,8 +12505,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndListDupProjectInfos(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.DupProjectInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
+            DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupProjectInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
             return new object[] {
                     results,
                     retVal};
@@ -12537,7 +12537,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOriginBiblioDbName}, this.onEndListDupProjectInfosDelegate, this.onListDupProjectInfosCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
             return base.Channel.GetUtilInfo(out strValue, strAction, strDbName, strFrom, strKey, strValueAttrName);
         }
         
@@ -12547,7 +12547,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
             return base.Channel.EndGetUtilInfo(out strValue, result);
         }
         
@@ -12562,7 +12562,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetUtilInfo(System.IAsyncResult result) {
             string strValue = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
             return new object[] {
                     strValue,
                     retVal};
@@ -12597,7 +12597,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strValueAttrName}, this.onEndGetUtilInfoDelegate, this.onGetUtilInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
             return base.Channel.SetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue);
         }
         
@@ -12607,7 +12607,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
             return base.Channel.EndSetUtilInfo(result);
         }
         
@@ -12624,7 +12624,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetUtilInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
             return new object[] {
                     retVal};
         }
@@ -12661,7 +12661,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strValue}, this.onEndSetUtilInfoDelegate, this.onSetUtilInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
             return base.Channel.GetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, strResPath, nStart, nLength, strStyle);
         }
         
@@ -12671,7 +12671,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
         }
         
@@ -12688,7 +12688,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strMetadata = this.GetDefaultValueForInitialization<string>();
             string strOutputResPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
             return new object[] {
                     baContent,
                     strMetadata,
@@ -12725,7 +12725,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndGetResDelegate, this.onGetResCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
             return base.Channel.WriteRes(out strOutputResPath, out baOutputTimestamp, strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp);
         }
         
@@ -12735,7 +12735,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
         }
         
@@ -12753,7 +12753,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndWriteRes(System.IAsyncResult result) {
             string strOutputResPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
             return new object[] {
                     strOutputResPath,
                     baOutputTimestamp,
@@ -12791,7 +12791,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -12801,7 +12801,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
             return base.Channel.EndGetComments(out commentinfos, result);
         }
         
@@ -12815,8 +12815,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetComments(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
             return new object[] {
                     commentinfos,
                     retVal};
@@ -12857,132 +12857,132 @@ namespace DigitalPlatform.CirculationClient.localhost {
     public interface dp2library {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/SetCommentsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/SetCommentsResponse")]
-        System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetCommentInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetCommentInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentInfoResponse")]
         System.IAsyncResult BeginGetCommentInfo(string strRefID, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchCommentDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchCommentDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchCommentDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchCommentDupResponse")]
         System.IAsyncResult BeginSearchCommentDup(string strIndex, string strBiblioRecPath, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchComment", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchCommentResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchComment", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchCommentResponse")]
         System.IAsyncResult BeginSearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetMessage", ReplyAction="http://dp2003.com/dp2library/dp2library/GetMessageResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetMessage", ReplyAction="http://dp2003.com/dp2library/dp2library/GetMessageResponse")]
-        System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ListMessage", ReplyAction="http://dp2003.com/dp2library/dp2library/ListMessageResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ListMessage", ReplyAction="http://dp2003.com/dp2library/dp2library/ListMessageResponse")]
-        System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetMessage", ReplyAction="http://dp2003.com/dp2library/dp2library/SetMessageResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetMessage", ReplyAction="http://dp2003.com/dp2library/dp2library/SetMessageResponse")]
-        System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetStatisInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetStatisInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetStatisInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetStatisInfoResponse")]
         System.IAsyncResult BeginGetStatisInfo(string strDateRangeString, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ExistStatisInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/ExistStatisInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, string strDateRangeString);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, string strDateRangeString);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ExistStatisInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/ExistStatisInfoResponse")]
         System.IAsyncResult BeginExistStatisInfo(string strDateRangeString, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetFile", ReplyAction="http://dp2003.com/dp2library/dp2library/GetFileResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetFile", ReplyAction="http://dp2003.com/dp2library/dp2library/GetFileResponse")]
         System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ListFile", ReplyAction="http://dp2003.com/dp2library/dp2library/ListFileResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ListFile", ReplyAction="http://dp2003.com/dp2library/dp2library/ListFileResponse")]
         System.IAsyncResult BeginListFile(string strAction, string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/HitCounter", ReplyAction="http://dp2003.com/dp2library/dp2library/HitCounterResponse")]
         System.IAsyncResult BeginHitCounter(string strAction, string strName, string strClientAddress, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         System.IAsyncResult BeginGetVersion(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Login", ReplyAction="http://dp2003.com/dp2library/dp2library/LoginResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Login", ReplyAction="http://dp2003.com/dp2library/dp2library/LoginResponse")]
         System.IAsyncResult BeginLogin(string strUserName, string strPassword, string strParameters, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Logout", ReplyAction="http://dp2003.com/dp2library/dp2library/LogoutResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Logout();
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Logout();
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Logout", ReplyAction="http://dp2003.com/dp2library/dp2library/LogoutResponse")]
         System.IAsyncResult BeginLogout(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetLang", ReplyAction="http://dp2003.com/dp2library/dp2library/SetLangResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetLang", ReplyAction="http://dp2003.com/dp2library/dp2library/SetLangResponse")]
         System.IAsyncResult BeginSetLang(string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, IsInitiating=false, Action="http://dp2003.com/dp2library/dp2library/Stop")]
         void Stop();
@@ -12993,195 +12993,195 @@ namespace DigitalPlatform.CirculationClient.localhost {
         void EndStop(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/VerifyReaderPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/VerifyReaderPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/VerifyReaderPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/VerifyReaderPasswordResponse")]
         System.IAsyncResult BeginVerifyReaderPassword(string strReaderBarcode, string strReaderPassword, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ChangeReaderPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ChangeReaderPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ChangeReaderPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ChangeReaderPasswordResponse")]
         System.IAsyncResult BeginChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetReaderInfoResponse")]
         System.IAsyncResult BeginGetReaderInfo(string strBarcode, string strResultTypeList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetReaderInfoResponse")]
         System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfoResponse")]
         System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/DevolveReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/DevolveReaderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/DevolveReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/DevolveReaderInfoResponse")]
         System.IAsyncResult BeginDevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchReader", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchReaderResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchReader", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchReaderResponse")]
         System.IAsyncResult BeginSearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetFriends", ReplyAction="http://dp2003.com/dp2library/dp2library/SetFriendsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetFriends", ReplyAction="http://dp2003.com/dp2library/dp2library/SetFriendsResponse")]
         System.IAsyncResult BeginSetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchOneDb", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneDbResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchOneDb", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneDbResponse")]
         System.IAsyncResult BeginSearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Search", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Search", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchResponse")]
         System.IAsyncResult BeginSearch(string strQueryXml, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetSearchResultResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetSearchResultResponse")]
         System.IAsyncResult BeginGetSearchResult(string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetRecord", ReplyAction="http://dp2003.com/dp2library/dp2library/GetRecordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetRecord", ReplyAction="http://dp2003.com/dp2library/dp2library/GetRecordResponse")]
         System.IAsyncResult BeginGetRecord(string strPath, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetBrowseRecords", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBrowseRecordsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetBrowseRecords", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBrowseRecordsResponse")]
         System.IAsyncResult BeginGetBrowseRecords(string[] paths, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ListBiblioDbFroms", ReplyAction="http://dp2003.com/dp2library/dp2library/ListBiblioDbFromsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ListBiblioDbFroms", ReplyAction="http://dp2003.com/dp2library/dp2library/ListBiblioDbFromsResponse")]
         System.IAsyncResult BeginListBiblioDbFroms(string strDbType, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchBiblioResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchBiblioResponse")]
         System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfoResponse")]
         System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/CopyBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/CopyBiblioInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/CopyBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/CopyBiblioInfoResponse")]
         System.IAsyncResult BeginCopyBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfoResponse")]
         System.IAsyncResult BeginGetBiblioInfo(string strBiblioRecPath, string strBiblioXml, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfosResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfosResponse")]
         System.IAsyncResult BeginGetBiblioInfos(string strBiblioRecPath, string strBiblioXml, string[] formats, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchItem", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchItemResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchItem", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchItemResponse")]
         System.IAsyncResult BeginSearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetItemInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetItemInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetItemInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetItemInfoResponse")]
         System.IAsyncResult BeginGetItemInfo(string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchItemDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchItemDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchItemDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchItemDupResponse")]
         System.IAsyncResult BeginSearchItemDup(string strBarcode, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetBiblioSummary", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBiblioSummaryResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetBiblioSummary", ReplyAction="http://dp2003.com/dp2library/dp2library/GetBiblioSummaryResponse")]
         System.IAsyncResult BeginGetBiblioSummary(string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Borrow", ReplyAction="http://dp2003.com/dp2library/dp2library/BorrowResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Borrow(
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Borrow(
                     out string[] item_records, 
                     out string[] reader_records, 
                     out string[] biblio_records, 
-                    out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, 
+                    out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, 
                     out string[] aDupPath, 
                     out string strOutputReaderBarcode, 
                     bool bRenew, 
@@ -13198,459 +13198,459 @@ namespace DigitalPlatform.CirculationClient.localhost {
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Borrow", ReplyAction="http://dp2003.com/dp2library/dp2library/BorrowResponse")]
         System.IAsyncResult BeginBorrow(bool bRenew, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, bool bForce, string[] saBorrowedItemBarcode, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Return", ReplyAction="http://dp2003.com/dp2library/dp2library/ReturnResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Return", ReplyAction="http://dp2003.com/dp2library/dp2library/ReturnResponse")]
         System.IAsyncResult BeginReturn(string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Reservation", ReplyAction="http://dp2003.com/dp2library/dp2library/ReservationResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Reservation", ReplyAction="http://dp2003.com/dp2library/dp2library/ReservationResponse")]
         System.IAsyncResult BeginReservation(string strFunction, string strReaderBarcode, string strItemBarcodeList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Amerce", ReplyAction="http://dp2003.com/dp2library/dp2library/AmerceResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Amerce", ReplyAction="http://dp2003.com/dp2library/dp2library/AmerceResponse")]
-        System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetIssues", ReplyAction="http://dp2003.com/dp2library/dp2library/GetIssuesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetIssues", ReplyAction="http://dp2003.com/dp2library/dp2library/GetIssuesResponse")]
         System.IAsyncResult BeginGetIssues(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetIssues", ReplyAction="http://dp2003.com/dp2library/dp2library/SetIssuesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetIssues", ReplyAction="http://dp2003.com/dp2library/dp2library/SetIssuesResponse")]
-        System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetIssueInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetIssueInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetIssueInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetIssueInfoResponse")]
         System.IAsyncResult BeginGetIssueInfo(string strRefID, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchIssueDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchIssueDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchIssueDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchIssueDupResponse")]
         System.IAsyncResult BeginSearchIssueDup(string strPublishTime, string strBiblioRecPath, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchIssue", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchIssueResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchIssue", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchIssueResponse")]
         System.IAsyncResult BeginSearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetEntities", ReplyAction="http://dp2003.com/dp2library/dp2library/GetEntitiesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetEntities", ReplyAction="http://dp2003.com/dp2library/dp2library/GetEntitiesResponse")]
         System.IAsyncResult BeginGetEntities(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetEntities", ReplyAction="http://dp2003.com/dp2library/dp2library/SetEntitiesResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetEntities", ReplyAction="http://dp2003.com/dp2library/dp2library/SetEntitiesResponse")]
-        System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOrders", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOrdersResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOrders", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOrdersResponse")]
         System.IAsyncResult BeginGetOrders(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetOrders", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOrdersResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetOrders", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOrdersResponse")]
-        System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOrderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOrderInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOrderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOrderInfoResponse")]
         System.IAsyncResult BeginGetOrderInfo(string strRefID, string strItemXml, string strResultType, string strBiblioType, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchOrderDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOrderDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchOrderDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOrderDupResponse")]
         System.IAsyncResult BeginSearchOrderDup(string strIndex, string strBiblioRecPath, int nMax, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchOrder", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOrderResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchOrder", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOrderResponse")]
         System.IAsyncResult BeginSearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetClock", ReplyAction="http://dp2003.com/dp2library/dp2library/SetClockResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetClock(string strTime);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetClock(string strTime);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetClock", ReplyAction="http://dp2003.com/dp2library/dp2library/SetClockResponse")]
         System.IAsyncResult BeginSetClock(string strTime, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetClock", ReplyAction="http://dp2003.com/dp2library/dp2library/GetClockResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetClock(out string strTime);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetClock(out string strTime);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetClock", ReplyAction="http://dp2003.com/dp2library/dp2library/GetClockResponse")]
         System.IAsyncResult BeginGetClock(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ResetPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ResetPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ResetPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ResetPasswordResponse")]
         System.IAsyncResult BeginResetPassword(string strParameters, string strMessageTemplate, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetValueTable", ReplyAction="http://dp2003.com/dp2library/dp2library/GetValueTableResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetValueTable", ReplyAction="http://dp2003.com/dp2library/dp2library/GetValueTableResponse")]
         System.IAsyncResult BeginGetValueTable(string strTableName, string strDbName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOperLogs", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOperLogsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOperLogs", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOperLogsResponse")]
         System.IAsyncResult BeginGetOperLogs(string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOperLog", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOperLogResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOperLog", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOperLogResponse")]
         System.IAsyncResult BeginGetOperLog(string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetCalendar", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCalendarResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetCalendar", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCalendarResponse")]
         System.IAsyncResult BeginGetCalendar(string strAction, string strName, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetCalendar", ReplyAction="http://dp2003.com/dp2library/dp2library/SetCalendarResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetCalendar", ReplyAction="http://dp2003.com/dp2library/dp2library/SetCalendarResponse")]
-        System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/BatchTask", ReplyAction="http://dp2003.com/dp2library/dp2library/BatchTaskResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/BatchTask", ReplyAction="http://dp2003.com/dp2library/dp2library/BatchTaskResponse")]
-        System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ClearAllDbs", ReplyAction="http://dp2003.com/dp2library/dp2library/ClearAllDbsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ClearAllDbs();
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ClearAllDbs();
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ClearAllDbs", ReplyAction="http://dp2003.com/dp2library/dp2library/ClearAllDbsResponse")]
         System.IAsyncResult BeginClearAllDbs(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/dp2library/ManageDatabaseResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/dp2library/ManageDatabaseResponse")]
         System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetUser", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUserResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetUser", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUserResponse")]
         System.IAsyncResult BeginGetUser(string strAction, string strName, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetUser", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUserResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetUser", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUserResponse")]
-        System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetChannelInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetChannelInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetChannelInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetChannelInfoResponse")]
         System.IAsyncResult BeginGetChannelInfo(string strQuery, string strStyle, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ManageChannel", ReplyAction="http://dp2003.com/dp2library/dp2library/ManageChannelResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ManageChannel", ReplyAction="http://dp2003.com/dp2library/dp2library/ManageChannelResponse")]
-        System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ChangeUserPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ChangeUserPasswordResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ChangeUserPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ChangeUserPasswordResponse")]
         System.IAsyncResult BeginChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/dp2library/VerifyBarcodeResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/dp2library/VerifyBarcodeResponse")]
         System.IAsyncResult BeginVerifyBarcode(string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetSystemParameter", ReplyAction="http://dp2003.com/dp2library/dp2library/GetSystemParameterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetSystemParameter", ReplyAction="http://dp2003.com/dp2library/dp2library/GetSystemParameterResponse")]
         System.IAsyncResult BeginGetSystemParameter(string strCategory, string strName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetSystemParameter", ReplyAction="http://dp2003.com/dp2library/dp2library/SetSystemParameterResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetSystemParameter", ReplyAction="http://dp2003.com/dp2library/dp2library/SetSystemParameterResponse")]
         System.IAsyncResult BeginSetSystemParameter(string strCategory, string strName, string strValue, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/UrgentRecover", ReplyAction="http://dp2003.com/dp2library/dp2library/UrgentRecoverResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult UrgentRecover(string strXML);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult UrgentRecover(string strXML);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/UrgentRecover", ReplyAction="http://dp2003.com/dp2library/dp2library/UrgentRecoverResponse")]
         System.IAsyncResult BeginUrgentRecover(string strXML, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfoResponse")]
         System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/PassGate", ReplyAction="http://dp2003.com/dp2library/dp2library/PassGateResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/PassGate", ReplyAction="http://dp2003.com/dp2library/dp2library/PassGateResponse")]
         System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Foregift", ReplyAction="http://dp2003.com/dp2library/dp2library/ForegiftResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Foregift", ReplyAction="http://dp2003.com/dp2library/dp2library/ForegiftResponse")]
         System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Hire", ReplyAction="http://dp2003.com/dp2library/dp2library/HireResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Hire", ReplyAction="http://dp2003.com/dp2library/dp2library/HireResponse")]
         System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Settlement", ReplyAction="http://dp2003.com/dp2library/dp2library/SettlementResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Settlement", ReplyAction="http://dp2003.com/dp2library/dp2library/SettlementResponse")]
         System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumberResponse")]
         System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResultResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResultResponse")]
         System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumberResponse")]
         System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumberResponse")]
         System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihaoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihaoResponse")]
         System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResultResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResultResponse")]
         System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumberResponse")]
         System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumberResponse")]
         System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchDupResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchDupResponse")]
         System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResultResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResultResponse")]
         System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfosResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfosResponse")]
         System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUtilInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUtilInfoResponse")]
         System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUtilInfoResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUtilInfoResponse")]
         System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetRes", ReplyAction="http://dp2003.com/dp2library/dp2library/GetResResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetRes", ReplyAction="http://dp2003.com/dp2library/dp2library/GetResResponse")]
         System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/WriteRes", ReplyAction="http://dp2003.com/dp2library/dp2library/WriteResResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/WriteRes", ReplyAction="http://dp2003.com/dp2library/dp2library/WriteResResponse")]
         System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
         System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface dp2libraryChannel : DigitalPlatform.CirculationClient.localhost.dp2library, System.ServiceModel.IClientChannel {
+    public interface dp2libraryChannel : DigitalPlatform.LibraryClient.localhost.dp2library, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -13664,17 +13664,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -13725,10 +13725,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -13751,10 +13751,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -13770,10 +13770,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -13789,17 +13789,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.MessageData[] messages {
+        public DigitalPlatform.LibraryClient.localhost.MessageData[] messages {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.MessageData[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.MessageData[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -13822,17 +13822,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.MessageData[] messages {
+        public DigitalPlatform.LibraryClient.localhost.MessageData[] messages {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.MessageData[])(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.MessageData[])(this.results[1]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -13848,17 +13848,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages {
+        public DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.MessageData[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.MessageData[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -13874,10 +13874,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info {
+        public DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.RangeStatisInfo)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.RangeStatisInfo)(this.results[0]));
             }
         }
         
@@ -13888,10 +13888,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -13907,17 +13907,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.DateExist[] dates {
+        public DigitalPlatform.LibraryClient.localhost.DateExist[] dates {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.DateExist[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.DateExist[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -13947,10 +13947,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -13966,17 +13966,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos {
+        public DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.FileItemInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.FileItemInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -13999,10 +13999,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14025,10 +14025,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14065,10 +14065,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[3]));
             }
         }
     }
@@ -14084,10 +14084,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14110,10 +14110,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14129,10 +14129,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14148,10 +14148,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14188,10 +14188,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[3]));
             }
         }
     }
@@ -14235,17 +14235,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode {
+        public DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ErrorCodeValue)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.ErrorCodeValue)(this.results[4]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -14275,10 +14275,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -14294,10 +14294,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14313,10 +14313,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14332,10 +14332,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14351,10 +14351,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14370,10 +14370,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14389,17 +14389,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.Record[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.Record[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.Record[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.Record[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14429,10 +14429,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -14448,17 +14448,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.Record[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.Record[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.Record[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.Record[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14474,17 +14474,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos {
+        public DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14507,10 +14507,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14540,10 +14540,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -14580,10 +14580,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[3]));
             }
         }
     }
@@ -14606,10 +14606,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14639,10 +14639,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[2]));
             }
         }
     }
@@ -14658,10 +14658,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14712,10 +14712,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -14738,10 +14738,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14771,10 +14771,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -14811,10 +14811,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info {
+        public DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.BorrowInfo)(this.results[3]));
+                return ((DigitalPlatform.LibraryClient.localhost.BorrowInfo)(this.results[3]));
             }
         }
         
@@ -14832,10 +14832,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[6]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[6]));
             }
         }
     }
@@ -14886,17 +14886,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info {
+        public DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ReturnInfo)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.ReturnInfo)(this.results[5]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[6]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[6]));
             }
         }
     }
@@ -14912,10 +14912,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -14931,10 +14931,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items {
+        public DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.AmerceItem[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.AmerceItem[])(this.results[0]));
             }
         }
         
@@ -14945,10 +14945,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -14964,17 +14964,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -14990,17 +14990,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15051,10 +15051,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -15077,10 +15077,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15096,10 +15096,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15115,17 +15115,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15141,17 +15141,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15167,17 +15167,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15193,17 +15193,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15254,10 +15254,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[5]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[5]));
             }
         }
     }
@@ -15280,10 +15280,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15299,10 +15299,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15318,10 +15318,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15344,10 +15344,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15363,10 +15363,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15389,10 +15389,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15408,17 +15408,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records {
+        public DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.OperLogInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.OperLogInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15462,10 +15462,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
             }
         }
     }
@@ -15481,17 +15481,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents {
+        public DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.CalenderInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.CalenderInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15507,10 +15507,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15526,17 +15526,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo {
+        public DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.BatchTaskInfo)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.BatchTaskInfo)(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15552,10 +15552,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15578,10 +15578,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15597,17 +15597,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.UserInfo[] contents {
+        public DigitalPlatform.LibraryClient.localhost.UserInfo[] contents {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.UserInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.UserInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15623,10 +15623,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15642,17 +15642,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents {
+        public DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ChannelInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.ChannelInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15668,17 +15668,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results1 = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results {
+        public DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ChannelInfo[])(this.results1[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.ChannelInfo[])(this.results1[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -15694,10 +15694,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15713,10 +15713,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15739,10 +15739,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15758,10 +15758,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15777,10 +15777,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15824,10 +15824,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
             }
         }
     }
@@ -15850,10 +15850,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -15883,10 +15883,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -15916,10 +15916,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -15935,10 +15935,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -15961,10 +15961,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -15980,17 +15980,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16013,10 +16013,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16039,10 +16039,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16065,10 +16065,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16084,17 +16084,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16117,10 +16117,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16143,10 +16143,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16169,10 +16169,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16188,17 +16188,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults {
+        public DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.DupSearchResult[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.DupSearchResult[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16214,17 +16214,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results1 = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results {
+        public DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.DupProjectInfo[])(this.results1[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.DupProjectInfo[])(this.results1[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results1[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -16247,10 +16247,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -16266,10 +16266,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -16313,10 +16313,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[4]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
             }
         }
     }
@@ -16346,10 +16346,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[2]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -16365,24 +16365,24 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos {
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
             }
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class dp2libraryClient : System.ServiceModel.ClientBase<DigitalPlatform.CirculationClient.localhost.dp2library>, DigitalPlatform.CirculationClient.localhost.dp2library {
+    public partial class dp2libraryClient : System.ServiceModel.ClientBase<DigitalPlatform.LibraryClient.localhost.dp2library>, DigitalPlatform.LibraryClient.localhost.dp2library {
         
         private BeginOperationDelegate onBeginSetCommentsDelegate;
         
@@ -17179,29 +17179,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         public event System.EventHandler<GetCommentsCompletedEventArgs1> GetCommentsCompleted;
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             return base.Channel.SetComments(out errorinfos, strBiblioRecPath, commentinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetComments(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetComments(strBiblioRecPath, commentinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetComments(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetComments(strBiblioRecPath, commentinfos, callback, asyncState);
         }
         
         private object[] OnEndSetComments(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetComments(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetComments(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -17214,11 +17214,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos) {
+        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             this.SetCommentsAsync(strBiblioRecPath, commentinfos, null);
         }
         
-        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, object userState) {
+        public void SetCommentsAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, object userState) {
             if ((this.onBeginSetCommentsDelegate == null)) {
                 this.onBeginSetCommentsDelegate = new BeginOperationDelegate(this.OnBeginSetComments);
             }
@@ -17233,7 +17233,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         commentinfos}, this.onEndSetCommentsDelegate, this.onSetCommentsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, strRefID, strItemXml, strResultType, strBiblioType);
         }
         
@@ -17243,7 +17243,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCommentInfo(out string strResult, out string strCommentRecPath, out byte[] comment_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
         }
         
@@ -17261,7 +17261,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] comment_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCommentInfo(out strResult, out strCommentRecPath, out comment_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strCommentRecPath,
@@ -17299,7 +17299,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetCommentInfoDelegate, this.onGetCommentInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCommentDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
             return base.Channel.SearchCommentDup(out paths, strIndex, strBiblioRecPath, nMax);
         }
         
@@ -17309,7 +17309,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCommentDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchCommentDup(out paths, result);
         }
         
@@ -17322,7 +17322,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchCommentDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchCommentDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchCommentDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -17355,7 +17355,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchCommentDupDelegate, this.onSearchCommentDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchComment(string strCommentDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchComment(strCommentDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -17365,7 +17365,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchComment(System.IAsyncResult result) {
             return base.Channel.EndSearchComment(result);
         }
         
@@ -17383,7 +17383,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchComment(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchComment(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchComment(result);
             return new object[] {
                     retVal};
         }
@@ -17421,29 +17421,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchCommentDelegate, this.onSearchCommentCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel) {
             return base.Channel.GetMessage(out messages, message_ids, messagelevel);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginGetMessage(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginGetMessage(message_ids, messagelevel, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result) {
             return base.Channel.EndGetMessage(out messages, result);
         }
         
         private System.IAsyncResult OnBeginGetMessage(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string[] message_ids = ((string[])(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.CirculationClient.localhost.MessageLevel)(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.LibraryClient.localhost.MessageLevel)(inValues[1]));
             return this.BeginGetMessage(message_ids, messagelevel, callback, asyncState);
         }
         
         private object[] OnEndGetMessage(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.MessageData[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetMessage(out messages, result);
+            DigitalPlatform.LibraryClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.MessageData[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetMessage(out messages, result);
             return new object[] {
                     messages,
                     retVal};
@@ -17456,11 +17456,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void GetMessageAsync(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel) {
+        public void GetMessageAsync(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel) {
             this.GetMessageAsync(message_ids, messagelevel, null);
         }
         
-        public void GetMessageAsync(string[] message_ids, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, object userState) {
+        public void GetMessageAsync(string[] message_ids, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, object userState) {
             if ((this.onBeginGetMessageDelegate == null)) {
                 this.onBeginGetMessageDelegate = new BeginOperationDelegate(this.OnBeginGetMessage);
             }
@@ -17475,17 +17475,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         messagelevel}, this.onEndGetMessageDelegate, this.onGetMessageCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
             return base.Channel.ListMessage(out nTotalCount, out messages, strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginListMessage(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginListMessage(strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListMessage(out int nTotalCount, out DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.IAsyncResult result) {
             return base.Channel.EndListMessage(out nTotalCount, out messages, result);
         }
         
@@ -17493,7 +17493,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strStyle = ((string)(inValues[0]));
             string strResultsetName = ((string)(inValues[1]));
             string strBoxType = ((string)(inValues[2]));
-            DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.CirculationClient.localhost.MessageLevel)(inValues[3]));
+            DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel = ((DigitalPlatform.LibraryClient.localhost.MessageLevel)(inValues[3]));
             int nStart = ((int)(inValues[4]));
             int nCount = ((int)(inValues[5]));
             return this.BeginListMessage(strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount, callback, asyncState);
@@ -17501,8 +17501,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndListMessage(System.IAsyncResult result) {
             int nTotalCount = this.GetDefaultValueForInitialization<int>();
-            DigitalPlatform.CirculationClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.MessageData[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListMessage(out nTotalCount, out messages, result);
+            DigitalPlatform.LibraryClient.localhost.MessageData[] messages = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.MessageData[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListMessage(out nTotalCount, out messages, result);
             return new object[] {
                     nTotalCount,
                     messages,
@@ -17516,11 +17516,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
+        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount) {
             this.ListMessageAsync(strStyle, strResultsetName, strBoxType, messagelevel, nStart, nCount, null);
         }
         
-        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.CirculationClient.localhost.MessageLevel messagelevel, int nStart, int nCount, object userState) {
+        public void ListMessageAsync(string strStyle, string strResultsetName, string strBoxType, DigitalPlatform.LibraryClient.localhost.MessageLevel messagelevel, int nStart, int nCount, object userState) {
             if ((this.onBeginListMessageDelegate == null)) {
                 this.onBeginListMessageDelegate = new BeginOperationDelegate(this.OnBeginListMessage);
             }
@@ -17539,30 +17539,30 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndListMessageDelegate, this.onListMessageCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages) {
             return base.Channel.SetMessage(out output_messages, strAction, strStyle, messages);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetMessage(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetMessage(strAction, strStyle, messages, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetMessage(out DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages, System.IAsyncResult result) {
             return base.Channel.EndSetMessage(out output_messages, result);
         }
         
         private System.IAsyncResult OnBeginSetMessage(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
             string strStyle = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.MessageData[] messages = ((DigitalPlatform.CirculationClient.localhost.MessageData[])(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.MessageData[] messages = ((DigitalPlatform.LibraryClient.localhost.MessageData[])(inValues[2]));
             return this.BeginSetMessage(strAction, strStyle, messages, callback, asyncState);
         }
         
         private object[] OnEndSetMessage(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.MessageData[] output_messages = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.MessageData[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetMessage(out output_messages, result);
+            DigitalPlatform.LibraryClient.localhost.MessageData[] output_messages = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.MessageData[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetMessage(out output_messages, result);
             return new object[] {
                     output_messages,
                     retVal};
@@ -17575,11 +17575,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages) {
+        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages) {
             this.SetMessageAsync(strAction, strStyle, messages, null);
         }
         
-        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.MessageData[] messages, object userState) {
+        public void SetMessageAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.MessageData[] messages, object userState) {
             if ((this.onBeginSetMessageDelegate == null)) {
                 this.onBeginSetMessageDelegate = new BeginOperationDelegate(this.OnBeginSetMessage);
             }
@@ -17595,7 +17595,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         messages}, this.onEndSetMessageDelegate, this.onSetMessageCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, string strDateRangeString, string strStyle) {
             return base.Channel.GetStatisInfo(out info, out strXml, strDateRangeString, strStyle);
         }
         
@@ -17605,7 +17605,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetStatisInfo(out DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info, out string strXml, System.IAsyncResult result) {
             return base.Channel.EndGetStatisInfo(out info, out strXml, result);
         }
         
@@ -17616,9 +17616,9 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetStatisInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.RangeStatisInfo info = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.RangeStatisInfo>();
+            DigitalPlatform.LibraryClient.localhost.RangeStatisInfo info = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.RangeStatisInfo>();
             string strXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetStatisInfo(out info, out strXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetStatisInfo(out info, out strXml, result);
             return new object[] {
                     info,
                     strXml,
@@ -17651,7 +17651,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndGetStatisInfoDelegate, this.onGetStatisInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, string strDateRangeString) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, string strDateRangeString) {
             return base.Channel.ExistStatisInfo(out dates, strDateRangeString);
         }
         
@@ -17661,7 +17661,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.CirculationClient.localhost.DateExist[] dates, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, System.IAsyncResult result) {
             return base.Channel.EndExistStatisInfo(out dates, result);
         }
         
@@ -17671,8 +17671,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndExistStatisInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.DateExist[] dates = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.DateExist[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndExistStatisInfo(out dates, result);
+            DigitalPlatform.LibraryClient.localhost.DateExist[] dates = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DateExist[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndExistStatisInfo(out dates, result);
             return new object[] {
                     dates,
                     retVal};
@@ -17703,7 +17703,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strDateRangeString}, this.onEndExistStatisInfoDelegate, this.onExistStatisInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength) {
             return base.Channel.GetFile(out baContent, out strFileTime, strCategory, strFileName, lStart, lLength);
         }
         
@@ -17713,7 +17713,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result) {
             return base.Channel.EndGetFile(out baContent, out strFileTime, result);
         }
         
@@ -17728,7 +17728,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetFile(System.IAsyncResult result) {
             byte[] baContent = this.GetDefaultValueForInitialization<byte[]>();
             string strFileTime = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetFile(out baContent, out strFileTime, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetFile(out baContent, out strFileTime, result);
             return new object[] {
                     baContent,
                     strFileTime,
@@ -17763,7 +17763,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndGetFileDelegate, this.onGetFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength) {
             return base.Channel.ListFile(out infos, strAction, strCategory, strFileName, lStart, lLength);
         }
         
@@ -17773,7 +17773,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, System.IAsyncResult result) {
             return base.Channel.EndListFile(out infos, result);
         }
         
@@ -17787,8 +17787,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndListFile(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.FileItemInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListFile(out infos, result);
+            DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.FileItemInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListFile(out infos, result);
             return new object[] {
                     infos,
                     retVal};
@@ -17823,7 +17823,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult HitCounter(out long Value, string strAction, string strName, string strClientAddress) {
             return base.Channel.HitCounter(out Value, strAction, strName, strClientAddress);
         }
         
@@ -17833,7 +17833,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result) {
             return base.Channel.EndHitCounter(out Value, result);
         }
         
@@ -17846,7 +17846,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndHitCounter(System.IAsyncResult result) {
             long Value = this.GetDefaultValueForInitialization<long>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHitCounter(out Value, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHitCounter(out Value, result);
             return new object[] {
                     Value,
                     retVal};
@@ -17879,7 +17879,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strClientAddress}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
             return base.Channel.GetVersion(out uid);
         }
         
@@ -17889,7 +17889,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result) {
             return base.Channel.EndGetVersion(out uid, result);
         }
         
@@ -17899,7 +17899,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetVersion(System.IAsyncResult result) {
             string uid = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetVersion(out uid, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetVersion(out uid, result);
             return new object[] {
                     uid,
                     retVal};
@@ -17929,7 +17929,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginGetVersionDelegate, null, this.onEndGetVersionDelegate, this.onGetVersionCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters) {
             return base.Channel.Login(out strOutputUserName, out strRights, out strLibraryCode, strUserName, strPassword, strParameters);
         }
         
@@ -17939,7 +17939,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogin(out string strOutputUserName, out string strRights, out string strLibraryCode, System.IAsyncResult result) {
             return base.Channel.EndLogin(out strOutputUserName, out strRights, out strLibraryCode, result);
         }
         
@@ -17954,7 +17954,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strOutputUserName = this.GetDefaultValueForInitialization<string>();
             string strRights = this.GetDefaultValueForInitialization<string>();
             string strLibraryCode = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndLogin(out strOutputUserName, out strRights, out strLibraryCode, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndLogin(out strOutputUserName, out strRights, out strLibraryCode, result);
             return new object[] {
                     strOutputUserName,
                     strRights,
@@ -17989,7 +17989,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strParameters}, this.onEndLoginDelegate, this.onLoginCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Logout() {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Logout() {
             return base.Channel.Logout();
         }
         
@@ -17999,7 +17999,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndLogout(System.IAsyncResult result) {
             return base.Channel.EndLogout(result);
         }
         
@@ -18008,7 +18008,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndLogout(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndLogout(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndLogout(result);
             return new object[] {
                     retVal};
         }
@@ -18037,7 +18037,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginLogoutDelegate, null, this.onEndLogoutDelegate, this.onLogoutCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetLang(out string strOldLang, string strLang) {
             return base.Channel.SetLang(out strOldLang, strLang);
         }
         
@@ -18047,7 +18047,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetLang(out string strOldLang, System.IAsyncResult result) {
             return base.Channel.EndSetLang(out strOldLang, result);
         }
         
@@ -18058,7 +18058,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSetLang(System.IAsyncResult result) {
             string strOldLang = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetLang(out strOldLang, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetLang(out strOldLang, result);
             return new object[] {
                     strOldLang,
                     retVal};
@@ -18136,7 +18136,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginStopDelegate, null, this.onEndStopDelegate, this.onStopCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyReaderPassword(string strReaderBarcode, string strReaderPassword) {
             return base.Channel.VerifyReaderPassword(strReaderBarcode, strReaderPassword);
         }
         
@@ -18146,7 +18146,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyReaderPassword(System.IAsyncResult result) {
             return base.Channel.EndVerifyReaderPassword(result);
         }
         
@@ -18157,7 +18157,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndVerifyReaderPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndVerifyReaderPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyReaderPassword(result);
             return new object[] {
                     retVal};
         }
@@ -18188,7 +18188,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderPassword}, this.onEndVerifyReaderPasswordDelegate, this.onVerifyReaderPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeReaderPassword(string strReaderBarcode, string strReaderOldPassword, string strReaderNewPassword) {
             return base.Channel.ChangeReaderPassword(strReaderBarcode, strReaderOldPassword, strReaderNewPassword);
         }
         
@@ -18198,7 +18198,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeReaderPassword(System.IAsyncResult result) {
             return base.Channel.EndChangeReaderPassword(result);
         }
         
@@ -18210,7 +18210,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndChangeReaderPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndChangeReaderPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndChangeReaderPassword(result);
             return new object[] {
                     retVal};
         }
@@ -18242,7 +18242,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderNewPassword}, this.onEndChangeReaderPasswordDelegate, this.onChangeReaderPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, string strBarcode, string strResultTypeList) {
             return base.Channel.GetReaderInfo(out results, out strRecPath, out baTimestamp, strBarcode, strResultTypeList);
         }
         
@@ -18252,7 +18252,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result) {
             return base.Channel.EndGetReaderInfo(out results, out strRecPath, out baTimestamp, result);
         }
         
@@ -18266,7 +18266,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string[] results = this.GetDefaultValueForInitialization<string[]>();
             string strRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetReaderInfo(out results, out strRecPath, out baTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetReaderInfo(out results, out strRecPath, out baTimestamp, result);
             return new object[] {
                     results,
                     strRecPath,
@@ -18300,7 +18300,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultTypeList}, this.onEndGetReaderInfoDelegate, this.onGetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
             return base.Channel.SetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp);
         }
         
@@ -18310,7 +18310,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result) {
             return base.Channel.EndSetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, result);
         }
         
@@ -18328,8 +18328,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strSavedXml = this.GetDefaultValueForInitialization<string>();
             string strSavedRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baNewTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.ErrorCodeValue kernel_errorcode = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ErrorCodeValue>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, result);
+            DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ErrorCodeValue>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, result);
             return new object[] {
                     strExistingXml,
                     strSavedXml,
@@ -18368,7 +18368,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         baOldTimestamp}, this.onEndSetReaderInfoDelegate, this.onSetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp) {
             return base.Channel.MoveReaderInfo(strSourceRecPath, ref strTargetRecPath, out target_timestamp);
         }
         
@@ -18378,7 +18378,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result) {
             return base.Channel.EndMoveReaderInfo(ref strTargetRecPath, out target_timestamp, result);
         }
         
@@ -18391,7 +18391,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndMoveReaderInfo(System.IAsyncResult result) {
             string strTargetRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] target_timestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndMoveReaderInfo(ref strTargetRecPath, out target_timestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndMoveReaderInfo(ref strTargetRecPath, out target_timestamp, result);
             return new object[] {
                     strTargetRecPath,
                     target_timestamp,
@@ -18424,7 +18424,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTargetRecPath}, this.onEndMoveReaderInfoDelegate, this.onMoveReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode) {
             return base.Channel.DevolveReaderInfo(strSourceReaderBarcode, strTargetReaderBarcode);
         }
         
@@ -18434,7 +18434,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDevolveReaderInfo(System.IAsyncResult result) {
             return base.Channel.EndDevolveReaderInfo(result);
         }
         
@@ -18445,7 +18445,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndDevolveReaderInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndDevolveReaderInfo(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndDevolveReaderInfo(result);
             return new object[] {
                     retVal};
         }
@@ -18476,7 +18476,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTargetReaderBarcode}, this.onEndDevolveReaderInfoDelegate, this.onDevolveReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchReader(string strReaderDbNames, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strOutputStyle) {
             return base.Channel.SearchReader(strReaderDbNames, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strOutputStyle);
         }
         
@@ -18486,7 +18486,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchReader(System.IAsyncResult result) {
             return base.Channel.EndSearchReader(result);
         }
         
@@ -18503,7 +18503,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchReader(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchReader(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchReader(result);
             return new object[] {
                     retVal};
         }
@@ -18540,7 +18540,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchReaderDelegate, this.onSearchReaderCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetFriends(string strAction, string strReaderBarcode, string strComment, string strStyle) {
             return base.Channel.SetFriends(strAction, strReaderBarcode, strComment, strStyle);
         }
         
@@ -18550,7 +18550,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetFriends(System.IAsyncResult result) {
             return base.Channel.EndSetFriends(result);
         }
         
@@ -18563,7 +18563,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetFriends(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetFriends(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetFriends(result);
             return new object[] {
                     retVal};
         }
@@ -18596,7 +18596,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndSetFriendsDelegate, this.onSetFriendsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneDb(string strQueryWord, string strDbName, string strFrom, string strMatchStyle, string strLang, long lMaxCount, string strResultSetName, string strOutputStyle) {
             return base.Channel.SearchOneDb(strQueryWord, strDbName, strFrom, strMatchStyle, strLang, lMaxCount, strResultSetName, strOutputStyle);
         }
         
@@ -18606,7 +18606,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneDb(System.IAsyncResult result) {
             return base.Channel.EndSearchOneDb(result);
         }
         
@@ -18623,7 +18623,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchOneDb(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOneDb(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneDb(result);
             return new object[] {
                     retVal};
         }
@@ -18660,7 +18660,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchOneDbDelegate, this.onSearchOneDbCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Search(string strQueryXml, string strResultSetName, string strOutputStyle) {
             return base.Channel.Search(strQueryXml, strResultSetName, strOutputStyle);
         }
         
@@ -18670,7 +18670,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearch(System.IAsyncResult result) {
             return base.Channel.EndSearch(result);
         }
         
@@ -18682,7 +18682,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearch(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearch(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearch(result);
             return new object[] {
                     retVal};
         }
@@ -18714,7 +18714,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchDelegate, this.onSearchCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
             return base.Channel.GetSearchResult(out searchresults, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
         }
         
@@ -18724,7 +18724,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSearchResult(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetSearchResult(out searchresults, result);
         }
         
@@ -18738,8 +18738,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.Record[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.Record[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -18774,7 +18774,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetSearchResultDelegate, this.onGetSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRecord(out byte[] timestamp, out string strXml, string strPath) {
             return base.Channel.GetRecord(out timestamp, out strXml, strPath);
         }
         
@@ -18784,7 +18784,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRecord(out byte[] timestamp, out string strXml, System.IAsyncResult result) {
             return base.Channel.EndGetRecord(out timestamp, out strXml, result);
         }
         
@@ -18796,7 +18796,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetRecord(System.IAsyncResult result) {
             byte[] timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetRecord(out timestamp, out strXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRecord(out timestamp, out strXml, result);
             return new object[] {
                     timestamp,
                     strXml,
@@ -18828,7 +18828,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strPath}, this.onEndGetRecordDelegate, this.onGetRecordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, string[] paths, string strBrowseInfoStyle) {
             return base.Channel.GetBrowseRecords(out searchresults, paths, strBrowseInfoStyle);
         }
         
@@ -18838,7 +18838,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.CirculationClient.localhost.Record[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBrowseRecords(out DigitalPlatform.LibraryClient.localhost.Record[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetBrowseRecords(out searchresults, result);
         }
         
@@ -18849,8 +18849,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetBrowseRecords(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.Record[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBrowseRecords(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.Record[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBrowseRecords(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -18882,7 +18882,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBrowseInfoStyle}, this.onEndGetBrowseRecordsDelegate, this.onGetBrowseRecordsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, string strDbType, string strLang) {
             return base.Channel.ListBiblioDbFroms(out infos, strDbType, strLang);
         }
         
@@ -18892,7 +18892,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result) {
             return base.Channel.EndListBiblioDbFroms(out infos, result);
         }
         
@@ -18903,8 +18903,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndListBiblioDbFroms(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListBiblioDbFroms(out infos, result);
+            DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListBiblioDbFroms(out infos, result);
             return new object[] {
                     infos,
                     retVal};
@@ -18936,7 +18936,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndListBiblioDbFromsDelegate, this.onListBiblioDbFromsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchBiblio(out strQueryXml, strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -18946,7 +18946,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result) {
             return base.Channel.EndSearchBiblio(out strQueryXml, result);
         }
         
@@ -18965,7 +18965,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchBiblio(System.IAsyncResult result) {
             string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchBiblio(out strQueryXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchBiblio(out strQueryXml, result);
             return new object[] {
                     strQueryXml,
                     retVal};
@@ -19004,7 +19004,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
             return base.Channel.SetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment);
         }
         
@@ -19014,7 +19014,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndSetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, result);
         }
         
@@ -19031,7 +19031,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndSetBiblioInfo(System.IAsyncResult result) {
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, result);
             return new object[] {
                     strOutputBiblioRecPath,
                     baOutputTimestamp,
@@ -19068,7 +19068,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strComment}, this.onEndSetBiblioInfoDelegate, this.onSetBiblioInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle) {
             return base.Channel.CopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strNewBiblioRecPath, strNewBiblio, strMergeStyle);
         }
         
@@ -19078,7 +19078,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndCopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndCopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, result);
         }
         
@@ -19098,7 +19098,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strOutputBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndCopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndCopyBiblioInfo(out strOutputBiblio, out strOutputBiblioRecPath, out baOutputTimestamp, result);
             return new object[] {
                     strOutputBiblio,
                     strOutputBiblioRecPath,
@@ -19138,7 +19138,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strMergeStyle}, this.onEndCopyBiblioInfoDelegate, this.onCopyBiblioInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfo(out string strBiblio, string strBiblioRecPath, string strBiblioXml, string strBiblioType) {
             return base.Channel.GetBiblioInfo(out strBiblio, strBiblioRecPath, strBiblioXml, strBiblioType);
         }
         
@@ -19148,7 +19148,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfo(out string strBiblio, System.IAsyncResult result) {
             return base.Channel.EndGetBiblioInfo(out strBiblio, result);
         }
         
@@ -19161,7 +19161,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetBiblioInfo(System.IAsyncResult result) {
             string strBiblio = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfo(out strBiblio, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfo(out strBiblio, result);
             return new object[] {
                     strBiblio,
                     retVal};
@@ -19194,7 +19194,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetBiblioInfoDelegate, this.onGetBiblioInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioInfos(out string[] results, out byte[] baTimestamp, string strBiblioRecPath, string strBiblioXml, string[] formats) {
             return base.Channel.GetBiblioInfos(out results, out baTimestamp, strBiblioRecPath, strBiblioXml, formats);
         }
         
@@ -19204,7 +19204,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioInfos(out string[] results, out byte[] baTimestamp, System.IAsyncResult result) {
             return base.Channel.EndGetBiblioInfos(out results, out baTimestamp, result);
         }
         
@@ -19218,7 +19218,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetBiblioInfos(System.IAsyncResult result) {
             string[] results = this.GetDefaultValueForInitialization<string[]>();
             byte[] baTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfos(out results, out baTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBiblioInfos(out results, out baTimestamp, result);
             return new object[] {
                     results,
                     baTimestamp,
@@ -19252,7 +19252,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         formats}, this.onEndGetBiblioInfosDelegate, this.onGetBiblioInfosCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItem(string strItemDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchItem(strItemDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -19262,7 +19262,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItem(System.IAsyncResult result) {
             return base.Channel.EndSearchItem(result);
         }
         
@@ -19280,7 +19280,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchItem(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchItem(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchItem(result);
             return new object[] {
                     retVal};
         }
@@ -19318,7 +19318,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchItemDelegate, this.onSearchItemCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, string strItemDbType, string strBarcode, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, strItemDbType, strBarcode, strItemXml, strResultType, strBiblioType);
         }
         
@@ -19328,7 +19328,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetItemInfo(out string strResult, out string strItemRecPath, out byte[] item_timestamp, out string strBiblio, out string strBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, result);
         }
         
@@ -19347,7 +19347,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] item_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetItemInfo(out strResult, out strItemRecPath, out item_timestamp, out strBiblio, out strBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strItemRecPath,
@@ -19386,7 +19386,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetItemInfoDelegate, this.onGetItemInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchItemDup(out string[] paths, string strBarcode, int nMax) {
             return base.Channel.SearchItemDup(out paths, strBarcode, nMax);
         }
         
@@ -19396,7 +19396,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchItemDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchItemDup(out paths, result);
         }
         
@@ -19408,7 +19408,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchItemDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchItemDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchItemDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -19440,7 +19440,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchItemDupDelegate, this.onSearchItemDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetBiblioSummary(out string strBiblioRecPath, out string strSummary, string strItemBarcode, string strConfirmItemRecPath, string strBiblioRecPathExclude) {
             return base.Channel.GetBiblioSummary(out strBiblioRecPath, out strSummary, strItemBarcode, strConfirmItemRecPath, strBiblioRecPathExclude);
         }
         
@@ -19450,7 +19450,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetBiblioSummary(out string strBiblioRecPath, out string strSummary, System.IAsyncResult result) {
             return base.Channel.EndGetBiblioSummary(out strBiblioRecPath, out strSummary, result);
         }
         
@@ -19464,7 +19464,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndGetBiblioSummary(System.IAsyncResult result) {
             string strBiblioRecPath = this.GetDefaultValueForInitialization<string>();
             string strSummary = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetBiblioSummary(out strBiblioRecPath, out strSummary, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetBiblioSummary(out strBiblioRecPath, out strSummary, result);
             return new object[] {
                     strBiblioRecPath,
                     strSummary,
@@ -19498,11 +19498,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioRecPathExclude}, this.onEndGetBiblioSummaryDelegate, this.onGetBiblioSummaryCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Borrow(
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Borrow(
                     out string[] item_records, 
                     out string[] reader_records, 
                     out string[] biblio_records, 
-                    out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, 
+                    out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, 
                     out string[] aDupPath, 
                     out string strOutputReaderBarcode, 
                     bool bRenew, 
@@ -19524,7 +19524,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBorrow(out string[] item_records, out string[] reader_records, out string[] biblio_records, out DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info, out string[] aDupPath, out string strOutputReaderBarcode, System.IAsyncResult result) {
             return base.Channel.EndBorrow(out item_records, out reader_records, out biblio_records, out borrow_info, out aDupPath, out strOutputReaderBarcode, result);
         }
         
@@ -19546,10 +19546,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string[] item_records = this.GetDefaultValueForInitialization<string[]>();
             string[] reader_records = this.GetDefaultValueForInitialization<string[]>();
             string[] biblio_records = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.BorrowInfo borrow_info = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.BorrowInfo>();
+            DigitalPlatform.LibraryClient.localhost.BorrowInfo borrow_info = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BorrowInfo>();
             string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
             string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndBorrow(out item_records, out reader_records, out biblio_records, out borrow_info, out aDupPath, out strOutputReaderBarcode, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBorrow(out item_records, out reader_records, out biblio_records, out borrow_info, out aDupPath, out strOutputReaderBarcode, result);
             return new object[] {
                     item_records,
                     reader_records,
@@ -19594,7 +19594,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioFormatList}, this.onEndBorrowDelegate, this.onBorrowCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Return(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, string strAction, string strReaderBarcode, string strItemBarcode, string strComfirmItemRecPath, bool bForce, string strStyle, string strItemFormatList, string strReaderFormatList, string strBiblioFormatList) {
             return base.Channel.Return(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, strAction, strReaderBarcode, strItemBarcode, strComfirmItemRecPath, bForce, strStyle, strItemFormatList, strReaderFormatList, strBiblioFormatList);
         }
         
@@ -19604,7 +19604,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReturn(out string[] item_records, out string[] reader_records, out string[] biblio_records, out string[] aDupPath, out string strOutputReaderBarcode, out DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info, System.IAsyncResult result) {
             return base.Channel.EndReturn(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, result);
         }
         
@@ -19627,8 +19627,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string[] biblio_records = this.GetDefaultValueForInitialization<string[]>();
             string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
             string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.ReturnInfo return_info = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ReturnInfo>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndReturn(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, result);
+            DigitalPlatform.LibraryClient.localhost.ReturnInfo return_info = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ReturnInfo>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndReturn(out item_records, out reader_records, out biblio_records, out aDupPath, out strOutputReaderBarcode, out return_info, result);
             return new object[] {
                     item_records,
                     reader_records,
@@ -19672,7 +19672,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioFormatList}, this.onEndReturnDelegate, this.onReturnCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Reservation(string strFunction, string strReaderBarcode, string strItemBarcodeList) {
             return base.Channel.Reservation(strFunction, strReaderBarcode, strItemBarcodeList);
         }
         
@@ -19682,7 +19682,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndReservation(System.IAsyncResult result) {
             return base.Channel.EndReservation(result);
         }
         
@@ -19694,7 +19694,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndReservation(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndReservation(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndReservation(result);
             return new object[] {
                     retVal};
         }
@@ -19726,31 +19726,31 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strItemBarcodeList}, this.onEndReservationDelegate, this.onReservationCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Amerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items) {
             return base.Channel.Amerce(out failed_items, out strReaderXml, strFunction, strReaderBarcode, amerce_items);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginAmerce(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginAmerce(strFunction, strReaderBarcode, amerce_items, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndAmerce(out DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items, out string strReaderXml, System.IAsyncResult result) {
             return base.Channel.EndAmerce(out failed_items, out strReaderXml, result);
         }
         
         private System.IAsyncResult OnBeginAmerce(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strFunction = ((string)(inValues[0]));
             string strReaderBarcode = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items = ((DigitalPlatform.CirculationClient.localhost.AmerceItem[])(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items = ((DigitalPlatform.LibraryClient.localhost.AmerceItem[])(inValues[2]));
             return this.BeginAmerce(strFunction, strReaderBarcode, amerce_items, callback, asyncState);
         }
         
         private object[] OnEndAmerce(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.AmerceItem[] failed_items = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.AmerceItem[]>();
+            DigitalPlatform.LibraryClient.localhost.AmerceItem[] failed_items = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.AmerceItem[]>();
             string strReaderXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndAmerce(out failed_items, out strReaderXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndAmerce(out failed_items, out strReaderXml, result);
             return new object[] {
                     failed_items,
                     strReaderXml,
@@ -19764,11 +19764,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items) {
+        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items) {
             this.AmerceAsync(strFunction, strReaderBarcode, amerce_items, null);
         }
         
-        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.CirculationClient.localhost.AmerceItem[] amerce_items, object userState) {
+        public void AmerceAsync(string strFunction, string strReaderBarcode, DigitalPlatform.LibraryClient.localhost.AmerceItem[] amerce_items, object userState) {
             if ((this.onBeginAmerceDelegate == null)) {
                 this.onBeginAmerceDelegate = new BeginOperationDelegate(this.OnBeginAmerce);
             }
@@ -19784,7 +19784,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         amerce_items}, this.onEndAmerceDelegate, this.onAmerceCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetIssues(out issueinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -19794,7 +19794,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.IAsyncResult result) {
             return base.Channel.EndGetIssues(out issueinfos, result);
         }
         
@@ -19808,8 +19808,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetIssues(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetIssues(out issueinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetIssues(out issueinfos, result);
             return new object[] {
                     issueinfos,
                     retVal};
@@ -19844,29 +19844,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetIssuesDelegate, this.onGetIssuesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos) {
             return base.Channel.SetIssues(out errorinfos, strBiblioRecPath, issueinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetIssues(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetIssues(strBiblioRecPath, issueinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetIssues(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetIssues(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetIssues(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetIssues(strBiblioRecPath, issueinfos, callback, asyncState);
         }
         
         private object[] OnEndSetIssues(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetIssues(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetIssues(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -19879,11 +19879,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos) {
+        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos) {
             this.SetIssuesAsync(strBiblioRecPath, issueinfos, null);
         }
         
-        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] issueinfos, object userState) {
+        public void SetIssuesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos, object userState) {
             if ((this.onBeginSetIssuesDelegate == null)) {
                 this.onBeginSetIssuesDelegate = new BeginOperationDelegate(this.OnBeginSetIssues);
             }
@@ -19898,7 +19898,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         issueinfos}, this.onEndSetIssuesDelegate, this.onSetIssuesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, strRefID, strItemXml, strResultType, strBiblioType);
         }
         
@@ -19908,7 +19908,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetIssueInfo(out string strResult, out string strIssueRecPath, out byte[] issue_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
         }
         
@@ -19926,7 +19926,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] issue_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetIssueInfo(out strResult, out strIssueRecPath, out issue_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strIssueRecPath,
@@ -19964,7 +19964,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetIssueInfoDelegate, this.onGetIssueInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssueDup(out string[] paths, string strPublishTime, string strBiblioRecPath, int nMax) {
             return base.Channel.SearchIssueDup(out paths, strPublishTime, strBiblioRecPath, nMax);
         }
         
@@ -19974,7 +19974,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssueDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchIssueDup(out paths, result);
         }
         
@@ -19987,7 +19987,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchIssueDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchIssueDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchIssueDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -20020,7 +20020,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchIssueDupDelegate, this.onSearchIssueDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchIssue(string strIssueDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchIssue(strIssueDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -20030,7 +20030,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchIssue(System.IAsyncResult result) {
             return base.Channel.EndSearchIssue(result);
         }
         
@@ -20048,7 +20048,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchIssue(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchIssue(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchIssue(result);
             return new object[] {
                     retVal};
         }
@@ -20086,7 +20086,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchIssueDelegate, this.onSearchIssueCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetEntities(out entityinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -20096,7 +20096,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.IAsyncResult result) {
             return base.Channel.EndGetEntities(out entityinfos, result);
         }
         
@@ -20110,8 +20110,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetEntities(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetEntities(out entityinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetEntities(out entityinfos, result);
             return new object[] {
                     entityinfos,
                     retVal};
@@ -20146,29 +20146,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetEntitiesDelegate, this.onGetEntitiesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos) {
             return base.Channel.SetEntities(out errorinfos, strBiblioRecPath, entityinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetEntities(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetEntities(strBiblioRecPath, entityinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetEntities(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetEntities(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetEntities(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetEntities(strBiblioRecPath, entityinfos, callback, asyncState);
         }
         
         private object[] OnEndSetEntities(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetEntities(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetEntities(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -20181,11 +20181,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos) {
+        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos) {
             this.SetEntitiesAsync(strBiblioRecPath, entityinfos, null);
         }
         
-        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] entityinfos, object userState) {
+        public void SetEntitiesAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] entityinfos, object userState) {
             if ((this.onBeginSetEntitiesDelegate == null)) {
                 this.onBeginSetEntitiesDelegate = new BeginOperationDelegate(this.OnBeginSetEntities);
             }
@@ -20200,7 +20200,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         entityinfos}, this.onEndSetEntitiesDelegate, this.onSetEntitiesCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetOrders(out orderinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -20210,7 +20210,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.IAsyncResult result) {
             return base.Channel.EndGetOrders(out orderinfos, result);
         }
         
@@ -20224,8 +20224,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetOrders(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOrders(out orderinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOrders(out orderinfos, result);
             return new object[] {
                     orderinfos,
                     retVal};
@@ -20260,29 +20260,29 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetOrdersDelegate, this.onGetOrdersCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos) {
             return base.Channel.SetOrders(out errorinfos, strBiblioRecPath, orderinfos);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetOrders(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetOrders(strBiblioRecPath, orderinfos, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOrders(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, System.IAsyncResult result) {
             return base.Channel.EndSetOrders(out errorinfos, result);
         }
         
         private System.IAsyncResult OnBeginSetOrders(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strBiblioRecPath = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos = ((DigitalPlatform.CirculationClient.localhost.EntityInfo[])(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos = ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(inValues[1]));
             return this.BeginSetOrders(strBiblioRecPath, orderinfos, callback, asyncState);
         }
         
         private object[] OnEndSetOrders(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetOrders(out errorinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOrders(out errorinfos, result);
             return new object[] {
                     errorinfos,
                     retVal};
@@ -20295,11 +20295,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos) {
+        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos) {
             this.SetOrdersAsync(strBiblioRecPath, orderinfos, null);
         }
         
-        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.CirculationClient.localhost.EntityInfo[] orderinfos, object userState) {
+        public void SetOrdersAsync(string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] orderinfos, object userState) {
             if ((this.onBeginSetOrdersDelegate == null)) {
                 this.onBeginSetOrdersDelegate = new BeginOperationDelegate(this.OnBeginSetOrders);
             }
@@ -20314,7 +20314,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         orderinfos}, this.onEndSetOrdersDelegate, this.onSetOrdersCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, string strRefID, string strItemXml, string strResultType, string strBiblioType) {
             return base.Channel.GetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, strRefID, strItemXml, strResultType, strBiblioType);
         }
         
@@ -20324,7 +20324,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOrderInfo(out string strResult, out string strOrderRecPath, out byte[] order_timestamp, out string strBiblio, out string strOutputBiblioRecPath, System.IAsyncResult result) {
             return base.Channel.EndGetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
         }
         
@@ -20342,7 +20342,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             byte[] order_timestamp = this.GetDefaultValueForInitialization<byte[]>();
             string strBiblio = this.GetDefaultValueForInitialization<string>();
             string strOutputBiblioRecPath = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOrderInfo(out strResult, out strOrderRecPath, out order_timestamp, out strBiblio, out strOutputBiblioRecPath, result);
             return new object[] {
                     strResult,
                     strOrderRecPath,
@@ -20380,7 +20380,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBiblioType}, this.onEndGetOrderInfoDelegate, this.onGetOrderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrderDup(out string[] paths, string strIndex, string strBiblioRecPath, int nMax) {
             return base.Channel.SearchOrderDup(out paths, strIndex, strBiblioRecPath, nMax);
         }
         
@@ -20390,7 +20390,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrderDup(out string[] paths, System.IAsyncResult result) {
             return base.Channel.EndSearchOrderDup(out paths, result);
         }
         
@@ -20403,7 +20403,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchOrderDup(System.IAsyncResult result) {
             string[] paths = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOrderDup(out paths, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOrderDup(out paths, result);
             return new object[] {
                     paths,
                     retVal};
@@ -20436,7 +20436,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nMax}, this.onEndSearchOrderDupDelegate, this.onSearchOrderDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOrder(string strOrderDbName, string strQueryWord, int nPerMax, string strFrom, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
             return base.Channel.SearchOrder(strOrderDbName, strQueryWord, nPerMax, strFrom, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
         }
         
@@ -20446,7 +20446,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOrder(System.IAsyncResult result) {
             return base.Channel.EndSearchOrder(result);
         }
         
@@ -20464,7 +20464,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSearchOrder(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOrder(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOrder(result);
             return new object[] {
                     retVal};
         }
@@ -20502,7 +20502,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOutputStyle}, this.onEndSearchOrderDelegate, this.onSearchOrderCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetClock(string strTime) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetClock(string strTime) {
             return base.Channel.SetClock(strTime);
         }
         
@@ -20512,7 +20512,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetClock(System.IAsyncResult result) {
             return base.Channel.EndSetClock(result);
         }
         
@@ -20522,7 +20522,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetClock(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetClock(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetClock(result);
             return new object[] {
                     retVal};
         }
@@ -20552,7 +20552,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTime}, this.onEndSetClockDelegate, this.onSetClockCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetClock(out string strTime) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetClock(out string strTime) {
             return base.Channel.GetClock(out strTime);
         }
         
@@ -20562,7 +20562,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result) {
             return base.Channel.EndGetClock(out strTime, result);
         }
         
@@ -20572,7 +20572,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetClock(System.IAsyncResult result) {
             string strTime = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetClock(out strTime, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetClock(out strTime, result);
             return new object[] {
                     strTime,
                     retVal};
@@ -20602,7 +20602,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginGetClockDelegate, null, this.onEndGetClockDelegate, this.onGetClockCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate) {
             return base.Channel.ResetPassword(strParameters, strMessageTemplate);
         }
         
@@ -20612,7 +20612,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result) {
             return base.Channel.EndResetPassword(result);
         }
         
@@ -20623,7 +20623,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndResetPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndResetPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndResetPassword(result);
             return new object[] {
                     retVal};
         }
@@ -20654,7 +20654,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strMessageTemplate}, this.onEndResetPasswordDelegate, this.onResetPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName) {
             return base.Channel.GetValueTable(out values, strTableName, strDbName);
         }
         
@@ -20664,7 +20664,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetValueTable(out string[] values, System.IAsyncResult result) {
             return base.Channel.EndGetValueTable(out values, result);
         }
         
@@ -20676,7 +20676,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetValueTable(System.IAsyncResult result) {
             string[] values = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetValueTable(out values, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetValueTable(out values, result);
             return new object[] {
                     values,
                     retVal};
@@ -20708,7 +20708,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strDbName}, this.onEndGetValueTableDelegate, this.onGetValueTableCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, string strFileName, long lIndex, long lHint, int nCount, string strStyle, string strFilter) {
             return base.Channel.GetOperLogs(out records, strFileName, lIndex, lHint, nCount, strStyle, strFilter);
         }
         
@@ -20718,7 +20718,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLogs(out DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records, System.IAsyncResult result) {
             return base.Channel.EndGetOperLogs(out records, result);
         }
         
@@ -20733,8 +20733,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetOperLogs(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.OperLogInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOperLogs(out records, result);
+            DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.OperLogInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOperLogs(out records, result);
             return new object[] {
                     records,
                     retVal};
@@ -20770,7 +20770,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strFilter}, this.onEndGetOperLogsDelegate, this.onGetOperLogsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, string strFileName, long lIndex, long lHint, string strStyle, string strFilter, long lAttachmentFragmentStart, int nAttachmentFragmentLength) {
             return base.Channel.GetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, strFileName, lIndex, lHint, strStyle, strFilter, lAttachmentFragmentStart, nAttachmentFragmentLength);
         }
         
@@ -20780,7 +20780,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOperLog(out string strXml, out long lHintNext, out byte[] attachment_data, out long lAttachmentTotalLength, System.IAsyncResult result) {
             return base.Channel.EndGetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, result);
         }
         
@@ -20800,7 +20800,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             long lHintNext = this.GetDefaultValueForInitialization<long>();
             byte[] attachment_data = this.GetDefaultValueForInitialization<byte[]>();
             long lAttachmentTotalLength = this.GetDefaultValueForInitialization<long>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOperLog(out strXml, out lHintNext, out attachment_data, out lAttachmentTotalLength, result);
             return new object[] {
                     strXml,
                     lHintNext,
@@ -20840,7 +20840,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nAttachmentFragmentLength}, this.onEndGetOperLogDelegate, this.onGetOperLogCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, string strAction, string strName, int nStart, int nCount) {
             return base.Channel.GetCalendar(out contents, strAction, strName, nStart, nCount);
         }
         
@@ -20850,7 +20850,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCalendar(out DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents, System.IAsyncResult result) {
             return base.Channel.EndGetCalendar(out contents, result);
         }
         
@@ -20863,8 +20863,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetCalendar(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.CalenderInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.CalenderInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetCalendar(out contents, result);
+            DigitalPlatform.LibraryClient.localhost.CalenderInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CalenderInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCalendar(out contents, result);
             return new object[] {
                     contents,
                     retVal};
@@ -20898,28 +20898,28 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndGetCalendarDelegate, this.onGetCalendarCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info) {
             return base.Channel.SetCalendar(strAction, info);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetCalendar(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetCalendar(strAction, info, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetCalendar(System.IAsyncResult result) {
             return base.Channel.EndSetCalendar(result);
         }
         
         private System.IAsyncResult OnBeginSetCalendar(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.CalenderInfo info = ((DigitalPlatform.CirculationClient.localhost.CalenderInfo)(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.CalenderInfo info = ((DigitalPlatform.LibraryClient.localhost.CalenderInfo)(inValues[1]));
             return this.BeginSetCalendar(strAction, info, callback, asyncState);
         }
         
         private object[] OnEndSetCalendar(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetCalendar(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetCalendar(result);
             return new object[] {
                     retVal};
         }
@@ -20931,11 +20931,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetCalendarAsync(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info) {
+        public void SetCalendarAsync(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info) {
             this.SetCalendarAsync(strAction, info, null);
         }
         
-        public void SetCalendarAsync(string strAction, DigitalPlatform.CirculationClient.localhost.CalenderInfo info, object userState) {
+        public void SetCalendarAsync(string strAction, DigitalPlatform.LibraryClient.localhost.CalenderInfo info, object userState) {
             if ((this.onBeginSetCalendarDelegate == null)) {
                 this.onBeginSetCalendarDelegate = new BeginOperationDelegate(this.OnBeginSetCalendar);
             }
@@ -20950,30 +20950,30 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         info}, this.onEndSetCalendarDelegate, this.onSetCalendarCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info) {
             return base.Channel.BatchTask(out resultInfo, strName, strAction, info);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginBatchTask(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginBatchTask(strName, strAction, info, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchTask(out DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo, System.IAsyncResult result) {
             return base.Channel.EndBatchTask(out resultInfo, result);
         }
         
         private System.IAsyncResult OnBeginBatchTask(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strName = ((string)(inValues[0]));
             string strAction = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info = ((DigitalPlatform.CirculationClient.localhost.BatchTaskInfo)(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info = ((DigitalPlatform.LibraryClient.localhost.BatchTaskInfo)(inValues[2]));
             return this.BeginBatchTask(strName, strAction, info, callback, asyncState);
         }
         
         private object[] OnEndBatchTask(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.BatchTaskInfo resultInfo = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.BatchTaskInfo>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndBatchTask(out resultInfo, result);
+            DigitalPlatform.LibraryClient.localhost.BatchTaskInfo resultInfo = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BatchTaskInfo>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBatchTask(out resultInfo, result);
             return new object[] {
                     resultInfo,
                     retVal};
@@ -20986,11 +20986,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info) {
+        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info) {
             this.BatchTaskAsync(strName, strAction, info, null);
         }
         
-        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.CirculationClient.localhost.BatchTaskInfo info, object userState) {
+        public void BatchTaskAsync(string strName, string strAction, DigitalPlatform.LibraryClient.localhost.BatchTaskInfo info, object userState) {
             if ((this.onBeginBatchTaskDelegate == null)) {
                 this.onBeginBatchTaskDelegate = new BeginOperationDelegate(this.OnBeginBatchTask);
             }
@@ -21006,7 +21006,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         info}, this.onEndBatchTaskDelegate, this.onBatchTaskCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ClearAllDbs() {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ClearAllDbs() {
             return base.Channel.ClearAllDbs();
         }
         
@@ -21016,7 +21016,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result) {
             return base.Channel.EndClearAllDbs(result);
         }
         
@@ -21025,7 +21025,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndClearAllDbs(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndClearAllDbs(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndClearAllDbs(result);
             return new object[] {
                     retVal};
         }
@@ -21054,7 +21054,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             base.InvokeAsync(this.onBeginClearAllDbsDelegate, null, this.onEndClearAllDbsDelegate, this.onClearAllDbsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo) {
             return base.Channel.ManageDatabase(out strOutputInfo, strAction, strDatabaseName, strDatabaseInfo);
         }
         
@@ -21064,7 +21064,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result) {
             return base.Channel.EndManageDatabase(out strOutputInfo, result);
         }
         
@@ -21077,7 +21077,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndManageDatabase(System.IAsyncResult result) {
             string strOutputInfo = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndManageDatabase(out strOutputInfo, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndManageDatabase(out strOutputInfo, result);
             return new object[] {
                     strOutputInfo,
                     retVal};
@@ -21110,7 +21110,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strDatabaseInfo}, this.onEndManageDatabaseDelegate, this.onManageDatabaseCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount) {
             return base.Channel.GetUser(out contents, strAction, strName, nStart, nCount);
         }
         
@@ -21120,7 +21120,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.CirculationClient.localhost.UserInfo[] contents, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, System.IAsyncResult result) {
             return base.Channel.EndGetUser(out contents, result);
         }
         
@@ -21133,8 +21133,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetUser(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.UserInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.UserInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetUser(out contents, result);
+            DigitalPlatform.LibraryClient.localhost.UserInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.UserInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUser(out contents, result);
             return new object[] {
                     contents,
                     retVal};
@@ -21168,28 +21168,28 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndGetUserDelegate, this.onGetUserCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info) {
             return base.Channel.SetUser(strAction, info);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetUser(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetUser(strAction, info, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUser(System.IAsyncResult result) {
             return base.Channel.EndSetUser(result);
         }
         
         private System.IAsyncResult OnBeginSetUser(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
-            DigitalPlatform.CirculationClient.localhost.UserInfo info = ((DigitalPlatform.CirculationClient.localhost.UserInfo)(inValues[1]));
+            DigitalPlatform.LibraryClient.localhost.UserInfo info = ((DigitalPlatform.LibraryClient.localhost.UserInfo)(inValues[1]));
             return this.BeginSetUser(strAction, info, callback, asyncState);
         }
         
         private object[] OnEndSetUser(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetUser(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUser(result);
             return new object[] {
                     retVal};
         }
@@ -21201,11 +21201,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void SetUserAsync(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info) {
+        public void SetUserAsync(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info) {
             this.SetUserAsync(strAction, info, null);
         }
         
-        public void SetUserAsync(string strAction, DigitalPlatform.CirculationClient.localhost.UserInfo info, object userState) {
+        public void SetUserAsync(string strAction, DigitalPlatform.LibraryClient.localhost.UserInfo info, object userState) {
             if ((this.onBeginSetUserDelegate == null)) {
                 this.onBeginSetUserDelegate = new BeginOperationDelegate(this.OnBeginSetUser);
             }
@@ -21220,7 +21220,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         info}, this.onEndSetUserDelegate, this.onSetUserCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, string strQuery, string strStyle, int nStart, int nCount) {
             return base.Channel.GetChannelInfo(out contents, strQuery, strStyle, nStart, nCount);
         }
         
@@ -21230,7 +21230,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetChannelInfo(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents, System.IAsyncResult result) {
             return base.Channel.EndGetChannelInfo(out contents, result);
         }
         
@@ -21243,8 +21243,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetChannelInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.ChannelInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ChannelInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetChannelInfo(out contents, result);
+            DigitalPlatform.LibraryClient.localhost.ChannelInfo[] contents = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ChannelInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetChannelInfo(out contents, result);
             return new object[] {
                     contents,
                     retVal};
@@ -21278,30 +21278,30 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndGetChannelInfoDelegate, this.onGetChannelInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests) {
             return base.Channel.ManageChannel(out results, strAction, strStyle, requests);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginManageChannel(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginManageChannel(strAction, strStyle, requests, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageChannel(out DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results, System.IAsyncResult result) {
             return base.Channel.EndManageChannel(out results, result);
         }
         
         private System.IAsyncResult OnBeginManageChannel(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strAction = ((string)(inValues[0]));
             string strStyle = ((string)(inValues[1]));
-            DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests = ((DigitalPlatform.CirculationClient.localhost.ChannelInfo[])(inValues[2]));
+            DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests = ((DigitalPlatform.LibraryClient.localhost.ChannelInfo[])(inValues[2]));
             return this.BeginManageChannel(strAction, strStyle, requests, callback, asyncState);
         }
         
         private object[] OnEndManageChannel(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.ChannelInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ChannelInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndManageChannel(out results, result);
+            DigitalPlatform.LibraryClient.localhost.ChannelInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ChannelInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndManageChannel(out results, result);
             return new object[] {
                     results,
                     retVal};
@@ -21314,11 +21314,11 @@ namespace DigitalPlatform.CirculationClient.localhost {
             }
         }
         
-        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests) {
+        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests) {
             this.ManageChannelAsync(strAction, strStyle, requests, null);
         }
         
-        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.CirculationClient.localhost.ChannelInfo[] requests, object userState) {
+        public void ManageChannelAsync(string strAction, string strStyle, DigitalPlatform.LibraryClient.localhost.ChannelInfo[] requests, object userState) {
             if ((this.onBeginManageChannelDelegate == null)) {
                 this.onBeginManageChannelDelegate = new BeginOperationDelegate(this.OnBeginManageChannel);
             }
@@ -21334,7 +21334,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         requests}, this.onEndManageChannelDelegate, this.onManageChannelCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ChangeUserPassword(string strUserName, string strOldPassword, string strNewPassword) {
             return base.Channel.ChangeUserPassword(strUserName, strOldPassword, strNewPassword);
         }
         
@@ -21344,7 +21344,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result) {
             return base.Channel.EndChangeUserPassword(result);
         }
         
@@ -21356,7 +21356,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndChangeUserPassword(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndChangeUserPassword(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndChangeUserPassword(result);
             return new object[] {
                     retVal};
         }
@@ -21388,7 +21388,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strNewPassword}, this.onEndChangeUserPasswordDelegate, this.onChangeUserPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode) {
             return base.Channel.VerifyBarcode(strLibraryCode, strBarcode);
         }
         
@@ -21398,7 +21398,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result) {
             return base.Channel.EndVerifyBarcode(result);
         }
         
@@ -21409,7 +21409,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndVerifyBarcode(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(result);
             return new object[] {
                     retVal};
         }
@@ -21440,7 +21440,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBarcode}, this.onEndVerifyBarcodeDelegate, this.onVerifyBarcodeCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName) {
             return base.Channel.GetSystemParameter(out strValue, strCategory, strName);
         }
         
@@ -21450,7 +21450,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetSystemParameter(out string strValue, System.IAsyncResult result) {
             return base.Channel.EndGetSystemParameter(out strValue, result);
         }
         
@@ -21462,7 +21462,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetSystemParameter(System.IAsyncResult result) {
             string strValue = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetSystemParameter(out strValue, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetSystemParameter(out strValue, result);
             return new object[] {
                     strValue,
                     retVal};
@@ -21494,7 +21494,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strName}, this.onEndGetSystemParameterDelegate, this.onGetSystemParameterCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetSystemParameter(string strCategory, string strName, string strValue) {
             return base.Channel.SetSystemParameter(strCategory, strName, strValue);
         }
         
@@ -21504,7 +21504,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetSystemParameter(System.IAsyncResult result) {
             return base.Channel.EndSetSystemParameter(result);
         }
         
@@ -21516,7 +21516,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetSystemParameter(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetSystemParameter(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetSystemParameter(result);
             return new object[] {
                     retVal};
         }
@@ -21548,7 +21548,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strValue}, this.onEndSetSystemParameterDelegate, this.onSetSystemParameterCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult UrgentRecover(string strXML) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult UrgentRecover(string strXML) {
             return base.Channel.UrgentRecover(strXML);
         }
         
@@ -21558,7 +21558,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result) {
             return base.Channel.EndUrgentRecover(result);
         }
         
@@ -21568,7 +21568,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndUrgentRecover(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndUrgentRecover(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndUrgentRecover(result);
             return new object[] {
                     retVal};
         }
@@ -21598,7 +21598,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strXML}, this.onEndUrgentRecoverDelegate, this.onUrgentRecoverCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
             return base.Channel.RepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount);
         }
         
@@ -21608,7 +21608,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
             return base.Channel.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
         }
         
@@ -21627,7 +21627,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             int nTotalBorrowItems = this.GetDefaultValueForInitialization<int>();
             string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
             string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
             return new object[] {
                     nProcessedBorrowItems,
                     nTotalBorrowItems,
@@ -21666,7 +21666,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         nCount}, this.onEndRepairBorrowInfoDelegate, this.onRepairBorrowInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
             return base.Channel.PassGate(out results, strReaderBarcode, strGateName, strResultTypeList);
         }
         
@@ -21676,7 +21676,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
             return base.Channel.EndPassGate(out results, result);
         }
         
@@ -21689,7 +21689,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndPassGate(System.IAsyncResult result) {
             string[] results = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
             return new object[] {
                     results,
                     retVal};
@@ -21722,7 +21722,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultTypeList}, this.onEndPassGateDelegate, this.onPassGateCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
             return base.Channel.Foregift(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
         }
         
@@ -21732,7 +21732,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
             return base.Channel.EndForegift(out strOutputReaderXml, out strOutputID, result);
         }
         
@@ -21745,7 +21745,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndForegift(System.IAsyncResult result) {
             string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
             string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
             return new object[] {
                     strOutputReaderXml,
                     strOutputID,
@@ -21778,7 +21778,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderBarcode}, this.onEndForegiftDelegate, this.onForegiftCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
             return base.Channel.Hire(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
         }
         
@@ -21788,7 +21788,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
             return base.Channel.EndHire(out strOutputReaderXml, out strOutputID, result);
         }
         
@@ -21801,7 +21801,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndHire(System.IAsyncResult result) {
             string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
             string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
             return new object[] {
                     strOutputReaderXml,
                     strOutputID,
@@ -21834,7 +21834,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strReaderBarcode}, this.onEndHireDelegate, this.onHireCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
             return base.Channel.Settlement(strAction, ids);
         }
         
@@ -21844,7 +21844,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
             return base.Channel.EndSettlement(result);
         }
         
@@ -21855,7 +21855,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSettlement(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
             return new object[] {
                     retVal};
         }
@@ -21886,7 +21886,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         ids}, this.onEndSettlementDelegate, this.onSettlementCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
             return base.Channel.SearchOneClassCallNumber(out strQueryXml, strArrangeGroupName, strClass, strResultSetName);
         }
         
@@ -21896,7 +21896,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
             return base.Channel.EndSearchOneClassCallNumber(out strQueryXml, result);
         }
         
@@ -21909,7 +21909,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchOneClassCallNumber(System.IAsyncResult result) {
             string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
             return new object[] {
                     strQueryXml,
                     retVal};
@@ -21942,7 +21942,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultSetName}, this.onEndSearchOneClassCallNumberDelegate, this.onSearchOneClassCallNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
             return base.Channel.GetCallNumberSearchResult(out searchresults, strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
         }
         
@@ -21952,7 +21952,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetCallNumberSearchResult(out searchresults, result);
         }
         
@@ -21967,8 +21967,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetCallNumberSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -22004,7 +22004,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetCallNumberSearchResultDelegate, this.onGetCallNumberSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
             return base.Channel.GetOneClassTailNumber(out strTailNumber, strArrangeGroupName, strClass);
         }
         
@@ -22014,7 +22014,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
             return base.Channel.EndGetOneClassTailNumber(out strTailNumber, result);
         }
         
@@ -22026,7 +22026,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetOneClassTailNumber(System.IAsyncResult result) {
             string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
             return new object[] {
                     strTailNumber,
                     retVal};
@@ -22058,7 +22058,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strClass}, this.onEndGetOneClassTailNumberDelegate, this.onGetOneClassTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
             return base.Channel.SetOneClassTailNumber(out strOutputNumber, strAction, strArrangeGroupName, strClass, strTestNumber);
         }
         
@@ -22068,7 +22068,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
             return base.Channel.EndSetOneClassTailNumber(out strOutputNumber, result);
         }
         
@@ -22082,7 +22082,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSetOneClassTailNumber(System.IAsyncResult result) {
             string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
             return new object[] {
                     strOutputNumber,
                     retVal};
@@ -22116,7 +22116,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTestNumber}, this.onEndSetOneClassTailNumberDelegate, this.onSetOneClassTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
             return base.Channel.SearchUsedZhongcihao(out strQueryXml, strZhongcihaoGroupName, strClass, strResultSetName);
         }
         
@@ -22126,7 +22126,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
             return base.Channel.EndSearchUsedZhongcihao(out strQueryXml, result);
         }
         
@@ -22139,7 +22139,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchUsedZhongcihao(System.IAsyncResult result) {
             string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
             return new object[] {
                     strQueryXml,
                     retVal};
@@ -22172,7 +22172,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strResultSetName}, this.onEndSearchUsedZhongcihaoDelegate, this.onSearchUsedZhongcihaoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
             return base.Channel.GetZhongcihaoSearchResult(out searchresults, strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
         }
         
@@ -22182,7 +22182,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetZhongcihaoSearchResult(out searchresults, result);
         }
         
@@ -22197,8 +22197,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetZhongcihaoSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -22234,7 +22234,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strLang}, this.onEndGetZhongcihaoSearchResultDelegate, this.onGetZhongcihaoSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
             return base.Channel.GetZhongcihaoTailNumber(out strTailNumber, strZhongcihaoGroupName, strClass);
         }
         
@@ -22244,7 +22244,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
             return base.Channel.EndGetZhongcihaoTailNumber(out strTailNumber, result);
         }
         
@@ -22256,7 +22256,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetZhongcihaoTailNumber(System.IAsyncResult result) {
             string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
             return new object[] {
                     strTailNumber,
                     retVal};
@@ -22288,7 +22288,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strClass}, this.onEndGetZhongcihaoTailNumberDelegate, this.onGetZhongcihaoTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
             return base.Channel.SetZhongcihaoTailNumber(out strOutputNumber, strAction, strZhongcihaoGroupName, strClass, strTestNumber);
         }
         
@@ -22298,7 +22298,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
             return base.Channel.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
         }
         
@@ -22312,7 +22312,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSetZhongcihaoTailNumber(System.IAsyncResult result) {
             string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
             return new object[] {
                     strOutputNumber,
                     retVal};
@@ -22346,7 +22346,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strTestNumber}, this.onEndSetZhongcihaoTailNumberDelegate, this.onSetZhongcihaoTailNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
             return base.Channel.SearchDup(out strUsedProjectName, strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle);
         }
         
@@ -22356,7 +22356,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
             return base.Channel.EndSearchDup(out strUsedProjectName, result);
         }
         
@@ -22370,7 +22370,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndSearchDup(System.IAsyncResult result) {
             string strUsedProjectName = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
             return new object[] {
                     strUsedProjectName,
                     retVal};
@@ -22404,7 +22404,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndSearchDupDelegate, this.onSearchDupCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
             return base.Channel.GetDupSearchResult(out searchresults, lStart, lCount, strBrowseInfoStyle);
         }
         
@@ -22414,7 +22414,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
             return base.Channel.EndGetDupSearchResult(out searchresults, result);
         }
         
@@ -22426,8 +22426,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetDupSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.DupSearchResult[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
+            DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
             return new object[] {
                     searchresults,
                     retVal};
@@ -22460,7 +22460,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strBrowseInfoStyle}, this.onEndGetDupSearchResultDelegate, this.onGetDupSearchResultCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
             return base.Channel.ListDupProjectInfos(out results, strOriginBiblioDbName);
         }
         
@@ -22470,7 +22470,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
             return base.Channel.EndListDupProjectInfos(out results, result);
         }
         
@@ -22480,8 +22480,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndListDupProjectInfos(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.DupProjectInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
+            DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupProjectInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
             return new object[] {
                     results,
                     retVal};
@@ -22512,7 +22512,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strOriginBiblioDbName}, this.onEndListDupProjectInfosDelegate, this.onListDupProjectInfosCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
             return base.Channel.GetUtilInfo(out strValue, strAction, strDbName, strFrom, strKey, strValueAttrName);
         }
         
@@ -22522,7 +22522,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
             return base.Channel.EndGetUtilInfo(out strValue, result);
         }
         
@@ -22537,7 +22537,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         
         private object[] OnEndGetUtilInfo(System.IAsyncResult result) {
             string strValue = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
             return new object[] {
                     strValue,
                     retVal};
@@ -22572,7 +22572,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strValueAttrName}, this.onEndGetUtilInfoDelegate, this.onGetUtilInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
             return base.Channel.SetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue);
         }
         
@@ -22582,7 +22582,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
             return base.Channel.EndSetUtilInfo(result);
         }
         
@@ -22599,7 +22599,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndSetUtilInfo(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
             return new object[] {
                     retVal};
         }
@@ -22636,7 +22636,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strValue}, this.onEndSetUtilInfoDelegate, this.onSetUtilInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
             return base.Channel.GetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, strResPath, nStart, nLength, strStyle);
         }
         
@@ -22646,7 +22646,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
         }
         
@@ -22663,7 +22663,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
             string strMetadata = this.GetDefaultValueForInitialization<string>();
             string strOutputResPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
             return new object[] {
                     baContent,
                     strMetadata,
@@ -22700,7 +22700,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         strStyle}, this.onEndGetResDelegate, this.onGetResCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
             return base.Channel.WriteRes(out strOutputResPath, out baOutputTimestamp, strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp);
         }
         
@@ -22710,7 +22710,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
             return base.Channel.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
         }
         
@@ -22728,7 +22728,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         private object[] OnEndWriteRes(System.IAsyncResult result) {
             string strOutputResPath = this.GetDefaultValueForInitialization<string>();
             byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
             return new object[] {
                     strOutputResPath,
                     baOutputTimestamp,
@@ -22766,7 +22766,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
             return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
         }
         
@@ -22776,7 +22776,7 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
             return base.Channel.EndGetComments(out commentinfos, result);
         }
         
@@ -22790,8 +22790,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetComments(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.CirculationClient.localhost.EntityInfo[]>();
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
             return new object[] {
                     commentinfos,
                     retVal};

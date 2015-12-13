@@ -15,7 +15,7 @@ using ClosedXML.Excel;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;

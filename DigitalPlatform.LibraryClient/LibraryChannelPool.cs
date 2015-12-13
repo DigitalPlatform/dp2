@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 
-namespace DigitalPlatform.CirculationClient
+namespace DigitalPlatform.LibraryClient
 {
     // 
     /// <summary>
@@ -99,7 +101,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         // 查找指定URL的LibraryChannel对象
-        LibraryChannelWrapper _findChannel(string strUrl, 
+        LibraryChannelWrapper _findChannel(string strUrl,
             string strUserName,
             bool bAutoSetUsing)
         {
@@ -107,7 +109,7 @@ namespace DigitalPlatform.CirculationClient
             {
                 if (wrapper.InUsing == false
                     && wrapper.Channel.Url == strUrl
-                    && (string.IsNullOrEmpty(wrapper.Channel.UserName) == true 
+                    && (string.IsNullOrEmpty(wrapper.Channel.UserName) == true
                     || wrapper.Channel.UserName == strUserName)
                     )
                 {

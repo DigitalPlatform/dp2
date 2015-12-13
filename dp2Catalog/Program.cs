@@ -1,12 +1,14 @@
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2Catalog
 {

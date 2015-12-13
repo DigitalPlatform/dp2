@@ -11,12 +11,13 @@ using System.Collections;
 using System.Threading;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -516,7 +517,7 @@ namespace DigitalPlatform.OPAC.Server
             long lRet = 0;
 
             string strExistingXml = "";
-            CirculationClient.localhost.ErrorCodeValue kernel_errorcode = CirculationClient.localhost.ErrorCodeValue.NoError;
+            ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
 
             // 注：保存读者记录本来是为上传透着个性头像，修改 preference 等用途提供的。如果用代理帐户做这个操作，就要求代理帐户具有修改读者记录的权限，同时修改哪些字段就得不到限制了。可以考虑在 dp2library，增加一种功能，在代理帐户修改读者记录的时候，模仿读者权限来进行限制？
             //TempChannel temp = GetTempChannel(this.Password);
@@ -537,8 +538,8 @@ namespace DigitalPlatform.OPAC.Server
                     out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.ErrorCode == CirculationClient.localhost.ErrorCode.TimestampMismatch
-                        || kernel_errorcode == CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
+                    if (this.Channel.ErrorCode == ErrorCode.TimestampMismatch
+                        || kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                         return -2;
                     return -1;
                 }

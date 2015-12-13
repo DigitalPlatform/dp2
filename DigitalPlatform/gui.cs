@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;  // for Registry
 using System.Threading;
-
 using System.Windows.Forms;
 using System.Drawing;
-
 using System.Runtime.InteropServices;
 
 using Microsoft.Win32;
-using System.Collections.Generic;  // for Registry
 
 namespace DigitalPlatform.GUI
 {

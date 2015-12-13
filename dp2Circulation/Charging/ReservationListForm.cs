@@ -216,7 +216,7 @@ namespace dp2Circulation
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -250,7 +250,7 @@ namespace dp2Circulation
                     List<string> paths = new List<string>();
 
                     int i = 0;
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record record in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                     {
                         // record.RecordBody.Xml;
                         paths.Add(record.Path);

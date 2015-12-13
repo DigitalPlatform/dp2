@@ -6,6 +6,7 @@ using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

@@ -9,6 +9,12 @@ using System.IO;
 using System.Xml;
 using System.Threading;
 using System.Diagnostics;
+using System.Collections;
+using System.Web;
+using System.Reflection;
+
+using Microsoft.Win32;
+// using DocumentFormat.OpenXml.Packaging;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -16,20 +22,13 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Collections;
-using System.Web;
 using DigitalPlatform.IO;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
-
-
-using System.Reflection;
-using Microsoft.Win32;
 using DigitalPlatform.dp2.Statis;
-// using DocumentFormat.OpenXml.Packaging;
-
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
@@ -1223,7 +1222,7 @@ namespace dp2Catalog
 
                         long lStart = 0;
                         long lPerCount = Math.Min(50, lHitCount);
-                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                        DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                         // 装入浏览格式
                         for (; ; )
@@ -1433,7 +1432,7 @@ namespace dp2Catalog
 
                         long lStart = 0;
                         long lPerCount = Math.Min(50, lHitCount);
-                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                        DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                         // 装入浏览格式
                         for (; ; )
@@ -1663,7 +1662,7 @@ namespace dp2Catalog
 
                     long lStart = 0;
                     long lPerCount = Math.Min(50, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     this.listView_browse.Focus();
 
@@ -1969,7 +1968,7 @@ namespace dp2Catalog
 
                             long lStart = 0;
                             long lPerCount = Math.Min(50, lHitCount);
-                            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                             // this.listView_browse.Focus();
 
@@ -2322,7 +2321,7 @@ namespace dp2Catalog
 
                         long lStart = 0;
                         long lPerCount = Math.Min(50, lHitCount);
-                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                        DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                         // 装入浏览格式
                         for (; ; )
@@ -5832,7 +5831,9 @@ MessageBoxDefaultButton.Button2);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									Environment.CurrentDirectory + "\\documentformat.openxml.dll",
                                     Environment.CurrentDirectory + "\\dp2catalog.exe",
@@ -7257,7 +7258,7 @@ out string strError)
 
             string[] paths = new string[1];
             paths[0] = strPurePath;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             long lRet = this.Channel.GetBrowseRecords(
                 this.stop,
@@ -7917,7 +7918,7 @@ out string strError)
                 loader.RecPaths = recpaths;
 
                 int i = 0;
-                foreach (DigitalPlatform.CirculationClient.localhost.Record record in loader)
+                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                 {
                     Application.DoEvents();	// 出让界面控制权
 

@@ -21,7 +21,7 @@ using DigitalPlatform.Marc;
 // using DigitalPlatform.Range;
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Server
 {

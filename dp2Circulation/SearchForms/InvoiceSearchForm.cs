@@ -19,7 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {

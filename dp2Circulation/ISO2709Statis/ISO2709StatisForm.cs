@@ -13,7 +13,6 @@ using System.Runtime.Remoting;
 using System.Web;   // HttpUtility
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
@@ -22,7 +21,8 @@ using DigitalPlatform.Text;
 
 using DigitalPlatform.dp2.Statis;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -237,7 +237,7 @@ namespace dp2Circulation
                     "projectname",
                     this.textBox_projectName.Text);
             }
-            
+
 #if NO
             if (this.ErrorInfoForm != null)
             {
@@ -344,7 +344,6 @@ namespace dp2Circulation
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             try
             {
-
                 int nRet = 0;
                 strError = "";
 
@@ -469,7 +468,6 @@ namespace dp2Circulation
                                     "system.windows.forms.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
-
 									Environment.CurrentDirectory + "\\digitalplatform.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
@@ -478,6 +476,7 @@ namespace dp2Circulation
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
@@ -505,7 +504,6 @@ namespace dp2Circulation
                     goto ERROR1;
                 MessageBox.Show(this, strWarning);
             }
-
 
             this.AssemblyMain = Assembly.LoadFrom(strMainCsDllName);
             if (this.AssemblyMain == null)
@@ -1164,6 +1162,6 @@ namespace dp2Circulation
 
             return 1;
         }
-    
+
     }
 }

@@ -14,8 +14,10 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -313,7 +315,7 @@ namespace DigitalPlatform.CirculationClient
                         loader.Format = "id,metadata,timestamp";
 
                         int i = 0;
-                        foreach (DigitalPlatform.CirculationClient.localhost.Record record in loader)
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                         {
                             Application.DoEvents();
 
@@ -403,7 +405,7 @@ namespace DigitalPlatform.CirculationClient
                             out strError);
                         if (nRet == -1)
                         {
-                            if (channel.ErrorCode == localhost.ErrorCode.AccessDenied)
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
                                 return -1;
                             }

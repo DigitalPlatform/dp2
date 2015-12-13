@@ -12,7 +12,6 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
@@ -20,6 +19,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.GcatClient;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;	// DateTimeUtil
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 
 namespace DigitalPlatform.OPAC.Server

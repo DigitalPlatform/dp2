@@ -9,17 +9,17 @@ using System.Drawing;
 using System.Xml;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.EasyMarc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using System.Threading;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {

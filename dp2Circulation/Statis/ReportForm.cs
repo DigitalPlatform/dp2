@@ -24,11 +24,13 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Range;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -449,7 +451,7 @@ MessageBoxDefaultButton.Button1);
 
                 long lStart = lIndex;
                 long lCount = lHitCount - lIndex;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // bool bOutputBiblioRecPath = false;
                 // bool bOutputItemRecPath = false;
@@ -499,7 +501,7 @@ MessageBoxDefaultButton.Button1);
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         ItemLine line = new ItemLine();
                         line.ItemRecPath = searchresult.Path;
@@ -682,7 +684,7 @@ MessageBoxDefaultButton.Button1);
 
                 long lStart = lIndex;
                 long lCount = lHitCount - lIndex;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string strStyle = "id,cols,format:@coldef:*/barcode|*/department|*/readerType|*/name|*/state";
 
@@ -726,7 +728,7 @@ MessageBoxDefaultButton.Button1);
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         ReaderLine line = new ReaderLine();
                         line.ReaderRecPath = searchresult.Path;
@@ -833,7 +835,7 @@ MessageBoxDefaultButton.Button1);
 
                 long lStart = lIndex;
                 long lCount = lHitCount - lIndex;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // string strStyle = "id,cols,format:@coldef:*/barcode|*/department|*/readerType|*/name";
                 string strStyle = "id";
@@ -878,9 +880,9 @@ MessageBoxDefaultButton.Button1);
 
                     // 处理浏览结果
 
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record searchresult in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
-                        // DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        // DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         BiblioLine line = new BiblioLine();
                         line.BiblioRecPath = searchresult.Path;
@@ -1224,7 +1226,7 @@ MessageBoxDefaultButton.Button1);
 
                 long lStart = lIndex;
                 long lCount = lHitCount - lIndex;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // string strStyle = "id,cols,format:@coldef:*/barcode|*/department|*/readerType|*/name";
                 string strStyle = "keyid,id,key";
@@ -1262,9 +1264,9 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     // 处理浏览结果
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record searchresult in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
-                        // DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        // DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         ClassLine line = new ClassLine();
                         line.BiblioRecPath = searchresult.Path;
@@ -5935,7 +5937,7 @@ MessageBoxDefaultButton.Button2);
             strFirstDate = "";
             strError = "";
 
-            DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records = null;
+            DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records = null;
 
             List<string> dates = new List<string>();
             List<string> styles = new List<string>();
@@ -7169,7 +7171,7 @@ out strError);
         //      1   完成
         int ProcessLogRecord(
             SQLiteConnection connection,
-            // DigitalPlatform.CirculationClient.localhost.OperLogInfo info,
+            // DigitalPlatform.LibraryClient.localhost.OperLogInfo info,
             OperLogItem info,
             XmlDocument dom,
             out string strError)
@@ -12727,7 +12729,7 @@ MessageBoxDefaultButton.Button1);
                         // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
                         if (bRetryOverwiteExisting == true
                             && j == 0
-                            && channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.TimestampMismatch
+                            && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
                             && nRedoCount == 0)
                         {
                             nRedoCount++;

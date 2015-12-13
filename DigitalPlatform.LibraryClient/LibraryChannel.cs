@@ -1,34 +1,30 @@
-﻿// #define BASIC_HTTP // 为了测试 basic.http://
-// #define NEW_API
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using System.Net;
-using System.Diagnostics;
-using System.Threading;
-using System.Windows.Forms;
-using System.IO;
-using System.Xml;
-using System.ServiceModel;
-using System.Globalization;
 
-using System.ServiceModel.Security;
+using System.Threading;
+using System.Net;
+using System.ServiceModel;
+using System.Xml;
 using System.ServiceModel.Channels;
+using System.Windows.Forms;
+using System.Diagnostics;
+using System.ServiceModel.Security;
+using System.IdentityModel.Claims;
+
+using System.IO;
+using System.IdentityModel.Policy;
 using System.Security.Cryptography.X509Certificates;
 using System.IdentityModel.Selectors;
-
-using System.IdentityModel.Policy;
-using System.IdentityModel.Claims;
 using System.ServiceModel.Security.Tokens;
 
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.Range;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;    // SaveResObject()
-using DigitalPlatform.Xml;  // BuildMetadata()
+using DigitalPlatform.LibraryClient.localhost;
 
-namespace DigitalPlatform.CirculationClient
+
+namespace DigitalPlatform.LibraryClient
 {
     /// <summary>
     /// 登录失败的原因
@@ -48,16 +44,6 @@ namespace DigitalPlatform.CirculationClient
         /// </summary>
         PasswordError = 2,  // 密码不正确
     }
-
-#if NO
-    public enum CertMode
-    {
-        None = 0,   // 不清楚
-        Strict = 1, // 严格证书
-        Downgrade = 2,  // 从严格降级到内部证书
-        Loss = 3, // 内部证书
-    }
-#endif
 
     /// <summary>
     /// 通讯通道
@@ -1499,7 +1485,7 @@ out strError);
         /// </summary>
         /// <param name="keys">检索词数组。即 KeyFrom 对象数组</param>
         /// <returns>字符串</returns>
-        public static string BuildDisplayKeyString(DigitalPlatform.CirculationClient.localhost.KeyFrom[] keys)
+        public static string BuildDisplayKeyString(DigitalPlatform.LibraryClient.localhost.KeyFrom[] keys)
         {
             if (keys == null || keys.Length == 0)
                 return "";
@@ -6638,8 +6624,6 @@ out strError);
                 nStart += baContent.Length;
                 if (nStart >= (int)lRet)
                     break;	// 结束
-
-
             } // end of for
 
             if (StringUtil.IsInList("data", strStyle) != true)
@@ -6654,6 +6638,7 @@ out strError);
             return 0;   // TODO: return lRet?
         }
 
+#if NNNNNNNNO
         // 获得资源。包装版本 -- 返回字符串版本、Cache版本。
         // parameters:
         //      remote_timestamp    远端时间戳。如果为 null，表示要从服务器实际获取时间戳
@@ -6939,6 +6924,7 @@ out strError);
 
             return lRet;
         }
+#endif
 
         // 获得资源。包装版本 -- 写入文件的版本。特别适用于获得资源，也可用于获得主记录体。
         // parameters:
@@ -7362,10 +7348,10 @@ out strError);
             // string strMetadata = "<file mimetype='" + strMime + "' localpath='" + strLocalPath + "'/>";
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<file />");
-            DomUtil.SetAttr(dom.DocumentElement,
+            dom.DocumentElement.SetAttribute(
                 "mimetype",
                 strMime);
-            DomUtil.SetAttr(dom.DocumentElement,
+            dom.DocumentElement.SetAttribute(
                 "localpath",
                 strLocalPath);
             return dom.DocumentElement.OuterXml;
@@ -9562,5 +9548,4 @@ Stack:
         public string ErrorInfo = "";
         // public bool Canceled = false;
     }
-
 }

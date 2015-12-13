@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -17,8 +18,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Net;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC
 {
@@ -28,7 +29,7 @@ namespace DigitalPlatform.OPAC
 
         public bool NeedAppendRights = false;
 
-        // ³¬¼¶ÓÃ»§¡£ÓÃÓÚ´´½¨´úÀíÕÊ»§
+        // è¶…çº§ç”¨æˆ·ã€‚ç”¨äºåˆ›å»ºä»£ç†å¸æˆ·
         public string SupervisorUserName = "supervisor";
         public string SupervisorPassword = "";
 
@@ -54,53 +55,53 @@ namespace DigitalPlatform.OPAC
 
                 if (this.Dp2LibraryUrl == "")
                 {
-                    MessageBox.Show(this, "ÉĞÎ´ÊäÈë dp2Library ·şÎñÆ÷µÄ URL");
+                    MessageBox.Show(this, "å°šæœªè¾“å…¥ dp2Library æœåŠ¡å™¨çš„ URL");
                     return;
                 }
 
                 if (this.ManageUserName == "")
                 {
-                    MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨´úÀíÕÊ»§ÓÃ»§Ãû¡£");
+                    MessageBox.Show(this, "å°šæœªæŒ‡å®šä»£ç†å¸æˆ·ç”¨æˆ·åã€‚");
                     return;
                 }
 
                 if (this.ManageUserName == "reader"
     || this.ManageUserName == "public"
-    || this.ManageUserName == "Í¼Êé¹İ")
+    || this.ManageUserName == "å›¾ä¹¦é¦†")
                 {
-                    strError = "´úÀíÕÊ»§µÄÓÃ»§Ãû²»ÄÜÎª 'reader' 'public' 'Í¼Êé¹İ' Ö®Ò»£¬ÒòÎªÕâĞ©¶¼ÊÇ dp2Library ÏµÍ³ÄÚ¾ßÓĞÌØ¶¨ÓÃÍ¾µÄ±£ÁôÕÊ»§Ãû";
+                    strError = "ä»£ç†å¸æˆ·çš„ç”¨æˆ·åä¸èƒ½ä¸º 'reader' 'public' 'å›¾ä¹¦é¦†' ä¹‹ä¸€ï¼Œå› ä¸ºè¿™äº›éƒ½æ˜¯ dp2Library ç³»ç»Ÿå†…å…·æœ‰ç‰¹å®šç”¨é€”çš„ä¿ç•™å¸æˆ·å";
                     MessageBox.Show(this, strError);
                     return;
                 }
 
                 if (this.textBox_managePassword.Text != this.textBox_confirmManagePassword.Text)
                 {
-                    strError = "´úÀíÕÊ»§ ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£";
+                    strError = "ä»£ç†å¸æˆ· å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                     MessageBox.Show(this, strError);
                     return;
                 }
 
-                // ÑéÖ¤´úÀíÕÊ»§ÓÃ»§ÊÇ·ñÒÑ¾­¿ÉÓÃ£¿
+                // éªŒè¯ä»£ç†å¸æˆ·ç”¨æˆ·æ˜¯å¦å·²ç»å¯ç”¨ï¼Ÿ
                 // return:
-                //       -1  ³ö´í
-                //      0   ²»´æÔÚ
-                //      1   ´æÔÚ, ÇÒÃÜÂëÒ»ÖÂ
-                //      2   ´æÔÚ, µ«ÃÜÂë²»Ò»ÖÂ
+                //       -1  å‡ºé”™
+                //      0   ä¸å­˜åœ¨
+                //      1   å­˜åœ¨, ä¸”å¯†ç ä¸€è‡´
+                //      2   å­˜åœ¨, ä½†å¯†ç ä¸ä¸€è‡´
                 int nRet = DetectManageUser(out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, "ÑéÖ¤´úÀíÕÊ»§Ê±·¢ÏÖÎÊÌâ: " + strError + "\r\n\r\nÇëÈ·±£´úÀíÕÊ»§ÒÑ¾­ÕıÈ·´´½¨");
+                    MessageBox.Show(this, "éªŒè¯ä»£ç†å¸æˆ·æ—¶å‘ç°é—®é¢˜: " + strError + "\r\n\r\nè¯·ç¡®ä¿ä»£ç†å¸æˆ·å·²ç»æ­£ç¡®åˆ›å»º");
                     return;
                 }
 
                 if (nRet == 1)
                 {
-                    // Ôö²¹È¨ÏŞ
+                    // å¢è¡¥æƒé™
                     this.NeedAppendRights = true;
                 }
                 else if (nRet == 2)
                 {
-                    string strText = "´úÀíÕÊ»§ÒÑ¾­´æÔÚ, µ«ÊÇÆäÃÜÂëºÍµ±Ç°Ãæ°åÖĞÄâÉèÖÃµÄÃÜÂë²»Ò»ÖÂ¡£\r\n\r\nÊÇ·ñÒªÖØÉèÆäÃÜÂë?\r\n\r\n(ÊÇ(Yes): ÖØÉèÃÜÂë²¢¼ÌĞø°²×°£»·ñ(No): ²»ÖØÉèÃÜÂë²¢¼ÌĞø°²×°£»È¡Ïû(Cancel): ·µ»ØÉèÖÃÃæ°å)";
+                    string strText = "ä»£ç†å¸æˆ·å·²ç»å­˜åœ¨, ä½†æ˜¯å…¶å¯†ç å’Œå½“å‰é¢æ¿ä¸­æ‹Ÿè®¾ç½®çš„å¯†ç ä¸ä¸€è‡´ã€‚\r\n\r\næ˜¯å¦è¦é‡è®¾å…¶å¯†ç ?\r\n\r\n(æ˜¯(Yes): é‡è®¾å¯†ç å¹¶ç»§ç»­å®‰è£…ï¼›å¦(No): ä¸é‡è®¾å¯†ç å¹¶ç»§ç»­å®‰è£…ï¼›å–æ¶ˆ(Cancel): è¿”å›è®¾ç½®é¢æ¿)";
                     DialogResult result = MessageBox.Show(this,
                         strText,
                         "setup_dp2opac",
@@ -112,23 +113,23 @@ namespace DigitalPlatform.OPAC
                         nRet = ResetManageUserPassword(out strError);
                         if (nRet == -1)
                         {
-                            MessageBox.Show(this, "ÖØÉè´úÀíÕÊ»§ÃÜÂëÊ±³ö´í: " + strError + "\r\n\r\nÇëÈ·±£´úÀíÕÊ»§ÒÑ¾­ÕıÈ·´´½¨");
+                            MessageBox.Show(this, "é‡è®¾ä»£ç†å¸æˆ·å¯†ç æ—¶å‡ºé”™: " + strError + "\r\n\r\nè¯·ç¡®ä¿ä»£ç†å¸æˆ·å·²ç»æ­£ç¡®åˆ›å»º");
                             return;
                         }
                     }
 
                     if (result == DialogResult.Cancel)
-                        return; // ·µ»ØÃæ°å
+                        return; // è¿”å›é¢æ¿
 
-                    // Ôö²¹È¨ÏŞ
+                    // å¢è¡¥æƒé™
                     this.NeedAppendRights = true;
                 }
 
-                // ´úÀíÕÊ»§²»´æÔÚ
+                // ä»£ç†å¸æˆ·ä¸å­˜åœ¨
                 else if (nRet == 0)
                 {
-                    // ×Ô¶¯´´Á¢?
-                    string strText = "´úÀíÕÊ»§ '" + this.textBox_manageUserName.Text + "' ÉĞÎ´´´½¨, ÊÇ·ñ´´½¨Ö®?\r\n\r\n(È·¶¨(OK): ´´½¨£» È¡Ïû(Cancel): ²»´´½¨£¬·µ»ØÉèÖÃÃæ°å)";
+                    // è‡ªåŠ¨åˆ›ç«‹?
+                    string strText = "ä»£ç†å¸æˆ· '" + this.textBox_manageUserName.Text + "' å°šæœªåˆ›å»º, æ˜¯å¦åˆ›å»ºä¹‹?\r\n\r\n(ç¡®å®š(OK): åˆ›å»ºï¼› å–æ¶ˆ(Cancel): ä¸åˆ›å»ºï¼Œè¿”å›è®¾ç½®é¢æ¿)";
                     DialogResult result = MessageBox.Show(this,
                         strText,
                         "setup_dp2opac",
@@ -147,14 +148,14 @@ namespace DigitalPlatform.OPAC
                     this.NeedAppendRights = false;
                 }
 
-                // »ñµÃ±¨±íÄ¿Â¼Â·¾¶
+                // è·å¾—æŠ¥è¡¨ç›®å½•è·¯å¾„
                 if (IsLocalHostUrl(this.textBox_dp2LibraryUrl.Text) == true)
                 {
                     string strDataDir = "";
                     nRet = GetLibraryDataDir(out strDataDir, out strError);
                     if (nRet == -1)
                     {
-                        MessageBox.Show(this, "»ñµÃ dp2Library Êı¾İÄ¿Â¼ÅäÖÃÊ±³öÏÖÎÊÌâ: " + strError + "\r\n\r\nÇëÔÚ°²×°³É¹¦ºóÊÖ¶¯ÅäÖÃ opac.xml ÎÄ¼ş");
+                        MessageBox.Show(this, "è·å¾— dp2Library æ•°æ®ç›®å½•é…ç½®æ—¶å‡ºç°é—®é¢˜: " + strError + "\r\n\r\nè¯·åœ¨å®‰è£…æˆåŠŸåæ‰‹åŠ¨é…ç½® opac.xml æ–‡ä»¶");
                     }
 
                     if (string.IsNullOrEmpty(strDataDir) == false)
@@ -182,7 +183,7 @@ namespace DigitalPlatform.OPAC
             return IsLocalIpAddress(uri.Host);
         }
 
-        // ¼ì²éÒ»¸öµØÖ·ÊÇ·ñµÈÍ¬ localhost
+        // æ£€æŸ¥ä¸€ä¸ªåœ°å€æ˜¯å¦ç­‰åŒ localhost
         // http://stackoverflow.com/questions/11834091/how-to-check-if-localhost
         public static bool IsLocalIpAddress(string host)
         {
@@ -230,7 +231,7 @@ namespace DigitalPlatform.OPAC
             }
         }
 
-        // ´úÀíÓÃ»§Ãû
+        // ä»£ç†ç”¨æˆ·å
         public string ManageUserName
         {
             get
@@ -243,7 +244,7 @@ namespace DigitalPlatform.OPAC
             }
         }
 
-        // ´úÀíÓÃ»§ÃÜÂë
+        // ä»£ç†ç”¨æˆ·å¯†ç 
         public string ManagePassword
         {
             get
@@ -257,30 +258,30 @@ namespace DigitalPlatform.OPAC
             }
         }
 
-        // ¼ì²â¹ÜÀíÓÃ»§ÊÇ·ñÒÑ¾­´æÔÚ?
+        // æ£€æµ‹ç®¡ç†ç”¨æˆ·æ˜¯å¦å·²ç»å­˜åœ¨?
         // return:
-        //       -1  ³ö´í
-        //      0   ²»´æÔÚ
-        //      1   ´æÔÚ, ÇÒÃÜÂëÒ»ÖÂ
-        //      2   ´æÔÚ, µ«ÃÜÂë²»Ò»ÖÂ
+        //       -1  å‡ºé”™
+        //      0   ä¸å­˜åœ¨
+        //      1   å­˜åœ¨, ä¸”å¯†ç ä¸€è‡´
+        //      2   å­˜åœ¨, ä½†å¯†ç ä¸ä¸€è‡´
         int DetectManageUser(out string strError)
         {
             strError = "";
             if (this.textBox_dp2LibraryUrl.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ dp2Library ·şÎñÆ÷ URL";
+                strError = "å°šæœªæŒ‡å®š dp2Library æœåŠ¡å™¨ URL";
                 return -1;
             }
 
             if (this.textBox_manageUserName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨´úÀíÕÊ»§µÄÓÃ»§Ãû";
+                strError = "å°šæœªæŒ‡å®šä»£ç†å¸æˆ·çš„ç”¨æˆ·å";
                 return -1;
             }
 
             if (this.textBox_managePassword.Text != this.textBox_confirmManagePassword.Text)
             {
-                strError = "´úÀíÕÊ»§ ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£";
+                strError = "ä»£ç†å¸æˆ· å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                 return -1;
             }
 
@@ -295,7 +296,7 @@ namespace DigitalPlatform.OPAC
                 out strError);
             if (nRet == -1)
             {
-                strError = "ÒÔÓÃ»§Ãû '" + this.textBox_manageUserName.Text + "' ºÍÃÜÂëµÇÂ¼Ê§°Ü: " + strError;
+                strError = "ä»¥ç”¨æˆ·å '" + this.textBox_manageUserName.Text + "' å’Œå¯†ç ç™»å½•å¤±è´¥: " + strError;
                 return -1;
             }
 
@@ -309,11 +310,11 @@ namespace DigitalPlatform.OPAC
                 channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                 channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
-                strError = "ÎªÈ·ÈÏ´úÀíÕÊ»§ÊÇ·ñ´æÔÚ, ÇëÓÃ³¬¼¶ÓÃ»§Éí·İµÇÂ¼¡£";
+                strError = "ä¸ºç¡®è®¤ä»£ç†å¸æˆ·æ˜¯å¦å­˜åœ¨, è¯·ç”¨è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•ã€‚";
                 nRet = channel.DoNotLogin(ref strError);
                 if (nRet == -1 || nRet == 0)
                 {
-                    strError = "ÒÔ³¬¼¶ÓÃ»§Éí·İµÇÂ¼Ê§°Ü: " + strError + "\r\n\r\nÒò´ËÎŞ·¨È·¶¨´úÀíÕÊ»§ÊÇ·ñ´æÔÚ";
+                    strError = "ä»¥è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•å¤±è´¥: " + strError + "\r\n\r\nå› æ­¤æ— æ³•ç¡®å®šä»£ç†å¸æˆ·æ˜¯å¦å­˜åœ¨";
                     return -1;
                 }
 
@@ -328,19 +329,19 @@ namespace DigitalPlatform.OPAC
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "»ñÈ¡ÓÃ»§ '" + this.textBox_manageUserName.Text + "' ĞÅÏ¢Ê±·¢Éú´íÎó: " + strError + "\r\n\r\nÒò´ËÎŞ·¨È·¶¨´úÀíÕÊ»§ÊÇ·ñ´æÔÚ¡£";
+                    strError = "è·å–ç”¨æˆ· '" + this.textBox_manageUserName.Text + "' ä¿¡æ¯æ—¶å‘ç”Ÿé”™è¯¯: " + strError + "\r\n\r\nå› æ­¤æ— æ³•ç¡®å®šä»£ç†å¸æˆ·æ˜¯å¦å­˜åœ¨ã€‚";
                     return -1;
                 }
                 if (nRet == 1)
                 {
                     Debug.Assert(users != null, "");
-                    strError = "´úÀíÕÊ»§ '" + this.textBox_manageUserName.Text + "' ÒÑ¾­´æÔÚ, µ«ÆäÃÜÂëºÍµ±Ç°Ãæ°åÄâÉèÖÃµÄÃÜÂë²»Ò»ÖÂ¡£";
+                    strError = "ä»£ç†å¸æˆ· '" + this.textBox_manageUserName.Text + "' å·²ç»å­˜åœ¨, ä½†å…¶å¯†ç å’Œå½“å‰é¢æ¿æ‹Ÿè®¾ç½®çš„å¯†ç ä¸ä¸€è‡´ã€‚";
                     return 2;
                 }
                 if (nRet >= 1)
                 {
                     Debug.Assert(users != null, "");
-                    strError = "ÒÔ '" + this.textBox_manageUserName.Text + "' ÎªÓÃ»§Ãû µÄÓÃ»§¼ÇÂ¼´æÔÚ¶àÌõ£¬ÕâÊÇÒ»¸öÑÏÖØ´íÎó£¬ÇëÏµÍ³¹ÜÀíÔ±ÆôÓÃdp2circulation¾¡¿ìĞŞÕı´Ë´íÎó¡£";
+                    strError = "ä»¥ '" + this.textBox_manageUserName.Text + "' ä¸ºç”¨æˆ·å çš„ç”¨æˆ·è®°å½•å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ä¸ªä¸¥é‡é”™è¯¯ï¼Œè¯·ç³»ç»Ÿç®¡ç†å‘˜å¯ç”¨dp2circulationå°½å¿«ä¿®æ­£æ­¤é”™è¯¯ã€‚";
                     return -1;
                 }
 
@@ -360,7 +361,7 @@ namespace DigitalPlatform.OPAC
                 e.Parameters = "location=#setup,type=worker";
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // Á¢¼´·µ»Ø, ÒÔ±ã×÷µÚÒ»´Î ²»³öÏÖ ¶Ô»°¿òµÄ×Ô¶¯µÇÂ¼
+                    return; // ç«‹å³è¿”å›, ä»¥ä¾¿ä½œç¬¬ä¸€æ¬¡ ä¸å‡ºç° å¯¹è¯æ¡†çš„è‡ªåŠ¨ç™»å½•
             }
 
             // 
@@ -405,11 +406,11 @@ namespace DigitalPlatform.OPAC
         }
 
 #if NO
-        // »ñµÃÓÃ»§¼ÇÂ¼
+        // è·å¾—ç”¨æˆ·è®°å½•
         // return:
         //      -1  error
         //      0   not found
-        //      >=1   ¼ìË÷ÃüÖĞµÄÌõÊı
+        //      >=1   æ£€ç´¢å‘½ä¸­çš„æ¡æ•°
         public static int GetUserRecord(
             RmsChannel channel,
             string strUserName,
@@ -426,7 +427,7 @@ namespace DigitalPlatform.OPAC
 
             if (strUserName == "")
             {
-                strError = "ÓÃ»§ÃûÎª¿Õ";
+                strError = "ç”¨æˆ·åä¸ºç©º";
                 return -1;
             }
 
@@ -440,7 +441,7 @@ namespace DigitalPlatform.OPAC
                 out strError);
             if (nRet == -1)
             {
-                strError = "¼ìË÷ÕÊ»§¿âÊ±³ö´í: " + strError;
+                strError = "æ£€ç´¢å¸æˆ·åº“æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -459,12 +460,12 @@ namespace DigitalPlatform.OPAC
                 out strError);
             if (nRet == -1)
             {
-                strError = "¼ìË÷×¢²áÓÃ»§¿â»ñÈ¡¼ìË÷½á¹ûÊ±³ö´í: " + strError;
+                strError = "æ£€ç´¢æ³¨å†Œç”¨æˆ·åº“è·å–æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
                 return -1;
             }
             if (aPath.Count == 0)
             {
-                strError = "¼ìË÷×¢²áÓÃ»§¿â»ñÈ¡µÄ¼ìË÷½á¹ûÎª¿Õ";
+                strError = "æ£€ç´¢æ³¨å†Œç”¨æˆ·åº“è·å–çš„æ£€ç´¢ç»“æœä¸ºç©º";
                 return -1;
             }
 
@@ -484,7 +485,7 @@ namespace DigitalPlatform.OPAC
                 out strError);
             if (nRet == -1)
             {
-                strError = "»ñÈ¡×¢²áÓÃ»§¿â¼ÇÂ¼ÌåÊ±³ö´í: " + strError;
+                strError = "è·å–æ³¨å†Œç”¨æˆ·åº“è®°å½•ä½“æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -494,33 +495,33 @@ namespace DigitalPlatform.OPAC
 
 #endif
 
-        // ´´½¨´úÀíÕÊ»§
+        // åˆ›å»ºä»£ç†å¸æˆ·
         int CreateManageUser(out string strError)
         {
             strError = "";
             if (this.textBox_dp2LibraryUrl.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨dp2Library·şÎñÆ÷URL";
+                strError = "å°šæœªæŒ‡å®šdp2LibraryæœåŠ¡å™¨URL";
                 return -1;
             }
 
             if (this.textBox_manageUserName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨´úÀíÕÊ»§µÄÓÃ»§Ãû";
+                strError = "å°šæœªæŒ‡å®šä»£ç†å¸æˆ·çš„ç”¨æˆ·å";
                 return -1;
             }
 
             if (this.textBox_manageUserName.Text == "reader"
                 || this.textBox_manageUserName.Text == "public"
-                || this.textBox_manageUserName.Text == "Í¼Êé¹İ")
+                || this.textBox_manageUserName.Text == "å›¾ä¹¦é¦†")
             {
-                strError = "´úÀíÕÊ»§µÄÓÃ»§Ãû²»ÄÜÎª 'reader' 'public' 'Í¼Êé¹İ' Ö®Ò»£¬ÒòÎªÕâĞ©¶¼ÊÇ dp2Library ÏµÍ³ÄÚ¾ßÓĞÌØ¶¨ÓÃÍ¾µÄ±£ÁôÕÊ»§Ãû";
+                strError = "ä»£ç†å¸æˆ·çš„ç”¨æˆ·åä¸èƒ½ä¸º 'reader' 'public' 'å›¾ä¹¦é¦†' ä¹‹ä¸€ï¼Œå› ä¸ºè¿™äº›éƒ½æ˜¯ dp2Library ç³»ç»Ÿå†…å…·æœ‰ç‰¹å®šç”¨é€”çš„ä¿ç•™å¸æˆ·å";
                 return -1;
             }
 
             if (this.textBox_managePassword.Text != this.textBox_confirmManagePassword.Text)
             {
-                strError = "´úÀíÕÊ ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£";
+                strError = "ä»£ç†å¸ å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                 return -1;
             }
 
@@ -530,11 +531,11 @@ namespace DigitalPlatform.OPAC
             channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
-            strError = "ÇëÓÃ³¬¼¶ÓÃ»§Éí·İµÇÂ¼£¬ÒÔ±ã´´½¨´úÀíÕÊ»§¡£";
+            strError = "è¯·ç”¨è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•ï¼Œä»¥ä¾¿åˆ›å»ºä»£ç†å¸æˆ·ã€‚";
             int nRet = channel.DoNotLogin(ref strError);
             if (nRet == -1 || nRet == 0)
             {
-                strError = "ÒÔ³¬¼¶ÓÃ»§Éí·İµÇÂ¼Ê§°Ü: " + strError;
+                strError = "ä»¥è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•å¤±è´¥: " + strError;
                 return -1;
             }
             UserInfo user = new UserInfo();
@@ -544,7 +545,7 @@ namespace DigitalPlatform.OPAC
             user.Rights = "getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker";
 
             /*
-´úÀíÕÊ»§:
+ä»£ç†å¸æˆ·:
 getsystemparameter
 getres
 search
@@ -559,7 +560,7 @@ writeobject * */
     out strError);
             if (lRet == -1)
             {
-                strError = "´´½¨´úÀíÕÊ»§Ê±·¢Éú´íÎó: " + strError;
+                strError = "åˆ›å»ºä»£ç†å¸æˆ·æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -567,25 +568,25 @@ writeobject * */
             return 0;
         }
 
-        // ÖØÉèÖÃ´úÀíÕÊ»§ÃÜÂë
+        // é‡è®¾ç½®ä»£ç†å¸æˆ·å¯†ç 
         int ResetManageUserPassword(out string strError)
         {
             strError = "";
             if (this.textBox_dp2LibraryUrl.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨dp2Library·şÎñÆ÷URL";
+                strError = "å°šæœªæŒ‡å®šdp2LibraryæœåŠ¡å™¨URL";
                 return -1;
             }
 
             if (this.textBox_manageUserName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨´úÀíÕÊ»§µÄÓÃ»§Ãû";
+                strError = "å°šæœªæŒ‡å®šä»£ç†å¸æˆ·çš„ç”¨æˆ·å";
                 return -1;
             }
 
             if (this.textBox_managePassword.Text != this.textBox_confirmManagePassword.Text)
             {
-                strError = "´úÀíÕÊ»§ ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£";
+                strError = "ä»£ç†å¸æˆ· å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                 return -1;
             }
 
@@ -595,17 +596,17 @@ writeobject * */
             channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
-            strError = "ÇëÓÃ³¬¼¶ÓÃ»§Éí·İµÇÂ¼£¬ÒÔ±ãÖØÉè´úÀíÕÊ»§ÃÜÂë¡£";
+            strError = "è¯·ç”¨è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•ï¼Œä»¥ä¾¿é‡è®¾ä»£ç†å¸æˆ·å¯†ç ã€‚";
             int nRet = channel.DoNotLogin(ref strError);
             if (nRet == -1 || nRet == 0)
             {
-                strError = "ÒÔ³¬¼¶ÓÃ»§Éí·İµÇÂ¼Ê§°Ü: " + strError;
+                strError = "ä»¥è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•å¤±è´¥: " + strError;
                 return -1;
             }
 
             if (StringUtil.IsInList("changeuserpassword", channel.Rights) == false)
             {
-                strError = "ÄúËùÊ¹ÓÃµÄ³¬¼¶ÓÃ»§ '" + this.SupervisorUserName + "' ²»¾ß±¸ changeuserpassword È¨ÏŞ£¬ÎŞ·¨½øĞĞ(Îª´úÀíÕÊ»§ '" + this.textBox_manageUserName.Text + "' )ÖØÉèÃÜÂëµÄ²Ù×÷";
+                strError = "æ‚¨æ‰€ä½¿ç”¨çš„è¶…çº§ç”¨æˆ· '" + this.SupervisorUserName + "' ä¸å…·å¤‡ changeuserpassword æƒé™ï¼Œæ— æ³•è¿›è¡Œ(ä¸ºä»£ç†å¸æˆ· '" + this.textBox_manageUserName.Text + "' )é‡è®¾å¯†ç çš„æ“ä½œ";
                 return -1;
             }
 
@@ -620,7 +621,7 @@ writeobject * */
                 out strError);
             if (lRet == -1)
             {
-                strError = "ÖØÉèÃÜÂëÊ±·¢Éú´íÎó: " + strError;
+                strError = "é‡è®¾å¯†ç æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -628,7 +629,7 @@ writeobject * */
             return 0;
         }
 
-        // »ñµÃ dp2Library Êı¾İÄ¿Â¼
+        // è·å¾— dp2Library æ•°æ®ç›®å½•
         int GetLibraryDataDir(out string strDataDir, out string strError)
         {
             strError = "";
@@ -636,19 +637,19 @@ writeobject * */
 
             if (this.textBox_dp2LibraryUrl.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ dp2Library ·şÎñÆ÷ URL";
+                strError = "å°šæœªæŒ‡å®š dp2Library æœåŠ¡å™¨ URL";
                 return -1;
             }
 
             if (this.textBox_manageUserName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨´úÀíÕÊ»§µÄÓÃ»§Ãû";
+                strError = "å°šæœªæŒ‡å®šä»£ç†å¸æˆ·çš„ç”¨æˆ·å";
                 return -1;
             }
 
             if (this.textBox_managePassword.Text != this.textBox_confirmManagePassword.Text)
             {
-                strError = "´úÀíÕÊ»§ ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£";
+                strError = "ä»£ç†å¸æˆ· å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                 return -1;
             }
 
@@ -663,7 +664,7 @@ writeobject * */
                 out strError);
             if (nRet == -1)
             {
-                strError = "ÒÔÓÃ»§Ãû '" + this.textBox_manageUserName.Text + "' ºÍÃÜÂëµÇÂ¼Ê§°Ü: " + strError;
+                strError = "ä»¥ç”¨æˆ·å '" + this.textBox_manageUserName.Text + "' å’Œå¯†ç ç™»å½•å¤±è´¥: " + strError;
                 return -1;
             }
 
@@ -674,11 +675,11 @@ writeobject * */
                     channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                     channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
-                    strError = "Îª»ñÈ¡ dp2Library Êı¾İÄ¿Â¼ÅäÖÃĞÅÏ¢, ÇëÓÃ³¬¼¶ÓÃ»§Éí·İµÇÂ¼¡£";
+                    strError = "ä¸ºè·å– dp2Library æ•°æ®ç›®å½•é…ç½®ä¿¡æ¯, è¯·ç”¨è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•ã€‚";
                     nRet = channel.DoNotLogin(ref strError);
                     if (nRet == -1 || nRet == 0)
                     {
-                        strError = "ÒÔ³¬¼¶ÓÃ»§Éí·İµÇÂ¼Ê§°Ü: " + strError + "\r\n\r\nÒò´ËÎŞ·¨»ñÈ¡ dp2Library Êı¾İÄ¿Â¼ÅäÖÃĞÅÏ¢";
+                        strError = "ä»¥è¶…çº§ç”¨æˆ·èº«ä»½ç™»å½•å¤±è´¥: " + strError + "\r\n\r\nå› æ­¤æ— æ³•è·å– dp2Library æ•°æ®ç›®å½•é…ç½®ä¿¡æ¯";
                         return -1;
                     }
                 }
@@ -746,13 +747,13 @@ writeobject * */
             UserRecDom.LoadXml("<record><name /><password /><server /></record>");
 
 
-            // ÉèÖÃÓÃ»§Ãû
+            // è®¾ç½®ç”¨æˆ·å
             DomUtil.SetElementText(UserRecDom.DocumentElement,
                 "name",
                 this.textBox_manageUserName.Text);
 
 
-            // ÃÜÂë
+            // å¯†ç 
             DomUtil.SetElementText(UserRecDom.DocumentElement,
                "password",
                 Cryptography.GetSHA1(this.textBox_managePassword.Text));
@@ -760,7 +761,7 @@ writeobject * */
             XmlNode nodeServer = UserRecDom.DocumentElement.SelectSingleNode("server");
             if (nodeServer == null)
             {
-                Debug.Assert(false, "²»¿ÉÄÜµÄÇé¿ö");
+                Debug.Assert(false, "ä¸å¯èƒ½çš„æƒ…å†µ");
                 return -1;
             }
 
@@ -788,7 +789,7 @@ writeobject * */
 
         }
 
-        // ¼ì²â¹ÜÀíÕÊ»§ÊÇ·ñ´æÔÚ£¬µÇÂ¼ÊÇ·ñÕıÈ·
+        // æ£€æµ‹ç®¡ç†å¸æˆ·æ˜¯å¦å­˜åœ¨ï¼Œç™»å½•æ˜¯å¦æ­£ç¡®
         private void button_detectManageUser_Click(object sender, EventArgs e)
         {
             EnableControls(false);
@@ -796,15 +797,15 @@ writeobject * */
             {
                 if (string.IsNullOrEmpty(this.textBox_manageUserName.Text) == true)
                 {
-                    MessageBox.Show(this, "ÇëÏÈÔÚÃæ°åÉÏÖ¸¶¨Òª¼ì²âµÄ´úÀíÕÊ»§Ãû");
+                    MessageBox.Show(this, "è¯·å…ˆåœ¨é¢æ¿ä¸ŠæŒ‡å®šè¦æ£€æµ‹çš„ä»£ç†å¸æˆ·å");
                     return;
                 }
                 string strError = "";
                 // return:
-                //       -1  ³ö´í
-                //      0   ²»´æÔÚ
-                //      1   ´æÔÚ, ÇÒÃÜÂëÒ»ÖÂ
-                //      2   ´æÔÚ, µ«ÃÜÂë²»Ò»ÖÂ
+                //       -1  å‡ºé”™
+                //      0   ä¸å­˜åœ¨
+                //      1   å­˜åœ¨, ä¸”å¯†ç ä¸€è‡´
+                //      2   å­˜åœ¨, ä½†å¯†ç ä¸ä¸€è‡´
                 int nRet = DetectManageUser(out strError);
                 if (nRet == -1)
                 {
@@ -812,16 +813,16 @@ writeobject * */
                 }
                 else if (nRet == 0)
                 {
-                    MessageBox.Show(this, "´úÀíÕÊ»§ '" + this.textBox_manageUserName.Text + "' Ä¿Ç°ÉĞ²»´æÔÚ¡£");
+                    MessageBox.Show(this, "ä»£ç†å¸æˆ· '" + this.textBox_manageUserName.Text + "' ç›®å‰å°šä¸å­˜åœ¨ã€‚");
                 }
                 else if (nRet == 2)
                 {
-                    MessageBox.Show(this, "´úÀíÕÊ»§ '" + this.textBox_manageUserName.Text + "' ¾­¼ìÑé´æÔÚ£¬µ«ÆäÃÜÂëºÍµ±Ç°Ãæ°åÉÏÊäÈëµÄÃÜÂë²»Ò»ÖÂ¡£");
+                    MessageBox.Show(this, "ä»£ç†å¸æˆ· '" + this.textBox_manageUserName.Text + "' ç»æ£€éªŒå­˜åœ¨ï¼Œä½†å…¶å¯†ç å’Œå½“å‰é¢æ¿ä¸Šè¾“å…¥çš„å¯†ç ä¸ä¸€è‡´ã€‚");
                 }
                 else
                 {
                     Debug.Assert(nRet == 1, "");
-                    MessageBox.Show(this, "´úÀíÕÊ»§ '" + this.textBox_manageUserName.Text + "' ¾­¼ìÑé´æÔÚ¡£");
+                    MessageBox.Show(this, "ä»£ç†å¸æˆ· '" + this.textBox_manageUserName.Text + "' ç»æ£€éªŒå­˜åœ¨ã€‚");
                 }
             }
             finally
@@ -830,7 +831,7 @@ writeobject * */
             }
         }
 
-        // ´´½¨Ò»¸öĞÂµÄ¹ÜÀíÕÊ»§¡£ĞèÒªÓÃ root È¨ÏŞµÇÂ¼²ÅÄÜ´´½¨
+        // åˆ›å»ºä¸€ä¸ªæ–°çš„ç®¡ç†å¸æˆ·ã€‚éœ€è¦ç”¨ root æƒé™ç™»å½•æ‰èƒ½åˆ›å»º
         private void button_createManageUser_Click(object sender, EventArgs e)
         {
             EnableControls(false);
@@ -845,7 +846,7 @@ writeobject * */
                 }
                 else
                 {
-                    MessageBox.Show(this, "´úÀíÕÊ»§´´½¨³É¹¦¡£");
+                    MessageBox.Show(this, "ä»£ç†å¸æˆ·åˆ›å»ºæˆåŠŸã€‚");
                 }
             }
             finally
@@ -856,7 +857,7 @@ writeobject * */
 
         private void button_resetManageUserPassword_Click(object sender, EventArgs e)
         {
-            // ÖØÉèÖÃ´úÀíÕÊ»§ÃÜÂë
+            // é‡è®¾ç½®ä»£ç†å¸æˆ·å¯†ç 
             EnableControls(false);
             try
             {
@@ -868,7 +869,7 @@ writeobject * */
                 }
                 else
                 {
-                    MessageBox.Show(this, "ÖØÉè´úÀíÕÊ»§ÃÜÂë³É¹¦¡£");
+                    MessageBox.Show(this, "é‡è®¾ä»£ç†å¸æˆ·å¯†ç æˆåŠŸã€‚");
                 }
             }
             finally

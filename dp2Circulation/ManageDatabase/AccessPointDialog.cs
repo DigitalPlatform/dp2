@@ -10,7 +10,7 @@ using System.Diagnostics;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {

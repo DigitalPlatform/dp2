@@ -12,11 +12,12 @@ using System.Runtime.Serialization;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Marc;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {

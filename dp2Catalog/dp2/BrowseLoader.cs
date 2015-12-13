@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 // TODO: 可以改造为使用 ChannelPool。这样和 dp2circulation 也能统一了
 
@@ -127,7 +128,7 @@ namespace dp2Catalog
                         string[] paths = new string[batch.Count];
                         batch.CopyTo(paths);
 
-                        DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                        DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                         string strError = "";
 
                         long lRet = channel.GetBrowseRecords(
@@ -148,7 +149,7 @@ namespace dp2Catalog
 
                         for (int i = 0; i < searchresults.Length; i++)
                         {
-                            DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                            DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
                             Debug.Assert(batch[i] == record.Path, "");
 
                             // 包含服务器名

@@ -18,7 +18,8 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.rms;  // rmsutil
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -801,7 +802,7 @@ namespace DigitalPlatform.OPAC.Server
                         TimeSpan delta = DateTime.Now - start_time;
 
                         // 超时处理
-                        if (this.Channel.ErrorCode == CirculationClient.localhost.ErrorCode.RequestTimeOut
+                        if (this.Channel.ErrorCode == LibraryClient.localhost.ErrorCode.RequestTimeOut
                             && nRedoCount < 5)
                         {
                             this.Channel.Abort();

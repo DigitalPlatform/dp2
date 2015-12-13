@@ -640,7 +640,7 @@ namespace dp2Circulation
             // 针对有报错信息的情况
             if (this.Item != null
                 && this.Item.Error != null
-                && this.Item.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
+                && this.Item.Error.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCodeValue.TimestampMismatch)
             {
                 this.Item.OldRecord = this.Item.Error.OldRecord;
                 this.Item.Timestamp = this.Item.Error.OldTimestamp;

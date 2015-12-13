@@ -101,7 +101,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.60 (2015/11/25) GetOperLogs() 和 GetOperLog() API 开始支持两种日志类型。
         //      2.61 (2015/12/9) GetReaderInfo() 允许使用 _testreader 获得测试用的读者记录信息
         //      2.62 (2015/12/11) Login() API 增加了检查前端最低版本号的功能。如果用户权限中有 checkclientversion，就进行这项检查
-        public static string Version = "2.62";
+        //      2.63 (2015/12/12) Return() API，对于超期违约金因子为空的情况，现在不当作出错处理。这种情况交费信息不会写入读者记录的交费信息字段，但会进入操作日志中(便于以后进行统计)。
+        public static string Version = "2.63";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

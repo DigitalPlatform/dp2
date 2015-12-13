@@ -14,7 +14,7 @@ using System.Globalization;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using System.Xml;
 using DigitalPlatform.Xml;
 

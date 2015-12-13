@@ -22,7 +22,7 @@ using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.dp2.Statis;
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 public partial class Report : MyWebPage
 {

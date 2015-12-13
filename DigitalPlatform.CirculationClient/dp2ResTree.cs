@@ -12,8 +12,10 @@ using System.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.CirculationClient
 {

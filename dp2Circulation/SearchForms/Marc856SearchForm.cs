@@ -14,12 +14,14 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {

@@ -136,7 +136,7 @@ ref sessioninfo) == false)
         if (nUntouched == -1)
         {
             // 2014/3/12
-            if (sessioninfo.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotLogin)
+            if (sessioninfo.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotLogin)
             {
                 Session.Abandon();  // 迫使重新登录
                 goto END_GETINFO;

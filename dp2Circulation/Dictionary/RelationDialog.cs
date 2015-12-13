@@ -11,11 +11,12 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

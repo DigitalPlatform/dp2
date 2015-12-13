@@ -18,8 +18,6 @@ using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.AmazonInterface;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.EasyMarc;
 using DigitalPlatform.GUI;
@@ -29,6 +27,10 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.MessageClient;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -1434,7 +1436,7 @@ out strError);
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string strStyle = "id";
 
@@ -1467,7 +1469,7 @@ out strError);
 
                     // 处理浏览结果
 
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record searchresult in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
                         biblio_recpaths.Add(searchresult.Path);
                     }

@@ -1101,6 +1101,7 @@ namespace DigitalPlatform.Script
             strCodeFileName = strLocate + "\\" + strSourceFileName;
 
             string strCode = "";
+#if NO
             try
             {
                 using (StreamReader sr = new StreamReader(strCodeFileName, true))
@@ -1113,6 +1114,10 @@ namespace DigitalPlatform.Script
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
+#endif
+            nRet = LoadCode(strCodeFileName, out strCode, out strError);
+            if (nRet == -1)
+                return -1;
 
             nRet = CreateAssemblyFile(strCode,
                 saRef,
@@ -1146,8 +1151,76 @@ namespace DigitalPlatform.Script
                     + "' 中文件" + strSourceFileName + "' 编译发现警告:\r\n" + strWarning;
             }
 
-
             return nRet;
+        }
+
+        static bool IsUsing(string line)
+        {
+            if (string.IsNullOrEmpty(line) == true)
+                return true;
+            if (line.StartsWith("using ") == true)
+                return true;
+            if (line.StartsWith("//") == true)
+                return true;
+
+            return false;
+        }
+
+        public static int LoadCode(string strCodeFileName,
+            out string strCode,
+            out string strError)
+        {
+            strCode = "";
+            strError = "";
+
+            bool bHasCirculationClientUsing = false;
+            bool bHasLibraryClientUsing = false;
+            StringBuilder text = new StringBuilder();
+            try
+            {
+                using (StreamReader sr = new StreamReader(strCodeFileName, true))
+                {
+                    while (true)
+                    {
+                        string line = sr.ReadLine();
+                        if (line == null)
+                            break;
+                        if (IsUsing(line) == false)
+                        {
+                            text.Append(line + "\r\n");
+                            break;
+                        }
+
+                        line = line.Trim();
+
+                        if (line == "using DigitalPlatform.CirculationClient;")
+                            bHasCirculationClientUsing = true;
+                        if (line == "using DigitalPlatform.LibraryClient;")
+                            bHasLibraryClientUsing = true;
+                        if (line == "using DigitalPlatform.CirculationClient.localhost;")
+                        {
+                            text.Append("using DigitalPlatform.LibraryClient.localhost; // 为兼容而作的自动修改\r\n");
+                            continue;
+                        }
+                        text.Append(line + "\r\n");
+                    }
+                    text.Append(sr.ReadToEnd());
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            if (bHasCirculationClientUsing == true && bHasLibraryClientUsing == false)
+            {
+                strCode = "using DigitalPlatform.LibraryClient; // 为兼容而作的自动修改\r\n\r\n"
+                    + text.ToString();
+            }
+            else
+                strCode = text.ToString();
+            return 0;
         }
 
         // 从xml字符串中得到refs字符串数组

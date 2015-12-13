@@ -26,11 +26,12 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Install;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 using dp2LibraryXE.Properties;
 
@@ -2068,8 +2069,8 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
             this.Channel.Url = GetFirstUrl(this.LibraryServerUrlList);
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
             Stop = new DigitalPlatform.Stop();
             Stop.Register(stopManager, true);	// 和容器关联
@@ -2098,7 +2099,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 Stop = null;
             }
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.Close();
             this.Channel = null;
 
@@ -2106,7 +2107,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
         }
 
         internal void Channel_BeforeLogin(object sender,
-    DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+    DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             if (e.FirstTry == true)
             {
@@ -4539,7 +4540,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
                 try
                 {
-                    DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos = null;
+                    DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos = null;
                     string strError = "";
                     long lRet = Channel.ListDbFroms(Stop,
                         "biblio",

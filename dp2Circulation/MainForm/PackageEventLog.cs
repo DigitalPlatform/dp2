@@ -1,9 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
-using Ionic.Zip;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +6,14 @@ using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
+
+using Ionic.Zip;
+
+using DigitalPlatform;
+using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

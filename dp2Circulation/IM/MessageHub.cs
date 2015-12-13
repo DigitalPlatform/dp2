@@ -12,9 +12,10 @@ using System.Windows.Forms;
 // using Microsoft.AspNet.SignalR.Client.Hubs;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -345,7 +346,7 @@ searchParam
                 if (lRet == -1 || lRet == 0)
                 {
                     if (lRet == 0
-                        || (lRet == -1 && channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound))
+                        || (lRet == -1 && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound))
                     {
                         // 没有命中
                         Response(
@@ -461,7 +462,7 @@ SearchRequest searchParam
                 if (lRet == -1 || lRet == 0)
                 {
                     if (lRet == 0
-                        || (lRet == -1 && channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound))
+                        || (lRet == -1 && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound))
                     {
                         // 没有命中
                         Response(
@@ -486,7 +487,7 @@ strError);  // 出错信息大概为 not found。
 
                     long lStart = 0;
                     long lPerCount = Math.Min(50, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )
@@ -527,7 +528,7 @@ strError);  // 出错信息大概为 not found。
                         }
 
                         records.Clear();
-                        foreach (DigitalPlatform.CirculationClient.localhost.Record record in searchresults)
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                         {
                             BiblioRecord biblio = new BiblioRecord();
                             biblio.RecPath = record.Path;

@@ -21,7 +21,7 @@ using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -4109,7 +4109,7 @@ out strError);
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -4319,7 +4319,7 @@ out strError);
                 long lHitCount = lRet;
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 获取命中结果
                 for (; ; )
@@ -4354,7 +4354,7 @@ out strError);
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         string strIssueRecPath = searchresult.Path;
 

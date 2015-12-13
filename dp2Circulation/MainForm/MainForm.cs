@@ -33,13 +33,15 @@ using DigitalPlatform.Script;
 using DigitalPlatform.IO;   // DateTimeUtil
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -380,7 +382,7 @@ namespace dp2Circulation
             this.toolStrip_main.BackColor = Color.Transparent;
              * */
 
-            this._channelPool.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
             this.BeginInvoke(new Action(FirstInitial));
         }
@@ -803,7 +805,7 @@ Stack:
 
             if (this._channelPool != null)
             {
-                this._channelPool.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
                 this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
                 this._channelPool.Close();
             }
@@ -2388,7 +2390,7 @@ Stack:
         bool _expireVersionChecked = false;
 
         internal void Channel_BeforeLogin(object sender,
-            DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+            DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
 #if SN
             if (_expireVersionChecked == false)
@@ -4159,7 +4161,7 @@ Stack:
                 byte[] baTimestamp = null;
                 if (lRet >= 1)
                 {
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     lRet = channel.GetSearchResult(
                         Stop,
                         "default",
@@ -4172,7 +4174,7 @@ Stack:
                     if (lRet == -1)
                         goto ERROR1;
 
-                    DigitalPlatform.CirculationClient.localhost.Record record = searchresults[0];
+                    DigitalPlatform.LibraryClient.localhost.Record record = searchresults[0];
 
                     strXml = (record.RecordBody.Xml);
                     strRecPath = record.Path;
@@ -4328,7 +4330,7 @@ Stack:
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 for (; ; )
                 {
@@ -4347,7 +4349,7 @@ Stack:
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
 
                         results.Add(record.Path + "|" + record.RecordBody.Xml);
                     }
@@ -4418,7 +4420,7 @@ Stack:
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return -2;
                     goto ERROR1;
                 }
@@ -4603,7 +4605,7 @@ Stack:
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return -2;
                     return -1;
                 }

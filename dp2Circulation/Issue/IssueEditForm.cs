@@ -290,7 +290,7 @@ namespace dp2Circulation
             // 针对有报错信息的情况
             if (this.IssueItem != null
                 && this.IssueItem.Error != null
-                && this.IssueItem.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
+                && this.IssueItem.Error.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCodeValue.TimestampMismatch)
             {
                 this.IssueItem.OldRecord = this.IssueItem.Error.OldRecord;
                 this.IssueItem.Timestamp = this.IssueItem.Error.OldTimestamp;

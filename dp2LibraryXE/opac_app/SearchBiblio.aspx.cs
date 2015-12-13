@@ -19,6 +19,7 @@ using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using System.Collections;
+using DigitalPlatform.LibraryClient;
 
 public partial class SearchBiblio : MyWebPage
 {

@@ -12,13 +12,14 @@ using System.Xml;
 using System.IO;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -2206,7 +2207,7 @@ dlg.UiState);
                             // 清除记忆的册条码号
                             this.m_itemBarcodes.Clear();
 
-                            if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
+                            if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
                                 // this.MainForm.PrepareSearch();
                                 LibraryChannel channel = this.MainForm.GetChannel();
@@ -2443,7 +2444,7 @@ dlg.UiState);
                             // 清除记忆的册条码号
                             this.m_itemBarcodes.Clear();
 
-                            if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
+                            if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
                                 // this.MainForm.PrepareSearch();
                                 LibraryChannel channel = this.MainForm.GetChannel();

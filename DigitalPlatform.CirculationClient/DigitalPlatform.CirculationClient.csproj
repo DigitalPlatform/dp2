@@ -146,12 +146,11 @@
     <Compile Include="GetDp2ResDlg.Designer.cs">
       <DependentUpon>GetDp2ResDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="LibraryChannel\LibraryChannel.cs" />
     <Compile Include="CirculationLoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="LibraryChannel\LibraryChannelCollection.cs" />
-    <Compile Include="LibraryChannel\LibraryChannelPool.cs" />
+    <Compile Include="LibraryChannel\LibraryChannelExtension.cs" />
     <Compile Include="LoanPolicy\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
@@ -323,6 +322,10 @@
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryClient\DigitalPlatform.LibraryClient.csproj">
+      <Project>{3541ec0b-82f5-4829-afc3-5ef48254175d}</Project>
+      <Name>DigitalPlatform.LibraryClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2F085431-027A-4DDF-9B3D-83219E629FA1}</Project>

@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {

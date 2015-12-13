@@ -5,10 +5,12 @@ using System.Text;
 using System.Collections;
 using System.Diagnostics;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {

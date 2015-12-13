@@ -24,7 +24,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -605,7 +605,7 @@ namespace dp2Circulation
 
         internal class RecordInfo
         {
-            public DigitalPlatform.CirculationClient.localhost.Record Record = null;    // 册记录
+            public DigitalPlatform.LibraryClient.localhost.Record Record = null;    // 册记录
             public XmlDocument Dom = null;  // 册记录XML装入DOM
             public string BiblioRecPath = "";
             public SummaryInfo SummaryInfo = null;  // 摘要信息
@@ -617,7 +617,7 @@ namespace dp2Circulation
         internal virtual int GetSummaries(
             bool bFillSummaryColumn,
             string [] summary_col_names,
-            List<DigitalPlatform.CirculationClient.localhost.Record> records,
+            List<DigitalPlatform.LibraryClient.localhost.Record> records,
             out List<RecordInfo> infos,
             out string strError)
         {
@@ -1574,7 +1574,7 @@ namespace dp2Circulation
 
                     long lStart = 0;
                     long lPerCount = Math.Min(150, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )
@@ -1607,7 +1607,7 @@ namespace dp2Circulation
                         }
 
                         // 处理浏览结果
-                        foreach (DigitalPlatform.CirculationClient.localhost.Record record in searchresults)
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                         {
                             sw.WriteLine(record.Path);
                         }

@@ -10,11 +10,13 @@ using System.Diagnostics;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -255,7 +257,7 @@ namespace dp2Circulation
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -300,7 +302,7 @@ namespace dp2Circulation
                     }
 
                     // 处理浏览结果
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record record in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                     {
                         this._biblioRecPaths.Add(record.Path);
                     }

@@ -21,7 +21,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Drawing;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 

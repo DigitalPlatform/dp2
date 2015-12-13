@@ -11,6 +11,7 @@ using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2OPAC
 {

@@ -13,7 +13,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
@@ -735,7 +735,7 @@ out strError);
                     loader.Format = strFormat;
 
                 int i = 0;
-                foreach (DigitalPlatform.CirculationClient.localhost.Record record in loader)
+                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                 {
                     Application.DoEvents();	// 出让界面控制权
 

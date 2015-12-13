@@ -11,11 +11,12 @@ using System.Diagnostics;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Marc;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
@@ -1505,7 +1506,7 @@ namespace dp2Catalog
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     long lRet = this.Channel.GetBrowseRecords(
                         this.stop,
@@ -1524,7 +1525,7 @@ namespace dp2Catalog
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
 
                         ListViewUtil.EnsureColumns(this.listView_browse,
                             2 + (record.Cols == null ? 0 : record.Cols.Length),

@@ -603,7 +603,7 @@ namespace dp2Circulation
             // 针对有报错信息的情况
             if (this.OrderItem != null
                 && this.OrderItem.Error != null
-                && this.OrderItem.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
+                && this.OrderItem.Error.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCodeValue.TimestampMismatch)
             {
                 this.OrderItem.OldRecord = this.OrderItem.Error.OldRecord;
                 this.OrderItem.Timestamp = this.OrderItem.Error.OldTimestamp;

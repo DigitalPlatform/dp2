@@ -12,9 +12,13 @@ using System.Web;
 using System.Drawing;
 using System.Resources;
 using System.Globalization;
+using System.Drawing.Imaging;
+using System.Web.UI;
 
 using ZXing;
 using ZXing.Common;
+using ZXing.QrCode;
+using ZXing.QrCode.Internal;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -23,11 +27,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Range;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Drawing.Imaging;
-using ZXing.QrCode;
-using ZXing.QrCode.Internal;
-using System.Web.UI;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -3533,7 +3534,7 @@ out strError);
 
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == CirculationClient.localhost.ErrorCode.TimestampMismatch)
+                        if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.TimestampMismatch)
                         {
 
                             timestamp = new byte[output_timestamp.Length];

@@ -24,7 +24,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DigitalPlatform.dp2.Statis;
@@ -5605,7 +5605,7 @@ nLineIndex++,
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -9735,7 +9735,7 @@ MessageBoxDefaultButton.Button1);
             {
                 // 记录路径 --> XML记录体
                 Hashtable result_table = new Hashtable();
-                List<DigitalPlatform.CirculationClient.localhost.Record> results = new List<DigitalPlatform.CirculationClient.localhost.Record>();
+                List<DigitalPlatform.LibraryClient.localhost.Record> results = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
                 // 集中获取全部册记录信息
                 for (; ; )
@@ -9749,7 +9749,7 @@ MessageBoxDefaultButton.Button1);
                         }
                     }
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     string[] paths = new string[item_recpaths.Count];
                     item_recpaths.CopyTo(paths);
@@ -9773,7 +9773,7 @@ MessageBoxDefaultButton.Button1);
                         return -1;
                     }
 
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record record in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                     {
                         if (record.RecordBody == null || string.IsNullOrEmpty(record.Path) == true)
                             continue;
