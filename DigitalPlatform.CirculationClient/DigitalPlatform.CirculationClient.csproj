@@ -200,11 +200,6 @@
     <Compile Include="ServersDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Service References\localhost\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="TemplateRecordDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -215,86 +210,26 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.AmerceItem.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.BatchTaskInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.BorrowInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.CalenderInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.CallNumberSearchResult.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.ChannelInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.DateExist.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.DupProjectInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.DupSearchResult.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.EntityInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.FileItemInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.LibraryServerResult.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.MessageData.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.OperLogInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.RangeStatisInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.Record.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.ReturnInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.UserInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.ZhongcihaoSearchResult.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\localhost\LibraryService.wsdl" />
-    <None Include="Service References\localhost\metadata.wsdl" />
-    <None Include="Service References\localhost\metadata.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata4.xsd">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.AmerceItem.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.BatchTaskInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.BorrowInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.CalenderInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.ChannelInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.DateExist.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.DupProjectInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.DupSearchResult.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.EntityInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.FileItemInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.LibraryServerResult.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.MessageData.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.OperLogInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.RangeStatisInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.Record.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.ReturnInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.UserInfo.datasource" />
+    <None Include="Properties\DataSources\DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult.datasource" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">
@@ -402,27 +337,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadataStorage Include="Service References\localhost\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\localhost\configuration91.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\localhost\configuration.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\localhost\metadata5.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Include="LoanPolicy\EditableTextBlock.xaml">
