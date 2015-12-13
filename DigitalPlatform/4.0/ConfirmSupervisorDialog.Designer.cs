@@ -1,4 +1,4 @@
-namespace DigitalPlatform.CirculationClient
+namespace DigitalPlatform
 {
     partial class ConfirmSupervisorDialog
     {

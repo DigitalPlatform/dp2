@@ -167,10 +167,6 @@
     <Compile Include="ZhengyuanReplication.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
-      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
-      <Name>DigitalPlatform.CirculationClient</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj">
       <Project>{91B90948-8475-4D9B-A3C7-6285EFC45E19}</Project>
       <Name>DigitalPlatform.DTLP</Name>

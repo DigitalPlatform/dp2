@@ -10,7 +10,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.LibraryServer
@@ -740,7 +740,8 @@ namespace DigitalPlatform.LibraryServer
                 {
                     DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
-                    string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(searchresult.Path);
+                    // string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(searchresult.Path);
+                    string strID = StringUtil.GetRecordId(searchresult.Path);
                     long id = 0;
                     if (long.TryParse(strID, out id) == false)
                     {
@@ -898,7 +899,8 @@ namespace DigitalPlatform.LibraryServer
                 if (biblio.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                     continue;
 
-                string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(strRecPath);
+                // string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(strRecPath);
+                string strID = StringUtil.GetRecordId(strRecPath);
                 string strBiblioRecPath = strLocalDbName + "/" + strID;
 
                 SetProgressText("复制 "+biblio.RecPath+" 到 " + strBiblioRecPath);

@@ -4,7 +4,7 @@ using System.Text;
 using System.IO;
 
 using DigitalPlatform.IO;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server

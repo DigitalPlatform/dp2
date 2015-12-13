@@ -1,22 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Collections;
 
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
-// using DigitalPlatform.CirculationClient;
-using DigitalPlatform;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
-namespace DigitalPlatform.CirculationClient
+namespace DigitalPlatform.LibraryClient
 {
     /// <summary>
     /// 快速获得书目记录信息
     /// </summary>
-    public class BiblioLoader : IEnumerable 
+    public class BiblioLoader : IEnumerable
     {
         /// <summary>
         /// 提示框事件
@@ -281,7 +277,8 @@ namespace DigitalPlatform.CirculationClient
         /// <param name="error"></param>
         /// <param name="strText"></param>
         public ChannelException(ErrorCode error,
-            string strText) : base(strText)
+            string strText)
+            : base(strText)
         {
             this.ErrorCode = error;
         }

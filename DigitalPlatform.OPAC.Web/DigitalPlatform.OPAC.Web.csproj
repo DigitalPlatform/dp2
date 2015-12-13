@@ -90,10 +90,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
-      <Project>{397bb898-88e0-41d6-8d01-09233c7ffc75}</Project>
-      <Name>DigitalPlatform.CirculationClient</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
       <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
       <Name>DigitalPlatform.Drawing</Name>

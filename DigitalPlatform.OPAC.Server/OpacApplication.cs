@@ -26,7 +26,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Range;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -256,8 +256,10 @@ namespace DigitalPlatform.OPAC.Server
             if (StringUtil.HasHead(strUri, "uri:") == true)
                 strUri = strUri.Substring(4).Trim();
 
-            string strDbName = ResPath.GetDbName(strRecPath);
-            string strRecID = ResPath.GetRecordId(strRecPath);
+            //string strDbName = ResPath.GetDbName(strRecPath);
+            //string strRecID = ResPath.GetRecordId(strRecPath);
+            string strDbName = StringUtil.GetDbName(strRecPath);
+            string strRecID = StringUtil.GetRecordId(strRecPath);
 
             string strOutputUri = "";
             ReplaceUri(strUri,
@@ -2874,7 +2876,8 @@ System.Text.Encoding.UTF8))
             byte[] item_timestamp = null;
 
             {
-                string strCommentDbName0 = ResPath.GetDbName(strCommentRecPath);
+                // string strCommentDbName0 = ResPath.GetDbName(strCommentRecPath);
+                string strCommentDbName0 = StringUtil.GetDbName(strCommentRecPath);
                 // 需要检查一下数据库名是否在允许的实体库名之列
                 if (this.IsCommentDbName(strCommentDbName0) == false)
                 {
@@ -2944,7 +2947,8 @@ out strError);
             byte[] item_timestamp = null;
 
             {
-                string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                // string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                string strItemDbName0 = StringUtil.GetDbName(strItemRecPath);
                 // 需要检查一下数据库名是否在允许的实体库名之列
                 if (this.IsItemDbName(strItemDbName0) == false)
                 {

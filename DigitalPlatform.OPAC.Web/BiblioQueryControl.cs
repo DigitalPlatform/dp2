@@ -13,7 +13,7 @@ using System.Resources;
 using System.Globalization;
 
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.OPAC.Server;
 
 namespace DigitalPlatform.OPAC.Web

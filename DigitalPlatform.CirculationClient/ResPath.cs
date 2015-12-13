@@ -186,6 +186,5 @@ namespace DigitalPlatform.CirculationClient
                 return strRegularRecordPath;
             return strRegularRecordPath.Substring(nRet + 1).Trim() + " @" + strRegularRecordPath.Substring(0, nRet).Trim();
         }
-
     }
 }

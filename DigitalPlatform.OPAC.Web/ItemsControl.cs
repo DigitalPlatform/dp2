@@ -13,7 +13,7 @@ using System.Threading;
 using System.Resources;
 using System.Globalization;
 
-using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.OPAC.Server;
@@ -1270,7 +1270,7 @@ namespace DigitalPlatform.OPAC.Web
             if (this.m_hidecolumns == null)
             {
 
-                string strItemDbName = ResPath.GetDbName(e.Path);
+                string strItemDbName = StringUtil.GetDbName(e.Path);
                 string strBiblioDbName = "";
 
                 // 根据实体库名, 找到对应的书目库名

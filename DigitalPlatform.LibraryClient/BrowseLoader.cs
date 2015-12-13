@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
 
-using DigitalPlatform;
-using DigitalPlatform.Text;
-using DigitalPlatform.LibraryClient;
-
-namespace DigitalPlatform.CirculationClient
+namespace DigitalPlatform.LibraryClient
 {
     /// <summary>
     /// 快速获得浏览行信息
@@ -131,5 +127,6 @@ namespace DigitalPlatform.CirculationClient
             }
         }
     }
+
 
 }

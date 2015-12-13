@@ -18,7 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
-using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.LibraryServer
 {

@@ -15,7 +15,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -1021,7 +1021,8 @@ namespace DigitalPlatform.OPAC.Server
 
             Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "");
 
-            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+            //string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+            string strBiblioDbName = StringUtil.GetDbName(strBiblioRecPath);
 
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
@@ -1041,7 +1042,8 @@ namespace DigitalPlatform.OPAC.Server
             if (nRet == -1)
                 return -1;
 
-            string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
+            //string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
+            string strBiblioRecId = StringUtil.GetRecordId(strBiblioRecPath);
 
             string strQueryXml = "<target list='"
                 + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14 

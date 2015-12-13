@@ -20,7 +20,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Web
@@ -1890,7 +1890,7 @@ out strError);
             EntityInfo info = new EntityInfo();
             info.RefID = Guid.NewGuid().ToString();
 
-            string strTargetBiblioRecID = ResPath.GetRecordId(strBiblioRecPath);
+            string strTargetBiblioRecID = StringUtil.GetRecordId(strBiblioRecPath);
 
             XmlDocument comment_dom = new XmlDocument();
             try
@@ -2008,7 +2008,7 @@ out strError);
             EntityInfo info = new EntityInfo();
             info.RefID = Guid.NewGuid().ToString();
 
-            string strTargetBiblioRecID = ResPath.GetRecordId(strBiblioRecPath);
+            string strTargetBiblioRecID = StringUtil.GetRecordId(strBiblioRecPath);
 
             XmlDocument comment_dom = new XmlDocument();
             try
@@ -2316,7 +2316,7 @@ string strWrapperClass)
             string strCommentRecPath,
             string strParentID)
         {
-            string strCommentDbName = ResPath.GetDbName(strCommentRecPath);
+            string strCommentDbName = StringUtil.GetDbName(strCommentRecPath);
             string strBiblioDbName = GetBiblioDbName(app, strCommentDbName);
 
             return strBiblioDbName + "/" + strParentID;

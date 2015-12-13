@@ -8,6 +8,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml;
 using System.Diagnostics;
+using System.Web.UI.HtmlControls;
 
 using System.Threading;
 using System.Resources;
@@ -19,8 +20,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient;
-using System.Web.UI.HtmlControls;
+// using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -775,7 +775,7 @@ out strError);
             if (bAjax == false)
             {
                 string strBiblio = "";
-                string strBiblioDbName = ResPath.GetDbName(this.RecPath);
+                string strBiblioDbName = StringUtil.GetDbName(this.RecPath);
 
                 // 需要从内核映射过来文件
                 string strLocalPath = "";

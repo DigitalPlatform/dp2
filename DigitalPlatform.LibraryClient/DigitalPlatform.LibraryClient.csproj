@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BiblioLoader.cs" />
+    <Compile Include="BrowseLoader.cs" />
     <Compile Include="LibraryChannel.cs" />
     <Compile Include="LibraryChannelPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,12 +6,10 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-using DigitalPlatform;
-
-namespace DigitalPlatform.CirculationClient
+namespace DigitalPlatform
 {
     /// <summary>
-    /// ÎªÁËÈ·ÈÏ³¬¼¶ÓÃ»§Éí·İ¶øµÇÂ¼µÄ¶Ô»°¿ò
+    /// ä¸ºäº†ç¡®è®¤è¶…çº§ç”¨æˆ·èº«ä»½è€Œç™»å½•çš„å¯¹è¯æ¡†
     /// </summary>
     public partial class ConfirmSupervisorDialog : Form
     {
@@ -24,14 +22,13 @@ namespace DigitalPlatform.CirculationClient
 
         private void ConfirmSupervisorDialog_Load(object sender, EventArgs e)
         {
-
             API.PostMessage(this.Handle, WM_MOVE_FOCUS, 0, 0);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -49,12 +46,11 @@ namespace DigitalPlatform.CirculationClient
             base.DefWndProc(ref m);
         }
 
-
         private void button_OK_Click(object sender, EventArgs e)
         {
             if (this.textBox_userName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÓÃ»§Ãû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šç”¨æˆ·å");
                 return;
             }
 
