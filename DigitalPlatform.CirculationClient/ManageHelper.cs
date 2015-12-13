@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -62,7 +62,6 @@ namespace DigitalPlatform.CirculationClient
             return nodeDatabase;
         }
 
-
         // 创建读者库的定义结点
         static XmlNode CreateReaderDatabaseNode(XmlDocument dom,
             string strDatabaseName,
@@ -91,7 +90,6 @@ namespace DigitalPlatform.CirculationClient
 
             return nodeDatabase;
         }
-
 
         // 创建普通数据库的定义结点
         static XmlNode CreateSimpleDatabaseNode(XmlDocument dom,
@@ -201,7 +199,6 @@ namespace DigitalPlatform.CirculationClient
     "消息",
     "message");
 
-
             // 创建 OPAC 数据库的定义
             XmlDocument opac_dom = new XmlDocument();
             opac_dom.LoadXml("<virtualDatabases />");
@@ -242,39 +239,45 @@ namespace DigitalPlatform.CirculationClient
                 }
             }
 
-            string strOutputInfo = "";
-            long lRet = Channel.ManageDatabase(
-                Stop,
-                "create",
-                "",
-                database_dom.OuterXml,
-                out strOutputInfo,
-                out strError);
-            if (lRet == -1)
-                return -1;
+            TimeSpan old_timeout = Channel.Timeout;
+            Channel.Timeout = new TimeSpan(0, 10, 0);
+            try
+            {
+                string strOutputInfo = "";
+                long lRet = Channel.ManageDatabase(
+                    Stop,
+                    "create",
+                    "",
+                    database_dom.OuterXml,
+                    out strOutputInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
 
-            lRet = Channel.SetSystemParameter(
-Stop,
-"opac",
-"databases",
-opac_dom.DocumentElement.InnerXml,
-out strError);
-            if (lRet == -1)
-                return -1;
+                lRet = Channel.SetSystemParameter(
+    Stop,
+    "opac",
+    "databases",
+    opac_dom.DocumentElement.InnerXml,
+    out strError);
+                if (lRet == -1)
+                    return -1;
 
-            lRet = Channel.SetSystemParameter(
-Stop,
-"opac",
-"browseformats",
-browse_dom.DocumentElement.InnerXml,
-out strError);
-            if (lRet == -1)
-                return -1;
+                lRet = Channel.SetSystemParameter(
+    Stop,
+    "opac",
+    "browseformats",
+    browse_dom.DocumentElement.InnerXml,
+    out strError);
+                if (lRet == -1)
+                    return -1;
 
-            return 1;
+                return 1;
+            }
+            finally
+            {
+                Channel.Timeout = old_timeout;
+            }
         }
-
-
     }
-
 }

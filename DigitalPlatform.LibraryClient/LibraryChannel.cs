@@ -106,8 +106,9 @@ namespace DigitalPlatform.LibraryClient
                     this.OperationTimeout = value;
                 else
                 {
-                    this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout;
+                    // this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout; // BUG!!! 2015/12/3
                     this.OperationTimeout = value;
+                    this.m_ws.InnerChannel.OperationTimeout = value;
                 }
             }
         }
@@ -9330,7 +9331,8 @@ Stack:
             {
                 if (this.m_ws != null)
                 {
-                    this.m_ws.Abort();
+                    this.m_ws.Abort();  // TODO: 是否因为这里没有调用 .Close() 导致通道泄露？
+                    this.m_ws.Close();  // 2015/12/31
                     this.m_ws = null;
                 }
             }

@@ -3936,10 +3936,7 @@ MessageBoxDefaultButton.Button2);
                         if (nRet == -1)
                             goto ERROR1;
                     }
-
-
                 }
-
             }
             finally
             {
@@ -3955,11 +3952,9 @@ MessageBoxDefaultButton.Button2);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         // 装载一条空白记录 从本地
         private void toolStripMenuItem_loadBlankFromLocal_Click(object sender, EventArgs e)
