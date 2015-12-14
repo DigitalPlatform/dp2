@@ -5503,6 +5503,24 @@ MessageBoxDefaultButton.Button1);
         }
 #endif
 
+        // 兼容以前 API
+        public int RefreshBrowseLine(
+            ListViewItem item,
+            out string strError)
+        {
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                return RefreshBrowseLine(
+                    channel,
+                    item,
+                    out strError);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
 
         // 调用前，记录路径列已经有值
         /// <summary>
