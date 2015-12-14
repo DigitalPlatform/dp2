@@ -99,7 +99,7 @@ namespace dp2Circulation
                 this.BeginInvoke(new Action<object, EventArgs>(button_search_Click), this, new EventArgs());
             }
 
-            if (this.MainForm.ServerVersion < 2.33)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.33") < 0)
             {
                 MessageBox.Show(this, "选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 " + this.MainForm.ServerVersion.ToString() + "，请及时升级");
             }

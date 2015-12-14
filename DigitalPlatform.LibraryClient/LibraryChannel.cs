@@ -325,6 +325,55 @@ namespace DigitalPlatform.LibraryClient
         public static int GetServerVersion(
             LibraryChannel channel,
             Stop stop,
+            out string strVersion,
+            out string strError)
+        {
+            strError = "";
+            strVersion = "0";
+
+            // string strVersion = "";
+            string strUID = "";
+            long lRet = channel.GetVersion(stop,
+out strVersion,
+out strUID,
+out strError);
+            if (lRet == -1)
+            {
+                if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
+                {
+                    // 原来的dp2Library不具备GetVersion() API，会走到这里
+                    strVersion = "0";
+                    strError = "dp2 前端需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
+                    return 0;
+                }
+
+                strError = "针对服务器 " + channel.Url + " 获得版本号的过程发生错误：" + strError;
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strVersion) == true)
+            {
+                strVersion = "2.0";
+            }
+
+            string base_version = "2.60"; // 2.60 2015/12/8 开始
+            if (StringUtil.CompareVersion(strVersion, base_version) < 0)   // 2.12
+            {
+                strError = "dp2 前端需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + strVersion + " )。\r\n\r\n请尽快升级 dp2Library 到最新版本。";
+                return 0;
+            }
+
+            return 1;
+        }
+
+#if NO
+        // return:
+        //      -1  error
+        //      0   dp2Library的版本号过低。警告信息在strError中
+        //      1   dp2Library版本号符合要求
+        public static int GetServerVersion(
+            LibraryChannel channel,
+            Stop stop,
             out double version,
             out string strError)
         {
@@ -387,6 +436,8 @@ out strError);
 
             return 1;
         }
+
+#endif
 
         // public localhost.LibraryWse ws
         /// <summary>

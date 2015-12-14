@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("DigitalPlatform")]
 [assembly: AssemblyProduct("DigitalPlatform.CirculationClient")]
-[assembly: AssemblyCopyright("Copyright © 2006-2012 DigitalPlatform 数字平台(北京)软件有限责任公司")]
+[assembly: AssemblyCopyright("Copyright © 2006-2015 DigitalPlatform 数字平台(北京)软件有限责任公司")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,7 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.0.*")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyVersion("2.1.*")]
+[assembly: AssemblyFileVersion("2.1.0.0")]
+
+// V2.1 2015/12/14 剥离纯粹通讯功能到 DigitalPlatform.LibraryClient.dll 中

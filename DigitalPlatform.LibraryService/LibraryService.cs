@@ -855,17 +855,18 @@ namespace dp2Library
             if (string.IsNullOrEmpty(strName) == true
                 || string.IsNullOrEmpty(strVersion) == true)
                 return "前端版本太旧，未达到 dp2library 服务器对前端版本的最低要求，登录失败。请立即升级前端程序到最新版本";
-            double version = GetVersionValue(strVersion);
+            Version version = new Version(strVersion);
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version < 2.8)
+                if (version.CompareTo(new Version("2.8")) < 0)
                     return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
             }
 
             return null;    // 表示版本满足要求
         }
 
+#if NO
         // 取出 12.34 形态
         static double GetVersionValue(string strVersion)
         {
@@ -880,6 +881,7 @@ namespace dp2Library
                 return 0;
             return result;
         }
+#endif
 
         class SimulateLoginInfo
         {

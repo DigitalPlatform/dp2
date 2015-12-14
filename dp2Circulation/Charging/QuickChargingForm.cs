@@ -1751,7 +1751,8 @@ false);
                 string strFormat = "";
                 if (_cardControl != null)
                 {
-                    if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.25)
+                    if (this.NoBorrowHistory == true 
+                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.25") >= 0)
                     {
                         styles.Add("noborrowhistory");
                         // return "xml:noborrowhistory";
@@ -1760,7 +1761,8 @@ false);
                 }
                 else
                 {
-                    if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
+                    if (this.NoBorrowHistory == true
+                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.21") >= 0)
                     {
                         styles.Add("noborrowhistory");
                         // return "html:noborrowhistory";

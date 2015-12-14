@@ -5706,7 +5706,8 @@ MessageBoxDefaultButton.Button1);
                     byte[] baTimestamp = null;
                     string strOutputPath = "";
                     string[] formats = null;
-                    if (bDeleteSub == false && this.MainForm.ServerVersion >= 2.30)
+                    if (bDeleteSub == false 
+                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.30") >= 0)
                     {
                         formats = new string[1];
                         formats[0] = "subcount";

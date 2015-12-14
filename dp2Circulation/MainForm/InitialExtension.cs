@@ -2406,7 +2406,7 @@ Culture=neutral, PublicKeyToken=null
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public double ServerVersion { get; set; }    // = 0
+        public string ServerVersion { get; set; }    // = 0
 
         /// <summary>
         /// 当前连接的 dp2library 的 uid
@@ -2466,7 +2466,7 @@ Culture=neutral, PublicKeyToken=null
                     if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                     {
                         // 原来的dp2Library不具备GetVersion() API，会走到这里
-                        this.ServerVersion = 0;
+                        this.ServerVersion = "0";
                         this.ServerUID = "";
                         strError = "当前 dp2Circulation 版本需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                         return 0;
@@ -2478,6 +2478,7 @@ Culture=neutral, PublicKeyToken=null
 
                 this.ServerUID = strUID;
 
+#if NO
                 double value = 0;
 
                 if (string.IsNullOrEmpty(strVersion) == true)
@@ -2496,9 +2497,14 @@ Culture=neutral, PublicKeyToken=null
                 }
 
                 this.ServerVersion = value;
+#endif
+                if (string.IsNullOrEmpty(strVersion) == true)
+                    strVersion = "2.0";
 
-                double base_version = 2.60; // 2.33
-                if (value < base_version)   // 2.12
+                this.ServerVersion = strVersion;
+
+                string base_version = "2.60"; // 2.33
+                if (StringUtil.CompareVersion(strVersion, base_version) < 0)   // 2.12
                 {
                     // strError = "当前 dp2Circulation 版本必须和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + strVersion + " )。\r\n\r\n请立即升级 dp2Library 到最新版本。";
                     strError = "dp2 前端所连接的 dp2library 版本必须升级为 " + base_version + " 以上时才能使用 (当前 dp2library 版本为 " + strVersion + ")\r\n\r\n请立即升级 dp2Library 到最新版本。\r\n\r\n注：升级服务器的操作非常容易：\r\n1) 若是 dp2 标准版，请系统管理员在服务器机器上，运行 dp2installer(dp2服务器安装工具) 即可。这个模块的安装页面是 http://dp2003.com/dp2installer/v1/publish.htm 。\r\n2) 若是单机版或小型版，反复重启 dp2libraryxe 模块多次即可自动升级。\r\n\r\n亲，若有任何问题，请及时联系数字平台哟 ~";
@@ -2508,7 +2514,7 @@ Culture=neutral, PublicKeyToken=null
                 }
 
 #if SN
-                if (this.TestMode == true && this.ServerVersion < 2.34)
+                if (this.TestMode == true && StringUtil.CompareVersion(this.ServerVersion, "2.34") < 0)
                 {
                     strError = "dp2Circulation 的评估模式只能在所连接的 dp2library 版本为 2.34 以上时才能使用 (当前 dp2library 版本为 " + this.ServerVersion.ToString() + ")";
                     if (this.AppInfo != null)
@@ -2623,7 +2629,7 @@ Culture=neutral, PublicKeyToken=null
                     this.ReaderDbFromInfos = infos;
                 }
 
-                if (this.ServerVersion >= 2.11)
+                if (StringUtil.CompareVersion(this.ServerVersion, "2.11") >= 0)
                 {
                     // 获得实体库的检索途径
                     infos = null;
@@ -2682,7 +2688,7 @@ Culture=neutral, PublicKeyToken=null
                     this.CommentDbFromInfos = infos;
                 }
 
-                if (this.ServerVersion >= 2.17)
+                if (StringUtil.CompareVersion(this.ServerVersion, "2.17") >= 0)
                 {
                     // 获得发票库的检索途径
                     infos = null;
@@ -2716,7 +2722,7 @@ Culture=neutral, PublicKeyToken=null
 
                 }
 
-                if (this.ServerVersion >= 2.47)
+                if (StringUtil.CompareVersion(this.ServerVersion, "2.47") >= 0)
                 {
                     // 获得预约到书库的检索途径
                     infos = null;
@@ -3013,7 +3019,7 @@ Culture=neutral, PublicKeyToken=null
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(Stop,
                     "cfgs",
-                    this.ServerVersion >= 2.23 ? "listFileNamesEx" : "listFileNames",
+                    StringUtil.CompareVersion(this.ServerVersion, "2.23") >= 0 ? "listFileNamesEx" : "listFileNames",
                     out strValue,
                     out strError);
                 if (lRet == -1)
@@ -3026,7 +3032,7 @@ Culture=neutral, PublicKeyToken=null
 
                 string[] filenames = null;
 
-                if (this.ServerVersion >= 2.23)
+                if (StringUtil.CompareVersion(this.ServerVersion, "2.23") >= 0)
                     filenames = strValue.Replace("||", "?").Split(new char[] { '?' });
                 else
                     filenames = strValue.Split(new char[] { ',' });
@@ -3319,7 +3325,7 @@ Culture=neutral, PublicKeyToken=null
                     this.NormalDbProperties.Add(normal);
 #endif
                         // 为了避免因 dp2library 2.48 及以前的版本的一个 bug 引起报错
-                        if (this.ServerVersion <= 2.48 && prop.Type == "amerce")
+                        if (StringUtil.CompareVersion(this.ServerVersion, "2.48") <= 0 && prop.Type == "amerce")
                             continue;
                         // 暂时不处理 accessLog 和 hitcount 类型
                         if (prop.Type == "accessLog" || prop.Type == "hitcount")
@@ -3338,7 +3344,7 @@ Culture=neutral, PublicKeyToken=null
                     this.NormalDbProperties.Add(normal);
                 }
 
-                if (this.ServerVersion >= 2.23)
+                if (StringUtil.CompareVersion(this.ServerVersion, "2.23") >= 0)
                 {
                     // 构造文件名列表
                     List<string> filenames = new List<string>();
@@ -4172,7 +4178,7 @@ Culture=neutral, PublicKeyToken=null
             {
                 this._arrivedDbName = "";
 
-                if (this.ServerVersion < 2.47)
+                if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
                     return 0;
 
                 string strValue = "";

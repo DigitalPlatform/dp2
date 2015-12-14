@@ -1921,7 +1921,7 @@ strNewDefault);
                 bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
-                    if (this.MainForm.ServerVersion < 2.51)
+                    if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.51") < 0)
                     {
                         strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + this.MainForm.ServerVersion;
                         goto ERROR1;

@@ -740,7 +740,7 @@ namespace DigitalPlatform.CirculationClient
                 }
 #endif
 
-                double version = 0;
+                string version = "0";
                 // return:
                 //      -1  error
                 //      0   dp2Library的版本号过低。警告信息在strError中
@@ -753,16 +753,16 @@ namespace DigitalPlatform.CirculationClient
                 if (nRet != 1)
                     return -1;
 
-                if (this.TestMode == true && version < 2.34)
+                if (this.TestMode == true && StringUtil.CompareVersion(version, "2.34") < 0)
                 {
                     strError = "dp2 前端的评估模式只能在所连接的 dp2library 版本为 2.34 以上时才能使用 (当前 dp2library 版本为 " + version.ToString() + ")";
                     return -1;
                 }
 
-                double base_version = 2.60;
+                string base_version = "2.60";
 
                 // 检查 dp2library 最低版本要求 2.60
-                if (version < base_version) // 2.48
+                if (StringUtil.CompareVersion(version, base_version) < 0) // 2.48
                 {
                     strError = "dp2 前端所连接的 dp2library 版本必须升级为 " + base_version + " 以上时才能使用 (当前 dp2library 版本为 " + version.ToString() + ")";
                     return -1;

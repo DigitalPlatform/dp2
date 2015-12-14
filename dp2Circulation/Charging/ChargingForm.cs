@@ -168,7 +168,8 @@ namespace dp2Circulation
                 if (this.DisplayState == DisplayState.TEXT)
                     return "text";
 
-                if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
+                if (this.NoBorrowHistory == true 
+                    && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.21") >= 0)
                     return "html:noborrowhistory";
 
                 return "html";

@@ -171,7 +171,7 @@ namespace DigitalPlatform.CirculationClient
             LibraryChannel channel,
             string strBiblioRecPath,
             string strXml,
-            double dp2library_version,
+            string dp2library_version,
             out string strError)
         {
             strError = "";
@@ -253,7 +253,7 @@ namespace DigitalPlatform.CirculationClient
         public int LoadObject(
             LibraryChannel channel,
             XmlNodeList nodes,
-            double dp2library_version,
+            string dp2library_version,
             out string strError)
         {
             strError = "";
@@ -296,7 +296,7 @@ namespace DigitalPlatform.CirculationClient
 
                 }
 
-                if (dp2library_version >= 2.58)
+                if (StringUtil.CompareVersion(dp2library_version, "2.58") >= 0)
                 {
                     // 新方法，速度快
 #if NO
@@ -1890,7 +1890,7 @@ bool bChanged)
         //		>=0 实际上载的资源对象数
         public int Save(
             LibraryChannel channel,
-            double dp2library_version,
+            string dp2library_version,
             out string strError)
         {
             strError = "";
@@ -1955,7 +1955,7 @@ bool bChanged)
                             if (info != null
                                 && info.ResChanged == false)
                             {
-                                if (dp2library_version < 2.59)
+                                if (StringUtil.CompareVersion(dp2library_version, "2.59") < 0)
                                 {
                                     strError = "单独修改对象 metadata 的操作需要连接的 dp2library 版本在 2.59 以上 (然而当前 dp2library 版本为 " + dp2library_version + ")";
                                     return -1;

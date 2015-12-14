@@ -347,6 +347,15 @@ namespace dp2Circulation
                 this.qrRecognitionControl1.TabIndex = 0;
                 this.qrRecognitionControl1.BackColor = Color.DarkGray;   //  System.Drawing.SystemColors.Window;
             }
+            catch (FileLoadException ex)
+            {
+                if (Detect360() == true)
+                {
+                    MessageBox.Show("dp2Circulation (内务)受到 360 软件干扰而无法启动。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
+                    throw ex;
+                }
+                ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
+            }
             catch(Exception ex)
             {
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
@@ -2396,11 +2405,11 @@ Stack:
 #if SN
             if (_expireVersionChecked == false)
             {
-                double base_version = 2.36;
+                string base_version = "2.36";
                 string strExpire = GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false
-                    && this.ServerVersion < base_version
-                    && this.ServerVersion != 0)
+                    && StringUtil.CompareVersion(this.ServerVersion, base_version) < 0
+                    && this.ServerVersion != "0")
                 {
                     string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
                     Program.PromptAndExit(this, strError);
@@ -7074,7 +7083,7 @@ out strError);
             form.Show();
 #endif
             // OpenWindow<NewInventoryForm>();
-            if (this.ServerVersion < 2.50)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.50") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.50 和以上才能使用 盘点窗");
                 return;
@@ -7544,7 +7553,7 @@ Keys keyData)
 
         private void MenuItem_openEntityRegisterWizard_Click(object sender, EventArgs e)
         {
-            if (this.ServerVersion < 2.48)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.48") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.48 和以上才能使用 册登记窗");
                 return;
@@ -7939,7 +7948,7 @@ Keys keyData)
 
         private void MenuItem_openArrivedSearchForm_Click(object sender, EventArgs e)
         {
-            if (this.ServerVersion < 2.47)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约到书查询窗");
                 return;
@@ -7949,7 +7958,7 @@ Keys keyData)
 
         private void MenuItem_openReservationListForm_Click(object sender, EventArgs e)
         {
-            if (this.ServerVersion < 2.47)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约响应窗");
                 return;

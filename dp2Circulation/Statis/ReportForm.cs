@@ -94,10 +94,10 @@ namespace dp2Circulation
             // DelaySetUploadButtonState();
             BeginUpdateUploadButtonText();
 
-            double dp2library_version = 2.60;
+            string dp2library_version = "2.60";
 
-            if (this.MainForm.ServerVersion < dp2library_version)
-                MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion.ToString() + ")\r\n\r\n请及时升级 dp2library 到最新版本");
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, dp2library_version) < 0)
+                MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion + ")\r\n\r\n请及时升级 dp2library 到最新版本");
             else
             {
                 double local_version = 0;

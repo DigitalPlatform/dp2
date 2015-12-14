@@ -2073,10 +2073,10 @@ namespace dp2Circulation
             MainForm.SetControlFont(style_dlg, this.Font, false);
 
             // 2.38
-            if (this.MainForm.ServerVersion >= 2.38)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.38") >= 0)
                 style_dlg.AutoRebuildKeysVisible = true;
 
-            if (this.MainForm.ServerVersion >= 2.54)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.54") >= 0)
                 style_dlg.RecoverStateVisible = bHasReaderDatabase;
 
             style_dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -8258,7 +8258,7 @@ namespace dp2Circulation
                 menuItem = new MenuItem("修改 " + strName + " (&M)");
                 menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_modify_Click);
                 if (this.listView_calendar.SelectedItems.Count == 0
-                || this.MainForm.ServerVersion < 2.29)
+                || StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
                     menuItem.Enabled = false;
                 // 缺省命令
                 menuItem.DefaultItem = true;
@@ -8272,7 +8272,7 @@ namespace dp2Circulation
 
             menuItem = new MenuItem("新增(&N)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_new_Click);
-            if (this.MainForm.ServerVersion < 2.29)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8292,7 +8292,7 @@ namespace dp2Circulation
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_delete_Click);
             if (this.listView_calendar.SelectedItems.Count == 0
-                || this.MainForm.ServerVersion < 2.29)
+                || StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8303,7 +8303,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("保存(&S)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_save_Click);
             if (this.CalendarDefChanged == false
-                || this.MainForm.ServerVersion < 2.29)
+                || StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 

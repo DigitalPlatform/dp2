@@ -1660,22 +1660,39 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 检查最低版本号
-            double value = 0;
-            if (double.TryParse(strVersion, out value) == false)
+            try
             {
-                strError = "dp2Kernel版本号 '" + strVersion + "' 格式不正确";
+                Version version = new Version(strVersion);
+                Version base_version = new Version("2.63");
+                if (version.CompareTo(base_version) < 0)
+                {
+                    strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
+                    return -1;
+                }
+#if NO
+                double value = 0;
+                if (double.TryParse(strVersion, out value) == false)
+                {
+                    strError = "dp2Kernel版本号 '" + strVersion + "' 格式不正确";
+                    return -1;
+                }
+
+                double base_version = 2.63;
+
+                if (value < base_version)
+                {
+                    strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + value + ")。请立即升级 dp2Kernel 到最新版本。";
+                    return -1;
+                }
+#endif
+
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                strError = "比较 dp2kernel 版本号的过程发生错误: " + ex.Message;
                 return -1;
             }
-
-            double base_version = 2.63;
-
-            if (value < base_version)
-            {
-                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + value + ")。请立即升级 dp2Kernel 到最新版本。";
-                return -1;
-            }
-
-            return 0;
         }
 
 #if NO

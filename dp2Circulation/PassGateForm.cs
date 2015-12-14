@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -378,7 +379,7 @@ namespace dp2Circulation
                     {
                         strTypeList += ",html";
 
-                        if (this.MainForm.ServerVersion >= 2.25)
+                        if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.25") >= 0)
                             strTypeList += ":noborrowhistory";
 
                         nTypeCount = 2;

@@ -16,6 +16,19 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static int CompareVersion(string strVersion1, string strVersion2)
+        {
+            if (string.IsNullOrEmpty(strVersion1) == true)
+                strVersion1 = "0";
+            if (string.IsNullOrEmpty(strVersion2) == true)
+                strVersion2 = "0";
+
+            Version version1 = new Version(strVersion1);
+            Version version2 = new Version(strVersion2);
+
+            return version1.CompareTo(version2);
+        }
+
         // 从一个纯路径(不含url部分)中截取库名部分
         // parameters:
         //      strPath 路径字符串。例如 “中文图书/1”
