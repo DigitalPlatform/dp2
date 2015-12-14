@@ -347,8 +347,9 @@ namespace dp2Circulation
                 this.qrRecognitionControl1.TabIndex = 0;
                 this.qrRecognitionControl1.BackColor = Color.DarkGray;   //  System.Drawing.SystemColors.Window;
             }
-            catch
+            catch(Exception ex)
             {
+                ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
         }
 

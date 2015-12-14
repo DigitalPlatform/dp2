@@ -278,6 +278,30 @@ size.Height);
 
         double _saveOpacity = 0.7;
 
+        /*
+发生未捕获的界面线程异常: 
+Type: System.ComponentModel.Win32Exception
+Message: 存储空间不足，无法处理此命令。
+Stack:
+在 System.Windows.Forms.Form.UpdateLayered()
+在 System.Windows.Forms.Form.set_Opacity(Double value)
+在 DigitalPlatform.CommonControl.FloatingMessageForm.set_Opacity(Double value)
+在 dp2Catalog.MyForm.OnMyFormLoad()
+在 dp2Catalog.MyForm.OnLoad(EventArgs e)
+在 System.Windows.Forms.Form.OnCreateControl()
+在 System.Windows.Forms.Control.CreateControl(Boolean fIgnoreVisible)
+在 System.Windows.Forms.Control.CreateControl()
+在 System.Windows.Forms.Control.WmShowWindow(Message& m)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ScrollableControl.WndProc(Message& m)
+在 System.Windows.Forms.Form.WmShowWindow(Message& m)
+在 System.Windows.Forms.Form.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+         * */
         public new double Opacity
         {
             get
@@ -286,7 +310,14 @@ size.Height);
             }
             set
             {
-                base.Opacity = value;
+                try
+                {
+                    base.Opacity = value;
+                }
+                catch(System.ComponentModel.Win32Exception)
+                {
+
+                }
                 _saveOpacity = value;
             }
         }
@@ -305,10 +336,17 @@ size.Height);
             this._rectColor = rectColor;
             this.Closeable = bClickClose;
 
-            if (bClickClose)
-                base.Opacity = 1.0;
-            else
-                base.Opacity = _saveOpacity;    // 恢复原来的不透明度
+            try
+            {
+                if (bClickClose)
+                    base.Opacity = 1.0;
+                else
+                    base.Opacity = _saveOpacity;    // 恢复原来的不透明度
+            }
+            catch(System.ComponentModel.Win32Exception)
+            {
+
+            }
 
             this.Invalidate();
         }

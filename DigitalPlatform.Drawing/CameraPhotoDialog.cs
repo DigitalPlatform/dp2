@@ -32,14 +32,9 @@ namespace DigitalPlatform.Drawing
         {
             InitializeComponent();
 
-            try
-            {
-                this.qrRecognitionControl1 = new DigitalPlatform.Drawing.QrRecognitionControl();
-                this.qrRecognitionControl1.PhotoMode = true;
-            }
-            catch
-            {
-            }
+            this.qrRecognitionControl1 = new DigitalPlatform.Drawing.QrRecognitionControl();
+            this.qrRecognitionControl1.PhotoMode = true;
+
             // 
             // tabPage_camera
             // 
@@ -65,7 +60,7 @@ namespace DigitalPlatform.Drawing
         private void CameraPhotoDialog_Load(object sender, EventArgs e)
         {
             // if (string.IsNullOrEmpty(m_strCurrentCamera) == false)
-                this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
+            this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
 
         }
 

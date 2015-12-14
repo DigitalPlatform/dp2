@@ -3901,6 +3901,7 @@ MessageBoxDefaultButton.Button2);
             this.MainForm.DisableCamera();
             try
             {
+                // 注： new CameraPhotoDialog() 可能会抛出异常
                 using (CameraPhotoDialog dlg = new CameraPhotoDialog())
                 {
                     // MainForm.SetControlFont(dlg, this.Font, false);

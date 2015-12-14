@@ -405,7 +405,6 @@ out strError);
                 {
                     string strUrl = this.Url;
 
-
                     bool bWs0 = false;
                     Uri uri = new Uri(strUrl);
 
