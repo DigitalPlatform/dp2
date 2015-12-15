@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -29,10 +30,10 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Interfaces;
-using DigitalPlatform.CirculationClient;
-using System.Collections;
 using DigitalPlatform.EasyMarc;
 using DigitalPlatform.AmazonInterface;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -1348,7 +1349,7 @@ ref bHideMessageBox);
 #endif
         }
 
-        void Channel_BeforeLogin(object sender, DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+        void Channel_BeforeLogin(object sender, DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
@@ -1379,8 +1380,8 @@ ref bHideMessageBox);
                     LibraryChannel channel = new LibraryChannel();
                     channel.Url = this.MainForm.LibraryServerUrl;
 
-                    channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-                    channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                    channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                    channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
                     string strValue = "";
                     string strError = "";
@@ -1392,7 +1393,7 @@ ref bHideMessageBox);
 #if NO
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.OutofSession)
+                        if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.OutofSession)
                             break;
                     }
 #endif
@@ -1648,8 +1649,8 @@ dlg.UiState);
             LibraryChannel channel = new LibraryChannel();
             channel.Url = this.MainForm.LibraryServerUrl;
 
-            channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
 
             _stop = new DigitalPlatform.Stop();
@@ -1690,7 +1691,7 @@ dlg.UiState);
 #if NO
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.OutofSession)
+                        if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.OutofSession)
                             break;
                     }
 #endif

@@ -882,7 +882,9 @@ namespace dp2Circulation
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
@@ -1175,7 +1177,9 @@ namespace dp2Circulation
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",
+   									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",

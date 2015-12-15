@@ -11,11 +11,12 @@ using System.Diagnostics;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Marc;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
@@ -529,6 +530,8 @@ namespace dp2Catalog
                     e.Parameters += ",expire=" + strExpire;
 #endif
 
+                e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
             }
@@ -552,6 +555,9 @@ namespace dp2Catalog
             e.Password = dlg.Password;
             e.SavePasswordShort = false;
             e.Parameters = "location=dp2Catalog,type=worker";
+
+            e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
             /*
             e.IsReader = false;
             e.Location = "dp2Catalog";
@@ -1500,7 +1506,7 @@ namespace dp2Catalog
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     long lRet = this.Channel.GetBrowseRecords(
                         this.stop,
@@ -1519,7 +1525,7 @@ namespace dp2Catalog
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
 
                         ListViewUtil.EnsureColumns(this.listView_browse,
                             2 + (record.Cols == null ? 0 : record.Cols.Length),

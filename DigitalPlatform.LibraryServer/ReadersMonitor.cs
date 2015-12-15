@@ -17,7 +17,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class ReadersMonitor : BatchTask
     {
-        public ReadersMonitor(LibraryApplication app, 
+        public ReadersMonitor(LibraryApplication app,
             string strName)
             : base(app, strName)
         {
@@ -62,7 +62,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    string strErrorText = "从文件中获取 "+strMonitorName+" 每日启动时间时发生错误: " + strError;
+                    string strErrorText = "从文件中获取 " + strMonitorName + " 每日启动时间时发生错误: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
                     this.App.WriteErrorLog(strErrorText);
                     return;
@@ -86,7 +86,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1 || nRet == -2)
                 {
-                    string strErrorText = "获取 "+strMonitorName+" 每日启动时间时发生错误: " + strError;
+                    string strErrorText = "获取 " + strMonitorName + " 每日启动时间时发生错误: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
                     this.App.WriteErrorLog(strErrorText);
                     if (nRet == -2)
@@ -284,7 +284,7 @@ namespace DigitalPlatform.LibraryServer
 
             AppendResultText("循环结束。共处理 " + nTotalRecCount.ToString() + " 条记录。\r\n");
             SetProgressText("循环结束。共处理 " + nTotalRecCount.ToString() + " 条记录。");
-            
+
             // 2015/10/3
             // 让前端激活的任务，只执行一次。如果配置了每日激活时间，后面要再执行，除非是每日激活时间已到
             if (startinfo.Start == "activate")
@@ -323,7 +323,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
             int nRedoCount = 0;
 
-            REDO:
+        REDO:
 
             byte[] output_timestamp = null;
 
@@ -355,7 +355,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
-                strError = "获得读者类型 '"+strReaderType+"' 的相关日历过程失败: " + strError;
+                strError = "获得读者类型 '" + strReaderType + "' 的相关日历过程失败: " + strError;
                 return -1;
             }
 
@@ -366,7 +366,7 @@ namespace DigitalPlatform.LibraryServer
             bodytypes.Add("email");
             if (this.App.m_externalMessageInterfaces != null)
             {
-                foreach(MessageInterface message_interface in this.App.m_externalMessageInterfaces)
+                foreach (MessageInterface message_interface in this.App.m_externalMessageInterfaces)
                 {
                     bodytypes.Add(message_interface.Type);
                 }
@@ -432,12 +432,12 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.DoNotifyReaderScriptFunction(
                         readerdom,
                         calendar,
-                        // notifiedBarcodes,
+                    // notifiedBarcodes,
                         strBodyType,
                         out nResultValue,
                         out strBody,
                         out strMime,
-                        // out wantNotifyBarcodes,
+                    // out wantNotifyBarcodes,
                         out strError);
                 if (nRet == -1)
                 {
@@ -541,7 +541,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                         if (nRet == -1)
                         {
-                            strError = "向读者 '"+strReaderBarcode+"' 发送" + external_interface.Type + " message时出错: " + strError;
+                            strError = "向读者 '" + strReaderBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
                             if (this.App.Statis != null)
                                 this.App.Statis.IncreaseEntryValue(
                                 strLibraryCode,
@@ -560,7 +560,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             if (this.App.Statis != null)
                                 this.App.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知", 
+                                "超期通知",
                                 external_interface.Type + " message 超期通知人数",
                                 1);
                         }
@@ -580,7 +580,7 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "发送email出错: " + strError;
+                            strError = "发送 email 到 '" + strReaderEmailAddress + "' 出错: " + strError;
                             if (this.App.Statis != null)
                                 this.App.Statis.IncreaseEntryValue(
                                 strLibraryCode,
@@ -601,7 +601,7 @@ namespace DigitalPlatform.LibraryServer
                                 this.App.Statis.IncreaseEntryValue(
                                 strLibraryCode,
                                 "超期通知",
-                                "email超期通知人数", 
+                                "email超期通知人数",
                                 1);
                         }
                     }
@@ -733,7 +733,7 @@ namespace DigitalPlatform.LibraryServer
                         nRedoCount++;
                         goto REDO;
                     }
-                    
+
                     strError = "写回读者库记录 '" + strPath + "' 时发生错误: " + strError;
                     return -1;
                 }
@@ -756,7 +756,7 @@ namespace DigitalPlatform.LibraryServer
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrowHistory/borrow");
             if (nodes.Count > this.App.MaxPatronHistoryItems)
             {
-                for(int i=this.App.MaxPatronHistoryItems;i<nodes.Count;i++)
+                for (int i = this.App.MaxPatronHistoryItems; i < nodes.Count; i++)
                 {
                     XmlNode node = nodes[i];
                     node.ParentNode.RemoveChild(node);
@@ -1093,7 +1093,7 @@ namespace DigitalPlatform.LibraryServer
                 strText = strText.PadRight(index + 1, chBlank);
 
             strText = strText.Remove(index, 1);
-            strText = strText.Insert(index, new string(ch,1));
+            strText = strText.Insert(index, new string(ch, 1));
         }
 
 #if NO
@@ -1333,7 +1333,7 @@ namespace DigitalPlatform.LibraryServer
                 // 发现未归还的册中出现了超期情况
                 if (nOverCount > 0)
                 {
-                    strError = "该读者当前有 " + Convert.ToString(nOverCount) + " 个未还超期册: " + strOverdueItemBarcodeList + ""; 
+                    strError = "该读者当前有 " + Convert.ToString(nOverCount) + " 个未还超期册: " + strOverdueItemBarcodeList + "";
                     return 1;
                 }
             }

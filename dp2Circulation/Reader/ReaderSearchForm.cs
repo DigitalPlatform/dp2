@@ -15,9 +15,10 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Reflection;
 
+using ClosedXML.Excel;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
@@ -25,10 +26,12 @@ using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Interfaces;
 
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
-using ClosedXML.Excel;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -512,7 +515,7 @@ namespace dp2Circulation
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 bool bPushFillingBrowse = this.PushFillingBrowse;
 
@@ -2026,7 +2029,7 @@ out strError);
             string strRecPath = ListViewUtil.GetItemText(item, 0);
             string[] paths = new string[1];
             paths[0] = strRecPath;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             long lRet = this.Channel.GetBrowseRecords(
                 this.stop,
@@ -3618,7 +3621,7 @@ out strError);
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -3655,7 +3658,7 @@ out strError);
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
                         if (bCreate == true)
                         {
                             if (record.Cols == null || record.Cols.Length < 3)
@@ -3881,13 +3884,13 @@ out strError);
                 lines.Add(recpath);
                 if (lines.Count >= 100)
                 {
-                    List<DigitalPlatform.CirculationClient.localhost.Record> records = null;
+                    List<DigitalPlatform.LibraryClient.localhost.Record> records = null;
                     nRet = GetSomeFingerprintData(lines,
     out records,
     out strError);
                     if (nRet == -1)
                         return -1;
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record record in records)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record record in records)
                     {
                         if (record.Cols == null || record.Cols.Length < 3)
                         {
@@ -3911,13 +3914,13 @@ out strError);
 
             if (lines.Count > 0)
             {
-                List<DigitalPlatform.CirculationClient.localhost.Record> records = null;
+                List<DigitalPlatform.LibraryClient.localhost.Record> records = null;
                 nRet = GetSomeFingerprintData(lines,
 out records,
 out strError);
                 if (nRet == -1)
                     return -1;
-                foreach (DigitalPlatform.CirculationClient.localhost.Record record in records)
+                foreach (DigitalPlatform.LibraryClient.localhost.Record record in records)
                 {
                     if (record.Cols == null || record.Cols.Length < 3)
                     {
@@ -3938,13 +3941,13 @@ out strError);
         // 处理一小批指纹数据的装入
         // parameters:
         int GetSomeFingerprintData(List<string> lines,
-            out List<DigitalPlatform.CirculationClient.localhost.Record> records,
+            out List<DigitalPlatform.LibraryClient.localhost.Record> records,
             out string strError)
         {
             strError = "";
 
-            records = new List<DigitalPlatform.CirculationClient.localhost.Record>();
-            // List<DigitalPlatform.CirculationClient.localhost.Record> records = new List<DigitalPlatform.CirculationClient.localhost.Record>();
+            records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
+            // List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
             for (; ; )
             {
@@ -3954,7 +3957,7 @@ out strError);
                     return -1;
                 }
 
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
@@ -4748,7 +4751,9 @@ out strFingerprint);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
@@ -5906,7 +5911,7 @@ out strError);
                         yield break;
                     }
 
-                    DigitalPlatform.CirculationClient.localhost.Record biblio = (DigitalPlatform.CirculationClient.localhost.Record)enumerator.Current;
+                    DigitalPlatform.LibraryClient.localhost.Record biblio = (DigitalPlatform.LibraryClient.localhost.Record)enumerator.Current;
                     Debug.Assert(biblio.Path == strRecPath, "m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
 
                     // 需要放入缓存

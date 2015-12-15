@@ -11,13 +11,19 @@ using System.IO;
 using System.Threading;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2LibraryXE
 {
     static class Program
     {
+        /// <summary>
+        /// 前端，也就是 dp2libraryxe.exe 的版本号
+        /// </summary>
+        public static string ClientVersion { get; set; }
+
         static bool bExiting = false;
 
         static MainForm _mainForm = null;
@@ -31,6 +37,8 @@ namespace dp2LibraryXE
         [STAThread]
         static void Main()
         {
+            ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
+
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);
  

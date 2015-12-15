@@ -15,16 +15,18 @@ using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Marc;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -592,7 +594,7 @@ Keys keyData)
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 bool bPushFillingBrowse = this.PushFillingBrowse;
 
@@ -660,7 +662,7 @@ Keys keyData)
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         string[] cols = null;
                         if (bOutputKeyID == true)
@@ -1087,7 +1089,7 @@ Keys keyData)
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 bool bPushFillingBrowse = this.PushFillingBrowse;
 
@@ -1160,7 +1162,7 @@ Keys keyData)
                             {
                                 ListViewItem item = null;
 
-                                DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                                DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                                 string[] cols = null;
                                 if (bOutputKeyCount == true)
@@ -1353,13 +1355,15 @@ Keys keyData)
 
             string strOutputSearchID = "";
             int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
-                strSearchID,
+                "*",
+                new SearchRequest(strSearchID,
+                    "searchBiblio",
                 "<全部>",
 strQueryWord,
 strFromStyle,
 strMatchStyle,
 "",
-1000,
+1000),
 out strOutputSearchID,
 out strError);
             if (nRet == -1)
@@ -2655,7 +2659,7 @@ MessageBoxDefaultButton.Button1);
                 loader.Format = "id,cols";
 
                 int i = 0;
-                foreach (DigitalPlatform.CirculationClient.localhost.Record record in loader)
+                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
@@ -3688,7 +3692,9 @@ MessageBoxDefaultButton.Button1);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.CommonControl.dll",  // 2015/11/20 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
@@ -5497,6 +5503,24 @@ MessageBoxDefaultButton.Button1);
         }
 #endif
 
+        // 兼容以前 API
+        public int RefreshBrowseLine(
+            ListViewItem item,
+            out string strError)
+        {
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                return RefreshBrowseLine(
+                    channel,
+                    item,
+                    out strError);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
 
         // 调用前，记录路径列已经有值
         /// <summary>
@@ -5516,7 +5540,7 @@ MessageBoxDefaultButton.Button1);
             string strRecPath = ListViewUtil.GetItemText(item, 0);
             string[] paths = new string[1];
             paths[0] = strRecPath;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             long lRet = channel.GetBrowseRecords(
                 this.stop,
@@ -5682,7 +5706,8 @@ MessageBoxDefaultButton.Button1);
                     byte[] baTimestamp = null;
                     string strOutputPath = "";
                     string[] formats = null;
-                    if (bDeleteSub == false && this.MainForm.ServerVersion >= 2.30)
+                    if (bDeleteSub == false 
+                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.30") >= 0)
                     {
                         formats = new string[1];
                         formats[0] = "subcount";
@@ -7110,7 +7135,7 @@ MessageBoxDefaultButton.Button2);
 
                 long lStart = this.listView_records.Items.Count;
                 long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 bool bPushFillingBrowse = this.PushFillingBrowse;
 
@@ -7185,7 +7210,7 @@ MessageBoxDefaultButton.Button2);
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         string[] cols = null;
                         if (this.m_bFirstColumnIsKey == true)

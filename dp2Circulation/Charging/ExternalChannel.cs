@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

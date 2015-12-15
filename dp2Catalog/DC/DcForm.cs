@@ -607,7 +607,7 @@ namespace dp2Catalog
                             dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
                             strLocalPath,
                             strRecordXml,
-                            0,  // TODO
+                            "0",  // TODO
                             out strError);
                         if (nRet == -1)
                         {
@@ -816,7 +816,7 @@ namespace dp2Catalog
                     dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
                     strLocalPath,
                     strRecordXml,
-                    0,  // TODO
+                    "0",  // TODO
                     out strError);
                 if (nRet == -1)
                 {
@@ -1323,7 +1323,7 @@ namespace dp2Catalog
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
                         dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
-                        0,   // TODO: 要替换为 server_version
+                        "0",   // TODO: 要替换为 server_version
                         out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);

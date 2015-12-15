@@ -24,7 +24,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -309,7 +309,7 @@ namespace dp2Circulation
             }
         }
 
-        private void AccountBookForm_FormClosing(object sender, 
+        private void AccountBookForm_FormClosing(object sender,
             FormClosingEventArgs e)
         {
 #if NO
@@ -382,14 +382,14 @@ namespace dp2Circulation
         /// <param name="m">消息</param>
         protected override void DefWndProc(ref Message m)
         {
-                    /*
-            switch (m.Msg)
-            {
-                case WM_LOADSIZE:
-                    LoadSize();
-                    return;
-            }
-                     * */
+            /*
+    switch (m.Msg)
+    {
+        case WM_LOADSIZE:
+            LoadSize();
+            return;
+    }
+             * */
             base.DefWndProc(ref m);
         }
 
@@ -483,7 +483,7 @@ namespace dp2Circulation
 #if NO
         class RecordInfo
         {
-            public DigitalPlatform.CirculationClient.localhost.Record Record = null;    // 册记录
+            public DigitalPlatform.LibraryClient.localhost.Record Record = null;    // 册记录
             public XmlDocument Dom = null;  // 册记录XML装入DOM
             public string BiblioRecPath = "";
             public SummaryInfo SummaryInfo = null;  // 摘要信息
@@ -491,7 +491,7 @@ namespace dp2Circulation
 
         // 准备DOM和书目摘要等
         int GetSummaries(
-            List<DigitalPlatform.CirculationClient.localhost.Record> records,
+            List<DigitalPlatform.LibraryClient.localhost.Record> records,
             out List<RecordInfo> infos,
             out string strError)
         {
@@ -673,7 +673,7 @@ namespace dp2Circulation
         internal override int DoLoadRecords(List<string> lines,
             List<ListViewItem> items,
             bool bFillSummaryColumn,
-            string [] summary_col_names,
+            string[] summary_col_names,
             out string strError)
         {
             strError = "";
@@ -685,7 +685,7 @@ namespace dp2Circulation
             }
 #endif
 
-            List<DigitalPlatform.CirculationClient.localhost.Record> records = new List<DigitalPlatform.CirculationClient.localhost.Record>();
+            List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
             // 集中获取全部册记录信息
             for (; ; )
@@ -696,7 +696,7 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
@@ -899,7 +899,7 @@ namespace dp2Circulation
             if (lRet == -1)
                 return -1;
 
-            List<string> recpaths = new List<string>(strResult.Split(new char [] {','}));
+            List<string> recpaths = new List<string>(strResult.Split(new char[] { ',' }));
             Debug.Assert(refids.Count == recpaths.Count, "");
 
             // List<string> notfound_refids = new List<string>();
@@ -927,7 +927,7 @@ namespace dp2Circulation
             }
 
             if (errors.Count > 0)
-                strError = "获得"+strRecordName+"的过程发生错误: " + StringUtil.MakePathList(errors);
+                strError = "获得" + strRecordName + "的过程发生错误: " + StringUtil.MakePathList(errors);
 
 #if NO
             if (notfound_refids.Count > 0)
@@ -955,7 +955,7 @@ namespace dp2Circulation
                 List<string> lines = new List<string>();
                 lines.AddRange(order_recpaths);
 
-                List<DigitalPlatform.CirculationClient.localhost.Record> records = new List<DigitalPlatform.CirculationClient.localhost.Record>();
+                List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
                 // 集中获取全部册记录信息
                 for (; ; )
@@ -969,7 +969,7 @@ namespace dp2Circulation
                         }
                     }
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     string[] paths = new string[lines.Count];
                     lines.CopyTo(paths);
@@ -1022,7 +1022,7 @@ namespace dp2Circulation
                         return -1;
                     }
 
-                    DigitalPlatform.CirculationClient.localhost.Record record = records[index];
+                    DigitalPlatform.LibraryClient.localhost.Record record = records[index];
                     if (record.RecordBody != null
                         && record.RecordBody.Result != null
                         && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
@@ -2855,8 +2855,8 @@ MessageBoxDefaultButton.Button1);
             string strPubType)
         {
             string strError = "";
-            int nRet = 0; 
-            
+            int nRet = 0;
+
             Debug.Assert(string.IsNullOrEmpty(info.OrderXml) == false, "");
 
             ListViewItem item = info.ListViewItem;
@@ -2905,7 +2905,7 @@ MessageBoxDefaultButton.Button1);
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "从期记录 "+info.OrderRecPath+" 中获得包含 '" + info.ItemRefID + "' 的订购记录片段时出错: " + strError;
+                    strError = "从期记录 " + info.OrderRecPath + " 中获得包含 '" + info.ItemRefID + "' 的订购记录片段时出错: " + strError;
                     goto ERROR1;
                 }
                 if (nRet == 0)
@@ -3105,7 +3105,7 @@ MessageBoxDefaultButton.Button1);
 
             long lHitCount = lRet;
 
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             // 装入浏览格式
 
@@ -3233,7 +3233,7 @@ MessageBoxDefaultButton.Button1);
 
             long lHitCount = lRet;
 
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             // 装入浏览格式
 
@@ -3550,8 +3550,8 @@ MessageBoxDefaultButton.Button1);
 
             this.SetNextButtonEnable();
             return;
-            ERROR1:
-                MessageBox.Show(this, strError);
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 汇报数据装载情况。
@@ -3572,13 +3572,13 @@ MessageBoxDefaultButton.Button1);
 
                 if (item.ImageIndex == TYPE_ERROR)
                     nRedCount++;
-                else 
+                else
                     nWhiteCount++;
             }
 
             if (nRedCount != 0)
             {
-                strError = "列表中有 " +nRedCount+ " 个错误事项(红色行)。请修改数据后重新装载。";
+                strError = "列表中有 " + nRedCount + " 个错误事项(红色行)。请修改数据后重新装载。";
                 return 2;
             }
 
@@ -3740,17 +3740,17 @@ MessageBoxDefaultButton.Button1);
                     new CellFormat() { FontId = 2, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 2 - Italic
                     new CellFormat() { FontId = 3, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 3 - Times Roman
                     new CellFormat() { FontId = 0, FillId = 2, BorderId = 0, ApplyFill = true },       // Index 4 - Yellow Fill
-                    // 5 textwrap
+                // 5 textwrap
                     new CellFormat(                                                                   // Index 5 - Alignment
                         new Alignment() { Vertical = VerticalAlignmentValues.Center, WrapText = BooleanValue.FromBoolean(true) }
                     ) { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
 
                     // 6 align center
-                    new CellFormat(                                                                  
+                    new CellFormat(
                         new Alignment() { Horizontal = HorizontalAlignmentValues.Center, Vertical = VerticalAlignmentValues.Center }
                     ) { ApplyAlignment = true },
 
-                    
+
                     new CellFormat() { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }      // Index 6 - Border
                 )
             ); // return
@@ -4052,7 +4052,7 @@ null,
 
                     string strResult = StringUtil.MacroString(macro_table,
                         strContent);
-                    string[] lines = strResult.Split(new string[] {"\r\n"},
+                    string[] lines = strResult.Split(new string[] { "\r\n" },
                         StringSplitOptions.None);
                     for (int i = 0; i < lines.Length; i++)
                     {
@@ -4734,7 +4734,7 @@ nLineIndex++,
 "总价",
 strTotalPrice);
 #endif
-                        
+
                         int nLineIndex = 2;
 
                         WriteValuePair(sheet,
@@ -4750,7 +4750,7 @@ strTotalPrice);
                         WriteValuePair(sheet,
 nLineIndex++,
 "总价",
-strTotalPrice);           
+strTotalPrice);
                     }
 
                 }
@@ -4918,7 +4918,7 @@ strTotalPrice);
             strCaption,
             true);
 #endif
-                    var cell = sheet.Cell(2+1, i+1);
+                    var cell = sheet.Cell(2 + 1, i + 1);
                     cell.Value = strCaption;
                     // cell.Style.Font.FontName = "微软雅黑";
                     cell.Style.Font.Bold = true;
@@ -5135,17 +5135,17 @@ strTotalPrice);
         ERROR1:
             if (sw != null)
                 sw.WriteLine(strError);
-        if (sheet != null)
-        {
+            if (sheet != null)
+            {
 #if NO
             List<CellData> temp_cells = new List<CellData>();
             temp_cells.Add(new CellData(0, strError));
             doc.WriteExcelLine(nIndex + _nTopIndex, temp_cells);
 #endif
-            IXLCell cell = sheet.Cell(nIndex + _nTopIndex + 1, 1);
-            cell.Value = strError;
+                IXLCell cell = sheet.Cell(nIndex + _nTopIndex + 1, 1);
+                cell.Value = strError;
 
-        }
+            }
             return -1;
         }
 
@@ -5266,7 +5266,7 @@ strTotalPrice);
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "accountbook.css");  // 便于引用服务器端或“css”模板的CSS文件
 
                 // strFileName = strFileNamePrefix + "0" + ".html";
-                strFileName = strFileNamePrefix + "0-" + Guid.NewGuid().ToString()+ ".html";
+                strFileName = strFileNamePrefix + "0-" + Guid.NewGuid().ToString() + ".html";
 
                 filenames.Add(strFileName);
 
@@ -5524,7 +5524,7 @@ strTotalPrice);
                 + IndentString(1) + "</head>\r\n"
                 + IndentString(1) + "<body>\r\n");
 
-           
+
             // 页眉
             string strPageHeaderText = option.PageHeader;
 
@@ -5600,7 +5600,7 @@ strTotalPrice);
         {
             decimal total = 0;
             string strBiblioRecPath = GetColumnContent(items[nIndex], "biblioRecpath");
-            for (int i = nIndex; i>=0; i--)
+            for (int i = nIndex; i >= 0; i--)
             {
                 ListViewItem item = items[i];
 
@@ -5975,14 +5975,14 @@ strTotalPrice);
                         return item.SubItems[COLUMN_MERGECOMMENT].Text;
                     case "batchNo":
                         return item.SubItems[COLUMN_BATCHNO].Text;
-                        /*
-                    case "borrower":
-                        return item.SubItems[COLUMN_BORROWER].Text;
-                    case "borrowDate":
-                        return item.SubItems[COLUMN_BORROWDATE].Text;
-                    case "borrowPeriod":
-                        return item.SubItems[COLUMN_BORROWPERIOD].Text;
-                         * */
+                    /*
+                case "borrower":
+                    return item.SubItems[COLUMN_BORROWER].Text;
+                case "borrowDate":
+                    return item.SubItems[COLUMN_BORROWDATE].Text;
+                case "borrowPeriod":
+                    return item.SubItems[COLUMN_BORROWPERIOD].Text;
+                     * */
                     case "recpath":
                         return item.SubItems[COLUMN_RECPATH].Text;
                     case "biblioRecpath":
@@ -6151,12 +6151,12 @@ strTotalPrice);
 
             string strError = "";
             string strTotalPrice = "";
-                            // 汇总价格
-        // 货币单位不同的，互相独立
-        // 本函数还有另外一个版本，是返回List<string>的
-        // return:
-        //      -1  error
-        //      0   succeed
+            // 汇总价格
+            // 货币单位不同的，互相独立
+            // 本函数还有另外一个版本，是返回List<string>的
+            // return:
+            //      -1  error
+            //      0   succeed
             int nRet = PriceUtil.TotalPrice(prices,
             out strTotalPrice,
             out strError);
@@ -6355,7 +6355,7 @@ strTotalPrice);
 
                     long lStart = 0;
                     long lPerCount = Math.Min(150, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )
@@ -6388,7 +6388,7 @@ strTotalPrice);
                         }
 
                         // 处理浏览结果
-                        foreach (DigitalPlatform.CirculationClient.localhost.Record record in searchresults)
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                         {
                             sw.WriteLine(record.Path);
                         }
@@ -6607,7 +6607,7 @@ strTotalPrice);
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -6660,7 +6660,7 @@ strTotalPrice);
                             }
                         }
 
-                        DigitalPlatform.CirculationClient.localhost.Record result_item = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record result_item = searchresults[i];
 
                         string strBarcode = result_item.Cols[0];
                         string strRecPath = result_item.Path;
@@ -6989,7 +6989,7 @@ strTotalPrice);
         {
             string strPrevText = "";
             bool bDark = false;
-            for(int i=0;i<list.Items.Count;i++)
+            for (int i = 0; i < list.Items.Count; i++)
             {
                 ListViewItem item = list.Items[i];
 
@@ -7095,7 +7095,7 @@ strTotalPrice);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_in, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_in, new Point(e.X, e.Y));
         }
 
         void menu_refreshSelected_Click(object sender, EventArgs e)
@@ -7109,7 +7109,7 @@ strTotalPrice);
             }
             RefreshLines(
                 COLUMN_RECPATH,
-                items, 
+                items,
                 this.checkBox_load_fillBiblioSummary.Checked,
                 new string[] { "summary", "@isbnissn" });
         }
@@ -7154,7 +7154,7 @@ strTotalPrice);
             }
 
             DialogResult result = MessageBox.Show(this,
-"确实要删除选定的 "+items.Count.ToString()+" 个事项?",
+"确实要删除选定的 " + items.Count.ToString() + " 个事项?",
 "dp2Circulation",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -7611,8 +7611,8 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
-                MessageBox.Show(this, strError);
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 配置打印选项 WordXML
@@ -8017,7 +8017,7 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-                int i = 0; 
+                int i = 0;
                 foreach (ListViewItem item in this.listView_in.Items)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -8142,7 +8142,8 @@ MessageBoxDefaultButton.Button1);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
             };

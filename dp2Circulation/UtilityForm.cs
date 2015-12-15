@@ -794,7 +794,7 @@ out strError);
                    out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return 0;
                     return -1;
                 }
@@ -933,7 +933,7 @@ out strError);
                         // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
                         if (bRetryOverwiteExisting == true
                             && j == 0
-                            && this.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.TimestampMismatch
+                            && this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
                             && nRedoCount == 0)
                         {
                             nRedoCount++;

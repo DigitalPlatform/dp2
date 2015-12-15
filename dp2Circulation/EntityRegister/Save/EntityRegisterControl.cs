@@ -21,7 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.AmazonInterface;
 
@@ -1885,7 +1885,7 @@ MessageBoxDefaultButton.Button1);
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string strStyle = "id";
 
@@ -1919,7 +1919,7 @@ MessageBoxDefaultButton.Button1);
 
                     // 处理浏览结果
 
-                    foreach (DigitalPlatform.CirculationClient.localhost.Record searchresult in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
                         biblio_recpaths.Add(searchresult.Path);
                     }

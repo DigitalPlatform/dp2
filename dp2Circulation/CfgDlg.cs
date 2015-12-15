@@ -228,7 +228,7 @@ namespace dp2Circulation
                 "charging_form",
                 "no_borrow_history",
                 true);
-            if (this.MainForm.ServerVersion < 2.20)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.20") < 0)
                 this.checkBox_charging_noBorrowHistory.Enabled = false;
 
             // 启用 ISBN 借书还书功能
@@ -264,7 +264,7 @@ ap.GetString("quickcharging_form",
                 "quickcharging_form",
                 "no_borrow_history",
                 true);
-            if (this.MainForm.ServerVersion < 2.20)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.20") < 0)
                 this.checkBox_quickCharging_noBorrowHistory.Enabled = false;
 
             // 朗读读者姓名

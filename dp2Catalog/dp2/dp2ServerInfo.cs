@@ -4,7 +4,9 @@ using System.Text;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2Catalog
 {
@@ -87,7 +89,7 @@ namespace dp2Catalog
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public double Version = 0;  // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
+        public string Version = "0";  // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
 
         public bool TestMode = false;   // 是否为评估模式
 
@@ -127,7 +129,7 @@ namespace dp2Catalog
 
             try
             {
-                double version = 0;
+                string version = "0";
                 // return:
                 //      -1  error
                 //      0   dp2Library的版本号过低。警告信息在strError中
@@ -141,7 +143,7 @@ namespace dp2Catalog
                     return -1;
                 this.Version = version;
 
-                if (this.TestMode == true && this.Version < 2.34)
+                if (this.TestMode == true && StringUtil.CompareVersion(this.Version, "2.34") < 0)
                 {
                     strError = "dp2 前端的评估模式只能在所连接的 dp2library 版本为 2.34 以上时才能使用 (当前 dp2library 版本为 " + this.Version.ToString() + ")";
                     return -1;

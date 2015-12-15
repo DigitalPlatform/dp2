@@ -988,7 +988,9 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.amazoninterface.dll",
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.amazoninterface.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe"

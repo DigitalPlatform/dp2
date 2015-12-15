@@ -21,6 +21,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2ZServer
 {

@@ -22,7 +22,7 @@ using DigitalPlatform.MarcDom;
 
 using DigitalPlatform.dp2.Statis;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 // 2013/3/26 添加 XML 注释
 
@@ -752,7 +752,9 @@ namespace dp2Circulation
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",
+   									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",
@@ -1478,7 +1480,7 @@ namespace dp2Circulation
                     long lCount = lHitCount;
 
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )

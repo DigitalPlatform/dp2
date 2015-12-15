@@ -520,7 +520,7 @@ namespace dp2Circulation
             // 针对有报错信息的情况
             if (this.CommentItem != null
                 && this.CommentItem.Error != null
-                && this.CommentItem.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
+                && this.CommentItem.Error.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCodeValue.TimestampMismatch)
             {
                 this.CommentItem.OldRecord = this.CommentItem.Error.OldRecord;
                 this.CommentItem.Timestamp = this.CommentItem.Error.OldTimestamp;

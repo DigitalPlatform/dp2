@@ -7,10 +7,12 @@ using System.Diagnostics;
 using System.Collections;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient.localhost;
+//using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -148,6 +150,8 @@ false);
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
 #endif
+
+                e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录

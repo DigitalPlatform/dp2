@@ -11,7 +11,7 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 
-using DigitalPlatform.CirculationClient.localhost;  // EntityInfo
+using DigitalPlatform.LibraryClient.localhost;  // EntityInfo
 
 namespace dp2Circulation
 {

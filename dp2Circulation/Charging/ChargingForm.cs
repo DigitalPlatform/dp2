@@ -12,13 +12,14 @@ using System.Xml;
 using System.IO;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -167,7 +168,8 @@ namespace dp2Circulation
                 if (this.DisplayState == DisplayState.TEXT)
                     return "text";
 
-                if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
+                if (this.NoBorrowHistory == true 
+                    && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.21") >= 0)
                     return "html:noborrowhistory";
 
                 return "html";
@@ -2206,7 +2208,7 @@ dlg.UiState);
                             // 清除记忆的册条码号
                             this.m_itemBarcodes.Clear();
 
-                            if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
+                            if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
                                 // this.MainForm.PrepareSearch();
                                 LibraryChannel channel = this.MainForm.GetChannel();
@@ -2443,7 +2445,7 @@ dlg.UiState);
                             // 清除记忆的册条码号
                             this.m_itemBarcodes.Clear();
 
-                            if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
+                            if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
                                 // this.MainForm.PrepareSearch();
                                 LibraryChannel channel = this.MainForm.GetChannel();

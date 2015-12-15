@@ -10,12 +10,12 @@ using System.Diagnostics;
 using System.Threading;
 using System.Resources;
 using System.Globalization;
+using System.Xml;
 
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Xml;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.OPAC.Web

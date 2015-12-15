@@ -14,7 +14,6 @@ using System.Runtime.Remoting;
 using System.Web;   // HttpUtility
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
@@ -22,7 +21,9 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.dp2.Statis;
 
-using DigitalPlatform.CirculationClient.localhost;
+//using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

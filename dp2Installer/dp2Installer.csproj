@@ -34,7 +34,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>56</ApplicationRevision>
+    <ApplicationRevision>64</ApplicationRevision>
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -177,6 +177,10 @@
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryClient\DigitalPlatform.LibraryClient.csproj">
+      <Project>{3541ec0b-82f5-4829-afc3-5ef48254175d}</Project>
+      <Name>DigitalPlatform.LibraryClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Install\DigitalPlatform.LibraryServer.Install.csproj">
       <Project>{80344E08-5816-438F-BC88-F4BF038648CC}</Project>

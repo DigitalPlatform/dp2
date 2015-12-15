@@ -468,6 +468,12 @@ namespace dp2Library
                 string strError = "";
                 int nRet = 0;
 
+                if (string.IsNullOrEmpty(strUserName) == true)
+                {
+                    strError = "用户名不能为空";
+                    goto ERROR1;
+                }
+
                 nRet = app.UserNameTable.BeforeLogin(strUserName,
                     sessioninfo.ClientIP,
                     out strError);
@@ -623,7 +629,7 @@ namespace dp2Library
                                         sessioninfo.ClientIP,
                                         nRet);
                                     if (string.IsNullOrEmpty(strLogText) == false)
-                                        app.WriteErrorLog("!!! " + strLogText);
+                                        app.WriteErrorLog("!!!(simulate 1) " + strLogText);
                                 }
                                 goto ERROR1;
                             }
@@ -717,7 +723,7 @@ namespace dp2Library
                                         sessioninfo.ClientIP,
                                         nRet);
                                     if (string.IsNullOrEmpty(strLogText) == false)
-                                        app.WriteErrorLog("!!! " + strLogText);
+                                        app.WriteErrorLog("!!!(simulate 2) " + strLogText);
                                 }
                                 goto ERROR1;
                             }
@@ -795,6 +801,25 @@ namespace dp2Library
                         app.WriteErrorLog("!!! " + strLogText);
                 }
 
+                // 检查前端版本
+                if (nRet == 1 && StringUtil.IsInList("checkclientversion", strRights) == true)
+                {
+                    string strClientVersion = (string)parameters["client"];
+                    if (string.IsNullOrEmpty(strClientVersion) == true)
+                    {
+                        sessioninfo.Account = null;
+                        strError = "前端版本太旧，未达到 dp2library 服务器对前端版本的最低要求，登录失败。请立即升级前端程序到最新版本";
+                        goto ERROR1;
+                    }
+                    // 参数值格式为 clientname|versionstring
+                    strError = CheckClientVersion(strClientVersion);
+                    if (string.IsNullOrEmpty(strError) == false)
+                    {
+                        sessioninfo.Account = null;
+                        goto ERROR1;
+                    }
+                }
+
                 // END1:
                 result.Value = nRet;
                 result.ErrorInfo = strError;
@@ -821,6 +846,42 @@ namespace dp2Library
                 return result;
             }
         }
+
+        static string CheckClientVersion(string strText)
+        {
+            string strName = "";
+            string strVersion = "";
+            StringUtil.ParseTwoPart(strText, "|", out strName, out strVersion);
+            if (string.IsNullOrEmpty(strName) == true
+                || string.IsNullOrEmpty(strVersion) == true)
+                return "前端版本太旧，未达到 dp2library 服务器对前端版本的最低要求，登录失败。请立即升级前端程序到最新版本";
+            Version version = new Version(strVersion);
+            strName = strName.ToLower();
+            if (strName == "dp2circulation")
+            {
+                if (version.CompareTo(new Version("2.8")) < 0)
+                    return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
+            }
+
+            return null;    // 表示版本满足要求
+        }
+
+#if NO
+        // 取出 12.34 形态
+        static double GetVersionValue(string strVersion)
+        {
+            string[] parts = strVersion.Split(new char[] { '.' });
+            List<string> list = parts.ToList<string>();
+            while(list.Count > 2)
+            {
+                list.RemoveAt(2);
+            }
+            double result = 0;
+            if (double.TryParse(string.Join(".", list.ToArray()), out result) == false)
+                return 0;
+            return result;
+        }
+#endif
 
         class SimulateLoginInfo
         {
@@ -1270,7 +1331,6 @@ namespace dp2Library
                 return result;
             }
         }
-
 
         // 修改读者记录
         // 需要一并发来旧记录的原因, 是为了和数据库中当前可能已经变化了的记录进行比较，
@@ -4679,6 +4739,7 @@ namespace dp2Library
             try
             {
 #if NO
+                // test
                 Random random = new Random();
                 Thread.Sleep(random.Next(0, 10000)); // test
 #endif

@@ -12,6 +12,7 @@ using System.Threading;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Marc;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2ZServer
 {

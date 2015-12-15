@@ -17,7 +17,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 // 2013/3/16 添加 XML 注释
 

@@ -4,7 +4,8 @@ using System.Text;
 using System.IO;
 
 using DigitalPlatform.IO;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -107,7 +108,7 @@ namespace DigitalPlatform.OPAC.Server
                  * */
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == LibraryClient.localhost.ErrorCode.NotFound)
                     {
                         // 为了避免以后再次从网络获取耗费时间, 需要在本地写一个0字节的文件
                         using(FileStream fs = File.Create(strLocalPath))

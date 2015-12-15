@@ -99,7 +99,10 @@ namespace DigitalPlatform.LibraryServer
         //      2.58 (2015/11/14) GetBrowseRecords() API 允许获取对象的 metadata 和 timestamp 了。这个版本要求 dp2kernel 为 V2.62 以上
         //      2.59 (2015/11/16) WriteRes() API 允许通过 lTotalLength 为 -1 调用，作用是仅修改 metadata。这个版本要求 dp2kernel 为 V2.63 以上
         //      2.60 (2015/11/25) GetOperLogs() 和 GetOperLog() API 开始支持两种日志类型。
-        public static string Version = "2.60";
+        //      2.61 (2015/12/9) GetReaderInfo() 允许使用 _testreader 获得测试用的读者记录信息
+        //      2.62 (2015/12/11) Login() API 增加了检查前端最低版本号的功能。如果用户权限中有 checkclientversion，就进行这项检查
+        //      2.63 (2015/12/12) Return() API，对于超期违约金因子为空的情况，现在不当作出错处理。这种情况交费信息不会写入读者记录的交费信息字段，但会进入操作日志中(便于以后进行统计)。
+        public static string Version = "2.63";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -128,6 +131,11 @@ namespace DigitalPlatform.LibraryServer
         /// 是否为评估状态
         /// </summary>
         public bool TestMode = false;
+
+        /// <summary>
+        /// 在登录阶段是否强制检查前端的版本号？(对几个特殊的代理账户不做此项检查)
+        /// </summary>
+        public bool CheckClientVersion = false;
 
         // 存储各种参数信息
         // 为C#脚本所准备
@@ -739,6 +747,19 @@ namespace DigitalPlatform.LibraryServer
                 else
                 {
                     app.NotifyDef = "";
+                }
+
+                // <login>
+                node = dom.DocumentElement.SelectSingleNode("login") as XmlElement;
+                if (node != null)
+                {
+                    this.CheckClientVersion = DomUtil.GetBooleanParam(node,
+                        "checkClientVersion",
+                        false);
+                }
+                else
+                {
+                    this.CheckClientVersion = false;
                 }
 
                 // <circulation>
@@ -1639,22 +1660,39 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 检查最低版本号
-            double value = 0;
-            if (double.TryParse(strVersion, out value) == false)
+            try
             {
-                strError = "dp2Kernel版本号 '" + strVersion + "' 格式不正确";
+                Version version = new Version(strVersion);
+                Version base_version = new Version("2.63");
+                if (version.CompareTo(base_version) < 0)
+                {
+                    strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
+                    return -1;
+                }
+#if NO
+                double value = 0;
+                if (double.TryParse(strVersion, out value) == false)
+                {
+                    strError = "dp2Kernel版本号 '" + strVersion + "' 格式不正确";
+                    return -1;
+                }
+
+                double base_version = 2.63;
+
+                if (value < base_version)
+                {
+                    strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + value + ")。请立即升级 dp2Kernel 到最新版本。";
+                    return -1;
+                }
+#endif
+
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                strError = "比较 dp2kernel 版本号的过程发生错误: " + ex.Message;
                 return -1;
             }
-
-            double base_version = 2.63;
-
-            if (value < base_version)
-            {
-                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + value + ")。请立即升级 dp2Kernel 到最新版本。";
-                return -1;
-            }
-
-            return 0;
         }
 
 #if NO
@@ -3043,6 +3081,13 @@ namespace DigitalPlatform.LibraryServer
                         // <libraryInfo>
                         // 注: <libraryName>元素在此里面
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <login>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("login");
                         if (node != null)
                         {
                             node.WriteTo(writer);

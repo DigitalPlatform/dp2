@@ -15,16 +15,18 @@ using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 // 2013/3/16 添加 XML 注释
 
@@ -704,7 +706,7 @@ this.DbType + "_search_form",
 
             long lStart = 0;
             long lCount = lHitCount;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             bool bOutputBiblioRecPath = false;
             bool bOutputItemRecPath = false;
@@ -762,7 +764,7 @@ this.DbType + "_search_form",
 
                 for (int i = 0; i < searchresults.Length; i++)
                 {
-                    DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                    DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                     if (bOutputBiblioRecPath == true)
                     {
@@ -1144,7 +1146,7 @@ this.DbType + "_search_form",
             bool bSelectFirstLine = false;
             long lStart = 0;
             long lCount = lHitCount;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             bool bPushFillingBrowse = this.PushFillingBrowse;
 
@@ -1194,7 +1196,7 @@ this.DbType + "_search_form",
                     {
                         ListViewItem item = null;
 
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         if (bOutputKeyCount == false
                             && bOutputKeyID == false)
@@ -4125,7 +4127,7 @@ this.MainForm.DefaultFont);
                 long lHitCount = lRet;
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 获取命中结果
                 for (; ; )
@@ -4160,7 +4162,7 @@ this.MainForm.DefaultFont);
 
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         string strIssueRecPath = searchresult.Path;
 
@@ -5113,7 +5115,7 @@ MessageBoxDefaultButton.Button1);
             string strRecPath = ListViewUtil.GetItemText(item, 0);
             string[] paths = new string[1];
             paths[0] = strRecPath;
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             long lRet = this.Channel.GetBrowseRecords(
                 this.stop,
@@ -7346,7 +7348,9 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
             };

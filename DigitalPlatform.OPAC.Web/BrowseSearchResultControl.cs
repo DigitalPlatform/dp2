@@ -20,8 +20,9 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+//using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -1438,7 +1439,7 @@ namespace DigitalPlatform.OPAC.Web
 
                     string strPath = paths[i];
 
-                    string strDbName = ResPath.GetDbName(strPath);
+                    string strDbName = StringUtil.GetDbName(strPath);
                     if (app.IsBiblioDbName(strDbName) == false)
                         continue;
 
@@ -2094,7 +2095,7 @@ namespace DigitalPlatform.OPAC.Web
                             {
                                 string strItemPath = cols[0];
 
-                                string strItemDbName = ResPath.GetDbName(strItemPath);
+                                string strItemDbName = StringUtil.GetDbName(strItemPath);
                                 if (app.IsItemDbName(strItemDbName) == true)
                                 {
                                     // 插入控件
@@ -2163,7 +2164,7 @@ namespace DigitalPlatform.OPAC.Web
                             {
                                 string strItemPath = cols[0];
 
-                                string strItemDbName = ResPath.GetDbName(strItemPath);
+                                string strItemDbName = StringUtil.GetDbName(strItemPath);
                                 if (app.IsCommentDbName(strItemDbName) == true)
                                 {
                                     // 插入控件
@@ -2224,7 +2225,7 @@ namespace DigitalPlatform.OPAC.Web
                             bool bIsBiblioType = false;
                             if (cols != null)
                             {
-                                string strDbName = ResPath.GetDbName(cols[0]);
+                                string strDbName = StringUtil.GetDbName(cols[0]);
 #if NO
                                 // 判断一个数据库名是不是合法的书目库名
                                 if (app.IsBiblioDbName(strDbName) == false)
@@ -2293,7 +2294,7 @@ namespace DigitalPlatform.OPAC.Web
 
                             if (cols != null)
                             {
-                                string strDbName = ResPath.GetDbName(cols[0]);
+                                string strDbName = StringUtil.GetDbName(cols[0]);
 
 #if NO
                                 // 判断一个数据库名是不是合法的书目库名
@@ -2432,7 +2433,7 @@ namespace DigitalPlatform.OPAC.Web
                                         commentscontrol.BiblioRecPath = strBiblioRecPath; // cols[0];
 
                                         {
-                                            string strBiblioDbName = ResPath.GetDbName(cols[0]);
+                                            string strBiblioDbName = StringUtil.GetDbName(cols[0]);
                                             string strCommentDbName = "";
                                             // return:
                                             //      -1  出错

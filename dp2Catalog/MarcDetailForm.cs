@@ -6095,7 +6095,9 @@ Stack:
 									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2catalog.exe"
 								};
@@ -7425,7 +7427,9 @@ Keys keyData)
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\dp2catalog.exe"
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\dp2catalog.exe"
 								};
 
             if (saAddRef != null)
@@ -7545,7 +7549,9 @@ Keys keyData)
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\dp2catalog.exe"
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\dp2catalog.exe"
 								};
 
             Assembly assembly = null;

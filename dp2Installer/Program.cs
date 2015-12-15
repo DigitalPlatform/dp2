@@ -10,8 +10,9 @@ using System.Deployment.Application;
 using System.Security.Principal;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Installer
 {

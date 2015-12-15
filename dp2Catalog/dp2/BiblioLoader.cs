@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
-using DigitalPlatform.CirculationClient;
+
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {

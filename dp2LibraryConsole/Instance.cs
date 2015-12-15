@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 using Ionic.Zip;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Diagnostics;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2LibraryConsole
 {
@@ -880,7 +881,7 @@ value);
         {
             if (this.Channel != null)
             {
-                this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
                 this.Channel.Idle -= Channel_Idle;
 
                 this.Channel.Close();
@@ -895,7 +896,7 @@ value);
             this.Channel = new LibraryChannel();
             this.Channel.Url = this.LibraryServerUrl;
 
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.Idle += Channel_Idle;
         }
 
@@ -974,7 +975,7 @@ value);
         }
 
         internal void Channel_BeforeLogin(object sender,
-    DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+    DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             if (e.FirstTry == true)
             {
@@ -1412,7 +1413,7 @@ value);
                         // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
                         if (bRetryOverwiteExisting == true
                             && j == 0
-                            && channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.TimestampMismatch
+                            && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
                             && nRedoCount == 0)
                         {
                             nRedoCount++;

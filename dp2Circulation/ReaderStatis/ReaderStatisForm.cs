@@ -21,7 +21,7 @@ using DigitalPlatform.Text;
 
 using DigitalPlatform.dp2.Statis;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -632,7 +632,9 @@ namespace dp2Circulation
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									// Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",

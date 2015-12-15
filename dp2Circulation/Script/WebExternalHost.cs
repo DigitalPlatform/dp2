@@ -9,16 +9,17 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Diagnostics;
 using System.Xml;
+using System.Web;
+using System.IO;
+using System.Drawing;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
-using System.Web;
-using System.IO;
-using System.Drawing;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -193,6 +194,9 @@ namespace dp2Circulation
             this.StopThread(false);
         }
 
+        // 最近一次使用 AbortIt() 的时间
+        DateTime _lastAbortTime = new DateTime(0);
+
         /// <summary>
         /// 停止通讯
         /// </summary>
@@ -209,7 +213,15 @@ namespace dp2Circulation
             {
                 if (this.Channel.IsInSearching > 0)
                 {
-                    this.Channel.Abort();
+                    DateTime now = DateTime.Now;
+                    // 每隔 5 分钟才允许使用一次 AbortIt()
+                    if (this._lastAbortTime - now > new TimeSpan(0,5,0))
+                    {
+                        this.Channel.AbortIt();
+                        this._lastAbortTime = now;
+                    }
+                    else
+                        this.Channel.Abort();
                     // this.Channel.AbortIt(); // 能立即切断通讯。但会留下很多丢弃的通道，很快会突破服务器端对每个 IP 50 个通道的限制
                 }
             }
@@ -1175,6 +1187,16 @@ namespace dp2Circulation
                             strError = "中断";
                             break;
                         }
+
+                        if (strItemBarcode.StartsWith("_testitem") == true)
+                        {
+                            lRet = 1;
+                            strBiblioRecPath = "_测试书目库/1";
+                            strSummary = "测试书名/测试作者. -- ISBN 978-7-5397-3818-5";
+                            break;
+                        }
+
+                        // 注: Channel.Timeout 在 GetBiblioSummary() 函数中会自动设置
                         lRet = this.Channel.GetBiblioSummary(
                             stop,
                             strItemBarcode,
@@ -1220,7 +1242,6 @@ namespace dp2Circulation
 #endif
 
         END1:
-
             if (bCutting == true)
             {
                 if (string.IsNullOrEmpty(strSummary) == false && strSummary[0] == '<')
@@ -1427,7 +1448,10 @@ namespace dp2Circulation
                  * */
                 // 2014/9/9
                 // 要在一个控制台输出这些异常信息，帮助诊断
-                DoOutputDebugInfo("WebExternalHost 异常：" + ExceptionUtil.GetDebugText(ex));
+                string strError = "WebExternalHost 异常：" + ExceptionUtil.GetDebugText(ex);
+                DoOutputDebugInfo(strError);
+                this.MainForm.ReportError("dp2circulation WebExternalHost 异常",
+                    strError);
             }
         }
 

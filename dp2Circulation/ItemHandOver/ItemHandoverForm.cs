@@ -20,7 +20,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using System.Threading;
 
 namespace dp2Circulation
@@ -775,7 +775,7 @@ this.splitContainer_inAndOutof,
             }
 #endif
 
-            List<DigitalPlatform.CirculationClient.localhost.Record> records = new List<DigitalPlatform.CirculationClient.localhost.Record>();
+            List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
             // 集中获取全部册记录信息
             for (; ; )
@@ -786,7 +786,7 @@ this.splitContainer_inAndOutof,
                     return -1;
                 }
 
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
@@ -3236,7 +3236,7 @@ MessageBoxDefaultButton.Button2);
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -3278,7 +3278,7 @@ MessageBoxDefaultButton.Button2);
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record result_item = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record result_item = searchresults[i];
 
                         string strBarcode = result_item.Cols[0];
                         string strRecPath = result_item.Path;

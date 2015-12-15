@@ -7,11 +7,13 @@ using System.Drawing;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
 using System.Diagnostics;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -434,7 +436,7 @@ namespace dp2Circulation
                 strStyle += ",summary";
             {
                 strStyle += ",xml";
-                if (this.Container.MainForm.ServerVersion >= 2.25)
+                if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.25") >= 0)
                     strStyle += ":noborrowhistory";
             }
 #if NO
@@ -511,7 +513,7 @@ namespace dp2Circulation
                     strReaderXml = "";
 
                     strStyle = "xml";
-                    if (this.Container.MainForm.ServerVersion >= 2.25)
+                    if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.25") >= 0)
                         strStyle += ":noborrowhistory";
                     results = null;
 
@@ -637,7 +639,7 @@ out strError);
 
         string GetPostFix()
         {
-            if (this.Container.MainForm.ServerVersion >= 2.24)
+            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
                 return ":noborrowhistory";
             return "";
         }
@@ -712,7 +714,7 @@ out strError);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (this.Container.MainForm.ServerVersion >= 2.24)
+            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;
@@ -998,7 +1000,7 @@ end_time);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (this.Container.MainForm.ServerVersion >= 2.24)
+            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;

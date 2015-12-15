@@ -1081,7 +1081,7 @@ this.splitContainer_inAndOutof,
             }
 #endif
 
-            List<DigitalPlatform.CirculationClient.localhost.Record> records = new List<DigitalPlatform.CirculationClient.localhost.Record>();
+            List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
             // 集中获取全部册记录信息
             for (; ; )
@@ -1094,7 +1094,7 @@ this.splitContainer_inAndOutof,
                     return -1;
                 }
 
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);

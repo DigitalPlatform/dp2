@@ -12,60 +12,60 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.Script
 {
-	/// <summary>
-	/// Summary description for CompileErrorDlg.
-	/// </summary>
-	public class CompileErrorDlg : System.Windows.Forms.Form
-	{
-		public ApplicationInfo	applicationInfo = null;
+    /// <summary>
+    /// Summary description for CompileErrorDlg.
+    /// </summary>
+    public class CompileErrorDlg : System.Windows.Forms.Form
+    {
+        public ApplicationInfo applicationInfo = null;
 
-		public bool IsFltx = false;	// 是否为.fltx.cs文件
+        public bool IsFltx = false;	// 是否为.fltx.cs文件
 
         bool bFirst = true;
         public NoHasSelTextBox textBox_errorInfo;
-		public NoHasSelTextBox textBox_code;
-		public System.Windows.Forms.Label label_codeFileName;
-		private System.Windows.Forms.Label label_message;
+        public NoHasSelTextBox textBox_code;
+        public System.Windows.Forms.Label label_codeFileName;
+        private System.Windows.Forms.Label label_message;
         private SplitContainer splitContainer1;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public CompileErrorDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public CompileErrorDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CompileErrorDlg));
             this.textBox_code = new DigitalPlatform.GUI.NoHasSelTextBox();
             this.textBox_errorInfo = new DigitalPlatform.GUI.NoHasSelTextBox();
@@ -166,246 +166,257 @@ namespace DigitalPlatform.Script
             this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void CompileErrorDlg_Load(object sender, System.EventArgs e)
-		{
-			// 恢复窗口尺寸
-			int nWindowWidth = applicationInfo.GetInt("code_editor",
-				"window_width",
-				-1);
-			int nWindowHeight = applicationInfo.GetInt("code_editor",
-				"window_height",
-				-1);
-			if (nWindowHeight != -1) 
-			{
-				this.Size = new Size(nWindowWidth, nWindowHeight);
+        private void CompileErrorDlg_Load(object sender, System.EventArgs e)
+        {
+            // 恢复窗口尺寸
+            int nWindowWidth = applicationInfo.GetInt("code_editor",
+                "window_width",
+                -1);
+            int nWindowHeight = applicationInfo.GetInt("code_editor",
+                "window_height",
+                -1);
+            if (nWindowHeight != -1)
+            {
+                this.Size = new Size(nWindowWidth, nWindowHeight);
 
-				int x = applicationInfo.GetInt("code_editor",
-					"window_x",
-					0);
-				int y = applicationInfo.GetInt("code_editor",
-					"window_y",
-					0);
-				this.Location = new Point(x, y);
-			}
+                int x = applicationInfo.GetInt("code_editor",
+                    "window_x",
+                    0);
+                int y = applicationInfo.GetInt("code_editor",
+                    "window_y",
+                    0);
+                this.Location = new Point(x, y);
+            }
 
-			this.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState),
-				applicationInfo.GetString(
-				"code_editor", "window_state", "Normal"));
-
-
-			string strFontFace1 = applicationInfo.GetString("code_editor",
-				"code_font_face",
-				"Lucida Console");
-			int nFontSize1 = 
-				applicationInfo.GetInt("code_editor",
-				"code_font_size",
-				9);
-			textBox_code.Font = new Font(strFontFace1, nFontSize1);
-
-			string strFontFace2 = applicationInfo.GetString("code_editor",
-				"error_font_face",
-				"Lucida Console");
-			int nFontSize2 = 
-				applicationInfo.GetInt("code_editor",
-				"error_font_size",
-				9);
-			textBox_errorInfo.Font = new Font(strFontFace2, nFontSize2);
+            this.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState),
+                applicationInfo.GetString(
+                "code_editor", "window_state", "Normal"));
 
 
-			if (label_codeFileName.Text != "") 
-			{
-				bFirst = true;
-				// 源代码本身
-				try 
-				{
+            string strFontFace1 = applicationInfo.GetString("code_editor",
+                "code_font_face",
+                "Lucida Console");
+            int nFontSize1 =
+                applicationInfo.GetInt("code_editor",
+                "code_font_size",
+                9);
+            textBox_code.Font = new Font(strFontFace1, nFontSize1);
+
+            string strFontFace2 = applicationInfo.GetString("code_editor",
+                "error_font_face",
+                "Lucida Console");
+            int nFontSize2 =
+                applicationInfo.GetInt("code_editor",
+                "error_font_size",
+                9);
+            textBox_errorInfo.Font = new Font(strFontFace2, nFontSize2);
+
+
+            if (label_codeFileName.Text != "")
+            {
+                bFirst = true;
+
+#if NO
+                // 源代码本身
+                try
+                {
                     using (StreamReader sr = new StreamReader(label_codeFileName.Text, true))
                     {
                         textBox_code.Text = sr.ReadToEnd();
                     }
-				}
-				catch
-				{
-					textBox_code.Text = "";
-				}
+                }
+                catch
+                {
+                    textBox_code.Text = "";
+                }
+#endif
+                {
+                    string strError = "";
+                    string strCode = "";
+                    int nRet = ScriptManager.LoadCode(label_codeFileName.Text,
+                out strCode,
+                out strError);
+                    if (nRet == -1)
+                        this.textBox_code.Text = "";
+                    else
+                        this.textBox_code.Text = strCode;
+                }
 
-				bFirst = false;
+                bFirst = false;
 
-				/*
-				// tabstop 为什么不起作用?
+                /*
+                // tabstop 为什么不起作用?
 
-				int [] tabstops = {8};
-				API.SetEditTabStops(textBox_code, tabstops);
-				textBox_code.Invalidate();
-				*/
-			}
+                int [] tabstops = {8};
+                API.SetEditTabStops(textBox_code, tabstops);
+                textBox_code.Invalidate();
+                */
+            }
 
-			/*
-			textBox_errorInfo.Focus();
-			API.SetEditCurrentCaretPos(
-				textBox_errorInfo,
-				0,
-				0,
-				true);
-				*/
+            /*
+            textBox_errorInfo.Focus();
+            API.SetEditCurrentCaretPos(
+                textBox_errorInfo,
+                0,
+                0,
+                true);
+                */
 
-		}
+        }
 
-		public void Initial(string strCodeFileName,
-			string strErrorInfo)
-		{
-			label_codeFileName.Text = strCodeFileName;
+        public void Initial(string strCodeFileName,
+            string strErrorInfo)
+        {
+            label_codeFileName.Text = strCodeFileName;
+            textBox_errorInfo.Text = strErrorInfo;
+        }
 
-			textBox_errorInfo.Text = strErrorInfo;
-		}
-
-		private void textBox_errorInfo_DoubleClick(object sender, System.EventArgs e)
-		{
+        private void textBox_errorInfo_DoubleClick(object sender, System.EventArgs e)
+        {
             if (textBox_errorInfo.Lines.Length == 0)
                 return;
 
             // TODO: textbox内容不能折行
-			int x =0;
-			int y = 0;
-			API.GetEditCurrentCaretPos(
-				textBox_errorInfo,
-				out x,
-				out y);
+            int x = 0;
+            int y = 0;
+            API.GetEditCurrentCaretPos(
+                textBox_errorInfo,
+                out x,
+                out y);
 
-			string strLine = textBox_errorInfo.Lines[y];
+            string strLine = textBox_errorInfo.Lines[y];
 
-			// 析出"(行，列)"值
+            // 析出"(行，列)"值
 
-			int nRet = strLine.IndexOf("(");
-			if (nRet == -1)
-				return;
-			strLine = strLine.Substring(nRet+1);
-			nRet = strLine.IndexOf(")");
-			if (nRet != -1)
-				strLine = strLine.Substring(0, nRet);
-			strLine = strLine.Trim();
+            int nRet = strLine.IndexOf("(");
+            if (nRet == -1)
+                return;
+            strLine = strLine.Substring(nRet + 1);
+            nRet = strLine.IndexOf(")");
+            if (nRet != -1)
+                strLine = strLine.Substring(0, nRet);
+            strLine = strLine.Trim();
 
-			// 找到','
-			nRet = strLine.IndexOf(",");
-			if (nRet == -1)
-				return;
-			y = Convert.ToInt32(strLine.Substring(0, nRet).Trim()) - 1;
-			x = Convert.ToInt32(strLine.Substring(nRet+1).Trim()) - 1;
+            // 找到','
+            nRet = strLine.IndexOf(",");
+            if (nRet == -1)
+                return;
+            y = Convert.ToInt32(strLine.Substring(0, nRet).Trim()) - 1;
+            x = Convert.ToInt32(strLine.Substring(nRet + 1).Trim()) - 1;
 
-			// MessageBox.Show(Convert.ToString(x) + " , "+Convert.ToString(y));
+            // MessageBox.Show(Convert.ToString(x) + " , "+Convert.ToString(y));
 
-			textBox_code.Focus();
-			textBox_code.DisableEmSetSelMsg = false;
-			API.SetEditCurrentCaretPos(
-				textBox_code,
-				x,
-				y,
-				true);
-			textBox_code.DisableEmSetSelMsg = true;
-			OnCaretChanged();
+            textBox_code.Focus();
+            textBox_code.DisableEmSetSelMsg = false;
+            API.SetEditCurrentCaretPos(
+                textBox_code,
+                x,
+                y,
+                true);
+            textBox_code.DisableEmSetSelMsg = true;
+            OnCaretChanged();
 
-		}
+        }
 
-		private void CompileErrorDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (label_codeFileName.Text != "" 
-				&& API.GetEditModify(textBox_code) == true) 
-			{
+        private void CompileErrorDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (label_codeFileName.Text != ""
+                && API.GetEditModify(textBox_code) == true)
+            {
 
-				if (IsFltx == true)
-				{
-					MessageBox.Show(this, "警告: 文件 '" 
-						+ label_codeFileName.Text +
-						"' 不应在这里直修改(因为即便修改了，下次重新编译时，此.fltx.cs文件也会被程序从.fltx文件新创建的内容覆盖掉)。\r\n\r\n请修改对应的 .fltx 文件");
-					return;
-				}
+                if (IsFltx == true)
+                {
+                    MessageBox.Show(this, "警告: 文件 '"
+                        + label_codeFileName.Text +
+                        "' 不应在这里直修改(因为即便修改了，下次重新编译时，此.fltx.cs文件也会被程序从.fltx文件新创建的内容覆盖掉)。\r\n\r\n请修改对应的 .fltx 文件");
+                    return;
+                }
 
+                DialogResult msgResult = MessageBox.Show(this,
+                    "源代码已经被修改。\r\n是否保存到文件 " + label_codeFileName.Text + "?",
+                    "script",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1);
+                if (msgResult == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
 
-				DialogResult msgResult = MessageBox.Show(this,
-					"源代码已经被修改。\r\n是否保存到文件 " + label_codeFileName.Text + "?",
-					"script",
-					MessageBoxButtons.YesNoCancel,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button1);
-				if (msgResult == DialogResult.Cancel) 
-				{
-					e.Cancel = true;
-					return;
-				}
+                if (msgResult == DialogResult.Yes)
+                {
+                    SaveCodeFile();
+                    return;
+                }
 
-				if (msgResult == DialogResult.Yes) 
-				{
-					SaveCodeFile();
-					return;
-				}
+            }
+            applicationInfo.SetString(
+                "code_editor", "window_state",
+                Enum.GetName(typeof(FormWindowState), this.WindowState));
 
-			}
-			applicationInfo.SetString(
-				"code_editor", "window_state", 
-				Enum.GetName(typeof(FormWindowState), this.WindowState));
+            WindowState = FormWindowState.Normal;	// 是否先隐藏窗口?
 
-			WindowState = FormWindowState.Normal;	// 是否先隐藏窗口?
+            // 保存窗口尺寸
+            applicationInfo.SetInt("code_editor",
+                "window_width",
+                this.Size.Width);
+            applicationInfo.SetInt("code_editor",
+                "window_height",
+                this.Size.Height);
+            applicationInfo.SetInt("code_editor",
+                "window_x",
+                this.Location.X);
+            applicationInfo.SetInt("code_editor",
+                "window_y",
+                this.Location.Y);
+        }
 
-			// 保存窗口尺寸
-			applicationInfo.SetInt("code_editor",
-				"window_width",
-				this.Size.Width);
-			applicationInfo.SetInt("code_editor",
-				"window_height",
-				this.Size.Height);
-			applicationInfo.SetInt("code_editor",
-				"window_x",
-				this.Location.X);
-			applicationInfo.SetInt("code_editor",
-				"window_y",
-				this.Location.Y);
-		}
-
-		void SaveCodeFile()
-		{
-			if (label_codeFileName.Text == "")
-				return;
+        void SaveCodeFile()
+        {
+            if (label_codeFileName.Text == "")
+                return;
             using (StreamWriter sw = new StreamWriter(label_codeFileName.Text,
                 false, Encoding.UTF8))
             {
                 sw.Write(textBox_code.Text);
             }
-			API.SetEditModify(textBox_code, false);
-		}
+            API.SetEditModify(textBox_code, false);
+        }
 
-		private void textBox_code_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-		{
-			OnCaretChanged();
-		}
+        private void textBox_code_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            OnCaretChanged();
+        }
 
-		private void textBox_code_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			OnCaretChanged();
-		}
+        private void textBox_code_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            OnCaretChanged();
+        }
 
-		void OnCaretChanged()
-		{
-			int x =0;
-			int y = 0;
-			API.GetEditCurrentCaretPos(
-				textBox_code,
-				out x,
-				out y);
-			label_message.Text = Convert.ToString(y+1) + ", " + Convert.ToString(x+1);
+        void OnCaretChanged()
+        {
+            int x = 0;
+            int y = 0;
+            API.GetEditCurrentCaretPos(
+                textBox_code,
+                out x,
+                out y);
+            label_message.Text = Convert.ToString(y + 1) + ", " + Convert.ToString(x + 1);
+        }
 
-		}
-
-		private void textBox_code_TextChanged(object sender, System.EventArgs e)
-		{
-			if (IsFltx == true && bFirst == false)
-			{
-				MessageBox.Show(this, "警告: 文件 '" 
-					+ label_codeFileName.Text 
-					+ "'文件不能在这里直修改(因为即便修改了，下次重新编译时，此.fltx.cs文件也会被程序从.fltx文件新创建的内容覆盖掉)。\r\n\r\n请修改对应的 .fltx 文件");
-				return;
-			}
-		}
-	}
+        private void textBox_code_TextChanged(object sender, System.EventArgs e)
+        {
+            if (IsFltx == true && bFirst == false)
+            {
+                MessageBox.Show(this, "警告: 文件 '"
+                    + label_codeFileName.Text
+                    + "'文件不能在这里直修改(因为即便修改了，下次重新编译时，此.fltx.cs文件也会被程序从.fltx文件新创建的内容覆盖掉)。\r\n\r\n请修改对应的 .fltx 文件");
+                return;
+            }
+        }
+    }
 }

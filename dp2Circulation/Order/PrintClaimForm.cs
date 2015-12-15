@@ -26,7 +26,7 @@ using DigitalPlatform.Text;
 
 using DigitalPlatform.dp2.Statis;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -582,7 +582,7 @@ false);
                 long lStart = 0;
                 long lCount = lHitCount;
 
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -836,7 +836,7 @@ false);
                 long lCount = lHitCount;
 
 
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -2165,7 +2165,7 @@ false);
                     long lCount = lHitCount;
 
 
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )

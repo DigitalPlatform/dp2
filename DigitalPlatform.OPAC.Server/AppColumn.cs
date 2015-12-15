@@ -20,8 +20,8 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
 // using DigitalPlatform.Range;
 
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Server
 {

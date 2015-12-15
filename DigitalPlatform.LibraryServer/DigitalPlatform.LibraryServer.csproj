@@ -167,10 +167,6 @@
     <Compile Include="ZhengyuanReplication.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
-      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
-      <Name>DigitalPlatform.CirculationClient</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj">
       <Project>{91B90948-8475-4D9B-A3C7-6285EFC45E19}</Project>
       <Name>DigitalPlatform.DTLP</Name>
@@ -182,6 +178,10 @@
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryClient\DigitalPlatform.LibraryClient.csproj">
+      <Project>{3541ec0b-82f5-4829-afc3-5ef48254175d}</Project>
+      <Name>DigitalPlatform.LibraryClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2F085431-027A-4DDF-9B3D-83219E629FA1}</Project>

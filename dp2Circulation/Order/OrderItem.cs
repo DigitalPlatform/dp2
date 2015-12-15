@@ -10,7 +10,7 @@ using System.Collections;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;  // EntityInfo
 
 /*

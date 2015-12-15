@@ -26,11 +26,12 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Install;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 using dp2LibraryXE.Properties;
 
@@ -147,7 +148,7 @@ namespace dp2LibraryXE
 #endif
 
             string[] args = Environment.GetCommandLineArgs();
-            if (args != null && args.Length >=2 )
+            if (args != null && args.Length >= 2)
             {
 #if LOG
                 WriteLibraryEventLog("命令行参数=" + string.Join(",", args), EventLogEntryType.Information);
@@ -377,7 +378,7 @@ FormWindowState.Normal);
                     {
                         AutoCloseMessageBox.Show(this,
                             "当前超级用户 " + this.SupervisorUserName + " 的密码为空，如果启动 dp2OPAC，其他人将可能通过浏览器冒用此账户。\r\n\r\n请(使用 dp2circulation (内务前端))为此账户设置密码，然后重新启动 dp2libraryXE。\r\n\r\n为确保安全，本次未启动 dp2OPAC",
-                            20*1000,
+                            20 * 1000,
                             "dp2library XE 警告");
 #if NO
                         MessageBox.Show(this,
@@ -413,7 +414,7 @@ FormWindowState.Normal);
 #if NO
                 _messageBar.Close();
                 _messageBar = null;
-#endif 
+#endif
                 this._floatingMessage.Text = "";
 
                 this.SetTitle();
@@ -517,7 +518,7 @@ this.Font);
 dp2Library XE
 ---
 dp2 图书馆集成系统 图书馆应用服务器 "
-                + (this.IsServer == false ? "单机" : "小型服务器") 
+                + (this.IsServer == false ? "单机" : "小型服务器")
                 + (this.TestMode == false ? " [专业版]" : " [社区版]")
                 +
 @"
@@ -854,7 +855,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             string strMAC = (string)ext_table["mac"];
             if (string.IsNullOrEmpty(strMAC) == true)
                 strOriginCode = "!error";
-            else 
+            else
                 strOriginCode = Cryptography.Encrypt(strOriginCode,
                 this.CopyrightKey);
             SerialCodeForm dlg = new SerialCodeForm();
@@ -868,7 +869,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -973,7 +974,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if ( this._skipFinalize == false)
+            if (this._skipFinalize == false)
                 Finalize(false);
 #if NO
             this.toolStripStatusLabel_main.Text = "正在退出 dp2Library XE，请稍候 ...";
@@ -1188,7 +1189,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             {
                 string strCurrentDir = Directory.GetCurrentDirectory();
 
-                strError = "删除目录 " + strDirectory + " 的过程中出现错误: " + ex.Message + "。\r\n请手动删除此目录后，重新进行操作"; 
+                strError = "删除目录 " + strDirectory + " 的过程中出现错误: " + ex.Message + "。\r\n请手动删除此目录后，重新进行操作";
                 return -1;
             }
             return 0;
@@ -1247,7 +1248,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 out strError);
             if (nRet == -1)
                 return -1;
-            
+
 #if NO
             if (_messageBar != null)
                 _messageBar.MessageText = "正在初始化 dp2Kernel 数据目录 ...";
@@ -1495,7 +1496,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             else
             {
-                strError = "未知的 SQL 服务器类型 '"+strSqlServerType+"'";
+                strError = "未知的 SQL 服务器类型 '" + strSqlServerType + "'";
                 return -1;
             }
 #if NO
@@ -1700,7 +1701,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
             library_host = new LibraryHost();
             library_host.DataDir = this.LibraryDataDir;
-            library_host.HostUrl = this.LibraryServerUrlList;  
+            library_host.HostUrl = this.LibraryServerUrlList;
             int nRet = library_host.Start(out strError);
             if (nRet == -1)
                 return -1;
@@ -1822,7 +1823,6 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 #endif
             if (string.IsNullOrEmpty(this._floatingMessage.Text) == false)
                 this._floatingMessage.Text = "正在创建基本数据库，可能需要几分钟时间 ...";
-
 
             // 创建缺省的几个数据库
             nRet = CreateDefaultDatabases(out strError);
@@ -2068,8 +2068,8 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
             this.Channel.Url = GetFirstUrl(this.LibraryServerUrlList);
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
             Stop = new DigitalPlatform.Stop();
             Stop.Register(stopManager, true);	// 和容器关联
@@ -2098,7 +2098,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 Stop = null;
             }
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.Close();
             this.Channel = null;
 
@@ -2106,7 +2106,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
         }
 
         internal void Channel_BeforeLogin(object sender,
-    DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+    DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             if (e.FirstTry == true)
             {
@@ -2119,6 +2119,8 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
                 string strLocation = "manager";
                 e.Parameters = "location=" + strLocation;
+
+                e.Parameters += ",client=dp2libraryxe|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -2172,6 +2174,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             if (this.TestMode == true)
                 e.Parameters += ",testmode=true";
 #endif
+            e.Parameters += ",client=dp2libraryxe|" + Program.ClientVersion;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)
@@ -2349,7 +2352,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             return Cryptography.Encrypt(strPlainText, this.EncryptKey);
         }
 
-                /// <summary>
+        /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
@@ -2411,9 +2414,9 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
         // 顺次备份为 ._1 ._2 ...
         static void BackupFile(string strFullPath)
         {
-            for(int i = 0;;i++)
+            for (int i = 0; ; i++)
             {
-                string strBackupFilePath = strFullPath + "._" + (i+1).ToString();
+                string strBackupFilePath = strFullPath + "._" + (i + 1).ToString();
                 if (File.Exists(strBackupFilePath) == false)
                 {
                     File.Copy(strFullPath, strBackupFilePath);
@@ -2675,7 +2678,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 dom.DocumentElement.AppendChild(accounts_root);
             }
 
-            XmlElement account = accounts_root.SelectSingleNode("account[@name='"+strUserName+"']") as XmlElement;
+            XmlElement account = accounts_root.SelectSingleNode("account[@name='" + strUserName + "']") as XmlElement;
             if (account == null)
             {
                 account = dom.CreateElement("account");
@@ -3048,7 +3051,7 @@ miniServer	-- enterprise mini
             }
 
 
-            RESTART:
+        RESTART:
             // 修改后的模式
             //string strNewMode = this.AppInfo.GetString("main_form", "last_mode", "standard");
             //if (strOldMode != strNewMode)
@@ -3736,7 +3739,7 @@ MessageBoxDefaultButton.Button2);
                 strDataDir,
                 out strError);
             if (nRet == -1)
-               return -1;
+                return -1;
 
             return 0;
         }
@@ -3915,7 +3918,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
             if (File.Exists(fileName) == false)
             {
-                strError = "文件 "+fileName+" 不存在， IIS Express 启动失败";
+                strError = "文件 " + fileName + " 不存在， IIS Express 启动失败";
                 return 0;
             }
 
@@ -4219,7 +4222,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 if (File.Exists(fileName) == true
                     && FileVersionInfo.GetVersionInfo(fileName).FileMajorPart >= 8)
                 {
-                } 
+                }
                 else
                 {
 
@@ -4236,7 +4239,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     {
                         Process.Start(install_url);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         MessageBox.Show(this, "打开 URL '" + install_url + "' 失败: " + ex.Message);
                     }
@@ -4324,7 +4327,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 {
                     Process.Start(localhost_opac_url);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(this, "打开 URL '" + localhost_opac_url + "' 失败: " + ex.Message);
                 }
@@ -4478,6 +4481,8 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
                 try
                 {
+                    int nRedoCount = 0;
+                REDO:
                     // return:
                     //      -1  error
                     //      0   登录未成功
@@ -4487,7 +4492,15 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                         "type=worker",
                         out strError);
                     if (lRet == -1)
+                    {
+                        if (Channel.WcfException is System.TimeoutException
+                            && nRedoCount < 3)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
                         return -1;
+                    }
 
                     if (lRet == 0)
                     {
@@ -4526,7 +4539,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
                 try
                 {
-                    DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos = null;
+                    DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos = null;
                     string strError = "";
                     long lRet = Channel.ListDbFroms(Stop,
                         "biblio",
@@ -4594,7 +4607,7 @@ Stack:
                 {
                     Process.Start(localhost_opac_url);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(this, "打开 URL '" + localhost_opac_url + "' 失败: " + ex.Message);
                 }

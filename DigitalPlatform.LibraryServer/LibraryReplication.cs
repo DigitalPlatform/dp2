@@ -7,10 +7,11 @@ using System.Xml;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -705,7 +706,7 @@ namespace DigitalPlatform.LibraryServer
 
             long lStart = 0;
             long lPerCount = Math.Min(500, lHitCount);
-            DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             List<long> recids = new List<long>();
 
@@ -737,9 +738,10 @@ namespace DigitalPlatform.LibraryServer
                 // 处理浏览结果
                 for (int i = 0; i < searchresults.Length; i++)
                 {
-                    DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+                    DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
-                    string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(searchresult.Path);
+                    // string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(searchresult.Path);
+                    string strID = StringUtil.GetRecordId(searchresult.Path);
                     long id = 0;
                     if (long.TryParse(strID, out id) == false)
                     {
@@ -894,10 +896,11 @@ namespace DigitalPlatform.LibraryServer
                 BiblioItem biblio = (BiblioItem)enumerator.Current;
                 Debug.Assert(biblio.RecPath == strRecPath, "loader 和 recpaths 的元素之间 记录路径存在严格的锁定对应关系");
 
-                if (biblio.ErrorCode == CirculationClient.localhost.ErrorCode.NotFound)
+                if (biblio.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                     continue;
 
-                string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(strRecPath);
+                // string strID = DigitalPlatform.CirculationClient.ResPath.GetRecordId(strRecPath);
+                string strID = StringUtil.GetRecordId(strRecPath);
                 string strBiblioRecPath = strLocalDbName + "/" + strID;
 
                 SetProgressText("复制 "+biblio.RecPath+" 到 " + strBiblioRecPath);
@@ -994,7 +997,7 @@ namespace DigitalPlatform.LibraryServer
                         if (this.Stopped == true)
                             return 0;
 
-                        DigitalPlatform.CirculationClient.localhost.OperLogInfo[] records = null;
+                        DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records = null;
 
                         // 获得日志
                         // return:
@@ -1030,7 +1033,7 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         int i = 0;
-                        foreach (DigitalPlatform.CirculationClient.localhost.OperLogInfo record in records)
+                        foreach (DigitalPlatform.LibraryClient.localhost.OperLogInfo record in records)
                         {
                             if (this.Stopped == true)
                                 return 0;
@@ -1096,7 +1099,7 @@ namespace DigitalPlatform.LibraryServer
         //      1   完成
         int ProcessLogRecord(
             string strServer,
-            DigitalPlatform.CirculationClient.localhost.OperLogInfo info,
+            DigitalPlatform.LibraryClient.localhost.OperLogInfo info,
             out string strError)
         {
             strError = "";

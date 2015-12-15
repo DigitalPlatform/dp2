@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform;

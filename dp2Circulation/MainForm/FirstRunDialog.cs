@@ -11,8 +11,9 @@ using System.Diagnostics;
 using System.Threading;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -363,8 +364,8 @@ MessageBoxDefaultButton.Button1);
 
             this.Channel.Url = this.textBox_server_dp2LibraryServerUrl.Text;
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
             this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
@@ -391,7 +392,7 @@ MessageBoxDefaultButton.Button1);
         }
 
         internal void Channel_BeforeLogin(object sender,
-    DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+    DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
 
             if (e.FirstTry == true)
@@ -440,7 +441,7 @@ MessageBoxDefaultButton.Button1);
                         return -1;
                     }
 
-                    if (this.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.RequestError)
+                    if (this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.RequestError)
                     {
                         if (this.comboBox_server_serverType.Text == "单机版 (dp2Library XE)")
                             strError += "\r\n\r\n请检查 dp2libraryXE 模块确实安装和启动了？";

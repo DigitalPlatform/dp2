@@ -19,6 +19,7 @@ using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using System.Collections;
+using DigitalPlatform.LibraryClient;
 
 public partial class SearchBiblio : MyWebPage
 {
@@ -611,7 +612,7 @@ ref sessioninfo) == false)
         }
 
         string strParameters = this.filter.SelectedNodePath;
-        string [] parameters = strParameters.Split(new char [] {','});
+        string[] parameters = strParameters.Split(new char[] { ',' });
         string strNode = "";
         int nStart = 0;
         if (parameters.Length >= 1)

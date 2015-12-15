@@ -17,8 +17,9 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.rms;  // rmsutil
 
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {

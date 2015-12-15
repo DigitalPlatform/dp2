@@ -9,8 +9,9 @@ using System.Windows.Forms;
 using System.IO;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using System.Diagnostics;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
@@ -172,8 +173,8 @@ namespace dp2Catalog
 
             this.Channel.Url = this.textBox_server_dp2LibraryServerUrl.Text;
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
             Stop = new DigitalPlatform.Stop();
             Stop.Register(this.MainForm.stopManager, true);	// 和容器关联
@@ -197,7 +198,7 @@ namespace dp2Catalog
         }
 
         internal void Channel_BeforeLogin(object sender,
-    DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+    DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
 
             if (e.FirstTry == true)
@@ -238,7 +239,7 @@ namespace dp2Catalog
                         return -1;
                     }
 
-                    if (this.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.RequestError)
+                    if (this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.RequestError)
                     {
                         if (this.comboBox_server_serverType.Text == "单机版 (dp2Library XE)")
                             strError += "\r\n\r\n请检查 dp2libraryXE 模块确实安装和启动了？";

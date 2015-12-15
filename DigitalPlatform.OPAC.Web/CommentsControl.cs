@@ -19,7 +19,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient;
+//using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -965,7 +965,7 @@ namespace DigitalPlatform.OPAC.Web
             string strCommentDbName = "";
             if (String.IsNullOrEmpty(this.BiblioRecPath) == false)
             {
-                string strBiblioDbName = ResPath.GetDbName(this.BiblioRecPath);
+                string strBiblioDbName = StringUtil.GetDbName(this.BiblioRecPath);
                 // return:
                 //      -1  出错
                 //      0   没有找到(书目库)

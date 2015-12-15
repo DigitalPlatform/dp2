@@ -8,10 +8,11 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {

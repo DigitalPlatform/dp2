@@ -1,9 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,6 +6,14 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -174,7 +177,7 @@ namespace dp2Circulation
 
                     long lStart = 0;
                     long lCount = lHitCount;
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )
@@ -370,7 +373,7 @@ namespace dp2Circulation
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )

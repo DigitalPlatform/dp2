@@ -4,10 +4,10 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Reflection;
+using System.Deployment.Application;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.Deployment.Application;
 
 namespace dp2Circulation
 {
@@ -77,19 +77,19 @@ namespace dp2Circulation
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(10, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(461, 17);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2内务/流通 dp2Circulation V2.8";
+            this.label1.Text = "dp2内务/流通 dp2Circulation V2.10";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright
             // 
-            this.label_copyright.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.label_copyright.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_copyright.Location = new System.Drawing.Point(10, 50);
             this.label_copyright.Name = "label_copyright";
@@ -101,8 +101,9 @@ namespace dp2Circulation
             // 
             // linkLabel1
             // 
-            this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.linkLabel1.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.linkLabel1.Location = new System.Drawing.Point(10, 92);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(459, 36);
@@ -125,11 +126,12 @@ namespace dp2Circulation
             // 
             // textBox_environment
             // 
-            this.textBox_environment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_environment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_environment.BackColor = System.Drawing.SystemColors.Window;
+            this.textBox_environment.BackColor = System.Drawing.Color.MidnightBlue;
             this.textBox_environment.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox_environment.ForeColor = System.Drawing.Color.Gainsboro;
             this.textBox_environment.Location = new System.Drawing.Point(10, 131);
             this.textBox_environment.MaxLength = 0;
             this.textBox_environment.Multiline = true;
@@ -143,14 +145,14 @@ namespace dp2Circulation
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-            this.BackColor = System.Drawing.SystemColors.Window;
+            this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(481, 361);
             this.Controls.Add(this.textBox_environment);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.label_copyright);
             this.Controls.Add(this.label1);
-            this.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.ForeColor = System.Drawing.Color.Gainsboro;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -195,8 +197,10 @@ namespace dp2Circulation
             label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.";
 
             Assembly myAssembly = Assembly.GetAssembly(this.GetType());
+            AssemblyName name = myAssembly.GetName();
+
             textBox_environment.Text = "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
-                + "\r\n本软件: " + myAssembly.FullName
+                + "\r\n本软件: "+name.Name+" " + name.Version.ToString()    // .FullName
                 + "\r\n当前连接的 dp2Library (位于 " + this.MainForm.LibraryServerUrl + "): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
                 + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress())
                 + "\r\n是否安装 KB2468871: " + Global.IsKbInstalled("KB2468871")

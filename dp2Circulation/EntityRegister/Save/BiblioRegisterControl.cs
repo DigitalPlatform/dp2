@@ -16,7 +16,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Script;
 
 #pragma warning disable 1591

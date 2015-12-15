@@ -1263,6 +1263,10 @@
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryClient\DigitalPlatform.LibraryClient.csproj">
+      <Project>{3541ec0b-82f5-4829-afc3-5ef48254175d}</Project>
+      <Name>DigitalPlatform.LibraryClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.OPAC.Server\DigitalPlatform.OPAC.Server.csproj">
       <Project>{765049EC-C6B2-4051-97B3-B940D38D9FEA}</Project>
       <Name>DigitalPlatform.OPAC.Server</Name>

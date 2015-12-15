@@ -12,7 +12,6 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
@@ -20,6 +19,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.GcatClient;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -318,7 +319,7 @@ namespace dp2Circulation
                     string strCreator = this.GetFirstSubfield("998", "z");
                     if (string.IsNullOrEmpty(strCreator) == true)
                     {
-                        strCreator = this.DetailForm.Channel.UserName;
+                        strCreator = this.DetailForm.CurrentUserName;   // this.DetailForm.Channel.UserName;
                         this.SetFirstSubfield("998", "z", strCreator);
                         bChanged = true;
                     }

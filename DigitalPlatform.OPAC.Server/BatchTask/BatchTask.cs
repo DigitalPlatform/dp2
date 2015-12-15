@@ -10,7 +10,8 @@ using System.Web;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -339,7 +340,6 @@ namespace DigitalPlatform.OPAC.Server
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-
             if (e.FirstTry == false)
             {
                 e.Cancel = true;

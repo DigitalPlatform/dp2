@@ -11,7 +11,10 @@ using System.Drawing;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -2059,7 +2062,7 @@ namespace dp2Circulation
             strError = "";
             strResultXml = "";
 
-            if (this.MainForm.ServerVersion < 2.43)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.43") < 0)
             {
                 strError = "获得子记录检索点要求 dp2Library 版本在 2.43 及以上";
                 return -1;

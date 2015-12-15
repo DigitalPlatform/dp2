@@ -92,7 +92,7 @@
   <property name='setiteminfo'>
     <comment lang='chi'>修改册</comment>
     <comment lang='eng'>set item info</comment>
-  </property>  
+  </property>
   <property name='getoperlog'>
     <comment lang='chi'>获得操作日志</comment>
     <comment lang='eng'>get oper log</comment>
@@ -123,7 +123,7 @@
     <comment lang='chi'>删除盘点记录</comment>
     <comment lang='eng'>delete inventory record</comment>
   </property>
-  
+
   <property name='search'>
     <comment lang='chi'>检索</comment>
     <comment lang='eng'>search</comment>
@@ -150,7 +150,7 @@
     <comment lang='eng'>delete calendar</comment>
   </property>
 
-  
+
   <property name='batchtask'>
     <comment lang='chi'>批处理任务</comment>
     <comment lang='eng'>batch task</comment>
@@ -240,12 +240,12 @@
     <comment lang='chi'>创建押金交费请求</comment>
     <comment lang='eng'>create foregift record</comment>
   </property>
-  
+
   <property name='returnforegift'>
     <comment lang='chi'>创建押金退费请求</comment>
     <comment lang='eng'>create foregift returnback record</comment>
   </property>
-  
+
   <property name='settlement'>
     <comment lang='chi'>(费用)结算</comment>
     <comment lang='eng'>settlement</comment>
@@ -297,7 +297,7 @@
     <comment lang='chi'>检索评注信息</comment>
     <comment lang='eng'>search comment</comment>
   </property>
-  
+
   <property name='denychangemypassword'>
     <comment lang='chi'>阻止修改自己的密码</comment>
     <comment lang='eng'>deny change my password</comment>
@@ -362,25 +362,24 @@
     <comment lang='chi'>下载文件</comment>
     <comment lang='eng'>Download Files</comment>
   </property>
+  <property name='checkclientversion'>
+    <comment lang='chi'>检查前端版本</comment>
+    <comment lang='eng'>Check Client Version</comment>
+  </property>
   <property name='client_uimodifyorderrecord'>
     <comment lang='chi'>前端允许界面直接修改订购记录</comment>
     <comment lang='eng'>Client UI Allow Modify Order Record</comment>
   </property>
-
   <property name='client_forceverifydata'>
     <comment lang='chi'>前端保存记录时是否强制校验数据。校验时如果发现数据有错，会拒绝保存</comment>
     <comment lang='eng'>Client Force Verify Data</comment>
   </property>
-
   <property name='client_deletebibliosubrecords'>
     <comment lang='chi'>前端删除书目记录时是否强制删除下属的实体、期、订购、评注记录。如果不具备此权限，则需要下属记录全部删除以后才能删除书目记录</comment>
     <comment lang='eng'>Client Delete Biblio Subrecords</comment>
   </property>
-
   <property name='client_simulateborrow'>
     <comment lang='chi'>前端允许进行模拟借还操作</comment>
     <comment lang='eng'>Client Simulate Borrow</comment>
   </property>
-
-
 </root>

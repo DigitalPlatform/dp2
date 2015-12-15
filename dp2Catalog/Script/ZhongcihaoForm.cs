@@ -15,7 +15,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
@@ -252,6 +253,8 @@ namespace dp2Catalog
                     e.Parameters += ",expire=" + strExpire;
 #endif
 
+                e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
             }
@@ -274,6 +277,8 @@ namespace dp2Catalog
             e.Password = dlg.Password;
             e.SavePasswordShort = false;
             e.Parameters = "location=dp2Catalog,type=worker";
+
+            e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
 
             /*
             e.IsReader = false;

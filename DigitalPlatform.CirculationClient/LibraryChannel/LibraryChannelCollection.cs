@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
+using DigitalPlatform.LibraryClient;
+
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
@@ -200,4 +202,5 @@ namespace DigitalPlatform.CirculationClient
             }
         }
     }
+
 }

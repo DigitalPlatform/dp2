@@ -17,8 +17,6 @@ using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
@@ -31,6 +29,10 @@ using DigitalPlatform.GcatClient.gcat_new_ws;
 
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -1711,7 +1713,6 @@ true);
             LibraryChannel channel = this.GetChannel();
             try
             {
-
                 // 创建实体记录
                 for (int i = 0; i < e.DataList.Count; i++)
                 {
@@ -4691,7 +4692,7 @@ true);
 
                     long lStart = 0;
                     long lPerCount = Math.Min(50, lHitCount);
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
                     for (; ; )
@@ -4900,13 +4901,15 @@ true);
 
             string strOutputSearchID = "";
             int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
-                strSearchID,
+                "*",
+                new SearchRequest(strSearchID,
+                    "searchBiblio",
                 "<全部>",
 strQueryWord,
 strFromStyle,
 strMatchStyle,
 "",
-1000,
+1000),
 out strOutputSearchID,
 out strError);
             if (nRet == -1)
@@ -5506,7 +5509,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return -2;
                     goto ERROR1;
                 }
@@ -8339,7 +8342,9 @@ MessageBoxDefaultButton.Button1);
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\dp2circulation.exe"
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe"
 								};
 
             if (saAddRef != null)
@@ -8472,7 +8477,9 @@ MessageBoxDefaultButton.Button1);
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\dp2circulation.exe"
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe"
 								};
 
             Assembly assembly = null;
@@ -8622,7 +8629,9 @@ MessageBoxDefaultButton.Button1);
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
+									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe"
 								};
@@ -9113,7 +9122,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-            if (this.MainForm.ServerVersion < 2.39)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.39") < 0)
             {
                 strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
                 goto ERROR1;
@@ -11532,7 +11541,7 @@ value);
             string strError = "";
             int nRet = 0;
 
-            if (this.MainForm.ServerVersion < 2.39)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.39") < 0)
             {
                 strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
                 goto ERROR1;

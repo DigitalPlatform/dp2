@@ -21,7 +21,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Drawing;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
@@ -531,6 +531,13 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
+        /*
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 DigitalPlatform.OPAC.Web.MyWebPage.Page_PreRenderComplete(Object sender, EventArgs e)
+在 System.Web.UI.Page.ProcessRequestMain(Boolean includeStagesBeforeAsyncPoint, Boolean includeStagesAfterAsyncPoint)
+         * */
         protected void Page_PreRenderComplete(object sender, EventArgs e)
         {
             // 经过测试和上网找资料，我发现IE 8中Ajax功能不正常的原因是，我们的页面主要是<table>构成的，<td>元素下方的元素的.innerHTML在IE 8里面不能操作，基本上要抛出异常，我们所使用的jquery函数库来操作虽然还没有抛出异常但是功能不正常了。
@@ -540,7 +547,9 @@ namespace DigitalPlatform.OPAC.Web
                 meta.HttpEquiv = "X-UA-Compatible";
                 meta.Content = "IE=7";
 
-                this.Page.Header.Controls.AddAt(0, meta);
+                // this.Page.Header.Controls.AddAt(0, meta);
+                if (this.Header != null && this.Header.Controls != null)
+                    this.Header.Controls.AddAt(0, meta);
             }
         }
 

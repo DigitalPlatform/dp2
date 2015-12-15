@@ -10,6 +10,9 @@ using System.Xml;
 using System.Threading;
 using System.Diagnostics;
 using System.IO;
+using System.Web;
+
+using Microsoft.Win32;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -18,12 +21,10 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
-
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Web;
-using Microsoft.Win32;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -2082,7 +2083,7 @@ namespace dp2Circulation
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )

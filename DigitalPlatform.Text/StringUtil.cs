@@ -16,6 +16,43 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static int CompareVersion(string strVersion1, string strVersion2)
+        {
+            if (string.IsNullOrEmpty(strVersion1) == true)
+                strVersion1 = "0";
+            if (string.IsNullOrEmpty(strVersion2) == true)
+                strVersion2 = "0";
+
+            Version version1 = new Version(strVersion1);
+            Version version2 = new Version(strVersion2);
+
+            return version1.CompareTo(version2);
+        }
+
+        // 从一个纯路径(不含url部分)中截取库名部分
+        // parameters:
+        //      strPath 路径字符串。例如 “中文图书/1”
+        public static string GetDbName(string strPath)
+        {
+            int nRet = strPath.IndexOf("/");
+            if (nRet == -1)
+                return strPath;
+            else
+                return strPath.Substring(0, nRet);
+        }
+
+        // 从一个纯路径(不含url部分)中截取记录id部分
+        // parameters:
+        //      strPath 路径字符串。例如 “中文图书/1”
+        public static string GetRecordId(string strPath)
+        {
+            int nRet = strPath.IndexOf("/");
+            if (nRet == -1)
+                return strPath;
+            else
+                return strPath.Substring(nRet + 1).Trim();
+        }
+
         // 将 strMime 的左边部分和 strLeftParam 进行比较
         // return:
         //      false   不匹配

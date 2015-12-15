@@ -17,7 +17,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Script;
 using DigitalPlatform.Xml;
 
@@ -699,6 +699,13 @@ dlg.UiState);
             if (StringUtil.HasHead(strBarcode, "PQR:") == true)
             {
                 strError = "这是读者证号二维码";
+                return 1;
+            }
+
+            // 2015/12/9
+            if (strBarcode == "_testreader")
+            {
+                strError = "这是一个测试用的读者证号";
                 return 1;
             }
 
@@ -1744,7 +1751,8 @@ false);
                 string strFormat = "";
                 if (_cardControl != null)
                 {
-                    if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.25)
+                    if (this.NoBorrowHistory == true 
+                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.25") >= 0)
                     {
                         styles.Add("noborrowhistory");
                         // return "xml:noborrowhistory";
@@ -1753,7 +1761,8 @@ false);
                 }
                 else
                 {
-                    if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
+                    if (this.NoBorrowHistory == true
+                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.21") >= 0)
                     {
                         styles.Add("noborrowhistory");
                         // return "html:noborrowhistory";

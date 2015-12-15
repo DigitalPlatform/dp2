@@ -16,8 +16,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+//using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -824,7 +824,7 @@ namespace DigitalPlatform.OPAC.Web
             else
                 bMoveToRecycleBin = true;
 
-            MessageData [] messages = new MessageData [ids.Count];
+            MessageData[] messages = new MessageData[ids.Count];
             for (int i = 0; i < ids.Count; i++)
             {
                 messages[i] = new MessageData();
@@ -873,7 +873,7 @@ namespace DigitalPlatform.OPAC.Web
 
             string strError = "";
             int nTotalCount = 0;
-            MessageData [] messages = null;
+            MessageData[] messages = null;
             if (String.IsNullOrEmpty(this.UserID) == true)
             {
                 // text-level: 内部错误
@@ -983,7 +983,7 @@ namespace DigitalPlatform.OPAC.Web
             {
 
                 int nTotalCount = 0;
-                MessageData [] messages = null;
+                MessageData[] messages = null;
                 nRet = sessioninfo.Channel.ListMessage(
                     "", // false,
                     this.ResultSetName,
@@ -1248,9 +1248,10 @@ namespace DigitalPlatform.OPAC.Web
             string strBoxType,
             out string strError)
         {
+            strError = "";
+
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
-
 
             // 首先默认控件的当前信箱
             if (String.IsNullOrEmpty(strBoxType) == true)
@@ -1263,7 +1264,7 @@ namespace DigitalPlatform.OPAC.Web
             string strResultSetName = "messagelist_" + strBoxType;
 
             int nTotalCount = 0;
-            MessageData [] messages = null;
+            MessageData[] messages = null;
             long nRet = sessioninfo.Channel.ListMessage(
                 "search", // true,
                 strResultSetName,

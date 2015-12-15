@@ -74,7 +74,7 @@ namespace DigitalPlatform
             {
                 if (DateTime.Now < info.RetryTime)
                 {
-                    strError = "前端 [" + strClientIP + "] 因登录失败的次数太多，已被 " + this.ServerName + " 列入监控名单，禁止使用 Login() API";
+                    strError = "前端 用户名 '" + strUserName + "' IP地址 '" + strClientIP + "' 因登录失败的次数太多，已被 " + this.ServerName + " 列入监控名单，禁止使用 Login() API";
                     Thread.Sleep(ShortPauseTicks);
                     return -1;
                 }
@@ -82,7 +82,7 @@ namespace DigitalPlatform
 
             if (DateTime.Now < info.RetryTime)
             {
-                strError = "登录操作被暂时禁止。请于 " + info.RetryTime.ToShortTimeString() + " 以后重试登录";
+                strError = "前端 用户名 '" + strUserName + "' IP地址 '" + strClientIP + "' 登录操作被暂时禁止。请于 " + info.RetryTime.ToShortTimeString() + " 以后重试登录";
                 Thread.Sleep(ShortPauseTicks);
                 return -1;
             }

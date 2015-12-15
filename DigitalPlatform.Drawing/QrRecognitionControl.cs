@@ -43,6 +43,9 @@ namespace DigitalPlatform.Drawing
         {
             InitializeComponent();
 
+            // test
+            // throw new Exception("test exception");
+
             camDevices = new CameraDevices();
 
             decodingThread = new Thread(DecodeBarcode);

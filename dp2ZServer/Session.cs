@@ -9,11 +9,12 @@ using System.Runtime.Serialization;
 
 using DigitalPlatform;
 using DigitalPlatform.Z3950;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2ZServer
 {
@@ -1066,7 +1067,7 @@ namedResultSets        (14)
             int nCount = 0;
             for (; ; )
             {
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 long lRet = this.Channel.GetSearchResult(
                     null,   // stop,

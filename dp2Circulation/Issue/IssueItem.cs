@@ -13,7 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 
-using DigitalPlatform.CirculationClient.localhost;  // IssueInfo
+using DigitalPlatform.LibraryClient.localhost;  // IssueInfo
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation

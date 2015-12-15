@@ -12,9 +12,13 @@ using System.Web;
 using System.Drawing;
 using System.Resources;
 using System.Globalization;
+using System.Drawing.Imaging;
+using System.Web.UI;
 
 using ZXing;
 using ZXing.Common;
+using ZXing.QrCode;
+using ZXing.QrCode.Internal;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -22,12 +26,9 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Range;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using System.Drawing.Imaging;
-using ZXing.QrCode;
-using ZXing.QrCode.Internal;
-using System.Web.UI;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -255,8 +256,10 @@ namespace DigitalPlatform.OPAC.Server
             if (StringUtil.HasHead(strUri, "uri:") == true)
                 strUri = strUri.Substring(4).Trim();
 
-            string strDbName = ResPath.GetDbName(strRecPath);
-            string strRecID = ResPath.GetRecordId(strRecPath);
+            //string strDbName = ResPath.GetDbName(strRecPath);
+            //string strRecID = ResPath.GetRecordId(strRecPath);
+            string strDbName = StringUtil.GetDbName(strRecPath);
+            string strRecID = StringUtil.GetRecordId(strRecPath);
 
             string strOutputUri = "";
             ReplaceUri(strUri,
@@ -659,7 +662,7 @@ namespace DigitalPlatform.OPAC.Server
                     app.WriteErrorLog("opac service结束重新装载 " + this.m_strFileName);
                 else
                 {
-                    var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
+                    // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
                     app.WriteErrorLog("opac service 成功启动。版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString());
 
@@ -2873,7 +2876,8 @@ System.Text.Encoding.UTF8))
             byte[] item_timestamp = null;
 
             {
-                string strCommentDbName0 = ResPath.GetDbName(strCommentRecPath);
+                // string strCommentDbName0 = ResPath.GetDbName(strCommentRecPath);
+                string strCommentDbName0 = StringUtil.GetDbName(strCommentRecPath);
                 // 需要检查一下数据库名是否在允许的实体库名之列
                 if (this.IsCommentDbName(strCommentDbName0) == false)
                 {
@@ -2943,7 +2947,8 @@ out strError);
             byte[] item_timestamp = null;
 
             {
-                string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                // string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                string strItemDbName0 = StringUtil.GetDbName(strItemRecPath);
                 // 需要检查一下数据库名是否在允许的实体库名之列
                 if (this.IsItemDbName(strItemDbName0) == false)
                 {
@@ -3533,7 +3538,7 @@ out strError);
 
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == CirculationClient.localhost.ErrorCode.TimestampMismatch)
+                        if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.TimestampMismatch)
                         {
 
                             timestamp = new byte[output_timestamp.Length];

@@ -15,7 +15,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
@@ -482,7 +482,7 @@ namespace dp2Circulation
 
 
                     if (bPrevNext == true
-                        && this.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                        && this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                     {
                         strError += "\r\n\r\n新记录没有装载，窗口中还保留了装载前的记录";
                         goto ERROR1;

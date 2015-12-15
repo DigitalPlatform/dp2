@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 // 2013/3/16 添加 XML 注释
 

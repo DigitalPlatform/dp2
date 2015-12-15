@@ -10,6 +10,7 @@
 // 2011/8/27 将search.aspx修改为searchbiblio.aspx
 // 2014/11/5 封面图片
 // 2015/7/17 数字资源对象表格显示，采用 ScriptUtil.BuildObjectHtmlTable() 构造
+// 2015/12/10 修正一处缺少 <div class='coverimage'> 的 Bug
 
 using System;
 using System.Collections.Generic;
@@ -1607,7 +1608,7 @@ using DigitalPlatform.Text;
         else
           {
             string strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(OpacApplication.MakeObjectUrl(Host.RecPath, Root._imageUrl));
-            Host.ResultString = "<img  src='"+strObjectUrl+"' alt='封面图片'></img></div>" + Host.ResultString;
+            Host.ResultString = "<div class='coverimage'><img  src='"+strObjectUrl+"' alt='封面图片'></img></div>" + Host.ResultString;
           }
 
     }

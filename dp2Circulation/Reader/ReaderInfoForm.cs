@@ -15,17 +15,19 @@ using System.Runtime.Remoting.Channels.Ipc;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Interfaces;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -1766,7 +1768,7 @@ strNewDefault);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return -2;
                     goto ERROR1;
                 }
@@ -1919,7 +1921,7 @@ strNewDefault);
                 bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
-                    if (this.MainForm.ServerVersion < 2.51)
+                    if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.51") < 0)
                     {
                         strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + this.MainForm.ServerVersion;
                         goto ERROR1;
@@ -3899,6 +3901,7 @@ MessageBoxDefaultButton.Button2);
             this.MainForm.DisableCamera();
             try
             {
+                // 注： new CameraPhotoDialog() 可能会抛出异常
                 using (CameraPhotoDialog dlg = new CameraPhotoDialog())
                 {
                     // MainForm.SetControlFont(dlg, this.Font, false);
@@ -3934,10 +3937,7 @@ MessageBoxDefaultButton.Button2);
                         if (nRet == -1)
                             goto ERROR1;
                     }
-
-
                 }
-
             }
             finally
             {
@@ -3953,11 +3953,9 @@ MessageBoxDefaultButton.Button2);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         // 装载一条空白记录 从本地
         private void toolStripMenuItem_loadBlankFromLocal_Click(object sender, EventArgs e)

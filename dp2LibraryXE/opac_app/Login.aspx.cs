@@ -68,7 +68,6 @@ ref this.sessioninfo) == false)
         if (this.LoginControl1.KeepLogin == false)
             this.SetCookiesLogin(null, null, -1, 0);
 #endif
-
         if (WebUtil.PrepareEnvironment(this,
     ref app,
     ref sessioninfo) == false)
@@ -439,7 +438,7 @@ ref this.sessioninfo) == false)
         }
 
         return;
-        ERROR1:
+    ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         this.Response.End();
     }
@@ -586,7 +585,7 @@ ref this.sessioninfo) == false)
     protected void LoginControl1_Login(object sender, LoginEventArgs e)
     {
         string strError = "";
-        int nRet = this.LoginControl1.DoLogin(this.TitleBarControl1.SelectedLibraryCode, 
+        int nRet = this.LoginControl1.DoLogin(this.TitleBarControl1.SelectedLibraryCode,
             out strError);
 
         if (nRet == -1)
@@ -757,7 +756,7 @@ ref this.sessioninfo) == false)
         SsoInterface sso_interface = app.GetSsoInterface(strType);
         if (sso_interface == null)
         {
-            strError = "当前没有配置类型为 '"+strType+"' 的 SSO 接口";
+            strError = "当前没有配置类型为 '" + strType + "' 的 SSO 接口";
             goto ERROR1;
         }
 
@@ -773,7 +772,13 @@ ref this.sessioninfo) == false)
             goto ERROR1;
         }
 
-        string strParameters = "location=#opac_sso@"+sessioninfo.ClientIP+",index=-1,type=reader,simulate=yes,libraryCode=" + LoginControl.GetLibraryCodeParam(strLibraryCode);
+        if (string.IsNullOrEmpty(strLoginName) == true)
+        {
+            strError = "sso_interface.HostObj.GetUserInfo() 所获得的 strLoginName 不应为空";
+            goto ERROR1;
+        }
+
+        string strParameters = "location=#opac_sso@" + sessioninfo.ClientIP + ",index=-1,type=reader,simulate=yes,libraryCode=" + LoginControl.GetLibraryCodeParam(strLibraryCode);
         string strPassword = app.ManagerUserName + "," + app.ManagerPassword;   // simulate登录的需要
         // 读者身份登录
         // return:
@@ -793,7 +798,7 @@ ref this.sessioninfo) == false)
 
         if (lRet == -1 || lRet == 0)    // lRet == 0 是增加的部分 2014/12/20
         {
-            strError = "对图书馆读者帐户 '"+strLoginName+"' 进行登录时出错：" + strError;
+            strError = "对图书馆读者帐户 '" + strLoginName + "' 进行登录时出错：" + strError;
             goto ERROR1;
         }
         if (lRet > 1)

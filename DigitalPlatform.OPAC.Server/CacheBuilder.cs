@@ -17,8 +17,9 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.rms;  // rmsutil
 
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -801,7 +802,7 @@ namespace DigitalPlatform.OPAC.Server
                         TimeSpan delta = DateTime.Now - start_time;
 
                         // 超时处理
-                        if (this.Channel.ErrorCode == CirculationClient.localhost.ErrorCode.RequestTimeOut
+                        if (this.Channel.ErrorCode == LibraryClient.localhost.ErrorCode.RequestTimeOut
                             && nRedoCount < 5)
                         {
                             this.Channel.Abort();
@@ -1760,7 +1761,8 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
 
-            string strItemDbName = ResPath.GetDbName(strItemRecPath);
+            // string strItemDbName = ResPath.GetDbName(strItemRecPath);
+            string strItemDbName = StringUtil.GetDbName(strItemRecPath);
             if (string.IsNullOrEmpty(strItemDbName) == true)
             {
                 strError = "从册记录路径 '" + strItemRecPath + "' 中获取数据库名的过程出错";
@@ -1811,7 +1813,8 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
 
-            string strItemDbName = ResPath.GetDbName(strItemRecPath);
+            // string strItemDbName = ResPath.GetDbName(strItemRecPath);
+            string strItemDbName = StringUtil.GetDbName(strItemRecPath);
             if (string.IsNullOrEmpty(strItemDbName) == true)
             {
                 strError = "从册记录路径 '" + strItemRecPath + "' 中获取数据库名的过程出错";
@@ -2030,7 +2033,8 @@ namespace DigitalPlatform.OPAC.Server
 
 
                         string strBiblioDbName = "";
-                        string strDbName = ResPath.GetDbName(strPath);
+                        // string strDbName = ResPath.GetDbName(strPath);
+                        string strDbName = StringUtil.GetDbName(strPath);
                         string strDbType = this.App.GetDbType(strDbName,
                             out strBiblioDbName);
                         if (strDbType == null)

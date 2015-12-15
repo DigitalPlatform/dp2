@@ -33,13 +33,15 @@ using DigitalPlatform.Script;
 using DigitalPlatform.IO;   // DateTimeUtil
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -345,8 +347,18 @@ namespace dp2Circulation
                 this.qrRecognitionControl1.TabIndex = 0;
                 this.qrRecognitionControl1.BackColor = Color.DarkGray;   //  System.Drawing.SystemColors.Window;
             }
-            catch
+            catch (FileLoadException ex)
             {
+                if (Detect360() == true)
+                {
+                    MessageBox.Show("dp2Circulation (内务)受到 360 软件干扰而无法启动。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
+                    throw ex;
+                }
+                ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
+            }
+            catch(Exception ex)
+            {
+                ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
         }
 
@@ -380,7 +392,7 @@ namespace dp2Circulation
             this.toolStrip_main.BackColor = Color.Transparent;
              * */
 
-            this._channelPool.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
             this.BeginInvoke(new Action(FirstInitial));
         }
@@ -803,7 +815,7 @@ Stack:
 
             if (this._channelPool != null)
             {
-                this._channelPool.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
                 this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
                 this._channelPool.Close();
             }
@@ -2388,22 +2400,38 @@ Stack:
         bool _expireVersionChecked = false;
 
         internal void Channel_BeforeLogin(object sender,
-            DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
+            DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
 #if SN
             if (_expireVersionChecked == false)
             {
-                double base_version = 2.36;
+                string base_version = "2.36";
                 string strExpire = GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false
-                    && this.ServerVersion < base_version
-                    && this.ServerVersion != 0)
+                    && StringUtil.CompareVersion(this.ServerVersion, base_version) < 0
+                    && this.ServerVersion != "0")
                 {
                     string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
                     Program.PromptAndExit(this, strError);
+                    e.Cancel = true;
                     return;
                 }
                 _expireVersionChecked = true;
+            }
+#endif
+
+#if NO
+            {
+                double base_version = 2.60;
+
+                if (this.ServerVersion < base_version
+                    && this.ServerVersion != 0)
+                {
+                    string strError = "dp2 前端所连接的 dp2library 版本必须升级为 " + base_version + " 以上时才能使用 (当前 dp2library 版本为 " + this.ServerVersion.ToString() + ")\r\n\r\n注：升级服务器的操作非常容易：\r\n1) 若是 dp2 标准版，请系统管理员在服务器机器上，运行 dp2installer(dp2服务器安装工具) 即可。这个模块的安装页面是 http://dp2003.com/dp2installer/v1/publish.htm 。\r\n2) 若是单机版或小型版，反复重启 dp2libraryxe 模块多次即可自动升级。\r\n\r\n亲，若有任何问题，请及时联系数字平台哟 ~";
+                    Program.PromptAndExit(this, strError);
+                    e.Cancel = true;
+                    return;
+                }
             }
 #endif
 
@@ -2446,6 +2474,8 @@ Stack:
                 // 2014/10/23
                 if (this.TestMode == true)
                     e.Parameters += ",testmode=true";
+
+                e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -2494,6 +2524,8 @@ Stack:
             // 2014/10/23
             if (this.TestMode == true)
                 e.Parameters += ",testmode=true";
+
+            e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)
@@ -4139,7 +4171,7 @@ Stack:
                 byte[] baTimestamp = null;
                 if (lRet >= 1)
                 {
-                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     lRet = channel.GetSearchResult(
                         Stop,
                         "default",
@@ -4152,7 +4184,7 @@ Stack:
                     if (lRet == -1)
                         goto ERROR1;
 
-                    DigitalPlatform.CirculationClient.localhost.Record record = searchresults[0];
+                    DigitalPlatform.LibraryClient.localhost.Record record = searchresults[0];
 
                     strXml = (record.RecordBody.Xml);
                     strRecPath = record.Path;
@@ -4308,7 +4340,7 @@ Stack:
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 for (; ; )
                 {
@@ -4327,7 +4359,7 @@ Stack:
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record record = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
 
                         results.Add(record.Path + "|" + record.RecordBody.Xml);
                     }
@@ -4398,7 +4430,7 @@ Stack:
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return -2;
                     goto ERROR1;
                 }
@@ -4583,7 +4615,7 @@ Stack:
                     out strError);
                 if (lRet == -1)
                 {
-                    if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
+                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return -2;
                     return -1;
                 }
@@ -7051,7 +7083,7 @@ out strError);
             form.Show();
 #endif
             // OpenWindow<NewInventoryForm>();
-            if (this.ServerVersion < 2.50)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.50") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.50 和以上才能使用 盘点窗");
                 return;
@@ -7521,7 +7553,7 @@ Keys keyData)
 
         private void MenuItem_openEntityRegisterWizard_Click(object sender, EventArgs e)
         {
-            if (this.ServerVersion < 2.48)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.48") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.48 和以上才能使用 册登记窗");
                 return;
@@ -7916,7 +7948,7 @@ Keys keyData)
 
         private void MenuItem_openArrivedSearchForm_Click(object sender, EventArgs e)
         {
-            if (this.ServerVersion < 2.47)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约到书查询窗");
                 return;
@@ -7926,7 +7958,7 @@ Keys keyData)
 
         private void MenuItem_openReservationListForm_Click(object sender, EventArgs e)
         {
-            if (this.ServerVersion < 2.47)
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约响应窗");
                 return;
@@ -7957,12 +7989,12 @@ Keys keyData)
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            Stop Stop = new DigitalPlatform.Stop();
-            Stop.Register(stopManager, true);	// 和容器关联
+            Stop temp_stop = new DigitalPlatform.Stop();
+            temp_stop.Register(stopManager, true);	// 和容器关联
 
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在打包事件日志信息 ...");
-            Stop.BeginLoop();
+            temp_stop.OnStop += new StopEventHandler(this.DoStop);
+            temp_stop.Initial("正在打包事件日志信息 ...");
+            temp_stop.BeginLoop();
             this.EnableControls(false);
 
             try
@@ -7989,9 +8021,9 @@ Keys keyData)
                         Application.DoEvents();
 
                         if (strText != null)
-                            this.Stop.SetMessage(strText);
+                            temp_stop.SetMessage(strText);
 
-                        if (this.Stop != null && this.Stop.State != 0)
+                        if (temp_stop != null && temp_stop.State != 0)
                             return false;
                         return true;
                     },
@@ -8011,14 +8043,14 @@ Keys keyData)
             finally
             {
                 this.EnableControls(true);
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
+                temp_stop.EndLoop();
+                temp_stop.OnStop -= new StopEventHandler(this.DoStop);
+                temp_stop.Initial("");
 
-                if (Stop != null) // 脱离关联
+                if (temp_stop != null) // 脱离关联
                 {
-                    Stop.Unregister(true);
-                    Stop = null;
+                    temp_stop.Unregister(true);
+                    temp_stop = null;
                 }
             }
             return;

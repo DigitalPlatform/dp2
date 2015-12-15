@@ -23,7 +23,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 
-using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -661,7 +661,7 @@ namespace dp2Circulation
 
                 long lStart = 0;
                 long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
                 for (; ; )
@@ -703,7 +703,7 @@ namespace dp2Circulation
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        DigitalPlatform.CirculationClient.localhost.Record result_item = searchresults[i];
+                        DigitalPlatform.LibraryClient.localhost.Record result_item = searchresults[i];
 
                         string strBarcode = result_item.Cols[0];
                         string strRecPath = result_item.Path;
