@@ -5,12 +5,13 @@
 
 // CNMARC格式图书 html 格式构造
 // (C)Copyright 2006-2015 数字平台(北京)软件有限责任公司
-// 最后修改时间: 2015/7/17
+// 最后修改时间: 2015/12/14
 
 // 2011/8/27 将search.aspx修改为searchbiblio.aspx
 // 2014/11/5 封面图片
 // 2015/7/17 数字资源对象表格显示，采用 ScriptUtil.BuildObjectHtmlTable() 构造
 // 2015/12/10 修正一处缺少 <div class='coverimage'> 的 Bug
+// 2015/12/14 Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
 
 using System;
 using System.Collections.Generic;
@@ -1405,7 +1406,7 @@ using DigitalPlatform.Text;
         </field>
         <end>
           <![CDATA[
-                      Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "MediumImage");
+                      Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
                       
                       Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath);
 		]]></end>

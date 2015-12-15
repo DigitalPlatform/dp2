@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Threading;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -20,17 +21,20 @@ namespace dp2Circulation
     {
         // 复制出一个绿色安装
         // parameters:
+        //      strVersion  主要 .exe 的版本号
         //      strProgramDir   程序目录
         //      strDataDir  数据目录
         //      strTargetDir    目标安装目录
         // return:
         //      -1  出错
-        //      0   没有必要创建。(也许是因为当前程序正是从备用位置启动的)
+        //      0   没有必要创建。(也许是因为当前程序正是从备用位置启动的、版本没有发生更新)
         //      1   已经创建
         public static int CopyGreen(
+            string strVersion,
             string strProgramDir,
             string strDataDir,
             string strTargetDir,
+            StringBuilder debugInfo,
             out string strError)
         {
             strError = "";
@@ -41,11 +45,26 @@ namespace dp2Circulation
                 return 0;
             }
 
+            // 判断版本号是否有变化
+            string strVersionFilePath = Path.Combine(strTargetDir, "_version.txt");
+#if NO
+            if (File.Exists(strVersionFilePath) == true)
+            {
+                using (StreamReader reader = new StreamReader(strVersionFilePath, Encoding.Default))
+                {
+                    string strLine = reader.ReadLine();
+                    if (StringUtil.CompareVersion(strLine, strVersion) >= 0)
+                        return 0;
+                }
+            }
+#endif
+
             // 将两个要害文件的最后修改时间进行比较？如果没有变化就不要复制了
 
             int nRet = CopyDirectory(strProgramDir,
                 strTargetDir,
                 FileNameFilter,
+                debugInfo,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -55,9 +74,16 @@ namespace dp2Circulation
                 nRet = CopyDirectory(strDataDir,
         strTargetDir,
         FileNameFilter,
+        debugInfo,
         out strError);
                 if (nRet == -1)
                     return -1;
+            }
+
+            // 最后写入主要 .exe 的版本号
+            using (StreamWriter writer = new StreamWriter(strVersionFilePath, false, Encoding.Default))
+            {
+                writer.Write(strVersion);
             }
 
             return 0;
@@ -95,6 +121,7 @@ Stack:
         public static int CopyDirectory(string strSourceDir,
             string strTargetDir,
             FileNameFilterProc filter_proc,
+            StringBuilder debugInfo,
             out string strError)
         {
             strError = "";
@@ -133,6 +160,7 @@ Stack:
                         int nRet = CopyDirectory(sub.FullName,
                             Path.Combine(strTargetDir, sub.Name),
                             filter_proc,
+                            debugInfo,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -144,13 +172,19 @@ Stack:
                     string target = Path.Combine(strTargetDir, sub.Name);
                     // 如果目标文件已经存在，并且修后修改时间相同，则不复制了
                     if (File.Exists(target) == true && File.GetLastWriteTimeUtc(source) == File.GetLastWriteTimeUtc(target))
+                    {
+                        if (debugInfo != null)
+                            debugInfo.Append("目标文件 " + target + "已经存在，并且和源文件最后修改时间相同，被跳过\r\n");
                         continue;
+                    }
                     // 拷贝文件，最多重试 10 次
                     for (int nRedoCount = 0; ; nRedoCount++)
                     {
                         try
                         {
                             File.Copy(source, target, true);
+                            if (debugInfo != null)
+                                debugInfo.Append("复制文件 "+source+" --> "+target+"\r\n");
                         }
                         catch(Exception ex)
                         {
