@@ -740,7 +740,7 @@ namespace DigitalPlatform.CirculationClient
                 }
 #endif
 
-                string version = "0";
+                string version = "0.0";
                 // return:
                 //      -1  error
                 //      0   dp2Library的版本号过低。警告信息在strError中

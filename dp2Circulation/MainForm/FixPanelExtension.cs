@@ -13,12 +13,45 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
-        // 属性页标题文字动画
-        public void FixedPageAnimation(TabPage page)
+        internal int _fixedPanelAnimation = 0; // 0 表示尚未初始化; -1: false; 1: true
+
+        public bool FixedPanelAnimationEnabled
         {
+            get
+            {
+                if (_fixedPanelAnimation != 0)
+                    return _fixedPanelAnimation == 1 ? true : false;
+
+                bool bRet = this.AppInfo.GetBoolean(
+                "MainForm",
+                "fixed_panel_animation",
+                false);
+
+                if (bRet)
+                    _fixedPanelAnimation = 1;
+                else
+                    _fixedPanelAnimation = -1;
+                return bRet;
+            }
+            set
+            {
+                _fixedPanelAnimation = 0;
+                this.AppInfo.SetBoolean(
+"MainForm",
+"fixed_panel_animation",
+value);
+            }
+        }
+
+        // 属性页标题文字动画
+        public void FixedPanelAnimation(TabPage page)
+        {
+            if (this.FixedPanelAnimationEnabled == false)
+                return;
+
             if (this.InvokeRequired)
             {
-                this.BeginInvoke(new Action<TabPage>(FixedPageAnimation), page);
+                this.BeginInvoke(new Action<TabPage>(FixedPanelAnimation), page);
                 return;
             }
 

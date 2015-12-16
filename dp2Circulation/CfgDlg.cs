@@ -354,6 +354,11 @@ false);
                 "hide_fixed_panel",
                 false);
 
+            this.checkBox_ui_fixedPanelAnimationEnabled.Checked = ap.GetBoolean(
+                "MainForm",
+                "fixed_panel_animation",
+                false);
+
             this.textBox_ui_defaultFont.Text = ap.GetString(
     "Global",
     "default_font",
@@ -719,7 +724,6 @@ false);
     "");
             }
 
-
             ap.SetBoolean(
                 "default_account",
                 "isreader",
@@ -932,6 +936,11 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "MainForm",
                 "hide_fixed_panel",
                 this.checkBox_ui_hideFixedPanel.Checked);
+
+            ap.SetBoolean(
+    "MainForm",
+    "fixed_panel_animation",
+    this.checkBox_ui_fixedPanelAnimationEnabled.Checked);
 
             ap.SetString(
                 "Global",
@@ -1191,6 +1200,8 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 // 重新获得各种库名、列表
                 this.MainForm.StartPrepareNames(false, false);
             }
+
+            this.MainForm.FixedPanelAnimationEnabled = this.checkBox_ui_fixedPanelAnimationEnabled.Checked;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

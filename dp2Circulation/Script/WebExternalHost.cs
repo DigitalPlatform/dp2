@@ -1197,6 +1197,7 @@ namespace dp2Circulation
                         }
 
                         // 注: Channel.Timeout 在 GetBiblioSummary() 函数中会自动设置
+                        
                         lRet = this.Channel.GetBiblioSummary(
                             stop,
                             strItemBarcode,

@@ -2476,7 +2476,7 @@ Culture=neutral, PublicKeyToken=null
                     if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                     {
                         // 原来的dp2Library不具备GetVersion() API，会走到这里
-                        this.ServerVersion = "0";
+                        this.ServerVersion = "0.0";
                         this.ServerUID = "";
                         strError = "当前 dp2Circulation 版本需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                         return 0;

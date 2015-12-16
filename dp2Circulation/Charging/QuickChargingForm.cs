@@ -14,9 +14,9 @@ using System.Drawing.Drawing2D;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Script;
 using DigitalPlatform.Xml;

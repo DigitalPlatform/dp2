@@ -31,6 +31,8 @@ namespace dp2Circulation
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CfgDlg));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_server = new System.Windows.Forms.TabPage();
+            this.textBox_server_greenPackage = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
             this.textBox_server_pinyin_gcatUrl = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_server_authorNumber_gcatUrl = new System.Windows.Forms.TextBox();
@@ -207,8 +209,7 @@ namespace dp2Circulation
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.textBox_server_greenPackage = new System.Windows.Forms.TextBox();
-            this.label31 = new System.Windows.Forms.Label();
+            this.checkBox_ui_fixedPanelAnimationEnabled = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -302,6 +303,24 @@ namespace dp2Circulation
             this.tabPage_server.TabIndex = 0;
             this.tabPage_server.Text = " 服务器 ";
             this.tabPage_server.UseVisualStyleBackColor = true;
+            // 
+            // textBox_server_greenPackage
+            // 
+            this.textBox_server_greenPackage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_server_greenPackage.Location = new System.Drawing.Point(9, 208);
+            this.textBox_server_greenPackage.Name = "textBox_server_greenPackage";
+            this.textBox_server_greenPackage.Size = new System.Drawing.Size(470, 21);
+            this.textBox_server_greenPackage.TabIndex = 8;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(7, 192);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(227, 12);
+            this.label31.TabIndex = 7;
+            this.label31.Text = "dp2Circulation 绿色安装包 服务器 URL:";
             // 
             // textBox_server_pinyin_gcatUrl
             // 
@@ -1134,6 +1153,7 @@ namespace dp2Circulation
             // tabPage_ui
             // 
             this.tabPage_ui.AutoScroll = true;
+            this.tabPage_ui.Controls.Add(this.checkBox_ui_fixedPanelAnimationEnabled);
             this.tabPage_ui.Controls.Add(this.button_ui_getDefaultFont);
             this.tabPage_ui.Controls.Add(this.textBox_ui_defaultFont);
             this.tabPage_ui.Controls.Add(this.label16);
@@ -1150,29 +1170,29 @@ namespace dp2Circulation
             // 
             // button_ui_getDefaultFont
             // 
-            this.button_ui_getDefaultFont.Location = new System.Drawing.Point(306, 76);
+            this.button_ui_getDefaultFont.Location = new System.Drawing.Point(305, 110);
             this.button_ui_getDefaultFont.Name = "button_ui_getDefaultFont";
             this.button_ui_getDefaultFont.Size = new System.Drawing.Size(48, 23);
-            this.button_ui_getDefaultFont.TabIndex = 5;
+            this.button_ui_getDefaultFont.TabIndex = 6;
             this.button_ui_getDefaultFont.Text = "...";
             this.button_ui_getDefaultFont.UseVisualStyleBackColor = true;
             this.button_ui_getDefaultFont.Click += new System.EventHandler(this.button_ui_getDefaultFont_Click);
             // 
             // textBox_ui_defaultFont
             // 
-            this.textBox_ui_defaultFont.Location = new System.Drawing.Point(139, 78);
+            this.textBox_ui_defaultFont.Location = new System.Drawing.Point(138, 112);
             this.textBox_ui_defaultFont.Name = "textBox_ui_defaultFont";
             this.textBox_ui_defaultFont.Size = new System.Drawing.Size(161, 21);
-            this.textBox_ui_defaultFont.TabIndex = 4;
+            this.textBox_ui_defaultFont.TabIndex = 5;
             // 
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(4, 81);
+            this.label16.Location = new System.Drawing.Point(3, 115);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(77, 12);
-            this.label16.TabIndex = 3;
-            this.label16.Text = "缺省字体(&D):";
+            this.label16.TabIndex = 4;
+            this.label16.Text = "默认字体(&D):";
             // 
             // checkBox_ui_hideFixedPanel
             // 
@@ -2193,7 +2213,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(297, 84);
+            this.groupBox7.Size = new System.Drawing.Size(280, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2201,7 +2221,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(186, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(169, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2215,7 +2235,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(285, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(268, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2338,23 +2358,16 @@ namespace dp2Circulation
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // textBox_server_greenPackage
+            // checkBox_ui_fixedPanelAnimationEnabled
             // 
-            this.textBox_server_greenPackage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_server_greenPackage.Location = new System.Drawing.Point(9, 208);
-            this.textBox_server_greenPackage.Name = "textBox_server_greenPackage";
-            this.textBox_server_greenPackage.Size = new System.Drawing.Size(470, 21);
-            this.textBox_server_greenPackage.TabIndex = 8;
-            // 
-            // label31
-            // 
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(7, 192);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(227, 12);
-            this.label31.TabIndex = 7;
-            this.label31.Text = "dp2Circulation 绿色安装包 服务器 URL:";
+            this.checkBox_ui_fixedPanelAnimationEnabled.AutoSize = true;
+            this.checkBox_ui_fixedPanelAnimationEnabled.Location = new System.Drawing.Point(4, 66);
+            this.checkBox_ui_fixedPanelAnimationEnabled.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_ui_fixedPanelAnimationEnabled.Name = "checkBox_ui_fixedPanelAnimationEnabled";
+            this.checkBox_ui_fixedPanelAnimationEnabled.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_ui_fixedPanelAnimationEnabled.TabIndex = 3;
+            this.checkBox_ui_fixedPanelAnimationEnabled.Text = "固定面板活动动画(&A)";
+            this.checkBox_ui_fixedPanelAnimationEnabled.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -2630,5 +2643,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.TextBox textBox_server_greenPackage;
         private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.CheckBox checkBox_ui_fixedPanelAnimationEnabled;
     }
 }

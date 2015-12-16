@@ -329,7 +329,7 @@ namespace DigitalPlatform.LibraryClient
             out string strError)
         {
             strError = "";
-            strVersion = "0";
+            strVersion = "0.0";
 
             // string strVersion = "";
             string strUID = "";
@@ -342,7 +342,7 @@ out strError);
                 if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                 {
                     // 原来的dp2Library不具备GetVersion() API，会走到这里
-                    strVersion = "0";
+                    strVersion = "0.0";
                     strError = "dp2 前端需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                     return 0;
                 }

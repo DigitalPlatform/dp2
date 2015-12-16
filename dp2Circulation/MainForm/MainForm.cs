@@ -1244,7 +1244,6 @@ Stack:
             form.MainForm = this;
             form.Show();
 #endif
-
             OpenWindow<QuickChargingForm>();
         }
 
@@ -2409,7 +2408,7 @@ Stack:
                 string strExpire = GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false
                     && StringUtil.CompareVersion(this.ServerVersion, base_version) < 0
-                    && this.ServerVersion != "0")
+                    && this.ServerVersion != "0.0")
                 {
                     string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
                     Program.PromptAndExit(this, strError);

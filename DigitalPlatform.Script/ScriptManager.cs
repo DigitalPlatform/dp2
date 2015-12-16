@@ -84,10 +84,8 @@ namespace DigitalPlatform.Script
         // 从xml文件中装载内容到内存
         public void Load(bool bAutoCreate = true)
         {
-            if (CfgFilePath == "")
-            {
-                throw (new Exception("CfgFilePath成员值为空"));
-            }
+            if (string.IsNullOrEmpty(CfgFilePath) == true)
+                throw (new ArgumentException("ScriptManager.CfgFilePath 成员值不应为空"));
 
             try
             {
@@ -114,9 +112,9 @@ namespace DigitalPlatform.Script
 
                 dom.Load(this.CfgFilePath);
             }
-            catch (Exception ex)
+            catch (Exception ex0)
             {
-                throw ex;
+                throw new Exception("装载文件 '"+this.CfgFilePath+"' 到 XmlDocument 时出错: " + ex0.Message, ex0);
             }
 
             // 缺省代码目录
@@ -128,8 +126,7 @@ namespace DigitalPlatform.Script
             {
                 // 设置为执行程序目录之下clientcfgs目录
                 DefaultCodeFileDir =
-                    Environment.CurrentDirectory + "\\clientcfgs";
-
+                    Path.Combine(Environment.CurrentDirectory, "clientcfgs");
             }
             else
             {
@@ -140,11 +137,10 @@ namespace DigitalPlatform.Script
                 {
                     if (String.IsNullOrEmpty(this.DataDir) == true)
                         throw new Exception("当DefaultCodeFileDir=" + DefaultCodeFileDir + "为相对路径时，需要定义this.DataDir帮助确定全路径。");
-                    strPath = PathUtil.MergePath(this.DataDir, DefaultCodeFileDir);
+                    strPath = Path.Combine(this.DataDir, DefaultCodeFileDir);
                 }
 
                 DirectoryInfo di = new DirectoryInfo(strPath);
-
                 DefaultCodeFileDir = di.FullName;
             }
         }

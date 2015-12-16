@@ -89,7 +89,7 @@ namespace dp2Catalog
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public string Version = "0";  // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
+        public string Version = "0.0";  // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
 
         public bool TestMode = false;   // 是否为评估模式
 
@@ -129,7 +129,7 @@ namespace dp2Catalog
 
             try
             {
-                string version = "0";
+                string version = "0.0";
                 // return:
                 //      -1  error
                 //      0   dp2Library的版本号过低。警告信息在strError中
