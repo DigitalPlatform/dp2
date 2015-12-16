@@ -94,8 +94,11 @@ namespace dp2Circulation
             // Application.DoEvents();
 
             // ClickOnce 特殊文件不要复制
-            if (Path.GetExtension(fi.Name).ToLower() == "cdf-ms")
+            string strExtension = Path.GetExtension(fi.Name).ToLower();
+            if (strExtension == ".cdf-ms"
+                || strExtension == ".manifest")
                 return false;
+
             // 临时文件不要复制
             if (string.IsNullOrEmpty(fi.Name) == false && fi.Name[0] == '~')
                 return false;
