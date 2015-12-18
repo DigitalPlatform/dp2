@@ -128,15 +128,15 @@ namespace DigitalPlatform.MessageClient
                 OnAddMessageRecieved(name, message)
                 );
 
-            HubProxy.On<SearchRequest>("searchBiblio",
+            HubProxy.On<SearchRequest>("search",
                 (searchParam) => OnSearchBiblioRecieved(searchParam)
                 );
 
             HubProxy.On<string,
     long,
     long,
-    IList<BiblioRecord>,
-        string>("responseSearchBiblio", (searchID,
+    IList<Record>,
+        string>("responseSearch", (searchID,
     resultCount,
     start,
     records,
@@ -277,7 +277,7 @@ SearchRequest param
         public virtual void OnSearchResponseRecieved(string searchID,
     long resultCount,
     long start,
-    IList<BiblioRecord> records,
+    IList<Record> records,
     string errorInfo)
         {
         }
@@ -465,7 +465,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 );
             try
             {
-                Task<MessageResult> task = HubProxy.Invoke<MessageResult>("RequestSearchBiblio",
+                Task<MessageResult> task = HubProxy.Invoke<MessageResult>("RequestSearch",
 #if NO
                     inputSearchID,
                     dbNameList,
@@ -538,12 +538,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             string searchID,
             long resultCount,
             long start,
-            IList<BiblioRecord> records,
+            IList<Record> records,
             string errorInfo)
         {
             try
             {
-                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSearchBiblio",
+                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSearch",
     searchID,
     resultCount,
     start,
@@ -639,7 +639,7 @@ errorInfo);
         public string ErrorInfo { get; set; }   // 出错信息
     }
 
-    public class BiblioRecord
+    public class Record
     {
         // 记录路径。这是本地路径，例如 “图书总库/1”
         public string RecPath { get; set; }

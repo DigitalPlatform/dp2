@@ -1450,7 +1450,7 @@ out strError);
             // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
             // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
             // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
-            foreach (BiblioRecord record in e.Records)
+            foreach (DigitalPlatform.MessageClient.Record record in e.Records)
             {
                 string strXml = record.Data;
 

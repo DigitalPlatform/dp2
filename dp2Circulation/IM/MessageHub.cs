@@ -326,7 +326,7 @@ searchParam
 
         void GetPatronInfo(SearchRequest searchParam)
         {
-            IList<BiblioRecord> records = new List<BiblioRecord>();
+            IList<Record> records = new List<Record>();
 
             LibraryChannel channel = GetChannel();
             try
@@ -371,7 +371,7 @@ strError);  // 出错信息大概为 not found。
                 int i = 0;
                 foreach (string result in results)
                 {
-                    BiblioRecord biblio = new BiblioRecord();
+                    Record biblio = new Record();
                     biblio.RecPath = strRecPath;
                     biblio.Data = result;
                     biblio.Format = formats[i];
@@ -419,7 +419,7 @@ SearchRequest searchParam
                 return;
             }
 
-            IList<BiblioRecord> records = new List<BiblioRecord>();
+            IList<Record> records = new List<Record>();
 
             string strResultSetName = "default";
 
@@ -535,7 +535,7 @@ strError);  // 出错信息大概为 not found。
                         records.Clear();
                         foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                         {
-                            BiblioRecord biblio = new BiblioRecord();
+                            Record biblio = new Record();
                             biblio.RecPath = record.Path;
                             biblio.Data = record.RecordBody.Xml;
                             records.Add(biblio);
@@ -570,7 +570,7 @@ strError);  // 出错信息大概为 not found。
         public override void OnSearchResponseRecieved(string searchID,
             long resultCount,
             long start,
-            IList<BiblioRecord> records,
+            IList<Record> records,
             string errorInfo)
         {
 #if NO
@@ -674,7 +674,7 @@ strError);  // 出错信息大概为 not found。
         public string SsearchID = "";   // 检索请求的 ID
         public long ResultCount = 0;    // 整个结果集中记录个数
         public long Start = 0;  // Records 从整个结果集的何处开始
-        public IList<BiblioRecord> Records = null;  // 命中的书目记录集合
+        public IList<Record> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
     }
 }
