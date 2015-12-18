@@ -1409,6 +1409,29 @@ Stack:
 
         }
 
+        public string MessageUserName
+        {
+            get
+            {
+                return this.AppInfo.GetString(
+    "message",
+    "username",
+    "");
+            }
+        }
+
+        public string MessagePassword
+        {
+            get
+            {
+                string strPassword = this.AppInfo.GetString(
+        "message",
+        "password",
+        "");
+                return this.DecryptPasssword(strPassword);
+            }
+        }
+
         // 系统参数配置
         private void MenuItem_configuration_Click(object sender, EventArgs e)
         {
@@ -1423,6 +1446,9 @@ Stack:
                 bOldShareBiblio = this.MessageHub.ShareBiblio;
                 strOldDp2MserverUrl = this.MessageHub.dp2MServerUrl;
             }
+
+            string strOldMessageUserName = this.MessageUserName;
+            string strOldMessagePassword = this.MessagePassword;
 
             CfgDlg dlg = new CfgDlg();
 
@@ -1468,10 +1494,15 @@ Stack:
             }
 
             if (this.MessageHub != null
-                && (bOldShareBiblio != this.MessageHub.ShareBiblio || strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl))
+                && (bOldShareBiblio != this.MessageHub.ShareBiblio 
+                || strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl
+                || strOldMessageUserName != this.MessageUserName
+                || strOldMessagePassword != this.MessagePassword))
             {
                 // URL 变化，需要先关闭然后重新连接
-                if (strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl)
+                if (strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl
+                    || strOldMessageUserName != this.MessageUserName
+                    || strOldMessagePassword != this.MessagePassword)
                     this.MessageHub.CloseConnection();
 
                 // TODO: 如果没有 Connect，要先 Connect

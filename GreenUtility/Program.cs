@@ -1,5 +1,4 @@
-﻿using Ionic.Zip;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+
+using Ionic.Zip;
 
 /*
  * 制作和解压绿色更新安装包的实用工具程序

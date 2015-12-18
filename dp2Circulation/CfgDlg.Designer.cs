@@ -108,6 +108,7 @@ namespace dp2Circulation
             this.checkBox_itemManagement_cataloging = new System.Windows.Forms.CheckBox();
             this.checkBox_itemManagement_verifyItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_ui = new System.Windows.Forms.TabPage();
+            this.checkBox_ui_fixedPanelAnimationEnabled = new System.Windows.Forms.CheckBox();
             this.button_ui_getDefaultFont = new System.Windows.Forms.Button();
             this.textBox_ui_defaultFont = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
@@ -203,13 +204,16 @@ namespace dp2Circulation
             this.comboBox_labelPrint_accessNoSource = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.tabPage_message = new System.Windows.Forms.TabPage();
-            this.textBox_server_dp2MServerUrl = new System.Windows.Forms.TextBox();
+            this.textBox_message_dp2MServerUrl = new System.Windows.Forms.TextBox();
             this.label29 = new System.Windows.Forms.Label();
             this.label_comment = new System.Windows.Forms.Label();
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_ui_fixedPanelAnimationEnabled = new System.Windows.Forms.CheckBox();
+            this.textBox_message_password = new System.Windows.Forms.TextBox();
+            this.textBox_message_userName = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.label33 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -1167,6 +1171,17 @@ namespace dp2Circulation
             this.tabPage_ui.TabIndex = 4;
             this.tabPage_ui.Text = "外观";
             this.tabPage_ui.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_ui_fixedPanelAnimationEnabled
+            // 
+            this.checkBox_ui_fixedPanelAnimationEnabled.AutoSize = true;
+            this.checkBox_ui_fixedPanelAnimationEnabled.Location = new System.Drawing.Point(4, 66);
+            this.checkBox_ui_fixedPanelAnimationEnabled.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_ui_fixedPanelAnimationEnabled.Name = "checkBox_ui_fixedPanelAnimationEnabled";
+            this.checkBox_ui_fixedPanelAnimationEnabled.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_ui_fixedPanelAnimationEnabled.TabIndex = 3;
+            this.checkBox_ui_fixedPanelAnimationEnabled.Text = "固定面板活动动画(&A)";
+            this.checkBox_ui_fixedPanelAnimationEnabled.UseVisualStyleBackColor = true;
             // 
             // button_ui_getDefaultFont
             // 
@@ -2213,7 +2228,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(280, 84);
+            this.groupBox7.Size = new System.Drawing.Size(263, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2221,7 +2236,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(169, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(152, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2235,7 +2250,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(268, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(251, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2284,7 +2299,11 @@ namespace dp2Circulation
             // tabPage_message
             // 
             this.tabPage_message.AutoScroll = true;
-            this.tabPage_message.Controls.Add(this.textBox_server_dp2MServerUrl);
+            this.tabPage_message.Controls.Add(this.textBox_message_password);
+            this.tabPage_message.Controls.Add(this.textBox_message_userName);
+            this.tabPage_message.Controls.Add(this.label32);
+            this.tabPage_message.Controls.Add(this.label33);
+            this.tabPage_message.Controls.Add(this.textBox_message_dp2MServerUrl);
             this.tabPage_message.Controls.Add(this.label29);
             this.tabPage_message.Controls.Add(this.label_comment);
             this.tabPage_message.Controls.Add(this.checkBox_message_shareBiblio);
@@ -2295,14 +2314,14 @@ namespace dp2Circulation
             this.tabPage_message.Text = "消息";
             this.tabPage_message.UseVisualStyleBackColor = true;
             // 
-            // textBox_server_dp2MServerUrl
+            // textBox_message_dp2MServerUrl
             // 
-            this.textBox_server_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_message_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_server_dp2MServerUrl.Location = new System.Drawing.Point(11, 123);
-            this.textBox_server_dp2MServerUrl.Name = "textBox_server_dp2MServerUrl";
-            this.textBox_server_dp2MServerUrl.Size = new System.Drawing.Size(470, 21);
-            this.textBox_server_dp2MServerUrl.TabIndex = 18;
+            this.textBox_message_dp2MServerUrl.Location = new System.Drawing.Point(11, 123);
+            this.textBox_message_dp2MServerUrl.Name = "textBox_message_dp2MServerUrl";
+            this.textBox_message_dp2MServerUrl.Size = new System.Drawing.Size(470, 21);
+            this.textBox_message_dp2MServerUrl.TabIndex = 18;
             // 
             // label29
             // 
@@ -2358,16 +2377,38 @@ namespace dp2Circulation
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // checkBox_ui_fixedPanelAnimationEnabled
+            // textBox_message_password
             // 
-            this.checkBox_ui_fixedPanelAnimationEnabled.AutoSize = true;
-            this.checkBox_ui_fixedPanelAnimationEnabled.Location = new System.Drawing.Point(4, 66);
-            this.checkBox_ui_fixedPanelAnimationEnabled.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox_ui_fixedPanelAnimationEnabled.Name = "checkBox_ui_fixedPanelAnimationEnabled";
-            this.checkBox_ui_fixedPanelAnimationEnabled.Size = new System.Drawing.Size(138, 16);
-            this.checkBox_ui_fixedPanelAnimationEnabled.TabIndex = 3;
-            this.checkBox_ui_fixedPanelAnimationEnabled.Text = "固定面板活动动画(&A)";
-            this.checkBox_ui_fixedPanelAnimationEnabled.UseVisualStyleBackColor = true;
+            this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_password.Location = new System.Drawing.Point(107, 177);
+            this.textBox_message_password.Name = "textBox_message_password";
+            this.textBox_message_password.PasswordChar = '*';
+            this.textBox_message_password.Size = new System.Drawing.Size(156, 21);
+            this.textBox_message_password.TabIndex = 22;
+            // 
+            // textBox_message_userName
+            // 
+            this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_userName.Location = new System.Drawing.Point(107, 150);
+            this.textBox_message_userName.Name = "textBox_message_userName";
+            this.textBox_message_userName.Size = new System.Drawing.Size(156, 21);
+            this.textBox_message_userName.TabIndex = 20;
+            // 
+            // label32
+            // 
+            this.label32.Location = new System.Drawing.Point(9, 180);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(75, 18);
+            this.label32.TabIndex = 21;
+            this.label32.Text = "密码(&P)：";
+            // 
+            // label33
+            // 
+            this.label33.Location = new System.Drawing.Point(9, 153);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(75, 18);
+            this.label33.TabIndex = 19;
+            this.label33.Text = "用户名(&U)：";
             // 
             // CfgDlg
             // 
@@ -2636,7 +2677,7 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_message;
         private System.Windows.Forms.Label label_comment;
         public System.Windows.Forms.CheckBox checkBox_message_shareBiblio;
-        private System.Windows.Forms.TextBox textBox_server_dp2MServerUrl;
+        private System.Windows.Forms.TextBox textBox_message_dp2MServerUrl;
         private System.Windows.Forms.Label label29;
         private System.Windows.Forms.CheckBox checkBox_quickCharging_logOperTime;
         private System.Windows.Forms.ComboBox comboBox_quickCharging_displayStyle;
@@ -2644,5 +2685,9 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_server_greenPackage;
         private System.Windows.Forms.Label label31;
         private System.Windows.Forms.CheckBox checkBox_ui_fixedPanelAnimationEnabled;
+        public System.Windows.Forms.TextBox textBox_message_password;
+        public System.Windows.Forms.TextBox textBox_message_userName;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label33;
     }
 }

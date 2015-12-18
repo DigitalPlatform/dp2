@@ -7046,7 +7046,7 @@ out strError);
 
             for (; ; )
             {
-                Application.DoEvents();	// 出让界面控制权
+                // Application.DoEvents();	// 出让界面控制权
 
                 if (stop != null && stop.State != 0)
                 {
@@ -7088,7 +7088,6 @@ out strError);
                 if (lRet == -1)
                     return -1;
 
-
                 if (bHasMetadataStyle == true)
                 {
                     StringUtil.RemoveFromInList("metadata",
@@ -7098,7 +7097,6 @@ out strError);
                 }
 
                 lTotalLength = lRet;
-
 
                 if (StringUtil.IsInList("timestamp", strStyle) == true)
                 {

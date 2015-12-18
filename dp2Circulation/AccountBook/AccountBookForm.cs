@@ -12,10 +12,14 @@ using System.Diagnostics;
 using System.Web;
 using System.Reflection;
 
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml;
+using ClosedXML.Excel;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
@@ -24,12 +28,10 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+
 using DigitalPlatform.dp2.Statis;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml;
-using ClosedXML.Excel;
 
 namespace dp2Circulation
 {
@@ -46,7 +48,6 @@ namespace dp2Circulation
         /// 曾经用过的册条码号文件全路径
         /// </summary>
         public string BarcodeFilePath = "";
-
 
         // ******************************
         // WordXML输出特性
@@ -1305,7 +1306,6 @@ namespace dp2Circulation
             this.Text = "打印财产帐";
             MessageBox.Show(this, strError);
         }
-
 
 #if NO
         // 根据记录路径文件装载

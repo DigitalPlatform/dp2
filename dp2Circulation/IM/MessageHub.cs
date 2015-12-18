@@ -334,7 +334,7 @@ searchParam
                 string strError = "";
                 string[] results = null;
                 string strRecPath = "";
-                byte[] baTimestamp= null;
+                byte[] baTimestamp = null;
 
                 long lRet = channel.GetReaderInfo(null,
                     searchParam.QueryWord,
@@ -367,9 +367,9 @@ strError);  // 出错信息大概为 not found。
                 }
 
                 records.Clear();
-                string[] formats = searchParam.FormatList.Split(new char[] {','});
+                string[] formats = searchParam.FormatList.Split(new char[] { ',' });
                 int i = 0;
-                foreach(string result in results)
+                foreach (string result in results)
                 {
                     BiblioRecord biblio = new BiblioRecord();
                     biblio.RecPath = strRecPath;
@@ -457,6 +457,11 @@ SearchRequest searchParam
                         strResultSetName,
                         "",
                         out strError);
+                }
+                else
+                {
+                    lRet = -1;
+                    strError = "无法识别的 Operation 值 '"+searchParam.Operation+"'";
                 }
 
                 if (lRet == -1 || lRet == 0)
@@ -635,8 +640,8 @@ strError);  // 出错信息大概为 not found。
             Guid.NewGuid().ToString(),   // this.MainForm.ServerUID,
             dlg.ShareBiblio ? "biblio_search" : "");
 #endif
-            Login("",
-                "",
+            Login(this.MainForm.MessageUserName,
+                this.MainForm.MessagePassword,
                 this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
                 this.MainForm.LibraryName,
                 this.ShareBiblio ? "biblio_search" : "");

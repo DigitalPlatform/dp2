@@ -89,7 +89,7 @@ namespace dp2Circulation
                 "");
 
             // dp2MServer URL
-            this.textBox_server_dp2MServerUrl.Text =
+            this.textBox_message_dp2MServerUrl.Text =
                 ap.GetString("config",
                 "im_server_url",
                 "http://dp2003.com:8083/dp2MServer");
@@ -101,8 +101,6 @@ namespace dp2Circulation
                 "default_account",
                 "username",
                 "");
-
-
 
             this.checkBox_defaulAccount_savePasswordShort.Checked =
                 ap.GetBoolean(
@@ -632,6 +630,20 @@ false);
                 false);
             _disableShareBiblioChangedEvent--;
 
+            this.textBox_message_userName.Text =
+    ap.GetString(
+    "message",
+    "username",
+    "");
+            {
+                string strPassword = ap.GetString(
+        "message",
+        "password",
+        "");
+                strPassword = this.MainForm.DecryptPasssword(strPassword);
+                this.textBox_message_password.Text = strPassword;
+            }
+
             checkBox_charging_isbnBorrow_CheckedChanged(this, null);
             checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
 
@@ -687,15 +699,13 @@ false);
             // dp2MServer URL
             ap.SetString("config",
                 "im_server_url",
-                this.textBox_server_dp2MServerUrl.Text);
+                this.textBox_message_dp2MServerUrl.Text);
 
             // default account
-
             ap.SetString(
                 "default_account",
                 "username",
                 this.textBox_defaultAccount_userName.Text);
-
 
             ap.SetBoolean(
                 "default_account",
@@ -1193,6 +1203,19 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "message",
                 "share_biblio",
                 this.checkBox_message_shareBiblio.Checked);
+
+            ap.SetString(
+    "message",
+    "username",
+    this.textBox_message_userName.Text);
+
+            {
+                string strPassword = this.MainForm.EncryptPassword(this.textBox_message_password.Text);
+                ap.SetString(
+                    "message",
+                    "password",
+                    strPassword);
+            }
 
             if (m_bServerCfgChanged == true
                 && this.MainForm != null)

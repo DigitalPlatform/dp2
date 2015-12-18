@@ -198,6 +198,7 @@ Stack:
                             }
                             else
                             {
+                                // TODO: 如果重试多次复制依然失败，并且当前是 Administrator 身份，则可以考虑使用延迟复制方法，最后提醒用户重启 Windows
                                 string strText = "source '" + source + "' lastmodified = '" + File.GetLastWriteTimeUtc(source) .ToString()+ "'; "
                                     + "target '" + target + "' lastmodified = '" + File.GetLastWriteTimeUtc(target).ToString() + "'";
                                 throw new Exception(strText, ex);
