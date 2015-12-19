@@ -356,7 +356,7 @@ namespace dp2Circulation
                 }
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
@@ -1494,7 +1494,7 @@ Stack:
             }
 
             if (this.MessageHub != null
-                && (bOldShareBiblio != this.MessageHub.ShareBiblio 
+                && (bOldShareBiblio != this.MessageHub.ShareBiblio
                 || strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl
                 || strOldMessageUserName != this.MessageUserName
                 || strOldMessagePassword != this.MessagePassword))
@@ -8272,6 +8272,20 @@ Keys keyData)
             MainForm.SetControlFont(dlg, this.DefaultFont);
             dlg.Connection = this.MessageHub;
             dlg.ShowDialog(this);
+
+            if (dlg.Changed == true)
+            {
+                this.MessageHub.CloseConnection();
+                this.MessageHub.Connect();
+                this.MessageHub.Login();
+            }
+        }
+
+        private void toolStripButton_messageHub_relogin_Click(object sender, EventArgs e)
+        {
+            this.MessageHub.CloseConnection();
+            this.MessageHub.Connect();
+            this.MessageHub.Login();
         }
     }
 

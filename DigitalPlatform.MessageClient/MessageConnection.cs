@@ -665,6 +665,7 @@ errorInfo);
         public string userName { get; set; } // 用户名
         public string password { get; set; }  // 密码
         public string rights { get; set; } // 权限
+        public string duty { get; set; } // 义务
         public string department { get; set; } // 部门名称
         public string tel { get; set; }  // 电话号码
         public string comment { get; set; }  // 注释

@@ -44,6 +44,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
+            this.textBox_duty = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -132,47 +134,47 @@
             // 
             // textBox_tel
             // 
-            this.textBox_tel.Location = new System.Drawing.Point(119, 147);
+            this.textBox_tel.Location = new System.Drawing.Point(119, 181);
             this.textBox_tel.Name = "textBox_tel";
             this.textBox_tel.Size = new System.Drawing.Size(204, 21);
-            this.textBox_tel.TabIndex = 11;
+            this.textBox_tel.TabIndex = 13;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 150);
+            this.label6.Location = new System.Drawing.Point(12, 184);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(53, 12);
-            this.label6.TabIndex = 10;
+            this.label6.TabIndex = 12;
             this.label6.Text = "电话(&T):";
             // 
             // textBox_comment
             // 
             this.textBox_comment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_comment.Location = new System.Drawing.Point(119, 174);
+            this.textBox_comment.Location = new System.Drawing.Point(119, 208);
             this.textBox_comment.Multiline = true;
             this.textBox_comment.Name = "textBox_comment";
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_comment.Size = new System.Drawing.Size(289, 89);
-            this.textBox_comment.TabIndex = 13;
+            this.textBox_comment.TabIndex = 15;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 177);
+            this.label7.Location = new System.Drawing.Point(12, 211);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(53, 12);
-            this.label7.TabIndex = 12;
+            this.label7.TabIndex = 14;
             this.label7.Text = "注释(&C):";
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(333, 293);
+            this.button_Cancel.Location = new System.Drawing.Point(333, 325);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
-            this.button_Cancel.TabIndex = 14;
+            this.button_Cancel.TabIndex = 17;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -180,19 +182,39 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(252, 293);
+            this.button_OK.Location = new System.Drawing.Point(252, 325);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
-            this.button_OK.TabIndex = 15;
+            this.button_OK.TabIndex = 16;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
+            // 
+            // textBox_duty
+            // 
+            this.textBox_duty.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_duty.Location = new System.Drawing.Point(119, 147);
+            this.textBox_duty.Name = "textBox_duty";
+            this.textBox_duty.Size = new System.Drawing.Size(289, 21);
+            this.textBox_duty.TabIndex = 11;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(12, 150);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(53, 12);
+            this.label8.TabIndex = 10;
+            this.label8.Text = "义务(&D):";
             // 
             // UserDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 328);
+            this.ClientSize = new System.Drawing.Size(420, 360);
+            this.Controls.Add(this.textBox_duty);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.textBox_comment);
@@ -237,5 +259,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.TextBox textBox_duty;
+        private System.Windows.Forms.Label label8;
     }
 }
