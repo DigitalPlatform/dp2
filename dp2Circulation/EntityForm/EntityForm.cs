@@ -4909,7 +4909,10 @@ strQueryWord,
 strFromStyle,
 strMatchStyle,
 "",
-1000),
+"",
+1000,
+0,
+-1),
 out strOutputSearchID,
 out strError);
             if (nRet == -1)
