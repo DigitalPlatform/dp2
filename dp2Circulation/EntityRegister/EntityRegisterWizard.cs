@@ -1214,7 +1214,7 @@ MessageBoxDefaultButton.Button1);
 
         void MessageHub_SearchResponseEvent(object sender, SearchResponseEventArgs e)
         {
-            if (e.SsearchID != _searchParam._searchID)
+            if (e.TaskID != _searchParam._searchID)
                 return;
             if (e.ResultCount == -1 && e.Start == -1)
             {
@@ -1254,7 +1254,8 @@ out strError);
                 RegisterBiblioInfo info = new RegisterBiblioInfo();
                 info.OldXml = strXml;   // strMARC;
                 info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
-                info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                // info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                info.RecPath = record.RecPath;
                 info.MarcSyntax = strMarcSyntax;
                 AddBiblioBrowseLine(
                     image_index,    // -1,

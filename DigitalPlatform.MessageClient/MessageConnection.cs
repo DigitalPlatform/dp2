@@ -146,8 +146,10 @@ namespace DigitalPlatform.MessageClient
     start,
     records,
     errorInfo)
-
 );
+            HubProxy.On<SetInfoRequest>("setInfo",
+            (searchParam) => OnSetInfoRecieved(searchParam)
+            );
 
 #if NO
             Task task = Connection.Start();
@@ -271,6 +273,11 @@ namespace DigitalPlatform.MessageClient
 SearchRequest param
             )
         {
+        }
+
+        public virtual void OnSetInfoRecieved(SetInfoRequest request)
+        {
+
         }
 
         // 当 server 发来检索响应的时候被调用。重载时可以显示收到的记录
@@ -443,7 +450,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             string formatList,
             long maxResults,
 #endif
-            SearchRequest searchParam,
+ SearchRequest searchParam,
             out string outputSearchID,
             out string strError)
         {
@@ -462,7 +469,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 + "; formatList=" + formatList
                 + "; maxResults=" + maxResults
 #endif
-                );
+);
             try
             {
                 Task<MessageResult> task = HubProxy.Invoke<MessageResult>("RequestSearch",
@@ -475,7 +482,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     formatList,
                     maxResults
 #endif
-                    searchParam
+ searchParam
                     );
 
 #if NO
@@ -491,7 +498,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 {
                     // AddErrorLine(GetExceptionText(task.Exception));
                     strError = GetExceptionText(task.Exception);
-                    AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.SearchID
+                    AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
     + "; return error=" + strError + " value="
     + -1);
                     return -1;
@@ -502,7 +509,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 {
                     // AddErrorLine(result.ErrorInfo);
                     strError = result.ErrorInfo;
-                    AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.SearchID
+                    AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
     + "; return error=" + strError + " value="
     + -1);
                     return -1;
@@ -511,14 +518,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 {
                     // AddErrorLine(result.ErrorInfo);
                     strError = result.ErrorInfo;
-                    AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.SearchID
+                    AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
    + "; return error=" + strError + " value="
    + 0);
                     return 0;
                 }
                 // AddMessageLine("search ID:", result.String);
                 outputSearchID = result.String;
-                AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.SearchID
+                AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
 + "; return value="
 + 1);
                 return 1;
@@ -526,15 +533,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             catch (Exception ex)
             {
                 strError = ExceptionUtil.GetAutoText(ex);
-                AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.SearchID
+                AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
 + "; return error=" + strError + " value="
 + -1);
                 return -1;
             }
         }
 
-        // 调用 server 端 ResponseSearchBiblio
-        public async void Response(
+        // 调用 server 端 ResponseSearch
+        public async void ResponseSearch(
             string searchID,
             long resultCount,
             long start,
@@ -579,6 +586,32 @@ errorInfo);
                 AddErrorLine(task.Result.ErrorInfo);
             }
 #endif
+        }
+
+        // 调用 server 端 ResponseSetInfo
+        public async void ResponseSetInfo(
+            string taskID,
+            long resultValue,
+            IList<Entity> entities,
+            string errorInfo)
+        {
+            try
+            {
+                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
+    taskID,
+    resultValue,
+    entities,
+    errorInfo);
+                if (result.Value == -1)
+                {
+                    AddErrorLine(result.ErrorInfo);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                AddErrorLine(ex.Message);
+            }
         }
 
         public GetUserResult GetUsers(string userName, int start, int count)
@@ -641,12 +674,15 @@ errorInfo);
 
     public class Record
     {
-        // 记录路径。这是本地路径，例如 “图书总库/1”
+        // 记录路径。可能是本地路径，例如 “图书总库/1”；也可能是全局路径，例如“图书总库@xxxxxxx”
         public string RecPath { get; set; }
+
+#if NO
         // 图书馆 UID
         public string LibraryUID { get; set; }
         // 图书馆名
         public string LibraryName { get; set; }
+#endif
 
         public string Format { get; set; }
         public string Data { get; set; }
@@ -673,7 +709,7 @@ errorInfo);
 
     public class SearchRequest
     {
-        public string SearchID { get; set; }    // 本次检索的 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+        public string TaskID { get; set; }    // 本次检索的 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
         public string Operation { get; set; }   // 操作名。若为 getResult 表示本次不需要进行检索，而是从已有的结果集中获取数据。结果集名在 ResultSetName 中
         public string DbNameList { get; set; }  // 数据库名列表。一般为 "<全部>"
         public string QueryWord { get; set; }   // 检索词。
@@ -697,7 +733,7 @@ errorInfo);
             long start,
             long count)
         {
-            this.SearchID = searchID;
+            this.TaskID = searchID;
             this.Operation = operation;
             this.DbNameList = dbNameList;
             this.QueryWord = queryWord;
@@ -710,4 +746,31 @@ errorInfo);
             this.Count = count;
         }
     }
+
+    public class SetInfoRequest
+    {
+        public string TaskID { get; set; }    // 任务 ID。由于一个 Connection 可以用于同时执行多个任务，本参数用于区分不同的任务
+        public string Operation { get; set; }   // 操作名。
+
+        public string BiblioRecPath { get; set; }
+        public List<Entity> Entities { get; set; }
+    }
+
+    public class Entity
+    {
+        public string Action { get; set; }   // 要执行的操作(get时此项无用)
+
+        public string RefID { get; set; }   // 参考 ID
+
+        public Record OldRecord { get; set; }
+
+        public Record NewRecord { get; set; }
+
+        public string Style { get; set; }   // 风格。常用作附加的特性参数。例如: nocheckdup,noeventlog,force
+
+        public string ErrorInfo { get; set; }  // 出错信息
+
+        public string ErrorCode { get; set; }   // 出错码（表示属于何种类型的错误）
+    }
+
 }

@@ -1434,7 +1434,7 @@ out strError);
 
         void MessageHub_SearchResponseEvent(object sender, SearchResponseEventArgs e)
         {
-            if (e.SsearchID != _searchParam._searchID)
+            if (e.TaskID != _searchParam._searchID)
                 return;
             if (e.ResultCount == -1 && e.Start == -1)
             {
@@ -1468,7 +1468,9 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                // string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                string strRecPath = record.RecPath;
+
 
 #if NO
                 string strDbName = ListViewProperty.GetDbName(strRecPath);

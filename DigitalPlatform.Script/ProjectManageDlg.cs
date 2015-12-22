@@ -2180,6 +2180,11 @@ Stack:
                 strError = "文件 " + dlg.FileName + "不存在...";
                 goto ERROR1;
             }
+            catch (Exception ex)
+            {
+                strError = "从文件 " + dlg.FileName + "读入时发生错误: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
 
             FileInfo fi = new FileInfo(dlg.FileName);
             string strLastModified = DateTimeUtil.Rfc1123DateTimeString(fi.LastWriteTimeUtc);
