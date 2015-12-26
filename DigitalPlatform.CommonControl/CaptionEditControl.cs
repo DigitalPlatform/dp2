@@ -8,7 +8,6 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 
-
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.CommonControl

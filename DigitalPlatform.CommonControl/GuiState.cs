@@ -10,7 +10,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 
-
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
@@ -144,7 +143,7 @@ namespace DigitalPlatform.CommonControl
             if (string.IsNullOrEmpty(strState) == false)
             {
                 List<string> values = StringUtil.SplitList(strState);
-                for (int i = 0; i < list.Items.Count; i++ )
+                for (int i = 0; i < list.Items.Count; i++)
                 {
                     string s = (string)list.Items[i];
 
@@ -398,8 +397,8 @@ namespace DigitalPlatform.CommonControl
                 true);
         }
 
-     // 观察是否为指定的类型，并返回状态内容字符串部分
-        static bool IsType(string strText, 
+        // 观察是否为指定的类型，并返回状态内容字符串部分
+        static bool IsType(string strText,
             object control,
             out string strState)
         {
@@ -488,7 +487,7 @@ namespace DigitalPlatform.CommonControl
         {
             string strState = "";
             if (IsType(strText, button, out strState) == false)
-                return; 
+                return;
             if (DomUtil.IsBooleanTrue(strState))
                 button.Checked = true;
             else
@@ -524,7 +523,7 @@ namespace DigitalPlatform.CommonControl
         public static void SetUiState(List<object> controls,
             string strStates)
         {
-            string[] sections = strStates.Split(new char [] {';'});
+            string[] sections = strStates.Split(new char[] { ';' });
 
             int i = 0;
             foreach (object obj in controls)
@@ -603,7 +602,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     SetRadioButtonState(control as RadioButton, strState);
                 }
-                else 
+                else
                     throw new ArgumentException("不支持的类型 " + control.GetType().ToString());
 
                 i++;

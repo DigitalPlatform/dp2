@@ -20,7 +20,7 @@ namespace dp2Circulation
     /// 订购记录编辑对话框
     /// </summary>
     public partial class OrderEditForm : OrderEditFormBase
-        // ItemEditFormBase<OrderItem, OrderItemCollection>
+    // ItemEditFormBase<OrderItem, OrderItemCollection>
     {
 #if NO
         /// <summary>
@@ -540,6 +540,7 @@ namespace dp2Circulation
         /// <returns>-1: 出错; 0: 没有错误</returns>
         internal override int FinishVerify(out string strError)
         {
+#if NO
             strError = "";
             int nRet = 0;
 
@@ -584,8 +585,13 @@ namespace dp2Circulation
             return 0;
         ERROR1:
             return -1;
+#endif
+            // 检查各个字段内容是否正确
+            // return:
+            //      -1  有错
+            //      0   正确
+            return this.orderEditControl_editing.VerifyFields(out strError);
         }
-
 
         private void button_OK_Click(object sender, EventArgs e)
         {

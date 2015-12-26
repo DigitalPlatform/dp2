@@ -14,6 +14,8 @@ using System.Web;
 using System.Drawing;
 using System.Runtime.Serialization;
 
+using MongoDB.Driver;
+
 // using DigitalPlatform.Drawing;
 
 using DigitalPlatform;	// Stop类
@@ -198,6 +200,7 @@ namespace DigitalPlatform.LibraryServer
 
         public HitCountDatabase HitCountDatabase = new HitCountDatabase();
         public AccessLogDatabase AccessLogDatabase = new AccessLogDatabase();
+        public ChargingOperDatabase ChargingOperDatabase = new ChargingOperDatabase();
 
         public Semaphore PictureLimit = new Semaphore(10, 10);
 
@@ -687,6 +690,7 @@ namespace DigitalPlatform.LibraryServer
                     this.MongoDbInstancePrefix = "";
                     this.AccessLogDatabase = new AccessLogDatabase();
                     this.HitCountDatabase = new HitCountDatabase();
+                    this.ChargingOperDatabase = new ChargingOperDatabase();
                 }
 
                 // 预约到书
@@ -1161,38 +1165,67 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(this.MongoDbConnStr) == false)
                 {
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: OpenSummaryStorage");
-#endif
-                    nRet = OpenSummaryStorage(out strError);
-                    if (nRet == -1)
+                    try
                     {
-                        strError = "启动书目摘要库时出错: " + strError;
+                        this._mongoClient = new MongoClient(this.MongoDbConnStr);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "初始化 MongoClient 时出错: " + ex.Message;
                         app.WriteErrorLog(strError);
+                        this._mongoClient = null;
                     }
 
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: Open HitCountDatabase");
-#endif
-                    nRet = this.HitCountDatabase.Open(this.MongoDbConnStr,
-                        this.MongoDbInstancePrefix,
-                        out strError);
-                    if (nRet == -1)
+                    if (this._mongoClient != null)
                     {
-                        strError = "启动计数器库时出错: " + strError;
-                        app.WriteErrorLog(strError);
-                    }
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: OpenSummaryStorage");
+#endif
+                        nRet = OpenSummaryStorage(out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动书目摘要库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: Open AccessLogDatabase");
+                        app.WriteErrorLog("INFO: Open HitCountDatabase");
 #endif
-                    nRet = this.AccessLogDatabase.Open(this.MongoDbConnStr,
-                        this.MongoDbInstancePrefix,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "启动访问日志库时出错: " + strError;
-                        app.WriteErrorLog(strError);
+                        nRet = this.HitCountDatabase.Open(//this.MongoDbConnStr,
+                            this._mongoClient,
+                            this.MongoDbInstancePrefix,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动计数器库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: Open AccessLogDatabase");
+#endif
+                        nRet = this.AccessLogDatabase.Open(// this.MongoDbConnStr,
+                            this._mongoClient,
+                            this.MongoDbInstancePrefix,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动访问日志库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: Open ChargingOperDatabase");
+#endif
+                        nRet = this.ChargingOperDatabase.Open(
+                            this._mongoClient,
+                            this.MongoDbInstancePrefix,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动出纳操作库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
                     }
                 }
 

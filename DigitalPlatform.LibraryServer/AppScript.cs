@@ -1352,10 +1352,11 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "move")
             {
                 if (string.IsNullOrEmpty(strPersonalLibrary) == false
+                    && strPersonalLibrary[0] != '*'
                     && strPersonalLibrary[0] != '~')
                 {
                     // TODO: 注意普通馆藏地点字符串中的地点名字的第一字符不能为 '~'
-                    strError = "个人书斋名 '"+strPersonalLibrary+"' 不合法。第一字符必须为 '~'";
+                    strError = "个人书斋名 '"+strPersonalLibrary+"' 不合法。第一字符必须为 '~' 或者 '*'";
                     return 1;
                 }
             }

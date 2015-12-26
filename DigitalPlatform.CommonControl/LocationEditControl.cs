@@ -12,7 +12,7 @@ using DigitalPlatform;
 /*
  * TODO:
  * 1) 应提供菜单可以增删行，进而触发CountChanged事件和ContentChanged事件
- * 
+ * 2) 可改为平时绘制控件外貌，当点到某行的时候再真正创建这一行的控件
  * 
  * */
 
@@ -54,7 +54,7 @@ namespace DigitalPlatform.CommonControl
 
         int m_nLineHeight = 26;
 
-        internal int m_nLabelWidth = 26;    // 6
+        internal int m_nLabelWidth = 40;    // 26
         // internal int m_nLibraryWidth = 100;
         internal int m_nLocationWidth = 160;
         internal int m_nArrivedWidth = 40;
@@ -62,7 +62,7 @@ namespace DigitalPlatform.CommonControl
         internal int m_nLineLeftBlank = 6;    // 线条部分左边的空白宽度
         internal int m_nLineWidth = 6;    // 线条横线部分的宽度
         internal int m_nNumberTextWidth = 20;    // 线条横线右边的数字文字的宽度
-        
+
         internal int m_nRightBlank = 4;    // 30
 
         public List<LocationItem> LocationItems = new List<LocationItem>();
@@ -104,7 +104,7 @@ namespace DigitalPlatform.CommonControl
             if (String.IsNullOrEmpty(strIDs) == true)
                 return "";
 
-            string[] ids = strIDs.Split(new char[] {','});
+            string[] ids = strIDs.Split(new char[] { ',' });
 
             if (ids.Length <= nCount)
                 return strIDs;
@@ -211,7 +211,7 @@ namespace DigitalPlatform.CommonControl
             {
                 if (strResult != "")
                     strResult += ";";
-                strResult += "" + ":" + (nAmount-nCurrent).ToString();
+                strResult += "" + ":" + (nAmount - nCurrent).ToString();
 
                 // ids不用了
             }
@@ -499,9 +499,18 @@ namespace DigitalPlatform.CommonControl
             // this.LocationItems.Clear();
             this.ClearItems();
 
+            List<Control> controls = new List<Control>();
             while (this.panel_main.Controls.Count != 0)
             {
+                Control control = this.panel_main.Controls[0];
                 this.panel_main.Controls.RemoveAt(0);
+                if (control != null)
+                    controls.Add(control);
+            }
+
+            foreach(Control control in controls)
+            {
+                control.Dispose();
             }
         }
 
@@ -758,7 +767,7 @@ namespace DigitalPlatform.CommonControl
             return strResult;
         }
 
-#endif 
+#endif
 
         // 2012/5/18
         internal int m_nDontMerge = 0;
@@ -839,7 +848,7 @@ namespace DigitalPlatform.CommonControl
             {
                 this.Clear();
 
-                string[] sections = value.Split(new char[] {';'});
+                string[] sections = value.Split(new char[] { ';' });
                 for (int i = 0; i < sections.Length; i++)
                 {
                     string strSection = sections[i].Trim();
@@ -880,22 +889,22 @@ namespace DigitalPlatform.CommonControl
                         catch
                         {
                             throw new Exception(
-                                "馆藏地点字符串局部 '" + strSection + "' 中 " 
-                                + "'"+strCount+"' 应为纯数字");
+                                "馆藏地点字符串局部 '" + strSection + "' 中 "
+                                + "'" + strCount + "' 应为纯数字");
                         }
 
                         if (nCount > 1000)
                             throw new Exception(
-                                "馆藏地点字符串局部 '" + strSection + "' 中 " 
-                                + "数字 "+strCount+" 值太大，超过1000");
+                                "馆藏地点字符串局部 '" + strSection + "' 中 "
+                                + "数字 " + strCount + " 值太大，超过1000");
 
                         // 2008/12/5
                         if (nCount < 0)
                             throw new Exception(
-                                "馆藏地点字符串局部 '" + strSection + "' 中 " 
-                                + "数字 "+strCount+" 为负数，格式错误");
+                                "馆藏地点字符串局部 '" + strSection + "' 中 "
+                                + "数字 " + strCount + " 为负数，格式错误");
 
-                        Debug.Assert(nCount >=0, "");
+                        Debug.Assert(nCount >= 0, "");
                     }
 
                     this.m_nDontMerge++;
@@ -916,14 +925,14 @@ namespace DigitalPlatform.CommonControl
 
                     if (string.IsNullOrEmpty(strIDs) == false)
                     {
-                        Debug.Assert(nCount >=0, "");
+                        Debug.Assert(nCount >= 0, "");
 
                         string[] ids = strIDs.Split(new char[] { ',' });
 
                         int nStartBase = this.LocationItems.Count - nCount;
                         for (int k = 0; k < nCount; k++)
                         {
-                            Debug.Assert((nStartBase + k) >=0
+                            Debug.Assert((nStartBase + k) >= 0
                                 && (nStartBase + k) < this.LocationItems.Count,
                                 "");
                             LocationItem item = this.LocationItems[nStartBase + k];
@@ -959,7 +968,7 @@ namespace DigitalPlatform.CommonControl
         {
             // 调整容器高度
             this.Size = new Size(this.TotalWidth,
-                this.m_nLineHeight * Math.Max( 1, this.LocationItems.Count) + 4/*微调*/);
+                this.m_nLineHeight * Math.Max(1, this.LocationItems.Count) + 4/*微调*/);
         }
 
         public override Size MaximumSize
@@ -1050,7 +1059,7 @@ namespace DigitalPlatform.CommonControl
                 for (int i = 0; i < this.LocationItems.Count; i++)
                 {
                     LocationItem item = this.LocationItems[i];
-                    if (item.Arrived == true && 
+                    if (item.Arrived == true &&
                         (item.ReadOnly == true || this.ReadOnly == true))// 2008/11/12
                         nValue++;
                 }
@@ -1169,7 +1178,7 @@ namespace DigitalPlatform.CommonControl
 
                         nCount++;
                         Debug.Assert(nDelta < 0, "");
-                        if (nCount >= -1*nDelta)
+                        if (nCount >= -1 * nDelta)
                             break;
                     }
 
@@ -1427,7 +1436,7 @@ namespace DigitalPlatform.CommonControl
             int nStart,
             int nCount)
         {
-            int x = m_nLabelWidth + m_nLocationWidth 
+            int x = m_nLabelWidth + m_nLocationWidth
                 + m_nArrivedWidth
                 + m_nLineLeftBlank; // 6
             int w = m_nLineWidth;   // 6
@@ -1735,7 +1744,7 @@ namespace DigitalPlatform.CommonControl
             // 颜色
             label_color = new Label();
             label_color.Size = new Size(this.Container.m_nLabelWidth, 26);
-            label_color.TextAlign = ContentAlignment.MiddleLeft;
+            label_color.TextAlign = ContentAlignment.MiddleRight;
             label_color.ForeColor = SystemColors.GrayText;
 
             container.panel_main.Controls.Add(label_color);
@@ -1780,10 +1789,18 @@ namespace DigitalPlatform.CommonControl
         public void RemoveFromContainer()
         {
             Container.panel_main.Controls.Remove(this.label_color);
+            this.label_color.Dispose();
+            this.label_color = null;
+
             Container.panel_main.Controls.Remove(this.comboBox_location);
+            this.comboBox_location.Dispose();
+            this.comboBox_location = null;
+
             Debug.Assert(this.checkBox_arrived != null, "");
 
             Container.panel_main.Controls.Remove(this.checkBox_arrived);
+            this.checkBox_arrived.Dispose();
+            this.checkBox_arrived = null;
         }
 
         public Point Location
@@ -2401,7 +2418,7 @@ namespace DigitalPlatform.CommonControl
 
         public NotEnoughException(string s)
             : base(s)
-		{
-		}
+        {
+        }
     }
 }

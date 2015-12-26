@@ -97,8 +97,9 @@ namespace DigitalPlatform.CommonControl
                         if (this.e == null
     || this.e.Cancelled == true)
                         {
-                            try {
-                            File.Delete(this.TempFielname);
+                            try
+                            {
+                                File.Delete(this.TempFielname);
                             }
                             catch
                             {
@@ -111,8 +112,9 @@ namespace DigitalPlatform.CommonControl
                         {
                             if (e.Error != null)
                             {
-                                try {
-                                File.Delete(this.TempFielname);
+                                try
+                                {
+                                    File.Delete(this.TempFielname);
                                 }
                                 catch
                                 {
@@ -140,7 +142,7 @@ namespace DigitalPlatform.CommonControl
                                 {
                                     File.Delete(this.TempFielname);
                                 }
-                                catch 
+                                catch
                                 {
                                 }
                             }
@@ -285,6 +287,6 @@ namespace DigitalPlatform.CommonControl
 
             return request;
         }
-             
+
     }
 }

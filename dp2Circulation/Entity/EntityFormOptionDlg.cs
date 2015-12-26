@@ -195,6 +195,16 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            // 检查各个字段内容是否正确
+            // return:
+            //      -1  有错
+            //      0   正确
+            if (this.orderEditControl_normalRegisterDefault.VerifyFields(out strError) == -1)
+            {
+                strError = "一般订购缺省值定义有误：" + strError;
+                goto ERROR1;
+            }
+
             // 册一般登记
             {
                 string strNormalDefault = "";
@@ -320,9 +330,11 @@ this.checkBox_normalRegister_simple.Checked);
                 "verify_item_barcode",
                 this.checkBox_verifyItemBarcode.Checked);
 
-
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)

@@ -42,7 +42,7 @@ namespace DigitalPlatform.LibraryServer
         public string MongoDbConnStr = "";
         public string MongoDbInstancePrefix = ""; // MongoDB 的实例字符串。用于区分不同的 dp2OPAC 实例在同一 MongoDB 实例中创建的数据库名，这个实例名被用作数据库名的前缀字符串
 
-        MongoClient m_mongoClient = null;
+        MongoClient _mongoClient = null;
 
         string _summaryDbName = "";
 
@@ -64,17 +64,24 @@ namespace DigitalPlatform.LibraryServer
 
             _summaryDbName = strPrefix + "bibliosummary";
 
+#if NO
             try
             {
-                this.m_mongoClient = new MongoClient(this.MongoDbConnStr);
+                this._mongoClient = new MongoClient(this.MongoDbConnStr);
             }
             catch (Exception ex)
             {
                 strError = "初始化 MongoClient 时出错: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
+#endif
+            if (this._mongoClient == null)
+            {
+                strError = "this._mongoClient == null";
+                return -1;
+            }
 
-            var server = m_mongoClient.GetServer();
+            var server = this._mongoClient.GetServer();
 
             {
                 var db = server.GetDatabase(this._summaryDbName);

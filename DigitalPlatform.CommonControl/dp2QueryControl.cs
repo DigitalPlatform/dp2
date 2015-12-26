@@ -11,7 +11,6 @@ using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 
-
 namespace DigitalPlatform.CommonControl
 {
     public partial class dp2QueryControl : UserControl
@@ -120,7 +119,7 @@ namespace DigitalPlatform.CommonControl
 
         public void Restore(string strSaveString)
         {
-            string[] lines = strSaveString.Split(new char[] {'^'});
+            string[] lines = strSaveString.Split(new char[] { '^' });
             for (int i = 0; i < lines.Length; i++)
             {
                 if (i >= this.Lines.Count)
@@ -233,7 +232,7 @@ namespace DigitalPlatform.CommonControl
                 if (line.FromString == "__id")
                 {
                     // 如果为范围式
-                    if (line.WordString.IndexOfAny(new char [] {'-','~'}) != -1)
+                    if (line.WordString.IndexOfAny(new char[] { '-', '~' }) != -1)
                     {
                         strRelation = "draw";
                         strDataType = "number";
@@ -304,7 +303,7 @@ namespace DigitalPlatform.CommonControl
             QueryItem item = new QueryItem();
             items.Add(item);
             int nQueryCount = 0;
-            for(int i=0;i<this.Lines.Count;i++)
+            for (int i = 0; i < this.Lines.Count; i++)
             {
                 dp2QueryLine line = this.Lines[i];
 
@@ -315,14 +314,14 @@ namespace DigitalPlatform.CommonControl
 
                 if (string.IsNullOrEmpty(line.ServerNameString) == true)
                 {
-                    strError = "第 "+(i+1).ToString()+" 行：尚未指定服务器名";
+                    strError = "第 " + (i + 1).ToString() + " 行：尚未指定服务器名";
                     return -1;
                 }
                 if (line.ServerNameString.IndexOf(",") != -1)
                 {
                     strError = "第 " + (i + 1).ToString() + " 行：服务器名中不能有逗号";
                     return -1;
-                } 
+                }
                 if (string.IsNullOrEmpty(line.DbNameString) == true)
                 {
                     strError = "第 " + (i + 1).ToString() + " 行：尚未指定数据库名";
@@ -799,7 +798,7 @@ namespace DigitalPlatform.CommonControl
             return this.comboBox_logicOperator.Text
                 + "|" + this.comboBox_server.Text
                 + "|" + this.comboBox_dbName.Text
-                + "|" + this.textBox_word.Text.Replace("|", "").Replace("^","")
+                + "|" + this.textBox_word.Text.Replace("|", "").Replace("^", "")
                 + "|" + this.comboBox_from.Text
                 + "|" + this.comboBox_matchStyle.Text;
         }
@@ -1002,7 +1001,7 @@ namespace DigitalPlatform.CommonControl
                     }
                     break;
                 case Keys.Down:
-                     {
+                    {
                         int index = this.Container.Lines.IndexOf(this);
                         if (index < this.Container.Lines.Count - 1)
                         {

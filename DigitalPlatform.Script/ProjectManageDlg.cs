@@ -2197,7 +2197,7 @@ Stack:
                 if (string.IsNullOrEmpty(strHostName) == false
                 && strHostName != this.HostName)
                 {
-                    strError = "拟导入方案 '" + project.NamePath + "' 其宿主为 '" + GetHostNameCaption(strHostName)+ "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。被拒绝导入。";
+                    strError = "拟导入方案 '" + project.NamePath + "' 其宿主为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。被拒绝导入。";
                     MessageBox.Show(this, strError);
                     continue;
                 }
@@ -2240,7 +2240,6 @@ Stack:
             TreeNode node = null;
             TreeNode parent = null;
 
-
             // 恢复原始名字路径
             if (bRestoreOriginNamePath == true)
             {
@@ -2277,7 +2276,6 @@ Stack:
                 }
                 else
                 {
-
                     if (node.ImageIndex == 0) // 目录
                     {
                         parent = node;

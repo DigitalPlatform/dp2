@@ -75,8 +75,15 @@ namespace dp2Circulation
             // 如果窗口打开的时候，发现一个事项也没有，就需要加入一个空白事项，以便用户在此基础上进行编辑
             if (this.orderDesignControl1.Items.Count == 0)
             {
-                // TODO: 需要删除缺省就在里面的copy为0的唯一事项，然后增加一个copy为0的事项。新增加的事项会有批次号等信息。
-                this.orderDesignControl1.InsertNewItem(0);  // this.orderDesignControl1.Items.Count
+                try
+                {
+                    // TODO: 需要删除缺省就在里面的copy为0的唯一事项，然后增加一个copy为0的事项。新增加的事项会有批次号等信息。
+                    this.orderDesignControl1.InsertNewItem(0);  // this.orderDesignControl1.Items.Count
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message);
+                }
 
                 this.orderDesignControl1.RemoveMultipleZeroCopyItem();
             }

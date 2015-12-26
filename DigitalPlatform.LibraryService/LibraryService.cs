@@ -12571,10 +12571,10 @@ namespace dp2Library
         // 权限：需要有getcommentinfo权限
         public LibraryServerResult GetComments(
             string strBiblioRecPath,
-                   long lStart,
-                   long lCount,
-                   string strStyle,
-                   string strLang,
+            long lStart,
+            long lCount,
+            string strStyle,
+            string strLang,
             out EntityInfo[] commentinfos)
         {
             commentinfos = null;
@@ -12585,7 +12585,6 @@ namespace dp2Library
 
             try
             {
-
                 // 权限字符串
                 if (StringUtil.IsInList("getcommentinfo", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)

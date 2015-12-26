@@ -61,7 +61,7 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            WriteHtml(this.webBrowser1, "</pre><span id='"+strID+"'>" + HttpUtility.HtmlEncode(strText) + "</span>"
+            WriteHtml(this.webBrowser1, "</pre><span id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</span>"
                 + "<pre style=\"font-family:Consolas; \">");
             ScrollToEnd();
         }
@@ -236,7 +236,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     iAutomaticUpdates.EnableService();
                 }
-                catch(System.InvalidCastException ex)
+                catch (System.InvalidCastException ex)
                 {
                     strError = ex.Message;
                     return -1;
@@ -298,8 +298,8 @@ namespace DigitalPlatform.CommonControl
 
             this.AppendString("正在搜索更新，请耐心等候 ...\r\n(如果您这台电脑是安装 Windows 操作系统后第一次更新，可能会在这一步耗费较长时间，请一定耐心等待)\r\n");
             // Begin Asynchronous IUpdateSearcher...
-            _searchJob = _updateSearcher.BeginSearch("IsInstalled=0 AND IsPresent=0", 
-                new SearchCompleteFunc(this), 
+            _searchJob = _updateSearcher.BeginSearch("IsInstalled=0 AND IsPresent=0",
+                new SearchCompleteFunc(this),
                 null // new UpdateSearcher_state(this)
                 );
         }
@@ -437,7 +437,7 @@ MessageBoxDefaultButton.Button2);
         void BeginInstallation()
         {
             UpdateCollection installCollection = new UpdateCollection();
-            foreach(IUpdate update in this._updateCollection)
+            foreach (IUpdate update in this._updateCollection)
             {
                 if (update.IsDownloaded)
                     installCollection.Add(update);
@@ -583,7 +583,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // Implementation of IDownloadProgressChangedCallback interface...
-            public void Invoke(IDownloadJob downloadJob, 
+            public void Invoke(IDownloadJob downloadJob,
                 IDownloadProgressChangedCallbackArgs e)
             {
                 decimal downloaded = ((e.Progress.TotalBytesDownloaded / 1024) / 1024);

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,14 +13,14 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CommonControl
 {
-    // ·şÎñÓÚ CheckedCombobox
+    // æœåŠ¡äº CheckedCombobox
     public partial class PropertyStringDialog : Form
     {
         public CheckedComboBox CheckedComboBox = null;
 
         const int WM_CLOSE = API.WM_USER + 201;
 
-        public bool HideCloseButton 
+        public bool HideCloseButton
         {
             get
             {
@@ -33,7 +33,7 @@ namespace DigitalPlatform.CommonControl
                 if (value == true)
                 {
                     this.FormBorderStyle = FormBorderStyle.None;
-                    this.listView1.BorderStyle = BorderStyle.FixedSingle;   // FormÃ»ÓĞ±ß¿òÁË£¬¾Í¿¿ListViewµÄ±ß¿òÁË
+                    this.listView1.BorderStyle = BorderStyle.FixedSingle;   // Formæ²¡æœ‰è¾¹æ¡†äº†ï¼Œå°±é ListViewçš„è¾¹æ¡†äº†
                 }
                 else
                 {
@@ -43,7 +43,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ÊÇ·ñ½ö½öÔÚ½á¹ûÖĞ·µ»ØµÚÒ»¸ö\t×ó±ßµÄÄÚÈİ¡£·ñÔò·µ»ØÈ«²¿ÄÚÈİ
+        // æ˜¯å¦ä»…ä»…åœ¨ç»“æœä¸­è¿”å›ç¬¬ä¸€ä¸ª\tå·¦è¾¹çš„å†…å®¹ã€‚å¦åˆ™è¿”å›å…¨éƒ¨å†…å®¹
         public bool ReturnFirstPart = true;
 
         int m_nIndex = 0;
@@ -52,7 +52,7 @@ namespace DigitalPlatform.CommonControl
 
         public string PropertyString = "";
 
-        // È«²¿¿ÉÓÃÖµµÄÁĞ±í
+        // å…¨éƒ¨å¯ç”¨å€¼çš„åˆ—è¡¨
         public List<string> Items = new List<string>();
 
         public PropertyStringDialog()
@@ -82,7 +82,7 @@ namespace DigitalPlatform.CommonControl
             this.PropertyString = GetValue();
         }
 
-        // ¸ù¾İÁĞµÄ¶àÉÙ£¬ÖÇÄÜÉèÖÃÁĞ¿í¶È
+        // æ ¹æ®åˆ—çš„å¤šå°‘ï¼Œæ™ºèƒ½è®¾ç½®åˆ—å®½åº¦
         void SetColumnWidth()
         {
             if (this.listView1.View == View.Details)
@@ -103,7 +103,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ¸ù¾İValueTableÏÈ½¨Á¢Î´¹´Ñ¡µÄÈ«²¿ÁĞ±íÊÂÏî
+        // æ ¹æ®ValueTableå…ˆå»ºç«‹æœªå‹¾é€‰çš„å…¨éƒ¨åˆ—è¡¨äº‹é¡¹
         void BuildList()
         {
             this.listView1.Items.Clear();
@@ -119,7 +119,7 @@ namespace DigitalPlatform.CommonControl
 
                 ListViewItem item = new ListViewItem();
 
-                // ¸ù¾İ\t·ÖÎªÈô¸É²¿·Ö
+                // æ ¹æ®\tåˆ†ä¸ºè‹¥å¹²éƒ¨åˆ†
                 string[] columns = strLine.Split(new char[] { '\t' });
                 for (int j = 0; j < columns.Length; j++)
                 {
@@ -130,7 +130,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ¸ù¾İ¶ººÅ·Ö¸îµÄÖµÁĞ±íÏÈ½¨Á¢Î´¹´Ñ¡µÄÈ«²¿ÁĞ±íÊÂÏî
+        // æ ¹æ®é€—å·åˆ†å‰²çš„å€¼åˆ—è¡¨å…ˆå»ºç«‹æœªå‹¾é€‰çš„å…¨éƒ¨åˆ—è¡¨äº‹é¡¹
         void BuildList(string strValue)
         {
             this.listView1.Items.Clear();
@@ -145,7 +145,7 @@ namespace DigitalPlatform.CommonControl
 
                 ListViewItem item = new ListViewItem();
 
-                // ¸ù¾İ\t·ÖÎªÈô¸É²¿·Ö
+                // æ ¹æ®\tåˆ†ä¸ºè‹¥å¹²éƒ¨åˆ†
                 string[] columns = strLine.Split(new char[] { '\t' });
                 for (int j = 0; j < columns.Length; j++)
                 {
@@ -156,7 +156,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ¹¹Ôì¹´Ñ¡ÊÂÏî×Ö·û´®
+        // æ„é€ å‹¾é€‰äº‹é¡¹å­—ç¬¦ä¸²
         string GetValue()
         {
             List<NumberedString> results = new List<NumberedString>();
@@ -185,7 +185,7 @@ namespace DigitalPlatform.CommonControl
                 results.Add(one);
             }
 
-            // ÅÅĞò
+            // æ’åº
             results.Sort(new NumberdStringCompare());
 
             for (int i = 0; i < results.Count; i++)
@@ -198,22 +198,22 @@ namespace DigitalPlatform.CommonControl
             return strResult;
         }
 
-        // ¹´Ñ¡ÖµÊÂÏî¡£±¾º¯ÊıĞëÒªÔÚBuildList()ºóµ÷ÓÃ
-        // ±¾º¯ÊıÄÜ×Ô¶¯Ìí¼ÓstrValueÖĞ¾ß±¸¡¢µ«ÊÇListViewÖĞÉĞÎ´´æÔÚµÄÊÂÏîĞĞ
+        // å‹¾é€‰å€¼äº‹é¡¹ã€‚æœ¬å‡½æ•°é¡»è¦åœ¨BuildList()åè°ƒç”¨
+        // æœ¬å‡½æ•°èƒ½è‡ªåŠ¨æ·»åŠ strValueä¸­å…·å¤‡ã€ä½†æ˜¯ListViewä¸­å°šæœªå­˜åœ¨çš„äº‹é¡¹è¡Œ
         void SetValue(string strValue)
         {
-            // Çå³ıÏÈÇ°µÄÈ«²¿checked×´Ì¬
+            // æ¸…é™¤å…ˆå‰çš„å…¨éƒ¨checkedçŠ¶æ€
             for (int i = 0; i < this.listView1.Items.Count; i++)
             {
                 ListViewItem item = this.listView1.Items[i];
                 if (item.Checked == true)
                     item.Checked = false;
-                item.Tag = null;    // Çå³ıÔ­À´²ĞÁôµÄĞòºÅ
+                item.Tag = null;    // æ¸…é™¤åŸæ¥æ®‹ç•™çš„åºå·
             }
 
-            this.m_nIndex = 0;  // ĞòºÅ
+            this.m_nIndex = 0;  // åºå·
 
-            string[] parts = strValue.Split(new char[] {','});
+            string[] parts = strValue.Split(new char[] { ',' });
 
             for (int i = 0; i < parts.Length; i++)
             {
@@ -221,19 +221,19 @@ namespace DigitalPlatform.CommonControl
                 if (String.IsNullOrEmpty(strLine) == true)
                     continue;
 
-                // ¸ù¾İ\t·ÖÎªÈô¸É²¿·Ö
-                string[] columns = strLine.Split(new char [] {'\t'});
+                // æ ¹æ®\tåˆ†ä¸ºè‹¥å¹²éƒ¨åˆ†
+                string[] columns = strLine.Split(new char[] { '\t' });
                 if (columns.Length == 0)
                     continue;
 
-                // Ö»ÓÃµÚÒ»²¿·ÖÀ´½øĞĞÆ¥Åä¹´Ñ¡
+                // åªç”¨ç¬¬ä¸€éƒ¨åˆ†æ¥è¿›è¡ŒåŒ¹é…å‹¾é€‰
                 string strFirstColumn = columns[0].Trim();
 
                 ListViewItem item = ListViewUtil.FindItem(
                     this.listView1,
                     strFirstColumn, 0);
 
-                // Èç¹ûÊÂÏî¾ÓÈ»²»´æÔÚ
+                // å¦‚æœäº‹é¡¹å±…ç„¶ä¸å­˜åœ¨
                 if (item == null)
                 {
                     item = new ListViewItem();
@@ -247,11 +247,11 @@ namespace DigitalPlatform.CommonControl
 
                 item.Checked = true;
 
-                // ±£ÁôÔ­Ê¼ĞòºÅ
+                // ä¿ç•™åŸå§‹åºå·
                 ItemInfo iteminfo = new ItemInfo();
                 iteminfo.Index = this.m_nIndex++;
                 iteminfo.OldItem = true;
-                item.Tag = iteminfo; 
+                item.Tag = iteminfo;
             }
         }
 
@@ -279,7 +279,7 @@ namespace DigitalPlatform.CommonControl
                 this.CheckedComboBox.OnItemChecked(e);
         }
 
-        // ÉÏÏÂÎÄ²Ëµ¥
+        // ä¸Šä¸‹æ–‡èœå•
         private void listView1_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -288,7 +288,7 @@ namespace DigitalPlatform.CommonControl
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("³öÏÖ´°¿Ú±êÌâÌõ(&T)");
+            menuItem = new MenuItem("å‡ºç°çª—å£æ ‡é¢˜æ¡(&T)");
             menuItem.Click += new System.EventHandler(this.menu_displayTitleBar_Click);
             if (this.FormBorderStyle == FormBorderStyle.None)
                 menuItem.Checked = false;
@@ -296,7 +296,7 @@ namespace DigitalPlatform.CommonControl
                 menuItem.Checked = true;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("³öÏÖÀ¸Ä¿±êÌâ(&C)");
+            menuItem = new MenuItem("å‡ºç°æ ç›®æ ‡é¢˜(&C)");
             menuItem.Click += new System.EventHandler(this.menu_displayColumTitle_Click);
             if (this.listView1.HeaderStyle == ColumnHeaderStyle.None)
                 menuItem.Checked = false;
@@ -309,15 +309,15 @@ namespace DigitalPlatform.CommonControl
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("È«Ñ¡(&S)");
+            menuItem = new MenuItem("å…¨é€‰(&S)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("È«²»Ñ¡(&C)");
+            menuItem = new MenuItem("å…¨ä¸é€‰(&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            // TODO: ÉÏÒÆ¡¢ÏÂÒÆ¡¢°´ÕÕÏÔÊ¾Ë³ĞòÊä³ö¡¢°´ÕÕÔ­Ê¼Ë³ĞòÏÔÊ¾...
+            // TODO: ä¸Šç§»ã€ä¸‹ç§»ã€æŒ‰ç…§æ˜¾ç¤ºé¡ºåºè¾“å‡ºã€æŒ‰ç…§åŸå§‹é¡ºåºæ˜¾ç¤º...
 
             /*
             // ---
@@ -325,7 +325,7 @@ namespace DigitalPlatform.CommonControl
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("É¾³ı(&D)");
+            menuItem = new MenuItem("åˆ é™¤(&D)");
             menuItem.Tag = this.listView_in;
             menuItem.Click += new System.EventHandler(this.menu_deleteSelected_Click);
             if (this.listView_in.SelectedItems.Count == 0)
@@ -395,9 +395,9 @@ namespace DigitalPlatform.CommonControl
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -422,12 +422,12 @@ namespace DigitalPlatform.CommonControl
                 return;
 
 
-            if (e.X < info.Item.Bounds.Height+2)
+            if (e.X < info.Item.Bounds.Height + 2)
                 return;
 
             if (info.SubItem == info.Item.SubItems[0])
             {
-                // check´ËÏî£¬Çå³ıÆäËüÏî
+                // checkæ­¤é¡¹ï¼Œæ¸…é™¤å…¶å®ƒé¡¹
                 for (int i = 0; i < this.listView1.Items.Count; i++)
                 {
                     ListViewItem item = this.listView1.Items[i];
@@ -444,7 +444,7 @@ namespace DigitalPlatform.CommonControl
                 }
 
                 this.PropertyString = GetValue();
-                API.PostMessage(this.Handle, WM_CLOSE, 0, 0);   // 2009/11/2 changed Èç¹ûÕâÀïÖ±½ÓÓÃthis.Close()£¬»áµ¼ÖÂÎŞ·¨²¶×½µÄDivideByZeroException
+                API.PostMessage(this.Handle, WM_CLOSE, 0, 0);   // 2009/11/2 changed å¦‚æœè¿™é‡Œç›´æ¥ç”¨this.Close()ï¼Œä¼šå¯¼è‡´æ— æ³•æ•æ‰çš„DivideByZeroException
                 return;
             }
 
@@ -459,11 +459,11 @@ namespace DigitalPlatform.CommonControl
 
     class ItemInfo
     {
-        public int Index = -1;  // -1±íÊ¾ÉĞÎ´³õÊ¼»¯
-        public bool OldItem = false;    // ==true±íÊ¾ÎªÔ­ÏÈ¾ÍÓĞµÄÊÂÏî¡£ĞÂ¹´Ñ¡µÄÊÂÏîÎªfalse
+        public int Index = -1;  // -1è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
+        public bool OldItem = false;    // ==trueè¡¨ç¤ºä¸ºåŸå…ˆå°±æœ‰çš„äº‹é¡¹ã€‚æ–°å‹¾é€‰çš„äº‹é¡¹ä¸ºfalse
     }
 
-    // ´øÓĞĞòºÅµÄ×Ö·û´®
+    // å¸¦æœ‰åºå·çš„å­—ç¬¦ä¸²
     public class NumberedString
     {
         public int Index = 0;
@@ -485,17 +485,17 @@ namespace DigitalPlatform.CommonControl
 OpenDetailEventArgs e);
 
     /// <summary>
-    /// ´ò¿ªÏêÏ¸´°ÊÂ¼şµÄ²ÎÊı
+    /// æ‰“å¼€è¯¦ç»†çª—äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class OpenDetailEventArgs : EventArgs
     {
         /// <summary>
-        /// ¼ÇÂ¼È«Â·¾¶¼¯ºÏ¡£
+        /// è®°å½•å…¨è·¯å¾„é›†åˆã€‚
         /// </summary>
         public string[] Paths = null;
 
         /// <summary>
-        /// ÊÇ·ñ¿ªÎªĞÂ´°¿Ú
+        /// æ˜¯å¦å¼€ä¸ºæ–°çª—å£
         /// </summary>
         public bool OpenNew = false;
     }

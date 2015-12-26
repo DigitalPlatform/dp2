@@ -2879,7 +2879,6 @@ start_time_1,
                      * */
                     return 0;
                 }
-
             }
 
             // 
@@ -2890,7 +2889,7 @@ start_time_1,
 
             if (string.IsNullOrEmpty(strPersonalLibrary) == false)
             {
-                if (strRoom != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
+                if (strPersonalLibrary != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
                 {
                     strError = "当前用户 '" + account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
                     // text-level: 用户提示
@@ -11874,7 +11873,7 @@ out string strError)
 
             if (string.IsNullOrEmpty(strPersonalLibrary) == false)
             {
-                if (strRoom != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
+                if (strPersonalLibrary != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
                 {
                     strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
                     return -1;

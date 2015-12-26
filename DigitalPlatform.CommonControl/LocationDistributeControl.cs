@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// 馆藏去向分配控件
+    /// 棣嗚棌鍘诲悜鍒嗛厤鎺т欢
     /// </summary>
     public partial class LocationDistributeControl : UserControl
     {

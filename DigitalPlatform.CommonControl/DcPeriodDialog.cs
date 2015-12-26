@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// DCÖĞÀàĞÍÎªdcterms:PeriodµÄÊ±¼ä·¶Î§ÖµµÄ±à¼­¶Ô»°¿ò
+    /// DCä¸­ç±»å‹ä¸ºdcterms:Periodçš„æ—¶é—´èŒƒå›´å€¼çš„ç¼–è¾‘å¯¹è¯æ¡†
     /// </summary>
     public partial class DcPeriodDialog : Form
     {
@@ -73,12 +73,12 @@ namespace DigitalPlatform.CommonControl
             return strValue;
         }
 
-        // ¼ì²âÄÚÈİÊÇ·ñ°üº¬ÁË±»Ö§³ÖµÄ Ê±¼ä×Ö·û´®ÀàĞÍ
+        // æ£€æµ‹å†…å®¹æ˜¯å¦åŒ…å«äº†è¢«æ”¯æŒçš„ æ—¶é—´å­—ç¬¦ä¸²ç±»å‹
         public static bool IsSupportType(string strValue)
         {
             string strScheme = GetParameter(strValue, "scheme");
 
-            // È±Ê¡µÄÀàĞÍ
+            // ç¼ºçœçš„ç±»å‹
             if (String.IsNullOrEmpty(strScheme) == true)
             {
                 strScheme = "W3C-DTF";
@@ -110,7 +110,7 @@ namespace DigitalPlatform.CommonControl
             strName = GetParameter(strValue, "name");
             strScheme = GetParameter(strValue, "scheme");
 
-            // È±Ê¡µÄÀàĞÍ
+            // ç¼ºçœçš„ç±»å‹
             if (String.IsNullOrEmpty(strScheme) == true)
             {
                 strScheme = "W3C-DTF";
@@ -118,7 +118,7 @@ namespace DigitalPlatform.CommonControl
 
             if (strScheme != "W3C-DTF")
             {
-                strError = "Ä¿Ç°ÉĞ²»Ö§³Ö±à¼­ '" + strScheme + "' ÀàĞÍµÄÊ±¼ä×Ö·û´®";
+                strError = "ç›®å‰å°šä¸æ”¯æŒç¼–è¾‘ '" + strScheme + "' ç±»å‹çš„æ—¶é—´å­—ç¬¦ä¸²";
                 return -1;
             }
 
@@ -139,7 +139,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "ÆğÊ¼Ê±¼ä¸ñÊ½ÓĞ´í: " + ex.Message;
+                strError = "èµ·å§‹æ—¶é—´æ ¼å¼æœ‰é”™: " + ex.Message;
                 return -1;
             }
 
@@ -155,7 +155,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "½áÊøÊ±¼ä¸ñÊ½ÓĞ´í: " + ex.Message;
+                strError = "ç»“æŸæ—¶é—´æ ¼å¼æœ‰é”™: " + ex.Message;
                 return -1;
             }
 

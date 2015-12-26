@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -32,8 +32,8 @@ namespace DigitalPlatform.CommonControl
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void RoundRectangle(Graphics graphics,
             Pen pen,
             Brush brush,
@@ -51,8 +51,8 @@ namespace DigitalPlatform.CommonControl
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void RoundRectangle(Graphics graphics,
             Pen pen,
             Brush brush,

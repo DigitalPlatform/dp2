@@ -23,23 +23,27 @@ namespace DigitalPlatform.LibraryServer
         // 初始化
         // parameters:
         public int Open(
-            string strMongoDbConnStr,
+            // string strMongoDbConnStr,
+            MongoClient client,
             string strInstancePrefix,
             out string strError)
         {
             strError = "";
 
+#if NO
             if (string.IsNullOrEmpty(strMongoDbConnStr) == true)
             {
                 strError = "strMongoDbConnStr 参数值不应为空";
                 return -1;
             }
+#endif
 
             if (string.IsNullOrEmpty(strInstancePrefix) == false)
                 strInstancePrefix = strInstancePrefix + "_";
 
             m_strHitCountDatabaseName = strInstancePrefix + "hitcount";
 
+#if NO
             try
             {
                 this.m_mongoClient = new MongoClient(strMongoDbConnStr);
@@ -49,8 +53,9 @@ namespace DigitalPlatform.LibraryServer
                 strError = "初始化 MongoClient 时出错: " + ex.Message;
                 return -1;
             }
+#endif
 
-            var server = m_mongoClient.GetServer();
+            var server = client.GetServer();
 
             {
                 var db = server.GetDatabase(this.m_strHitCountDatabaseName);

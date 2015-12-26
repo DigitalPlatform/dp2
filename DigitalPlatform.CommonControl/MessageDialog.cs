@@ -8,7 +8,6 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.Text;
-
 using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CommonControl
@@ -35,7 +34,7 @@ namespace DigitalPlatform.CommonControl
             this.textBox_message.DeselectAll();
         }
 
-        void SetButtonState(string [] button_texts = null)
+        void SetButtonState(string[] button_texts = null)
         {
             {
                 ButtonInfo info = null;
@@ -405,7 +404,7 @@ namespace DigitalPlatform.CommonControl
             ref bool bCheckBox)
         {
             MessageDialog dlg = new MessageDialog();
-            GuiUtil.AutoSetDefaultFont(dlg); 
+            GuiUtil.AutoSetDefaultFont(dlg);
             dlg.Text = strTitle;
             if (strCheckBoxText == null)
                 dlg.CheckBoxVisible = false;

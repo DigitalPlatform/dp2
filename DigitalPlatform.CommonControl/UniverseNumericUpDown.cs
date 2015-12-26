@@ -10,7 +10,7 @@ namespace DigitalPlatform.CommonControl
     /// <summary>
     /// 能切换显示不同单位数值的 NumbericUpDown 控件
     /// </summary>
-    public class UniverseNumericUpDown : NumericUpDown 
+    public class UniverseNumericUpDown : NumericUpDown
     {
         private ToolTip toolTip1;
         // private System.ComponentModel.IContainer components;
@@ -55,7 +55,7 @@ namespace DigitalPlatform.CommonControl
         {
             get
             {
-                return  ConvertValue(this._currentUnit, GraphicsUnit.Display, this.Value);
+                return ConvertValue(this._currentUnit, GraphicsUnit.Display, this.Value);
             }
             set
             {

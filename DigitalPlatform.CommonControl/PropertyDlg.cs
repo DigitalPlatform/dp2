@@ -3,10 +3,10 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using System.Xml;
-using DigitalPlatform.Xml;
 using System.Collections.Generic;
+
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.CommonControl
 {

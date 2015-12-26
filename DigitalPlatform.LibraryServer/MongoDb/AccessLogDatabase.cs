@@ -17,7 +17,7 @@ namespace DigitalPlatform.LibraryServer
 {
     public class AccessLogDatabase
     {
-        MongoClient m_mongoClient = null;
+        MongoClient _mongoClient = null;
 
         string _logDatabaseName = "";
 
@@ -28,34 +28,39 @@ namespace DigitalPlatform.LibraryServer
         // 初始化
         // parameters:
         public int Open(
-            string strMongoDbConnStr,
+            // string strMongoDbConnStr,
+            MongoClient client,
             string strInstancePrefix,
             out string strError)
         {
             strError = "";
 
+#if NO
             if (string.IsNullOrEmpty(strMongoDbConnStr) == true)
             {
                 strError = "strMongoDbConnStr 参数值不应为空";
                 return -1;
             }
+#endif
 
             if (string.IsNullOrEmpty(strInstancePrefix) == false)
                 strInstancePrefix = strInstancePrefix + "_";
 
             _logDatabaseName = strInstancePrefix + "accessLog";
 
+#if NO
             try
             {
-                this.m_mongoClient = new MongoClient(strMongoDbConnStr);
+                this._mongoClient = new MongoClient(strMongoDbConnStr);
             }
             catch (Exception ex)
             {
                 strError = "初始化 MongoClient 时出错: " + ex.Message;
                 return -1;
             }
+#endif
 
-            var server = m_mongoClient.GetServer();
+            var server = client.GetServer();
 
             {
                 var db = server.GetDatabase(this._logDatabaseName);
@@ -114,6 +119,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+#if NO
         // parameters:
         //      maxItemCount    最大事项数。如果为 -1 表示不限制
         public bool Add(string operation,
@@ -149,14 +155,54 @@ namespace DigitalPlatform.LibraryServer
                 .Add("HitCount", initial_hitcount)
                 .Add("Operator", operator_param)
                 .Add("OperTime", opertime);
-#if NO
-            var update = Update.Inc("HitCount", 1);
-            collection.Update(
-    query,
-    update,
-    UpdateFlags.Upsert);
-#endif
             collection.Insert(query);
+            return true;
+        }
+#endif
+        public bool Add(string operation,
+    string path,
+    long size,
+    string mime,
+    string clientAddress,
+    long initial_hitcount,
+    string operator_param,
+    DateTime opertime,
+    long maxItemCount)
+        {
+            AccessLogItem item = new AccessLogItem();
+            item.Operation = operation;
+            item.Path = path;
+            item.Size = size;
+            item.MIME = mime;
+            item.ClientAddress = clientAddress;
+            item.HitCount = initial_hitcount;
+            item.Operator = operator_param;
+            item.OperTime = opertime;
+
+            return Add(item, maxItemCount);
+        }
+
+        // parameters:
+        //      maxItemCount    最大事项数。如果为 -1 表示不限制
+        public bool Add(AccessLogItem item,
+            long maxItemCount)
+        {
+            MongoCollection<AccessLogItem> collection = this.LogCollection;
+            if (collection == null)
+                return false;
+
+            // 限制最大事项数
+            {
+                string date = GetToday();
+                long newValue = _itemCount.GetValue(date, 1);
+                if (maxItemCount != -1 && newValue > maxItemCount)
+                {
+                    _itemCount.GetValue(date, -1);
+                    return false;
+                }
+            }
+
+            collection.Insert(item);
             return true;
         }
 
@@ -236,7 +282,7 @@ namespace DigitalPlatform.LibraryServer
                 null
             ).ToArray();
 
-            foreach(BsonDocument doc in result)
+            foreach (BsonDocument doc in result)
             {
                 return doc.GetValue("count", 0).ToInt32();
             }
@@ -292,7 +338,7 @@ namespace DigitalPlatform.LibraryServer
             foreach (BsonDocument doc in result)
             {
                 ValueCount item = new ValueCount();
-                item.Value = doc.GetValue("day", "").ToString().Replace("-","");
+                item.Value = doc.GetValue("day", "").ToString().Replace("-", "");
                 item.Count = doc.GetValue("count", 0).ToInt32();
                 values.Add(item);
                 nCount++;
@@ -468,7 +514,7 @@ namespace DigitalPlatform.LibraryServer
             if (collection == null)
                 return 0;
             List<OperLogInfo> infos = new List<OperLogInfo>();
-            foreach(AccessLogItem item in collection)
+            foreach (AccessLogItem item in collection)
             {
                 OperLogInfo info = new OperLogInfo();
                 info.AttachmentLength = 0;
@@ -494,7 +540,7 @@ namespace DigitalPlatform.LibraryServer
         public string LibraryCode { get; set; } // 访问者的图书馆代码
         public string Operation { get; set; } // 操作名
         public string Path { get; set; } // 所获取的记录路径
-        public long Size {get;set; }    // 对象大小
+        public long Size { get; set; }    // 对象大小
         public string MIME { get; set; }  // 媒体类型
         public string ClientAddress { get; set; }  // 访问者的IP地址
         public long HitCount { get; set; } // 访问次数。一般为 1

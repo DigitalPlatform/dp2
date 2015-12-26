@@ -204,16 +204,16 @@ namespace dp2Circulation
             this.comboBox_labelPrint_accessNoSource = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.tabPage_message = new System.Windows.Forms.TabPage();
+            this.textBox_message_password = new System.Windows.Forms.TextBox();
+            this.textBox_message_userName = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.label33 = new System.Windows.Forms.Label();
             this.textBox_message_dp2MServerUrl = new System.Windows.Forms.TextBox();
             this.label29 = new System.Windows.Forms.Label();
             this.label_comment = new System.Windows.Forms.Label();
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.textBox_message_password = new System.Windows.Forms.TextBox();
-            this.textBox_message_userName = new System.Windows.Forms.TextBox();
-            this.label32 = new System.Windows.Forms.Label();
-            this.label33 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -2228,7 +2228,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(263, 84);
+            this.groupBox7.Size = new System.Drawing.Size(467, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2236,7 +2236,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(152, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(356, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2250,7 +2250,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(251, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(455, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2314,6 +2314,39 @@ namespace dp2Circulation
             this.tabPage_message.Text = "消息";
             this.tabPage_message.UseVisualStyleBackColor = true;
             // 
+            // textBox_message_password
+            // 
+            this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_password.Location = new System.Drawing.Point(107, 177);
+            this.textBox_message_password.Name = "textBox_message_password";
+            this.textBox_message_password.PasswordChar = '*';
+            this.textBox_message_password.Size = new System.Drawing.Size(156, 21);
+            this.textBox_message_password.TabIndex = 22;
+            // 
+            // textBox_message_userName
+            // 
+            this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_userName.Location = new System.Drawing.Point(107, 150);
+            this.textBox_message_userName.Name = "textBox_message_userName";
+            this.textBox_message_userName.Size = new System.Drawing.Size(156, 21);
+            this.textBox_message_userName.TabIndex = 20;
+            // 
+            // label32
+            // 
+            this.label32.Location = new System.Drawing.Point(9, 180);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(75, 18);
+            this.label32.TabIndex = 21;
+            this.label32.Text = "密码(&P)：";
+            // 
+            // label33
+            // 
+            this.label33.Location = new System.Drawing.Point(9, 153);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(75, 18);
+            this.label33.TabIndex = 19;
+            this.label33.Text = "用户名(&U)：";
+            // 
             // textBox_message_dp2MServerUrl
             // 
             this.textBox_message_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -2376,39 +2409,6 @@ namespace dp2Circulation
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // textBox_message_password
-            // 
-            this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_message_password.Location = new System.Drawing.Point(107, 177);
-            this.textBox_message_password.Name = "textBox_message_password";
-            this.textBox_message_password.PasswordChar = '*';
-            this.textBox_message_password.Size = new System.Drawing.Size(156, 21);
-            this.textBox_message_password.TabIndex = 22;
-            // 
-            // textBox_message_userName
-            // 
-            this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_message_userName.Location = new System.Drawing.Point(107, 150);
-            this.textBox_message_userName.Name = "textBox_message_userName";
-            this.textBox_message_userName.Size = new System.Drawing.Size(156, 21);
-            this.textBox_message_userName.TabIndex = 20;
-            // 
-            // label32
-            // 
-            this.label32.Location = new System.Drawing.Point(9, 180);
-            this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(75, 18);
-            this.label32.TabIndex = 21;
-            this.label32.Text = "密码(&P)：";
-            // 
-            // label33
-            // 
-            this.label33.Location = new System.Drawing.Point(9, 153);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(75, 18);
-            this.label33.TabIndex = 19;
-            this.label33.Text = "用户名(&U)：";
             // 
             // CfgDlg
             // 
