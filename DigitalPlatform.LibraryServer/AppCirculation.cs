@@ -2492,6 +2492,54 @@ start_time_1,
                 return 0;
         }
 
+        // 检查存取权限中的 location
+        // parameters:
+        //      
+        // return:
+        //      -1  出错
+        //      0   允许继续访问
+        //      1   权限限制，不允许继续访问。strError 中有说明原因的文字
+        //      2   没有定义相关的存取定义参数
+        static int AccessLocationRange(
+            string strAccessString,
+            string strItemLocation,
+            string strReaderDbName,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (String.IsNullOrEmpty(strAccessString) == true)
+                return 2;
+
+            string strAccessActionList = "";
+            strAccessActionList = GetDbOperRights(strAccessString,
+                strReaderDbName,
+                "location");
+            if (strAccessActionList == "*")
+            {
+                // 通配
+                return 0;
+            }
+
+            if (strAccessActionList == null)
+                return 2;
+
+            string strRoom = "";
+            string strCode = "";
+
+                // 解析
+            ParseCalendarName(strItemLocation,
+            out strCode,
+            out strRoom);
+
+            if (StringUtil.IsInList(strRoom, strAccessActionList) == true)
+                return 0;
+
+            strError = "当前用户只能操作馆藏地为 '"+strAccessActionList+"' 之一的册，不能操作(分馆 '"+strCode+"' 内)馆藏地为 '"+strRoom+"' 的册";
+            return 1;
+        }
+
         // 检查存取权限中的 reader
         // parameters:
         //      

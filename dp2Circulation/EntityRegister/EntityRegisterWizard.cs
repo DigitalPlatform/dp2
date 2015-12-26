@@ -399,7 +399,6 @@ namespace dp2Circulation
 
                 this.flowLayoutPanel1.BackColor = this.BackColor;
                 this.flowLayoutPanel1.ForeColor = this.ForeColor;
-
             }
 
             {
@@ -2693,11 +2692,14 @@ MessageBoxDefaultButton.Button1);
                 long lCount = -1;
                 for (; ; )
                 {
+#if NO
+                    // 这是 Bug
                     if (Progress.State != 0)
                     {
                         strError = "用户中断";
                         return -2;
                     }
+#endif
 
                     EntityInfo[] entities = null;
 

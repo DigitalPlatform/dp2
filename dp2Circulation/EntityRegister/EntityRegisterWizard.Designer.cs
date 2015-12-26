@@ -430,7 +430,7 @@
             // 
             this.splitContainer_biblioAndItems.Panel2.Controls.Add(this.flowLayoutPanel1);
             this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(465, 256);
-            this.splitContainer_biblioAndItems.SplitterDistance = 233;
+            this.splitContainer_biblioAndItems.SplitterDistance = 234;
             this.splitContainer_biblioAndItems.SplitterWidth = 8;
             this.splitContainer_biblioAndItems.TabIndex = 0;
             this.splitContainer_biblioAndItems.DoubleClick += new System.EventHandler(this.splitContainer_biblioAndItems_DoubleClick);
@@ -447,7 +447,7 @@
             this.easyMarcControl1.MarcDefDom = null;
             this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(0);
             this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(233, 256);
+            this.easyMarcControl1.Size = new System.Drawing.Size(234, 256);
             this.easyMarcControl1.TabIndex = 0;
             this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
             this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
@@ -457,12 +457,13 @@
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoScroll = true;
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.DimGray;
             this.flowLayoutPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(224, 256);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(223, 256);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.SizeChanged += new System.EventHandler(this.flowLayoutPanel1_SizeChanged);
             this.flowLayoutPanel1.Enter += new System.EventHandler(this.flowLayoutPanel1_Enter);
