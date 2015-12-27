@@ -3795,6 +3795,23 @@ out strError);
                     goto ERROR1;
             }
 
+            nRet = BuildReaderResults(
+                sessioninfo,
+                readerdom,
+                strXml,
+                strResultTypeList,
+                strLibraryCode,
+                recpaths,
+                strOutputPath,
+                baTimestamp,
+                OperType.None,
+                null,
+                "",
+                ref results,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+#if NO
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             results = new string[result_types.Length];
 
@@ -3974,6 +3991,7 @@ out strError);
                     goto ERROR1;
                 }
             }
+#endif
 
             return result;
         ERROR1:
@@ -3981,6 +3999,226 @@ out strError);
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // parameters:
+        //      readerdom   读者 XMLDocument 对象。如果为空，则 strXml 参数中应该有读者记录
+        //      strXml      读者 XML 记录。如果 readerdom 为空，可以用这里的值
+        int BuildReaderResults(
+            SessionInfo sessioninfo,
+            XmlDocument readerdom,
+            string strXml,
+            string strResultTypeList,
+            string strLibraryCode,  // calendar/advancexml/html 时需要
+            List<string> recpaths,    // recpaths 时需要
+            string strOutputPath,   // recpaths 时需要
+            byte[] baTimestamp,    // timestamp 时需要
+            OperType operType,  // html 时需要
+            string [] saBorrowedItemBarcode,
+            string strCurrentItemBarcode,
+            ref string[] results,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string[] result_types = strResultTypeList.Split(new char[] { ',' });
+            results = new string[result_types.Length];
+
+            for (int i = 0; i < result_types.Length; i++)
+            {
+                string strResultType = result_types[i];
+
+                // 2008/4/3 
+                // if (String.Compare(strResultType, "calendar", true) == 0)
+                if (IsResultType(strResultType, "calendar") == true)
+                {
+                    if (readerdom == null)
+                    {
+                        nRet = LibraryApplication.LoadToDom(strXml,
+                            out readerdom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                            goto ERROR1;
+                        }
+                    }
+
+                    string strReaderType = DomUtil.GetElementText(readerdom, "readerType");
+
+                    // 获得日历
+                    DigitalPlatform.LibraryServer.Calendar calendar = null;
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到日历
+                    //      1   找到日历
+                    nRet = this.GetReaderCalendar(strReaderType,
+                        strLibraryCode,
+                        out calendar,
+                        out strError);
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        calendar = null;
+                    }
+
+                    string strCalendarName = "";
+
+                    if (calendar != null)
+                        strCalendarName = calendar.Name;
+
+                    results[i] = strCalendarName;
+                }
+                // else if (String.Compare(strResultType, "xml", true) == 0)
+                else if (IsResultType(strResultType, "xml") == true)
+                {
+                    // results[i] = strXml;
+                    string strResultXml = "";
+                    nRet = GetItemXml(strXml,
+        strResultType,
+        out strResultXml,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "获取 " + strResultType + " 格式的 XML 字符串时出错: " + strError;
+                        goto ERROR1;
+                    }
+                    results[i] = strResultXml;
+                }
+                else if (String.Compare(strResultType, "timestamp", true) == 0)
+                {
+                    // 2011/1/27
+                    results[i] = ByteArray.GetHexTimeStampString(baTimestamp);
+                }
+                else if (String.Compare(strResultType, "recpaths", true) == 0)
+                {
+                    // 2013/5/21
+                    if (recpaths != null)
+                        results[i] = StringUtil.MakePathList(recpaths);
+                    else
+                        results[i] = strOutputPath;
+                }
+                else if (String.Compare(strResultType, "advancexml_borrow_bibliosummary", true) == 0
+                    || String.Compare(strResultType, "advancexml_overdue_bibliosummary", true) == 0
+                    || String.Compare(strResultType, "advancexml_history_bibliosummary", true) == 0
+                    )
+                {
+                    // 2011/1/27
+                    continue;
+                }
+                // else if (String.Compare(strResultType, "summary", true) == 0)
+                else if (IsResultType(strResultType, "summary") == true)
+                {
+                    // 2013/11/15
+                    string strSummary = "";
+#if NO
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strSummary = "读者 XML 装入 DOM 出错: " + ex.Message;
+                        results[i] = strSummary;
+                        continue;
+                    }
+#endif
+                    if (readerdom == null)
+                    {
+                        nRet = LibraryApplication.LoadToDom(strXml,
+                            out readerdom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strSummary = "读者 XML 装入 DOM 出错: " + strError;
+                            results[i] = strSummary;
+                            continue;
+                        }
+                    }
+                    strSummary = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                    results[i] = strSummary;
+                }
+                // else if (String.Compare(strResultType, "advancexml", true) == 0)
+                else if (IsResultType(strResultType, "advancexml") == true)
+                {
+                    // 2008/4/3 
+                    string strOutputXml = "";
+                    nRet = this.GetAdvanceReaderXml(
+                        sessioninfo,
+                        strResultTypeList,  // strResultType, BUG!!! 2012/4/8
+                        strLibraryCode,
+                        strXml,
+                        out strOutputXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "GetAdvanceReaderXml()出错: " + strError;
+                        goto ERROR1;
+                    }
+                    results[i] = strOutputXml;
+                }
+                // else if (String.Compare(strResultType, "html", true) == 0)
+                else if (IsResultType(strResultType, "html") == true)
+                {
+                    string strReaderRecord = "";
+                    // 将读者记录数据从XML格式转换为HTML格式
+                    nRet = this.ConvertReaderXmlToHtml(
+                        sessioninfo,
+                        Path.Combine(this.CfgDir, "readerxml2html.cs"),
+                        Path.Combine(this.CfgDir, "readerxml2html.cs.ref"),
+                        strLibraryCode,
+                        strXml,
+                        strOutputPath,  // 2009/10/18 
+                        operType,   // OperType.None,
+                        saBorrowedItemBarcode,  // null,
+                        strCurrentItemBarcode,
+                        strResultType,
+                        out strReaderRecord,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ConvertReaderXmlToHtml()出错(脚本程序为" + this.CfgDir + "\\readerxml2html.cs" + "): " + strError;
+                        goto ERROR1;
+                    }
+                    // test strReaderRecord = "<html><body><p>test</p></body></html>";
+                    results[i] = strReaderRecord;
+                }
+                // else if (String.Compare(strResultType, "text", true) == 0)
+                else if (IsResultType(strResultType, "text") == true)
+                {
+                    string strReaderRecord = "";
+                    // 将读者记录数据从XML格式转换为text格式
+                    nRet = this.ConvertReaderXmlToHtml(
+                        sessioninfo,
+                        this.CfgDir + "\\readerxml2text.cs",
+                        this.CfgDir + "\\readerxml2text.cs.ref",
+                        strLibraryCode,
+                        strXml,
+                        strOutputPath,  // 2009/10/18 
+                        OperType.None,
+                        null,
+                        "",
+                        strResultType,
+                        out strReaderRecord,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ConvertReaderXmlToHtml()出错(脚本程序为" + this.CfgDir + "\\readerxml2html.cs" + "): " + strError;
+                        goto ERROR1;
+                    }
+                    results[i] = strReaderRecord;
+                }
+                else
+                {
+                    strError = "未知的结果类型 '" + strResultType + "'";
+                    goto ERROR1;
+                }
+            }
+
+            return 0;
+        ERROR1:
+            return -1;
         }
 
         static bool IsResultType(string strResultType, string strName)
