@@ -164,6 +164,7 @@
     <Compile Include="deleted\TestControl2.cs" />
     <Compile Include="AccountTable.cs" />
     <Compile Include="Threads\DefaultThread.cs" />
+    <Compile Include="Threads\OperLogThread.cs" />
     <Compile Include="Threads\RebuildKeys.cs" />
     <Compile Include="TraceDTLP.cs" />
     <Compile Include="UnhandledExceptionModule.cs" />

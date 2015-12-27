@@ -13,7 +13,10 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class ReadingOperDatabase : MongoDatabase<ReadingOperItem>
     {
-
+        public ReadingOperDatabase()
+        {
+            _databaseName = "readingOper";
+        }
     }
 
     public class ReadingOperItem

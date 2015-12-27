@@ -106,7 +106,6 @@ namespace DigitalPlatform.LibraryServer
 
         #endregion
 
-
         // 一次操作循环
         public override void Worker()
         {

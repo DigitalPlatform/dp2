@@ -203,6 +203,8 @@ namespace DigitalPlatform.LibraryServer
                     task = new ReadersMonitor(this, strName);
                 else if (strName == "消息监控")
                     task = new MessageMonitor(this, strName);
+                else if (strName == "创建 MongoDB 日志库")
+                    task = new BuildMongoOperDatabase(this, strName);
                 else
                 {
                     strError = "系统不能识别任务名 '" + strName + "'";

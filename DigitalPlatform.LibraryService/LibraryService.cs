@@ -11975,6 +11975,8 @@ namespace dp2Library
                     return result;
                 }
 
+                bool bIsReaderDb = false;
+
                 // 2012/9/16
                 // 需要限制检索读者库为当前管辖的范围
                 // TODO: 读者身份是否还需要作更细致的限定?
@@ -11987,6 +11989,8 @@ namespace dp2Library
                         out bReaderDbInCirculation,
                         out strLibraryCode) == true)
                     {
+                        bIsReaderDb = true;
+
                         if (bIsReader == true)
                         {
                             DigitalPlatform.LibraryServer.LibraryApplication.ResPathType type = LibraryApplication.GetResPathType(strResPath);
@@ -12066,6 +12070,10 @@ namespace dp2Library
                         bClearMetadata = true;
                     }
                 }
+
+                // 访问读者库的动作不记入访问日志
+                if (bWriteLog == true && bIsReaderDb == true)
+                    bWriteLog = false;
 
                 lRet = channel.GetRes(strResPath,
                     nStart,

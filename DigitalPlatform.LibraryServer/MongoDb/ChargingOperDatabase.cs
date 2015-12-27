@@ -15,6 +15,10 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class ChargingOperDatabase : MongoDatabase<ChargingOperItem>
     {
+        public ChargingOperDatabase()
+        {
+            _databaseName = "chargingOper";
+        }
 
         public override void CreateIndex()
         {

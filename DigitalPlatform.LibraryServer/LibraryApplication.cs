@@ -104,7 +104,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.61 (2015/12/9) GetReaderInfo() 允许使用 _testreader 获得测试用的读者记录信息
         //      2.62 (2015/12/11) Login() API 增加了检查前端最低版本号的功能。如果用户权限中有 checkclientversion，就进行这项检查
         //      2.63 (2015/12/12) Return() API，对于超期违约金因子为空的情况，现在不当作出错处理。这种情况交费信息不会写入读者记录的交费信息字段，但会进入操作日志中(便于以后进行统计)。
-        public static string Version = "2.63";
+        //      2.64 (2015/12/27) 借书和还书操作信息会自动写入 mongodb 的日志库。增加后台任务 "创建 MongoDB 日志库"
+        public static string Version = "2.64";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -258,6 +259,8 @@ namespace DigitalPlatform.LibraryServer
         public string NotifyDef = "";       // 提醒通知的定义。"15day,50%,70%"
 
         DefaultThread defaultManagerThread = null; // 缺省管理后台任务
+
+        internal OperLogThread operLogThread = null; // 操作日志辅助线程
 
         // 全部读者库集合(包括不参与流通的读者库)
         public List<ReaderDbCfg> ReaderDbs = new List<ReaderDbCfg>();
@@ -1253,9 +1256,29 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        app.WriteErrorLog("启动批处理任务DefaultThread时出错：" + ex.Message);
+                        app.WriteErrorLog("启动后台任务 DefaultThread 时出错：" + ex.Message);
                         goto ERROR1;
                     }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: OperLogThread");
+#endif
+                    // 启动 OperLogThread
+                    try
+                    {
+                        OperLogThread thread = new OperLogThread(this, null);
+                        this.BatchTasks.Add(thread);
+
+                        thread.StartWorkerThread();
+
+                        this.operLogThread = thread;
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动后台任务 OperLogThread 时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+
 
 #if LOG_INFO
                     app.WriteErrorLog("INFO: ArriveMonitor");

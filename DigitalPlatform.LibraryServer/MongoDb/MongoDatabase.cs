@@ -13,7 +13,7 @@ namespace DigitalPlatform.LibraryServer
     /// <typeparam name="T"></typeparam>
     public class MongoDatabase<T>
     {
-        internal string _databaseName = "";
+        internal string _databaseName = ""; // 数据库名。实际上要加上 prefix 部分才构成真正使用的数据库名
         internal MongoCollection<T> _collection = null;
         internal string _collectionName = "collection";
 
@@ -41,12 +41,18 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strInstancePrefix) == false)
                 strInstancePrefix = strInstancePrefix + "_";
 
-            _databaseName = strInstancePrefix + _collectionName;
+            if (string.IsNullOrEmpty(this._databaseName) == true)
+            {
+                strError = "_databaseName 尚未初始化";
+                return -1;
+            }
+
+            string databaseName = strInstancePrefix + this._databaseName;
 
             var server = client.GetServer();
 
             {
-                var db = server.GetDatabase(_databaseName);
+                var db = server.GetDatabase(databaseName);
 
                 this._collection = db.GetCollection<T>(_collectionName);
                 if (this._collection.GetIndexes().Count == 0)
@@ -76,7 +82,5 @@ namespace DigitalPlatform.LibraryServer
             CreateIndex();
             return 0;
         }
-
     }
-
 }

@@ -62,8 +62,6 @@ namespace dp2Circulation
 
             this.comboBox_recoverLevel.Text = strRecoverLevel;
             this.checkBox_clearBefore.Checked = bClearFirst;
-
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -118,7 +116,7 @@ namespace dp2Circulation
                 strRecoverLevel);
             DomUtil.SetAttr(dom.DocumentElement,
                 "clearFirst",
-                (this.checkBox_clearBefore.Checked == true ? "yes" : "no") );
+                (this.checkBox_clearBefore.Checked == true ? "yes" : "no"));
 
             this.StartInfo.Param = dom.OuterXml;
 
@@ -205,7 +203,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 strError = "strParam参数装入XML DOM时出错: " + ex.Message;
-                return -1;   
+                return -1;
             }
 
             /*

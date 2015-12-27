@@ -1,4 +1,5 @@
-﻿using DigitalPlatform.Xml;
+﻿using DigitalPlatform.IO;
+using DigitalPlatform.Xml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,6 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class BuildMongoOperDatabase : BatchTask
     {
-
         public BuildMongoOperDatabase(LibraryApplication app,
             string strName)
             : base(app, strName)
@@ -129,6 +129,12 @@ namespace DigitalPlatform.LibraryServer
         // 一次操作循环
         public override void Worker()
         {
+            // 系统挂起的时候，不运行本线程
+            if (this.App.HangupReason == HangupReason.LogRecover)
+                return;
+            if (this.App.PauseBatchTask == true)
+                return;
+
             string strError = "";
 
             BatchTaskStartInfo startinfo = this.StartInfo;
@@ -182,7 +188,8 @@ namespace DigitalPlatform.LibraryServer
 
             FileInfo[] fis = di.GetFiles("*.log");
 
-            Array.Sort(fis, (x,y) => {
+            Array.Sort(fis, (x, y) =>
+            {
                 return ((new CaseInsensitiveComparer()).Compare(((FileInfo)x).Name, ((FileInfo)y).Name));
             });
 
@@ -320,7 +327,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             this.AppendResultText("发生错误：" + strError + "\r\n");
-                                return -1;
+                            return -1;
                         }
                     }
                 }
@@ -341,34 +348,30 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
-            XmlDocument dom = new XmlDocument();
+            XmlDocument domOperLog = new XmlDocument();
             try
             {
-                dom.LoadXml(strXml);
+                domOperLog.LoadXml(strXml);
             }
             catch (Exception ex)
             {
-                strError = "日志记录装载到DOM时出错: " + ex.Message;
+                strError = "日志记录装载到 DOM 时出错: " + ex.Message;
                 return -1;
             }
 
-            string strOperation = DomUtil.GetElementText(dom.DocumentElement,
+            string strOperation = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "operation");
-            if (strOperation == "borrow")
+            if (strOperation == "borrow" || strOperation == "return")
             {
-            }
-            else if (strOperation == "return")
-            {
-            }
-            else
-            {
-                strError = "不能识别的日志操作类型 '" + strOperation + "'";
-                return -1;
+                nRet = AppendOperationBorrowReturn(this.App,
+                    domOperLog,
+                    strOperation,
+                    out strError);
             }
 
             if (nRet == -1)
             {
-                string strAction = DomUtil.GetElementText(dom.DocumentElement,
+                string strAction = DomUtil.GetElementText(domOperLog.DocumentElement,
                         "action");
                 strError = "operation=" + strOperation + ";action=" + strAction + ": " + strError;
                 return -1;
@@ -377,7 +380,44 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 将一条 borrow 或 return 操作日志信息加入 mongodb 日志库
+        public static int AppendOperationBorrowReturn(
+            LibraryApplication app,
+            XmlDocument domOperLog,
+            string strOperation,
+            out string strError)
+        {
+            strError = "";
 
+            ChargingOperItem item = new ChargingOperItem();
+            item.Operation = strOperation;
+            item.Action = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "action");
+            item.LibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "libraryCode");
+            item.ItemBarcode = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "itemBarcode");
+            item.PatronBarcode = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "readerBarcode");
+            item.ClientAddress = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "clientAddress");
+            item.Operator = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "operator");
+            string strOperTime = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "operTime");
+            try
+            {
+                item.OperTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime).ToLocalTime();
+            }
+            catch (Exception ex)
+            {
+                strError = "operTime 元素内容 '" + strOperTime + "' 格式错误:" + ex.Message;
+                return -1;
+            }
+
+            app.ChargingOperDatabase.Add(item);
+            return 0;
+        }
     }
 
 }

@@ -42,7 +42,7 @@ namespace DigitalPlatform.LibraryServer
         public string MongoDbConnStr = "";
         public string MongoDbInstancePrefix = ""; // MongoDB 的实例字符串。用于区分不同的 dp2OPAC 实例在同一 MongoDB 实例中创建的数据库名，这个实例名被用作数据库名的前缀字符串
 
-        MongoClient _mongoClient = null;
+        internal MongoClient _mongoClient = null;
 
         string _summaryDbName = "";
 
