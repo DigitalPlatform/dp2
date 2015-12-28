@@ -789,5 +789,14 @@ namespace dp2Library
             string strClientAddress,
             out long Value);
 
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult SearchCharging(
+            string patronBarcode,
+            string timeRange,
+            string actions,
+            string order,
+            long start,
+            long count,
+            out ChargingItem[] results);
     }
 }

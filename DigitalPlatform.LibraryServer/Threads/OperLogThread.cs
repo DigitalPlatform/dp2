@@ -16,7 +16,7 @@ namespace DigitalPlatform.LibraryServer
     {
         List<XmlDocument> _datas = new List<XmlDocument>();
 
-        internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
+        internal new ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
 
         public OperLogThread(LibraryApplication app,
             string strName)

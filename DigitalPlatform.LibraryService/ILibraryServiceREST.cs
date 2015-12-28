@@ -809,5 +809,14 @@ SessionMode = SessionMode.NotAllowed)]
             string strClientAddress,
             out long Value);
 
+        [OperationContract]
+        LibraryServerResult SearchCharging(
+            string patronBarcode,
+            string timeRange,
+            string actions,
+            string order,
+            long start,
+            long count,
+            out ChargingItem[] results);
     }
 }

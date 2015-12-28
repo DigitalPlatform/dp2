@@ -44,6 +44,101 @@ IndexOptions.SetUnique(false));
             return true;
         }
 
+#if NO
+        [Flags]
+        public enum ChargingActionType
+        {
+            Borrow = 0x01,  // 普通借书
+            Return = 0x02,  // 普通还书
+            Renew = 0x04,   // 续借
+            Lost = 0x10,    // 丢失声明
+        }
+#endif
+
+        public IMongoQuery BuildQuery(
+            string patronBarcode,
+            DateTime startTime,
+            DateTime endTime,
+            string operTypes)
+        {
+            var time_query = Query.And(Query.GTE("OperTime", startTime),
+                Query.LT("OperTime", endTime));
+            var patron_query = Query.EQ("PatronBarcode", patronBarcode);
+
+            List<IMongoQuery> action_items = new List<IMongoQuery>();
+            string[] types = operTypes.Split(new char[] {','});
+            foreach (string type in types)
+            {
+                if (type == "borrow")
+                    action_items.Add(Query.EQ("Action", "borrow"));
+                if (type == "return")
+                    action_items.Add(Query.EQ("Action", "return"));
+                if (type == "renew")
+                    action_items.Add(Query.EQ("Action", "renew"));
+                if (type == "lost")
+                    action_items.Add(Query.EQ("Action", "lost"));
+            }
+
+            var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation","return")),
+                Query.Or(action_items));
+
+            return Query.And(time_query, patron_query, type_query);
+        }
+
+        // parameters:
+        //      order   排序方式。ascending/descending 之一。默认 ascending
+        public IEnumerable<ChargingOperItem> Find(
+            string patronBarcode,
+            DateTime startTime,
+            DateTime endTime,
+            string operTypes,
+            string order,
+            int start,
+            out long totalCount)
+        {
+            totalCount = 0;
+            MongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return null;
+
+            var query = BuildQuery(patronBarcode,
+                startTime,
+                endTime,
+                operTypes);
+            IMongoSortBy sortBy = SortBy.Ascending("OperTime");
+            if (order == "descending")
+                sortBy = SortBy.Descending("OperTime");
+
+            MongoCursor<ChargingOperItem> cursor = collection.Find(query).SetSortOrder(sortBy);
+            IEnumerable<ChargingOperItem> results = cursor.Skip(start);
+            totalCount = cursor.Count();
+            return results;
+        }
+
+        public int GetItemCount(IMongoQuery query)
+        {
+            MongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return -1;
+
+            var keyFunction = (BsonJavaScript)@"{}";
+
+            var document = new BsonDocument("count", 0);
+            var result = collection.Group(
+                query,
+                keyFunction,
+                document,
+                new BsonJavaScript("function(doc, out){ out.count++; }"),
+                null
+            ).ToArray();
+
+            foreach (BsonDocument doc in result)
+            {
+                return doc.GetValue("count", 0).ToInt32();
+            }
+
+            return 0;
+        }
 
     }
 

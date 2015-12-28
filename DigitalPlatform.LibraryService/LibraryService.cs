@@ -1925,6 +1925,97 @@ namespace dp2Library
             }
         }
 
+        public LibraryServerResult SearchCharging(
+            string patronBarcode,
+            string timeRange,
+            string actions,
+            string order,
+            long start,
+            long count,
+            out ChargingItem[] results)
+        {
+            results = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("SearchCharging", true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                if (StringUtil.IsInList("searchcharging", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获得出纳历史信息被拒绝。不具备 searchcharging 权限";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+                // 对读者身份的附加判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    if (sessioninfo.Account != null
+                        && patronBarcode != sessioninfo.Account.Barcode)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "获得出纳历史信息被拒绝。作为读者只能获得自己的出纳历史信息";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+
+                string strStart = "";
+                string strEnd = "";
+                StringUtil.ParseTwoPart(timeRange, "~", out strStart, out strEnd);
+                DateTime startTime = DateTime.Parse(strStart);
+                DateTime endTime = DateTime.Parse(strEnd);
+
+                string strError = "";
+                long totalCount = 0;
+                IEnumerable<ChargingOperItem> collection = app.ChargingOperDatabase.Find(
+                    patronBarcode,
+                    startTime,
+                    endTime,
+                    actions,
+                    order,
+                    (int)start,
+                    out totalCount);
+                if (collection == null)
+                {
+                    strError = "Find() error";
+                    goto ERROR1;
+                }
+
+                List<ChargingItem> infos = new List<ChargingItem>();
+                long i = 0;
+                foreach (ChargingOperItem item in collection)
+                {
+                    if (count != -1 && i >= count)
+                        break;
+                    ChargingItem info = new ChargingItem(item);
+                    infos.Add(info);
+                    i++;
+                }
+
+                results = infos.ToArray();
+                result.Value = totalCount;
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SearchCharging() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
         // 设置好友关系
         // parameters:
         //      strAction   'request' 请求添加好友。当前用户为发起者, strReaderBarcode 中为被请求者
@@ -2934,7 +3025,6 @@ namespace dp2Library
                 }
 
                 bool bDesc = StringUtil.IsInList("desc", strSearchStyle);
-
 
                 // 构造检索式
                 string strFromList = "";
@@ -14189,6 +14279,46 @@ out strError);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+    }
+
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class ChargingItem
+    {
+        [DataMember]
+        public string Id { get; set; }
+
+        [DataMember]
+        public string LibraryCode { get; set; } // 访问者的图书馆代码
+        [DataMember]
+        public string Operation { get; set; } // 操作名
+        [DataMember]
+        public string Action { get; set; }  // 动作
+
+        [DataMember]
+        public string ItemBarcode { get; set; }
+        [DataMember]
+        public string PatronBarcode { get; set; }
+
+        [DataMember]
+        public string ClientAddress { get; set; }  // 访问者的IP地址
+
+        [DataMember]
+        public string Operator { get; set; }  // 操作者(访问者)
+        [DataMember]
+        public string OperTime { get; set; } // 操作时间。? 格式
+
+        public ChargingItem(ChargingOperItem item)
+        {
+            this.Id = item.Id;
+            this.LibraryCode = item.LibraryCode;
+            this.Operation = item.Operation;
+            this.Action = item.Action;
+            this.ItemBarcode = item.ItemBarcode;
+            this.PatronBarcode = item.PatronBarcode;
+            this.ClientAddress = item.ClientAddress;
+            this.Operator = item.Operator;
+            this.OperTime = item.OperTime.ToString("g");
         }
     }
 
