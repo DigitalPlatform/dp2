@@ -30,6 +30,8 @@ namespace dp2Circulation
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class WebExternalHost : ThreadBase, IDisposable
     {
+        public event EventHandler CallFunc = null;
+
         /// <summary>
         /// 输出调试信息的事件
         /// </summary>
@@ -1561,6 +1563,12 @@ text-align: center;
             {
                 _backColor = value;
             }
+        }
+
+        public void Call(string name)
+        {
+            if (this.CallFunc != null)
+                this.CallFunc(name, new EventArgs());
         }
     }
 

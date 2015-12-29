@@ -3914,12 +3914,12 @@ Stack:
                 && this.ActiveMdiChild is ChargingForm)
             {
                 EnsureChildForm<ChargingForm>().Activate();
-                EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.VerifyRenew;
+                EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Renew;   // FuncState.VerifyRenew;
             }
             else
             {
                 EnsureChildForm<QuickChargingForm>().Activate();
-                EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.VerifyRenew;
+                EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.Renew;   // FuncState.VerifyRenew;
             }
         }
 

@@ -28,6 +28,7 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -53,6 +54,8 @@ namespace dp2Circulation
         const int WM_SET_FOCUS = API.WM_USER + 210;
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
+
+        WebExternalHost m_chargingInterface = new WebExternalHost();
 
         string m_strSetAction = "new";  // new / change 之一
 
@@ -159,11 +162,18 @@ namespace dp2Circulation
             // this.binaryResControl1.Channel = this.Channel;
             this.binaryResControl1.Stop = this.stop;
 
-            // webbrowser
+            // webBrowser_readerInfo
             this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_readerInfo);
             this.m_webExternalHost.GetLocalPath -= new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             this.m_webExternalHost.GetLocalPath += new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             this.webBrowser_readerInfo.ObjectForScripting = this.m_webExternalHost;
+
+            // webBrowser_borrowHistory
+            this.m_chargingInterface.Initial(this.MainForm, this.webBrowser_borrowHistory);
+            this.m_chargingInterface.GetLocalPath -= new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
+            this.m_chargingInterface.GetLocalPath += new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
+            this.m_chargingInterface.CallFunc += m_chargingInterface_CallFunc;
+            this.webBrowser_borrowHistory.ObjectForScripting = this.m_chargingInterface;
 
             this.commander = new Commander(this);
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
@@ -179,6 +189,8 @@ namespace dp2Circulation
             }
 
             LoadExternalFields();
+
+            FillBorrowHistoryStartPage();
 
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
         }
@@ -379,6 +391,8 @@ namespace dp2Circulation
             if (this.m_webExternalHost != null)
                 this.m_webExternalHost.Destroy();
 
+            if (this.m_chargingInterface != null)
+                this.m_chargingInterface.Destroy();
 #if NO
             if (stop != null) // 脱离关联
             {
@@ -513,11 +527,8 @@ MessageBoxDefaultButton.Button2);
             {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在初始化浏览器组件 ...");
+                stop.Initial("正在装载读者记录 ...");
                 stop.BeginLoop();
-
-                this.Update();
-                this.MainForm.Update();
 
                 EnableControls(false);
 
@@ -730,6 +741,13 @@ MessageBoxDefaultButton.Button2);
 
             Global.ClearHtmlPage(this.webBrowser_readerInfo,
     this.MainForm.DataDir);
+
+            this.m_chargingInterface.StopPrevious();
+            FillBorrowHistoryStartPage();
+#if NO
+            Global.ClearHtmlPage(this.webBrowser_borrowHistory,
+    this.MainForm.DataDir);
+#endif
         }
 
         void SetReaderHtmlString(string strHtml)
@@ -1115,7 +1133,6 @@ MessageBoxDefaultButton.Button2);
             this.webBrowser_readerInfo.Stop();
 
             this.commander.AddMessage(WM_LOAD_RECORD);
-
         }
 
 #if NO
@@ -5568,6 +5585,198 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        void LoadBorrowHistory()
+        {
+            string strError = "";
+            int nRet = LoadBorrowHistory(this.toolStripTextBox_barcode.Text,
+                0,
+                out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+        }
+
+        int LoadBorrowHistory(
+            string strBarcode,
+            int nPageNo,
+            out string strError)
+        {
+            strError = "";
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在装载借阅历史 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+            try
+            {
+                ChargingItem[] results = null;
+                long lStart = nPageNo * 10;
+                long lRet = 0;
+                this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
+                try
+                {
+                    lRet = this.Channel.SearchCharging(
+                        stop,
+                        strBarcode,
+                        "~",
+                        "borrow,return,renew,lost",
+                        "",
+                        lStart,
+                        10,
+                        out results,
+                        out strError);
+                }
+                finally
+                {
+                    this.Channel.Idle -= Channel_Idle;
+                }
+                if (lRet == -1)
+                    return -1;
+
+                FillBorrowHistoryPage(results, (int)lStart, (int)lRet);
+                return 0;
+            }
+            finally
+            {
+                EnableControls(true);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        }
+
+        void Channel_Idle(object sender, IdleEventArgs e)
+        {
+            e.bDoEvents = false;
+        }
+
+        void m_chargingInterface_CallFunc(object sender, EventArgs e)
+        {
+            string name = sender as string;
+            if (name == "load")
+            {
+                this.BeginInvoke(new Action(LoadBorrowHistory));
+            }
+        }
+
+        void FillBorrowHistoryStartPage()
+        {
+            ClearHtml();
+
+            string strItemLink = "<a href='javascript:void(0);' onclick=\"window.external.Call('load');\">" + HttpUtility.HtmlEncode("装载") + "</a>";
+
+            AppendHtml("<html><body>");
+            AppendHtml(strItemLink);
+            AppendHtml("</body></html>");
+        }
+
+        void FillBorrowHistoryPage(ChargingItem[] items,
+            int nStart,
+            int nTotalCount)
+        {
+            StringBuilder text = new StringBuilder();
+
+            string strBinDir = Environment.CurrentDirectory;
+
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
+                + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
+                + "<script type='text/javascript' charset='UTF-8' src='%bindir%/getsummary.js'></script>";
+            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
+                + strLink
+                + strScriptHead.Replace("%bindir%", strBinDir)
+                + "</head><body>");
+
+#if NO
+            string strJs = @"<script type='text/javascript' language='javascript'>
+$(document).ready(function () {
+    window.setTimeout('GetSummary()', 10);
+});
+</script>";
+
+            text.Append(strJs);
+#endif
+            text.Append("<p>"+nTotalCount+"</p>");
+
+
+            text.Append("<table>");
+            text.Append("<tr>");
+            text.Append("<td>序号</td>");
+            text.Append("<td>操作类型</td>");
+            text.Append("<td>册条码号</td>");
+            text.Append("<td>书目摘要</td>");
+            text.Append("<td>操作者</td>");
+            text.Append("<td>操作时间</td>");
+            text.Append("</tr>");
+
+            foreach (ChargingItem item in items)
+            {
+                text.Append("<tr>");
+                text.Append("<td>" + (nStart + 1).ToString() + "</td>");
+                text.Append("<td>" + item.Action + "</td>");
+
+                text.Append("<td>" + item.ItemBarcode + "</td>");
+                text.Append("<td class='summary pending'>BC:" + item.ItemBarcode + "</td>");
+
+                text.Append("<td>" + item.Operator + "</td>");
+                text.Append("<td>" + item.OperTime + "</td>");
+                text.Append("</tr>");
+                nStart++;
+            }
+            text.Append("</table>");
+            text.Append("</body></html>");
+
+            this.m_chargingInterface.SetHtmlString(text.ToString(),
+    "readerinfoform_charginghis");
+
+        }
+
+        /// <summary>
+        /// 清除已有的 HTML 显示
+        /// </summary>
+        public void ClearHtml()
+        {
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strJs = "";
+
+            {
+                HtmlDocument doc = this.webBrowser_borrowHistory.Document;
+
+                if (doc == null)
+                {
+                    this.webBrowser_borrowHistory.Navigate("about:blank");
+                    doc = this.webBrowser_borrowHistory.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            Global.WriteHtml(this.webBrowser_borrowHistory,
+                "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
+        /// <summary>
+        /// 向 IE 控件中追加一段 HTML 内容
+        /// </summary>
+        /// <param name="strText">HTML 内容</param>
+        public void AppendHtml(string strText)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string>(AppendHtml), strText);
+                return;
+            }
+
+            Global.WriteHtml(this.webBrowser_borrowHistory,
+                strText);
+
+            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+            this.webBrowser_borrowHistory.Document.Window.ScrollTo(0,
+                this.webBrowser_borrowHistory.Document.Body.ScrollRectangle.Height);
         }
     }
 }

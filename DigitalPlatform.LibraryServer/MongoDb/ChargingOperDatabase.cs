@@ -63,6 +63,14 @@ IndexOptions.SetUnique(false));
         {
             var time_query = Query.And(Query.GTE("OperTime", startTime),
                 Query.LT("OperTime", endTime));
+
+            if (startTime == new DateTime(0) && endTime == new DateTime(0))
+                time_query = Query.GTE("OperTime", startTime);
+            else if (startTime == new DateTime(0))
+                time_query = Query.LT("OperTime", endTime);
+            else if (endTime == new DateTime(0))
+                time_query = Query.GTE("OperTime", startTime);
+
             var patron_query = Query.EQ("PatronBarcode", patronBarcode);
 
             List<IMongoQuery> action_items = new List<IMongoQuery>();
@@ -82,7 +90,7 @@ IndexOptions.SetUnique(false));
             var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation","return")),
                 Query.Or(action_items));
 
-            return Query.And(time_query, patron_query, type_query);
+            return Query.And(patron_query, time_query, type_query);
         }
 
         // parameters:

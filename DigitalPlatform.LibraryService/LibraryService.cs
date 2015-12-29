@@ -1965,8 +1965,8 @@ namespace dp2Library
                 string strStart = "";
                 string strEnd = "";
                 StringUtil.ParseTwoPart(timeRange, "~", out strStart, out strEnd);
-                DateTime startTime = DateTime.Parse(strStart);
-                DateTime endTime = DateTime.Parse(strEnd);
+                DateTime startTime = string.IsNullOrEmpty(strStart) ? new DateTime(0) : DateTime.Parse(strStart);
+                DateTime endTime = string.IsNullOrEmpty(strEnd) ? new DateTime(0) : DateTime.Parse(strEnd);
 
                 string strError = "";
                 long totalCount = 0;
