@@ -114,19 +114,19 @@ namespace dp2Circulation
 
                 if (String.IsNullOrEmpty(value) == true)
                 {
-                    this.ToolStripMenuItem_naviToAmerceForm.Enabled = false;
-                    this.ToolStripMenuItem_naviToReaderInfoForm.Enabled = false;
-                    this.ToolStripMenuItem_naviToActivateForm_old.Enabled = false;
-                    this.ToolStripMenuItem_openReaderManageForm.Enabled = false;
-                    this.ToolStripMenuItem_naviToActivateForm_new.Enabled = false;
+                    this.toolStripMenuItem_naviToAmerceForm.Enabled = false;
+                    this.toolStripMenuItem_naviToReaderInfoForm.Enabled = false;
+                    this.toolStripMenuItem_naviToActivateForm_old.Enabled = false;
+                    this.toolStripMenuItem_openReaderManageForm.Enabled = false;
+                    this.toolStripMenuItem_naviToActivateForm_new.Enabled = false;
                 }
                 else
                 {
-                    this.ToolStripMenuItem_naviToAmerceForm.Enabled = true;
-                    this.ToolStripMenuItem_naviToReaderInfoForm.Enabled = true;
-                    this.ToolStripMenuItem_naviToActivateForm_old.Enabled = true;
-                    this.ToolStripMenuItem_openReaderManageForm.Enabled = true;
-                    this.ToolStripMenuItem_naviToActivateForm_new.Enabled = true;
+                    this.toolStripMenuItem_naviToAmerceForm.Enabled = true;
+                    this.toolStripMenuItem_naviToReaderInfoForm.Enabled = true;
+                    this.toolStripMenuItem_naviToActivateForm_old.Enabled = true;
+                    this.toolStripMenuItem_openReaderManageForm.Enabled = true;
+                    this.toolStripMenuItem_naviToActivateForm_new.Enabled = true;
                 }
             }
         }
@@ -146,13 +146,13 @@ namespace dp2Circulation
 
                 if (String.IsNullOrEmpty(value) == true)
                 {
-                    this.ToolStripMenuItem_openEntityForm.Enabled = false;
-                    this.ToolStripMenuItem_openItemInfoForm.Enabled = false;
+                    this.toolStripMenuItem_openEntityForm.Enabled = false;
+                    this.toolStripMenuItem_openItemInfoForm.Enabled = false;
                 }
                 else
                 {
-                    this.ToolStripMenuItem_openEntityForm.Enabled = true;
-                    this.ToolStripMenuItem_openItemInfoForm.Enabled = true;
+                    this.toolStripMenuItem_openEntityForm.Enabled = true;
+                    this.toolStripMenuItem_openItemInfoForm.Enabled = true;
                 }
             }
         }
@@ -798,6 +798,7 @@ namespace dp2Circulation
                 this.toolStripMenuItem_return.Checked = false;
                 this.toolStripMenuItem_verifyReturn.Checked = false;
                 this.toolStripMenuItem_renew.Checked = false;
+                this.toolStripMenuItem_verifyRenew.Checked = false;
                 this.toolStripMenuItem_lost.Checked = false;
 
                 // 2008/9/26 
@@ -830,10 +831,18 @@ namespace dp2Circulation
                     // this.textBox_readerBarcode.Enabled = true;
                     EnableEdit(READER_BARCODE, true);
                 }
-                if (m_funcstate == FuncState.VerifyRenew)
+                // 2015/12/29
+                if (m_funcstate == FuncState.Renew)
                 {
                     this.button_itemAction.Text = "续借";
                     this.toolStripMenuItem_renew.Checked = true;
+                    this.textBox_readerBarcode.Text = "";
+                    EnableEdit(READER_BARCODE, false);
+                }
+                if (m_funcstate == FuncState.VerifyRenew)
+                {
+                    this.button_itemAction.Text = "验证续借";
+                    this.toolStripMenuItem_verifyRenew.Checked = true;
                     // this.textBox_readerBarcode.Enabled = true;
                     EnableEdit(READER_BARCODE, true);
                 }
@@ -2072,6 +2081,7 @@ dlg.UiState);
 
                 // 借/续借
                 if (this.FuncState == FuncState.Borrow
+                    || this.FuncState == FuncState.Renew
                     || this.FuncState == FuncState.VerifyRenew)
                 {
                     string strOperName = "";
@@ -2109,7 +2119,8 @@ dlg.UiState);
                         string strConfirmItemRecPath = null;
 
                         bool bRenew = false;
-                        if (this.FuncState == FuncState.VerifyRenew)
+                        if (this.FuncState == FuncState.VerifyRenew
+                            || this.FuncState == dp2Circulation.FuncState.Renew)
                             bRenew = true;
 
                     REDO:
@@ -2150,7 +2161,7 @@ dlg.UiState);
                         lRet = Channel.Borrow(
                             stop,
                             bRenew,
-                            this.textBox_readerBarcode.Text,
+                            this.FuncState == dp2Circulation.FuncState.Renew? "" : this.textBox_readerBarcode.Text,
                             this.textBox_itemBarcode.Text,
                             strConfirmItemRecPath,
                             this.Force,
@@ -2711,12 +2722,17 @@ dlg.UiState);
             this.FuncState = FuncState.VerifyReturn;
         }
 
-        private void toolStripMenuItem_renew_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_verifyRenew_Click(object sender, EventArgs e)
         {
             this.FuncState = FuncState.VerifyRenew;
         }
 
-        private void ToolStripMenuItem_lost_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_renew_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.Renew;
+        }
+
+        private void toolStripMenuItem_lost_Click(object sender, EventArgs e)
         {
             this.FuncState = FuncState.Lost;
         }
@@ -3080,7 +3096,7 @@ dlg.UiState);
 
         #region 读者证条码号快速导航菜单功能
 
-        private void ToolStripMenuItem_naviToAmerceForm_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_naviToAmerceForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
@@ -3094,7 +3110,7 @@ dlg.UiState);
             form.LoadReader(this.ActiveReaderBarcode, true);
         }
 
-        private void ToolStripMenuItem_naviToReaderInfoForm_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_naviToReaderInfoForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
@@ -3109,7 +3125,7 @@ dlg.UiState);
                 false);
         }
 
-        private void ToolStripMenuItem_naviToActivateForm_old_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_naviToActivateForm_old_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
@@ -3123,7 +3139,7 @@ dlg.UiState);
             form.LoadOldRecord(this.ActiveReaderBarcode);
         }
 
-        private void ToolStripMenuItem_naviToActivateForm_new_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_naviToActivateForm_new_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
@@ -3137,7 +3153,7 @@ dlg.UiState);
             form.LoadNewRecord(this.ActiveReaderBarcode);
         }
 
-        private void ToolStripMenuItem_openReaderManageForm_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_openReaderManageForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
@@ -3156,7 +3172,7 @@ dlg.UiState);
         #region 册条码号快速导航菜单功能
 
 
-        private void ToolStripMenuItem_openEntityForm_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_openEntityForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveItemBarcode) == true)
             {
@@ -3170,7 +3186,7 @@ dlg.UiState);
             form.LoadItemByBarcode(this.ActiveItemBarcode, false);
         }
 
-        private void ToolStripMenuItem_openItemInfoForm_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_openItemInfoForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveItemBarcode) == true)
             {
@@ -3351,6 +3367,8 @@ Keys keyData)
                     false);
             }
         }
+
+
 
 
     }

@@ -314,7 +314,7 @@ Stack:
                 {
                     base.Opacity = value;
                 }
-                catch(System.ComponentModel.Win32Exception)
+                catch (System.ComponentModel.Win32Exception)
                 {
 
                 }
@@ -343,7 +343,7 @@ Stack:
                 else
                     base.Opacity = _saveOpacity;    // 恢复原来的不透明度
             }
-            catch(System.ComponentModel.Win32Exception)
+            catch (System.ComponentModel.Win32Exception)
             {
 
             }

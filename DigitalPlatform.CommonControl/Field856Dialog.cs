@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,16 +15,16 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// ±à¼­ 856 ×Ö¶ÎµÄ¶Ô»°¿ò¡£¼æÄÜ±à¼­¶ÔÏóµÄ rights ÊôĞÔ
+    /// ç¼–è¾‘ 856 å­—æ®µçš„å¯¹è¯æ¡†ã€‚å…¼èƒ½ç¼–è¾‘å¯¹è±¡çš„ rights å±æ€§
     /// </summary>
     public partial class Field856Dialog : Form
     {
-        // $8ÄÚÈİÓĞ³õÊ¼Öµ£¬ÒªÇófollowÌî³äÆäËü¼¸¸öÏà¹Ø×Ó×Ö¶ÎÄÚÈİ£¬ÔòĞèÒªÔÚ´ò¿ª¶Ô»°¿òÇ°ÉèÖÃ¸Ã³ÉÔ±Îªtrue
+        // $8å†…å®¹æœ‰åˆå§‹å€¼ï¼Œè¦æ±‚followå¡«å……å…¶å®ƒå‡ ä¸ªç›¸å…³å­å­—æ®µå†…å®¹ï¼Œåˆ™éœ€è¦åœ¨æ‰“å¼€å¯¹è¯æ¡†å‰è®¾ç½®è¯¥æˆå‘˜ä¸ºtrue
         public bool AutoFollowIdSet = false;
 
         public event GetResInfoEventHandler GetResInfo = null;
 
-        // string m_strReserve = "";   // ÆäËûÃ»ÓĞ±»Ä£°å¶¨ÒåµÄ×Ó×Ö¶ÎÄÚÈİ
+        // string m_strReserve = "";   // å…¶ä»–æ²¡æœ‰è¢«æ¨¡æ¿å®šä¹‰çš„å­å­—æ®µå†…å®¹
 
         public Field856Dialog()
         {
@@ -35,37 +35,37 @@ namespace DigitalPlatform.CommonControl
 
         void FillTypeList()
         {
-            this.tabComboBox_type.Items.Add("·âÃæÍ¼Ïñ");
-            this.tabComboBox_type.Items.Add("·âÃæÍ¼Ïñ.Ğ¡");
-            this.tabComboBox_type.Items.Add("·âÃæÍ¼Ïñ.ÖĞ");
-            this.tabComboBox_type.Items.Add("·âÃæÍ¼Ïñ.´ó");
+            this.tabComboBox_type.Items.Add("å°é¢å›¾åƒ");
+            this.tabComboBox_type.Items.Add("å°é¢å›¾åƒ.å°");
+            this.tabComboBox_type.Items.Add("å°é¢å›¾åƒ.ä¸­");
+            this.tabComboBox_type.Items.Add("å°é¢å›¾åƒ.å¤§");
         }
 
-        // Í¨¹ıºº×ÖÃû³Æ»ñµÃÕı¹æµÄÓ¢ÎÄµÄ type ÊôĞÔÖµ
+        // é€šè¿‡æ±‰å­—åç§°è·å¾—æ­£è§„çš„è‹±æ–‡çš„ type å±æ€§å€¼
         static string GetTypeString(string strCaption)
         {
-            if (strCaption == "·âÃæÍ¼Ïñ")
+            if (strCaption == "å°é¢å›¾åƒ")
                 return "FrontCover";
-            if (strCaption == "·âÃæÍ¼Ïñ.Ğ¡")
+            if (strCaption == "å°é¢å›¾åƒ.å°")
                 return "FrontCover.SmallImage";
-            if (strCaption == "·âÃæÍ¼Ïñ.ÖĞ")
+            if (strCaption == "å°é¢å›¾åƒ.ä¸­")
                 return "FrontCover.MediumImage";
-            if (strCaption == "·âÃæÍ¼Ïñ.´ó")
+            if (strCaption == "å°é¢å›¾åƒ.å¤§")
                 return "FrontCover.LargeImage";
             return "";
         }
 
-        // Í¨¹ıÕı¹æµÄÓ¢ÎÄµÄ type ÊôĞÔÖµ»ñµÃºº×ÖÃû³Æ
+        // é€šè¿‡æ­£è§„çš„è‹±æ–‡çš„ type å±æ€§å€¼è·å¾—æ±‰å­—åç§°
         static string GetTypeCaption(string strType)
         {
             if (strType == "FrontCover")
-                return "·âÃæÍ¼Ïñ";
+                return "å°é¢å›¾åƒ";
             if (strType == "FrontCover.SmallImage")
-                return "·âÃæÍ¼Ïñ.Ğ¡";
+                return "å°é¢å›¾åƒ.å°";
             if (strType == "FrontCover.MediumImage")
-                return "·âÃæÍ¼Ïñ.ÖĞ";
+                return "å°é¢å›¾åƒ.ä¸­";
             if (strType == "FrontCover.LargeImage")
-                return "·âÃæÍ¼Ïñ.´ó";
+                return "å°é¢å›¾åƒ.å¤§";
             return "";
         }
         public string MessageText
@@ -134,15 +134,15 @@ namespace DigitalPlatform.CommonControl
             this.comboBox_indicator1.Items.Add("2\tTelnet");
             this.comboBox_indicator1.Items.Add("3\tDial-up");
             this.comboBox_indicator1.Items.Add("4\tHTTP");
-            this.comboBox_indicator1.Items.Add("7\tÆäËü·½·¨");
+            this.comboBox_indicator1.Items.Add("7\tå…¶å®ƒæ–¹æ³•");
 
-            this.comboBox_indicator2.Items.Add(" \tÎ´Ö¸Ã÷");
-            this.comboBox_indicator2.Items.Add("0\t×ÊÔ´¶ÔÏó");
-            this.comboBox_indicator2.Items.Add("1\t×ÊÔ´µÄÆäËü°æ±¾");
-            this.comboBox_indicator2.Items.Add("2\tÏà¹Ø×ÊÔ´");
-            this.comboBox_indicator2.Items.Add("8\t²»²úÉúÇ°µ¼Óï");
+            this.comboBox_indicator2.Items.Add(" \tæœªæŒ‡æ˜");
+            this.comboBox_indicator2.Items.Add("0\tèµ„æºå¯¹è±¡");
+            this.comboBox_indicator2.Items.Add("1\tèµ„æºçš„å…¶å®ƒç‰ˆæœ¬");
+            this.comboBox_indicator2.Items.Add("2\tç›¸å…³èµ„æº");
+            this.comboBox_indicator2.Items.Add("8\tä¸äº§ç”Ÿå‰å¯¼è¯­");
 
-            // Èç¹û$8ÄÚÈİÓĞ³õÊ¼Öµ£¬²¢ÇÒÃ÷È·ÒªÇóÁËfollowÌî³äÆäËü¼¸¸öÏà¹Ø×Ó×Ö¶ÎÄÚÈİ
+            // å¦‚æœ$8å†…å®¹æœ‰åˆå§‹å€¼ï¼Œå¹¶ä¸”æ˜ç¡®è¦æ±‚äº†followå¡«å……å…¶å®ƒå‡ ä¸ªç›¸å…³å­å­—æ®µå†…å®¹
             if (this.AutoFollowIdSet == true
                 && this.comboBox_u.Text != "")
             {
@@ -165,7 +165,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        #region Íâ²¿¿ÉÒÔÖ±½Ó·ÃÎÊÃ¿¸ö×Ó×Ö¶ÎÄÚÈİµÄtextbox
+        #region å¤–éƒ¨å¯ä»¥ç›´æ¥è®¿é—®æ¯ä¸ªå­å­—æ®µå†…å®¹çš„textbox
 
         public string Subfield_f
         {
@@ -326,13 +326,13 @@ namespace DigitalPlatform.CommonControl
 
             if (this.comboBox_indicator1.Text.Length != 1)
             {
-                strError = "Ö¸Ê¾·û1±ØĞëÎª1×Ö·û";
+                strError = "æŒ‡ç¤ºç¬¦1å¿…é¡»ä¸º1å­—ç¬¦";
                 return -1;
             }
 
             if (this.comboBox_indicator2.Text.Length != 1)
             {
-                strError = "Ö¸Ê¾·û2±ØĞëÎª1×Ö·û";
+                strError = "æŒ‡ç¤ºç¬¦2å¿…é¡»ä¸º1å­—ç¬¦";
                 return -1;
             }
 
@@ -399,7 +399,7 @@ namespace DigitalPlatform.CommonControl
                     + "8"
                     + this.textBox_8.Text;
 
-            // ÆäËûÃ»ÓĞÏÔÊ¾µÄ
+            // å…¶ä»–æ²¡æœ‰æ˜¾ç¤ºçš„
             if (String.IsNullOrEmpty(this.m_strReserve) == false)
                 strResult += m_strReserve;
 
@@ -407,7 +407,7 @@ namespace DigitalPlatform.CommonControl
         }
 #endif
 
-        // ÓÃÓÚ´æ´¢³õÊ¼µÄ 856 ×Ö¶ÎÄÚÈİ
+        // ç”¨äºå­˜å‚¨åˆå§‹çš„ 856 å­—æ®µå†…å®¹
         MarcRecord _record = null;
 
         void SetSubfield(string strName, string strValue)
@@ -420,12 +420,12 @@ namespace DigitalPlatform.CommonControl
             {
                 if (string.IsNullOrEmpty(strValue) == true)
                     return;
-                // ÒÔÇ°²»´æÔÚÕâ¸ö×Ó×Ö¶Î£¬Ö»ÄÜ×·¼Ó
+                // ä»¥å‰ä¸å­˜åœ¨è¿™ä¸ªå­å­—æ®µï¼Œåªèƒ½è¿½åŠ 
                 field.add(new MarcSubfield(strName, strValue));
                 return;
             }
 
-            // Ô­Î»ÖÃĞŞ¸Ä
+            // åŸä½ç½®ä¿®æ”¹
             subfields[0].Content = strValue;
         }
 
@@ -438,13 +438,13 @@ namespace DigitalPlatform.CommonControl
 
             if (this.comboBox_indicator1.Text.Length != 1)
             {
-                strError = "Ö¸Ê¾·û1±ØĞëÎª1×Ö·û";
+                strError = "æŒ‡ç¤ºç¬¦1å¿…é¡»ä¸º1å­—ç¬¦";
                 return -1;
             }
 
             if (this.comboBox_indicator2.Text.Length != 1)
             {
-                strError = "Ö¸Ê¾·û2±ØĞëÎª1×Ö·û";
+                strError = "æŒ‡ç¤ºç¬¦2å¿…é¡»ä¸º1å­—ç¬¦";
                 return -1;
             }
 
@@ -488,7 +488,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // parameters:
-        //      strValue    µÚÒ»¡¢µÚ¶ş×Ö·ûÎªÖ¸Ê¾·û£¬ºóÃæÎª×Ö¶ÎÄÚÈİ
+        //      strValue    ç¬¬ä¸€ã€ç¬¬äºŒå­—ç¬¦ä¸ºæŒ‡ç¤ºç¬¦ï¼Œåé¢ä¸ºå­—æ®µå†…å®¹
         int SetValue(string strValue,
             out string strError)
         {
@@ -533,7 +533,7 @@ namespace DigitalPlatform.CommonControl
         }
 #if NO
         // parameters:
-        //      strValue    µÚÒ»¡¢µÚ¶ş×Ö·ûÎªÖ¸Ê¾·û£¬ºóÃæÎª×Ö¶ÎÄÚÈİ
+        //      strValue    ç¬¬ä¸€ã€ç¬¬äºŒå­—ç¬¦ä¸ºæŒ‡ç¤ºç¬¦ï¼Œåé¢ä¸ºå­—æ®µå†…å®¹
         int SetValue(string strValue,
             out string strError)
         {
@@ -556,7 +556,7 @@ namespace DigitalPlatform.CommonControl
             if (strValue.Length <= 2)
                 return 0;
 
-            // È¥µô×Ö¶ÎÖ¸Ê¾·û2×Ö·û
+            // å»æ‰å­—æ®µæŒ‡ç¤ºç¬¦2å­—ç¬¦
             strValue = strValue.Substring(2);
 
             this.textBox_f.Text = GetSubfield(ref strValue, 'f');
@@ -577,10 +577,10 @@ namespace DigitalPlatform.CommonControl
 #endif
 
 #if NO
-        // ´Ó×Ö·û´®ÖĞ³éÈ¡Ò»¸ö×Ó×Ö¶ÎÄÚÈİ
+        // ä»å­—ç¬¦ä¸²ä¸­æŠ½å–ä¸€ä¸ªå­å­—æ®µå†…å®¹
         // return:
-        //      ""  Ã»ÓĞÕÒµ½
-        //      ÆäËû    ×Ó×Ö¶ÎÄÚÈİ£¬²»°üÀ¨×Ó×Ö¶ÎÃû(Ò»¸ö×Ö·û)¡£
+        //      ""  æ²¡æœ‰æ‰¾åˆ°
+        //      å…¶ä»–    å­å­—æ®µå†…å®¹ï¼Œä¸åŒ…æ‹¬å­å­—æ®µå(ä¸€ä¸ªå­—ç¬¦)ã€‚
         static string GetSubfield(ref string strValue,
             char chSubfieldName)
         {
@@ -625,18 +625,18 @@ namespace DigitalPlatform.CommonControl
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // Ğ£Ñé
+            // æ ¡éªŒ
             string strError = "";
 
             if (this.comboBox_indicator1.Text.Length != 1)
             {
-                strError = "Ö¸Ê¾·û1±ØĞëÎª1×Ö·û";
+                strError = "æŒ‡ç¤ºç¬¦1å¿…é¡»ä¸º1å­—ç¬¦";
                 goto ERROR1;
             }
 
             if (this.comboBox_indicator2.Text.Length != 1)
             {
-                strError = "Ö¸Ê¾·û2±ØĞëÎª1×Ö·û";
+                strError = "æŒ‡ç¤ºç¬¦2å¿…é¡»ä¸º1å­—ç¬¦";
                 goto ERROR1;
             }
 
@@ -658,7 +658,7 @@ namespace DigitalPlatform.CommonControl
         {
             if (this.comboBox_indicator1.Text.Length != 1)
             {
-                MessageBox.Show(this, "Ö¸Ê¾·û1ÄÚÈİ±ØĞëÎª1×Ö·û");
+                MessageBox.Show(this, "æŒ‡ç¤ºç¬¦1å†…å®¹å¿…é¡»ä¸º1å­—ç¬¦");
                 e.Cancel = true;
             }
         }
@@ -667,7 +667,7 @@ namespace DigitalPlatform.CommonControl
         {
             if (this.comboBox_indicator2.Text.Length != 1)
             {
-                MessageBox.Show(this, "Ö¸Ê¾·û2ÄÚÈİ±ØĞëÎª1×Ö·û");
+                MessageBox.Show(this, "æŒ‡ç¤ºç¬¦2å†…å®¹å¿…é¡»ä¸º1å­—ç¬¦");
                 e.Cancel = true;
             }
         }
@@ -676,7 +676,7 @@ namespace DigitalPlatform.CommonControl
 
         private void comboBox_u_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -749,8 +749,8 @@ namespace DigitalPlatform.CommonControl
             FillObjectRights();
         }
 
-        // ¸ù¾İ $u ÄÚÈİÉèÖÃ this.textBox_objectRights.Text Öµ¡£ÕâÓÃÓÚ¶Ô»°¿ò´ò¿ªµÄÊ±ºò
-        // Èç¹û $u ÄÚÈİµ±×÷ id È¥¶ÔÏóÁĞ±íÖĞÕÒÃ»ÓĞÕÒµ½£¬Ôò²»¸Ä±ä this.textBox_objectRights.Text Öµ
+        // æ ¹æ® $u å†…å®¹è®¾ç½® this.textBox_objectRights.Text å€¼ã€‚è¿™ç”¨äºå¯¹è¯æ¡†æ‰“å¼€çš„æ—¶å€™
+        // å¦‚æœ $u å†…å®¹å½“ä½œ id å»å¯¹è±¡åˆ—è¡¨ä¸­æ‰¾æ²¡æœ‰æ‰¾åˆ°ï¼Œåˆ™ä¸æ”¹å˜ this.textBox_objectRights.Text å€¼
         void FillObjectRights()
         {
             if (String.IsNullOrEmpty(this.comboBox_u.Text) == true)
@@ -781,7 +781,7 @@ namespace DigitalPlatform.CommonControl
             this.toolStripButton_copyRights_objectTo856.Enabled = bEnable;
         }
 
-        int _disable_type = 0; // ´óÓÚ 0 Ôò½ûÖ¹ tabComboBox_type ÏìÓ¦ TextChanged ÊÂ¼ş
+        int _disable_type = 0; // å¤§äº 0 åˆ™ç¦æ­¢ tabComboBox_type å“åº” TextChanged äº‹ä»¶
 
         private void tabComboBox_type_TextChanged(object sender, EventArgs e)
         {
@@ -801,7 +801,7 @@ namespace DigitalPlatform.CommonControl
                 Change_x_TypeString(GetTypeString(this.tabComboBox_type.Text));
         }
 
-        // ĞŞ¸Ä textBox_x ÖĞµÄ type ÊôĞÔ²¿·Ö
+        // ä¿®æ”¹ textBox_x ä¸­çš„ type å±æ€§éƒ¨åˆ†
         void Change_x_TypeString(string strTypeString)
         {
             Hashtable table = StringUtil.ParseParameters(this.Subfield_x, ';', ':');
@@ -813,7 +813,7 @@ namespace DigitalPlatform.CommonControl
             _disable_x--;
         }
 
-        int _disable_x = 0; // ´óÓÚ 0 Ôò½ûÖ¹ textBox_x ÏìÓ¦ TextChanged ÊÂ¼ş
+        int _disable_x = 0; // å¤§äº 0 åˆ™ç¦æ­¢ textBox_x å“åº” TextChanged äº‹ä»¶
 
         private void textBox_x_TextChanged(object sender, EventArgs e)
         {
@@ -822,7 +822,7 @@ namespace DigitalPlatform.CommonControl
                 _disable_x++;
                 try
                 {
-                    // ³éÈ¡ÀïÃæµÄ rights ÊôĞÔ£¬ÉèÖÃµ½ textBox_856Rights ÖĞ
+                    // æŠ½å–é‡Œé¢çš„ rights å±æ€§ï¼Œè®¾ç½®åˆ° textBox_856Rights ä¸­
                     Hashtable table = StringUtil.ParseParameters(this.Subfield_x, ';', ':');
                     string strRights = (string)table["rights"];
                     string strType = (string)table["type"];
@@ -844,7 +844,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        int _disable_856 = 0; // ´óÓÚ 0 Ôò½ûÖ¹ textBox_856Rights ÏìÓ¦ TextChanged ÊÂ¼ş
+        int _disable_856 = 0; // å¤§äº 0 åˆ™ç¦æ­¢ textBox_856Rights å“åº” TextChanged äº‹ä»¶
 
         private void textBox_856Rights_TextChanged(object sender, EventArgs e)
         {
@@ -853,7 +853,7 @@ namespace DigitalPlatform.CommonControl
                 _disable_856++;
                 try
                 {
-                    // ÉèÖÃµ½ textBox_x µÄ rights ÊôĞÔÖĞ
+                    // è®¾ç½®åˆ° textBox_x çš„ rights å±æ€§ä¸­
                     Hashtable table = StringUtil.ParseParameters(this.Subfield_x, ';', ':');
                     table["rights"] = this.textBox_856Rights.Text;
                     string strText = StringUtil.BuildParameterString(table, ';', ':');
@@ -873,7 +873,7 @@ namespace DigitalPlatform.CommonControl
         {
             if (this.textBox_856Rights.Text.IndexOfAny(new char[] { ';', ':' }) != -1)
             {
-                MessageBox.Show(this, "856 È¨ÏŞ×Ö·û´®Àï²»ÔÊĞí³öÏÖ·ÖºÅºÍÃ°ºÅ");
+                MessageBox.Show(this, "856 æƒé™å­—ç¬¦ä¸²é‡Œä¸å…è®¸å‡ºç°åˆ†å·å’Œå†’å·");
                 e.Cancel = true;
             }
         }
@@ -882,13 +882,13 @@ namespace DigitalPlatform.CommonControl
         {
             if (this.textBox_objectRights.Text.IndexOfAny(new char[] { ';', ':' }) != -1)
             {
-                MessageBox.Show(this, "¶ÔÏóÈ¨ÏŞ×Ö·û´®Àï²»ÔÊĞí³öÏÖ·ÖºÅºÍÃ°ºÅ");
+                MessageBox.Show(this, "å¯¹è±¡æƒé™å­—ç¬¦ä¸²é‡Œä¸å…è®¸å‡ºç°åˆ†å·å’Œå†’å·");
                 e.Cancel = true;
             }
         }
 
         /// <summary>
-        /// È¨ÏŞÖµÅäÖÃÎÄ¼şÈ«Â·¾¶
+        /// æƒé™å€¼é…ç½®æ–‡ä»¶å…¨è·¯å¾„
         /// </summary>
         public string RightsCfgFileName
         {
@@ -902,7 +902,7 @@ namespace DigitalPlatform.CommonControl
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.Text = "856×Ö¶ÎµÄÈ¨ÏŞ";
+            dlg.Text = "856å­—æ®µçš„æƒé™";
             dlg.PropertyString = this.textBox_856Rights.Text;
             dlg.CfgFileName = RightsCfgFileName;
             dlg.ShowDialog(this);
@@ -919,7 +919,7 @@ namespace DigitalPlatform.CommonControl
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.Text = "¶ÔÏóµÄÈ¨ÏŞ";
+            dlg.Text = "å¯¹è±¡çš„æƒé™";
             dlg.PropertyString = this.textBox_objectRights.Text;
             dlg.CfgFileName = RightsCfgFileName;
             dlg.ShowDialog(this);
@@ -948,21 +948,21 @@ namespace DigitalPlatform.CommonControl
         public string Mime = "";
         public long Size = 0;
         public string LocalPath = "";
-        // public string LastModified = "";    // ×îºóĞŞ¸ÄÊ±¼ä
+        // public string LastModified = "";    // æœ€åä¿®æ”¹æ—¶é—´
         public string Usage = "";   // 2015/7/19
         public string Rights = "";  // 2015/7/19
     }
 
     /// <summary>
-    /// »ñµÃ×ÊÔ´Ïà¹ØĞÅÏ¢
+    /// è·å¾—èµ„æºç›¸å…³ä¿¡æ¯
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetResInfoEventHandler(object sender,
         GetResInfoEventArgs e);
 
     /// <summary>
-    /// »ñµÃÖµÁĞ±íµÄ²ÎÊı
+    /// è·å¾—å€¼åˆ—è¡¨çš„å‚æ•°
     /// </summary>
     public class GetResInfoEventArgs : EventArgs
     {

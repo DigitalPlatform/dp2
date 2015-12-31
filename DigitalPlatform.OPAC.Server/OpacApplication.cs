@@ -3983,7 +3983,7 @@ Value data: HEX 0x1
                 out strError);
             if (lRet == -1)
             {
-                Page.Response.ContentType = "text/plain";
+                // Page.Response.ContentType = "text/plain";    // 可能因为 Page.Response.OutputStream 已经写入了部分内容，这时候设置 ContentType 会抛出异常
                 strError = "GetRes() (for res) Error : " + strError;
                 return -1;
             }

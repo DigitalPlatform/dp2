@@ -1,58 +1,36 @@
-using System.Reflection;
+ï»¿using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-//
-// ÓĞ¹Ø³ÌĞò¼¯µÄ³£¹æĞÅÏ¢ÊÇÍ¨¹ıÏÂÁĞ
-// ÊôĞÔ¼¯¿ØÖÆµÄ¡£¸ü¸ÄÕâĞ©ÊôĞÔÖµ¿ÉĞŞ¸ÄÓë³ÌĞò¼¯
-// ¹ØÁªµÄĞÅÏ¢¡£
-//
-[assembly: AssemblyTitle("")]
+// æœ‰å…³ç¨‹åºé›†çš„å¸¸è§„ä¿¡æ¯é€šè¿‡ä»¥ä¸‹
+// ç‰¹æ€§é›†æ§åˆ¶ã€‚æ›´æ”¹è¿™äº›ç‰¹æ€§å€¼å¯ä¿®æ”¹
+// ä¸ç¨‹åºé›†å…³è”çš„ä¿¡æ¯ã€‚
+[assembly: AssemblyTitle("DigitalPlatform")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyProduct("DigitalPlatform")]
+[assembly: AssemblyCopyright("Copyright Â© 2015")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]		
+[assembly: AssemblyCulture("")]
 
-//
-// ³ÌĞò¼¯µÄ°æ±¾ĞÅÏ¢ÓÉÏÂÁĞ 4 ¸öÖµ×é³É:
-//
-//      Ö÷°æ±¾
-//      ´Î°æ±¾ 
-//      ÄÚ²¿°æ±¾ºÅ
-//      ĞŞ¶©ºÅ
-//
-// Äú¿ÉÒÔÖ¸¶¨ËùÓĞÕâĞ©Öµ£¬Ò²¿ÉÒÔÊ¹ÓÃ¡°ĞŞ¶©ºÅ¡±ºÍ¡°ÄÚ²¿°æ±¾ºÅ¡±µÄÄ¬ÈÏÖµ£¬·½·¨ÊÇ°´
-// ÈçÏÂËùÊ¾Ê¹ÓÃ '*':
+// å°† ComVisible è®¾ç½®ä¸º false ä½¿æ­¤ç¨‹åºé›†ä¸­çš„ç±»å‹
+// å¯¹ COM ç»„ä»¶ä¸å¯è§ã€‚  å¦‚æœéœ€è¦ä» COM è®¿é—®æ­¤ç¨‹åºé›†ä¸­çš„ç±»å‹ï¼Œ
+// åˆ™å°†è¯¥ç±»å‹ä¸Šçš„ ComVisible ç‰¹æ€§è®¾ç½®ä¸º trueã€‚
+[assembly: ComVisible(false)]
 
-[assembly: AssemblyVersion("2.0.*")]
+// å¦‚æœæ­¤é¡¹ç›®å‘ COM å…¬å¼€ï¼Œåˆ™ä¸‹åˆ— GUID ç”¨äºç±»å‹åº“çš„ ID
+[assembly: Guid("1CC5FB5F-DBC8-47C4-8CB3-BBDABA091DBA")]
 
+// ç¨‹åºé›†çš„ç‰ˆæœ¬ä¿¡æ¯ç”±ä¸‹é¢å››ä¸ªå€¼ç»„æˆ: 
 //
-// Òª¶Ô³ÌĞò¼¯½øĞĞÇ©Ãû£¬±ØĞëÖ¸¶¨ÒªÊ¹ÓÃµÄÃÜÔ¿¡£ÓĞ¹Ø³ÌĞò¼¯Ç©ÃûµÄ¸ü¶àĞÅÏ¢£¬Çë²Î¿¼ 
-// Microsoft .NET Framework ÎÄµµ¡£
+//      ä¸»ç‰ˆæœ¬
+//      æ¬¡ç‰ˆæœ¬ 
+//      ç”Ÿæˆå·
+//      ä¿®è®¢å·
 //
-// Ê¹ÓÃÏÂÃæµÄÊôĞÔ¿ØÖÆÓÃÓÚÇ©ÃûµÄÃÜÔ¿¡£
-//
-// ×¢Òâ:
-//   (*) Èç¹ûÎ´Ö¸¶¨ÃÜÔ¿£¬Ôò³ÌĞò¼¯²»»á±»Ç©Ãû¡£
-//   (*) KeyName ÊÇÖ¸ÒÑ¾­°²×°ÔÚ¼ÆËã»úÉÏµÄ
-//      ¼ÓÃÜ·şÎñÌá¹©³ÌĞò(CSP)ÖĞµÄÃÜÔ¿¡£KeyFile ÊÇÖ¸°üº¬
-//       ÃÜÔ¿µÄÎÄ¼ş¡£
-//   (*) Èç¹û KeyFile ºÍ KeyName Öµ¶¼ÒÑÖ¸¶¨£¬Ôò 
-//       ·¢ÉúÏÂÁĞ´¦Àí:
-//       (1) Èç¹ûÔÚ CSP ÖĞ¿ÉÒÔÕÒµ½ KeyName£¬ÔòÊ¹ÓÃ¸ÃÃÜÔ¿¡£
-//       (2) Èç¹û KeyName ²»´æÔÚ¶ø KeyFile ´æÔÚ£¬Ôò 
-//           KeyFile ÖĞµÄÃÜÔ¿°²×°µ½ CSP ÖĞ²¢ÇÒÊ¹ÓÃ¸ÃÃÜÔ¿¡£
-//   (*) Òª´´½¨ KeyFile£¬¿ÉÒÔÊ¹ÓÃ sn.exe(Ç¿Ãû³Æ)ÊµÓÃ¹¤¾ß¡£
-//       ÔÚÖ¸¶¨ KeyFile Ê±£¬KeyFile µÄÎ»ÖÃÓ¦¸ÃÏà¶ÔÓÚ
-//       ÏîÄ¿Êä³öÄ¿Â¼£¬¼´
-//       %Project Directory%\obj\<configuration>¡£ÀıÈç£¬Èç¹û KeyFile Î»ÓÚ
-//       ¸ÃÏîÄ¿Ä¿Â¼£¬Ó¦½« AssemblyKeyFile 
-//       ÊôĞÔÖ¸¶¨Îª [assembly: AssemblyKeyFile("..\\..\\mykey.snk")]
-//   (*) ¡°ÑÓ³ÙÇ©Ãû¡±ÊÇÒ»¸ö¸ß¼¶Ñ¡Ïî - ÓĞ¹ØËüµÄ¸ü¶àĞÅÏ¢£¬Çë²ÎÔÄ Microsoft .NET Framework
-//       ÎÄµµ¡£
-//
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile("")]	// client.snk
-[assembly: AssemblyKeyName("")]
+// å¯ä»¥æŒ‡å®šæ‰€æœ‰è¿™äº›å€¼ï¼Œä¹Ÿå¯ä»¥ä½¿ç”¨â€œç”Ÿæˆå·â€å’Œâ€œä¿®è®¢å·â€çš„é»˜è®¤å€¼ï¼Œ
+// æ–¹æ³•æ˜¯æŒ‰å¦‚ä¸‹æ‰€ç¤ºä½¿ç”¨â€œ*â€: 
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

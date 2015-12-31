@@ -14,6 +14,12 @@ namespace DigitalPlatform.MessageClient
     {
         public MessageConnection Connection { get; set; }
 
+        public bool Changed
+        {
+            get;
+            set;
+        }
+
         public UserManageDialog()
         {
             InitializeComponent();
@@ -128,6 +134,8 @@ namespace DigitalPlatform.MessageClient
             ListViewItem item = ChangeItem(null, user);
             this.listView1.SelectedItems.Clear();
             item.Selected = true;
+
+            this.Changed = true;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -136,8 +144,9 @@ namespace DigitalPlatform.MessageClient
         const int COLUMN_USERNAME = 0;
         const int COLUMN_DEPARTMENT = 1;
         const int COLUMN_RIGHTS = 2;
-        const int COLUMN_TEL = 3;
-        const int COLUMN_COMMENT = 4;
+        const int COLUMN_DUTY = 3;
+        const int COLUMN_TEL = 4;
+        const int COLUMN_COMMENT = 5;
 
         // 修改 ListViewItem 值，或者新创建一个 ListViewItem
         // parameters:
@@ -151,6 +160,7 @@ namespace DigitalPlatform.MessageClient
             ListViewUtil.ChangeItemText(item, COLUMN_USERNAME, user.userName);
             ListViewUtil.ChangeItemText(item, COLUMN_DEPARTMENT, user.department);
             ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, user.rights);
+            ListViewUtil.ChangeItemText(item, COLUMN_DUTY, user.duty);
             ListViewUtil.ChangeItemText(item, COLUMN_TEL, user.tel);
             ListViewUtil.ChangeItemText(item, COLUMN_COMMENT, user.comment);
 
@@ -216,6 +226,8 @@ namespace DigitalPlatform.MessageClient
             }
 
             ChangeItem(item, dlg.UserItem);
+
+            this.Changed = true;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -275,7 +287,9 @@ MessageBoxDefaultButton.Button2);
             foreach (ListViewItem item in this.listView1.SelectedItems)
             {
                 this.listView1.Items.Remove(item);
-            } 
+            }
+
+            this.Changed = true;
             return;
         ERROR1:
             MessageBox.Show(this, strError);

@@ -14,6 +14,8 @@ using System.Web;
 using System.Drawing;
 using System.Runtime.Serialization;
 
+using MongoDB.Driver;
+
 // using DigitalPlatform.Drawing;
 
 using DigitalPlatform;	// Stop类
@@ -102,7 +104,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.61 (2015/12/9) GetReaderInfo() 允许使用 _testreader 获得测试用的读者记录信息
         //      2.62 (2015/12/11) Login() API 增加了检查前端最低版本号的功能。如果用户权限中有 checkclientversion，就进行这项检查
         //      2.63 (2015/12/12) Return() API，对于超期违约金因子为空的情况，现在不当作出错处理。这种情况交费信息不会写入读者记录的交费信息字段，但会进入操作日志中(便于以后进行统计)。
-        public static string Version = "2.63";
+        //      2.64 (2015/12/27) 借书和还书操作信息会自动写入 mongodb 的日志库。增加后台任务 "创建 MongoDB 日志库"
+        public static string Version = "2.64";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -198,6 +201,7 @@ namespace DigitalPlatform.LibraryServer
 
         public HitCountDatabase HitCountDatabase = new HitCountDatabase();
         public AccessLogDatabase AccessLogDatabase = new AccessLogDatabase();
+        public ChargingOperDatabase ChargingOperDatabase = new ChargingOperDatabase();
 
         public Semaphore PictureLimit = new Semaphore(10, 10);
 
@@ -255,6 +259,8 @@ namespace DigitalPlatform.LibraryServer
         public string NotifyDef = "";       // 提醒通知的定义。"15day,50%,70%"
 
         DefaultThread defaultManagerThread = null; // 缺省管理后台任务
+
+        internal OperLogThread operLogThread = null; // 操作日志辅助线程
 
         // 全部读者库集合(包括不参与流通的读者库)
         public List<ReaderDbCfg> ReaderDbs = new List<ReaderDbCfg>();
@@ -687,6 +693,7 @@ namespace DigitalPlatform.LibraryServer
                     this.MongoDbInstancePrefix = "";
                     this.AccessLogDatabase = new AccessLogDatabase();
                     this.HitCountDatabase = new HitCountDatabase();
+                    this.ChargingOperDatabase = new ChargingOperDatabase();
                 }
 
                 // 预约到书
@@ -1161,38 +1168,67 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(this.MongoDbConnStr) == false)
                 {
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: OpenSummaryStorage");
-#endif
-                    nRet = OpenSummaryStorage(out strError);
-                    if (nRet == -1)
+                    try
                     {
-                        strError = "启动书目摘要库时出错: " + strError;
+                        this._mongoClient = new MongoClient(this.MongoDbConnStr);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "初始化 MongoClient 时出错: " + ex.Message;
                         app.WriteErrorLog(strError);
+                        this._mongoClient = null;
                     }
 
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: Open HitCountDatabase");
-#endif
-                    nRet = this.HitCountDatabase.Open(this.MongoDbConnStr,
-                        this.MongoDbInstancePrefix,
-                        out strError);
-                    if (nRet == -1)
+                    if (this._mongoClient != null)
                     {
-                        strError = "启动计数器库时出错: " + strError;
-                        app.WriteErrorLog(strError);
-                    }
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: OpenSummaryStorage");
+#endif
+                        nRet = OpenSummaryStorage(out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动书目摘要库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: Open AccessLogDatabase");
+                        app.WriteErrorLog("INFO: Open HitCountDatabase");
 #endif
-                    nRet = this.AccessLogDatabase.Open(this.MongoDbConnStr,
-                        this.MongoDbInstancePrefix,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "启动访问日志库时出错: " + strError;
-                        app.WriteErrorLog(strError);
+                        nRet = this.HitCountDatabase.Open(//this.MongoDbConnStr,
+                            this._mongoClient,
+                            this.MongoDbInstancePrefix,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动计数器库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: Open AccessLogDatabase");
+#endif
+                        nRet = this.AccessLogDatabase.Open(// this.MongoDbConnStr,
+                            this._mongoClient,
+                            this.MongoDbInstancePrefix,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动访问日志库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: Open ChargingOperDatabase");
+#endif
+                        nRet = this.ChargingOperDatabase.Open(
+                            this._mongoClient,
+                            this.MongoDbInstancePrefix,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "启动出纳操作库时出错: " + strError;
+                            app.WriteErrorLog(strError);
+                        }
                     }
                 }
 
@@ -1220,9 +1256,29 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        app.WriteErrorLog("启动批处理任务DefaultThread时出错：" + ex.Message);
+                        app.WriteErrorLog("启动后台任务 DefaultThread 时出错：" + ex.Message);
                         goto ERROR1;
                     }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: OperLogThread");
+#endif
+                    // 启动 OperLogThread
+                    try
+                    {
+                        OperLogThread thread = new OperLogThread(this, null);
+                        this.BatchTasks.Add(thread);
+
+                        thread.StartWorkerThread();
+
+                        this.operLogThread = thread;
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动后台任务 OperLogThread 时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+
 
 #if LOG_INFO
                     app.WriteErrorLog("INFO: ArriveMonitor");

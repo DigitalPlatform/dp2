@@ -19,14 +19,21 @@ namespace DigitalPlatform.Text
         public static int CompareVersion(string strVersion1, string strVersion2)
         {
             if (string.IsNullOrEmpty(strVersion1) == true)
-                strVersion1 = "0";
+                strVersion1 = "0.0";
             if (string.IsNullOrEmpty(strVersion2) == true)
-                strVersion2 = "0";
+                strVersion2 = "0.0";
 
-            Version version1 = new Version(strVersion1);
-            Version version2 = new Version(strVersion2);
+            try
+            {
+                Version version1 = new Version(strVersion1);
+                Version version2 = new Version(strVersion2);
 
-            return version1.CompareTo(version2);
+                return version1.CompareTo(version2);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("比较版本号字符串 '" + strVersion1 + "' 和 '" + strVersion2 + "' 过程出现异常: " + ex.Message, ex);
+            }
         }
 
         // 从一个纯路径(不含url部分)中截取库名部分

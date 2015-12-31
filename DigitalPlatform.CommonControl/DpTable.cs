@@ -20,7 +20,7 @@ namespace DigitalPlatform.CommonControl
     public partial class DpTable : Control
     {
         public ImageList ImageList = null;
-        
+
         public event EventHandler SelectionChanged = null;
 
         /// <summary>
@@ -668,7 +668,7 @@ namespace DigitalPlatform.CommonControl
 
             pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
             pe.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            pe.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality; 
+            pe.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 #if NO
             pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 #endif
@@ -713,7 +713,7 @@ namespace DigitalPlatform.CommonControl
                     pe.Graphics.FillRectangle(brush,
                         xOffset - this.m_documentMargin.Left + 4,
                         yOffset + this.m_lContentHeight - this.ColumnHeight + this.m_documentMargin.Bottom,
-                        this.m_lContentWidth + this.m_documentMargin.Horizontal -1,
+                        this.m_lContentWidth + this.m_documentMargin.Horizontal - 1,
                         4);
                 }
             }
@@ -809,38 +809,38 @@ namespace DigitalPlatform.CommonControl
                 result.AreaPortion = AreaPortion.RightBlank;  // 右方空白
             else
             {
-                    result.AreaPortion = AreaPortion.Content;
+                result.AreaPortion = AreaPortion.Content;
 
-                    long xOffset = this.Padding.Left;
-                    long yOffset = this.Padding.Top
-        + (this.ColumnHeight);
+                long xOffset = this.Padding.Left;
+                long yOffset = this.Padding.Top
+    + (this.ColumnHeight);
 
-                    int i = 0;
-                    foreach (DpRow line in this.Rows)
+                int i = 0;
+                foreach (DpRow line in this.Rows)
+                {
+                    // DpRow line = this.Rows[i];
+
+                    // 每次一行
+                    RectangleF rect = new RectangleF(xOffset,
+                        yOffset,
+                        this.m_lContentWidth,
+                        line.TextHeight + this.m_cellPadding.Vertical);
+
+                    if (GuiUtil.PtInRect(x, y, rect) == true)
                     {
-                        // DpRow line = this.Rows[i];
-
-                        // 每次一行
-                        RectangleF rect = new RectangleF(xOffset,
-                            yOffset,
-                            this.m_lContentWidth,
-                            line.TextHeight + this.m_cellPadding.Vertical);
-
-                        if (GuiUtil.PtInRect(x, y, rect) == true)
-                        {
-                            line.HitTest(x - xOffset,
-                                y - yOffset,
-                                out result);
-                            return;
-                        }
-
-                        yOffset += line.TextHeight + this.m_cellPadding.Vertical;
-
-                        // 行间距
-                        yOffset += this.m_nLineDistance;
-
-                        i++;
+                        line.HitTest(x - xOffset,
+                            y - yOffset,
+                            out result);
+                        return;
                     }
+
+                    yOffset += line.TextHeight + this.m_cellPadding.Vertical;
+
+                    // 行间距
+                    yOffset += this.m_nLineDistance;
+
+                    i++;
+                }
 
                 return;
             }
@@ -971,11 +971,11 @@ namespace DigitalPlatform.CommonControl
             else if (this.Capture == false)
             {
                 HitTestResult result = null;
-                    // 屏幕坐标
-                    this.HitTest(
-                        e.X,
-                        e.Y,
-                        out result);
+                // 屏幕坐标
+                this.HitTest(
+                    e.X,
+                    e.Y,
+                    out result);
 
                 // 栏目标题行
                 if (result != null
@@ -1019,7 +1019,7 @@ namespace DigitalPlatform.CommonControl
                     }
                 }
             }
-            END1:
+        END1:
             base.OnMouseMove(e);
         }
 
@@ -1474,7 +1474,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
             if (bInvalidateLeftRightBlank == true)
             {
                 rect.X -= this.Padding.Left + this.m_documentMargin.Left;
-                rect.Width += this.Padding.Horizontal + this.m_documentMargin.Horizontal + 4*2;
+                rect.Width += this.Padding.Horizontal + this.m_documentMargin.Horizontal + 4 * 2;
             }
 
 #if NO
@@ -1483,13 +1483,13 @@ Color.FromArgb(100, this.m_hoverBackColor)
 #endif
 
             rect.Height = (int)this.m_lContentHeight + this.m_documentMargin.Vertical + this.Padding.Vertical + 2000;  // + 4*2
-            
+
             if (bInvalidateUpperDistance == true)
             {
                 rect.Y -= this.m_nLineDistance;
                 rect.Height += this.m_nLineDistance;
-            } 
-            
+            }
+
             rect.Inflate(1, 1);
             this.Invalidate(rect);
         }
@@ -1541,7 +1541,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
         //      bClearRest  是否清除其余的选择
         // return:
         //      操作中是否修改过Selected状态
-        public bool SelectRange(object start, 
+        public bool SelectRange(object start,
             object end,
             bool bClearRest = false)
         {
@@ -1553,8 +1553,8 @@ Color.FromArgb(100, this.m_hoverBackColor)
             if (this.m_bFullRowSelect == true)
             {
                 if (!(start is DpRow))
-                    start = GetLineObj(start); 
-                
+                    start = GetLineObj(start);
+
                 if (!(end is DpRow))
                     end = GetLineObj(end);
 
@@ -2434,7 +2434,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
     && index == this.Rows.Count - 1)
                 {
                     // 已经在最后一行，但是还想向下看
-                    this.DocumentOrgY = - this.DocumentHeight;
+                    this.DocumentOrgY = -this.DocumentHeight;
                     return;
                 }
 
@@ -2494,7 +2494,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
                     {
                         if (this.m_shiftStartObj == null)
                         {
-                            
+
                             // 将第一个已经选定的对象作为 shiftStartObject
                             if (this.m_bFullRowSelect == true)
                             {
@@ -2612,8 +2612,8 @@ Color.FromArgb(100, this.m_hoverBackColor)
 
             SKIP1:
                 DpRow line = this.Rows[y];
-            if (line.IsSeperator == true)
-                goto REDO;
+                if (line.IsSeperator == true)
+                    goto REDO;
 
                 DpCell new_focus_cell = line[x];
 
@@ -3603,7 +3603,7 @@ nHeight);
         public new void RemoveAt(int index)
         {
             base.RemoveAt(index);
-                OnChanged();
+            OnChanged();
         }
 
         public new void RemoveRange(int index, int count)
@@ -4000,7 +4000,7 @@ nHeight);
 
                         this.Container.Control.TriggerSelectionChanged();
                     }
-               }
+                }
             }
         }
 
@@ -4159,7 +4159,7 @@ nHeight);
             set
             {
                 this.m_backColor = value;
-                if (this.Container != null 
+                if (this.Container != null
                     && this.Container.Control != null)
                     this.Container.Control.InvalidateCell(this);
             }
@@ -4332,7 +4332,7 @@ nHeight);
             }
             else
             {
-                PaintBackground(pe.Graphics, 
+                PaintBackground(pe.Graphics,
                     rectBack,
                     bLineSeleted);
 #if NO
@@ -4548,7 +4548,7 @@ nHeight - cell_padding.Vertical);
         }
 
         // 绘制单元对象的背景
-        public void PaintBackground(Graphics g, 
+        public void PaintBackground(Graphics g,
             RectangleF rectBack,
             bool bLineSeleted)
         {
@@ -4628,7 +4628,7 @@ nHeight - cell_padding.Vertical);
             int nIconHeight = 0;
 
             // 除去Icon宽度
-            if (((this.ImageIndex != -1 && this.Container.Control.ImageList != null ) || this._image != null)
+            if (((this.ImageIndex != -1 && this.Container.Control.ImageList != null) || this._image != null)
                 && this.Container != null
                 && this.Container.Control != null
                 )
@@ -4764,7 +4764,7 @@ nHeight - cell_padding.Vertical);
             // 变换为整体文档坐标，然后变换为view坐标
             rect.Offset(control.m_lWindowOrgX + padding.Left + control.m_nHorzDelta + this.Container.GetCellXOffset(this),
                 control.m_lWindowOrgY
-                + padding.Top 
+                + padding.Top
                 + control.ColumnHeight
                 + control.Rows.GetLineYOffset(this.Container));
 
@@ -5063,7 +5063,7 @@ nHeight - cell_padding.Vertical);
                 return 2;
 
             if (g == null)
-			    g = Graphics.FromHwnd(this.Control.Handle);
+                g = Graphics.FromHwnd(this.Control.Handle);
 
             if (cols == null)
                 cols = this.Control.m_columns;
@@ -5415,7 +5415,7 @@ this.TextHeight + cell_padding.Vertical);
             {
                 index = this.Control.Rows.IndexOf(this);
                 if (index == -1)
-                    return new RectangleF(0,0,0,0); // 说明对象已经不在挂接状态
+                    return new RectangleF(0, 0, 0, 0); // 说明对象已经不在挂接状态
 
                 Debug.Assert(index != -1, "");
             }
@@ -5430,10 +5430,10 @@ this.TextHeight + cell_padding.Vertical);
             // 变换为整体文档坐标，然后变换为view坐标
             rect.Offset(this.Control.m_lWindowOrgX + padding.Left + this.Control.m_nHorzDelta,
                 this.Control.m_lWindowOrgY
-                + padding.Top 
+                + padding.Top
                 + this.Control.ColumnHeight
                 + this.Control.Rows.GetLineYOffset(this));
-            
+
             return rect;
         }
 
@@ -5489,7 +5489,7 @@ this.TextHeight + cell_padding.Vertical);
         public long GetCellXOffset(DpCell cell)
         {
             long result = 0;
-            for(int i=0;i<this.Count;i++)
+            for (int i = 0; i < this.Count; i++)
             {
                 DpCell curcell = this[i];
                 if (curcell == cell)
@@ -5505,7 +5505,7 @@ this.TextHeight + cell_padding.Vertical);
     public class DpRowCollection : List<DpRow>
     {
         public DpTable Control = null;
- 
+
         public new void Add(DpRow row)
         {
             Debug.Assert(this.Control != null, "");
@@ -5573,7 +5573,7 @@ this.TextHeight + cell_padding.Vertical);
                 // 行间距
                 if (this.Count > 1)
                     this.Control.m_lContentHeight -= this.Control.m_nLineDistance;
-                
+
                 this.Control.SetScrollBars(scrollbar);
 
                 // 精确失效新增的行

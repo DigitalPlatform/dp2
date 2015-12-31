@@ -4518,7 +4518,6 @@ namespace DigitalPlatform.rms
                     strColumnList = " idstring" + strSelectKeystring + " ";
                 }
 
-
                 // 循环每一个检索途径
                 for (int i = 0; i < aTableInfo.Count; i++)
                 {
@@ -4684,7 +4683,6 @@ namespace DigitalPlatform.rms
 
                     if (bSearchNull == true)
                     {
-
                         string strColumns = " id ";
                         if (bOutputKeyCount == true)
                         {
@@ -4778,6 +4776,18 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
+                        // 将 top 子句插入 select 后面 2015/12/23
+                        if (string.IsNullOrEmpty(strTop) == false)
+                            strCommand = InsertTopPart(strCommand, strTop);
+
+                        if (string.IsNullOrEmpty(strLimit) == false
+    || string.IsNullOrEmpty(strOrderBy) == false)
+                            strCommand = strCommand
+        + strOrderBy
+        + strLimit;
+
+#if NO
+                        // strTop 有内容时这个用法要导致 MS SQL Server 报错
                         if (string.IsNullOrEmpty(strTop) == false
                             || string.IsNullOrEmpty(strLimit) == false
                             || string.IsNullOrEmpty(strOrderBy) == false)
@@ -4786,6 +4796,7 @@ namespace DigitalPlatform.rms
         + " * FROM (" + strCommand + ") "
         + strOrderBy
         + strLimit;
+#endif
                     }
 
 
@@ -5494,6 +5505,14 @@ namespace DigitalPlatform.rms
                 return 1;
 
             return 0;
+        }
+
+        static string InsertTopPart(string strCommand, string strTop)
+        {
+            int pos = strCommand.IndexOf("select ");
+            if (pos != -1)
+                return strCommand.Insert(pos + "select ".Length, " " + strTop + " ");
+            return strCommand;
         }
 
         static void Open(SQLiteConnection connection)

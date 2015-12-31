@@ -32,7 +32,6 @@ namespace DigitalPlatform.LibraryServer
         // 一次操作循环
         public override void Worker()
         {
-
             // 清理 Garden
             try
             {

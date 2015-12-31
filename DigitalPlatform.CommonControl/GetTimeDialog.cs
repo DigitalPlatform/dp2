@@ -13,7 +13,6 @@ namespace DigitalPlatform.CommonControl
 {
     public partial class GetTimeDialog : Form
     {
-
         public GetTimeDialog()
         {
             InitializeComponent();

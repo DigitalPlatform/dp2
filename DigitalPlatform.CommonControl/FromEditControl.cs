@@ -329,7 +329,7 @@ namespace DigitalPlatform.CommonControl
 
                 if (String.IsNullOrEmpty(strStyle) == true)
                 {
-                    strError = "第 " + (i+1).ToString() + " 行的style尚未指定";
+                    strError = "第 " + (i + 1).ToString() + " 行的style尚未指定";
                     return -1;
                 }
 

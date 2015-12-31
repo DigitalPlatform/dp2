@@ -41,6 +41,7 @@
             this.columnHeader_rights = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_tel = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_duty = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -110,6 +111,7 @@
             this.columnHeader_userName,
             this.columnHeader_deparmtent,
             this.columnHeader_rights,
+            this.columnHeader_duty,
             this.columnHeader_tel,
             this.columnHeader_comment});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -149,6 +151,11 @@
             this.columnHeader_comment.Text = "注释";
             this.columnHeader_comment.Width = 200;
             // 
+            // columnHeader_duty
+            // 
+            this.columnHeader_duty.Text = "义务";
+            this.columnHeader_duty.Width = 100;
+            // 
             // UserManageDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -182,5 +189,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_delete;
         private System.Windows.Forms.ColumnHeader columnHeader_tel;
         private System.Windows.Forms.ColumnHeader columnHeader_comment;
+        private System.Windows.Forms.ColumnHeader columnHeader_duty;
     }
 }

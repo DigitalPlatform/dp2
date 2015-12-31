@@ -1367,11 +1367,6 @@ namespace DigitalPlatform.LibraryServer
                         bRenew == true ? "renew" : "borrow");
                     // 原来在这里
 
-
-
-
-
-
                     // 借阅API的从属函数
                     // 检查预约相关信息
                     // return:
@@ -1689,6 +1684,40 @@ namespace DigitalPlatform.LibraryServer
             DateTime output_start_time = DateTime.Now;
 
             if (String.IsNullOrEmpty(strOutputReaderXml) == false
+    && StringUtil.IsInList("reader", strStyle) == true)
+            {
+                DateTime start_time_1 = DateTime.Now;
+                nRet = BuildReaderResults(
+            sessioninfo,
+            null,
+            strOutputReaderXml,
+            strReaderFormatList,
+            strLibraryCode,  // calendar/advancexml/html 时需要
+            null,    // recpaths 时需要
+            strOutputReaderRecPath,   // recpaths 时需要
+            null,    // timestamp 时需要
+            OperType.Borrow,
+            saBorrowedItemBarcode,
+            strItemBarcode,
+            ref reader_records,
+            out strError);
+                if (nRet == -1)
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                    // "虽然出现了下列错误，但是借阅操作已经成功: " + strError;
+                    goto ERROR1;
+                }
+
+                WriteTimeUsed(
+    time_lines,
+    start_time_1,
+    "Borrow() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
+            }
+
+#if NO
+            if (String.IsNullOrEmpty(strOutputReaderXml) == false
                 && StringUtil.IsInList("reader", strStyle) == true)
             {
                 DateTime start_time_1 = DateTime.Now;
@@ -1806,6 +1835,8 @@ namespace DigitalPlatform.LibraryServer
                     start_time_1,
                     "Borrow() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
             }
+
+#endif
 
             if (String.IsNullOrEmpty(strOutputItemXml) == false
                 && StringUtil.IsInList("item", strStyle) == true)
@@ -2492,6 +2523,54 @@ start_time_1,
                 return 0;
         }
 
+        // 检查存取权限中的 location
+        // parameters:
+        //      
+        // return:
+        //      -1  出错
+        //      0   允许继续访问
+        //      1   权限限制，不允许继续访问。strError 中有说明原因的文字
+        //      2   没有定义相关的存取定义参数
+        static int AccessLocationRange(
+            string strAccessString,
+            string strItemLocation,
+            string strReaderDbName,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (String.IsNullOrEmpty(strAccessString) == true)
+                return 2;
+
+            string strAccessActionList = "";
+            strAccessActionList = GetDbOperRights(strAccessString,
+                strReaderDbName,
+                "location");
+            if (strAccessActionList == "*")
+            {
+                // 通配
+                return 0;
+            }
+
+            if (strAccessActionList == null)
+                return 2;
+
+            string strRoom = "";
+            string strCode = "";
+
+            // 解析
+            ParseCalendarName(strItemLocation,
+            out strCode,
+            out strRoom);
+
+            if (StringUtil.IsInList(strRoom, strAccessActionList) == true)
+                return 0;
+
+            strError = "当前用户只能操作馆藏地为 '" + strAccessActionList + "' 之一的册，不能操作(分馆 '" + strCode + "' 内)馆藏地为 '" + strRoom + "' 的册";
+            return 1;
+        }
+
         // 检查存取权限中的 reader
         // parameters:
         //      
@@ -2879,7 +2958,6 @@ start_time_1,
                      * */
                     return 0;
                 }
-
             }
 
             // 
@@ -2890,7 +2968,7 @@ start_time_1,
 
             if (string.IsNullOrEmpty(strPersonalLibrary) == false)
             {
-                if (strRoom != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
+                if (strPersonalLibrary != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
                 {
                     strError = "当前用户 '" + account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
                     // text-level: 用户提示
@@ -4806,7 +4884,7 @@ start_time_1,
                     if (String.IsNullOrEmpty(strOverdueString) == false)
                     {
                         DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "overdues", 
+                            "overdues",
                             strOverdueString.StartsWith("!") ? strOverdueString.Substring(1) : strOverdueString);
                     }
 
@@ -5056,6 +5134,38 @@ start_time_1,
             DateTime output_start_time = DateTime.Now;
 
             if (String.IsNullOrEmpty(strOutputReaderXml) == false
+    && StringUtil.IsInList("reader", strStyle) == true)
+            {
+                DateTime start_time_1 = DateTime.Now;
+
+                nRet = BuildReaderResults(
+sessioninfo,
+null,
+strOutputReaderXml,
+strReaderFormatList,
+strLibraryCode,  // calendar/advancexml/html 时需要
+null,    // recpaths 时需要
+strOutputReaderRecPath,   // recpaths 时需要
+null,    // timestamp 时需要
+OperType.Return,
+                            null,
+                            strItemBarcodeParam,
+ref reader_records,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                    goto ERROR1;
+                }
+
+                WriteTimeUsed(
+time_lines,
+start_time_1,
+"Return() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
+            }
+
+#if NO
+            if (String.IsNullOrEmpty(strOutputReaderXml) == false
                 && StringUtil.IsInList("reader", strStyle) == true)
             {
                 DateTime start_time_1 = DateTime.Now;
@@ -5163,6 +5273,7 @@ start_time_1,
     "Return() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
 
             } // end if
+#endif
 
             // 2008/5/9
             if (String.IsNullOrEmpty(strOutputItemXml) == false
@@ -11874,7 +11985,7 @@ out string strError)
 
             if (string.IsNullOrEmpty(strPersonalLibrary) == false)
             {
-                if (strRoom != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
+                if (strPersonalLibrary != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
                 {
                     strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
                     return -1;

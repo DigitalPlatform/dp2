@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.Xml;
+using System.Runtime.Serialization;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Runtime.Serialization;
-using System.Collections;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -81,7 +81,6 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
             }
 
-
             return 0;
         }
 
@@ -116,7 +115,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             this.m_streamSpare.SetLength(this.m_streamSpare.Position);
-
             return 0;
         }
 
@@ -136,7 +134,6 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             this.m_streamSpare.Seek(0, SeekOrigin.Begin);
-
 
             // 观察是否有应急写入的内容?
             byte[] length = new byte[8];
@@ -172,7 +169,6 @@ namespace DigitalPlatform.LibraryServer
             bool bSucceed = false;
             try
             {
-
                 // 把备用文件中的内容，复制到当日日志文件尾部
                 m_streamSpare.Seek(0, SeekOrigin.Begin);
                 for (int i = 0; ; i++)
@@ -211,7 +207,6 @@ namespace DigitalPlatform.LibraryServer
                         strError = "写入当日日志文件时出错: " + ex.Message;
                         return -1;
                     }
-
 
                     // 读入内容，追加到当日文件末尾
                     int nWrited = 0;
@@ -300,7 +295,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-
                 m_strDirectory = strDirectory;
 
                 PathUtil.CreateDirIfNeed(m_strDirectory);
@@ -1138,6 +1132,15 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
                 return -1;
+
+            // 2015/12/27
+            if (this.App != null && this.App.operLogThread != null)
+            {
+                string strOperation = DomUtil.GetElementText(dom.DocumentElement,
+"operation");
+                if (OperLogThread.NeedAdd(strOperation))
+                    this.App.operLogThread.AddOperLog(dom);
+            }
 
             // ReOpen();          
             return 0;
@@ -3632,7 +3635,6 @@ out strTargetLibraryCode);
                     continue;
                 string strBigFileName = Path.Combine(Path.GetDirectoryName(strFileName), strPureFileName.Substring(0, 8) + ".log");
 
-
                 try
                 {
                     using (Stream target = File.Open(
@@ -3669,7 +3671,6 @@ out strTargetLibraryCode);
                 }
             }
 
-
             if (string.IsNullOrEmpty(strErrorText) == false)
             {
                 strError = strErrorText;
@@ -3678,8 +3679,6 @@ out strTargetLibraryCode);
 
             return 0;
         }
-
-
     }
 
     // API GetOperLogs()所使用的结构
@@ -3696,5 +3695,4 @@ out strTargetLibraryCode);
         [DataMember]
         public long AttachmentLength = 0;   // 附件尺寸
     }
-
 }

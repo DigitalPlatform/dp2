@@ -1351,13 +1351,17 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "changereaderbarcode"
 || strAction == "move")
             {
+                // 注：个人书斋名称，实际上允许 ~xxxx 方式，也允许 xxxxx 方式。后者是班级书架管理方式所需要的
+#if NO
                 if (string.IsNullOrEmpty(strPersonalLibrary) == false
+                    && strPersonalLibrary[0] != '*'
                     && strPersonalLibrary[0] != '~')
                 {
                     // TODO: 注意普通馆藏地点字符串中的地点名字的第一字符不能为 '~'
-                    strError = "个人书斋名 '"+strPersonalLibrary+"' 不合法。第一字符必须为 '~'";
+                    strError = "个人书斋名 '"+strPersonalLibrary+"' 不合法。第一字符必须为 '~' 或者 '*'";
                     return 1;
                 }
+#endif
             }
 
             return 0;

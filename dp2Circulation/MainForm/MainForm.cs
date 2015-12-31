@@ -356,7 +356,7 @@ namespace dp2Circulation
                 }
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
@@ -1244,7 +1244,6 @@ Stack:
             form.MainForm = this;
             form.Show();
 #endif
-
             OpenWindow<QuickChargingForm>();
         }
 
@@ -1410,6 +1409,29 @@ Stack:
 
         }
 
+        public string MessageUserName
+        {
+            get
+            {
+                return this.AppInfo.GetString(
+    "message",
+    "username",
+    "");
+            }
+        }
+
+        public string MessagePassword
+        {
+            get
+            {
+                string strPassword = this.AppInfo.GetString(
+        "message",
+        "password",
+        "");
+                return this.DecryptPasssword(strPassword);
+            }
+        }
+
         // 系统参数配置
         private void MenuItem_configuration_Click(object sender, EventArgs e)
         {
@@ -1424,6 +1446,9 @@ Stack:
                 bOldShareBiblio = this.MessageHub.ShareBiblio;
                 strOldDp2MserverUrl = this.MessageHub.dp2MServerUrl;
             }
+
+            string strOldMessageUserName = this.MessageUserName;
+            string strOldMessagePassword = this.MessagePassword;
 
             CfgDlg dlg = new CfgDlg();
 
@@ -1469,10 +1494,15 @@ Stack:
             }
 
             if (this.MessageHub != null
-                && (bOldShareBiblio != this.MessageHub.ShareBiblio || strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl))
+                && (bOldShareBiblio != this.MessageHub.ShareBiblio
+                || strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl
+                || strOldMessageUserName != this.MessageUserName
+                || strOldMessagePassword != this.MessagePassword))
             {
                 // URL 变化，需要先关闭然后重新连接
-                if (strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl)
+                if (strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl
+                    || strOldMessageUserName != this.MessageUserName
+                    || strOldMessagePassword != this.MessagePassword)
                     this.MessageHub.CloseConnection();
 
                 // TODO: 如果没有 Connect，要先 Connect
@@ -2409,7 +2439,7 @@ Stack:
                 string strExpire = GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false
                     && StringUtil.CompareVersion(this.ServerVersion, base_version) < 0
-                    && this.ServerVersion != "0")
+                    && this.ServerVersion != "0.0")
                 {
                     string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
                     Program.PromptAndExit(this, strError);
@@ -3884,12 +3914,12 @@ Stack:
                 && this.ActiveMdiChild is ChargingForm)
             {
                 EnsureChildForm<ChargingForm>().Activate();
-                EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.VerifyRenew;
+                EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Renew;   // FuncState.VerifyRenew;
             }
             else
             {
                 EnsureChildForm<QuickChargingForm>().Activate();
-                EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.VerifyRenew;
+                EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.Renew;   // FuncState.VerifyRenew;
             }
         }
 
@@ -8242,6 +8272,20 @@ Keys keyData)
             MainForm.SetControlFont(dlg, this.DefaultFont);
             dlg.Connection = this.MessageHub;
             dlg.ShowDialog(this);
+
+            if (dlg.Changed == true)
+            {
+                this.MessageHub.CloseConnection();
+                this.MessageHub.Connect();
+                this.MessageHub.Login();
+            }
+        }
+
+        private void toolStripButton_messageHub_relogin_Click(object sender, EventArgs e)
+        {
+            this.MessageHub.CloseConnection();
+            this.MessageHub.Connect();
+            this.MessageHub.Login();
         }
     }
 

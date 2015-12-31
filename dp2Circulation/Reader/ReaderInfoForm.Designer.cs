@@ -80,6 +80,8 @@ namespace dp2Circulation
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.tabPage_borrowHistory = new System.Windows.Forms.TabPage();
+            this.webBrowser_borrowHistory = new System.Windows.Forms.WebBrowser();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -91,6 +93,7 @@ namespace dp2Circulation
             this.toolStrip1.SuspendLayout();
             this.toolStrip_load.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
+            this.tabPage_borrowHistory.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer_normal
@@ -173,6 +176,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_readerInfo.Controls.Add(this.tabPage_normal);
+            this.tabControl_readerInfo.Controls.Add(this.tabPage_borrowHistory);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_xml);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_objects);
             this.tabControl_readerInfo.Location = new System.Drawing.Point(2, 27);
@@ -239,6 +243,7 @@ namespace dp2Circulation
             this.binaryResControl1.RightsCfgFileName = null;
             this.binaryResControl1.Size = new System.Drawing.Size(598, 257);
             this.binaryResControl1.TabIndex = 1;
+            this.binaryResControl1.TempDir = null;
             // 
             // toolStrip1
             // 
@@ -643,6 +648,25 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(610, 337);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
+            // tabPage_borrowHistory
+            // 
+            this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
+            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
+            this.tabPage_borrowHistory.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_borrowHistory.TabIndex = 3;
+            this.tabPage_borrowHistory.Text = "ΩË‘ƒ¿˙ ∑";
+            this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser_borrowHistory
+            // 
+            this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
+            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(598, 257);
+            this.webBrowser_borrowHistory.TabIndex = 0;
+            // 
             // ReaderInfoForm
             // 
             this.AllowDrop = true;
@@ -677,6 +701,7 @@ namespace dp2Circulation
             this.toolStrip_load.PerformLayout();
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
+            this.tabPage_borrowHistory.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -734,6 +759,8 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_exportExcel;
         private System.Windows.Forms.ToolStripButton toolStripButton_addFriends;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_exportDetailToExcelFile;
+        private System.Windows.Forms.TabPage tabPage_borrowHistory;
+        private System.Windows.Forms.WebBrowser webBrowser_borrowHistory;
 
     }
 }

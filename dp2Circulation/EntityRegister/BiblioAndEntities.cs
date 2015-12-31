@@ -457,23 +457,6 @@ MessageBoxDefaultButton.Button2);
             out string strError)
         {
             strError = "";
-#if NO
-            if (this.easyMarcControl1.InvokeRequired)
-            {
-                Delegate_NewEntity d = new Delegate_NewEntity(NewEntity);
-                object[] args = new object[5];
-                args[0] = strRecPath;
-                args[1] = timestamp;
-                args[2] = strXml;
-                args[3] = ScrollIntoView;
-                args[4] = strError;
-                int result = (int)this.easyMarcControl1.Invoke(d, args);
-
-                // 取出out参数值
-                strError = (string)args[4];
-                return result;
-            }
-#endif
 
             control = new EntityEditControl();
             control.DisplayMode = "simple_register";
@@ -512,22 +495,9 @@ MessageBoxDefaultButton.Button2);
 
             AddEditEvents(control, true);
 
-            // ClearBlank();
-
-            // control.BackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
             SetControlColor(control);
-#if NO
-            control.BackColor = this.flowLayoutPanel1.BackColor;
-            control.ForeColor = this.flowLayoutPanel1.ForeColor;
-#endif
-            
-            // this.flowLayoutPanel1.Controls.Add(control);
+
             AddEditControl(control);
-
-            // this.flowLayoutPanel1.PerformLayout();
-            // this.tableLayoutPanel1.PerformLayout();
-
-            // this.AdjustFlowLayoutHeight();
 
             if (bAutoSetFocus == true)
                 control.Focus();    // 这一句让 Edit Control 部分可见，但不是全部可见

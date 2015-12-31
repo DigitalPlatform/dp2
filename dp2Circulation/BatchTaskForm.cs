@@ -78,7 +78,7 @@ namespace dp2Circulation
                     this.ToolStripMenuItem_progress.Checked = true;
                 if ((this.m_messageStyle & MessageStyle.Result) != 0)
                     this.ToolStripMenuItem_result.Checked = true;
-               
+
             }
         }
 
@@ -180,7 +180,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "任务 '" +this.comboBox_taskName.Text+ "' 已成功启动");
+                MessageBox.Show(this, "任务 '" + this.comboBox_taskName.Text + "' 已成功启动");
 
         }
 
@@ -346,9 +346,20 @@ namespace dp2Circulation
             {
                 startinfo.Start = "activate";   // 表示立即启动，忽略服务器原有定时启动参数
             }
+            else if (strTaskName == "创建 MongoDB 日志库")
+            {
+                StartLogRecoverDlg dlg = new StartLogRecoverDlg();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.StartInfo = startinfo;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.OK)
+                {
+                    strError = "用户放弃启动";
+                    return -1;
+                }
+            }
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
-
             try
             {
                 EnableControls(false);
@@ -718,7 +729,7 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                 try
                 {
 
-                    for (int i=0;i<10;i++)  // 最多循环获取10次
+                    for (int i = 0; i < 10; i++)  // 最多循环获取10次
                     {
                         Application.DoEvents();
                         if (stop != null && stop.State != 0)
@@ -743,7 +754,7 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
                         param.ResultOffset = this.CurResultOffs;
 
-                        stop.SetMessage("正在获取任务 '" + MonitorTaskName + "' 的最新信息 (第 "+(i+1).ToString()+" 批 共10批)...");
+                        stop.SetMessage("正在获取任务 '" + MonitorTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批 共10批)...");
 
                         long lRet = Channel.BatchTask(
                             stop,

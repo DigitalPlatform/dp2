@@ -101,14 +101,14 @@ namespace dp2Circulation
 
             string strOutputHanzi = "";
             List<string> sjhms = null;
-                    // 把字符串中的汉字转换为四角号码
-        // parameters:
-        //      bLocal  是否从本地获取四角号码
-        //      strOutputText   [out]去除各种符号后的汉字字符串
-        // return:
-        //      -1  出错
-        //      0   用户希望中断
-        //      1   正常
+            // 把字符串中的汉字转换为四角号码
+            // parameters:
+            //      bLocal  是否从本地获取四角号码
+            //      strOutputText   [out]去除各种符号后的汉字字符串
+            // return:
+            //      -1  出错
+            //      0   用户希望中断
+            //      1   正常
             int nRet = HanziTextToSjhm(
             this.textBox_sjhm_source.Text,
             out strOutputHanzi,
@@ -121,7 +121,7 @@ namespace dp2Circulation
             }
 
             string strText = "";
-            for (int i = 0; i < sjhms.Count;i++ )
+            for (int i = 0; i < sjhms.Count; i++)
             {
                 string strOne = sjhms[i];
                 char ch = strOutputHanzi[i];
@@ -174,13 +174,13 @@ namespace dp2Circulation
                 int nRet = 0;
 
 
-                    nRet = this.MainForm.LoadQuickSjhm(true, out strError);
-                    if (nRet == -1)
-                        return -1;
-                    nRet = this.MainForm.QuickSjhm.GetSjhm(
-                        strHanzi,
-                        out strResultSjhm,
-                        out strError);
+                nRet = this.MainForm.LoadQuickSjhm(true, out strError);
+                if (nRet == -1)
+                    return -1;
+                nRet = this.MainForm.QuickSjhm.GetSjhm(
+                    strHanzi,
+                    out strResultSjhm,
+                    out strError);
 
 
                 if (nRet == -1)
@@ -396,8 +396,9 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        /*public*/ static void FillEncodingList(ComboBox list,
-    bool bHasMarc8)
+        /*public*/
+        static void FillEncodingList(ComboBox list,
+            bool bHasMarc8)
         {
             list.Items.Clear();
 
@@ -410,7 +411,8 @@ namespace dp2Circulation
 
         // 列出encoding名列表
         // 需要把gb2312 utf-8等常用的提前
-        /*public*/ static List<string> GetEncodingList(bool bHasMarc8)
+        /*public*/
+        static List<string> GetEncodingList(bool bHasMarc8)
         {
             List<string> result = new List<string>();
 
@@ -658,7 +660,7 @@ out strError);
 
                 double m_secs = delta.TotalMilliseconds;    // 221
 
-                int score = (int)(((double)50*10 / m_secs) * (double)100);
+                int score = (int)(((double)50 * 10 / m_secs) * (double)100);
                 this.label_health_message.Text = score.ToString() + "\r\n\r\n以每次通讯 50 毫秒为基准，满分 100";
             }
             finally
@@ -708,8 +710,6 @@ out strError);
                         continue;
                     }
 
-
-
                     string strTarget = "";
                     nRet = this.MainForm.IsbnSplitter.IsbnInsertHyphen(
                        strText,
@@ -720,10 +720,10 @@ out strError);
                     {
                         text.Append("? " + strText + " " + strError);
                     }
-
+#if NO
                     if (this.toolStripButton_isbn_hyphen.Checked == false)
                         strTarget = strTarget.Replace("-", "");
-
+#endif
                     text.Append(strTarget);
                 }
 
@@ -767,7 +767,7 @@ out strError);
         //      0   不存在
         //      1   存在
         public int ServerFileExists(string strServerFilePath,
-            out byte [] baOutputTimestamp,
+            out byte[] baOutputTimestamp,
             out string strError)
         {
             strError = "";
@@ -819,7 +819,7 @@ out strError);
             string strClientFilePath,
             string strServerFilePath,
             string strStyle,
-            byte [] timestamp,
+            byte[] timestamp,
             bool bRetryOverwiteExisting,
             out string strError)
         {
@@ -1287,7 +1287,7 @@ MessageBoxDefaultButton.Button2);
 
                 EnableControls(true);
             }
-            MessageBox.Show(this, "转换完成。记录已写入文件 "+dlg.FileName+" 中");
+            MessageBox.Show(this, "转换完成。记录已写入文件 " + dlg.FileName + " 中");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1333,6 +1333,29 @@ MessageBoxDefaultButton.Button2);
                 controls.Add(this.comboBox_worToIso_encoding);
                 GuiState.SetUiState(controls, value);
             }
+        }
+
+        private void toolStripButton_isbn_removeHyphen_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder(4096);
+            foreach (string strText in this.textBox_isbn_text.Lines)
+            {
+                if (string.IsNullOrEmpty(strText) == true)
+                {
+                    text.Append(strText + "\r\n");
+                    continue;
+                }
+
+                if (strText[0] == '?')
+                {
+                    text.Append(strText + "\r\n");
+                    continue;
+                }
+
+                text.Append(strText.Replace("-", "") + "\r\n");
+            }
+
+            this.textBox_isbn_text.Text = text.ToString();
         }
 
     }

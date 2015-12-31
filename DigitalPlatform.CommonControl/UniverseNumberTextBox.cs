@@ -79,7 +79,7 @@ namespace DigitalPlatform.CommonControl
 #endif
             strText = strText.Replace("，", ","); // 将中文逗号替换为西文逗号
 
-            string[] numbers = strText.Split(new char [] {','});
+            string[] numbers = strText.Split(new char[] { ',' });
             StringBuilder text = new StringBuilder();
             int i = 0;
             foreach (string number in numbers)
@@ -139,14 +139,14 @@ namespace DigitalPlatform.CommonControl
                 return -1;
             }
 #endif
-            strText = strText.Replace("，",","); // 将中文逗号替换为西文逗号
+            strText = strText.Replace("，", ","); // 将中文逗号替换为西文逗号
 
             string[] numbers = strText.Split(new char[] { ',' });
             foreach (string number in numbers)
             {
                 if (string.IsNullOrEmpty(number) == true)
                 {
-                    strError = "'"+strText+"' 中，(两个逗号之间)不应出现空的部分";
+                    strError = "'" + strText + "' 中，(两个逗号之间)不应出现空的部分";
                     return -1;
                 }
 
@@ -160,7 +160,7 @@ namespace DigitalPlatform.CommonControl
                 decimal v = 0;
                 if (decimal.TryParse(strNumber, out v) == false)
                 {
-                    strError = "'" + strText + "'中，'"+strNumber+"' 部分格式不正确，应该是一个数字";
+                    strError = "'" + strText + "'中，'" + strNumber + "' 部分格式不正确，应该是一个数字";
                     return -1;
                 }
             }
@@ -176,7 +176,7 @@ namespace DigitalPlatform.CommonControl
             int nRet = ValidateNumberListString(this.Text, out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this.Parent, 
+                MessageBox.Show(this.Parent,
                     string.IsNullOrEmpty(this.ValidateWarningFormat) == true ?
                     strError : string.Format(this.ValidateWarningFormat, strError, this.Text));
                 e.Cancel = true;

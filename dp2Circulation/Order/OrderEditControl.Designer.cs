@@ -867,6 +867,7 @@ namespace dp2Circulation
             this.dateTimePicker_orderTime.TabIndex = 78;
             this.dateTimePicker_orderTime.Value = new System.DateTime(1753, 1, 1, 0, 0, 0, 0);
             this.dateTimePicker_orderTime.ValueChanged += new System.EventHandler(this.dateTimePicker_orderTime_ValueChanged);
+            this.dateTimePicker_orderTime.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dateTimePicker_orderTime_MouseUp);
             // 
             // OrderEditControl
             // 

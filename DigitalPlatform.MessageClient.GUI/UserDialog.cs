@@ -31,6 +31,7 @@ namespace DigitalPlatform.MessageClient
             this.textBox_password.Text = this.UserItem.password;
             this.textBox_department.Text = this.UserItem.department;
             this.textBox_rights.Text = this.UserItem.rights;
+            this.textBox_duty.Text = this.UserItem.duty;
             this.textBox_tel.Text = this.UserItem.tel;
             this.textBox_comment.Text = this.UserItem.comment;
         }
@@ -44,6 +45,7 @@ namespace DigitalPlatform.MessageClient
             this.UserItem.password = this.textBox_password.Text;
             this.UserItem.department = this.textBox_department.Text;
             this.UserItem.rights = this.textBox_rights.Text;
+            this.UserItem.duty = this.textBox_duty.Text;
             this.UserItem.tel = this.textBox_tel.Text;
             this.UserItem.comment = this.textBox_comment.Text;
         }
@@ -66,6 +68,5 @@ namespace DigitalPlatform.MessageClient
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
         }
-
     }
 }

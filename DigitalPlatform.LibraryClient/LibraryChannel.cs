@@ -5,24 +5,23 @@ using System.Text;
 
 using System.Threading;
 using System.Net;
-using System.ServiceModel;
 using System.Xml;
-using System.ServiceModel.Channels;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Security;
-using System.IdentityModel.Claims;
+using System.ServiceModel.Security.Tokens;
 
 using System.IO;
 using System.IdentityModel.Policy;
-using System.Security.Cryptography.X509Certificates;
+using System.IdentityModel.Claims;
 using System.IdentityModel.Selectors;
-using System.ServiceModel.Security.Tokens;
+using System.Security.Cryptography.X509Certificates;
 
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
-
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -329,7 +328,7 @@ namespace DigitalPlatform.LibraryClient
             out string strError)
         {
             strError = "";
-            strVersion = "0";
+            strVersion = "0.0";
 
             // string strVersion = "";
             string strUID = "";
@@ -342,7 +341,7 @@ out strError);
                 if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                 {
                     // 原来的dp2Library不具备GetVersion() API，会走到这里
-                    strVersion = "0";
+                    strVersion = "0.0";
                     strError = "dp2 前端需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                     return 0;
                 }
@@ -7046,7 +7045,7 @@ out strError);
 
             for (; ; )
             {
-                Application.DoEvents();	// 出让界面控制权
+                // Application.DoEvents();	// 出让界面控制权
 
                 if (stop != null && stop.State != 0)
                 {
@@ -7088,7 +7087,6 @@ out strError);
                 if (lRet == -1)
                     return -1;
 
-
                 if (bHasMetadataStyle == true)
                 {
                     StringUtil.RemoveFromInList("metadata",
@@ -7098,7 +7096,6 @@ out strError);
                 }
 
                 lTotalLength = lRet;
-
 
                 if (StringUtil.IsInList("timestamp", strStyle) == true)
                 {
@@ -9261,6 +9258,75 @@ out strError);
                 if (nRet == 0)
                     return -1;
                 goto REDO;
+            }
+        }
+
+        public long SearchCharging(
+            DigitalPlatform.Stop stop,
+            string patronBarcode,
+            string timeRange,
+            string actions,
+            string order,
+            long start,
+            long count,
+            out ChargingItem[] results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+
+        REDO:
+            this.BeginSearch();
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginSearchCharging(
+                    patronBarcode,
+                        timeRange,
+                        actions,
+                        order,
+                        start,
+                        count,
+                        null,
+                        null);
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndSearchCharging(
+                    out results,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+            finally
+            {
+                this.EndSearch();
             }
         }
 

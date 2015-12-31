@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,19 +10,19 @@ using System.Diagnostics;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// ÆÚ¿¯ÌØÊâ¶©¹ºÇşµÀÉè¼ÆÆ÷ ¶Ô»°¿ò
+    /// æœŸåˆŠç‰¹æ®Šè®¢è´­æ¸ é“è®¾è®¡å™¨ å¯¹è¯æ¡†
     /// 
     /// </summary>
     public partial class SpecialSourceSeriesDialog : Form
     {
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
-        public string DbName = "";  // ÓÃÓÚ»ñµÃÖµÁĞ±í
+        public string DbName = "";  // ç”¨äºè·å¾—å€¼åˆ—è¡¨
 
-        // µØÖ·XMLÆ¬¶Î
+        // åœ°å€XMLç‰‡æ®µ
         public string AddressXml = "";
 
         public string Seller = "";
@@ -36,7 +36,7 @@ namespace DigitalPlatform.CommonControl
         private void SpecialSourceSeriesDialog_Load(object sender, EventArgs e)
         {
             string strError = "";
-            // ×ÛºÏ¸÷ÖÖĞÅÏ¢£¬ÉèÖÃ×´Ì¬
+            // ç»¼åˆå„ç§ä¿¡æ¯ï¼Œè®¾ç½®çŠ¶æ€
             int nRet = SetType(out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -56,7 +56,7 @@ namespace DigitalPlatform.CommonControl
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
-            // »ñµÃÓÃ»§Ñ¡ÔñµÄ×´Ì¬
+            // è·å¾—ç”¨æˆ·é€‰æ‹©çš„çŠ¶æ€
             int nRet = GetType(out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -74,115 +74,115 @@ namespace DigitalPlatform.CommonControl
             this.Close();
         }
 
-        // »ñµÃÓÃ»§Ñ¡ÔñµÄ×´Ì¬
+        // è·å¾—ç”¨æˆ·é€‰æ‹©çš„çŠ¶æ€
         int GetType(out string strError)
         {
             strError = "";
 
             if (this.personAddressControl.Changed == true)
             {
-                // »ñµÃ±à¼­ºóµÄÊı¾İ
+                // è·å¾—ç¼–è¾‘åçš„æ•°æ®
                 try
                 {
                     this.AddressXml = this.personAddressControl.DataDom.DocumentElement.OuterXml;
                 }
                 catch (Exception ex)
                 {
-                    strError = "»ñµÃAddressXmlÊı¾İÊ±³ö´í: " + ex.Message;
+                    strError = "è·å¾—AddressXmlæ•°æ®æ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
             }
 
-            // ÆÕÍ¨ÇşµÀ
-            if (this.comboBox_specialSource.Text == "ÆÕÍ¨")
+            // æ™®é€šæ¸ é“
+            if (this.comboBox_specialSource.Text == "æ™®é€š")
             {
                 if (this.comboBox_seller.Text == "")
                 {
-                    strError = "ÆÕÍ¨ÇşµÀÀàĞÍÊ±£¬ÇşµÀÃû²»ÄÜÎª¿Õ";
+                    strError = "æ™®é€šæ¸ é“ç±»å‹æ—¶ï¼Œæ¸ é“åä¸èƒ½ä¸ºç©º";
                     return -1;
                 }
 
                 if (this.comboBox_source.Text == "")
                 {
-                    strError = "ÆÕÍ¨ÇşµÀÀàĞÍÊ±£¬¾­·ÑÀ´Ô´²»ÄÜÎª¿Õ";
+                    strError = "æ™®é€šæ¸ é“ç±»å‹æ—¶ï¼Œç»è´¹æ¥æºä¸èƒ½ä¸ºç©º";
                     return -1;
                 }
 
                 ///
 
-                if (this.comboBox_seller.Text == "Ö±¶©")
+                if (this.comboBox_seller.Text == "ç›´è®¢")
                 {
-                    strError = "ÆÕÍ¨ÇşµÀÀàĞÍÊ±£¬ÇşµÀÃû²»ÄÜÎª '" + this.comboBox_seller.Text + "'";
+                    strError = "æ™®é€šæ¸ é“ç±»å‹æ—¶ï¼Œæ¸ é“åä¸èƒ½ä¸º '" + this.comboBox_seller.Text + "'";
                     return -1;
                 }
 
-                if (this.comboBox_seller.Text == "½»»»")
+                if (this.comboBox_seller.Text == "äº¤æ¢")
                 {
-                    strError = "ÆÕÍ¨ÇşµÀÀàĞÍÊ±£¬ÇşµÀÃû²»ÄÜÎª '" + this.comboBox_seller.Text + "'";
+                    strError = "æ™®é€šæ¸ é“ç±»å‹æ—¶ï¼Œæ¸ é“åä¸èƒ½ä¸º '" + this.comboBox_seller.Text + "'";
                     return -1;
                 }
 
-                if (this.comboBox_seller.Text == "Ôù")
+                if (this.comboBox_seller.Text == "èµ ")
                 {
-                    strError = "ÆÕÍ¨ÇşµÀÀàĞÍÊ±£¬ÇşµÀÃû²»ÄÜÎª '" + this.comboBox_seller.Text + "'";
+                    strError = "æ™®é€šæ¸ é“ç±»å‹æ—¶ï¼Œæ¸ é“åä¸èƒ½ä¸º '" + this.comboBox_seller.Text + "'";
                     return -1;
                 }
 
                 this.Source = this.comboBox_source.Text;
                 this.Seller = this.comboBox_seller.Text;
-                // µØÖ·²»±ä
+                // åœ°å€ä¸å˜
                 return 0;
             }
 
-            // Ö±¶©
-            if (this.comboBox_specialSource.Text == "Ö±¶©")
+            // ç›´è®¢
+            if (this.comboBox_specialSource.Text == "ç›´è®¢")
             {
                 if (this.comboBox_source.Text == "")
                 {
-                    strError = "Ö±¶©Ê±£¬¾­·ÑÀ´Ô´²»ÄÜÎª¿Õ";
+                    strError = "ç›´è®¢æ—¶ï¼Œç»è´¹æ¥æºä¸èƒ½ä¸ºç©º";
                     return -1;
                 }
 
-                if (this.comboBox_seller.Text == "½»»»")
+                if (this.comboBox_seller.Text == "äº¤æ¢")
                 {
-                    strError = "Ö±¶©Ê±£¬ÇşµÀÃû²»ÄÜÎª '" + this.comboBox_seller.Text + "'";
+                    strError = "ç›´è®¢æ—¶ï¼Œæ¸ é“åä¸èƒ½ä¸º '" + this.comboBox_seller.Text + "'";
                     return -1;
                 }
 
-                if (this.comboBox_seller.Text == "Ôù")
+                if (this.comboBox_seller.Text == "èµ ")
                 {
-                    strError = "Ö±¶©Ê±£¬ÇşµÀÃû²»ÄÜÎª '" + this.comboBox_seller.Text + "'";
+                    strError = "ç›´è®¢æ—¶ï¼Œæ¸ é“åä¸èƒ½ä¸º '" + this.comboBox_seller.Text + "'";
                     return -1;
                 }
 
                 this.Source = this.comboBox_source.Text;
 
-                this.Seller = "Ö±¶©";
-                // TODO: ºÏ³ÉµØÖ·
+                this.Seller = "ç›´è®¢";
+                // TODO: åˆæˆåœ°å€
                 return 0;
             }
 
-            // ½»»»
-            if (this.comboBox_specialSource.Text == "½»»»")
+            // äº¤æ¢
+            if (this.comboBox_specialSource.Text == "äº¤æ¢")
             {
-                this.Seller = "½»»»";
+                this.Seller = "äº¤æ¢";
                 this.Source = "";
                 return 0;
             }
 
-            // Ôù
-            if (this.comboBox_specialSource.Text == "Ôù")
+            // èµ 
+            if (this.comboBox_specialSource.Text == "èµ ")
             {
-                this.Seller = "Ôù";
+                this.Seller = "èµ ";
                 this.Source = "";
                 return 0;
             }
 
-            strError = "²»ºÏ·¨µÄÇşµÀÀàĞÍ '" + this.comboBox_specialSource.Text + "'";
+            strError = "ä¸åˆæ³•çš„æ¸ é“ç±»å‹ '" + this.comboBox_specialSource.Text + "'";
             return -1;
         }
 
-        // ×ÛºÏ¸÷ÖÖĞÅÏ¢£¬ÉèÖÃ×´Ì¬
+        // ç»¼åˆå„ç§ä¿¡æ¯ï¼Œè®¾ç½®çŠ¶æ€
         int SetType(out string strError)
         {
             strError = "";
@@ -191,7 +191,7 @@ namespace DigitalPlatform.CommonControl
             this.comboBox_seller.Text = this.Seller;
             this.comboBox_source.Text = this.Source;
 
-            // ×°ÈëµØÖ·ĞÅÏ¢
+            // è£…å…¥åœ°å€ä¿¡æ¯
             if (String.IsNullOrEmpty(this.AddressXml) == false)
             {
                 nRet = this.personAddressControl.SetData(this.AddressXml,
@@ -200,34 +200,34 @@ namespace DigitalPlatform.CommonControl
                     return -1;
             }
 
-            if (this.Seller == "Ö±¶©")
+            if (this.Seller == "ç›´è®¢")
             {
-                this.comboBox_specialSource.Text = "Ö±¶©";
+                this.comboBox_specialSource.Text = "ç›´è®¢";
                 return 0;
             }
 
-            if (this.Seller == "½»»»")
+            if (this.Seller == "äº¤æ¢")
             {
-                this.comboBox_specialSource.Text = "½»»»";
+                this.comboBox_specialSource.Text = "äº¤æ¢";
                 return 0;
             }
 
-            if (this.Seller == "Ôù")
+            if (this.Seller == "èµ ")
             {
-                this.comboBox_specialSource.Text = "Ôù";
+                this.comboBox_specialSource.Text = "èµ ";
                 return 0;
             }
 
-            this.comboBox_specialSource.Text = "ÆÕÍ¨";
+            this.comboBox_specialSource.Text = "æ™®é€š";
             return 0;
         }
 
-        // ·ÀÖ¹ÖØÈë 2009/7/19
+        // é˜²æ­¢é‡å…¥ 2009/7/19
         int m_nInDropDown = 0;
 
         private void comboBox_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/7/19
+            // é˜²æ­¢é‡å…¥ 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -250,7 +250,7 @@ namespace DigitalPlatform.CommonControl
                         e1.TableName = "orderSeller";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -288,7 +288,7 @@ namespace DigitalPlatform.CommonControl
 
         private void comboBox_specialSource_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_specialSource.Text == "Ö±¶©")
+            if (this.comboBox_specialSource.Text == "ç›´è®¢")
             {
                 this.comboBox_seller.Enabled = false;
                 this.comboBox_seller.Visible = false;
@@ -298,7 +298,7 @@ namespace DigitalPlatform.CommonControl
                 this.comboBox_source.Visible = true;
                 this.label_source.Visible = true;
             }
-            else if (this.comboBox_specialSource.Text == "½»»»")
+            else if (this.comboBox_specialSource.Text == "äº¤æ¢")
             {
                 this.comboBox_seller.Enabled = false;
                 this.comboBox_seller.Visible = false;
@@ -308,7 +308,7 @@ namespace DigitalPlatform.CommonControl
                 this.comboBox_source.Visible = false;
                 this.label_source.Visible = false;
             }
-            else if (this.comboBox_specialSource.Text == "Ôù")
+            else if (this.comboBox_specialSource.Text == "èµ ")
             {
                 this.comboBox_seller.Enabled = false;
                 this.comboBox_seller.Visible = false;
@@ -318,7 +318,7 @@ namespace DigitalPlatform.CommonControl
                 this.comboBox_source.Visible = false;
                 this.label_source.Visible = false;
             }
-            else if (this.comboBox_specialSource.Text == "ÆÕÍ¨")
+            else if (this.comboBox_specialSource.Text == "æ™®é€š")
             {
                 this.comboBox_seller.Enabled = true;
                 this.comboBox_seller.Visible = true;
@@ -328,16 +328,16 @@ namespace DigitalPlatform.CommonControl
                 this.comboBox_source.Visible = true;
                 this.label_source.Visible = true;
 
-                if (this.comboBox_seller.Text == "Ö±¶©")
+                if (this.comboBox_seller.Text == "ç›´è®¢")
                     this.comboBox_seller.Text = "";
 
-                if (this.comboBox_seller.Text == "½»»»"
-                    || this.comboBox_seller.Text == "Ôù")
+                if (this.comboBox_seller.Text == "äº¤æ¢"
+                    || this.comboBox_seller.Text == "èµ ")
                     this.comboBox_seller.Text = "";
             }
             else
             {
-                // ÆäËû²»ºÏ·¨µÄÇşµÀÃû
+                // å…¶ä»–ä¸åˆæ³•çš„æ¸ é“å
                 this.comboBox_seller.Enabled = false;
                 this.comboBox_seller.Visible = false;
                 this.label_seller.Visible = false;

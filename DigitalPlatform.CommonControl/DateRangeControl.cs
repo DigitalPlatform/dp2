@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -117,7 +117,7 @@ namespace DigitalPlatform.CommonControl
             {
                 strStart = strValue;
                 if (strStart.Length != 8)
-                    throw new Exception("Ê±¼ä·¶Î§ '"+strValue+"' ¸ñÊ½²»ÕıÈ·");
+                    throw new Exception("æ—¶é—´èŒƒå›´ '" + strValue + "' æ ¼å¼ä¸æ­£ç¡®");
 
                 strEnd = "";
             }
@@ -127,27 +127,25 @@ namespace DigitalPlatform.CommonControl
 
                 if (strStart.Length != 8
                     && string.IsNullOrEmpty(strStart) == false)
-                    throw new Exception("Ê±¼ä·¶Î§ '" + strValue + "' ÄÚ '"+strStart+"' ¸ñÊ½²»ÕıÈ·");
-
+                    throw new Exception("æ—¶é—´èŒƒå›´ '" + strValue + "' å†… '" + strStart + "' æ ¼å¼ä¸æ­£ç¡®");
 
                 strEnd = strValue.Substring(nRet + 1).Trim();
 
                 if (strEnd.Length != 8
                     && string.IsNullOrEmpty(strEnd) == false)
-                    throw new Exception("Ê±¼ä·¶Î§ '" + strValue + "' ÄÚ '"+strEnd+"' ¸ñÊ½²»ÕıÈ·");
+                    throw new Exception("æ—¶é—´èŒƒå›´ '" + strValue + "' å†… '" + strEnd + "' æ ¼å¼ä¸æ­£ç¡®");
             }
 
             if (String.IsNullOrEmpty(strStart) == false)
                 this.dateTimePicker_start.Value = Long8ToDateTime(strStart);
             if (String.IsNullOrEmpty(strEnd) == false)
                 this.dateTimePicker_end.Value = Long8ToDateTime(strEnd);
-
         }
 
         public static DateTime Long8ToDateTime(string strDate8)
         {
             if (strDate8.Length != 8)
-                throw new Exception("ÈÕÆÚ×Ö·û´®¸ñÊ½±ØĞëÎª8×Ö·û¡£");
+                throw new Exception("æ—¥æœŸå­—ç¬¦ä¸²æ ¼å¼å¿…é¡»ä¸º8å­—ç¬¦ã€‚");
 
             int nYear = Convert.ToInt32(strDate8.Substring(0, 4));
             int nMonth = Convert.ToInt32(strDate8.Substring(4, 2));
@@ -178,15 +176,15 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // »ñµÃ×î½üÈıÄêµÄÄê·İ×Ö·û´®
+        // è·å¾—æœ€è¿‘ä¸‰å¹´çš„å¹´ä»½å­—ç¬¦ä¸²
         List<string> GetRecentYear()
         {
             List<string> results = new List<string>();
             int nCurrentYear = DateTime.Now.Year;
 
-            results.Add((nCurrentYear-1).ToString().PadLeft(4, '0'));
+            results.Add((nCurrentYear - 1).ToString().PadLeft(4, '0'));
             results.Add(nCurrentYear.ToString().PadLeft(4, '0'));
-            results.Add((nCurrentYear+1).ToString().PadLeft(4, '0'));
+            results.Add((nCurrentYear + 1).ToString().PadLeft(4, '0'));
 
             return results;
         }
@@ -209,7 +207,7 @@ namespace DigitalPlatform.CommonControl
                 contextMenu.MenuItems.Add(menuItem);
 
                 // 
-                string strPart = "È«Äê";
+                string strPart = "å…¨å¹´";
 
                 QuickSetParam param = new QuickSetParam();
                 param.Year = strYear;
@@ -221,7 +219,7 @@ namespace DigitalPlatform.CommonControl
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 
-                strPart = "ÉÏ°ëÄê";
+                strPart = "ä¸ŠåŠå¹´";
                 param = new QuickSetParam();
                 param.Year = strYear;
                 param.Part = strPart;
@@ -232,7 +230,7 @@ namespace DigitalPlatform.CommonControl
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 
-                strPart = "ÏÂ°ëÄê";
+                strPart = "ä¸‹åŠå¹´";
                 param = new QuickSetParam();
                 param.Year = strYear;
                 param.Part = strPart;
@@ -253,22 +251,22 @@ namespace DigitalPlatform.CommonControl
 
             QuickSetParam param = (QuickSetParam)menu.Tag;
 
-            if (param.Part == "È«Äê")
+            if (param.Part == "å…¨å¹´")
             {
                 this.Text = param.Year + "0101-" + param.Year + "1231";
                 return;
             }
-            if (param.Part == "ÉÏ°ëÄê")
+            if (param.Part == "ä¸ŠåŠå¹´")
             {
                 this.Text = param.Year + "0101-" + param.Year + "0630";
                 return;
             }
-            if (param.Part == "ÏÂ°ëÄê")
+            if (param.Part == "ä¸‹åŠå¹´")
             {
                 this.Text = param.Year + "0701-" + param.Year + "1231";
                 return;
             }
-            throw new Exception("Î´ÖªµÄpart²ÎÊıÖµ '" + param.Part + "'");
+            throw new Exception("æœªçŸ¥çš„partå‚æ•°å€¼ '" + param.Part + "'");
         }
 
     }
@@ -276,6 +274,6 @@ namespace DigitalPlatform.CommonControl
     public class QuickSetParam
     {
         public string Year = "";
-        public string Part = "";    // È«Äê/ÉÏ°ëÄê/ÏÂ°ëÄê µÈµÈ
+        public string Part = "";    // å…¨å¹´/ä¸ŠåŠå¹´/ä¸‹åŠå¹´ ç­‰ç­‰
     }
 }

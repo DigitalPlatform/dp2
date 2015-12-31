@@ -720,7 +720,7 @@ DIV.createtime
         DirectoryInfo di = new DirectoryInfo(strDir);
 
         DirectoryInfo[] sub_dirs = di.GetDirectories();
-        int i = 0;
+        // int i = 0;
         foreach (DirectoryInfo sub in sub_dirs)
         {
             if (strLevel == "library")

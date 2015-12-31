@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -276,65 +277,31 @@ SearchRequest searchParam
             )
         {
             // 单独给一个线程来执行
-#if NO
-            try
-            {
-                await Task.Factory.StartNew(() => SearchAndResponse(
-                    searchID,
-                    dbNameList,
-                    queryWord,
-                    fromList,
-                    matchStyle,
-                    formatList,
-                    maxResults));
-            }
-            catch(Exception ex)
-            {
-                AddErrorLine(ex.Message);
-            }
-#endif
+            Task.Factory.StartNew(() => SearchAndResponse(searchParam));
+        }
 
-#if NO
-            Task task = Task.Factory.StartNew(() => SearchAndResponse(
-                    searchID,
-                    dbNameList,
-                    queryWord,
-                    fromList,
-                    matchStyle,
-                    formatList,
-                    maxResults));
-            task.Wait();
-            if (task.IsFaulted)
-            {
-                AddErrorLine(GetExceptionText(task.Exception));
-            }
-            task.Dispose();
-#endif
-            Task.Factory.StartNew(() => SearchAndResponse(
-#if NO
-        searchID,
-        dbNameList,
-        queryWord,
-        fromList,
-        matchStyle,
-        formatList,
-        maxResults
-#endif
-searchParam
-        ));
+        public override void OnSetInfoRecieved(SetInfoRequest request)
+        {
+            Task.Factory.StartNew(() => SetInfoAndResponse(request));
         }
 
         void GetPatronInfo(SearchRequest searchParam)
         {
-            IList<BiblioRecord> records = new List<BiblioRecord>();
+            string strError = "";
+            IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
+
+            if (string.IsNullOrEmpty(searchParam.FormatList) == true)
+            {
+                strError = "FormatList 不应为空";
+                goto ERROR1;
+            }
 
             LibraryChannel channel = GetChannel();
             try
             {
-                string strError = "";
                 string[] results = null;
                 string strRecPath = "";
-                byte[] baTimestamp= null;
+                byte[] baTimestamp = null;
 
                 long lRet = channel.GetReaderInfo(null,
                     searchParam.QueryWord,
@@ -349,29 +316,26 @@ searchParam
                         || (lRet == -1 && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound))
                     {
                         // 没有命中
-                        Response(
-searchParam.SearchID,
+                        ResponseSearch(
+searchParam.TaskID,
 0,
 0,
 records,
 strError);  // 出错信息大概为 not found。
                         return;
                     }
-                    Response(
-        searchParam.SearchID,
-        -1,
-        0,
-        records,
-        strError);
-                    return;
+                    goto ERROR1;
                 }
 
+                if (results == null)
+                    results = new string[0];
+
                 records.Clear();
-                string[] formats = searchParam.FormatList.Split(new char[] {','});
+                string[] formats = searchParam.FormatList.Split(new char[] { ',' });
                 int i = 0;
-                foreach(string result in results)
+                foreach (string result in results)
                 {
-                    BiblioRecord biblio = new BiblioRecord();
+                    DigitalPlatform.MessageClient.Record biblio = new DigitalPlatform.MessageClient.Record();
                     biblio.RecPath = strRecPath;
                     biblio.Data = result;
                     biblio.Format = formats[i];
@@ -379,8 +343,8 @@ strError);  // 出错信息大概为 not found。
                     i++;
                 }
 
-                Response(
-                    searchParam.SearchID,
+                ResponseSearch(
+                    searchParam.TaskID,
                     records.Count,  // lHitCount,
                     0, // lStart,
                     records,
@@ -388,7 +352,9 @@ strError);  // 出错信息大概为 not found。
             }
             catch (Exception ex)
             {
-                AddErrorLine("SearchAndResponse() 出现异常: " + ex.Message);
+                AddErrorLine("GetPatronInfo() 出现异常: " + ex.Message);
+                strError = "GetPatronInfo() 异常：" + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
             }
             finally
             {
@@ -396,22 +362,64 @@ strError);  // 出错信息大概为 not found。
             }
 
             this.AddInfoLine("search and response end");
+            return;
+        ERROR1:
+            // 报错
+            ResponseSearch(
+searchParam.TaskID,
+-1,
+0,
+records,
+strError);
+        }
+
+        static void SetValue(Entity entity, EntityInfo info)
+        {
+            if (entity.OldRecord != null)
+            {
+                info.OldRecPath = entity.OldRecord.RecPath;
+                info.OldRecord = entity.OldRecord.Data;
+                info.OldTimestamp = ByteArray.GetTimeStampByteArray(entity.OldRecord.Timestamp);
+            }
+
+            if (entity.NewRecord != null)
+            {
+                info.NewRecPath = entity.NewRecord.RecPath;
+                info.NewRecord = entity.NewRecord.Data;
+                info.NewTimestamp = ByteArray.GetTimeStampByteArray(entity.NewRecord.Timestamp);
+            }
+
+            info.Action = entity.Action;
+            info.RefID = entity.RefID;
+            info.Style = entity.Style;
+        }
+
+        static void SetValue(EntityInfo info, Entity entity)
+        {
+            entity.OldRecord = new DigitalPlatform.MessageClient.Record();
+            {
+                entity.OldRecord.RecPath = info.OldRecPath;
+                entity.OldRecord.Data = info.OldRecord;
+                entity.OldRecord.Timestamp = ByteArray.GetHexTimeStampString(info.OldTimestamp);
+            }
+
+            entity.NewRecord = new DigitalPlatform.MessageClient.Record();
+            {
+                entity.NewRecord.RecPath = info.NewRecPath;
+                entity.NewRecord.Data = info.NewRecord;
+                entity.NewRecord.Timestamp = ByteArray.GetHexTimeStampString(info.NewTimestamp);
+            }
+
+            entity.Action = info.Action;
+            entity.RefID = info.RefID;
+            entity.Style = info.Style;
+            entity.ErrorInfo = info.ErrorInfo;
+            entity.ErrorCode = info.ErrorCode.ToString();
         }
 
         // TODO: 本函数最好放在一个工作线程内执行
         // Form Close 的时候要及时中断工作线程
-        public void SearchAndResponse(
-#if NO
-            string searchID,
-            string dbNameList,
-            string queryWord,
-            string fromList,
-            string matchStyle,
-            string formatList,
-            long maxResults
-#endif
-SearchRequest searchParam
-            )
+        void SearchAndResponse(SearchRequest searchParam)
         {
             if (searchParam.Operation == "getPatronInfo")
             {
@@ -419,74 +427,112 @@ SearchRequest searchParam
                 return;
             }
 
-            IList<BiblioRecord> records = new List<BiblioRecord>();
+            string strError = "";
+            IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
 
-            string strResultSetName = "default";
+            string strResultSetName = searchParam.ResultSetName;
+            if (string.IsNullOrEmpty(strResultSetName) == true)
+                strResultSetName = "default";
+            else
+                strResultSetName = "#" + strResultSetName;  // 如果请求方指定了结果集名，则在 dp2library 中处理为全局结果集名
 
             LibraryChannel channel = GetChannel();
             try
             {
-                string strError = "";
                 string strQueryXml = "";
                 long lRet = 0;
 
-                if (searchParam.Operation == "searchBiblio")
+                if (searchParam.QueryWord == "!getResult")
                 {
-                    lRet = channel.SearchBiblio(null,
-                         searchParam.DbNameList,
-                         searchParam.QueryWord,
-                         (int)searchParam.MaxResults,
-                         searchParam.UseList,
-                         searchParam.MatchStyle,
-                         "zh",
-                         strResultSetName,
-                         "", // strSearchStyle
-                         "", // strOutputStyle
-                         out strQueryXml,
-                         out strError);
-                }
-                else if (searchParam.Operation == "searchPatron")
-                {
-                    lRet = channel.SearchReader(null,
-                        searchParam.DbNameList,
-                        searchParam.QueryWord,
-                        (int)searchParam.MaxResults,
-                        searchParam.UseList,
-                        searchParam.MatchStyle,
-                        "zh",
-                        strResultSetName,
-                        "",
-                        out strError);
-                }
-
-                if (lRet == -1 || lRet == 0)
-                {
-                    if (lRet == 0
-                        || (lRet == -1 && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound))
-                    {
-                        // 没有命中
-                        Response(
-searchParam.SearchID,
-0,
-0,
-records,
-strError);  // 出错信息大概为 not found。
-                        return;
-                    }
-                    Response(
-        searchParam.SearchID,
-        -1,
-        0,
-        records,
-        strError);
-                    return;
+                    lRet = -1;
                 }
                 else
                 {
+                    if (searchParam.Operation == "searchBiblio")
+                    {
+                        lRet = channel.SearchBiblio(null,
+                             searchParam.DbNameList,
+                             searchParam.QueryWord,
+                             (int)searchParam.MaxResults,
+                             searchParam.UseList,
+                             searchParam.MatchStyle,
+                             "zh",
+                             strResultSetName,
+                             "", // strSearchStyle
+                             "", // strOutputStyle
+                             out strQueryXml,
+                             out strError);
+                    }
+                    else if (searchParam.Operation == "searchPatron")
+                    {
+                        lRet = channel.SearchReader(null,
+                            searchParam.DbNameList,
+                            searchParam.QueryWord,
+                            (int)searchParam.MaxResults,
+                            searchParam.UseList,
+                            searchParam.MatchStyle,
+                            "zh",
+                            strResultSetName,
+                            "",
+                            out strError);
+                    }
+                    else
+                    {
+                        lRet = -1;
+                        strError = "无法识别的 Operation 值 '" + searchParam.Operation + "'";
+                    }
+
+                    if (lRet == -1 || lRet == 0)
+                    {
+                        if (lRet == 0
+                            || (lRet == -1 && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound))
+                        {
+                            // 没有命中
+                            ResponseSearch(
+    searchParam.TaskID,
+    0,
+    0,
+    records,
+    strError);  // 出错信息大概为 not found。
+                            return;
+                        }
+                        goto ERROR1;
+                    }
+                }
+
+
+                {
                     long lHitCount = lRet;
 
-                    long lStart = 0;
-                    long lPerCount = Math.Min(50, lHitCount);
+                    if (searchParam.Count == 0)
+                    {
+                        // 返回命中数
+                        ResponseSearch(
+                            searchParam.TaskID,
+                            lHitCount,
+0,
+records,
+"本次没有返回任何记录");
+                        return;
+                    }
+
+                    long lStart = searchParam.Start;
+                    long lPerCount = searchParam.Count; // 本次拟返回的个数
+
+                    if (lHitCount != -1)
+                    {
+                        if (lPerCount == -1)
+                            lPerCount = lHitCount - lStart;
+                        else
+                            lPerCount = Math.Min(lPerCount, lHitCount - lStart);
+
+                        if (lPerCount <= 0)
+                        {
+                            strError = "命中结果总数为 " + lHitCount + "，取结果开始位置为 " + lStart + "，它已超出结果集范围";
+                            goto ERROR1;
+                        }
+                    }
+
                     DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                     // 装入浏览格式
@@ -504,48 +550,39 @@ strError);  // 出错信息大概为 not found。
             out searchresults,
             out strError);
                         if (lRet == -1)
-                        {
-                            // 报错
-                            Response(
-                searchParam.SearchID,
-                -1,
-                0,
-                records,
-                strError);
-                            return;
-                        }
+                            goto ERROR1;
 
                         if (searchresults.Length == 0)
                         {
-                            // 报错
-                            Response(
-                searchParam.SearchID,
-                -1,
-                0,
-                records,
-                "GetSearchResult() searchResult empty");
-                            return;
+                            strError = "GetSearchResult() searchResult empty";
+                            goto ERROR1;
                         }
+
+                        if (lHitCount == -1)
+                            lHitCount = lRet;   // 延迟得到命中总数
 
                         records.Clear();
                         foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                         {
-                            BiblioRecord biblio = new BiblioRecord();
+                            DigitalPlatform.MessageClient.Record biblio = new DigitalPlatform.MessageClient.Record();
                             biblio.RecPath = record.Path;
                             biblio.Data = record.RecordBody.Xml;
                             records.Add(biblio);
                         }
 
-                        Response(
-                            searchParam.SearchID,
+                        ResponseSearch(
+                            searchParam.TaskID,
                             lHitCount,
                             lStart,
                             records,
                             "");
 
                         lStart += searchresults.Length;
-                        // lCount -= searchresults.Length;
-                        if (lStart >= lHitCount || lPerCount <= 0)
+
+                        if (lPerCount != -1)
+                            lPerCount -= searchresults.Length;
+
+                        if (lStart >= lHitCount || (lPerCount <= 0 && lPerCount != -1))
                             break;
                     }
                 }
@@ -553,6 +590,8 @@ strError);  // 出错信息大概为 not found。
             catch (Exception ex)
             {
                 AddErrorLine("SearchAndResponse() 出现异常: " + ex.Message);
+                strError = ex.Message;
+                goto ERROR1;
             }
             finally
             {
@@ -560,12 +599,93 @@ strError);  // 出错信息大概为 not found。
             }
 
             this.AddInfoLine("search and response end");
+            return;
+        ERROR1:
+            // 报错
+            ResponseSearch(
+searchParam.TaskID,
+-1,
+0,
+records,
+strError);
+        }
+
+        // 写入实体库
+        void SetEntity(SetInfoRequest request)
+        {
+            string strError = "";
+            IList<Entity> entities = new List<Entity>();
+
+            LibraryChannel channel = GetChannel();
+            try
+            {
+                List<EntityInfo> input_items = new List<EntityInfo>();
+                foreach (Entity entity in request.Entities)
+                {
+                    EntityInfo info = new EntityInfo();
+                    SetValue(entity, info);
+                    input_items.Add(info);
+                }
+
+                EntityInfo[] output_items = null;
+
+                long lRet = channel.SetEntities(null,
+                    request.BiblioRecPath,
+                    input_items.ToArray(),
+                    out output_items,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                if (output_items != null)
+                {
+                    foreach (EntityInfo info in output_items)
+                    {
+                        Entity entity = new Entity();
+                        SetValue(info, entity);
+                        entities.Add(entity);
+                    }
+                }
+
+                ResponseSetInfo(
+                    request.TaskID,
+                    lRet,
+                    entities,
+                    "");
+            }
+            catch (Exception ex)
+            {
+                AddErrorLine("SetEntity() 出现异常: " + ex.Message);
+                strError = "SetEntity() 异常：" + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                this._channelPool.ReturnChannel(channel);
+            }
+            return;
+        ERROR1:
+            // 报错
+            ResponseSetInfo(
+request.TaskID,
+-1,
+entities,
+strError);
+        }
+
+        void SetInfoAndResponse(SetInfoRequest request)
+        {
+            if (request.Operation == "setEntity")
+            {
+                SetEntity(request);
+                return;
+            }
         }
 
         public override void OnSearchResponseRecieved(string searchID,
             long resultCount,
             long start,
-            IList<BiblioRecord> records,
+            IList<DigitalPlatform.MessageClient.Record> records,
             string errorInfo)
         {
 #if NO
@@ -580,7 +700,7 @@ strError);  // 出错信息大概为 not found。
             if (SearchResponseEvent != null)
             {
                 SearchResponseEventArgs e = new SearchResponseEventArgs();
-                e.SsearchID = searchID;
+                e.TaskID = searchID;
                 e.ResultCount = resultCount;
                 e.Start = start;
                 e.Records = records;
@@ -635,8 +755,8 @@ strError);  // 出错信息大概为 not found。
             Guid.NewGuid().ToString(),   // this.MainForm.ServerUID,
             dlg.ShareBiblio ? "biblio_search" : "");
 #endif
-            Login("",
-                "",
+            Login(this.MainForm.MessageUserName,
+                this.MainForm.MessagePassword,
                 this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
                 this.MainForm.LibraryName,
                 this.ShareBiblio ? "biblio_search" : "");
@@ -666,10 +786,10 @@ strError);  // 出错信息大概为 not found。
     /// </summary>
     public class SearchResponseEventArgs : EventArgs
     {
-        public string SsearchID = "";   // 检索请求的 ID
+        public string TaskID = "";   // 检索请求的 ID
         public long ResultCount = 0;    // 整个结果集中记录个数
         public long Start = 0;  // Records 从整个结果集的何处开始
-        public IList<BiblioRecord> Records = null;  // 命中的书目记录集合
+        public IList<DigitalPlatform.MessageClient.Record> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
     }
 }

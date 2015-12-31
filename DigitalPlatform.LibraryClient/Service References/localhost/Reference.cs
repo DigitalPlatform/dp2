@@ -991,6 +991,179 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ChargingItem", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class ChargingItem : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ActionField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ClientAddressField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string IdField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ItemBarcodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LibraryCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string OperTimeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string OperationField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string OperatorField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string PatronBarcodeField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Action {
+            get {
+                return this.ActionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ActionField, value) != true)) {
+                    this.ActionField = value;
+                    this.RaisePropertyChanged("Action");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ClientAddress {
+            get {
+                return this.ClientAddressField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ClientAddressField, value) != true)) {
+                    this.ClientAddressField = value;
+                    this.RaisePropertyChanged("ClientAddress");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Id {
+            get {
+                return this.IdField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.IdField, value) != true)) {
+                    this.IdField = value;
+                    this.RaisePropertyChanged("Id");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ItemBarcode {
+            get {
+                return this.ItemBarcodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ItemBarcodeField, value) != true)) {
+                    this.ItemBarcodeField = value;
+                    this.RaisePropertyChanged("ItemBarcode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LibraryCode {
+            get {
+                return this.LibraryCodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LibraryCodeField, value) != true)) {
+                    this.LibraryCodeField = value;
+                    this.RaisePropertyChanged("LibraryCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string OperTime {
+            get {
+                return this.OperTimeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.OperTimeField, value) != true)) {
+                    this.OperTimeField = value;
+                    this.RaisePropertyChanged("OperTime");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Operation {
+            get {
+                return this.OperationField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.OperationField, value) != true)) {
+                    this.OperationField = value;
+                    this.RaisePropertyChanged("Operation");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Operator {
+            get {
+                return this.OperatorField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.OperatorField, value) != true)) {
+                    this.OperatorField = value;
+                    this.RaisePropertyChanged("Operator");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string PatronBarcode {
+            get {
+                return this.PatronBarcodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.PatronBarcodeField, value) != true)) {
+                    this.PatronBarcodeField = value;
+                    this.RaisePropertyChanged("PatronBarcode");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Record", Namespace="http://dp2003.com/dp2kernel/")]
     [System.SerializableAttribute()]
     public partial class Record : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -2971,6 +3144,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCharging", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchChargingResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, string patronBarcode, string timeRange, string actions, string order, long start, long count);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCharging", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchChargingResponse")]
+        System.IAsyncResult BeginSearchCharging(string patronBarcode, string timeRange, string actions, string order, long start, long count, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -4028,6 +4209,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchChargingCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public SearchChargingCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ChargingItem[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ChargingItem[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -6481,6 +6688,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onHitCounterCompletedDelegate;
         
+        private BeginOperationDelegate onBeginSearchChargingDelegate;
+        
+        private EndOperationDelegate onEndSearchChargingDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchChargingCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -7033,6 +7246,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<ListFileCompletedEventArgs> ListFileCompleted;
         
         public event System.EventHandler<HitCounterCompletedEventArgs> HitCounterCompleted;
+        
+        public event System.EventHandler<SearchChargingCompletedEventArgs> SearchChargingCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -7902,6 +8117,68 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strAction,
                         strName,
                         strClientAddress}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, string patronBarcode, string timeRange, string actions, string order, long start, long count) {
+            return base.Channel.SearchCharging(out results, patronBarcode, timeRange, actions, order, start, count);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchCharging(string patronBarcode, string timeRange, string actions, string order, long start, long count, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchCharging(patronBarcode, timeRange, actions, order, start, count, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, System.IAsyncResult result) {
+            return base.Channel.EndSearchCharging(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchCharging(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string patronBarcode = ((string)(inValues[0]));
+            string timeRange = ((string)(inValues[1]));
+            string actions = ((string)(inValues[2]));
+            string order = ((string)(inValues[3]));
+            long start = ((long)(inValues[4]));
+            long count = ((long)(inValues[5]));
+            return this.BeginSearchCharging(patronBarcode, timeRange, actions, order, start, count, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchCharging(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.ChargingItem[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ChargingItem[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchCharging(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnSearchChargingCompleted(object state) {
+            if ((this.SearchChargingCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchChargingCompleted(this, new SearchChargingCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchChargingAsync(string patronBarcode, string timeRange, string actions, string order, long start, long count) {
+            this.SearchChargingAsync(patronBarcode, timeRange, actions, order, start, count, null);
+        }
+        
+        public void SearchChargingAsync(string patronBarcode, string timeRange, string actions, string order, long start, long count, object userState) {
+            if ((this.onBeginSearchChargingDelegate == null)) {
+                this.onBeginSearchChargingDelegate = new BeginOperationDelegate(this.OnBeginSearchCharging);
+            }
+            if ((this.onEndSearchChargingDelegate == null)) {
+                this.onEndSearchChargingDelegate = new EndOperationDelegate(this.OnEndSearchCharging);
+            }
+            if ((this.onSearchChargingCompletedDelegate == null)) {
+                this.onSearchChargingCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchChargingCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchChargingDelegate, new object[] {
+                        patronBarcode,
+                        timeRange,
+                        actions,
+                        order,
+                        start,
+                        count}, this.onEndSearchChargingDelegate, this.onSearchChargingCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -12952,6 +13229,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHitCounter(out long Value, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchCharging", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchChargingResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, string patronBarcode, string timeRange, string actions, string order, long start, long count);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchCharging", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchChargingResponse")]
+        System.IAsyncResult BeginSearchCharging(string patronBarcode, string timeRange, string actions, string order, long start, long count, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -14003,6 +14288,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchChargingCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public SearchChargingCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ChargingItem[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ChargingItem[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -16456,6 +16767,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onHitCounterCompletedDelegate;
         
+        private BeginOperationDelegate onBeginSearchChargingDelegate;
+        
+        private EndOperationDelegate onEndSearchChargingDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchChargingCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -17008,6 +17325,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<ListFileCompletedEventArgs1> ListFileCompleted;
         
         public event System.EventHandler<HitCounterCompletedEventArgs1> HitCounterCompleted;
+        
+        public event System.EventHandler<SearchChargingCompletedEventArgs1> SearchChargingCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -17877,6 +18196,68 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strAction,
                         strName,
                         strClientAddress}, this.onEndHitCounterDelegate, this.onHitCounterCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, string patronBarcode, string timeRange, string actions, string order, long start, long count) {
+            return base.Channel.SearchCharging(out results, patronBarcode, timeRange, actions, order, start, count);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchCharging(string patronBarcode, string timeRange, string actions, string order, long start, long count, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchCharging(patronBarcode, timeRange, actions, order, start, count, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItem[] results, System.IAsyncResult result) {
+            return base.Channel.EndSearchCharging(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchCharging(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string patronBarcode = ((string)(inValues[0]));
+            string timeRange = ((string)(inValues[1]));
+            string actions = ((string)(inValues[2]));
+            string order = ((string)(inValues[3]));
+            long start = ((long)(inValues[4]));
+            long count = ((long)(inValues[5]));
+            return this.BeginSearchCharging(patronBarcode, timeRange, actions, order, start, count, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchCharging(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.ChargingItem[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ChargingItem[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchCharging(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnSearchChargingCompleted(object state) {
+            if ((this.SearchChargingCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchChargingCompleted(this, new SearchChargingCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchChargingAsync(string patronBarcode, string timeRange, string actions, string order, long start, long count) {
+            this.SearchChargingAsync(patronBarcode, timeRange, actions, order, start, count, null);
+        }
+        
+        public void SearchChargingAsync(string patronBarcode, string timeRange, string actions, string order, long start, long count, object userState) {
+            if ((this.onBeginSearchChargingDelegate == null)) {
+                this.onBeginSearchChargingDelegate = new BeginOperationDelegate(this.OnBeginSearchCharging);
+            }
+            if ((this.onEndSearchChargingDelegate == null)) {
+                this.onEndSearchChargingDelegate = new EndOperationDelegate(this.OnEndSearchCharging);
+            }
+            if ((this.onSearchChargingCompletedDelegate == null)) {
+                this.onSearchChargingCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchChargingCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchChargingDelegate, new object[] {
+                        patronBarcode,
+                        timeRange,
+                        actions,
+                        order,
+                        start,
+                        count}, this.onEndSearchChargingDelegate, this.onSearchChargingCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {

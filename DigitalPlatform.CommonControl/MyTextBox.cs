@@ -52,12 +52,12 @@ namespace DigitalPlatform.CommonControl
         {
             base.OnKeyDown(e);
 
-            this._strokeCount ++;
+            this._strokeCount++;
         }
 
         void _timer_Tick(object sender, EventArgs e)
         {
-            
+
             if (this.DelayTextChanged != null)
             {
                 if (this._strokeCount > 0)

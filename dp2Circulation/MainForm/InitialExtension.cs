@@ -947,7 +947,6 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-
 #if NO
             if (DetectIE() == false)
             {
@@ -1250,7 +1249,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            // this.BeginInvoke(new Action(CopyGreen));
+            // 第一次复制绿色版本
             Task.Factory.StartNew(() => CopyGreen());
 
             StartPrepareNames(true, true);
@@ -1331,6 +1330,8 @@ MessageBoxDefaultButton.Button1);
             this.PropertyTaskList.BeginThread();
         }
 
+        bool _copyGreenError = false;   // 第一次 CopyGreen() 是否出错
+
         // 复制出一个绿色安装包
         // return:
         //      false   没有启动
@@ -1350,18 +1351,23 @@ MessageBoxDefaultButton.Button1);
             if (PathUtil.IsEqual(strProgramDir, strTargetDir) == true)
                 return false;
 
-            this.DisplayBackgroundText("正在创建绿色安装包 ...\r\n");
+            this.DisplayBackgroundText("正在创建备用绿色安装包 ...\r\n");
 
-            nRet = GreenProgram.CopyGreen(strProgramDir,
+            StringBuilder debugInfo = new StringBuilder();
+            nRet = GreenProgram.CopyGreen(
+                Program.ClientVersion,
+                strProgramDir,
                 this.DataDir,
                 strTargetDir,
+                debugInfo,
                 out strError);
             if (nRet == -1)
             {
                 ShowMessageBox("创建备用绿色安装包时出错: " + strError);
                 this.DisplayBackgroundText(strError + "\r\n");
                 // 发送给 dp2003.com
-                ReportError("dp2circulation 创建备用绿色安装包时出错", strError);
+                ReportError("dp2circulation 创建备用绿色安装包时出错", strError + "\r\n\r\nDebug Info:\r\n" + debugInfo.ToString());
+                _copyGreenError = true;
 #if NO
                 string strText = strError;
                 if (string.IsNullOrEmpty(strText) == true)
@@ -1391,7 +1397,7 @@ MessageBoxDefaultButton.Button1);
                    "内务绿色",
                    Path.Combine(strTargetDir, "dp2circulation.exe"),
                    false);
-                this.DisplayBackgroundText("绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
+                this.DisplayBackgroundText("备用绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
             }
 
             return true;
@@ -1455,7 +1461,7 @@ MessageBoxDefaultButton.Button1);
                         strBodyClass = " class='green' ";
 
                     Global.WriteHtml(m_backgroundForm.WebBrowser,
-                        "<html><head>" + strLink + "</head><body"+strBodyClass+">");
+                        "<html><head>" + strLink + "</head><body" + strBodyClass + ">");
                 }
                 catch (Exception ex)
                 {
@@ -2285,6 +2291,10 @@ Culture=neutral, PublicKeyToken=null
 
                 ClearBackground();
 
+                // 若第一次复制绿色版本失败，则需要再进行一次
+                if (_copyGreenError == true)
+                    Task.Factory.StartNew(() => CopyGreen());
+
                 BeginUpdateClickOnceApplication();    // 自动探测更新 dp2circulation
 
                 BeginUpdateGreenApplication(); // 自动进行绿色更新
@@ -2466,7 +2476,7 @@ Culture=neutral, PublicKeyToken=null
                     if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                     {
                         // 原来的dp2Library不具备GetVersion() API，会走到这里
-                        this.ServerVersion = "0";
+                        this.ServerVersion = "0.0";
                         this.ServerUID = "";
                         strError = "当前 dp2Circulation 版本需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                         return 0;

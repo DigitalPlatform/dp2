@@ -16,8 +16,8 @@ namespace DigitalPlatform.CommonControl
     {
         [Category("Appearance")]
         [DescriptionAttribute("Left Part FontStyle")]
-        [DefaultValue(typeof(FontStyle),"Regular")]
-        public FontStyle LeftFontStyle 
+        [DefaultValue(typeof(FontStyle), "Regular")]
+        public FontStyle LeftFontStyle
         {
             get
             {
@@ -34,7 +34,7 @@ namespace DigitalPlatform.CommonControl
 
         [Category("Appearance")]
         [DescriptionAttribute("Right Part FontStyle")]
-        [DefaultValue(typeof(FontStyle),"Regular")]
+        [DefaultValue(typeof(FontStyle), "Regular")]
         public FontStyle RightFontStyle
         {
             get
@@ -46,7 +46,7 @@ namespace DigitalPlatform.CommonControl
                 this.m_rightFontStyle = value;
             }
         }
-        
+
         FontStyle m_rightFontStyle = FontStyle.Regular;
 
         public bool RemoveRightPartAtTextBox = true;    // 在textbox域中删除文字的右边部分(也就是'\t'右边的部分，包括'\t')

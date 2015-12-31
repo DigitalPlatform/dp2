@@ -54,7 +54,8 @@ ref sessioninfo) == false)
 
     protected void Page_Unload(object sender, EventArgs e)
     {
-        sessioninfo.Channel.Close();
+        if (sessioninfo != null && sessioninfo.Channel != null)
+            sessioninfo.Channel.Close();
     }
 
     // 根据记录数量的多少，少的时候可以立即返回结果，多的时候用线程后台处理，然后可以随时查询状态
@@ -280,7 +281,7 @@ ref sessioninfo) == false)
         if (string.IsNullOrEmpty(strValue) == true)
             goto NOTFOUND;
 
-        return "{"+index.ToString().PadLeft(2, '0')+"}" + strValue;
+        return "{" + index.ToString().PadLeft(2, '0') + "}" + strValue;
     NOTFOUND:
         return strID;
     }

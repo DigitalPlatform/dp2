@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// W3CDTFʱ��ؼ�
+    /// W3CDTF时间控件
     /// </summary>
     public partial class W3cDtfControl : UserControl
     {
@@ -92,7 +92,7 @@ namespace DigitalPlatform.CommonControl
 
         static bool IsAllBlank(string strText)
         {
-            bool bFound = false;    // �Ƿ����˷ǿո��ַ���
+            bool bFound = false;    // 是否发现了非空格字符？
             for (int i = 0; i < strText.Length; i++)
             {
                 if (strText[i] != ' ')
@@ -107,9 +107,9 @@ namespace DigitalPlatform.CommonControl
             return true;
         }
 
-        // ��W3CDTF�ַ�������Ϊ �ܼ���̬�� ʱ�� �� ʱ�� �ַ���
+        // 将W3CDTF字符串解析为 密集形态的 时间 和 时区 字符串
         /*
-W3CDTF�ǻ���ISO8601��ʽ�������¶��ǺϷ��ģ�
+W3CDTF是基于ISO8601格式，即以下都是合法的：
    Year:
       YYYY (eg 1997)
    Year and month:
@@ -136,12 +136,12 @@ second
 
             if (String.IsNullOrEmpty(strW3cDtfString) == true)
             {
-                return 0;   // ���ؿ�ֵ
+                return 0;   // 返回空值
             }
 
             if (strW3cDtfString.Length < 4)
             {
-                strError = "���Ȳ���4�ַ�";
+                strError = "长度不足4字符";
                 return -1;
             }
 
@@ -153,7 +153,7 @@ second
                 nRet = CheckNumberRange(strYear,
                     "0000",
                     "9999",
-                    "��",
+                    "年",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -169,7 +169,7 @@ second
 
             if (strW3cDtfString.Length > 4 && strW3cDtfString.Length < 7)
             {
-                strError = "�·ݲ��ָ�ʽ����";
+                strError = "月份部分格式错误";
                 return -1;
             }
 
@@ -178,7 +178,7 @@ second
             {
                 if (strW3cDtfString[4] != '-')
                 {
-                    strError = "��5�ַ�Ӧ��Ϊ'-'";
+                    strError = "第5字符应当为'-'";
                     return -1;
                 }
 
@@ -187,7 +187,7 @@ second
                 nRet = CheckNumberRange(strMonth,
                     "01",
                     "12",
-                    "��",
+                    "月",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -204,7 +204,7 @@ second
 
             if (strW3cDtfString.Length > 7 && strW3cDtfString.Length < 10)
             {
-                strError = "��ֵ���ָ�ʽ����";
+                strError = "日值部分格式错误";
                 return -1;
             }
 
@@ -214,7 +214,7 @@ second
             {
                 if (strW3cDtfString[7] != '-')
                 {
-                    strError = "��8�ַ�Ӧ��Ϊ'-'";
+                    strError = "第8字符应当为'-'";
                     return -1;
                 }
 
@@ -224,12 +224,12 @@ second
                 nRet = CheckNumberRange(strDay,
                     "01",
                     "31",
-                    "��",
+                    "日",
                     out strError);
                 if (nRet == -1)
                     return -1;
 
-                // TODO: ����Ҫ��ȷ��鵱ʱ�Ǹ��µ�����ֵ��Χ
+                // TODO: 还需要精确检查当时那个月的天数值范围
             }
 
             if (strW3cDtfString.Length == 10)
@@ -240,8 +240,8 @@ second
                 return 0;
             }
 
-            string strTimeSegment = ""; // ʱ���
-            string strTimeZoneSegment = ""; // ʱ����
+            string strTimeSegment = ""; // 时间段
+            string strTimeZoneSegment = ""; // 时区段
 
             nRet = strW3cDtfString.IndexOf("T");
             if (nRet != -1)
@@ -251,11 +251,11 @@ second
                 if (nRet != -1)
                 {
                     strTimeZoneSegment = strTimeSegment.Substring(nRet);
-                    strTimeSegment = strTimeSegment.Substring(0, nRet);   // ȥ����������TimeZone����
+                    strTimeSegment = strTimeSegment.Substring(0, nRet);   // 去掉后面多余的TimeZone部分
                 }
             }
 
-            // ϸ�ڽ���ʱ���
+            // 细节解剖时间段
             if (strTimeSegment != "")
             {
                 string strHour = "";
@@ -273,7 +273,7 @@ second
                 if (nRet == -1)
                     return -1;
 
-                // װ��Ϊ������̬
+                // 装配为紧凑形态
                 strTimeSegment = strHour;
                 strTimeSegment += strMinute;
                 if (String.IsNullOrEmpty(strSecond) == true)
@@ -288,7 +288,7 @@ second
 
             }
 
-            // ϸ�ڽ���ʱ����
+            // 细节解剖时区段
 
             if (strTimeZoneSegment != "")
             {
@@ -304,7 +304,7 @@ second
                 if (nRet == -1)
                     return -1;
 
-                // װ��Ϊ������̬
+                // 装配为紧凑形态
                 strTimeZoneSegment = strEastWest;
                 strTimeZoneSegment += strTzdHour;
                 strTimeZoneSegment += strTzdMinute;
@@ -323,7 +323,7 @@ second
             if (strTimeSegment != ""
                 && strTimeZoneSegment == "")
             {
-                strError = "�߱�ʱ���(T�����Ĳ���)�ͱ���߱�ʱ����(+��-�����Ĳ���)";
+                strError = "具备时间段(T引导的部分)就必须具备时区段(+或-引导的部分)";
                 return -1;
             }
 
@@ -333,8 +333,8 @@ second
         }
 
         // return:
-        //      0   û�д���
-        //      -1  �д���
+        //      0   没有错误
+        //      -1  有错误
         static int CheckNumberRange(string strText,
             string strMin,
             string strMax,
@@ -345,7 +345,7 @@ second
 
             if (strText.IndexOf(" ") != -1)
             {
-                strError = strName + "ֵ '" + strText + "' �в�Ӧ�����ո�";
+                strError = strName + "值 '" + strText + "' 中不应包含空格";
                 return -1;
             }
 
@@ -354,27 +354,27 @@ second
                 char ch = strText[i];
                 if (ch < '0' || ch > '9')
                 {
-                    strError = strName + "ֵ '" +strText+ "' ���Ǵ�����";
+                    strError = strName + "值 '" + strText + "' 不是纯数字";
                     return -1;
                 }
             }
 
             if (String.Compare(strText, strMin) < 0)
             {
-                strError = strName + "ֵ��ӦС�� '" + strMin + "'";
+                strError = strName + "值不应小于 '" + strMin + "'";
                 return -1;
             }
 
             if (String.Compare(strText, strMax) > 0)
             {
-                strError = strName + "ֵ��Ӧ���� '" + strMax + "'";
+                strError = strName + "值不应大于 '" + strMax + "'";
                 return -1;
             }
 
             return 0;
         }
 
-        // ϸ�ڽ���ʱ���
+        // 细节解剖时间段
         // 19:20:30.45
         static int ParseTimeSegment(string strSegment,
             out string strHour,
@@ -394,7 +394,7 @@ second
                 && strSegment.Length != 8
                 && strSegment.Length != 11)
             {
-                strError = "ʱ���ַ��� '" + strSegment + "' ��ʽ����ȷ������ӦΪ5 8 11�ַ�";
+                strError = "时间字符串 '" + strSegment + "' 格式不正确，长度应为5 8 11字符";
                 return -1;
             }
 
@@ -404,11 +404,11 @@ second
                 strHour = strSegment.Substring(0, 2);
                 strMinute = strSegment.Substring(3, 2);
 
-                // �����ֵ��Χ
+                // 检查数值范围
                 nRet = CheckNumberRange(strHour,
                     "00",
                     "23",
-                    "Сʱ",
+                    "小时",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -416,7 +416,7 @@ second
                 nRet = CheckNumberRange(strMinute,
                     "00",
                     "59",
-                    "��",
+                    "分",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -430,7 +430,7 @@ second
                 nRet = CheckNumberRange(strSecond,
                     "00",
                     "59",
-                    "��",
+                    "秒",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -443,7 +443,7 @@ second
                 nRet = CheckNumberRange(strSecondDecimal,
                     "00",
                     "99",
-                    "�ٷ���",
+                    "百分秒",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -454,7 +454,7 @@ second
             return 0;
         }
 
-        // ϸ�ڽ���ʱ����
+        // 细节解剖时区段
         // +01:00
         int ParseTimeZoneSegment(string strSegment,
             out string strEastWest,
@@ -470,7 +470,7 @@ second
 
             if (strSegment.Length != 6)
             {
-                strError = "ʱ���ַ��� '" + strSegment + "' ��ʽ����ȷ������ӦΪ6�ַ�";
+                strError = "时区字符串 '" + strSegment + "' 格式不正确，长度应为6字符";
                 return -1;
             }
 
@@ -478,7 +478,7 @@ second
             if (strEastWest != "+"
                 && strEastWest != "-")
             {
-                strError = "ʱ���ַ��� '" + strSegment + "' ��һ�ַ�'"+strEastWest+"'��ʽ����ȷ��ӦΪ+ -֮һ";
+                strError = "时区字符串 '" + strSegment + "' 第一字符'" + strEastWest + "'格式不正确，应为+ -之一";
                 return -1;
             }
 
@@ -489,12 +489,12 @@ second
                 strHour = strSegment.Substring(0, 2);
                 strMinute = strSegment.Substring(3, 2);
 
-                // TODO: �����ֵ��Χ
-                
+                // TODO: 检查数值范围
+
                 nRet = CheckNumberRange(strHour,
                     "00",
                     strEastWest == "-" ? "12" : "13",
-                    "ʱ�� Сʱ",
+                    "时区 小时",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -502,7 +502,7 @@ second
                 nRet = CheckNumberRange(strMinute,
                     "00",
                     "59",
-                    "ʱ�� ��",
+                    "时区 分",
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -511,14 +511,14 @@ second
             return 0;
         }
 
-        // ��01:00�任0100
+        // 将01:00变换0100
         static string GetPureHourMinte(string strText)
         {
             return strText.Substring(0, 2)
             + strText.Substring(3, 2);
         }
 
-        // ���ܼ���̬��ʱ���ʱ��ֵ �任ΪW3CDTF��̬
+        // 将密集形态的时间和时区值 变换为W3CDTF形态
         int BuildW3cDtfString(string strDateTimeString,
             string strTimeZoneString,
             out string strResult,
@@ -531,23 +531,23 @@ second
             if (String.IsNullOrEmpty(strDateTimeString) == true
                 && String.IsNullOrEmpty(strTimeZoneString) == true)
             {
-                return 0;   // ���ؿ�ֵ
+                return 0;   // 返回空值
             }
-            
-            // ȡ�����
+
+            // 取得年段
             string strYearSegment = "";
             if (strDateTimeString.Length >= 4)
             {
                 strYearSegment = strDateTimeString.Substring(0, 4);
             }
 
-            // ������
+            // 处理年
             string strYear = "";
             if (strYearSegment != "")
             {
                 if (strYearSegment.Length < 4)
                 {
-                    strError = "���Ӧ��Ϊ4λ����";
+                    strError = "年份应当为4位数字";
                     goto ERROR1;
                 }
 
@@ -556,7 +556,7 @@ second
                 nRet = CheckNumberRange(strYear,
                     "0000",
                     "9999",
-                    "��",
+                    "年",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -564,11 +564,11 @@ second
 
             if (strYear == "")
             {
-                strError = "����ҲҪ����4λ���ֵ����ֵ";
+                strError = "至少也要输入4位数字的年份值";
                 goto ERROR1;
             }
 
-            // ȡ���¶�
+            // 取得月段
             string strMonthSegment = "";
             if (strDateTimeString.Length >= 6)
             {
@@ -577,17 +577,17 @@ second
 
             if (strDateTimeString.Length > 4 && strDateTimeString.Length < 6)
             {
-                strError = "�·�ֵӦΪ2λ����";
+                strError = "月份值应为2位数字";
                 goto ERROR1;
             }
 
-            // ������
+            // 处理月
             string strMonth = "";
             if (strMonthSegment != "")
             {
                 if (strMonthSegment.Length < 2)
                 {
-                    strError = "�·�Ӧ��Ϊ2λ����";
+                    strError = "月份应当为2位数字";
                     goto ERROR1;
                 }
 
@@ -595,14 +595,14 @@ second
                 nRet = CheckNumberRange(strMonth,
                     "01",
                     "12",
-                    "�·�",
+                    "月份",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
 
 
-            // ȡ���ն�
+            // 取得日段
             string strDaySegment = "";
             if (strDateTimeString.Length >= 8)
             {
@@ -611,18 +611,18 @@ second
 
             if (strDateTimeString.Length > 6 && strDateTimeString.Length < 8)
             {
-                strError = "��ֵӦΪ2λ����";
+                strError = "日值应为2位数字";
                 goto ERROR1;
             }
 
-            // ������
+            // 处理日
             string strDay = "";
             if (strDaySegment != "")
             {
                 // 8
                 if (strDaySegment.Length < 2)
                 {
-                    strError = "��ֵӦ��Ϊ2λ����";
+                    strError = "日值应当为2位数字";
                     goto ERROR1;
                 }
 
@@ -630,7 +630,7 @@ second
                 nRet = CheckNumberRange(strDay,
                     "01",
                     "31",
-                    "��",
+                    "日",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -642,7 +642,7 @@ second
             {
                 if (strMonth != "" || strDay != "")
                 {
-                    strError = "���������ֵ";
+                    strError = "请输入年份值";
                     goto ERROR1;
                 }
             }
@@ -651,13 +651,13 @@ second
             {
                 if (strDay != "")
                 {
-                    strError = "�������·�ֵ";
+                    strError = "请输入月份值";
                     goto ERROR1;
                 }
             }
 
 
-            // ȡ��ʱ�ֶ�
+            // 取得时分段
             string strHourMinuteSegment = "";
             if (strDateTimeString.Length >= 12)
             {
@@ -666,11 +666,11 @@ second
 
             if (strDateTimeString.Length > 8 && strDateTimeString.Length < 12)
             {
-                strError = "ʱ����ֵӦΪ4λ����";
+                strError = "时、分值应为4位数字";
                 goto ERROR1;
             }
 
-            // ����ʱ����
+            // 处理时、分
             string strHour = "";
             string strMinute = "";
             if (strHourMinuteSegment != ""
@@ -678,7 +678,7 @@ second
             {
                 if (strHourMinuteSegment.Length < 4)
                 {
-                    strError = "ʱ����ֵӦ��Ϊ4λ����";
+                    strError = "时、分值应当为4位数字";
                     goto ERROR1;
                 }
 
@@ -686,7 +686,7 @@ second
                 nRet = CheckNumberRange(strHour,
                     "00",
                     "23",
-                    "Сʱ",
+                    "小时",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -695,7 +695,7 @@ second
                 nRet = CheckNumberRange(strMinute,
                     "00",
                     "59",
-                    "��",
+                    "分",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -704,20 +704,20 @@ second
                 int hour = Convert.ToInt32(strHour);
                 if (hour < 0 || hour > 23)
                 {
-                    strError = "ʱֵӦ����00-23֮��";
+                    strError = "时值应当在00-23之间";
                     goto ERROR1;
                 }
 
                 int minute = Convert.ToInt32(strMinute);
                 if (minute < 0 || minute > 59)
                 {
-                    strError = "��ֵӦ����00-59֮��";
+                    strError = "分值应当在00-59之间";
                     goto ERROR1;
                 }
                  * */
             }
 
-            // ȡ���롢�ٷ����
+            // 取得秒、百分秒段
             string strSecondSegment = "";
             if (strDateTimeString.Length >= 16)
             {
@@ -730,11 +730,11 @@ second
 
             if (strDateTimeString.Length > 12 && strDateTimeString.Length < 14)
             {
-                strError = "��ӦΪ2λ����";
+                strError = "秒应为2位数字";
                 goto ERROR1;
             }
 
-            // �����롢�ٷ���
+            // 处理秒、百分秒
             string strSecond = "";
             string strSecondDecimal = "";
             if (strSecondSegment != ""
@@ -742,7 +742,7 @@ second
             {
                 if (strSecondSegment.Length < 2)
                 {
-                    strError = "��ֵӦ��Ϊ2λ����";
+                    strError = "秒值应当为2位数字";
                     goto ERROR1;
                 }
 
@@ -755,7 +755,7 @@ second
                 {
                     if (strSecondSegment.Length != 4)
                     {
-                        strError = "��ֵӦ��Ϊ4λ����(�����ٷ���ʱ)";
+                        strError = "秒值应当为4位数字(包含百分秒时)";
                         goto ERROR1;
                     }
 
@@ -769,7 +769,7 @@ second
                         nRet = CheckNumberRange(strSecondDecimal,
                             "00",
                             "99",
-                            "�ٷ���",
+                            "百分秒",
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -779,40 +779,40 @@ second
                 /*
                 if (strSecond.IndexOf(" ") != -1)
                 {
-                    strError = "��ֵ�в�Ӧ�������ո��ַ�";
+                    strError = "秒值中不应当包含空格字符";
                     goto ERROR1;
                 }
 
                 int second = Convert.ToInt32(strSecond);
                 if (second < 0 || second > 59)
                 {
-                    strError = "��ֵӦ����00-59֮��";
+                    strError = "秒值应当在00-59之间";
                     goto ERROR1;
                 }
                 */
                 nRet = CheckNumberRange(strSecond,
                     "00",
                     "59",
-                    "��",
+                    "秒",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
             }
 
-            // ȡ��ʱ����
+            // 取得时区段
             string strTimeZoneSegment = "";
             if (String.IsNullOrEmpty(strTimeZoneString) == false)
             {
                 if (strTimeZoneString.Length < 5)
                 {
-                    strError = "ʱ��ӦΪ5λ�ַ�(һ��+/-����λ��4λ����)";
+                    strError = "时区应为5位字符(一个+/-符号位和4位数字)";
                     goto ERROR1;
                 }
                 strTimeZoneSegment = strTimeZoneString;
             }
 
-            // ����ʱ����
+            // 处理时区段
             string strTzdHour = "";
             string strTzdMinute = "";
             string strTzdDirection = "";
@@ -821,14 +821,14 @@ second
             {
                 if (strTimeZoneSegment.Length < 5)
                 {
-                    strError = "ʱ�� ���š�ʱ����ֵӦ��Ϊ5λ�ַ�";
+                    strError = "时区 符号、时、分值应当为5位字符";
                     goto ERROR1;
                 }
 
                 strTzdDirection = strTimeZoneSegment.Substring(0, 1);
                 if (strTzdDirection != "+" && strTzdDirection != "-")
                 {
-                    strError = "ʱ�� ����ֵ Ӧ��Ϊ +/-֮һ";
+                    strError = "时区 符号值 应当为 +/-之一";
                     goto ERROR1;
                 }
 
@@ -836,28 +836,28 @@ second
                 strTzdHour = strTimeZoneSegment.Substring(1, 2);
                 if (strTzdHour.IndexOf(" ") != -1)
                 {
-                    strError = "ʱ�� ʱֵ�в�Ӧ�������ո��ַ�";
+                    strError = "时区 时值中不应当包含空格字符";
                     goto ERROR1;
                 }
 
                 strTzdMinute = strTimeZoneSegment.Substring(3, 2);
                 if (strTzdMinute.IndexOf(" ") != -1)
                 {
-                    strError = "ʱ�� ��ֵ�в�Ӧ�������ո��ַ�";
+                    strError = "时区 分值中不应当包含空格字符";
                     goto ERROR1;
                 }
 
                 int hour = Convert.ToInt32(strTzdHour);
                 if (hour < 0 || hour > 23)
                 {
-                    strError = "ʱ�� ʱֵӦ����00-23֮��";
+                    strError = "时区 时值应当在00-23之间";
                     goto ERROR1;
                 }
 
                 int minute = Convert.ToInt32(strTzdMinute);
                 if (minute < 0 || minute > 59)
                 {
-                    strError = "ʱ�� ��ֵӦ����00-59֮��";
+                    strError = "时区 分值应当在00-59之间";
                     goto ERROR1;
                 }
                  * */
@@ -867,7 +867,7 @@ second
                 nRet = CheckNumberRange(strTzdHour,
                     "00",
                     strTzdDirection == "-" ? "12" : "13",
-                    "ʱ�� Сʱ",
+                    "时区 小时",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -877,18 +877,18 @@ second
                 nRet = CheckNumberRange(strTzdMinute,
                     "00",
                     "59",
-                    "ʱ�� ��",
+                    "时区 分",
                      out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
 
-            // �·ݻ�������ȱʡ
+            // 月份或者日期缺省
             if (strMonth == "" && strDay == "")
             {
                 if (strTimeZoneSegment != "")
                 {
-                    strError = "��û������ʱ����ֵ������£�����������ʱ��ֵ";
+                    strError = "在没有输入时、分值的情况下，不允许输入时区值";
                     goto ERROR1;
                 }
 
@@ -900,7 +900,7 @@ second
             {
                 if (strTimeZoneSegment != "")
                 {
-                    strError = "��û������ʱ����ֵ������£�����������ʱ��ֵ";
+                    strError = "在没有输入时、分值的情况下，不允许输入时区值";
                     goto ERROR1;
                 }
 
@@ -912,7 +912,7 @@ second
                 && strMonth != ""
                 && strDay != "", "");
 
-            // �����ն���ȫ������£���������ֵ���Ч��
+            // 年月日都齐全的情况下，检查日数字的有效性
             try
             {
                 DateTime date = new DateTime(Convert.ToInt32(strYear),
@@ -921,22 +921,22 @@ second
             }
             catch // (Exception ex)
             {
-                strError = strYear + "��" + strMonth + "�²�����" + strDay + "��";
+                strError = strYear + "年" + strMonth + "月不存在" + strDay + "日";
                 goto ERROR1;
             }
- 
+
 
             if (strHourMinuteSegment == "")
             {
                 if (strSecondSegment != "")
                 {
-                    strError = "��������ֵ���ͱ���Ҳ����ʱ����ֵ";
+                    strError = "输入了秒值，就必须也输入时、分值";
                     goto ERROR1;
                 }
 
                 if (strTimeZoneSegment != "")
                 {
-                    strError = "��û������ʱ����ֵ������£�����������ʱ��ֵ";
+                    strError = "在没有输入时、分值的情况下，不允许输入时区值";
                     goto ERROR1;
                 }
 
@@ -984,15 +984,15 @@ second
                 return 0;
             }
 
-            strError = "��ʽ����";
+            strError = "格式错误！";
             goto ERROR1;
-            // return 0;
+        // return 0;
 
         ERROR1:
             return -1;
         }
 
-        // ���ֲ˵�
+        // 出现菜单
         private void label_eastWest_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -1004,14 +1004,14 @@ second
             MenuItem menuItem = null;
 
             //
-            menuItem = new MenuItem("+\t����ʱ��");
+            menuItem = new MenuItem("+\t东部时区");
             menuItem.Click += new System.EventHandler(this.menu_east_Click);
             if (this.label_eastWest.Text == "+")
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("-\t����ʱ��");
+            menuItem = new MenuItem("-\t西部时区");
             menuItem.Click += new System.EventHandler(this.menu_west_Click);
             if (this.label_eastWest.Text == "-")
                 menuItem.Enabled = false;
@@ -1041,93 +1041,93 @@ second
 
         /*
 http://read.newbooks.com.cn/info/180524.html
-(GMT) ����������������ά�ǣ��׿���δ��
-(GMT) �������α�׼ʱ��: ������, ������, �׶�, ��˹��
-(GMT+01:00) �з�����
-(GMT+01:00) ��³�������籾���������������
-(GMT+01:00) �������ѣ�˹�������ɳ�������ղ�
-(GMT+01:00) ���������£�������˹������������˹��¬�������ǣ�������
-(GMT+01:00) ��ķ˹�ص������֣������ᣬ������˹�¸��Ħ��άҲ��
-(GMT+02:00) �����ף�����������
-(GMT+02:00) ����
-(GMT+02:00) ����
-(GMT+02:00) ��˹��
-(GMT+02:00) �µúͿ�
-(GMT+02:00) Ү·����
-(GMT+02:00) ��³��
-(GMT+02:00) �ն���������������ӣ������ǣ����֣�ά��Ŧ˹
-(GMT+02:00) �ŵ䣬������˹�أ���˹̹����
-(GMT+03:00) ���ޱ�
-(GMT+03:00) �͸��
-(GMT+03:00) �����أ����ŵ�
-(GMT+03:00) �ڱ���˹
-(GMT+03:00) Ī˹�ƣ�ʥ�˵ñ�, �����Ӹ���
-(GMT+03:30) �º���
-(GMT+04:00) ������
-(GMT+04:00) �Ϳ�
-(GMT+04:00) �������ȣ���˹����
-(GMT+04:00) �߼�����׼ʱ��
-(GMT+04:30) ������
-(GMT+05:00) ��˹�����������棬��ʲ��
-(GMT+05:00) Ҷ�����ձ�
-(GMT+05:30) ˹����ǻ���������
-(GMT+05:30) ������˹���Ӷ����������µ���
-(GMT+05:45) �ӵ�����
-(GMT+06:00) ����ľͼ������������
-(GMT+06:00) ��˹���ɣ��￨
-(GMT+06:30) ����
-(GMT+07:00) ����˹ŵ�Ƕ�˹��
-(GMT+07:00) ���ȣ����ڣ��żӴ�
-(GMT+08:00) ������Ŀˣ�������ͼ
-(GMT+08:00) ���������죬����ر�����������³ľ��
-(GMT+08:00) ̨��
-(GMT+08:00) ��¡�£��¼���
-(GMT+08:00) ��˹
-(GMT+09:00) ���࣬���ϣ�����
-(GMT+09:00) ����
-(GMT+09:00) �ſ�Ŀ�
-(GMT+09:30) �����
-(GMT+09:30) ��������
-(GMT+10:00) �ص���Ī���ȱȸ�
-(GMT+10:00) ��������ī������Ϥ��
-(GMT+10:00) ����˹��
-(GMT+10:00) ��������˹�п�
-(GMT+10:00) ������
-(GMT+11:00) ���ӵ���������Ⱥ�����¿��������
-(GMT+12:00) �¿����������
-(GMT+12:00) 쳼ã�����Ӱ뵺�����ܶ�Ⱥ��
-(GMT+13:00) Ŭ�Ⱒ�巨
-(GMT-01:00) ���ٶ�Ⱥ��
-(GMT-01:00) ��ý�Ⱥ��
-(GMT-02:00) �д�����
-(GMT-03:00) ��������
-(GMT-03:00) ����ŵ˹����˹�����ζ�
-(GMT-03:00) ������
-(GMT-03:00) �ɵ�ά����
-(GMT-03:30) Ŧ����
-(GMT-04:00) ʥ���Ǹ�
-(GMT-04:00) ������ʱ��(���ô�)
-(GMT-04:00) ����˹
-(GMT-04:00) ���˹
-(GMT-04:30) ������˹
-(GMT-05:00) ����ʱ��(�����ͼ��ô�)
-(GMT-05:00) ӡ�ذ�����(����)
-(GMT-05:00) �������������²��ʿ�
-(GMT-06:00) ������
-(GMT-06:00) �в�ʱ��(�����ͼ��ô�)
-(GMT-06:00) �ϴ���������ī����ǣ�������(��)
-(GMT-06:00) �ϴ���������ī����ǣ�������(��)
-(GMT-06:00) ��˹������
-(GMT-07:00) ����ɣ��
-(GMT-07:00) �����ߣ�����˹����������(��)
-(GMT-07:00) �����ߣ�����˹����������(��)
-(GMT-07:00) ɽ��ʱ��(�����ͼ��ô�)
-(GMT-08:00) ̫ƽ��ʱ��(�����ͼ��ô�)
-(GMT-08:00) �ٻ��ɣ��¼�����������
-(GMT-09:00) ����˹��
-(GMT-10:00) ������
-(GMT-11:00) ��;������Ħ��Ⱥ��
-(GMT-12:00) �ս�����
+(GMT) 卡萨布兰卡，蒙罗维亚，雷克雅未克
+(GMT) 格林威治标准时间: 都柏林, 爱丁堡, 伦敦, 里斯本
+(GMT+01:00) 中非西部
+(GMT+01:00) 布鲁塞尔，哥本哈根，马德里，巴黎
+(GMT+01:00) 萨拉热窝，斯科普里，华沙，萨格勒布
+(GMT+01:00) 贝尔格莱德，布拉迪斯拉发，布达佩斯，卢布尔雅那，布拉格
+(GMT+01:00) 阿姆斯特丹，柏林，伯尔尼，罗马，斯德哥尔摩，维也纳
+(GMT+02:00) 哈拉雷，比勒陀利亚
+(GMT+02:00) 安曼
+(GMT+02:00) 开罗
+(GMT+02:00) 明斯克
+(GMT+02:00) 温得和克
+(GMT+02:00) 耶路撒冷
+(GMT+02:00) 贝鲁特
+(GMT+02:00) 赫尔辛基，基辅，里加，索非亚，塔林，维尔纽斯
+(GMT+02:00) 雅典，布加勒斯特，伊斯坦布尔
+(GMT+03:00) 内罗毕
+(GMT+03:00) 巴格达
+(GMT+03:00) 科威特，利雅得
+(GMT+03:00) 第比利斯
+(GMT+03:00) 莫斯科，圣彼得堡, 伏尔加格勒
+(GMT+03:30) 德黑兰
+(GMT+04:00) 埃里温
+(GMT+04:00) 巴库
+(GMT+04:00) 阿布扎比，马斯喀特
+(GMT+04:00) 高加索标准时间
+(GMT+04:30) 喀布尔
+(GMT+05:00) 伊斯兰堡，卡拉奇，塔什干
+(GMT+05:00) 叶卡捷琳堡
+(GMT+05:30) 斯里哈亚华登尼普拉
+(GMT+05:30) 马德拉斯，加尔各答，孟买，新德里
+(GMT+05:45) 加德满都
+(GMT+06:00) 阿拉木图，新西伯利亚
+(GMT+06:00) 阿斯塔纳，达卡
+(GMT+06:30) 仰光
+(GMT+07:00) 克拉斯诺亚尔斯克
+(GMT+07:00) 曼谷，河内，雅加达
+(GMT+08:00) 伊尔库茨克，乌兰巴图
+(GMT+08:00) 北京，重庆，香港特别行政区，乌鲁木齐
+(GMT+08:00) 台北
+(GMT+08:00) 吉隆坡，新加坡
+(GMT+08:00) 珀斯
+(GMT+09:00) 大坂，札幌，东京
+(GMT+09:00) 汉城
+(GMT+09:00) 雅库茨克
+(GMT+09:30) 达尔文
+(GMT+09:30) 阿德莱德
+(GMT+10:00) 关岛，莫尔兹比港
+(GMT+10:00) 堪培拉，墨尔本，悉尼
+(GMT+10:00) 布里斯班
+(GMT+10:00) 符拉迪沃斯托克
+(GMT+10:00) 霍巴特
+(GMT+11:00) 马加丹，索罗门群岛，新喀里多尼亚
+(GMT+12:00) 奥克兰，惠灵顿
+(GMT+12:00) 斐济，堪察加半岛，马绍尔群岛
+(GMT+13:00) 努库阿洛法
+(GMT-01:00) 亚速尔群岛
+(GMT-01:00) 佛得角群岛
+(GMT-02:00) 中大西洋
+(GMT-03:00) 巴西利亚
+(GMT-03:00) 布宜诺斯艾利斯，乔治敦
+(GMT-03:00) 格陵兰
+(GMT-03:00) 蒙得维的亚
+(GMT-03:30) 纽芬兰
+(GMT-04:00) 圣地亚哥
+(GMT-04:00) 大西洋时间(加拿大)
+(GMT-04:00) 拉巴斯
+(GMT-04:00) 马瑙斯
+(GMT-04:30) 加拉加斯
+(GMT-05:00) 东部时间(美国和加拿大)
+(GMT-05:00) 印地安那州(东部)
+(GMT-05:00) 波哥大，利马，里奥布朗库
+(GMT-06:00) 中美洲
+(GMT-06:00) 中部时间(美国和加拿大)
+(GMT-06:00) 瓜达拉哈拉，墨西哥城，蒙特雷(新)
+(GMT-06:00) 瓜达拉哈拉，墨西哥城，蒙特雷(旧)
+(GMT-06:00) 萨斯喀彻温
+(GMT-07:00) 亚利桑那
+(GMT-07:00) 奇瓦瓦，拉巴斯，马扎特兰(新)
+(GMT-07:00) 奇瓦瓦，拉巴斯，马萨特兰(旧)
+(GMT-07:00) 山地时间(美国和加拿大)
+(GMT-08:00) 太平洋时间(美国和加拿大)
+(GMT-08:00) 蒂华纳，下加利福尼亚州
+(GMT-09:00) 阿拉斯加
+(GMT-10:00) 夏威夷
+(GMT-11:00) 中途岛，萨摩亚群岛
+(GMT-12:00) 日界线西
  
          * */
 

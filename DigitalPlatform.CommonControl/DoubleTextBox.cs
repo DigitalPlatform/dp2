@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -120,8 +120,8 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // 根据两个值是否相同，设置TextBox是否可见
-        // 两个值相同的时候，TextBox不可见；不同的时候，TextBox可见
+        // 鏍规嵁涓や釜鍊兼槸鍚︾浉鍚岋紝璁剧疆TextBox鏄惁鍙
+        // 涓や釜鍊肩浉鍚岀殑鏃跺�欙紝TextBox涓嶅彲瑙侊紱涓嶅悓鐨勬椂鍊欙紝TextBox鍙
         void SetVisibleState()
         {
             if (this.TextBox.Text != this.SecondTextBox.Text)
@@ -129,7 +129,7 @@ namespace DigitalPlatform.CommonControl
                 this.SecondTextBox.Visible = true;
                 //this.Height = 28 * 2;
                 this.SecondTextBox.Location = new Point(this.SecondTextBox.Location.X,
-                    this.TextBox.Height + 2);   // 没有这句话以前，SecondTextBox可能会靠下，看不到的位置
+                    this.TextBox.Height + 2);   // 娌℃湁杩欏彞璇濅互鍓嶏紝SecondTextBox鍙兘浼氶潬涓嬶紝鐪嬩笉鍒扮殑浣嶇疆
             }
             else
             {

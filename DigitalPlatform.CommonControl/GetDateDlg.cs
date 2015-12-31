@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace DigitalPlatform.CommonControl
 {
-    // ·þÎñÓÚDateControl
+    // æœåŠ¡äºŽDateControl
     public partial class GetDateDlg : Form
     {
         public DateTime DateTime = new DateTime((long)0);
@@ -30,11 +30,11 @@ namespace DigitalPlatform.CommonControl
                 + SystemInformation.CaptionHeight
                 + SystemInformation.Border3DSize.Height * 2
                 + 4);
-            
+
             this.Size = size;
             // this.Location = this.StartLocation;
 
-            // µ÷Õûµ½¿É¼û·¶Î§
+            // è°ƒæ•´åˆ°å¯è§èŒƒå›´
             if (this.Location.Y + this.Size.Height > SystemInformation.WorkingArea.Height)
             {
                 this.Location = new Point(this.Location.X,

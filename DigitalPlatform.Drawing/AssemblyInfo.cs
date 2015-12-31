@@ -1,58 +1,36 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-//
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-//
-[assembly: AssemblyTitle("")]
+// 有关程序集的常规信息通过以下
+// 特性集控制。更改这些特性值可修改
+// 与程序集关联的信息。
+[assembly: AssemblyTitle("DigitalPlatform.Drawing")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyProduct("DigitalPlatform.Drawing")]
+[assembly: AssemblyCopyright("Copyright © 2015")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]		
+[assembly: AssemblyCulture("")]
 
-//
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Revision and Build Numbers 
-// by using the '*' as shown below:
+// 将 ComVisible 设置为 false 使此程序集中的类型
+// 对 COM 组件不可见。  如果需要从 COM 访问此程序集中的类型，
+// 则将该类型上的 ComVisible 特性设置为 true。
+[assembly: ComVisible(false)]
 
-[assembly: AssemblyVersion("2.0.*")]
+// 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
+[assembly: Guid("7CCF1B70-9B4A-4623-8F8F-D7B8CADB5051")]
 
+// 程序集的版本信息由下面四个值组成: 
 //
-// In order to sign your assembly you must specify a key to use. Refer to the 
-// Microsoft .NET Framework documentation for more information on assembly signing.
+//      主版本
+//      次版本 
+//      生成号
+//      修订号
 //
-// Use the attributes below to control which key is used for signing. 
-//
-// Notes: 
-//   (*) If no key is specified, the assembly is not signed.
-//   (*) KeyName refers to a key that has been installed in the Crypto Service
-//       Provider (CSP) on your machine. KeyFile refers to a file which contains
-//       a key.
-//   (*) If the KeyFile and the KeyName values are both specified, the 
-//       following processing occurs:
-//       (1) If the KeyName can be found in the CSP, that key is used.
-//       (2) If the KeyName does not exist and the KeyFile does exist, the key 
-//           in the KeyFile is installed into the CSP and used.
-//   (*) In order to create a KeyFile, you can use the sn.exe (Strong Name) utility.
-//       When specifying the KeyFile, the location of the KeyFile should be
-//       relative to the project output directory which is
-//       %Project Directory%\obj\<configuration>. For example, if your KeyFile is
-//       located in the project directory, you would specify the AssemblyKeyFile 
-//       attribute as [assembly: AssemblyKeyFile("..\\..\\mykey.snk")]
-//   (*) Delay Signing is an advanced option - see the Microsoft .NET Framework
-//       documentation for more information on this.
-//
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile("")]
-[assembly: AssemblyKeyName("")]
+// 可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值，
+// 方法是按如下所示使用“*”: 
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

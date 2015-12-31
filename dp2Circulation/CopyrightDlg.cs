@@ -199,9 +199,10 @@ namespace dp2Circulation
             Assembly myAssembly = Assembly.GetAssembly(this.GetType());
             AssemblyName name = myAssembly.GetName();
 
-            textBox_environment.Text = "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
+            textBox_environment.Text = "版本和环境:"
                 + "\r\n本软件: "+name.Name+" " + name.Version.ToString()    // .FullName
                 + "\r\n当前连接的 dp2Library (位于 " + this.MainForm.LibraryServerUrl + "): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
+                + "\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
                 + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress())
                 + "\r\n是否安装 KB2468871: " + Global.IsKbInstalled("KB2468871")
                 + "\r\n是否 ClickOnce 安装: " + ApplicationDeployment.IsNetworkDeployed;

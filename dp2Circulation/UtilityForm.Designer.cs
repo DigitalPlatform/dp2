@@ -102,6 +102,7 @@
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_worToIso_worFilename = new System.Windows.Forms.TextBox();
             this.button_worToIso_findFileName = new System.Windows.Forms.Button();
+            this.toolStripButton_isbn_removeHyphen = new System.Windows.Forms.ToolStripButton();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -458,7 +459,7 @@
             this.textBox_currency_target.Multiline = true;
             this.textBox_currency_target.Name = "textBox_currency_target";
             this.textBox_currency_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_target.Size = new System.Drawing.Size(190, 303);
+            this.textBox_currency_target.Size = new System.Drawing.Size(186, 303);
             this.textBox_currency_target.TabIndex = 2;
             // 
             // tabPage_textLines
@@ -555,7 +556,7 @@
             this.textBox_textLines_source2.Multiline = true;
             this.textBox_textLines_source2.Name = "textBox_textLines_source2";
             this.textBox_textLines_source2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source2.Size = new System.Drawing.Size(211, 145);
+            this.textBox_textLines_source2.Size = new System.Drawing.Size(207, 145);
             this.textBox_textLines_source2.TabIndex = 2;
             // 
             // tableLayoutPanel_textLines_down
@@ -665,7 +666,8 @@
             this.toolStripSeparator1,
             this.toolStripButton_isbn_to13,
             this.toolStripSeparator2,
-            this.toolStripButton_isbn_hyphen});
+            this.toolStripButton_isbn_hyphen,
+            this.toolStripButton_isbn_removeHyphen});
             this.toolStrip_isbn.Location = new System.Drawing.Point(0, 308);
             this.toolStrip_isbn.Name = "toolStrip_isbn";
             this.toolStrip_isbn.Size = new System.Drawing.Size(477, 25);
@@ -711,6 +713,7 @@
             this.toolStripButton_isbn_hyphen.Name = "toolStripButton_isbn_hyphen";
             this.toolStripButton_isbn_hyphen.Size = new System.Drawing.Size(36, 22);
             this.toolStripButton_isbn_hyphen.Text = "横杠";
+            this.toolStripButton_isbn_hyphen.Visible = false;
             // 
             // label9
             // 
@@ -969,6 +972,16 @@
             this.button_worToIso_findFileName.Text = "...";
             this.button_worToIso_findFileName.Click += new System.EventHandler(this.button_worToIso_findWorFileName_Click);
             // 
+            // toolStripButton_isbn_removeHyphen
+            // 
+            this.toolStripButton_isbn_removeHyphen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_isbn_removeHyphen.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_isbn_removeHyphen.Image")));
+            this.toolStripButton_isbn_removeHyphen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_isbn_removeHyphen.Name = "toolStripButton_isbn_removeHyphen";
+            this.toolStripButton_isbn_removeHyphen.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_isbn_removeHyphen.Text = "去掉横杠";
+            this.toolStripButton_isbn_removeHyphen.Click += new System.EventHandler(this.toolStripButton_isbn_removeHyphen_Click);
+            // 
             // UtilityForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1100,5 +1113,6 @@
         private System.Windows.Forms.ComboBox comboBox_worToIso_encoding;
         private System.Windows.Forms.TextBox textBox_worToIso_preview;
         private System.Windows.Forms.Button button_worToIso_convert;
+        private System.Windows.Forms.ToolStripButton toolStripButton_isbn_removeHyphen;
     }
 }

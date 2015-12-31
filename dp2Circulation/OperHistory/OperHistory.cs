@@ -286,7 +286,7 @@ namespace dp2Circulation
 
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
             ScriptManager.CfgFilePath =
-                this.MainForm.DataDir + "\\charging_print_projects.xml";
+                Path.Combine(this.MainForm.DataDir, "charging_print_projects.xml");
             ScriptManager.DataDir = this.MainForm.DataDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -303,7 +303,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "load script manager error: " + ex.Message;
+                strError = "ScriptManager.Load() 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -693,7 +693,7 @@ namespace dp2Circulation
         // 工作线程每一轮循环的实质性工作
         public override void Worker()
         {
-            this.MainForm.FixedPageAnimation(this.MainForm.PageOperHistory);
+            this.MainForm.FixedPanelAnimation(this.MainForm.PageOperHistory);
 
             try
             {

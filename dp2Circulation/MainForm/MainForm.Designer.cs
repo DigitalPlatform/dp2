@@ -202,14 +202,15 @@ namespace dp2Circulation
             this.tabPage_camera = new System.Windows.Forms.TabPage();
             this.tabPage_accept = new System.Windows.Forms.TabPage();
             this.tabPage_share = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel_messageHub = new System.Windows.Forms.TableLayoutPanel();
+            this.webBrowser_messageHub = new System.Windows.Forms.WebBrowser();
             this.toolStrip_messageHub = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_messageHub_userManage = new System.Windows.Forms.ToolStripButton();
-            this.webBrowser_messageHub = new System.Windows.Forms.WebBrowser();
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.tableLayoutPanel_messageHub = new System.Windows.Forms.TableLayoutPanel();
+            this.toolStripButton_messageHub_relogin = new System.Windows.Forms.ToolStripButton();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -218,9 +219,9 @@ namespace dp2Circulation
             this.contextMenuStrip_fixedPanel.SuspendLayout();
             this.tabPage_history.SuspendLayout();
             this.tabPage_share.SuspendLayout();
+            this.tableLayoutPanel_messageHub.SuspendLayout();
             this.toolStrip_messageHub.SuspendLayout();
             this.toolStrip_panelFixed.SuspendLayout();
-            this.tableLayoutPanel_messageHub.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip_main
@@ -1648,11 +1649,37 @@ namespace dp2Circulation
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
             // 
+            // tableLayoutPanel_messageHub
+            // 
+            this.tableLayoutPanel_messageHub.ColumnCount = 1;
+            this.tableLayoutPanel_messageHub.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_messageHub.Controls.Add(this.webBrowser_messageHub, 0, 0);
+            this.tableLayoutPanel_messageHub.Controls.Add(this.toolStrip_messageHub, 0, 1);
+            this.tableLayoutPanel_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_messageHub.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_messageHub.Name = "tableLayoutPanel_messageHub";
+            this.tableLayoutPanel_messageHub.RowCount = 3;
+            this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
+            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(199, 283);
+            this.tableLayoutPanel_messageHub.TabIndex = 2;
+            // 
+            // webBrowser_messageHub
+            // 
+            this.webBrowser_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser_messageHub.Location = new System.Drawing.Point(3, 3);
+            this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_messageHub.Name = "webBrowser_messageHub";
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(193, 252);
+            this.webBrowser_messageHub.TabIndex = 0;
+            // 
             // toolStrip_messageHub
             // 
             this.toolStrip_messageHub.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_messageHub.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_messageHub_userManage});
+            this.toolStripButton_messageHub_userManage,
+            this.toolStripButton_messageHub_relogin});
             this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 258);
             this.toolStrip_messageHub.Name = "toolStrip_messageHub";
             this.toolStrip_messageHub.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
@@ -1669,15 +1696,6 @@ namespace dp2Circulation
             this.toolStripButton_messageHub_userManage.Size = new System.Drawing.Size(60, 22);
             this.toolStripButton_messageHub_userManage.Text = "用户管理";
             this.toolStripButton_messageHub_userManage.Click += new System.EventHandler(this.toolStripButton_messageHub_userManage_Click);
-            // 
-            // webBrowser_messageHub
-            // 
-            this.webBrowser_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser_messageHub.Location = new System.Drawing.Point(3, 3);
-            this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(193, 252);
-            this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_panelFixed
             // 
@@ -1711,21 +1729,15 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // tableLayoutPanel_messageHub
+            // toolStripButton_messageHub_relogin
             // 
-            this.tableLayoutPanel_messageHub.ColumnCount = 1;
-            this.tableLayoutPanel_messageHub.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_messageHub.Controls.Add(this.webBrowser_messageHub, 0, 0);
-            this.tableLayoutPanel_messageHub.Controls.Add(this.toolStrip_messageHub, 0, 1);
-            this.tableLayoutPanel_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_messageHub.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_messageHub.Name = "tableLayoutPanel_messageHub";
-            this.tableLayoutPanel_messageHub.RowCount = 3;
-            this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
-            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(199, 283);
-            this.tableLayoutPanel_messageHub.TabIndex = 2;
+            this.toolStripButton_messageHub_relogin.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_messageHub_relogin.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_messageHub_relogin.Image")));
+            this.toolStripButton_messageHub_relogin.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_messageHub_relogin.Name = "toolStripButton_messageHub_relogin";
+            this.toolStripButton_messageHub_relogin.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_messageHub_relogin.Text = "重新登录";
+            this.toolStripButton_messageHub_relogin.Click += new System.EventHandler(this.toolStripButton_messageHub_relogin_Click);
             // 
             // MainForm
             // 
@@ -1761,12 +1773,12 @@ namespace dp2Circulation
             this.contextMenuStrip_fixedPanel.ResumeLayout(false);
             this.tabPage_history.ResumeLayout(false);
             this.tabPage_share.ResumeLayout(false);
+            this.tableLayoutPanel_messageHub.ResumeLayout(false);
+            this.tableLayoutPanel_messageHub.PerformLayout();
             this.toolStrip_messageHub.ResumeLayout(false);
             this.toolStrip_messageHub.PerformLayout();
             this.toolStrip_panelFixed.ResumeLayout(false);
             this.toolStrip_panelFixed.PerformLayout();
-            this.tableLayoutPanel_messageHub.ResumeLayout(false);
-            this.tableLayoutPanel_messageHub.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1954,6 +1966,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStrip toolStrip_messageHub;
         private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_userManage;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_messageHub;
+        private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_relogin;
     }
 }
 

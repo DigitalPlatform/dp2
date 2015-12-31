@@ -13,6 +13,7 @@ using System.Globalization;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2Circulation
 {
@@ -1250,5 +1251,72 @@ namespace dp2Circulation
             // valueTextChanged(sender, e);
         }
 
+        // 检查各个字段内容是否正确
+        // return:
+        //      -1  有错
+        //      0   正确
+        public int VerifyFields(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strRange = this.Range;
+            string strOrderTime = this.OrderTime;
+
+            if (string.IsNullOrEmpty(strRange) == false)
+            {
+                // 检查出版时间范围字符串是否合法
+                // 如果使用单个出版时间来调用本函数，也是可以的
+                // return:
+                //      -1  出错
+                //      0   正确
+                nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            if (string.IsNullOrEmpty(strOrderTime) == false)
+            {
+                try
+                {
+                    DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strOrderTime);
+                    if (time.Year == 1753)
+                    {
+                        strError = "订购时间字符串 '" + strOrderTime + "' 这是一个不太可能的时间";
+                        return -1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "订购时间字符串 '" + strOrderTime + "' 格式错误: " + ex.Message;
+                    return -1;
+                }
+            }
+
+            // TODO: 验证馆藏分配字符串
+
+            return 0;
+        }
+
+        private void dateTimePicker_orderTime_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("清空(&C)");
+            menuItem.Click += new System.EventHandler(this.menu_clearOrderTime_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            contextMenu.Show(this.dateTimePicker_orderTime, new Point(e.X, e.Y));
+        }
+
+        void menu_clearOrderTime_Click(object sender, EventArgs e)
+        {
+            this.dateTimePicker_orderTime.Value = this.dateTimePicker_orderTime.MinDate;
+        }
     }
 }

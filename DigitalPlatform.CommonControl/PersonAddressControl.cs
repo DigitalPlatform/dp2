@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -16,24 +16,24 @@ namespace DigitalPlatform.CommonControl
 {
     public partial class PersonAddressControl : UserControl
     {
-        public string DbName = "";  // Êı¾İ¿âÃû¡£ÓÃÓÚ»ñÈ¡valueTableÖµÊ±×÷ÎªÏßË÷
+        public string DbName = "";  // æ•°æ®åº“åã€‚ç”¨äºè·å–valueTableå€¼æ—¶ä½œä¸ºçº¿ç´¢
 
         XmlDocument RecordDom = null;
 
         bool m_bChanged = false;
 
-        bool m_bInInitial = true;   // ÊÇ·ñÕıÔÚ³õÊ¼»¯¹ı³ÌÖ®ÖĞ
+        bool m_bInInitial = true;   // æ˜¯å¦æ­£åœ¨åˆå§‹åŒ–è¿‡ç¨‹ä¹‹ä¸­
 
-        Color ColorChanged = Color.Yellow; // ±íÊ¾ÄÚÈİ¸Ä±ä¹ıµÄÑÕÉ«
-        Color ColorDifference = Color.Blue; // ±íÊ¾ÄÚÈİÓĞ²îÒìµÄÑÕÉ«
+        Color ColorChanged = Color.Yellow; // è¡¨ç¤ºå†…å®¹æ”¹å˜è¿‡çš„é¢œè‰²
+        Color ColorDifference = Color.Blue; // è¡¨ç¤ºå†…å®¹æœ‰å·®å¼‚çš„é¢œè‰²
 
         /// <summary>
-        /// ÄÚÈİ·¢Éú¸Ä±ä
+        /// å†…å®¹å‘ç”Ÿæ”¹å˜
         /// </summary>
         public event ContentChangedEventHandler ContentChanged = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
@@ -47,7 +47,7 @@ namespace DigitalPlatform.CommonControl
             InitializeComponent();
         }
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
         public string OldRecord = "";
         // public byte[] Timestamp = null;
@@ -172,10 +172,10 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        #endregion  // Êı¾İ³ÉÔ±
+        #endregion  // æ•°æ®æˆå‘˜
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -191,7 +191,7 @@ namespace DigitalPlatform.CommonControl
                 if (this.m_bChanged == false)
                     this.ResetColor();
 
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (bOldValue != value && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
@@ -215,11 +215,11 @@ namespace DigitalPlatform.CommonControl
         }
 
         /// <summary>
-        /// ÉèÖÃÊı¾İ
+        /// è®¾ç½®æ•°æ®
         /// </summary>
-        /// <param name="strXml">µØÖ· XML</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">åœ°å€ XML</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int SetData(string strXml,
             out string strError)
         {
@@ -234,7 +234,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í" + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™" + ex.Message;
                 return -1;
             }
 
@@ -327,11 +327,11 @@ namespace DigitalPlatform.CommonControl
         }
 
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="strXml">·µ»Ø¹¹ÔìºÃµÄµØÖ· XML</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">è¿”å›æ„é€ å¥½çš„åœ°å€ XML</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int GetData(
             out string strXml,
             out string strError)
@@ -363,7 +363,7 @@ namespace DigitalPlatform.CommonControl
         public void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
-            this.label_zipcode_color.BackColor = color;    // ºÍ±³¾°Ò»ÖÂ
+            this.label_zipcode_color.BackColor = color;    // å’ŒèƒŒæ™¯ä¸€è‡´
             this.label_address_color.BackColor = color;
             this.label_name_color.BackColor = color;
             this.label_department_color.BackColor = color;
@@ -393,14 +393,14 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
-                Debug.Assert(false, "Î´´¦ÀíµÄÀàĞÍ " + sender.GetType().ToString());
+                Debug.Assert(false, "æœªå¤„ç†çš„ç±»å‹ " + sender.GetType().ToString());
                 return;
             }
 
             int nRet = strControlName.IndexOf("_");
             if (nRet == -1)
             {
-                Debug.Assert(false, "textboxÃû×ÖÖĞÃ»ÓĞÏÂ»®Ïß");
+                Debug.Assert(false, "textboxåå­—ä¸­æ²¡æœ‰ä¸‹åˆ’çº¿");
                 return;
             }
 
@@ -409,7 +409,7 @@ namespace DigitalPlatform.CommonControl
             Label label = (Label)this.tableLayoutPanel_main.Controls[strLabelName];
             if (label == null)
             {
-                Debug.Assert(false, "Ã»ÓĞÕÒµ½Ãû×ÖÎª '" + strLabelName + "' µÄLabel¿Ø¼ş");
+                Debug.Assert(false, "æ²¡æœ‰æ‰¾åˆ°åå­—ä¸º '" + strLabelName + "' çš„Labelæ§ä»¶");
                 return;
             }
 
@@ -417,9 +417,9 @@ namespace DigitalPlatform.CommonControl
         }
 
         /*
-        // ´ÓÂ·¾¶ÖĞÈ¡³ö¿âÃû²¿·Ö
+        // ä»è·¯å¾„ä¸­å–å‡ºåº“åéƒ¨åˆ†
         // parammeters:
-        //      strPath Â·¾¶¡£ÀıÈç"ÖĞÎÄÍ¼Êé/3"
+        //      strPath è·¯å¾„ã€‚ä¾‹å¦‚"ä¸­æ–‡å›¾ä¹¦/3"
         public static string GetDbName(string strPath)
         {
             int nRet = strPath.LastIndexOf("/");
@@ -430,13 +430,13 @@ namespace DigitalPlatform.CommonControl
         }
         */
 
-        // ·ÀÖ¹ÖØÈë 2009/7/19
+        // é˜²æ­¢é‡å…¥ 2009/7/19
         int m_nInDropDown = 0;
 
 
         private void comboBox_payStyle_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/1/15
+            // é˜²æ­¢é‡å…¥ 2009/1/15
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -458,7 +458,7 @@ namespace DigitalPlatform.CommonControl
                         e1.TableName = "payStyle";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -484,11 +484,11 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        // æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// <summary>
-        /// ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        /// æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// </summary>
-        /// <param name="refControl">ÒªºÍ×Ô¼º½øĞĞ±È½ÏµÄ¿Ø¼ş¶ÔÏó</param>
+        /// <param name="refControl">è¦å’Œè‡ªå·±è¿›è¡Œæ¯”è¾ƒçš„æ§ä»¶å¯¹è±¡</param>
         public void HighlightDifferences(PersonAddressControl refControl)
         {
             if (this.Zipcode != refControl.Zipcode)
@@ -550,7 +550,7 @@ namespace DigitalPlatform.CommonControl
                     e1.Name = "Comment";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 
@@ -587,7 +587,7 @@ namespace DigitalPlatform.CommonControl
                     e1.Name = "Comment";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 

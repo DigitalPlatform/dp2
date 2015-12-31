@@ -222,7 +222,7 @@ namespace DigitalPlatform.CommonControl
 
         public void EnsureVisible(Item item)
         {
-            int [] row_heights = this.tableLayoutPanel_content.GetRowHeights();
+            int[] row_heights = this.tableLayoutPanel_content.GetRowHeights();
             int nYOffs = row_heights[0];
             int i = 1;
             foreach (Item cur_item in this.Items)
@@ -504,7 +504,7 @@ namespace DigitalPlatform.CommonControl
                     if (String.IsNullOrEmpty(item.StateString) == true
                         && String.IsNullOrEmpty(item.Price) == false)
                     {
-                        strError = "第 " + (i + 1).ToString() + " 行: 当输入了价格 ('"+item.Price+"') 时，必须把总价格设置为空 (但现在为 '"+strTotalPrice+"')";
+                        strError = "第 " + (i + 1).ToString() + " 行: 当输入了价格 ('" + item.Price + "') 时，必须把总价格设置为空 (但现在为 '" + strTotalPrice + "')";
                         return 1;
                     }
                 }
@@ -536,7 +536,7 @@ namespace DigitalPlatform.CommonControl
                         return 1;
                     }
 
-                    if (item.RangeString.Length != (2*8 + 1))
+                    if (item.RangeString.Length != (2 * 8 + 1))
                     {
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入完整的时间范围";
                         return 1;
@@ -623,7 +623,7 @@ namespace DigitalPlatform.CommonControl
                     nRet = locations.Build(strLocationString, out strError);
                     if (nRet == -1)
                     {
-                        strError = "第 " + (i + 1).ToString() + " 行: 去向字符串 '"+strLocationString+"' 格式错误: " + strError;
+                        strError = "第 " + (i + 1).ToString() + " 行: 去向字符串 '" + strLocationString + "' 格式错误: " + strError;
                         return -1;
                     }
                     string strUsedLibraryCodes = StringUtil.MakePathList(locations.GetUsedLibraryCodes());
@@ -787,7 +787,7 @@ namespace DigitalPlatform.CommonControl
 
             if (nNotOrderItemCount > 0)
             {
-                strMessage = "全部 " + this.Items.Count + " 个事项中有 "+nNotOrderItemCount.ToString()+" 个事项处在未订购状态";
+                strMessage = "全部 " + this.Items.Count + " 个事项中有 " + nNotOrderItemCount.ToString() + " 个事项处在未订购状态";
                 return 1;
             }
 
@@ -1416,7 +1416,6 @@ namespace DigitalPlatform.CommonControl
 
             item.OldSource = strOldSource;
 
-
             // distribute string
             // 注意：必须在copy前设置，因为copy string中可能包含勾选location item的信息，如果copy string先设置，勾选好的状态会被后来重设distribute string而冲掉
             string strDistribute = DomUtil.GetElementText(dom.DocumentElement,
@@ -1462,7 +1461,6 @@ namespace DigitalPlatform.CommonControl
                     item.OldCopyString = strOldCopy;
             }
 
-
             // 限制馆藏地点事项的个数
             int nMaxCopyValue = Math.Max(item.CopyValue, item.OldCopyValue);
 
@@ -1501,13 +1499,9 @@ namespace DigitalPlatform.CommonControl
 
             item.OldPrice = strOldPrice;
 
-
-
-
             // class
             item.Class = DomUtil.GetElementText(dom.DocumentElement,
                 "class");
-
 
             // 设置好 已订购 状态
             string strState = DomUtil.GetElementText(dom.DocumentElement,
@@ -1545,7 +1539,7 @@ namespace DigitalPlatform.CommonControl
                 }
 
             }
-            
+
             // 2009/2/13
             try
             {
@@ -1590,12 +1584,12 @@ namespace DigitalPlatform.CommonControl
             // ruguo you duoyu yige de 0 shixiang
             if (nTotalCopies == 0 && this.Items.Count > 1)
             {
-                    for (int i = 1; i < this.Items.Count; i++)
-                    {
-                        Item item = this.Items[i];
-                        this.RemoveItem(i);
-                        i--;
-                    }
+                for (int i = 1; i < this.Items.Count; i++)
+                {
+                    Item item = this.Items[i];
+                    this.RemoveItem(i);
+                    i--;
+                }
 
             }
 
@@ -1692,7 +1686,7 @@ namespace DigitalPlatform.CommonControl
                         true,
                         out strError);
                     if (nRet == -1)
-                        throw new Exception(strError);
+                        throw new Exception("装载订购记录缺省值时出错: " + strError);
                 }
             END1:
 
@@ -2020,7 +2014,7 @@ namespace DigitalPlatform.CommonControl
         // 最后最靠后的一个未被完全封锁的、可改变copy值的事项
         Item GetLastChangeableItem()
         {
-            for (int i = this.Items.Count - 1; i >=0 ; i--)
+            for (int i = this.Items.Count - 1; i >= 0; i--)
             {
                 Item item = this.Items[i];
 
@@ -2175,7 +2169,7 @@ namespace DigitalPlatform.CommonControl
             {
                 nDelta *= -1;   // 变为正数
 
-                for (int i = this.Items.Count - 1; i>= 0; i--)
+                for (int i = this.Items.Count - 1; i >= 0; i--)
                 {
                     item = this.Items[i];
 
@@ -2251,7 +2245,7 @@ namespace DigitalPlatform.CommonControl
 
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
-            using(Brush brushText = new SolidBrush(Color.Black))
+            using (Brush brushText = new SolidBrush(Color.Black))
             using (Pen pen = new Pen(Color.Red))
             {
 
@@ -2521,8 +2515,8 @@ namespace DigitalPlatform.CommonControl
             comboBox_source.TextBox.ForeColor = SystemColors.GrayText;
 
             comboBox_source.Dock = DockStyle.Fill;
-            comboBox_source.MaximumSize = new Size(110, 28*2);
-            comboBox_source.Size = new Size(80, 28*2);
+            comboBox_source.MaximumSize = new Size(110, 28 * 2);
+            comboBox_source.Size = new Size(80, 28 * 2);
             comboBox_source.MinimumSize = new Size(50, 28);
 
 
@@ -2608,9 +2602,9 @@ namespace DigitalPlatform.CommonControl
             comboBox_copy.TextBox.ForeColor = SystemColors.GrayText;
 
             comboBox_copy.Dock = DockStyle.Fill;
-            comboBox_copy.MaximumSize = new Size(60, 28*2);
-            comboBox_copy.Size = new Size(40, 28*2);
-            comboBox_copy.MinimumSize = new Size(30, 28*2);
+            comboBox_copy.MaximumSize = new Size(60, 28 * 2);
+            comboBox_copy.Size = new Size(40, 28 * 2);
+            comboBox_copy.MinimumSize = new Size(30, 28 * 2);
             // this.comboBox_copy.Visible = false;
 
             // 单价
@@ -3663,10 +3657,10 @@ namespace DigitalPlatform.CommonControl
 
             if (combobox.Items.Count == 0)
             {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        combobox.Items.Add((i+1).ToString());
-                    }
+                for (int i = 0; i < 10; i++)
+                {
+                    combobox.Items.Add((i + 1).ToString());
+                }
             }
         }
 
@@ -3808,7 +3802,7 @@ namespace DigitalPlatform.CommonControl
                      MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Cancel)
                     return;
-            } 
+            }
 
             SpecialSourceSeriesDialog dlg = new SpecialSourceSeriesDialog();
             GuiUtil.SetControlFont(dlg, this.Container.Font, false);
@@ -3993,7 +3987,6 @@ namespace DigitalPlatform.CommonControl
                 // 可能会抛出异常
                 this.dateRange_range.Text = value;
             }
-
         }
 
         // 检测一个出版时间是否处在RangeString的时间范围内?
@@ -4403,7 +4396,7 @@ namespace DigitalPlatform.CommonControl
             string strOrderTime = DateTimeUtil.LocalTime(DomUtil.GetElementText(dom.DocumentElement,
                 "orderTime"));   // 2008/12/17 changed
             string strOrderID = DomUtil.GetElementText(dom.DocumentElement,
-                "orderID"); 
+                "orderID");
             string strComment = DomUtil.GetElementText(dom.DocumentElement,
                 "comment");
             string strBatchNo = DomUtil.GetElementText(dom.DocumentElement,
