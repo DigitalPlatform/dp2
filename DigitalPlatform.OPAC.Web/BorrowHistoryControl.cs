@@ -512,10 +512,13 @@ namespace DigitalPlatform.OPAC.Web
                 this.strBarcode = wrapper.Item.ItemBarcode;
                 this.strRecPath = "";
                 this.strBorrowDate = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.OperTime;
-                this.strBorrowPeriod = "";
+                this.strBorrowPeriod = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.Period;
                 this.strBorrowOperator = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.Operator;
                 this.strReturnDate = wrapper.Item.OperTime;
-                this.strNo = "";
+                this.strNo = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.No;
+                if (this.strNo == "0")
+                    this.strNo = "";
+
                 this.strRenewComment = "";
                 this.strOperator = wrapper.Item.Operator;
             }
@@ -634,7 +637,7 @@ namespace DigitalPlatform.OPAC.Web
 
                         text.Append("<tr " + strTrClass + ">");
 
-                        text.Append("<td class='no'>" + (i + 1).ToString() + "</td>");
+                        text.Append("<td class='no'>" + (i + this.StartIndex + 1).ToString() + "</td>");
                         text.Append("<td class='barcode'>" + strBarcodeLink + "</td>");
                         text.Append("<td class='summary pending' >" + info.strBarcode + "</td>");
 
@@ -644,30 +647,21 @@ namespace DigitalPlatform.OPAC.Web
                             text.Append("<td class='borrowinfo'>" + "</td>");
                         else
                         {
-                            if (this.DatabaseMode == false)
-                                text.Append("<td class='borrowinfo'>"
-                                    + "<div class='borrowno'>"
-                                    + this.GetString("续借次")
-                                    + "  :" + info.strNo + "</div>"
-                                    + "<div class='borrowdate'>"
-                                    + this.GetString("借阅日期")
-                                    + ":" + info.strBorrowDate + "</div>"
-                                    + "<div class='borrowperiod'>"
-                                    + this.GetString("期限")
-                                    + ":    " + info.strBorrowPeriod + "</div>"
-                                    + "<div class='returndate'>"
-                                    + this.GetString("还书日期")
-                                    + ":" + info.strReturnDate + "</div>"
-                                    + "</td>");
-                            else
-                                text.Append("<td class='borrowinfo'>"
-    + "<div class='borrowdate'>"
-    + this.GetString("借阅日期")
-    + ": " + info.strBorrowDate + "</div>"
-    + "<div class='returndate'>"
-    + this.GetString("还书日期")
-    + ": " + info.strReturnDate + "</div>"
-    + "</td>");
+                            text.Append("<td class='borrowinfo'>"
+                                + "<div class='borrowno'>"
+                                + this.GetString("续借次")
+                                + "  :" + info.strNo + "</div>"
+                                + "<div class='borrowdate'>"
+                                + this.GetString("借阅日期")
+                                + ":" + info.strBorrowDate + "</div>"
+                                + "<div class='borrowperiod'>"
+                                + this.GetString("期限")
+                                + ":    " + info.strBorrowPeriod + "</div>"
+                                + "<div class='returndate'>"
+                                + this.GetString("还书日期")
+                                + ":" + info.strReturnDate + "</div>"
+                                + "</td>");
+
                         }
                         text.Append("<td class='renewcomment'>" + info.strRenewComment + "</td>");
 
