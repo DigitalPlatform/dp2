@@ -587,7 +587,6 @@
     <Compile Include="Reader\ChangeStateActionControl.Designer.cs">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Reader\ChargingHistoryHost.cs" />
     <Compile Include="Reader\SelectPatronDialog.cs">
       <SubType>Form</SubType>
     </Compile>

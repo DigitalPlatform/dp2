@@ -40,7 +40,10 @@
     <comment lang='chi'>获得书目摘要</comment>
     <comment lang='eng'>get biblio summary</comment>
   </property>
-
+  <property name='searchcharging'>
+    <comment lang='chi'>检索借阅历史</comment>
+    <comment lang='eng'>search charging history</comment>
+  </property>
   <property name='searchreader'>
     <comment lang='chi'>检索读者</comment>
     <comment lang='eng'>search reader</comment>

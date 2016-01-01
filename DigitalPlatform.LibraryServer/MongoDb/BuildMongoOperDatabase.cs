@@ -399,6 +399,13 @@ namespace DigitalPlatform.LibraryServer
                 "itemBarcode");
             item.PatronBarcode = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "readerBarcode");
+            if (strOperation == "borrow")
+            {
+                item.Period = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "borrowPeriod");
+                item.No = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "no");
+            }
             item.ClientAddress = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "clientAddress");
             item.Operator = DomUtil.GetElementText(domOperLog.DocumentElement,

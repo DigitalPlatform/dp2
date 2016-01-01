@@ -23,14 +23,13 @@ namespace DigitalPlatform.LibraryServer
         public override void CreateIndex()
         {
             _collection.CreateIndex(new IndexKeysBuilder().Ascending("OperTime"),
-    IndexOptions.SetUnique(false));
+                IndexOptions.SetUnique(false));
 
             _collection.CreateIndex(new IndexKeysBuilder().Ascending("ItemBarcode"),
-IndexOptions.SetUnique(false));
+                IndexOptions.SetUnique(false));
 
             _collection.CreateIndex(new IndexKeysBuilder().Ascending("PatronBarcode"),
-IndexOptions.SetUnique(false));
-
+                IndexOptions.SetUnique(false));
         }
 
         // parameters:
@@ -54,7 +53,8 @@ IndexOptions.SetUnique(false));
             Lost = 0x10,    // 丢失声明
         }
 #endif
-
+        // parameters:
+        //      patronBarcode   读者证条码号。如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
         public IMongoQuery BuildQuery(
             string patronBarcode,
             DateTime startTime,
@@ -71,10 +71,21 @@ IndexOptions.SetUnique(false));
             else if (endTime == new DateTime(0))
                 time_query = Query.GTE("OperTime", startTime);
 
-            var patron_query = Query.EQ("PatronBarcode", patronBarcode);
+            string itemBarcodePrefix = "@itemBarcode:";
+            string itemRefIdPrefix = "@itemRefID:";
+
+            IMongoQuery patron_query = null;
+            if (patronBarcode != null
+                && patronBarcode.StartsWith(itemBarcodePrefix) == true)
+                patron_query = Query.EQ("ItemBarcode", patronBarcode.Substring(itemBarcodePrefix.Length));
+            else if (patronBarcode != null
+                && patronBarcode.StartsWith(itemRefIdPrefix) == true)
+                patron_query = Query.EQ("ItemBarcode", "@refID:" + patronBarcode.Substring(itemRefIdPrefix.Length));
+            else
+                patron_query = Query.EQ("PatronBarcode", patronBarcode);
 
             List<IMongoQuery> action_items = new List<IMongoQuery>();
-            string[] types = operTypes.Split(new char[] {','});
+            string[] types = operTypes.Split(new char[] { ',' });
             foreach (string type in types)
             {
                 if (type == "borrow")
@@ -87,10 +98,47 @@ IndexOptions.SetUnique(false));
                     action_items.Add(Query.EQ("Action", "lost"));
             }
 
-            var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation","return")),
+            var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation", "return")),
                 Query.Or(action_items));
 
             return Query.And(patron_query, time_query, type_query);
+        }
+
+#if NO
+        static IMongoQuery _rel_type_query = null;   // 存储起来，避免每次创建的消耗
+                    if (_rel_type_query == null)
+            {
+                List<IMongoQuery> action_items = new List<IMongoQuery>();
+                {
+                    action_items.Add(Query.EQ("Action", "return"));
+                    action_items.Add(Query.EQ("Action", "renew"));
+                    action_items.Add(Query.EQ("Action", "lost"));
+                }
+
+                _rel_type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation", "return")),
+        Query.Or(action_items));
+            }
+#endif
+
+        // 查找和本还书 item 关联的的借书操作 item
+        public ChargingOperItem FindRelativeBorrowItem(ChargingOperItem return_item)
+        {
+            MongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return null;
+
+            var query = Query.And(
+                Query.And(Query.EQ("Operation", "borrow"), Query.EQ("Action", "borrow")),
+                Query.EQ("PatronBarcode", return_item.PatronBarcode),
+                Query.EQ("ItemBarcode", return_item.ItemBarcode),
+                Query.LTE("OperTime", return_item.OperTime));
+            // 获得最近的一个 borrow item
+            MongoCursor<ChargingOperItem> cursor = collection.Find(query).SetSortOrder(SortBy.Descending("OperTime")).SetLimit(1);
+            foreach (ChargingOperItem item in cursor.Take(1))
+            {
+                return item;
+            }
+            return null;
         }
 
         // parameters:
@@ -162,6 +210,9 @@ IndexOptions.SetUnique(false));
 
         public string ItemBarcode { get; set; }
         public string PatronBarcode { get; set; }
+
+        public string Period { get; set; }  // 期限
+        public string No { get; set; }  // 续借次，序号
 
         public string ClientAddress { get; set; }  // 访问者的IP地址
 

@@ -70,6 +70,7 @@ namespace dp2Circulation
 
         Commander commander = null;
         WebExternalHost m_webExternalHost_item = new WebExternalHost();
+        WebExternalHost m_chargingInterface = new WebExternalHost();
         WebExternalHost m_webExternalHost_biblio = new WebExternalHost();
 
 #if NO
@@ -114,6 +115,10 @@ namespace dp2Circulation
             this.m_webExternalHost_item.Initial(this.MainForm, this.webBrowser_itemHTML);
             this.webBrowser_itemHTML.ObjectForScripting = this.m_webExternalHost_item;
 
+            this.m_chargingInterface.Initial(this.MainForm, this.webBrowser_borrowHistory);
+            this.m_chargingInterface.CallFunc += m_chargingInterface_CallFunc;
+            this.webBrowser_borrowHistory.ObjectForScripting = this.m_chargingInterface;
+
             this.m_webExternalHost_biblio.Initial(this.MainForm, this.webBrowser_biblio);
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHost_biblio;
 
@@ -122,6 +127,8 @@ namespace dp2Circulation
             this.commander.IsBusy += new IsBusyEventHandler(commander_IsBusy);
 
             this.Text = this.DbTypeCaption;
+
+            ClearBorrowHistoryPage();
         }
 
         void commander_IsBusy(object sender, IsBusyEventArgs e)
@@ -153,7 +160,8 @@ namespace dp2Circulation
                 this.m_webExternalHost_item.Destroy();
             if (this.m_webExternalHost_biblio != null)
                 this.m_webExternalHost_biblio.Destroy();
-
+            if (this.m_chargingInterface != null)
+                this.m_chargingInterface.Destroy();
 #if NO
             if (stop != null) // 脱离关联
             {
@@ -206,13 +214,8 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在初始化浏览器组件 ...");
+            stop.Initial("正在装载册信息 ...");
             stop.BeginLoop();
-
-
-            this.Update();
-            this.MainForm.Update();
-
 
             Global.ClearHtmlPage(this.webBrowser_itemHTML,
                 this.MainForm.DataDir);
@@ -220,12 +223,14 @@ namespace dp2Circulation
                 this.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_biblio,
                 this.MainForm.DataDir);
+
+            ClearBorrowHistoryPage();
+            SetItemRefID("");
+
             // this.textBox_message.Text = "";
             this.toolStripLabel_message.Text = "";
 
             stop.SetMessage("正在装入册记录 " + strItemBarcode + " ...");
-
-
             try
             {
                 string strItemText = "";
@@ -321,6 +326,8 @@ namespace dp2Circulation
                         this.MainForm.DataDir,
                         "xml",
                         strItemText);
+
+                    SetItemRefID(strItemText);
                 }
             }
             finally
@@ -335,6 +342,7 @@ namespace dp2Circulation
                 this.textBox_queryWord.Focus();
             }
 
+            tabControl_item_SelectedIndexChanged(this, new EventArgs());
             return 1;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -401,13 +409,15 @@ namespace dp2Circulation
                     this.MainForm.DataDir);
                 Global.ClearHtmlPage(this.webBrowser_biblio,
                     this.MainForm.DataDir);
+
                 // this.textBox_message.Text = "";
                 this.toolStripLabel_message.Text = "";
             }
 
-            stop.SetMessage("正在装入"+this.DbTypeCaption+"记录 " + strItemRecPath + " ...");
+            ClearBorrowHistoryPage();
+            SetItemRefID("");
 
-
+            stop.SetMessage("正在装入" + this.DbTypeCaption + "记录 " + strItemRecPath + " ...");
             try
             {
                 string strItemText = "";
@@ -421,24 +431,24 @@ namespace dp2Circulation
                 string strBarcode = "@path:" + strRecPath;
 
                 long lRet = 0;
-                
+
                 if (this.m_strDbType == "item")
-                lRet = Channel.GetItemInfo(
-                     stop,
-                     strBarcode,
-                     "html",
-                     out strItemText,
-                     out strOutputItemRecPath,
-                     out item_timestamp,
-                     "html",
-                     out strBiblioText,
-                     out strBiblioRecPath,
-                     out strError);
+                    lRet = Channel.GetItemInfo(
+                         stop,
+                         strBarcode,
+                         "html",
+                         out strItemText,
+                         out strOutputItemRecPath,
+                         out item_timestamp,
+                         "html",
+                         out strBiblioText,
+                         out strBiblioRecPath,
+                         out strError);
                 else if (this.m_strDbType == "comment")
                     lRet = Channel.GetCommentInfo(
                          stop,
                          strBarcode,    // "@path:" + strItemRecPath,
-                         // "",
+                        // "",
                          "html",
                          out strItemText,
                          out strOutputItemRecPath,
@@ -451,7 +461,7 @@ namespace dp2Circulation
                     lRet = Channel.GetOrderInfo(
                          stop,
                          strBarcode,    // "@path:" + strItemRecPath,
-                         // "",
+                        // "",
                          "html",
                          out strItemText,
                          out strOutputItemRecPath,
@@ -464,7 +474,7 @@ namespace dp2Circulation
                     lRet = Channel.GetIssueInfo(
                          stop,
                          strBarcode,    // "@path:" + strItemRecPath,
-                         // "",
+                        // "",
                          "html",
                          out strItemText,
                          out strOutputItemRecPath,
@@ -476,11 +486,8 @@ namespace dp2Circulation
                 else
                     throw new Exception("未知的DbType '" + this.m_strDbType + "'");
 
-
                 if (lRet == -1 || lRet == 0)
                 {
-
-
                     if (bPrevNext == true
                         && this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                     {
@@ -532,28 +539,28 @@ namespace dp2Circulation
                 }
 
                 // this.textBox_message.Text = "册记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
-                this.toolStripLabel_message.Text = this.DbTypeCaption+"记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
+                this.toolStripLabel_message.Text = this.DbTypeCaption + "记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
                 this.textBox_queryWord.Text = this.ItemRecPath; // strItemRecPath;
-                this.comboBox_from.Text = this.DbTypeCaption+"记录路径";
+                this.comboBox_from.Text = this.DbTypeCaption + "记录路径";
 
                 // 最后获得item xml
                 if (this.m_strDbType == "item")
-                lRet = Channel.GetItemInfo(
-                    stop,
-                    "@path:" + strOutputItemRecPath, // strBarcode,
-                    "xml",
-                    out strItemText,
-                    out strItemRecPath,
-                    out item_timestamp,
-                    null,   // "html",
-                    out strBiblioText,
-                    out strBiblioRecPath,
-                    out strError);
+                    lRet = Channel.GetItemInfo(
+                        stop,
+                        "@path:" + strOutputItemRecPath, // strBarcode,
+                        "xml",
+                        out strItemText,
+                        out strItemRecPath,
+                        out item_timestamp,
+                        null,   // "html",
+                        out strBiblioText,
+                        out strBiblioRecPath,
+                        out strError);
                 else if (this.m_strDbType == "comment")
                     lRet = Channel.GetCommentInfo(
                          stop,
                          "@path:" + strOutputItemRecPath,
-                         // "",
+                        // "",
                          "xml",
                          out strItemText,
                          out strOutputItemRecPath,
@@ -566,7 +573,7 @@ namespace dp2Circulation
                     lRet = Channel.GetOrderInfo(
                          stop,
                          "@path:" + strOutputItemRecPath,
-                         // "",
+                        // "",
                          "xml",
                          out strItemText,
                          out strOutputItemRecPath,
@@ -579,7 +586,7 @@ namespace dp2Circulation
                     lRet = Channel.GetIssueInfo(
                          stop,
                          "@path:" + strOutputItemRecPath,
-                         // "",
+                        // "",
                          "xml",
                          out strItemText,
                          out strOutputItemRecPath,
@@ -590,7 +597,6 @@ namespace dp2Circulation
                          out strError);
                 else
                     throw new Exception("未知的DbType '" + this.m_strDbType + "'");
-
 
                 if (lRet == -1 || lRet == 0)
                 {
@@ -609,6 +615,8 @@ namespace dp2Circulation
                         this.MainForm.DataDir,
                         "xml",
                         strItemText);
+
+                    SetItemRefID(strItemText);
                 }
             }
             finally
@@ -620,12 +628,37 @@ namespace dp2Circulation
                 EnableControls(true);
             }
 
+            tabControl_item_SelectedIndexChanged(this, new EventArgs());
             return 1;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
 
+        string _itemBarcode = "";
+        string _refID = "";
+
+        // 设置当前记录的唯一标识
+        void SetItemRefID(string strXml)
+        {
+            _itemBarcode = "";
+            _refID = "";
+
+            if (string.IsNullOrEmpty(strXml) == true)
+                return; // 起到清除的作用
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+                _itemBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                _refID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+            }
+            catch
+            {
+
+            }
+        }
 #if NO
         void DoStop(object sender, StopEventArgs e)
         {
@@ -774,7 +807,7 @@ namespace dp2Circulation
                 int nRet = this.textBox_queryWord.Text.IndexOf("/");
                 if (nRet == -1)
                 {
-                    strError = "您输入的检索词似乎为一个册条码号，而不是"+this.DbTypeCaption+"记录路径";
+                    strError = "您输入的检索词似乎为一个册条码号，而不是" + this.DbTypeCaption + "记录路径";
                     MessageBox.Show(this, strError);
                 }
 
@@ -1425,7 +1458,7 @@ out strError);
             out string strBiblioXml,
             out List<string> reserve_subjects,
             out List<string> subjects,
-            out byte [] timestamp,
+            out byte[] timestamp,
             out string strError)
         {
             strError = "";
@@ -1531,5 +1564,324 @@ out strError);
 
             return 0;
         }
+
+        void m_chargingInterface_CallFunc(object sender, EventArgs e)
+        {
+            if (this.DbType != "item")
+                return;
+
+            string name = sender as string;
+            this.BeginInvoke(new Action<string>(LoadBorrowHistory), name);
+        }
+
+        void LoadBorrowHistory(string action)
+        {
+            string strError = "";
+            int nPageNo = 0;
+            if (action == "load")
+                nPageNo = 0;
+            else if (action == "loadAll")
+                nPageNo = -1;
+            else if (action == "prevPage")
+            {
+                nPageNo = _currentPageNo - 1;
+                if (nPageNo < 0)
+                {
+                    strError = "已经到头";
+                    goto ERROR1;
+                }
+            }
+            else if (action == "nextPage")
+            {
+                nPageNo = _currentPageNo + 1;
+                if (nPageNo > _pageCount - 1)
+                {
+                    strError = "已经到尾";
+                    goto ERROR1;
+                }
+            }
+            else if (action == "firstPage")
+                nPageNo = 0;
+            else if (action == "tailPage")
+            {
+                if (_pageCount <= 0)
+                {
+                    strError = "没有尾页";
+                    goto ERROR1;
+                }
+                nPageNo = _pageCount - 1;
+            }
+
+            string strItemRefID = GetItemRefID();
+
+            if (string.IsNullOrEmpty(strItemRefID) == true)
+            {
+                strError = "strItemRefID 为空";
+                goto ERROR1;
+            }
+
+            int nRet = LoadBorrowHistory(strItemRefID,
+     nPageNo,
+     out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
+        }
+
+        string GetItemRefID()
+        {
+            if (string.IsNullOrEmpty(this._itemBarcode) == false)
+                return "@itemBarcode:" + this._itemBarcode;
+            return "@itemRefID:" + this._refID;
+        }
+
+        static int _itemsPerPage = 10;
+
+        // parameters:
+        //      nPageNo 页号。如果为 -1，表示希望从头获取全部内容
+        int LoadBorrowHistory(
+            string strBarcode,
+            int nPageNo,
+            out string strError)
+        {
+            strError = "";
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在装载借阅历史 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+            try
+            {
+                long lRet = 0;
+                List<ChargingItemWrapper> total_results = new List<ChargingItemWrapper>();
+
+                int nLength = 0;
+                if (nPageNo == -1)
+                {
+                    nPageNo = 0;
+                    nLength = -1;
+                }
+                else
+                {
+                    nLength = _itemsPerPage;
+                }
+
+                this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
+                try
+                {
+                    lRet = this.Channel.LoadBorrowHistory(stop,
+                        strBarcode,
+                        nPageNo,
+                        nLength,
+                        out total_results,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+
+                    _currentPageNo = nPageNo;
+                }
+                finally
+                {
+                    this.Channel.Idle -= Channel_Idle;
+                }
+
+                FillBorrowHistoryPage(total_results, nPageNo * _itemsPerPage, (int)lRet);
+                return 0;
+            }
+            finally
+            {
+                EnableControls(true);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        }
+
+        void Channel_Idle(object sender, IdleEventArgs e)
+        {
+            e.bDoEvents = false;
+        }
+
+        void ClearBorrowHistoryPage()
+        {
+            ClearHtml();
+
+            string strItemLink = "<a href='javascript:void(0);' onclick=\"window.external.Call('load');\">" + HttpUtility.HtmlEncode("装载") + "</a>";
+
+            AppendHtml("<html><body>");
+            AppendHtml(strItemLink);
+            AppendHtml("</body></html>");
+
+            _borrowHistoryLoaded = false;
+        }
+
+        int _currentPageNo = 0;
+        int _pageCount = 0;
+
+        static string MakeAnchor(string name, string caption, bool enabled)
+        {
+            if (enabled)
+                return "<a href='javascript:void(0);' onclick=\"window.external.Call('" + name + "');\">" + HttpUtility.HtmlEncode(caption) + "</a>";
+            return HttpUtility.HtmlEncode(caption);
+        }
+
+        void FillBorrowHistoryPage(List<ChargingItemWrapper> items,
+            int nStart,
+            int nTotalCount)
+        {
+            this.ClearMessage();
+
+            StringBuilder text = new StringBuilder();
+
+            _currentPageNo = nStart / _itemsPerPage;
+            _pageCount = nTotalCount / _itemsPerPage;
+            if ((nTotalCount % _itemsPerPage) > 0)
+                _pageCount++;
+
+            string strBinDir = Environment.CurrentDirectory;
+
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
+                + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
+                + "<script type='text/javascript' charset='UTF-8' src='%bindir%/getsummary.js'></script>";
+            string strStyle = @"<style type='text/css'>
+.nowrap {
+white-space: nowrap;
+}
+</style>";
+
+            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
+                + strLink
+                + strScriptHead.Replace("%bindir%", strBinDir)
+                + strStyle
+                + "</head><body>");
+
+            string strFirstPageLink = MakeAnchor("firstPage", "首页", _currentPageNo > 0);
+            string strPrevPageLink = MakeAnchor("prevPage", "前页", _currentPageNo > 0);
+            string strNextPageLink = MakeAnchor("nextPage", "后页", _currentPageNo < _pageCount - 1);
+            string strTailPageLink = MakeAnchor("tailPage", "末页", _currentPageNo != _pageCount - 1 && _pageCount > 0);
+            string strLoadAllLink = MakeAnchor("loadAll", "装载全部", _pageCount > 1);
+
+            string strPages = (_currentPageNo + 1) + "/" + _pageCount + "&nbsp;";
+            if (items.Count > _itemsPerPage)
+                strPages = "(全部)";
+
+            text.Append(strPages
+                + strFirstPageLink + "&nbsp;" + strPrevPageLink + "&nbsp;" + strNextPageLink + "&nbsp;" + strTailPageLink + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                + strLoadAllLink);
+
+            text.Append("<table>");
+            text.Append("<tr>");
+            text.Append("<td class='nowrap'>序号</td>");
+            text.Append("<td class='nowrap'>证条码号</td>");
+            text.Append("<td class='nowrap'>姓名</td>");
+            text.Append("<td class='nowrap'>期限</td>");
+            text.Append("<td class='nowrap'>借阅操作者</td>");
+            text.Append("<td class='nowrap'>借阅操作时间</td>");
+            text.Append("<td class='nowrap'>还回操作者</td>");
+            text.Append("<td class='nowrap'>还回操作时间</td>");
+            text.Append("</tr>");
+
+            foreach (ChargingItemWrapper wrapper in items)
+            {
+                ChargingItem item = wrapper.Item;
+                text.Append("<tr>");
+                text.Append("<td class='nowrap'>" + (nStart + 1).ToString() + "</td>");
+
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.PatronBarcode) + "</td>");
+                text.Append("<td class='summary pending nowrap'>P:" + HttpUtility.HtmlEncode(item.PatronBarcode) + "</td>");
+
+                string strPeriod = "";
+                if (wrapper.RelatedItem != null)
+                    strPeriod = wrapper.RelatedItem.Period;
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strPeriod) + "</td>");
+
+                string strBorrowOperator = "";
+                string strBorrowTime = "";
+                if (wrapper.RelatedItem != null)
+                {
+                    strBorrowOperator = wrapper.RelatedItem.Operator;
+                    strBorrowTime = wrapper.RelatedItem.OperTime;
+                }
+
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strBorrowOperator) + "</td>");
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strBorrowTime) + "</td>");
+
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.Operator) + "</td>");
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.OperTime) + "</td>");
+
+                text.Append("</tr>");
+                nStart++;
+            }
+            text.Append("</table>");
+            text.Append("</body></html>");
+
+            this.m_chargingInterface.SetHtmlString(text.ToString(),
+    "readerinfoform_charginghis");
+        }
+
+        /// <summary>
+        /// 清除已有的 HTML 显示
+        /// </summary>
+        public void ClearHtml()
+        {
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strJs = "";
+
+            {
+                HtmlDocument doc = this.webBrowser_borrowHistory.Document;
+
+                if (doc == null)
+                {
+                    this.webBrowser_borrowHistory.Navigate("about:blank");
+                    doc = this.webBrowser_borrowHistory.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            Global.WriteHtml(this.webBrowser_borrowHistory,
+                "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
+        /// <summary>
+        /// 向 IE 控件中追加一段 HTML 内容
+        /// </summary>
+        /// <param name="strText">HTML 内容</param>
+        public void AppendHtml(string strText)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string>(AppendHtml), strText);
+                return;
+            }
+
+            Global.WriteHtml(this.webBrowser_borrowHistory,
+                strText);
+
+            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+            this.webBrowser_borrowHistory.Document.Window.ScrollTo(0,
+                this.webBrowser_borrowHistory.Document.Body.ScrollRectangle.Height);
+        }
+
+        bool _borrowHistoryLoaded = false;
+
+        private void tabControl_item_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.tabControl_item.SelectedTab == this.tabPage_borrowHistory)
+            {
+                if (_borrowHistoryLoaded == false)
+                {
+                    this.BeginInvoke(new Action<string>(LoadBorrowHistory), "load");
+                    _borrowHistoryLoaded = true;
+                }
+            }
+        }
+
     }
 }

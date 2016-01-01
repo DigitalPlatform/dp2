@@ -629,7 +629,8 @@ out strError);
                 // TODO: 报错是否要直接显示在 dpTable 中?
                 // MessageBox.Show(this._myForm, strError);
                 DisplayAutoGenMenuWindow(false);
-                this.m_genDataViewer.DisplayError(strError);
+                if (this.m_genDataViewer != null)
+                    this.m_genDataViewer.DisplayError(strError);
             }
             finally
             {

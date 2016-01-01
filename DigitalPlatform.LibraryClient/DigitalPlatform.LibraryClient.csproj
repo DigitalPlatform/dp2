@@ -80,7 +80,7 @@
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.ChannelInfo.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.ChargingItem.datasource">
+    <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.ChargingItemWrapper.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.DateExist.datasource">

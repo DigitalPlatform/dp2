@@ -1932,7 +1932,7 @@ namespace dp2Library
             string order,
             long start,
             long count,
-            out ChargingItem[] results)
+            out ChargingItemWrapper[] results)
         {
             results = null;
 
@@ -1980,18 +1980,36 @@ namespace dp2Library
                     out totalCount);
                 if (collection == null)
                 {
-                    strError = "Find() error";
-                    goto ERROR1;
+                    strError = "ChargingOperDatabase 尚未启用";
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.NotFound;
+                    return result;
+                }
+                if (count == 0)
+                {
+                    result.Value = totalCount;
+                    return result;
                 }
 
-                List<ChargingItem> infos = new List<ChargingItem>();
+                int MAXITEMS = 100;    // 每次最多返回的事项数
+                List<ChargingItemWrapper> infos = new List<ChargingItemWrapper>();
                 long i = 0;
                 foreach (ChargingOperItem item in collection)
                 {
+                    if (i >= MAXITEMS)
+                        break;
                     if (count != -1 && i >= count)
                         break;
-                    ChargingItem info = new ChargingItem(item);
-                    infos.Add(info);
+                    ChargingItemWrapper wrapper = new ChargingItemWrapper();
+                    wrapper.Item = new ChargingItem(item);
+                    if (item.Operation == "return")
+                    {
+                        ChargingOperItem rel = app.ChargingOperDatabase.FindRelativeBorrowItem(item);
+                        if (rel != null)
+                            wrapper.RelatedItem = new ChargingItem(rel);
+                    }
+                    infos.Add(wrapper);
                     i++;
                 }
 
@@ -9633,7 +9651,6 @@ namespace dp2Library
                         goto END1;
                     }
 
-
                     // 获得<browseformats>元素下级XML
                     if (strName == "browseformats")
                     {
@@ -9672,6 +9689,17 @@ namespace dp2Library
 
                 if (strCategory == "circulation")
                 {
+                    // 2016/1/1
+                    if (strName == "chargingOperDatabase")
+                    {
+                        if (app.ChargingOperDatabase.Enabled == true)
+                            strValue = "enabled";
+                        else
+                            strValue = "";
+                        nRet = 1;
+                        goto END1;
+                    }
+
                     // <clientFineInterface>元素内容
                     // strValue中是OuterXml定义。
                     if (strName == "clientFineInterface")
@@ -14283,6 +14311,18 @@ out strError);
     }
 
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class ChargingItemWrapper
+    {
+        // 基本 Item
+        [DataMember]
+        public ChargingItem Item { get; set; }
+
+        // 相关的 Item。比如一个 return 动作的 item 就可能具有一个 borrow 动作的 item
+        [DataMember]
+        public ChargingItem RelatedItem { get; set; }
+    }
+
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class ChargingItem
     {
         [DataMember]
@@ -14301,6 +14341,11 @@ out strError);
         public string PatronBarcode { get; set; }
 
         [DataMember]
+        public string Period { get; set; }  // 期限
+        [DataMember]
+        public string No { get; set; }  // 续借次，序号
+
+        [DataMember]
         public string ClientAddress { get; set; }  // 访问者的IP地址
 
         [DataMember]
@@ -14316,9 +14361,11 @@ out strError);
             this.Action = item.Action;
             this.ItemBarcode = item.ItemBarcode;
             this.PatronBarcode = item.PatronBarcode;
+            this.Period = item.Period;
+            this.No = item.No;
             this.ClientAddress = item.ClientAddress;
             this.Operator = item.Operator;
-            this.OperTime = item.OperTime.ToString("g");
+            this.OperTime = item.OperTime.ToString("G");
         }
     }
 

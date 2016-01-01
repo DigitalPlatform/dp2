@@ -817,6 +817,6 @@ SessionMode = SessionMode.NotAllowed)]
             string order,
             long start,
             long count,
-            out ChargingItem[] results);
+            out ChargingItemWrapper[] results);
     }
 }
