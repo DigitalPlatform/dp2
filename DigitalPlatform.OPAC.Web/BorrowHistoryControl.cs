@@ -661,8 +661,8 @@ namespace DigitalPlatform.OPAC.Web
                                 + this.GetString("还书日期")
                                 + ":" + info.strReturnDate + "</div>"
                                 + "</td>");
-
                         }
+
                         text.Append("<td class='renewcomment'>" + info.strRenewComment + "</td>");
 
                         if (this.DatabaseMode == false || info.IsEmpty())

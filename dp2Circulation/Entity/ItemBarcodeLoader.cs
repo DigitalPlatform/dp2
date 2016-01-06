@@ -7,15 +7,14 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
     // 通过册条码号获得册记录路径的枚举器
-    public class ItemBarcodeLoader : IEnumerable 
+    public class ItemBarcodeLoader : IEnumerable
     {
         /// <summary>
         /// 提示框事件
@@ -50,14 +49,13 @@ namespace dp2Circulation
 
         public IEnumerator GetEnumerator()
         {
-
             List<string> batch = new List<string>();
             for (int index = 0; index < m_barcodes.Count; index++)
             {
                 string s = m_barcodes[index];
 
                 if (string.IsNullOrEmpty(s) == true)
-                    throw new Exception("册条码号字符串不允许为空 (index="+index.ToString()+")");
+                    throw new Exception("册条码号字符串不允许为空 (index=" + index.ToString() + ")");
 
                 batch.Add(s);
 

@@ -4653,7 +4653,8 @@ MessageBoxDefaultButton.Button1);
             ItemSearchForm form = this.MainForm.OpenItemSearchForm(strDbType);
 
             nRet = form.ImportFromRecPathFile(strTempFileName,
-            out strError);
+                "clear",
+                out strError);
             if (nRet == -1)
                 return -1;
             return 0;

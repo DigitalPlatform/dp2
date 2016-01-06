@@ -14,12 +14,14 @@ namespace dp2Circulation
     /// <summary>
     /// 版权 对话框
     /// </summary>
-    internal class CopyrightDlg : System.Windows.Forms.Form
+    internal class AboutDlg : System.Windows.Forms.Form
     {
+#if NO
         /// <summary>
         /// 框架窗口
         /// </summary>
         public MainForm MainForm = null;
+#endif
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.LinkLabel linkLabel1;
@@ -31,7 +33,7 @@ namespace dp2Circulation
         /// </summary>
         private System.ComponentModel.Container components = null;
 
-        public CopyrightDlg()
+        public AboutDlg()
         {
             //
             // Required for Windows Form Designer support
@@ -67,7 +69,7 @@ namespace dp2Circulation
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CopyrightDlg));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutDlg));
             this.label1 = new System.Windows.Forms.Label();
             this.label_copyright = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
@@ -84,7 +86,7 @@ namespace dp2Circulation
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(461, 17);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2内务/流通 dp2Circulation V2.10";
+            this.label1.Text = "dp2 内务/流通 dp2Circulation V2.11";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright
@@ -109,7 +111,7 @@ namespace dp2Circulation
             this.linkLabel1.Size = new System.Drawing.Size(459, 36);
             this.linkLabel1.TabIndex = 2;
             this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "http://www.dp2003.com";
+            this.linkLabel1.Text = "https://github.com/DigitalPlatform/dp2";
             this.linkLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
@@ -156,9 +158,9 @@ namespace dp2Circulation
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "CopyrightDlg";
+            this.Name = "About";
             this.ShowInTaskbar = false;
-            this.Text = "版权 Copyright";
+            this.Text = "关于 About";
             this.Load += new System.EventHandler(this.CopyrightDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -194,14 +196,14 @@ namespace dp2Circulation
 
         private void CopyrightDlg_Load(object sender, System.EventArgs e)
         {
-            label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.";
+            label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\n2015 年以 Apache License Version 2.0 方式开源";
 
             Assembly myAssembly = Assembly.GetAssembly(this.GetType());
             AssemblyName name = myAssembly.GetName();
 
             textBox_environment.Text = "版本和环境:"
                 + "\r\n本软件: "+name.Name+" " + name.Version.ToString()    // .FullName
-                + "\r\n当前连接的 dp2Library (位于 " + this.MainForm.LibraryServerUrl + "): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
+                + "\r\n当前连接的 dp2Library (位于 " + Program.MainForm.LibraryServerUrl + "): " + Program.MainForm.ServerVersion.ToString() + " UID:" + Program.MainForm.ServerUID
                 + "\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
                 + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress())
                 + "\r\n是否安装 KB2468871: " + Global.IsKbInstalled("KB2468871")

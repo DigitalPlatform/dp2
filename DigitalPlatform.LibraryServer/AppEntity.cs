@@ -145,7 +145,7 @@ namespace DigitalPlatform.LibraryServer
         // 如果返回值不是0，就中断循环并返回
         public delegate int Delegate_checkRecord(string strRecPath,
             XmlDocument dom,
-            byte [] baTimestamp,
+            byte[] baTimestamp,
             object param,
             out string strError);
 
@@ -323,9 +323,9 @@ namespace DigitalPlatform.LibraryServer
 
                         if (procCheckRecord != null)
                         {
-                            nRet = procCheckRecord(strOutputPath, 
-                                domExist, 
-                                timestamp, 
+                            nRet = procCheckRecord(strOutputPath,
+                                domExist,
+                                timestamp,
                                 param,
                                 out strError);
                             if (nRet != 0)
@@ -516,7 +516,7 @@ namespace DigitalPlatform.LibraryServer
             string strParentID = ResPath.GetRecordId(strTargetBiblioRecPath);
             if (string.IsNullOrEmpty(strParentID) == true)
             {
-                strError = "目标书目记录路径 '"+strTargetBiblioRecPath+"' 不正确，无法获得记录号";
+                strError = "目标书目记录路径 '" + strTargetBiblioRecPath + "' 不正确，无法获得记录号";
                 return -1;
             }
 
@@ -748,7 +748,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (entityinfos.Count != target_recpaths.Count)
             {
-                strError = "entityinfos.Count (" + entityinfos.Count.ToString() + ") != target_recpaths.Count (" + target_recpaths.Count .ToString()+ ")";
+                strError = "entityinfos.Count (" + entityinfos.Count.ToString() + ") != target_recpaths.Count (" + target_recpaths.Count.ToString() + ")";
                 return -1;
             }
 
@@ -974,7 +974,7 @@ namespace DigitalPlatform.LibraryServer
                             }
                             catch (Exception ex)
                             {
-                                strError = "实体记录 '"+info.RecPath+"' XML装载进入DOM时发生错误: " + ex.Message;
+                                strError = "实体记录 '" + info.RecPath + "' XML装载进入DOM时发生错误: " + ex.Message;
                                 goto ERROR1;
                             }
 
@@ -987,7 +987,7 @@ namespace DigitalPlatform.LibraryServer
                                 out strDetail);
                             if (bHasCirculationInfo == true)
                             {
-                                strError = "拟删除的册记录 '" + info.RecPath + "' 中包含有流通信息("+strDetail+")(此种情况可能不限于这一条)，不能删除。";
+                                strError = "拟删除的册记录 '" + info.RecPath + "' 中包含有流通信息(" + strDetail + ")(此种情况可能不限于这一条)，不能删除。";
                                 goto ERROR1;
                             }
 
@@ -1323,7 +1323,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strText = strPart.Trim();
                 if (StringUtil.HasHead(strText, "librarycode:") == true)
-                    return strText.Substring("librarycode:".Length).Trim().Replace("|",",");
+                    return strText.Substring("librarycode:".Length).Trim().Replace("|", ",");
             }
 
             return null;
@@ -1409,7 +1409,7 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strItemDbName) == true)
             {
                 result.Value = -1;
-                result.ErrorInfo = "书目库 '"+strBiblioDbName+"' 未定义下属的实体库";
+                result.ErrorInfo = "书目库 '" + strBiblioDbName + "' 未定义下属的实体库";
                 result.ErrorCode = ErrorCode.ItemDbNotDef;
                 return result;
             }
@@ -1444,7 +1444,7 @@ namespace DigitalPlatform.LibraryServer
          + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录+馆藏地点")
          + "'><item><word>"
          + StringUtil.GetXmlStringSimple(strBiblioRecId + "|" + strCode + "/")
-         +"</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
                     if (string.IsNullOrEmpty(strQueryXml) == false)
                     {
                         Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
@@ -1579,7 +1579,7 @@ namespace DigitalPlatform.LibraryServer
                         entityinfo.NewRecord = "";
                         entityinfo.NewTimestamp = null;
                         entityinfo.Action = "";
-                        
+
                         goto CONTINUE;
                     }
 
@@ -1997,7 +1997,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             // 检查实体库名 2014/9/5
-            if (string.IsNullOrEmpty(strBiblioDbName) == false 
+            if (string.IsNullOrEmpty(strBiblioDbName) == false
                 && string.IsNullOrEmpty(strItemDbName) == true)
             {
                 strError = "书目库 '" + strBiblioDbName + "' 不具备下属的实体库，设置实体记录的操作失败";
@@ -2061,7 +2061,7 @@ namespace DigitalPlatform.LibraryServer
                         StringUtil.SetInList(ref strStyle, "force", true);
 
                 }
-                    // 2008/10/6 
+                // 2008/10/6 
                 else if (StringUtil.IsInList("force", info.Style) == true)
                 {
                     bForce = true;
@@ -2173,7 +2173,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "strAction值为delete时, info.NewTimestamp参数必须为空";
                     }
-                        // 2008/6/24 
+                    // 2008/6/24 
                     else if (String.IsNullOrEmpty(info.NewRecPath) == false)
                     {
                         if (info.NewRecPath != info.OldRecPath)
@@ -3174,13 +3174,13 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             GetPureValue(ref values);
-            strError = "图书类型 '"+strBookType+"' 不是合法的值。应为 '"+StringUtil.MakePathList(values)+"' 之一";
+            strError = "图书类型 '" + strBookType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";
             return 1;
         }
 
         static void GetPureValue(ref List<string> values)
         {
-            for(int i = 0;i<values.Count; i++)
+            for (int i = 0; i < values.Count; i++)
             {
                 string strText = values[i].Trim();
                 if (string.IsNullOrEmpty(strText) == true)
@@ -3603,7 +3603,7 @@ namespace DigitalPlatform.LibraryServer
             //      1   不符合要求
             nRet = CheckItemLibraryCode(domExist,
                 sessioninfo,
-                        // sessioninfo.LibraryCodeList,
+                // sessioninfo.LibraryCodeList,
                         out strLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -3726,7 +3726,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (info.OldRecPath != info.NewRecPath)
             {
-                strError = "当action为\"change\"时，info.NewRecordPath路径 '" + info.NewRecPath + "' 和info.OldRecPath '" +info.OldRecPath+ "' 必须相同";
+                strError = "当action为\"change\"时，info.NewRecordPath路径 '" + info.NewRecPath + "' 和info.OldRecPath '" + info.OldRecPath + "' 必须相同";
                 goto ERROR1;
             }
 
@@ -3854,7 +3854,7 @@ namespace DigitalPlatform.LibraryServer
                 //      1   不符合要求
                 nRet = CheckItemLibraryCode(domExist,
                     sessioninfo,
-                            // sessioninfo.LibraryCodeList,
+                    // sessioninfo.LibraryCodeList,
                             out strSourceLibraryCode,
                             out strError);
                 if (nRet == -1)
@@ -4136,7 +4136,7 @@ namespace DigitalPlatform.LibraryServer
             //      1   不符合要求
             nRet = CheckItemLibraryCode(strNewXml,
                 sessioninfo,
-                        // sessioninfo.LibraryCodeList,
+                // sessioninfo.LibraryCodeList,
                         out strTargetLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -4275,7 +4275,7 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode nodeOperations = dom.DocumentElement.SelectSingleNode("operations");
                 if (nodeOperations != null)
                     nodeOperations.ParentNode.RemoveChild(nodeOperations);
-                else 
+                else
                     break;
             }
 
@@ -4305,7 +4305,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "XML字符串装入DOM时发生错误: "+ ex.Message;
+                strError = "XML字符串装入DOM时发生错误: " + ex.Message;
                 return -1;
             }
 
@@ -4394,7 +4394,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (i + 1 >= nodes.Count)
                         break;
-                    XmlNode current = nodes[i+1];
+                    XmlNode current = nodes[i + 1];
                     current.ParentNode.RemoveChild(current);
                 }
             }
@@ -4603,7 +4603,7 @@ namespace DigitalPlatform.LibraryServer
             //      1   不符合要求
             nRet = CheckItemLibraryCode(domSourceExist,
                 sessioninfo,
-                        // sessioninfo.LibraryCodeList,
+                // sessioninfo.LibraryCodeList,
                         out strSourceLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -4723,7 +4723,7 @@ namespace DigitalPlatform.LibraryServer
             //      1   不符合要求
             nRet = CheckItemLibraryCode(strNewXml,
                 sessioninfo,
-                        // sessioninfo.LibraryCodeList,
+                // sessioninfo.LibraryCodeList,
                         out strTargetLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -4938,7 +4938,8 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 #endif
-        static int IndexOf(
+
+        static int IndexOfFirst(
             List<string> list,
             string one,
             bool bIgnoreCase)
@@ -4952,6 +4953,23 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return -1;
+        }
+
+        static List<int> IndexOf(
+    List<string> list,
+    string one,
+    bool bIgnoreCase)
+        {
+            List<int> results = new List<int>();
+            int index = 0;
+            foreach (string s in list)
+            {
+                if (string.Compare(s, one, bIgnoreCase) == 0)
+                    results.Add(index);
+                index++;
+            }
+
+            return results;
         }
 
         // 根据册条码号列表，得到记录路径列表
@@ -5012,6 +5030,8 @@ namespace DigitalPlatform.LibraryServer
                 results.Add("");
             }
 
+#if NO
+            // TODO: 如果 word_list 中有重复的
             // 按照key归并?
             foreach (Record record in records)
             {
@@ -5037,6 +5057,41 @@ namespace DigitalPlatform.LibraryServer
                 {
                     Debug.Assert(string.IsNullOrEmpty(record.Path) == false, "");
                     results[nIndex] = record.Path;
+                }
+            }
+#endif
+
+            // 注意 word_list 中可能有重复的 key
+            // 按照key归并?
+            foreach (Record record in records)
+            {
+                if (record.Keys == null || record.Keys.Length == 0)
+                {
+                    strError = "record.Keys error";
+                    return -1;
+                }
+
+                string strKey = record.Keys[0].Key;
+                if (record.Keys[0].From == "refID")
+                    strKey = "@refID:" + strKey;    // TODO: 前缀用法需要统一。比如前端发来的册条码号也故意指定了前缀怎么办？
+
+                List<int> indices = IndexOf(word_list, strKey, bIgnoreCase);
+                if (indices.Count == 0)
+                {
+                    strError = "很奇怪出现了 key '" + strKey + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                    return -1;
+                }
+
+                foreach (int nIndex in indices)
+                {
+                    // 是否发生了命中检索词重复?
+                    if (string.IsNullOrEmpty(results[nIndex]) == false)
+                        results[nIndex] = "!" + strFrom + " '" + strKey + "' 检索命中不唯一";
+                    else
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(record.Path) == false, "");
+                        results[nIndex] = record.Path;
+                    }
                 }
             }
 
@@ -5118,10 +5173,12 @@ namespace DigitalPlatform.LibraryServer
 
                 Debug.Assert(temp_results.Count == temp_words.Count, "");
 
-                for (int i = 0; i<temp_words.Count; i++)
+                for (int i = 0; i < temp_words.Count; i++)
                 {
                     string word = temp_words[i];
-                    int nPos = IndexOf(word_list, word, bIgnoreCase);
+#if NO
+                    // TODO: 这里需要测试一下
+                    int nPos = IndexOfFirst(word_list, word, bIgnoreCase);
                     if (nRet == -1)
                     {
                         strError = "很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
@@ -5129,6 +5186,19 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     results[nPos] = temp_results[i];
+#endif
+                    // 2016/1/6
+                    List<int> indices = IndexOf(word_list, word, bIgnoreCase);
+                    if (indices.Count == 0)
+                    {
+                        strError = "很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                        return -1;
+                    }
+
+                    foreach (int nPos in indices)
+                    {
+                        results[nPos] = temp_results[i];
+                    }
                 }
             }
 
@@ -5136,10 +5206,7 @@ namespace DigitalPlatform.LibraryServer
             strResult = StringUtil.MakePathList(results);
             return 1;
         }
-
-
     }
-
 
     // 实体信息
     public class DeleteEntityInfo

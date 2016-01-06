@@ -3442,6 +3442,16 @@ namespace dp2Circulation
                 MessageBox.Show(ForegroundWindow.Instance, "尚未选择要编辑的事项");
                 return;
             }
+
+            bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord",
+    this.MainForm._currentUserRights// this.Rights
+    ) == true;
+            if (bAllowModify == false)
+            {
+                MessageBox.Show(ForegroundWindow.Instance, "当前用户不具备 client_uimodifyorderrecord 权限");
+                return;
+            }
+
             OrderItem orderitem = (OrderItem)this.listView.SelectedItems[0].Tag;
 
             ModifyOrder(orderitem);
@@ -3660,7 +3670,8 @@ namespace dp2Circulation
 
         private void ListView_DoubleClick(object sender, EventArgs e)
         {
-            menu_modifyOrder_Click(this, null);
+            // menu_modifyOrder_Click(this, null);
+            menu_design_Click(this, new EventArgs());
         }
 
 #if NO

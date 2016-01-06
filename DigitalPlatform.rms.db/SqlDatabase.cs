@@ -6279,7 +6279,6 @@ namespace DigitalPlatform.rms
                         byte[] baWholeXml = null;
                         byte[] baPreamble = null;
 
-
                         string strXml = null;
                         XmlDocument dom = null;
 
@@ -6449,7 +6448,7 @@ namespace DigitalPlatform.rms
                         } // if (StringUtil.IsInList("withresmetadata", strStyle) == true)
 
                         // 通过xpath找片断的情况
-                        if (strXPath != null && strXPath != "")
+                        if (string.IsNullOrEmpty(strXPath) == false)
                         {
                             if (dom != null)
                             {
@@ -6523,7 +6522,7 @@ namespace DigitalPlatform.rms
                                 destBuffer = new byte[0];
                             }
 
-                            return 0;
+                            return destBuffer.Length;   // 2016/1/3
                         } // end if (strXPath != null && strXPath != "")
 
                         if (dom != null)
@@ -14944,11 +14943,12 @@ start_time,
                                 keynumParam.Value = oneKey.Num;
 #else
 
+                                // 2016/1/6 加入 N
                                 strCommand.Append(" DELETE FROM " + strKeysTableName
-    + " WHERE keystring = '" + MySqlHelper.EscapeString(oneKey.Key)
-    + "' AND fromstring = '" + MySqlHelper.EscapeString(oneKey.FromValue)
-    + "' AND idstring = '" + MySqlHelper.EscapeString(oneKey.RecordID)
-    + "' AND keystringnum = '" + MySqlHelper.EscapeString(oneKey.Num) + "' ;\n");
+    + " WHERE keystring = N'" + MySqlHelper.EscapeString(oneKey.Key)
+    + "' AND fromstring = N'" + MySqlHelper.EscapeString(oneKey.FromValue)
+    + "' AND idstring = N'" + MySqlHelper.EscapeString(oneKey.RecordID)
+    + "' AND keystringnum = N'" + MySqlHelper.EscapeString(oneKey.Num) + "' ;\n");
 
 #endif
 
@@ -14959,7 +14959,7 @@ start_time,
                                     command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                         + strCommand
 #if !PARAMETERS
- + " ;\n"
+ // + " ;\n"
 #endif
 ;
                                     try
@@ -15037,21 +15037,23 @@ start_time,
                                 if (strCommand.Length == 0
                                     || strKeysTableName != strPrevSqlTableName)
                                 {
-                                    if (strCommand.Length > 0)
+                                    if (strCommand.Length > 0 && i > 0) // 2016/1/6 增加 i>0 限制。否则会多产生一个分号，导致 SQL 语法错误
                                         strCommand.Append(" ; ");
 
+                                    // 2016/1/6 加入 N
                                     strCommand.Append(" INSERT INTO " + strKeysTableName
         + " (keystring,fromstring,idstring,keystringnum) "
-        + " VALUES ('" + MySqlHelper.EscapeString(oneKey.Key) + "','"
-        + MySqlHelper.EscapeString(oneKey.FromValue) + "','"
-        + MySqlHelper.EscapeString(oneKey.RecordID) + "','"
+        + " VALUES (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
         + MySqlHelper.EscapeString(oneKey.Num) + "') ");
                                 }
                                 else
                                 {
-                                    strCommand.Append(", ('" + MySqlHelper.EscapeString(oneKey.Key) + "','"
-        + MySqlHelper.EscapeString(oneKey.FromValue) + "','"
-        + MySqlHelper.EscapeString(oneKey.RecordID) + "','"
+                                    // 2016/1/6 加入 N
+                                    strCommand.Append(", (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
         + MySqlHelper.EscapeString(oneKey.Num) + "') ");
                                 }
 
@@ -15074,6 +15076,7 @@ start_time,
                                     catch (Exception ex)
                                     {
                                         strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                        this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
                                         return -1;
                                     }
                                     strCommand.Clear();
@@ -15104,6 +15107,7 @@ start_time,
                             catch (Exception ex)
                             {
                                 strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
                                 return -1;
                             }
 

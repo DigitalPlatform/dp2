@@ -34,7 +34,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>67</ApplicationRevision>
+    <ApplicationRevision>74</ApplicationRevision>
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -60,10 +60,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>E9B4F6909843B92D17E022B28977DA914E4E2598</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>6100BCFAC388EACAF7E22368B140127C1FE348AC</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2Installer_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2Installer_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -137,6 +137,7 @@
     <None Include="copykernel.bat" />
     <None Include="copylibrary.bat" />
     <None Include="copyopac.bat" />
+    <None Include="dp2Installer_1_TemporaryKey.pfx" />
     <None Include="dp2Installer_TemporaryKey.pfx" />
     <Content Include="opac_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

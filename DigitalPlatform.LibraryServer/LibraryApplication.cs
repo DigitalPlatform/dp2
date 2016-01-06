@@ -106,7 +106,9 @@ namespace DigitalPlatform.LibraryServer
         //      2.63 (2015/12/12) Return() API，对于超期违约金因子为空的情况，现在不当作出错处理。这种情况交费信息不会写入读者记录的交费信息字段，但会进入操作日志中(便于以后进行统计)。
         //      2.64 (2015/12/27) 借书和还书操作信息会自动写入 mongodb 的日志库。增加后台任务 "创建 MongoDB 日志库"
         //      2.65 (2016/1/1) GetSystemParameters() API 增加 circulation/chargingOperDatabase。
-        public static string Version = "2.65";
+        //      2.66 (2016/1/2) GetBiblioInfos() API 中当 strBiblioRecPath 参数在使用 @path-list: 引导的时候，其后部允许出现 @itemBarcode:xxxx|@itemBarcode:xxx 这样的内容
+        //      2.67 (2016/1/6) GetItemInfo() API 的 @barcode-list:" "get-path-list" 功能允许间杂 @refID:前缀的号码。
+        public static string Version = "2.67";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1720,7 +1722,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.63");
+                Version base_version = new Version("2.64");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -1745,7 +1747,7 @@ namespace DigitalPlatform.LibraryServer
 
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "比较 dp2kernel 版本号的过程发生错误: " + ex.Message;
                 return -1;
@@ -6307,10 +6309,10 @@ out strError);
 
         public int GetItemRecXml(
             RmsChannel channel,
-    string strBarcode,
-    out string strXml,
-    out string strOutputPath,
-    out string strError)
+            string strBarcode,
+            out string strXml,
+            out string strOutputPath,
+            out string strError)
         {
             byte[] timestamp = null;
 
@@ -6439,6 +6441,42 @@ out strError);
             return -1;
         }
 #endif
+        public int GetItemRecParent(
+    RmsChannel channel,
+    string strBarcode,
+    out string strParentID,
+    out string strOutputPath,
+    out string strError)
+        {
+            byte[] timestamp = null;
+
+            return GetItemRecXml(
+channel,
+strBarcode,
+"parent",
+out strParentID,
+out strOutputPath,
+out timestamp,
+out strError);
+        }
+
+        public int GetItemRecXml(
+    RmsChannel channel,
+    string strBarcodeParam,
+    out string strXml,
+    out string strOutputPath,
+    out byte[] timestamp,
+    out string strError)
+        {
+            return GetItemRecXml(
+    channel,
+    strBarcodeParam,
+    "",
+    out strXml,
+    out strOutputPath,
+    out timestamp,
+    out strError);
+        }
 
         // 2014/9/19 strBarcode 可以包含 @refID: 前缀了
         // 2012/1/5 改造为PiggyBack检索
@@ -6453,6 +6491,7 @@ out strError);
         public int GetItemRecXml(
             RmsChannel channel,
             string strBarcodeParam,
+            string strStyle,
             out string strXml,
             out string strOutputPath,
             out byte[] timestamp,
@@ -6513,6 +6552,9 @@ out strError);
                 strQueryXml = "<group>" + strQueryXml + "</group>";
             }
 
+            string strBrowseStyle = "id,xml,timestamp";
+            if (strStyle == "parent")
+                strBrowseStyle = "id,cols,format:@coldef://parent";
 
             Record[] records = null;
             long lRet = channel.DoSearchEx(strQueryXml,
@@ -6520,7 +6562,7 @@ out strError);
                 "", // strOuputStyle
                 1,
                 "zh",
-                "id,xml,timestamp",
+                strBrowseStyle, // "id,xml,timestamp",
                 out records,
                 out strError);
             if (lRet == -1)
@@ -6541,11 +6583,19 @@ out strError);
                 return -1;
             }
 
-            Debug.Assert(records[0].RecordBody != null, "");
+            if (strStyle == "parent")
+            {
+                strOutputPath = records[0].Path;
+                strXml = records[0].Cols[0];
+            }
+            else
+            {
+                Debug.Assert(records[0].RecordBody != null, "");
 
-            strOutputPath = records[0].Path;
-            strXml = records[0].RecordBody.Xml;
-            timestamp = records[0].RecordBody.Timestamp;
+                strOutputPath = records[0].Path;
+                strXml = records[0].RecordBody.Xml;
+                timestamp = records[0].RecordBody.Timestamp;
+            }
 
             return (int)lHitCount;
         ERROR1:
@@ -7548,6 +7598,26 @@ out strError);
             return -1;
         }
 
+        // 将一个检索词列表中的，带有 @refID 的部分检索词拆为另外一个 list
+        static void SplitWordList(string strWordList,
+            out string strNormalList,
+            out string strRefIDList)
+        {
+            List<string> refids = new List<string>();
+            List<string> normals = new List<string>();
+            string[] list = strWordList.Split(new char[] { ',' });
+            foreach (string word in list)
+            {
+                if (word != null && word.StartsWith("@refID:") == true)
+                    refids.Add(word.Substring("@refID:".Length));
+                else
+                    normals.Add(word);
+            }
+
+            strNormalList = string.Join(",", normals);
+            strRefIDList = string.Join(",", refids);
+        }
+
         // 一次检索多个检索词
         // "册条码";
         // "参考ID";
@@ -7580,6 +7650,18 @@ out strError);
             if (nRet == -1)
                 return -1;
 
+            string strRefIDList = "";
+
+            if (strFrom == "册条码" || strFrom == "册条码号")
+            {
+                string strNormalList = "";
+                // 将一个检索词列表中的，带有 @refID 的部分检索词拆为另外一个 list
+                SplitWordList(strWordList,
+                    out strNormalList,
+                    out strRefIDList);
+                strWordList = strNormalList;
+            }
+
             // 构造检索式
             string strQueryXml = "";
             int nDbCount = 0;
@@ -7590,20 +7672,39 @@ out strError);
                 if (String.IsNullOrEmpty(strDbName) == true)
                     continue;
 
-                string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
-                    + "'><item><word>"
-                    + StringUtil.GetXmlStringSimple(strWordList)
-                    + "</word><match>exact</match><relation>list</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
-
-                if (nDbCount > 0)
+                if (string.IsNullOrEmpty(strWordList) == false)
                 {
-                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
-                    strQueryXml += "<operator value='OR'/>";
+                    string strOneDbQuery = "<target list='"
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
+                        + "'><item><word>"
+                        + StringUtil.GetXmlStringSimple(strWordList)
+                        + "</word><match>exact</match><relation>list</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+                    if (nDbCount > 0)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                        strQueryXml += "<operator value='OR'/>";
+                    }
+                    strQueryXml += strOneDbQuery;
+                    nDbCount++;
                 }
 
-                strQueryXml += strOneDbQuery;
-                nDbCount++;
+                if (string.IsNullOrEmpty(strRefIDList) == false)
+                {
+                    string strOneDbQuery = "<target list='"
+    + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID") 
+    + "'><item><word>"
+    + StringUtil.GetXmlStringSimple(strRefIDList)
+    + "</word><match>exact</match><relation>list</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+                    if (nDbCount > 0)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                        strQueryXml += "<operator value='OR'/>";
+                    }
+                    strQueryXml += strOneDbQuery;
+                    nDbCount++;
+                }
             }
 
             if (nDbCount > 0)
@@ -10279,8 +10380,6 @@ out strError);
                 string strMetaData = "";
                 // string strTempOutputPath = "";
 
-
-
                 long lRet = channel.GetRes(strItemRecPath,
                     out strItemXml,
                     out strMetaData,
@@ -10295,7 +10394,6 @@ out strError);
             }
             else // 普通条码号
             {
-
                 List<string> aPath = null;
 
                 // 获得册记录
@@ -10591,7 +10689,6 @@ out strError);
             strError = "";
             strBiblioRecPath = "";
             int nRet = 0;
-
 
             {
                 string strItemDbName0 = ResPath.GetDbName(strItemRecPath);

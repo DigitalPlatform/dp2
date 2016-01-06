@@ -19,7 +19,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
-
 namespace dp2Circulation
 {
     /// <summary>
@@ -6780,7 +6779,6 @@ issue.Volume);
                     "");
                  * */
 
-
                 // 插入到合适的位置?
                 InsertIssueToIssues(new_issue);
 
@@ -8370,6 +8368,16 @@ issue.Volume);
                 ref nPreferredDelta);
         }
 
+        // 2016/1/6
+        // 获得一年的天数。2016 年为 366 天
+        static int GetDaysOfYear(string strYear)
+        {
+            DateTime start = DateTimeUtil.Long8ToDateTime(strYear + "0101");
+            string strNextYear = (Int32.Parse(strYear) + 1).ToString().PadLeft(4, '0');
+            DateTime end = DateTimeUtil.Long8ToDateTime(strNextYear + "0101");
+            return (int)((end - start).TotalDays);
+        }
+
         // 预测下一期的出版时间
         // exception:
         //      可能因strPublishTime为不可能的日期而抛出异常
@@ -8382,6 +8390,9 @@ issue.Volume);
             ref int nPreferredDelta)
         {
             strPublishTime = CanonicalizeLong8TimeString(strPublishTime);
+
+            // 计算出一年有多少天。比如 2016 年就是 366 天而不是 365 天
+            int nDaysOfYear = GetDaysOfYear(strPublishTime.Substring(0, 4));
 
             DateTime start = DateTimeUtil.Long8ToDateTime(strPublishTime);
 
@@ -8562,7 +8573,7 @@ issue.Volume);
             }
 
             // 一年365期
-            else if (nIssueCount > 183 && nIssueCount <= 365)
+            else if (nIssueCount > 183 && nIssueCount <= nDaysOfYear)
             {
                 // 1天以后
                 start += new TimeSpan(1, 0, 0, 0);

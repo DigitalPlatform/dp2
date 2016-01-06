@@ -3894,7 +3894,8 @@ MessageBoxDefaultButton.Button2);
                 ItemSearchForm form = this.MainForm.OpenItemSearchForm("item");
                 // form.Activate();
                 int nRet = form.ImportFromRecPathFile(strTempFileName,
-    out strError);
+                    "clear",
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }

@@ -2549,6 +2549,7 @@ namespace dp2Circulation
             string strError = "";
 
             int nRet = ImportFromRecPathFile(null,
+                "clear",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

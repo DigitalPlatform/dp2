@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>8</ApplicationRevision>
+    <ApplicationRevision>9</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -587,6 +587,12 @@
     <Compile Include="Reader\ChangeStateActionControl.Designer.cs">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Reader\ExportPatronExcelDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ExportPatronExcelDialog.Designer.cs">
+      <DependentUpon>ExportPatronExcelDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reader\SelectPatronDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -726,7 +732,7 @@
     <Compile Include="Reader\CompareReaderForm.Designer.cs">
       <DependentUpon>CompareReaderForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="CopyrightDlg.cs">
+    <Compile Include="AboutDlg.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dup\DupForm.cs">
@@ -1644,6 +1650,9 @@
     <EmbeddedResource Include="Reader\ChangeStateActionControl.resx">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ExportPatronExcelDialog.resx">
+      <DependentUpon>ExportPatronExcelDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Reader\SelectPatronDialog.resx">
       <DependentUpon>SelectPatronDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -1720,8 +1729,8 @@
       <SubType>Designer</SubType>
       <DependentUpon>CompareReaderForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CopyrightDlg.resx">
-      <DependentUpon>CopyrightDlg.cs</DependentUpon>
+    <EmbeddedResource Include="AboutDlg.resx">
+      <DependentUpon>AboutDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dup\DupForm.resx">

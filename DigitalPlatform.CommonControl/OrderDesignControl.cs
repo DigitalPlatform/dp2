@@ -480,7 +480,6 @@ namespace DigitalPlatform.CommonControl
 
                 // 2009/11/9
                 string strTotalPrice = "";
-
                 try
                 {
                     strTotalPrice = item.TotalPrice;
@@ -558,10 +557,7 @@ namespace DigitalPlatform.CommonControl
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入期数";
                         return 1;
                     }
-
-
                 }
-
 
                 if (bStrict == true)
                 {
@@ -772,7 +768,7 @@ namespace DigitalPlatform.CommonControl
             {
                 Item cur_element = this.Items[i];
 
-                if (cur_element.StateString == "")
+                if (String.IsNullOrEmpty(cur_element.StateString) == true)
                 {
                     Debug.Assert(cur_element.location.ReadOnly == true, "");
                     nNotOrderItemCount++;
@@ -1607,6 +1603,19 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        // 获得缺省记录
+        internal string GetDefaultXml()
+        {
+            if (this.GetDefaultRecord != null)
+            {
+                GetDefaultRecordEventArgs e = new GetDefaultRecordEventArgs();
+                this.GetDefaultRecord(this, e);
+
+                return e.Xml;
+            }
+            return "";
+        }
+
         public Item AppendNewItem(bool bSetDefaultRecord)
         {
             this.DisableUpdate();   // 防止闪动。彻底解决问题。2009/10/13 
@@ -1622,31 +1631,24 @@ namespace DigitalPlatform.CommonControl
 
                 this.Items.Add(item);
 
-                if (this.GetDefaultRecord != null
-                    && bSetDefaultRecord == true)
+                if (bSetDefaultRecord == true)
                 {
-                    GetDefaultRecordEventArgs e = new GetDefaultRecordEventArgs();
-                    this.GetDefaultRecord(this, e);
+                    string strDefaultRecord = GetDefaultXml();
 
-                    string strDefaultRecord = e.Xml;
-
-                    if (String.IsNullOrEmpty(strDefaultRecord) == true)
-                        goto END1;
-
-                    string strError = "";
-                    // 根据缺省XML订购记录填充必要的字段
-                    int nRet = SetDefaultRecord(item,
-                        strDefaultRecord,
-                        true,
-                        out strError);
-                    if (nRet == -1)
-                        throw new Exception(strError);
-
+                    if (String.IsNullOrEmpty(strDefaultRecord) == false)
+                    {
+                        string strError = "";
+                        // 根据缺省XML订购记录填充必要的字段
+                        int nRet = SetDefaultRecord(item,
+                            strDefaultRecord,
+                            true,
+                            out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+                    }
                 }
 
-            END1:
                 item.State = ItemState.New;
-
                 return item;
             }
             finally
@@ -1655,7 +1657,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        public Item InsertNewItem(int index)
+        public Item InsertNewItem(int index, string strDefaultRecord = "")
         {
             this.DisableUpdate();   // 防止闪动。彻底解决问题。2009/10/13 
             try
@@ -1669,16 +1671,11 @@ namespace DigitalPlatform.CommonControl
 
                 this.Items.Insert(index, item);
 
-                if (this.GetDefaultRecord != null)
+                if (string.IsNullOrEmpty(strDefaultRecord) == true)
+                    strDefaultRecord = this.GetDefaultXml();
+
+                if (String.IsNullOrEmpty(strDefaultRecord) == false)
                 {
-                    GetDefaultRecordEventArgs e = new GetDefaultRecordEventArgs();
-                    this.GetDefaultRecord(this, e);
-
-                    string strDefaultRecord = e.Xml;
-
-                    if (String.IsNullOrEmpty(strDefaultRecord) == true)
-                        goto END1;
-
                     string strError = "";
                     // 根据缺省XML订购记录填充必要的字段
                     int nRet = SetDefaultRecord(item,
@@ -1688,7 +1685,6 @@ namespace DigitalPlatform.CommonControl
                     if (nRet == -1)
                         throw new Exception("装载订购记录缺省值时出错: " + strError);
                 }
-            END1:
 
                 item.State = ItemState.New;
                 return item;
@@ -2245,10 +2241,14 @@ namespace DigitalPlatform.CommonControl
 
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
+            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
             using (Brush brushText = new SolidBrush(Color.Black))
             using (Pen pen = new Pen(Color.Red))
             {
-
                 Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
                 // Debug.WriteLine("p x=" + p.X.ToString() + " y=" + p.Y.ToString());
 
@@ -2318,7 +2318,6 @@ namespace DigitalPlatform.CommonControl
                         }
                         x += fWidth;
                     }
-
                     // y += height;
                 }
             }
@@ -2893,7 +2892,6 @@ namespace DigitalPlatform.CommonControl
 
             try
             {
-
                 // 移除本行相关的控件
                 table.Controls.Remove(this.label_color);
                 table.Controls.Remove(this.textBox_catalogNo);
@@ -3090,7 +3088,6 @@ namespace DigitalPlatform.CommonControl
             // events
             AddEvents(true);
         }
-
 
         void AddEvents(bool bAdd)
         {
@@ -3301,8 +3298,6 @@ namespace DigitalPlatform.CommonControl
 
             this.Container.Changed = true;
         }
-
-
 
         #region events
 
@@ -3683,12 +3678,21 @@ namespace DigitalPlatform.CommonControl
              * */
 
             //
-            menuItem = new MenuItem("前插(&I)");
+            menuItem = new MenuItem("复制新增[后](&A)");
+            menuItem.Click += new System.EventHandler(this.menu_appendCopyElement_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            //
+            menuItem = new MenuItem("新增[前](&I)");
             menuItem.Click += new System.EventHandler(this.menu_insertElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
             //
-            menuItem = new MenuItem("后插(&A)");
+            menuItem = new MenuItem("新增[后](&A)");
             menuItem.Click += new System.EventHandler(this.menu_appendElement_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -3868,6 +3872,61 @@ namespace DigitalPlatform.CommonControl
             this.Container.InsertNewItem(nPos + 1).EnsureVisible();
         }
 
+        // 复制新增
+        void menu_appendCopyElement_Click(object sender, EventArgs e)
+        {
+            int nPos = this.Container.Items.IndexOf(this);
+            if (nPos == -1)
+            {
+                throw new Exception("not found myself");
+            }
+
+            string strError = "";
+            string strXml = "";
+            Item source = this.Container.Items[nPos];
+            // 获得表示事项全部内容的XML记录
+            int nRet = BuildXml(out strXml, out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            string strBatchNo = "";
+            {
+                string strDefaultXml = this.Container.GetDefaultXml();
+                if (string.IsNullOrEmpty(strDefaultXml) == false)
+                {
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(strDefaultXml);
+                    strBatchNo = DomUtil.GetElementText(dom.DocumentElement, "batchNo");
+                }
+            }
+
+            // 修改一些字段
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(strXml);
+
+                // 如果单价和总价都有，则要把总价清空
+                string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
+                string strTotalPrice = DomUtil.GetElementText(dom.DocumentElement, "totalPrice");
+                if (string.IsNullOrEmpty(strPrice) == false && string.IsNullOrEmpty(strTotalPrice) == false)
+                    DomUtil.SetElementText(dom.DocumentElement, "totalPrice", "");
+
+                DomUtil.SetElementText(dom.DocumentElement, "state", "");
+                DomUtil.SetElementText(dom.DocumentElement, "refID", "");
+                DomUtil.SetElementText(dom.DocumentElement, "range", "");
+                DomUtil.SetElementText(dom.DocumentElement, "batchNo", strBatchNo);
+                strXml = dom.DocumentElement.OuterXml;
+            }
+
+            Item target = this.Container.InsertNewItem(nPos + 1, strXml);
+#if NO
+            target.StateString = "";
+            target.RefID = "";
+            target.RangeString = "";    // TODO: 可以从上一个事项的时候后面自动计算延展
+#endif
+            target.EnsureVisible();
+        }
+
         // 删除当前元素
         void menu_deleteElements_Click(object sender, EventArgs e)
         {
@@ -3918,6 +3977,23 @@ namespace DigitalPlatform.CommonControl
 
             if (nNotDeleteCount > 0)
                 MessageBox.Show(this.Container, "有 " + nNotDeleteCount.ToString() + " 项已订购状态的事项未能删除");
+        }
+
+        void CopyTo(Item item)
+        {
+            item.CatalogNo = this.CatalogNo;
+            item.Seller = this.Seller;
+            item.Source = this.Source;
+            item.RangeString = this.RangeString;
+            item.IssueCountString = this.IssueCountString;
+            item.CopyString = this.CopyString;
+            item.OldPrice = this.OldPrice;
+            item.Price = this.Price;
+            item.Distribute = this.Distribute;
+            item.SellerAddressXml = this.SellerAddressXml;
+            item.Class = this.Class;
+            // StateString 不要复制
+            // item.TotalPrice = this.TotalPrice;
         }
 
         #region 外部需要使用的属性
@@ -4287,12 +4363,12 @@ namespace DigitalPlatform.CommonControl
 
                 this.OtherXml = dom.OuterXml;
                 // 会自动刷新显示
-
             }
         }
 
+#if NO
         // 2008/11/12
-        string m_strStateString = "";
+        // string m_strStateString = "";
 
         public string StateString
         {
@@ -4300,7 +4376,68 @@ namespace DigitalPlatform.CommonControl
             {
                 return m_strStateString;
             }
+            set
+            {
+                m_strStateString = value;
+            }
         }
+#endif
+        string GetFieldValue(string strElementName)
+        {
+            XmlDocument dom = new XmlDocument();
+            if (String.IsNullOrEmpty(this.m_otherXml) == false)
+            {
+                try
+                {
+                    dom.LoadXml(this.m_otherXml);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("load other xml error: " + ex.Message);
+                }
+                return DomUtil.GetElementText(dom.DocumentElement,
+                    strElementName);
+            }
+            else
+                return "";
+        }
+
+        void SetFieldValue(string strElementName, string strValue)
+        {
+            XmlDocument dom = new XmlDocument();
+            if (String.IsNullOrEmpty(this.m_otherXml) == false)
+            {
+                try
+                {
+                    dom.LoadXml(this.m_otherXml);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("load other xml error: " + ex.Message);
+                }
+            }
+            else
+                dom.LoadXml("<root />");
+
+            DomUtil.SetElementText(dom.DocumentElement,
+                strElementName, strValue);
+
+            this.m_otherXml = dom.DocumentElement.OuterXml;
+        }
+
+        // 可能会抛出异常
+        public string StateString
+        {
+            get
+            {
+                return this.GetFieldValue("state");
+            }
+            set
+            {
+                this.SetFieldValue("state", value);
+            }
+        }
+
 
         int DisplaySellerAddressXml(string strXml,
             out string strError)
@@ -4389,7 +4526,7 @@ namespace DigitalPlatform.CommonControl
             string strState = DomUtil.GetElementText(dom.DocumentElement,
                 "state");
 
-            m_strStateString = strState;
+            ////m_strStateString = strState;
 
             string strRange = DomUtil.GetElementText(dom.DocumentElement,
                 "range");
@@ -4425,6 +4562,7 @@ namespace DigitalPlatform.CommonControl
         {
             get
             {
+#if NO
                 XmlDocument dom = new XmlDocument();
                 if (String.IsNullOrEmpty(this.m_otherXml) == false)
                 {
@@ -4441,9 +4579,12 @@ namespace DigitalPlatform.CommonControl
                 }
                 else
                     return "";
+#endif
+                return this.GetFieldValue("totalPrice");
             }
             set
             {
+#if NO
                 XmlDocument dom = new XmlDocument();
                 if (String.IsNullOrEmpty(this.m_otherXml) == false)
                 {
@@ -4463,6 +4604,60 @@ namespace DigitalPlatform.CommonControl
                     "totalPrice", value);
 
                 this.m_otherXml = dom.DocumentElement.OuterXml;
+#endif
+                this.SetFieldValue("totalPrice", value);
+            }
+        }
+
+        // 可能会抛出异常
+        public string RefID
+        {
+            get
+            {
+#if NO
+                XmlDocument dom = new XmlDocument();
+                if (String.IsNullOrEmpty(this.m_otherXml) == false)
+                {
+                    try
+                    {
+                        dom.LoadXml(this.m_otherXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("load other xml error: " + ex.Message);
+                    }
+                    return DomUtil.GetElementText(dom.DocumentElement,
+                        "refID");
+                }
+                else
+                    return "";
+#endif
+                return this.GetFieldValue("refID");
+            }
+            set
+            {
+#if NO
+                XmlDocument dom = new XmlDocument();
+                if (String.IsNullOrEmpty(this.m_otherXml) == false)
+                {
+                    try
+                    {
+                        dom.LoadXml(this.m_otherXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("load other xml error: " + ex.Message);
+                    }
+                }
+                else
+                    dom.LoadXml("<root />");
+
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "refID", value);
+
+                this.m_otherXml = dom.DocumentElement.OuterXml;
+#endif
+                this.SetFieldValue("refID", value);
             }
         }
 
@@ -4521,7 +4716,6 @@ namespace DigitalPlatform.CommonControl
                 "class", this.Class);
 
             strXml = dom.OuterXml;
-
             return 0;
         }
 

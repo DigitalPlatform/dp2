@@ -587,8 +587,6 @@ out strError);
                         strID = strText;
                      * */
 
-
-
                     if (bHasID == true)
                     {
                         // GetCaptionSafety()函数先找到指定语言的库名;

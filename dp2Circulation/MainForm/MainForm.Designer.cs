@@ -206,11 +206,11 @@ namespace dp2Circulation
             this.webBrowser_messageHub = new System.Windows.Forms.WebBrowser();
             this.toolStrip_messageHub = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_messageHub_userManage = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_messageHub_relogin = new System.Windows.Forms.ToolStripButton();
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.toolStripButton_messageHub_relogin = new System.Windows.Forms.ToolStripButton();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1253,8 +1253,8 @@ namespace dp2Circulation
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
             this.MenuItem_copyright.Size = new System.Drawing.Size(196, 22);
-            this.MenuItem_copyright.Text = "版权(&C)...";
-            this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
+            this.MenuItem_copyright.Text = "关于(&A)...";
+            this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_about_Click);
             // 
             // statusStrip_main
             // 
@@ -1697,6 +1697,16 @@ namespace dp2Circulation
             this.toolStripButton_messageHub_userManage.Text = "用户管理";
             this.toolStripButton_messageHub_userManage.Click += new System.EventHandler(this.toolStripButton_messageHub_userManage_Click);
             // 
+            // toolStripButton_messageHub_relogin
+            // 
+            this.toolStripButton_messageHub_relogin.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_messageHub_relogin.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_messageHub_relogin.Image")));
+            this.toolStripButton_messageHub_relogin.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_messageHub_relogin.Name = "toolStripButton_messageHub_relogin";
+            this.toolStripButton_messageHub_relogin.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_messageHub_relogin.Text = "重新登录";
+            this.toolStripButton_messageHub_relogin.Click += new System.EventHandler(this.toolStripButton_messageHub_relogin_Click);
+            // 
             // toolStrip_panelFixed
             // 
             this.toolStrip_panelFixed.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
@@ -1728,16 +1738,6 @@ namespace dp2Circulation
             this.splitter_fixed.Size = new System.Drawing.Size(2, 337);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
-            // 
-            // toolStripButton_messageHub_relogin
-            // 
-            this.toolStripButton_messageHub_relogin.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_messageHub_relogin.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_messageHub_relogin.Image")));
-            this.toolStripButton_messageHub_relogin.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_messageHub_relogin.Name = "toolStripButton_messageHub_relogin";
-            this.toolStripButton_messageHub_relogin.Size = new System.Drawing.Size(60, 22);
-            this.toolStripButton_messageHub_relogin.Text = "重新登录";
-            this.toolStripButton_messageHub_relogin.Click += new System.EventHandler(this.toolStripButton_messageHub_relogin_Click);
             // 
             // MainForm
             // 

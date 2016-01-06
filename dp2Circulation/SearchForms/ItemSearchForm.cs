@@ -95,7 +95,7 @@ namespace dp2Circulation
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
 
             prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn);
-            prop.CompareColumn += new CompareEventHandler(prop_CompareColumn); 
+            prop.CompareColumn += new CompareEventHandler(prop_CompareColumn);
         }
 
         void prop_CompareColumn(object sender, CompareEventArgs e)
@@ -483,7 +483,7 @@ this.DbType + "_search_form",
                 this.comboBox_from.Items.Add(from);
             }
             // this.comboBox_from.Items.AddRange(GetFromList());
-            
+
         }
 
         private void ItemSearchForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -913,7 +913,7 @@ this.DbType + "_search_form",
                         this.textBox_queryWord.Text,
                         this.MaxSearchResultCount,
                         this.comboBox_from.Text,
-                        strMatchStyle, 
+                        strMatchStyle,
                         this.Lang,
                         null,
                         "",
@@ -1297,7 +1297,6 @@ this.DbType + "_search_form",
                             return 0;
                         }
                     }
-
                 }
                 finally
                 {
@@ -2012,7 +2011,7 @@ out strError);
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 到种册窗，条码
-//                if (this.DbType == "item")
+                //                if (this.DbType == "item")
                 if (string.IsNullOrEmpty(strBarcode) == false)
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + "种册窗，根据册条码号 '" + strBarcode + "'");
@@ -2484,7 +2483,7 @@ out strError);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-        
+
 
         // 进行流通操作
         int DoCirculation(string strAction,
@@ -2516,7 +2515,7 @@ out strError);
                 strOperName = "盘点";
             else
             {
-                strError = "未知的 strAction 值 '"+strAction+"'";
+                strError = "未知的 strAction 值 '" + strAction + "'";
                 return -1;
             }
 
@@ -3080,12 +3079,12 @@ this.MainForm.DefaultFont);
 
             string strText = "";
             if (nWarningLineCount > 0)
-                strText = "有 " + nWarningLineCount.ToString()+ " 行因为相关库浏览格式没有包含父记录 ID 列而被忽略";
+                strText = "有 " + nWarningLineCount.ToString() + " 行因为相关库浏览格式没有包含父记录 ID 列而被忽略";
             if (nDupCount > 0)
             {
                 if (string.IsNullOrEmpty(strText) == false)
                     strText += "\r\n\r\n";
-                strText += "书目记录有 "+nDupCount.ToString()+" 项重复被忽略";
+                strText += "书目记录有 " + nDupCount.ToString() + " 项重复被忽略";
             }
 
             if (string.IsNullOrEmpty(strText) == false)
@@ -3100,7 +3099,7 @@ this.MainForm.DefaultFont);
         void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
-    "确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个"+this.DbTypeCaption+"记录?\r\n\r\n(OK 删除；Cancel 取消)",
+    "确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个" + this.DbTypeCaption + "记录?\r\n\r\n(OK 删除；Cancel 取消)",
     "BiblioSearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
@@ -3149,7 +3148,7 @@ this.MainForm.DefaultFont);
 
                     BiblioInfo info = item.BiblioInfo;
 
-                    Debug.Assert(item.ListViewItem ==  items[i], "");
+                    Debug.Assert(item.ListViewItem == items[i], "");
                     //string strRecPath = ListViewUtil.GetItemText(item, 0);
 
                     EntityInfo entity = new EntityInfo();
@@ -3169,7 +3168,7 @@ this.MainForm.DefaultFont);
                         entity.RefID = BookItem.GenRefID();
 #endif
 
-                    stop.SetMessage("正在删除"+this.DbTypeCaption+"记录 " + info.RecPath);
+                    stop.SetMessage("正在删除" + this.DbTypeCaption + "记录 " + info.RecPath);
 
                     string strBiblioRecPath = "";
                     EntityInfo[] errorinfos = null;
@@ -3794,7 +3793,7 @@ this.MainForm.DefaultFont);
             MessageBox.Show(this, strError);
         }
 
-                // 调用打印催询单窗口
+        // 调用打印催询单窗口
         void menu_printClaimForm_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -3975,10 +3974,10 @@ this.MainForm.DefaultFont);
                 bAppend = false;
 
             // 创建文件
-            using(StreamWriter sw = new StreamWriter(strFilename,
+            using (StreamWriter sw = new StreamWriter(strFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8))
-            { 
+            {
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在导出已验收的册记录路径 ...");
@@ -4458,7 +4457,7 @@ this.MainForm.DefaultFont);
                 this.EnableControls(true);
             }
 
-            MessageBox.Show(this, "共处理 "+nCount.ToString()+" 个册记录");
+            MessageBox.Show(this, "共处理 " + nCount.ToString() + " 个册记录");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5043,8 +5042,7 @@ MessageBoxDefaultButton.Button1);
 
                     this.listView_records.Items.Add(item);
 
-                    FillLineByBarcode(
-                        strBarcode, item);
+                    FillLineByBarcode(strBarcode, item);
 
                     items.Add(item);
                 }
@@ -5081,14 +5079,13 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-
-
         // 从记录路径文件中导入
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             int nRet = ImportFromRecPathFile(null,
+                "clear",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -5839,7 +5836,7 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-         // 保存选择的行中的有路径的部分行 到书目库记录路径文件
+        // 保存选择的行中的有路径的部分行 到书目库记录路径文件
         void menu_saveToBiblioRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6085,10 +6082,10 @@ out strError);
                 bAppend = false;
 
             // 创建文件
-            using(StreamWriter sw = new StreamWriter(strFilename,
+            using (StreamWriter sw = new StreamWriter(strFilename,
     bAppend,	// append
     System.Text.Encoding.UTF8))
-            { 
+            {
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在导出记录路径 ...");
@@ -6244,10 +6241,10 @@ out strError);
                 bAppend = false;
 
             // 创建文件
-            using(StreamWriter sw = new StreamWriter(this.ExportTextFilename,
+            using (StreamWriter sw = new StreamWriter(this.ExportTextFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8))
-            { 
+            {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
 
@@ -6415,7 +6412,7 @@ out strError);
         }
 
         // 将 ItemQueryParam 中的信息恢复到面板中
-        void QueryToPanel(ItemQueryParam query, 
+        void QueryToPanel(ItemQueryParam query,
             bool bClearList = true)
         {
             Cursor oldCursor = this.Cursor;
@@ -7119,7 +7116,7 @@ out strError);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在针对"+this.DbTypeCaption+"记录执行 C# 脚本 ...");
+            stop.Initial("正在针对" + this.DbTypeCaption + "记录执行 C# 脚本 ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -7610,7 +7607,7 @@ Keys keyData)
 
         private void dp2QueryControl1_ViewXml(object sender, EventArgs e)
         {
-                    string strError = "";
+            string strError = "";
             string strQueryXml = "";
 
             int nRet = dp2QueryControl1.BuildQueryXml(
@@ -7643,7 +7640,7 @@ out strError);
 
         private void dp2QueryControl1_AppendMenu(object sender, AppendMenuEventArgs e)
         {
-                    MenuItem menuItem = null;
+            MenuItem menuItem = null;
 
             menuItem = new MenuItem("检索(&S)");
             menuItem.Click += new System.EventHandler(this.menu_logicSearch_Click);

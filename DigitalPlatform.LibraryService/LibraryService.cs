@@ -4167,7 +4167,6 @@ namespace dp2Library
                 string strBiblioDbName1 = "";
                 XmlDocument item_dom = null;
 
-
                 // 特殊用法 @barcode-list: 获得册记录路径列表
                 if (StringUtil.HasHead(strBarcode, "@barcode-list:") == true
                     && strResultType == "get-path-list")
