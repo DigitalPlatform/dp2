@@ -127,7 +127,8 @@
             this.label_welcome.Name = "label_welcome";
             this.label_welcome.Size = new System.Drawing.Size(435, 201);
             this.label_welcome.TabIndex = 0;
-            this.label_welcome.Text = "欢迎使用\r\ndp2 编目 (dp2Catalog)\r\n这是一个图书馆业务前端软件\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)软件有限责任公司";
+            this.label_welcome.Text = "欢迎使用\r\ndp2 编目 (dp2Catalog)\r\n这是一个图书馆业务前端软件\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)软件有限责任公司\r\n2" +
+    "015 年以 Apache License Version 2.0 方式开源";
             this.label_welcome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tabPage_license

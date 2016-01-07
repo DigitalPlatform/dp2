@@ -348,7 +348,7 @@ namespace DigitalPlatform.OPAC.Server
 
             e.UserName = this.Dp2UserName;
             e.Password = this.Dp2Password;
-            e.Parameters = "location=#opac,type=worker";
+            e.Parameters = "location=#opac,type=worker,client=dp2OPAC|" + OpacApplication.ClientVersion;
             e.LibraryServerUrl = this.App.WsUrl;
         }
 

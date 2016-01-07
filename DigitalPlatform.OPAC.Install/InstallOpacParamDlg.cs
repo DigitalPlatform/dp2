@@ -289,7 +289,7 @@ namespace DigitalPlatform.OPAC
             channel.Url = this.textBox_dp2LibraryUrl.Text;
 
             // Debug.Assert(false, "");
-            string strParameters = "location=#setup,type=worker";
+            string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
             long nRet = channel.Login(this.textBox_manageUserName.Text,
                 this.textBox_managePassword.Text,
                 strParameters,
@@ -358,7 +358,7 @@ namespace DigitalPlatform.OPAC
                 e.UserName = this.SupervisorUserName;
                 e.Password = this.SupervisorPassword;
 
-                e.Parameters = "location=#setup,type=worker";
+                e.Parameters = "location=#setup,type=worker,client=dp2OPAC|";
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -396,7 +396,7 @@ namespace DigitalPlatform.OPAC
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
             e.SavePasswordShort = dlg.SavePasswordShort;
-            e.Parameters = "location=#setup,type=worker";
+            e.Parameters = "location=#setup,type=worker,client=dp2OPAC|";
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             e.LibraryServerUrl = dlg.ServerUrl;
@@ -657,7 +657,7 @@ writeobject * */
             channel.Url = this.textBox_dp2LibraryUrl.Text;
 
             // Debug.Assert(false, "");
-            string strParameters = "location=#setup,type=worker";
+            string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
             long nRet = channel.Login(this.textBox_manageUserName.Text,
                 this.textBox_managePassword.Text,
                 strParameters,

@@ -566,7 +566,8 @@ EventLogEntryType.Information);
             {
                 e.UserName = this.ManagerUserName;
                 e.Password = this.ManagerPassword;
-                e.Parameters = "location=z39.50 server manager,type=worker";
+                e.Parameters = "location=z39.50 server manager,type=worker,client=dp2ZServer|";
+
                 /*
                 e.IsReader = false;
                 e.Location = "z39.50 server manager";

@@ -1202,7 +1202,7 @@ string strWrapperClass)
             //      -1  error
             //      0   登录未成功
             //      1   登录成功
-            string strParameters = "location=#opac@" + sessioninfo.ClientIP + ",type=worker";
+            string strParameters = "location=#opac@" + sessioninfo.ClientIP + ",type=worker,client=dp2OPAC|" + OpacApplication.ClientVersion;
             long lRet = sessioninfo.Login("public",
                          "",
                          strParameters,
@@ -1247,7 +1247,7 @@ string strWrapperClass)
                 sessioninfo.Clear();
 
             long lRet = 0;
-            string strParameters = "location=#opac@" + sessioninfo.ClientIP + "";
+            string strParameters = "location=#opac@" + sessioninfo.ClientIP + ",client=dp2OPAC|" + OpacApplication.ClientVersion;
 
             if (strUserType == "librarian")
             {
@@ -1501,7 +1501,7 @@ string strWrapperClass)
             }
 
             long lRet = 0;
-            string strParameters = "location=#opac@" + sessioninfo.ClientIP + "";
+            string strParameters = "location=#opac@" + sessioninfo.ClientIP + ",client=dp2OPAC|" + OpacApplication.ClientVersion;
 
             if (this.ActiveLoginColumn == LoginColumn.ID)
             {

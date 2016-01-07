@@ -1089,6 +1089,7 @@ namespace DigitalPlatform.LibraryServer
             e.Password = m_strPassword;
 
             e.Parameters = "";
+            e.Parameters += ",client=dp2library|" + LibraryApplication.Version;
 
             e.LibraryServerUrl = m_strUrl;
         }

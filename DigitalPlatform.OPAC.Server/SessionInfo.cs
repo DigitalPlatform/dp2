@@ -219,6 +219,7 @@ namespace DigitalPlatform.OPAC.Server
                         parameters["type"] = "reader";
                     parameters["simulate"] = "yes";
                     parameters["location"] = "#opac_token@" + this.ClientIP;
+                    parameters["client"] = "dp2OPAC|" + OpacApplication.ClientVersion;
 
                     e.Parameters = StringUtil.BuildParameterString(parameters, ',', '=');
 
@@ -227,7 +228,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
                 else
                 {
-                    e.Parameters = "location=#opac@" + this.ClientIP;
+                    e.Parameters = "location=#opac@" + this.ClientIP + ",client=dp2OPAC|" + OpacApplication.ClientVersion;
                     if (m_bIsReader == true)
                         e.Parameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
                 }
@@ -253,7 +254,7 @@ namespace DigitalPlatform.OPAC.Server
                     channel.Param = this.m_strParameters;   // 2015/11/20 SSO Login 会这么用
                 else
                 {
-                    string strParameters = "location=#opac@" + this.ClientIP;
+                    string strParameters = "location=#opac@" + this.ClientIP + ",client=dp2OPAC|" + OpacApplication.ClientVersion;
                     if (m_bIsReader == true)
                         strParameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
                     channel.Param = strParameters;  // Tag

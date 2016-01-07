@@ -344,6 +344,11 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+        /// <summary>
+        /// 前端，也就是 dp2OPAC 的版本号
+        /// </summary>
+        public static string ClientVersion { get; set; }
+
         public int Load(
     bool bReload,
     string strDataDir,
@@ -352,6 +357,8 @@ namespace DigitalPlatform.OPAC.Server
         {
             strError = "";
             int nRet = 0;
+
+            ClientVersion = Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version.ToString();
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
@@ -682,7 +689,10 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
-                    app.WriteErrorLog("opac service 成功启动。版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString());
+                    app.WriteErrorLog("opac service 成功启动。版本: " 
+                        // + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString()
+                        + ClientVersion
+                        );
 
                     // 写入down机检测文件
                     app.WriteAppDownDetectFile("opac service启动。");
@@ -733,6 +743,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     parameters = StringUtil.ParseParameters((string)channel.Param, ',', '=');
                 }
+                parameters["client"] = "dp2OPAC|" + OpacApplication.ClientVersion;
                 parameters["index"] = "-1";
 #if NO
                 if (parameters.ContainsKey("type") == false)

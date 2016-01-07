@@ -779,25 +779,25 @@ namespace DigitalPlatform.LibraryServer
                     {
                         string strList = DomUtil.GetAttr(node, "patronAdditionalFroms");
                         if (string.IsNullOrEmpty(strList) == false)
-                        {
                             this.PatronAdditionalFroms = StringUtil.SplitList(strList);
-                        }
+                        else
+                            this.PatronAdditionalFroms = new List<string>();
                     }
 
                     {
                         string strList = DomUtil.GetAttr(node, "patronAdditionalFields");
                         if (string.IsNullOrEmpty(strList) == false)
-                        {
                             this.PatronAdditionalFields = StringUtil.SplitList(strList);
-                        }
+                        else
+                            this.PatronAdditionalFields = new List<string>();
                     }
 
                     {
                         string strList = DomUtil.GetAttr(node, "patronReplicationFields");
                         if (string.IsNullOrEmpty(strList) == false)
-                        {
                             this.PatronReplicationFields = StringUtil.SplitList(strList);
-                        }
+                        else
+                            this.PatronReplicationFields = StringUtil.SplitList(strList);
                     }
 
                     int v = 0;

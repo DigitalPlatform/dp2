@@ -4281,6 +4281,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 string strLocation = "manager";
                 e.Parameters = "location=" + strLocation;
+                e.Parameters += ",client=dp2installer|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -4310,6 +4311,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Password = dlg.Password;
             e.SavePasswordShort = dlg.SavePasswordShort;
             e.Parameters = "location=" + dlg.OperLocation;
+            e.Parameters += ",client=dp2installer|" + Program.ClientVersion;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)

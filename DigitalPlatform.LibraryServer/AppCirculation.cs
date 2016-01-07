@@ -2402,7 +2402,6 @@ start_time_1,
                 }
             }
 
-
             nRet = LibraryApplication.LoadToDom(strReaderXml,
                 out readerdom,
                 out strError);
