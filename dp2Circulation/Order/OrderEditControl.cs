@@ -538,7 +538,6 @@ namespace dp2Circulation
                 "operations");
 
             this.RecPath = strRecPath;
-
         }
 
         /// <summary>
@@ -923,7 +922,6 @@ namespace dp2Circulation
         // 防止重入 2009/7/19
         int m_nInDropDown = 0;
 
-
         private void comboBox_state_DropDown(object sender, EventArgs e)
         {
             // 防止重入 2009/7/19
@@ -937,8 +935,6 @@ namespace dp2Circulation
             this.m_nInDropDown++;
             try
             {
-
-
                 if (combobox.Items.Count == 0
                     /*&& this.GetValueTable != null*/)
                 {
@@ -999,7 +995,6 @@ namespace dp2Circulation
 
             if (this.CatalogNo != refControl.CatalogNo)
                 this.label_catalogNo_color.BackColor = this.ColorDifference;
-
 
             if (this.Seller != refControl.Seller)
                 this.label_seller_color.BackColor = this.ColorDifference;
@@ -1294,7 +1289,18 @@ namespace dp2Circulation
                 }
             }
 
-            // TODO: 验证馆藏分配字符串
+            // 验证馆藏分配字符串
+            string strDistribute = this.Distribute;
+            if (string.IsNullOrEmpty(strDistribute) == false)
+            {
+                LocationCollection locations = new LocationCollection();
+                nRet = locations.Build(strDistribute, out strError);
+                if (nRet == -1)
+                {
+                    strError = "馆藏分配字符串 '" + strDistribute + "' 格式错误: " + strError;
+                    return -1;
+                }
+            }
 
             return 0;
         }

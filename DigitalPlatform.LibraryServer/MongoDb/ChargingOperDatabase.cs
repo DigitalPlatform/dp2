@@ -43,16 +43,6 @@ namespace DigitalPlatform.LibraryServer
             return true;
         }
 
-#if NO
-        [Flags]
-        public enum ChargingActionType
-        {
-            Borrow = 0x01,  // 普通借书
-            Return = 0x02,  // 普通还书
-            Renew = 0x04,   // 续借
-            Lost = 0x10,    // 丢失声明
-        }
-#endif
         // parameters:
         //      patronBarcode   读者证条码号。如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
         public IMongoQuery BuildQuery(
@@ -96,6 +86,8 @@ namespace DigitalPlatform.LibraryServer
                     action_items.Add(Query.EQ("Action", "renew"));
                 if (type == "lost")
                     action_items.Add(Query.EQ("Action", "lost"));
+                if (type == "read")
+                    action_items.Add(Query.EQ("Action", "read"));
             }
 
             var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation", "return")),

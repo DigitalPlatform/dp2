@@ -581,7 +581,7 @@ namespace dp2Circulation
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.Text = "新增期";
             edit.MainForm = this.MainForm;
-            // edit.EntityForm = this;
+            // edit.EntityForm = this;  // ???
             nRet = edit.InitialForEdit(issueitem,
                 this.Items,
                 out strError);

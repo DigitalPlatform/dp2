@@ -9337,9 +9337,10 @@ out strError);
         // return:
         //      -1  出错
         //      其它  符合条件的事项总数
-        public long LoadBorrowHistory(
+        public long LoadChargingHistory(
             DigitalPlatform.Stop stop,
             string strBarcode,
+            string strActions,
             int nPageNo,
             int nItemsPerPage,
             out List<ChargingItemWrapper> results,
@@ -9367,7 +9368,7 @@ out strError);
                     stop,
                     strBarcode,
                     "~",
-                    "return,lost",
+                    strActions, // "return,lost",
                     "descending",
                     lStart + nGeted,
                     lLength,

@@ -1672,8 +1672,9 @@ out strError);
                 this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
                 try
                 {
-                    lRet = this.Channel.LoadBorrowHistory(stop,
+                    lRet = this.Channel.LoadChargingHistory(stop,
                         strBarcode,
+                        "return,lost,read",
                         nPageNo,
                         nLength,
                         out total_results,
@@ -1744,15 +1745,13 @@ out strError);
 
             string strBinDir = Environment.CurrentDirectory;
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
                 + "<script type='text/javascript' charset='UTF-8' src='%bindir%/getsummary.js'></script>";
             string strStyle = @"<style type='text/css'>
-.nowrap {
-white-space: nowrap;
-}
+
 </style>";
 
             text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
@@ -1778,6 +1777,7 @@ white-space: nowrap;
             text.Append("<table>");
             text.Append("<tr>");
             text.Append("<td class='nowrap'>序号</td>");
+            text.Append("<td class='nowrap'>类型</td>");
             text.Append("<td class='nowrap'>证条码号</td>");
             text.Append("<td class='nowrap'>姓名</td>");
             text.Append("<td class='nowrap'>期限</td>");
@@ -1790,8 +1790,9 @@ white-space: nowrap;
             foreach (ChargingItemWrapper wrapper in items)
             {
                 ChargingItem item = wrapper.Item;
-                text.Append("<tr>");
+                text.Append("<tr class='" + HttpUtility.HtmlEncode(item.Action) + "'>");
                 text.Append("<td class='nowrap'>" + (nStart + 1).ToString() + "</td>");
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(ReaderInfoForm.GetOperTypeName(item.Action)) + "</td>");
 
                 text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.PatronBarcode) + "</td>");
                 text.Append("<td class='summary pending nowrap'>P:" + HttpUtility.HtmlEncode(item.PatronBarcode) + "</td>");
@@ -1830,7 +1831,7 @@ white-space: nowrap;
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 

@@ -143,8 +143,8 @@ namespace dp2Circulation
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
                 this.MainForm.AppInfo.SetString(
-                    GetReportSection(), 
-                    "ui_state", 
+                    GetReportSection(),
+                    "ui_state",
                     this.UiState);
 
             // 删除所有输出文件
@@ -443,8 +443,8 @@ MessageBoxDefaultButton.Button1);
                 if (lRet == -1)
                     return -1;
                 if (lRet == 0)
-                    return 0; 
-                
+                    return 0;
+
                 long lHitCount = lRet;
 
                 AdjustProgressRange(lOldCount, lHitCount);
@@ -631,7 +631,7 @@ MessageBoxDefaultButton.Button1);
                 if (lines.Count > 0)
                 {
                     Debug.Assert(false, "");
-                } 
+                }
 
                 return 0;
             }
@@ -786,7 +786,7 @@ MessageBoxDefaultButton.Button1);
                 if (lines.Count > 0)
                 {
                     Debug.Assert(false, "");
-                } 
+                }
 
                 return 0;
             }
@@ -970,8 +970,8 @@ MessageBoxDefaultButton.Button1);
                 if (lines.Count > 0)
                 {
                     Debug.Assert(false, "");
-                } 
-                
+                }
+
                 return 0;
             }
         }
@@ -1168,7 +1168,7 @@ MessageBoxDefaultButton.Button1);
         static string GetPureStyle(string strText)
         {
             List<string> results = new List<string>();
-            string[] parts = strText.Split(new char [] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = strText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in parts)
             {
                 if (s[0] == '_')
@@ -1305,7 +1305,7 @@ MessageBoxDefaultButton.Button1);
 
                     stop.SetMessage(strBiblioDbNameParam + " " + strClassFromStyle + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
                         + GetProgressTimeString(lProgress));
-                     
+
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
@@ -1313,7 +1313,7 @@ MessageBoxDefaultButton.Button1);
                 if (lines.Count > 0)
                 {
                     Debug.Assert(false, "");
-                } 
+                }
 
                 return 0;
             }
@@ -2617,7 +2617,7 @@ MessageBoxDefaultButton.Button1);
             tableDepartment.Sort(strColumnSortStyle);
 
             // 观察表格中是否全部行为 0
-            for(int i = 0; i < tableDepartment.Count; i++)
+            for (int i = 0; i < tableDepartment.Count; i++)
             {
                 Line line = tableDepartment[i];
                 if (line.GetInt64(0) > 0)
@@ -2667,8 +2667,6 @@ MessageBoxDefaultButton.Button1);
 
             return 0;
         }
-
-
 
         // 这是创建到一个子目录(会在子目录中创建很多文件和下级目录)，而不是输出到一个文件
         // return:
@@ -2767,7 +2765,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (System.ArgumentException ex)
                 {
-                    strError = "文件名字符串 '"+strPureFileName+"' 中有非法字符。" + ex.Message;
+                    strError = "文件名字符串 '" + strPureFileName + "' 中有非法字符。" + ex.Message;
                     return -1;
                 }
 
@@ -2796,17 +2794,17 @@ MessageBoxDefaultButton.Button1);
 
                 List<string> commands = new List<string>();
 
-                    string strCommand = "";
-                    nRet = CreateReaderReportCommand(
-                        strLibraryCode,
-                        strDateRange,
-                        "131",
-                        strReaderBarcode,
-                        out strCommand,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                    commands.Add(strCommand);
+                string strCommand = "";
+                nRet = CreateReaderReportCommand(
+                    strLibraryCode,
+                    strDateRange,
+                    "131",
+                    strReaderBarcode,
+                    out strCommand,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                commands.Add(strCommand);
 
                 nRet = RunQuery(
                     commands,
@@ -2886,7 +2884,7 @@ MessageBoxDefaultButton.Button1);
             // invalid_chars += "\t";
 
             // 2014/9/19 修改 BUG
-            char [] invalid_chars = Path.GetInvalidPathChars();
+            char[] invalid_chars = Path.GetInvalidPathChars();
             StringBuilder result = new StringBuilder();
             foreach (char c in strText)
             {
@@ -2961,11 +2959,9 @@ MessageBoxDefaultButton.Button1);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 "+strReportType+" 表时",
+    "创建 " + strReportType + " 表时",
 out strError);
         }
-
-
 
         // return:
         //      -1  出错
@@ -3111,7 +3107,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 "+strReportType+" 表时",
+    "创建 " + strReportType + " 表时",
 out strError);
         }
 
@@ -3202,7 +3198,7 @@ out strError);
 
             DateTime start = DateTimeUtil.Long8ToDateTime(strStartDate);
             start -= new TimeSpan(1, 0, 0, 0);  // 前一天
-            strResult = DateTimeUtil.DateTimeToString8(new DateTime(0)) + "-" +DateTimeUtil.DateTimeToString8(start);
+            strResult = DateTimeUtil.DateTimeToString8(new DateTime(0)) + "-" + DateTimeUtil.DateTimeToString8(start);
 
             return 0;
         }
@@ -3238,8 +3234,8 @@ out strError);
 
             // 存量
             string strResult = "";
-                    // 获得存量需要的时间字符串
-        // 20120101-20140101 --> 00010101-20111231
+            // 获得存量需要的时间字符串
+            // 20120101-20140101 --> 00010101-20111231
             nRet = BuildPrevDateString(strDateRange,
                 out strResult,
                 out strError);
@@ -3468,10 +3464,10 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 "+strType+" 表时",
+    "创建 " + strType + " 表时",
 out strError);
 
-            
+
 #if NO
             string strColumnSortStyle = GetColumnSortStyle(strCfgFile);
             if (string.IsNullOrEmpty(strColumnSortStyle) == true)
@@ -3506,7 +3502,7 @@ out strError);
 #endif
         }
 
-                // return:
+        // return:
         //      -1  出错
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
@@ -3621,12 +3617,12 @@ out strError);
 
         // source : operator unit amerce_count amerce_money undo_count undo_money expire_count total_count
         // target : operator amerce_count amerce_money undo_count undo_money expire_count total_count
-        static Table MergeCurrency(List<object []> table)
+        static Table MergeCurrency(List<object[]> table)
         {
             Table result_table = new Table(0);
             // 合并各种货币单位
             // operator unit amerce_count amerce_money undo_count undo_money expire_count total_count
-            foreach (object [] line in table)
+            foreach (object[] line in table)
             {
                 string strOperator = (string)line[SOURCE_OPERATOR];
                 string strUnit = (string)line[SOURCE_UNII]; // unit
@@ -3677,7 +3673,7 @@ out strError);
             return "-" + strUnit + (-value).ToString();
         }
 
-        static void IncPrice(object [] line,
+        static void IncPrice(object[] line,
     string strUnit,
     int source_column_index,
     Table result_table,
@@ -3736,7 +3732,7 @@ out strError);
 
         int RunQuery(
 List<string> commands,
-ref List<object []> table,
+ref List<object[]> table,
 out string strError)
         {
             strError = "";
@@ -3748,7 +3744,7 @@ out string strError)
                 {
                     strError = "command 不应为空";
                     return -1;
-                } 
+                }
                 text.Append(command);
                 text.Append("\r\n\r\n");
             }
@@ -3779,7 +3775,7 @@ out string strError)
                                 {
                                     // string strKey = GetString(dr, 0);
 
-                                    object [] values = new object [dr.FieldCount];
+                                    object[] values = new object[dr.FieldCount];
                                     dr.GetValues(values);
                                     table.Add(values);
 #if NO
@@ -3904,7 +3900,7 @@ out string strError)
                 {
                     strError = "command 不应为空";
                     return -1;
-                } 
+                }
                 text.Append(command);
                 text.Append("\r\n\r\n");
             }
@@ -3944,7 +3940,7 @@ out string strError)
         }
 
         // 创建读者报表，关于流通业务
-        // 1) 按照读者自然单位分类的借书册数表 101
+        // 1) 按照读者自然单位分类的借书册数表 101 9101
         // 2) 按照指定的单位分类的借书册数表 102
         // 3) 按照读者类型分类的借书册数表 111
         // 4) 按照读者姓名分类的借书册数表 121
@@ -4002,6 +3998,17 @@ out string strError)
                      + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
                      + " GROUP BY reader.department ORDER BY borrow DESC, reader.department;";
+            }
+            else if (StringUtil.IsInList("9101", strStyle) == true)
+            {
+                // 9101 表 按照读者 *自然单位* 分类的阅读册数表
+                strCommand = "select reader.department, "
+                    + " count(*) as count1 "
+                    + " FROM operlogcircu left outer JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                     + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                     + " GROUP BY reader.department ORDER BY count1 DESC, reader.department;";
             }
             else if (StringUtil.IsInList("102", strStyle) == true)
             {
@@ -4119,7 +4126,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             }
             else
             {
-                strError = "无法支持的 strStyle '"+strStyle+"'";
+                strError = "无法支持的 strStyle '" + strStyle + "'";
                 return -1;
             }
 
@@ -4221,7 +4228,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                      + " FROM operlogcircu JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
-                     + "     AND "+strLocationLike+" ) "
+                     + "     AND " + strLocationLike + " ) "
                      + " AND " + strLocationLike    // 限定 item 表里面的记录范围为分馆的册
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate.Insert(6, "-").Insert(4, "-") + "' "  // 限定册记录创建的时间在 end 以前
                      + " GROUP BY item.bibliorecpath ORDER BY item.bibliorecpath;";
@@ -4284,7 +4291,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             }
             else
             {
-                strError = "不支持的 strStyle '"+strStyle+"'";
+                strError = "不支持的 strStyle '" + strStyle + "'";
                 return -1;
             }
 
@@ -4394,7 +4401,7 @@ out strError);
                      + " FROM item "
                      + " LEFT OUTER JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
                      + "     WHERE " + strLocationLike
-                     + " AND substr(item.createtime,1,10) >= '" + strStartDate +"' "  // 限定册记录创建的时间在 start 以后
+                     + " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
                      + " GROUP BY path1 "
                      + " ) group by classhead ORDER BY classhead ;";
@@ -4433,9 +4440,9 @@ out strError);
                 // 302 表 册在架情况
                 strCommand = // "select substr(" + strDistinctClassTableName + ".class,1,1) as classhead, "
                     "select " + strClassColumn + " as classhead, "
-                    + " count(case when item.borrower <> '' then item.borrower end) as outitems, " 
+                    + " count(case when item.borrower <> '' then item.borrower end) as outitems, "
                     + " count(case when item.borrower = '' then item.borrower end) as initems, "
-                    + " count(item.itemrecpath) as icount "        
+                    + " count(item.itemrecpath) as icount "
                     // + " printf(\"%.2f%\", 100.0 * count(case when item.borrower <> '' then item.borrower end) / count(item.itemrecpath)) as percent "
                      + " FROM item "
                      + " LEFT OUTER JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
@@ -4654,7 +4661,7 @@ out strError);
         // 从一个逗号间隔的字符串中析出 3 位数字
         static int GetStyleNumber(string strStyle)
         {
-            string[] parts = strStyle.Split(new char [] {','});
+            string[] parts = strStyle.Split(new char[] { ',' });
             foreach (string s in parts)
             {
                 if (s.Length == 3 && StringUtil.IsPureNumber(s) == true)
@@ -4850,7 +4857,7 @@ out strError);
                      + "     operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
                      + " GROUP BY operlogcircu.operator "
-                    +" ORDER BY operlogcircu.operator ;";
+                    + " ORDER BY operlogcircu.operator ;";
             }
             else if (nNumber == 443)
             {
@@ -4877,7 +4884,7 @@ out strError);
                      + " left outer JOIN item ON operlogamerce.itembarcode <> '' AND operlogamerce.itembarcode <> '' AND operlogamerce.itembarcode = item.itembarcode "
                      + " left outer JOIN biblio ON item.bibliorecpath <> '' AND item.bibliorecpath = biblio.bibliorecpath "
                      + " left outer JOIN reader ON operlogamerce.readerbarcode <> '' AND operlogamerce.readerbarcode = reader.readerbarcode "
-                     // + " left outer JOIN user ON operlogamerce.operator = user.id "
+                    // + " left outer JOIN user ON operlogamerce.operator = user.id "
                      + " WHERE "
                      + "     operlogamerce.date >= '" + strStartDate + "' AND operlogamerce.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
@@ -5245,7 +5252,7 @@ out strError);
             }
 #endif
 
-            contextMenu.Show(this.listView_libraryConfig, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_libraryConfig, new Point(e.X, e.Y));
         }
 
         // 根据配置文件类型，找到配置文件名
@@ -5438,7 +5445,7 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            REDO:
+        REDO:
             this.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
             dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
             dlg.ShowDialog(this);
@@ -5498,7 +5505,7 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
-            foreach(ListViewItem item in this.listView_libraryConfig.SelectedItems)
+            foreach (ListViewItem item in this.listView_libraryConfig.SelectedItems)
             {
                 string strLibraryCode = ListViewUtil.GetItemText(item, 0);
                 strLibraryCode = GetOriginLibraryCode(strLibraryCode);
@@ -5585,7 +5592,6 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-
                 task_dom = new XmlDocument();
                 task_dom.LoadXml("<root />");
 
@@ -6800,7 +6806,7 @@ MessageBoxDefaultButton.Button2);
 
             strEndDate = DomUtil.GetAttr(dom.DocumentElement, strPrefix + "end_date");
             int nRet = DomUtil.GetIntegerParam(dom.DocumentElement, strPrefix + "index",
-                0, 
+                0,
                 out lIndex,
                 out strError);
             if (nRet == -1)
@@ -6815,12 +6821,17 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 获得和当前服务器、用户相关的报表信息本地存储目录
-        string GetBaseDirectory()
+        static string GetBaseDirectory()
         {
             // 2015/6/20 将数据库文件存储在和每个 dp2library 服务器和用户名相关的目录中
-            string strDirectory = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()));
+            string strDirectory = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()));
             PathUtil.CreateDirIfNeed(strDirectory);
             return strDirectory;
+        }
+
+        public static string GetReportDir()
+        {
+            return Path.Combine(GetBaseDirectory(), "reports");
         }
 
         string GetOperlogConnectionString()
@@ -6886,7 +6897,7 @@ MessageBoxDefaultButton.Button2);
                     out strError);
                 if (nRet == -1)
                     return -1;
-                
+
                 _classFromStyles = styles;
 
                 _updateBiblios.Clear();
@@ -7231,7 +7242,7 @@ out strError);
                     connection,
                     dom,
                     out strError);
-            } 
+            }
 
             if (nRet == -1)
             {
@@ -7682,7 +7693,7 @@ connection))
                             keys.Add(DomUtil.GetAttr(node, "k"));
                         }
 
-                        command_text.Append("delete from class_" + style.Style + " where bibliorecpath = @bibliorecpath" + i +" ;");
+                        command_text.Append("delete from class_" + style.Style + " where bibliorecpath = @bibliorecpath" + i + " ;");
 
                         if (bBiblioRecPathParamSetted == false)
                         {
@@ -7700,7 +7711,7 @@ update.BiblioRecPath);
                         foreach (string key in keys)
                         {
                             // 把分类号写入分类号表
-                            command_text.Append("insert into class_" + style.Style + " values (@bibliorecpath"+i+", @class_" + i + "_" + j + ") ;");
+                            command_text.Append("insert into class_" + style.Style + " values (@bibliorecpath" + i + ", @class_" + i + "_" + j + ") ;");
 
                             SQLiteUtil.SetParameter(command,
              "@class_" + i + "_" + j,
@@ -8166,7 +8177,7 @@ out strError);
                 }
 
                 string strCreateOperTime = "";
-                
+
                 if (strAction == "new")
                     strCreateOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
 
@@ -9238,7 +9249,7 @@ Stack:
             nRet = this.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
-                MessageBox.Show( "创建报表功能尚未被许可");
+                MessageBox.Show("创建报表功能尚未被许可");
                 return;
             }
 #endif
@@ -9298,6 +9309,7 @@ MessageBoxDefaultButton.Button1);
 "daily_report_end_date",
 "20130101");
 
+            // TODO: 特殊允许当天的也参加统计
             string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
 
             string strRealEndDate = "";
@@ -9680,7 +9692,7 @@ MessageBoxDefaultButton.Button1);
                     }
                     catch (Exception ex)
                     {
-                        strError = "装载文件 '"+strTaskFileName+"' 到 XMLDOM 时出错: " +ex.Message;
+                        strError = "装载文件 '" + strTaskFileName + "' 到 XMLDOM 时出错: " + ex.Message;
                         goto ERROR1;
                     }
                 }
@@ -10107,7 +10119,7 @@ MessageBoxDefaultButton.Button1);
                         stop.SetProgressValue(i);
                     }
 
-                        // fileType 没有 html 的时候，不要创建 index.html 文件
+                    // fileType 没有 html 的时候，不要创建 index.html 文件
                     if ((this._fileType & FileType.HTML) != 0)
                     {
                         string strOutputDir = GetReportOutputDir(strLibraryCode);
@@ -10376,7 +10388,7 @@ MessageBoxDefaultButton.Button1);
                 if (string.IsNullOrEmpty(strText) == true)
                     return results;
 
-                string[] segments = strText.Split(new char[] {','});
+                string[] segments = strText.Split(new char[] { ',' });
                 foreach (string strTime in segments)
                 {
                     results.Add(OneTime.FromString(strTime));
@@ -10500,7 +10512,7 @@ MessageBoxDefaultButton.Button1);
             // 两个日期都不允许超过今天
             if (start >= daily_end)
             {
-                strError = "统计时间范围的起点不应晚于 日志同步最后日期 "+strDailyEndDate+" 的前一天";
+                strError = "统计时间范围的起点不应晚于 日志同步最后日期 " + strDailyEndDate + " 的前一天";
                 return -1;
             }
 
@@ -10611,16 +10623,16 @@ MessageBoxDefaultButton.Button1);
             string strFileName = Path.Combine(strCssTemplateDir, GetValidPathString(strHtmlTemplate) + ".css");
             if (File.Exists(strFileName) == false)
             {
-                strError = "CSS 模板文件 '"+strFileName+"' 不存在";
+                strError = "CSS 模板文件 '" + strFileName + "' 不存在";
                 return -1;
             }
 
             Encoding encoding;
-        // return:
-        //      -1  出错 strError中有返回值
-        //      0   文件不存在 strError中有返回值
-        //      1   文件存在
-        //      2   读入的内容不是全部
+            // return:
+            //      -1  出错 strError中有返回值
+            //      0   文件不存在 strError中有返回值
+            //      1   文件存在
+            //      2   读入的内容不是全部
             int nRet = FileUtil.ReadTextFileContent(strFileName,
                 -1,
                 out strTemplate,
@@ -10941,7 +10953,7 @@ MessageBoxDefaultButton.Button1);
                     else if (nRet == 1)
                         nAdd = 1;
                 }
-                else if (strReportType == "101"
+                else if (strReportType == "101" || strReportType == "9101"
                     || strReportType == "111"
                     || strReportType == "121"
                     || strReportType == "122"
@@ -11192,7 +11204,7 @@ MessageBoxDefaultButton.Button1);
             out strError);
                             if (nRet == -1)
                             {
-                                strError = "报表类型 '"+strReportType+"' 的名字表定义不合法： " + strError;
+                                strError = "报表类型 '" + strReportType + "' 的名字表定义不合法： " + strError;
                                 return -1;
                             }
 
@@ -11545,7 +11557,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (DirectoryNotFoundException)
                 {
-                } 
+                }
                 return 0;
             }
             if (index_dom == null)
@@ -11879,7 +11891,7 @@ MessageBoxDefaultButton.Button1);
                 return NewLeafElement(day, strReportName, strReportType);
             }
 
-            throw new ArgumentException("未知的 strTimeType 值 '"+strTimeType+"'", "strTimeType");
+            throw new ArgumentException("未知的 strTimeType 值 '" + strTimeType + "'", "strTimeType");
         }
 
         // 根据 index.xml 文件创建 index.html 文件
@@ -11907,7 +11919,7 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            
+
             StringBuilder text = new StringBuilder(4096);
 
             text.Append("<html><body>");
@@ -12219,7 +12231,7 @@ MessageBoxDefaultButton.Button1);
 "daily_report_end_date",
 "20130101");
 
-            REDO:
+        REDO:
             strLastDate = InputDlg.GetInput(
     this,
     "设置报表最末日期",
@@ -12233,7 +12245,7 @@ MessageBoxDefaultButton.Button1);
                 || strLastDate.Length != 8
                 || StringUtil.IsNumber(strLastDate) == false)
             {
-                MessageBox.Show(this, "所输入的日期字符串 '"+strLastDate+"' 不合法，应该是 8 字符的时间格式。请重新输入");
+                MessageBox.Show(this, "所输入的日期字符串 '" + strLastDate + "' 不合法，应该是 8 字符的时间格式。请重新输入");
                 goto REDO;
             }
 
@@ -12262,7 +12274,7 @@ MessageBoxDefaultButton.Button1);
             part_filenames = new List<string>();
 
             long lTotalSize = 0;
-            for(int i = 0;i<filenames.Count; i++)
+            for (int i = 0; i < filenames.Count; i++)
             {
                 string strFileName = filenames[i];
                 FileInfo fi = new FileInfo(strFileName);
@@ -12443,7 +12455,7 @@ MessageBoxDefaultButton.Button1);
             // SetUploadButtonState();
             BeginUpdateUploadButtonText();
 
-            this.MainForm.StatusBarMessage = "完成上传 " + lUploadedFiles.ToString() + " 个文件, 总尺寸" + lUnzipFileLength .ToString()+ "，压缩后尺寸 " + lZipFileLength.ToString();
+            this.MainForm.StatusBarMessage = "完成上传 " + lUploadedFiles.ToString() + " 个文件, 总尺寸" + lUnzipFileLength.ToString() + "，压缩后尺寸 " + lZipFileLength.ToString();
             if (this.DeleteReportFileAfterUpload == true && lUploadedFiles > 0)
                 this.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
             return;
@@ -12560,7 +12572,7 @@ MessageBoxDefaultButton.Button1);
                         {
                         }
                     }
-                    else 
+                    else
                         File.SetAttributes(filename, FileAttributes.Normal);
 
                     i++;
@@ -12593,7 +12605,7 @@ MessageBoxDefaultButton.Button1);
             {
                 // SetUploadButtonState();
                 BeginUpdateUploadButtonText();
-            } 
+            }
             MessageBox.Show(this, strError);
         }
 
@@ -12606,7 +12618,7 @@ MessageBoxDefaultButton.Button1);
             else if (this.comboBox_start_uploadMethod.Text == "FTP")
                 UploadReportByFtp();
             else
-                MessageBox.Show(this, "未知的上传方式 '"+this.comboBox_start_uploadMethod.Text+"'");
+                MessageBox.Show(this, "未知的上传方式 '" + this.comboBox_start_uploadMethod.Text + "'");
         }
 
         // 上传文件到到 dp2lbrary 服务器
@@ -12923,9 +12935,9 @@ MessageBoxDefaultButton.Button1);
             FileInfo[] fis = di.GetFiles();
             foreach (FileInfo fi in fis)
             {
-                    string strExtention = Path.GetExtension(fi.Name).ToLower();
-                    if (strExtention == ".rml")
-                        result.Add(fi.FullName);
+                string strExtention = Path.GetExtension(fi.Name).ToLower();
+                if (strExtention == ".rml")
+                    result.Add(fi.FullName);
             }
 
             // 处理下级目录，递归
@@ -13129,7 +13141,7 @@ MessageBoxDefaultButton.Button1);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_query_results, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_query_results, new Point(e.X, e.Y));
 
         }
 
@@ -13192,7 +13204,7 @@ MessageBoxDefaultButton.Button1);
                     foreach (ListViewItem item in this.listView_query_results.SelectedItems)
                     {
                         cells = new List<CellData>();
-                        nColIndex = 0; 
+                        nColIndex = 0;
                         foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)
                         {
                             cells.Add(new CellData(nColIndex++, subitem.Text));
@@ -13221,6 +13233,18 @@ MessageBoxDefaultButton.Button1);
         void menu_queryResult_copyToClipboard_Click(object sender, EventArgs e)
         {
             Global.CopyLinesToClipboard(this, this.listView_query_results, false);
+        }
+
+        private void toolStripButton_openReportFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(GetReportDir());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
         }
     }
 

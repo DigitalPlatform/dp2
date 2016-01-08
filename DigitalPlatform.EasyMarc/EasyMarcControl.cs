@@ -2056,7 +2056,8 @@ namespace DigitalPlatform.EasyMarc
             {
                 foreach (EasyLine item in this.Items)
                 {
-                    if (item.textBox_content.Visible == true)
+                    if (item != null && item.textBox_content != null
+                        && item.textBox_content.Visible == true)
                     {
                         item.textBox_content.SetHeight();
                     }
@@ -3803,7 +3804,9 @@ Stack:
         //      bSetAll 是否要重设全部颜色？= false 表示仅重设和焦点变化有关的颜色; = true 表示要重设全部颜色，包括和焦点变化无关的那些颜色
         public virtual void SetLineColor(bool bSetAll = false)
         {
-            if (this.Container == null)
+            if (this.Container == null
+                || this.textBox_content == null
+                || this.label_color == null)
                 return;
 
             if (bSetAll == true)

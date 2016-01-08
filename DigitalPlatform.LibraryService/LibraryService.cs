@@ -2003,7 +2003,8 @@ namespace dp2Library
                         break;
                     ChargingItemWrapper wrapper = new ChargingItemWrapper();
                     wrapper.Item = new ChargingItem(item);
-                    if (item.Operation == "return")
+                    if (item.Operation == "return"
+                        && item.Action != "read")
                     {
                         ChargingOperItem rel = app.ChargingOperDatabase.FindRelativeBorrowItem(item);
                         if (rel != null)
@@ -4973,7 +4974,8 @@ namespace dp2Library
 
         // 还书
         // paramters:
-        //      strReaderBarcodeParam   读者证条码号
+        //      strAction   动作。有 return/lost/inventory/read
+        //      strReaderBarcode   读者证条码号
         //      strItemBarcode  册条码号
         //      bForce  是否强制执行还书操作。用于某些配置参数和数据结构不正确的特殊情况
         //      strStyle   风格。"reader" 表示希望返回处理完后的读者记录

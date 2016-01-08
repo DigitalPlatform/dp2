@@ -45,7 +45,7 @@
             this.toolStripMenuItem_verifyLost = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_loadPatronInfo = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_inventoryBook = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_inventoryBook = new System.Windows.Forms.ToolStripMenuItem();
             this.dpColumn_color = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_state = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_content = new DigitalPlatform.CommonControl.DpColumn();
@@ -69,6 +69,7 @@
             this.toolStripButton_selectItem = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_read = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -103,100 +104,101 @@
             this.toolStripMenuItem_verifyLost,
             this.toolStripSeparator4,
             this.toolStripMenuItem_loadPatronInfo,
-            this.ToolStripMenuItem_inventoryBook});
+            this.toolStripMenuItem_inventoryBook,
+            this.toolStripMenuItem_read});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(149, 248);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(153, 292);
             this.contextMenuStrip_selectFunc.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_selectFunc_Opening);
             // 
             // toolStripMenuItem_borrow
             // 
             this.toolStripMenuItem_borrow.Name = "toolStripMenuItem_borrow";
-            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_borrow.Text = "借";
             this.toolStripMenuItem_borrow.Click += new System.EventHandler(this.toolStripMenuItem_borrow_Click);
             // 
             // toolStripMenuItem_continueBorrow
             // 
             this.toolStripMenuItem_continueBorrow.Name = "toolStripMenuItem_continueBorrow";
-            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_continueBorrow.Text = "同一读者借";
             this.toolStripMenuItem_continueBorrow.Click += new System.EventHandler(this.toolStripMenuItem_continueBorrow_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_return
             // 
             this.toolStripMenuItem_return.Name = "toolStripMenuItem_return";
-            this.toolStripMenuItem_return.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_return.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_return.Text = "还";
             this.toolStripMenuItem_return.Click += new System.EventHandler(this.toolStripMenuItem_return_Click);
             // 
             // toolStripMenuItem_verifyReturn
             // 
             this.toolStripMenuItem_verifyReturn.Name = "toolStripMenuItem_verifyReturn";
-            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_verifyReturn.Text = "验证还";
             this.toolStripMenuItem_verifyReturn.Click += new System.EventHandler(this.toolStripMenuItem_verifyReturn_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_renew
             // 
             this.toolStripMenuItem_renew.Name = "toolStripMenuItem_renew";
-            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_renew.Text = "续借";
             this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // toolStripMenuItem_verifyRenew
             // 
             this.toolStripMenuItem_verifyRenew.Name = "toolStripMenuItem_verifyRenew";
-            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_verifyRenew.Text = "验证续借";
             this.toolStripMenuItem_verifyRenew.Click += new System.EventHandler(this.toolStripMenuItem_verifyRenew_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_lost
             // 
             this.toolStripMenuItem_lost.Name = "toolStripMenuItem_lost";
-            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_lost.Text = "丢失";
             this.toolStripMenuItem_lost.Click += new System.EventHandler(this.toolStripMenuItem_lost_Click);
             // 
             // toolStripMenuItem_verifyLost
             // 
             this.toolStripMenuItem_verifyLost.Name = "toolStripMenuItem_verifyLost";
-            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_verifyLost.Text = "验证丢失";
             this.toolStripMenuItem_verifyLost.Click += new System.EventHandler(this.toolStripMenuItem_verifyLost_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_loadPatronInfo
             // 
             this.toolStripMenuItem_loadPatronInfo.Name = "toolStripMenuItem_loadPatronInfo";
-            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_loadPatronInfo.Text = "装载读者信息";
             this.toolStripMenuItem_loadPatronInfo.Click += new System.EventHandler(this.toolStripMenuItem_loadPatronInfo_Click);
             // 
             // ToolStripMenuItem_inventoryBook
             // 
-            this.ToolStripMenuItem_inventoryBook.Name = "ToolStripMenuItem_inventoryBook";
-            this.ToolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(148, 22);
-            this.ToolStripMenuItem_inventoryBook.Text = "盘点图书";
-            this.ToolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
+            this.toolStripMenuItem_inventoryBook.Name = "ToolStripMenuItem_inventoryBook";
+            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_inventoryBook.Text = "盘点图书";
+            this.toolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
             // 
             // dpColumn_color
             // 
@@ -488,6 +490,13 @@
             this.ToolStripMenuItem_inventoryFromFile.Text = "从文件导入盘点 ...";
             this.ToolStripMenuItem_inventoryFromFile.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryFromFile_Click);
             // 
+            // ToolStripMenuItem_read
+            // 
+            this.toolStripMenuItem_read.Name = "ToolStripMenuItem_read";
+            this.toolStripMenuItem_read.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_read.Text = "读过";
+            this.toolStripMenuItem_read.Click += new System.EventHandler(this.ToolStripMenuItem_read_Click);
+            // 
             // QuickChargingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -558,8 +567,9 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_selectItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_renew;
         private System.Windows.Forms.ToolStripButton toolStripButton_upperInput;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_inventoryBook;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_inventoryBook;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_inventoryFromFile;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_read;
     }
 }

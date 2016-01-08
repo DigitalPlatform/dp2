@@ -1695,6 +1695,7 @@ namespace dp2Circulation
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.Text = "新增订购事项";
             edit.MainForm = this.MainForm;
+            edit.ItemControl = this;    // 2016/1/8
             nRet = edit.InitialForEdit(orderitem,
                 this.Items,
                 out strError);
@@ -3696,6 +3697,86 @@ namespace dp2Circulation
             this.listView.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView.ListViewItemSorter = null;
+        }
+
+        // 条码查重
+        // return:
+        //      -1  出错
+        //      0   不重复
+        //      1   重复
+        /// <summary>
+        /// 对distribute 中的 refid 查重
+        /// </summary>
+        /// <param name="strDistribute">发起查重的 distribute 字符串</param>
+        /// <param name="myself">发起查重的对象</param>
+        /// <param name="bCheckCurrentList">是否要检查当前列表中的(尚未保存的)事项</param>
+        /// <param name="bCheckDb">是否对数据库进行查重</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 不重复; 1: 有重复</returns>
+        public int CheckDistributeDup(
+            string strDistribute,
+            OrderItem myself,
+            bool bCheckCurrentList,
+            bool bCheckDb,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strDistribute) == true)
+                return 0;
+
+            if (bCheckCurrentList == true)
+            {
+                LocationCollection locations = new LocationCollection();
+                nRet = locations.Build(strDistribute, out strError);
+                if (nRet == -1)
+                {
+                    strError = "待查重的馆藏分配字符串 '" + strDistribute + "' 格式错误: " + strError;
+                    return -1;
+                }
+
+                List<string> refids = locations.GetRefIDs();
+                if (refids.Count == 0)
+                    return 0;
+
+                foreach(OrderItem item in this.Items)
+                {
+                    if (item == myself)
+                        continue;
+                    string strCurrent = item.Distribute;
+                    if (string.IsNullOrEmpty(strCurrent) == true)
+                        continue;
+
+                    LocationCollection current_locations = new LocationCollection();
+                    nRet = current_locations.Build(strCurrent, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "列表中某订购记录的馆藏分配字符串 '" + strCurrent + "' 格式错误: " + strError;
+                        return -1;
+                    }
+                    if (current_locations.Count == 0)
+                        continue;
+                    List<string> current_refids = current_locations.GetRefIDs();
+                    if (current_refids.Count == 0)
+                        continue;
+                    foreach(string s in refids)
+                    {
+                        if (current_refids.IndexOf(s) != -1)
+                        {
+                            strError = "馆藏分配字符串中的参考ID '"+s+"' 和其它订购记录的馆藏分配字符串发生了重复";
+                            return 1;
+                        }
+                    }
+                }
+            }
+
+            // 对所有订购记录进行馆藏分配字符串(refid)查重
+            if (bCheckDb == true)
+            {
+            }
+
+            return 0;
         }
 
 #if NO

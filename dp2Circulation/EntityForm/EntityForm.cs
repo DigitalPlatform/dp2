@@ -9998,13 +9998,48 @@ merge_dlg.UiState);
 
         private void toolStripButton_prev_Click(object sender, EventArgs e)
         {
-            // TODO: 可以改进为调用Safe...，这样就不必在意Disable按钮来防止重入了
-            this.LoadRecordOld(this.BiblioRecPath, "prev", true);
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                this.ClearMessage();
+                string strRecPath = GetPrevNextRecPath("prev");
+                if (string.IsNullOrEmpty(strRecPath))
+                    this.ShowMessage("无法移动", "yellow", true);
+                else
+                    this.LoadRecordOld(strRecPath, "", true);
+            }
+            else
+            {
+                // TODO: 可以改进为调用Safe...，这样就不必在意Disable按钮来防止重入了
+                this.LoadRecordOld(this.BiblioRecPath, "prev", true);
+            }
         }
 
         private void toolStripButton_next_Click(object sender, EventArgs e)
         {
-            this.LoadRecordOld(this.BiblioRecPath, "next", true);
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                this.ClearMessage();
+                string strRecPath = GetPrevNextRecPath("next");
+                if (string.IsNullOrEmpty(strRecPath))
+                    this.ShowMessage("无法移动", "yellow", true);
+                else
+                    this.LoadRecordOld(strRecPath, "", true);
+            }
+            else
+            {
+                this.LoadRecordOld(this.BiblioRecPath, "next", true);
+            }
+        }
+
+        static string GetPrevNextRecPath(string strStyle)
+        {
+            BiblioSearchForm form = Program.MainForm.GetTopChildWindow<BiblioSearchForm>();
+            if (form == null)
+                return "";
+            ListViewItem item = form.MoveSelectedItem(strStyle);
+            if (item == null)
+                return "";
+            return ListViewUtil.GetItemText(item, 0);
         }
 
         string m_strFocusedPart = "";

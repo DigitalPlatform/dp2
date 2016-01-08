@@ -3422,6 +3422,11 @@ Keys keyData)
         /// 盘点图书
         /// </summary>
         InventoryBook = 10, // 盘点图书 2015/8/16
+
+        /// <summary>
+        /// 读过
+        /// </summary>
+        Read = 11,  // 读过 2016/1/8
     }
 
     /*public*/

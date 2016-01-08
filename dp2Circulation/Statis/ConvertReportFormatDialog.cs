@@ -138,9 +138,9 @@ namespace dp2Circulation
 
         private void button_localReportDir_Click(object sender, EventArgs e)
         {
-            string strReportDir = Path.Combine(this.MainForm.UserDir, "reports");
+            // string strReportDir = Path.Combine(this.MainForm.UserDir, "reports");
 
-            this.textBox_reportDirectory.Text = strReportDir;
+            this.textBox_reportDirectory.Text = ReportForm.GetReportDir();
         }
     }
 }

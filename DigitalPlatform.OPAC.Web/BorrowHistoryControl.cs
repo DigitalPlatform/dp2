@@ -159,9 +159,10 @@ namespace DigitalPlatform.OPAC.Web
             // return:
             //      -1  出错
             //      其它  符合条件的事项总数
-            return (int)sessioninfo.Channel.LoadBorrowHistory(
+            return (int)sessioninfo.Channel.LoadChargingHistory(
                 null,
                 strReaderBarcode,
+                "return,lost,read",
                 nPageNo,
                 nItemsPerPage,
                 out results,

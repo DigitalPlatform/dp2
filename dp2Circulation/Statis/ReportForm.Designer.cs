@@ -59,6 +59,7 @@
             this.toolStripButton_setReportEndDay = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_convertFormat = new System.Windows.Forms.ToolStripButton();
             this.timer_qu = new System.Windows.Forms.Timer(this.components);
+            this.toolStripButton_openReportFolder = new System.Windows.Forms.ToolStripButton();
             this.tabControl1.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_libraryConfig.SuspendLayout();
@@ -356,7 +357,8 @@
             this.toolStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_printHtml,
             this.toolStripButton_setReportEndDay,
-            this.toolStripButton_convertFormat});
+            this.toolStripButton_convertFormat,
+            this.toolStripButton_openReportFolder});
             this.toolStrip_main.Location = new System.Drawing.Point(0, 303);
             this.toolStrip_main.Name = "toolStrip_main";
             this.toolStrip_main.Size = new System.Drawing.Size(431, 25);
@@ -399,6 +401,16 @@
             // 
             this.timer_qu.Interval = 1000;
             this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
+            // 
+            // toolStripButton_openReportFolder
+            // 
+            this.toolStripButton_openReportFolder.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_openReportFolder.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_openReportFolder.Image")));
+            this.toolStripButton_openReportFolder.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_openReportFolder.Name = "toolStripButton_openReportFolder";
+            this.toolStripButton_openReportFolder.Size = new System.Drawing.Size(96, 22);
+            this.toolStripButton_openReportFolder.Text = "打开报表文件夹";
+            this.toolStripButton_openReportFolder.Click += new System.EventHandler(this.toolStripButton_openReportFolder_Click);
             // 
             // ReportForm
             // 
@@ -470,5 +482,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_convertFormat;
         private System.Windows.Forms.TabPage tabPage_option;
         private System.Windows.Forms.CheckBox checkBox_option_deleteReportFileAfterUpload;
+        private System.Windows.Forms.ToolStripButton toolStripButton_openReportFolder;
     }
 }

@@ -496,7 +496,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(config.TypeName) == false
                 && config.TypeName.Length > 3)
-                this.textBox_reportName.Text = config.TypeName.Substring(3).Trim();
+                this.textBox_reportName.Text = config.TypeName.Substring(GetNumberPrefix(config.TypeName).Length).Trim();
 
             if (string.IsNullOrEmpty(this.checkedComboBox_createFreq.Text) == true)
                 this.checkedComboBox_createFreq.Text = config.CreateFreq;
@@ -504,6 +504,20 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 获得一个字符串前面的数字部分。例如 "101 xxxx" "9101 xxxxxxx"
+        static string GetNumberPrefix(string strText)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach(char ch in strText)
+            {
+                if (char.IsDigit(ch) == false)
+                    return result.ToString();
+                result.Append(ch);
+            }
+
+            return result.ToString();
         }
 
         private void textBox_cfgFileName_TextChanged(object sender, EventArgs e)
@@ -517,7 +531,11 @@ namespace dp2Circulation
 
             string strCfgDir = Path.Combine(this.MainForm.UserDir, "report_def");
             DirectoryInfo di = new DirectoryInfo(strCfgDir);
-            FileInfo[] fis = di.GetFiles("???.xml");
+
+            List<FileInfo> array = new List<FileInfo>();
+            array.AddRange( di.GetFiles("???.xml"));
+            array.AddRange( di.GetFiles("????.xml"));
+            FileInfo[] fis = array.ToArray();
             Array.Sort(fis, new FileInfoCompare());
 
             foreach (FileInfo fi in fis)

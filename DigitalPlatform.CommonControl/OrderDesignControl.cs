@@ -474,7 +474,7 @@ namespace DigitalPlatform.CommonControl
                 nRet = item.location.Check(out strError);
                 if (nRet != 0)
                 {
-                    strError = "第 " + (i + 1).ToString() + " 行: 去向 格式有问题: " + strError;
+                    strError = "第 " + (i + 1).ToString() + " 行: 馆藏分配去向 格式有问题: " + strError;
                     return 1;
                 }
 
@@ -619,7 +619,7 @@ namespace DigitalPlatform.CommonControl
                     nRet = locations.Build(strLocationString, out strError);
                     if (nRet == -1)
                     {
-                        strError = "第 " + (i + 1).ToString() + " 行: 去向字符串 '" + strLocationString + "' 格式错误: " + strError;
+                        strError = "第 " + (i + 1).ToString() + " 行: 馆藏分配去向字符串 '" + strLocationString + "' 格式错误: " + strError;
                         return -1;
                     }
                     string strUsedLibraryCodes = StringUtil.MakePathList(locations.GetUsedLibraryCodes());
@@ -634,7 +634,7 @@ namespace DigitalPlatform.CommonControl
                         this.VerifyLibraryCode(this, e);
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                         {
-                            strError = "第 " + (i + 1).ToString() + " 行: 去向错误: " + e.ErrorInfo;
+                            strError = "第 " + (i + 1).ToString() + " 行: 馆藏分配去向错误: " + e.ErrorInfo;
                             return -1;
                         }
                     }
@@ -659,7 +659,7 @@ namespace DigitalPlatform.CommonControl
                         nRet = temp_locations.Build(strTempLocationString, out strError);
                         if (nRet == -1)
                         {
-                            strError = "第 " + (j + 1).ToString() + " 行: 去向字符串 '" + strTempLocationString + "' 格式错误: " + strError;
+                            strError = "第 " + (j + 1).ToString() + " 行: 馆藏分配去向字符串 '" + strTempLocationString + "' 格式错误: " + strError;
                             return -1;
                         }
                         string strTempUsedLibraryCodes = StringUtil.MakePathList(temp_locations.GetUsedLibraryCodes());
@@ -674,7 +674,7 @@ namespace DigitalPlatform.CommonControl
                                     && item.Price == temp_item.Price
                                     && strUsedLibraryCodes == strTempUsedLibraryCodes)
                                 {
-                                    strError = "第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/价格/去向(中所含的馆代码) 四元组重复，需要将它们合并为一行";
+                                    strError = "第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/价格/馆藏分配去向(中所含的馆代码) 四元组重复，需要将它们合并为一行";
                                     return 1;
                                 }
                             }
@@ -687,7 +687,7 @@ namespace DigitalPlatform.CommonControl
                                     && item.RangeString == temp_item.RangeString
                                     && strUsedLibraryCodes == strTempUsedLibraryCodes)
                                 {
-                                    strError = "第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/时间范围/价格/去向(中所含的馆代码) 五元组重复，需要将它们合并为一行";
+                                    strError = "第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/时间范围/价格/馆藏分配去向(中所含的馆代码) 五元组重复，需要将它们合并为一行";
                                     return 1;
                                 }
                             }
@@ -3910,6 +3910,18 @@ namespace DigitalPlatform.CommonControl
                 string strTotalPrice = DomUtil.GetElementText(dom.DocumentElement, "totalPrice");
                 if (string.IsNullOrEmpty(strPrice) == false && string.IsNullOrEmpty(strTotalPrice) == false)
                     DomUtil.SetElementText(dom.DocumentElement, "totalPrice", "");
+
+                // 把 location 中的已验收信息清除
+                string strDistributeString = DomUtil.GetElementText(dom.DocumentElement, "distribute");
+                if (string.IsNullOrEmpty(strDistributeString) == false)
+                {
+                    LocationCollection locations = new LocationCollection();
+                    nRet = locations.Build(strDistributeString, out strError);
+                    if (nRet == -1)
+                        throw new Exception("馆藏分配去向字符串 '" + strDistributeString + "' 格式错误: " + strError);
+                    strDistributeString = locations.ToString(false);
+                    DomUtil.SetElementText(dom.DocumentElement, "distribute", strDistributeString);
+                }
 
                 DomUtil.SetElementText(dom.DocumentElement, "state", "");
                 DomUtil.SetElementText(dom.DocumentElement, "refID", "");
