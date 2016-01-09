@@ -43,6 +43,53 @@ namespace DigitalPlatform.LibraryServer
             return true;
         }
 
+        // 构造检索特定读者特定册条码号的特定事项的 Query
+        // parameters:
+        //      patronBarcode   读者证条码号。纯净的号码
+        //      itemBarcode 册条码号
+        public IMongoQuery BuildQuery(
+            string patronBarcode,
+            string itemBarcode,
+            DateTime startTime,
+            DateTime endTime,
+            string operTypes)
+        {
+            var time_query = Query.And(Query.GTE("OperTime", startTime),
+                Query.LT("OperTime", endTime));
+
+            if (startTime == new DateTime(0) && endTime == new DateTime(0))
+                time_query = Query.GTE("OperTime", startTime);
+            else if (startTime == new DateTime(0))
+                time_query = Query.LT("OperTime", endTime);
+            else if (endTime == new DateTime(0))
+                time_query = Query.GTE("OperTime", startTime);
+
+            IMongoQuery patron_query = Query.EQ("PatronBarcode", patronBarcode);
+            IMongoQuery item_query = Query.EQ("ItemBarcode", itemBarcode);
+
+            List<IMongoQuery> action_items = new List<IMongoQuery>();
+            string[] types = operTypes.Split(new char[] { ',' });
+            foreach (string type in types)
+            {
+                if (type == "borrow")
+                    action_items.Add(Query.EQ("Action", "borrow"));
+                if (type == "return")
+                    action_items.Add(Query.EQ("Action", "return"));
+                if (type == "renew")
+                    action_items.Add(Query.EQ("Action", "renew"));
+                if (type == "lost")
+                    action_items.Add(Query.EQ("Action", "lost"));
+                if (type == "read")
+                    action_items.Add(Query.EQ("Action", "read"));
+            }
+
+            var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation", "return")),
+                Query.Or(action_items));
+
+            return Query.And(patron_query, item_query, time_query, type_query);
+        }
+
+        // 构造 Query
         // parameters:
         //      patronBarcode   读者证条码号。如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
         public IMongoQuery BuildQuery(
@@ -188,6 +235,26 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 探测是否存在这样的事项
+        public bool Exists(
+            string patronBarcode,
+            string itemBarcode,
+            DateTime startTime,
+            DateTime endTime,
+            string operTypes)
+        {
+            MongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return false;
+
+            var query = BuildQuery(patronBarcode,
+                itemBarcode,
+                startTime,
+                endTime,
+                operTypes);
+
+            return collection.Find(query).Count() > 0;
+        }
     }
 
     public class ChargingOperItem

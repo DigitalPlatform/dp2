@@ -2543,10 +2543,17 @@ MessageBoxDefaultButton.Button1);
             Hashtable macro_table,
             string strNameTable,
             string strOutputFileName,
+            string strReportType,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            if (strReportType != "102" && strReportType != "9102")
+            {
+                strError = "Create_102_report() 的 strReportType 参数值必须为 102/9102 之一";
+                return -1;
+            }
 
             List<string> departments = StringUtil.SplitList(strNameTable);
             if (departments.Count == 0)
@@ -2582,7 +2589,7 @@ MessageBoxDefaultButton.Button1);
                 nRet = CreateReaderReportCommand(
                     strLibraryCode,
                     strDateRange,
-                    "102",
+                    strReportType,  // "102",
                     department,
                     out strCommand,
                     out strError);
@@ -2680,6 +2687,7 @@ MessageBoxDefaultButton.Button1);
             Hashtable macro_table,
             // string strNameTable,
             string strOutputDir,
+            string strReportType,
             out string strError)
         {
             strError = "";
@@ -2798,7 +2806,7 @@ MessageBoxDefaultButton.Button1);
                 nRet = CreateReaderReportCommand(
                     strLibraryCode,
                     strDateRange,
-                    "131",
+                    strReportType,  // "131",
                     strReaderBarcode,
                     out strCommand,
                     out strError);
@@ -2811,7 +2819,7 @@ MessageBoxDefaultButton.Button1);
     writer,
     strOutputFileName,
     macro_table,
-    "创建 131 表时",
+    "创建 "+strReportType+" 表时",
     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2841,6 +2849,7 @@ MessageBoxDefaultButton.Button1);
                         strReaderBarcode,
                         strOutputDir,
                         strOutputFileName,
+                        strReportType,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -2972,6 +2981,7 @@ out strError);
             string strCfgFile,
             Hashtable macro_table,
             string strOutputFileName,
+            string strReportType,
             out string strError)
         {
             strError = "";
@@ -2992,7 +3002,7 @@ out strError);
             nRet = CreateBookReportCommand(
                 strLibraryCode,
                 strDateRange,
-                "201",
+                strReportType,  // "201",
                 "",
                 null,
                 out strCommand,
@@ -3006,7 +3016,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 201 表时",
+    "创建 "+strReportType+" 表时",
 out strError);
         }
 
@@ -3019,6 +3029,7 @@ out strError);
             string strCfgFile,
             Hashtable macro_table,
             string strOutputFileName,
+            string strReportType,
             out string strError)
         {
             strError = "";
@@ -3039,7 +3050,7 @@ out strError);
             nRet = CreateBookReportCommand(
                 strLibraryCode,
                 strDateRange,
-                "202",
+                strReportType,  // "202",
                 "",
                 null,
                 out strCommand,
@@ -3053,7 +3064,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 202 表时",
+    "创建 "+strReportType+" 表时",
 out strError);
         }
 
@@ -3941,11 +3952,11 @@ out string strError)
 
         // 创建读者报表，关于流通业务
         // 1) 按照读者自然单位分类的借书册数表 101 9101
-        // 2) 按照指定的单位分类的借书册数表 102
-        // 3) 按照读者类型分类的借书册数表 111
-        // 4) 按照读者姓名分类的借书册数表 121
-        // 5) 没有借书的读者 122
-        // 6) 每个读者的借阅清单 131
+        // 2) 按照指定的单位分类的借书册数表 102 9102
+        // 3) 按照读者类型分类的借书册数表 111 9111
+        // 4) 按照读者姓名分类的借书册数表 121 9121
+        // 5) 没有借书的读者 122 9122
+        // 6) 每个读者的借阅清单 131 9131
         int CreateReaderReportCommand(
             string strLibraryCode,
             string strDateRange,
@@ -4032,6 +4043,18 @@ out string strError)
                      + "  ORDER BY borrow DESC, department;";
 
             }
+            else if (StringUtil.IsInList("9102", strStyle) == true)
+            {
+                // 9102 表 按照 *指定的单位* 分类的阅读册数表
+                // 这里每次只能获得一个单位的一行数据。需要按照不同单位 (strParameters) 多次循环调用本函数
+                strCommand = "select '" + strParameters + "' as department, "
+                    + " count(*) as count1 "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                     + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "' AND reader.department like '" + strParameters + "' "
+                     + "  ORDER BY count1 DESC, department;";
+            }
             else if (StringUtil.IsInList("111", strStyle) == true)
             {
                 // 111 表 按照读者 *自然类型* 分类的借书册数表
@@ -4051,6 +4074,18 @@ out string strError)
      + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
      + "     AND reader.librarycode = '" + strLibraryCode + "' "
      + " GROUP BY reader.readertype ORDER BY borrow DESC, reader.readertype;";
+
+            }
+            else if (StringUtil.IsInList("9111", strStyle) == true)
+            {
+                // 9111 表 按照读者 *自然类型* 分类的阅读册数表
+                strCommand = "select reader.readertype, "
+                    + " count(*) as count1 "
+                    + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                    + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                    + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
+                    + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                    + " GROUP BY reader.readertype ORDER BY count1 DESC, reader.readertype;";
 
             }
             else if (StringUtil.IsInList("121", strStyle) == true)
@@ -4074,6 +4109,17 @@ out string strError)
      + " GROUP BY operlogcircu.readerbarcode ORDER BY borrow DESC, reader.department, operlogcircu.readerbarcode ;";
 
             }
+            else if (StringUtil.IsInList("9121", strStyle) == true)
+            {
+                // 9121 表 按照读者 *姓名* 分类的阅读册数表
+                strCommand = "select operlogcircu.readerbarcode, reader.name, reader.department, "
+                    + " count(*) as count1 "
+                    + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                    + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                    + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
+                    + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                    + " GROUP BY operlogcircu.readerbarcode ORDER BY count1 DESC, reader.department, operlogcircu.readerbarcode ;";
+            }
             else if (StringUtil.IsInList("122", strStyle) == true)
             {
                 /*
@@ -4096,6 +4142,22 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                      + " ORDER BY department, readerbarcode ;";
                 // nNumber = 122;
             }
+            else if (StringUtil.IsInList("9122", strStyle) == true)
+            {
+                // 9122 表 按照读者 *姓名* 没有阅读的读者
+                strCommand =
+                     "create temp table tt as select operlogcircu.readerbarcode "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " WHERE operlogcircu.operation = 'return' and operlogcircu.action = 'read' "
+                     + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "';"
+                     + " select readerbarcode, name, department from reader "
+                     + " WHERE (select count(*) from tt) > 0 "
+                     + " AND librarycode = '" + strLibraryCode + "' "
+                     + " AND readerbarcode not in tt "
+                     + " AND state = '' "   // 状态值为空的读者才能参与此项统计
+                     + " ORDER BY department, readerbarcode ;";
+            }
             else if (StringUtil.IsInList("131", strStyle) == true)
             {
                 // 131 表 每个读者的借阅清单
@@ -4104,6 +4166,17 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                         + " left JOIN item ON oper1.itembarcode <> '' AND oper1.itembarcode = item.itembarcode "
                         + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
                         + " where oper1.operation = 'borrow' and oper1.action = 'borrow' "
+                        + "     AND oper1.date >= '" + strStartDate + "' AND oper1.date <= '" + strEndDate + "' "
+                        + "     AND oper1.readerbarcode = '" + strParameters + "' "
+                        + " group by oper1.readerbarcode, oper1.itembarcode, oper1.opertime order by oper1.readerbarcode, oper1.opertime ; ";
+            }
+            else if (StringUtil.IsInList("9131", strStyle) == true)
+            {
+                // 9131 表 每个读者的阅读清单
+                strCommand = "select oper1.itembarcode, biblio.summary, oper1.opertime as 'readtime' from operlogcircu as oper1 "
+                        + " left JOIN item ON oper1.itembarcode <> '' AND oper1.itembarcode = item.itembarcode "
+                        + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+                        + " where oper1.operation = 'return' and oper1.action = 'read' "
                         + "     AND oper1.date >= '" + strStartDate + "' AND oper1.date <= '" + strEndDate + "' "
                         + "     AND oper1.readerbarcode = '" + strParameters + "' "
                         + " group by oper1.readerbarcode, oper1.itembarcode, oper1.opertime order by oper1.readerbarcode, oper1.opertime ; ";
@@ -4150,9 +4223,9 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
         }
 
         // 创建图书报表，关于流通业务
-        // 1) 201 按照图书种分类的借书册数表
-        // 2) 202 从来没有借出的图书 *种* 。册数列表示种下属的册数，不是被借出的册数
-        // 4) 212 表 按照图书 *分类* 分类的借书册数表
+        // 1) 201 9201 按照图书种分类的借书册数表 
+        // 2) 202 9202 从来没有借出的图书 *种* 。册数列表示种下属的册数，不是被借出的册数
+        // 4) 212 9212 按照图书 *分类* 分类的借书册数表
         int CreateBookReportCommand(
             string strLocation, // "名称/"
             string strDateRange,
@@ -4217,6 +4290,19 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
      + " GROUP BY item.bibliorecpath ORDER BY borrow DESC ;";
 
             }
+            else if (StringUtil.IsInList("9201", strStyle) == true)
+            {
+                // 9201 表 按照图书 *种* 分类的阅读册数表
+                strCommand = "select item.bibliorecpath, biblio.summary, "
+                    + " count(*) as count1 "
+                    + " FROM operlogcircu "
+                    + " JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+                    + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+                    + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                    + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
+                    + "     AND " + strLocationLike
+                    + " GROUP BY item.bibliorecpath ORDER BY count1 DESC ;";
+            }
             else if (StringUtil.IsInList("202", strStyle) == true)
             {
                 // 202 表 从来没有借出的图书 *种* 。册数列表示种下属的册数，不是被借出的册数
@@ -4227,6 +4313,22 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                      + " ( select item.bibliorecpath "
                      + " FROM operlogcircu JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
+                     + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                     + "     AND " + strLocationLike + " ) "
+                     + " AND " + strLocationLike    // 限定 item 表里面的记录范围为分馆的册
+                     + " AND substr(item.createtime,1,10) <= '" + strEndDate.Insert(6, "-").Insert(4, "-") + "' "  // 限定册记录创建的时间在 end 以前
+                     + " GROUP BY item.bibliorecpath ORDER BY item.bibliorecpath;";
+            }
+            else if (StringUtil.IsInList("9202", strStyle) == true)
+            {
+                // 9202 表 从来没有阅读的图书 *种* 。册数列表示种下属的册数，不是被阅读的册数
+                strCommand = "select item.bibliorecpath, biblio.summary, count(*) as count "
+                     + " FROM item "
+                     + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+                     + " WHERE item.bibliorecpath not in "
+                     + " ( select item.bibliorecpath "
+                     + " FROM operlogcircu JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+                     + " WHERE operlogcircu.operation = 'return' and operlogcircu.action = 'read' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND " + strLocationLike + " ) "
                      + " AND " + strLocationLike    // 限定 item 表里面的记录范围为分馆的册
@@ -4288,6 +4390,33 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
      + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
      + "     AND " + strLocationLike
      + " GROUP BY classhead ORDER BY classhead ;";
+            }
+            else if (StringUtil.IsInList("9212", strStyle) == true
+                || StringUtil.IsInList("9213", strStyle) == true)
+            {
+                string strClassTableName = "class_" + strParameters;
+
+                int nRet = PrepareDistinctClassTable(
+            strClassTableName,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                string strDistinctClassTableName = "class_" + strParameters + "_d";
+                string strClassColumn = BuildClassColumnFragment(strDistinctClassTableName,
+    filters,
+    "other");
+
+                // 9212 表 按照图书 *分类* 分类的借书册数表
+                strCommand =
+                    "select " + strClassColumn + " as classhead, "
+                    + " count(*) as count1 "
+                    + " FROM operlogcircu left outer JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+                    + " left outer JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
+                    + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                    + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
+                    + "     AND " + strLocationLike
+                    + " GROUP BY classhead ORDER BY classhead ;";
             }
             else
             {
@@ -4850,6 +4979,7 @@ out strError);
                     + "  count(case operlogcircu.action when 'renew' then operlogcircu.action end) as renew, "
                     + "  count(case operlogcircu.action when 'return' then operlogcircu.action end) as return, "
                     + "  count(case operlogcircu.action when 'lost' then operlogcircu.action end) as lost, "
+                    + "  count(case operlogcircu.action when 'read' then operlogcircu.action end) as read, "
                     + "  count(*) as total "
                      + " FROM operlogcircu "
                      + " left outer JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
@@ -4867,6 +4997,7 @@ out strError);
                     + "  count(case operlogcircu.action when 'renew' then operlogcircu.action end) as renew, "
                     + "  count(case operlogcircu.action when 'return' then operlogcircu.action end) as return, "
                     + "  count(case operlogcircu.action when 'lost' then operlogcircu.action end) as lost, "
+                    + "  count(case operlogcircu.action when 'read' then operlogcircu.action end) as read, "
                     + "  count(*) as total "
                      + " FROM operlogcircu "
                      + " left outer JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
@@ -10934,7 +11065,7 @@ MessageBoxDefaultButton.Button1);
 #endif
                 int nAdd = 0;   // 0 表示什么也不做。 1表示要加入 -1 表示要删除
 
-                if (strReportType == "102")
+                if (strReportType == "102" || strReportType == "9102")
                 {
                     // *** 102
                     // 按照指定的单位名称列表，列出借书册数
@@ -10945,6 +11076,7 @@ MessageBoxDefaultButton.Button1);
                         macro_table,
                         strNameTable,
                         strOutputFileName,
+                        strReportType,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -10954,9 +11086,9 @@ MessageBoxDefaultButton.Button1);
                         nAdd = 1;
                 }
                 else if (strReportType == "101" || strReportType == "9101"
-                    || strReportType == "111"
-                    || strReportType == "121"
-                    || strReportType == "122"
+                    || strReportType == "111" || strReportType == "9111"
+                    || strReportType == "121" || strReportType == "9121"
+                    || strReportType == "122" || strReportType == "9122"
                     || strReportType == "141")
                 {
                     nRet = Create_1XX_report(strLibraryCode,
@@ -10973,15 +11105,16 @@ MessageBoxDefaultButton.Button1);
                     else if (nRet == 1)
                         nAdd = 1;
                 }
-                else if (strReportType == "131")
+                else if (strReportType == "131" || strReportType == "9131")
                 {
-                    string str131Dir = Path.Combine(strOutputDir, "table_131");
+                    string str131Dir = Path.Combine(strOutputDir, "table_" + strReportType);
                     // 这是创建到一个子目录(会在子目录中创建很多文件和下级目录)，而不是输出到一个文件
                     nRet = Create_131_report(strLibraryCode,
                         time.Time,
                         strCfgFile,
                         macro_table,
                         str131Dir,
+                        strReportType,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -11003,12 +11136,13 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-                else if (strReportType == "201"
-                    || strReportType == "202"
-                    || strReportType == "212"
+                else if (strReportType == "201" || strReportType == "9201"
+                    || strReportType == "202" || strReportType == "9202"
+                    || strReportType == "212" || strReportType == "9212"
                     || strReportType == "213") // begin of 2xx
                 {
-                    if (strReportType == "212" && class_styles.Count == 0)
+                    if ((strReportType == "212" || strReportType == "9212")
+                        && class_styles.Count == 0)
                         continue;
                     if (strReportType == "213")
                         continue;   // 213 表已经被废止，其原有功能被合并到 212 表
@@ -11039,30 +11173,32 @@ MessageBoxDefaultButton.Button1);
                         if (string.IsNullOrEmpty(strOutputFileName) == true)
                             strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
 
-                        if (strReportType == "201")
+                        if (strReportType == "201" || strReportType == "9201")
                         {
                             nRet = Create_201_report(strLocation,
-                        time.Time,
+                                time.Time,
                                 strCfgFile,
                                 macro_table,
                                 strOutputFileName,
+                                strReportType,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
                         }
-                        else if (strReportType == "202")
+                        else if (strReportType == "202" || strReportType == "9202")
                         {
                             nRet = Create_202_report(strLocation,
-                        time.Time,
+                                time.Time,
                                 strCfgFile,
                                 macro_table,
                                 strOutputFileName,
+                                strReportType,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
                         }
-                        else if (strReportType == "212"
-                            || strReportType == "213")
+                        else if (strReportType == "212" || strReportType == "9212"
+                            || strReportType == "213" || strReportType == "9213")
                         {
                             // List<string> names = StringUtil.SplitList(strNameTable);
                             List<OneClassType> class_table = null;
@@ -11586,7 +11722,7 @@ MessageBoxDefaultButton.Button1);
 
             // 根据时间类型创建一个 index.xml 中的 item 元素
             XmlNode item = null;
-            if (strReportType == "131")
+            if (strReportType == "131" || strReportType == "9131")
             {
                 item = CreateDirNode(index_dom.DocumentElement,
                     strTableName + "-" + strReportType,
@@ -11774,7 +11910,7 @@ MessageBoxDefaultButton.Button1);
             string strReportType)
         {
             string strElementName = "report";
-            if (strReportType == "131")
+            if (strReportType == "131" || strReportType == "9131")
                 strElementName = "dir";
             XmlNode item = parent.SelectSingleNode(strElementName + "[@name='" + strReportName + "']");
             if (item == null)
@@ -11949,6 +12085,7 @@ MessageBoxDefaultButton.Button1);
             string strPatronBarcode,
             string strOutputDir,
             string strReportFileName,
+            string strReportType,
             out string strError)
         {
             strError = "";
@@ -11983,7 +12120,7 @@ MessageBoxDefaultButton.Button1);
                 strDepartment,
                 strPersonName + "-" + strPatronBarcode);
             Debug.Assert(item != null, "");
-            DomUtil.SetAttr(item, "type", "131");
+            DomUtil.SetAttr(item, "type", strReportType);
 
             string strNewFileName = "." + strReportFileName.Substring(strOutputDir.Length);
 

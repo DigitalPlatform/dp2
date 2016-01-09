@@ -1791,7 +1791,7 @@ MessageBoxDefaultButton.Button1);
             filenames.Add("objectrights.xml");
             filenames.Add("inventory_item_browse.xml");
             filenames.Add("inventory.css");
-            filenames.Add("charginghistory.css");
+            // filenames.Add("charginghistory.css");
             filenames.Add("nonephoto.png");
 #if NO
             filenames.Add("comment_change_actions.xml");

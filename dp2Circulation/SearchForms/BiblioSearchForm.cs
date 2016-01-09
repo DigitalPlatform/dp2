@@ -8110,8 +8110,6 @@ MessageBoxDefaultButton.Button1);
             if (this.listView_records.SelectedItems.Count > 1)
                 ListViewUtil.SelectLine(item, true);
 
-            string strError = "";
-            List<int> indices = null;
             bool bRet = ListViewUtil.MoveSelectedUpDown(
                 this.listView_records,
                 strStyle == "prev" ? true : false);

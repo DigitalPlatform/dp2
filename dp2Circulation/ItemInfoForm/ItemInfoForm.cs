@@ -1746,10 +1746,11 @@ out strError);
             string strBinDir = Environment.CurrentDirectory;
 
             string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
+            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
-                + "<script type='text/javascript' charset='UTF-8' src='%bindir%/getsummary.js'></script>";
+                + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
             string strStyle = @"<style type='text/css'>
 
 </style>";

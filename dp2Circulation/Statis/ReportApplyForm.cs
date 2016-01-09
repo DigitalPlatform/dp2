@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,10 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Collections;
 
 namespace dp2Circulation
 {
@@ -86,14 +87,13 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            if (strNumber == "102"
+            if ((strNumber == "102" || strNumber == "9102")
                 && string.IsNullOrEmpty(this.textBox_nameTable_strings.Text) == true)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_nameTable;
-                strError = "类型为 102 报表必须配置名字列表内容";
+                strError = "类型为 "+strNumber+" 的报表必须配置名字列表内容";
                 goto ERROR1;
             }
-
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
@@ -318,7 +318,7 @@ namespace dp2Circulation
 
             string strNumber = this.GetTypeNumber();
 
-            if (strNumber == "102")
+            if (strNumber == "102" || strNumber == "9102")
             {
                 List<string> results = null;
                 // 获得一个分馆内读者记录的所有单位名称
@@ -331,8 +331,8 @@ namespace dp2Circulation
 
                 this.textBox_nameTable_strings.Text = StringUtil.MakePathList(results, "\r\n");
             }
-            else if (strNumber == "212"
-                || strNumber == "213"
+            else if (strNumber == "212" || strNumber == "9212"
+                || strNumber == "213" || strNumber == "9213"
                 || strNumber == "301"
                 || strNumber == "302"
                 || strNumber == "493")
@@ -347,7 +347,6 @@ namespace dp2Circulation
 
                 this.textBox_nameTable_strings.Text = StringUtil.MakePathList(results, "\r\n");
             }
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -422,8 +421,8 @@ namespace dp2Circulation
             {
                 // string strNumber = this.GetTypeNumber();
 
-                if (strNumber == "212"
-                    || strNumber == "213"
+                if (strNumber == "212" || strNumber == "9212"
+                    || strNumber == "213" || strNumber == "9213"
                     || strNumber == "301"
                     || strNumber == "302"
                     || strNumber == "493"
@@ -433,7 +432,7 @@ namespace dp2Circulation
                     this.textBox_nameTable_strings.Enabled = true;
                     this.button_nameTable_importStrings.Enabled = true;
                 }
-                else if (strNumber == "102")
+                else if (strNumber == "102" || strNumber == "9102")
                 {
                     this.label_nameTable_strings.Text = "部门名称列表 [每行一个名称]";
                     this.textBox_nameTable_strings.Enabled = true;
@@ -510,7 +509,7 @@ namespace dp2Circulation
         static string GetNumberPrefix(string strText)
         {
             StringBuilder result = new StringBuilder();
-            foreach(char ch in strText)
+            foreach (char ch in strText)
             {
                 if (char.IsDigit(ch) == false)
                     return result.ToString();
@@ -533,8 +532,8 @@ namespace dp2Circulation
             DirectoryInfo di = new DirectoryInfo(strCfgDir);
 
             List<FileInfo> array = new List<FileInfo>();
-            array.AddRange( di.GetFiles("???.xml"));
-            array.AddRange( di.GetFiles("????.xml"));
+            array.AddRange(di.GetFiles("???.xml"));
+            array.AddRange(di.GetFiles("????.xml"));
             FileInfo[] fis = array.ToArray();
             Array.Sort(fis, new FileInfoCompare());
 

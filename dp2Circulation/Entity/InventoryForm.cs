@@ -2837,7 +2837,7 @@ null);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");   // ?? 还是用的 default 目录的文件啊，没有用用户目录的同名文件。似乎启动时不用拷贝了
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 

@@ -4605,8 +4605,6 @@ start_time_1,
                     string strReaderState = DomUtil.GetElementText(readerdom.DocumentElement,
                         "state");
 
-
-
                     string strOperTime = this.Clock.GetClock();
                     string strWarning = "";
 
@@ -4718,7 +4716,21 @@ start_time_1,
                         strOperTime);
 
                     if (strAction == "read")
+                    {
+                        // 探测 mongodb 库中是否已经存在这样的事项
+                        bool bRet = this.ChargingOperDatabase.Exists(
+                            strReaderBarcode,
+                            string.IsNullOrEmpty(strItemBarcode) == false ? strItemBarcode : strItemBarcodeParam,
+                            DateTime.Now - new TimeSpan(0, 5, 0),
+                            new DateTime(0),
+                            "read");
+                        if (bRet == true)
+                        {
+                            strError = "读者 '"+strReaderBarcode+"' 早先(五分钟内)已经读过册 '"+strItemBarcode+"' 了，本次操作被拒绝";
+                            goto ERROR1;
+                        }
                         goto WRITE_OPERLOG;
+                    }
 
                     WriteTimeUsed(
                         time_lines,
@@ -5792,6 +5804,7 @@ start_time_1,
             return 0;
         }
 
+#if NO
         // 执行“读过”记载
         int DoRead(
             SessionInfo sessioninfo,
@@ -5970,6 +5983,8 @@ start_time_1,
 
             return 0;
         }
+
+#endif
 
         #region Return()下级函数
 

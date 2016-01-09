@@ -108,7 +108,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.65 (2016/1/1) GetSystemParameters() API 增加 circulation/chargingOperDatabase。
         //      2.66 (2016/1/2) GetBiblioInfos() API 中当 strBiblioRecPath 参数在使用 @path-list: 引导的时候，其后部允许出现 @itemBarcode:xxxx|@itemBarcode:xxx 这样的内容
         //      2.67 (2016/1/6) GetItemInfo() API 的 @barcode-list:" "get-path-list" 功能允许间杂 @refID:前缀的号码。
-        public static string Version = "2.67";
+        //      2.68 (2016/1/9) Return() API 增加了 read action。会将动作记入操作日志。ChargingOperDatabase 库也会自动更新
+        public static string Version = "2.68";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

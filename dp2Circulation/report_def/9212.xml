@@ -1,0 +1,16 @@
+<root>
+  <title>阅读排行, 按分类，馆藏地\r%location%\r%class%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="类号" type="String" align="left" sum="no" class="class" eval="" />
+    <column name="阅读册数" type="" align="right" sum="yes" class="readitems" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>9212 馆藏地点和分类的阅读排行</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>year,month,day</createFrequency>
+  <property fresh="false" />
+</root>

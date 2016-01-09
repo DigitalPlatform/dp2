@@ -927,7 +927,15 @@ end_time);
             if (task.Action == "inventory")
                 strOperText = task.ReaderBarcode + " 盘点 " + task.ItemBarcode;
             else if (task.Action == "read")
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.68") < 0)
+                {
+                    task.ErrorInfo = "操作未能进行。“读过”功能要求 dp2library 版本在 2.68 或以上";
+                    goto ERROR1;
+                }
+
                 strOperText = task.ReaderBarcode + " 读过 " + task.ItemBarcode;
+            }
             else
                 strOperText = task.ReaderBarcode + " 还 " + task.ItemBarcode;
 
