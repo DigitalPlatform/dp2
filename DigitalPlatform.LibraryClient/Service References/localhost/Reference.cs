@@ -1063,6 +1063,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string ActionField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BiblioRecPathField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ClientAddressField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -1111,6 +1114,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.ActionField, value) != true)) {
                     this.ActionField = value;
                     this.RaisePropertyChanged("Action");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string BiblioRecPath {
+            get {
+                return this.BiblioRecPathField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BiblioRecPathField, value) != true)) {
+                    this.BiblioRecPathField = value;
+                    this.RaisePropertyChanged("BiblioRecPath");
                 }
             }
         }

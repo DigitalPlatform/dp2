@@ -2578,7 +2578,7 @@ namespace dp2Circulation
         /*public*/ static string BuildVolumeRangeString(List<string> volumes)
         {
             Hashtable no_list_table = new Hashtable();
-            List<string> volumn_list = new List<string>();
+            List<string> volume_list = new List<string>();
             List<string> zong_list = new List<string>();
 
             for(int i=0;i<volumes.Count;i++)
@@ -2603,7 +2603,7 @@ namespace dp2Circulation
                 }
 
                 no_list.Add(strNo);
-                volumn_list.Add(strSingleVolume);
+                volume_list.Add(strSingleVolume);
                 zong_list.Add(strZong);
             }
 
@@ -2628,7 +2628,7 @@ namespace dp2Circulation
                     + "no." + Global.BuildNumberRangeString(no_list);
             }
 
-            string strVolumnString = Global.BuildNumberRangeString(volumn_list);
+            string strVolumeString = Global.BuildNumberRangeString(volume_list);
             string strZongString = Global.BuildNumberRangeString(zong_list);
 
             string strValue = strNoString;
@@ -2640,11 +2640,11 @@ namespace dp2Circulation
                 strValue += "总." + strZongString;
             }
 
-            if (String.IsNullOrEmpty(strVolumnString) == false)
+            if (String.IsNullOrEmpty(strVolumeString) == false)
             {
                 if (String.IsNullOrEmpty(strValue) == false)
                     strValue += "=";
-                strValue += "v." + strVolumnString;
+                strValue += "v." + strVolumeString;
             }
 
             return strValue;

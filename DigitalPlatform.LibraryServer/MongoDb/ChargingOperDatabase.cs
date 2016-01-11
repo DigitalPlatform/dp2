@@ -30,6 +30,10 @@ namespace DigitalPlatform.LibraryServer
 
             _collection.CreateIndex(new IndexKeysBuilder().Ascending("PatronBarcode"),
                 IndexOptions.SetUnique(false));
+
+            // 2016/1/9
+            _collection.CreateIndex(new IndexKeysBuilder().Ascending("BiblioRecPath"),
+                IndexOptions.SetUnique(false));
         }
 
         // parameters:
@@ -50,43 +54,75 @@ namespace DigitalPlatform.LibraryServer
         public IMongoQuery BuildQuery(
             string patronBarcode,
             string itemBarcode,
+            string biblioRecPath,
+            string volume,
             DateTime startTime,
             DateTime endTime,
             string operTypes)
         {
-            var time_query = Query.And(Query.GTE("OperTime", startTime),
-                Query.LT("OperTime", endTime));
+            List<IMongoQuery> and_items = new List<IMongoQuery>();
 
-            if (startTime == new DateTime(0) && endTime == new DateTime(0))
-                time_query = Query.GTE("OperTime", startTime);
-            else if (startTime == new DateTime(0))
-                time_query = Query.LT("OperTime", endTime);
-            else if (endTime == new DateTime(0))
-                time_query = Query.GTE("OperTime", startTime);
-
-            IMongoQuery patron_query = Query.EQ("PatronBarcode", patronBarcode);
-            IMongoQuery item_query = Query.EQ("ItemBarcode", itemBarcode);
-
-            List<IMongoQuery> action_items = new List<IMongoQuery>();
-            string[] types = operTypes.Split(new char[] { ',' });
-            foreach (string type in types)
             {
-                if (type == "borrow")
-                    action_items.Add(Query.EQ("Action", "borrow"));
-                if (type == "return")
-                    action_items.Add(Query.EQ("Action", "return"));
-                if (type == "renew")
-                    action_items.Add(Query.EQ("Action", "renew"));
-                if (type == "lost")
-                    action_items.Add(Query.EQ("Action", "lost"));
-                if (type == "read")
-                    action_items.Add(Query.EQ("Action", "read"));
+                var time_query = Query.And(Query.GTE("OperTime", startTime),
+                    Query.LT("OperTime", endTime));
+
+                if (startTime == new DateTime(0) && endTime == new DateTime(0))
+                    time_query = Query.GTE("OperTime", startTime);
+                else if (startTime == new DateTime(0))
+                    time_query = Query.LT("OperTime", endTime);
+                else if (endTime == new DateTime(0))
+                    time_query = Query.GTE("OperTime", startTime);
+
+                and_items.Add(time_query);
             }
 
-            var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation", "return")),
-                Query.Or(action_items));
+            if (string.IsNullOrEmpty(patronBarcode) == false)
+                and_items.Add(Query.EQ("PatronBarcode", patronBarcode));
 
-            return Query.And(patron_query, item_query, time_query, type_query);
+            if (string.IsNullOrEmpty(itemBarcode) == false
+                && string.IsNullOrEmpty(biblioRecPath) == false)
+            {
+                // 两个条件只要满足一个即可
+                and_items.Add(
+                        Query.Or(Query.EQ("ItemBarcode", itemBarcode),
+                            Query.EQ("BiblioRecPath", biblioRecPath))
+                    );
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(itemBarcode) == false)
+                    and_items.Add(Query.EQ("ItemBarcode", itemBarcode));
+                if (string.IsNullOrEmpty(biblioRecPath) == false)
+                    and_items.Add(Query.EQ("BiblioRecPath", biblioRecPath));
+            }
+
+            if (string.IsNullOrEmpty(volume) == false
+                && string.IsNullOrEmpty(itemBarcode) == true)   // 只有 itemBarcode 为空的时候，才匹配 volume
+                and_items.Add(Query.EQ("No", volume));
+
+            {
+                List<IMongoQuery> action_items = new List<IMongoQuery>();
+                string[] types = operTypes.Split(new char[] { ',' });
+                foreach (string type in types)
+                {
+                    if (type == "borrow")
+                        action_items.Add(Query.EQ("Action", "borrow"));
+                    if (type == "return")
+                        action_items.Add(Query.EQ("Action", "return"));
+                    if (type == "renew")
+                        action_items.Add(Query.EQ("Action", "renew"));
+                    if (type == "lost")
+                        action_items.Add(Query.EQ("Action", "lost"));
+                    if (type == "read")
+                        action_items.Add(Query.EQ("Action", "read"));
+                }
+
+                var type_query = Query.And(Query.Or(Query.EQ("Operation", "borrow"), Query.EQ("Operation", "return")),
+                    Query.Or(action_items));
+                and_items.Add(type_query);
+            }
+
+            return Query.And(and_items);
         }
 
         // 构造 Query
@@ -236,24 +272,31 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 探测是否存在这样的事项
-        public bool Exists(
+        // 当 itemBarcode 不为空的时候，不使用 volume 参数的值
+        // parameters:
+        public IEnumerable<ChargingOperItem> Exists(
             string patronBarcode,
             string itemBarcode,
+            string biblioRecPath,
+            string volume,
             DateTime startTime,
             DateTime endTime,
             string operTypes)
         {
             MongoCollection<ChargingOperItem> collection = this._collection;
             if (collection == null)
-                return false;
+                return null;
 
             var query = BuildQuery(patronBarcode,
                 itemBarcode,
+                biblioRecPath,
+                volume,
                 startTime,
                 endTime,
                 operTypes);
 
-            return collection.Find(query).Count() > 0;
+            return collection.Find(query);
+            // return collection.Find(query).Count() > 0;
         }
     }
 
@@ -269,6 +312,8 @@ namespace DigitalPlatform.LibraryServer
 
         public string ItemBarcode { get; set; }
         public string PatronBarcode { get; set; }
+
+        public string BiblioRecPath { get; set; }
 
         public string Period { get; set; }  // 期限
         public string No { get; set; }  // 续借次，序号

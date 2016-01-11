@@ -1777,7 +1777,7 @@ false);
                 string strFormat = "";
                 if (_cardControl != null)
                 {
-                    if (this.NoBorrowHistory == true 
+                    if (this.NoBorrowHistory == true
                         && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.25") >= 0)
                     {
                         styles.Add("noborrowhistory");
@@ -3210,7 +3210,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             if (string.IsNullOrEmpty(strText) == true)
                 return strText;
             if (this.toolStripButton_upperInput.Checked == true)
+            {
+                if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
+                    return strText; // 特殊地，不要转为大写
                 return strText.ToUpper();
+            }
             return strText;
         }
 

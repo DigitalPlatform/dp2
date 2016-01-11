@@ -5892,12 +5892,18 @@ MessageBoxDefaultButton.Button1);
                 text.Append("<td>" + (nStart + 1).ToString() + "</td>");
                 text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(GetOperTypeName(item.Action)) + "</td>");
 
-                if (string.IsNullOrEmpty(item.ItemBarcode) == false
-                    && item.ItemBarcode.StartsWith("@refID:") == true)
-                    text.Append("<td>" + HttpUtility.HtmlEncode(item.ItemBarcode) + "</td>");
+                string strItemBarcode = item.ItemBarcode;
+                if (string.IsNullOrEmpty(strItemBarcode) == true
+                    && string.IsNullOrEmpty(item.BiblioRecPath) == false)
+                    strItemBarcode = "@biblioRecPath:" + item.BiblioRecPath;
+
+                if (string.IsNullOrEmpty(strItemBarcode) == false
+                    && (strItemBarcode.StartsWith("@refID:") == true || strItemBarcode.StartsWith("@biblioRecPath:") == true))
+                    text.Append("<td>" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
                 else
-                    text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.ItemBarcode) + "</td>");
-                text.Append("<td class='summary pending'>BC:" + HttpUtility.HtmlEncode(item.ItemBarcode) + "</td>");
+                    text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
+
+                text.Append("<td class='summary pending'>BC:" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
 
                 string strPeriod = "";
                 if (wrapper.RelatedItem != null)

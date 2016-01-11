@@ -127,7 +127,7 @@ namespace dp2Circulation
             {
                 long lRet = channel.Login(strUserName,
     strPassword,
-    "type=worker",
+    "type=worker,client=dp2circulation|" + Program.ClientVersion,
     out strError);
                 if (lRet != 1)
                 {

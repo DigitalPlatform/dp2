@@ -3338,8 +3338,10 @@ Culture=neutral, PublicKeyToken=null
                         // 为了避免因 dp2library 2.48 及以前的版本的一个 bug 引起报错
                         if (StringUtil.CompareVersion(this.ServerVersion, "2.48") <= 0 && prop.Type == "amerce")
                             continue;
-                        // 暂时不处理 accessLog 和 hitcount 类型
-                        if (prop.Type == "accessLog" || prop.Type == "hitcount")
+                        // 暂时不处理 accessLog / hitcount / chargingOper 类型
+                        if (prop.Type == "accessLog"
+                            || prop.Type == "hitcount"
+                            || prop.Type == "chargingOper")
                             continue;
                         dbnames.Add(prop.DbName);
                     }

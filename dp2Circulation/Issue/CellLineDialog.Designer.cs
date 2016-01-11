@@ -96,7 +96,7 @@ namespace dp2Circulation
             "accessNo -- 索取号",
             "bookType -- 册类型",
             "price -- 册价格",
-            "volumn -- 卷期号",
+            "volume -- 卷期号",
             "comment -- 注释",
             "batchNo -- 批次号",
             "binding -- 合订信息",

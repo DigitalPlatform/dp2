@@ -58,7 +58,7 @@ namespace dp2Circulation
         /// <summary>
         /// ListView 栏目下标：卷册信息
         /// </summary>
-        public const int COLUMN_VOLUMN = 8;
+        public const int COLUMN_VOLUME = 8;
         /// <summary>
         /// ListView 栏目下标：索取号
         /// </summary>
@@ -157,7 +157,7 @@ namespace dp2Circulation
                 this.Source = strText;
             else if (nCol == COLUMN_PRICE)
                 this.Price = strText;
-            else if (nCol == COLUMN_VOLUMN)
+            else if (nCol == COLUMN_VOLUME)
                 this.Volume = strText;
             else if (nCol == COLUMN_ACCESSNO)
                 this.AccessNo = strText;
@@ -658,7 +658,7 @@ namespace dp2Circulation
                 this.Price);
 
             ListViewUtil.ChangeItemText(item,
-                COLUMN_VOLUMN,
+                COLUMN_VOLUME,
                 this.Volume);
             ListViewUtil.ChangeItemText(item,
                 COLUMN_ACCESSNO,

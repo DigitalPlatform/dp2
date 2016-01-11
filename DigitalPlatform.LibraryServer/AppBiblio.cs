@@ -1404,7 +1404,7 @@ namespace DigitalPlatform.LibraryServer
             // 特殊情况，通过种路径
             string strHead = "@bibliorecpath:";
             if (strItemBarcode.Length > strHead.Length
-                && strItemBarcode.Substring(0, strHead.Length) == strHead)
+                && strItemBarcode.Substring(0, strHead.Length).ToLower() == strHead)
             {
                 strBiblioRecPath = strItemBarcode.Substring(strHead.Length);
 
@@ -1418,7 +1418,7 @@ namespace DigitalPlatform.LibraryServer
                 goto LOADBIBLIO;
             }
 
-            // 如果 strComfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
+            // 如果 strConfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
             {
                 string strLeft = "";
                 string strRight = "";

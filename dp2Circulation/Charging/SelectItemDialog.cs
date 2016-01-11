@@ -17,6 +17,8 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Collections;
+using DigitalPlatform.Marc;
 
 namespace dp2Circulation
 {
@@ -42,7 +44,7 @@ namespace dp2Circulation
         /// 功能类型
         /// 根据它决定某些事项显示为灰色文字
         /// </summary>
-        public string FunctionType = "borrow";  // borrow/return/renew
+        public string FunctionType = "borrow";  // borrow/return/renew/inventory/read。在 read 状态时，除了显示册记录行，还要显示书目记录行
 
         /// <summary>
         /// 验证还书时的读者证条码号
@@ -132,10 +134,23 @@ namespace dp2Circulation
             {
                 foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
                 {
-                    if (string.IsNullOrEmpty(prop.DbName) == false &&
-                        string.IsNullOrEmpty(prop.ItemDbName) == false)
+                    if (string.IsNullOrEmpty(prop.DbName) == true)
+                        continue;   // 很罕见的情况下，数据库组可能不包含书目库
+
+#if NO
+                    if (this.FunctionType == "read")
                     {
+                        // “读过”功能要检索所有书目库
                         results.Add(prop.DbName);
+                    }
+                    else
+#endif
+                    {
+                        if (string.IsNullOrEmpty(prop.DbName) == false &&
+                            string.IsNullOrEmpty(prop.ItemDbName) == false)
+                        {
+                            results.Add(prop.DbName);
+                        }
                     }
                 }
             }
@@ -144,6 +159,7 @@ namespace dp2Circulation
         }
 
         int m_nInSearching = 0;
+        Hashtable _biblioXmlTable = new Hashtable(); // biblioRecPath --> xml
 
         private void button_search_Click(object sender, EventArgs e)
         {
@@ -158,6 +174,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            this._biblioXmlTable.Clear();
             this._biblioRecPaths.Clear();
             this.dpTable_items.Rows.Clear();
 
@@ -280,7 +297,7 @@ namespace dp2Circulation
                         null,   // strResultSetName
                         lStart,
                         lPerCount,
-                        "id", // "id,cols",
+                        this.FunctionType == "read" ? "id,xml" : "id", // "id,cols",
                         this.Lang,
                         out searchresults,
                         out strError);
@@ -305,6 +322,9 @@ namespace dp2Circulation
                     foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                     {
                         this._biblioRecPaths.Add(record.Path);
+                        // 存储书目记录 XML
+                        if (this.FunctionType == "read" && record.RecordBody != null)
+                            this._biblioXmlTable[record.Path] = record.RecordBody.Xml;
                     }
 
                     lStart += searchresults.Length;
@@ -427,6 +447,11 @@ namespace dp2Circulation
             strError = "";
 
             Progress.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
+
+            if (this.FunctionType == "read")
+            {
+                AddBiblioLine(strBiblioRecPath);
+            }
 
             int nCount = 0;
 
@@ -577,9 +602,9 @@ namespace dp2Circulation
                     row.Add(cell);
 
                     // 卷册
-                    string strVolumn = DomUtil.GetElementText(dom.DocumentElement, "volumn");
+                    string strVolume = DomUtil.GetElementText(dom.DocumentElement, "volume");
                     cell = new DpCell();
-                    cell.Text = strVolumn;
+                    cell.Text = strVolume;
                     row.Add(cell);
 
                     // 地点
@@ -614,6 +639,7 @@ namespace dp2Circulation
                     lCount = lResultCount - lStart;
             }
 
+            // 分割行
             if (lStart > 0)
             {
                 DpRow row = new DpRow();
@@ -624,11 +650,165 @@ namespace dp2Circulation
             return nCount;
         }
 
+        void GetVolume(string strBiblioRecPath,
+            out string strVolume,
+            out string strPrice)
+        {
+            strVolume = "";
+            strPrice = "";
+
+            string strXml = (string)this._biblioXmlTable[strBiblioRecPath];
+            if (string.IsNullOrEmpty(strXml) == true)
+                return;
+
+            string strOutMarcSyntax = "";
+            string strMARC = "";
+            string strError = "";
+            int nRet = MarcUtil.Xml2Marc(strXml,
+                false,
+                "",
+                out strOutMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+                return;
+            if (string.IsNullOrEmpty(strMARC) == true)
+                return;
+            MarcRecord record = new MarcRecord(strMARC);
+            if (strOutMarcSyntax == "unimarc")
+            {
+                string h = record.select("field[@name='200']/subfield[@name='h']").FirstContent;
+                string i = record.select("field[@name='200']/subfield[@name='h']").FirstContent;
+                if (string.IsNullOrEmpty(h) == false && string.IsNullOrEmpty(i) == false)
+                    strVolume = h + " . " + i;
+                else
+                {
+                    if (h == null)
+                        h = "";
+                    strVolume = h + i;
+                }
+
+                strPrice = record.select("field[@name='010']/subfield[@name='d']").FirstContent;
+            }
+            else if (strOutMarcSyntax == "usmarc")
+            {
+                string n = record.select("field[@name='200']/subfield[@name='n']").FirstContent;
+                string p = record.select("field[@name='200']/subfield[@name='p']").FirstContent;
+                if (string.IsNullOrEmpty(n) == false && string.IsNullOrEmpty(p) == false)
+                    strVolume = n + " . " + p;
+                else
+                {
+                    if (n == null)
+                        n = "";
+                    strVolume = n + p;
+                }
+
+                strPrice = record.select("field[@name='020']/subfield[@name='c']").FirstContent;
+            }
+            else
+            {
+
+            }
+
+        }
+
+        // 加入书目行
+        void AddBiblioLine(string strBiblioRecPath)
+        {
+            string strError = "";
+
+            string strVolume = "";
+            string strPrice = "";
+
+            GetVolume(strBiblioRecPath,
+            out strVolume,
+            out strPrice);
+
+            Color colorBack = Color.LightGreen;
+
+            DpRow row = new DpRow();
+#if NO
+            // 设为灰色行
+            SetGrayText(row);
+#endif
+
+            // 状态
+            DpCell cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = "";
+            row.Add(cell);
+
+            // 册条码号
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = "@biblioRecPath:" + strBiblioRecPath;
+            row.Add(cell);
+
+            // 在借情况
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+#if NO
+            {
+                    if (IsGray(row) == true)
+                        cell.BackColor = Color.FromArgb(220, 220, 0);
+                    else
+                        cell.BackColor = Color.FromArgb(180, 180, 0);
+
+                cell.ForeColor = Color.FromArgb(255, 255, 255);
+                cell.Alignment = DpTextAlignment.Center;
+                cell.Text = "";
+            }
+#endif
+            row.Add(cell);
+
+            // 书目摘要
+            string strSummary = "";
+            {
+                int nRet = this.MainForm.GetBiblioSummary("@bibliorecpath:" + strBiblioRecPath,
+                    "",
+                    false,
+                    out strSummary,
+                    out strError);
+                if (nRet == -1)
+                    strSummary = strError;
+            }
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = strSummary;
+            row.Add(cell);
+
+            // 卷册
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = strVolume;
+            row.Add(cell);
+
+            // 地点
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = "";
+            row.Add(cell);
+
+            // 价格
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = strPrice;
+            row.Add(cell);
+
+            // 册记录路径
+            cell = new DpCell();
+            cell.BackColor = colorBack;
+            cell.Text = strBiblioRecPath;
+            row.Add(cell);
+
+            this.dpTable_items.Rows.Add(row);
+        }
+
         const int COLUMN_STATE = 0;
         const int COLUMN_ITEMBARCODE = 1;
         const int COLUMN_BORROWINFO = 2;
         const int COLUMN_SUMMARY = 3;
-        const int COLUMN_VOLUMN = 4;
+        const int COLUMN_VOLUME = 4;
         const int COLUMN_LOCATION = 5;
         const int COLUMN_PRICE = 6;
         const int COLUMN_ITEMRECPATH = 7;
@@ -689,7 +869,7 @@ namespace dp2Circulation
             // 检查是否为灰色文字
             if (Control.ModifierKeys == Keys.Control)
             {
-                // 按下 Control 键盘的时候灰色事项也可以操作
+                // 按下 Control 键的时候灰色事项也可以操作
             }
             else
             {
@@ -1012,6 +1192,7 @@ namespace dp2Circulation
 
             return text.ToString();
         }
+
         // 打开到 册窗
         void menuItem_loadToItemInfoForm_Click(object sender, EventArgs e)
         {
@@ -1030,6 +1211,12 @@ namespace dp2Circulation
                 strError = "所选定的册事项不具备册条码号信息";
                 goto ERROR1;
             }
+            if (strItemBarcode.StartsWith("@biblioRecPath:") == true)
+            {
+                strError = "所选定的行是书目行，不具备册条码号信息";
+                goto ERROR1;
+            }
+
             ItemInfoForm form = this.MainForm.EnsureItemInfoForm();
             Global.Activate(form);
 
@@ -1064,7 +1251,10 @@ namespace dp2Circulation
             EntityForm form = this.MainForm.EnsureEntityForm();
             Global.Activate(form);
 
-            form.LoadItemByBarcode(strItemBarcode, false);
+            if (strItemBarcode.StartsWith("@biblioRecPath:") == true)
+                form.LoadRecordOld(strItemBarcode.Substring("@biblioRecPath:".Length), "", true);
+            else
+                form.LoadItemByBarcode(strItemBarcode, false);
 
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
@@ -1072,7 +1262,6 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
     }
 
 #if NO

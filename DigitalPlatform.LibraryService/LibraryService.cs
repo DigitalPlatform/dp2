@@ -14340,6 +14340,8 @@ out strError);
         public string ItemBarcode { get; set; }
         [DataMember]
         public string PatronBarcode { get; set; }
+        [DataMember]
+        public string BiblioRecPath { get; set; }
 
         [DataMember]
         public string Period { get; set; }  // 期限
@@ -14362,6 +14364,7 @@ out strError);
             this.Action = item.Action;
             this.ItemBarcode = item.ItemBarcode;
             this.PatronBarcode = item.PatronBarcode;
+            this.BiblioRecPath = item.BiblioRecPath;
             this.Period = item.Period;
             this.No = item.No;
             this.ClientAddress = item.ClientAddress;

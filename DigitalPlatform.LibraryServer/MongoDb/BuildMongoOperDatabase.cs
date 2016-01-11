@@ -389,16 +389,26 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
+            string strAction = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "action");
+
             ChargingOperItem item = new ChargingOperItem();
             item.Operation = strOperation;
-            item.Action = DomUtil.GetElementText(domOperLog.DocumentElement,
-                "action");
+            item.Action = strAction;
             item.LibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "libraryCode");
             item.ItemBarcode = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "itemBarcode");
             item.PatronBarcode = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "readerBarcode");
+
+            {
+                string strBiblioRecPath = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "biblioRecPath");
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
+                    item.BiblioRecPath = strBiblioRecPath;
+            }
+
             if (strOperation == "borrow")
             {
                 item.Period = DomUtil.GetElementText(domOperLog.DocumentElement,
@@ -406,6 +416,14 @@ namespace DigitalPlatform.LibraryServer
                 item.No = DomUtil.GetElementText(domOperLog.DocumentElement,
                     "no");
             }
+
+            if (strOperation == "return" && strAction == "read")
+            {
+                // no 用作卷册信息
+                item.No = DomUtil.GetElementText(domOperLog.DocumentElement,
+    "no");
+            }
+
             item.ClientAddress = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "clientAddress");
             item.Operator = DomUtil.GetElementText(domOperLog.DocumentElement,
