@@ -191,11 +191,12 @@ ref sessioninfo) == false)
         // http://support.microsoft.com/kb/306355
         Exception objErr = Server.GetLastError().GetBaseException();
 
-        if (objErr is ArgumentException)
+        if (objErr != null && objErr is ArgumentException)
         {
             Server.ClearError();
             this.SetErrorInfo("请重新点击树节点");
         }
+#if NO
         else
         {
             string err = "<b>Error Caught in Page_Error event</b><hr><br>" +
@@ -206,6 +207,7 @@ ref sessioninfo) == false)
             Response.Write(err.ToString());
             Server.ClearError();
         }
+#endif
     }
 
     // 设置出错信息

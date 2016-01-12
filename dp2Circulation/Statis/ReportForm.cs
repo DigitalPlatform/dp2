@@ -7909,6 +7909,11 @@ out string strError)
         {
             strError = "";
 
+            string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+    "action");
+            if (strAction == "read")
+                return 0;   // read 动作并不会改变任何册记录，所以这里返回了
+
             //long lRet = 0;
             int nRet = 0;
 
@@ -7919,6 +7924,8 @@ out string strError)
                 strError = "<readerBarcode>元素值为空";
                 return -1;
             }
+
+
 
             // 读入册记录
             string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,

@@ -1283,7 +1283,6 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-
 #if LOG_INFO
                     app.WriteErrorLog("INFO: ArriveMonitor");
 #endif

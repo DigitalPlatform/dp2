@@ -513,7 +513,6 @@ MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                     return 0;   // cancelled
-
             }
 
             this.m_nChannelInUse++;
@@ -525,7 +524,6 @@ MessageBoxDefaultButton.Button2);
             }
             try
             {
-
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在装载读者记录 ...");
                 stop.BeginLoop();
@@ -650,7 +648,6 @@ MessageBoxDefaultButton.Button2);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-
 
                     // 接着装入对象资源
                     {
