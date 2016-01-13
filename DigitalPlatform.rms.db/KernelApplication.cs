@@ -17,7 +17,7 @@ using DigitalPlatform.ResultSet;
 namespace DigitalPlatform.rms
 {
     // 全局信息
-    public partial class KernelApplication 
+    public partial class KernelApplication
     {
         // private string m_strLogFileName = "";	//日志文件名称
         private string m_strDebugFileName = "";	// 
@@ -149,7 +149,7 @@ namespace DigitalPlatform.rms
 
                 eventFinished.Set();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.WriteErrorLog("管理线程异常(线程已退出):" + ExceptionUtil.GetDebugText(ex));
             }
@@ -287,7 +287,7 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.WriteErrorLog("删除 session 下级目录时出错: " + ExceptionUtil.GetDebugText(ex));
             }
@@ -332,7 +332,7 @@ namespace DigitalPlatform.rms
             }
 
             this.LogDir = strLogDir;
-            
+
             // this.m_strLogFileName = strLogDir + "\\log.txt";
             this.m_strDebugFileName = strLogDir + "\\debug.txt";
 
@@ -431,7 +431,7 @@ namespace DigitalPlatform.rms
         void CleanResultSetDir(string strResultSetDir)
         {
             if (PathUtil.TryClearDir(strResultSetDir) == false)
-                this.WriteErrorLog("清除 结果集目录 "+strResultSetDir+" 时出错");
+                this.WriteErrorLog("清除 结果集目录 " + strResultSetDir + " 时出错");
         }
 
         // 整数返回值转换为ErrorCode
@@ -477,7 +477,6 @@ namespace DigitalPlatform.rms
                 + "\r\n" + myAssembly.FullName;
 
             return strResult;
-
         }
 
         // 关闭
@@ -668,7 +667,7 @@ namespace DigitalPlatform.rms
 
         public Result(
             string strError,
-            ErrorCodeValue errorcode, 
+            ErrorCodeValue errorcode,
             int nValue)
         {
             this.ErrorCode = errorcode;

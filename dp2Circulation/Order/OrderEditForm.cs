@@ -533,6 +533,46 @@ namespace dp2Circulation
              * */
         }
 
+        OrderControl OrderControl
+        {
+            get
+            {
+                return (OrderControl)this.ItemControl;
+            }
+        }
+
+        internal override int RestoreVerify(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // TODO: 是否当这个checkbox为false的时候，至少也要检查本种之类的重复情形？
+            // 如果这里不检查，可否在提交保存的时候，先查完本种之类的重复，才真正向服务器提交?
+            if (this.checkBox_autoSearchDup.Checked == true
+                && this.OrderControl != null
+                && String.IsNullOrEmpty(this.orderEditControl_editing.Distribute) == false)
+            {
+                // Debug.Assert(false, "");
+                // distribute 中的 refid 查重
+                // return:
+                //      -1  出错
+                //      0   不重复
+                //      1   重复
+                nRet = this.OrderControl.CheckDistributeDup(
+                    this.orderEditControl_editing.Distribute,
+                    this.Item,
+                    true,   // bCheckCurrentList,
+                    true,   // bCheckDb,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    return -1;   // 重复
+            }
+
+            return 0;
+        }
+
         /// <summary>
         /// 结束前的校验
         /// </summary>
@@ -666,7 +706,6 @@ namespace dp2Circulation
             EnablePrevNextRecordButtons();
 
             this.EnableControls(true);
-
         }
 
         private void orderEditControl_editing_ContentChanged(object sender, ContentChangedEventArgs e)
@@ -722,10 +761,9 @@ namespace dp2Circulation
                     this.orderEditControl_editing.OrderID = orderitem.OrderID;
                     break;
                 case "Distribute":
+                    // TODO: 复制的时候是否要自动去掉 refid 部分?
                     this.orderEditControl_editing.Distribute = orderitem.Distribute;
                     break;
-
-
                 case "Comment":
                     this.orderEditControl_editing.Comment = orderitem.Comment;
                     break;

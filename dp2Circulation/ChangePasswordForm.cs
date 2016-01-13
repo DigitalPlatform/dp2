@@ -236,7 +236,7 @@ namespace dp2Circulation
                         //      1   登录成功
                         lRet = Channel.Login(this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
-                            "type=worker",
+                            "type=worker,client=dp2circulation|" + Program.ClientVersion,
                             out strError);
                         if (lRet == -1)
                         {

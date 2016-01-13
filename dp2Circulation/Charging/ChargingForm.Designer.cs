@@ -34,6 +34,7 @@ namespace dp2Circulation
             this.toolStripMenuItem_borrow = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_return = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_verifyReturn = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_renew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_verifyRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_lost = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
@@ -74,7 +75,6 @@ namespace dp2Circulation
             this.contextMenuStrip_verifyReaderPassword = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MenuItem_verifyReaderPassword = new System.Windows.Forms.ToolStripMenuItem();
             this.panel_main = new System.Windows.Forms.Panel();
-            this.toolStripMenuItem_renew = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -104,40 +104,47 @@ namespace dp2Circulation
             this.toolStripMenuItem_verifyRenew,
             this.toolStripMenuItem_lost});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(153, 158);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(125, 136);
             // 
             // toolStripMenuItem_borrow
             // 
             this.toolStripMenuItem_borrow.Name = "toolStripMenuItem_borrow";
-            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(124, 22);
             this.toolStripMenuItem_borrow.Text = "借";
             this.toolStripMenuItem_borrow.Click += new System.EventHandler(this.toolStripMenuItem_borrow_Click);
             // 
             // toolStripMenuItem_return
             // 
             this.toolStripMenuItem_return.Name = "toolStripMenuItem_return";
-            this.toolStripMenuItem_return.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_return.Size = new System.Drawing.Size(124, 22);
             this.toolStripMenuItem_return.Text = "还";
             this.toolStripMenuItem_return.Click += new System.EventHandler(this.toolStripMenuItem_return_Click);
             // 
             // toolStripMenuItem_verifyReturn
             // 
             this.toolStripMenuItem_verifyReturn.Name = "toolStripMenuItem_verifyReturn";
-            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(124, 22);
             this.toolStripMenuItem_verifyReturn.Text = "验证还";
             this.toolStripMenuItem_verifyReturn.Click += new System.EventHandler(this.toolStripMenuItem_verifyReturn_Click);
+            // 
+            // toolStripMenuItem_renew
+            // 
+            this.toolStripMenuItem_renew.Name = "toolStripMenuItem_renew";
+            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(124, 22);
+            this.toolStripMenuItem_renew.Text = "续借";
+            this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // toolStripMenuItem_verifyRenew
             // 
             this.toolStripMenuItem_verifyRenew.Name = "toolStripMenuItem_verifyRenew";
-            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(124, 22);
             this.toolStripMenuItem_verifyRenew.Text = "验证续借";
             this.toolStripMenuItem_verifyRenew.Click += new System.EventHandler(this.toolStripMenuItem_verifyRenew_Click);
             // 
             // toolStripMenuItem_lost
             // 
             this.toolStripMenuItem_lost.Name = "toolStripMenuItem_lost";
-            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(124, 22);
             this.toolStripMenuItem_lost.Text = "丢失";
             this.toolStripMenuItem_lost.Click += new System.EventHandler(this.toolStripMenuItem_lost_Click);
             // 
@@ -236,18 +243,18 @@ namespace dp2Circulation
             this.toolStripDropDownButton_itemBarcodeNavigate.Size = new System.Drawing.Size(29, 22);
             this.toolStripDropDownButton_itemBarcodeNavigate.ToolTipText = "册条码号快速导航";
             // 
-            // ToolStripMenuItem_openEntityForm
+            // toolStripMenuItem_openEntityForm
             // 
             this.toolStripMenuItem_openEntityForm.Enabled = false;
-            this.toolStripMenuItem_openEntityForm.Name = "ToolStripMenuItem_openEntityForm";
+            this.toolStripMenuItem_openEntityForm.Name = "toolStripMenuItem_openEntityForm";
             this.toolStripMenuItem_openEntityForm.Size = new System.Drawing.Size(112, 22);
             this.toolStripMenuItem_openEntityForm.Text = "种册窗";
             this.toolStripMenuItem_openEntityForm.Click += new System.EventHandler(this.toolStripMenuItem_openEntityForm_Click);
             // 
-            // ToolStripMenuItem_openItemInfoForm
+            // toolStripMenuItem_openItemInfoForm
             // 
             this.toolStripMenuItem_openItemInfoForm.Enabled = false;
-            this.toolStripMenuItem_openItemInfoForm.Name = "ToolStripMenuItem_openItemInfoForm";
+            this.toolStripMenuItem_openItemInfoForm.Name = "toolStripMenuItem_openItemInfoForm";
             this.toolStripMenuItem_openItemInfoForm.Size = new System.Drawing.Size(112, 22);
             this.toolStripMenuItem_openItemInfoForm.Text = "实体窗";
             this.toolStripMenuItem_openItemInfoForm.Click += new System.EventHandler(this.toolStripMenuItem_openItemInfoForm_Click);
@@ -267,42 +274,42 @@ namespace dp2Circulation
             this.toolStripDropDownButton_readerBarcodeNavigate.Size = new System.Drawing.Size(29, 22);
             this.toolStripDropDownButton_readerBarcodeNavigate.ToolTipText = "读者证条码号快速导航";
             // 
-            // ToolStripMenuItem_naviToAmerceForm
+            // toolStripMenuItem_naviToAmerceForm
             // 
             this.toolStripMenuItem_naviToAmerceForm.Enabled = false;
-            this.toolStripMenuItem_naviToAmerceForm.Name = "ToolStripMenuItem_naviToAmerceForm";
+            this.toolStripMenuItem_naviToAmerceForm.Name = "toolStripMenuItem_naviToAmerceForm";
             this.toolStripMenuItem_naviToAmerceForm.Size = new System.Drawing.Size(144, 22);
             this.toolStripMenuItem_naviToAmerceForm.Text = "交费窗";
             this.toolStripMenuItem_naviToAmerceForm.Click += new System.EventHandler(this.toolStripMenuItem_naviToAmerceForm_Click);
             // 
-            // ToolStripMenuItem_naviToReaderInfoForm
+            // toolStripMenuItem_naviToReaderInfoForm
             // 
             this.toolStripMenuItem_naviToReaderInfoForm.Enabled = false;
-            this.toolStripMenuItem_naviToReaderInfoForm.Name = "ToolStripMenuItem_naviToReaderInfoForm";
+            this.toolStripMenuItem_naviToReaderInfoForm.Name = "toolStripMenuItem_naviToReaderInfoForm";
             this.toolStripMenuItem_naviToReaderInfoForm.Size = new System.Drawing.Size(144, 22);
             this.toolStripMenuItem_naviToReaderInfoForm.Text = "读者窗";
             this.toolStripMenuItem_naviToReaderInfoForm.Click += new System.EventHandler(this.toolStripMenuItem_naviToReaderInfoForm_Click);
             // 
-            // ToolStripMenuItem_naviToActivateForm_old
+            // toolStripMenuItem_naviToActivateForm_old
             // 
             this.toolStripMenuItem_naviToActivateForm_old.Enabled = false;
-            this.toolStripMenuItem_naviToActivateForm_old.Name = "ToolStripMenuItem_naviToActivateForm_old";
+            this.toolStripMenuItem_naviToActivateForm_old.Name = "toolStripMenuItem_naviToActivateForm_old";
             this.toolStripMenuItem_naviToActivateForm_old.Size = new System.Drawing.Size(144, 22);
             this.toolStripMenuItem_naviToActivateForm_old.Text = "激活窗(源)";
             this.toolStripMenuItem_naviToActivateForm_old.Click += new System.EventHandler(this.toolStripMenuItem_naviToActivateForm_old_Click);
             // 
-            // ToolStripMenuItem_openReaderManageForm
+            // toolStripMenuItem_openReaderManageForm
             // 
             this.toolStripMenuItem_openReaderManageForm.Enabled = false;
-            this.toolStripMenuItem_openReaderManageForm.Name = "ToolStripMenuItem_openReaderManageForm";
+            this.toolStripMenuItem_openReaderManageForm.Name = "toolStripMenuItem_openReaderManageForm";
             this.toolStripMenuItem_openReaderManageForm.Size = new System.Drawing.Size(144, 22);
             this.toolStripMenuItem_openReaderManageForm.Text = "停借窗";
             this.toolStripMenuItem_openReaderManageForm.Click += new System.EventHandler(this.toolStripMenuItem_openReaderManageForm_Click);
             // 
-            // ToolStripMenuItem_naviToActivateForm_new
+            // toolStripMenuItem_naviToActivateForm_new
             // 
             this.toolStripMenuItem_naviToActivateForm_new.Enabled = false;
-            this.toolStripMenuItem_naviToActivateForm_new.Name = "ToolStripMenuItem_naviToActivateForm_new";
+            this.toolStripMenuItem_naviToActivateForm_new.Name = "toolStripMenuItem_naviToActivateForm_new";
             this.toolStripMenuItem_naviToActivateForm_new.Size = new System.Drawing.Size(144, 22);
             this.toolStripMenuItem_naviToActivateForm_new.Text = "激活窗(目标)";
             this.toolStripMenuItem_naviToActivateForm_new.Click += new System.EventHandler(this.toolStripMenuItem_naviToActivateForm_new_Click);
@@ -651,13 +658,6 @@ namespace dp2Circulation
             this.panel_main.Padding = new System.Windows.Forms.Padding(0, 8, 0, 4);
             this.panel_main.Size = new System.Drawing.Size(442, 392);
             this.panel_main.TabIndex = 7;
-            // 
-            // ToolStripMenuItem_renew
-            // 
-            this.toolStripMenuItem_renew.Name = "ToolStripMenuItem_renew";
-            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItem_renew.Text = "续借";
-            this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // ChargingForm
             // 

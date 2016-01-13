@@ -61,7 +61,6 @@ namespace DigitalPlatform.OPAC.Web
             return nCount;
         }
 
-
         protected override void RenderContents(HtmlTextWriter output)
         {
             int nParentCount = GetParentCount();
@@ -73,7 +72,6 @@ namespace DigitalPlatform.OPAC.Web
 
             EndIndentor.Write(output);
             output.Write("</td></tr>");
-
 
             // 底部图像表格 开始
 
@@ -96,12 +94,20 @@ namespace DigitalPlatform.OPAC.Web
 
             // 中
             NormalIndentor.Write(output);
+#if NO
             output.Write("<td class='middle'>"
                 + this.GetString("dp2图书馆集成系统")
                 + " V2 - " + this.GetString("版权所有") + " © 2006-2015 <a href='http://dp2003.com'>"
                 + this.GetString("数字平台(北京)软件有限责任公司")
                 + "</a>"
                 + "</td>");
+#endif
+            output.Write("<td class='middle'>"
+    + this.GetString("dp2 图书馆集成系统")
+    + " V2 - <a href='https://github.com/DigitalPlatform/dp2'>"
+    + "开源的图书馆管理系统"
+    + "</a>"
+    + "</td>");
 
             // 右
             NormalIndentor.Write(output);

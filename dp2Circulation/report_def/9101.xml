@@ -1,0 +1,16 @@
+<root>
+  <title>阅读排行, 按部门\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="部门" align="left" sum="no" class="department" eval="" />
+    <column name="阅读册数" align="right" sum="yes" class="readitems" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>9101 部门的阅读排行</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>year,month,day</createFrequency>
+  <property fresh="false" />
+</root>

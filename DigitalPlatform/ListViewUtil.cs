@@ -82,6 +82,33 @@ namespace DigitalPlatform.GUI
             }
         }
 
+        public static bool MoveSelectedUpDown(
+            ListView list,
+            bool bUp)
+        {
+            if (list.SelectedItems.Count == 0)
+                return false;
+
+            int index = list.SelectedIndices[0];
+
+            if (bUp)
+            {
+                index--;
+                if (index < 0)
+                    return false;
+            }
+            else
+            {
+                index++;
+                if (index >= list.Items.Count)
+                    return false;
+            }
+
+            list.SelectedItems.Clear();
+            list.Items[index].Selected = true;
+            return true;
+        }
+
         // parameters:
         //      indices 返回移动涉及到的下标位置。第一个元素是移动前的位置，第二个元素是移动后的位置
         public static int MoveItemUpDown(
@@ -210,7 +237,7 @@ namespace DigitalPlatform.GUI
         {
             string strResult = "";
             int nEndIndex = list.Columns.Count;
-            for (int i = list.Columns.Count-1; i >= 0; i--)
+            for (int i = list.Columns.Count - 1; i >= 0; i--)
             {
                 ColumnHeader header = list.Columns[i];
                 if (String.IsNullOrEmpty(header.Text) == false)
@@ -235,7 +262,7 @@ namespace DigitalPlatform.GUI
             string strWidthList,
             bool bExpandColumnCount)
         {
-            string[] parts = strWidthList.Split(new char[] {','});
+            string[] parts = strWidthList.Split(new char[] { ',' });
 
             if (bExpandColumnCount == true)
                 EnsureColumns(list, parts.Length, 100);
@@ -467,7 +494,7 @@ namespace DigitalPlatform.GUI
             ToolStripMenuItem menuItem = null;
             ToolStripMenuItem subMenuItem = null;
 
-// list.Columns[nClickColumn].Text
+            // list.Columns[nClickColumn].Text
             menuItem = new ToolStripMenuItem("设置排序方式");
             contextMenu.Items.Add(menuItem);
 
@@ -503,7 +530,7 @@ namespace DigitalPlatform.GUI
                 return "[None]";
 
             // 将 call_number 形态转换为 CallNumber 形态
-            string[] parts = strName.Split(new char[] {'_'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = strName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
             StringBuilder text = new StringBuilder(4096);
             foreach (string s in parts)
             {
@@ -725,7 +752,6 @@ namespace DigitalPlatform.GUI
             {
                 item.Focused = true;
             }
-
         }
 
     }
@@ -799,7 +825,7 @@ namespace DigitalPlatform.GUI
             if (this.SortStyles.Count <= nColumn)
             {
             }
-            else 
+            else
                 result = SortStyles[nColumn];
 
             if (result == null || result == ColumnSortStyle.None)
@@ -950,7 +976,7 @@ namespace DigitalPlatform.GUI
         /// </summary>
         public string Convert = ""; // 字符串转换方法 2015/8/27
 
-        public ColumnProperty(string strTitle, 
+        public ColumnProperty(string strTitle,
             string strType = "",
             string strXPath = "",
             string strConvert = "")
@@ -972,8 +998,8 @@ namespace DigitalPlatform.GUI
         /// </summary>
         /// <param name="strTitle">标题</param>
         /// <param name="strType">类型</param>
-        public void Add(string strTitle, 
-            string strType = "", 
+        public void Add(string strTitle,
+            string strType = "",
             string strXPath = "",
             string strConvert = "")
         {
@@ -1004,7 +1030,7 @@ namespace DigitalPlatform.GUI
             {
                 if (col.Type == strType)
                     return index;
-                index ++;
+                index++;
             }
             return -1;
         }

@@ -255,7 +255,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strItemDbName) == true)
             {
-                strError = "从(来自事项第一列的)记录路径 '"+strRecPath+"' 获得库名时出错";
+                strError = "从(来自事项第一列的)记录路径 '" + strRecPath + "' 获得库名时出错";
                 return -1;
             }
 
@@ -280,9 +280,11 @@ namespace dp2Circulation
         /// 从记录路径文件导入
         /// </summary>
         /// <param name="strFileName">文件名</param>
+        /// <param name="strStyle">风格。"clear" 表示加入新内容前试图清除 list 中已有的内容，会出现对话框警告。如果没有这个值，则追加到现有内容后面</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错 0: 放弃处理 1:正常结束</returns>
         public int ImportFromRecPathFile(string strFileName,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -334,7 +336,8 @@ namespace dp2Circulation
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
-                if (this._listviewRecords.Items.Count > 0)
+                if (this._listviewRecords.Items.Count > 0
+                    && StringUtil.IsInList("clear", strStyle) == true)
                 {
                     DialogResult result = MessageBox.Show(this,
                         "导入前是否要清除命中记录列表中的现有的 " + this._listviewRecords.Items.Count.ToString() + " 行?\r\n\r\n(如果不清除，则新导入的行将追加在已有行后面)\r\n(Yes 清除；No 不清除(追加)；Cancel 放弃导入)",
@@ -767,7 +770,6 @@ namespace dp2Circulation
                 biblio_recpaths.Add(strBiblioRecPath);
             }
 
-
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
             loader.Channel = this.Channel;
             loader.Stop = this.stop;
@@ -1025,8 +1027,6 @@ namespace dp2Circulation
 
             return 1;
         }
-
-
 
         internal void FillLineByBarcode(
     string strBarcode,

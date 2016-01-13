@@ -19,6 +19,23 @@ namespace dp2Circulation
     /// </summary>
     internal partial class StartLogRecoverDlg : Form
     {
+        string _taskName = "日志恢复";  // 日志恢复/创建 MongoDB 日志库
+        public string TaskName
+        {
+            get
+            {
+                return this._taskName;
+            }
+            set
+            {
+                this._taskName = value;
+                if (value == "创建 MongoDB 日志库")
+                {
+                    this.comboBox_recoverLevel.Visible = false;
+                }
+            }
+        }
+
         /// <summary>
         /// 后台任务启动参数
         /// </summary>
@@ -74,12 +91,12 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            if (this.comboBox_recoverLevel.Text == "")
+            if (this.comboBox_recoverLevel.Visible == true
+                && this.comboBox_recoverLevel.Text == "")
             {
                 MessageBox.Show(this, "尚未指定 恢复级别");
                 return;
             }
-
 
             // 合成参数
             if (this.textBox_startFileName.Text == "")
@@ -111,15 +128,17 @@ namespace dp2Circulation
 
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
-            DomUtil.SetAttr(dom.DocumentElement,
-                "recoverLevel",
-                strRecoverLevel);
+            if (this.comboBox_recoverLevel.Visible == true)
+            {
+                DomUtil.SetAttr(dom.DocumentElement,
+                    "recoverLevel",
+                    strRecoverLevel);
+            }
             DomUtil.SetAttr(dom.DocumentElement,
                 "clearFirst",
                 (this.checkBox_clearBefore.Checked == true ? "yes" : "no"));
 
             this.StartInfo.Param = dom.OuterXml;
-
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -128,7 +147,6 @@ namespace dp2Circulation
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
-
         }
 
         // 解析 开始 参数

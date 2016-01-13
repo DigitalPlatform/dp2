@@ -205,6 +205,7 @@ namespace dp2Catalog
             {
                 e.UserName = this.textBox_server_userName.Text;
                 e.Password = this.textBox_server_password.Text;
+                e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -258,7 +259,7 @@ namespace dp2Catalog
                 //      1   登录成功
                 lRet = this.Channel.Login(this.textBox_server_userName.Text,
                     this.textBox_server_password.Text,
-                    "type=worker",
+                    "type=worker,client=dp2catalog|" + Program.ClientVersion,
                     out strError);
                 if (lRet == -1)
                 {

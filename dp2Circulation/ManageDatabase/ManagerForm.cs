@@ -1968,6 +1968,7 @@ namespace dp2Circulation
                 "location",
                 "");
             string strParameters = "location=" + strLocation + ",type=worker";
+            strParameters += ",client=dp2circulation|" + Program.ClientVersion;
 
             // return:
             //      -1  error

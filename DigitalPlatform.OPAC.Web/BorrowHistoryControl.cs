@@ -15,12 +15,22 @@ using System.Globalization;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Web
 {
     [ToolboxData("<{0}:BorrowHistoryControl runat=server></{0}:BorrowHistoryControl>")]
     public class BorrowHistoryControl : ReaderInfoBase
     {
+        /// <summary>
+        /// 是否为借还历史库模式。false 表示不是历史库模式，即要从读者记录中获得借阅历史信息；true 表示为历史库模式，要用 dp2library 的 SearchCharging() API 获得历史信息
+        /// </summary>
+        public bool DatabaseMode
+        {
+            get;
+            set;
+        }
+
         ResourceManager m_rm = null;
 
         ResourceManager GetRm()
@@ -41,7 +51,6 @@ namespace DigitalPlatform.OPAC.Web
             // TODO: 如果抛出异常，则要试着取zh-cn的字符串，或者返回一个报错的字符串
             try
             {
-
                 string s = GetRm().GetString(strID, ci);
                 if (String.IsNullOrEmpty(s) == true)
                     return strID;
@@ -77,25 +86,87 @@ namespace DigitalPlatform.OPAC.Web
             get
             {
                 string strError = "";
+                int nRet = 0;
+                if (this.DatabaseMode == false)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    //      1   尚未登录
+                    nRet = this.LoadReaderXml(out strError);
+                    if (nRet == -1)
+                        return 0;
+
+                    if (nRet == 1)
+                        return 0;
+
+                    XmlNodeList nodes = ReaderDom.DocumentElement.SelectNodes("borrowHistory/borrow");
+                    return nodes.Count;
+                }
+
+                List<ChargingItemWrapper> results = null;
+                // return:
+                //      -2  尚未登录
+                //      -1  出错
+                //      其它  符合条件的事项总数
+                nRet = GetChargingHistory(0,
+            -1,
+            out results,
+            out strError);
+                if (nRet < 0)
+                    return 0;
+                return nRet;
+            }
+        }
+
+        // 获得历史信息
+        // parameters:
+        //      nStart  开始位置。如果为 -1，表示仅获得事项总数
+        // return:
+        //      -2  尚未登录
+        //      -1  出错
+        //      其它  符合条件的事项总数
+        int GetChargingHistory(int nPageNo,
+            int nItemsPerPage,
+            out List<ChargingItemWrapper> results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+
+            // 获得读者证条码号
+            string strReaderBarcode = "";
+            {
                 // return:
                 //      -1  出错
                 //      0   成功
                 //      1   尚未登录
                 int nRet = this.LoadReaderXml(out strError);
                 if (nRet == -1)
-                {
                     return 0;
-                }
-
                 if (nRet == 1)
-                {
-                    return 0;
-                }
-
-                XmlNodeList nodes = ReaderDom.DocumentElement.SelectNodes("borrowHistory/borrow");
-
-                return nodes.Count;
+                    return -2;
+                strReaderBarcode = DomUtil.GetElementText(ReaderDom.DocumentElement, "barcode");
             }
+
+            OpacApplication app = (OpacApplication)this.Page.Application["app"];
+            SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+
+            // 获得借阅历史
+            // parameters:
+            //      nPageNo 页号
+            //      nItemsPerPage    每页的事项个数。如果为 -1，表示希望从头获取全部内容
+            // return:
+            //      -1  出错
+            //      其它  符合条件的事项总数
+            return (int)sessioninfo.Channel.LoadChargingHistory(
+                null,
+                strReaderBarcode,
+                "return,lost,read",
+                nPageNo,
+                nItemsPerPage,
+                out results,
+                out strError);
         }
 
         // 计算出页码总数
@@ -152,7 +223,6 @@ namespace DigitalPlatform.OPAC.Web
 
         protected override void CreateChildControls()
         {
-
             this.Controls.Add(new LiteralControl(
                 this.GetPrefixString(
                 this.GetString("借阅历史"), // "借阅历史"
@@ -195,7 +265,6 @@ namespace DigitalPlatform.OPAC.Web
             content.ID = "content";
             this.Controls.Add(content);
 
-
             // 内容行
             for (int i = 0; i < this.LineCount; i++)
             {
@@ -209,7 +278,6 @@ namespace DigitalPlatform.OPAC.Web
 
             // 命令行
             CreateCmdLine();
-
 
             this.Controls.Add(new LiteralControl(
                "</table>" + this.GetPostfixString()
@@ -234,12 +302,10 @@ namespace DigitalPlatform.OPAC.Web
                 content.Controls.Add(line);
             }
 
-
             // 内容
             LiteralControl literal = new LiteralControl();
             literal.ID = "line" + Convert.ToString(nLineNo) + "_content";
             line.Controls.Add(literal);
-
 
             /*
             literal = new LiteralControl();
@@ -247,13 +313,11 @@ namespace DigitalPlatform.OPAC.Web
             line.Controls.Add(literal);
              * */
 
-
             return line;
         }
 
         void CreateCmdLine()
         {
-
             this.Controls.Add(new LiteralControl(
                 "<tr class='cmdline'><td colspan='4'>"
             ));
@@ -262,7 +326,6 @@ namespace DigitalPlatform.OPAC.Web
                 "<table border='0' width='100%'><tr><td>"
             ));
 
-
             this.Controls.Add(new LiteralControl(
                 "</td><td align='right'> "
             ));
@@ -270,7 +333,6 @@ namespace DigitalPlatform.OPAC.Web
             PlaceHolder pageswitcher = new PlaceHolder();
             pageswitcher.ID = "pageswitcher";
             this.Controls.Add(pageswitcher);
-
 
             LinkButton firstpage = new LinkButton();
             firstpage.ID = "first";
@@ -302,7 +364,6 @@ namespace DigitalPlatform.OPAC.Web
             pageswitcher.Controls.Add(new LiteralControl(
                 " "
             ));
-
 
             LinkButton nextpage = new LinkButton();
             nextpage.ID = "next";
@@ -336,7 +397,6 @@ namespace DigitalPlatform.OPAC.Web
             literal = new LiteralControl();
             literal.Text = " " + this.GetString("第") + " ";    // " 第 "
             pageswitcher.Controls.Add(literal);
-
 
             TextBox textbox = new TextBox();
             textbox.ID = "gotopageno";
@@ -396,7 +456,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.StartIndex = (this.ResultCount / this.PageMaxLines) * this.PageMaxLines;
             else
                 this.StartIndex = Math.Max(0, (this.ResultCount / this.PageMaxLines) * this.PageMaxLines - 1);
-
         }
 
         void nextpage_Click(object sender, EventArgs e)
@@ -420,169 +479,221 @@ namespace DigitalPlatform.OPAC.Web
             this.StartIndex = 0;
         }
 
+        class LineInfo
+        {
+            public string strBarcode { get; set; }
+            public string strRecPath { get; set; }
+            public string strBorrowDate { get; set; }
+            public string strBorrowPeriod { get; set; }
+            public string strBorrowOperator { get; set; }   // 2016/1/1
+            public string strReturnDate { get; set; }
+            public string strNo { get; set; }
+            public string strRenewComment { get; set; }
+            public string strOperator { get; set; }
+
+            public LineInfo()
+            {
+
+            }
+
+            public LineInfo(XmlElement node)
+            {
+                this.strBarcode = DomUtil.GetAttr(node, "barcode");
+                this.strRecPath = DomUtil.GetAttr(node, "recPath");
+                this.strBorrowDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "borrowDate"));
+                this.strBorrowPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                this.strReturnDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "returnDate"));
+                this.strNo = DomUtil.GetAttr(node, "no");
+                this.strRenewComment = DomUtil.GetAttr(node, "renewComment");
+                this.strOperator = DomUtil.GetAttr(node, "operator");
+            }
+
+            public LineInfo(ChargingItemWrapper wrapper)
+            {
+                this.strBarcode = wrapper.Item.ItemBarcode;
+                this.strRecPath = "";
+                this.strBorrowDate = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.OperTime;
+                this.strBorrowPeriod = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.Period;
+                this.strBorrowOperator = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.Operator;
+                this.strReturnDate = wrapper.Item.OperTime;
+                this.strNo = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.No;
+                if (this.strNo == "0")
+                    this.strNo = "";
+
+                this.strRenewComment = "";
+                this.strOperator = wrapper.Item.Operator;
+            }
+
+            public bool IsEmpty()
+            {
+                return (string.IsNullOrEmpty(this.strBarcode) == true);
+            }
+        }
 
         protected override void Render(HtmlTextWriter writer)
         {
             int nRet = 0;
 
             string strError = "";
-            // return:
-            //      -1  出错
-            //      0   成功
-            //      1   尚未登录
-            nRet = this.LoadReaderXml(out strError);
-            if (nRet == -1)
-            {
-                writer.Write(strError);
-                return;
-            }
-
-            if (nRet == 1)
-            {
-                sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
-                this.Page.Response.Redirect("login.aspx", true);
-                return;
-            }
+            List<LineInfo> infos = new List<LineInfo>();
 
             int nPageNo = this.StartIndex / this.PageMaxLines;
 
-            XmlNodeList nodes = ReaderDom.DocumentElement.SelectNodes("borrowHistory/borrow");
-
-            SetResultInfo(nodes.Count);
-
-            if (nodes.Count != 0)
+            if (this.DatabaseMode == false)
             {
-                OpacApplication app = (OpacApplication)this.Page.Application["app"];
-                SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      1   尚未登录
+                nRet = this.LoadReaderXml(out strError);
+                if (nRet == -1)
+                {
+                    writer.Write(strError);
+                    return;
+                }
 
+                if (nRet == 1)
+                {
+                    sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
+                    this.Page.Response.Redirect("login.aspx", true);
+                    return;
+                }
 
-                // 显示本页中的浏览行
+                XmlNodeList nodes = ReaderDom.DocumentElement.SelectNodes("borrowHistory/borrow");
+
+                SetResultInfo(nodes.Count);
+
                 for (int i = this.StartIndex; i < this.StartIndex + this.PageMaxLines; i++)
                 {
-                    /*
-                    string strBarcode = "";
-                    string strRecPath = "";
-                    string strBorrowDate = "";
-                    string strBorrowPeriod = "";
-                    string strReturnDate = "";
-                    string strNo = "";
-                    string strRenewComment = "";
-                    string strOperator = "";
-                    string strBarcodeLink = "";
-                    string strSummary = "";
-                    string strBiblioRecPath = "";
-                     * */
-
-                    string strResult = "";
-
                     if (i >= nodes.Count)
                     {
-                        string strTrClass = " class='dark content blank' ";
-
-                        if ((i % 2) == 1)
-                            strTrClass = " class='light content blank' ";
-
-                        strResult += "<tr " + strTrClass + ">";
-
-                        strResult += "<td class='no'>" + (i + 1).ToString() + "</td>";
-                        strResult += "<td class='barcode'></td>";
-                        strResult += "<td class='summary' ></td>";
-                        strResult += "<td class='borrowinfo'></td>";
-                        strResult += "<td class='renewcomment'></td>";
-                        strResult += "<td class='operator'></td>";
-                        strResult += "</tr>";
-
+                        infos.Add(new LineInfo());
                     }
                     else
                     {
-
                         XmlNode node = nodes[i];
-                        string strBarcode = DomUtil.GetAttr(node, "barcode");
-                        string strRecPath = DomUtil.GetAttr(node, "recPath");
-                        string strBorrowDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "borrowDate"));
-                        string strBorrowPeriod = DomUtil.GetAttr(node, "borrowPeriod");
-                        string strReturnDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "returnDate"));
-                        string strNo = DomUtil.GetAttr(node, "no");
-                        string strRenewComment = DomUtil.GetAttr(node, "renewComment");
-                        string strOperator = DomUtil.GetAttr(node, "operator");
+                        infos.Add(new LineInfo(node as XmlElement));
+                    }
+                }
+            }
+            else
+            {
+                List<ChargingItemWrapper> results = null;
 
-                        string strBarcodeLink = "<a href='book.aspx?barcode=" + strBarcode + "&forcelogin=userid' target='_blank'>" + strBarcode + "</a>";
+                // return:
+                //      -2  尚未登录
+                //      -1  出错
+                //      其它  符合条件的事项总数
+                nRet = GetChargingHistory(nPageNo,
+            this.PageMaxLines,
+            out results,
+            out strError);
+                if (nRet == -1)
+                {
+                    writer.Write(strError);
+                    return;
+                }
+                if (nRet == -2)
+                {
+                    sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
+                    this.Page.Response.Redirect("login.aspx", true);
+                    return;
+                }
 
-#if NO
-                        // 获得摘要
-                        string strSummary = "";
-                        string strBiblioRecPath = "";
+                SetResultInfo(nRet);
 
-                        long lRet = sessioninfo.Channel.GetBiblioSummary(
-                            null,
-                            strBarcode,
-                            null,
-                            null,
-                            out strBiblioRecPath,
-                            out strSummary,
-                            out strError);
-                        if (lRet == -1 || lRet == 0)
-                            strSummary = strError;
-                        /*
-                        LibraryServerResult result = app.GetBiblioSummary(
-                            sessioninfo,
-                            strBarcode,
-                            null,
-                            null,
-                            out strBiblioRecPath,
-                            out strSummary);
-                        if (result.Value == -1 || result.Value == 0)
-                            strSummary = result.ErrorInfo;
-                        */
-#endif
+                for (int i = 0; i < this.PageMaxLines; i++)
+                {
+                    if (i >= results.Count)
+                    {
+                        infos.Add(new LineInfo());
+                    }
+                    else
+                    {
+                        ChargingItemWrapper wrapper = results[i];
+                        LineInfo info = new LineInfo(wrapper);
+                        infos.Add(info);
+                    }
+                }
+            }
+
+            if (infos.Count != 0)
+            {
+                //OpacApplication app = (OpacApplication)this.Page.Application["app"];
+                //SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+
+                // 显示本页中的浏览行
+                {
+                    int i = 0;
+                    foreach (LineInfo info in infos)
+                    {
+                        StringBuilder text = new StringBuilder();
+
+                        string strBarcodeLink = "<a href='book.aspx?barcode=" + info.strBarcode + "&forcelogin=userid' target='_blank'>" + info.strBarcode + "</a>";
 
                         string strTrClass = " class='dark content' ";
 
                         if ((i % 2) == 1)
                             strTrClass = " class='light content' ";
 
+                        text.Append("<tr " + strTrClass + ">");
 
-                        strResult += "<tr " + strTrClass + ">";
+                        text.Append("<td class='no'>" + (i + this.StartIndex + 1).ToString() + "</td>");
+                        text.Append("<td class='barcode'>" + strBarcodeLink + "</td>");
+                        text.Append("<td class='summary pending' >" + info.strBarcode + "</td>");
 
-                        strResult += "<td class='no'>" + (i + 1).ToString() + "</td>";
-                        strResult += "<td class='barcode'>" + strBarcodeLink + "</td>";
-                        strResult += "<td class='summary pending' >" + strBarcode + "</td>";
+                        info.strBorrowPeriod = app.GetDisplayTimePeriodStringEx(info.strBorrowPeriod);
 
-                        strBorrowPeriod = app.GetDisplayTimePeriodStringEx(strBorrowPeriod);
+                        if (info.IsEmpty() == true)
+                            text.Append("<td class='borrowinfo'>" + "</td>");
+                        else
+                        {
+                            text.Append("<td class='borrowinfo'>"
+                                + "<div class='borrowno'>"
+                                + this.GetString("续借次")
+                                + "  :" + info.strNo + "</div>"
+                                + "<div class='borrowdate'>"
+                                + this.GetString("借阅日期")
+                                + ":" + info.strBorrowDate + "</div>"
+                                + "<div class='borrowperiod'>"
+                                + this.GetString("期限")
+                                + ":    " + info.strBorrowPeriod + "</div>"
+                                + "<div class='returndate'>"
+                                + this.GetString("还书日期")
+                                + ":" + info.strReturnDate + "</div>"
+                                + "</td>");
+                        }
 
-                        strResult += "<td class='borrowinfo'>"
-                            + "<div class='borrowno'>"
-                            + this.GetString("续借次")
-                            + "  :" + strNo + "</div>"
-                            + "<div class='borrowdate'>"
-                            + this.GetString("借阅日期")
-                            + ":" + strBorrowDate + "</div>"
-                            + "<div class='borrowperiod'>"
-                            + this.GetString("期限")
-                            + ":    " + strBorrowPeriod + "</div>"
-                            + "<div class='returndate'>"
-                            + this.GetString("还书日期")
-                            + ":" + strReturnDate + "</div>"
-                            + "</td>";
-                        strResult += "<td class='renewcomment'>" + strRenewComment + "</td>";
-                        strResult += "<td class='operator'>" + strOperator + "</td>";
-                        strResult += "</tr>";
-                    }
+                        text.Append("<td class='renewcomment'>" + info.strRenewComment + "</td>");
 
-                    PlaceHolder line = (PlaceHolder)this.FindControl("line" + Convert.ToString(i));
-                    if (line == null)
-                    {
-                        PlaceHolder insertpoint = (PlaceHolder)this.FindControl("insertpoint");
-                        PlaceHolder content = (PlaceHolder)this.FindControl("content");
+                        if (this.DatabaseMode == false || info.IsEmpty())
+                            text.Append("<td class='operator'>" + info.strOperator + "</td>");
+                        else
+                            text.Append("<td class='operator'>"
+    + "<div class='borrowoperator'>"
+    + this.GetString("借")
+    + ": " + info.strBorrowOperator + "</div>"
+    + "<div class='returnoperator'>"
+    + this.GetString("还")
+    + ": " + info.strOperator + "</div>"
+    + "</td>");
 
-                        line = this.NewContentLine(content, i, insertpoint);
-                    }
+                        text.Append("</tr>");
 
-                    LiteralControl contentcontrol = (LiteralControl)this.FindControl("line" + Convert.ToString(i) + "_content");
+                        PlaceHolder line = (PlaceHolder)this.FindControl("line" + Convert.ToString(i));
+                        if (line == null)
+                        {
+                            PlaceHolder insertpoint = (PlaceHolder)this.FindControl("insertpoint");
+                            PlaceHolder content = (PlaceHolder)this.FindControl("content");
 
-                    contentcontrol.Text = strResult;
+                            line = this.NewContentLine(content, i, insertpoint);
+                        }
 
-                } // end of for
+                        LiteralControl contentcontrol = (LiteralControl)this.FindControl("line" + Convert.ToString(i) + "_content");
+                        contentcontrol.Text = text.ToString();
+                        i++;
+                    } // end of for
+                }
 
                 this.LineCount = Math.Max(this.LineCount, this.PageMaxLines);
             }
@@ -595,114 +706,9 @@ namespace DigitalPlatform.OPAC.Web
                     if (line == null)
                         continue;
                 }
-
             }
 
             base.Render(writer);
         }
-
-        /*
-        <borrow 
-         barcode="0000001"
-         recPath="中文图书实体/1" 
-         borrowDate="Fri, 07 Apr 2006 01:38:43 GMT"
-         no="0"
-         borrowPeriod="30day" 
-         renewComment="" 
-         operator="test" 
-         notifyHistory="yy" />
-         */
-        /*
-        protected override void RenderContents(HtmlTextWriter output)
-        {
-            string strError = "";
-            // return:
-            //      -1  出错
-            //      0   成功
-            //      1   尚未登录
-            int nRet = this.LoadReaderXml(out strError);
-            if (nRet == -1)
-            {
-                output.Write(strError);
-                return;
-            }
-
-            if (nRet == 1)
-            {
-                sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
-                this.Page.Response.Redirect("login.aspx", true);
-                return;
-            }
-
-            string strResult = "";
-
-            XmlNodeList nodes = ReaderDom.DocumentElement.SelectNodes("borrowHistory/borrow");
-
-            strResult += this.GetPrefixString("借阅历史", null);
-            strResult += "<table class='borrowhistory'>";
-            strResult += "<tr class='columntitle'><td>册条码号</td><td>书目摘要</td><td>借阅情况</td><td>续借注</td><td>操作者</td></tr>";
-
-            if (nodes.Count == 0)
-            {
-                strResult += "<tr class='dark' >";
-                strResult += "<td class='comment' colspan='6'>(无违约/交费信息)</td>";
-                strResult += "</tr>";
-            }
-
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                XmlNode node = nodes[i];
-                string strBarcode = DomUtil.GetAttr(node, "barcode");
-                string strRecPath = DomUtil.GetAttr(node, "recPath");
-                string strBorrowDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "borrowDate"));
-                string strBorrowPeriod = DomUtil.GetAttr(node, "borrowPeriod");
-                string strReturnDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "returnDate"));
-                string strNo = DomUtil.GetAttr(node, "no");
-                string strRenewComment = DomUtil.GetAttr(node, "renewComment");
-                string strOperator = DomUtil.GetAttr(node, "operator");
-
-                string strBarcodeLink = "<a href='book.aspx?barcode=" + strBarcode + "&forcelogin=userid' target='_blank'>" + strBarcode + "</a>";
-
-                // 获得摘要
-                string strSummary = "";
-                string strBiblioRecPath = "";
-                Result result = app.GetBiblioSummary(
-                    sessioninfo,
-                    strBarcode,
-                    null,
-                    null,
-                    out strBiblioRecPath,
-                    out strSummary);
-                if (result.Value == -1 || result.Value == 0)
-                    strSummary = result.ErrorInfo;
-
-
-                string strTrClass = " class='dark' ";
-
-                if ((i % 2) == 1)
-                    strTrClass = " class='light' ";
-
-                strResult += "<tr " + strTrClass + ">";
-                strResult += "<td class='barcode' nowrap>" + strBarcodeLink + "</td>";
-                strResult += "<td class='summary' >" + strSummary + "</td>";
-                strResult += "<td class='borrowinfo'>"
-                    + "<div class='borrowno'>续借次  :" + strNo + "</div>"
-                    + "<div class='borrowdate'>借阅日期:" + strBorrowDate + "</div>"
-                    + "<div class='borrowperiod'>期限:    " + strBorrowPeriod + "</div>"
-                    + "<div class='returndate'>还书日期:" + strReturnDate + "</div>"
-                    + "</td>";
-                strResult += "<td class='renewcomment'>" + strRenewComment + "</td>";
-                strResult += "<td class='operator'>" + strOperator + "</td>";
-                strResult += "</tr>";
-
-            }
-
-            strResult += "</table>";
-
-            strResult += this.GetPostfixString();
-
-            output.Write(strResult);
-        }
-         * */
     }
 }

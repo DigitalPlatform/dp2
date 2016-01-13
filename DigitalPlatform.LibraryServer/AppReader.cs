@@ -4022,6 +4022,12 @@ out strError);
             strError = "";
             int nRet = 0;
 
+            if (string.IsNullOrEmpty(strResultTypeList) == true)
+            {
+                results = new string[0];
+                return 0;
+            }
+
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             results = new string[result_types.Length];
 

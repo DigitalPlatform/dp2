@@ -22,7 +22,6 @@ namespace dp2Circulation
 
         const int WM_SETCARETPOS = API.WM_USER + 201;
 
-
         /// <summary>
         /// 框架窗口
         /// </summary>
@@ -44,7 +43,7 @@ namespace dp2Circulation
         public event VerifyLibraryCodeEventHandler VerifyLibraryCode = null;
 
         // 事项数组
-        public List<DigitalPlatform.CommonControl.Item> Items 
+        public List<DigitalPlatform.CommonControl.Item> Items
         {
             get
             {
@@ -80,7 +79,7 @@ namespace dp2Circulation
                     // TODO: 需要删除缺省就在里面的copy为0的唯一事项，然后增加一个copy为0的事项。新增加的事项会有批次号等信息。
                     this.orderDesignControl1.InsertNewItem(0);  // this.orderDesignControl1.Items.Count
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(this, ex.Message);
                 }
@@ -130,7 +129,7 @@ namespace dp2Circulation
                     {
                         this.orderDesignControl1.EnsureVisible(item);
                         this.orderDesignControl1.SelectItem(item, nCount == 0 ? true : false);
-                        nCount ++;
+                        nCount++;
                     }
                     // TODO: 如果没有精确匹配的，还可以计算出和当前时间距离最近的
                     // 如果时间范围为空，还可以看订购时间

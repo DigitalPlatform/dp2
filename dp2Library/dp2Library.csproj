@@ -78,8 +78,6 @@
     <Compile Include="Host.Designer.cs">
       <DependentUpon>Host.cs</DependentUpon>
     </Compile>
-    <Compile Include="ILibraryService.cs" />
-    <Compile Include="ILibraryServiceREST.cs" />
     <Compile Include="Install\HostNameDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -92,7 +90,6 @@
     <Compile Include="Install\Installer1.Designer.cs">
       <DependentUpon>Installer1.cs</DependentUpon>
     </Compile>
-    <Compile Include="LibraryService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

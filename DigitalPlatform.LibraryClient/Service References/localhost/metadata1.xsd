@@ -238,7 +238,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q26="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchChargingResult" nillable="true" type="q26:LibraryServerResult" />
-        <xs:element xmlns:q27="http://dp2003.com/dp2library/" minOccurs="0" name="results" nillable="true" type="q27:ArrayOfChargingItem" />
+        <xs:element xmlns:q27="http://dp2003.com/dp2library/" minOccurs="0" name="results" nillable="true" type="q27:ArrayOfChargingItemWrapper" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

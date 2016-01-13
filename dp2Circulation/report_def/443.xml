@@ -8,6 +8,7 @@
     <column name="续借" type="" align="right" sum="yes" class="renew" eval="" />
     <column name="还书" type="" align="right" sum="yes" class="return" eval="" />
     <column name="丢失" type="" align="right" sum="yes" class="lost" eval="" />
+    <column name="读过" type="" align="right" sum="yes" class="read" eval="" />
     <column name="操作总量" type="" align="right" sum="yes" class="total" eval="" />
   </columns>
   <css>

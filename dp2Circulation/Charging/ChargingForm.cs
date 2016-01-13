@@ -168,7 +168,7 @@ namespace dp2Circulation
                 if (this.DisplayState == DisplayState.TEXT)
                     return "text";
 
-                if (this.NoBorrowHistory == true 
+                if (this.NoBorrowHistory == true
                     && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.21") >= 0)
                     return "html:noborrowhistory";
 
@@ -929,7 +929,7 @@ namespace dp2Circulation
             }
 
             if (strBarcode != this.textBox_readerBarcode.Text)
-                this.textBox_readerBarcode.Text = strBarcode; 
+                this.textBox_readerBarcode.Text = strBarcode;
         }
 
 
@@ -1090,7 +1090,7 @@ namespace dp2Circulation
                 stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                 string[] results = null;
-                byte [] baTimestamp = null;
+                byte[] baTimestamp = null;
                 string strRecPath = "";
                 long lRet = Channel.GetReaderInfo(
                     stop,
@@ -1948,7 +1948,7 @@ dlg.UiState);
             string strFastInputText = "";
 
             string strTemp = this.textBox_itemBarcode.Text;
-            if ( ( this.UseIsbnBorrow == true && QuickChargingForm.IsISBN(ref strTemp) == true)
+            if ((this.UseIsbnBorrow == true && QuickChargingForm.IsISBN(ref strTemp) == true)
                 || strTemp.ToLower() == "?b"
                 || string.IsNullOrEmpty(strTemp) == true)
             {
@@ -2095,7 +2095,6 @@ dlg.UiState);
                         strOperName = "续借";
                     }
 
-
                     stop.OnStop += new StopEventHandler(this.DoStop);
                     stop.Initial("正在进行" + strOperName + "操作: " + this.textBox_readerBarcode.Text
                     + " " + strOperName + " " + this.textBox_itemBarcode.Text + " ...");
@@ -2161,7 +2160,7 @@ dlg.UiState);
                         lRet = Channel.Borrow(
                             stop,
                             bRenew,
-                            this.FuncState == dp2Circulation.FuncState.Renew? "" : this.textBox_readerBarcode.Text,
+                            this.FuncState == dp2Circulation.FuncState.Renew ? "" : this.textBox_readerBarcode.Text,
                             this.textBox_itemBarcode.Text,
                             strConfirmItemRecPath,
                             this.Force,
@@ -3423,9 +3422,15 @@ Keys keyData)
         /// 盘点图书
         /// </summary>
         InventoryBook = 10, // 盘点图书 2015/8/16
+
+        /// <summary>
+        /// 读过
+        /// </summary>
+        Read = 11,  // 读过 2016/1/8
     }
 
-    /*public*/ class BarcodeAndTime
+    /*public*/
+    class BarcodeAndTime
     {
         public string Barcode = "";
         public DateTime Time = DateTime.Now;

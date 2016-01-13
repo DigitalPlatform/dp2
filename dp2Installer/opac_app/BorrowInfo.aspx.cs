@@ -49,6 +49,9 @@ ref sessioninfo) == false)
 
         ///
         this.TitleBarControl1.CurrentColumn = TitleColumn.BorrowInfo;
+
+        if (app != null)
+            this.BorrowHistoryControl1.DatabaseMode = string.IsNullOrEmpty(app.ChargingHistoryType) == false;
     }
 
     protected void Page_Load(object sender, EventArgs e)

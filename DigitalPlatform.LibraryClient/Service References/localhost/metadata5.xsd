@@ -328,27 +328,37 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q16="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchChargingResult" nillable="true" type="q16:LibraryServerResult" />
-        <xs:element minOccurs="0" name="results" nillable="true" type="tns:ArrayOfChargingItem" />
+        <xs:element minOccurs="0" name="results" nillable="true" type="tns:ArrayOfChargingItemWrapper" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:complexType name="ArrayOfChargingItem">
+  <xs:complexType name="ArrayOfChargingItemWrapper">
     <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="ChargingItem" nillable="true" type="tns:ChargingItem" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ChargingItemWrapper" nillable="true" type="tns:ChargingItemWrapper" />
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="ArrayOfChargingItem" nillable="true" type="tns:ArrayOfChargingItem" />
+  <xs:element name="ArrayOfChargingItemWrapper" nillable="true" type="tns:ArrayOfChargingItemWrapper" />
+  <xs:complexType name="ChargingItemWrapper">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Item" nillable="true" type="tns:ChargingItem" />
+      <xs:element minOccurs="0" name="RelatedItem" nillable="true" type="tns:ChargingItem" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ChargingItemWrapper" nillable="true" type="tns:ChargingItemWrapper" />
   <xs:complexType name="ChargingItem">
     <xs:sequence>
       <xs:element minOccurs="0" name="Action" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="BiblioRecPath" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ClientAddress" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Id" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ItemBarcode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="LibraryCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="No" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="OperTime" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Operation" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Operator" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="PatronBarcode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Period" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ChargingItem" nillable="true" type="tns:ChargingItem" />

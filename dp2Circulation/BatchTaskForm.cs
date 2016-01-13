@@ -350,6 +350,8 @@ namespace dp2Circulation
             {
                 StartLogRecoverDlg dlg = new StartLogRecoverDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Text = "启动 创建 MongoDB 日志库 任务";
+                dlg.TaskName = "创建 MongoDB 日志库";
                 dlg.StartInfo = startinfo;
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
@@ -719,7 +721,6 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
             // this.EnableControls(false);
             try
             {
-
                 string strError = "";
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
@@ -891,7 +892,6 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                 this.MessageStyle -= MessageStyle.Progress;
             else
                 this.MessageStyle |= MessageStyle.Progress;
-
         }
 
         // 刷新

@@ -66,12 +66,12 @@ namespace dp2Circulation
             OperLogFilenames.Clear();
 
             string strStartDate = "";
-            
+
             if (this.dateControl_start.IsValueNull() == false)
                 strStartDate = DateTimeUtil.DateTimeToString8(this.dateControl_start.Value);
 
             string strEndDate = "";
-            
+
             if (this.dateControl_end.IsValueNull() == false)
                 strEndDate = DateTimeUtil.DateTimeToString8(this.dateControl_end.Value);
 
@@ -117,7 +117,7 @@ namespace dp2Circulation
 
             this.OperLogFilenames = LogFileNames;
 
-            END1:
+        END1:
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;

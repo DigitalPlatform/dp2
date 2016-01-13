@@ -190,7 +190,7 @@ namespace dp2Circulation
 
             LoadExternalFields();
 
-            FillBorrowHistoryStartPage();
+            ClearBorrowHistoryPage();
 
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
         }
@@ -513,7 +513,6 @@ MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                     return 0;   // cancelled
-
             }
 
             this.m_nChannelInUse++;
@@ -525,7 +524,6 @@ MessageBoxDefaultButton.Button2);
             }
             try
             {
-
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在装载读者记录 ...");
                 stop.BeginLoop();
@@ -539,6 +537,8 @@ MessageBoxDefaultButton.Button2);
 #endif
                 ClearReaderHtmlPage();
                 this.binaryResControl1.Clear();
+
+                this.ClearBorrowHistoryPage();
 
                 try
                 {
@@ -649,7 +649,6 @@ MessageBoxDefaultButton.Button2);
                     if (nRet == -1)
                         goto ERROR1;
 
-
                     // 接着装入对象资源
                     {
                         nRet = this.binaryResControl1.LoadObject(
@@ -727,6 +726,7 @@ MessageBoxDefaultButton.Button2);
                 this.m_nChannelInUse--;
             }
 
+            tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
             return 1;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -743,11 +743,6 @@ MessageBoxDefaultButton.Button2);
     this.MainForm.DataDir);
 
             this.m_chargingInterface.StopPrevious();
-            FillBorrowHistoryStartPage();
-#if NO
-            Global.ClearHtmlPage(this.webBrowser_borrowHistory,
-    this.MainForm.DataDir);
-#endif
         }
 
         void SetReaderHtmlString(string strHtml)
@@ -825,9 +820,6 @@ MessageBoxDefaultButton.Button2);
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
 
-                this.Update();
-                this.MainForm.Update();
-
                 EnableControls(false);
 
                 // NewExternal();
@@ -843,6 +835,8 @@ MessageBoxDefaultButton.Button2);
 
                     this.binaryResControl1.Clear();
                 }
+
+                this.ClearBorrowHistoryPage();
 
                 try
                 {
@@ -969,6 +963,7 @@ MessageBoxDefaultButton.Button2);
                 this.m_nChannelInUse--;
             }
 
+            tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
             return 1;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5587,16 +5582,58 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        void LoadBorrowHistory()
+        void LoadBorrowHistory(string action)
         {
             string strError = "";
+            int nPageNo = 0;
+            if (action == "load")
+                nPageNo = 0;
+            else if (action == "loadAll")
+                nPageNo = -1;
+            else if (action == "prevPage")
+            {
+                nPageNo = _currentPageNo - 1;
+                if (nPageNo < 0)
+                {
+                    strError = "已经到头";
+                    goto ERROR1;
+                }
+            }
+            else if (action == "nextPage")
+            {
+                nPageNo = _currentPageNo + 1;
+                if (nPageNo > _pageCount - 1)
+                {
+                    strError = "已经到尾";
+                    goto ERROR1;
+                }
+            }
+            else if (action == "firstPage")
+                nPageNo = 0;
+            else if (action == "tailPage")
+            {
+                if (_pageCount <= 0)
+                {
+                    strError = "没有尾页";
+                    goto ERROR1;
+                }
+                nPageNo = _pageCount - 1;
+            }
+
             int nRet = LoadBorrowHistory(this.toolStripTextBox_barcode.Text,
-                0,
-                out strError);
+     nPageNo,
+     out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                goto ERROR1;
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
         }
 
+        static int _itemsPerPage = 10;
+
+        // parameters:
+        //      nPageNo 页号。如果为 -1，表示希望从头获取全部内容
         int LoadBorrowHistory(
             string strBarcode,
             int nPageNo,
@@ -5611,31 +5648,42 @@ MessageBoxDefaultButton.Button1);
             EnableControls(false);
             try
             {
-                ChargingItem[] results = null;
-                long lStart = nPageNo * 10;
+                List<ChargingItemWrapper> total_results = new List<ChargingItemWrapper>();
+
+                int nLength = 0;
+                if (nPageNo == -1)
+                {
+                    nPageNo = 0;
+                    nLength = -1;
+                }
+                else
+                {
+                    nLength = _itemsPerPage;
+                }
+
                 long lRet = 0;
                 this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
                 try
                 {
-                    lRet = this.Channel.SearchCharging(
+                    lRet = this.Channel.LoadChargingHistory(
                         stop,
                         strBarcode,
-                        "~",
-                        "borrow,return,renew,lost",
-                        "",
-                        lStart,
-                        10,
-                        out results,
+                        "return,lost,read",
+                        nPageNo,
+                        nLength,
+                        out total_results,
                         out strError);
+                    if (lRet == -1)
+                        return -1;
+
+                    _currentPageNo = nPageNo;
                 }
                 finally
                 {
                     this.Channel.Idle -= Channel_Idle;
                 }
-                if (lRet == -1)
-                    return -1;
 
-                FillBorrowHistoryPage(results, (int)lStart, (int)lRet);
+                FillBorrowHistoryPage(total_results, nPageNo * _itemsPerPage, (int)lRet);
                 return 0;
             }
             finally
@@ -5648,6 +5696,91 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+#if NO
+        // parameters:
+        //      nPageNo 页号。如果为 -1，表示希望从头获取全部内容
+        int LoadBorrowHistory(
+            string strBarcode,
+            int nPageNo,
+            out string strError)
+        {
+            strError = "";
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在装载借阅历史 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+            try
+            {
+                List<ChargingItemWrapper> total_results = new List<ChargingItemWrapper>();
+                long lHitCount = 0;
+
+                long lLength = 0;
+                long lStart = 0;
+                if (nPageNo == -1)
+                    lLength = -1;
+                else
+                {
+                    lStart = nPageNo * _itemsPerPage;
+                    lLength = _itemsPerPage;
+                }
+                int nGeted = 0;
+                this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
+                try
+                {
+                    for (; ; )
+                    {
+                        ChargingItemWrapper[] results = null;
+                        long lRet = this.Channel.SearchCharging(
+                            stop,
+                            strBarcode,
+                            "~",
+                            "return,lost",
+                            "descending",
+                            lStart + nGeted,
+                            lLength,
+                            out results,
+                            out strError);
+                        if (lRet == -1)
+                            return -1;
+                        if (results.Length == 0)
+                            break;
+                        total_results.AddRange(results);
+                        lHitCount = lRet;
+
+                        // 修正 lLength
+                        if (lLength != -1 && lHitCount < lStart + nGeted + lLength)
+                            lLength -= lStart + nGeted + lLength - lHitCount;
+
+                        if (total_results.Count >= lHitCount - lStart)
+                            break;
+
+                        nGeted += results.Length;
+                        if (lLength != -1)
+                            lLength -= results.Length;
+                    }
+
+                }
+                finally
+                {
+                    this.Channel.Idle -= Channel_Idle;
+                }
+
+                FillBorrowHistoryPage(total_results, (int)lStart, (int)lHitCount);
+                return 0;
+            }
+            finally
+            {
+                EnableControls(true);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        }
+#endif
+
         void Channel_Idle(object sender, IdleEventArgs e)
         {
             e.bDoEvents = false;
@@ -5656,13 +5789,10 @@ MessageBoxDefaultButton.Button1);
         void m_chargingInterface_CallFunc(object sender, EventArgs e)
         {
             string name = sender as string;
-            if (name == "load")
-            {
-                this.BeginInvoke(new Action(LoadBorrowHistory));
-            }
+            this.BeginInvoke(new Action<string>(LoadBorrowHistory), name);
         }
 
-        void FillBorrowHistoryStartPage()
+        void ClearBorrowHistoryPage()
         {
             ClearHtml();
 
@@ -5671,59 +5801,125 @@ MessageBoxDefaultButton.Button1);
             AppendHtml("<html><body>");
             AppendHtml(strItemLink);
             AppendHtml("</body></html>");
+
+            _borrowHistoryLoaded = false;
         }
 
-        void FillBorrowHistoryPage(ChargingItem[] items,
+        int _currentPageNo = 0;
+        int _pageCount = 0;
+
+        static string MakeAnchor(string name, string caption, bool enabled)
+        {
+            if (enabled)
+                return "<a href='javascript:void(0);' onclick=\"window.external.Call('" + name + "');\">" + HttpUtility.HtmlEncode(caption) + "</a>";
+            return HttpUtility.HtmlEncode(caption);
+        }
+
+        public static string GetOperTypeName(string strAction)
+        {
+            if (strAction == "return")
+                return "借过";
+            if (strAction == "lost")
+                return "借过(丢失)";
+            if (strAction == "read")
+                return "读过";
+            return strAction;
+        }
+
+        void FillBorrowHistoryPage(List<ChargingItemWrapper> items,
             int nStart,
             int nTotalCount)
         {
+            this.ClearMessage();
+
             StringBuilder text = new StringBuilder();
+
+            _currentPageNo = nStart / _itemsPerPage;
+            _pageCount = nTotalCount / _itemsPerPage;
+            if ((nTotalCount % _itemsPerPage) > 0)
+                _pageCount++;
 
             string strBinDir = Environment.CurrentDirectory;
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
+            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
-                + "<script type='text/javascript' charset='UTF-8' src='%bindir%/getsummary.js'></script>";
+                + "<script type='text/javascript' charset='UTF-8' src='"+strSummaryJs+"'></script>";
+            string strStyle = @"<style type='text/css'>
+</style>";
             text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
                 + strLink
                 + strScriptHead.Replace("%bindir%", strBinDir)
+                + strStyle
                 + "</head><body>");
 
-#if NO
-            string strJs = @"<script type='text/javascript' language='javascript'>
-$(document).ready(function () {
-    window.setTimeout('GetSummary()', 10);
-});
-</script>";
+            string strFirstPageLink = MakeAnchor("firstPage", "首页", _currentPageNo > 0);
+            string strPrevPageLink = MakeAnchor("prevPage", "前页", _currentPageNo > 0);
+            string strNextPageLink = MakeAnchor("nextPage", "后页", _currentPageNo < _pageCount - 1);
+            string strTailPageLink = MakeAnchor("tailPage", "末页", _currentPageNo != _pageCount - 1 && _pageCount > 0);
+            string strLoadAllLink = MakeAnchor("loadAll", "装载全部", _pageCount > 1);
 
-            text.Append(strJs);
-#endif
-            text.Append("<p>"+nTotalCount+"</p>");
+            string strPages = (_currentPageNo + 1) + "/" + _pageCount + "&nbsp;";
+            if (items.Count > _itemsPerPage)
+                strPages = "(全部)";
 
+            text.Append(strPages
+                + strFirstPageLink + "&nbsp;" + strPrevPageLink + "&nbsp;" + strNextPageLink + "&nbsp;" + strTailPageLink + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                + strLoadAllLink);
 
             text.Append("<table>");
             text.Append("<tr>");
-            text.Append("<td>序号</td>");
-            text.Append("<td>操作类型</td>");
-            text.Append("<td>册条码号</td>");
-            text.Append("<td>书目摘要</td>");
-            text.Append("<td>操作者</td>");
-            text.Append("<td>操作时间</td>");
+            text.Append("<td class='nowrap'>序号</td>");
+            text.Append("<td class='nowrap'>类型</td>");
+            text.Append("<td class='nowrap'>册条码号</td>");
+            text.Append("<td class='nowrap'>书目摘要</td>");
+            text.Append("<td class='nowrap'>期限</td>");
+            text.Append("<td class='nowrap'>借阅操作者</td>");
+            text.Append("<td class='nowrap'>借阅操作时间</td>");
+            text.Append("<td class='nowrap'>还回操作者</td>");
+            text.Append("<td class='nowrap'>还回操作时间</td>");
             text.Append("</tr>");
 
-            foreach (ChargingItem item in items)
+            foreach (ChargingItemWrapper wrapper in items)
             {
-                text.Append("<tr>");
+                ChargingItem item = wrapper.Item;
+                text.Append("<tr class='"+HttpUtility.HtmlEncode(item.Action)+"'>");
                 text.Append("<td>" + (nStart + 1).ToString() + "</td>");
-                text.Append("<td>" + item.Action + "</td>");
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(GetOperTypeName(item.Action)) + "</td>");
 
-                text.Append("<td>" + item.ItemBarcode + "</td>");
-                text.Append("<td class='summary pending'>BC:" + item.ItemBarcode + "</td>");
+                string strItemBarcode = item.ItemBarcode;
+                if (string.IsNullOrEmpty(strItemBarcode) == true
+                    && string.IsNullOrEmpty(item.BiblioRecPath) == false)
+                    strItemBarcode = "@biblioRecPath:" + item.BiblioRecPath;
 
-                text.Append("<td>" + item.Operator + "</td>");
-                text.Append("<td>" + item.OperTime + "</td>");
+                if (string.IsNullOrEmpty(strItemBarcode) == false
+                    && (strItemBarcode.StartsWith("@refID:") == true || strItemBarcode.StartsWith("@biblioRecPath:") == true))
+                    text.Append("<td>" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
+                else
+                    text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
+
+                text.Append("<td class='summary pending'>BC:" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
+
+                string strPeriod = "";
+                if (wrapper.RelatedItem != null)
+                    strPeriod = wrapper.RelatedItem.Period;
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strPeriod) + "</td>");
+
+                string strBorrowOperator = "";
+                string strBorrowTime = "";
+                if (wrapper.RelatedItem != null)
+                {
+                    strBorrowOperator = wrapper.RelatedItem.Operator;
+                    strBorrowTime = wrapper.RelatedItem.OperTime;
+                }
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strBorrowOperator) + "</td>");
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strBorrowTime) + "</td>");
+
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.Operator) + "</td>");
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(item.OperTime) + "</td>");
+
                 text.Append("</tr>");
                 nStart++;
             }
@@ -5732,7 +5928,6 @@ $(document).ready(function () {
 
             this.m_chargingInterface.SetHtmlString(text.ToString(),
     "readerinfoform_charginghis");
-
         }
 
         /// <summary>
@@ -5740,7 +5935,7 @@ $(document).ready(function () {
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -5777,6 +5972,20 @@ $(document).ready(function () {
             // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
             this.webBrowser_borrowHistory.Document.Window.ScrollTo(0,
                 this.webBrowser_borrowHistory.Document.Body.ScrollRectangle.Height);
+        }
+
+        bool _borrowHistoryLoaded = false;
+
+        private void tabControl_readerInfo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.tabControl_readerInfo.SelectedTab == this.tabPage_borrowHistory)
+            {
+                if (_borrowHistoryLoaded == false)
+                {
+                    this.BeginInvoke(new Action<string>(LoadBorrowHistory), "load");
+                    _borrowHistoryLoaded = true;
+                }
+            }
         }
     }
 }

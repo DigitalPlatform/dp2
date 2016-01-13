@@ -399,7 +399,7 @@ MessageBoxDefaultButton.Button1);
             {
                 e.UserName = this.textBox_server_userName.Text;
                 e.Password = this.textBox_server_password.Text;
-
+                e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
                 //bool bIsReader = false;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
@@ -410,11 +410,9 @@ MessageBoxDefaultButton.Button1);
             return;
         }
 
-
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
         }
-
 
         int TouchServer(bool bPrepareSearch,
             out string strError)
@@ -460,7 +458,7 @@ MessageBoxDefaultButton.Button1);
                 //      1   登录成功
                 lRet = this.Channel.Login(this.textBox_server_userName.Text,
                     this.textBox_server_password.Text,
-                    "type=worker",
+                    "type=worker,client=dp2circulation|" + Program.ClientVersion,
                     out strError);
                 if (lRet == -1)
                 {
@@ -494,7 +492,7 @@ MessageBoxDefaultButton.Button1);
             string strFileName = Path.Combine(this.MainForm.DataDir, "eula.txt");
             using (StreamReader sr = new StreamReader(strFileName, true))
             {
-                this.textBox_license.Text = sr.ReadToEnd().Replace("\r\n","\n").Replace("\n","\r\n");   // 两个 Replace() 会将只有 LF 结尾的行处理为 CR LF
+                this.textBox_license.Text = sr.ReadToEnd().Replace("\r\n", "\n").Replace("\n", "\r\n");   // 两个 Replace() 会将只有 LF 结尾的行处理为 CR LF
             }
         }
 
@@ -531,7 +529,7 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
-                MessageBox.Show(this, "未知的服务器类型 '"+this.comboBox_server_serverType.Text+"'");
+                MessageBox.Show(this, "未知的服务器类型 '" + this.comboBox_server_serverType.Text + "'");
             }
         }
 
@@ -583,7 +581,7 @@ MessageBoxDefaultButton.Button1);
             {
                 if (value == "community")    // "test"
                     this.radioButton_licenseMode_community.Checked = true;
-                else 
+                else
                     this.radioButton_licenseMode_standard.Checked = true;
             }
         }

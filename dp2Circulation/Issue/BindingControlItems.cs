@@ -6442,14 +6442,14 @@ rectFrame);
                 if (issue != null
                     && String.IsNullOrEmpty(issue.PublishTime) == false)
                 {
-                    string strVolumeString = VolumeInfo.BuildItemVolumeString(
+                    string strTempVolumeString = VolumeInfo.BuildItemVolumeString(
                         IssueUtil.GetYearPart(issue.PublishTime),
                         issue.Issue,
                         issue.Zong,
                         issue.Volume);
-                    if (this.Volume != strVolumeString)
+                    if (this.Volume != strTempVolumeString)
                     {
-                        this.Volume = strVolumeString;
+                        this.Volume = strTempVolumeString;
                         return true;
                     }
                 }
@@ -6467,7 +6467,7 @@ rectFrame);
 
             Hashtable no_list_table = new Hashtable();
             // List<string> no_list = new List<string>();
-            List<string> volumn_list = new List<string>();
+            List<string> volume_list = new List<string>();
             List<string> zong_list = new List<string>();
 
             for (int i = 0; i < this.MemberCells.Count; i++)
@@ -6520,7 +6520,7 @@ rectFrame);
                 }
 
                 no_list.Add(strNo);
-                volumn_list.Add(strVolume);
+                volume_list.Add(strVolume);
                 zong_list.Add(strZong);
             }
 
@@ -6543,7 +6543,7 @@ rectFrame);
                 strNoString += strYear + ",no." + Global.BuildNumberRangeString(no_list);   // :no
             }
 
-            string strVolumnString = Global.BuildNumberRangeString(volumn_list);
+            string strVolumeListString = Global.BuildNumberRangeString(volume_list);
             string strZongString = Global.BuildNumberRangeString(zong_list);
 
             string strValue = strNoString;
@@ -6556,11 +6556,11 @@ rectFrame);
                 strValue += "总." + strZongString;
             }
 
-            if (String.IsNullOrEmpty(strVolumnString) == false)
+            if (String.IsNullOrEmpty(strVolumeListString) == false)
             {
                 if (String.IsNullOrEmpty(strValue) == false)
                     strValue += "=";
-                strValue += "v." + strVolumnString;
+                strValue += "v." + strVolumeListString;
             }
 
             if (this.Volume == strValue)
@@ -6818,7 +6818,8 @@ rectFrame);
                     return this.BookType;
                 case "price":
                     return this.Price;
-                case "volumn":
+                case "volumn":  // 兼容以前的拼写错误
+                case "volume":
                     return this.Volume;
                 case "comment":
                     return this.Comment;

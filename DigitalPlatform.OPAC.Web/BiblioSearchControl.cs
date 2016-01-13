@@ -341,7 +341,6 @@ namespace DigitalPlatform.OPAC.Web
 
             for (int i = 0; i < this.LineCount; i++)
             {
-
                 PlaceHolder line = new PlaceHolder();
                 line.ID = "queryline_" + i.ToString();  // id用于render()时定位
                 this.Controls.Add(line);
@@ -1066,13 +1065,13 @@ namespace DigitalPlatform.OPAC.Web
                         VirtualDatabase temp = app.vdbs[strDbName];
                         if (temp == null)
                         {
-                            strNotFound += "库名 '"+strDbName+"' 没有找到; ";
+                            strNotFound += "库名 '" + strDbName + "' 没有找到; ";
                             continue;
                         }
                         string strFromCaptions = temp.BuildCaptionListByStyleList(strFrom, this.Lang);
                         if (String.IsNullOrEmpty(strFromCaptions) == true)
                         {
-                            strNotFound += "数据库 '" + strDbName + "' 中不存在检索途径 '"+strFrom+"'; ";
+                            strNotFound += "数据库 '" + strDbName + "' 中不存在检索途径 '" + strFrom + "'; ";
                             continue;
                         }
 

@@ -1272,6 +1272,8 @@ out strError);
                 strOperName = "丢失";
             else if (strAction == "inventory")
                 strOperName = "盘点";
+            else if (strAction == "read")
+                strOperName = "读过";
 
             string strError = "";
             string strSummary = "";

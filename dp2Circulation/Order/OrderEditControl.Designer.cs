@@ -55,7 +55,7 @@ namespace dp2Circulation
             this.textBox_totalPrice = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label_distribute_color = new System.Windows.Forms.Label();
-            this.textBox_distribute = new System.Windows.Forms.TextBox();
+            this.textBox_distribute = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label_orderTime_color = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
@@ -279,7 +279,7 @@ namespace dp2Circulation
             // 
             this.label13.AutoSize = true;
             this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label13.Location = new System.Drawing.Point(15, 382);
+            this.label13.Location = new System.Drawing.Point(15, 389);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(77, 18);
             this.label13.TabIndex = 24;
@@ -290,7 +290,7 @@ namespace dp2Circulation
             // 
             this.textBox_batchNo.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_batchNo.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_batchNo.Location = new System.Drawing.Point(103, 384);
+            this.textBox_batchNo.Location = new System.Drawing.Point(103, 391);
             this.textBox_batchNo.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_batchNo.MinimumSize = new System.Drawing.Size(80, 0);
             this.textBox_batchNo.Name = "textBox_batchNo";
@@ -365,7 +365,7 @@ namespace dp2Circulation
             // 
             this.label_batchNo_color.AutoSize = true;
             this.label_batchNo_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_batchNo_color.Location = new System.Drawing.Point(97, 382);
+            this.label_batchNo_color.Location = new System.Drawing.Point(97, 389);
             this.label_batchNo_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_batchNo_color.Name = "label_batchNo_color";
             this.label_batchNo_color.Size = new System.Drawing.Size(2, 18);
@@ -469,7 +469,7 @@ namespace dp2Circulation
             this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label8.Location = new System.Drawing.Point(15, 256);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(77, 18);
+            this.label8.Size = new System.Drawing.Size(77, 25);
             this.label8.TabIndex = 48;
             this.label8.Text = "π›≤ÿ∑÷≈‰";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -481,7 +481,7 @@ namespace dp2Circulation
             this.label_distribute_color.Location = new System.Drawing.Point(97, 256);
             this.label_distribute_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_distribute_color.Name = "label_distribute_color";
-            this.label_distribute_color.Size = new System.Drawing.Size(2, 18);
+            this.label_distribute_color.Size = new System.Drawing.Size(2, 25);
             this.label_distribute_color.TabIndex = 49;
             // 
             // textBox_distribute
@@ -492,8 +492,10 @@ namespace dp2Circulation
             this.textBox_distribute.Location = new System.Drawing.Point(103, 258);
             this.textBox_distribute.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_distribute.MinimumSize = new System.Drawing.Size(180, 0);
+            this.textBox_distribute.Multiline = true;
             this.textBox_distribute.Name = "textBox_distribute";
-            this.textBox_distribute.Size = new System.Drawing.Size(189, 14);
+            this.textBox_distribute.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_distribute.Size = new System.Drawing.Size(189, 21);
             this.textBox_distribute.TabIndex = 50;
             // 
             // label9
@@ -554,7 +556,7 @@ namespace dp2Circulation
             // 
             this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_comment.Location = new System.Drawing.Point(103, 300);
+            this.textBox_comment.Location = new System.Drawing.Point(103, 307);
             this.textBox_comment.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_comment.MinimumSize = new System.Drawing.Size(180, 80);
             this.textBox_comment.Multiline = true;
@@ -567,7 +569,7 @@ namespace dp2Circulation
             // 
             this.label6.AutoSize = true;
             this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label6.Location = new System.Drawing.Point(15, 298);
+            this.label6.Location = new System.Drawing.Point(15, 305);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(77, 84);
             this.label6.TabIndex = 18;
@@ -578,7 +580,7 @@ namespace dp2Circulation
             // 
             this.label_comment_color.AutoSize = true;
             this.label_comment_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_comment_color.Location = new System.Drawing.Point(97, 298);
+            this.label_comment_color.Location = new System.Drawing.Point(97, 305);
             this.label_comment_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_comment_color.Name = "label_comment_color";
             this.label_comment_color.Size = new System.Drawing.Size(2, 84);
@@ -688,7 +690,7 @@ namespace dp2Circulation
             // 
             this.label17.AutoSize = true;
             this.label17.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label17.Location = new System.Drawing.Point(15, 274);
+            this.label17.Location = new System.Drawing.Point(15, 281);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(77, 24);
             this.label17.TabIndex = 66;
@@ -699,7 +701,7 @@ namespace dp2Circulation
             // 
             this.label_class_color.AutoSize = true;
             this.label_class_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_class_color.Location = new System.Drawing.Point(97, 274);
+            this.label_class_color.Location = new System.Drawing.Point(97, 281);
             this.label_class_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_class_color.Name = "label_class_color";
             this.label_class_color.Size = new System.Drawing.Size(2, 24);
@@ -710,7 +712,7 @@ namespace dp2Circulation
             this.comboBox_class.Dock = System.Windows.Forms.DockStyle.Fill;
             this.comboBox_class.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_class.FormattingEnabled = true;
-            this.comboBox_class.Location = new System.Drawing.Point(103, 276);
+            this.comboBox_class.Location = new System.Drawing.Point(103, 283);
             this.comboBox_class.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_class.MinimumSize = new System.Drawing.Size(90, 0);
             this.comboBox_class.Name = "comboBox_class";
@@ -723,7 +725,7 @@ namespace dp2Circulation
             // 
             this.label10.AutoSize = true;
             this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Location = new System.Drawing.Point(15, 585);
+            this.label10.Location = new System.Drawing.Point(15, 592);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(77, 18);
             this.label10.TabIndex = 36;
@@ -734,7 +736,7 @@ namespace dp2Circulation
             // 
             this.label_recPath_color.AutoSize = true;
             this.label_recPath_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_recPath_color.Location = new System.Drawing.Point(97, 585);
+            this.label_recPath_color.Location = new System.Drawing.Point(97, 592);
             this.label_recPath_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_recPath_color.Name = "label_recPath_color";
             this.label_recPath_color.Size = new System.Drawing.Size(2, 18);
@@ -744,7 +746,7 @@ namespace dp2Circulation
             // 
             this.textBox_recPath.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_recPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_recPath.Location = new System.Drawing.Point(103, 587);
+            this.textBox_recPath.Location = new System.Drawing.Point(103, 594);
             this.textBox_recPath.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_recPath.MinimumSize = new System.Drawing.Size(90, 0);
             this.textBox_recPath.Name = "textBox_recPath";
@@ -755,7 +757,7 @@ namespace dp2Circulation
             // 
             this.label18.AutoSize = true;
             this.label18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label18.Location = new System.Drawing.Point(15, 400);
+            this.label18.Location = new System.Drawing.Point(15, 407);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(77, 117);
             this.label18.TabIndex = 69;
@@ -766,7 +768,7 @@ namespace dp2Circulation
             // 
             this.label_sellerAddress_color.AutoSize = true;
             this.label_sellerAddress_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_sellerAddress_color.Location = new System.Drawing.Point(97, 400);
+            this.label_sellerAddress_color.Location = new System.Drawing.Point(97, 407);
             this.label_sellerAddress_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_sellerAddress_color.Name = "label_sellerAddress_color";
             this.label_sellerAddress_color.Size = new System.Drawing.Size(2, 117);
@@ -779,7 +781,7 @@ namespace dp2Circulation
             this.textBox_sellerAddress.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sellerAddress.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_sellerAddress.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.textBox_sellerAddress.Location = new System.Drawing.Point(103, 402);
+            this.textBox_sellerAddress.Location = new System.Drawing.Point(103, 409);
             this.textBox_sellerAddress.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_sellerAddress.MaxLength = 0;
             this.textBox_sellerAddress.MinimumSize = new System.Drawing.Size(180, 60);
@@ -793,7 +795,7 @@ namespace dp2Circulation
             // 
             this.label19.AutoSize = true;
             this.label19.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label19.Location = new System.Drawing.Point(15, 603);
+            this.label19.Location = new System.Drawing.Point(15, 610);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(77, 18);
             this.label19.TabIndex = 72;
@@ -804,7 +806,7 @@ namespace dp2Circulation
             // 
             this.textBox_refID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_refID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_refID.Location = new System.Drawing.Point(103, 605);
+            this.textBox_refID.Location = new System.Drawing.Point(103, 612);
             this.textBox_refID.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_refID.MinimumSize = new System.Drawing.Size(180, 0);
             this.textBox_refID.Name = "textBox_refID";
@@ -815,7 +817,7 @@ namespace dp2Circulation
             // 
             this.label_refID_color.AutoSize = true;
             this.label_refID_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_refID_color.Location = new System.Drawing.Point(97, 603);
+            this.label_refID_color.Location = new System.Drawing.Point(97, 610);
             this.label_refID_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_refID_color.Name = "label_refID_color";
             this.label_refID_color.Size = new System.Drawing.Size(2, 18);
@@ -825,7 +827,7 @@ namespace dp2Circulation
             // 
             this.textBox_operations.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_operations.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_operations.Location = new System.Drawing.Point(103, 519);
+            this.textBox_operations.Location = new System.Drawing.Point(103, 526);
             this.textBox_operations.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_operations.MaxLength = 0;
             this.textBox_operations.MinimumSize = new System.Drawing.Size(180, 32);
@@ -839,7 +841,7 @@ namespace dp2Circulation
             // 
             this.label_operations_color.AutoSize = true;
             this.label_operations_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_operations_color.Location = new System.Drawing.Point(97, 517);
+            this.label_operations_color.Location = new System.Drawing.Point(97, 524);
             this.label_operations_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_operations_color.Name = "label_operations_color";
             this.label_operations_color.Size = new System.Drawing.Size(2, 68);
@@ -849,7 +851,7 @@ namespace dp2Circulation
             // 
             this.label20.AutoSize = true;
             this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label20.Location = new System.Drawing.Point(15, 517);
+            this.label20.Location = new System.Drawing.Point(15, 524);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(77, 68);
             this.label20.TabIndex = 77;
@@ -920,7 +922,7 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_totalPrice;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label_distribute_color;
-        private System.Windows.Forms.TextBox textBox_distribute;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_distribute;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label_orderTime_color;
         private System.Windows.Forms.Label label_orderID_color;

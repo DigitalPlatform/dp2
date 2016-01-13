@@ -33,6 +33,11 @@ namespace DigitalPlatform.CommonControl
         public DateRangeControl()
         {
             InitializeComponent();
+
+            this.dateTimePicker_start.Value = this.dateTimePicker_start.MinDate;
+            this.dateTimePicker_end.Value = this.dateTimePicker_end.MinDate;
+            RefreshDisplay(this.dateTimePicker_start);
+            RefreshDisplay(this.dateTimePicker_end);
         }
 
         public override Size MaximumSize
@@ -156,6 +161,8 @@ namespace DigitalPlatform.CommonControl
 
         private void dateTimePicker_start_ValueChanged(object sender, EventArgs e)
         {
+            RefreshDisplay(this.dateTimePicker_start);
+
             if (IngoreTextChange > 0)
                 return;
 
@@ -165,8 +172,18 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void RefreshDisplay(DateTimePicker picker)
+        {
+            if (picker.Value == picker.MinDate)
+                picker.CustomFormat = " ";
+            else
+                picker.CustomFormat = "yyyy-MM-dd";
+        }
+
         private void dateTimePicker_end_ValueChanged(object sender, EventArgs e)
         {
+            RefreshDisplay(this.dateTimePicker_end);
+
             if (IngoreTextChange > 0)
                 return;
 
@@ -241,8 +258,17 @@ namespace DigitalPlatform.CommonControl
                 menuItem.MenuItems.Add(subMenuItem);
             }
 
+            menuItem = new MenuItem("清空");
+            menuItem.Click += menu_clear_Click;
+            contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.label_start, new Point(e.X, e.Y));
+        }
+
+        void menu_clear_Click(object sender, EventArgs e)
+        {
+            this.dateTimePicker_start.Value = this.dateTimePicker_start.MinDate;
+            this.dateTimePicker_end.Value = this.dateTimePicker_end.MinDate;
         }
 
         void menu_quickSet_Click(object sender, EventArgs e)

@@ -17,6 +17,15 @@ namespace DigitalPlatform.LibraryServer
         internal MongoCollection<T> _collection = null;
         internal string _collectionName = "collection";
 
+        // 数据库是否已经启用
+        public bool Enabled
+        {
+            get
+            {
+                return this._collection != null;
+            }
+        }
+
         public string CollectionName
         {
             get

@@ -989,6 +989,8 @@ value);
                 if (bIsReader == true)
                     e.Parameters += ",type=reader";
 
+                e.Parameters += ",client=dp2libraryconsole|";
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
             }

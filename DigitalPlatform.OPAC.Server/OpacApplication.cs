@@ -44,6 +44,15 @@ namespace DigitalPlatform.OPAC.Server
             set;
         }
 
+        /// <summary>
+        /// 借还历史数据库类型。空表示没有启用。其他表示启用了，例如 enabled
+        /// </summary>
+        public string ChargingHistoryType
+        {
+            get;
+            set;
+        }
+
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
         public double dp2LibraryVersion = 0;
@@ -335,6 +344,11 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+        /// <summary>
+        /// 前端，也就是 dp2OPAC 的版本号
+        /// </summary>
+        public static string ClientVersion { get; set; }
+
         public int Load(
     bool bReload,
     string strDataDir,
@@ -343,6 +357,8 @@ namespace DigitalPlatform.OPAC.Server
         {
             strError = "";
             int nRet = 0;
+
+            ClientVersion = Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version.ToString();
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
@@ -599,6 +615,15 @@ namespace DigitalPlatform.OPAC.Server
 
                 }
 
+#if NO
+                // chargingHistory
+                XmlElement nodeCharingHistory = this.OpacCfgDom.DocumentElement.SelectSingleNode("chargingHistory") as XmlElement;
+                if (nodeCharingHistory != null)
+                {
+                    this.ChargingHistoryType = nodeCharingHistory.GetAttribute("type");
+                }
+#endif
+
                 // searchLog
                 XmlElement nodeSearchLog = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog") as XmlElement;
                 if (nodeSearchLog != null)
@@ -664,7 +689,10 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
-                    app.WriteErrorLog("opac service 成功启动。版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString());
+                    app.WriteErrorLog("opac service 成功启动。版本: " 
+                        // + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString()
+                        + ClientVersion
+                        );
 
                     // 写入down机检测文件
                     app.WriteAppDownDetectFile("opac service启动。");
@@ -715,6 +743,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     parameters = StringUtil.ParseParameters((string)channel.Param, ',', '=');
                 }
+                parameters["client"] = "dp2OPAC|" + OpacApplication.ClientVersion;
                 parameters["index"] = "-1";
 #if NO
                 if (parameters.ContainsKey("type") == false)
@@ -1257,6 +1286,17 @@ namespace DigitalPlatform.OPAC.Server
                         }
                     }
 
+                    string strValue = "";
+                    lRet = session.Channel.GetSystemParameter(
+                        null,
+                        "circulation",
+                        "chargingOperDatabase",
+                        out strValue,
+                        out strError);
+                    if (strValue == "enabled")
+                        this.ChargingHistoryType = strValue;
+                    else
+                        this.ChargingHistoryType = "";
 
                     // 获取虚拟库定义
                     string strXml = "";
@@ -1303,7 +1343,6 @@ namespace DigitalPlatform.OPAC.Server
                     if (bOuputDebugInfo == true)
                         strDebugInfo += "*** system/arrived:\r\n" + strXml + "\r\n";
 
-
                     XmlNode node_arrived = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
                     if (node_arrived == null)
                     {
@@ -1313,7 +1352,6 @@ namespace DigitalPlatform.OPAC.Server
 
                     node_arrived = DomUtil.SetElementOuterXml(node_arrived, strXml);
                     Debug.Assert(node_arrived != null, "");
-
 
                     // 获取<browseformats>定义
                     lRet = session.Channel.GetSystemParameter(
@@ -1341,7 +1379,6 @@ namespace DigitalPlatform.OPAC.Server
 
                     node_browseformats.InnerXml = strXml;
 
-
                     // 获取<biblioDbGroup>定义
                     lRet = session.Channel.GetSystemParameter(
                         null,
@@ -1358,7 +1395,6 @@ namespace DigitalPlatform.OPAC.Server
 
                     if (bOuputDebugInfo == true)
                         strDebugInfo += "*** system/biblioDbGroup:\r\n" + strXml + "\r\n";
-
 
                     XmlNode node_biblioDbGroup = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
                     if (node_biblioDbGroup == null)
@@ -1389,7 +1425,6 @@ namespace DigitalPlatform.OPAC.Server
 
                         if (bOuputDebugInfo == true)
                             strDebugInfo += "*** system/readerDbGroup:\r\n" + strXml + "\r\n";
-
 
                         XmlNode node_readerDbGroup = this.OpacCfgDom.DocumentElement.SelectSingleNode("readerDbGroup");
                         if (node_readerDbGroup == null)
@@ -1882,6 +1917,15 @@ System.Text.Encoding.UTF8))
                         {
                             node.WriteTo(writer);
                         }
+
+#if NO
+                        // <chargingHistory>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("chargingHistory");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+#endif
 
                         // <searchLog>
                         node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
@@ -2798,8 +2842,9 @@ System.Text.Encoding.UTF8))
         // 语言相关的最新版本
         public string GetDisplayTimePeriodStringEx(string strText)
         {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
             strText = strText.Replace("day", this.GetString("天"));
-
             return strText.Replace("hour", this.GetString("小时"));
         }
 

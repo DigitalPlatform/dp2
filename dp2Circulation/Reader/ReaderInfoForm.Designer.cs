@@ -34,6 +34,8 @@ namespace dp2Circulation
             this.webBrowser_readerInfo = new System.Windows.Forms.WebBrowser();
             this.tabControl_readerInfo = new System.Windows.Forms.TabControl();
             this.tabPage_normal = new System.Windows.Forms.TabPage();
+            this.tabPage_borrowHistory = new System.Windows.Forms.TabPage();
+            this.webBrowser_borrowHistory = new System.Windows.Forms.WebBrowser();
             this.tabPage_xml = new System.Windows.Forms.TabPage();
             this.webBrowser_xml = new System.Windows.Forms.WebBrowser();
             this.tabPage_objects = new System.Windows.Forms.TabPage();
@@ -80,20 +82,18 @@ namespace dp2Circulation
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.tabPage_borrowHistory = new System.Windows.Forms.TabPage();
-            this.webBrowser_borrowHistory = new System.Windows.Forms.WebBrowser();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
             this.splitContainer_normal.SuspendLayout();
             this.tabControl_readerInfo.SuspendLayout();
             this.tabPage_normal.SuspendLayout();
+            this.tabPage_borrowHistory.SuspendLayout();
             this.tabPage_xml.SuspendLayout();
             this.tabPage_objects.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.toolStrip_load.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
-            this.tabPage_borrowHistory.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer_normal
@@ -185,6 +185,7 @@ namespace dp2Circulation
             this.tabControl_readerInfo.SelectedIndex = 0;
             this.tabControl_readerInfo.Size = new System.Drawing.Size(606, 283);
             this.tabControl_readerInfo.TabIndex = 3;
+            this.tabControl_readerInfo.SelectedIndexChanged += new System.EventHandler(this.tabControl_readerInfo_SelectedIndexChanged);
             // 
             // tabPage_normal
             // 
@@ -197,6 +198,25 @@ namespace dp2Circulation
             this.tabPage_normal.TabIndex = 0;
             this.tabPage_normal.Text = "常规";
             this.tabPage_normal.UseVisualStyleBackColor = true;
+            // 
+            // tabPage_borrowHistory
+            // 
+            this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
+            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
+            this.tabPage_borrowHistory.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_borrowHistory.TabIndex = 3;
+            this.tabPage_borrowHistory.Text = "借阅历史";
+            this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser_borrowHistory
+            // 
+            this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
+            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(598, 257);
+            this.webBrowser_borrowHistory.TabIndex = 0;
             // 
             // tabPage_xml
             // 
@@ -648,25 +668,6 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(610, 337);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // tabPage_borrowHistory
-            // 
-            this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
-            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
-            this.tabPage_borrowHistory.Size = new System.Drawing.Size(598, 257);
-            this.tabPage_borrowHistory.TabIndex = 3;
-            this.tabPage_borrowHistory.Text = "借阅历史";
-            this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
-            // 
-            // webBrowser_borrowHistory
-            // 
-            this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
-            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(598, 257);
-            this.webBrowser_borrowHistory.TabIndex = 0;
-            // 
             // ReaderInfoForm
             // 
             this.AllowDrop = true;
@@ -693,6 +694,7 @@ namespace dp2Circulation
             this.splitContainer_normal.ResumeLayout(false);
             this.tabControl_readerInfo.ResumeLayout(false);
             this.tabPage_normal.ResumeLayout(false);
+            this.tabPage_borrowHistory.ResumeLayout(false);
             this.tabPage_xml.ResumeLayout(false);
             this.tabPage_objects.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
@@ -701,7 +703,6 @@ namespace dp2Circulation
             this.toolStrip_load.PerformLayout();
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
-            this.tabPage_borrowHistory.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

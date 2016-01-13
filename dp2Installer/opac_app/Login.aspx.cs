@@ -778,7 +778,7 @@ ref this.sessioninfo) == false)
             goto ERROR1;
         }
 
-        string strParameters = "location=#opac_sso@" + sessioninfo.ClientIP + ",index=-1,type=reader,simulate=yes,libraryCode=" + LoginControl.GetLibraryCodeParam(strLibraryCode);
+        string strParameters = "location=#opac_sso@" + sessioninfo.ClientIP + ",index=-1,type=reader,simulate=yes,libraryCode=" + LoginControl.GetLibraryCodeParam(strLibraryCode) + ",client=dp2OPAC|" + OpacApplication.ClientVersion;
         string strPassword = app.ManagerUserName + "," + app.ManagerPassword;   // simulate登录的需要
         // 读者身份登录
         // return:

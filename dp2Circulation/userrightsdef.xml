@@ -16,6 +16,10 @@
     <comment lang='chi'>丢失</comment>
     <comment lang='eng'>lost</comment>
   </property>
+  <property name='read'>
+    <comment lang='chi'>读过</comment>
+    <comment lang='eng'>read</comment>
+  </property>
   <property name='reservation'>
     <comment lang='chi'>预约</comment>
     <comment lang='eng'>reservation books</comment>
@@ -40,7 +44,10 @@
     <comment lang='chi'>获得书目摘要</comment>
     <comment lang='eng'>get biblio summary</comment>
   </property>
-
+  <property name='searchcharging'>
+    <comment lang='chi'>检索借阅历史</comment>
+    <comment lang='eng'>search charging history</comment>
+  </property>
   <property name='searchreader'>
     <comment lang='chi'>检索读者</comment>
     <comment lang='eng'>search reader</comment>

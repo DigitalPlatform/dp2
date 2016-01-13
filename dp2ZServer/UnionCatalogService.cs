@@ -150,7 +150,7 @@ namespace dp2ZServer
                 strPassword = strAuthString.Substring(nRet + 1).Trim();
             }
 
-            string strParameters = "location=#unioncatalog";
+            string strParameters = "location=#unioncatalog,client=dp2Catalog|";
 
             LibraryChannel channel = new LibraryChannel();
             try

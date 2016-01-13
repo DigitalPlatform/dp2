@@ -28,6 +28,7 @@ namespace dp2Catalog
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SaveRecordDlg));
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
@@ -56,6 +57,7 @@ namespace dp2Catalog
             // 
             // button_OK
             // 
+            this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(284, 238);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
@@ -67,6 +69,7 @@ namespace dp2Catalog
             // 
             // button_Cancel
             // 
+            this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.Location = new System.Drawing.Point(344, 238);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
@@ -78,9 +81,9 @@ namespace dp2Catalog
             // 
             // tabControl_main
             // 
-            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_main.Controls.Add(this.tabPage_DTLP);
             this.tabControl_main.Controls.Add(this.tabPage_dp2);
             this.tabControl_main.Controls.Add(this.tabPage_unionCatalog);
@@ -132,9 +135,9 @@ namespace dp2Catalog
             // 
             // dtlpResDirControl1
             // 
-            this.dtlpResDirControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.dtlpResDirControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dtlpResDirControl1.BackColor = System.Drawing.SystemColors.Window;
             this.dtlpResDirControl1.HideSelection = false;
             this.dtlpResDirControl1.ImageIndex = 0;
@@ -150,8 +153,8 @@ namespace dp2Catalog
             // 
             // textBox_dtlpRecPath
             // 
-            this.textBox_dtlpRecPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_dtlpRecPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_dtlpRecPath.Location = new System.Drawing.Point(86, 174);
             this.textBox_dtlpRecPath.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_dtlpRecPath.Name = "textBox_dtlpRecPath";
@@ -199,9 +202,9 @@ namespace dp2Catalog
             // 
             // dp2ResTree1
             // 
-            this.dp2ResTree1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.dp2ResTree1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dp2ResTree1.HideSelection = false;
             this.dp2ResTree1.ImageIndex = 0;
             this.dp2ResTree1.Location = new System.Drawing.Point(5, 24);
@@ -224,8 +227,8 @@ namespace dp2Catalog
             // 
             // textBox_dp2RecPath
             // 
-            this.textBox_dp2RecPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_dp2RecPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_dp2RecPath.Location = new System.Drawing.Point(86, 174);
             this.textBox_dp2RecPath.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_dp2RecPath.Name = "textBox_dp2RecPath";
@@ -270,8 +273,8 @@ namespace dp2Catalog
             // 
             // textBox_unionCatalogRecPath
             // 
-            this.textBox_unionCatalogRecPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_unionCatalogRecPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_unionCatalogRecPath.Location = new System.Drawing.Point(86, 174);
             this.textBox_unionCatalogRecPath.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_unionCatalogRecPath.Name = "textBox_unionCatalogRecPath";

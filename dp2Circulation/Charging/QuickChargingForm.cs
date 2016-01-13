@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -10,16 +11,15 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using System.Xml;
-using System.Drawing.Drawing2D;
 
 using DigitalPlatform;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Script;
-using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -503,6 +503,12 @@ namespace dp2Circulation
             {
                 dlg.FunctionType = "inventory";
                 dlg.Text = "请选择要盘点的册";
+            }
+            else if (func == dp2Circulation.FuncState.Read)
+            {
+                dlg.FunctionType = "read";
+                dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
+                dlg.Text = "请选择要读过的册";
             }
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
@@ -1586,6 +1592,21 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ItemBarcode = strText;
                 task.Action = "verify_lost";
             }
+            else if (func == dp2Circulation.FuncState.Read)
+            {
+                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true)
+                {
+                    WillLoadReaderInfo = true;
+                    // 提示请输入读者证条码号
+                    // TODO: 这里直接出现对话框搜集读者证条码号
+                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.textBox_input.SelectAll();
+                    return;
+                }
+                task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
+                task.ItemBarcode = strText;
+                task.Action = "read";
+            }
 
             this.textBox_input.SelectAll();
 
@@ -1691,6 +1712,11 @@ false);
             this.FuncState = FuncState.InventoryBook;
         }
 
+        private void ToolStripMenuItem_read_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.Read;
+        }
+
         #region 各种配置参数
 
         // 加快响应的记忆变量
@@ -1751,7 +1777,7 @@ false);
                 string strFormat = "";
                 if (_cardControl != null)
                 {
-                    if (this.NoBorrowHistory == true 
+                    if (this.NoBorrowHistory == true
                         && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.25") >= 0)
                     {
                         styles.Add("noborrowhistory");
@@ -1896,7 +1922,8 @@ false);
                 this.toolStripMenuItem_verifyLost.Checked = false;
                 this.toolStripMenuItem_loadPatronInfo.Checked = false;
                 this.toolStripMenuItem_continueBorrow.Checked = false;
-                this.ToolStripMenuItem_inventoryBook.Checked = false;
+                this.toolStripMenuItem_inventoryBook.Checked = false;
+                this.toolStripMenuItem_read.Checked = false;
 
                 if (this.AutoClearTextbox == true)
                 {
@@ -1957,8 +1984,12 @@ false);
                 }
                 else if (_funcstate == FuncState.InventoryBook)
                 {
-                    this.ToolStripMenuItem_inventoryBook.Checked = true;
+                    this.toolStripMenuItem_inventoryBook.Checked = true;
                     WillLoadReaderInfo = false;
+                }
+                else if (_funcstate == FuncState.Read)
+                {
+                    this.toolStripMenuItem_read.Checked = true;
                 }
                 // SetInputMessage();
             }
@@ -3179,7 +3210,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             if (string.IsNullOrEmpty(strText) == true)
                 return strText;
             if (this.toolStripButton_upperInput.Checked == true)
+            {
+                if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
+                    return strText; // 特殊地，不要转为大写
                 return strText.ToUpper();
+            }
             return strText;
         }
 
@@ -3234,6 +3269,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 strText = "自";
             else if (_funcstate == FuncState.InventoryBook)
                 strText = "盘";
+            else if (_funcstate == FuncState.Read)
+                strText = "读";
             else
                 strText = "?";
 
@@ -3401,6 +3438,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
             return 0;
         }
+
 
     }
 

@@ -123,10 +123,34 @@
   <metadata name="toolStrip_navigate.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>566, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="toolStripDropDownButton_itemBarcodeNavigate.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFJSURBVDhPYwCB8PYH/8Pa7v0HsYObb/0ParwBZsOAd8XZ
+        /56lp+BiTrkH/jtk70WoAWkObbkLFgBpDqy/hmIASLN78XG4GEizXcZOhBqQ5pDm22ABkGb/2ssoBoA0
+        uxYcgYuBNNukbkWoQXY2SLNv1QUUA1wLDv8HORvKZQBptkrehFAD0hwAdTZIM8jPYAkocM5D9bNl0qb/
+        5gnrEGpAmmHORg8wEED3s3nC+v+msasRapCdjR5gIIDuZ5Bm4+gVCDXIzkYPMBBA9zNIs2HEUoQaZGeD
+        AgzkZ7AEFIA0I/sZpFk/bBFCDbKz0QMMBND9rB+66L9u8HyEGoizD4MFMBIJEKD7GaRZJ3AOQg1yPGMk
+        EiBA97M2ULOW/ywUNZQBh+w9cNNgoQ3zM8xmkLNBNoPYIKDuMxXOBjsbRKNHFZQJBjg1UwYYGACfxwQX
+        +x/RKgAAAABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="toolStripDropDownButton_readerBarcodeNavigate.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAARCAYAAADUryzEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFlSURBVDhPY8AFNjcp/0fGUGHiAEjDkwMt/5+dmvn/6dHe
+        /7s6tP8vLhYhzpC1HXb/9/cZ/7++POj/w52l/48uivsPEiPJgAuTdcGGPFtk8///Zt//L1c4gb0RHRlE
+        2BCQAf93h6JioCHHulVJMGC1K1gTGIPYQLyzUZp4A34utoVrBLF/zjb9Xx1NpAEg8KpPE6wJhP9MN/q/
+        v0qEOM0ePd7/QbgmjeH/sRoxMN5czPs/sESRsAFOS5z+g3D3/e7/Vdt6/u+/uf//ho3z/1tVWYHFtbK0
+        8BtgMtPkf8rplP/Nt5v/B83O+P/3////PXv6/8fujgWLu2xw+e9d4Y3bEOke6f8xJ2L+Z5/L/g8y7MDT
+        y2CbQXyQASabTf7Llcvh9kpaWtp/zWma/0MOhYAN0KnXAWsEYevt1mADZBtk8YcFyBDjJGOwTbKpsv9B
+        rgJhkEaQmEG4AXGxATIIF4YqGTSAgQEAJj8jgyEu8bgAAAAASUVORK5CYII=
+</value>
+  </data>
   <metadata name="tableLayoutPanel_operation.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="button_verifyReaderPassword.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
@@ -169,33 +193,6 @@
         SCROJCJ9KhVphjTcNqQg2ZiM2PlYCFdE4K/x4bPuC49Vd7iaXOHU7ewAcDu4JyEDPEQMiSEZkUDCfJQY
         XSyi9dEQGoQIMfPhb/HDVcs1uM25wVnvDKc2juMr2w63wVVfooDmIOK3hVBIeyjx2/kU/DyY/Dv9yUvj
         RR4aD+J2c8mly4U4rU5k2LWwraeAU8jFApy/n1yziq0LErEAAAAASUVORK5CYII=
-</value>
-  </data>
-  <metadata name="toolStrip_navigate.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>566, 17</value>
-  </metadata>
-  <data name="toolStripDropDownButton_itemBarcodeNavigate.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFJSURBVDhPYwCB8PYH/8Pa7v0HsYObb/0ParwBZsOAd8XZ
-        /56lp+BiTrkH/jtk70WoAWkObbkLFgBpDqy/hmIASLN78XG4GEizXcZOhBqQ5pDm22ABkGb/2ssoBoA0
-        uxYcgYuBNNukbkWoQXY2SLNv1QUUA1wLDv8HORvKZQBptkrehFAD0hwAdTZIM8jPYAkocM5D9bNl0qb/
-        5gnrEGpAmmHORg8wEED3s3nC+v+msasRapCdjR5gIIDuZ5Bm4+gVCDXIzkYPMBBA9zNIs2HEUoQaZGeD
-        AgzkZ7AEFIA0I/sZpFk/bBFCDbKz0QMMBND9rB+66L9u8HyEGoizD4MFMBIJEKD7GaRZJ3AOQg1yPGMk
-        EiBA97M2ULOW/ywUNZQBh+w9cNNgoQ3zM8xmkLNBNoPYIKDuMxXOBjsbRKNHFZQJBjg1UwYYGACfxwQX
-        +x/RKgAAAABJRU5ErkJggg==
-</value>
-  </data>
-  <data name="toolStripDropDownButton_readerBarcodeNavigate.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAARCAYAAADUryzEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFlSURBVDhPY8AFNjcp/0fGUGHiAEjDkwMt/5+dmvn/6dHe
-        /7s6tP8vLhYhzpC1HXb/9/cZ/7++POj/w52l/48uivsPEiPJgAuTdcGGPFtk8///Zt//L1c4gb0RHRlE
-        2BCQAf93h6JioCHHulVJMGC1K1gTGIPYQLyzUZp4A34utoVrBLF/zjb9Xx1NpAEg8KpPE6wJhP9MN/q/
-        v0qEOM0ePd7/QbgmjeH/sRoxMN5czPs/sESRsAFOS5z+g3D3/e7/Vdt6/u+/uf//ho3z/1tVWYHFtbK0
-        8BtgMtPkf8rplP/Nt5v/B83O+P/3////PXv6/8fujgWLu2xw+e9d4Y3bEOke6f8xJ2L+Z5/L/g8y7MDT
-        y2CbQXyQASabTf7Llcvh9kpaWtp/zWma/0MOhYAN0KnXAWsEYevt1mADZBtk8YcFyBDjJGOwTbKpsv9B
-        rgJhkEaQmEG4AXGxATIIF4YqGTSAgQEAJj8jgyEu8bgAAAAASUVORK5CYII=
 </value>
   </data>
   <metadata name="contextMenuStrip_verifyReaderPassword.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

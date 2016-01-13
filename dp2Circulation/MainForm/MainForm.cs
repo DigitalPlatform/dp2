@@ -5190,11 +5190,11 @@ out strError);
         }
 #endif
 
-        private void MenuItem_copyright_Click(object sender, EventArgs e)
+        private void MenuItem_about_Click(object sender, EventArgs e)
         {
-            CopyrightDlg dlg = new CopyrightDlg();
+            AboutDlg dlg = new AboutDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this;
+            // dlg.MainForm = this;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
         }

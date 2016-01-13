@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>8</ApplicationRevision>
+    <ApplicationRevision>16</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -587,7 +587,12 @@
     <Compile Include="Reader\ChangeStateActionControl.Designer.cs">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Reader\ChargingHistoryHost.cs" />
+    <Compile Include="Reader\ExportPatronExcelDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ExportPatronExcelDialog.Designer.cs">
+      <DependentUpon>ExportPatronExcelDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reader\SelectPatronDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -727,7 +732,7 @@
     <Compile Include="Reader\CompareReaderForm.Designer.cs">
       <DependentUpon>CompareReaderForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="CopyrightDlg.cs">
+    <Compile Include="AboutDlg.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dup\DupForm.cs">
@@ -1335,6 +1340,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="bondfingerprintscanfc0.gif" />
+    <Content Include="default\charginghistory.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="default\comment_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -1645,6 +1653,9 @@
     <EmbeddedResource Include="Reader\ChangeStateActionControl.resx">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ExportPatronExcelDialog.resx">
+      <DependentUpon>ExportPatronExcelDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Reader\SelectPatronDialog.resx">
       <DependentUpon>SelectPatronDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -1721,8 +1732,8 @@
       <SubType>Designer</SubType>
       <DependentUpon>CompareReaderForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CopyrightDlg.resx">
-      <DependentUpon>CopyrightDlg.cs</DependentUpon>
+    <EmbeddedResource Include="AboutDlg.resx">
+      <DependentUpon>AboutDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dup\DupForm.resx">
@@ -2409,6 +2420,33 @@
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Thread\ThreadBase.cs" />
+    <Content Include="report_def\9212.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9202.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9201.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9131.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9122.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9121.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9111.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9102.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\9101.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="unimarc_cfgs\dp2circulation_marc_autogen.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -2925,7 +2963,37 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="default\856_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default\charginghistory.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="default\comment_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default\fieldhtml.css">
       <Visible>False</Visible>
       <Group>
       </Group>

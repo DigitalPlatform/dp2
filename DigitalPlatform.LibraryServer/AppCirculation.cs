@@ -1585,8 +1585,11 @@ namespace DigitalPlatform.LibraryServer
                     DateTime start_time_write_operlog = DateTime.Now;
 
                     // 写入日志
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "confirmItemRecPath", strConfirmItemRecPath);
+                    if (string.IsNullOrEmpty(strConfirmItemRecPath) == false)
+                    {
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "confirmItemRecPath", strConfirmItemRecPath);
+                    }
 
                     if (string.IsNullOrEmpty(strIdcardNumber) == false)
                     {
@@ -2401,7 +2404,6 @@ start_time_1,
                     goto ERROR1;
                 }
             }
-
 
             nRet = LibraryApplication.LoadToDom(strReaderXml,
                 out readerdom,
@@ -3613,14 +3615,23 @@ start_time_1,
                 return "丢失声明";
             else if (strAction == "inventory")
                 return "盘点";
+            else if (strAction == "read")
+                return "读过";
             else
                 return strAction;
         }
 
+        static bool IsBiblioRecPath(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return false;
+            return strText.ToLower().StartsWith("@bibliorecpath:");
+        }
         // API: 还书
         // 权限：  工作人员需要return权限，如果是丢失处理需要lost权限；所有读者均不具备还书操作权限。盘点需要 inventory 权限
         // parameters:
-        //      strAction   return/lost/inventory
+        //      strAction   return/lost/inventory/read
+        //      strReaderBarcodeParam   读者证条码号。当 strAction 为 "inventory" 时，这里是批次号
         // return:
         //      Result.Value    -1  出错 0 操作成功 1 操作成功，但有值得操作人员留意的情况：如有超期情况；发现条码号重复；需要放入预约架
         public LibraryServerResult Return(
@@ -3698,6 +3709,17 @@ start_time_1,
                 {
                     result.Value = -1;
                     result.ErrorInfo = strActionName + " 操作被拒绝。不具备 inventory 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    // return result;
+                }
+            }
+            else if (strAction == "read")
+            {
+                // 权限字符串
+                if (StringUtil.IsInList("read", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 read 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -3879,7 +3901,7 @@ start_time_1,
                             goto ERROR1;
                         }
                     }
-                    else
+                    else if (IsBiblioRecPath(strItemBarcodeParam) == false)
                     {
                         // 从册条码号获得册记录
 
@@ -4113,13 +4135,16 @@ start_time_1,
                     }
 
                     XmlDocument itemdom = null;
-                    nRet = LibraryApplication.LoadToDom(strItemXml,
-                        out itemdom,
-                        out strError);
-                    if (nRet == -1)
+                    if (string.IsNullOrEmpty(strItemXml) == false)
                     {
-                        strError = "装载册记录进入 XML DOM 时发生错误: " + strError;
-                        goto ERROR1;
+                        nRet = LibraryApplication.LoadToDom(strItemXml,
+                            out itemdom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "装载册记录进入 XML DOM 时发生错误: " + strError;
+                            goto ERROR1;
+                        }
                     }
 
                     WriteTimeUsed(
@@ -4164,41 +4189,43 @@ start_time_1,
                     }
 
                     string strOutputReaderBarcode = ""; // 返回的借阅者证条码号
-                    // 在册记录中获得借阅者证条码号
-                    // return:
-                    //      -1  出错
-                    //      0   该册为未借出状态
-                    //      1   成功
-                    nRet = GetBorrowerBarcode(itemdom,
-                        out strOutputReaderBarcode,
-                        out strError);
-                    if (strAction == "inventory")
+                    if (strAction != "read")
                     {
-                        if (nRet == -1)
+                        // 在册记录中获得借阅者证条码号
+                        // return:
+                        //      -1  出错
+                        //      0   该册为未借出状态
+                        //      1   成功
+                        nRet = GetBorrowerBarcode(itemdom,
+                            out strOutputReaderBarcode,
+                            out strError);
+                        if (strAction == "inventory")
                         {
-                            strError = strError + " (册记录路径为 '" + strOutputItemRecPath + "')";
-                            goto ERROR1;
+                            if (nRet == -1)
+                            {
+                                strError = strError + " (册记录路径为 '" + strOutputItemRecPath + "')";
+                                goto ERROR1;
+                            }
+                            if (string.IsNullOrEmpty(strOutputReaderBarcode) == false)
+                            {
+                                // 该册处于被借阅状态，需要警告前端，建议立即进行还书操作
+                                strInventoryWarning = "册 " + strItemBarcodeParam + " 当前处于被借阅状态。如确属在架已还图书，建议立即为之补办还书手续。" + " (册记录路径为 '" + strOutputItemRecPath + "')";
+                            }
                         }
-                        if (string.IsNullOrEmpty(strOutputReaderBarcode) == false)
+                        else
                         {
-                            // 该册处于被借阅状态，需要警告前端，建议立即进行还书操作
-                            strInventoryWarning = "册 " + strItemBarcodeParam + " 当前处于被借阅状态。如确属在架已还图书，建议立即为之补办还书手续。" + " (册记录路径为 '" + strOutputItemRecPath + "')";
+                            if (nRet == -1 || nRet == 0)
+                            {
+                                strError = strError + " (册记录路径为 '" + strOutputItemRecPath + "')";
+                                goto ERROR1;
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (nRet == -1 || nRet == 0)
-                        {
-                            strError = strError + " (册记录路径为 '" + strOutputItemRecPath + "')";
-                            goto ERROR1;
-                        }
-                    }
 
-                    // 如果提供了读者证条码号，则需要核实
-                    if (String.IsNullOrEmpty(strReaderBarcodeParam) == false)
-                    {
-                        if (strOutputReaderBarcode != strReaderBarcodeParam)
+                        // 如果提供了读者证条码号，则需要核实
+                        if (String.IsNullOrEmpty(strReaderBarcodeParam) == false)
                         {
+                            if (strOutputReaderBarcode != strReaderBarcodeParam)
+                            {
 #if NO
                             if (StringUtil.IsIdcardNumber(strReaderBarcodeParam) == true)
                             {
@@ -4212,14 +4239,15 @@ start_time_1,
                                 goto ERROR1;
                             }
 #endif
-                            // 暂时不报错，滞后验证
-                            bDelayVerifyReaderBarcode = true;
-                            strIdcardNumber = strReaderBarcodeParam;
+                                // 暂时不报错，滞后验证
+                                bDelayVerifyReaderBarcode = true;
+                                strIdcardNumber = strReaderBarcodeParam;
+                            }
                         }
-                    }
 
-                    if (String.IsNullOrEmpty(strReaderBarcode) == true)
-                        strReaderBarcode = strOutputReaderBarcode;
+                        if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                            strReaderBarcode = strOutputReaderBarcode;
+                    }
 
                     // *** 如果读者记录在前面没有锁定, 在这里锁定
                     if (bReaderLocked == false && string.IsNullOrEmpty(strReaderBarcode) == false)
@@ -4461,7 +4489,6 @@ start_time_1,
                         goto END3;
                     }
 
-
                     // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
                     // 2008/6/4
                     bool bReaderDbInCirculation = true;
@@ -4590,72 +4617,81 @@ start_time_1,
                     string strReaderState = DomUtil.GetElementText(readerdom.DocumentElement,
                         "state");
 
-                    // 获得相关日历
-                    Calendar calendar = null;
-                    // return:
-                    //      -1  出错
-                    //      0   没有找到日历
-                    //      1   找到日历
-                    nRet = GetReaderCalendar(strReaderType,
-                        strLibraryCode,
-                        out calendar,
-                        out strError);
-                    if (nRet == -1 || nRet == 0)
-                        goto ERROR1;
-
                     string strOperTime = this.Clock.GetClock();
                     string strWarning = "";
 
                     // 处理册记录
                     string strOverdueString = "";
                     string strLostComment = "";
-                    // return:
-                    //      -1  出错
-                    //      0   正常
-                    //      1   超期还书或者丢失处理的情况
-                    nRet = DoReturnItemXml(
-                        strAction,
-                        sessioninfo,    // sessioninfo.Account,
-                        calendar,
-                        strReaderType,
-                        strLibraryCode,
-                        strAccessParameters,
-                        readerdom,  // 为了调用GetLost()脚本函数
-                        ref itemdom,
-                        bForce,
-                        bItemBarcodeDup,  // 若条码号足以定位，则不记载实体记录路径
-                        strOutputItemRecPath,
-                        sessioninfo.UserID, // 还书操作者
-                        strOperTime,
-                        out strOverdueString,
-                        out strLostComment,
-                        out return_info,
-                        out strWarning,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
 
-                    if (string.IsNullOrEmpty(strWarning) == false)
+                    if (strAction != "read")
                     {
-                        if (String.IsNullOrEmpty(result.ErrorInfo) == false)
-                            result.ErrorInfo += "\r\n";
-                        result.ErrorInfo += strWarning;
-                        result.Value = 1;
+                        // 获得相关日历
+                        Calendar calendar = null;
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到日历
+                        //      1   找到日历
+                        nRet = GetReaderCalendar(strReaderType,
+                            strLibraryCode,
+                            out calendar,
+                            out strError);
+                        if (nRet == -1 || nRet == 0)
+                            goto ERROR1;
+
+                        // return:
+                        //      -1  出错
+                        //      0   正常
+                        //      1   超期还书或者丢失处理的情况
+                        nRet = DoReturnItemXml(
+                            strAction,
+                            sessioninfo,    // sessioninfo.Account,
+                            calendar,
+                            strReaderType,
+                            strLibraryCode,
+                            strAccessParameters,
+                            readerdom,  // 为了调用GetLost()脚本函数
+                            ref itemdom,
+                            bForce,
+                            bItemBarcodeDup,  // 若条码号足以定位，则不记载实体记录路径
+                            strOutputItemRecPath,
+                            sessioninfo.UserID, // 还书操作者
+                            strOperTime,
+                            out strOverdueString,
+                            out strLostComment,
+                            out return_info,
+                            out strWarning,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (string.IsNullOrEmpty(strWarning) == false)
+                        {
+                            if (String.IsNullOrEmpty(result.ErrorInfo) == false)
+                                result.ErrorInfo += "\r\n";
+                            result.ErrorInfo += strWarning;
+                            result.Value = 1;
+                        }
                     }
+                    else
+                        nRet = 0;
 
-                    string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
-
-                    // 创建日志记录
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode",
-                        string.IsNullOrEmpty(strItemBarcode) == false ? strItemBarcode : strItemBarcodeParam);
-                    /* 后面会写入<overdues>
-                    if (nRet == 1)
+                    string strItemBarcode = "";
+                    if (itemdom != null)
                     {
-                        // 如果有超期和或丢失处理信息
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "overdueString",
-                        strOverdueString);
+                        strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+                        // 创建日志记录
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode",
+                            string.IsNullOrEmpty(strItemBarcode) == false ? strItemBarcode : strItemBarcodeParam);
+                        /* 后面会写入<overdues>
+                        if (nRet == 1)
+                        {
+                            // 如果有超期和或丢失处理信息
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "overdueString",
+                            strOverdueString);
+                        }
+                         * */
                     }
-                     * */
 
                     bool bOverdue = false;
                     string strOverdueInfo = "";
@@ -4669,19 +4705,22 @@ start_time_1,
                     // 处理读者记录
                     // string strNewReaderXml = "";
                     string strDeletedBorrowFrag = "";
-                    nRet = DoReturnReaderXml(
-                        strLibraryCode,
-                        ref readerdom,
-                        strItemBarcodeParam,
-                        strItemBarcode,
-                        strOverdueString.StartsWith("!") ? "" : strOverdueString,
-                        sessioninfo.UserID, // 还书操作者
-                        strOperTime,
-                        sessioninfo.ClientAddress,  // 前端触发
-                        out strDeletedBorrowFrag,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    if (strAction != "read")
+                    {
+                        nRet = DoReturnReaderXml(
+                            strLibraryCode,
+                            ref readerdom,
+                            strItemBarcodeParam,
+                            strItemBarcode,
+                            strOverdueString.StartsWith("!") ? "" : strOverdueString,
+                            sessioninfo.UserID, // 还书操作者
+                            strOperTime,
+                            sessioninfo.ClientAddress,  // 前端触发
+                            out strDeletedBorrowFrag,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
 
                     // 创建日志记录
                     Debug.Assert(string.IsNullOrEmpty(strReaderBarcode) == false, "");
@@ -4691,6 +4730,71 @@ start_time_1,
                         sessioninfo.UserID);
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                         strOperTime);
+
+                    if (strAction == "read")
+                    {
+                        string strBiblioRecPath = "";
+                        string strVolume = "";
+                        if (IsBiblioRecPath(strItemBarcodeParam) == false)
+                        {
+                            strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
+
+                            string strBiblioDbName = "";
+                            // 根据实体库名, 找到对应的书目库名
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                                out strBiblioDbName,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            if (string.IsNullOrEmpty(strBiblioDbName) == false)
+                            {
+                                strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+                                DomUtil.SetElementText(domOperLog.DocumentElement, "biblioRecPath",
+                                    strBiblioRecPath);
+                            }
+
+                            strVolume = DomUtil.GetElementText(itemdom.DocumentElement, "volume");
+                            if (string.IsNullOrEmpty(strVolume) == false)
+                                DomUtil.SetElementText(domOperLog.DocumentElement, "no", strVolume);
+                        }
+                        else
+                            strBiblioRecPath = strItemBarcodeParam.Substring("@biblioRecPath:".Length);
+
+                        // 探测 mongodb 库中是否已经存在这样的事项
+                        IEnumerable<ChargingOperItem> collection = this.ChargingOperDatabase.Exists(
+                            strReaderBarcode,
+                            "", // string.IsNullOrEmpty(strItemBarcode) == false ? strItemBarcode : strItemBarcodeParam,
+                            strBiblioRecPath,
+                            strVolume,
+                            new DateTime(0),    // DateTime.Now - new TimeSpan(0, 5, 0),
+                            new DateTime(0),
+                            "read");
+                        if (collection != null)
+                        {
+                            DateTime existingOperTime = new DateTime(0);
+
+                            foreach (ChargingOperItem item in collection)
+                            {
+                                existingOperTime = item.OperTime;
+                                break;
+                            }
+
+                            if (existingOperTime != new DateTime(0))
+                            {
+                                strError = "读者 '" + strReaderBarcode + "' 早先 (" + existingOperTime.ToString("G") + ") 已经读过 [" + GetReadCaption(strBiblioRecPath, strVolume) + "] 了，本次操作被拒绝";
+                                goto ERROR1;
+                            }
+                        }
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement, 
+                            "biblioRecPath", strBiblioRecPath);
+                        goto WRITE_OPERLOG;
+                    }
 
                     WriteTimeUsed(
                         time_lines,
@@ -4876,6 +4980,7 @@ start_time_1,
                         start_time_write_item,
                         "Return() 中写回册记录 耗时 ");
 
+                WRITE_OPERLOG:
                     DateTime start_time_write_operlog = DateTime.Now;
 
                     // 写入日志
@@ -4889,8 +4994,11 @@ start_time_1,
                     }
 
                     // 确认册路径
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "confirmItemRecPath", strConfirmItemRecPath);
+                    if (string.IsNullOrEmpty(strConfirmItemRecPath) == false)
+                    {
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "confirmItemRecPath", strConfirmItemRecPath);
+                    }
 
                     if (string.IsNullOrEmpty(strIdcardNumber) == false)
                     {
@@ -4905,9 +5013,12 @@ start_time_1,
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
 
                     // 写入册记录
-                    node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "itemRecord", itemdom.OuterXml);
-                    DomUtil.SetAttr(node, "recPath", strOutputItemRecPath);
+                    if (itemdom != null)
+                    {
+                        node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "itemRecord", itemdom.OuterXml);
+                        DomUtil.SetAttr(node, "recPath", strOutputItemRecPath);
+                    }
 
                     if (strLostComment != "")
                     {
@@ -4953,7 +5064,7 @@ start_time_1,
                     if (this.Statis != null)
                         this.Statis.IncreaseEntryValue(strLibraryCode,
                         "出纳",
-                        "还册",
+                        strAction == "read" ? "读过册" : "还册",
                         1);
 
                     if (strAction == "lost")
@@ -5057,10 +5168,13 @@ start_time_1,
                         result.Value = 1;
                     }
 
-                    strOutputItemXml = itemdom.OuterXml;
+                    if (itemdom != null)
+                        strOutputItemXml = itemdom.OuterXml;
                     strOutputReaderXml = readerdom.OuterXml;
-                    strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
-
+                    if (itemdom != null)
+                    {
+                        strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
+                    }
                 } // 册记录锁定范围结束
                 finally
                 {
@@ -5127,8 +5241,6 @@ start_time_1,
             }
 
         END3:
-
-
             // 输出数据
             // 把输出数据部分放在读者锁以外范围，是为了尽量减少锁定的时间，提高并发运行效率
             DateTime output_start_time = DateTime.Now;
@@ -5361,35 +5473,41 @@ start_time_1,
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
                 DateTime start_time_1 = DateTime.Now;
+                string strBiblioRecPath = "";
+                if (IsBiblioRecPath(strItemBarcodeParam) == true)
+                    strBiblioRecPath = strItemBarcodeParam.Substring("@biblioRecPath:".Length);
 
-                if (String.IsNullOrEmpty(strBiblioRecID) == true)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                 {
-                    strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
-                    strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                    goto ERROR1;
+                    if (String.IsNullOrEmpty(strBiblioRecID) == true)
+                    {
+                        strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
+                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        goto ERROR1;
+                    }
+
+                    string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
+
+                    string strBiblioDbName = "";
+                    // 根据实体库名, 找到对应的书目库名
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                        out strBiblioDbName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        goto ERROR1;
+                    }
+
+                    strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
                 }
-
-                string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
-
-                string strBiblioDbName = "";
-                // 根据实体库名, 找到对应的书目库名
-                // return:
-                //      -1  出错
-                //      0   没有找到
-                //      1   找到
-                nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
-                    out strBiblioDbName,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
-                    strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                    goto ERROR1;
-                }
-
-                string strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
 
                 string[] biblio_formats = strBiblioFormatList.Split(new char[] { ',' });
                 biblio_records = new string[biblio_formats.Length];
@@ -5441,7 +5559,7 @@ start_time_1,
                         // TODO: 可以cache
                         nRet = this.MapKernelScriptFile(
                             sessioninfo,
-                            strBiblioDbName,
+                            StringUtil.GetDbName(strBiblioRecPath),
                             "./cfgs/loan_biblio.fltx",
                             out strLocalPath,
                             out strError);
@@ -5481,7 +5599,7 @@ start_time_1,
                         // TODO: 可以cache
                         nRet = this.MapKernelScriptFile(
                             sessioninfo,
-                            strBiblioDbName,
+                            StringUtil.GetDbName(strBiblioRecPath),
                             "./cfgs/loan_biblio_text.fltx",
                             out strLocalPath,
                             out strError);
@@ -5539,7 +5657,6 @@ start_time_1,
 "Return() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
             }
 
-
             this.WriteTimeUsed(
                 time_lines,
                 start_time,
@@ -5582,6 +5699,14 @@ start_time_1,
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 构造用于提示“读过”卷册的文字
+        static string GetReadCaption(string strBiblioRecPath, string strVolume)
+        {
+            if (string.IsNullOrEmpty(strVolume) == true)
+                return "书目记录 '" + strBiblioRecPath + "'";
+            return "书目记录 '" + strBiblioRecPath + "' 卷 '" + strVolume + "'";
         }
 
         // 执行盘点记载
@@ -5762,6 +5887,188 @@ start_time_1,
 
             return 0;
         }
+
+#if NO
+        // 执行“读过”记载
+        int DoRead(
+            SessionInfo sessioninfo,
+            string strAccessParameters,
+            XmlDocument itemdom,
+            string strItemRecPath,
+            string strBatchNo,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strInventoryDbName = GetInventoryDbName();
+
+            if (string.IsNullOrEmpty(strInventoryDbName) == true)
+            {
+                strError = "当前尚未配置盘点库，无法进行盘点操作";
+                return -1;
+            }
+
+            // 馆藏地点
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+            // 去掉#reservation部分
+            strLocation = StringUtil.GetPureLocationString(strLocation);
+
+            // 获得册记录的馆代码，检查是否在当前用户管辖范围内
+
+            string strLibraryCode = "";
+            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+            // parameters:
+            //      strLibraryCodeList  当前用户管辖的馆代码列表
+            //      strLibraryCode  [out]册记录中的馆代码
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            nRet = CheckItemLibraryCode(itemdom,
+                sessioninfo.LibraryCodeList,
+                out strLibraryCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 1)
+            {
+                strError = "盘点操作被拒绝: " + strError;
+                return -1;
+            }
+
+#if NO
+            string strCode = "";
+            string strRoom = "";
+            {
+                // 解析
+                ParseCalendarName(strLocation,
+            out strCode,
+            out strRoom);
+                if (StringUtil.IsInList(strCode, sessioninfo.LibraryCodeList) == false)
+                {
+                    strError = "册记录的馆藏地 '" + strLocation + "' 不属于当前用户所在馆代码 '" + sessioninfo.LibraryCodeList + "' 管辖，不允许进行盘点操作。";
+                    return -1;
+                }
+            }
+#endif
+
+            // 检查存取定义馆藏地列表
+            if (string.IsNullOrEmpty(strAccessParameters) == false && strAccessParameters != "*")
+            {
+                string strCode = "";
+                string strRoom = "";
+                // 解析
+                ParseCalendarName(strLocation,
+            out strCode,
+            out strRoom);
+
+                bool bFound = false;
+                List<string> locations = StringUtil.SplitList(strAccessParameters);
+                foreach (string s in locations)
+                {
+                    string c = "";
+                    string r = "";
+                    ParseCalendarName(s,
+                        out c,
+                        out r);
+                    if (/*string.IsNullOrEmpty(c) == false && */ c != "*")
+                    {
+                        if (c != strLibraryCode)
+                            continue;
+                    }
+
+                    if (/*string.IsNullOrEmpty(r) == false && */ r != "*")
+                    {
+                        if (r != strRoom)
+                            continue;
+                    }
+
+                    bFound = true;
+                    break;
+                }
+
+                if (bFound == false)
+                {
+                    strError = "盘点操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不在当前用户存取定义规定的盘点操作的馆藏地许可范围 '" + strAccessParameters + "' 之内";
+                    return -1;
+                }
+            }
+
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+            string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement, "refID");
+
+            // 在盘点库中查重
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            List<string> aPath = null;
+            // 根据馆代码、批次号和册条码号对盘点库进行查重
+            // 本函数只负责查重, 并不获得记录体
+            // return:
+            //      -1  error
+            //      其他    命中记录条数(不超过nMax规定的极限)
+            nRet = SearchInventoryRecDup(
+                channel,
+                strLibraryCode,
+                strBatchNo,
+                strItemBarcode,
+                strItemRefID,
+                2,
+                out aPath,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet >= 1)
+            {
+                if (string.IsNullOrEmpty(strItemBarcode) == false)
+                    strError = "馆代码 '" + strLibraryCode + "' 批次号 '" + strBatchNo + "' 册条码号 '" + strItemBarcode + "' 的盘点记录已经存在，无法重复创建 ...";
+                else
+                    strError = "馆代码 '" + strLibraryCode + "' 批次号 '" + strBatchNo + "' 参考ID '" + strItemRefID + "' 的盘点记录已经存在，无法重复创建 ...";
+                return -1;
+            }
+
+            // 在盘点库中创建一条新记录
+            XmlDocument inventory_dom = new XmlDocument();
+            inventory_dom.LoadXml("<root />");
+
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "itemBarcode", strItemBarcode);
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "itemRefID", strItemRefID);   // 册记录的参考 ID
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "itemRecPath", strItemRecPath);
+
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "batchNo", strBatchNo);
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "location", strLocation);
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "libraryCode", strLibraryCode);
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "refID", Guid.NewGuid().ToString());  // 盘点记录的参考 ID
+            string strOperTime = this.Clock.GetClock();
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "operator",
+                sessioninfo.UserID);   // 操作者
+            DomUtil.SetElementText(inventory_dom.DocumentElement, "operTime",
+                strOperTime);   // 操作时间
+
+            byte[] output_timestamp = null;
+            string strOutputPath = "";
+
+            long lRet = channel.DoSaveTextRes(strInventoryDbName + "/?",
+    inventory_dom.OuterXml,
+    false,   // include preamble?
+    "content",
+    null,   // info.OldTimestamp,
+    out output_timestamp,
+    out strOutputPath,
+    out strError);
+            if (lRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+#endif
 
         #region Return()下级函数
 

@@ -5071,7 +5071,6 @@ ref strNewStyle);	// 不要数据体和metadata
             out string strOutputResPath,
             out string strError)
         {
-
             strMetaData = "";
             strResult = "";
             strError = "";
@@ -5105,7 +5104,6 @@ ref strNewStyle);	// 不要数据体和metadata
                 REDO:
                 try
                 {
-
                     // string strStyle = "content,data";
                     IAsyncResult soapresult = this.ws.BeginGetRes(strPath,
                         lStart,
@@ -5181,11 +5179,8 @@ ref strNewStyle);	// 不要数据体和metadata
                         return -1;
                     }
 
-
-
                     if (StringUtil.IsInList("data", strStyle) != true)
                         break;
-
 
                     baTotal = ByteArray.Add(baTotal, baContent);
                     // bytes.AddRange(baContent);

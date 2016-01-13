@@ -9269,7 +9269,7 @@ out strError);
             string order,
             long start,
             long count,
-            out ChargingItem[] results,
+            out ChargingItemWrapper[] results,
             out string strError)
         {
             strError = "";
@@ -9328,6 +9328,75 @@ out strError);
             {
                 this.EndSearch();
             }
+        }
+
+        // 获得借阅历史
+        // parameters:
+        //      nPageNo 页号
+        //      nItemsPerPage    每页的事项个数。如果为 -1，表示希望从头获取全部内容
+        // return:
+        //      -1  出错
+        //      其它  符合条件的事项总数
+        public long LoadChargingHistory(
+            DigitalPlatform.Stop stop,
+            string strBarcode,
+            string strActions,
+            int nPageNo,
+            int nItemsPerPage,
+            out List<ChargingItemWrapper> results,
+            out string strError)
+        {
+            strError = "";
+            results = new List<ChargingItemWrapper>();
+
+            long lHitCount = 0;
+
+            long lLength = 0;
+            long lStart = 0;
+            if (nItemsPerPage == -1)
+                lLength = -1;
+            else
+            {
+                lStart = nPageNo * nItemsPerPage;
+                lLength = nItemsPerPage;
+            }
+            int nGeted = 0;
+            for (; ; )
+            {
+                ChargingItemWrapper[] temp_results = null;
+                long lRet = this.SearchCharging(
+                    stop,
+                    strBarcode,
+                    "~",
+                    strActions, // "return,lost",
+                    "descending",
+                    lStart + nGeted,
+                    lLength,
+                    out temp_results,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                lHitCount = lRet;
+                if (temp_results == null || temp_results.Length == 0)
+                    break;
+                results.AddRange(temp_results);
+
+                // 修正 lLength
+                if (lLength != -1 && lHitCount < lStart + nGeted + lLength)
+                    lLength -= lStart + nGeted + lLength - lHitCount;
+
+                if (results.Count >= lHitCount - lStart)
+                    break;
+
+                nGeted += temp_results.Length;
+                if (lLength != -1)
+                    lLength -= temp_results.Length;
+
+                if (lLength <= 0 && lLength != -1)
+                    break;
+            }
+
+            return lHitCount;
         }
 
         public void DoStop()

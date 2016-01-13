@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="maxpagecount" xml:space="preserve">
     <value>({0} pages.)</value>
@@ -123,6 +123,9 @@
   <data name="书目摘要" xml:space="preserve">
     <value>Item Information</value>
     <comment>栏目标题</comment>
+  </data>
+  <data name="借" xml:space="preserve">
+    <value>Loan</value>
   </data>
   <data name="借阅历史" xml:space="preserve">
     <value>Borrow History</value>
@@ -185,6 +188,9 @@
   <data name="跳到" xml:space="preserve">
     <value>Jump to</value>
     <comment>按钮</comment>
+  </data>
+  <data name="还" xml:space="preserve">
+    <value>Return</value>
   </data>
   <data name="还书日期" xml:space="preserve">
     <value>Return Date</value>

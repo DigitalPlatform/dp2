@@ -102,7 +102,7 @@ namespace dp2Circulation
         /// </summary>
         public EntityInfo Error = null;
 
-        
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -274,91 +274,6 @@ namespace dp2Circulation
         /// <returns>刚加入的 ListViewItem</returns>
         public ListViewItem AddToListView(ListView list)
         {
-#if NO
-            ListViewItem item = new ListViewItem(this.Barcode, 0);
-
-            // 2009/10/11 changed
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_ERRORINFO,
-                this.ErrorInfo);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_STATE,
-                this.State);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_PUBLISHTIME,
-                this.PublishTime);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_LOCATION,
-                this.Location);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_SELLER,
-                this.Seller);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_SOURCE,
-                this.Source);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_PRICE,
-                this.Price);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_VOLUMN,
-                this.Volume);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_ACCESSNO,
-                this.AccessNo);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BOOKTYPE,
-                this.BookType);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_REGISTERNO,
-                this.RegisterNo);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_COMMENT,
-                this.Comment);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_MERGECOMMENT,
-                this.MergeComment);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BATCHNO,
-                this.BatchNo);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BORROWER,
-                this.Borrower);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BORROWDATE,
-                this.BorrowDate);
-            ListViewUtil.ChangeItemText(item, 
-                COLUMN_BORROWPERIOD,
-                this.BorrowPeriod);
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_INTACT,
-                this.Intact);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BINDINGCOST,
-                this.BindingCost);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BINDING,
-                this.Binding);
-
-            // 2013/1/18 增补 以前缺乏的情况是个bug
-            ListViewUtil.ChangeItemText(item,
-    COLUMN_OPERATIONS,
-    this.Binding);
-
-
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_RECPATH,
-                this.RecPath);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_REFID,
-                this.RefID);
-#endif
             ListViewItem item = new ListViewItem();
             item.ImageIndex = 0;
 

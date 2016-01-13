@@ -19,7 +19,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
-
 namespace dp2Circulation
 {
     /// <summary>
@@ -2250,13 +2249,13 @@ namespace dp2Circulation
             }
 
             // 如果多于一个，才用卷号来过滤
-            if (issues.Count > 1 && String.IsNullOrEmpty(info.Volumn) == false)
+            if (issues.Count > 1 && String.IsNullOrEmpty(info.Volume) == false)
             {
                 List<IssueBindingItem> temp = new List<IssueBindingItem>();
                 for (int i = 0; i < issues.Count; i++)
                 {
                     IssueBindingItem issue = issues[i];
-                    if (issue.Volume == info.Volumn)
+                    if (issue.Volume == info.Volume)
                         temp.Add(issue);
                 }
 
@@ -6780,7 +6779,6 @@ issue.Volume);
                     "");
                  * */
 
-
                 // 插入到合适的位置?
                 InsertIssueToIssues(new_issue);
 
@@ -8370,6 +8368,16 @@ issue.Volume);
                 ref nPreferredDelta);
         }
 
+        // 2016/1/6
+        // 获得一年的天数。2016 年为 366 天
+        static int GetDaysOfYear(string strYear)
+        {
+            DateTime start = DateTimeUtil.Long8ToDateTime(strYear + "0101");
+            string strNextYear = (Int32.Parse(strYear) + 1).ToString().PadLeft(4, '0');
+            DateTime end = DateTimeUtil.Long8ToDateTime(strNextYear + "0101");
+            return (int)((end - start).TotalDays);
+        }
+
         // 预测下一期的出版时间
         // exception:
         //      可能因strPublishTime为不可能的日期而抛出异常
@@ -8382,6 +8390,9 @@ issue.Volume);
             ref int nPreferredDelta)
         {
             strPublishTime = CanonicalizeLong8TimeString(strPublishTime);
+
+            // 计算出一年有多少天。比如 2016 年就是 366 天而不是 365 天
+            int nDaysOfYear = GetDaysOfYear(strPublishTime.Substring(0, 4));
 
             DateTime start = DateTimeUtil.Long8ToDateTime(strPublishTime);
 
@@ -8562,7 +8573,7 @@ issue.Volume);
             }
 
             // 一年365期
-            else if (nIssueCount > 183 && nIssueCount <= 365)
+            else if (nIssueCount > 183 && nIssueCount <= nDaysOfYear)
             {
                 // 1天以后
                 start += new TimeSpan(1, 0, 0, 0);
@@ -15541,149 +15552,6 @@ Color.FromArgb(100, color)
             // this.mouseMoveArgs
             this.OnMouseMove(e1);
         }
-
-#if NO
-        public int BuildVolumeStrings(string strText,
-            out string strYear,
-            out string strVolumn,
-            out string strZong,
-            out string strNo)
-        {
-            if (this.IsParent == false)
-            {
-                IssueBindingItem issue = this.Container;
-                if (issue != null
-                    && String.IsNullOrEmpty(issue.PublishTime) == false)
-                {
-                    string strVolumeString = VolumeInfo.BuildItemVolumeString(
-                        IssueUtil.GetYearPart(issue.PublishTime),
-                        issue.Issue,
-                        issue.Zong,
-                        issue.Volume);
-                    if (this.Volume != strVolumeString)
-                    {
-                        this.Volume = strVolumeString;
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            if (this.MemberCells.Count == 0)
-            {
-                if (this.Volume == "")
-                    return false;
-                this.Volume = "";
-                return true;
-            }
-
-            Hashtable no_list_table = new Hashtable();
-            // List<string> no_list = new List<string>();
-            List<string> volumn_list = new List<string>();
-            List<string> zong_list = new List<string>();
-
-            for (int i = 0; i < this.MemberCells.Count; i++)
-            {
-                Cell cell = this.MemberCells[i];
-                if (cell == null)
-                {
-                    Debug.Assert(false, "");
-                    continue;
-                }
-
-                if (cell.item == null)
-                    continue;   // 跳过缺期
-
-                IssueBindingItem issue = cell.Container;
-                Debug.Assert(issue != null, "");
-
-                string strNo = "";
-                string strVolume = "";
-                string strZong = "";
-
-                if (cell.item != null
-                    && String.IsNullOrEmpty(cell.item.Volume) == false)
-                {
-                    // 解析当年期号、总期号、卷号的字符串
-                    VolumeInfo.ParseItemVolumeString(cell.item.Volume,
-                        out strNo,
-                        out strZong,
-                        out strVolume);
-                }
-
-                // 实在不行，还是用期行的?
-                if (String.IsNullOrEmpty(strNo) == true)
-                {
-                    strNo = issue.Issue;
-                    Debug.Assert(String.IsNullOrEmpty(strNo) == false, "");
-
-                    strVolume = issue.Volume;
-                    strZong = issue.Zong;
-                }
-
-                Debug.Assert(String.IsNullOrEmpty(issue.PublishTime) == false, "");
-                string strYear = IssueUtil.GetYearPart(issue.PublishTime);
-
-                List<string> no_list = (List<string>)no_list_table[strYear];
-                if (no_list == null)
-                {
-                    no_list = new List<string>();
-                    no_list_table[strYear] = no_list;
-                }
-
-                no_list.Add(strNo);
-                volumn_list.Add(strVolume);
-                zong_list.Add(strZong);
-            }
-
-            List<string> keys = new List<string>();
-            foreach (string key in no_list_table.Keys)
-            {
-                keys.Add(key);
-            }
-            keys.Sort();
-
-            string strNoString = "";
-            for (int i = 0; i < keys.Count; i++)
-            {
-                string strYear = keys[i];
-                List<string> no_list = (List<string>)no_list_table[strYear];
-                Debug.Assert(no_list != null);
-
-                if (String.IsNullOrEmpty(strNoString) == false)
-                    strNoString += ","; // ;
-                strNoString += strYear + ",no." + Global.BuildNumberRangeString(no_list);   // :no
-            }
-
-            string strVolumnString = Global.BuildNumberRangeString(volumn_list);
-            string strZongString = Global.BuildNumberRangeString(zong_list);
-
-            string strValue = strNoString;
-
-
-            if (String.IsNullOrEmpty(strZongString) == false)
-            {
-                if (String.IsNullOrEmpty(strValue) == false)
-                    strValue += "=";
-                strValue += "总." + strZongString;
-            }
-
-            if (String.IsNullOrEmpty(strVolumnString) == false)
-            {
-                if (String.IsNullOrEmpty(strValue) == false)
-                    strValue += "=";
-                strValue += "v." + strVolumnString;
-            }
-
-            if (this.Volume == strValue)
-                return false;
-
-            this.Volume = strValue;
-            return true;
-        }
-
-#endif
     }
 
     // 点击检测结果

@@ -1300,7 +1300,7 @@ false);
                 {
                     // int nCount = 0;
 
-                    for (int nRecord=0; ;nRecord++)
+                    for (int nRecord = 0; ; nRecord++)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
@@ -1518,50 +1518,10 @@ false);
 
                         if (nRet == 0)
                             continue;
-
-                        /*
-                        // 处理一条书目记录以及其下的订购、期记录
-                        nRet = host.LoadIssueRecords(strRecPath,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "在IssueHost中装入记录 " + strRecPath + " 的下属期记录时发生错误:" + strError;
-                            this.WriteHtml(strError + "\r\n");
-                            continue;
-                        }
-
-                        nRet = host.LoadOrderRecords(strRecPath,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "在IssueHost中装入记录 " + strRecPath + " 的下属订购记录时发生错误: " + strError;
-                            this.WriteHtml(strError + "\r\n");
-                            continue;
-                        }
-
-                        nRet = host.CreateIssues(out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "在IssueHost中CreateIssues() " + strRecPath + " error: " + strError;
-                            this.WriteHtml(strError + "\r\n");
-                            continue;
-                        }
-
-                        if (nRet != 0)
-                        {
-                            this.WriteHtml(host.BiblioRecPath + "\r\n" + host.DumpIssue() + "\r\n");
-                        }
-                         * */
-                        /*
-                        CONTINUE:
-                        nCount++;
-                         * */
                     }
-
                 }
                 finally
                 {
-
                     if (sr != null)
                         sr.Close();
                 }
@@ -2466,49 +2426,49 @@ false);
 
             //
 
-             if (this.comboBox_inputOrderDbName.Items.Count > 0)
-             {
-                 this.comboBox_inputOrderDbName.Items.Clear();
-             }
+            if (this.comboBox_inputOrderDbName.Items.Count > 0)
+            {
+                this.comboBox_inputOrderDbName.Items.Clear();
+            }
 
-             strText = this.comboBox_inputOrderDbName.Text;
+            strText = this.comboBox_inputOrderDbName.Text;
 
-             // 检查一下当前已经选定的订购库名和出版物类型是否矛盾
-             if (this.comboBox_source_type.Text == "图书"
-     && this.comboBox_inputOrderDbName.Text == "<全部期刊>")
-             {
-                 this.comboBox_inputOrderDbName.Text = "<全部图书>";
-                 return;
-             }
-             if (this.comboBox_source_type.Text == "连续出版物"
+            // 检查一下当前已经选定的订购库名和出版物类型是否矛盾
+            if (this.comboBox_source_type.Text == "图书"
+    && this.comboBox_inputOrderDbName.Text == "<全部期刊>")
+            {
+                this.comboBox_inputOrderDbName.Text = "<全部图书>";
+                return;
+            }
+            if (this.comboBox_source_type.Text == "连续出版物"
 && this.comboBox_inputOrderDbName.Text == "<全部图书>")
-             {
-                 this.comboBox_inputOrderDbName.Text = "<全部期刊>";
-                 return;
-             }
-             if (this.MainForm.BiblioDbProperties != null)
-             {
-                 for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
-                 {
-                     BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+            {
+                this.comboBox_inputOrderDbName.Text = "<全部期刊>";
+                return;
+            }
+            if (this.MainForm.BiblioDbProperties != null)
+            {
+                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                {
+                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
 
-                     if (strText == prop.OrderDbName)
-                     {
-                         if (this.comboBox_source_type.Text == "图书"
-                             && String.IsNullOrEmpty(prop.IssueDbName) == false)
-                         {
-                             this.comboBox_inputOrderDbName.Text = "";
-                             break;
-                         }
-                         else if (this.comboBox_source_type.Text == "连续出版物"
-                             && String.IsNullOrEmpty(prop.IssueDbName) == true)
-                         {
-                             this.comboBox_inputOrderDbName.Text = "";
-                             break;
-                         }
-                     }
-                 }
-             }
+                    if (strText == prop.OrderDbName)
+                    {
+                        if (this.comboBox_source_type.Text == "图书"
+                            && String.IsNullOrEmpty(prop.IssueDbName) == false)
+                        {
+                            this.comboBox_inputOrderDbName.Text = "";
+                            break;
+                        }
+                        else if (this.comboBox_source_type.Text == "连续出版物"
+                            && String.IsNullOrEmpty(prop.IssueDbName) == true)
+                        {
+                            this.comboBox_inputOrderDbName.Text = "";
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void button_next_Click(object sender, EventArgs e)
@@ -2876,9 +2836,9 @@ false);
                     if (String.IsNullOrEmpty((string)macro_table["%selleraddress%"]) == false)
                         strAddressLine = "致：%selleraddress%<br/><br/>";
 
-                    string strText = strAddressLine + "尊敬的 %seller%:<br/>我馆在贵处订购的以下"+this.TypeName+" %seriescount% 种，有 "
+                    string strText = strAddressLine + "尊敬的 %seller%:<br/>我馆在贵处订购的以下" + this.TypeName + " %seriescount% 种，有 "
                         + (this.TypeName == "期刊" ? "%issuecount% 期 " : "")
-                        +"共 %missingitemcount% 册至今未到。望尽快补齐为盼。谢谢。<br/><br/>%libraryname%<br/>%date%";
+                        + "共 %missingitemcount% 册至今未到。望尽快补齐为盼。谢谢。<br/><br/>%libraryname%<br/>%date%";
                     strText = StringUtil.MacroString(macro_table,
                         strText);
 
@@ -2965,7 +2925,7 @@ false);
 
         // 输出一种期刊的信息
         void PrintOneSeries(PrintOption option,
-            Hashtable macro_table, 
+            Hashtable macro_table,
             OneSeries series,
             string strFilename)
         {
@@ -3166,7 +3126,7 @@ false);
                     case "出版日期":
                         {
                             string strPublishTime = "";
-                            
+
                             if (string.IsNullOrEmpty(info.PublishTime) == false)
                                 strPublishTime = DateTimeUtil.ForcePublishTime8(info.PublishTime);
 
@@ -3209,7 +3169,7 @@ false);
             }
             catch
             {
-                return null; 
+                return null;
             }
         }
 
@@ -3501,7 +3461,7 @@ false);
                     BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
-                        continue; 
+                        continue;
 
                     if (this.comboBox_source_type.Text == "图书")
                     {

@@ -4653,7 +4653,8 @@ MessageBoxDefaultButton.Button1);
             ItemSearchForm form = this.MainForm.OpenItemSearchForm(strDbType);
 
             nRet = form.ImportFromRecPathFile(strTempFileName,
-            out strError);
+                "clear",
+                out strError);
             if (nRet == -1)
                 return -1;
             return 0;
@@ -5711,7 +5712,7 @@ MessageBoxDefaultButton.Button1);
                     byte[] baTimestamp = null;
                     string strOutputPath = "";
                     string[] formats = null;
-                    if (bDeleteSub == false 
+                    if (bDeleteSub == false
                         && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.30") >= 0)
                     {
                         formats = new string[1];
@@ -8092,6 +8093,30 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // 前移或后移 Selection Item
+        public ListViewItem MoveSelectedItem(string strStyle)
+        {
+            if (this.listView_records.Items.Count == 0)
+                return null;
+            ListViewItem item = null;
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                item = this.listView_records.Items[0];
+                item.Selected = true;
+                return item;
+            }
+
+            item = this.listView_records.SelectedItems[0];
+            if (this.listView_records.SelectedItems.Count > 1)
+                ListViewUtil.SelectLine(item, true);
+
+            bool bRet = ListViewUtil.MoveSelectedUpDown(
+                this.listView_records,
+                strStyle == "prev" ? true : false);
+            if (bRet == false)
+                return null;
+            return this.listView_records.SelectedItems[0];
+        }
     }
 
     // 为一行存储的书目信息

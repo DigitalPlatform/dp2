@@ -37,7 +37,7 @@
             this.dpColumn_itemBarcode = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_borrowInfo = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_summary = new DigitalPlatform.CommonControl.DpColumn();
-            this.dpColumn_volumn = new DigitalPlatform.CommonControl.DpColumn();
+            this.dpColumn_volume = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_location = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_price = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_itemRecPath = new DigitalPlatform.CommonControl.DpColumn();
@@ -94,7 +94,7 @@
             this.dpTable_items.Columns.Add(this.dpColumn_itemBarcode);
             this.dpTable_items.Columns.Add(this.dpColumn_borrowInfo);
             this.dpTable_items.Columns.Add(this.dpColumn_summary);
-            this.dpTable_items.Columns.Add(this.dpColumn_volumn);
+            this.dpTable_items.Columns.Add(this.dpColumn_volume);
             this.dpTable_items.Columns.Add(this.dpColumn_location);
             this.dpTable_items.Columns.Add(this.dpColumn_price);
             this.dpTable_items.Columns.Add(this.dpColumn_itemRecPath);
@@ -156,14 +156,14 @@
             this.dpColumn_summary.Text = "书目摘要";
             this.dpColumn_summary.Width = 200;
             // 
-            // dpColumn_volumn
+            // dpColumn_volume
             // 
-            this.dpColumn_volumn.Alignment = System.Drawing.StringAlignment.Near;
-            this.dpColumn_volumn.BackColor = System.Drawing.Color.Transparent;
-            this.dpColumn_volumn.Font = null;
-            this.dpColumn_volumn.ForeColor = System.Drawing.Color.Transparent;
-            this.dpColumn_volumn.Text = "卷册";
-            this.dpColumn_volumn.Width = 50;
+            this.dpColumn_volume.Alignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_volume.BackColor = System.Drawing.Color.Transparent;
+            this.dpColumn_volume.Font = null;
+            this.dpColumn_volume.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_volume.Text = "卷册";
+            this.dpColumn_volume.Width = 50;
             // 
             // dpColumn_location
             // 
@@ -292,7 +292,7 @@
         private DigitalPlatform.CommonControl.DpColumn dpColumn_itemBarcode;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_borrowInfo;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_summary;
-        private DigitalPlatform.CommonControl.DpColumn dpColumn_volumn;
+        private DigitalPlatform.CommonControl.DpColumn dpColumn_volume;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_location;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_price;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_itemRecPath;

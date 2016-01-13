@@ -12,29 +12,15 @@ namespace dp2Circulation
         public string Year = "";
         public string IssueNo = "";
         public string Zong = "";
-        public string Volumn = "";
+        public string Volume = "";
 
         public string GetString(/*bool bIncludeYear*/)
         {
-            /*
-            if (bIncludeYear == false)
-            {
-                // 构造表达一个册所在的当年期号、总期号、卷号的字符串
-                return BuildItemVolumeString(this.IssueNo,
-                    this.Zong,
-                    this.Volumn);
-            }
-            else
-            {
-             * */
-                return BuildItemVolumeString(
-                    this.Year,
-                    this.IssueNo,
-                    this.Zong,
-                    this.Volumn);
-            /*
-            }
-             * */
+            return BuildItemVolumeString(
+                this.Year,
+                this.IssueNo,
+                this.Zong,
+                this.Volume);
         }
 
         // 构造表达一个册所在的当年期号、总期号、卷号的字符串
@@ -113,7 +99,7 @@ namespace dp2Circulation
 
             string strCurrentYear = strDefaultYear;
 
-            string[] no_parts = strText.Split(new char[] { ',', ':', ';', '，','：','；' });    // ':' ';' 是为了兼容某个阶段的临时用法 2001:no.1-2;2002:no.1-12
+            string[] no_parts = strText.Split(new char[] { ',', ':', ';', '，', '：', '；' });    // ':' ';' 是为了兼容某个阶段的临时用法 2001:no.1-2;2002:no.1-12
             for (int i = 0; i < no_parts.Length; i++)
             {
                 string strPart = no_parts[i].Trim();
@@ -181,7 +167,7 @@ namespace dp2Circulation
 
             string strYearString = "";
             string strNoString = "";
-            string strVolumnString = "";
+            string strVolumeString = "";
             string strZongString = "";
 
             List<string> notdef_segments = new List<string>();
@@ -197,7 +183,7 @@ namespace dp2Circulation
                 else if (strSegment.IndexOf("no.") != -1)
                     strNoString = strSegment;
                 else if (strSegment.IndexOf("v.") != -1)
-                    strVolumnString = strSegment;
+                    strVolumeString = strSegment;
                 else if (strSegment.IndexOf("总.") != -1)
                     strZongString = strSegment;
                 else
@@ -209,7 +195,7 @@ namespace dp2Circulation
             // 2012/4/25
             // 当年期号序列很重要，如果缺了，光有总期号和卷号是不行的
             if (string.IsNullOrEmpty(strNoString) == true
-                && (string.IsNullOrEmpty(strZongString) == false || string.IsNullOrEmpty(strVolumnString) == false))
+                && (string.IsNullOrEmpty(strZongString) == false || string.IsNullOrEmpty(strVolumeString) == false))
             {
                 strError = "当年期号序列不能省却。'" + strText + "'";
                 if (notdef_segments.Count > 0)
@@ -268,22 +254,22 @@ namespace dp2Circulation
             }
 
             // 去掉"v."部分
-            if (StringUtil.HasHead(strVolumnString, "v.") == true)
+            if (StringUtil.HasHead(strVolumeString, "v.") == true)
             {
-                strVolumnString = strVolumnString.Substring(2).Trim();
+                strVolumeString = strVolumeString.Substring(2).Trim();
             }
 
-            if (String.IsNullOrEmpty(strVolumnString) == false)
+            if (String.IsNullOrEmpty(strVolumeString) == false)
             {
                 List<string> volumes = null;
 
                 try
                 {
-                    volumes = ExpandSequence(strVolumnString);
+                    volumes = ExpandSequence(strVolumeString);
                 }
                 catch (Exception ex)
                 {
-                    strError = "v.序列 '" + strVolumnString + "' 格式错误:" + ex.Message;
+                    strError = "v.序列 '" + strVolumeString + "' 格式错误:" + ex.Message;
                     return -1;
                 }
 
@@ -293,11 +279,11 @@ namespace dp2Circulation
                     VolumeInfo info = infos[i];
                     if (i < volumes.Count)
                     {
-                        info.Volumn = volumes[i];
-                        strLastValue = info.Volumn; // 记忆最后一个
+                        info.Volume = volumes[i];
+                        strLastValue = info.Volume; // 记忆最后一个
                     }
                     else
-                        info.Volumn = strLastValue; // 沿用最后一个
+                        info.Volume = strLastValue; // 沿用最后一个
                 }
             }
 
@@ -316,7 +302,7 @@ namespace dp2Circulation
         public static List<string> ExpandSequence(string strText)
         {
             List<string> results = new List<string>();
-            string[] parts = strText.Split(new char[] { ',','，' });
+            string[] parts = strText.Split(new char[] { ',', '，' });
             for (int i = 0; i < parts.Length; i++)
             {
                 string strPart = parts[i];
@@ -376,7 +362,7 @@ namespace dp2Circulation
             strZong = "";
             strVolume = "";
 
-            string[] segments = strVolumeString.Split(new char[] { ';', ',', '=','；','，','＝' });    // ',','='为2010/2/24新增
+            string[] segments = strVolumeString.Split(new char[] { ';', ',', '=', '；', '，', '＝' });    // ',','='为2010/2/24新增
             for (int i = 0; i < segments.Length; i++)
             {
                 string strSegment = segments[i].Trim();
@@ -397,7 +383,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            if (strIssueNo.IndexOfAny(new char[] {'-','*',',',';','=','?','－','＊','，','；','＝','？' }) != -1)
+            if (strIssueNo.IndexOfAny(new char[] { '-', '*', ',', ';', '=', '?', '－', '＊', '，', '；', '＝', '？' }) != -1)
             {
                 strError = strName + "字符串中不能包含下列字符: '-','*',',',';','=','?'";
                 return -1;

@@ -1,0 +1,17 @@
+<root>
+  <title>没有被阅读过的图书, 按图书种，馆藏地\r%location%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="书目记录路径" align="left" sum="no" class="bibliorecpath" eval="" />
+    <column name="书目摘要" align="left" sum="no" class="bibliosummary" eval="" />
+    <column name="册数" align="right" sum="yes" class="items" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>9202 馆藏地点的没有被阅读的图书种</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>month</createFrequency>
+  <property fresh="false" />
+</root>

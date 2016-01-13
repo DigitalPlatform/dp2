@@ -137,6 +137,10 @@ namespace dp2Circulation
             {
                 strText = GetOperText("盘点");
             }
+            else if (this.Action == "read")
+            {
+                strText = GetOperText("读过");
+            }
 
             if (string.IsNullOrEmpty(this.ErrorInfo) == false)
                 strText += "\r\n===\r\n" + this.ErrorInfo;
@@ -198,7 +202,6 @@ namespace dp2Circulation
                 return this.ReaderBarcode + " " + this.ReaderName + " " + strOperName + " " + this.ItemBarcode + strSummary;
             else
                 return strOperName + " " + this.ItemBarcode + strSummary;
-
         }
 
         // 任务是否完成
@@ -337,7 +340,8 @@ namespace dp2Circulation
                             || task.Action == "verify_return"
                             || task.Action == "lost"
                             || task.Action == "verify_lost"
-                            || task.Action == "inventory")
+                            || task.Action == "inventory"
+                            || task.Action == "read")
                         {
                             Return(task);
                         }
@@ -922,6 +926,16 @@ end_time);
 
             if (task.Action == "inventory")
                 strOperText = task.ReaderBarcode + " 盘点 " + task.ItemBarcode;
+            else if (task.Action == "read")
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.68") < 0)
+                {
+                    task.ErrorInfo = "操作未能进行。“读过”功能要求 dp2library 版本在 2.68 或以上";
+                    goto ERROR1;
+                }
+
+                strOperText = task.ReaderBarcode + " 读过 " + task.ItemBarcode;
+            }
             else
                 strOperText = task.ReaderBarcode + " 还 " + task.ItemBarcode;
 
@@ -970,6 +984,16 @@ end_time);
                     goto ERROR1;
                 }
                 strAction = "inventory";
+            }
+            else if (task.Action == "read")
+            {
+                if (string.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strError = "尚未输入读者证条码号";
+                    task.ErrorInfo = strError;
+                    goto ERROR1;
+                }
+                strAction = "read";
             }
             else
             {
@@ -1192,7 +1216,6 @@ end_time);
 
             times.Add(DateTime.Now);
             LogOperTime("return", times, strOperText);
-
             return;
 
         ERROR1:

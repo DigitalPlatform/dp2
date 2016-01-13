@@ -13,7 +13,6 @@ namespace DigitalPlatform
 
     public class LocationCollection : List<Location>
     {
-
         // 解析馆藏地名字字符串
         // 例如“海淀分馆/阅览室”拆分为左右两个部分。“阅览室”会被认为是第二部分；"海淀分馆/"会被人为是第一部分
         public static void ParseLocationName(string strName,
@@ -143,12 +142,12 @@ namespace DigitalPlatform
         public virtual List<string> GetRefIDs()
         {
             List<string> results = new List<string>();
-            foreach(Location location in this)
+            foreach (Location location in this)
             {
                 if (String.IsNullOrEmpty(location.RefID) == true)
                     continue;
 
-                string[] parts = location.RefID.Split(new char [] {'|'});
+                string[] parts = location.RefID.Split(new char[] { '|' });
                 results.AddRange(parts);
             }
 
@@ -240,7 +239,6 @@ namespace DigitalPlatform
                 {
                     strLocationString = strSection.Substring(0, nRet).Trim();
                     string strCount = strSection.Substring(nRet + 1);
-
 
                     nRet = strCount.IndexOf("{");
                     if (nRet != -1)
