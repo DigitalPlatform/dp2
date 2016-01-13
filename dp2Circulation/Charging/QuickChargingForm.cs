@@ -701,6 +701,12 @@ dlg.UiState);
         {
             strError = "";
 
+            if (string.IsNullOrEmpty(strBarcode) == true)
+            {
+                strError = "条码号不应为空";
+                return -1;
+            }
+
             // 2014/5/4
             if (StringUtil.HasHead(strBarcode, "PQR:") == true)
             {
@@ -713,6 +719,13 @@ dlg.UiState);
             {
                 strError = "这是一个测试用的读者证号";
                 return 1;
+            }
+
+            // 2016/1/13
+            if (strBarcode.ToLower().StartsWith("@bibliorecpath:") == true)
+            {
+                strError = "无法确定类型(为兼容“读过”功能)";
+                return -2;
             }
 
             this._barcodeChannel.PrepareSearch("正在验证条码号 " + strBarcode + "...");
@@ -1226,6 +1239,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         // 包含一个以上汉字，或者 ~ 开头的任意文字
         static bool IsName(string strText)
         {
+            if (string.IsNullOrEmpty(strText) == false && strText[0] == '@')
+                return false;
             if (StringUtil.ContainHanzi(strText) == true)
                 return true;
             if (StringUtil.HasHead(strText, "~") == true)
@@ -1442,6 +1457,18 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     || IsName(strText) == true)
                 {
                     WillLoadReaderInfo = true;
+                }
+                else if (func == dp2Circulation.FuncState.Read
+                    && string.IsNullOrEmpty(strText) == false
+                    && strText.ToLower().StartsWith("@bibliorecpath:") == true)
+                {
+                    if (this.WillLoadReaderInfo == true)
+                    {
+                        // TODO: 语音提示
+                        MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                        this.textBox_input.SelectAll();
+                        return;
+                    }
                 }
                 else
                 {
