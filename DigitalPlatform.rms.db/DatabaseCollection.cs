@@ -83,7 +83,7 @@ namespace DigitalPlatform.rms
         }
 
         // 帐户集合指针,用于修改帐户库记录时，刷新当前帐户
-        public UserCollection UserColl 
+        public UserCollection UserColl
         {
             get
             {
@@ -696,7 +696,7 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
             }
-            
+
             if (String.IsNullOrEmpty(strBrowseDefault) == false)
             {
                 XmlDocument dom = new XmlDocument();
@@ -804,7 +804,7 @@ namespace DigitalPlatform.rms
                     if (this.SqlServerType == rms.SqlServerType.Oracle
                         && strSqlDbName.Length > 3)
                     {
-                        strError = "所指定的 SQL 数据库名 '"+strSqlDbName+"' 不应超过3字符";
+                        strError = "所指定的 SQL 数据库名 '" + strSqlDbName + "' 不应超过3字符";
                         return -1;
                     }
                 }
@@ -887,7 +887,7 @@ namespace DigitalPlatform.rms
 
                 // TODO: 这里发生xml片断可能会有小问题，应当用XmlTextWriter来发生?
                 string strDbXml = "<database type='" + strType + "' id='" + strDbID + "' localdir='" + strPureCfgsDir
-                    + "' dbo='"+user.Name+"'>"  // dbo参数为2006/7/4增加
+                    + "' dbo='" + user.Name + "'>"  // dbo参数为2006/7/4增加
                     + "<property>"
                     + strLogicNames
                     + "<datasource>" + strDataSource + "</datasource>"
@@ -1651,7 +1651,7 @@ namespace DigitalPlatform.rms
 
                 if (db.FastAppendTaskCount == 0)
                 {
-                    strError = "对数据库 '"+db.GetCaption("zh-CN")+"' endfastappend 动作的次数多于 beginfastappend 的次数，本次 endfastappend 操作被拒绝";
+                    strError = "对数据库 '" + db.GetCaption("zh-CN") + "' endfastappend 动作的次数多于 beginfastappend 的次数，本次 endfastappend 操作被拒绝";
                     return -1;
                 }
                 db.FastAppendTaskCount--;
@@ -1664,14 +1664,14 @@ namespace DigitalPlatform.rms
                 // 这是因为快速模式中间如果遇到覆盖的情况，当时不方便处理检索点，所以存储下来ID最后处理
                 if (db.RebuildIDs != null && db.RebuildIDs.Count > 0)
                 {
-                        nRet = db.RebuildKeys(
-                            "fastmode", // 不需要 deletekeys，因为每条的过程中已经把旧记录的 keys 都删除过了
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
+                    nRet = db.RebuildKeys(
+                        "fastmode", // 不需要 deletekeys，因为每条的过程中已经把旧记录的 keys 都删除过了
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
-                        // 将所有延迟堆积的行成批写入相关 keys 表
-                        int nKeysCount = nRet;
+                    // 将所有延迟堆积的行成批写入相关 keys 表
+                    int nKeysCount = nRet;
                 }
 
                 // 将所有延迟堆积的行成批写入相关 keys 表
@@ -2036,7 +2036,7 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-#region CopyRecord() 下级函数
+        #region CopyRecord() 下级函数
 
         // 判断一个路径是否为追加方式的路径
         bool IsAppendPath(string strResPath)
@@ -2125,7 +2125,7 @@ namespace DigitalPlatform.rms
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
             nsmgr.AddNamespace("dprms", DpNs.dprms);
-            XmlNode file = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='"+strID+"']", nsmgr);
+            XmlNode file = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='" + strID + "']", nsmgr);
             if (file != null)
                 return file.OuterXml;
             return null;
@@ -2219,7 +2219,7 @@ namespace DigitalPlatform.rms
         // 获得修改后的 id 字符串
         static string GetChangedID(List<ChangeID> change_list, string strID)
         {
-            foreach(ChangeID changed in change_list)
+            foreach (ChangeID changed in change_list)
             {
                 if (changed.OldID == strID)
                     return changed.NewID;
@@ -2228,7 +2228,7 @@ namespace DigitalPlatform.rms
             return strID;
         }
 
-#endregion
+        #endregion
 
         // 拷贝一条源记录到目标记录，要求对源记录有读权限，对目标记录有写权限
         // 关键点是锁的问题
@@ -2376,7 +2376,7 @@ namespace DigitalPlatform.rms
                     existing_ids = GetIdList(existing_dom);
                 }
             }
-            
+
             XmlDocument source_dom = new XmlDocument(); // 源记录的 XMLDOM
             {
                 byte[] baPreamble;
@@ -3329,9 +3329,9 @@ namespace DigitalPlatform.rms
                 if (bRecordPath == false)
                 {
                     // 检查路径中是否有非法字符
-                    if (strResPath.IndexOfAny(new char[] {'?','*','？','＊'}) != -1)
+                    if (strResPath.IndexOfAny(new char[] { '?', '*', '？', '＊' }) != -1)
                     {
-                        strError = "路径 '"+strResPath+"' 格式不合法。表示目录和文件资源的路径字符串中不能包含符号 ? *";
+                        strError = "路径 '" + strResPath + "' 格式不合法。表示目录和文件资源的路径字符串中不能包含符号 ? *";
                         return -1;
                     }
 
@@ -3944,7 +3944,7 @@ namespace DigitalPlatform.rms
                      strRanges,
                      lTotalLength,
                      baSource,
-                     // streamSource,
+                    // streamSource,
                      strMetadata,
                      strStyle,
                      baInputTimestamp,
@@ -4069,7 +4069,7 @@ namespace DigitalPlatform.rms
             }
             else
             {
-                using(FileStream s = File.Create(strFilePath))
+                using (FileStream s = File.Create(strFilePath))
                 {
 
                 }
@@ -4287,9 +4287,9 @@ namespace DigitalPlatform.rms
             // 5.metadata的长度为目标文件的总长度
             if (bFull == true)
             {
-                using(Stream s = new FileStream(strNewFilePath,
+                using (Stream s = new FileStream(strNewFilePath,
                     FileMode.OpenOrCreate))
-                { 
+                {
 
                     s.SetLength(lTotalLength);
                 }
@@ -4595,12 +4595,12 @@ namespace DigitalPlatform.rms
                 long lRet = 0;
 
                 PathInfo info = null;
-                        // 解析资源路径
-        // return:
-        //      -1  一般性错误
-        //		-5	未找到数据库
-        //		-7	路径不合法
-        //      0   成功
+                // 解析资源路径
+                // return:
+                //      -1  一般性错误
+                //		-5	未找到数据库
+                //		-7	路径不合法
+                //      0   成功
                 int nRet = ParsePath(strResPath,
     out info,
     out strError);
@@ -4608,7 +4608,7 @@ namespace DigitalPlatform.rms
                     return nRet;
                 if (info.IsConfigFilePath == true)
                 {
-                                        //当配置事项处理
+                    //当配置事项处理
                     // return:
                     //		-1  一般性错误
                     //		-4	未找到路径对应的对象
@@ -4730,75 +4730,75 @@ namespace DigitalPlatform.rms
                     }
 
 #endif
-                    ///////////////////////////////////
-                ///开始做事情
-                //////////////////////////////////////////
+            ///////////////////////////////////
+            ///开始做事情
+            //////////////////////////////////////////
 
                 DOGET:
-                    // 检查对数据库中记录的权限
-                    string strExistRights = "";
-                    bool bHasRight = user.HasRights(info.DbName + "/" + info.RecordID,
-                        ResType.Record,
-                        "read",
-                        out strExistRights);
-                    if (bHasRight == false)
-                    {
-                        strError = "您的帐户名为'" + user.Name + "'，对'" + info.DbName + "'库没有'读记录(read)'权限，目前的权限值为'" + strExistRights + "'。";
-                        return -6;
-                    }
+                // 检查对数据库中记录的权限
+                string strExistRights = "";
+                bool bHasRight = user.HasRights(info.DbName + "/" + info.RecordID,
+                    ResType.Record,
+                    "read",
+                    out strExistRights);
+                if (bHasRight == false)
+                {
+                    strError = "您的帐户名为'" + user.Name + "'，对'" + info.DbName + "'库没有'读记录(read)'权限，目前的权限值为'" + strExistRights + "'。";
+                    return -6;
+                }
 
-                    if (info.IsObjectPath == true)  // 对象
-                    {
-                        //		-1  出错
-                        //		-4  记录不存在
-                        //		>=0 资源总长度
-                        lRet = info.Database.GetObject(info.RecordID,
-                            info.ObjectID,
-                            lStart,
-                            nLength,
-                            nMaxLength,
-                            strStyle,
-                            out baData,
-                            out strMetadata,
-                            out baOutputTimestamp,
-                            out strError);
+                if (info.IsObjectPath == true)  // 对象
+                {
+                    //		-1  出错
+                    //		-4  记录不存在
+                    //		>=0 资源总长度
+                    lRet = info.Database.GetObject(info.RecordID,
+                        info.ObjectID,
+                        lStart,
+                        nLength,
+                        nMaxLength,
+                        strStyle,
+                        out baData,
+                        out strMetadata,
+                        out baOutputTimestamp,
+                        out strError);
 
-                        if (StringUtil.IsInList("outputpath", strStyle) == true)
-                        {
-                            strOutputResPath = info.DbName + "/" + info.RecordID + "/object/" + info.ObjectID;
-                        }
-                    }
-                    else
+                    if (StringUtil.IsInList("outputpath", strStyle) == true)
                     {
-                        string strOutputID;
-                        // return:
-                        //		-1  出错
-                        //		-4  未找到记录
-                        //      -10 记录局部未找到
-                        //		>=0 资源总长度
-                        //      nAdditionError -50 有一个以上下级资源记录不存在
-                        lRet = info.Database.GetXml(info.RecordID,
-                            info.XPath,
-                            lStart,
-                            nLength,
-                            nMaxLength,
-                            strStyle,
-                            out baData,
-                            out strMetadata,
-                            out strOutputID,
-                            out baOutputTimestamp,
-                            true,
-                            out nAdditionError,
-                            out strError);
-                        if (StringUtil.IsInList("outputpath", strStyle) == true)
-                        {
-                            // strRecordID = strOutputID;
-                            if (string.IsNullOrEmpty(info.XPath) == true)
-                                strOutputResPath = info.DbName + "/" + strOutputID;
-                            else
-                                strOutputResPath = info.DbName + "/" + strOutputID + "/xpath/" + info.XPath;
-                        }
+                        strOutputResPath = info.DbName + "/" + info.RecordID + "/object/" + info.ObjectID;
                     }
+                }
+                else
+                {
+                    string strOutputID;
+                    // return:
+                    //		-1  出错
+                    //		-4  未找到记录
+                    //      -10 记录局部未找到
+                    //		>=0 资源总长度
+                    //      nAdditionError -50 有一个以上下级资源记录不存在
+                    lRet = info.Database.GetXml(info.RecordID,
+                        info.XPath,
+                        lStart,
+                        nLength,
+                        nMaxLength,
+                        strStyle,
+                        out baData,
+                        out strMetadata,
+                        out strOutputID,
+                        out baOutputTimestamp,
+                        true,
+                        out nAdditionError,
+                        out strError);
+                    if (StringUtil.IsInList("outputpath", strStyle) == true)
+                    {
+                        // strRecordID = strOutputID;
+                        if (string.IsNullOrEmpty(info.XPath) == true)
+                            strOutputResPath = info.DbName + "/" + strOutputID;
+                        else
+                            strOutputResPath = info.DbName + "/" + strOutputID + "/xpath/" + info.XPath;
+                    }
+                }
 
                 return lRet;
             }
@@ -5017,9 +5017,9 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                using(FileStream s = new FileStream(strFilePath,
+                using (FileStream s = new FileStream(strFilePath,
                     FileMode.Open))
-                { 
+                {
                     destBuffer = new byte[lOutputLength];
                     s.Seek(lStart, SeekOrigin.Begin);
                     s.Read(destBuffer,
@@ -5317,7 +5317,7 @@ namespace DigitalPlatform.rms
                     return -1;
                     // 也可能是数据库对象
                 }
-                
+
                 {
 
                     string strPath = strResPath;
@@ -5814,7 +5814,7 @@ namespace DigitalPlatform.rms
                     if (StringUtil.IsInList("alllang", strStyle) == true)
                     {
                         List<string> results = db.GetAllLangCaptionSafety();
-                        string [] names = new string[results.Count];
+                        string[] names = new string[results.Count];
                         results.CopyTo(names);
                         resInfoItem.Names = names;
                     }
@@ -5984,7 +5984,7 @@ namespace DigitalPlatform.rms
             return this.GetDatabaseSafety(path.Name);
         }
 
-                // 从所有帐户库的所有表中查找帐户
+        // 从所有帐户库的所有表中查找帐户
         // parameter
         //		strUserName 用户名
         //		resultSet   结果集,用于存放查找到的用户
@@ -6258,7 +6258,7 @@ ChannelIdleEventArgs e);
                 else if (m_command is OracleCommand)
                     strConnectionName = ((OracleCommand)m_command).Connection.GetHashCode().ToString();
 
-                this.ErrorString = "检索线程(2): " + ex.Message + "; connection hashcode='"+strConnectionName+"'";
+                this.ErrorString = "检索线程(2): " + ex.Message + "; connection hashcode='" + strConnectionName + "'";
             }
 			finally  // 一定要返回信号
             {
@@ -6277,17 +6277,17 @@ ChannelIdleEventArgs e);
     || this.Canceled == false)
                 return;
 
-                if (m_command is SqlCommand)
-                {
-                    ((SqlCommand)m_command).Dispose();
-                    // ((SqlCommand)m_command).Connection.Close();
-                }
-                else if (m_command is SQLiteCommand)
-                    ((SQLiteCommand)m_command).Dispose();
-                else if (m_command is MySqlCommand)
-                    ((MySqlCommand)m_command).Dispose();
-                else if (m_command is OracleCommand)
-                    ((OracleCommand)m_command).Dispose();
+            if (m_command is SqlCommand)
+            {
+                ((SqlCommand)m_command).Dispose();
+                // ((SqlCommand)m_command).Connection.Close();
+            }
+            else if (m_command is SQLiteCommand)
+                ((SQLiteCommand)m_command).Dispose();
+            else if (m_command is MySqlCommand)
+                ((MySqlCommand)m_command).Dispose();
+            else if (m_command is OracleCommand)
+                ((OracleCommand)m_command).Dispose();
         }
 
         public void CloseConnection()

@@ -42,6 +42,8 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
+        int _fieldCount = -1;
+
         //
         // 摘要:
         //     Returns the number of columns in the current resultset
@@ -52,8 +54,14 @@ namespace DigitalPlatform.dp2.Statis
                 if (this.Table.Count == 0)
                     return 0;
 
+#if NO
                 Line line = this.Table[0];
                 return line.Count + 1;    // key 也是一列
+#endif
+                if (_fieldCount == -1)
+                    _fieldCount = this.Table.GetMaxColumnCount();
+
+                return _fieldCount + 1;
             }
         }
 
@@ -85,7 +93,7 @@ namespace DigitalPlatform.dp2.Statis
                 if (i == 0)
                     return this.CurrentLine.strKey;
 
-                return this.CurrentLine.GetObject(i-1);
+                return this.CurrentLine.GetObject(i - 1);
             }
         }
         //
@@ -162,7 +170,7 @@ namespace DigitalPlatform.dp2.Statis
         {
             if (this._lineIndex >= this.Table.Count - 1)
                 return false;
-            this._lineIndex ++;
+            this._lineIndex++;
             this.CurrentLine = this.Table[this._lineIndex];
             return true;
         }

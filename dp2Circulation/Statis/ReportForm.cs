@@ -11373,7 +11373,6 @@ MessageBoxDefaultButton.Button1);
                                     current_type = class_table[index];
                                 }
 
-
                                 // 这里稍微特殊一点，循环要写入多个输出文件
                                 if (string.IsNullOrEmpty(strOutputFileName) == true)
                                     strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");

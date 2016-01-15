@@ -7,21 +7,23 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Net;
+using System.Xml;
+using System.Threading;
+using System.Diagnostics;
+using System.Collections;
+using System.Xml.Xsl;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 
 using AmazonProductAdvtApi;
-using System.Net;
-using System.Xml;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform;
-using System.Threading;
-using System.Diagnostics;
-using System.Collections;
-using System.Xml.Xsl;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CirculationClient;
+
 using dp2Secure;
 
 namespace dp2Catalog
@@ -46,7 +48,6 @@ namespace dp2Catalog
         Exception m_exception = null;
         bool m_bErrorBox = true;
         bool m_bSetProgress = true;
-
 
         DigitalPlatform.Stop stop = null;
         bool m_bInSearching = false;
@@ -281,7 +282,7 @@ namespace dp2Catalog
             strPath = curItem.Text;
             ItemInfo info = (ItemInfo)curItem.Tag;
 
-            if (bForceFullElementSet == true && info.EelementSet != "F")
+            if (bForceFullElementSet == true && info.ElementSet != "F")
             {
                 // 需要重新装载这一条记录
                 List<ListViewItem> items = new List<ListViewItem>();
@@ -344,7 +345,7 @@ MessageBoxDefaultButton.Button1);
             record.m_baRecord = Encoding.UTF8.GetBytes(info.Xml);
             record.m_strDBName = m_searchParameters != null ? m_searchParameters["SearchIndex"] : "";
             record.m_strSyntaxOID = info.PreferSyntaxOID; // ???
-            record.m_strElementSetName = info.EelementSet;    // B F
+            record.m_strElementSetName = info.ElementSet;    // B F
 
             strSavePath = this.CurrentProtocol + ":" + strPath;
 
@@ -1628,7 +1629,6 @@ this.CurrentServer);
                 return -1;
             }
 
-
             return 0;
         }
 
@@ -1826,7 +1826,7 @@ MessageBoxDefaultButton.Button1);
 
                 ItemInfo info = new ItemInfo();
                 info.Xml = item.OuterXml;
-                info.EelementSet = strElementSet;
+                info.ElementSet = strElementSet;
 
                 ListViewItem listitem = new ListViewItem();
                 if (this.m_reloadInfo != null)
@@ -1858,7 +1858,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 listitem.Tag = info;
 
-                if (info.EelementSet == "B")
+                if (info.ElementSet == "B")
                     listitem.ImageIndex = BROWSE_TYPE_BRIEF;
                 else
                     listitem.ImageIndex = BROWSE_TYPE_FULL;
@@ -1911,7 +1911,7 @@ MessageBoxDefaultButton.Button1);
         public class ItemInfo
         {
             public string Xml = ""; // XML 记录
-            public string EelementSet = ""; // "B" "F"
+            public string ElementSet = ""; // "B" "F"
             public string PreferSyntaxOID = ""; // 优先要转换成的 MARC 格式
         }
 
@@ -2460,7 +2460,6 @@ value);
             menuItem.Click += new EventHandler(menuItem_exportBrowseToExcel_Click);
             contextMenu.Items.Add(menuItem);
 
-
             contextMenu.Show(this.listView_browse, e.Location);
         }
 
@@ -2600,7 +2599,7 @@ value);
                     continue;
                 }
 
-                if (info.EelementSet == "B")
+                if (info.ElementSet == "B")
                     return true;
             }
 
@@ -2957,7 +2956,6 @@ MessageBoxDefaultButton.Button1);
             e.Encoding = encoding;
         }
 
-
         public void menuItem_saveOriginRecordToIso2709_Click(object sender,
     EventArgs e)
         {
@@ -2985,7 +2983,6 @@ MessageBoxDefaultButton.Button1);
                 if (result == System.Windows.Forms.DialogResult.Yes)
                     bForceFull = true;
             }
-
 
             Encoding preferredEncoding = Encoding.UTF8;
 
@@ -3222,7 +3219,6 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         void MenuItem_selectAll_Click(object sender, EventArgs e)
         {

@@ -2577,8 +2577,9 @@ line.ReturningTime);
             line.ItemRecPath = strItemRecPath;
             line.ItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "barcode");
-            line.Location = DomUtil.GetElementText(dom.DocumentElement,
-                "location");    // 是否要变为纯净的地点信息，即不包含 #reserve 之类
+            line.Location = StringUtil.GetPureLocationString(
+                DomUtil.GetElementText(dom.DocumentElement,
+                "location"));    // 要变为纯净的地点信息，即不包含 #reservation 之类
             line.AccessNo = DomUtil.GetElementText(dom.DocumentElement,
                 "accessNo");
             line.BiblioRecPath = strBiblioRecPath;

@@ -247,7 +247,7 @@ var data = [
             }
 
             // .rml 修改为 .html
-            if (string.Compare(Path.GetExtension(strLink),".rml", true) == 0)
+            if (string.Compare(Path.GetExtension(strLink), ".rml", true) == 0)
                 strLink = Path.Combine(Path.GetDirectoryName(strLink), Path.GetFileNameWithoutExtension(strLink) + ".html").Replace("\\", "/");
 
             if (parent.Name == "report")
@@ -567,24 +567,34 @@ DIV.createtime
             strFileName = strTempFileName;
         }
 
-        using (Stream stream = File.Open(strFileName,
-            FileMode.Open,
-            FileAccess.ReadWrite,
-            FileShare.ReadWrite))
+        try
         {
-            this.Response.AddHeader("Content-Length", stream.Length.ToString());
+            using (Stream stream = File.Open(strFileName,
+                FileMode.Open,
+                FileAccess.ReadWrite,
+                FileShare.ReadWrite))
+            {
+                this.Response.AddHeader("Content-Length", stream.Length.ToString());
 
-            FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
+                FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
 
-            stream.Seek(0, SeekOrigin.Begin);
+                stream.Seek(0, SeekOrigin.Begin);
 
-            StreamUtil.DumpStream(stream, this.Response.OutputStream,
-                flushdelegate);
+                StreamUtil.DumpStream(stream, this.Response.OutputStream,
+                    flushdelegate);
+            }
         }
-
-        if (string.IsNullOrEmpty(strTempFileName) == false)
+        catch (System.Web.HttpException)
         {
-            File.Delete(strTempFileName);
+            // 2016/1/14
+            // 因为 Client 端切断通讯
+        }
+        finally
+        {
+            if (string.IsNullOrEmpty(strTempFileName) == false)
+            {
+                File.Delete(strTempFileName);
+            }
         }
 
         this.Response.OutputStream.Flush();
@@ -607,7 +617,7 @@ DIV.createtime
         if (string.IsNullOrEmpty(strPath) == true)
             return "";
         strPath = strPath.Replace("\\", "/");
-        string[] parts = strPath.Split(new char[] {'/'});
+        string[] parts = strPath.Split(new char[] { '/' });
         if (parts.Length >= 1)
             return parts[0];
 
@@ -696,7 +706,7 @@ DIV.createtime
                 ref paths);
         }
 
-        foreach(string line in paths)
+        foreach (string line in paths)
         {
             this.Response.Write("<p>" + line + "</p>");
         }
@@ -959,7 +969,7 @@ DIV.createtime
                 text);
         }
 
-            StringBuilder text1 = new StringBuilder(4096);
+        StringBuilder text1 = new StringBuilder(4096);
         {
             // 没有 index.xml，直接看目录结构
             ListSubDir(
@@ -1041,7 +1051,7 @@ DIV.createtime
                     )
                 {
                 }
-                else 
+                else
                     continue;
             }
             else

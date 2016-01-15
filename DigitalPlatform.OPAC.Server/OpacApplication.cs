@@ -689,7 +689,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
-                    app.WriteErrorLog("opac service 成功启动。版本: " 
+                    app.WriteErrorLog("opac service 成功启动。版本: "
                         // + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString()
                         + ClientVersion
                         );
@@ -4152,7 +4152,6 @@ out string strError)
                 bDisplayAllIP,
                 out info,
                 out strError);
-
         }
 
         // parameters:
