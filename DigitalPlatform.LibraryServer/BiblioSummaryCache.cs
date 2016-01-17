@@ -1,12 +1,9 @@
-﻿using MongoDB.Bson;
+﻿using System.Runtime.Caching;
+
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Caching;
-using System.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
