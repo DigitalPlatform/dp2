@@ -102,6 +102,12 @@ true);
 "default_server",
 "中国\twebservices.amazon.cn");
 
+                // 创建 856 字段
+                this.checkBox_amazon_create856.Checked = MainForm.AppInfo.GetBoolean(
+"amazon_search_form",
+"create_856",
+true);
+
                 // ui
                 // 停靠
                 this.comboBox_ui_fixedPanelDock.Text = this.MainForm.panel_fixed.Dock.ToString();
@@ -133,7 +139,7 @@ false);
                 this.textBox_server_pinyin_gcatUrl.Text =
                     MainForm.AppInfo.GetString("config",
                     "pinyin_server_url",
-                    "http://dp2003.com/gcatserver/"); 
+                    "http://dp2003.com/gcatserver/");
 
 
                 // *** 全局
@@ -265,6 +271,12 @@ this.checkBox_amazon_alwaysUseFullElementSet.Checked);
 "default_server",
 this.tabComboBox_amazon_defaultServer.Text);
 
+            // 创建 856 字段
+            MainForm.AppInfo.SetBoolean(
+"amazon_search_form",
+"create_856",
+this.checkBox_amazon_create856.Checked);
+
             // ui
             MainForm.AppInfo.SetBoolean(
                 "MainForm",
@@ -308,7 +320,7 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
         {
             // 还原中途曾经被改动过的
             if (this.comboBox_dp2SearchForm_layout.Text != this.m_strOldDp2searchformLayout)
-                        this.FireParamChanged(
+                this.FireParamChanged(
 "dp2searchform",
 "layout",
 (object)this.m_strOldDp2searchformLayout);

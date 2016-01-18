@@ -152,8 +152,8 @@ namespace DigitalPlatform.AmazonInterface
                 return -1;
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-//MY_AWS_ACCESS_KEY_ID,
-//MY_AWS_SECRET_KEY,
+                //MY_AWS_ACCESS_KEY_ID,
+                //MY_AWS_SECRET_KEY,
 strServerUrl);
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
@@ -190,8 +190,8 @@ strServerUrl);
             strUrl = "";
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-//MY_AWS_ACCESS_KEY_ID,
-//MY_AWS_SECRET_KEY,
+                //MY_AWS_ACCESS_KEY_ID,
+                //MY_AWS_SECRET_KEY,
 strServerUrl);
 
             if (this.m_nCurrentPageNo == -1)
@@ -408,7 +408,7 @@ strServerUrl);
                     if (this.Idle != null)
                     {
                         this.Idle(this, new EventArgs());
-                    } 
+                    }
                     Thread.Sleep(10);
                 }
             }
@@ -1051,16 +1051,21 @@ nsmgr,
                 string strAmount = amount.InnerText.Trim();
                 if (string.IsNullOrEmpty(strAmount) == false)
                 {
-                    long v = 0;
-                    if (long.TryParse(strAmount, out v) == false)
+                    if (code.InnerText.Trim() == "CNY")
                     {
-                        strText += " 数字 '" + strAmount + "' 格式错误";
+                        long v = 0;
+                        if (long.TryParse(strAmount, out v) == false)
+                        {
+                            strText += " 数字 '" + strAmount + "' 格式错误";
+                        }
+                        else
+                        {
+                            strAmount = (((decimal)v) / 100).ToString();
+                            strText += strAmount;
+                        }
                     }
                     else
-                    {
-                        strAmount = (((decimal)v) / 100).ToString();
                         strText += strAmount;
-                    }
                 }
             }
             return strText;
@@ -1101,7 +1106,7 @@ nsmgr,
             creator.Name = element.InnerText.Trim();
             creator.Role = strRole;
 
-            return  creator;
+            return creator;
         }
 
         // 获得尺寸字段的值
@@ -1139,6 +1144,8 @@ nsmgr,
 
                     if (strUnits == "inches")
                         return Math.Ceiling(((double)v) * (double)2.54).ToString() + "cm";
+                    if (strUnits == "hundredths-inches")
+                        return Math.Ceiling(((double)v / (double)100) * (double)2.54).ToString() + "cm";
 
                     return strValue + strUnits;
                 }
@@ -1277,7 +1284,10 @@ nsmgr,
 
 
         // 将亚马逊 XML 格式转换为 UNIMARC 格式
+        // parameters:
+        //      strStyle    转换风格。！856 表示不包含 856 字段
         public static int AmazonXmlToUNIMARC(XmlNode root,
+            string strStyle,
             out string strMARC,
             out string strError)
         {
@@ -1289,8 +1299,14 @@ nsmgr,
 
             MarcRecord record = new MarcRecord();
 
+            // *** 001
+            string strASIN = DomUtil.GetElementText(root, "amazon:ASIN", nsmgr);
+            if (string.IsNullOrEmpty(strASIN) == false)
+                record.ChildNodes.add(new MarcField("001", "ASIN:" + strASIN));
+
             // *** 010
             // ISBN
+#if NO
             List<string> isbns = GetFieldValues(root,
                 nsmgr,
                 "amazon:ItemAttributes/amazon:ISBN");
@@ -1298,6 +1314,19 @@ nsmgr,
                 isbns = GetFieldValues(root,
                 nsmgr,
                 "amazon:ItemAttributes/amazon:EAN");
+#endif
+            List<string> isbns = GetFieldValues(root,
+    nsmgr,
+    "amazon:ItemAttributes/amazon:EAN");
+            if (isbns.Count == 0)
+                isbns = GetFieldValues(root,
+                nsmgr,
+                "amazon:ItemAttributes/amazon:ISBN");
+
+            // Binding
+            List<string> bindings = GetFieldValues(root,
+                nsmgr,
+                "amazon:ItemAttributes/amazon:Binding");
 
             // 价格
             List<string> prices = GetPriceValues(root,
@@ -1307,10 +1336,13 @@ nsmgr,
             for (int i = 0; i < Math.Max(isbns.Count, prices.Count); i++)
             {
                 string isbn = "";
+                string binding = "";
                 string price = "";
 
                 if (i < isbns.Count)
                     isbn = isbns[i];
+                if (i < bindings.Count)
+                    binding = bindings[i];
                 if (i < prices.Count)
                     price = prices[i];
                 MarcField field = new MarcField("010", "  ");
@@ -1318,6 +1350,9 @@ nsmgr,
 
                 if (string.IsNullOrEmpty(isbn) == false)
                     field.ChildNodes.add(new MarcSubfield("a", isbn));
+                if (string.IsNullOrEmpty(binding) == false
+                    && binding != "平装")
+                    field.ChildNodes.add(new MarcSubfield("b", binding));
                 if (string.IsNullOrEmpty(price) == false)
                     field.ChildNodes.add(new MarcSubfield("d", price));
             }
@@ -1454,7 +1489,7 @@ nsmgr,
                     field.ChildNodes.add(new MarcSubfield("4", author.Role));
             }
 
-            foreach(Creator creator in creators)
+            foreach (Creator creator in creators)
             {
                 if (IndexOf(authors, creator.Name) != -1)
                     continue;
@@ -1466,28 +1501,31 @@ nsmgr,
                     field.ChildNodes.add(new MarcSubfield("4", creator.Role));
             }
 
-            // 856
-            string[] names = new string[] { 
+            if (StringUtil.IsInList("!856", strStyle) == false)
+            {
+                // 856
+                string[] names = new string[] { 
                 "SmallImage",
                 "MediumImage",
                 "LargeImage"};
-            foreach (string name in names)
-            {
-                List<ImageInfo> small_images = GetImageValues(root,
-    nsmgr,
-    "amazon:" + name);
-                foreach (ImageInfo info in small_images)
+                foreach (string name in names)
                 {
-                    MarcField field = new MarcField("856", "4 ");
-                    record.ChildNodes.add(field);
+                    List<ImageInfo> small_images = GetImageValues(root,
+        nsmgr,
+        "amazon:" + name);
+                    foreach (ImageInfo info in small_images)
+                    {
+                        MarcField field = new MarcField("856", "4 ");
+                        record.ChildNodes.add(field);
 
-                    field.ChildNodes.add(new MarcSubfield("3", "Cover image"));
+                        field.ChildNodes.add(new MarcSubfield("3", "Cover image"));
 
-                    field.ChildNodes.add(new MarcSubfield("u", info.Url));
-                    field.ChildNodes.add(new MarcSubfield("q", GetMime(info.Url)));
+                        field.ChildNodes.add(new MarcSubfield("u", info.Url));
+                        field.ChildNodes.add(new MarcSubfield("q", GetMime(info.Url)));
 
-                    field.ChildNodes.add(new MarcSubfield("x", "type:FrontCover." + name + ";size:" + info.Size + ";source:Amazon:"));
-                    //  + dlg.SelectedItem.ASIN
+                        field.ChildNodes.add(new MarcSubfield("x", "type:FrontCover." + name + ";size:" + info.Size + ";source:Amazon:"));
+                        //  + dlg.SelectedItem.ASIN
+                    }
                 }
             }
 
@@ -1498,7 +1536,7 @@ nsmgr,
         static int IndexOf(List<Creator> list, string strName)
         {
             int i = 0;
-            foreach(Creator creator in list)
+            foreach (Creator creator in list)
             {
                 if (creator.Name == strName)
                     return i;
