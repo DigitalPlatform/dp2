@@ -4056,7 +4056,7 @@ true);
             try
             {
                 Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " 的局部 ...");
-                channel.Timeout = new TimeSpan(0, 0, 5);
+                channel.Timeout = new TimeSpan(0, 0, 10);
                 long lRet = channel.GetBiblioInfo(
                     null,   // Progress.State == 0 ? Progress : null,
                     strBiblioRecPath,
@@ -4190,6 +4190,7 @@ true);
             string strHtml = "";
 
             LibraryChannel channel = this.GetChannel();
+            channel.Timeout = new TimeSpan(0, 5, 0);    // 保存大量册记录时可能会耗时长一点
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在保存记录 ...");

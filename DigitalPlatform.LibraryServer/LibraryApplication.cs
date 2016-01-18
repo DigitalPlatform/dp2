@@ -9228,6 +9228,7 @@ out strError);
 
                     strRights = temp_account.RightsOrigin;
                     strOutputUserName = temp_account.UserID;
+                    strLibraryCode = temp_account.AccountLibraryCode;   // 2016/1/17
                     return 1;
                 }
             }
