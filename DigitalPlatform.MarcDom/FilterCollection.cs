@@ -1,21 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
-
-using DigitalPlatform.IO;
 
 namespace DigitalPlatform.MarcDom
 {
+    /// <summary>
+    /// FilterDocument 存储容器。
+    /// 根据名字来管理 FilterDocument 对象
+    /// </summary>
     public class FilterCollection
     {
-        Hashtable table = new Hashtable();
+        Hashtable _table = new Hashtable();
 
         public bool IgnoreCase = true;
 
-        public ReaderWriterLock m_lock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5秒
+        ReaderWriterLock _lock = new ReaderWriterLock();
+        static int _nLockTimeout = 5000;	// 5000=5秒
 
         public int Max = 100;   // 每个List中对象数上限
 
@@ -26,67 +28,61 @@ namespace DigitalPlatform.MarcDom
 
             FilterList filterlist = null;
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this._lock.AcquireWriterLock(_nLockTimeout);
             try
             {
+                // 查看一个名字是否有对应的 FilterList 对象了
+                filterlist = (FilterList)_table[strName];
 
-                filterlist = (FilterList)table[strName];
-
-
+                // 如果还没有，则创建一个新对象
                 if (filterlist == null)
                 {
                     filterlist = new FilterList();
                     filterlist.Container = this;
-                    table[strName] = filterlist;
+                    _table[strName] = filterlist;
                 }
-
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                this._lock.ReleaseWriterLock();
             }
 
+            // 从 FilterList 对象中获取一个 FilterDocument 对象。
+            // 注： FilterList 对象用于管理多个 FilterDocument 对象，其中被征用的暂时就不能被使用了，需要创建新对象
             FilterDocument filter = filterlist.GetFilter();
             return filter;
         }
 
-        // 2007/1/8
         public void Clear()
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this._lock.AcquireWriterLock(_nLockTimeout);
             try
             {
-                this.table.Clear();
+                this._table.Clear();
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                this._lock.ReleaseWriterLock();
             }
         }
 
-
-        // 从集合中清除特定名字的filterlist
+        // 从集合中清除特定名字的 FilterList 对象
         public void ClearFilter(string strName)
         {
             if (IgnoreCase == true)
                 strName = strName.ToLower();
 
-            FilterList filterlist = null;
-
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this._lock.AcquireWriterLock(_nLockTimeout);
             try
             {
 
-                filterlist = (FilterList)table[strName];
-
+                FilterList filterlist = (FilterList)_table[strName];
                 if (filterlist != null)
-                {
-                    table.Remove(strName);
-                }
+                    _table.Remove(strName);
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                this._lock.ReleaseWriterLock();
             }
         }
 
@@ -97,22 +93,22 @@ namespace DigitalPlatform.MarcDom
                 strName = strName.ToLower();
             FilterList filterlist = null;
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this._lock.AcquireWriterLock(_nLockTimeout);
             try
             {
-                filterlist = (FilterList)table[strName];
+                filterlist = (FilterList)_table[strName];
 
                 if (filterlist == null)
                 {
                     filterlist = new FilterList();
                     filterlist.Container = this;
-                    table[strName] = filterlist;
+                    _table[strName] = filterlist;
                 }
-
+                Debug.Assert(filterlist != null, "");
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                this._lock.ReleaseWriterLock();
             }
 
             filterlist.SetFilter(filter);
@@ -120,9 +116,9 @@ namespace DigitalPlatform.MarcDom
 
         public int Count
         {
-            get 
+            get
             {
-                return this.table.Count;
+                return this._table.Count;
             }
         }
 
@@ -130,9 +126,9 @@ namespace DigitalPlatform.MarcDom
         {
             string strResult = "";
 
-            strResult += "本集合中共用'" + Convert.ToString(this.table.Count)+ "'个FilterList对象.\r\n";
+            strResult += "本集合中共用'" + Convert.ToString(this._table.Count) + "'个FilterList对象.\r\n";
 
-            foreach (DictionaryEntry item in table)
+            foreach (DictionaryEntry item in _table)
             {
                 strResult += "  " + item.Key + "\r\n";
 
@@ -145,52 +141,72 @@ namespace DigitalPlatform.MarcDom
         }
     }
 
+    /// <summary>
+    /// 管理 FilterDocument 对象的若干副本。
+    /// 确保 FilterDocument 对象在征用期间被独占使用
+    /// </summary>
     public class FilterList
     {
-        List<FilterHolder> list = new List<FilterHolder>();
+        List<FilterHolder> _list = new List<FilterHolder>();
 
-        public ReaderWriterLock m_lock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5秒
+        ReaderWriterLock _lock = new ReaderWriterLock();
+        static int _nLockTimeout = 5000;	// 5000=5秒
 
-        public FilterCollection Container = null;
+        private FilterCollection _container = null;
 
+        public FilterCollection Container
+        {
+            get
+            {
+                return _container;
+            }
+
+            set
+            {
+                _container = value;
+            }
+        }
+
+        /// <summary>
+        /// 获得一个尚未被征用的 FilterDocument 对象并立即征用它
+        /// </summary>
+        /// <returns>FilterDocument 对象</returns>
         public FilterDocument GetFilter()
         {
-            this.m_lock.AcquireReaderLock(m_nLockTimeout);
+            this._lock.AcquireReaderLock(_nLockTimeout);
             try
             {
-                for (int i = 0; i < list.Count; i++)
+                foreach (FilterHolder item in _list)
                 {
-                    FilterHolder item = this.list[i];
-
                     if (Interlocked.Increment(ref item.UsedCount) == 1)
-                    {
                         return item.FilterDocument;
-                    }
 
                     Interlocked.Decrement(ref item.UsedCount);
                 }
-
                 return null;
             }
             finally
             {
-                this.m_lock.ReleaseReaderLock();
+                this._lock.ReleaseReaderLock();
             }
         }
 
+        /// <summary>
+        /// 归还或者加入一个 FilterDocument 对象。
+        /// 如果对象在 list 中已经存在，则归还它；如果在 list 中不存在，则新添加它进入 list，此时它是尚未被征用状态。
+        /// 对 list 中最大对象数是进行了控制的
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns>true: 成功; false: 没能加入 list，因为超过数量极限 Max 了</returns>
         public bool SetFilter(FilterDocument filter)
         {
             // string strMessage = "";
 
-            this.m_lock.AcquireReaderLock(m_nLockTimeout);
+            this._lock.AcquireReaderLock(_nLockTimeout);
             try
             {
-
-                for (int i = 0; i < list.Count; i++)
+                foreach (FilterHolder item in _list)
                 {
-                    FilterHolder item = this.list[i];
-
                     if (item.FilterDocument == filter)
                     {
                         int nValue = Interlocked.Decrement(ref item.UsedCount);
@@ -205,12 +221,13 @@ namespace DigitalPlatform.MarcDom
             }
             finally
             {
-                this.m_lock.ReleaseReaderLock();
+                this._lock.ReleaseReaderLock();
             }
 
             return NewFilter(filter);
         }
 
+#if NO  // 暂时没有用到
         public void ReturnFilter(FilterDocument filter)
         {
             this.m_lock.AcquireReaderLock(m_nLockTimeout);
@@ -238,31 +255,29 @@ namespace DigitalPlatform.MarcDom
 
             throw new Exception("还回的对象在数组中没有找到");
         }
+#endif
 
+        // 加入一个 FilterDocument 对象。
+        // 如果 list 中的对象数量超过了 Max 上限，则不会加入
         // return:
         //      true    已经加入
         //      false   未加入
         public bool NewFilter(FilterDocument filter)
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this._lock.AcquireWriterLock(_nLockTimeout);
             try
             {
-
-
-                if (this.list.Count >= this.Container.Max)
+                if (this._list.Count >= this._container.Max)
                     return false;
-
 
                 FilterHolder item = new FilterHolder();
                 item.FilterDocument = filter;
-
-                this.list.Add(item);
-
+                this._list.Add(item);
                 return true;
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                this._lock.ReleaseWriterLock();
             }
         }
 
@@ -270,12 +285,15 @@ namespace DigitalPlatform.MarcDom
         {
             string strResult = "";
 
-            strResult += "共用'" + Convert.ToString(this.list.Count)+ "'个FilterDocumnet对象.\r\n";
+            strResult += "共用'" + Convert.ToString(this._list.Count) + "'个FilterDocumnet对象.\r\n";
 
             return strResult;
         }
     }
 
+    /// <summary>
+    /// 包裹 FilterDocument 的容器，并提供了使用计数
+    /// </summary>
     public class FilterHolder
     {
         public FilterDocument FilterDocument = null;
