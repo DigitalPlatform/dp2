@@ -1438,8 +1438,8 @@ MessageBoxDefaultButton.Button2);
 
                 AppendString("*** 检查实例 "+(i+1)+" '" + strInstanceName + "' 的序列号 '" + strSerialCode + "' ...\r\n");
 
-
-                if (string.IsNullOrEmpty(strSerialCode) == true)
+                if (string.IsNullOrEmpty(strSerialCode) == true
+                    || strSerialCode == "community")
                     continue;
 
                 if ( // String.IsNullOrEmpty(strSerialCode) == true || 
