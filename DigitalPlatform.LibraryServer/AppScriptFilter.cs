@@ -33,13 +33,16 @@ namespace DigitalPlatform.LibraryServer
         // MarcFilter对象缓冲池
         public FilterCollection Filters = new FilterCollection();
 
+#if NO
         // 存放xml-->html C# script assembly的hashtable
         public Hashtable Xml2HtmlAssemblyTable = new Hashtable();
 
 
         public ReaderWriterLock m_lockXml2HtmlAssemblyTable = new ReaderWriterLock();
         public static int m_nLockTimeout = 5000;	// 5000=5秒
-
+#endif
+        // 存储 Assembly 的容器
+        internal ObjectCache<Assembly> AssemblyCache = new ObjectCache<Assembly>();
 
         // 将读者记录数据从XML格式转换为HTML格式
         // parameters:
@@ -142,6 +145,7 @@ namespace DigitalPlatform.LibraryServer
             assembly = null;
             int nRet = 0;
 
+#if NO
             // 看看是否已经存在
             this.m_lockXml2HtmlAssemblyTable.AcquireReaderLock(m_nLockTimeout);
             try
@@ -152,11 +156,12 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.m_lockXml2HtmlAssemblyTable.ReleaseReaderLock();
             }
+#endif
+            assembly = this.AssemblyCache.FindObject(strCodeFileName);
 
             // 优化
             if (assembly != null)
                 return 1;
-
 
             string strCode = "";    // c#代码
 
@@ -248,6 +253,7 @@ namespace DigitalPlatform.LibraryServer
 
             }
 
+#if NO
             // 加入hashtable
             this.m_lockXml2HtmlAssemblyTable.AcquireWriterLock(m_nLockTimeout);
             try
@@ -258,7 +264,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
             }
-
+#endif
+            this.AssemblyCache.SetObject(strCodeFileName, assembly);
             return 0;
         ERROR1:
             return -1;
@@ -512,6 +519,14 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            Assembly assembly = null;
+            assembly = this.AssemblyCache.FindObject(strFilterFileName);
+            if (assembly != null)
+            {
+                filter.Assembly = assembly;
+                return 0;
+            }
+
             string strCode = "";    // c#代码
 
             int nRet = filter.BuildScriptFile(out strCode,
@@ -539,7 +554,6 @@ namespace DigitalPlatform.LibraryServer
 										 this.BinDir + "\\digitalplatform.marcquery.dll",
 										 /*strMainCsDllName*/ };
 
-            Assembly assembly = null;
             string strWarning = "";
             string strLibPaths = "";
 
@@ -557,7 +571,6 @@ namespace DigitalPlatform.LibraryServer
                 out assembly,
                 out strError,
                 out strWarning);
-
             if (nRet == -2)
                 goto ERROR1;
             if (nRet == -1)
@@ -570,7 +583,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             filter.Assembly = assembly;
-
+            this.AssemblyCache.SetObject(strFilterFileName, assembly);
             return 0;
         ERROR1:
             return -1;

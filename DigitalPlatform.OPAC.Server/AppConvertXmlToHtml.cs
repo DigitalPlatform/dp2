@@ -21,9 +21,13 @@ namespace DigitalPlatform.OPAC.Server
     public partial class OpacApplication
     {
         // 存放xml-->html C# script assembly的hashtable
-        public Hashtable Xml2HtmlAssemblyTable = new Hashtable();
+        // public Hashtable Xml2HtmlAssemblyTable = new Hashtable();
 
-        public ReaderWriterLock m_lockXml2HtmlAssemblyTable = new ReaderWriterLock();
+        // public ReaderWriterLock m_lockXml2HtmlAssemblyTable = new ReaderWriterLock();
+
+        // 存储 Assembly 的容器
+        internal ObjectCache<Assembly> AssemblyCache = new ObjectCache<Assembly>();
+
         // MarcFilter对象缓冲池
         public FilterCollection Filters = new FilterCollection();
 
@@ -39,6 +43,7 @@ namespace DigitalPlatform.OPAC.Server
             assembly = null;
             int nRet = 0;
 
+#if NO
             // 看看是否已经存在
             this.m_lockXml2HtmlAssemblyTable.AcquireReaderLock(m_nLockTimeout);
             try
@@ -49,6 +54,8 @@ namespace DigitalPlatform.OPAC.Server
             {
                 this.m_lockXml2HtmlAssemblyTable.ReleaseReaderLock();
             }
+#endif
+            assembly = this.AssemblyCache.FindObject(strCodeFileName.ToLower());
 
             // 优化
             if (assembly != null)
@@ -71,14 +78,14 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             string[] saAddRef1 = {
-										 strBinDir + "\\digitalplatform.marcdom.dll",
-										 strBinDir + "\\digitalplatform.marckernel.dll",
+                                         strBinDir + "\\digitalplatform.marcdom.dll",
+                                         strBinDir + "\\digitalplatform.marckernel.dll",
 										 // strBinDir + "\\digitalplatform.rms.client.dll",
 										 strBinDir + "\\digitalplatform.OPAC.Server.dll",
-										 strBinDir + "\\digitalplatform.dll",
-										 strBinDir + "\\digitalplatform.Text.dll",
-										 strBinDir + "\\digitalplatform.IO.dll",
-										 strBinDir + "\\digitalplatform.Xml.dll",
+                                         strBinDir + "\\digitalplatform.dll",
+                                         strBinDir + "\\digitalplatform.Text.dll",
+                                         strBinDir + "\\digitalplatform.IO.dll",
+                                         strBinDir + "\\digitalplatform.Xml.dll",
 										 // strBinDir + "\\dp2rms.exe",
 										 };
 
@@ -128,14 +135,11 @@ namespace DigitalPlatform.OPAC.Server
             if (nRet == -1)
             {
                 strError = "文件 '" + strCodeFileName + "' 编译出错: " + strError;
-                if (strWarning == "")
-                {
+                if (string.IsNullOrEmpty(strWarning) == true)
                     goto ERROR1;
-                }
-                // MessageBox.Show(this, strWarning);
-
             }
 
+#if NO
             // 加入hashtable
             this.m_lockXml2HtmlAssemblyTable.AcquireWriterLock(m_nLockTimeout);
             try
@@ -146,12 +150,14 @@ namespace DigitalPlatform.OPAC.Server
             {
                 this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
             }
-
+#endif
+            this.AssemblyCache.SetObject(strCodeFileName.ToLower(), assembly);
             return 0;
         ERROR1:
             return -1;
         }
 
+#if NO
         public void ClearXml2HtmlAssembly()
         {
             if (this.m_lockXml2HtmlAssemblyTable == null
@@ -168,6 +174,7 @@ namespace DigitalPlatform.OPAC.Server
                 this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
             }
         }
+#endif
 
         // 将一般库记录数据从XML格式转换为HTML格式
         // parameters:
@@ -365,26 +372,31 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
 
-            string strCode = "";    // c#代码
+            Assembly assembly = this.AssemblyCache.FindObject(strFilterFileName);
+            if (assembly != null)
+            {
+                filter.Assembly = assembly;
+                return 0;
+            }
 
+            string strCode = "";    // c#代码
             int nRet = filter.BuildScriptFile(out strCode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             string[] saAddRef1 = {
-										 this.BinDir + "\\digitalplatform.marcdom.dll",
-										 this.BinDir + "\\digitalplatform.marckernel.dll",
-										 this.BinDir + "\\digitalplatform.OPAC.Server.dll",
-										 this.BinDir + "\\digitalplatform.dll",
-										 this.BinDir + "\\digitalplatform.Text.dll",
-										 this.BinDir + "\\digitalplatform.IO.dll",
-										 this.BinDir + "\\digitalplatform.Xml.dll",
-										 this.BinDir + "\\digitalplatform.script.dll",
-										 this.BinDir + "\\digitalplatform.marcquery.dll",
+                                         this.BinDir + "\\digitalplatform.marcdom.dll",
+                                         this.BinDir + "\\digitalplatform.marckernel.dll",
+                                         this.BinDir + "\\digitalplatform.OPAC.Server.dll",
+                                         this.BinDir + "\\digitalplatform.dll",
+                                         this.BinDir + "\\digitalplatform.Text.dll",
+                                         this.BinDir + "\\digitalplatform.IO.dll",
+                                         this.BinDir + "\\digitalplatform.Xml.dll",
+                                         this.BinDir + "\\digitalplatform.script.dll",
+                                         this.BinDir + "\\digitalplatform.marcquery.dll",
 										 /*strMainCsDllName*/ };
 
-            Assembly assembly = null;
             string strWarning = "";
             string strLibPaths = "";
 
@@ -402,20 +414,16 @@ namespace DigitalPlatform.OPAC.Server
                 out assembly,
                 out strError,
                 out strWarning);
-
             if (nRet == -2)
                 goto ERROR1;
             if (nRet == -1)
             {
-                if (strWarning == "")
-                {
+                if (string.IsNullOrEmpty(strWarning) == true)
                     goto ERROR1;
-                }
-                // MessageBox.Show(this, strWarning);
             }
 
             filter.Assembly = assembly;
-
+            this.AssemblyCache.SetObject(strFilterFileName, assembly);
             return 0;
         ERROR1:
             return -1;

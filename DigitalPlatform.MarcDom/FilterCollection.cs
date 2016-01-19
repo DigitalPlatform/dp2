@@ -19,7 +19,7 @@ namespace DigitalPlatform.MarcDom
         ReaderWriterLock _lock = new ReaderWriterLock();
         static int _nLockTimeout = 5000;	// 5000=5秒
 
-        public int Max = 100;   // 每个List中对象数上限
+        public int Max = 100;   // 每个List中对象数上限。100
 
         public FilterDocument GetFilter(string strName)
         {
@@ -75,7 +75,6 @@ namespace DigitalPlatform.MarcDom
             this._lock.AcquireWriterLock(_nLockTimeout);
             try
             {
-
                 FilterList filterlist = (FilterList)_table[strName];
                 if (filterlist != null)
                     _table.Remove(strName);

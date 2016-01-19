@@ -15,9 +15,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
-using DigitalPlatform.rms;  // rmsutil
 
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 

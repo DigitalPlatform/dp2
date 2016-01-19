@@ -69,8 +69,8 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strError = "<interface>元素未配置type属性值";
                     return -1;
-                } 
-                
+                }
+
                 string strAssemblyName = DomUtil.GetAttr(node, "assemblyName");
                 if (String.IsNullOrEmpty(strAssemblyName) == true)
                 {
@@ -103,7 +103,7 @@ namespace DigitalPlatform.LibraryServer
         null);
                 if (message_interface.HostObj == null)
                 {
-                    strError = "创建 type 为 '"+strType+"' 的 DigitalPlatform.Interfaces.ExternalMessageHost 类的派生类的对象（构造函数）失败，初始化扩展消息接口失败...";
+                    strError = "创建 type 为 '" + strType + "' 的 DigitalPlatform.Interfaces.ExternalMessageHost 类的派生类的对象（构造函数）失败，初始化扩展消息接口失败...";
                     return -1;
                 }
 
@@ -168,7 +168,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             XmlNode firstNode = nodeScript.ChildNodes[0];
-
 
             //第一个儿子节点不是CDATA或者Text节点时
             if (firstNode.NodeType != XmlNodeType.CDATA
@@ -1098,7 +1097,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (this.m_assemblyLibraryHost == null)
             {
-                strError = "未定义<script>脚本代码，无法执行脚本函数"+strFuncName+"()。";
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
                 return -2;
             }
 
@@ -1107,7 +1106,7 @@ namespace DigitalPlatform.LibraryServer
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
-                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数"+strFuncName+"()。";
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数" + strFuncName + "()。";
                 return -2;
             }
 
@@ -1509,7 +1508,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
-                // 验证条码号
+            // 验证条码号
             if (this.App.VerifyBarcode == true)
             {
                 // return:
@@ -1574,7 +1573,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "订购日期字符串 '"+strOrderTime+"' 格式错误: " + ex.Message;
+                    strError = "订购日期字符串 '" + strOrderTime + "' 格式错误: " + ex.Message;
                     return -1;
                 }
             }
