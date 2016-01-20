@@ -5214,15 +5214,11 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
-
 
                     string strLine = sr.ReadLine();
 
@@ -5230,6 +5226,10 @@ MessageBoxDefaultButton.Button1);
 
                     if (strLine == null)
                         break;
+
+                    strLine = strLine.Trim();
+                    if (string.IsNullOrEmpty(strLine) == true)
+                        continue;
 
                     string strRecPath = "";
                     bool bOtherCols = false;
@@ -5261,7 +5261,6 @@ MessageBoxDefaultButton.Button1);
                         }
                     }
 
-
                     // 检查路径的正确性，检查数据库是否为书目库之一
                     // 判断它是书目记录路径，还是实体记录路径？
                     string strDbName = Global.GetDbName(strRecPath);
@@ -5282,8 +5281,8 @@ MessageBoxDefaultButton.Button1);
                     if (bOtherCols == true)
                     {
                         item = Global.BuildListViewItem(
-                    this.listView_records,
-                    strLine);
+                            this.listView_records,
+                            strLine);
                         this.listView_records.Items.Add(item);
                     }
                     else
@@ -5295,7 +5294,6 @@ MessageBoxDefaultButton.Button1);
 
                         items.Add(item);
                     }
-
                 }
             }
             finally

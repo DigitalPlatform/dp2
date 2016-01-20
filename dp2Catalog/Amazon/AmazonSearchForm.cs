@@ -7,22 +7,25 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Net;
+using System.Xml;
+using System.Threading;
+using System.Diagnostics;
+using System.Collections;
+using System.Xml.Xsl;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 
 using AmazonProductAdvtApi;
-using System.Net;
-using System.Xml;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform;
-using System.Threading;
-using System.Diagnostics;
-using System.Collections;
-using System.Xml.Xsl;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CirculationClient;
+
 using dp2Secure;
+using DigitalPlatform.AmazonInterface;
 
 namespace dp2Catalog
 {
@@ -46,7 +49,6 @@ namespace dp2Catalog
         Exception m_exception = null;
         bool m_bErrorBox = true;
         bool m_bSetProgress = true;
-
 
         DigitalPlatform.Stop stop = null;
         bool m_bInSearching = false;
@@ -281,7 +283,7 @@ namespace dp2Catalog
             strPath = curItem.Text;
             ItemInfo info = (ItemInfo)curItem.Tag;
 
-            if (bForceFullElementSet == true && info.EelementSet != "F")
+            if (bForceFullElementSet == true && info.ElementSet != "F")
             {
                 // 需要重新装载这一条记录
                 List<ListViewItem> items = new List<ListViewItem>();
@@ -344,7 +346,7 @@ MessageBoxDefaultButton.Button1);
             record.m_baRecord = Encoding.UTF8.GetBytes(info.Xml);
             record.m_strDBName = m_searchParameters != null ? m_searchParameters["SearchIndex"] : "";
             record.m_strSyntaxOID = info.PreferSyntaxOID; // ???
-            record.m_strElementSetName = info.EelementSet;    // B F
+            record.m_strElementSetName = info.ElementSet;    // B F
 
             strSavePath = this.CurrentProtocol + ":" + strPath;
 
@@ -435,56 +437,76 @@ MessageBoxDefaultButton.Button1);
             XmlDocument domData = new XmlDocument();
             domData.LoadXml(strXml);
 
-            XslCompiledTransform xt = (XslCompiledTransform)this.m_xsltTable[strMarcSyntaxOID];
-
-            if (xt == null)
+            if (Control.ModifierKeys != Keys.Control
+                && strMarcSyntaxOID == "1.2.840.10003.5.1")
             {
-                string strPrefix = strMarcSyntaxOID.Replace(".", "_");
-                string strXsltFilename = Path.Combine(this.MainForm.DataDir, strPrefix + "/amazon.xslt");   // 1_2_840_10003_5_1
+                List<string> styles = new List<string>();
+                if (this.Create856 == false)
+                    styles.Add("!856");
 
-                XmlDocument temp = new XmlDocument();
-                temp.Load(strXsltFilename);
-
-                XmlReader xr = new XmlNodeReader(temp);
-
-                // 把xsl加到XslTransform
-                xt = new XslCompiledTransform();
-                XsltSettings settings = new XsltSettings();
-                settings.EnableScript = true;
-                xt.Load(xr, settings, null);
-
-                this.m_xsltTable[strMarcSyntaxOID] = xt;
+                // 将亚马逊 XML 格式转换为 UNIMARC 格式
+                int nRet = AmazonSearch.AmazonXmlToUNIMARC(domData.DocumentElement,
+                    StringUtil.MakePathList(styles),
+                    out strMarc,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                return 0;
             }
 
-            // 输出到的地方
-            string strResultXml = "";
-            using (TextWriter tw = new StringWriter())
-            using (XmlTextWriter xw = new XmlTextWriter(tw))
             {
-                //执行转换 
-                xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
 
-                // tw.Close();
-                tw.Flush();
-                strResultXml = tw.ToString();
+                XslCompiledTransform xt = (XslCompiledTransform)this.m_xsltTable[strMarcSyntaxOID];
+
+                if (xt == null)
+                {
+                    string strPrefix = strMarcSyntaxOID.Replace(".", "_");
+                    string strXsltFilename = Path.Combine(this.MainForm.DataDir, strPrefix + "/amazon.xslt");   // 1_2_840_10003_5_1
+
+                    XmlDocument temp = new XmlDocument();
+                    temp.Load(strXsltFilename);
+
+                    XmlReader xr = new XmlNodeReader(temp);
+
+                    // 把xsl加到XslTransform
+                    xt = new XslCompiledTransform();
+                    XsltSettings settings = new XsltSettings();
+                    settings.EnableScript = true;
+                    xt.Load(xr, settings, null);
+
+                    this.m_xsltTable[strMarcSyntaxOID] = xt;
+                }
+
+                // 输出到的地方
+                string strResultXml = "";
+                using (TextWriter tw = new StringWriter())
+                using (XmlTextWriter xw = new XmlTextWriter(tw))
+                {
+                    //执行转换 
+                    xt.Transform(domData.CreateNavigator(), /*null,*/ xw /*, null*/);
+
+                    // tw.Close();
+                    tw.Flush();
+                    strResultXml = tw.ToString();
+                }
+
+                string strMarcSyntax = "";
+                string strOutMarcSyntax = "";
+                // 从数据记录中获得MARC格式
+                int nRet = MarcUtil.Xml2Marc(strResultXml,
+                    true,
+                    strMarcSyntax,
+                    out strOutMarcSyntax,
+                    out strMarc,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "XML转换到MARC记录时出错: " + strError;
+                    return -1;
+                }
+
+                return 0;
             }
-
-            string strMarcSyntax = "";
-            string strOutMarcSyntax = "";
-            // 从数据记录中获得MARC格式
-            int nRet = MarcUtil.Xml2Marc(strResultXml,
-                true,
-                strMarcSyntax,
-                out strOutMarcSyntax,
-                out strMarc,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "XML转换到MARC记录时出错: " + strError;
-                return -1;
-            }
-
-            return 0;
         }
 
         #endregion
@@ -498,7 +520,6 @@ MessageBoxDefaultButton.Button1);
 
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
-
 
             string strWidths = this.MainForm.AppInfo.GetString(
 "amazonsearchform",
@@ -1628,7 +1649,6 @@ this.CurrentServer);
                 return -1;
             }
 
-
             return 0;
         }
 
@@ -1826,7 +1846,7 @@ MessageBoxDefaultButton.Button1);
 
                 ItemInfo info = new ItemInfo();
                 info.Xml = item.OuterXml;
-                info.EelementSet = strElementSet;
+                info.ElementSet = strElementSet;
 
                 ListViewItem listitem = new ListViewItem();
                 if (this.m_reloadInfo != null)
@@ -1858,7 +1878,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 listitem.Tag = info;
 
-                if (info.EelementSet == "B")
+                if (info.ElementSet == "B")
                     listitem.ImageIndex = BROWSE_TYPE_BRIEF;
                 else
                     listitem.ImageIndex = BROWSE_TYPE_FULL;
@@ -1911,7 +1931,7 @@ MessageBoxDefaultButton.Button1);
         public class ItemInfo
         {
             public string Xml = ""; // XML 记录
-            public string EelementSet = ""; // "B" "F"
+            public string ElementSet = ""; // "B" "F"
             public string PreferSyntaxOID = ""; // 优先要转换成的 MARC 格式
         }
 
@@ -2181,6 +2201,18 @@ nsmgr,
 true);
             }
         }
+        // 是否创建 856 字段
+        public bool Create856
+        {
+            get
+            {
+                // 亚马逊检索窗
+                return this.MainForm.AppInfo.GetBoolean(
+"amazon_search_form",
+"create_856",
+true);
+            }
+        }
 
         // 为选定的行装入Full元素集的记录
         // 使用 ItemLookup API
@@ -2385,7 +2417,6 @@ value);
             menuItem.Click += new EventHandler(MenuItem_selectAll_Click);
             contextMenu.Items.Add(menuItem);
 
-
             menuItem = new ToolStripMenuItem("当前服务器(&C)");
             contextMenu.Items.Add(menuItem);
 
@@ -2459,7 +2490,6 @@ value);
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_exportBrowseToExcel_Click);
             contextMenu.Items.Add(menuItem);
-
 
             contextMenu.Show(this.listView_browse, e.Location);
         }
@@ -2600,7 +2630,7 @@ value);
                     continue;
                 }
 
-                if (info.EelementSet == "B")
+                if (info.ElementSet == "B")
                     return true;
             }
 
@@ -2957,7 +2987,6 @@ MessageBoxDefaultButton.Button1);
             e.Encoding = encoding;
         }
 
-
         public void menuItem_saveOriginRecordToIso2709_Click(object sender,
     EventArgs e)
         {
@@ -2985,7 +3014,6 @@ MessageBoxDefaultButton.Button1);
                 if (result == System.Windows.Forms.DialogResult.Yes)
                     bForceFull = true;
             }
-
 
             Encoding preferredEncoding = Encoding.UTF8;
 
@@ -3222,7 +3250,6 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         void MenuItem_selectAll_Click(object sender, EventArgs e)
         {

@@ -689,7 +689,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
-                    app.WriteErrorLog("opac service 成功启动。版本: " 
+                    app.WriteErrorLog("opac service 成功启动。版本: "
                         // + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString()
                         + ClientVersion
                         );
@@ -779,7 +779,8 @@ namespace DigitalPlatform.OPAC.Server
             if (this.Filters != null)
                 this.Filters.Clear();
 
-            ClearXml2HtmlAssembly();
+            // ClearXml2HtmlAssembly();
+            this.AssemblyCache.Clear();
 
             // 2012/10/26
             this.CfgsMap.Clear();
@@ -1045,8 +1046,6 @@ namespace DigitalPlatform.OPAC.Server
             Hashtable macro_table = (Hashtable)param;
             // 将源文件读入内存，进行宏变换，然后写入目标位置
 
-
-
             string strError = "";
             string strContent = "";
             Encoding encoding;
@@ -1178,7 +1177,6 @@ namespace DigitalPlatform.OPAC.Server
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-
                 // 临时的SessionInfo对象
                 SessionInfo session = new SessionInfo(this);
                 session.UserID = this.ManagerUserName;
@@ -4152,7 +4150,6 @@ out string strError)
                 bDisplayAllIP,
                 out info,
                 out strError);
-
         }
 
         // parameters:

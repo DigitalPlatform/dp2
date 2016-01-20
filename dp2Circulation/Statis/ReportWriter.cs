@@ -512,6 +512,8 @@ namespace dp2Circulation
                     string strText = "";
                     if (column.ColumnNumber != -1)
                     {
+                        // Debug.Assert(column.ColumnNumber < data_reader.FieldCount, "");
+
                         if (string.IsNullOrEmpty(column.Eval) == false)
                         {
                             // engine.SetGlobalValue("cell", line.GetObject(column.ColumnNumber));

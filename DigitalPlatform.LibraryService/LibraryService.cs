@@ -6636,7 +6636,6 @@ namespace dp2Library
                     return result;
                 }
 
-
                 return app.OrderItemDatabase.SetItems(sessioninfo,
                     strBiblioRecPath,
                     orderinfos,

@@ -273,6 +273,7 @@ namespace DigitalPlatform.LibraryServer
 
         // Application通用锁。可以用来管理GlobalCfgDom等
         public ReaderWriterLock m_lock = new ReaderWriterLock();
+        public static int m_nLockTimeout = 5000;	// 5000=5秒
 
         // 读者记录锁。避免多线程改写同一读者记录造成的故障
         public RecordLockCollection ReaderLocks = new RecordLockCollection();
@@ -462,6 +463,10 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
             LibraryApplication app = this;  // new CirculationApplication();
 
+            // 装载配置文件的过程，只能消除以前的 StartError 挂起状态，其他状态是无法消除的
+            // 本函数过程也约定好，只进行 StartError 挂起，不做其他挂起
+            if (app.HangupReason == LibraryServer.HangupReason.StartingError)
+                app.HangupReason = LibraryServer.HangupReason.None;
             try
             {
                 DateTime start = DateTime.Now;
@@ -1674,8 +1679,10 @@ namespace DigitalPlatform.LibraryServer
             if (bReload == true)
                 app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
             else
+            {
+                app.HangupReason = LibraryServer.HangupReason.StartingError;
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
-
+            }
             return -1;
         }
 
@@ -7692,7 +7699,7 @@ out strError);
                 if (string.IsNullOrEmpty(strRefIDList) == false)
                 {
                     string strOneDbQuery = "<target list='"
-    + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID") 
+    + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID")
     + "'><item><word>"
     + StringUtil.GetXmlStringSimple(strRefIDList)
     + "</word><match>exact</match><relation>list</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
@@ -9222,6 +9229,7 @@ out strError);
 
                     strRights = temp_account.RightsOrigin;
                     strOutputUserName = temp_account.UserID;
+                    strLibraryCode = temp_account.AccountLibraryCode;   // 2016/1/17
                     return 1;
                 }
             }
@@ -12555,6 +12563,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 清除各种缓存
         public void ClearCache()
         {
+#if NO
             this.m_lockXml2HtmlAssemblyTable.AcquireWriterLock(m_nLockTimeout);
             try
             {
@@ -12564,6 +12573,8 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
             }
+#endif
+            this.AssemblyCache.Clear();
 
             this.Filters.Clear();
 
@@ -13723,9 +13734,10 @@ strLibraryCode);    // 读者所在的馆代码
         LogRecover = 1, // 日志恢复
         Backup = 2, // 大备份
         Normal = 3, // 普通维护
-        OperLogError = 4,   // 操作日志错误（例如日志空间满）
-        Exit = 5,  // 系统正在退出
-        Expire = 6, // 因长期没有升级版本，当前版本已经失效
+        StartingError = 4, // 启动过程发生严重错误
+        OperLogError = 5,   // 操作日志错误（例如日志空间满）
+        Exit = 6,  // 系统正在退出
+        Expire = 7, // 因长期没有升级版本，当前版本已经失效
     }
 
     // API错误码

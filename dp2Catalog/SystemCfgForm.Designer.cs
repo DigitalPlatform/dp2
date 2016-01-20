@@ -71,6 +71,7 @@ namespace dp2Catalog
             this.label14 = new System.Windows.Forms.Label();
             this.tabPage_global = new System.Windows.Forms.TabPage();
             this.checkBox_global_autoSelPinyin = new System.Windows.Forms.CheckBox();
+            this.checkBox_amazon_create856 = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_dtlp.SuspendLayout();
             this.tabPage_dp2library.SuspendLayout();
@@ -349,6 +350,7 @@ namespace dp2Catalog
             // 
             // tabPage_amazonSearchForm
             // 
+            this.tabPage_amazonSearchForm.Controls.Add(this.checkBox_amazon_create856);
             this.tabPage_amazonSearchForm.Controls.Add(this.label7);
             this.tabPage_amazonSearchForm.Controls.Add(this.tabComboBox_amazon_defaultServer);
             this.tabPage_amazonSearchForm.Controls.Add(this.checkBox_amazon_alwaysUseFullElementSet);
@@ -562,6 +564,17 @@ namespace dp2Catalog
             this.checkBox_global_autoSelPinyin.Text = "加拼音时自动选择多音字(&A)";
             this.checkBox_global_autoSelPinyin.UseVisualStyleBackColor = true;
             // 
+            // checkBox_amazon_create856
+            // 
+            this.checkBox_amazon_create856.AutoSize = true;
+            this.checkBox_amazon_create856.Location = new System.Drawing.Point(7, 83);
+            this.checkBox_amazon_create856.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_amazon_create856.Name = "checkBox_amazon_create856";
+            this.checkBox_amazon_create856.Size = new System.Drawing.Size(120, 16);
+            this.checkBox_amazon_create856.TabIndex = 3;
+            this.checkBox_amazon_create856.Text = "创建 856 字段(&8)";
+            this.checkBox_amazon_create856.UseVisualStyleBackColor = true;
+            // 
             // SystemCfgForm
             // 
             this.AcceptButton = this.button_OK;
@@ -646,5 +659,6 @@ namespace dp2Catalog
         private DigitalPlatform.CommonControl.TabComboBox tabComboBox_amazon_defaultServer;
         private System.Windows.Forms.TabPage tabPage_global;
         private System.Windows.Forms.CheckBox checkBox_global_autoSelPinyin;
+        private System.Windows.Forms.CheckBox checkBox_amazon_create856;
     }
 }

@@ -907,7 +907,8 @@ MessageBoxDefaultButton.Button1);
                 strError = "放弃";
                 goto ERROR1;
             }
-            if (string.IsNullOrEmpty(strSerialCode) == true)
+            if (string.IsNullOrEmpty(strSerialCode) == true
+                || strSerialCode == "community")
             {
                 // MessageBox.Show(this, "序列号为空，将按照最多 5 个前端方式运行");
                 this.LineInfo.SerialNumber = strSerialCode;
@@ -957,6 +958,7 @@ MessageBoxDefaultButton.Button1);
                 dlg.Text = strTitle;
 
             // dlg.Font = this.Font;
+            dlg.DefaultCodes = new List<string>(new string[] { "community|社区版" });
             dlg.SerialCode = strSerialCode;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
@@ -1017,6 +1019,4 @@ MessageBoxDefaultButton.Button1);
 
         static string CopyrightKey = "dp2library_sn_key";
     }
-
-
 }

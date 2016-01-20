@@ -180,7 +180,6 @@ namespace dp2Library
                             urls = new string[0];
 
                         strSerialNumber = (string)instance.GetValue("sn");
-
                         return true;    // found
                     }
                 }
@@ -364,7 +363,8 @@ namespace dp2Library
 #if SN
                 //string strLocalString = OneInstanceDialog.GetEnvironmentString(strSerialNumber, strInstanceName);
                 //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
-                if (String.IsNullOrEmpty(strSerialNumber) == true)
+                if (String.IsNullOrEmpty(strSerialNumber) == true
+                    || strSerialNumber == "community")
                 {
                     nMaxClients = SessionInfo.DEFAULT_MAX_CLIENTS;
                 }

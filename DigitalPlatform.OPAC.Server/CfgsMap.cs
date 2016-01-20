@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 
 using DigitalPlatform.IO;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server

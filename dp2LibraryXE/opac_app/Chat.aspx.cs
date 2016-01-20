@@ -387,6 +387,10 @@ ref sessioninfo) == false)
         if (bIsManager == true)
             bDisplayAllIP = true;
 
+        // return:
+        //      -1  error
+        //      0   file not found
+        //      1   succeed
         nRet = app.GetChatInfo(
             MergeRights(sessioninfo.RightsOrigin, sessioninfo.SsoRights),
             strRoom,
@@ -396,7 +400,7 @@ ref sessioninfo) == false)
             bDisplayAllIP,
             out info,
             out strError);
-        if (nRet == -1)
+        if (nRet == -1 || nRet == 0)
         {
             result_info.ErrorString = strError;
             goto END_GETINFO;

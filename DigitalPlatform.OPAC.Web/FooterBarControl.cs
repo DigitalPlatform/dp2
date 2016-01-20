@@ -103,7 +103,7 @@ namespace DigitalPlatform.OPAC.Web
                 + "</td>");
 #endif
             output.Write("<td class='middle'>"
-    + this.GetString("dp2 图书馆集成系统")
+    + this.GetString("dp2图书馆集成系统")
     + " V2 - <a href='https://github.com/DigitalPlatform/dp2'>"
     + "开源的图书馆管理系统"
     + "</a>"

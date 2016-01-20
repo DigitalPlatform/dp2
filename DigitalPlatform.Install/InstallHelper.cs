@@ -608,6 +608,12 @@ MessageBoxDefaultButton.Button1);
 
                         if (string.IsNullOrEmpty(strSerialNumber) == false)
                             instance.SetValue("sn", strSerialNumber);
+                        else
+                        {
+                            // 2016/1/19
+                            if (instance.GetValue("sn") != null)
+                                instance.DeleteValue("sn");
+                        }
                     }
                 }
             }

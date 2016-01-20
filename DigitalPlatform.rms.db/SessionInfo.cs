@@ -49,7 +49,7 @@ namespace DigitalPlatform.rms
         public int BeginSearch()
         {
             return Interlocked.Increment(ref m_nInSearching) - 1;
- 
+
             /*
             lock (this.m_nInSearching)
             {
@@ -1026,6 +1026,12 @@ out strError);
             strError = "";
             int nRet = 0;
 
+            if (paths == null)
+            {
+                strError = "API_GetBrowse() paths == null";
+                return -1;
+            }
+
             //定义一个最大数量 ,应该是用尺寸，这里暂时用数组个数计算
             //int nMaxCount = 100;
             bool bHasID = StringUtil.IsInList("id", strStyle);
@@ -1057,17 +1063,29 @@ out strError);
                 }
 #endif
                 DatabaseCollection.PathInfo info = null;
-                        // 解析资源路径
-        // return:
-        //      -1  一般性错误
-        //		-5	未找到数据库
-        //		-7	路径不合法
-        //      0   成功
+                // 解析资源路径
+                // return:
+                //      -1  一般性错误
+                //		-5	未找到数据库
+                //		-7	路径不合法
+                //      0   成功
                 nRet = this.app.Dbs.ParsePath(strPath,
     out info,
     out strError);
                 if (nRet < 0)
                     return -1;
+
+                if (info == null)
+                {
+                    strError = "ParsePath() (strPath='"+strPath+"') error, info == null";
+                    return -1;
+                }
+
+                if (info.IsConfigFilePath == true)
+                {
+                    strError = "路径 '" + strPath + "' 不是记录型的路径";
+                    return -1;
+                }
 
                 if (bHasID == true)
                 {
@@ -1075,6 +1093,11 @@ out strError);
                 }
                 if (bHasCols == true && info.IsObjectPath == false)
                 {
+                    if (info.Database == null)
+                    {
+                        strError = "ParsePath() (strPath='" + strPath + "') error, info.Database == null";
+                        return -1;
+                    }
                     string[] cols;
                     nRet = info.Database.GetCols(
                         strFormat,
@@ -1134,6 +1157,11 @@ out strError);
                     (bTimestamp == true || bMetadata == true)
                     )
                 {
+                    if (info.Database == null)
+                    {
+                        strError = "ParsePath() (strPath='" + strPath + "') error, info.Database == null";
+                        return -1;
+                    }
                     byte[] buffer = new byte[10];
                     // return:
                     //		-1  出错
@@ -1186,7 +1214,6 @@ out strError);
 
             records = new Record[results.Count];
             results.CopyTo(records);
-
             return 0;
         }
 

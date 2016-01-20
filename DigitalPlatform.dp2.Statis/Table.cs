@@ -547,6 +547,27 @@ namespace DigitalPlatform.dp2.Statis
 
         int m_nColumnsHint = 0;	// 暗示表的列数
 
+        public int HintColumns
+        {
+            get
+            {
+                return this.m_nColumnsHint;
+            }
+        }
+
+        public int GetMaxColumnCount()
+        {
+            int nResult = 0;
+            foreach(string key in this.lines.Keys)
+            {
+                Line line = (Line)this.lines[key];
+                if (line.Count > nResult)
+                    nResult = line.Count;
+            }
+
+            return nResult;
+        }
+
         public Table(int nColumnsHint)
         {
             m_nColumnsHint = nColumnsHint;

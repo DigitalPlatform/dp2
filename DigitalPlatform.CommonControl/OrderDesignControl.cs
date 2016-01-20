@@ -4137,6 +4137,7 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
+                EnsureListValue(this.comboBox_issueCount, value.ToString());
                 this.comboBox_issueCount.Text = value.ToString();
             }
         }
@@ -4150,7 +4151,32 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
+                EnsureListValue(this.comboBox_issueCount, value);
                 this.comboBox_issueCount.Text = value;
+            }
+        }
+
+        // 确保 combobox 的列表里面有特定的值
+        static void EnsureListValue(ComboBox combobox, string strValue)
+        {
+            List<string> values = new List<string>();
+            foreach(string s in combobox.Items)
+            {
+                if (s == strValue)
+                    return;
+                values.Add(s);
+            }
+
+            values.Add(strValue);
+
+            values.Sort((x,y)=>{
+                return StringUtil.RightAlignCompare(x,y);
+            });
+
+            combobox.Items.Clear();
+            foreach(string s in values)
+            {
+                combobox.Items.Add(s);
             }
         }
 

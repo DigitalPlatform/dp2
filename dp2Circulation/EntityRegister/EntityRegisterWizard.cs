@@ -1026,6 +1026,7 @@ MessageBoxDefaultButton.Button1);
             string strMARC = "";
             // 将亚马逊 XML 格式转换为 UNIMARC 格式
             nRet = AmazonSearch.AmazonXmlToUNIMARC(dom.DocumentElement,
+                "",
                 out strMARC,
                 out strError);
             if (nRet == -1)

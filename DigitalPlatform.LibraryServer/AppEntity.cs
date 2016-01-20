@@ -1701,7 +1701,6 @@ namespace DigitalPlatform.LibraryServer
             // <borrowerRecPath>是2012/9/8以后为实体记录新增的一个元素，内容是借者读者记录的路径
             string strBorrowerRecPath = DomUtil.GetElementText(item_dom.DocumentElement, "borrowerRecPath");
 
-
             string strBorrowerLibraryCode = ""; // 当前册的借阅者所在的馆代码
             if (string.IsNullOrEmpty(strBorrowerRecPath) == false)
             {
@@ -1915,7 +1914,6 @@ namespace DigitalPlatform.LibraryServer
                     strClass = "warning";
 
                 // strPeriod = this.GetDisplayTimePeriodStringEx(strPeriod);
-
 
                 // 超期情况
                 {
