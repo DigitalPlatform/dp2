@@ -379,14 +379,14 @@ namespace dp2Library
 
             if (bCheckHangup == true)
             {
-                if (app.HangupReason != HangupReason.None)
+                if (app.HangupList.Count > 0)
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCode.Hangup;
-                    if (app.HangupReason == HangupReason.Expire)
+                    if (app.ContainsHangup("Expire"))
                         result.ErrorInfo = "系统当前处于维护状态，本功能暂时不能使用。原因: dp2library 版本太旧，请立即升级到最新版本";
                     else
-                        result.ErrorInfo = "因系统处于维护状态 " + app.HangupReason.ToString() + "，本功能暂时不能使用";
+                        result.ErrorInfo = "因系统处于维护状态 " + StringUtil.MakePathList(app.HangupList) + "，本功能暂时不能使用";
                     return result;
                 }
             }

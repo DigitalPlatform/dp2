@@ -103,6 +103,14 @@ namespace dp2LibraryXE
 
             List<string> urls = StringUtil.SplitList(this.HostUrl, ';');
 
+            ServiceHost host = new ServiceHost(typeof(LibraryService));
+            this.m_hosts.Add(host);
+
+            HostInfo info = new HostInfo();
+            info.DataDir = strDataDir;
+            host.Extensions.Add(info);
+
+            bool bHasWsHttp = false;
             int i = 0;
             foreach (string strTempUrl in urls)
             {
@@ -111,14 +119,6 @@ namespace dp2LibraryXE
                 if (string.IsNullOrEmpty(strUrl) == true)
                     continue;
 
-                string strInstanceName = "";
-
-                ServiceHost host = new ServiceHost(typeof(LibraryService));
-                this.m_hosts.Add(host);
-
-                HostInfo info = new HostInfo();
-                info.DataDir = strDataDir;
-                host.Extensions.Add(info);
                 /// 
                 // 绑定协议
 
@@ -132,9 +132,6 @@ namespace dp2LibraryXE
                     strError = "dp2Library OnStart() 警告：发现不正确的协议URL '" + strUrl + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
                     return -1;
                 }
-
-                bool bHasWsHttp = false;
-                string strCertSN = "";
 
                 if (uri.Scheme.ToLower() == "net.pipe")
                 {
@@ -177,28 +174,7 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
                     return -1;
                 }
 
-                // 如果具有ws1/ws2 binding，才启用证书
-                if (bHasWsHttp == true)
-                {
-                    try
-                    {
-                        X509Certificate2 cert = GetCertificate(strCertSN,
-                            out strError);
-                        if (cert == null)
-                        {
-                            strError = "dp2Library OnStart() 准备证书 时发生错误: " + strError;
-                            return -1;
-                        }
-                        else
-                            host.Credentials.ServiceCertificate.Certificate = cert;
-
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "dp2Library OnStart() 获取证书时发生错误: " + ExceptionUtil.GetExceptionMessage(ex);
-                        return -1;
-                    }
-                }
+                info.Protocol = uri.Scheme.ToLower();
 
                 // 只有第一个host才有metadata能力
                 if (// i == 0 // 
@@ -218,51 +194,76 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
                     this.MetadataUrl = strMetadataUrl;
                 }
 
-                if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
-                {
-                    ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
-                    behavior.MaxConcurrentCalls = 50;
-                    behavior.MaxConcurrentInstances = 1000;
-                    behavior.MaxConcurrentSessions = 1000;
-                    host.Description.Behaviors.Add(behavior);
-                }
+                i++;
+            }
 
-                // IncludeExceptionDetailInFaults
-                ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
-                if (debug_behavior == null)
-                {
-                    host.Description.Behaviors.Add(new ServiceDebugBehavior() { IncludeExceptionDetailInFaults = true });
-                }
-                else
-                {
-                    if (debug_behavior.IncludeExceptionDetailInFaults == false)
-                        debug_behavior.IncludeExceptionDetailInFaults = true;
-                }
-
-                host.Opening += new EventHandler(host_Opening);
-                host.Closing += new EventHandler(m_host_Closing);
-
+            // 如果具有ws1/ws2 binding，才启用证书
+            if (bHasWsHttp == true)
+            {
                 try
                 {
-                    host.Open();
+                    string strCertSN = "";
+                    X509Certificate2 cert = GetCertificate(strCertSN,
+                        out strError);
+                    if (cert == null)
+                    {
+                        strError = "dp2Library OnStart() 准备证书 时发生错误: " + strError;
+                        return -1;
+                    }
+                    else
+                        host.Credentials.ServiceCertificate.Certificate = cert;
+
                 }
                 catch (Exception ex)
                 {
-                    strError = "dp2Library OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ExceptionUtil.GetExceptionMessage(ex);
+                    strError = "dp2Library OnStart() 获取证书时发生错误: " + ExceptionUtil.GetExceptionMessage(ex);
                     return -1;
                 }
+            }
+
+
+            if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
+            {
+                ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
+                behavior.MaxConcurrentCalls = 50;
+                behavior.MaxConcurrentInstances = 1000;
+                behavior.MaxConcurrentSessions = 1000;
+                host.Description.Behaviors.Add(behavior);
+            }
+
+            // IncludeExceptionDetailInFaults
+            ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
+            if (debug_behavior == null)
+            {
+                host.Description.Behaviors.Add(new ServiceDebugBehavior() { IncludeExceptionDetailInFaults = true });
+            }
+            else
+            {
+                if (debug_behavior.IncludeExceptionDetailInFaults == false)
+                    debug_behavior.IncludeExceptionDetailInFaults = true;
+            }
+
+            host.Opening += new EventHandler(host_Opening);
+            host.Closing += new EventHandler(m_host_Closing);
+
+            try
+            {
+                host.Open();
+            }
+            catch (Exception ex)
+            {
+                string strInstanceName = "";
+                strError = "dp2Library OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ExceptionUtil.GetExceptionMessage(ex);
+                return -1;
+            }
 
 #if NO
             strError = "test error";
             return -1;
 #endif
-                i++;
-            }
 
             return 0;
         }
-
-
 
         void host_Opening(object sender, EventArgs e)
         {
@@ -298,12 +299,12 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             foreach (ServiceHost host in this.m_hosts)
             {
                 HostInfo info = host.Extensions.Find<HostInfo>();
-                    if (info != null)
-                    {
-                        info.TestMode = bTestMode;
-                        if (info.App != null)
-                            info.App.TestMode = bTestMode;
-                    }
+                if (info != null)
+                {
+                    info.TestMode = bTestMode;
+                    if (info.App != null)
+                        info.App.TestMode = bTestMode;
+                }
             }
         }
 
@@ -312,12 +313,12 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             foreach (ServiceHost host in this.m_hosts)
             {
                 HostInfo info = host.Extensions.Find<HostInfo>();
-                    if (info != null)
-                    {
-                        info.MaxClients = nMaxClients;
-                        if (info.App != null)
-                            info.App.MaxClients = nMaxClients;
-                    }
+                if (info != null)
+                {
+                    info.MaxClients = nMaxClients;
+                    if (info.App != null)
+                        info.App.MaxClients = nMaxClients;
+                }
             }
         }
 

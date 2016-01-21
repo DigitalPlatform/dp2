@@ -10,7 +10,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class DefaultThread : BatchTask
     {
-        public DefaultThread(LibraryApplication app, 
+        public DefaultThread(LibraryApplication app,
             string strName)
             : base(app, strName)
         {
@@ -132,7 +132,29 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            if (this.App.kdbs == null || this.App.vdbs == null)
+            if (this.App._mongoClient == null && string.IsNullOrEmpty(this.App.MongoDbConnStr) == false
+            && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
+            {
+                try
+                {
+                    nRet = this.App.InitialMongoDatabases(out strError);
+                    if (nRet == -1)
+                    {
+                        this.App.WriteErrorLog("ERR006 初始化 mongodb database 失败: " + strError);
+                    }
+                    // 清除 Hangup 状态
+                    if (this.App.ContainsHangup("ERR002"))
+                        this.App.ClearHangup("ERR002");
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 InitialMongoDatabases() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
+            if (this.App.kdbs == null || this.App.vdbs == null
+                || (this.App._mongoClient == null && string.IsNullOrEmpty(this.App.MongoDbConnStr) == false))
             {
                 m_nRetryAfterMinutes++;
             }

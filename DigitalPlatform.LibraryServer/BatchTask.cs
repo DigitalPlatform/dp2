@@ -66,8 +66,12 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
-                if (this.App.HangupReason == HangupReason.LogRecover)
+                //if (this.App.HangupReason == HangupReason.LogRecover)
+                //    return true;
+
+                if (this.App.ContainsHangup("LogRecover") == true)
                     return true;
+
                 if (this.App.PauseBatchTask == true)
                     return true;
                 return this.m_bClosed;
@@ -427,8 +431,11 @@ namespace DigitalPlatform.LibraryServer
 
         public void Close()
         {
+#if NO
             this.eventClose.Set();
             this.m_bClosed = true;
+#endif
+            this.Stop();
 
             if (this.m_stream != null)
             {
@@ -466,7 +473,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.m_lock.ReleaseWriterLock();
             }
-
         }
 
         // 追加结果文本

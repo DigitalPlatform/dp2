@@ -1393,10 +1393,20 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
-                GreenProgram.CreateShortcutToDesktop(
-                   "内务绿色",
-                   Path.Combine(strTargetDir, "dp2circulation.exe"),
-                   false);
+                try
+                {
+                    GreenProgram.CreateShortcutToDesktop(
+                       "内务绿色",
+                       Path.Combine(strTargetDir, "dp2circulation.exe"),
+                       false);
+                }
+                catch (Exception ex)
+                {
+                    strError = "dp2circulation 创建备用绿色安装包快捷方式时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.ReportError("dp2circulation 创建备用绿色安装包快捷方式时出现异常", "(安静报错)" + strError);
+                    this.DisplayBackgroundText(strError + "\r\n");
+                }
+
                 this.DisplayBackgroundText("备用绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
             }
 

@@ -209,7 +209,8 @@ namespace DigitalPlatform.LibraryServer
 
         public Semaphore PictureLimit = new Semaphore(10, 10);
 
-        public HangupReason HangupReason = HangupReason.None;
+        // public HangupReason HangupReason = HangupReason.None;
+        public List<string> HangupList = new List<string>();    // 具体的挂起原因。因为初始化和各种环节，可能会有不止一种令系统挂起的原因。如果在重试某些操作以后希望解除挂起状态，则需要检查是否消除了全部因素，才能决定是否解除
 
         public bool PauseBatchTask = false; // 是否暂停后台任务
 
@@ -273,6 +274,7 @@ namespace DigitalPlatform.LibraryServer
 
         // Application通用锁。可以用来管理GlobalCfgDom等
         public ReaderWriterLock m_lock = new ReaderWriterLock();
+        //public ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         public static int m_nLockTimeout = 5000;	// 5000=5秒
 
         // 读者记录锁。避免多线程改写同一读者记录造成的故障
@@ -453,6 +455,23 @@ namespace DigitalPlatform.LibraryServer
             disposed = true;
         }
 
+        public bool ContainsHangup(string strText)
+        {
+            return this.HangupList.IndexOf(strText) != -1;
+        }
+
+        public void ClearHangup(string strText)
+        {
+            for(int i = 0;i<this.HangupList.Count;i++)
+            {
+                if (this.HangupList[i] == strText)
+                {
+                    this.HangupList.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
         public int LoadCfg(
             bool bReload,
             string strDataDir,
@@ -465,8 +484,14 @@ namespace DigitalPlatform.LibraryServer
 
             // 装载配置文件的过程，只能消除以前的 StartError 挂起状态，其他状态是无法消除的
             // 本函数过程也约定好，只进行 StartError 挂起，不做其他挂起
+#if NO
             if (app.HangupReason == LibraryServer.HangupReason.StartingError)
                 app.HangupReason = LibraryServer.HangupReason.None;
+#endif
+            if (app.HangupList.Count > 0)
+            {
+                ClearHangup("StartingError");
+            }
             try
             {
                 DateTime start = DateTime.Now;
@@ -1175,70 +1200,14 @@ namespace DigitalPlatform.LibraryServer
                     // goto ERROR1;
                 }
 
-                if (string.IsNullOrEmpty(this.MongoDbConnStr) == false)
+
+                // 初始化 mongodb 相关对象
+                nRet = InitialMongoDatabases(out strError);
+                if (nRet == -1)
                 {
-                    try
-                    {
-                        this._mongoClient = new MongoClient(this.MongoDbConnStr);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "初始化 MongoClient 时出错: " + ex.Message;
-                        app.WriteErrorLog(strError);
-                        this._mongoClient = null;
-                    }
-
-                    if (this._mongoClient != null)
-                    {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: OpenSummaryStorage");
-#endif
-                        nRet = OpenSummaryStorage(out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动书目摘要库时出错: " + strError;
-                            app.WriteErrorLog(strError);
-                        }
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: Open HitCountDatabase");
-#endif
-                        nRet = this.HitCountDatabase.Open(//this.MongoDbConnStr,
-                            this._mongoClient,
-                            this.MongoDbInstancePrefix,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动计数器库时出错: " + strError;
-                            app.WriteErrorLog(strError);
-                        }
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: Open AccessLogDatabase");
-#endif
-                        nRet = this.AccessLogDatabase.Open(// this.MongoDbConnStr,
-                            this._mongoClient,
-                            this.MongoDbInstancePrefix,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动访问日志库时出错: " + strError;
-                            app.WriteErrorLog(strError);
-                        }
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: Open ChargingOperDatabase");
-#endif
-                        nRet = this.ChargingOperDatabase.Open(
-                            this._mongoClient,
-                            this.MongoDbInstancePrefix,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动出纳操作库时出错: " + strError;
-                            app.WriteErrorLog(strError);
-                        }
-                    }
+                    // app.HangupReason = LibraryServer.HangupReason.StartingError;
+                    app.HangupList.Add("ERR002");
+                    app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
                 }
 
                 if (this.BatchTasks == null)
@@ -1636,10 +1605,11 @@ namespace DigitalPlatform.LibraryServer
 #endif
                 }
 
-                if (DateTime.Now > new DateTime(2016, 2, 1))
+                if (DateTime.Now > new DateTime(2016, 5, 1))
                 {
                     // 通知系统挂起
-                    this.HangupReason = HangupReason.Expire;
+                    // this.HangupReason = HangupReason.Expire;
+                    app.HangupList.Add("Expire");
                     this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
                 }
 
@@ -1680,7 +1650,8 @@ namespace DigitalPlatform.LibraryServer
                 app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
             else
             {
-                app.HangupReason = LibraryServer.HangupReason.StartingError;
+                // app.HangupReason = LibraryServer.HangupReason.StartingError;
+                app.HangupList.Add("StartingError");
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
             }
             return -1;
@@ -2066,6 +2037,90 @@ namespace DigitalPlatform.LibraryServer
                     out infos,
                     out strError);
                 this.ArrivedDbFroms = infos;
+
+                return 0;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+        }
+
+        // 初始化和 mongodb 有关的数据库
+        public int InitialMongoDatabases(out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
+                return 0;
+
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+                try
+                {
+                    this._mongoClient = new MongoClient(this.MongoDbConnStr);
+                    var server = this._mongoClient.GetServer();
+                    server.Connect();
+                }
+                catch (Exception ex)
+                {
+                    this._mongoClient = null;
+                    strError = "初始化 MongoClient 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                int nRet = 0;
+                if (this._mongoClient != null)
+                {
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: OpenSummaryStorage");
+#endif
+                    nRet = OpenSummaryStorage(out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动书目摘要库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: Open HitCountDatabase");
+#endif
+                    nRet = this.HitCountDatabase.Open(//this.MongoDbConnStr,
+                        this._mongoClient,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动计数器库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: Open AccessLogDatabase");
+#endif
+                    nRet = this.AccessLogDatabase.Open(// this.MongoDbConnStr,
+                        this._mongoClient,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动访问日志库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: Open ChargingOperDatabase");
+#endif
+                    nRet = this.ChargingOperDatabase.Open(
+                        this._mongoClient,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动出纳操作库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+                }
 
                 return 0;
             }
@@ -3251,6 +3306,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
         }
+
         public StopState BeginLoop(string strTitle)
         {
             lock (this.StopTable)
@@ -3289,7 +3345,8 @@ namespace DigitalPlatform.LibraryServer
         {
             this.EndWather();
 
-            this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
+            //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
+            this.HangupList.Add("Exit");
 
             this.WriteErrorLog("LibraryApplication 开始下降");
 
@@ -13727,6 +13784,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
     }
 
+#if NO
     // 系统挂起的理由
     public enum HangupReason
     {
@@ -13739,6 +13797,7 @@ strLibraryCode);    // 读者所在的馆代码
         Exit = 6,  // 系统正在退出
         Expire = 7, // 因长期没有升级版本，当前版本已经失效
     }
+#endif
 
     // API错误码
     public enum ErrorCode
