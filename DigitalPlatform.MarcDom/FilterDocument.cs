@@ -761,18 +761,25 @@ namespace DigitalPlatform.MarcDom
             strError = "";
 
             Debug.Assert(assembly != null, "调用FillOneLevelType()以前，必须先给assembly赋值");
+            if (assembly == null)
+            {
+                strError = "调用FillOneLevelType()以前，必须先给assembly赋值";
+                return -1;
+            }
 
             // 
             HashFilterItem item = (HashFilterItem)this.NodeTable[xmlNode];
             if (item == null)
             {
                 Debug.Assert(false, "xml节点" + xmlNode.OuterXml + "没有在NodeTable中创建对应的事项");
+                strError = "xml节点" + xmlNode.OuterXml + "没有在NodeTable中创建对应的事项";
                 return -1;
             }
 
             if (item.FunctionName == "")
             {
                 Debug.Assert(false, "xml节点" + xmlNode.OuterXml + "所对应的FilterItem中FunctionName为空字符串，不正常");
+                strError = "xml节点" + xmlNode.OuterXml + "所对应的FilterItem中FunctionName为空字符串，不正常";
                 return -1;
             }
 
@@ -791,7 +798,6 @@ namespace DigitalPlatform.MarcDom
             }
             else
             {
-
                 // 得到Assembly中Batch派生类Type
                 item.FunctionType = assembly.GetType(
                     item.FunctionName,
@@ -812,7 +818,6 @@ namespace DigitalPlatform.MarcDom
                 return -1;
             }
 
-
             for (int i = 0; i < xmlNode.ChildNodes.Count; i++)
             {
                 XmlNode node = xmlNode.ChildNodes[i];
@@ -829,7 +834,6 @@ namespace DigitalPlatform.MarcDom
                     return -1;
 
             }
-
             return 0;
         }
 

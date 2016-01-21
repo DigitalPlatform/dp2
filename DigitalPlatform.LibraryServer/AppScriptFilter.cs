@@ -481,7 +481,7 @@ namespace DigitalPlatform.LibraryServer
 
 
         public int PrepareMarcFilter(
-    // FilterHost host,
+            // FilterHost host,
     string strFilterFileName,
     out LoanFilterDocument filter,
     out string strError)
@@ -519,6 +519,13 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            string strCode = "";    // c#代码
+
+            int nRet = filter.BuildScriptFile(out strCode,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
             Assembly assembly = null;
             assembly = this.AssemblyCache.FindObject(strFilterFileName);
             if (assembly != null)
@@ -527,15 +534,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            string strCode = "";    // c#代码
-
-            int nRet = filter.BuildScriptFile(out strCode,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
             string[] saAddRef1 = {
-                                     
                                     // 2011/9/3 增加
                                     "system.dll",
                                     "system.drawing.dll",

@@ -341,7 +341,6 @@ namespace DigitalPlatform.OPAC.Server
 
             // 看看是否有现成可用的对象
             filter = (LoanFilterDocument)this.Filters.GetFilter(strFilterFileName);
-
             if (filter != null)
             {
                 filter.FilterHost = host;
@@ -372,18 +371,18 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
 
+            string strCode = "";    // c#代码
+            int nRet = filter.BuildScriptFile(out strCode,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
             Assembly assembly = this.AssemblyCache.FindObject(strFilterFileName);
             if (assembly != null)
             {
                 filter.Assembly = assembly;
                 return 0;
             }
-
-            string strCode = "";    // c#代码
-            int nRet = filter.BuildScriptFile(out strCode,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
 
             string[] saAddRef1 = {
                                          this.BinDir + "\\digitalplatform.marcdom.dll",
