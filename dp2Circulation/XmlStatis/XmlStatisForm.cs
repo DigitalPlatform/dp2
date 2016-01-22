@@ -110,8 +110,9 @@ namespace dp2Circulation
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
-            ScriptManager.CfgFilePath =
-    this.MainForm.DataDir + "\\xml_statis_projects.xml";
+            ScriptManager.CfgFilePath = Path.Combine(
+    this.MainForm.UserDir,
+    "xml_statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
@@ -663,11 +664,11 @@ namespace dp2Circulation
 
             if (this.tabControl_main.SelectedTab == this.tabPage_source)
             {
-                    if (this.textBox_inputXmlFilename.Text == "")
-                    {
-                        strError = "尚未指定输入的XML文件名";
-                        goto ERROR1;
-                    }
+                if (this.textBox_inputXmlFilename.Text == "")
+                {
+                    strError = "尚未指定输入的XML文件名";
+                    goto ERROR1;
+                }
 
                 this.tabControl_main.SelectedTab = this.tabPage_selectProject;
                 return;

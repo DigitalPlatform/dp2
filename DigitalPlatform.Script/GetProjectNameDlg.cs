@@ -191,7 +191,7 @@ namespace DigitalPlatform.Script
 				}
 				catch(System.Xml.XmlException ex)
 				{
-					MessageBox.Show("装载" + scriptManager.CfgFilePath + "文件失败，原因:"
+					MessageBox.Show("装载 " + scriptManager.CfgFilePath + " 文件失败，原因:"
 						+ ex.Message);
 					return;
 				}

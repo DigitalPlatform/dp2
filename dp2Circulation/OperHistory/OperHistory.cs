@@ -285,9 +285,14 @@ namespace dp2Circulation
              * */
 
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
+#if NO
             ScriptManager.CfgFilePath =
                 Path.Combine(this.MainForm.DataDir, "charging_print_projects.xml");
             ScriptManager.DataDir = this.MainForm.DataDir;
+#endif
+            ScriptManager.CfgFilePath =
+    Path.Combine(Program.MainForm.UserDir, "charging_print_projects.xml");
+            ScriptManager.DataDir = Program.MainForm.UserDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);

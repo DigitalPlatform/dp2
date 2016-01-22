@@ -50,7 +50,8 @@ namespace DigitalPlatform.LibraryServer
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
 
         internal Thread threadWorker = null;
-        internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
+        // TODO: 似乎 eventClose 用 ManualResetEvent 更好
+        internal ManualResetEvent eventClose = new ManualResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 

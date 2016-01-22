@@ -31,6 +31,39 @@ namespace DigitalPlatform.Script
             }
         }
 
+        // 获得一个对象。如果对象尚不存在，则用给定的 proc 方法创建它
+        public T GetObject(string strPath, CreateItem<T> proc)
+        {
+            this.m_lock.EnterUpgradeableReadLock();
+            try
+            {
+                ObjectItem<T> item = (ObjectItem<T>)this.m_table[strPath];
+                if (item != null)
+                    return item.Object;
+                this.m_lock.EnterWriteLock();
+                try
+                {
+                    // 再次确认。因为有可能一瞬间前别的线程刚好在写锁定过程中创建好了对象
+                    item = (ObjectItem<T>)this.m_table[strPath];
+                    if (item != null)
+                        return item.Object;
+
+                    item = new ObjectItem<T>();
+                    item.Object = proc();
+                    this.m_table[strPath] = item; 
+                    return item.Object;
+                }
+                finally
+                {
+                    this.m_lock.ExitWriteLock();
+                }
+            }
+            finally
+            {
+                this.m_lock.ExitUpgradeableReadLock();
+            }
+        }
+
         // 包装后的版本
         public T FindObject(string strPath)
         {
@@ -111,4 +144,6 @@ namespace DigitalPlatform.Script
         public T Object = default(T);
         public string Timestamp = "";
     }
+
+    public delegate T CreateItem<T>();
 }

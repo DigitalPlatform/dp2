@@ -114,8 +114,9 @@ namespace dp2Circulation
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
-            ScriptManager.CfgFilePath =
-    this.MainForm.DataDir + "\\reader_statis_projects.xml";
+            ScriptManager.CfgFilePath = Path.Combine(
+    this.MainForm.UserDir,
+    "reader_statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;

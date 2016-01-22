@@ -2596,7 +2596,9 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
 
                     // 看看是否已经装入下方的种册窗
-                    if (this.m_detailWindow != null && m_detailWindow.BiblioRecPath == strRecPath)
+                    if (this.m_detailWindow != null
+                        && m_detailWindow.IsDisposed == false
+                        && m_detailWindow.BiblioRecPath == strRecPath)
                     {
 #if NO
                         if (this.SingleClickLoadDetail == true)

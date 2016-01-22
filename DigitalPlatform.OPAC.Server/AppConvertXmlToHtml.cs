@@ -11,6 +11,7 @@ using System.IO;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
+using DigitalPlatform.Text;
 
 
 namespace DigitalPlatform.OPAC.Server
@@ -40,44 +41,32 @@ namespace DigitalPlatform.OPAC.Server
             out string strError)
         {
             strError = "";
-            assembly = null;
-            int nRet = 0;
 
-#if NO
-            // 看看是否已经存在
-            this.m_lockXml2HtmlAssemblyTable.AcquireReaderLock(m_nLockTimeout);
             try
             {
-                assembly = (Assembly)this.Xml2HtmlAssemblyTable[strCodeFileName.ToLower()];
-            }
-            finally
-            {
-                this.m_lockXml2HtmlAssemblyTable.ReleaseReaderLock();
-            }
-#endif
-            assembly = this.AssemblyCache.FindObject(strCodeFileName.ToLower());
+                assembly = this.AssemblyCache.GetObject(strCodeFileName.ToLower(),
+                    () =>
+                    {
 
-            // 优化
-            if (assembly != null)
-                return 1;
+                        int nRet = 0;
+                        string strError1 = "";
+                        string strCode = "";    // c#代码
 
-            string strCode = "";    // c#代码
+                        // 装入code?
+                        try
+                        {
+                            using (StreamReader sr = new StreamReader(strCodeFileName, true))
+                            {
+                                strCode = sr.ReadToEnd();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError1 = ExceptionUtil.GetAutoText(ex);
+                            throw new Exception(strError1);
+                        }
 
-            // 装入code?
-            try
-            {
-                using (StreamReader sr = new StreamReader(strCodeFileName, true))
-                {
-                    strCode = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = ExceptionUtil.GetAutoText(ex);
-                return -1;
-            }
-
-            string[] saAddRef1 = {
+                        string[] saAddRef1 = {
                                          strBinDir + "\\digitalplatform.marcdom.dll",
                                          strBinDir + "\\digitalplatform.marckernel.dll",
 										 // strBinDir + "\\digitalplatform.rms.client.dll",
@@ -89,72 +78,71 @@ namespace DigitalPlatform.OPAC.Server
 										 // strBinDir + "\\dp2rms.exe",
 										 };
 
-            string strWarning = "";
-            string strLibPaths = "";
+                        string strWarning = "";
+                        // string strLibPaths = "";
 
-            string[] saRef2 = null;
+                        string[] saRef2 = null;
+                        if (String.IsNullOrEmpty(strRefFileName) == false)
+                        {
+                            // 从references.xml文件中得到refs字符串数组
+                            // return:
+                            //		-1	error
+                            //		0	not found file
+                            //		1	found file
+                            nRet = ScriptManager.GetRefs(strRefFileName,
+                                out saRef2,
+                                out strError1);
+                            if (nRet == -1)
+                            {
+                                strError1 = "ref文件 '" + strRefFileName + "' 出错: " + strError1;
+                                throw new Exception(strError1);
+                            }
+                        }
 
-            if (String.IsNullOrEmpty(strRefFileName) == false)
-            {
-                // 从references.xml文件中得到refs字符串数组
-                // return:
-                //		-1	error
-                //		0	not found file
-                //		1	found file
-                nRet = ScriptManager.GetRefs(strRefFileName,
-                    out saRef2,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "ref文件 '" + strRefFileName + "' 出错: " + strError;
-                    return -1;
-                }
-            }
-
-            string[] saRef = null;
-            if (saRef2 != null)
-            {
-                saRef = new string[saRef2.Length + saAddRef1.Length];
-                Array.Copy(saRef2, saRef, saRef2.Length);
-                Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
-            }
-            else
-                saRef = saAddRef1;
-
-            // 创建Script的Assembly
-            // 本函数内对saRef不再进行宏替换
-            nRet = ScriptManager.CreateAssembly_1(strCode,
-                saRef,
-                strLibPaths,
-                out assembly,
-                out strError,
-                out strWarning);
-
-            if (nRet == -2)
-                goto ERROR1;
-            if (nRet == -1)
-            {
-                strError = "文件 '" + strCodeFileName + "' 编译出错: " + strError;
-                if (string.IsNullOrEmpty(strWarning) == true)
-                    goto ERROR1;
-            }
-
+                        string[] saRef = StringUtil.Append(saRef2, saAddRef1);
 #if NO
-            // 加入hashtable
-            this.m_lockXml2HtmlAssemblyTable.AcquireWriterLock(m_nLockTimeout);
-            try
-            {
-                this.Xml2HtmlAssemblyTable[strCodeFileName.ToLower()] = assembly;
-            }
-            finally
-            {
-                this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
-            }
+                    if (saRef2 != null)
+                    {
+                        saRef = new string[saRef2.Length + saAddRef1.Length];
+                        Array.Copy(saRef2, saRef, saRef2.Length);
+                        Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
+                    }
+                    else
+                        saRef = saAddRef1;
 #endif
-            this.AssemblyCache.SetObject(strCodeFileName.ToLower(), assembly);
+
+                        Assembly assembly1 = null;
+                        // 创建Script的Assembly
+                        // 本函数内对saRef不再进行宏替换
+                        nRet = ScriptManager.CreateAssembly_1(strCode,
+                            saRef,
+                            "", // strLibPaths,
+                            out assembly1,
+                            out strError1,
+                            out strWarning);
+                        if (nRet == -2)
+                            throw new Exception(strError1);
+                        if (nRet == -1)
+                        {
+                            strError1 = "文件 '" + strCodeFileName + "' 编译出错: " + strError1;
+                            if (string.IsNullOrEmpty(strWarning) == true)
+                                throw new Exception(strError1);
+                        }
+
+                        return assembly1;
+                    });
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                assembly = null;
+                return -1;
+            }
+
+            // 优化
+            if (assembly != null)
+                return 1;
             return 0;
-        ERROR1:
-            return -1;
         }
 
 #if NO
@@ -348,8 +336,6 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             // 新创建
-            // string strFilterFileContent = "";
-
             filter = new LoanFilterDocument();
 
             filter.FilterHost = host;
@@ -358,8 +344,6 @@ namespace DigitalPlatform.OPAC.Server
             filter.strPreInitial = " LoanFilterDocument doc = (LoanFilterDocument)this.Document;\r\n";
             filter.strPreInitial += " Host = ("
                 + "FilterHost" + ")doc.FilterHost;\r\n";
-
-            // filter.Load(strFilterFileName);
 
             try
             {
@@ -375,16 +359,16 @@ namespace DigitalPlatform.OPAC.Server
             int nRet = filter.BuildScriptFile(out strCode,
                 out strError);
             if (nRet == -1)
-                goto ERROR1;
+                return -1;
 
-            Assembly assembly = this.AssemblyCache.FindObject(strFilterFileName);
-            if (assembly != null)
+            try
             {
-                filter.Assembly = assembly;
-                return 0;
-            }
+                string[] saRef2 = filter.GetRefs();
 
-            string[] saAddRef1 = {
+                filter.Assembly = this.AssemblyCache.GetObject(strFilterFileName,
+                    () =>
+                    {
+                        string[] saAddRef1 = {
                                          this.BinDir + "\\digitalplatform.marcdom.dll",
                                          this.BinDir + "\\digitalplatform.marckernel.dll",
                                          this.BinDir + "\\digitalplatform.OPAC.Server.dll",
@@ -394,38 +378,46 @@ namespace DigitalPlatform.OPAC.Server
                                          this.BinDir + "\\digitalplatform.Xml.dll",
                                          this.BinDir + "\\digitalplatform.script.dll",
                                          this.BinDir + "\\digitalplatform.marcquery.dll",
-										 /*strMainCsDllName*/ };
+										 };
 
-            string strWarning = "";
-            string strLibPaths = "";
+                        string strError1 = "";
+                        string strWarning = "";
+                        // string strLibPaths = "";
 
-            string[] saRef2 = filter.GetRefs();
+                        string[] saRef = StringUtil.Append(saRef2, saAddRef1);
+#if NO
+                        string[] saRef = new string[saRef2.Length + saAddRef1.Length];
+                        Array.Copy(saRef2, saRef, saRef2.Length);
+                        Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
+#endif
 
-            string[] saRef = new string[saRef2.Length + saAddRef1.Length];
-            Array.Copy(saRef2, saRef, saRef2.Length);
-            Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
+                        Assembly assembly1 = null;
+                        // 创建Script的Assembly
+                        // 本函数内对saRef不再进行宏替换
+                        nRet = ScriptManager.CreateAssembly_1(strCode,
+                            saRef,
+                            "", // strLibPaths,
+                            out assembly1,
+                            out strError1,
+                            out strWarning);
+                        if (nRet == -2)
+                            throw new Exception(strError1);
+                        if (nRet == -1)
+                        {
+                            if (string.IsNullOrEmpty(strWarning) == true)
+                                throw new Exception(strError1);
+                        }
 
-            // 创建Script的Assembly
-            // 本函数内对saRef不再进行宏替换
-            nRet = ScriptManager.CreateAssembly_1(strCode,
-                saRef,
-                strLibPaths,
-                out assembly,
-                out strError,
-                out strWarning);
-            if (nRet == -2)
-                goto ERROR1;
-            if (nRet == -1)
+                        return assembly1;
+                    });
+            }
+            catch (Exception ex)
             {
-                if (string.IsNullOrEmpty(strWarning) == true)
-                    goto ERROR1;
+                strError = ex.Message;
+                return -1;
             }
 
-            filter.Assembly = assembly;
-            this.AssemblyCache.SetObject(strFilterFileName, assembly);
             return 0;
-        ERROR1:
-            return -1;
         }
 
         // 映射内核脚本配置文件到本地

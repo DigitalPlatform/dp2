@@ -125,8 +125,9 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            ScriptManager.CfgFilePath =
-    this.MainForm.DataDir + "\\iso2709_statis_projects.xml";
+            ScriptManager.CfgFilePath = Path.Combine(
+    this.MainForm.UserDir,
+    "iso2709_statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;

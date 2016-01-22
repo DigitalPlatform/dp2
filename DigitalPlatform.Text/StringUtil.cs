@@ -440,7 +440,6 @@ namespace DigitalPlatform.Text
             return null;
         }
 
-
         // 接续追加两个 string []
         public static string[] Append(string[] a1, string[] a2)
         {
