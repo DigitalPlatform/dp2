@@ -1677,7 +1677,7 @@ namespace DigitalPlatform.OPAC.Server
                     }
 
                     // 归并后写入结果集文件
-                    resultset.Idle -= new IdleEventHandler(biblio_paths_Idle);
+                    resultset.Idle += new IdleEventHandler(biblio_paths_Idle);  // 2016/1/23 原来这里是 -=，令人费解
                     try
                     {
                         this.SetProgressText("正在排序");
@@ -1700,7 +1700,7 @@ namespace DigitalPlatform.OPAC.Server
                     }
                     finally
                     {
-                        resultset.Idle += new IdleEventHandler(biblio_paths_Idle);
+                        resultset.Idle -= new IdleEventHandler(biblio_paths_Idle);
                     }
                 }
 

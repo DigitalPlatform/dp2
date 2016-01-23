@@ -937,7 +937,7 @@ namespace DigitalPlatform.ResultSet
             bool bFirst = true;
             long lPos = 0;
             DpRecord record = null;
-            for (; ; )
+            for (;;)
             {
                 if (bFirst == true)
                 {
@@ -3226,7 +3226,6 @@ namespace DigitalPlatform.ResultSet
         }
     }
 
-
     public class DpResultSetEnumerator : IEnumerator
     {
         DpResultSet m_resultSet = null;
@@ -3241,6 +3240,7 @@ namespace DigitalPlatform.ResultSet
         {
             m_index = -1;
         }
+
         public bool MoveNext()
         {
             m_index++;
@@ -3248,6 +3248,7 @@ namespace DigitalPlatform.ResultSet
                 return false;
             return true;
         }
+
         public object Current
         {
             get
@@ -3256,7 +3257,6 @@ namespace DigitalPlatform.ResultSet
             }
         }
     }
-
 
     //设计意图:定义检索到记录的类型，作为DpResultSet的成员
     [Serializable]

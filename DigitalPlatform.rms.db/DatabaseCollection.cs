@@ -2527,7 +2527,7 @@ namespace DigitalPlatform.rms
                 long lTotalLength = 0;
 
                 // 分片获取和写入资源内容
-                for (; ; )
+                for (;;)
                 {
                     // 获取源资源内容
                     byte[] baOriginObjectData = null;
@@ -3447,7 +3447,7 @@ namespace DigitalPlatform.rms
                     }
 
 
-                    //------------------------------------------------
+                //------------------------------------------------
                 //开始处理资源
                 //---------------------------------------------------
 
@@ -3908,7 +3908,7 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-        DOWRITE:
+            DOWRITE:
 
             string strFilePath = "";//GetCfgItemLacalPath(strCfgItemPath);
             // return:
@@ -3944,7 +3944,7 @@ namespace DigitalPlatform.rms
                      strRanges,
                      lTotalLength,
                      baSource,
-                    // streamSource,
+                     // streamSource,
                      strMetadata,
                      strStyle,
                      baInputTimestamp,
@@ -4734,7 +4734,7 @@ namespace DigitalPlatform.rms
             ///开始做事情
             //////////////////////////////////////////
 
-                DOGET:
+            DOGET:
                 // 检查对数据库中记录的权限
                 string strExistRights = "";
                 bool bHasRight = user.HasRights(info.DbName + "/" + info.RecordID,
@@ -5857,8 +5857,6 @@ namespace DigitalPlatform.rms
             e.TempFilename = GetTempFileName();
         }
 
-
-
         // 根据用户名从库中查找用户记录，得到用户对象
         // 对象尚未进入集合, 因此无需为对象加锁
         // parameters:
@@ -5879,50 +5877,58 @@ namespace DigitalPlatform.rms
 
             int nRet = 0;
 
+            DpRecord record = null;
+
             DpResultSet resultSet = new DpResultSet(GetTempFileName);
             resultSet.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
 
-
-            //*********对帐户库集合加读锁***********
-            m_container_lock.AcquireReaderLock(m_nContainerLockTimeOut);
+            try
+            {
+                //*********对帐户库集合加读锁***********
+                m_container_lock.AcquireReaderLock(m_nContainerLockTimeOut);
 #if DEBUG_LOCK
 			this.WriteDebugInfo("ShearchUser()，对数据库集合加读锁。");
 #endif
-            try
-            {
-                // return:
-                //		-1	出错
-                //		0	成功
-                nRet = this.SearchUserInternal(strUserName,
-                    resultSet,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            finally
-            {
-                //*********对帐户库集合解读锁*************
-                m_container_lock.ReleaseReaderLock();
+                try
+                {
+                    // return:
+                    //		-1	出错
+                    //		0	成功
+                    nRet = this.SearchUserInternal(strUserName,
+                        resultSet,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                finally
+                {
+                    //*********对帐户库集合解读锁*************
+                    m_container_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
 				this.WriteDebugInfo("ShearchUser()，对数据库集合解读锁。");
 #endif
+                }
+
+                // 根据用户名没找到对应的帐户记录
+                long lCount = resultSet.Count;
+                if (lCount == 0)
+                    return 0;
+
+                if (lCount > 1)
+                {
+                    strError = "用户名'" + strUserName + "'对应多条记录";
+                    return -1;
+                }
+
+                // 按第一个帐户算
+                record = (DpRecord)resultSet[0];
             }
-
-            // 根据用户名没找到对应的帐户记录
-            long lCount = resultSet.Count;
-            if (lCount == 0)
-                return 0;
-
-            if (lCount > 1)
+            finally
             {
-                strError = "用户名'" + strUserName + "'对应多条记录";
-                return -1;
+                // 2016/1/23 卸载事件
+                resultSet.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
             }
 
-            // 按第一个帐户算
-            DpRecord record = (DpRecord)resultSet[0];
-
-            // 创建一个DpPsth实例
             DbPath path = new DbPath(record.ID);
 
             // 找到指定帐户数据库
@@ -6260,7 +6266,7 @@ ChannelIdleEventArgs e);
 
                 this.ErrorString = "检索线程(2): " + ex.Message + "; connection hashcode='" + strConnectionName + "'";
             }
-			finally  // 一定要返回信号
+            finally  // 一定要返回信号
             {
                 m_event.Set();
 

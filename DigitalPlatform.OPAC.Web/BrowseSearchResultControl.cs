@@ -1934,6 +1934,10 @@ namespace DigitalPlatform.OPAC.Web
                             {
                                 this.SetErrorInfo(ex.Message); // 显示出错信息
                                 this.ResultsetFilename = "";
+
+                                // 2016/1/23
+                                resultset.Dispose();
+                                resultset = null;
                                 goto REDO;
                             }
 

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 using System.Threading;
 using System.Diagnostics;
@@ -74,6 +72,7 @@ namespace DigitalPlatform.rms
                     return null;
 
                 resultset = new DpResultSet(GetTempFileName);
+                // 注：这里要特别注意在 resultset 对象销毁以前卸载事件
                 resultset.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
 
                 if (this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
@@ -146,7 +145,16 @@ namespace DigitalPlatform.rms
                 {
                     if (resultset == null)
                     {
-
+                        foreach (string key in this.Keys)
+                        {
+                            // 2016/1/23
+                            resultset = (DpResultSet)this[key];
+                            if (resultset != null)
+                            {
+                                resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
+                                resultset.Close();
+                            }
+                        }
                         this.Clear();
                         return null;
                     }
@@ -155,14 +163,18 @@ namespace DigitalPlatform.rms
                 }
                 if (resultset == null)
                 {
+                    // 2016/1/23
+                    resultset = (DpResultSet)this[strName];
+                    if (resultset != null)
+                    {
+                        resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
+                        resultset.Close();
+                    }
+
                     this.Remove(strName);
                     return strName;
                 }
 
-                // TODO: 如果临时文件目录在 session 临时目录下面，则要考虑移动文件
-                // TODO: 如果本来就在全局?
-
-                // TODO: 配额管理
                 resultset.Touch();
                 this[strName] = resultset;
                 return strName;
@@ -173,6 +185,9 @@ namespace DigitalPlatform.rms
             }
         }
 
+        // 清除最近没有使用过的 ResultSet 对象
+        // parameters:
+        //      delta   最近一次用过的时刻距离现在的时间长度。长于这个的对象才会被清除
         public void Clean(TimeSpan delta)
         {
             List<string> remove_keys = new List<string>();
@@ -184,14 +199,14 @@ namespace DigitalPlatform.rms
             {
                 foreach (string key in this.Keys)
                 {
-                    DpResultSet info = (DpResultSet)this[key];
+                    DpResultSet resultset = (DpResultSet)this[key];
 
-                    if (info == null)
+                    if (resultset == null)
                         continue;
 
-                    if ((DateTime.Now - info.LastUsedTime) >= delta)
+                    if ((DateTime.Now - resultset.LastUsedTime) >= delta)
                     {
-                        remove_keys.Add(key);   // 这里不能删除，因为 foreach 还要用枚举器
+                        remove_keys.Add(key);   // 这里暂时无法删除，因为 foreach 还要用枚举器
                     }
                 }
             }
@@ -204,21 +219,21 @@ namespace DigitalPlatform.rms
                 return;
 
             // 因为要删除某些元素，所以用写锁定
-            List<DpResultSet> delete_sessions = new List<DpResultSet>();
+            List<DpResultSet> delete_resultsets = new List<DpResultSet>();
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new ApplicationException("锁定尝试中超时");
             try
             {
                 foreach (string key in remove_keys)
                 {
-                    DpResultSet info = (DpResultSet)this[key];
-                    if (info == null)
-                        continue;   // sessionid 没有找到对应的 Session 对象
+                    DpResultSet resultset = (DpResultSet)this[key];
+                    if (resultset == null)
+                        continue;
 
-                    // 和 sessionid 的 hashtable 脱离关系
+                    // 和 hashtable 脱离关系
                     this.Remove(key);
 
-                    delete_sessions.Add(info);
+                    delete_resultsets.Add(resultset);
                 }
             }
             finally
@@ -226,11 +241,14 @@ namespace DigitalPlatform.rms
                 this.m_lock.ExitWriteLock();
             }
 
-            foreach (DpResultSet info in delete_sessions)
+            foreach (DpResultSet resultset in delete_resultsets)
             {
-                info.Close();
+                // 2016/1/23
+                if (resultset != null)
+                    resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
+
+                resultset.Close();
             }
         }
-
     }
 }
