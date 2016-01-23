@@ -1346,18 +1346,15 @@ namespace DigitalPlatform.OPAC.Web
                         }
                         finally
                         {
-
                             string strTemp1 = "";
                             string strTemp2 = "";
                             resultset.Detach(out strTemp1, out strTemp2);
                         }
-
                     }
                     finally
                     {
                         app.ResultsetLocks.UnlockForRead(strResultsetFilename);
                     }
-
                 }
                 else
                 {
@@ -1918,10 +1915,8 @@ namespace DigitalPlatform.OPAC.Web
 
                 try
                 {
-
                     try
                     {
-
                         if (String.IsNullOrEmpty(this.ResultsetFilename) == false)
                         {
                             int nOffsetStart = 0;
@@ -2080,7 +2075,6 @@ namespace DigitalPlatform.OPAC.Web
 
                             CheckBox checkbox = (CheckBox)this.FindControl("line" + Convert.ToString(i) + "_checkbox");
 
-
                             // 序号
                             string strNo = "&nbsp;";
                             if (cols != null)
@@ -2143,7 +2137,6 @@ namespace DigitalPlatform.OPAC.Web
                                     this.Controls.Remove(itemcontrol);
                                     this.Controls.Remove(bibliocontrol);
 
-
                                     layout_holder.Controls.Add(new LiteralControl("<table class='item_and_biblio'><tr><td class='item'>"));
                                     layout_holder.Controls.Add(itemcontrol);
                                     layout_holder.Controls.Add(new LiteralControl("</td><td class='biblio'>"));
@@ -2171,7 +2164,6 @@ namespace DigitalPlatform.OPAC.Web
                                     line.Controls.Add(new LiteralControl(
                                         "<td class='comment'>"
                                     ));
-
 
                                     string strParentID = "";
                                     nRet = commentcontrol.LoadRecord(strItemPath,
@@ -2205,7 +2197,6 @@ namespace DigitalPlatform.OPAC.Web
                                     // 重新布局
                                     this.Controls.Remove(commentcontrol);
                                     this.Controls.Remove(bibliocontrol);
-
 
                                     layout_holder.Controls.Add(new LiteralControl("<table class='comment_and_biblio'><tr><td class='comment'>"));
                                     layout_holder.Controls.Add(commentcontrol);
@@ -2287,8 +2278,6 @@ namespace DigitalPlatform.OPAC.Web
                                 pathcontrol.NavigateUrl = "./book.aspx?BiblioRecPath=" + HttpUtility.UrlEncode(strPath);
                             else
                                 pathcontrol.NavigateUrl = "";
-
-
 
                             // 内容
 
@@ -2409,9 +2398,6 @@ namespace DigitalPlatform.OPAC.Web
                                         goto SKIP0;
                                     }
 
-
-
-
                                     if (format.Type == "biblio")
                                     {
                                         // 插入控件
@@ -2459,8 +2445,6 @@ namespace DigitalPlatform.OPAC.Web
                                     string strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
                                         strDbName,
                                         format.ScriptFileName);
-
-
 
                                     nRet = app.CfgsMap.MapFileToLocal(
                                             GetManagerSession(app).Channel,
@@ -2553,7 +2537,6 @@ namespace DigitalPlatform.OPAC.Web
                                     }
                                     else
                                     {
-
                                         nRet = app.ConvertRecordXmlToHtml(
                                             strLocalPath,
                                             strLocalPath + ".ref",
@@ -2597,16 +2580,12 @@ namespace DigitalPlatform.OPAC.Web
                             itemcontrol.Visible = false;
                             commentcontrol.Visible = false;
 
-
                         SKIP1:
 
                             if (cols == null)
                                 checkbox.Visible = false;
                             continue;
-
                         } // end of for
-
-
                     }
                     finally
                     {

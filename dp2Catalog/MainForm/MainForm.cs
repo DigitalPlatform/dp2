@@ -3694,6 +3694,7 @@ out string strError)
             finally
             {
                 // 归还对象
+                filter.FilterHost = null;   // 2016/1/23
                 this.Filters.SetFilter(strFilterFileName, filter);
             }
 

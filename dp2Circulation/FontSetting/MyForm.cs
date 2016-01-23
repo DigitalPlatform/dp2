@@ -1146,6 +1146,7 @@ string strUserName = ".")
             finally
             {
                 // 归还对象
+                filter.FilterHost = null;   // 2016/1/23
                 this.MainForm.Filters.SetFilter(strFilterFileName, filter);
             }
 

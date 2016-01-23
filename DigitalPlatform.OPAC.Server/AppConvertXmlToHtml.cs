@@ -311,6 +311,7 @@ namespace DigitalPlatform.OPAC.Server
             finally
             {
                 // 归还对象
+                filter.FilterHost = null;  // 2016/1/23
                 app.Filters.SetFilter(strFilterFileName, filter);
             }
 

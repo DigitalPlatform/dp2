@@ -46,7 +46,7 @@ namespace DigitalPlatform.ResultSet
         {
             List<DpRecord> results = new List<DpRecord>();
             results.Add(start);
-            for (int i=nStart+1; i<results.Count ; i++) // BUG !!!
+            for (int i = nStart + 1; i < results.Count; i++) // BUG !!!
             {
                 DpRecord record = (DpRecord)resultset[i];
                 if (record == null)
@@ -103,7 +103,7 @@ namespace DigitalPlatform.ResultSet
                 {
                     // 对缓冲区内的每个 8 byte 进行整值的增量
                     if ((n % 8) != 0)
-                        throw new Exception("复制index文件过程中发现片断长度 "+n.ToString()+" 不是 8 的整倍数");
+                        throw new Exception("复制index文件过程中发现片断长度 " + n.ToString() + " 不是 8 的整倍数");
                     int nCount = n / 8;
                     for (int i = 0; i < nCount; i++)
                     {
@@ -135,12 +135,12 @@ namespace DigitalPlatform.ResultSet
             if ((target.Length % 8) != 0)
             {
                 throw new Exception("复制前目标index文件长度 " + target.Length.ToString() + " 不是 8 的整倍数");
-            } 
+            }
             long lLength = source.Length;
             if ((lLength % 8) != 0)
             {
                 throw new Exception("复制前源index文件长度 " + lLength.ToString() + " 不是 8 的整倍数");
-            } 
+            }
             long lCount = lLength / 8;
 
             source.Seek(0, SeekOrigin.Begin);
@@ -319,13 +319,13 @@ namespace DigitalPlatform.ResultSet
                 {
                     strError = "复制index缓冲区前发现目标缓冲区长度 " + sourceLeft.m_bufferSmall.Length.ToString() + " 不是 8 的整倍数";
                     return -1;
-                } 
+                }
                 int nLength = sourceRight.m_bufferSmall.Length;
                 if ((nLength % 8) != 0)
                 {
                     strError = "复制index缓冲区前发现源缓冲区长度 " + nLength.ToString() + " 不是 8 的整倍数";
                     return -1;
-                } 
+                }
                 // 复制相加索引部分
                 sourceLeft.m_bufferSmall = ByteArray.Add(sourceLeft.m_bufferSmall, sourceRight.m_bufferSmall);
                 Debug.Assert(sourceLeft.m_bufferSmall.Length == sourceRight.m_bufferSmall.Length + nLength, "");
@@ -527,7 +527,7 @@ namespace DigitalPlatform.ResultSet
                     }
                     catch (Exception e)
                     {
-                        Exception ex = new Exception("取SourceLeft集合出错：i=" + Convert.ToString(i) + "----Count=" + Convert.ToString(sourceLeft.Count) + ", internel error :" + e.Message+ "<br/>");
+                        Exception ex = new Exception("取SourceLeft集合出错：i=" + Convert.ToString(i) + "----Count=" + Convert.ToString(sourceLeft.Count) + ", internel error :" + e.Message + "<br/>");
                         throw (ex);
                     }
                 }
@@ -1041,14 +1041,14 @@ namespace DigitalPlatform.ResultSet
                 return Path.GetTempFileName();
             }
 
-            Debug.Assert(string.IsNullOrEmpty(e.TempFilename) == false , "");
+            Debug.Assert(string.IsNullOrEmpty(e.TempFilename) == false, "");
             return e.TempFilename;
         }
 
         public delegate string Delegate_getTempFileName();
 
         // 
-        public void Open(bool bCreateIndex, 
+        public void Open(bool bCreateIndex,
             Delegate_getTempFileName procGetTempFileName = null)
         {
             if (m_streamBig == null)
@@ -1256,7 +1256,7 @@ namespace DigitalPlatform.ResultSet
             {
                 this.m_strSmallFileName = strSmallFileName;
 
-                m_streamSmall = File.Open(m_strSmallFileName, 
+                m_streamSmall = File.Open(m_strSmallFileName,
                     FileMode.Open,
                     FileAccess.ReadWrite,
                     FileShare.ReadWrite);
@@ -1278,7 +1278,7 @@ namespace DigitalPlatform.ResultSet
             CloseAndDeleteBigFile();
 
             m_strBigFileName = strFileName;
-            m_streamBig = File.Open(m_strBigFileName, 
+            m_streamBig = File.Open(m_strBigFileName,
                 FileMode.OpenOrCreate,  // ???
                 FileAccess.ReadWrite,
                     FileShare.ReadWrite);   // 2010/10/11 changed
@@ -2028,11 +2028,11 @@ namespace DigitalPlatform.ResultSet
             try
             {
              * */
-                Array.Copy(this.m_bufferBig,
-        lOffset,
-        bufferText,
-        0,
-        nLength);
+            Array.Copy(this.m_bufferBig,
+    lOffset,
+    bufferText,
+    0,
+    nLength);
             /*
             }
             catch (Exception ex)
@@ -2075,7 +2075,7 @@ namespace DigitalPlatform.ResultSet
 
             if (4 + nLength > nMaxLength)
             {
-                throw (new Exception("当前小包的长度(4+"+nLength.ToString()+")超出总限制长度 " + nMaxLength.ToString()));
+                throw (new Exception("当前小包的长度(4+" + nLength.ToString() + ")超出总限制长度 " + nMaxLength.ToString()));
             }
 
             nMaxLength = nMaxLength - (4 + nLength);
@@ -2109,11 +2109,11 @@ namespace DigitalPlatform.ResultSet
                 try
                 {
                  * */
-                    Array.Copy(this.m_bufferBig,
-                        lOffset,
-                        bufferLength,
-                        0,
-                        4);
+                Array.Copy(this.m_bufferBig,
+                    lOffset,
+                    bufferLength,
+                    0,
+                    4);
                 /*
                 }
                 catch (Exception ex)
@@ -2288,7 +2288,6 @@ namespace DigitalPlatform.ResultSet
             return 0;
         }
 
-
         //排序
         public void Sort()
         {
@@ -2318,17 +2317,12 @@ namespace DigitalPlatform.ResultSet
                 WriteToDisk(true, false);
 
                 this.Sorted = true;
-
             }
             finally
             {
-
-
                 this.m_bufferSmall = null;
                 this.m_bufferBig = null;
-
             }
-
 
             delta = DateTime.Now - start_time;
             Debug.WriteLine("QuickSort() 耗时 " + delta.ToString());
@@ -2523,7 +2517,6 @@ namespace DigitalPlatform.ResultSet
 
                     Debug.Assert(oStream.Position - 8 >= 0, "");
 
-
                     long lSavePosition = oStream.Position;
 
                     StreamUtil.Move(oStream,
@@ -2573,7 +2566,6 @@ namespace DigitalPlatform.ResultSet
             target.AddRange(source);
             //lLength += source.Length ;
         }
-
 
         public void WriteBuffer(ByteList target,
             string strSource,
@@ -2667,9 +2659,6 @@ namespace DigitalPlatform.ResultSet
             m_count++;
         }
 
-
-
-
         // 2011/1/1
         // 在数据文件中直接搜索事项的起点偏移量。
         //	当然，这样速度很慢
@@ -2721,7 +2710,6 @@ namespace DigitalPlatform.ResultSet
 
             return -1;
         }
-
 
         // 2011/1/1
         // 自动选择从何处删除
@@ -2802,31 +2790,29 @@ namespace DigitalPlatform.ResultSet
             int nCount)
         {
 
-                if (nIndex < 0 || nIndex + nCount > m_count)
-                {
-                    throw (new Exception("下标 " + Convert.ToString(nIndex) + " 越界(Count=" + Convert.ToString(m_count) + ")"));
-                }
+            if (nIndex < 0 || nIndex + nCount > m_count)
+            {
+                throw (new Exception("下标 " + Convert.ToString(nIndex) + " 越界(Count=" + Convert.ToString(m_count) + ")"));
+            }
 
-                int nRet = 0;
-                if (m_streamSmall != null) // 有索引文件时
-                {
-                    // nRet = RemoveAtIndex(nIndex);
-                    nRet = CompressRemoveAtIndex(nIndex, nCount);
-                }
-                else
-                {
-                    throw (new Exception("暂时还没有编写"));
+            int nRet = 0;
+            if (m_streamSmall != null) // 有索引文件时
+            {
+                // nRet = RemoveAtIndex(nIndex);
+                nRet = CompressRemoveAtIndex(nIndex, nCount);
+            }
+            else
+            {
+                throw (new Exception("暂时还没有编写"));
+            }
 
-                }
+            if (nRet == -1)
+            {
+                throw (new Exception("RemoveAtAuto fail"));
+            }
 
-
-                if (nRet == -1)
-                {
-                    throw (new Exception("RemoveAtAuto fail"));
-                }
-
-                m_count -= nCount;
-                // bDirty = true;	// 表示已经有标记删除的事项了
+            m_count -= nCount;
+            // bDirty = true;	// 表示已经有标记删除的事项了
         }
 
         // 2011/1/1
@@ -2853,11 +2839,9 @@ namespace DigitalPlatform.ResultSet
         public virtual void Insert(int nIndex,
             DpRecord record)
         {
-
             // 若不存在索引文件
             if (m_streamSmall == null)
                 throw (new Exception("暂不支持无索引文件方式下的插入操作"));
-
 
             // 将数据文件指针置于尾部
             m_streamBig.Seek(0,
@@ -2922,7 +2906,6 @@ namespace DigitalPlatform.ResultSet
             m_streamBig.Write(bufferAll, 0, bufferAll.Length);
             m_count++;
         }
-
 
         /// <summary>
         /// 排序
@@ -3067,7 +3050,6 @@ namespace DigitalPlatform.ResultSet
                 }
             }
 
-
             return 0;
         }
 
@@ -3086,7 +3068,6 @@ namespace DigitalPlatform.ResultSet
             long T = 0;
             int nRet;
             long nSplit;
-
 
             nMiddle = (nStart + nEnd) / 2;
 
@@ -3138,7 +3119,6 @@ namespace DigitalPlatform.ResultSet
                     pSplit = pEnd;
                     nSplit = nEnd;
                 }
-
             }
 
             // 
@@ -3186,7 +3166,6 @@ namespace DigitalPlatform.ResultSet
             SetRowPtr(i, T);
             nSplitPos = i;
         }
-
 
         public void SetRowPtr(long nIndex, long lPtr)
         {

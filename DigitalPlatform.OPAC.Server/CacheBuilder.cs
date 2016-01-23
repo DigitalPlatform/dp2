@@ -234,7 +234,7 @@ namespace DigitalPlatform.OPAC.Server
                 Debug.Assert(this.App != null, "");
 
                 // 写入文件，记忆已经做过的当日时间
-                string strLastTime = DateTimeUtil.Rfc1123DateTimeString(DateTime.UtcNow/*(this.App.Clock.UtcNow*/); 
+                string strLastTime = DateTimeUtil.Rfc1123DateTimeString(DateTime.UtcNow/*(this.App.Clock.UtcNow*/);
                 WriteLastTime(strMonitorName,
                     strLastTime);
                 string strErrorText = (bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + "结束。共处理记录 " + nTotalRecCount.ToString() + " 个。";
@@ -444,11 +444,11 @@ namespace DigitalPlatform.OPAC.Server
 
                 if (strPart[0] == '%')
                 {
-                    text.Append( MacroTimeValue(strPart));
+                    text.Append(MacroTimeValue(strPart));
                 }
                 else
                 {
-                    text.Append( strPart);
+                    text.Append(strPart);
                 }
             }
 
@@ -523,10 +523,10 @@ namespace DigitalPlatform.OPAC.Server
             strMacro = strMacro.Replace("%year%", Convert.ToString(time.Year).PadLeft(4, '0'));
 
             // 当前的上一年
-            strMacro = strMacro.Replace("%prevyear%", Convert.ToString(time.Year-1).PadLeft(4, '0'));
+            strMacro = strMacro.Replace("%prevyear%", Convert.ToString(time.Year - 1).PadLeft(4, '0'));
 
             // 当前的下一年
-            strMacro = strMacro.Replace("%nextyear%", Convert.ToString(time.Year+1).PadLeft(4, '0'));
+            strMacro = strMacro.Replace("%nextyear%", Convert.ToString(time.Year + 1).PadLeft(4, '0'));
 
 
             // 年 y2
@@ -806,7 +806,7 @@ namespace DigitalPlatform.OPAC.Server
                             this.Channel.Abort();
                             this.Channel.Timeout = this.Channel.Timeout.Add(this.Channel.Timeout);
                             nRedoCount++;
-                            this.AppendResultText("警告：检索发生超时(耗费时间 "+delta.TotalMilliseconds.ToString()+" 秒), 自动重试 (" + nRedoCount.ToString() + ")\r\n");
+                            this.AppendResultText("警告：检索发生超时(耗费时间 " + delta.TotalMilliseconds.ToString() + " 秒), 自动重试 (" + nRedoCount.ToString() + ")\r\n");
                             goto REDO_SEARCH;
                         }
 
@@ -1357,15 +1357,11 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
             DpResultSet resultset = null;
-
-
             try
             {
-
                 resultset = new DpResultSet(false, false);
                 resultset.Attach(strResultsetFilename,
         strResultsetFilename + ".index");
-
             }
             catch (Exception ex)
             {
@@ -1420,7 +1416,6 @@ namespace DigitalPlatform.OPAC.Server
                     resultset = new DpResultSet(false, false);
                     resultset.Create(strResultsetFilename,
                         strResultsetFilename + ".index");
-
                 }
             }
             catch (Exception ex)
@@ -1547,7 +1542,7 @@ namespace DigitalPlatform.OPAC.Server
                                 && rec.RecordBody.Result != null
                                 && rec.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
                             {
-                                strError = "获得结果集位置偏移 "+(lStart + j).ToString()+" 时出错，该记录已被忽略: " + rec.RecordBody.Result.ErrorString;
+                                strError = "获得结果集位置偏移 " + (lStart + j).ToString() + " 时出错，该记录已被忽略: " + rec.RecordBody.Result.ErrorString;
                                 this.AppendResultText(strError + "\r\n");
                                 continue;
                             }
@@ -1569,7 +1564,7 @@ namespace DigitalPlatform.OPAC.Server
 #endif
                             if (rec.Cols == null || rec.Cols.Length == 0)
                             {
-                                strError = "获得结果集位置偏移 "+(lStart + j).ToString()+" 时出错： rec.Cols 为空";
+                                strError = "获得结果集位置偏移 " + (lStart + j).ToString() + " 时出错： rec.Cols 为空";
                                 this.AppendResultText(strError + "\r\n");
                                 continue;
                             }
@@ -1687,7 +1682,7 @@ namespace DigitalPlatform.OPAC.Server
                     {
                         this.SetProgressText("正在排序");
 
-                        this.AppendResultText("开始排序。事项数 "+resultset.Count+"\r\n");
+                        this.AppendResultText("开始排序。事项数 " + resultset.Count + "\r\n");
                         resultset.QuickSort();
                         this.AppendResultText("结束排序。事项数 " + resultset.Count + "\r\n");
 
@@ -1755,7 +1750,7 @@ namespace DigitalPlatform.OPAC.Server
 
             if (StringUtil.IsPureNumber(strParentID) == false)
             {
-                strError = "strParentID '"+strParentID+"' 不是纯数字，无法获得书目记录路径";
+                strError = "strParentID '" + strParentID + "' 不是纯数字，无法获得书目记录路径";
                 return -1;
             }
 
@@ -1830,7 +1825,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
                 if (string.IsNullOrEmpty(strBiblioDbName) == true)
                 {
-                    strError = "实体库 '"+strItemDbName+"' 没有找到对应的书目库名";
+                    strError = "实体库 '" + strItemDbName + "' 没有找到对应的书目库名";
                     return -1;
                 }
                 m_biblioDbNameTable[strItemDbName] = strBiblioDbName;
@@ -1842,8 +1837,8 @@ namespace DigitalPlatform.OPAC.Server
             {
                 strError = "册记录XML中 <parent> 元素为空，无法获得书目记录路径";
                 return -1;
-            } 
-            
+            }
+
             strBiblioRecPath = strBiblioDbName + "/" + strParentID;
 
             return 1;
@@ -2273,7 +2268,6 @@ out strError);
                         writer.WriteString(strLink);
                         writer.WriteEndElement();
 
-
                         writer.WriteStartElement("pubDate");
                         writer.WriteString(strPubDate);
                         writer.WriteEndElement();
@@ -2282,7 +2276,6 @@ out strError);
 
                         nOutputCount++;
                     }
-
                 }
                 finally
                 {
@@ -2290,7 +2283,6 @@ out strError);
                     string strTemp2 = "";
                     resultset.Detach(out strTemp1, out strTemp2);
                 }
-
 
                 writer.WriteEndElement();   // </channel>
                 writer.WriteEndElement();   // </rss>

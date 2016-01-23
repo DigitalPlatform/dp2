@@ -637,6 +637,5 @@ namespace DigitalPlatform.LibraryServer
         ERROR1:
             return -1;
         }
-
     }
 }
