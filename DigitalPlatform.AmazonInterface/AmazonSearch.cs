@@ -84,10 +84,13 @@ namespace DigitalPlatform.AmazonInterface
             disposed = true;
         }
 
+#if NO
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         ~AmazonSearch()
         {
             Dispose(false);
         }
+#endif
 
         // 构造检索式
         int BuildQueryString(

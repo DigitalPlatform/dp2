@@ -401,7 +401,6 @@ namespace DigitalPlatform.LibraryServer
             Dispose(false);
         }
 
-
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.

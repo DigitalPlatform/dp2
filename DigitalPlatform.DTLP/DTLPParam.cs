@@ -25,6 +25,8 @@ namespace DigitalPlatform.DTLP
 		{
 
 		}
+
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
 		~Param() 
 		{
 		}
@@ -44,10 +46,10 @@ namespace DigitalPlatform.DTLP
 			//
 		}
 
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
 		~DTLPParam()
 		{
 		}
-
 
 		void RemoveAll()
 		{

@@ -34,7 +34,7 @@ ref sessioninfo) == false)
             return;
 
         // 是否登录?
-        if (sessioninfo.UserID == "")
+        if (string.IsNullOrEmpty(sessioninfo.UserID) == true)
         {
             sessioninfo.UserID = "public";
             sessioninfo.IsReader = false;
@@ -86,6 +86,13 @@ ref sessioninfo) == false)
             byte[] timestamp = null;
 
             string[] results = null;
+
+            // 2016/1/24
+            if (string.IsNullOrEmpty(sessioninfo.UserID) == true)
+            {
+                strError = "sessioninfo.UserID 为空 {F548F93A-3ED7-4F7A-8729-CD65E375D360}";
+                goto ERROR1;
+            }
 
             LibraryChannel channel = null;
 #if CHANNEL_POOL

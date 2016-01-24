@@ -333,11 +333,9 @@ namespace DigitalPlatform.OPAC.Web
             bibliocontrol.WantFocus += new WantFocusEventHandler(bibliocontrol_WantFocus);
             biblioinfo_holder.Controls.Add(bibliocontrol);
 
-
             auto_literal = new AutoIndentLiteral();
             auto_literal.Text = "<%end%></td><%end%></tr>";
             line.Controls.Add(auto_literal);
-
             return line;
         }
 

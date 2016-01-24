@@ -18,6 +18,7 @@ using DigitalPlatform;	// Stop类
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 /*
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
@@ -33,6 +34,18 @@ namespace DigitalPlatform.OPAC.Server
     /// </summary>
     public partial class OpacApplication
     {
+        public LibraryChannel GetChannel()
+        {
+            LibraryChannel channel = this.ChannelPool.GetChannel(this.WsUrl, this.ManagerUserName);
+            channel.Password = this.ManagerPassword;
+            return channel;
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            this.ChannelPool.ReturnChannel(channel);
+        }
+
 
         // OPAC所用的浏览列定义缓存
         // 库名 --> List<BrowseColumnCaption>
@@ -98,36 +111,38 @@ namespace DigitalPlatform.OPAC.Server
             string strRemotePath = strDbName + "/cfgs/browse";
             string strLocalPath = "";
 
+#if NO
             // 临时的SessionInfo对象
             SessionInfo session = new SessionInfo(this);
             session.UserID = this.ManagerUserName;
             session.Password = this.ManagerPassword;
             session.IsReader = false;
             session.Parameters = "";    // 2014/12/23
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             try
             {
                 int nRet = this.CfgsMap.MapFileToLocal(
-                    session.Channel,
+                    channel,    //session.Channel,
                     strRemotePath,
                     out strLocalPath,
                     out strError);
-
                 if (nRet == -1)
                 {
                     strError = "获得配置文件 '" + strRemotePath + "' 时发生错误：" + strError;
                     return -1;
                 }
 
-
                 if (nRet == 0)
-                {
                     return 0;
-                }
             }
             finally
             {
+#if NO
                 session.CloseSession();
+#endif
+                this.ReturnChannel(channel);
             }
 
             XmlDocument dom = new XmlDocument();
@@ -194,7 +209,6 @@ namespace DigitalPlatform.OPAC.Server
                 one.ColumnCaptions = new List<string>();
                 defs.Add(one);
 
-
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("//col");
                 for (int j = 0; j < nodes.Count; j++)
                 {
@@ -207,7 +221,6 @@ namespace DigitalPlatform.OPAC.Server
                 goto REDO;
             }
         }
-
     }
 
     public class BrowseColumnCaption

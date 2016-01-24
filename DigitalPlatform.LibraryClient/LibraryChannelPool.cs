@@ -58,12 +58,11 @@ namespace DigitalPlatform.LibraryClient
                     if (nDeleteCount == 0)
                     {
                         // 全部都在使用
-                        throw new Exception("通道池已满，请稍候重试获取通道");
+                        throw new Exception("通道池已满，请稍后重试获取通道");
                     }
                 }
 
                 // 如果没有找到
-
                 LibraryChannel inner_channel = new LibraryChannel();
                 inner_channel.Url = strUrl;
                 inner_channel.UserName = strUserName;
@@ -84,7 +83,6 @@ namespace DigitalPlatform.LibraryClient
             {
                 this.m_lock.ExitWriteLock();
             }
-
         }
 
         void inner_channel_AfterLogin(object sender, AfterLoginEventArgs e)

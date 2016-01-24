@@ -678,7 +678,7 @@ namespace dp2Circulation
             if (strOutMarcSyntax == "unimarc")
             {
                 string h = record.select("field[@name='200']/subfield[@name='h']").FirstContent;
-                string i = record.select("field[@name='200']/subfield[@name='h']").FirstContent;
+                string i = record.select("field[@name='200']/subfield[@name='i']").FirstContent;
                 if (string.IsNullOrEmpty(h) == false && string.IsNullOrEmpty(i) == false)
                     strVolume = h + " . " + i;
                 else

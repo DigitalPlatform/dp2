@@ -17,6 +17,7 @@ namespace DigitalPlatform.IO
 		public string m_strFileName;
 	}
 
+#if NO
 	// 临时文件容器
 	public class TempFileCollection : ArrayList
 	{
@@ -24,6 +25,7 @@ namespace DigitalPlatform.IO
 		{
 		}
 
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
 		~TempFileCollection() 
 		{
 			Clear();
@@ -31,7 +33,6 @@ namespace DigitalPlatform.IO
 
 		public new void Clear() 
 		{
-
 			int l;
 			for(l=0; l<this.Count; l++) 
 			{
@@ -56,6 +57,7 @@ namespace DigitalPlatform.IO
 			base.Clear();
 		}
 	}
+#endif
 
 	public delegate bool FlushOutput();
 	public delegate bool ProgressOutput(long lCur);

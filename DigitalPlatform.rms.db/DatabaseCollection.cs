@@ -406,6 +406,8 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+#if NO
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         // 析构函数
         ~DatabaseCollection()
         {
@@ -414,6 +416,7 @@ namespace DigitalPlatform.rms
             this.WriteErrorLog("析构DatabaseCollection对象完成。");
              */
         }
+#endif
 
         public void Commit()
         {

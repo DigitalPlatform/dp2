@@ -32,6 +32,15 @@ namespace DigitalPlatform.OPAC.Web
         public event EventHandler Refreshed = null;
         public event LibraryCodeChangedEventHandler LibraryCodeChanged = null;
 
+        public override void Dispose()
+        {
+            this.Refreshing = null;
+            this.Refreshed = null;
+            this.LibraryCodeChanged = null;
+
+            base.Dispose();
+        }
+
         public string Dp2Sso = "";
 
         static string[] langs = new string[] {
@@ -111,8 +120,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.Page.Session[this.ID + "TitleBarControl_readerbarcode"] = value;
             }
         }
-
-        // public event GetInboxUnreadCountEventHandler GetInboxUnreadCount;
 
         // 当前所在的栏目
         public TitleColumn CurrentColumn = TitleColumn.None;
@@ -1616,7 +1623,6 @@ strLibraryStyleDir,
             literal = new AutoIndentLiteral();
             literal.Text = "</td>";
             this.Controls.Add(literal);
-
         }
 
         int GetParentCount()

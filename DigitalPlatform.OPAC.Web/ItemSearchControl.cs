@@ -23,6 +23,15 @@ namespace DigitalPlatform.OPAC.Web
     [ToolboxData("<{0}:ItemSearchControl runat=server></{0}:ItemSearchControl>")]
     public class ItemSearchControl : WebControl, INamingContainer
     {
+        public event SearchEventHandler Search;
+
+        public override void Dispose()
+        {
+            this.Search = null;
+
+            base.Dispose();
+        }
+
         ResourceManager m_rm = null;
 
         ResourceManager GetRm()
@@ -107,8 +116,6 @@ namespace DigitalPlatform.OPAC.Web
                 return Thread.CurrentThread.CurrentUICulture.Name;
             }
         }
-
-        public event SearchEventHandler Search;
 
         public int LineCount
         {

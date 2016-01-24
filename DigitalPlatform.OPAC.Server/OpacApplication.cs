@@ -84,6 +84,7 @@ namespace DigitalPlatform.OPAC.Server
         // filename:nodepath --> count
         public Hashtable BrowseNodeCountTable = new Hashtable();
 
+        // test leak
         public ChatRoomCollection ChatRooms = new ChatRoomCollection();
 
         public bool XmlLoaded = false;  // dp2library中的xml定义是否成功装载。报错信息不好在这里记载，因为可能在线程重试的过程中，内容尺寸太大。应该是从当日日志文件读取最好了
@@ -96,7 +97,6 @@ namespace DigitalPlatform.OPAC.Server
         string m_strFileName = "";  // opac.xml配置文件全路径
         string m_strWebuiFileName = ""; // webui.xml配置文件全路径
 
-
         public string DataDir = "";
         public string HostDir = "";
 
@@ -107,6 +107,7 @@ namespace DigitalPlatform.OPAC.Server
         public string StatisDir = "";   // 统计文件存放目录
         public string SessionDir = "";  // session临时文件
         public string ReportDir = "";   // 报表目录
+        public string TempDir = ""; // 临时文件目录 2016/1/24
 
         public string WsUrl = "";	// dp2Library WebService URL
 
@@ -368,36 +369,32 @@ namespace DigitalPlatform.OPAC.Server
                 this.DataDir = strDataDir;
                 this.HostDir = strHostDir;
 
-                string strFileName = PathUtil.MergePath(strDataDir, "opac.xml");
-                string strBinDir = PathUtil.MergePath(strHostDir, "bin");
-                string strCfgDir = PathUtil.MergePath(strDataDir, "cfgs");
-                string strCfgMapDir = PathUtil.MergePath(strDataDir, "cfgsmap");
-                string strLogDir = PathUtil.MergePath(strDataDir, "log");
-                string strSessionDir = PathUtil.MergePath(strDataDir, "session");
-                string strColumnDir = PathUtil.MergePath(strDataDir, "column");
-                // string strStyleDir = PathUtil.MergePath(strDataDir, "style");
+                app.m_strFileName =  Path.Combine(strDataDir, "opac.xml");
 
-                // PathUtil.CreateDirIfNeed(strStyleDir);	// 确保目录创建
+                // 配置文件目录
+                app.CfgDir = Path.Combine(strDataDir, "cfgs");
 
+                // 本地映射配置文件目录
+                app.CfgMapDir = Path.Combine(strDataDir, "cfgsmap");
+                PathUtil.CreateDirIfNeed(app.CfgMapDir);
 
-                app.m_strFileName = strFileName;
+                // 日志存储目录
+                app.LogDir = Path.Combine(strDataDir, "log");
+                PathUtil.CreateDirIfNeed(app.LogDir);
 
-                app.CfgDir = strCfgDir;
+                // session 临时文件目录
+                app.SessionDir = Path.Combine(strDataDir, "session");
+                PathUtil.CreateDirIfNeed(app.SessionDir);
 
-                app.CfgMapDir = strCfgMapDir;
-                PathUtil.CreateDirIfNeed(app.CfgMapDir);	// 确保目录创建
+                // 临时文件目录
+                app.TempDir = Path.Combine(strDataDir, "temp");
+                PathUtil.CreateDirIfNeed(app.TempDir);
 
-
-                // log
-                app.LogDir = strLogDir;	// 日志存储目录
-                PathUtil.CreateDirIfNeed(app.LogDir);	// 确保目录创建
-
-                // session临时文件
-                app.SessionDir = strSessionDir;
-                PathUtil.CreateDirIfNeed(app.SessionDir);	// 确保目录创建
+                if (PathUtil.TryClearDir(app.TempDir) == false)
+                    this.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
 
                 // bin dir
-                app.BinDir = strBinDir;
+                app.BinDir = Path.Combine(strHostDir, "bin");
 
                 nRet = 0;
 
@@ -434,16 +431,16 @@ namespace DigitalPlatform.OPAC.Server
                 XmlDocument dom = new XmlDocument();
                 try
                 {
-                    dom.Load(strFileName);
+                    dom.Load(this.m_strFileName);
                 }
                 catch (FileNotFoundException)
                 {
-                    strError = "file '" + strFileName + "' not found ...";
+                    strError = "file '" + this.m_strFileName + "' not found ...";
                     goto ERROR1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "装载配置文件-- '" + strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
+                    strError = "装载配置文件-- '" + this.m_strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
                     app.WriteErrorLog(strError);
                     // throw ex;
                     goto ERROR1;
@@ -494,6 +491,17 @@ namespace DigitalPlatform.OPAC.Server
                     CfgsMap.Clear();
                 }
 
+                if (this.ChannelPool != null)
+                {
+                    this.ChannelPool.Close();
+                    this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
+                    this.ChannelPool = null;
+
+                    this.ChannelPool = new LibraryChannelPool();
+                    this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
+                    this.ChannelPool.BeforeLogin += new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
+                }
+
                 // OPAC服务器
                 // 元素<opacServer>
                 // 属性url
@@ -512,7 +520,6 @@ namespace DigitalPlatform.OPAC.Server
                     app.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
                     app.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
                 }
-
 
                 // //
                 string strDebugInfo = "";
@@ -564,16 +571,6 @@ namespace DigitalPlatform.OPAC.Server
 
                 // *** 进入内存的参数结束
 
-                if (this.ChannelPool != null)
-                {
-                    this.ChannelPool.Close();
-                    this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
-                    this.ChannelPool = null;
-
-                    this.ChannelPool = new LibraryChannelPool();
-                    this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
-                    this.ChannelPool.BeforeLogin += new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
-                }
 
                 // 启动批处理任务
                 if (bReload == false)
@@ -644,14 +641,17 @@ namespace DigitalPlatform.OPAC.Server
                 }
 
                 // chat room
-                XmlNode nodeDef = this.OpacCfgDom.DocumentElement.SelectSingleNode("chatRoomDef");
-                nRet = this.ChatRooms.Initial(nodeDef,
-                    PathUtil.MergePath(this.DataDir, "chatrooms"),
-                    out strError);
-                if (nRet == -1)
+                if (this.ChatRooms != null)
                 {
-                    app.WriteErrorLog("启动批处理任务CacheBuilder时出错：" + strError);
-                    goto ERROR1;
+                    XmlNode nodeDef = this.OpacCfgDom.DocumentElement.SelectSingleNode("chatRoomDef");
+                    nRet = this.ChatRooms.Initial(nodeDef,
+                        PathUtil.MergePath(this.DataDir, "chatrooms"),
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog("初始化 ChatRooms 时出错：" + strError);
+                        goto ERROR1;
+                    }
                 }
 
                 // 公共查询最大命中数
@@ -673,9 +673,11 @@ namespace DigitalPlatform.OPAC.Server
 
                 if (bReload == false)
                 {
+                    string strColumnDir = Path.Combine(strDataDir, "column");
+
                     PathUtil.CreateDirIfNeed(strColumnDir);	// 确保目录创建
                     nRet = LoadCommentColumn(
-                        PathUtil.MergePath(strColumnDir, "comment"),
+                        Path.Combine(strColumnDir, "comment"),
                         out strError);
                     if (nRet == -1)
                     {
@@ -735,6 +737,19 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             LibraryChannel channel = sender as LibraryChannel;
+
+            if (channel.UserName == this.ManagerUserName)
+            {
+                e.UserName = channel.UserName;
+                e.Password = channel.Password;
+                e.LibraryServerUrl = channel.Url;
+                e.Parameters = "";
+#if NO
+                if (channel.Param is string)
+                    e.Parameters = (string)channel.Param;
+#endif
+                return;
+            }
 
             if (StringUtil.HasHead(channel.Password, "token:") == true)
             {
@@ -1177,31 +1192,38 @@ namespace DigitalPlatform.OPAC.Server
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
+#if NO
                 // 临时的SessionInfo对象
                 SessionInfo session = new SessionInfo(this);
                 session.UserID = this.ManagerUserName;
                 session.Password = this.ManagerPassword;
                 session.IsReader = false;
+#endif
+                LibraryChannel channel = this.GetChannel();
 
                 try
                 {
 
                     // 获取虚拟库定义
-                    long lRet = session.Channel.ListDbFroms(null,
+                    long lRet = // session.Channel.
+                        channel.ListDbFroms(null,
         strDbType,
         strLang,
         out infos,
         out strError);
                     if (lRet == -1)
                     {
-                        strError = "(" + session.UserID + ")获得from定义时发生错误: " + strError;
-                        // this.WriteErrorLog(strError);
+                        // strError = "(" + session.UserID + ")获得from定义时发生错误: " + strError;
+                        strError = "(" + channel.UserName + ")获得from定义时发生错误: " + strError;
                         goto ERROR1;
                     }
                 }
                 finally
                 {
+#if NO
                     session.CloseSession();
+#endif
+                    this.ReturnChannel(channel);
                 }
             }
             finally
@@ -1233,11 +1255,14 @@ namespace DigitalPlatform.OPAC.Server
             try
             {
 
+#if NO
                 // 临时的SessionInfo对象
                 SessionInfo session = new SessionInfo(this);
                 session.UserID = this.ManagerUserName;
                 session.Password = this.ManagerPassword;
                 session.IsReader = false;
+#endif
+                LibraryChannel channel = this.GetChannel();
 
                 try
                 {
@@ -1245,14 +1270,18 @@ namespace DigitalPlatform.OPAC.Server
                     {
                         string strVersion = "";
                         string strUID = "";
-                        lRet = session.Channel.GetVersion(
+                        lRet = // session.Channel.
+                            channel.GetVersion(
                             null,
                             out strVersion,
                             out strUID,
                             out strError);
                         if (lRet == -1)
                         {
-                            strError = "针对 dp2Library 服务器 " + session.Channel.Url + " 获得版本号的过程发生错误：" + strError;
+                            strError = "针对 dp2Library 服务器 "
+                                // + session.Channel.Url 
+                                + channel.Url
+                                + " 获得版本号的过程发生错误：" + strError;
                             goto ERROR1;
                         }
 
@@ -1285,7 +1314,8 @@ namespace DigitalPlatform.OPAC.Server
                     }
 
                     string strValue = "";
-                    lRet = session.Channel.GetSystemParameter(
+                    lRet = // session.Channel.
+                        channel.GetSystemParameter(
                         null,
                         "circulation",
                         "chargingOperDatabase",
@@ -1298,7 +1328,8 @@ namespace DigitalPlatform.OPAC.Server
 
                     // 获取虚拟库定义
                     string strXml = "";
-                    lRet = session.Channel.GetSystemParameter(
+                    lRet = // session.Channel.
+                        channel.GetSystemParameter(
                         null,
                         "virtual",
                         "def",
@@ -1306,8 +1337,8 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "(" + session.UserID + ")获取虚拟库定义时发生错误: " + strError;
-                        // this.WriteErrorLog(strError);
+                        // strError = "(" + session.UserID + ")获取虚拟库定义时发生错误: " + strError;
+                        strError = "(" + channel.UserName + ")获取虚拟库定义时发生错误: " + strError;
                         goto ERROR1;
                     }
 
@@ -1325,7 +1356,8 @@ namespace DigitalPlatform.OPAC.Server
                     Debug.Assert(node_virtual != null, "");
 
                     // 获取<arrived>定义
-                    lRet = session.Channel.GetSystemParameter(
+                    lRet = // session.Channel.
+                        channel.GetSystemParameter(
                         null,
                         "system",
                         "arrived",
@@ -1333,8 +1365,8 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "(" + session.UserID + ")获取<arrived>定义时发生错误: " + strError;
-                        // this.WriteErrorLog(strError);
+                        // strError = "(" + session.UserID + ")获取<arrived>定义时发生错误: " + strError;
+                        strError = "(" + channel.UserName + ")获取<arrived>定义时发生错误: " + strError;
                         goto ERROR1;
                     }
 
@@ -1352,7 +1384,8 @@ namespace DigitalPlatform.OPAC.Server
                     Debug.Assert(node_arrived != null, "");
 
                     // 获取<browseformats>定义
-                    lRet = session.Channel.GetSystemParameter(
+                    lRet = // session.Channel.
+                        channel.GetSystemParameter(
                         null,
                         "opac",
                         "browseformats",
@@ -1360,8 +1393,8 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "(" + session.UserID + ")获取<browseformats>定义时发生错误: " + strError;
-                        // this.WriteErrorLog(strError);
+                        // strError = "(" + session.UserID + ")获取<browseformats>定义时发生错误: " + strError;
+                        strError = "(" + channel.UserName + ")获取<browseformats>定义时发生错误: " + strError;
                         goto ERROR1;
                     }
 
@@ -1378,7 +1411,8 @@ namespace DigitalPlatform.OPAC.Server
                     node_browseformats.InnerXml = strXml;
 
                     // 获取<biblioDbGroup>定义
-                    lRet = session.Channel.GetSystemParameter(
+                    lRet = // session.Channel.
+                        channel.GetSystemParameter(
                         null,
                         "system",
                         "biblioDbGroup",
@@ -1386,8 +1420,8 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "(" + session.UserID + ")获取<biblioDbGroup>定义时发生错误: " + strError;
-                        // this.WriteErrorLog(strError);
+                        // strError = "(" + session.UserID + ")获取<biblioDbGroup>定义时发生错误: " + strError;
+                        strError = "(" + channel.UserName + ")获取<biblioDbGroup>定义时发生错误: " + strError;
                         goto ERROR1;
                     }
 
@@ -1408,7 +1442,8 @@ namespace DigitalPlatform.OPAC.Server
                     // 2012/10/23
                     // 获取<readerDbGroup>定义
                     {
-                        lRet = session.Channel.GetSystemParameter(
+                        lRet = // session.Channel.
+                            channel.GetSystemParameter(
                             null,
                             "system",
                             "readerDbGroup",
@@ -1416,8 +1451,8 @@ namespace DigitalPlatform.OPAC.Server
                             out strError);
                         if (lRet == -1)
                         {
-                            strError = "(" + session.UserID + ")获取<readerDbGroup>定义时发生错误: " + strError;
-                            // this.WriteErrorLog(strError);
+                            // strError = "(" + session.UserID + ")获取<readerDbGroup>定义时发生错误: " + strError;
+                            strError = "(" + channel.UserName + ")获取<readerDbGroup>定义时发生错误: " + strError;
                             goto ERROR1;
                         }
 
@@ -1438,8 +1473,8 @@ namespace DigitalPlatform.OPAC.Server
                     this.ActivateManagerThread();
 
                     // 检查 simulatereader 和 simulateworder 权限
-                    if (StringUtil.IsInList("simulatereader", session.Channel.Rights) == false
-                        || StringUtil.IsInList("simulateworker", session.Channel.Rights) == false)
+                    if (StringUtil.IsInList("simulatereader", channel.Rights) == false
+                        || StringUtil.IsInList("simulateworker", channel.Rights) == false)
                     {
                         strError = "OPAC 代理账户 '" + this.ManagerUserName + "' 缺乏 simulatereader 和 simulateworker 权限。请在 dp2library 中为它增配这两个权限";
                         return -1;
@@ -1489,7 +1524,10 @@ namespace DigitalPlatform.OPAC.Server
                 }
                 finally
                 {
+#if NO
                     session.CloseSession();
+#endif
+                    this.ReturnChannel(channel);
                 }
             }
             finally
@@ -1897,11 +1935,14 @@ System.Text.Encoding.UTF8))
                         }
 
                         // chat room
-                        string strError = "";
-                        string strXml = "";
-                        this.ChatRooms.GetDef(out strXml, out strError);
-                        if (string.IsNullOrEmpty(strXml) == false)
-                            writer.WriteRaw("\r\n" + strXml + "\r\n");
+                        if (this.ChatRooms != null)
+                        {
+                            string strError = "";
+                            string strXml = "";
+                            this.ChatRooms.GetDef(out strXml, out strError);
+                            if (string.IsNullOrEmpty(strXml) == false)
+                                writer.WriteRaw("\r\n" + strXml + "\r\n");
+                        }
 
                         // 2012/5/23
                         // <dp2sso>
@@ -2203,7 +2244,8 @@ System.Text.Encoding.UTF8))
                 // 2013/12/24
                 this.BatchTasks.Close();
 
-                this.ChatRooms.Close();
+                if (this.ChatRooms != null)
+                    this.ChatRooms.Close();
 
                 // 2012/12/17
                 // 将内存中的检索日志对象写入数据库
@@ -3160,6 +3202,7 @@ out strError);
             strError = "";
             strCode = "";
 
+#if NO
             // 临时的SessionInfo对象
             SessionInfo session = sessioninfo;
 
@@ -3170,12 +3213,19 @@ out strError);
                 session.Password = this.ManagerPassword;
                 session.IsReader = false;
             }
+#endif
+            LibraryChannel channel = null;
+            if (sessioninfo == null)
+                channel = this.GetChannel();
+            else
+                channel = sessioninfo.Channel;
 
             try
             {
 
                 // 读入读者记录
-                long lRet = session.Channel.VerifyReaderPassword(null,
+                long lRet = // session.Channel.
+                    channel.VerifyReaderPassword(null,
                     "!getpatrontempid:" + strReaderBarcode,
                     null,
                     out strError);
@@ -3191,8 +3241,12 @@ out strError);
             }
             finally
             {
+#if NO
                 if (sessioninfo == null)
                     session.CloseSession();
+#endif
+                if (sessioninfo == null)
+                    this.ReturnChannel(channel);
             }
         }
 
@@ -3227,14 +3281,17 @@ out strError);
                 strReaderBarcode = strTemp;
             }
 
+#if NO
             // 临时的SessionInfo对象
             SessionInfo session = new SessionInfo(this);
             session.UserID = this.ManagerUserName;
             session.Password = this.ManagerPassword;
             session.IsReader = false;
+#endif
+            LibraryChannel channel = this.GetChannel();
+
             try
             {
-
                 // 读入读者记录
                 string strReaderXml = "";
                 byte[] reader_timestamp = null;
@@ -3242,7 +3299,8 @@ out strError);
 
                 string strResultTypeList = "xml";
                 string[] results = null;
-                long lRet = session.Channel.GetReaderInfo(null,
+                long lRet = // session.Channel.
+                    channel.GetReaderInfo(null,
                     this.dp2LibraryVersion >= 2.22 ?
                     "@barcode:" + strReaderBarcode // dp2Library V2.22 及以后可以使用这个方法
                     : strReaderBarcode,
@@ -3275,34 +3333,6 @@ out strError);
                 }
 
                 strReaderXml = results[0];
-                /*
-
-                int nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
-                    strReaderBarcode,
-                    out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
-                    out strError);
-                if (nRet == 0)
-                {
-                    strError = "读者证条码号 '" + strReaderBarcode + "' 不存在";
-                    return 0;
-                }
-                if (nRet == -1)
-                {
-                    // text-level: 内部错误
-                    strError = "读入读者记录时发生错误: " + strError;
-                    return -1;
-                }
-
-                if (nRet > 1)
-                {
-                    // text-level: 内部错误
-                    strError = "读入读者记录时，发现读者证条码号 '" + strReaderBarcode + "' 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
-                    return -1;
-                }
-                 * */
 
                 XmlDocument readerdom = null;
                 int nRet = OpacApplication.LoadToDom(strReaderXml,
@@ -3347,45 +3377,12 @@ out strError);
             }
             finally
             {
-                session.CloseSession();
-            }
-        }
-
 #if NO
-        static Hashtable ParseMedaDataXml(string strXml,
-out string strError)
-        {
-            strError = "";
-            Hashtable result = new Hashtable();
-
-            if (strXml == "")
-                return result;
-
-            XmlDocument dom = new XmlDocument();
-
-            try
-            {
-                dom.LoadXml(strXml);
-            }
-            catch (Exception ex)
-            {
-                strError = ex.Message;
-                return null;
-            }
-
-            XmlAttributeCollection attrs = dom.DocumentElement.Attributes;
-            for (int i = 0; i < attrs.Count; i++)
-            {
-                string strName = attrs[i].Name;
-                string strValue = attrs[i].Value;
-
-                result.Add(strName, strValue);
-            }
-
-
-            return result;
-        }
+                session.CloseSession();
 #endif
+                this.ReturnChannel(channel);
+            }
+        }
 
         // 采用了代理帐户
         public int SaveUploadFile(
@@ -3399,15 +3396,20 @@ out string strError)
     out string strError)
         {
             strError = "";
+
+#if NO
             // 临时的SessionInfo对象
             SessionInfo session = new SessionInfo(this);
             session.UserID = this.ManagerUserName;
             session.Password = this.ManagerPassword;
             session.IsReader = false;
+#endif
+            LibraryChannel channel = this.GetChannel();
+
             try
             {
                 return SaveUploadFile(page,
-                    session.Channel,
+                    channel,    // session.Channel,
                     strXmlRecPath,
                     strFileID,
                     strResTimeStamp,
@@ -3418,7 +3420,10 @@ out string strError)
             }
             finally
             {
+#if NO
                 session.CloseSession();
+#endif
+                this.ReturnChannel(channel);
             }
         }
 
@@ -3613,7 +3618,7 @@ out strError);
         // 获得计数器值
         // parameters:
         //      strName 名字。为 书目记录路径 + '|' + URL
-        public long GetHitCount(LibraryChannel channel,
+        public long GetHitCount(LibraryChannel channel_param,
             string strName,
             out long lValue,
             out string strError)
@@ -3621,6 +3626,7 @@ out strError);
             lValue = 0;
             strError = "";
 
+#if NO
             SessionInfo session = null;
             if (channel == null)
             {
@@ -3632,6 +3638,13 @@ out strError);
                 session.IsReader = false;
                 channel = session.Channel;
             }
+#endif
+            LibraryChannel channel = null;
+            if (channel_param != null)
+                channel = channel_param;
+            else
+                channel = this.GetChannel();
+
             try
             {
                 return channel.HitCounter("get",
@@ -3642,8 +3655,12 @@ out strError);
             }
             finally
             {
+#if NO
                 if (session != null)
                     session.CloseSession();
+#endif
+                if (channel_param == null)
+                    this.ReturnChannel(channel);
             }
         }
 
@@ -3654,7 +3671,7 @@ out strError);
         //      -1  出错
         //      0   mongodb 没有启用
         //      1   成功
-        public long IncHitCount(LibraryChannel channel,
+        public long IncHitCount(LibraryChannel channel_param,
             string strName,
             string strClientAddress,
             bool bLog,
@@ -3662,6 +3679,7 @@ out strError);
         {
             strError = "";
 
+#if NO
             SessionInfo session = null;
             if (channel == null)
             {
@@ -3673,6 +3691,13 @@ out strError);
                 session.IsReader = false;
                 channel = session.Channel;
             }
+#endif
+            LibraryChannel channel = null;
+            if (channel_param != null)
+                channel = channel_param;
+            else
+                channel = this.GetChannel();
+
             try
             {
                 long lValue = 0;
@@ -3684,15 +3709,19 @@ out strError);
             }
             finally
             {
+#if NO
                 if (session != null)
                     session.CloseSession();
+#endif
+                if (channel_param == null)
+                    this.ReturnChannel(channel);
             }
         }
 
         // parameters:
         //      channel 通讯通道。如果为 null，则函数会自动使用管理员身份创建通道
         public int DownloadObject(System.Web.UI.Page Page,
-            LibraryChannel channel,
+            LibraryChannel channel_param,
             string strPath,
             bool bSaveAs,
             string strStyle,
@@ -3700,6 +3729,7 @@ out strError);
         {
             strError = "";
 
+#if NO
             if (channel == null)
             {
                 // 临时的SessionInfo对象
@@ -3730,6 +3760,27 @@ out strError);
     bSaveAs,
     strStyle,
     out strError);
+            }
+#endif
+            LibraryChannel channel = null;
+            if (channel_param != null)
+                channel = channel_param;
+            else
+                channel = this.GetChannel();
+
+            try
+            {
+                return DownloadObject0(Page,
+channel,
+strPath,
+bSaveAs,
+strStyle,
+out strError);
+            }
+            finally
+            {
+                if (channel_param == null)
+                    this.ReturnChannel(channel);
             }
         }
 

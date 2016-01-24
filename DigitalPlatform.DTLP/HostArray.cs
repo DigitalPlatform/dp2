@@ -163,7 +163,7 @@ namespace DigitalPlatform.DTLP
 			// m_nDTLPCharset = CHARSET_DBCS;
 		}
 
-
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
 		~HostEntry()
 		{
 			if (m_lChannel != -1 && client != null) 

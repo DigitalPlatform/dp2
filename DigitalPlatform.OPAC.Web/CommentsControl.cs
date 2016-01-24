@@ -31,9 +31,6 @@ namespace DigitalPlatform.OPAC.Web
 
         public bool MinimizeNewReviewEdtior = false;  // 初始时是否隐藏新创建评注编辑区域
 
-        // List<string> m_recpathlist = new List<string>();
-
-        // public bool Active = true;
         public event WantFocusEventHandler WantFocus = null;
 
         public string RefID = "";   // 参考ID。用于指定要显示的评注记录
@@ -49,6 +46,12 @@ namespace DigitalPlatform.OPAC.Web
 
         // ItemConverter ItemConverter = null;
 
+        public override void Dispose()
+        {
+            this.WantFocus = null;
+
+            base.Dispose();
+        }
 
         // 取消最外面的tag
         public override void RenderBeginTag(HtmlTextWriter writer)

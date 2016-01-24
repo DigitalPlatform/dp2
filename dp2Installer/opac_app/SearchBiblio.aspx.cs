@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define FILTER
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,6 +12,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -18,7 +21,6 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
-using System.Collections;
 using DigitalPlatform.LibraryClient;
 
 public partial class SearchBiblio : MyWebPage
@@ -54,7 +56,9 @@ ref this.sessioninfo) == false)
 
         this.BrowseSearchResultControl1.DefaultFormatName = "详细";
         this.BrowseSearchResultControl1.Visible = false;
+#if FILTER
         this.filter.Visible = false;
+#endif
 
         this.SideBarControl1.LayoutStyle = SideBarLayoutStyle.Horizontal;
     }
@@ -84,6 +88,7 @@ ref this.sessioninfo) == false)
         }
     }
 
+#if FILTER
     void VisibleFilter(bool bVisible)
     {
         if (bVisible == false)
@@ -98,8 +103,7 @@ ref this.sessioninfo) == false)
         else
             this.filter.Visible = true;
     }
-
-
+#endif
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -130,7 +134,9 @@ ref sessioninfo) == false)
         if (this.BrowseSearchResultControl1.ResultCount > 0)
         {
             this.BrowseSearchResultControl1.Visible = true;
+#if FILTER
             VisibleFilter(true);
+#endif
         }
 
         // 是否登录?
@@ -227,7 +233,9 @@ ref sessioninfo) == false)
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
-                sessioninfo.SetFilterTask(strResultSetName, null);
+#if FILTER
+                app.SetFilterTask(strResultSetName, null);
+#endif
 
                 if (app.SearchLog != null)
                 {
@@ -248,20 +256,26 @@ ref sessioninfo) == false)
                 if (lRet == 0)
                 {
                     this.BrowseSearchResultControl1.Visible = false;
+#if FILTER
                     this.filter.Visible = false;
+#endif
                     strError = "没有找到";
                     goto ERROR1;
                 }
 
                 this.BrowseSearchResultControl1.Clear();
                 this.BrowseSearchResultControl1.Visible = true;
+#if FILTER
                 VisibleFilter(true);
+#endif
 
                 this.BrowseSearchResultControl1.ResultSetName = strResultSetName;
                 this.BrowseSearchResultControl1.ResultCount = (int)lRet;
                 this.BrowseSearchResultControl1.StartIndex = 0; // 2008/12/15
 
+#if FILTER
                 this.filter.ResultSetName = strResultSetName;
+#endif
 
                 string strFormat = this.Request["format"];
                 if (String.IsNullOrEmpty(strFormat) == false)
@@ -292,15 +306,18 @@ ref sessioninfo) == false)
                     this.BrowseSearchResultControl1.ResultsetFilename = strResultsetFilename;
 
                     this.BrowseSearchResultControl1.Visible = true;
+#if FILTER
                     VisibleFilter(true);
 
                     this.filter.ResultSetName = strBaseResultSet;
+#endif
 
                     string strOffset = this.Request["offset"];
                     this.BrowseSearchResultControl1.ResultsetOffset = strOffset;
 
+#if FILTER
                     this.filter.SelectedNodePath = MakeSelectedPath(strResultSet, strOffset);
-
+#endif
                     if (string.IsNullOrEmpty(strOffset) == false)
                     {
                         int nStart = 0;
@@ -333,14 +350,17 @@ ref sessioninfo) == false)
                 // 只用了base参数
                 this.BrowseSearchResultControl1.Clear();
                 this.BrowseSearchResultControl1.Visible = true;
+#if FILTER
                 VisibleFilter(true);
+#endif
 
                 this.BrowseSearchResultControl1.ResultSetName = strBaseResultSet;
                 this.BrowseSearchResultControl1.ResultCount = (int)MyWebPage.GetServerResultCount(sessioninfo, strBaseResultSet);
                 this.BrowseSearchResultControl1.StartIndex = 0;
 
+#if FILTER
                 this.filter.ResultSetName = strBaseResultSet;
-
+#endif
             }
         }
 
@@ -519,7 +539,9 @@ ref sessioninfo) == false)
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
-            sessioninfo.SetFilterTask(strResultSetName, null);
+#if FILTER
+            app.SetFilterTask(strResultSetName, null);
+#endif
 
             if (app.SearchLog != null)
             {
@@ -536,7 +558,9 @@ ref sessioninfo) == false)
             if (lRet == 0)
             {
                 this.BrowseSearchResultControl1.Visible = false;
+#if FITLER
                 this.filter.Visible = false;
+#endif
 
                 strError = "没有找到";
                 goto ERROR1;
@@ -548,13 +572,17 @@ ref sessioninfo) == false)
             // e.ErrorInfo = "命中记录 " +lRet.ToString()+ " 条";
             this.BrowseSearchResultControl1.Clear();
             this.BrowseSearchResultControl1.Visible = true;
+#if FILTER
             VisibleFilter(true);
+#endif
 
             this.BrowseSearchResultControl1.ResultSetName = strResultSetName;
             this.BrowseSearchResultControl1.ResultCount = (int)lRet;
             this.BrowseSearchResultControl1.StartIndex = 0; // 2008/12/15
 
+#if FILTER
             this.filter.ResultSetName = strResultSetName;
+#endif
         }
         finally
         {
@@ -567,7 +595,9 @@ ref sessioninfo) == false)
         this.BrowseSearchResultControl1.ResultSetName = "";
         this.BrowseSearchResultControl1.ResultCount = 0;
 
+#if FILTER
         this.filter.ResultSetName = "";
+#endif
     }
 
     public void Page_Error(object sender, EventArgs e)
@@ -592,14 +622,13 @@ ref sessioninfo) == false)
         }
     }
 
-
-
+#if FILTER
     // 观看二级节点的其他片断
     protected void filter_TreeItemClick(object sender, TreeItemClickEventArgs e)
     {
         string strError = "";
         string strResultsetName = this.filter.ResultSetName;
-        FilterTask t = sessioninfo.FindFilterTask(strResultsetName);    // Task对象是利用Session内结果集名来进行管理的
+        FilterTask t = app.FindFilterTask(strResultsetName);    // Task对象是利用Session内结果集名来进行管理的
         if (t == null)
         {
             strError = "结果集名 '" + strResultsetName + "' 没有找到对应的任务对象";
@@ -629,12 +658,12 @@ ref sessioninfo) == false)
 
         // 确保上一级被选定。但此时和右边的 browselist 内容就不对应了
         this.filter.SelectedNodePath = GetParentResultsetName(this.filter.SelectedNodePath) + "/nav";
-
         return;
     ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         Response.End();
     }
+#endif
 
     // 获得路径的第一级
     static string GetParentResultsetName(string strSelectedPath)

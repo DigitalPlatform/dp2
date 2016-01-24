@@ -42,6 +42,13 @@ namespace DigitalPlatform.OPAC.Web
 
         ResourceManager m_rm = null;
 
+        public override void Dispose()
+        {
+            this.WantFocus = null;
+
+            base.Dispose();
+        }
+
         ResourceManager GetRm()
         {
             if (this.m_rm != null)

@@ -31,6 +31,13 @@ namespace DigitalPlatform.OPAC.Web
 
         public event CheckedChangedEventHandler CheckedChanged = null;
 
+        public override void Dispose()
+        {
+            this.CheckedChanged = null;
+
+            base.Dispose();
+        }
+
         public override void RenderBeginTag(HtmlTextWriter writer)
         {
 

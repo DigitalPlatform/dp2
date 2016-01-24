@@ -1613,10 +1613,13 @@ namespace DigitalPlatform.CommonControl
 
         #region 释放资源
 
+#if NO
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         ~LocationItem()
         {
             Dispose(false);
         }
+#endif
 
         private bool disposed = false;
         public void Dispose()

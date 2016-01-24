@@ -1911,7 +1911,6 @@ namespace DigitalPlatform.OPAC.Server
 
                 try
                 {
-
                     writer.WriteStartDocument();
                     writer.WriteStartElement("rss");
                     writer.WriteAttributeString("version", "2.0");
@@ -1956,45 +1955,6 @@ namespace DigitalPlatform.OPAC.Server
                     writer.WriteStartElement("lastBuildDate");
                     writer.WriteString(DateTimeUtil.Rfc1123DateTimeString(now));
                     writer.WriteEndElement();
-
-                    /*
-                    // 如果尚未登录
-                    if (sessioninfo.Account == null)
-                    {
-                        // 模拟一个具有getbibliosummary权限的用户
-                        sessioninfo.Account = new Account();
-                        sessioninfo.Account.Rights = "getbibliosummary";
-                    }
-                     * */
-
-                    /*
-                    // 临时的SessionInfo对象
-                    SessionInfo sessioninfo = new SessionInfo(this.App);
-
-                    // 模拟一个账户
-                    Account account = new Account();
-                    account.LoginName = "CacheBuilder";
-                    account.Password = "";
-                    account.Rights = "getbibliosummary";
-
-                    account.Type = "";
-                    account.Barcode = "";
-                    account.Name = "CacheBuilder";
-                    account.UserID = "CacheBuilder";
-                    account.RmsUserName = this.App.ManagerUserName;
-                    account.RmsPassword = this.App.ManagerPassword;
-
-                    sessioninfo.Account = account;
-                     * */
-
-                    /*
-                    // 临时的SessionInfo对象
-                    SessionInfo sessioninfo = new SessionInfo(this.App);
-                    sessioninfo.UserID = this.App.ManagerUserName;
-                    sessioninfo.Password = this.App.ManagerPassword;
-                    sessioninfo.IsReader = false;
-                     * */
-
 
                     long nCount = resultset.Count;
                     long nStart = 0;

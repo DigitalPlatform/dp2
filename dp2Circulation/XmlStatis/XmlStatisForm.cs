@@ -299,7 +299,6 @@ namespace dp2Circulation
 
             try
             {
-
                 int nRet = 0;
                 strError = "";
 

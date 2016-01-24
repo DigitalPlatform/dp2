@@ -27,6 +27,13 @@ namespace DigitalPlatform.OPAC.Web
     {
         public event TreeItemClickEventHandler TreeItemClick = null;
 
+        public override void Dispose()
+        {
+            this.TreeItemClick = null;
+
+            base.Dispose();
+        }
+
         protected override HtmlTextWriterTag TagKey
         {
             get

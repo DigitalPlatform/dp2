@@ -32,11 +32,9 @@ namespace DigitalPlatform.OPAC.Web
     {
         public bool PageNoUrlMode = false;  // pager 是否采用URL方式定位 pageno
 
-        // public event EventHandler AddToMyshelf = null;
         public bool EnableAddToMyBookshelf = true;  // 允许"加入我的书架"按钮
         public bool EnableRemoveFromMyBookshelf = false;  // 允许"从我的书架移除"按钮
         public bool EnableExport = true;    // 允许"导出"按钮
-
 
         public bool MinimizeNewReviewEdtior = true;  // 初始时是否隐藏新创建评注编辑区域
 
@@ -565,7 +563,6 @@ namespace DigitalPlatform.OPAC.Web
             content.ID = "content";
             this.Controls.Add(content);
 
-
             // 内容行
             for (int i = 0;
 #if USE_LINECOUNT
@@ -598,8 +595,6 @@ namespace DigitalPlatform.OPAC.Web
                 // "</table></div>"
                "</table>" + this.GetPostfixString()
                ));
-
-
         }
 
         void pager_GetBaseUrl(object sender, GetBaseUrlEventArgs e)
@@ -811,7 +806,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(sep);
              * */
 
-
             CommentsControl commentscontrol = new CommentsControl();
             commentscontrol.MinimizeNewReviewEdtior = this.MinimizeNewReviewEdtior;
             commentscontrol.ID = "line" + Convert.ToString(nLineNo) + "_comments";
@@ -840,7 +834,6 @@ namespace DigitalPlatform.OPAC.Web
             literal = new LiteralControl();
             literal.Text = "</td></tr>";
             line.Controls.Add(literal);
-
 
             return line;
         }
@@ -955,7 +948,6 @@ namespace DigitalPlatform.OPAC.Web
 
         void CreateCmdLine()
         {
-
             this.Controls.Add(new LiteralControl(
                 "<tr class='cmdline'><td colspan='2'>"
             ));
@@ -963,8 +955,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(new LiteralControl(
                 "<table border='0' width='100%'><tr>"
             ));
-
-
 
             this.Controls.Add(new LiteralControl(
                 "<td>"
@@ -989,14 +979,11 @@ namespace DigitalPlatform.OPAC.Web
             open_export_dialog.OnClientClick = "$( '#export-dialog-form' ).dialog({ modal: true }); return cancelClick();";
             this.Controls.Add(open_export_dialog);
 
-
             // 修改状态 对话框
             this.Controls.Add(new AutoIndentLiteral("<%begin%><div id='export-dialog-form' title='" + this.GetString("请指定导出特性") + "' style='DISPLAY:NONE'>"));
 
-
             {
                 this.Controls.Add(new AutoIndentLiteral("<%begin%><div>" + this.GetString("导出范围") + ": "));
-
 
                 RadioButton selected = new RadioButton();
                 selected.ID = "selected";
@@ -1048,7 +1035,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.Controls.Add(new AutoIndentLiteral("</div><%end%>"));
             }
 
-
             {
                 this.Controls.Add(new AutoIndentLiteral("<%begin%><div>" + this.GetString("编码方式") + ": "));
 
@@ -1070,7 +1056,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.Controls.Add(new AutoIndentLiteral("</div><%end%>"));
             }
 
-
             // 导出 按钮
             Button export_button = new Button();
             export_button.OnClientClick = "$( \"#export-dialog-form\" ).parent().appendTo($(\"form:first\"));$( \"#export-dialog-form\" ).dialog('close'); ";
@@ -1080,9 +1065,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(export_button);
 
             this.Controls.Add(new AutoIndentLiteral("<%end%></div>"));
-
-
-
 
 #if NO
             LiteralControl literal = new LiteralControl();
@@ -1135,16 +1117,13 @@ namespace DigitalPlatform.OPAC.Web
             }
 #endif
 
-
             this.Controls.Add(new LiteralControl(
                 "</td>"
             ));
 
-
             this.Controls.Add(new LiteralControl(
                 "<td align='right'> "
             ));
-
 #if NO
             PlaceHolder pageswitcher = new PlaceHolder();
             pageswitcher.ID = "pageswitcher";
@@ -1267,7 +1246,6 @@ namespace DigitalPlatform.OPAC.Web
             string strError = "";
             int nRet = 0;
 
-
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
@@ -1331,6 +1309,7 @@ namespace DigitalPlatform.OPAC.Web
                             this.SetErrorInfo(ex.Message); // 显示出错信息
                             goto ERROR1;
                         }
+
                         try
                         {
                             for (int i = 0; i < resultset.Count; i++)
@@ -1413,7 +1392,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.Page.Response.ContentType = "application/iso2709";
                 string strEncodedFileName = HttpUtility.UrlEncode("书目.mrc", Encoding.UTF8);
                 this.Page.Response.AddHeader("content-disposition", "attachment; filename=" + strEncodedFileName);
-
 
                 Encoding targetEncoding = null;
 
@@ -1799,6 +1777,7 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
+#if NO
         SessionInfo m_managerSession = null;
 
         SessionInfo GetManagerSession(OpacApplication app)
@@ -1823,6 +1802,7 @@ namespace DigitalPlatform.OPAC.Web
                 m_managerSession = null;
             }
         }
+#endif
 
         public static void ParseOffsetString(string strText,
             out int nStart,
@@ -1904,7 +1884,6 @@ namespace DigitalPlatform.OPAC.Web
                 List<string> titles = new List<string>();   // 各个记录的标题
 
                 long lRet = 0;
-                DpResultSet resultset = null;
                 bool bFillBrowse = false;   // 浏览列是否填充过
 
             REDO:
@@ -1912,9 +1891,11 @@ namespace DigitalPlatform.OPAC.Web
                 string strResultsetFilename = this.ResultsetFilename;
                 if (String.IsNullOrEmpty(strResultsetFilename) == false)
                     app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
-
+                LibraryChannel channel = app.GetChannel();
                 try
                 {
+                    DpResultSet resultset = null;
+
                     try
                     {
                         if (String.IsNullOrEmpty(this.ResultsetFilename) == false)
@@ -2179,7 +2160,6 @@ namespace DigitalPlatform.OPAC.Web
                                         goto SKIP0;
                                     }
 
-
                                     string strBiblioDbName = "";
 
                                     // return:
@@ -2394,7 +2374,6 @@ namespace DigitalPlatform.OPAC.Web
                                             bFillBrowse = true;
                                         }
 
-
                                         // 显示格式不存在, 只好用浏览格式了
                                         strContent = BuildBrowseContent(app, sessioninfo,
                                             strDbName,
@@ -2451,7 +2430,7 @@ namespace DigitalPlatform.OPAC.Web
                                         format.ScriptFileName);
 
                                     nRet = app.CfgsMap.MapFileToLocal(
-                                            GetManagerSession(app).Channel,
+                                        channel,    // GetManagerSession(app).Channel,
                                         strRemotePath,
                                         out strLocalPath,
                                         out strError);
@@ -2473,7 +2452,7 @@ namespace DigitalPlatform.OPAC.Web
 
                                         string strTempPath = "";
                                         nRet = app.CfgsMap.MapFileToLocal(
-                                            GetManagerSession(app).Channel,
+                                            channel,    // GetManagerSession(app).Channel,
                                             strRemotePath + ".ref",
                                             out strTempPath,
                                             out strError);
@@ -2607,7 +2586,10 @@ namespace DigitalPlatform.OPAC.Web
                     if (String.IsNullOrEmpty(strResultsetFilename) == false)
                         app.ResultsetLocks.UnlockForRead(strResultsetFilename);
 
+#if NO
                     CloseManagerSession();
+#endif
+                    app.ReturnChannel(channel);
                 }
 
 #if USE_LINECOUNT
@@ -2648,7 +2630,6 @@ namespace DigitalPlatform.OPAC.Web
                     CommentControl commentcontrol = (CommentControl)line.FindControl("line" + Convert.ToString(i) + "_comment");
 
                     CheckBox checkbox = (CheckBox)this.FindControl("line" + Convert.ToString(i) + "_checkbox");
-
 
                     if (bibliocontrol != null)
                         bibliocontrol.Visible = false;
@@ -2717,7 +2698,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.StartIndex = (this.ResultCount / this.PageMaxLines) * this.PageMaxLines;
             else
                 this.StartIndex = Math.Max(0, (this.ResultCount / this.PageMaxLines) * this.PageMaxLines - 1);
-
         }
 
         void nextpage_Click(object sender, EventArgs e)

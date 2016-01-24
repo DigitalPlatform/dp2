@@ -173,7 +173,6 @@ namespace dp2OPAC
                 // 增量计数
                 if (app != null)
                 {
-
                     long v = app.IpTable.IncIpCount(strClientIP, 1);
                     if (v >= app.IpTable.MAX_SESSIONS_PER_IP)
                     {

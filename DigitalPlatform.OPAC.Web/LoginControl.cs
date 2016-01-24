@@ -22,8 +22,16 @@ namespace DigitalPlatform.OPAC.Web
     [ToolboxData("<{0}:LoginControl runat=server></{0}:LoginControl>")]
     public class LoginControl : WebControl, INamingContainer
     {
-        // public LoginColumn ActiveLoginColumn = LoginColumn.Barcode;
+        public event LoginEventHandler Login;
+        public event LoginEventHandler AnonymouseLogin;
 
+        public override void Dispose()
+        {
+            this.Login = null;
+            this.AnonymouseLogin = null;
+
+            base.Dispose();
+        }
         ResourceManager m_rm = null;
 
         ResourceManager GetRm()
@@ -102,8 +110,6 @@ namespace DigitalPlatform.OPAC.Web
         }
          * */
 
-        public event LoginEventHandler Login;
-        public event LoginEventHandler AnonymouseLogin;
 
         public LoginStyle LoginStyle
         {

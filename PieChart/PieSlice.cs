@@ -208,6 +208,7 @@ namespace System.Drawing.PieChart {
             : this(boundingRect.X, boundingRect.Y, boundingRect.Width, boundingRect.Height, sliceHeight, startAngle, sweepAngle, surfaceColor, shadowStyle, edgeColorType, edgeLineWidth) {
         }
 
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         /// <summary>
         ///   <c>Finalize</c> implementation
         /// </summary>

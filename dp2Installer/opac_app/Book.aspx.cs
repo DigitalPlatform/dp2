@@ -64,6 +64,14 @@ ref sessioninfo) == false)
             this.CommentsControl1.Active = true;
     }
 
+#if NO
+    protected void Page_Unload(object sender, EventArgs e)
+    {
+        this.BiblioControl1.WantFocus -= new WantFocusEventHandler(BiblioControl1_WantFocus);
+        this.CommentsControl1.WantFocus -= new WantFocusEventHandler(CommentsControl1_WantFocus);
+    }
+#endif
+
     protected void Page_Load(object sender, EventArgs e)
     {
         if (WebUtil.PrepareEnvironment(this,

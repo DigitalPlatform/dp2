@@ -17,7 +17,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.rms;  // rmsutil
 
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 
@@ -408,6 +407,8 @@ namespace DigitalPlatform.OPAC.Server
                         if (nRet == -1)
                             return -1;
                     }
+
+                    // GC.Collect();    // 担心 DpResultSet 未能回收
                 }
             }
 
@@ -495,7 +496,6 @@ namespace DigitalPlatform.OPAC.Server
             bool bDone = false;
             try
             {
-
                 foreach (Segment segment in segments)
                 {
                     string strCommand = segment.Start.ToString() + "," + segment.Length.ToString();
@@ -537,7 +537,6 @@ namespace DigitalPlatform.OPAC.Server
             if (parts.Length >= 2)
                 strOffset = parts[1];
         }
-
 
         // 创建FilterInfo数组
         // parameters:
@@ -596,8 +595,7 @@ namespace DigitalPlatform.OPAC.Server
                 // 二级节点
                 if (node.SubCount > 0 && string.IsNullOrEmpty(node.SubNodePureName) == false)
                 {
-                    string strResultsetFilename = PathUtil.MergePath(strTempDir, node.SubNodePureName);
-                    DpResultSet resultset = new DpResultSet(false, false);
+                    string strResultsetFilename = Path.Combine(strTempDir, node.SubNodePureName);
 
                     List<FilterInfo> sub_results = new List<FilterInfo>();
 
@@ -617,42 +615,44 @@ namespace DigitalPlatform.OPAC.Server
                     }
 
                     int nTail = Math.Min(node.SubStart + nMaxSubNodeCount, node.SubCount);
-                    resultset.Attach(strResultsetFilename,
-                            strResultsetFilename + ".index");
-                    try
+
                     {
-                        for (int i = node.SubStart; i < nTail; i++)
+                        DpResultSet resultset = new DpResultSet(false, false);
+                        resultset.Attach(strResultsetFilename,
+                                strResultsetFilename + ".index");
+                        try
                         {
-                            DpRecord record = resultset[i];
-
-                            string strOffset = record.ID;
-                            string[] parts = strOffset.Split(new char[] { ',' });
-                            if (parts.Length != 2)
-                                continue;
-
-                            FilterInfo sub_info = new FilterInfo();
-                            sub_results.Add(sub_info);
-
-                            sub_info.Index = (i + 1).ToString();
-                            sub_info.Name = record.BrowseText;
-                            sub_info.Count = parts[1];
-                            sub_info.Url = "./searchbiblio.aspx?resultset=" + HttpUtility.UrlEncode(node.ResultSetPureName) + "&offset=" + strOffset + "&base=" + HttpUtility.UrlEncode(strBaseResultsetName) + "&title=" + HttpUtility.UrlEncode(RemoveHead(info.Name) + "/" + sub_info.Name); 
-
-                            if (string.IsNullOrEmpty(strSelectedOffset) == false
-                                && strSelectedResultsetName == node.ResultSetPureName && strSelectedOffset == strOffset)
+                            for (int i = node.SubStart; i < nTail; i++)
                             {
-                                sub_info.Selected = true;
+                                DpRecord record = resultset[i];
+
+                                string strOffset = record.ID;
+                                string[] parts = strOffset.Split(new char[] { ',' });
+                                if (parts.Length != 2)
+                                    continue;
+
+                                FilterInfo sub_info = new FilterInfo();
+                                sub_results.Add(sub_info);
+
+                                sub_info.Index = (i + 1).ToString();
+                                sub_info.Name = record.BrowseText;
+                                sub_info.Count = parts[1];
+                                sub_info.Url = "./searchbiblio.aspx?resultset=" + HttpUtility.UrlEncode(node.ResultSetPureName) + "&offset=" + strOffset + "&base=" + HttpUtility.UrlEncode(strBaseResultsetName) + "&title=" + HttpUtility.UrlEncode(RemoveHead(info.Name) + "/" + sub_info.Name);
+
+                                if (string.IsNullOrEmpty(strSelectedOffset) == false
+                                    && strSelectedResultsetName == node.ResultSetPureName && strSelectedOffset == strOffset)
+                                {
+                                    sub_info.Selected = true;
+                                }
                             }
                         }
+                        finally
+                        {
+                            string strTemp1 = "";
+                            string strTemp2 = "";
+                            resultset.Detach(out strTemp1, out strTemp2);
+                        }
                     }
-                    finally
-                    {
-                        string strTemp1 = "";
-                        string strTemp2 = "";
-                        resultset.Detach(out strTemp1, out strTemp2);
-                    }
-
-
 
                     // 如果没有显示完，则最后包含一个翻页或者延展的锚点
                     if (nTail < node.SubCount)

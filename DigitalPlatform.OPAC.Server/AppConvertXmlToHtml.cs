@@ -12,6 +12,7 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 
 
 namespace DigitalPlatform.OPAC.Server
@@ -439,18 +440,29 @@ namespace DigitalPlatform.OPAC.Server
             strLocalPath = "";
             int nRet = 0;
 
+            LibraryChannel channel = null;
+#if NO
             SessionInfo sessioninfo = null;
+#endif
             // 应该用管理员的权限来做这个事情
             // 临时的SessionInfo对象
             if (sessioninfo_param == null)
             {
+#if NO
                 sessioninfo = new SessionInfo(this);
                 sessioninfo.UserID = this.ManagerUserName;
                 sessioninfo.Password = this.ManagerPassword;
                 sessioninfo.IsReader = false;
+#endif
+                channel = this.GetChannel();
             }
             else
+            {
+#if NO
                 sessioninfo = sessioninfo_param;
+#endif
+                channel = sessioninfo_param.Channel;
+            }
 
             try
             {
@@ -468,7 +480,7 @@ namespace DigitalPlatform.OPAC.Server
                 // TODO: 还可以考虑支持http://这样的配置文件。
 
                 nRet = this.CfgsMap.MapFileToLocal(
-                    sessioninfo.Channel,
+                    channel,    // sessioninfo.Channel,
                     strRemotePath,
                     out strLocalPath,
                     out strError);
@@ -487,7 +499,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     string strTempPath = "";
                     nRet = this.CfgsMap.MapFileToLocal(
-                        sessioninfo_param.Channel,
+                        channel,    // sessioninfo_param.Channel,
                         strRemotePath + ".ref",
                         out strTempPath,
                         out strError);
@@ -515,7 +527,10 @@ namespace DigitalPlatform.OPAC.Server
             {
                 if (sessioninfo_param == null)
                 {
+#if NO
                     sessioninfo.CloseSession();
+#endif
+                    this.ReturnChannel(channel);
                 }
             }
         }

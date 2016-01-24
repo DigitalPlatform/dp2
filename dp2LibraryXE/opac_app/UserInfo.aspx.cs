@@ -67,10 +67,14 @@ ref sessioninfo) == false)
         string strError = "";
         int nRet = 0;
 
+#if NO
         SessionInfo temp_sessioninfo = new SessionInfo(app);
         temp_sessioninfo.UserID = app.ManagerUserName;
         temp_sessioninfo.Password = app.ManagerPassword;
         temp_sessioninfo.IsReader = false;
+#endif
+        LibraryChannel channel = app.GetChannel();
+
         try
         {
 
@@ -103,7 +107,6 @@ ref sessioninfo) == false)
                     strDisplayName = strDisplayName.Replace("]", "").Trim();
                 }
 
-
                 nRet = 0;
                 string strReaderXml = "";
                 string strOutputReaderPath = "";
@@ -112,30 +115,9 @@ ref sessioninfo) == false)
                 {
                     byte[] timestamp = null;
 
-                    /*
-                    // 通过读者显示名获得读者记录
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   命中1条
-                    //      >1  命中多于1条
-                    nRet = app.GetReaderRecXmlByDsiplayName(
-                    sessioninfo.Channels,
-                    strDisplayName,
-                    out strReaderXml,
-                    out strOutputReaderPath,
-                    out timestamp,
-                    out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == 0 && bHintDisplayName == true)
-                    {
-                        strBarcode = "";
-                        goto SEARCH_COMMENT;
-                    }
-                    */
                     string[] results = null;
-                    long lRet = temp_sessioninfo.Channel.GetReaderInfo(
+                    long lRet = // temp_sessioninfo.Channel.
+                        channel.GetReaderInfo(
                         null,
                         "@displayName:" + strDisplayName,
                         "xml",
@@ -158,37 +140,14 @@ ref sessioninfo) == false)
                 }
 
             SEARCH_BARCODE:
-
-
                 if (nRet == 0 && String.IsNullOrEmpty(strBarcode) == false)
                 {
                     strReaderXml = "";
                     byte[] timestamp = null;
 
-                    /*
-                    // 试探当做读者证条码号检索
-                    // 通过读者证条码号获得读者记录
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   命中1条
-                    //      >1  命中多于1条
-                    nRet = app.GetReaderRecXml(
-                sessioninfo.Channels,
-                strBarcode,
-                out strReaderXml,
-                out strOutputReaderPath,
-                out timestamp,
-                out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == 0)
-                    {
-                        goto SEARCH_COMMENT;
-                    }
-                     * */
                     string[] results = null;
-                    long lRet = temp_sessioninfo.Channel.GetReaderInfo(
+                    long lRet = // temp_sessioninfo.Channel.
+                        channel.GetReaderInfo(
                         null,
                         strBarcode,
                         "xml",
@@ -203,7 +162,6 @@ ref sessioninfo) == false)
                         goto SEARCH_COMMENT;
                     }
                     strReaderXml = results[0];
-
                 }
 
                 if (nRet == 0)
@@ -233,11 +191,7 @@ ref sessioninfo) == false)
                 strBarcode = DomUtil.GetElementInnerXml(readerdom.DocumentElement,
                     "barcode");
             }
-
-
-
         SEARCH_COMMENT:
-
             strText = strDisplayName;
             if (String.IsNullOrEmpty(strText) == true)
                 strText = strBarcode;
@@ -259,7 +213,6 @@ ref sessioninfo) == false)
                 strRecipient = strBarcode;
              * */
             strRecipient = BoxesInfo.BuildOneAddress(strDisplayName, strBarcode);
-
 
             string strSendMessageUrl = "./message.aspx?recipient=" + HttpUtility.UrlEncode(strRecipient);
             this.Button_sendMessage.OnClientClick = "window.open('" + strSendMessageUrl + "','_blank'); return cancelClick();";
@@ -377,10 +330,12 @@ ref sessioninfo) == false)
         }
         finally
         {
+#if NO
             temp_sessioninfo.CloseSession();
+#endif
+            app.ReturnChannel(channel);
         }
     }
-
 
     void channel_Idle(object sender, IdleEventArgs e)
     {

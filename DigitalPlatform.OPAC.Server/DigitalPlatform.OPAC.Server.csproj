@@ -59,11 +59,13 @@
     <Compile Include="AppBiblioDbGroup.cs" />
     <Compile Include="AppBrowseFormat.cs" />
     <Compile Include="AppColumn.cs" />
+    <Compile Include="AppFilterTaskManager.cs" />
     <Compile Include="AppInterface.cs" />
     <Compile Include="BatchTask\AppBatchTask.cs" />
     <Compile Include="BatchTask\BatchTask.cs" />
     <Compile Include="BatchTask\BatchTaskCollection.cs" />
     <Compile Include="BatchTask\DefaultThread.cs" />
+    <Compile Include="BatchTask\FilterTask.cs" />
     <Compile Include="BoxesInfo.cs" />
     <Compile Include="BrowseColumnCaptions.cs" />
     <Compile Include="CacheBuilder.cs" />

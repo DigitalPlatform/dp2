@@ -171,6 +171,7 @@ namespace DigitalPlatform.OPAC.Web
                 try
                 {
                     sessioninfo = new SessionInfo(app);
+                    sessioninfo.ClientIP = strClientIP;
                     page.Session["sessioninfo"] = sessioninfo;
                 }
                 catch (Exception ex)
@@ -515,6 +516,13 @@ namespace DigitalPlatform.OPAC.Web
             WebUtil.InitLang(this);
             base.InitializeCulture();
         }
+
+#if NO
+        protected override void OnUnload(EventArgs e)
+        {
+            base.OnUnload(e);
+        }
+#endif
 
         protected void Page_Unload(object sender, EventArgs e)
         {

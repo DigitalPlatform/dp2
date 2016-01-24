@@ -832,10 +832,13 @@ namespace DigitalPlatform.ResultSet
             disposed = true;
         }
 
+#if NO
         ~DpResultSet()
         {
             Dispose(false);
         }
+#endif
+
 #if NO
         ~DpResultSet()
         {
@@ -862,7 +865,6 @@ namespace DigitalPlatform.ResultSet
                 Open(bCreateIndex);
             }
         }
-
 
         public DpResultSet(bool bCreateIndex)
         {
