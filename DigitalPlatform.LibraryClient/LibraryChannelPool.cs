@@ -159,7 +159,7 @@ namespace DigitalPlatform.LibraryClient
         // 清理不用的通道
         // return:
         //      清理掉的通道数目
-        int CleanChannel(bool bLock)
+        public int CleanChannel(bool bLock)
         {
             List<LibraryChannelWrapper> deletes = new List<LibraryChannelWrapper>();
 
@@ -200,7 +200,7 @@ namespace DigitalPlatform.LibraryClient
         /// <summary>
         /// 关闭所有通道，清除集合
         /// </summary>
-        public void Close()
+        public new void Clear()
         {
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new LockException("锁定尝试中超时");
@@ -211,12 +211,17 @@ namespace DigitalPlatform.LibraryClient
                     wrapper.Channel.Close();
                 }
 
-                this.Clear();
+                base.Clear();
             }
             finally
             {
                 this.m_lock.ExitWriteLock();
             }
+        }
+
+        public void Close()
+        {
+            this.Clear();
         }
     }
 

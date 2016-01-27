@@ -545,7 +545,9 @@ namespace DigitalPlatform.OPAC
                 user.UserName = this.textBox_manageUserName.Text;
                 user.Password = this.textBox_managePassword.Text;
                 user.SetPassword = true;
-                user.Rights = "getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker";
+                // default_opac_rights
+                user.Rights = "getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker"
+                    + ",getiteminfo,getorderinfo,getissueinfo,getcommentinfo";  // 2016/1/27
 
                 /*
     代理帐户:

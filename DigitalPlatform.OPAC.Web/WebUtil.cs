@@ -227,6 +227,15 @@ namespace DigitalPlatform.OPAC.Web
         public OpacApplication app = null;
         public SessionInfo sessioninfo = null;
 
+        public bool MyFlushOutput()
+        {
+            // 2016/1/28
+            if (Response.IsClientConnected == false)
+                return false;
+            Response.Flush();
+            return Response.IsClientConnected;
+        }
+
         void PrepareSsoLogin()
         {
             HttpCookie cookie = this.Request.Cookies["dp2-sso"];

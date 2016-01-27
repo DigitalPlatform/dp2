@@ -87,7 +87,7 @@ ref sessioninfo) == false)
                 strFilePath = app.DataDir + "/log/" + strFilename;
             else
                 strFilePath = app.DataDir + "/log/log_" + DateTimeUtil.DateTimeToLong8(DateTime.Now) + ".txt";
-            
+
             int nRet = DumpFile(
                 strFilePath,
                 "text/plain",
@@ -98,7 +98,7 @@ ref sessioninfo) == false)
                 this.Response.StatusCode = 404;
                 this.Response.StatusDescription = strError;
                 this.Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p></body></html>");
-                this.Response.Flush(); 
+                this.Response.Flush();
                 this.Response.End();
                 return;
             }
@@ -196,8 +196,6 @@ ref sessioninfo) == false)
         return 0;
     }
 
-
-
     // return:
     //      -1  出错
     //      0   成功
@@ -234,7 +232,7 @@ ref sessioninfo) == false)
         }
         catch (FileNotFoundException)
         {
-            strError = "文件 '"+strFilename+"' 不存在";
+            strError = "文件 '" + strFilename + "' 不存在";
             return 0;
         }
         catch (DirectoryNotFoundException)
@@ -251,11 +249,13 @@ ref sessioninfo) == false)
         return 1;
     }
 
+#if NO
     bool MyFlushOutput()
     {
         Response.Flush();
         return Response.IsClientConnected;
     }
+#endif
 
     protected void Button_refreshCfg_Click(object sender, EventArgs e)
     {

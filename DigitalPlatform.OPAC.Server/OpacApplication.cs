@@ -847,11 +847,10 @@ namespace DigitalPlatform.OPAC.Server
             if (nRet == -1)
                 return -1;
 #endif
-
+            // 2016/1/27
+            this.ChannelPool.Close();
             return 0;
         }
-
-
 
         // 获得图书馆信息
         // parameters:
@@ -2942,7 +2941,13 @@ System.Text.Encoding.UTF8))
                     return 0;
                 }
                 if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ErrorCode.AccessDenied)
+                    {
+                        strError = "用户身份 '"+channel.UserName+"' 获取册记录失败: " + strError;
+                    }
                     return -1;
+                }
 
                 nResultCount = (int)lRet;
                 return nResultCount;

@@ -872,12 +872,6 @@ ref sessioninfo) == false)
         return 0;
     }
 
-    bool MyFlushOutput()
-    {
-        Response.Flush();
-        return Response.IsClientConnected;
-    }
-
     // return:
     //      -1  出错
     //      0   成功
