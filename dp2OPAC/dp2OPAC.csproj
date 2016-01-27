@@ -677,8 +677,6 @@
     <Content Include="Scripts\jquery-1.4.1-vsdoc.js" />
     <Content Include="Scripts\jquery-1.4.1.js" />
     <Content Include="Scripts\jquery-1.4.1.min.js" />
-    <Content Include="Search2.aspx" />
-    <Content Include="search2.js" />
     <Content Include="SearchBiblio.aspx" />
     <Content Include="searchbiblio.js" />
     <Content Include="SearchItem.aspx" />
@@ -1180,13 +1178,6 @@
     <Compile Include="sample.aspx.designer.cs">
       <DependentUpon>sample.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Search2.aspx.cs">
-      <DependentUpon>Search2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Search2.aspx.designer.cs">
-      <DependentUpon>Search2.aspx</DependentUpon>
-    </Compile>
     <Compile Include="SearchBiblio.aspx.cs">
       <DependentUpon>SearchBiblio.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1243,10 +1234,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
-      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
-      <Name>DigitalPlatform.CirculationClient</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.dp2.Statis\DigitalPlatform.dp2.Statis.csproj">
       <Project>{060DD22D-8C7A-4D17-AC72-06B45AE65174}</Project>
       <Name>DigitalPlatform.dp2.Statis</Name>

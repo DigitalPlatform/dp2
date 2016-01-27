@@ -1377,19 +1377,20 @@ ref bHideMessageBox);
                     if (_stop != null && _stop.State != 0)
                         break;
 
-                    LibraryChannel channel = new LibraryChannel();
-                    channel.Url = this.MainForm.LibraryServerUrl;
+                    using (LibraryChannel channel = new LibraryChannel())
+                    {
+                        channel.Url = this.MainForm.LibraryServerUrl;
 
-                    channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-                    channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                        channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                        channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
-                    string strValue = "";
-                    string strError = "";
-                    long lRet = channel.GetSystemParameter(_stop,
-                        "library",
-                        "name",
-                        out strValue,
-                        out strError);
+                        string strValue = "";
+                        string strError = "";
+                        long lRet = channel.GetSystemParameter(_stop,
+                            "library",
+                            "name",
+                            out strValue,
+                            out strError);
 #if NO
                     if (lRet == -1)
                     {
@@ -1398,7 +1399,8 @@ ref bHideMessageBox);
                     }
 #endif
 
-                    _stop.SetMessage(i.ToString());
+                        _stop.SetMessage(i.ToString());
+                    }
                 }
             }
             finally
@@ -1646,48 +1648,49 @@ dlg.UiState);
 
         private void button_test_loginAttack_Click(object sender, EventArgs e)
         {
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.MainForm.LibraryServerUrl;
-
-            channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-
-
-            _stop = new DigitalPlatform.Stop();
-            _stop.Register(this.MainForm.stopManager, true);	// 和容器关联
-
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Style = StopStyle.EnableHalfStop;
-            _stop.Initial("正在试探密码 ...");
-            _stop.BeginLoop();
-
-            this.button_test_loginAttack.Enabled = false;
-            this.numericUpDown_test_tryChannelCount.Enabled = false;
-            try
+            using (LibraryChannel channel = new LibraryChannel())
             {
-                for (int i = 0; i < this.numericUpDown_test_tryChannelCount.Value; i++)
+                channel.Url = this.MainForm.LibraryServerUrl;
+
+                channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+
+
+                _stop = new DigitalPlatform.Stop();
+                _stop.Register(this.MainForm.stopManager, true);	// 和容器关联
+
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Style = StopStyle.EnableHalfStop;
+                _stop.Initial("正在试探密码 ...");
+                _stop.BeginLoop();
+
+                this.button_test_loginAttack.Enabled = false;
+                this.numericUpDown_test_tryChannelCount.Enabled = false;
+                try
                 {
-                    Application.DoEvents();
+                    for (int i = 0; i < this.numericUpDown_test_tryChannelCount.Value; i++)
+                    {
+                        Application.DoEvents();
 
-                    if (_stop != null && _stop.State != 0)
-                        break;
+                        if (_stop != null && _stop.State != 0)
+                            break;
 
 
-                    string strUserName = "supervisor";
-                    string strPassword = i.ToString();
+                        string strUserName = "supervisor";
+                        string strPassword = i.ToString();
 
-                    string strRights = "";
-                    string strLibraryCode = "";
-                    string strOutputUserName = "";
-                    string strError = "";
-                    long lRet = channel.Login(
-                        strUserName,
-                        strPassword,
-                        "",
-                        out strOutputUserName,
-                        out strRights,
-                        out strLibraryCode,
-                        out strError);
+                        string strRights = "";
+                        string strLibraryCode = "";
+                        string strOutputUserName = "";
+                        string strError = "";
+                        long lRet = channel.Login(
+                            strUserName,
+                            strPassword,
+                            "",
+                            out strOutputUserName,
+                            out strRights,
+                            out strLibraryCode,
+                            out strError);
 #if NO
                     if (lRet == -1)
                     {
@@ -1696,25 +1699,25 @@ dlg.UiState);
                     }
 #endif
 
-                    _stop.SetMessage(i.ToString() + " username=" + strUserName + " password=" + strPassword + " lRet = " + lRet.ToString() + " " + strError);
+                        _stop.SetMessage(i.ToString() + " username=" + strUserName + " password=" + strPassword + " lRet = " + lRet.ToString() + " " + strError);
+                    }
                 }
-            }
-            finally
-            {
-                this.numericUpDown_test_tryChannelCount.Enabled = true;
-                this.button_test_loginAttack.Enabled = true;
-
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-
-                if (_stop != null) // 脱离关联
+                finally
                 {
-                    _stop.Unregister();	// 和容器关联
-                    _stop = null;
+                    this.numericUpDown_test_tryChannelCount.Enabled = true;
+                    this.button_test_loginAttack.Enabled = true;
+
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+
+                    if (_stop != null) // 脱离关联
+                    {
+                        _stop.Unregister();	// 和容器关联
+                        _stop = null;
+                    }
                 }
             }
-
         }
 
         private void button_testThrow_Click(object sender, EventArgs e)

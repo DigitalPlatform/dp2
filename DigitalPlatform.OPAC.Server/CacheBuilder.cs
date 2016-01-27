@@ -1321,10 +1321,9 @@ namespace DigitalPlatform.OPAC.Server
                 channel.Abort();
             }
 
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
 
             System.Threading.Thread.Sleep(100);	// 避免CPU资源过度耗费
-
         }
 
         public static string GetMyBookshelfFilename(

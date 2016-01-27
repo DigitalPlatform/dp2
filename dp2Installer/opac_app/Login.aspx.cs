@@ -139,7 +139,8 @@ ref this.sessioninfo) == false)
                     return;
 
                 // 登录成功后首次设置馆代码
-                this.TitleBarControl1.SelectedLibraryCode = sessioninfo.Channel.LibraryCodeList;
+                this.TitleBarControl1.SelectedLibraryCode = // sessioninfo.Channel.LibraryCodeList;
+                    sessioninfo.LibraryCodeList;
 
                 if (sessioninfo.LoginCallStack.Count != 0)
                 {
@@ -592,7 +593,8 @@ ref this.sessioninfo) == false)
             return;
 
         // 首次设置馆代码
-        this.TitleBarControl1.SelectedLibraryCode = sessioninfo.Channel.LibraryCodeList;
+        this.TitleBarControl1.SelectedLibraryCode = // sessioninfo.Channel.LibraryCodeList;
+            sessioninfo.LibraryCodeList;
 
         if (sessioninfo.LoginCallStack.Count != 0)
         {

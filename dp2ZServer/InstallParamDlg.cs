@@ -162,26 +162,28 @@ namespace dp2ZServer
         {
             strError = "";
 
-            LibraryChannel Channel = new LibraryChannel();
+            using (LibraryChannel Channel = new LibraryChannel())
+            {
 
-            Channel.Url = strLibraryWsUrl;
+                Channel.Url = strLibraryWsUrl;
 
-            // return:
-            //      -1  error
-            //      0   登录未成功
-            //      1   登录成功
-            long lRet = Channel.Login(strUserName,
-                strPassword,
-                "location=z39.50 server,type=worker",
-                /*
-                "z39.50 server",    // string strLocation,
-                false,  // bReader,
-                 * */
-                out strError);
-            if (lRet == -1)
-                return -1;
+                // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                long lRet = Channel.Login(strUserName,
+                    strPassword,
+                    "location=z39.50 server,type=worker",
+                    /*
+                    "z39.50 server",    // string strLocation,
+                    false,  // bReader,
+                     * */
+                    out strError);
+                if (lRet == -1)
+                    return -1;
 
-            return (int)lRet;
+                return (int)lRet;
+            }
         }
 
         void EnableControls(bool bEnable)

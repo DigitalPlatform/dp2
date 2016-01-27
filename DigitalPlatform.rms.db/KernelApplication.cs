@@ -17,7 +17,7 @@ using DigitalPlatform.ResultSet;
 namespace DigitalPlatform.rms
 {
     // 全局信息
-    public partial class KernelApplication
+    public partial class KernelApplication : IDisposable
     {
         // private string m_strLogFileName = "";	//日志文件名称
         private string m_strDebugFileName = "";	// 
@@ -48,6 +48,14 @@ namespace DigitalPlatform.rms
 
         private int PerTime = 5 * 60 * 1000;	// 5分钟?
 
+        public void Dispose()
+        {
+            // TODO: 加入 this.Close()。还需要进行一些改造
+            eventClose.Dispose();
+            eventActive.Dispose();
+            eventCommit.Dispose();
+            eventFinished.Dispose();
+        }
 
         // 启动工作线程
         public void StartWorkerThread()
@@ -479,6 +487,7 @@ namespace DigitalPlatform.rms
             return strResult;
         }
 
+        // TODO: 改进为可以重复调用。然后被 Dispose() 调用
         // 关闭
         public void Close()
         {
@@ -748,6 +757,14 @@ namespace DigitalPlatform.rms
 
         [EnumMember]
         PartialDenied = 23,  // 部分被拒绝 2012/10/9 本来是为了dp2library准备的
+
+        //
+
+        [EnumMember]
+        RequestError = 100,
+
+        [EnumMember]
+        RequestTimeOut = 112,   //请求超时 2016/1/27
 
     };
 

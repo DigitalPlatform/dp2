@@ -17,6 +17,11 @@
             {
                 components.Dispose();
             }
+
+            this.eventComplete.Dispose();
+            if (this.webClient != null)
+                this.webClient.Dispose();
+
             base.Dispose(disposing);
         }
 

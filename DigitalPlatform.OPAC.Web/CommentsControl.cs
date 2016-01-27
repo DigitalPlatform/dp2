@@ -19,6 +19,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.OPAC.Server;
+using DigitalPlatform.LibraryClient;
 //using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.OPAC.Web
@@ -955,7 +956,7 @@ namespace DigitalPlatform.OPAC.Web
             if (String.IsNullOrEmpty(this.RefID) == true
                 && String.IsNullOrEmpty(this.BiblioRecPath) == true)
             {
-                strError = "RefID和BiblioRecPath均为空, 无法显示";
+                strError = "RefID 和 BiblioRecPath 均为空, 无法显示";
                 this.SetDebugInfo("errorinfo", strError);
                 base.Render(output);
                 return;
@@ -990,34 +991,205 @@ namespace DigitalPlatform.OPAC.Web
             HiddenField biblio_recpath = (HiddenField)this.FindControl("biblio_recpath");
             biblio_recpath.Value = this.BiblioRecPath;
 
-
             LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
             PlaceHolder inputline = (PlaceHolder)this.FindControl("inputline");
-#if NO
-            // PlaceHolder edit_holder = (PlaceHolder)this.FindControl("edit_holder");
-            if (loginstate == LoginState.Public || loginstate == LoginState.NotLogin)
-            {
-                inputline.Visible = false;
-            }
-            else
-            {
-                inputline.Visible = true;
 
-                if (String.IsNullOrEmpty(this.EditLineNumbers) == true)
+            string strOutputCommentPath = "";
+            string strCommentXml = "";
+            string strBiblioRecPath = this.BiblioRecPath;
+            byte[] comment_timestamp = null;
+
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
+            {
+                // 如果this.BiblioRecPath为空, 并且要求显示同种全部评注
+                // 那只能通过this.Barcode取出一个评注记录, 从中才能得知种记录的路径
+                if (String.IsNullOrEmpty(strBiblioRecPath) == true)
                 {
+                    bool bGetItemXml = true;
+                    if ((this.CommentDispStyle & CommentDispStyle.Comments) == CommentDispStyle.Comments)
+                        bGetItemXml = false;
+
+                    string strBiblio = "";
+
+                    long lRet = // sessioninfo.Channel.
+                        channel.GetCommentInfo(
+                    null,
+                    "@refid:" + this.RefID,
+                        // null,
+                    (bGetItemXml == true) ? "xml" : "", // strResultType
+                    out strCommentXml,
+                    out strOutputCommentPath,
+                    out comment_timestamp,
+                    "recpath",  // strBiblioType
+                    out strBiblio,
+                    out strBiblioRecPath,
+                    out strError);
+
+                    if (lRet == -1)
+                        goto ERROR1;
+                    if (lRet > 1)
+                    {
+                        strError = "参考ID '" + this.RefID + "' 命中 " + nRet.ToString() + " 条记录";
+                        goto ERROR1;
+                    }
+
+                    this.BiblioRecPath = strBiblioRecPath;
+                }
+
+                long nHitCount = 0;
+
+                if ((this.CommentDispStyle & CommentDispStyle.Comments) == CommentDispStyle.Comments)
+                {
+                    // 检索出该种的所有评注
+#if NO
+                    sessioninfo.ItemLoad += new ItemLoadEventHandler(SessionInfo_CommentLoad);
+                    sessioninfo.SetStart += new SetStartEventHandler(sessioninfo_SetStart);
+#endif
+                    // tempItemBarcodes = new List<string>();
+                    try
+                    {
+                        long lRet = SearchComments(
+                            app,
+                            channel,
+                            strBiblioRecPath,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        nHitCount = lRet;
+
+                        if (nHitCount > 0)
+                        {
+                            if (String.IsNullOrEmpty(this.FocusRecPath) == true)
+                            {
+                                nRet = GetCommentsSearchResult(
+                                    app,
+                                    channel,
+                                    SessionInfo_CommentLoad,
+                                    this.StartIndex,
+                                    this.PageMaxLines,
+                                    false,
+                                    this.Lang,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                            }
+                            else
+                            {
+                                int nFoundStart = -1;
+                                // return:
+                                //      -1  出错
+                                //      0   没有找到
+                                //      1   找到
+                                nRet = GetCommentsSearchResult(
+                                    app,
+                                    channel,
+                                    SessionInfo_CommentLoad,
+                                    sessioninfo_SetStart,
+                                    this.PageMaxLines,
+                                    this.FocusRecPath,
+                                    false,
+                                    this.Lang,
+                                    out nFoundStart,
+                                    out strError);
+                                if (nRet == -1 || nRet == 0)
+                                    goto ERROR1;
+
+                            }
+                        }
+                    }
+                    finally
+                    {
+#if NO
+                        sessioninfo.SetStart -= new SetStartEventHandler(sessioninfo_SetStart);
+                        sessioninfo.ItemLoad -= new ItemLoadEventHandler(SessionInfo_CommentLoad);
+#endif
+                        //tempOutput = null;
+
+                        // this.ItemConverter = null;
+                    }
+
+                    // this.ItemBarcodes = this.tempItemBarcodes;
+
+                    this.ResultCount = (int)nHitCount;
+
+                    SetResultInfo((int)nHitCount);
+
+                    bool bHasCommandButton = false;
+
+                    if (nHitCount == 0)
+                    {
+                        // 如果一个评注也没有, 则不出现命令按钮
+                        PlaceHolder cmdline = (PlaceHolder)this.FindControl("cmdline");
+                        if (cmdline != null)
+                            cmdline.Visible = false;
+
+                        // 也可用SetInfo()
+                        // this.SetDebugInfo("none", this.GetString("无评注"));  // "(无评注)"
+                        this.SetInfo(this.GetString("无评注"));  // "(无评注)"
+
+                        // 不显示空的表格
+                        if (this.DisplayBlankTable == false)
+                        {
+                            this.Visible = false;
+                            return;
+                        }
+                    }
+                    else if (bHasCommandButton == false
+                        && this.ResultCount <= this.PageMaxLines)
+                    {
+                        // 如果没有命令按钮，并且没有分页器, 则不出现命令按钮区域
+                        PlaceHolder cmdline = (PlaceHolder)this.FindControl("cmdline");
+                        if (cmdline != null)
+                            cmdline.Visible = false;
+                    }
+                }
+                else if ((this.CommentDispStyle & CommentDispStyle.Comment) == CommentDispStyle.Comment)
+                {
+                    if (strCommentXml == "")
+                        throw new Exception("评注记录尚未准备好");
+
+                    // this.tempItemBarcodes = new List<string>();
+
+                    ItemLoadEventArgs e = new ItemLoadEventArgs();
+                    e.Index = 0;
+                    e.Path = strOutputCommentPath;
+                    e.Count = 1;
+                    e.Xml = strCommentXml;
+                    SessionInfo_CommentLoad(this, e);
+
+                    //m_recpathlist.Add(e.Path + "|" + ByteArray.GetHexTimeStampString(e.Timestamp));
+
+                }
+
+                //this.RecPathList = StringUtil.MakePathList(this.m_recpathlist);
+
+                if (String.IsNullOrEmpty(this.WarningText) == false)
+                    SetDebugInfo(this.WarningText);
+
+                // 根据登录身份决定是否能发表新评注
+                if (loginstate == LoginState.Public
+                    || loginstate == LoginState.NotLogin)
+                {
+                    inputline.Visible = false;
+                }
+                else
+                {
+                    inputline.Visible = true;
+
                     string strBiblioState = "";
                     {
-                        string strOutputPath = "";
                         string strBiblioXml = "";
-                        string strMetaData = "";
-                        byte[] timestamp = null;
-                        long lRet = channel.GetRes(this.BiblioRecPath,
-                            out strBiblioXml,
-                            out strMetaData,
-                            out timestamp,
-                            out strOutputPath,
-                            out strError);
+                        long lRet = // sessioninfo.Channel.
+                            channel.GetBiblioInfo(
+        null,
+        this.BiblioRecPath,
+        "",
+        "xml",
+        out strBiblioXml,
+        out strError);
                         if (lRet == -1)
                         {
                             /*
@@ -1053,425 +1225,365 @@ namespace DigitalPlatform.OPAC.Web
                     if (StringUtil.IsInList("订购征询", strBiblioState) == true)
                         bOrderComment = true;
 
-                    HiddenField type = (HiddenField)this.FindControl("edit_type");
-                    LiteralControl description = (LiteralControl)this.FindControl("edit_description");
-                    PlaceHolder ordercomment_description_holder = (PlaceHolder)this.FindControl("ordercomment_description_holder");
-                    // PlaceHolder recpath_holder = (PlaceHolder)this.FindControl("recpath_holder");
-
+                    CommentControl editor = (CommentControl)this.FindControl("editor");
+                    editor.BiblioRecPath = strBiblioRecPath;
 
                     if (bOrderComment == true)
                     {
-                        ordercomment_description_holder.Visible = true;
-                        description.Text = this.GetString("本书正在征求订购意见") + "：";
-                        type.Value = "订购征询";
+                        editor.EditType = "订购征询";
                     }
                     else
                     {
-                        ordercomment_description_holder.Visible = false;
-                        description.Text = this.GetString("在此贡献您的书评")+"：";
-                        type.Value = "书评";
+                        editor.EditType = "书评";
                     }
 
-                    if (sessioninfo.Account != null)
-                    {
-                        /*
-                        TextBox edit_creator = (TextBox)this.FindControl("edit_creator");
-                        edit_creator.Text = sessioninfo.Account.UserID;
-                         * */
-                        LiteralControl recordinfo = (LiteralControl)this.FindControl("recordinfo");
-                        recordinfo.Text = this.GetString("创建者") + ": " + GetCurrentAccountDisplayName();
-                        if (IsReaderHasnotDisplayName() == true)
-                        {
-                            recordinfo.Text += "<div class='comment'>" + this.GetString("若想以个性化的作者名字发表评注") + "，<a href='./personalinfo.aspx' target='_blank'>" + this.GetString("点这里立即添加我的显示名") + "</a></div>";
-                        }
-                    }
-
-                    // recpath_holder.Visible = false;
+                    editor.EditAction = "new";
+                    editor.RecPath = "";
                 }
 
-            }
-
-#endif
-
-            string strOutputCommentPath = "";
-            string strCommentXml = "";
-            string strBiblioRecPath = this.BiblioRecPath;
-            byte[] comment_timestamp = null;
-
-            // 如果this.BiblioRecPath为空, 并且要求显示同种全部评注
-            // 那只能通过this.Barcode取出一个评注记录, 从中才能得知种记录的路径
-            if (String.IsNullOrEmpty(strBiblioRecPath) == true)
-            {
                 /*
-                // 获得评注记录
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   命中1条
-                //      >1  命中多于1条
-                nRet = app.GetCommentRecXml(
-                    sessioninfo.Channels,
-                    this.RefID,
-                    out strCommentXml,
-                    out strOutputCommentPath,
-                    out strError);
-                if (nRet == 0)
+                if (this.Active == false)
                 {
-                    strError = "参考ID为 '" + this.RefID + "' 的评注记录没有找到";
-                    goto ERROR1;
+                    inputline.Visible = false;
                 }
-
-                if (nRet == -1)
-                    goto ERROR1;
                  * */
 
-                bool bGetItemXml = true;
-                if ((this.CommentDispStyle & CommentDispStyle.Comments) == CommentDispStyle.Comments)
-                   bGetItemXml = false;
+                SetControlActive();
 
-                string strBiblio = "";
+                /*
+                LiteralControl newreview_editor_style = (LiteralControl)this.FindControl("newreview_editor_style");
+                if (this.HideNewReviewEdtior == true)
+                    newreview_editor_style.Text = " style='DISPLAY:none'";
+                 * */
 
-                long lRet = sessioninfo.Channel.GetCommentInfo(
-                null,
-                "@refid:" + this.RefID,
-                // null,
-                (bGetItemXml == true) ? "xml" : "", // strResultType
-                out strCommentXml,
-                out strOutputCommentPath,
-                out comment_timestamp,
-                "recpath",  // strBiblioType
-                out strBiblio,
-                out strBiblioRecPath,
+                base.Render(output);
+                return;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
+
+        ERROR1:
+            this.SetDebugInfo("errorinfo", strError);
+        }
+
+
+        // 检索出评注数据
+        // return:
+        //      命中的全部结果数量。
+        public static long SearchComments(
+            OpacApplication app,
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+            // string strXml = "";
+
+            Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "");
+
+            //string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+            string strBiblioDbName = StringUtil.GetDbName(strBiblioRecPath);
+
+            if (String.IsNullOrEmpty(strBiblioDbName) == true)
+            {
+                strError = "从书目记录路径 '" + strBiblioRecPath + "' 中无法获得库名部分";
+                return -1;
+            }
+
+            string strCommentDbName = "";
+            // 根据书目库名, 找到对应的评注库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = app.GetCommentDbName(strBiblioDbName,
+                out strCommentDbName,
                 out strError);
+            if (nRet == -1)
+                return -1;
 
+            //string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
+            string strBiblioRecId = StringUtil.GetRecordId(strBiblioRecPath);
+
+            string strQueryXml = "<target list='"
+                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14 
+                + "'><item><order>DESC</order><word>"
+                + strBiblioRecId
+                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+
+            // LibraryChannel channel = this.GetChannel(true, this.m_strParameters);
+            try
+            {
+                long lRet = //this.Channel.
+                    channel.Search(
+                    null,
+                    strQueryXml,
+                    "default",
+                    "", // strOuputStyle
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
+                {
+                    strError = "没有找到";
+                    return 0;
+                }
+
+                return lRet;
+            }
+            finally
+            {
+                // this.ReturnChannel(channel);
+            }
+        }
+
+        // 根据特性的评注记录路径，获得一定范围的检索命中结果
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static int GetCommentsSearchResult(
+            OpacApplication app,
+            LibraryChannel channel,
+            ItemLoadEventHandler itemLoadProc,
+            SetStartEventHandler setStartProc,
+            int nPerCount,
+            string strCommentRecPath,
+            bool bGetRecord,
+            string strLang, // 2012/7/9
+            out int nStart,
+            out string strError)
+        {
+            strError = "";
+            nStart = -1;
+
+            long lHitCount = 0;
+
+            bool bFound = false;
+            List<string> aPath = null;
+            for (int j = 0; ; j++)
+            {
+                nStart = j * nPerCount;
+                // 只获得路径。确保所要的lStart lCount范围全部获得
+                long lRet = // this.Channel.
+                    channel.GetSearchResult(
+                    null,
+                    "default",
+                    nStart, // 0,
+                    nPerCount, // -1,
+                    strLang,
+                    out aPath,
+                    out strError);
                 if (lRet == -1)
                     goto ERROR1;
-                if (lRet > 1)
+
+                lHitCount = lRet;
+
+                if (lHitCount == 0)
+                    return 0;
+
+                if (aPath.Count == 0)
+                    break;
+
+                for (int i = 0; i < aPath.Count; i++)
                 {
-                    strError = "参考ID '" + this.RefID + "' 命中 " + nRet.ToString() + " 条记录";
-                    goto ERROR1;
-                }
-
-                this.BiblioRecPath = strBiblioRecPath;
-            }
-
-
-            // string strCommentDbName = "";  // 评注库名
-            // string strBiblioRecID = ""; // 种记录id
-
-            // 若需要取得种记录路径和id
-
-#if NO
-
-            // 如果需要从评注记录中获得种记录路径
-            if (String.IsNullOrEmpty(this.BiblioRecPath) == true
-                && strCommentXml != "")
-            {
-                strCommentDbName = ResPath.GetDbName(strOutputCommentPath);
-                string strBiblioDbName = "";
-
-                // 根据评注库名, 找到对应的书目库名
-                // return:
-                //      -1  出错
-                //      0   没有找到
-                //      1   找到
-                nRet = app.GetBiblioDbNameByCommentDbName(strCommentDbName,
-                    out strBiblioDbName,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    strError = "评注库 '" + strCommentDbName + "' 名在cfgs/global配置文件中没有找到对应的书目库名";
-                    goto ERROR1;
-                }
-
-                // 获得评注记录中的<parent>字段
-                XmlDocument dom = new XmlDocument();
-                try
-                {
-                    dom.LoadXml(strCommentXml);
-                }
-                catch (Exception ex)
-                {
-                    strError = "评注记录XML装载到DOM出错:" + ex.Message;
-                    goto ERROR1;
-                }
-
-                strBiblioRecID = DomUtil.GetElementText(dom.DocumentElement, "//parent");
-                if (String.IsNullOrEmpty(strBiblioRecID) == true)
-                {
-                    strError = "评注记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录";
-                    goto ERROR1;
-                }
-
-                strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
-            }
-#endif
-
-#if NO
-            // 若需要知道评注库名
-            if (String.IsNullOrEmpty(strCommentDbName) == true
-                && String.IsNullOrEmpty(this.BiblioRecPath) == false)
-            {
-                // 根据书目库名, 找到对应的评注库名
-                // return:
-                //      -1  出错
-                //      0   没有找到
-                //      1   找到
-                nRet = app.GetCommentDbName(ResPath.GetDbName(this.BiblioRecPath),
-                    out strCommentDbName,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-            }
-
-            if ((this.CommentDispStyle & CommentDispStyle.Comments) == CommentDispStyle.Comments)
-            {
-                // 已知种路径, 但不知评注库名
-                strBiblioRecPath = this.BiblioRecPath;
-                strBiblioRecID = ResPath.GetRecordId(this.BiblioRecPath);
-            }
-
-#endif
-            // //
-            //m_recpathlist.Clear();
-            //this.RecPathList = "";
-
-            long nHitCount = 0;
-
-            if ((this.CommentDispStyle & CommentDispStyle.Comments) == CommentDispStyle.Comments)
-            {
-
-
-                // 检索出该种的所有评注
-                sessioninfo.ItemLoad += new ItemLoadEventHandler(SessionInfo_CommentLoad);
-                sessioninfo.SetStart += new SetStartEventHandler(sessioninfo_SetStart);
-                // tempItemBarcodes = new List<string>();
-                try
-                {
-                    long lRet = sessioninfo.SearchComments(
-                        app,
-                        strBiblioRecPath,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    nHitCount = lRet;
-
-                    if (nHitCount > 0)
+                    if (aPath[i] == strCommentRecPath)
                     {
-                        if (String.IsNullOrEmpty(this.FocusRecPath) == true)
-                        {
-
-                            nRet = sessioninfo.GetCommentsSearchResult(
-                                app,
-                                this.StartIndex,
-                                this.PageMaxLines,
-                                false,
-                                this.Lang,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                        }
-                        else
-                        {
-                            int nFoundStart = -1;
-                            // return:
-                            //      -1  出错
-                            //      0   没有找到
-                            //      1   找到
-                            nRet = sessioninfo.GetCommentsSearchResult(
-                                app,
-                                this.PageMaxLines,
-                                this.FocusRecPath,
-                                false,
-                                this.Lang,
-                                out nFoundStart,
-                                out strError);
-                            if (nRet == -1 || nRet == 0)
-                                goto ERROR1;
-
-                        }
-                    }
-
-                }
-                finally
-                {
-                    sessioninfo.SetStart -= new SetStartEventHandler(sessioninfo_SetStart);
-                    sessioninfo.ItemLoad -= new ItemLoadEventHandler(SessionInfo_CommentLoad);
-                    //tempOutput = null;
-
-                    // this.ItemConverter = null;
-                }
-
-                // this.ItemBarcodes = this.tempItemBarcodes;
-
-                this.ResultCount = (int)nHitCount;
-
-                SetResultInfo((int)nHitCount);
-
-                bool bHasCommandButton = false;
-
-                if (nHitCount == 0)
-                {
-                    // 如果一个评注也没有, 则不出现命令按钮
-                    PlaceHolder cmdline = (PlaceHolder)this.FindControl("cmdline");
-                    if (cmdline != null)
-                        cmdline.Visible = false;
-
-                    // 也可用SetInfo()
-                    // this.SetDebugInfo("none", this.GetString("无评注"));  // "(无评注)"
-                    this.SetInfo(this.GetString("无评注"));  // "(无评注)"
-
-                    // 不显示空的表格
-                    if (this.DisplayBlankTable == false)
-                    {
-                        this.Visible = false;
-                        return;
+                        bFound = true;
+                        break;
                     }
                 }
-                else if (bHasCommandButton == false
-                    && this.ResultCount <= this.PageMaxLines)
-                {
-                    // 如果没有命令按钮，并且没有分页器, 则不出现命令按钮区域
-                    PlaceHolder cmdline = (PlaceHolder)this.FindControl("cmdline");
-                    if (cmdline != null)
-                        cmdline.Visible = false;
 
+                if (bFound == true)
+                    break;
+
+                if (nStart >= lHitCount)
+                    break;
+            }
+
+            if (bFound == true)
+            {
+                if (// this.SetStart != null
+                    setStartProc != null)
+                {
+                    SetStartEventArgs e = new SetStartEventArgs();
+                    e.StartIndex = nStart;
+
+                    // this.SetStart(this, e);
+                    setStartProc(null, e);
                 }
-            }
-            else if ((this.CommentDispStyle & CommentDispStyle.Comment) == CommentDispStyle.Comment)
-            {
-                if (strCommentXml == "")
-                    throw new Exception("评注记录尚未准备好");
 
-                // this.tempItemBarcodes = new List<string>();
-
-                ItemLoadEventArgs e = new ItemLoadEventArgs();
-                e.Index = 0;
-                e.Path = strOutputCommentPath;
-                e.Count = 1;
-                e.Xml = strCommentXml;
-                SessionInfo_CommentLoad(this, e);
-
-                //m_recpathlist.Add(e.Path + "|" + ByteArray.GetHexTimeStampString(e.Timestamp));
-
-            }
-
-            //this.RecPathList = StringUtil.MakePathList(this.m_recpathlist);
-
-            if (String.IsNullOrEmpty(this.WarningText) == false)
-                SetDebugInfo(this.WarningText);
-
-            // 根据登录身份决定是否能发表新评注
-            if (loginstate == LoginState.Public
-                || loginstate == LoginState.NotLogin)
-            {
-                inputline.Visible = false;
-            }
-            else
-            {
-                inputline.Visible = true;
-
-                string strBiblioState = "";
+                for (int i = 0; i < aPath.Count; i++)
                 {
-                    string strBiblioXml = "";
-                    /*
-                    string strOutputPath = "";
+                    if (bGetRecord == true)
+                    {
+                        string strXml = "";
+                        string strMetaData = "";
+                        byte[] timestamp = null;
+                        string strOutputPath = "";
+                        string strStyle = LibraryChannel.GETRES_ALL_STYLE;
+
+                        long lRet = // this.Channel.
+                            channel.GetRes(
+                            null,
+                            aPath[i],
+                            strStyle,
+                            out strXml,
+                            out strMetaData,
+                            out timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        if (//this.ItemLoad != null
+                            itemLoadProc != null)
+                        {
+                            ItemLoadEventArgs e = new ItemLoadEventArgs();
+                            e.Path = aPath[i];
+                            e.Index = i;
+                            e.Count = aPath.Count;
+                            e.Xml = strXml;
+                            e.Timestamp = timestamp;
+                            e.TotalCount = (int)lHitCount;
+
+                            // this.ItemLoad(this, e);
+                            e.Channel = channel;
+                            itemLoadProc(null, e);
+                        }
+                    }
+                    else
+                    {
+                        if (//this.ItemLoad != null
+                            itemLoadProc != null)
+                        {
+                            ItemLoadEventArgs e = new ItemLoadEventArgs();
+                            e.Path = aPath[i];
+                            e.Index = i;
+                            e.Count = aPath.Count;
+                            e.Xml = "";
+                            e.Timestamp = null;
+                            e.TotalCount = (int)lHitCount;
+
+                            // this.ItemLoad(this, e);
+                            e.Channel = channel;
+                            itemLoadProc(null, e);
+                        }
+                    }
+                }
+
+                return 1;   // 找到
+            }
+
+            nStart = -1;
+            strError = "路径为 '" + strCommentRecPath + "' 的记录在结果集中没有找到";
+            return 0;   // 没有找到
+        ERROR1:
+            return -1;
+        }
+
+        // TODO: 结果集是和 channel 在一起的。如果 channel 不确定，就需要用全局结果集
+        // 获得一定范围的检索命中结果
+        // return:
+        public static int GetCommentsSearchResult(
+            OpacApplication app,
+            LibraryChannel channel,
+            ItemLoadEventHandler itemLoadProc,
+            int nStart,
+            int nMaxCount,
+            bool bGetRecord,
+            string strLang, // 2012/7/9
+            out string strError)
+        {
+            strError = "";
+
+            List<string> aPath = null;
+            long lRet = // this.Channel.
+                channel.GetSearchResult(
+                null,
+                "default",
+                nStart, // 0,
+                nMaxCount, // -1,
+                strLang,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            long lHitCount = lRet;
+
+            if (aPath.Count == 0)
+            {
+                strError = "GetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            for (int i = 0; i < aPath.Count; i++)
+            {
+                if (bGetRecord == true)
+                {
+                    string strXml = "";
                     string strMetaData = "";
                     byte[] timestamp = null;
+                    string strOutputPath = "";
                     string strStyle = LibraryChannel.GETRES_ALL_STYLE;
 
-                    // TODO: 可以优化为从前面一次性获得
-                    long lRet = sessioninfo.Channel.GetRes(
+                    lRet = // this.Channel.
+                        channel.GetRes(
                         null,
-                        this.BiblioRecPath,
+                        aPath[i],
                         strStyle,
-                        out strBiblioXml,
+                        out strXml,
                         out strMetaData,
                         out timestamp,
                         out strOutputPath,
                         out strError);
-                     * */
-                    long lRet = sessioninfo.Channel.GetBiblioInfo(
-    null,
-    this.BiblioRecPath,
-    "",
-    "xml",
-    out strBiblioXml,
-    out strError);
                     if (lRet == -1)
-                    {
-                        /*
-                        strError = "获得种记录 '" + this.RecPath + "' 时出错: " + strError;
                         goto ERROR1;
-                         * */
-                    }
-                    else
+
+                    if (// this.ItemLoad != null
+                        itemLoadProc != null
+                        )
                     {
-                        string strOutMarcSyntax = "";
-                        string strMarc = "";
-                        // 将MARCXML格式的xml记录转换为marc机内格式字符串
-                        // parameters:
-                        //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
-                        //		strMarcSyntax	指示marc语法,如果==""，则自动识别
-                        //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
-                        nRet = MarcUtil.Xml2Marc(strBiblioXml,
-                            true,
-                            "", // this.CurMarcSyntax,
-                            out strOutMarcSyntax,
-                            out strMarc,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                        ItemLoadEventArgs e = new ItemLoadEventArgs();
+                        e.Path = aPath[i];
+                        e.Index = i;
+                        e.Count = aPath.Count;
+                        e.Xml = strXml;
+                        e.Timestamp = timestamp;
+                        e.TotalCount = (int)lHitCount;
 
-                        strBiblioState = MarcDocument.GetFirstSubfield(strMarc,
-                            "998",
-                            "s");   // 状态
+                        // this.ItemLoad(this, e);
+                        e.Channel = channel;
+                        itemLoadProc(null, e);
                     }
-                }
-
-                bool bOrderComment = false;
-                if (StringUtil.IsInList("订购征询", strBiblioState) == true)
-                    bOrderComment = true;
-
-                CommentControl editor = (CommentControl)this.FindControl("editor");
-                editor.BiblioRecPath = strBiblioRecPath;
-
-                if (bOrderComment == true)
-                {
-                    editor.EditType = "订购征询";
                 }
                 else
                 {
-                    editor.EditType = "书评";
+                    if (// this.ItemLoad != null
+                        itemLoadProc != null)
+                    {
+                        ItemLoadEventArgs e = new ItemLoadEventArgs();
+                        e.Path = aPath[i];
+                        e.Index = i;
+                        e.Count = aPath.Count;
+                        e.Xml = "";
+                        e.Timestamp = null;
+                        e.TotalCount = (int)lHitCount;
+
+                        // this.ItemLoad(this, e);
+                        e.Channel = channel;
+                        itemLoadProc(null, e);
+                    }
                 }
-
-                editor.EditAction = "new";
-                editor.RecPath = "";
             }
 
-            /*
-            if (this.Active == false)
-            {
-                inputline.Visible = false;
-            }
-             * */
-
-            SetControlActive();
-
-            /*
-            LiteralControl newreview_editor_style = (LiteralControl)this.FindControl("newreview_editor_style");
-            if (this.HideNewReviewEdtior == true)
-                newreview_editor_style.Text = " style='DISPLAY:none'";
-             * */
-
-            base.Render(output);
-            return;
-
+            return 0;
         ERROR1:
-            this.SetDebugInfo("errorinfo", strError);
+            return -1;
         }
 
         void sessioninfo_SetStart(object sender, SetStartEventArgs e)
@@ -1512,6 +1624,7 @@ namespace DigitalPlatform.OPAC.Web
             //      1   找到
             nRet = commentcontrol.GetRecord(app,
                 sessioninfo,
+                e.Channel,
                 e.Path,
                 out strXml,
                 out timestamp,
@@ -1590,22 +1703,10 @@ namespace DigitalPlatform.OPAC.Web
             middle.Text = strResult;
 
             commentcontrol.RecPath = e.Path;
-
-            //
-
-            /*
-            strResult = "</div>";
-            strResult += "</td>";
-            strResult += "</tr>";
-
-            right.Text = strResult;
-             * */
-
             return;
         ERROR1:
             this.Page.Response.Write(strError);
         }
-
 
         // [配置参数] 是否要显示空的表格。如果不显示，就是完全隐藏
         bool DisplayBlankTable

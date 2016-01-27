@@ -17,6 +17,12 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            if (this.m_webExternalHostItem != null)
+                this.m_webExternalHostItem.Dispose();
+            if (this.m_webExternalHostBiblio != null)
+                this.m_webExternalHostBiblio.Dispose();
+
             base.Dispose(disposing);
         }
 
@@ -42,8 +48,8 @@ namespace dp2Circulation
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(10, 90);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -79,7 +85,7 @@ namespace dp2Circulation
             // 
             // textBox_message
             // 
-            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_message.BackColor = System.Drawing.SystemColors.Info;
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.None;

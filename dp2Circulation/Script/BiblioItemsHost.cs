@@ -6,15 +6,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Windows.Forms;
+using System.Collections;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
-using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.GcatClient;
-using System.Collections;
 using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
@@ -214,6 +214,12 @@ namespace dp2Circulation
         public BiblioItemsHost()
         {
 
+        }
+
+        public void Dispose()
+        {
+            if (this.GcatChannel != null)
+                this.GcatChannel.Dispose();
         }
 
         /// <summary>

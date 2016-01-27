@@ -36,22 +36,9 @@ namespace dp2Circulation
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         bool m_bChanged = false;
 
         string RecPath = "";    // 读者记录路径
-        // string ReaderBarcode = "";  // 读者证条码号
         byte [] Timestamp = null;
         string OldRecord = "";
 

@@ -2995,6 +2995,7 @@ namespace dp2Kernel
                 try
                 {
                     this.App.Close();
+                    this.App.Dispose(); // 2016/1/25
                     this.App = null;
                 }
                 finally

@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -152,21 +153,30 @@ namespace DigitalPlatform.OPAC.Web
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
-            // 获得借阅历史
-            // parameters:
-            //      nPageNo 页号
-            //      nItemsPerPage    每页的事项个数。如果为 -1，表示希望从头获取全部内容
-            // return:
-            //      -1  出错
-            //      其它  符合条件的事项总数
-            return (int)sessioninfo.Channel.LoadChargingHistory(
-                null,
-                strReaderBarcode,
-                "return,lost,read",
-                nPageNo,
-                nItemsPerPage,
-                out results,
-                out strError);
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
+            {
+                // 获得借阅历史
+                // parameters:
+                //      nPageNo 页号
+                //      nItemsPerPage    每页的事项个数。如果为 -1，表示希望从头获取全部内容
+                // return:
+                //      -1  出错
+                //      其它  符合条件的事项总数
+                return (int)//sessioninfo.Channel.
+                    channel.LoadChargingHistory(
+                    null,
+                    strReaderBarcode,
+                    "return,lost,read",
+                    nPageNo,
+                    nItemsPerPage,
+                    out results,
+                    out strError);
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
         }
 
         // 计算出页码总数

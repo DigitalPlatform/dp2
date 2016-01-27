@@ -17,6 +17,11 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+            if (this.PropertyTaskList != null)
+                this.PropertyTaskList.Dispose();
+            if (this.OperHistory != null)
+                this.OperHistory.Dispose();
+
             base.Dispose(disposing);
         }
 

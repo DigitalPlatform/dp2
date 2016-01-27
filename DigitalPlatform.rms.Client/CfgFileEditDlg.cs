@@ -79,6 +79,10 @@ namespace DigitalPlatform.rms.Client
                 {
                     components.Dispose();
                 }
+
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+
             }
             base.Dispose(disposing);
         }
@@ -424,8 +428,6 @@ namespace DigitalPlatform.rms.Client
 
                 this.textBox_content.SelectionStart = 0;
                 this.textBox_content.SelectionLength = 0;
-
-
                 return;
             }
 

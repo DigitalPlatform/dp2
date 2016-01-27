@@ -12,7 +12,8 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 public partial class MyMessage : MyWebPage
 {
@@ -129,34 +130,44 @@ ref sessioninfo) == false)
             goto END_GETINFO;
         }
 
-        // return:
-        //      -1  出错
-        //      >=0 未读过的消息条数
-        int nUntouched = sessioninfo.Channel.GetUntouchedMessageCount(BoxesInfo.INBOX);
-        if (nUntouched == -1)
+        LibraryChannel channel = sessioninfo.GetChannel(true);
+        try
         {
-            // 2014/3/12
-            if (sessioninfo.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotLogin)
+            // return:
+            //      -1  出错
+            //      >=0 未读过的消息条数
+            int nUntouched = // sessioninfo.Channel.
+                channel.GetUntouchedMessageCount(BoxesInfo.INBOX);
+            if (nUntouched == -1)
             {
-                Session.Abandon();  // 迫使重新登录
-                goto END_GETINFO;
+                // 2014/3/12
+                if (// sessioninfo.Channel.
+                    channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotLogin)
+                {
+                    Session.Abandon();  // 迫使重新登录
+                    goto END_GETINFO;
+                }
             }
-        }
 
-        // 检查这个值是否有变化，如果有变化，需要把SessionInfo中的读者记录缓存清除，迫使后面的操作重新获取最新鲜的读者记录
-        // 这样做的目的是，假如读者接到了通知信件，那可能是读者记录发生了改变(例如预约到书等)，这里及时清除缓存，能确保读者读到的信件和预约状态等显示保持同步，防止出现迷惑读者的信息新旧状态不同的情况
-        // 当然，页面上的Refresh命令也能起到同样的作用
+            // 检查这个值是否有变化，如果有变化，需要把SessionInfo中的读者记录缓存清除，迫使后面的操作重新获取最新鲜的读者记录
+            // 这样做的目的是，假如读者接到了通知信件，那可能是读者记录发生了改变(例如预约到书等)，这里及时清除缓存，能确保读者读到的信件和预约状态等显示保持同步，防止出现迷惑读者的信息新旧状态不同的情况
+            // 当然，页面上的Refresh命令也能起到同样的作用
+            {
+                object o = this.Session["untouched_count"];
+                if (o != null)
+                {
+                    if ((int)o != nUntouched)
+                        sessioninfo.Clear();
+                }
+                this.Session["untouched_count"] = nUntouched;
+            }
+
+            result_info.Count = nUntouched.ToString();
+        }
+        finally
         {
-            object o = this.Session["untouched_count"];
-            if (o != null)
-            {
-                if ((int)o != nUntouched)
-                    sessioninfo.Clear();
-            }
-            this.Session["untouched_count"] = nUntouched;
+            sessioninfo.ReturnChannel(channel);
         }
-
-        result_info.Count = nUntouched.ToString();
     END_GETINFO:
         this.Response.Write(GetResultString(result_info));
         this.Response.End();

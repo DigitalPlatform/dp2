@@ -17,6 +17,9 @@
             {
                 components.Dispose();
             }
+
+            this.eventComplete.Dispose();
+
             base.Dispose(disposing);
         }
 

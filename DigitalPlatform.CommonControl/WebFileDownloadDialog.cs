@@ -167,8 +167,6 @@ namespace DigitalPlatform.CommonControl
                 this.eventComplete.Set();
         }
 
-
-
         private void button_cancel_Click(object sender, EventArgs e)
         {
             if (webClient != null)

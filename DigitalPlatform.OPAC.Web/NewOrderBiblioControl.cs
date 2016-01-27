@@ -639,8 +639,7 @@ out strError);
 
             string strOutputBiblioRecPath = "";
 
-            LibraryChannel channel = app.GetChannel();
-
+            LibraryChannel channel = sessioninfo.GetChannel(true);
             try
             {
 
@@ -672,7 +671,7 @@ out strError);
                 temp_sessioninfo.CloseSession();
                 temp_sessioninfo = null;
 #endif
-                app.ReturnChannel(channel);
+                sessioninfo.ReturnChannel(channel);
             }
 
             // 清除每个输入域的内容

@@ -92,7 +92,9 @@ namespace dp2Circulation
 
         private void QuickChargingForm_Load(object sender, EventArgs e)
         {
-            this.Channel.Idle += new IdleEventHandler(Channel_Idle);
+            // this.Channel.Idle += new IdleEventHandler(Channel_Idle);
+            // 被专门的线程使用，因而不需要出让控制权
+            this.ChannelDoEvents = false;
 
             if (this.DisplayFormat == "卡片")
             {
@@ -176,11 +178,13 @@ namespace dp2Circulation
         }
 #endif
 
+#if NO
         void Channel_Idle(object sender, IdleEventArgs e)
         {
             // 被专门的线程使用，因而不需要出让控制权
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
         }
+#endif
 
         private void QuickChargingForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -224,7 +228,7 @@ namespace dp2Circulation
             if (_patronSummaryForm != null)
                 _patronSummaryForm.Close();
 
-            this.Channel.Idle -= new IdleEventHandler(Channel_Idle);
+            // this.Channel.Idle -= new IdleEventHandler(Channel_Idle);
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {

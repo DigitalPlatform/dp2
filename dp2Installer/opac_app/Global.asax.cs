@@ -10,7 +10,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2OPAC
@@ -173,7 +173,6 @@ namespace dp2OPAC
                 // 增量计数
                 if (app != null)
                 {
-
                     long v = app.IpTable.IncIpCount(strClientIP, 1);
                     if (v >= app.IpTable.MAX_SESSIONS_PER_IP)
                     {

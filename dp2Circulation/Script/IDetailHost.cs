@@ -12,7 +12,7 @@ namespace dp2Circulation
     /// <summary>
     /// DetailHost 接口。用于种册窗的 Host 类
     /// </summary>
-    public interface IDetailHost
+    public interface IDetailHost : IDisposable
     {
         /// <summary>
         /// 

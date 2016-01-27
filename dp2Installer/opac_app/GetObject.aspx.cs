@@ -15,7 +15,7 @@ using System.Drawing;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 
@@ -49,7 +49,7 @@ ref sessioninfo) == false)
 
         LibraryChannel channel = null;
 #if CHANNEL_POOL
-        channel = sessioninfo.GetChannel(true, sessioninfo.Parameters);
+        channel = sessioninfo.GetChannel(true/*, sessioninfo.Parameters*/);
 #else
         channel = sessioninfo.GetChannel(false);
 #endif

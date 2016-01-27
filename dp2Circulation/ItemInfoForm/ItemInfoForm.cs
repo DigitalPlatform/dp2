@@ -1669,7 +1669,8 @@ out strError);
                     nLength = _itemsPerPage;
                 }
 
-                this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
+                this.ChannelDoEvents = false;
+                // this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
                 try
                 {
                     lRet = this.Channel.LoadChargingHistory(stop,
@@ -1686,7 +1687,8 @@ out strError);
                 }
                 finally
                 {
-                    this.Channel.Idle -= Channel_Idle;
+                    // this.Channel.Idle -= Channel_Idle;
+                    this.ChannelDoEvents = true;
                 }
 
                 FillBorrowHistoryPage(total_results, nPageNo * _itemsPerPage, (int)lRet);
@@ -1702,10 +1704,13 @@ out strError);
             }
         }
 
+#if NO
         void Channel_Idle(object sender, IdleEventArgs e)
         {
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
+
         }
+#endif
 
         void ClearBorrowHistoryPage()
         {

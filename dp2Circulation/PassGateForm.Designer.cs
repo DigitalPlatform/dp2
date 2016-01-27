@@ -17,6 +17,14 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            if (this.m_webExternalHost != null)
+                this.m_webExternalHost.Dispose();
+
+            this.eventClose.Dispose();
+            this.eventActive.Dispose();
+            this.eventFinished.Close();
+
             base.Dispose(disposing);
         }
 

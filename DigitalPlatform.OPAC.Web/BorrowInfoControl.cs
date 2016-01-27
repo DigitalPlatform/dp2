@@ -17,6 +17,7 @@ using DigitalPlatform.IO;
 
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -764,84 +765,69 @@ namespace DigitalPlatform.OPAC.Web
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
-            for (int i = 0; i < barcodes.Count; i++)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                string strItemBarcode = barcodes[i];
-                //string strItemRecord = "";
-                //string strReaderRecord = "";
-
-                string strReaderBarcode = "";
-                if (String.IsNullOrEmpty(this.ReaderBarcode) == false)
-                    strReaderBarcode = this.ReaderBarcode;
-                else
-                    strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
-
-                if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                for (int i = 0; i < barcodes.Count; i++)
                 {
-                    // text-level: 用户提示
-                    this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号"));   // "尚未指定读者证条码号。操作失败。"
-                    return;
-                }
+                    string strItemBarcode = barcodes[i];
+                    //string strItemRecord = "";
+                    //string strReaderRecord = "";
 
-                string[] aDupPath = null;
-                string[] item_records = null;
-                string[] reader_records = null;
-                string[] biblio_records = null;
-                BorrowInfo borrow_info = null;
-                string strError = "";
-                string strOutputReaderBarcode = "";
+                    string strReaderBarcode = "";
+                    if (String.IsNullOrEmpty(this.ReaderBarcode) == false)
+                        strReaderBarcode = this.ReaderBarcode;
+                    else
+                        strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
 
-                long lRet = sessioninfo.Channel.Borrow(
-                    null,
-                    true,
-                    strReaderBarcode,
-                    strItemBarcode,
-                    null,
-                    false,
-                    null,
-                    "", // style
-                    "",
-                    out item_records,
-                    "",
-                    out reader_records,
-                    "",
-                    out biblio_records,
-                    out aDupPath,
-                    out strOutputReaderBarcode,
-                    out borrow_info,
-                    out strError);
-                if (lRet == -1)
-                {
-                    this.SetDebugInfo("errorinfo", strError);
-                    return;
-                }
-                /*
-                LibraryServerResult result = app.Borrow(
-                    sessioninfo,
-                    true,
-                    strReaderBarcode,
-                    strItemBarcode,
-                    null,
-                    false,
-                    null,
-                    "", // style
-                    "",
-                    out item_records,
-                    "",
-                    out reader_records,
-                    "",
-                    out biblio_records,
-                    out aDupPath,
-                    out borrow_info);
-                if (result.Value == -1)
-                {
-                    this.SetDebugInfo("errorinfo", result.ErrorInfo);
-                    return;
-                }
-                 * */
+                    if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                    {
+                        // text-level: 用户提示
+                        this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号"));   // "尚未指定读者证条码号。操作失败。"
+                        return;
+                    }
 
-                // 清除读者记录缓存，以便借阅信息得到刷新
-                sessioninfo.ClearLoginReaderDomCache();
+                    string[] aDupPath = null;
+                    string[] item_records = null;
+                    string[] reader_records = null;
+                    string[] biblio_records = null;
+                    BorrowInfo borrow_info = null;
+                    string strError = "";
+                    string strOutputReaderBarcode = "";
+
+                    long lRet = // sessioninfo.Channel.
+                        channel.Borrow(
+                        null,
+                        true,
+                        strReaderBarcode,
+                        strItemBarcode,
+                        null,
+                        false,
+                        null,
+                        "", // style
+                        "",
+                        out item_records,
+                        "",
+                        out reader_records,
+                        "",
+                        out biblio_records,
+                        out aDupPath,
+                        out strOutputReaderBarcode,
+                        out borrow_info,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        this.SetDebugInfo("errorinfo", strError);
+                        return;
+                    }
+
+                    // 清除读者记录缓存，以便借阅信息得到刷新
+                    sessioninfo.ClearLoginReaderDomCache();
+                }
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
 
             // text-level: 用户提示

@@ -76,7 +76,6 @@ namespace DigitalPlatform.OPAC.Server
         {
             FilterTaskInput input = (FilterTaskInput)context;
 
-            Hashtable result_table = null;
             string strError = "";
 
 #if NO
@@ -90,6 +89,7 @@ namespace DigitalPlatform.OPAC.Server
 
             try
             {
+                Hashtable result_table = null;
                 long lHitCount = 0;
                 int nRet = ResultsetFilter.DoFilter(
                     input.App,

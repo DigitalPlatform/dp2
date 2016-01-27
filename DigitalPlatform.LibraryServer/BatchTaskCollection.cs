@@ -5,12 +5,16 @@ using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
-    public class BatchTaskCollection : List<BatchTask>
+    public class BatchTaskCollection : List<BatchTask>, IDisposable
     {
         // 数组锁
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
 
+        public void Dispose()
+        {
+            this.Clear();
+        }
 
         public new void Clear()
         {
@@ -23,6 +27,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 BatchTask task = this[i];
                 task.Close();
+                task.Dispose();
             }
 
             base.Clear();

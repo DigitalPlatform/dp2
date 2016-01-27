@@ -20,7 +20,7 @@ namespace DigitalPlatform
     /// </summary>
     public class IdleEventArgs : EventArgs
     {
-        public bool bDoEvents = true;
+        // public bool bDoEvents = true;
     }
 
     /// <summary>

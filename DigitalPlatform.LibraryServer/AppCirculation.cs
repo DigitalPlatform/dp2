@@ -811,7 +811,6 @@ namespace DigitalPlatform.LibraryServer
 
             try // 读者记录锁定范围开始
             {
-
                 // 读取读者记录
                 XmlDocument readerdom = null;
                 byte[] reader_timestamp = null;
@@ -819,13 +818,16 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(strReaderBarcode) == false)
                 {
+                    bool bReaderDbInCirculation = true;
                     LibraryServerResult result1 = GetReaderRecord(
                 sessioninfo,
                 strActionName,
                 time_lines,
+                true,
                 ref strReaderBarcode,
                 ref strIdcardNumber,
                 ref strLibraryCode,
+                out bReaderDbInCirculation,
                 out readerdom,
                 out strOutputReaderRecPath,
                 out reader_timestamp);
@@ -835,6 +837,18 @@ namespace DigitalPlatform.LibraryServer
                     else
                     {
                         return result1;
+                    }
+
+                    if (bReaderDbInCirculation == false)
+                    {
+                        // text-level: 用户提示
+                        strError = string.Format(this.GetString("借书操作被拒绝。读者证条码号s所在的读者记录s因其数据库s属于未参与流通的读者库"),  // "借书操作被拒绝。读者证条码号 '{0}' 所在的读者记录 '{1}' 因其数据库 '{2}' 属于未参与流通的读者库"
+                            strReaderBarcode,
+                            strOutputReaderRecPath,
+                            StringUtil.GetDbName(strOutputReaderRecPath));
+
+                        // "借书操作被拒绝。读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" +strOutputReaderRecPath + "' 因其数据库 '" +strReaderDbName+ "' 属于未参与流通的读者库";
+                        goto ERROR1;
                     }
 
                     // 记忆修改前的读者记录
@@ -2199,15 +2213,18 @@ start_time_1,
             SessionInfo sessioninfo,
             string strActionName,
             List<string> time_lines,
+            bool bVerifyReaderRecPath,
             ref string strReaderBarcode,    // 2015/1/4 加上 ref
             ref string strIdcardNumber,
             ref string strLibraryCode,
+            out bool bReaderDbInCirculation,
             out XmlDocument readerdom,
             out string strOutputReaderRecPath,
             out byte[] reader_timestamp)
         {
             string strError = "";
             int nRet = 0;
+            bReaderDbInCirculation = true;
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -2355,7 +2372,8 @@ start_time_1,
 
             // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
             // 2008/6/4
-            if (String.IsNullOrEmpty(strOutputReaderRecPath) == false)
+            if (bVerifyReaderRecPath == true 
+                && String.IsNullOrEmpty(strOutputReaderRecPath) == false)
             {
                 if (this.TestMode == true || sessioninfo.TestMode == true)
                 {
@@ -2374,7 +2392,7 @@ start_time_1,
                 }
 
                 string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
-                bool bReaderDbInCirculation = true;
+                // bool bReaderDbInCirculation = true;
                 if (this.IsReaderDbName(strReaderDbName,
                     out bReaderDbInCirculation,
                     out strLibraryCode) == false)
@@ -2384,6 +2402,7 @@ start_time_1,
                     goto ERROR1;
                 }
 
+#if NO
                 if (bReaderDbInCirculation == false)
                 {
                     // text-level: 用户提示
@@ -2395,6 +2414,8 @@ start_time_1,
                     // "借书操作被拒绝。读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" +strOutputReaderRecPath + "' 因其数据库 '" +strReaderDbName+ "' 属于未参与流通的读者库";
                     goto ERROR1;
                 }
+#endif
+
                 // 检查当前操作者是否管辖这个读者库
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                 if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
@@ -2411,14 +2432,14 @@ start_time_1,
             if (nRet == -1)
             {
                 // text-level: 内部错误
-                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                strError = "装载读者记录进入 XML DOM 时发生错误: " + strError;
                 goto ERROR1;
             }
 
             WriteTimeUsed(
                 time_lines,
                 start_time_read_reader,
-                "Borrow() 中读取读者记录 耗时 ");
+                strActionName + " 中读取读者记录 耗时 ");
             return result;
         ERROR1:
             result.Value = -1;
@@ -3627,6 +3648,7 @@ start_time_1,
                 return false;
             return strText.ToLower().StartsWith("@bibliorecpath:");
         }
+
         // API: 还书
         // 权限：  工作人员需要return权限，如果是丢失处理需要lost权限；所有读者均不具备还书操作权限。盘点需要 inventory 权限
         // parameters:
@@ -3843,6 +3865,73 @@ start_time_1,
 
             try // 读者记录锁定范围(可能)开始
             {
+                // 2016/1/27
+                // 读取读者记录
+                XmlDocument readerdom = null;
+                byte[] reader_timestamp = null;
+                string strOldReaderXml = "";
+                bool bReaderDbInCirculation = true;
+
+                if (string.IsNullOrEmpty(strReaderBarcode) == false)
+                {
+                    LibraryServerResult result1 = GetReaderRecord(
+                sessioninfo,
+                strActionName,
+                time_lines,
+                strAction != "inventory",
+                ref strReaderBarcode,
+                ref strIdcardNumber,
+                ref strLibraryCode,
+                out bReaderDbInCirculation,
+                out readerdom,
+                out strOutputReaderRecPath,
+                out reader_timestamp);
+                    if (result1.Value == 0)
+                    {
+                    }
+                    else
+                    {
+                        return result1;
+                    }
+
+                    // 记忆修改前的读者记录
+                    strOldReaderXml = readerdom.OuterXml;
+
+                    if (String.IsNullOrEmpty(strIdcardNumber) == false
+                        || string.IsNullOrEmpty(strReaderBarcode) == true /* 2013/5/23 */)
+                    {
+                        // 获得读者证条码号
+                        strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                            "barcode");
+                    }
+                    strOutputReaderBarcodeParam = DomUtil.GetElementText(readerdom.DocumentElement,
+                            "barcode");
+
+                    string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
+
+                    // 检查当前用户管辖的读者范围
+                    // return:
+                    //      -1  出错
+                    //      0   允许继续访问
+                    //      1   权限限制，不允许继续访问。strError 中有说明原因的文字
+                    nRet = CheckReaderRange(sessioninfo,
+                        readerdom,
+                        strReaderDbName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                    {
+                        // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderBarcode + ")。具体原因：" + strError;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+
+                //
+
                 List<string> aPath = null;
 
                 string strItemXml = "";
@@ -4035,7 +4124,6 @@ start_time_1,
                             strOutputItemRecPath = aFoundPath[0];
                             item_timestamp = aTimestamp[0];
                             strItemXml = aItemXml[0];
-
                         }
                         else
                         {
@@ -4342,9 +4430,68 @@ start_time_1,
                     // 读入读者记录
                     DateTime start_time_read_reader = DateTime.Now;
 
+                    if (readerdom == null
+                        && string.IsNullOrEmpty(strReaderBarcode) == false)
+                    {
+                        LibraryServerResult result1 = GetReaderRecord(
+                    sessioninfo,
+                    strActionName,
+                    time_lines,
+                    strAction != "inventory",
+                    ref strReaderBarcode,
+                    ref strIdcardNumber,
+                    ref strLibraryCode,
+                    out bReaderDbInCirculation,
+                    out readerdom,
+                    out strOutputReaderRecPath,
+                    out reader_timestamp);
+                        if (result1.Value == 0)
+                        {
+                        }
+                        else
+                        {
+                            return result1;
+                        }
+
+                        // 记忆修改前的读者记录
+                        strOldReaderXml = readerdom.OuterXml;
+
+                        if (String.IsNullOrEmpty(strIdcardNumber) == false
+                            || string.IsNullOrEmpty(strReaderBarcode) == true /* 2013/5/23 */)
+                        {
+                            // 获得读者证条码号
+                            strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                                "barcode");
+                        }
+                        strOutputReaderBarcodeParam = DomUtil.GetElementText(readerdom.DocumentElement,
+                                "barcode");
+
+                        string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
+
+                        // 检查当前用户管辖的读者范围
+                        // return:
+                        //      -1  出错
+                        //      0   允许继续访问
+                        //      1   权限限制，不允许继续访问。strError 中有说明原因的文字
+                        nRet = CheckReaderRange(sessioninfo,
+                            readerdom,
+                            strReaderDbName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                        {
+                            // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderBarcode + ")。具体原因：" + strError;
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+
+#if NO
                     string strReaderXml = "";
                     byte[] reader_timestamp = null;
-
                     if (string.IsNullOrEmpty(strReaderBarcode) == false)
                     {
                         nRet = this.TryGetReaderRecXml(
@@ -4445,7 +4592,6 @@ start_time_1,
 
                                     goto SKIP0;
                                 }
-
                             }
 
                             result.Value = -1;
@@ -4466,7 +4612,7 @@ start_time_1,
                             goto ERROR1;
                         }
                     }
-
+#endif
                 SKIP0:
 
                     if (strAction == "inventory")
@@ -4482,12 +4628,14 @@ start_time_1,
                             goto ERROR1;
 
                         strOutputItemXml = itemdom.OuterXml;
-                        strOutputReaderXml = strReaderXml;
+                        strOutputReaderXml = strOldReaderXml;   // strReaderXml;
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
 
                         SetReturnInfo(ref return_info, itemdom);
                         goto END3;
                     }
+
+#if NO
 
                     // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
                     // 2008/6/4
@@ -4548,6 +4696,7 @@ start_time_1,
                         start_time_read_reader,
                         "Return() 中读取读者记录 耗时 ");
 
+
                     // string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
 
                     // 观察读者记录是否在操作范围内
@@ -4569,6 +4718,7 @@ start_time_1,
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
+#endif
 
                     DateTime start_time_process = DateTime.Now;
 
@@ -4902,7 +5052,7 @@ start_time_1,
                         // 要Undo刚才对读者记录的写入
                         string strError1 = "";
                         lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
-                            strReaderXml,
+                            strOldReaderXml,    // strReaderXml,
                             false,
                             "content,ignorechecktimestamp",
                             reader_timestamp,
@@ -5086,7 +5236,7 @@ start_time_1,
                     {
                         if (String.IsNullOrEmpty(result.ErrorInfo) == false)
                             result.ErrorInfo += "\r\n";
-                        result.ErrorInfo += "读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" + strOutputReaderRecPath + "' 其数据库 '" + strReaderDbName + "' 属于未参与流通的读者库。";
+                        result.ErrorInfo += "读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" + strOutputReaderRecPath + "' 其数据库 '" + StringUtil.GetDbName(strOutputReaderRecPath) + "' 属于未参与流通的读者库。";
                         result.Value = 1;
                     }
 
@@ -5094,7 +5244,7 @@ start_time_1,
                     {
                         if (String.IsNullOrEmpty(result.ErrorInfo) == false)
                             result.ErrorInfo += "\r\n";
-                        result.ErrorInfo += "册条码号 '" + strItemBarcodeParam + "' 所在的册记录 '" + strOutputItemRecPath + "' 其数据库 '" + strReaderDbName + "' 属于未参与流通的实体库。";
+                        result.ErrorInfo += "册条码号 '" + strItemBarcodeParam + "' 所在的册记录 '" + strOutputItemRecPath + "' 其数据库 '" + StringUtil.GetDbName(strOutputReaderRecPath) + "' 属于未参与流通的实体库。";
                         result.Value = 1;
                     }
 

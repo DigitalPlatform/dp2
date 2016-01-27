@@ -20,7 +20,7 @@ namespace DigitalPlatform.CirculationClient
     /// <summary>
     /// 通讯通道集合。也就是 LibraryChannel 对象的集合
     /// </summary>
-    public class LibraryChannelCollection : List<LibraryChannel>
+    public class LibraryChannelCollection : List<LibraryChannel>, IDisposable
     {
         /// <summary>
         /// 登录前事件
@@ -32,6 +32,12 @@ namespace DigitalPlatform.CirculationClient
         /// </summary>
         public event AfterLoginEventHandle AfterLogin;
 
+        public void Dispose()
+        {
+            this.Close();
+            BeforeLogin = null;
+            AfterLogin = null;
+        }
 
         internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
@@ -202,5 +208,4 @@ namespace DigitalPlatform.CirculationClient
             }
         }
     }
-
 }

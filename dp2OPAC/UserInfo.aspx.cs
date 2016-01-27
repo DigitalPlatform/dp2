@@ -13,7 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 public partial class UserInfo : MyWebPage
@@ -293,10 +293,12 @@ ref sessioninfo) == false)
 
                 string strResultSetName = "opac_userinfo";
 
-                sessioninfo.Channel.Idle += new IdleEventHandler(channel_Idle);
+                // sessioninfo.Channel.
+                channel.Idle += new IdleEventHandler(channel_Idle);
                 try
                 {
-                    long lRet = sessioninfo.Channel.Search(
+                    long lRet = //sessioninfo.Channel.
+                        channel.Search(
                         null,
                         strXml,
                         strResultSetName,
@@ -320,7 +322,8 @@ ref sessioninfo) == false)
                 }
                 finally
                 {
-                    sessioninfo.Channel.Idle -= new IdleEventHandler(channel_Idle);
+                    //sessioninfo.Channel.
+                    channel.Idle -= new IdleEventHandler(channel_Idle);
                 }
             }
             return;
@@ -347,7 +350,7 @@ ref sessioninfo) == false)
             channel.Abort();
         }
 
-        e.bDoEvents = false;
+        // e.bDoEvents = false;
     }
 
     protected void Button_sendMessage_Click(object sender, EventArgs e)

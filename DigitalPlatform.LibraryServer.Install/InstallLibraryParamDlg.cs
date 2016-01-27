@@ -208,85 +208,84 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            RmsChannelCollection channels = new RmsChannelCollection();
-
-            RmsChannel channel = channels.GetChannel(this.textBox_kernelUrl.Text);
-            if (channel == null)
+            using (RmsChannelCollection channels = new RmsChannelCollection())
             {
-                strError = "channel == null";
-                return -1;
-            }
-
-            // Debug.Assert(false, "");
-
-            int nRet = channel.Login(this.textBox_manageUserName.Text,
-                this.textBox_managePassword.Text,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "以用户名 '" + this.textBox_manageUserName.Text + "' 和密码登录失败: " + strError;
-                return -1;
-            }
-
-            channel.DoLogout(out strError);
-
-            if (nRet == 0)
-            {
-                channels.AskAccountInfo -= new AskAccountInfoEventHandle(channels_AskAccountInfo);
-                channels.AskAccountInfo += new AskAccountInfoEventHandle(channels_AskAccountInfo);
-
-                nRet = channel.UiLogin("为确认代理帐户是否存在, 请用root用户身份登录。",
-                    "",
-                    LoginStyle.None,
-                    out strError);
-                if (nRet == -1 || nRet == 0)
+                RmsChannel channel = channels.GetChannel(this.textBox_kernelUrl.Text);
+                if (channel == null)
                 {
-                    strError = "以root用户身份登录失败: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在";
+                    strError = "channel == null";
                     return -1;
                 }
 
-                string strRecPath = "";
-                string strXml = "";
-                byte[] baTimeStamp = null;
+                // Debug.Assert(false, "");
 
-
-                // 获得用户记录
-                // return:
-                //      -1  error
-                //      0   not found
-                //      >=1   检索命中的条数
-                nRet = GetUserRecord(
-                    channel,
-                    this.textBox_manageUserName.Text,
-                    out strRecPath,
-                    out strXml,
-                    out baTimeStamp,
+                int nRet = channel.Login(this.textBox_manageUserName.Text,
+                    this.textBox_managePassword.Text,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在。";
+                    strError = "以用户名 '" + this.textBox_manageUserName.Text + "' 和密码登录失败: " + strError;
                     return -1;
                 }
 
-                if (nRet == 1)
+                channel.DoLogout(out strError);
+
+                if (nRet == 0)
                 {
-                    strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 已经存在, 但其密码和当前面板拟设置的密码不一致。";
-                    return 2;
-                }
-                if (nRet >= 1)
-                {
-                    strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请利用root身份启用dp2manager尽快修正此错误。";
-                    return -1;
+                    channels.AskAccountInfo -= new AskAccountInfoEventHandle(channels_AskAccountInfo);
+                    channels.AskAccountInfo += new AskAccountInfoEventHandle(channels_AskAccountInfo);
+
+                    nRet = channel.UiLogin("为确认代理帐户是否存在, 请用root用户身份登录。",
+                        "",
+                        LoginStyle.None,
+                        out strError);
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        strError = "以root用户身份登录失败: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在";
+                        return -1;
+                    }
+
+                    string strRecPath = "";
+                    string strXml = "";
+                    byte[] baTimeStamp = null;
+
+                    // 获得用户记录
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      >=1   检索命中的条数
+                    nRet = GetUserRecord(
+                        channel,
+                        this.textBox_manageUserName.Text,
+                        out strRecPath,
+                        out strXml,
+                        out baTimeStamp,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在。";
+                        return -1;
+                    }
+
+                    if (nRet == 1)
+                    {
+                        strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 已经存在, 但其密码和当前面板拟设置的密码不一致。";
+                        return 2;
+                    }
+                    if (nRet >= 1)
+                    {
+                        strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请利用root身份启用dp2manager尽快修正此错误。";
+                        return -1;
+                    }
+
+                    strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 不存在。";
+                    return 0;
                 }
 
-                strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 不存在。";
-                return 0;
+                strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 代理帐户经检验存在。";
+                return 1;
             }
-
-            strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 代理帐户经检验存在。";
-            return 1;
         }
-
 
         // 获得用户记录
         // return:
@@ -397,101 +396,98 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            RmsChannelCollection channels = new RmsChannelCollection();
-
-            channels.AskAccountInfo -= new AskAccountInfoEventHandle(channels_AskAccountInfo);
-            channels.AskAccountInfo += new AskAccountInfoEventHandle(channels_AskAccountInfo);
-
-
-
-            RmsChannel channel = channels.GetChannel(this.textBox_kernelUrl.Text);
-            if (channel == null)
+            using (RmsChannelCollection channels = new RmsChannelCollection())
             {
-                strError = "channel == null";
-                return -1;
+                channels.AskAccountInfo -= new AskAccountInfoEventHandle(channels_AskAccountInfo);
+                channels.AskAccountInfo += new AskAccountInfoEventHandle(channels_AskAccountInfo);
+
+                RmsChannel channel = channels.GetChannel(this.textBox_kernelUrl.Text);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    return -1;
+                }
+
+                int nRet = channel.UiLogin("请用root用户身份登录，以便创建代理帐户。",
+                    "",
+                    LoginStyle.None,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                {
+                    strError = "以root用户身份登录失败: " + strError;
+                    return -1;
+                }
+
+                // 获得用户库名
+
+
+                string strRecPath = "";
+                string strXml = "";
+                byte[] baTimeStamp = null;
+
+                // 查重，看这个用户名是否已经存在
+                // 获得用户记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      >=1   检索命中的条数
+                nRet = GetUserRecord(
+                    channel,
+                    this.textBox_manageUserName.Text,
+                    out strRecPath,
+                    out strXml,
+                    out baTimeStamp,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError;
+                    return -1;
+                }
+
+                if (nRet == 1)
+                {
+                    strError = "用户 '" + this.textBox_manageUserName.Text + "' 已经存在。";
+                    return -1;
+                }
+                if (nRet >= 1)
+                {
+                    strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请利用root身份启用dp2manager尽快修正此错误。";
+                    return -1;
+                }
+
+                // 构造一条用户记录写入
+                nRet = BuildUserRecord(out strXml,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "构造用户记录时发生错误: " + strError;
+                    return -1;
+                }
+
+                string strOutputPath = "";
+                byte[] baOutputTimeStamp;
+
+                if (strRecPath == "")
+                    strRecPath = Defs.DefaultUserDb.Name + "/" + "?";
+
+                long lRet = channel.DoSaveTextRes(
+                    strRecPath,
+                    strXml,
+                    false,	// bInlucdePreamble
+                    "",	// style
+                    baTimeStamp,	// baTimeStamp,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "保存用户记录时发生错误: " + strError;
+                    return -1;
+                }
+
+                channel.DoLogout(out strError);
+                return 0;
             }
-
-            int nRet = channel.UiLogin("请用root用户身份登录，以便创建代理帐户。",
-                "",
-                LoginStyle.None,
-                out strError);
-            if (nRet == -1 || nRet == 0)
-            {
-                strError = "以root用户身份登录失败: " + strError;
-                return -1;
-            }
-
-            // 获得用户库名
-
-
-            string strRecPath = "";
-            string strXml = "";
-            byte[] baTimeStamp = null;
-
-
-            // 查重，看这个用户名是否已经存在
-            // 获得用户记录
-            // return:
-            //      -1  error
-            //      0   not found
-            //      >=1   检索命中的条数
-            nRet = GetUserRecord(
-                channel,
-                this.textBox_manageUserName.Text,
-                out strRecPath,
-                out strXml,
-                out baTimeStamp,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError;
-                return -1;
-            }
-
-            if (nRet == 1)
-            {
-                strError = "用户 '" + this.textBox_manageUserName.Text + "' 已经存在。";
-                return -1;
-            }
-            if (nRet >= 1)
-            {
-                strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请利用root身份启用dp2manager尽快修正此错误。";
-                return -1;
-            }
-
-            // 构造一条用户记录写入
-            nRet = BuildUserRecord(out strXml,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "构造用户记录时发生错误: " + strError;
-                return -1;
-            }
-
-            string strOutputPath = "";
-            byte[] baOutputTimeStamp;
-
-            if (strRecPath == "")
-                strRecPath = Defs.DefaultUserDb.Name + "/" + "?";
-
-            long lRet = channel.DoSaveTextRes(
-                strRecPath,
-                strXml,
-                false,	// bInlucdePreamble
-                "",	// style
-                baTimeStamp,	// baTimeStamp,
-                out baOutputTimeStamp,
-                out strOutputPath,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "保存用户记录时发生错误: " + strError;
-                return -1;
-            }
-
-            channel.DoLogout(out strError);
-
-            return 0;
         }
 
         // 重设置代理帐户密码
@@ -516,103 +512,100 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            RmsChannelCollection channels = new RmsChannelCollection();
-
-            channels.AskAccountInfo -= new AskAccountInfoEventHandle(channels_AskAccountInfo);
-            channels.AskAccountInfo += new AskAccountInfoEventHandle(channels_AskAccountInfo);
-
-            RmsChannel channel = channels.GetChannel(this.textBox_kernelUrl.Text);
-            if (channel == null)
+            using (RmsChannelCollection channels = new RmsChannelCollection())
             {
-                strError = "channel == null";
-                return -1;
+                channels.AskAccountInfo -= new AskAccountInfoEventHandle(channels_AskAccountInfo);
+                channels.AskAccountInfo += new AskAccountInfoEventHandle(channels_AskAccountInfo);
+
+                RmsChannel channel = channels.GetChannel(this.textBox_kernelUrl.Text);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    return -1;
+                }
+
+                int nRet = channel.UiLogin("请用root用户身份登录，以便重设代理帐户密码。",
+                    "",
+                    LoginStyle.None,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                {
+                    strError = "以root用户身份登录失败: " + strError;
+                    return -1;
+                }
+
+                // 获得用户库名
+                string strRecPath = "";
+                string strXml = "";
+                byte[] baTimeStamp = null;
+
+                // 查重，看这个用户名是否已经存在
+                // 获得用户记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      >=1   检索命中的条数
+                nRet = GetUserRecord(
+                    channel,
+                    this.textBox_manageUserName.Text,
+                    out strRecPath,
+                    out strXml,
+                    out baTimeStamp,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError;
+                    return -1;
+                }
+
+                if (nRet == 0)
+                {
+                    strError = "用户 '" + this.textBox_manageUserName.Text + "' 尚不存在，因此无法重设其密码。请直接创建。";
+                    return -1;
+                }
+
+                if (nRet > 1)
+                {
+                    strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请利用root身份启用dp2manager尽快修正此错误。";
+                    return -1;
+                }
+
+                // 修改密码
+                nRet = ResetUserRecordPassword(ref strXml,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "构造用户记录时发生错误: " + strError;
+                    return -1;
+                }
+
+                string strOutputPath = "";
+                byte[] baOutputTimeStamp;
+
+                if (strRecPath == "")
+                {
+                    Debug.Assert(false, "不可能出现的情况。");
+                    strRecPath = Defs.DefaultUserDb.Name + "/" + "?";
+                }
+
+                long lRet = channel.DoSaveTextRes(
+                    strRecPath,
+                    strXml,
+                    false,	// bInlucdePreamble
+                    "",	// style
+                    baTimeStamp,	// baTimeStamp,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "保存用户记录时发生错误: " + strError;
+                    return -1;
+                }
+
+                channel.DoLogout(out strError);
+                return 0;
             }
-
-            int nRet = channel.UiLogin("请用root用户身份登录，以便重设代理帐户密码。",
-                "",
-                LoginStyle.None,
-                out strError);
-            if (nRet == -1 || nRet == 0)
-            {
-                strError = "以root用户身份登录失败: " + strError;
-                return -1;
-            }
-
-            // 获得用户库名
-
-
-            string strRecPath = "";
-            string strXml = "";
-            byte[] baTimeStamp = null;
-
-
-            // 查重，看这个用户名是否已经存在
-            // 获得用户记录
-            // return:
-            //      -1  error
-            //      0   not found
-            //      >=1   检索命中的条数
-            nRet = GetUserRecord(
-                channel,
-                this.textBox_manageUserName.Text,
-                out strRecPath,
-                out strXml,
-                out baTimeStamp,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError;
-                return -1;
-            }
-
-            if (nRet == 0)
-            {
-                strError = "用户 '" + this.textBox_manageUserName.Text + "' 尚不存在，因此无法重设其密码。请直接创建。";
-                return -1;
-            }
-
-            if (nRet > 1)
-            {
-                strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请利用root身份启用dp2manager尽快修正此错误。";
-                return -1;
-            }
-
-            // 修改密码
-            nRet = ResetUserRecordPassword(ref strXml,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "构造用户记录时发生错误: " + strError;
-                return -1;
-            }
-
-            string strOutputPath = "";
-            byte[] baOutputTimeStamp;
-
-            if (strRecPath == "")
-            {
-                Debug.Assert(false, "不可能出现的情况。");
-                strRecPath = Defs.DefaultUserDb.Name + "/" + "?";
-            }
-
-            long lRet = channel.DoSaveTextRes(
-                strRecPath,
-                strXml,
-                false,	// bInlucdePreamble
-                "",	// style
-                baTimeStamp,	// baTimeStamp,
-                out baOutputTimeStamp,
-                out strOutputPath,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "保存用户记录时发生错误: " + strError;
-                return -1;
-            }
-
-            channel.DoLogout(out strError);
-
-            return 0;
         }
 
         int ResetUserRecordPassword(ref string strXml,

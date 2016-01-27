@@ -1359,7 +1359,7 @@ out strError);
 
             LibraryChannel current_channel = _base.GetChannel(account.ServerUrl, account.UserName);
             current_channel.Timeout = new TimeSpan(0, 0, 15);   // 超时值为 15 秒
-            current_channel.Idle += _channel_Idle;
+            // current_channel.Idle += _channel_Idle;
             lock (this._channels)
             {
                 this._channels.Add(current_channel);
@@ -1588,7 +1588,7 @@ out strError);
                     this._channels.Remove(current_channel);
                 }
 
-                current_channel.Idle -= _channel_Idle;
+                // current_channel.Idle -= _channel_Idle;
                 _base.ReturnChannel(current_channel);
                 current_channel = null;
                 this.ClearMessage();
@@ -1599,10 +1599,15 @@ out strError);
             return -1;
         }
 
+#if NO
         void _channel_Idle(object sender, IdleEventArgs e)
         {
-            e.bDoEvents = true;
+            // .bDoEvents = true;
+
+            // 2016/1/26
+            Application.DoEvents();
         }
+#endif
 
         #endregion
 
@@ -2459,7 +2464,6 @@ MessageBoxDefaultButton.Button1);
             }
 
             Debug.Assert(strServerType == "dp2library", "");
-
 
             // string strBiblioDbName = Global.GetDbName(this._biblio.BiblioRecPath);
             string strBiblioDbName = Global.GetDbName(strBiblioRecPath);

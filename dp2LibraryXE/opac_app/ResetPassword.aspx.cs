@@ -12,7 +12,8 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 public partial class ResetPassword : MyWebPage  // System.Web.UI.Page
 {
@@ -53,48 +54,58 @@ ref sessioninfo) == false)
 
     protected void Button_GetTempPassword_Click(object sender, EventArgs e)
     {
+        string strError = "";
+
         if (string.IsNullOrEmpty(this.TextBox_name.Text) == true)
         {
-            this.Label_message.Text = "请输入姓名。";
-            return;
+            strError = "请输入姓名。";
+            goto ERROR1;
         }
 
         if (string.IsNullOrEmpty(this.TextBox_readerBarcode.Text) == true)
         {
-            this.Label_message.Text = "请输入读者证条码号。";
-            return;
+            strError = "请输入读者证条码号。";
+            goto ERROR1;
         }
 
         if (string.IsNullOrEmpty(this.TextBox_tel.Text) == true)
         {
-            this.Label_message.Text = "请输入手机号码。";
-            return;
+            strError = "请输入手机号码。";
+            goto ERROR1;
         }
 
         if (this.TextBox_tel.Text.Length != 11)
         {
-            this.Label_message.Text = "手机号码格式不正确。应该为 11 位数字";
-            return;
+            strError = "手机号码格式不正确。应该为 11 位数字";
+            goto ERROR1;
         }
 
         string strParameters = "name=" + GetParamValue(this.TextBox_name.Text)
             + ",tel=" + GetParamValue(this.TextBox_tel.Text)
             + ",barcode=" + GetParamValue(this.TextBox_readerBarcode.Text);
 
-        string strError = "";
-        long lRet = sessioninfo.Channel.ResetPassword(
-            null,
-            strParameters,
-            "",
-            out strError);
-        if (lRet != 1)
-            goto ERROR1;
+        LibraryChannel channel = sessioninfo.GetChannel(true);
+        try
+        {
+            long lRet = // sessioninfo.Channel.
+                channel.ResetPassword(
+                null,
+                strParameters,
+                "",
+                out strError);
+            if (lRet != 1)
+                goto ERROR1;
 
-        if (string.IsNullOrEmpty(strError) == true)
-            this.Label_message.Text = "临时密码已通过短信方式发送到手机 " + this.TextBox_tel.Text + "。请按照手机短信提示进行操作";
-        else
-            this.Label_message.Text = strError;
-        return;
+            if (string.IsNullOrEmpty(strError) == true)
+                this.Label_message.Text = "临时密码已通过短信方式发送到手机 " + this.TextBox_tel.Text + "。请按照手机短信提示进行操作";
+            else
+                this.Label_message.Text = strError;
+            return;
+        }
+        finally
+        {
+            sessioninfo.ReturnChannel(channel);
+        }
     ERROR1:
         this.Label_message.Text = strError;
     }

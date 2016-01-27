@@ -12,7 +12,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 
 public partial class Book : MyWebPage
 {
@@ -165,7 +165,7 @@ ref sessioninfo) == false)
             //      0   评注记录没有找到(strError中有说明信息)
             //      1   找到
             int nRet = app.GetBiblioRecPathByCommentRecPath(
-            sessioninfo,
+            // sessioninfo,
             strCommentRecPath,
             out strBiblioRecPath,
             out strError);
@@ -189,7 +189,7 @@ ref sessioninfo) == false)
             //      0   评注记录没有找到(strError中有说明信息)
             //      1   找到
             int nRet = app.GetBiblioRecPathByItemRecPath(
-            sessioninfo,
+            // sessioninfo,
             strItemRecPath,
             out strBiblioRecPath,
             out strError);

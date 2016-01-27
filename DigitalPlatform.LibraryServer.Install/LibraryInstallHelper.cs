@@ -246,49 +246,50 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            RmsChannelCollection channels = new RmsChannelCollection();
-
-            RmsChannel channel = channels.GetChannel(strKernelUrl);
-            if (channel == null)
+            using (RmsChannelCollection channels = new RmsChannelCollection())
             {
-                strError = "channel == null";
-                return -1;
-            }
+                RmsChannel channel = channels.GetChannel(strKernelUrl);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    return -1;
+                }
 
-            string strUserName = DomUtil.GetAttr(rmsserver_node, "username");
-            string strPassword = DomUtil.GetAttr(rmsserver_node, "password");
+                string strUserName = DomUtil.GetAttr(rmsserver_node, "username");
+                string strPassword = DomUtil.GetAttr(rmsserver_node, "password");
 
-            string EncryptKey = "dp2circulationpassword";
-            try
-            {
-                strPassword = Cryptography.Decrypt(
+                string EncryptKey = "dp2circulationpassword";
+                try
+                {
+                    strPassword = Cryptography.Decrypt(
+                        strPassword,
+                        EncryptKey);
+                }
+                catch
+                {
+                    strError = "<rmsserver>元素password属性中的密码设置不正确";
+                    return -1;
+                }
+
+
+                nRet = channel.Login(strUserName,
                     strPassword,
-                    EncryptKey);
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "以用户名 '" + strUserName + "' 和密码登录内核时失败: " + strError;
+                    return -1;
+                }
+
+                nRet = DeleteAllDatabase(
+                    channel,
+                    dom,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                return 1;
             }
-            catch
-            {
-                strError = "<rmsserver>元素password属性中的密码设置不正确";
-                return -1;
-            }
-
-
-            nRet = channel.Login(strUserName,
-                strPassword,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "以用户名 '" + strUserName + "' 和密码登录内核时失败: " + strError;
-                return -1;
-            }
-
-            nRet = DeleteAllDatabase(
-                channel,
-                dom,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            return 1;
         }
 
         // 探测数据目录，是否已经存在数据，是不是属于升级情形

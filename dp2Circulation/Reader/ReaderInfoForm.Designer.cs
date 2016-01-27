@@ -17,6 +17,12 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            if (this.m_webExternalHost != null)
+                this.m_webExternalHost.Dispose();
+            if (this.m_chargingInterface != null)
+                this.m_chargingInterface.Dispose();
+
             base.Dispose(disposing);
         }
 
@@ -172,8 +178,8 @@ namespace dp2Circulation
             // 
             // tabControl_readerInfo
             // 
-            this.tabControl_readerInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabControl_readerInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_readerInfo.Controls.Add(this.tabPage_normal);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_borrowHistory);

@@ -58,6 +58,7 @@ namespace DigitalPlatform.rms.Client
             }
 
             this.Clear();
+            this.AskAccountInfo = null;
         }
 
         public void OnAskAccountInfo(object sender, AskAccountInfoEventArgs e)
@@ -77,7 +78,6 @@ namespace DigitalPlatform.rms.Client
 		// 如果集合中已经存在这个对象，则直接返回；否则创建一个新对象
 		public RmsChannel GetChannel(string strUrl)
 		{
-
 			string strRegularUrl = strUrl.ToUpper();
 
 			RmsChannel channel = (RmsChannel)this[strRegularUrl];
@@ -91,10 +91,8 @@ namespace DigitalPlatform.rms.Client
 			channel.Container = this;
 
 			this.Add(strRegularUrl, channel);
-
 			return channel;
 		}
-
  
         // TPPD: 需要把这些临时对象管理起来，在必要的时候进行Close()
         // 创建一个临时Channel对象

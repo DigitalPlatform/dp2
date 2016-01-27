@@ -17,6 +17,10 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            if (this._fillThread != null)
+                this._fillThread.Dispose();
+
             base.Dispose(disposing);
         }
 

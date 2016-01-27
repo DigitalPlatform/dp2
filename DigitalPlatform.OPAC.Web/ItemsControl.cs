@@ -18,6 +18,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -591,25 +593,33 @@ namespace DigitalPlatform.OPAC.Web
                 return;
             }
 
-            string strError = "";
-            long lRet = sessioninfo.Channel.Reservation(null,
-                "new",
-                strReaderBarcode,
-                strBarcodeList,
-                out strError);
-            if (lRet == -1)
-                SetDebugInfo("errorinfo", strError);
-            else
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                string strMessage = this.GetString("预约成功");   // "预约成功。请看“<a href='./reservationinfo.aspx'>预约</a>”中的新增信息。";
+                string strError = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.Reservation(null,
+                    "new",
+                    strReaderBarcode,
+                    strBarcodeList,
+                    out strError);
+                if (lRet == -1)
+                    SetDebugInfo("errorinfo", strError);
+                else
+                {
+                    string strMessage = this.GetString("预约成功");   // "预约成功。请看“<a href='./reservationinfo.aspx'>预约</a>”中的新增信息。";
 
-                // 成功时也可能有提示信息
-                if (String.IsNullOrEmpty(strError) == false)
-                    strMessage += "<br/><br/>" + strError;
+                    // 成功时也可能有提示信息
+                    if (String.IsNullOrEmpty(strError) == false)
+                        strMessage += "<br/><br/>" + strError;
 
-                SetDebugInfo(strMessage);
+                    SetDebugInfo(strMessage);
+                }
             }
-
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
 
             // 清除读者记录缓存
             sessioninfo.ClearLoginReaderDomCache();
@@ -1005,7 +1015,6 @@ namespace DigitalPlatform.OPAC.Web
                 // 图书馆员才能动态指定读者证条码号
                 reservationreaderbarcode_holder.Visible = true;
 
-
                 // 放入可能的内容 2008/9/27
                 if (sessioninfo.ReaderInfo != null
                     && String.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderDomBarcode) == false)
@@ -1021,182 +1030,272 @@ namespace DigitalPlatform.OPAC.Web
                 reservationreaderbarcode_holder.Visible = false;
             }
 
-
-            string strBiblioRecPath = this.BiblioRecPath;
-
-
-            string strOutputItemPath = "";
-            string strItemXml = "";
-            byte[] item_timestamp = null;
-            // 如果this.BiblioRecPath为空, 并且要求显示同种全部册
-            // 那只能通过this.Barcode取出一个册记录, 从中才能得知种记录的路径
-            if (String.IsNullOrEmpty(strBiblioRecPath) == true)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
+                string strBiblioRecPath = this.BiblioRecPath;
 
-#if NO
-                // 获得册记录
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   命中1条
-                //      >1  命中多于1条
-                nRet = app.GetItemRecXml(
-                    sessioninfo.Channels,
+                string strOutputItemPath = "";
+                string strItemXml = "";
+                byte[] item_timestamp = null;
+                // 如果this.BiblioRecPath为空, 并且要求显示同种全部册
+                // 那只能通过this.Barcode取出一个册记录, 从中才能得知种记录的路径
+                if (String.IsNullOrEmpty(strBiblioRecPath) == true)
+                {
+                    bool bGetItemXml = true;
+                    if ((this.ItemDispStyle & ItemDispStyle.Items) == ItemDispStyle.Items)
+                        bGetItemXml = false;
+
+                    string strBiblio = "";
+
+                    long lRet = // sessioninfo.Channel.
+                        channel.GetItemInfo(
+                    null,
                     this.Barcode,
+                    (bGetItemXml == true) ? "xml" : "", // strResultType
                     out strItemXml,
                     out strOutputItemPath,
+                    out item_timestamp,
+                    "recpath",  // strBiblioType
+                    out strBiblio,
+                    out strBiblioRecPath,
                     out strError);
-                if (nRet == 0)
-                {
-                    strError = "册条码号为 '" + this.Barcode + "' 的册记录没有找到";
-                    goto ERROR1;
-                }
-
-                if (nRet == -1)
-                    goto ERROR1;
-#endif
-                
-                bool bGetItemXml = true;
-                if ((this.ItemDispStyle & ItemDispStyle.Items) == ItemDispStyle.Items)
-                    bGetItemXml = false;
-
-                string strBiblio = "";
-
-                long lRet = sessioninfo.Channel.GetItemInfo(
-                null,
-                this.Barcode,
-                (bGetItemXml == true) ? "xml" : "", // strResultType
-                out strItemXml,
-                out strOutputItemPath,
-                out item_timestamp,
-                "recpath",  // strBiblioType
-                out strBiblio,
-                out strBiblioRecPath,
-                out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-                if (lRet == 0)
-                {
-                    strError = "册条码号 '" + this.Barcode + "' 没有找到";
-                    goto ERROR1;
-                }
-
-                if (lRet > 1)
-                {
-                    strError = "册条码号 '" + this.Barcode + "' 命中 " + nRet.ToString() + " 条记录";
-                    goto ERROR1;
-                }
-
-                Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
-                this.BiblioRecPath = strBiblioRecPath;
-
-            }
-
-
-            if ((this.ItemDispStyle & ItemDispStyle.Items) == ItemDispStyle.Items)
-            {
-                string strLibraryCode = (string)this.Page.Session["librarycode"];
-
-                // 检索出该种的所有册
-                sessioninfo.ItemLoad += new ItemLoadEventHandler(SessionInfo_ItemLoad);
-                tempItemBarcodes = new List<string>();
-                //                 tempOutput = "";
-                // tempOutput = output;
-                try
-                {
-                    // return:
-                    //      -2  实体库没有定义
-                    //      -1  出错
-                    //      其他  命中的全部结果数量。
-                    nRet = sessioninfo.OpacSearchItems(
-                        app,
-                        strBiblioRecPath,
-                        this.StartIndex,
-                        this.PageMaxLines,
-                        this.Lang,
-                        strLibraryCode,
-                        out strError);
-                    if (nRet == -1)
+                    if (lRet == -1)
+                        goto ERROR1;
+                    if (lRet == 0)
                     {
-                        strError = "sessioninfo.SearchItems() error :" + strError;
+                        strError = "册条码号 '" + this.Barcode + "' 没有找到";
                         goto ERROR1;
                     }
-                    if (nRet == -2)
+
+                    if (lRet > 1)
                     {
-                        this.Visible = false;
-                        return;
+                        strError = "册条码号 '" + this.Barcode + "' 命中 " + nRet.ToString() + " 条记录";
+                        goto ERROR1;
+                    }
+
+                    Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
+                    this.BiblioRecPath = strBiblioRecPath;
+
+                }
+
+
+                if ((this.ItemDispStyle & ItemDispStyle.Items) == ItemDispStyle.Items)
+                {
+                    string strLibraryCode = (string)this.Page.Session["librarycode"];
+
+                    // 检索出该种的所有册
+#if NO
+                    sessioninfo.ItemLoad += new ItemLoadEventHandler(SessionInfo_ItemLoad);
+#endif
+                    tempItemBarcodes = new List<string>();
+                    //                 tempOutput = "";
+                    // tempOutput = output;
+                    try
+                    {
+                        // return:
+                        //      -2  实体库没有定义
+                        //      -1  出错
+                        //      其他  命中的全部结果数量。
+                        nRet = OpacSearchItems(
+                            app,
+                            channel,
+                            SessionInfo_ItemLoad,
+                            strBiblioRecPath,
+                            this.StartIndex,
+                            this.PageMaxLines,
+                            this.Lang,
+                            strLibraryCode,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "sessioninfo.SearchItems() error :" + strError;
+                            goto ERROR1;
+                        }
+                        if (nRet == -2)
+                        {
+                            this.Visible = false;
+                            return;
+                        }
+                    }
+                    finally
+                    {
+#if NO
+                        sessioninfo.ItemLoad -= new ItemLoadEventHandler(SessionInfo_ItemLoad);
+#endif
+                    }
+
+                    this.ItemBarcodes = this.tempItemBarcodes;
+
+                    this.ResultCount = nRet;    // 2009/6/9 add
+
+                    SetResultInfo(nRet);
+
+                    if (nRet == 0)
+                    {
+                        // 如果一册也没有, 则不出现命令按钮
+                        /*
+                        Button button = (Button)this.FindControl("reservationbutton");
+                        if (button != null)
+                            button.Visible = false;
+                         */
+                        PlaceHolder cmdline = (PlaceHolder)this.FindControl("cmdline");
+                        if (cmdline != null)
+                            cmdline.Visible = false;
+
+                        this.SetDebugInfo("none", this.GetString("无馆藏"));  // "(无馆藏)"
+
+                        // 不显示空的表格
+                        if (this.DisplayBlankTable == false)
+                        {
+                            this.Visible = false;
+                            return;
+                        }
                     }
                 }
-                finally
+                else if ((this.ItemDispStyle & ItemDispStyle.Item) == ItemDispStyle.Item)
                 {
-                    sessioninfo.ItemLoad -= new ItemLoadEventHandler(SessionInfo_ItemLoad);
-                    //tempOutput = null;
+                    if (strItemXml == "")
+                        throw new Exception("册记录尚未准备好");
 
-                    // // this.ItemConverter = null;
+                    this.tempItemBarcodes = new List<string>();
+
+                    ItemLoadEventArgs e = new ItemLoadEventArgs();
+                    e.Index = 0;
+                    e.Path = strOutputItemPath;
+                    e.Count = 1;
+                    e.Xml = strItemXml;
+                    e.Timestamp = item_timestamp;
+                    SessionInfo_ItemLoad(this, e);
+
+                    this.ItemBarcodes = this.tempItemBarcodes;
                 }
 
-                this.ItemBarcodes = this.tempItemBarcodes;
+                if (String.IsNullOrEmpty(this.WarningText) == false)
+                    SetDebugInfo(this.WarningText);
 
-                this.ResultCount = nRet;    // 2009/6/9 add
+                if (this.Active == false)
+                    reservationbutton.Enabled = false;
 
-                SetResultInfo(nRet);
-
-                if (nRet == 0)
-                {
-                    // 如果一册也没有, 则不出现命令按钮
-                    /*
-                    Button button = (Button)this.FindControl("reservationbutton");
-                    if (button != null)
-                        button.Visible = false;
-                     */
-                    PlaceHolder cmdline = (PlaceHolder)this.FindControl("cmdline");
-                    if (cmdline != null)
-                        cmdline.Visible = false;
-
-                    this.SetDebugInfo("none", this.GetString("无馆藏"));  // "(无馆藏)"
-
-                    // 不显示空的表格
-                    if (this.DisplayBlankTable == false)
-                    {
-                        this.Visible = false;
-                        return;
-                    }
-                }
+                base.Render(output);
+                return;
             }
-            else if ((this.ItemDispStyle & ItemDispStyle.Item) == ItemDispStyle.Item)
+            finally
             {
-                if (strItemXml == "")
-                    throw new Exception("册记录尚未准备好");
-
-                this.tempItemBarcodes = new List<string>();
-
-                ItemLoadEventArgs e = new ItemLoadEventArgs();
-                e.Index = 0;
-                e.Path = strOutputItemPath;
-                e.Count = 1;
-                e.Xml = strItemXml;
-                e.Timestamp = item_timestamp;
-                SessionInfo_ItemLoad(this, e);
-
-                this.ItemBarcodes = this.tempItemBarcodes;
+                sessioninfo.ReturnChannel(channel);
             }
-
-            if (String.IsNullOrEmpty(this.WarningText) == false)
-                SetDebugInfo(this.WarningText);
-
-            if (this.Active == false)
-                reservationbutton.Enabled = false;
-
-
-            base.Render(output);
-
-            return;
 
         ERROR1:
             // output.Write(strError);
             // 2011/4/21
             this.SetDebugInfo("errorinfo", strError);
             base.Render(output);
+        }
+
+        // 检索出册数据
+        // 带有偏移量的版本
+        // 2009/6/9 
+        // return:
+        //      -2  实体库没有定义
+        //      -1  出错
+        //      其他  命中的全部结果数量。
+        //
+        public static int OpacSearchItems(
+            OpacApplication app,
+            LibraryChannel channel,
+            ItemLoadEventHandler itemLoadProc,
+            string strBiblioRecPath,
+            int nStart,
+            int nMaxCount,
+            string strLang,
+            string strLibraryCode,
+            out string strError)
+        {
+            strError = "";
+            // string strXml = "";
+
+            // LibraryChannel channel = this.GetChannel(true, this.m_strParameters);
+            try
+            {
+                string strStyle = "opac";
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    strStyle += ",getotherlibraryitem";
+                else
+                    strStyle += ",librarycode:" + strLibraryCode;
+
+                long lStart = nStart;
+                long lCount = nMaxCount;
+                long lTotalCount = 0;
+                for (; ; )
+                {
+                    EntityInfo[] iteminfos = null;
+                    long lRet = // this.Channel.
+                        channel.GetEntities(
+                        null,
+                        strBiblioRecPath,
+                        lStart,
+                        lCount,
+                        strStyle,
+                        strLang,
+                        out iteminfos,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (//this.Channel.
+                            channel.ErrorCode == ErrorCode.ItemDbNotDef)
+                            return -2;
+                        return -1;
+                    }
+
+                    if (lRet == 0)
+                    {
+                        strError = "没有找到";
+                        return 0;
+                    }
+
+                    lTotalCount = lRet;
+
+                    if (lCount < 0)
+                        lCount = lTotalCount - lStart;
+
+                    if (lStart + lCount > lTotalCount)
+                        lCount = lTotalCount - lStart;
+
+                    // 处理
+                    for (int i = 0; i < iteminfos.Length; i++)
+                    {
+                        EntityInfo info = iteminfos[i];
+
+                        if (//this.ItemLoad != null
+                            itemLoadProc != null)
+                        {
+                            ItemLoadEventArgs e = new ItemLoadEventArgs();
+                            e.Path = info.OldRecPath;
+                            e.Index = i;    // +nStart;
+                            e.Count = nMaxCount;    // (int)lTotalCount - nStart;
+                            e.Timestamp = info.OldTimestamp;
+                            e.Xml = info.OldRecord;
+
+                            //this.ItemLoad(this, e);
+                            itemLoadProc(null, e);
+                        }
+                    }
+
+                    lStart += iteminfos.Length;
+                    lCount -= iteminfos.Length;
+
+                    if (lStart >= lTotalCount)
+                        break;
+                    if (lCount <= 0)
+                        break;
+                }
+
+                return (int)lTotalCount;
+            }
+            finally
+            {
+                // this.ReturnChannel(channel);
+            }
         }
 
         List<string> m_hidecolumns = null;
@@ -2037,7 +2136,7 @@ namespace DigitalPlatform.OPAC.Web
             // Debug.Assert(false, "需要改造");
             // TODO: 构造warning
             strWarning = "";
-            return app.GetBiblioRecPath(sessioninfo,
+            return app.GetBiblioRecPath( // sessioninfo,
                 strBarcode,
                 // strBorrower,
                 out strBiblioRecPath,
@@ -2227,7 +2326,7 @@ string strWrapperClass)
                 string[] parts = strRange.Split(new char[] { '~' });
                 if (parts.Length != 2)
                 {
-                    strError = "字符串 '"+strRangeList+"' 中单个索取号范围字符串 '" + strRange + "' 格式不正确";
+                    strError = "字符串 '" + strRangeList + "' 中单个索取号范围字符串 '" + strRange + "' 格式不正确";
                     return -1;
                 }
 

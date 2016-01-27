@@ -22,7 +22,7 @@ namespace DigitalPlatform.GcatClient
 		public bool Cancel = false;
 	}
 
-	public class Channel
+	public class Channel : IDisposable
 	{
 		public string Url = "";
 
@@ -40,6 +40,16 @@ namespace DigitalPlatform.GcatClient
 
         object resultParam = null;
         AutoResetEvent eventComplete = new AutoResetEvent(false);
+
+        public void Dispose()
+        {
+            this.BeforeLogin = null;
+
+            if (this.m_ws != null)
+                this.m_ws.Dispose();
+
+            eventComplete.Dispose();
+        }
 
 		public gcat ws 
 		{

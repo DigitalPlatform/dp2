@@ -522,7 +522,6 @@ namespace DigitalPlatform.MarcDom
                 }
             }
 
-
             if (itemParent != null)
             {
                 strResult += strTab + "public " + itemParent.FunctionName +
@@ -1685,7 +1684,7 @@ namespace DigitalPlatform.MarcDom
         */
     }
 
-    // hash table中和XmlNode对应的Item
+    // hash table 中和 XmlNode 对应的 Item
     public class HashFilterItem
     {
         public XmlNode xmlNode = null;

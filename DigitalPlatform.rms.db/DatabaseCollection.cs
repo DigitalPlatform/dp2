@@ -2530,7 +2530,7 @@ namespace DigitalPlatform.rms
                 long lTotalLength = 0;
 
                 // 分片获取和写入资源内容
-                for (;;)
+                for (; ; )
                 {
                     // 获取源资源内容
                     byte[] baOriginObjectData = null;
@@ -3911,7 +3911,7 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-            DOWRITE:
+        DOWRITE:
 
             string strFilePath = "";//GetCfgItemLacalPath(strCfgItemPath);
             // return:
@@ -3947,7 +3947,7 @@ namespace DigitalPlatform.rms
                      strRanges,
                      lTotalLength,
                      baSource,
-                     // streamSource,
+                    // streamSource,
                      strMetadata,
                      strStyle,
                      baInputTimestamp,
@@ -6170,7 +6170,8 @@ ChannelIdleEventArgs e);
     }
 
     #region 专门用于检索的类
-    public class DatabaseCommandTask
+
+    public class DatabaseCommandTask : IDisposable
     {
         public object m_command = null;
         public AutoResetEvent m_event = new AutoResetEvent(false);
@@ -6181,6 +6182,11 @@ ChannelIdleEventArgs e);
         public /*SqlDataReader*/object DataReader = null;
 
         public bool Canceled = false;
+
+        public void Dispose()
+        {
+            m_event.Dispose();
+        }
 
         public DatabaseCommandTask(object command)
         {
@@ -6211,7 +6217,6 @@ ChannelIdleEventArgs e);
                 ((OracleCommand)m_command).Cancel();
 
         }
-
 
         // 主函数
         public void ThreadMain()
@@ -6331,7 +6336,6 @@ ChannelIdleEventArgs e);
                 ((OracleDataReader)this.DataReader).Close();
         }
     }
-
 
     #endregion
 

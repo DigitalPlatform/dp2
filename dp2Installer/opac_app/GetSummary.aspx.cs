@@ -18,7 +18,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 public partial class GetSummary : System.Web.UI.Page // MyWebPage
@@ -90,13 +90,13 @@ ref sessioninfo) == false)
             // 2016/1/24
             if (string.IsNullOrEmpty(sessioninfo.UserID) == true)
             {
-                strError = "sessioninfo.UserID 为空 {F548F93A-3ED7-4F7A-8729-CD65E375D360}";
+                strError = "sessioninfo.UserID 为空 (sessioninfo.Parameters='" + sessioninfo.Parameters + "') {F548F93A-3ED7-4F7A-8729-CD65E375D360}";
                 goto ERROR1;
             }
 
             LibraryChannel channel = null;
 #if CHANNEL_POOL
-            channel = sessioninfo.GetChannel(true, sessioninfo.Parameters);
+            channel = sessioninfo.GetChannel(true/*, sessioninfo.Parameters*/);
 #else
             channel = sessioninfo.GetChannel(false);
 #endif
@@ -124,12 +124,12 @@ ref sessioninfo) == false)
             string strBiblioXml = results[0];
 
             // 创建HTML
-            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+            string strBiblioDbName = StringUtil.GetDbName(strBiblioRecPath);
 
             // 需要从内核映射过来文件
             string strLocalPath = "";
             nRet = app.MapKernelScriptFile(
-                null,   // sessioninfo,
+                // null,   // sessioninfo,
                 strBiblioDbName,
                 "./cfgs/opac_biblio.fltx",  // OPAC查询固定认这个角色的配置文件，作为公共查询书目格式创建的脚本。而流通前端，创建书目格式的时候，找的是loan_biblio.fltx配置文件
                 out strLocalPath,
@@ -185,7 +185,7 @@ ref sessioninfo) == false)
 
             LibraryChannel channel = null;
 #if CHANNEL_POOL
-            channel = sessioninfo.GetChannel(true);
+            channel = sessioninfo.GetChannel(true/*, sessioninfo.Parameters*/); // 2016/1/25 增加第二参数
 
 #else
             channel = sessioninfo.GetChannel(false);
@@ -213,13 +213,20 @@ ref sessioninfo) == false)
         }
         else
         {
+            // 2016/1/25
+            if (string.IsNullOrEmpty(sessioninfo.UserID) == true)
+            {
+                strError = "sessioninfo.UserID 为空 (sessioninfo.Parameters='" + sessioninfo.Parameters + "') {9A54CD5B-B1CF-43D2-8AE3-1969B5873055}";
+                goto ERROR1;
+            }
+
             // 获得摘要
             string strSummary = "";
             string strBiblioRecPath = "";
 
             LibraryChannel channel = null;
 #if CHANNEL_POOL
-            channel = sessioninfo.GetChannel(true);
+            channel = sessioninfo.GetChannel(true/*, sessioninfo.Parameters*/); // 2016/1/25 增加第二参数
 
 #else
             channel = sessioninfo.GetChannel(false);
@@ -250,7 +257,9 @@ ref sessioninfo) == false)
 
     protected void Page_Unload(object sender, EventArgs e)
     {
+#if NO
         if (sessioninfo != null && sessioninfo.Channel != null)
             sessioninfo.Channel.Close();
+#endif
     }
 }

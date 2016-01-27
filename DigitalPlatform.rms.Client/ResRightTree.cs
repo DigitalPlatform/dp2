@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
@@ -15,404 +15,407 @@ using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.rms.Client
 {
-	/// <summary>
-	/// Summary description for ResRightTree.
-	/// </summary>
-	public class ResRightTree : System.Windows.Forms.TreeView
-	{
-		public ServerCollection Servers = null;	// ÒıÓÃ
-		public RmsChannelCollection Channels = null;
+    /// <summary>
+    /// Summary description for ResRightTree.
+    /// </summary>
+    public class ResRightTree : System.Windows.Forms.TreeView
+    {
+        public ServerCollection Servers = null;	// å¼•ç”¨
+        public RmsChannelCollection Channels = null;
 
-		bool m_bChanged = false;
+        bool m_bChanged = false;
 
-		public DigitalPlatform.StopManager stopManager = null;
+        public DigitalPlatform.StopManager stopManager = null;
 
-		RmsChannel channel = null;
+        RmsChannel channel = null;
 
-		public string ServerUrl = "";
+        public string ServerUrl = "";
 
-		public string Lang = "zh";
+        public string Lang = "zh";
 
-		public XmlDocument UserRightsDom = null;	// ÓÃ»§ÕÊ»§¼ÇÂ¼
+        public XmlDocument UserRightsDom = null;	// ç”¨æˆ·å¸æˆ·è®°å½•
 
-		public string PropertyCfgFileName = "";
+        public string PropertyCfgFileName = "";
 
-		TreeNode m_oldHoverNode = null;
+        TreeNode m_oldHoverNode = null;
 
-		public int[] EnabledIndices = null;
+        public int[] EnabledIndices = null;
 
         public event GuiAppendMenuEventHandle OnSetMenu;
 
         public event NodeRightsChangedEventHandle OnNodeRightsChanged;
 
-		private System.Windows.Forms.ImageList imageList_resIcon;
-		private System.Windows.Forms.ToolTip toolTip1;
-		private System.ComponentModel.IContainer components;
+        private System.Windows.Forms.ImageList imageList_resIcon;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.ComponentModel.IContainer components;
 
-		public ResRightTree()
-		{
-			// This call is required by the Windows.Forms Form Designer.
-			InitializeComponent();
+        public ResRightTree()
+        {
+            // This call is required by the Windows.Forms Form Designer.
+            InitializeComponent();
 
-			this.ImageList = imageList_resIcon;
+            this.ImageList = imageList_resIcon;
 
-		}
+        }
 
-		/// <summary> 
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Component Designer generated code
-		/// <summary> 
-		/// Required method for Designer support - do not modify 
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
-			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(ResRightTree));
-			this.imageList_resIcon = new System.Windows.Forms.ImageList(this.components);
-			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-			// 
-			// imageList_resIcon
-			// 
-			this.imageList_resIcon.ImageSize = new System.Drawing.Size(16, 16);
-			this.imageList_resIcon.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList_resIcon.ImageStream")));
-			this.imageList_resIcon.TransparentColor = System.Drawing.Color.Fuchsia;
-			// 
-			// ResRightTree
-			// 
-			this.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.ResRightTree_AfterExpand);
-			this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ResRightTree_MouseUp);
-			this.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ResRightTree_AfterSelect);
-			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ResRightTree_MouseMove);
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
-		}
-		#endregion
+        #region Component Designer generated code
+        /// <summary> 
+        /// Required method for Designer support - do not modify 
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(ResRightTree));
+            this.imageList_resIcon = new System.Windows.Forms.ImageList(this.components);
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            // 
+            // imageList_resIcon
+            // 
+            this.imageList_resIcon.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageList_resIcon.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList_resIcon.ImageStream")));
+            this.imageList_resIcon.TransparentColor = System.Drawing.Color.Fuchsia;
+            // 
+            // ResRightTree
+            // 
+            this.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.ResRightTree_AfterExpand);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ResRightTree_MouseUp);
+            this.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ResRightTree_AfterSelect);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ResRightTree_MouseMove);
 
-		public bool Changed 
-		{
-			get 
-			{
-				return m_bChanged;
-			}
-			set 
-			{
-				m_bChanged = value;
-			}
-		}
+        }
+        #endregion
 
-        // ³õÊ¼»¯
+        public bool Changed
+        {
+            get
+            {
+                return m_bChanged;
+            }
+            set
+            {
+                m_bChanged = value;
+            }
+        }
+
+        // åˆå§‹åŒ–
         // parameters:
-        //      userRightsDom   ÓÃ»§¼ÇÂ¼µÄdom¶ÔÏó¡£½«Ö±½ÓÒıÓÃÕâ¸ö¶ÔÏó
-		public void Initial(ServerCollection servers,
-			RmsChannelCollection channels,
-			DigitalPlatform.StopManager stopManager,
-			string serverUrl,
-			XmlDocument UserRightsDom)
-		{
-			this.Servers = servers;
-			this.Channels = channels;
-			this.stopManager = stopManager;
-			this.ServerUrl = serverUrl;
+        //      userRightsDom   ç”¨æˆ·è®°å½•çš„domå¯¹è±¡ã€‚å°†ç›´æ¥å¼•ç”¨è¿™ä¸ªå¯¹è±¡
+        public void Initial(ServerCollection servers,
+            RmsChannelCollection channels,
+            DigitalPlatform.StopManager stopManager,
+            string serverUrl,
+            XmlDocument UserRightsDom)
+        {
+            this.Servers = servers;
+            this.Channels = channels;
+            this.stopManager = stopManager;
+            this.ServerUrl = serverUrl;
 
-			this.UserRightsDom = UserRightsDom; // Ö±½ÓÒıÓÃÍâ½çµÄdom¶ÔÏó
+            this.UserRightsDom = UserRightsDom; // ç›´æ¥å¼•ç”¨å¤–ç•Œçš„domå¯¹è±¡
 
-			// ÓÃ·şÎñÆ÷¶Ë»ñµÃµÄĞÅÏ¢Ìî³äÊ÷
-			Cursor save = this.Cursor;
-			this.Cursor = Cursors.WaitCursor;
-			FillAll(null);
-			InitialRightsParam();
-			this.Cursor = save;
+            // ç”¨æœåŠ¡å™¨ç«¯è·å¾—çš„ä¿¡æ¯å¡«å……æ ‘
+            Cursor save = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            FillAll(null);
+            InitialRightsParam();
+            this.Cursor = save;
 
-			this.m_bChanged = false;
-		}
+            this.m_bChanged = false;
+        }
 
-		string GetDefElementString(int nType)
-		{
-			if (nType == ResTree.RESTYPE_DB)
-				return "database";
-			if (nType == ResTree.RESTYPE_FILE)
-				return "file";
-			if (nType == ResTree.RESTYPE_FOLDER)
-				return "dir";
-			if (nType == ResTree.RESTYPE_FROM)
-				return "from";
-			if (nType == ResTree.RESTYPE_SERVER)
-				return "server";
+        string GetDefElementString(int nType)
+        {
+            if (nType == ResTree.RESTYPE_DB)
+                return "database";
+            if (nType == ResTree.RESTYPE_FILE)
+                return "file";
+            if (nType == ResTree.RESTYPE_FOLDER)
+                return "dir";
+            if (nType == ResTree.RESTYPE_FROM)
+                return "from";
+            if (nType == ResTree.RESTYPE_SERVER)
+                return "server";
 
-			return "object";
-		}
-
-
-		// µİ¹é
-		public int Fill(TreeNode node)
-		{
-			TreeNodeCollection children = null;
-
-			if (node == null) 
-			{
-				children = this.Nodes;
-			}
-			else 
-			{
-				children = node.Nodes;
-			}
-
-			int i;
+            return "object";
+        }
 
 
-			// Ìî³ä¸ù
-			if (node == null) 
-			{
-				children.Clear();
+        // é€’å½’
+        public int Fill(TreeNode node)
+        {
+            TreeNodeCollection children = null;
 
-				TreeNode nodeNew = new TreeNode(this.ServerUrl, ResTree.RESTYPE_SERVER, ResTree.RESTYPE_SERVER);
-				ResTree.SetLoading(nodeNew);
+            if (node == null)
+            {
+                children = this.Nodes;
+            }
+            else
+            {
+                children = node.Nodes;
+            }
 
-				NodeInfo nodeinfo = new NodeInfo();
-				nodeinfo.TreeNode = nodeNew;
-				nodeinfo.Expandable = true;
-				nodeinfo.DefElement = GetDefElementString(nodeNew.ImageIndex);
-				nodeinfo.NodeState |= NodeState.Object;
-
-				nodeNew.Tag = nodeinfo;
-
-
-				if (EnabledIndices != null
-					&& StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-					nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
-
-				children.Add(nodeNew);
-				return 0;
-			}
+            int i;
 
 
-			// ¸ùÒÔÏÂµÄ½ÚµãÀàĞÍ
-			ResPath respath = new ResPath(node);
+            // å¡«å……æ ¹
+            if (node == null)
+            {
+                children.Clear();
 
-			string strPath = respath.Path;
+                TreeNode nodeNew = new TreeNode(this.ServerUrl, ResTree.RESTYPE_SERVER, ResTree.RESTYPE_SERVER);
+                ResTree.SetLoading(nodeNew);
 
-			//if (node != null)
-			//	strPath = TreeViewUtil.GetPath(node);
+                NodeInfo nodeinfo = new NodeInfo();
+                nodeinfo.TreeNode = nodeNew;
+                nodeinfo.Expandable = true;
+                nodeinfo.DefElement = GetDefElementString(nodeNew.ImageIndex);
+                nodeinfo.NodeState |= NodeState.Object;
 
-			this.channel = Channels.GetChannel(this.ServerUrl);
+                nodeNew.Tag = nodeinfo;
 
-			Debug.Assert(channel != null, "Channels.GetChannel() Òì³£");
 
-			ResInfoItem [] items = null;
+                if (EnabledIndices != null
+                    && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                    nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-			string strError = "";
+                children.Add(nodeNew);
+                return 0;
+            }
 
-			DigitalPlatform.Stop stop = null;
 
-			if (stopManager != null) 
-			{
-				stop = new DigitalPlatform.Stop();
+            // æ ¹ä»¥ä¸‹çš„èŠ‚ç‚¹ç±»å‹
+            ResPath respath = new ResPath(node);
 
-                stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            string strPath = respath.Path;
+
+            //if (node != null)
+            //	strPath = TreeViewUtil.GetPath(node);
+
+            this.channel = Channels.GetChannel(this.ServerUrl);
+
+            Debug.Assert(channel != null, "Channels.GetChannel() å¼‚å¸¸");
+
+            ResInfoItem[] items = null;
+
+            string strError = "";
+
+            DigitalPlatform.Stop stop = null;
+
+            if (stopManager != null)
+            {
+                stop = new DigitalPlatform.Stop();
+
+                stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("ÕıÔÚÁĞÄ¿Â¼: " + this.ServerUrl + "?" + strPath);
-				stop.BeginLoop();
+                stop.Initial("æ­£åœ¨åˆ—ç›®å½•: " + this.ServerUrl + "?" + strPath);
+                stop.BeginLoop();
 
-			}
+            }
 
-			long lRet = channel.DoDir(strPath,
-				this.Lang,
-                null,   // ²»ĞèÒªÁĞ³öÈ«²¿ÓïÑÔµÄÃû×Ö
-				out items,
-				out strError);
+            long lRet = channel.DoDir(strPath,
+                this.Lang,
+                null,   // ä¸éœ€è¦åˆ—å‡ºå…¨éƒ¨è¯­è¨€çš„åå­—
+                out items,
+                out strError);
 
-			if (stopManager != null) 
-			{
-				stop.EndLoop();
+            if (stopManager != null)
+            {
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
-				stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
-			}
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
+            }
 
-			this.channel = null;
+            this.channel = null;
 
-			if (lRet == -1) 
-			{
-				try 
-				{
-					MessageBox.Show(this, "Channel::DoDir() Error: " + strError);
-				}
-				catch
-				{
-					// this¿ÉÄÜÒÑ¾­²»´æÔÚ
-					return -1;
-				}
+            if (lRet == -1)
+            {
+                try
+                {
+                    MessageBox.Show(this, "Channel::DoDir() Error: " + strError);
+                }
+                catch
+                {
+                    // thiså¯èƒ½å·²ç»ä¸å­˜åœ¨
+                    return -1;
+                }
 
-				if (node != null) 
-				{
-					ResTree.SetLoading(node);	// ³ö´íµÄÉÆºó´¦Àí£¬ÖØĞÂ³öÏÖ+ºÅ
-					node.Collapse();
-				}
-				return -1;
-			}
-
-
-			if (items != null) 
-			{
-				children.Clear();
-
-				for(i=0;i<items.Length;i++) 
-				{
-					// ºöÂÔfromÀàĞÍ½Úµã
-					if (items[i].Type == ResTree.RESTYPE_FROM)
-						continue;
-
-					TreeNode nodeNew = new TreeNode(items[i].Name, items[i].Type, items[i].Type);
+                if (node != null)
+                {
+                    ResTree.SetLoading(node);	// å‡ºé”™çš„å–„åå¤„ç†ï¼Œé‡æ–°å‡ºç°+å·
+                    node.Collapse();
+                }
+                return -1;
+            }
 
 
-					NodeInfo nodeinfo = new NodeInfo();
-					nodeinfo.TreeNode = nodeNew;
-					nodeinfo.Expandable = items[i].HasChildren;
-					nodeinfo.DefElement = GetDefElementString(nodeNew.ImageIndex);
-					nodeinfo.NodeState |= NodeState.Object;
+            if (items != null)
+            {
+                children.Clear();
+
+                for (i = 0; i < items.Length; i++)
+                {
+                    // å¿½ç•¥fromç±»å‹èŠ‚ç‚¹
+                    if (items[i].Type == ResTree.RESTYPE_FROM)
+                        continue;
+
+                    TreeNode nodeNew = new TreeNode(items[i].Name, items[i].Type, items[i].Type);
+
+
+                    NodeInfo nodeinfo = new NodeInfo();
+                    nodeinfo.TreeNode = nodeNew;
+                    nodeinfo.Expandable = items[i].HasChildren;
+                    nodeinfo.DefElement = GetDefElementString(nodeNew.ImageIndex);
+                    nodeinfo.NodeState |= NodeState.Object;
                     nodeinfo.Style = items[i].Style;
-					nodeNew.Tag = nodeinfo;
+                    nodeNew.Tag = nodeinfo;
 
-					if (items[i].HasChildren)
-						ResTree.SetLoading(nodeNew);
+                    if (items[i].HasChildren)
+                        ResTree.SetLoading(nodeNew);
 
-					if (EnabledIndices != null
-						&& StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-						nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+                    if (EnabledIndices != null
+                        && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                        nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-					children.Add(nodeNew);
-				}
-			}
+                    children.Add(nodeNew);
+                }
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
-		/*
-		// ÔÚÒ»¸ö½ÚµãÏÂ¼¶²åÈë"loading..."£¬ÒÔ±ã³öÏÖ+ºÅ
-		static void SetLoading(TreeNode node)
-		{
-			// ĞÂnode
-			TreeNode nodeNew = new TreeNode("loading...", ResTree.RESTYPE_LOADING, ResTree.RESTYPE_LOADING);
+        /*
+        // åœ¨ä¸€ä¸ªèŠ‚ç‚¹ä¸‹çº§æ’å…¥"loading..."ï¼Œä»¥ä¾¿å‡ºç°+å·
+        static void SetLoading(TreeNode node)
+        {
+            // æ–°node
+            TreeNode nodeNew = new TreeNode("loading...", ResTree.RESTYPE_LOADING, ResTree.RESTYPE_LOADING);
 
-			node.Nodes.Clear();
-			node.Nodes.Add(nodeNew);
-		}
+            node.Nodes.Clear();
+            node.Nodes.Add(nodeNew);
+        }
 
-		// ÏÂ¼¶ÊÇ·ñ°üº¬loading...?
-		static bool IsLoading(TreeNode node)
-		{
-			if (node.Nodes.Count == 0)
-				return false;
+        // ä¸‹çº§æ˜¯å¦åŒ…å«loading...?
+        static bool IsLoading(TreeNode node)
+        {
+            if (node.Nodes.Count == 0)
+                return false;
 
-			if (node.Nodes[0].Text == "loading...")
-				return true;
+            if (node.Nodes[0].Text == "loading...")
+                return true;
 
-			return false;
-		}
-		*/
+            return false;
+        }
+        */
 
-		// »Øµ÷º¯Êı
-		void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+        // å›è°ƒå‡½æ•°
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-		private void ResRightTree_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			TreeNode node = e.Node;
+        private void ResRightTree_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            TreeNode node = e.Node;
 
-			if (node == null)
-				return;
+            if (node == null)
+                return;
 
-			// ĞèÒªÕ¹¿ª
-			if (ResTree.IsLoading(node) == true) 
-			{
-				Fill(node);
-			}		
-		}
+            // éœ€è¦å±•å¼€
+            if (ResTree.IsLoading(node) == true)
+            {
+                Fill(node);
+            }
+        }
 
-		private void ResRightTree_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			TreeNode node = e.Node;
+        private void ResRightTree_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            TreeNode node = e.Node;
 
-			if (node == null)
-				return;
+            if (node == null)
+                return;
 
-			// ĞèÒªÕ¹¿ª
-			if (ResTree.IsLoading(node) == true) 
-			{
-				Fill(node);
-			}		
-		
-		}
+            // éœ€è¦å±•å¼€
+            if (ResTree.IsLoading(node) == true)
+            {
+                Fill(node);
+            }
 
-		void FillAll(TreeNode node)
-		{
-			Fill(node);
+        }
 
-			TreeNodeCollection children = null;
+        void FillAll(TreeNode node)
+        {
+            Fill(node);
 
-			if (node == null) 
-			{
-				children = this.Nodes;
-			}
-			else 
-			{
-				node.Expand();
-				children = node.Nodes;
-			}
+            TreeNodeCollection children = null;
 
-			for(int i=0;i<children.Count;i++)
-			{
-				TreeNode child = children[i];
-				// ĞèÒªÕ¹¿ª
-				if (ResTree.IsLoading(child) == true) 
-				{
-					FillAll(child);
-				}		
-			}
-		}
+            if (node == null)
+            {
+                children = this.Nodes;
+            }
+            else
+            {
+                node.Expand();
+                children = node.Nodes;
+            }
 
-		// ¸ù¾İÕÊ»§¼ÇÂ¼ÖĞµÄĞÅÏ¢, Ìî³äÈ«²¿¶ÔÏóµÄÈ¨ÏŞĞÅÏ¢
-		int InitialRightsParam()
-		{
-			// µÃµ½<server>½Úµã
+            for (int i = 0; i < children.Count; i++)
+            {
+                TreeNode child = children[i];
+                // éœ€è¦å±•å¼€
+                if (ResTree.IsLoading(child) == true)
+                {
+                    FillAll(child);
+                }
+            }
+        }
 
-			XmlNode nodeRoot = this.UserRightsDom.SelectSingleNode("//server");   // rightsItem
+        // æ ¹æ®å¸æˆ·è®°å½•ä¸­çš„ä¿¡æ¯, å¡«å……å…¨éƒ¨å¯¹è±¡çš„æƒé™ä¿¡æ¯
+        int InitialRightsParam()
+        {
+            // å¾—åˆ°<server>èŠ‚ç‚¹
 
-			if (nodeRoot == null)
-				return 0;	// ÈİÆ÷½ÚµãÃ»ÓĞÕÒµ½
+            XmlNode nodeRoot = this.UserRightsDom.SelectSingleNode("//server");   // rightsItem
 
-			// °´ÕÕ×ÔÈ»½á¹¹½øĞĞ³õÊ¼»¯
-			InitialRights(nodeRoot,
-				this.Nodes[0]);
+            if (nodeRoot == null)
+                return 0;	// å®¹å™¨èŠ‚ç‚¹æ²¡æœ‰æ‰¾åˆ°
 
-
-			return 0;
-		}
+            // æŒ‰ç…§è‡ªç„¶ç»“æ„è¿›è¡Œåˆå§‹åŒ–
+            InitialRights(nodeRoot,
+                this.Nodes[0]);
 
 
-		// ³õÊ¼»¯: °ÑxmlÖĞµÄĞÅÏ¢ÌîÈëtreeview
-		int InitialRights(XmlNode parentXmlNode,
-			TreeNode parentTreeNode)
-		{
-            // ·şÎñÆ÷½ÚµãÌØÊâ
+            return 0;
+        }
+
+
+        // åˆå§‹åŒ–: æŠŠxmlä¸­çš„ä¿¡æ¯å¡«å…¥treeview
+        int InitialRights(XmlNode parentXmlNode,
+            TreeNode parentTreeNode)
+        {
+            // æœåŠ¡å™¨èŠ‚ç‚¹ç‰¹æ®Š
             if (parentTreeNode.ImageIndex == ResTree.RESTYPE_SERVER)
             {
                 string strName = DomUtil.GetAttr(parentXmlNode, "name");
@@ -435,229 +438,229 @@ namespace DigitalPlatform.rms.Client
 
 
 
-			for(int i=0;i<parentXmlNode.ChildNodes.Count;i++)
-			{
-				XmlNode childXmlNode = parentXmlNode.ChildNodes[i];
-				if (childXmlNode.NodeType != XmlNodeType.Element)
-					continue;
+            for (int i = 0; i < parentXmlNode.ChildNodes.Count; i++)
+            {
+                XmlNode childXmlNode = parentXmlNode.ChildNodes[i];
+                if (childXmlNode.NodeType != XmlNodeType.Element)
+                    continue;
 
-				string strName = DomUtil.GetAttr(childXmlNode, "name");
+                string strName = DomUtil.GetAttr(childXmlNode, "name");
 
-				int nType = 0;
-				bool bExpandable = false;
-				// Êı¾İ¿â
-				if (childXmlNode.Name == "database")
-				{
-					nType = ResTree.RESTYPE_DB;
-					bExpandable = true;
-				}
-				// Ä¿Â¼
-				if (childXmlNode.Name == "dir")
-				{
-					nType = ResTree.RESTYPE_FOLDER;
-					bExpandable = true;
-				}
-				// ÎÄ¼ş
-				if (childXmlNode.Name == "file")
-				{
-					nType = ResTree.RESTYPE_FILE;
-					bExpandable = true;
-				}
+                int nType = 0;
+                bool bExpandable = false;
+                // æ•°æ®åº“
+                if (childXmlNode.Name == "database")
+                {
+                    nType = ResTree.RESTYPE_DB;
+                    bExpandable = true;
+                }
+                // ç›®å½•
+                if (childXmlNode.Name == "dir")
+                {
+                    nType = ResTree.RESTYPE_FOLDER;
+                    bExpandable = true;
+                }
+                // æ–‡ä»¶
+                if (childXmlNode.Name == "file")
+                {
+                    nType = ResTree.RESTYPE_FILE;
+                    bExpandable = true;
+                }
 
-				TreeNode childTreeNode = FindTreeNode(parentTreeNode, strName);
+                TreeNode childTreeNode = FindTreeNode(parentTreeNode, strName);
 
-				NodeInfo nodeinfo = null;
+                NodeInfo nodeinfo = null;
 
-				// Ã»ÓĞÕÒµ½
-				if (childTreeNode == null)
-				{
-					// ĞÂ´´½¨Ò»¸ö,µ«ÊÇ±ê×¢ÎªÎ´Ê¹ÓÃµÄ
-					childTreeNode = new TreeNode(strName, nType, nType);
+                // æ²¡æœ‰æ‰¾åˆ°
+                if (childTreeNode == null)
+                {
+                    // æ–°åˆ›å»ºä¸€ä¸ª,ä½†æ˜¯æ ‡æ³¨ä¸ºæœªä½¿ç”¨çš„
+                    childTreeNode = new TreeNode(strName, nType, nType);
 
-					nodeinfo = new NodeInfo();
-					nodeinfo.TreeNode = childTreeNode;
-					nodeinfo.Expandable = bExpandable;
-					nodeinfo.NodeState |= NodeState.Account;
-					childTreeNode.Tag = nodeinfo;
+                    nodeinfo = new NodeInfo();
+                    nodeinfo.TreeNode = childTreeNode;
+                    nodeinfo.Expandable = bExpandable;
+                    nodeinfo.NodeState |= NodeState.Account;
+                    childTreeNode.Tag = nodeinfo;
 
-					childTreeNode.ForeColor = ControlPaint.LightLight(childTreeNode.ForeColor);	// »ÒÉ«
+                    childTreeNode.ForeColor = ControlPaint.LightLight(childTreeNode.ForeColor);	// ç°è‰²
 
-					parentTreeNode.Nodes.Add(childTreeNode);
-				}
-				else // ÕÒµ½
-				{
-					nodeinfo = (NodeInfo)childTreeNode.Tag;
-					if (nodeinfo == null)
-					{
-						nodeinfo = new NodeInfo();
-						nodeinfo.TreeNode = childTreeNode;
-						childTreeNode.Tag = nodeinfo;
-					}
-					nodeinfo.NodeState |= NodeState.Account | NodeState.Object;
-				}
+                    parentTreeNode.Nodes.Add(childTreeNode);
+                }
+                else // æ‰¾åˆ°
+                {
+                    nodeinfo = (NodeInfo)childTreeNode.Tag;
+                    if (nodeinfo == null)
+                    {
+                        nodeinfo = new NodeInfo();
+                        nodeinfo.TreeNode = childTreeNode;
+                        childTreeNode.Tag = nodeinfo;
+                    }
+                    nodeinfo.NodeState |= NodeState.Account | NodeState.Object;
+                }
 
 
-				nodeinfo.DefElement = childXmlNode.Name;
-				nodeinfo.DefName = strName;
-				nodeinfo.Rights = DomUtil.GetAttrDiff(childXmlNode, "rights");
+                nodeinfo.DefElement = childXmlNode.Name;
+                nodeinfo.DefName = strName;
+                nodeinfo.Rights = DomUtil.GetAttrDiff(childXmlNode, "rights");
 
                 if (nodeinfo.Rights == "" || nodeinfo.Rights == null)
-					childTreeNode.ForeColor = SystemColors.GrayText;	// ControlPaint.LightLight(nodeNew.ForeColor);
-				else
-					childTreeNode.ForeColor = SystemColors.WindowText;
+                    childTreeNode.ForeColor = SystemColors.GrayText;	// ControlPaint.LightLight(nodeNew.ForeColor);
+                else
+                    childTreeNode.ForeColor = SystemColors.WindowText;
 
 
-				// µİ¹é
-				InitialRights(childXmlNode,
-					childTreeNode);
-
-			}
-
-			return 0;
-		}
-
-		TreeNode FindTreeNode(TreeNode parent,
-			string strName)
-		{
-			for(int i=0;i<parent.Nodes.Count;i++)
-			{
-				TreeNode node = parent.Nodes[i];
-				if (node.Text == strName)
-					return node;
-			}
-
-			return null;
-		}
-
-        // ÕÒµ½¶ù×Ó½ÚµãÖĞ°üº¬Ö¸¶¨nameÊôĞÔÖµµÄ
-        XmlNode FindXmlNode(XmlNode parent,
-			string strName)
-		{
-			for(int i=0;i<parent.ChildNodes.Count;i++)
-			{
-				XmlNode node = parent.ChildNodes[i];
-				if (node.NodeType != XmlNodeType.Element)
-					continue;
-				if (DomUtil.GetAttr(node, "name") == strName)
-					return node;
-			}
-
-			return null;
-		}
-
-
-        // °ÑtreeviewÖĞµÄĞÅÏ¢ÊÕ¼¯Ôö²¹µ½xmlÖĞ
-        public int FinishRightsParam()
-		{
-			// µÃµ½<server>½Úµã
-
-			XmlNode nodeRoot = this.UserRightsDom.SelectSingleNode("//server");   // rightsItem
-
-            if (nodeRoot == null)
-            {
-                // ÈİÆ÷½ÚµãÃ»ÓĞÕÒµ½
-                DomUtil.SetElementText(this.UserRightsDom.DocumentElement, "server", "");   // rightsItem
-                nodeRoot = this.UserRightsDom.SelectSingleNode("//server"); // rightsItems
-                Debug.Assert(nodeRoot != null, "ĞÂÔöÁËÎªºÎÕÒ²»µ½ÄØ?");
+                // é€’å½’
+                InitialRights(childXmlNode,
+                    childTreeNode);
 
             }
 
-			// °´ÕÕ×ÔÈ»½á¹¹½øĞĞ³õÊ¼»¯
-			FinishRights(nodeRoot,
-				this.Nodes[0]);
+            return 0;
+        }
+
+        TreeNode FindTreeNode(TreeNode parent,
+            string strName)
+        {
+            for (int i = 0; i < parent.Nodes.Count; i++)
+            {
+                TreeNode node = parent.Nodes[i];
+                if (node.Text == strName)
+                    return node;
+            }
+
+            return null;
+        }
+
+        // æ‰¾åˆ°å„¿å­èŠ‚ç‚¹ä¸­åŒ…å«æŒ‡å®šnameå±æ€§å€¼çš„
+        XmlNode FindXmlNode(XmlNode parent,
+            string strName)
+        {
+            for (int i = 0; i < parent.ChildNodes.Count; i++)
+            {
+                XmlNode node = parent.ChildNodes[i];
+                if (node.NodeType != XmlNodeType.Element)
+                    continue;
+                if (DomUtil.GetAttr(node, "name") == strName)
+                    return node;
+            }
+
+            return null;
+        }
 
 
-			return 0;
-		}
+        // æŠŠtreeviewä¸­çš„ä¿¡æ¯æ”¶é›†å¢è¡¥åˆ°xmlä¸­
+        public int FinishRightsParam()
+        {
+            // å¾—åˆ°<server>èŠ‚ç‚¹
 
-		// ±£´æ: °ÑtreeviewÖĞµÄĞÅÏ¢ÊÕ¼¯Ôö²¹µ½xmlÖĞ
-		int FinishRights(XmlNode parentXmlNode,
-			TreeNode parentTreeNode)
-		{
-			ArrayList aFound = new ArrayList();
+            XmlNode nodeRoot = this.UserRightsDom.SelectSingleNode("//server");   // rightsItem
 
-            // ¸ùÒªÌØÊâ´¦Àí
+            if (nodeRoot == null)
+            {
+                // å®¹å™¨èŠ‚ç‚¹æ²¡æœ‰æ‰¾åˆ°
+                DomUtil.SetElementText(this.UserRightsDom.DocumentElement, "server", "");   // rightsItem
+                nodeRoot = this.UserRightsDom.SelectSingleNode("//server"); // rightsItems
+                Debug.Assert(nodeRoot != null, "æ–°å¢äº†ä¸ºä½•æ‰¾ä¸åˆ°å‘¢?");
+
+            }
+
+            // æŒ‰ç…§è‡ªç„¶ç»“æ„è¿›è¡Œåˆå§‹åŒ–
+            FinishRights(nodeRoot,
+                this.Nodes[0]);
+
+
+            return 0;
+        }
+
+        // ä¿å­˜: æŠŠtreeviewä¸­çš„ä¿¡æ¯æ”¶é›†å¢è¡¥åˆ°xmlä¸­
+        int FinishRights(XmlNode parentXmlNode,
+            TreeNode parentTreeNode)
+        {
+            ArrayList aFound = new ArrayList();
+
+            // æ ¹è¦ç‰¹æ®Šå¤„ç†
             if (parentTreeNode.ImageIndex == ResTree.RESTYPE_SERVER)
             {
                 NodeInfo nodeinfo = (NodeInfo)parentTreeNode.Tag;
 
-                // ÉèÖÃÈ¨ÏŞÊôĞÔ
+                // è®¾ç½®æƒé™å±æ€§
                 DomUtil.SetAttr(parentXmlNode, "rights", nodeinfo.Rights);
             }
 
-			for(int i=0;i<parentTreeNode.Nodes.Count;i++)
-			{
-				TreeNode childTreeNode = parentTreeNode.Nodes[i];
+            for (int i = 0; i < parentTreeNode.Nodes.Count; i++)
+            {
+                TreeNode childTreeNode = parentTreeNode.Nodes[i];
 
-				string strName = childTreeNode.Text;
+                string strName = childTreeNode.Text;
 
-				NodeInfo nodeinfo = (NodeInfo)childTreeNode.Tag;
+                NodeInfo nodeinfo = (NodeInfo)childTreeNode.Tag;
 
-                // ÕÒµ½¶ù×Ó½ÚµãÖĞ°üº¬Ö¸¶¨nameÊôĞÔÖµµÄ
-				XmlNode childXmlNode = FindXmlNode(parentXmlNode,
-					strName);
+                // æ‰¾åˆ°å„¿å­èŠ‚ç‚¹ä¸­åŒ…å«æŒ‡å®šnameå±æ€§å€¼çš„
+                XmlNode childXmlNode = FindXmlNode(parentXmlNode,
+                    strName);
 
-				if (childXmlNode == null)
-				{
+                if (childXmlNode == null)
+                {
 
-					Debug.Assert(nodeinfo.DefElement != "", "nodeinfoÖĞDefElementÉĞÎ´ÉèÖÃ");
+                    Debug.Assert(nodeinfo.DefElement != "", "nodeinfoä¸­DefElementå°šæœªè®¾ç½®");
 
-					childXmlNode = parentXmlNode.OwnerDocument.CreateElement(nodeinfo.DefElement);
-					childXmlNode = parentXmlNode.AppendChild(childXmlNode);
-					DomUtil.SetAttr(childXmlNode, "name", strName);
-				}
-				else 
-				{
-					// ÕÒµ½
-				}
+                    childXmlNode = parentXmlNode.OwnerDocument.CreateElement(nodeinfo.DefElement);
+                    childXmlNode = parentXmlNode.AppendChild(childXmlNode);
+                    DomUtil.SetAttr(childXmlNode, "name", strName);
+                }
+                else
+                {
+                    // æ‰¾åˆ°
+                }
 
-				aFound.Add(childXmlNode);
+                aFound.Add(childXmlNode);
 
 
-				// ÉèÖÃÈ¨ÏŞÊôĞÔ
-				DomUtil.SetAttr(childXmlNode, "rights", nodeinfo.Rights);
+                // è®¾ç½®æƒé™å±æ€§
+                DomUtil.SetAttr(childXmlNode, "rights", nodeinfo.Rights);
 
-				// µİ¹é
-				FinishRights(childXmlNode,
-					childTreeNode);
+                // é€’å½’
+                FinishRights(childXmlNode,
+                    childTreeNode);
 
-			}
+            }
 
-			// ±Ètreenode¶à³öÀ´µÄ,ÒªÉ¾³ı
-			for(int i=0;i<parentXmlNode.ChildNodes.Count;i++)
-			{
+            // æ¯”treenodeå¤šå‡ºæ¥çš„,è¦åˆ é™¤
+            for (int i = 0; i < parentXmlNode.ChildNodes.Count; i++)
+            {
 
-				XmlNode node = parentXmlNode.ChildNodes[i];
-				if (node.NodeType != XmlNodeType.Element)
-					continue;
+                XmlNode node = parentXmlNode.ChildNodes[i];
+                if (node.NodeType != XmlNodeType.Element)
+                    continue;
 
-				if (aFound.IndexOf(node) == -1)
-				{
-					node.ParentNode.RemoveChild(node);
-					i --;
-				}
-			}
+                if (aFound.IndexOf(node) == -1)
+                {
+                    node.ParentNode.RemoveChild(node);
+                    i--;
+                }
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
-		private void ResRightTree_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			if(e.Button != MouseButtons.Right)
-				return;
+        private void ResRightTree_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
 
-			ContextMenu contextMenu = new ContextMenu();
-			MenuItem menuItem = null;
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
 
-			menuItem = new MenuItem("È¨ÏŞ(&R)");
-			menuItem.Click += new System.EventHandler(this.menu_editRights_Click);
-			contextMenu.MenuItems.Add(menuItem);
+            menuItem = new MenuItem("æƒé™(&R)");
+            menuItem.Click += new System.EventHandler(this.menu_editRights_Click);
+            contextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("É¾³ı(&D)");
-			menuItem.Click += new System.EventHandler(this.menu_deleteNode_Click);
+            menuItem = new MenuItem("åˆ é™¤(&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteNode_Click);
             if (this.SelectedNode != null && this.SelectedNode.ImageIndex == ResTree.RESTYPE_SERVER)
                 menuItem.Enabled = false;
-			contextMenu.MenuItems.Add(menuItem);
+            contextMenu.MenuItems.Add(menuItem);
 
             if (OnSetMenu != null)
             {
@@ -671,12 +674,12 @@ namespace DigitalPlatform.rms.Client
             if (contextMenu != null)
                 contextMenu.Show(this, new Point(e.X, e.Y));
 
-		}
+        }
 
-        // ±à¼­È¨ÏŞ
+        // ç¼–è¾‘æƒé™
         // return:
-        //      false   Ã»ÓĞ·¢ÉúĞŞ¸Ä
-        //      true    ·¢ÉúÁËĞŞ¸Ä
+        //      false   æ²¡æœ‰å‘ç”Ÿä¿®æ”¹
+        //      true    å‘ç”Ÿäº†ä¿®æ”¹
         public DialogResult NodeRightsDlg(TreeNode node,
             out string strRights)
         {
@@ -692,7 +695,7 @@ namespace DigitalPlatform.rms.Client
 			NodeInfo nodeinfo = (NodeInfo)this.SelectedNode.Tag;
 
 			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.Text = "¶ÔÏó '"+ this.SelectedNode.Text +"' µÄÈ¨ÏŞ";
+			dlg.Text = "å¯¹è±¡ '"+ this.SelectedNode.Text +"' çš„æƒé™";
 			dlg.PropertyString = nodeinfo.Rights;
 			dlg.CfgFileName = this.PropertyCfgFileName;
 			dlg.ShowDialog(this);
@@ -712,7 +715,7 @@ namespace DigitalPlatform.rms.Client
              */
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.Text = "¶ÔÏó '" + node.Text + "' µÄÈ¨ÏŞ";
+            dlg.Text = "å¯¹è±¡ '" + node.Text + "' çš„æƒé™";
             dlg.PropertyString = GetNodeRights(node);
             dlg.CfgFileName = this.PropertyCfgFileName;
             dlg.ShowDialog(this);
@@ -722,12 +725,12 @@ namespace DigitalPlatform.rms.Client
             return dlg.DialogResult;
         }
 
-		// ±à¼­È¨ÏŞ
-		private void menu_editRights_Click(object sender, System.EventArgs e)
-		{
+        // ç¼–è¾‘æƒé™
+        private void menu_editRights_Click(object sender, System.EventArgs e)
+        {
             if (this.SelectedNode == null)
             {
-                MessageBox.Show("ÉĞÎ´Ñ¡ÔñÒª±à¼­µÄÊÂÏî...");
+                MessageBox.Show("å°šæœªé€‰æ‹©è¦ç¼–è¾‘çš„äº‹é¡¹...");
                 return;
             }
 
@@ -738,9 +741,9 @@ namespace DigitalPlatform.rms.Client
                 return;
 
             SetNodeRights(this.SelectedNode, strRights);
-		}
+        }
 
-        // »ñµÃÒ»¸ö½ÚµãËù°üº¬µÄÈ¨ÏŞ×Ö·û´®
+        // è·å¾—ä¸€ä¸ªèŠ‚ç‚¹æ‰€åŒ…å«çš„æƒé™å­—ç¬¦ä¸²
         public static string GetNodeRights(TreeNode node)
         {
             NodeInfo nodeinfo = (NodeInfo)node.Tag;
@@ -761,7 +764,7 @@ namespace DigitalPlatform.rms.Client
             return nodeinfo.Style;
         }
 
-        // »ñµÃÒ»¸ö½ÚµãÊÇ·ñ¿ÉÒÔÕ¹¿ªµÄ×´Ì¬
+        // è·å¾—ä¸€ä¸ªèŠ‚ç‚¹æ˜¯å¦å¯ä»¥å±•å¼€çš„çŠ¶æ€
         public static bool GetNodeExpandable(TreeNode node)
         {
             NodeInfo nodeinfo = (NodeInfo)node.Tag;
@@ -772,7 +775,7 @@ namespace DigitalPlatform.rms.Client
             return nodeinfo.Expandable;
         }
 
-        // ÉèÖÃÒ»¸ö½ÚµãËù°üº¬µÄÈ¨ÏŞ×Ö·û´®
+        // è®¾ç½®ä¸€ä¸ªèŠ‚ç‚¹æ‰€åŒ…å«çš„æƒé™å­—ç¬¦ä¸²
         public void SetNodeRights(TreeNode node,
             string strRights)
         {
@@ -799,119 +802,119 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-		// É¾³ı½Úµã
-		private void menu_deleteNode_Click(object sender, System.EventArgs e)
-		{
-			if (this.SelectedNode == null)
-			{
-				MessageBox.Show("ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄ½Úµã...");
-				return;
-			}
+        // åˆ é™¤èŠ‚ç‚¹
+        private void menu_deleteNode_Click(object sender, System.EventArgs e)
+        {
+            if (this.SelectedNode == null)
+            {
+                MessageBox.Show("å°šæœªé€‰æ‹©è¦åˆ é™¤çš„èŠ‚ç‚¹...");
+                return;
+            }
 
             if (this.SelectedNode.ImageIndex == ResTree.RESTYPE_SERVER)
             {
-                MessageBox.Show("²»ÄÜÉ¾³ı·şÎñÆ÷½Úµã...");
+                MessageBox.Show("ä¸èƒ½åˆ é™¤æœåŠ¡å™¨èŠ‚ç‚¹...");
                 return;
             }
-                
 
 
-			DialogResult result = MessageBox.Show(this,
-				"È·ÊµÒªÉ¾³ı½Úµã " +this.SelectedNode.Text + "?",
-				"ResRightTree",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question, 
-				MessageBoxDefaultButton.Button2);
-			if (result != DialogResult.Yes)
-				return;
 
-			this.SelectedNode.Remove();
+            DialogResult result = MessageBox.Show(this,
+                "ç¡®å®è¦åˆ é™¤èŠ‚ç‚¹ " + this.SelectedNode.Text + "?",
+                "ResRightTree",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
 
-			this.m_bChanged = true;
-		}
+            this.SelectedNode.Remove();
 
-		private void ResRightTree_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			string strText = "";
+            this.m_bChanged = true;
+        }
 
-			// Point p = this.PointToClient(new Point(e.X, e.Y));
-			//TreeNode selection = this.GetNodeAt(p);
-			TreeNode selection = this.GetNodeAt(e.X, e.Y);
+        private void ResRightTree_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            string strText = "";
 
-			if (m_oldHoverNode == selection)
-				return;
+            // Point p = this.PointToClient(new Point(e.X, e.Y));
+            //TreeNode selection = this.GetNodeAt(p);
+            TreeNode selection = this.GetNodeAt(e.X, e.Y);
+
+            if (m_oldHoverNode == selection)
+                return;
 
 
-			if (selection != null) 
-			{
-				selection.BackColor = SystemColors.Info;
-				NodeInfo nodeinfo = (NodeInfo)selection.Tag;
-				if (nodeinfo != null) 
-				{
-					string strState = "";
-					strState = NodeInfo.GetNodeStateString(nodeinfo);
+            if (selection != null)
+            {
+                selection.BackColor = SystemColors.Info;
+                NodeInfo nodeinfo = (NodeInfo)selection.Tag;
+                if (nodeinfo != null)
+                {
+                    string strState = "";
+                    strState = NodeInfo.GetNodeStateString(nodeinfo);
 
                     if (nodeinfo.Rights == null)
-                        strText = "¶ÔÏó '" + selection.Text + "' È¨ÏŞ -- (Î´¶¨Òå);  ×´Ì¬--" + strState;
-					else if (nodeinfo.Rights == "")
-						strText = "¶ÔÏó '" + selection.Text + "' È¨ÏŞ -- (¿Õ);  ×´Ì¬--" + strState;
-					else
-						strText = "¶ÔÏó '" + selection.Text + "' È¨ÏŞ -- " + nodeinfo.Rights + ";  ×´Ì¬ -- "+ strState;
-				}
+                        strText = "å¯¹è±¡ '" + selection.Text + "' æƒé™ -- (æœªå®šä¹‰);  çŠ¶æ€--" + strState;
+                    else if (nodeinfo.Rights == "")
+                        strText = "å¯¹è±¡ '" + selection.Text + "' æƒé™ -- (ç©º);  çŠ¶æ€--" + strState;
+                    else
+                        strText = "å¯¹è±¡ '" + selection.Text + "' æƒé™ -- " + nodeinfo.Rights + ";  çŠ¶æ€ -- " + strState;
+                }
 
-			}
-			toolTip1.SetToolTip(this, strText);
+            }
+            toolTip1.SetToolTip(this, strText);
 
-			if (m_oldHoverNode != selection)
-			{
-				if (m_oldHoverNode != null)
-					m_oldHoverNode.BackColor = SystemColors.Window;
+            if (m_oldHoverNode != selection)
+            {
+                if (m_oldHoverNode != null)
+                    m_oldHoverNode.BackColor = SystemColors.Window;
 
-				m_oldHoverNode = selection;
-			}
-		}
+                m_oldHoverNode = selection;
+            }
+        }
 
-	}
+    }
 
-	public enum NodeState
-	{
-		None = 0,
-		Object = 0x01,	// À´×ÔÊµ¼Ê¶ÔÏó
-		Account = 0x02,	// À´×ÔÕÊ»§¼ÇÂ¼¶¨Òå
+    public enum NodeState
+    {
+        None = 0,
+        Object = 0x01,	// æ¥è‡ªå®é™…å¯¹è±¡
+        Account = 0x02,	// æ¥è‡ªå¸æˆ·è®°å½•å®šä¹‰
 
-	}
+    }
 
-	// ½ÚµãÏêÏ¸ĞÅÏ¢
-	public class NodeInfo
-	{
-		public bool Expandable = false;	// ÊÇ·ñ¿ÉÒÔÕ¹¿ªÏÂ¼¶¶ÔÏó
-		public string Rights = "";	// È¨ÏŞ×Ö·û´®
+    // èŠ‚ç‚¹è¯¦ç»†ä¿¡æ¯
+    public class NodeInfo
+    {
+        public bool Expandable = false;	// æ˜¯å¦å¯ä»¥å±•å¼€ä¸‹çº§å¯¹è±¡
+        public string Rights = "";	// æƒé™å­—ç¬¦ä¸²
 
-		public string DefElement = "";	// ¶¨ÒåÓÃµÄÔªËØÃû
-		public string DefName = "";	// ¶¨ÒåÔªËØÖĞµÄnameÊôĞÔÖµ
+        public string DefElement = "";	// å®šä¹‰ç”¨çš„å…ƒç´ å
+        public string DefName = "";	// å®šä¹‰å…ƒç´ ä¸­çš„nameå±æ€§å€¼
 
-		public TreeNode TreeNode = null;
+        public TreeNode TreeNode = null;
 
-		public NodeState NodeState = NodeState.None;
+        public NodeState NodeState = NodeState.None;
 
         public int Style = 0;
 
-		public static string GetNodeStateString(NodeInfo nodeinfo)
-		{
-			string strState = "";
-			if ((nodeinfo.NodeState & NodeState.Account) == NodeState.Account)
-				strState = "ÕÊ»§¶¨Òå";
-			if ((nodeinfo.NodeState & NodeState.Object) == NodeState.Object)
-			{
-				if (strState != "")
-					strState += ",";
-				strState = "¶ÔÏó";
-			}
+        public static string GetNodeStateString(NodeInfo nodeinfo)
+        {
+            string strState = "";
+            if ((nodeinfo.NodeState & NodeState.Account) == NodeState.Account)
+                strState = "å¸æˆ·å®šä¹‰";
+            if ((nodeinfo.NodeState & NodeState.Object) == NodeState.Object)
+            {
+                if (strState != "")
+                    strState += ",";
+                strState = "å¯¹è±¡";
+            }
 
-			return strState;
-		}
+            return strState;
+        }
 
-	}
+    }
 
     public delegate void NodeRightsChangedEventHandle(object sender,
     NodeRightsChangedEventArgs e);

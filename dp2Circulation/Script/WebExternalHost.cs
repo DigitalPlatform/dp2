@@ -28,7 +28,7 @@ namespace dp2Circulation
     /// </summary>
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    public class WebExternalHost : ThreadBase, IDisposable
+    public class WebExternalHost : ThreadBase
     {
         public event EventHandler CallFunc = null;
 
@@ -117,10 +117,14 @@ namespace dp2Circulation
         /// <summary>
         /// 释放资源
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
-            this.Clear();
-            this.StopThread(true);
+            this.Destroy();
+
+            if (this.Channel != null)
+                this.Channel.Dispose();
+
+            base.Dispose();
         }
 
         /// <summary>
@@ -163,7 +167,11 @@ namespace dp2Circulation
 
         void Channel_Idle(object sender, IdleEventArgs e)
         {
-            e.bDoEvents = this._doEvents;
+            // e.bDoEvents = this._doEvents;
+
+            // 2016/1/26
+            if (this._doEvents)
+                Application.DoEvents();
         }
 
         /// <summary>
@@ -177,6 +185,7 @@ namespace dp2Circulation
             // 2008/5/11 
             if (this.Channel != null)
             {
+                this.Channel.Idle -= new IdleEventHandler(Channel_Idle);
                 this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 this.IsInLoop = false;  // 2008/10/29 
                 this.Channel.Close();   // 2012/3/28

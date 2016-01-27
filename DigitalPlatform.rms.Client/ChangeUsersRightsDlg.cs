@@ -15,7 +15,6 @@ namespace DigitalPlatform.rms.Client
 	/// </summary>
 	public class ChangeUsersRightsDlg : System.Windows.Forms.Form
 	{
-
 		public ServerCollection Servers = null;	// ÒýÓÃ
 		public RmsChannelCollection Channels = null;
 
@@ -65,6 +64,9 @@ namespace DigitalPlatform.rms.Client
 				{
 					components.Dispose();
 				}
+
+                if (this.Channels != null)
+                    this.Channels.Dispose();
 			}
 			base.Dispose( disposing );
 		}

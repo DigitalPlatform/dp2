@@ -122,8 +122,11 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             string strLibraryCodeList = ""; // 当前用户管辖的馆代码列表
+#if NO
             if (sessioninfo.Channel != null)
                 strLibraryCodeList = sessioninfo.Channel.LibraryCodeList;
+#endif
+            strLibraryCodeList = sessioninfo.LibraryCodeList;
 
             // 面板上选择的馆代码
             string strSelectedLibraryCode = (string)this.Page.Session["librarycode"];

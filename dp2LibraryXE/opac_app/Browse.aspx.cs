@@ -9,6 +9,7 @@ using System.Xml;
 using System.Globalization;
 using System.IO;
 using System.Diagnostics;
+using System.Web.UI.HtmlControls;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -16,8 +17,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
-using System.Web.UI.HtmlControls;
+// using DigitalPlatform.CirculationClient;
 
 public partial class Browse2 : MyWebPage
 {

@@ -2214,7 +2214,7 @@ namespace dp2Library
                 Thread.Sleep(10);
             }
 
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
         }
 
         // 检索任意数据库

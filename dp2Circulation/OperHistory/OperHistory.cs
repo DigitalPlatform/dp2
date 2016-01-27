@@ -78,6 +78,13 @@ namespace dp2Circulation
         public LibraryChannel Channel = new LibraryChannel();
 #endif
 
+        public override void Dispose()
+        {
+            this.Close();
+
+            base.Dispose();
+        }
+
         int m_nCount = 0;
 
         /// <summary>
@@ -369,7 +376,11 @@ namespace dp2Circulation
 #endif
 
             if (this.m_webExternalHost != null)
+            {
                 this.m_webExternalHost.Destroy();
+                this.m_webExternalHost.Dispose();
+                this.m_webExternalHost = null;
+            }
 
 #if USE_LOCAL_CHANNEL
             if (this.Channel != null)
@@ -378,7 +389,6 @@ namespace dp2Circulation
                 this.Channel = null;
             }
 #endif
-
         }
 
         private void scriptManager_CreateDefaultContent(object sender,

@@ -590,7 +590,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_strUserName = DomUtil.GetAttr(server, "username");
             this.m_strPassword = LibraryApplication.DecryptPassword(DomUtil.GetAttr(server, "password"));
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             long lProcessCount = 0;
@@ -650,6 +649,7 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
                 this.AppendResultText("    共复制 " + lProcessCount.ToString() + " 条书目记录\r\n");
             }
@@ -976,7 +976,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_strUserName = DomUtil.GetAttr(server, "username");
             this.m_strPassword = LibraryApplication.DecryptPassword(DomUtil.GetAttr(server, "password"));
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             try
@@ -1070,6 +1069,7 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
             }
 
@@ -2045,7 +2045,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_strUserName = DomUtil.GetAttr(server, "username");
             this.m_strPassword = LibraryApplication.DecryptPassword(DomUtil.GetAttr(server, "password"));
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             try
@@ -2089,6 +2088,7 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
             }
         }

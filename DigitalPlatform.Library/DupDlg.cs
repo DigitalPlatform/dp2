@@ -17,11 +17,11 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Library
 {
-	/// <summary>
-	/// 查重对话框
-	/// </summary>
-	public class DupDlg : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// 查重对话框
+    /// </summary>
+    public class DupDlg : System.Windows.Forms.Form
+    {
         OneHit m_hit = null;
 
         string m_strWeightList = "";  // 原始的weight定义，逗号分割的列表
@@ -33,91 +33,93 @@ namespace DigitalPlatform.Library
 		string m_strSearchReason = "";	// 检索细节信息
          * */
 
-		Hashtable m_tableItem = new Hashtable();
+        Hashtable m_tableItem = new Hashtable();
 
-		SearchPanel SearchPanel = null;
+        SearchPanel SearchPanel = null;
 
         /// <summary>
         /// 检索结束
         /// </summary>
-		public AutoResetEvent EventFinish = new AutoResetEvent(false);
+        public AutoResetEvent EventFinish = new AutoResetEvent(false);
 
-		bool m_bAutoBeginSearch = false;
+        bool m_bAutoBeginSearch = false;
 
         /// <summary>
         /// 哪些记录需要装载浏览信息列
         /// </summary>
-		public LoadBrowse LoadBrowse = LoadBrowse.All;
+        public LoadBrowse LoadBrowse = LoadBrowse.All;
 
         /// <summary>
         /// 打开详细窗
         /// </summary>
-		public event OpenDetailEventHandler OpenDetail = null;
+        public event OpenDetailEventHandler OpenDetail = null;
 
-		XmlDocument domDupCfg = null;
+        XmlDocument domDupCfg = null;
 
-		string m_strRecord = "";
+        string m_strRecord = "";
 
-		private System.Windows.Forms.Button button_findServerUrl;
-		private System.Windows.Forms.TextBox textBox_serverUrl;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label_message;
-		private System.Windows.Forms.Button button_stop;
-		private System.Windows.Forms.Button button_search;
-		private System.Windows.Forms.ColumnHeader columnHeader_path;
-		private System.Windows.Forms.ColumnHeader columnHeader_sum;
+        private System.Windows.Forms.Button button_findServerUrl;
+        private System.Windows.Forms.TextBox textBox_serverUrl;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.Button button_stop;
+        private System.Windows.Forms.Button button_search;
+        private System.Windows.Forms.ColumnHeader columnHeader_path;
+        private System.Windows.Forms.ColumnHeader columnHeader_sum;
 
         /// <summary>
         /// 用于浏览检索命中记录的ListView
         /// </summary>
-		public ListView listView_browse;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox textBox_recordPath;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox textBox_projectName;
-		private System.Windows.Forms.Button button_findProjectName;
-		private System.Windows.Forms.ColumnHeader columnHeader_searchComment;
-		private System.Windows.Forms.ToolTip toolTip_searchComment;
-		private System.Windows.Forms.Label label_dupMessage;
-		private System.ComponentModel.IContainer components;
+        public ListView listView_browse;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox_recordPath;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox_projectName;
+        private System.Windows.Forms.Button button_findProjectName;
+        private System.Windows.Forms.ColumnHeader columnHeader_searchComment;
+        private System.Windows.Forms.ToolTip toolTip_searchComment;
+        private System.Windows.Forms.Label label_dupMessage;
+        private System.ComponentModel.IContainer components;
 
         /// <summary>
         /// 构造函数
         /// </summary>
-		public DupDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public DupDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                this.EventFinish.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DupDlg));
             this.button_findServerUrl = new System.Windows.Forms.Button();
@@ -321,26 +323,26 @@ namespace DigitalPlatform.Library
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
 
         /// <summary>
         /// 主服务器URL
         /// </summary>
         /// <remarks>用于获取cfgs/dup配置文件的服务器URL</remarks>
-		public string ServerUrl
-		{
-			get 
-			{
-				return textBox_serverUrl.Text;
-			}
-			set
-			{
-				domDupCfg = null;
-				textBox_serverUrl.Text = value;
-			}
-		}
+        public string ServerUrl
+        {
+            get
+            {
+                return textBox_serverUrl.Text;
+            }
+            set
+            {
+                domDupCfg = null;
+                textBox_serverUrl.Text = value;
+            }
+        }
 
         /// <summary>
         /// 初始化
@@ -348,81 +350,81 @@ namespace DigitalPlatform.Library
         /// <param name="searchpanel">检索面板</param>
         /// <param name="strServerUrl">主服务器URL</param>
         /// <param name="bAutoBeginSearch">当对话框打开后是否自动开始检索</param>
-		public void Initial(
-			SearchPanel searchpanel,
-			string strServerUrl,
-			bool bAutoBeginSearch)
-		{
-			this.SearchPanel = searchpanel;
+        public void Initial(
+            SearchPanel searchpanel,
+            string strServerUrl,
+            bool bAutoBeginSearch)
+        {
+            this.SearchPanel = searchpanel;
 
-			this.SearchPanel.InitialStopManager(this.button_stop,
-				this.label_message);
+            this.SearchPanel.InitialStopManager(this.button_stop,
+                this.label_message);
 
-			this.ServerUrl = strServerUrl;
+            this.ServerUrl = strServerUrl;
 
-			this.m_bAutoBeginSearch = bAutoBeginSearch;
-		}
+            this.m_bAutoBeginSearch = bAutoBeginSearch;
+        }
 
         /// <summary>
         /// 发起查重的记录
         /// </summary>
-		public string Record
-		{
-			get 
-			{
-				return m_strRecord;
-			}
-			set 
-			{
-				m_strRecord = value;
-			}
-		}
+        public string Record
+        {
+            get
+            {
+                return m_strRecord;
+            }
+            set
+            {
+                m_strRecord = value;
+            }
+        }
 
         /// <summary>
         /// 发起查重的记录路径。id可以为?。主要用来模拟出keys
         /// </summary>
-		public string RecordFullPath
-		{
-			get 
-			{
-				return this.textBox_recordPath.Text;
-			}
-			set 
-			{
-				this.textBox_recordPath.Text = value;
-				this.Text = "查重: " + ResPath.GetReverseRecordPath(value);
-			}
-		}
+        public string RecordFullPath
+        {
+            get
+            {
+                return this.textBox_recordPath.Text;
+            }
+            set
+            {
+                this.textBox_recordPath.Text = value;
+                this.Text = "查重: " + ResPath.GetReverseRecordPath(value);
+            }
+        }
 
 
         /// <summary>
         /// 发起查重的记录路径的数据库部分
         /// </summary>
-		public string OriginDbFullPath
-		{
-			get 
-			{
-				ResPath respath = new ResPath(this.textBox_recordPath.Text);
+        public string OriginDbFullPath
+        {
+            get
+            {
+                ResPath respath = new ResPath(this.textBox_recordPath.Text);
 
-				return respath.Url + "?" + ResPath.GetDbName(respath.Path);
-			}
+                return respath.Url + "?" + ResPath.GetDbName(respath.Path);
+            }
 
-		}
+        }
 
         /// <summary>
         /// 查重方案名
         /// </summary>
-		public string ProjectName 
-		{
-			get 
-			{
-				return this.textBox_projectName.Text;
-			}
-			set 
-			{
-				this.textBox_projectName.Text = value;
-			}
-		}
+        public string ProjectName
+        {
+            get
+            {
+                return this.textBox_projectName.Text;
+            }
+            set
+            {
+                this.textBox_projectName.Text = value;
+            }
+        }
 
         /// <summary>
         /// 从主服务器上获取cfgs/dup配置文件
@@ -432,198 +434,198 @@ namespace DigitalPlatform.Library
         /// <value>-1出错</value>
         /// <value>0正常</value>
         /// </returns>
-		int GetDupCfgFile(out string strError)
-		{
-			strError = "";
+        int GetDupCfgFile(out string strError)
+        {
+            strError = "";
 
-			if (this.domDupCfg != null)
-				return 0;	// 优化
+            if (this.domDupCfg != null)
+                return 0;	// 优化
 
-			if (this.textBox_serverUrl.Text == "")
-			{
-				strError = "尚未指定服务器URL";
-				return -1;
-			}
+            if (this.textBox_serverUrl.Text == "")
+            {
+                strError = "尚未指定服务器URL";
+                return -1;
+            }
 
-			string strCfgFilePath = "cfgs/dup";
-			XmlDocument tempdom = null;
-			// 获得配置文件
-			// return:
-			//		-1	error
-			//		0	not found
-			//		1	found
-			int nRet = this.SearchPanel.GetCfgFile(
+            string strCfgFilePath = "cfgs/dup";
+            XmlDocument tempdom = null;
+            // 获得配置文件
+            // return:
+            //		-1	error
+            //		0	not found
+            //		1	found
+            int nRet = this.SearchPanel.GetCfgFile(
                 this.textBox_serverUrl.Text,
-				strCfgFilePath,
-				out tempdom,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0) 
-			{
-				strError = "配置文件 '" + strCfgFilePath + "' 没有找到...";
-				return -1;
-			}
+                strCfgFilePath,
+                out tempdom,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "配置文件 '" + strCfgFilePath + "' 没有找到...";
+                return -1;
+            }
 
-			this.domDupCfg = tempdom;
+            this.domDupCfg = tempdom;
 
-			return 0;
-		}
+            return 0;
+        }
 
-		private void DupDlg_Load(object sender, System.EventArgs e)
-		{
-			object[] pList = new object []  { null, null };
+        private void DupDlg_Load(object sender, System.EventArgs e)
+        {
+            object[] pList = new object[] { null, null };
 
-			if (m_bAutoBeginSearch == true) 
-			{
-				this.BeginInvoke(new Delegate_Search(this.button_search_Click), pList);
-			}
+            if (m_bAutoBeginSearch == true)
+            {
+                this.BeginInvoke(new Delegate_Search(this.button_search_Click), pList);
+            }
 
-			// this.BackgroundImage = new Bitmap("f:\\cs\\dp1batch\\project_icon.bmp" );
-			// this.BackgroundImage = GetBackImage();
+            // this.BackgroundImage = new Bitmap("f:\\cs\\dp1batch\\project_icon.bmp" );
+            // this.BackgroundImage = GetBackImage();
 
-			// this.listView_browse.BackgroundImage = "f:\\cs\\dp1batch\\project_icon.bmp";
+            // this.listView_browse.BackgroundImage = "f:\\cs\\dp1batch\\project_icon.bmp";
 
-			// this.listView_browse.BackImage = GetBackImage();
+            // this.listView_browse.BackImage = GetBackImage();
 
-		}
+        }
 
-		delegate void Delegate_Search(object sender, EventArgs e);
+        delegate void Delegate_Search(object sender, EventArgs e);
 
         /// <summary>
         /// 等待检索结束
         /// </summary>
-		public void WaitSearchFinish()
-		{
-			for(;;)
-			{
-				Application.DoEvents();
-				bool bRet = this.EventFinish.WaitOne(10, true);
-				if (bRet == true)
-					break;
-			}
-		}
+        public void WaitSearchFinish()
+        {
+            for (; ; )
+            {
+                Application.DoEvents();
+                bool bRet = this.EventFinish.WaitOne(10, true);
+                if (bRet == true)
+                    break;
+            }
+        }
 
-		private void DupDlg_Closed(object sender, System.EventArgs e)
-		{
-			EventFinish.Set();
-		}
+        private void DupDlg_Closed(object sender, System.EventArgs e)
+        {
+            EventFinish.Set();
+        }
 
-		private void button_search_Click(object sender, System.EventArgs e)
-		{
-			string strError = "";
+        private void button_search_Click(object sender, System.EventArgs e)
+        {
+            string strError = "";
 
-			int nRet = DoSearch(out strError);
-			if (nRet == -1)
-			{
-				MessageBox.Show(this, strError);
-			}
+            int nRet = DoSearch(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
 
-			/*
-			EventFinish.Reset();
-			try 
-			{
+            /*
+            EventFinish.Reset();
+            try 
+            {
 
-				this.listView_browse.Items.Clear();
-				this.m_tableItem.Clear();
+                this.listView_browse.Items.Clear();
+                this.m_tableItem.Clear();
 
-				if (this.ServerUrl == "")
-				{
-					strError = "主服务器URL尚未指定";
-					goto ERROR1;
-				}
-				if (this.ProjectName == "")
-				{
-					strError = "查重方案名尚未指定";
-					goto ERROR1;
-				}
-				if (this.RecordFullPath == "")
-				{
-					strError = "源记录路径尚未指定";
-					goto ERROR1;
-				}
-				if (this.Record == "")
-				{
-					strError = "源记录内容尚未指定";
-					goto ERROR1;
-				}
+                if (this.ServerUrl == "")
+                {
+                    strError = "主服务器URL尚未指定";
+                    goto ERROR1;
+                }
+                if (this.ProjectName == "")
+                {
+                    strError = "查重方案名尚未指定";
+                    goto ERROR1;
+                }
+                if (this.RecordFullPath == "")
+                {
+                    strError = "源记录路径尚未指定";
+                    goto ERROR1;
+                }
+                if (this.Record == "")
+                {
+                    strError = "源记录内容尚未指定";
+                    goto ERROR1;
+                }
 
-				// 从服务器上获取dup配置文件
-				int nRet = GetDupCfgFile(out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                // 从服务器上获取dup配置文件
+                int nRet = GetDupCfgFile(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				// 检查project name是否存在
-				XmlNode nodeProject = GetProjectNode(this.ProjectName,
-					out strError);
-				if (nodeProject == null)
-					goto ERROR1;
+                // 检查project name是否存在
+                XmlNode nodeProject = GetProjectNode(this.ProjectName,
+                    out strError);
+                if (nodeProject == null)
+                    goto ERROR1;
 
-				// 分析源记录路径
-				ResPath respath = new ResPath(this.RecordFullPath);
+                // 分析源记录路径
+                ResPath respath = new ResPath(this.RecordFullPath);
 
-				ArrayList aLine = null;	// AccessKeyInfo对象数组
-				// 获得keys
-				// 模拟创建检索点
-				// return:
-				//		-1	一般出错
-				//		0	正常
-				nRet = this.SearchPanel.GetKeys(
-					respath.Url,
-					respath.Path,
-					this.Record,
-					out aLine,
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                ArrayList aLine = null;	// AccessKeyInfo对象数组
+                // 获得keys
+                // 模拟创建检索点
+                // return:
+                //		-1	一般出错
+                //		0	正常
+                nRet = this.SearchPanel.GetKeys(
+                    respath.Url,
+                    respath.Path,
+                    this.Record,
+                    out aLine,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				nRet = 	LoopSearch(
-					nodeProject,
-					aLine,
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                nRet = 	LoopSearch(
+                    nodeProject,
+                    aLine,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				// 排序
-				this.SearchPanel.BeginLoop("正在排序");
-				try 
-				{
-					this.listView_browse.ListViewItemSorter = new ListViewItemComparer();
-				}
-				finally 
-				{
-					this.SearchPanel.EndLoop();
-				}
-
-
-				// 获得浏览信息
-				this.SearchPanel.BeginLoop("正在获取浏览列信息 ...");
-				try 
-				{
-					nRet = GetBrowseColumns(out strError);
-					if (nRet == -1)
-						goto ERROR1;
-				}
-				finally 
-				{
-					this.SearchPanel.EndLoop();
-				}
+                // 排序
+                this.SearchPanel.BeginLoop("正在排序");
+                try 
+                {
+                    this.listView_browse.ListViewItemSorter = new ListViewItemComparer();
+                }
+                finally 
+                {
+                    this.SearchPanel.EndLoop();
+                }
 
 
-				// MessageBox.Show(this, "OK");	// 汇报查重情况
+                // 获得浏览信息
+                this.SearchPanel.BeginLoop("正在获取浏览列信息 ...");
+                try 
+                {
+                    nRet = GetBrowseColumns(out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                finally 
+                {
+                    this.SearchPanel.EndLoop();
+                }
 
-				return;
-			}
-			finally 
-			{
-				EventFinish.Set();
-			}
+
+                // MessageBox.Show(this, "OK");	// 汇报查重情况
+
+                return;
+            }
+            finally 
+            {
+                EventFinish.Set();
+            }
 			
 		
-			ERROR1:
-				MessageBox.Show(this, strError);
-			*/
-		}
+            ERROR1:
+                MessageBox.Show(this, strError);
+            */
+        }
 
 
         /// <summary>
@@ -631,294 +633,294 @@ namespace DigitalPlatform.Library
         /// </summary>
         /// <param name="strError">返回的错误信息</param>
         /// <returns>-1出错;0正常</returns>
-		public int DoSearch(out string strError)
-		{
-			strError = "";
+        public int DoSearch(out string strError)
+        {
+            strError = "";
 
-			EventFinish.Reset();
-			try 
-			{
+            EventFinish.Reset();
+            try
+            {
 
-				this.listView_browse.Items.Clear();
-				this.m_tableItem.Clear();
+                this.listView_browse.Items.Clear();
+                this.m_tableItem.Clear();
 
-				if (this.ServerUrl == "")
-				{
-					strError = "主服务器URL尚未指定";
-					goto ERROR1;
-				}
-				if (this.ProjectName == "")
-				{
-					strError = "查重方案名尚未指定";
-					goto ERROR1;
-				}
-				if (this.RecordFullPath == "")
-				{
-					strError = "源记录路径尚未指定";
-					goto ERROR1;
-				}
-				if (this.Record == "")
-				{
-					strError = "源记录内容尚未指定";
-					goto ERROR1;
-				}
+                if (this.ServerUrl == "")
+                {
+                    strError = "主服务器URL尚未指定";
+                    goto ERROR1;
+                }
+                if (this.ProjectName == "")
+                {
+                    strError = "查重方案名尚未指定";
+                    goto ERROR1;
+                }
+                if (this.RecordFullPath == "")
+                {
+                    strError = "源记录路径尚未指定";
+                    goto ERROR1;
+                }
+                if (this.Record == "")
+                {
+                    strError = "源记录内容尚未指定";
+                    goto ERROR1;
+                }
 
-				// 从服务器上获取dup配置文件
-				int nRet = GetDupCfgFile(out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                // 从服务器上获取dup配置文件
+                int nRet = GetDupCfgFile(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				if (this.ProjectName == "{default}")
-				{
-					ResPath respathtemp = new ResPath(this.RecordFullPath);
+                if (this.ProjectName == "{default}")
+                {
+                    ResPath respathtemp = new ResPath(this.RecordFullPath);
 
-					string strOriginDbFullPath = respathtemp.Url + "?" + ResPath.GetDbName(respathtemp.Path);
-					string strDefaultProjectName = "";
-					nRet = GetDefaultProjectName(strOriginDbFullPath,
-						out strDefaultProjectName,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
-					if (nRet == 0)
-					{
-						strError = "查重发起库 '" + strOriginDbFullPath + "' 尚未定义缺省查重方案参数(需在dup配置文件中用<default>元素定义)。\r\n或可用'查重方案'textbox右边的'...'按钮指定好一个实在的查重方案名后，再行查重。";
-						goto ERROR1;
-					}
-					Debug.Assert(nRet == 1, "");
-					this.ProjectName = strDefaultProjectName;
-				}
+                    string strOriginDbFullPath = respathtemp.Url + "?" + ResPath.GetDbName(respathtemp.Path);
+                    string strDefaultProjectName = "";
+                    nRet = GetDefaultProjectName(strOriginDbFullPath,
+                        out strDefaultProjectName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "查重发起库 '" + strOriginDbFullPath + "' 尚未定义缺省查重方案参数(需在dup配置文件中用<default>元素定义)。\r\n或可用'查重方案'textbox右边的'...'按钮指定好一个实在的查重方案名后，再行查重。";
+                        goto ERROR1;
+                    }
+                    Debug.Assert(nRet == 1, "");
+                    this.ProjectName = strDefaultProjectName;
+                }
 
-				// 检查project name是否存在
-				XmlNode nodeProject = GetProjectNode(this.ProjectName,
-					out strError);
-				if (nodeProject == null)
-					goto ERROR1;
+                // 检查project name是否存在
+                XmlNode nodeProject = GetProjectNode(this.ProjectName,
+                    out strError);
+                if (nodeProject == null)
+                    goto ERROR1;
 
-				// 分析源记录路径
-				ResPath respath = new ResPath(this.RecordFullPath);
+                // 分析源记录路径
+                ResPath respath = new ResPath(this.RecordFullPath);
 
                 List<AccessKeyInfo> aLine = null;	// AccessKeyInfo对象数组
-				// 获得keys
-				// 模拟创建检索点
-				// return:
-				//		-1	一般出错
-				//		0	正常
-				nRet = this.SearchPanel.GetKeys(
-					respath.Url,
-					respath.Path,
-					this.Record,
-					out aLine,
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                // 获得keys
+                // 模拟创建检索点
+                // return:
+                //		-1	一般出错
+                //		0	正常
+                nRet = this.SearchPanel.GetKeys(
+                    respath.Url,
+                    respath.Path,
+                    this.Record,
+                    out aLine,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				nRet = 	LoopSearch(
-					nodeProject,
-					aLine,
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
+                nRet = LoopSearch(
+                    nodeProject,
+                    aLine,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-				// 排序
-				this.SearchPanel.BeginLoop("正在排序");
-				try 
-				{
-					this.listView_browse.ListViewItemSorter = new ListViewItemComparer();
-				}
-				finally 
-				{
-					this.SearchPanel.EndLoop();
-				}
+                // 排序
+                this.SearchPanel.BeginLoop("正在排序");
+                try
+                {
+                    this.listView_browse.ListViewItemSorter = new ListViewItemComparer();
+                }
+                finally
+                {
+                    this.SearchPanel.EndLoop();
+                }
 
-				SetDupState();
+                SetDupState();
 
-				// 获得浏览信息
-				this.SearchPanel.BeginLoop("正在获取浏览列信息 ...");
-				try 
-				{
-					nRet = GetBrowseColumns(out strError);
-					if (nRet == -1)
-						goto ERROR1;
-				}
-				finally 
-				{
-					this.SearchPanel.EndLoop();
-				}
-				return 0;
-			}
-			finally 
-			{
-				EventFinish.Set();
-			}
-		
-			ERROR1:
-				return -1;
-		}
+                // 获得浏览信息
+                this.SearchPanel.BeginLoop("正在获取浏览列信息 ...");
+                try
+                {
+                    nRet = GetBrowseColumns(out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                finally
+                {
+                    this.SearchPanel.EndLoop();
+                }
+                return 0;
+            }
+            finally
+            {
+                EventFinish.Set();
+            }
+
+        ERROR1:
+            return -1;
+        }
 
 
         /// <summary>
         /// 获得查重结果：记录全路径的集合
         /// </summary>
-		public string[] DupPaths
-		{
-			get 
-			{
-				int i;
-				ArrayList aPath = new ArrayList();
-				for(i=0;i<this.listView_browse.Items.Count;i++)
-				{
-					string strText = this.listView_browse.Items[i].SubItems[1].Text;
+        public string[] DupPaths
+        {
+            get
+            {
+                int i;
+                ArrayList aPath = new ArrayList();
+                for (i = 0; i < this.listView_browse.Items.Count; i++)
+                {
+                    string strText = this.listView_browse.Items[i].SubItems[1].Text;
 
-					if (strText.Length > 0 && strText[0] == '*')
-					{
-						aPath.Add(ResPath.GetRegularRecordPath(this.listView_browse.Items[i].Text));
-					}
-					else
-						break;
-				}
+                    if (strText.Length > 0 && strText[0] == '*')
+                    {
+                        aPath.Add(ResPath.GetRegularRecordPath(this.listView_browse.Items[i].Text));
+                    }
+                    else
+                        break;
+                }
 
-				if (aPath.Count == 0)
-					return new string[0];
+                if (aPath.Count == 0)
+                    return new string[0];
 
-				string [] result = new string[aPath.Count];
-				for(i=0;i<aPath.Count;i++)
-				{
-					result[i] = (string)aPath[i];
-				}
+                string[] result = new string[aPath.Count];
+                for (i = 0; i < aPath.Count; i++)
+                {
+                    result[i] = (string)aPath[i];
+                }
 
-				return result;
-			}
-		}
+                return result;
+            }
+        }
 
-		// 设置查重状态
-		void SetDupState()
-		{
-			int nCount = 0;
-			for(int i=0;i<this.listView_browse.Items.Count;i++)
-			{
-				string strText = this.listView_browse.Items[i].SubItems[1].Text;
+        // 设置查重状态
+        void SetDupState()
+        {
+            int nCount = 0;
+            for (int i = 0; i < this.listView_browse.Items.Count; i++)
+            {
+                string strText = this.listView_browse.Items[i].SubItems[1].Text;
 
-				if (strText.Length > 0 && strText[0] == '*')
-					nCount ++;
-				else
-					break;
-			}
+                if (strText.Length > 0 && strText[0] == '*')
+                    nCount++;
+                else
+                    break;
+            }
 
-			if (nCount > 0)
-				this.label_dupMessage.Text = "有 " +Convert.ToString(nCount)+ " 条重复记录。";
-			else
-				this.label_dupMessage.Text = "没有重复记录。";
+            if (nCount > 0)
+                this.label_dupMessage.Text = "有 " + Convert.ToString(nCount) + " 条重复记录。";
+            else
+                this.label_dupMessage.Text = "没有重复记录。";
 
-		}
+        }
 
-		// 获得一个发起库对应的缺省查重方案名
-		int GetDefaultProjectName(string strFromDbFullPath,
-			out string strDefaultProjectName,
-			out string strError)
-		{
-			strDefaultProjectName = "";
-			strError = "";
+        // 获得一个发起库对应的缺省查重方案名
+        int GetDefaultProjectName(string strFromDbFullPath,
+            out string strDefaultProjectName,
+            out string strError)
+        {
+            strDefaultProjectName = "";
+            strError = "";
 
-			if (this.domDupCfg == null)
-			{
-				strError = "配置文件dom尚未初始化";
-				return -1;
-			}
+            if (this.domDupCfg == null)
+            {
+                strError = "配置文件dom尚未初始化";
+                return -1;
+            }
 
-			ResPath respath = new ResPath(strFromDbFullPath);
+            ResPath respath = new ResPath(strFromDbFullPath);
 
 
-			XmlNode node = this.domDupCfg.SelectSingleNode("//default[@origin='"+strFromDbFullPath+"']");
-			if (node == null)
-			{
-				node = this.domDupCfg.SelectSingleNode("//default[@origin='"+respath.Path+"']");
-			}
+            XmlNode node = this.domDupCfg.SelectSingleNode("//default[@origin='" + strFromDbFullPath + "']");
+            if (node == null)
+            {
+                node = this.domDupCfg.SelectSingleNode("//default[@origin='" + respath.Path + "']");
+            }
 
-			if (node == null)
-				return 0;	// not found
+            if (node == null)
+                return 0;	// not found
 
-			strDefaultProjectName = DomUtil.GetAttr(node, "project");
+            strDefaultProjectName = DomUtil.GetAttr(node, "project");
 
-			return 1;
-		}
+            return 1;
+        }
 
-		// 循环检索
-		int LoopSearch(
-			XmlNode nodeProject,
+        // 循环检索
+        int LoopSearch(
+            XmlNode nodeProject,
             List<AccessKeyInfo> aLine,
-			out string strError)
-		{
-			strError = "";
-			int nRet = 0;
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
 
-			if (nodeProject == null)
-			{
-				strError = "nodeProject参数不能为null";
-				return -1;
-			}
+            if (nodeProject == null)
+            {
+                strError = "nodeProject参数不能为null";
+                return -1;
+            }
 
             Hashtable threshold_table = new Hashtable();    // 数据库名和阈值的对照表
             Hashtable keyscount_table = new Hashtable();    // 发起记录的每个from所包含的key的数目 对照表。hashtable key的形态为strDbName + "|" + strFrom
 
-			XmlNodeList databases = nodeProject.SelectNodes("database");
+            XmlNodeList databases = nodeProject.SelectNodes("database");
 
-			// <database>循环
-			for(int i=0;i<databases.Count;i++)
-			{
-				XmlNode database = databases[i];
+            // <database>循环
+            for (int i = 0; i < databases.Count; i++)
+            {
+                XmlNode database = databases[i];
 
-				string strName = DomUtil.GetAttr(database, "name");
-				if (strName == "")
-					continue;
+                string strName = DomUtil.GetAttr(database, "name");
+                if (strName == "")
+                    continue;
 
-				string strThreshold = DomUtil.GetAttr(database, "threshold");
+                string strThreshold = DomUtil.GetAttr(database, "threshold");
 
-				int nThreshold = 0;
-				try 
-				{
-					nThreshold = Convert.ToInt32(strThreshold);
-				}
-				catch
-				{
-                    strError = "name为 '"+strName+"' 的<database>元素内threshold属性值 '" + strThreshold + "' 格式不正确，应为纯数字";
+                int nThreshold = 0;
+                try
+                {
+                    nThreshold = Convert.ToInt32(strThreshold);
+                }
+                catch
+                {
+                    strError = "name为 '" + strName + "' 的<database>元素内threshold属性值 '" + strThreshold + "' 格式不正确，应为纯数字";
                     return -1;
-				}
+                }
 
                 threshold_table[strName] = nThreshold;
 
-				string strUrl = "";
-				string strDbName = "";
-				// 分离出URL和库名
-				nRet = strName.IndexOf("?");
-				if (nRet == -1)
-				{
-					strUrl = this.ServerUrl;	// 当前主服务器
-					strDbName = strName;
-				}
-				else 
-				{
-					strUrl = strName.Substring(0, nRet);
-					strDbName = strName.Substring(nRet + 1);
-				}
+                string strUrl = "";
+                string strDbName = "";
+                // 分离出URL和库名
+                nRet = strName.IndexOf("?");
+                if (nRet == -1)
+                {
+                    strUrl = this.ServerUrl;	// 当前主服务器
+                    strDbName = strName;
+                }
+                else
+                {
+                    strUrl = strName.Substring(0, nRet);
+                    strDbName = strName.Substring(nRet + 1);
+                }
 
-				XmlNodeList accesspoints = database.SelectNodes("accessPoint");
-				// <accessPoint>循环
-				for(int j = 0;j<accesspoints.Count;j++)
-				{
-					XmlNode accesspoint = accesspoints[j];
+                XmlNodeList accesspoints = database.SelectNodes("accessPoint");
+                // <accessPoint>循环
+                for (int j = 0; j < accesspoints.Count; j++)
+                {
+                    XmlNode accesspoint = accesspoints[j];
 
-					string strFrom = DomUtil.GetAttr(accesspoint, "name");
+                    string strFrom = DomUtil.GetAttr(accesspoint, "name");
 
-					// 获得from所对应的key
+                    // 获得from所对应的key
                     List<string> keys = GetKeysByFrom(aLine,
-						strFrom);
-					if (keys.Count == 0)
-						continue;
+                        strFrom);
+                    if (keys.Count == 0)
+                        continue;
 
                     keyscount_table[strDbName + "|" + strFrom] = keys.Count;
 
-					string strWeight = DomUtil.GetAttr(accesspoint, "weight");
-					string strSearchStyle = DomUtil.GetAttr(accesspoint, "searchStyle");
+                    string strWeight = DomUtil.GetAttr(accesspoint, "weight");
+                    string strSearchStyle = DomUtil.GetAttr(accesspoint, "searchStyle");
 
                     /*
 					int nWeight = 0;
@@ -931,36 +933,36 @@ namespace DigitalPlatform.Library
 						// 警告定义问题?
 					}*/
 
-					for(int k=0;k<keys.Count;k++)
-					{
-						string strKey = (string)keys[k];
-						if (strKey == "")
-							continue;
+                    for (int k = 0; k < keys.Count; k++)
+                    {
+                        string strKey = (string)keys[k];
+                        if (strKey == "")
+                            continue;
 
-						// 检索一个from
-						nRet = SearchOneFrom(
-							strUrl,
-							strDbName,
-							strFrom,
-							strKey,
-							strSearchStyle,
-							strWeight,
-							// nThreshold,
-							5000,
-							out strError);
-						if (nRet == -1)
-						{
-							// ??? 警告检索错误?
-						}
-					}
+                        // 检索一个from
+                        nRet = SearchOneFrom(
+                            strUrl,
+                            strDbName,
+                            strFrom,
+                            strKey,
+                            strSearchStyle,
+                            strWeight,
+                            // nThreshold,
+                            5000,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            // ??? 警告检索错误?
+                        }
+                    }
 
-				}
+                }
 
                 // 处理完一个数据库了
-			}
+            }
 
             // 将listview中每行显示出来
-  			Color color = Color.FromArgb(255,255,200);
+            Color color = Color.FromArgb(255, 255, 200);
 
             for (int i = 0; i < this.listView_browse.Items.Count; i++)
             {
@@ -992,8 +994,8 @@ namespace DigitalPlatform.Library
                 ListViewUtil.ChangeItemText(item, 2, BuildComment(info.Hits));
             }
 
-			return 0;
-		}
+            return 0;
+        }
 
         // 先按照各个渠道累加各自的weight，然后算出总weight
         static int AddWeight(
@@ -1068,27 +1070,27 @@ namespace DigitalPlatform.Library
             public int Hits = 0;    // 命中事项数(次数)
         }
 
-		// 从模拟keys中根据from获得对应的key
-		List<string> GetKeysByFrom(List<AccessKeyInfo> aLine,
-			string strFromName)
-		{
-			List<string> aResult = new List<string>();
-			for(int i=0;i<aLine.Count;i++)
-			{
-				AccessKeyInfo info = aLine[i];
-				if (info.FromName == strFromName)
-					aResult.Add(info.Key);
-			}
+        // 从模拟keys中根据from获得对应的key
+        List<string> GetKeysByFrom(List<AccessKeyInfo> aLine,
+            string strFromName)
+        {
+            List<string> aResult = new List<string>();
+            for (int i = 0; i < aLine.Count; i++)
+            {
+                AccessKeyInfo info = aLine[i];
+                if (info.FromName == strFromName)
+                    aResult.Add(info.Key);
+            }
 
-			return aResult;
-		}
+            return aResult;
+        }
 
         // 从字符串中挑选出XML检索式专用的search style
         // 也就是 exact left middle right。如果缺省，认为等于exact
         // 如果有多个可用的值，则第一个起作用
         static string GetFirstQuerySearchStyle(string strText)
         {
-            string[] parts = strText.Split(new char[] {','});
+            string[] parts = strText.Split(new char[] { ',' });
             for (int i = 0; i < parts.Length; i++)
             {
                 string strStyle = parts[i].Trim().ToLower();
@@ -1106,13 +1108,13 @@ namespace DigitalPlatform.Library
         int SearchOneFrom(
             string strServerUrl,
             string strDbName,
-			string strFrom,
-			string strKey,
-			string strSearchStyle,
+            string strFrom,
+            string strKey,
+            string strSearchStyle,
             string strWeight,
-			// int nThreshold,
-			long nMax,
-			out string strError)
+            // int nThreshold,
+            long nMax,
+            out string strError)
         {
 
             this.SearchPanel.BrowseRecord -= new BrowseRecordEventHandler(BrowseRecordNoColsCallBack);
@@ -1179,15 +1181,15 @@ namespace DigitalPlatform.Library
         }
 
 
-		void BrowseRecordNoColsCallBack(object sender, BrowseRecordEventArgs e)
-		{
-			string strError = "";
+        void BrowseRecordNoColsCallBack(object sender, BrowseRecordEventArgs e)
+        {
+            string strError = "";
 
-			if (e.FullPath == this.RecordFullPath)
-				return;	// 当前记录自己并不要装入浏览窗
+            if (e.FullPath == this.RecordFullPath)
+                return;	// 当前记录自己并不要装入浏览窗
 
-			int nRet = FillList(
-				e.FullPath,
+            int nRet = FillList(
+                e.FullPath,
                 this.m_hit,
                 this.m_strWeightList,
                 /*
@@ -1196,20 +1198,20 @@ namespace DigitalPlatform.Library
 				this.m_nThreshold,
 				this.m_strSearchReason,
                  * */
-				out strError);
-			if (nRet == -1) 
-			{
-				e.Cancel = true;
-				e.ErrorInfo = strError;
-			}
-		}
+                out strError);
+            if (nRet == -1)
+            {
+                e.Cancel = true;
+                e.ErrorInfo = strError;
+            }
+        }
 
         // 填充列表
         // parameters:
         //      strReason   检索过程注释
         //      hit_param   携带了参数，但是要被复制后，将新对象进入队列
-		int FillList(
-			string strFullPath,
+        int FillList(
+            string strFullPath,
             OneHit hit_param,
             string strWeightList,
             /*
@@ -1218,15 +1220,15 @@ namespace DigitalPlatform.Library
 			int nThreshold,
 			string strReason,
              * */
-			out string strError)
-		{
-			strError = "";
+            out string strError)
+        {
+            strError = "";
 
-			// Color color = Color.FromArgb(255,255,200);
+            // Color color = Color.FromArgb(255,255,200);
 
-			// string strNumber = "";
+            // string strNumber = "";
 
-            OneHit hit= new OneHit(hit_param);
+            OneHit hit = new OneHit(hit_param);
             /*
             hit.From = hit_param.From;
             hit.Key = hit_param.Key;
@@ -1236,13 +1238,13 @@ namespace DigitalPlatform.Library
 
             ItemInfo info = null;
 
-			string strPath = ResPath.GetReverseRecordPath(strFullPath);
+            string strPath = ResPath.GetReverseRecordPath(strFullPath);
 
-			// 根据path寻找已经存在的item
-			ListViewItem item = (ListViewItem)m_tableItem[strPath];
-			if (item == null)
-			{
-				item = new ListViewItem(strPath, 0);
+            // 根据path寻找已经存在的item
+            ListViewItem item = (ListViewItem)m_tableItem[strPath];
+            if (item == null)
+            {
+                item = new ListViewItem(strPath, 0);
 
                 /*
 				strNumber = Convert.ToString(nCurWeight);
@@ -1257,15 +1259,15 @@ namespace DigitalPlatform.Library
 				item.SubItems.Add(strReason);
                  * */
 
-				this.listView_browse.Items.Add(item);
-				m_tableItem[strPath] = item;
+                this.listView_browse.Items.Add(item);
+                m_tableItem[strPath] = item;
 
                 info = new ItemInfo();
                 item.Tag = info;
                 info.Hits.Add(hit);
-			}
-			else 
-			{
+            }
+            else
+            {
                 /*
 				// 把已经存在的weight值加上本次新值
 				if (nCurWeight != 0)
@@ -1313,7 +1315,7 @@ namespace DigitalPlatform.Library
                 Debug.Assert(info != null, "");
 
                 info.Hits.Add(hit);
-			}
+            }
 
             int nHitIndex = GetHitIndex(info.Hits, hit.From);
 
@@ -1328,8 +1330,8 @@ namespace DigitalPlatform.Library
                 nHitIndex);
 
 
-			return 0;
-		}
+            return 0;
+        }
 
         // 获得特定from下，最后一次命中的index
         // return:
@@ -1467,200 +1469,200 @@ namespace DigitalPlatform.Library
 		}
          * */
 
-		private void button_stop_Click(object sender, System.EventArgs e)
-		{
-			if (this.SearchPanel != null)
-				this.SearchPanel.DoStopClick();
-		
-		}
+        private void button_stop_Click(object sender, System.EventArgs e)
+        {
+            if (this.SearchPanel != null)
+                this.SearchPanel.DoStopClick();
 
-		// 获得<project>配置元素
-		XmlNode GetProjectNode(string strProjectName,
-			out string strError)
-		{
-			strError = "";
+        }
 
-			if (this.domDupCfg == null)
-			{
-				strError = "请先调用GetDupCfgFile()获取配置文件";
-				return null;	
-			}
+        // 获得<project>配置元素
+        XmlNode GetProjectNode(string strProjectName,
+            out string strError)
+        {
+            strError = "";
 
-			XmlNode node = this.domDupCfg.DocumentElement.SelectSingleNode("//project[@name='"+strProjectName+"']");
-			if (node == null)
-				strError = "查重方案 '" +strProjectName + "' 不存在";
-			return node;
-		}
+            if (this.domDupCfg == null)
+            {
+                strError = "请先调用GetDupCfgFile()获取配置文件";
+                return null;
+            }
 
-		private void textBox_serverUrl_TextChanged(object sender, System.EventArgs e)
-		{
-			if (this.SearchPanel != null)
-				this.SearchPanel.ServerUrl = this.textBox_serverUrl.Text;
+            XmlNode node = this.domDupCfg.DocumentElement.SelectSingleNode("//project[@name='" + strProjectName + "']");
+            if (node == null)
+                strError = "查重方案 '" + strProjectName + "' 不存在";
+            return node;
+        }
 
-		}
+        private void textBox_serverUrl_TextChanged(object sender, System.EventArgs e)
+        {
+            if (this.SearchPanel != null)
+                this.SearchPanel.ServerUrl = this.textBox_serverUrl.Text;
 
-		private void listView_browse_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			ListViewItem selection = this.listView_browse.GetItemAt(e.X, e.Y);
+        }
 
-			if (selection != null)
-			{
-				string strText = "";
-				int nRet = 	ListViewUtil.ColumnHitTest(this.listView_browse,
-					e.X);
-				if (nRet == 0)
-					strText = selection.SubItems[0].Text;
-				else if (nRet == 1 || nRet == 2)
-					strText = selection.SubItems[0].Text + "\r\n------\r\n" + 
-					selection.SubItems[2].Text.Replace(";",";\r\n");
+        private void listView_browse_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            ListViewItem selection = this.listView_browse.GetItemAt(e.X, e.Y);
 
-				this.toolTip_searchComment.SetToolTip(this.listView_browse,
-					strText);
-			}
-			else
-				this.toolTip_searchComment.SetToolTip(this.listView_browse, null);
+            if (selection != null)
+            {
+                string strText = "";
+                int nRet = ListViewUtil.ColumnHitTest(this.listView_browse,
+                    e.X);
+                if (nRet == 0)
+                    strText = selection.SubItems[0].Text;
+                else if (nRet == 1 || nRet == 2)
+                    strText = selection.SubItems[0].Text + "\r\n------\r\n" +
+                    selection.SubItems[2].Text.Replace(";", ";\r\n");
 
-		}
+                this.toolTip_searchComment.SetToolTip(this.listView_browse,
+                    strText);
+            }
+            else
+                this.toolTip_searchComment.SetToolTip(this.listView_browse, null);
 
-		int GetBrowseColumns(out string strError)
-		{
-			strError = "";
+        }
 
-			if (this.LoadBrowse == LoadBrowse.None)
-				return 0;
+        int GetBrowseColumns(out string strError)
+        {
+            strError = "";
 
-
-			ArrayList aFullPath = new ArrayList();
-			int i=0;
-			for(i=0;i<this.listView_browse.Items.Count;i++)
-			{
-				string strFullPath = this.listView_browse.Items[i].Text;
-
-				string strNumber = this.listView_browse.Items[i].SubItems[1].Text;
-
-				if (strNumber.Length > 0 && strNumber[0] == '*')
-				{
-				}
-				else 
-				{
-					if (this.LoadBrowse == LoadBrowse.Dup)
-						continue;
-				}
-
-				aFullPath.Add(ResPath.GetRegularRecordPath(strFullPath));
-			}
-
-			string [] fullpaths = new string [aFullPath.Count];
-			for(i=0;i<fullpaths.Length;i++)
-			{
-				fullpaths[i] = (string)aFullPath[i];
-			}
+            if (this.LoadBrowse == LoadBrowse.None)
+                return 0;
 
 
-			this.SearchPanel.BrowseRecord -= new BrowseRecordEventHandler(BrowseRecordColsCallBack);
-			this.SearchPanel.BrowseRecord += new BrowseRecordEventHandler(BrowseRecordColsCallBack);
+            ArrayList aFullPath = new ArrayList();
+            int i = 0;
+            for (i = 0; i < this.listView_browse.Items.Count; i++)
+            {
+                string strFullPath = this.listView_browse.Items[i].Text;
+
+                string strNumber = this.listView_browse.Items[i].SubItems[1].Text;
+
+                if (strNumber.Length > 0 && strNumber[0] == '*')
+                {
+                }
+                else
+                {
+                    if (this.LoadBrowse == LoadBrowse.Dup)
+                        continue;
+                }
+
+                aFullPath.Add(ResPath.GetRegularRecordPath(strFullPath));
+            }
+
+            string[] fullpaths = new string[aFullPath.Count];
+            for (i = 0; i < fullpaths.Length; i++)
+            {
+                fullpaths[i] = (string)aFullPath[i];
+            }
 
 
-			try 
-			{
-				// 获取浏览记录
-				// return:
-				//		-1	error
-				//		0	not found
-				//		1	found
-				int nRet = this.SearchPanel.GetBrowseRecord(fullpaths,
-					false,
-					"cols",
-					out strError);
-				if (nRet == -1)
-					return -1;
-			}
-			finally 
-			{
-				this.SearchPanel.BrowseRecord -= new BrowseRecordEventHandler(BrowseRecordColsCallBack);
-			}
-
-			return 0;
-		}
+            this.SearchPanel.BrowseRecord -= new BrowseRecordEventHandler(BrowseRecordColsCallBack);
+            this.SearchPanel.BrowseRecord += new BrowseRecordEventHandler(BrowseRecordColsCallBack);
 
 
-		void BrowseRecordColsCallBack(object sender, BrowseRecordEventArgs e)
-		{
-			ListViewUtil.EnsureColumns(this.listView_browse,
-				3 + e.Cols.Length,
-				200);
+            try
+            {
+                // 获取浏览记录
+                // return:
+                //		-1	error
+                //		0	not found
+                //		1	found
+                int nRet = this.SearchPanel.GetBrowseRecord(fullpaths,
+                    false,
+                    "cols",
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            finally
+            {
+                this.SearchPanel.BrowseRecord -= new BrowseRecordEventHandler(BrowseRecordColsCallBack);
+            }
 
-			ListViewItem item = (ListViewItem)this.m_tableItem[ResPath.GetReverseRecordPath(e.FullPath)];
-			if (item == null)
-			{
-				e.Cancel = true;
-				e.ErrorInfo = "路径为 '" + e.FullPath + "' 的事项在listview中不存在...";
-				return;
-			}
+            return 0;
+        }
 
 
-			for(int j=0;j<e.Cols.Length;j++)
-			{
-				ListViewUtil.ChangeItemText(item,
-					j+3,
-					e.Cols[j]);
-			}
-		}
+        void BrowseRecordColsCallBack(object sender, BrowseRecordEventArgs e)
+        {
+            ListViewUtil.EnsureColumns(this.listView_browse,
+                3 + e.Cols.Length,
+                200);
 
-		private void listView_browse_DoubleClick(object sender, System.EventArgs e)
-		{
-			if (this.OpenDetail == null)
-				return;
+            ListViewItem item = (ListViewItem)this.m_tableItem[ResPath.GetReverseRecordPath(e.FullPath)];
+            if (item == null)
+            {
+                e.Cancel = true;
+                e.ErrorInfo = "路径为 '" + e.FullPath + "' 的事项在listview中不存在...";
+                return;
+            }
 
-			string[] paths = BrowseList.GetSelectedRecordPaths(this.listView_browse, true);
 
-			if (paths.Length == 0)
-				return;
-			/*
-			string [] paths = new string [this.listView_browse.SelectedItems.Count];
-			for(int i=0;i<this.listView_browse.SelectedItems.Count;i++)
-			{
-				string strPath = this.listView_browse.SelectedItems[i].Text;
+            for (int j = 0; j < e.Cols.Length; j++)
+            {
+                ListViewUtil.ChangeItemText(item,
+                    j + 3,
+                    e.Cols[j]);
+            }
+        }
 
-				// paths[i] = this.textBox_serverUrl.Text + "?" + strPath;
-				paths[i] = ResPath.GetRegularRecordPath(strPath);
+        private void listView_browse_DoubleClick(object sender, System.EventArgs e)
+        {
+            if (this.OpenDetail == null)
+                return;
 
-			}
-			*/
+            string[] paths = BrowseList.GetSelectedRecordPaths(this.listView_browse, true);
 
-			OpenDetailEventArgs args = new OpenDetailEventArgs();
-			args.Paths = paths;
-			args.OpenNew = true;
+            if (paths.Length == 0)
+                return;
+            /*
+            string [] paths = new string [this.listView_browse.SelectedItems.Count];
+            for(int i=0;i<this.listView_browse.SelectedItems.Count;i++)
+            {
+                string strPath = this.listView_browse.SelectedItems[i].Text;
 
-			this.listView_browse.Enabled = false;
-			this.OpenDetail(this, args);		
-			this.listView_browse.Enabled = true;
-		}
+                // paths[i] = this.textBox_serverUrl.Text + "?" + strPath;
+                paths[i] = ResPath.GetRegularRecordPath(strPath);
 
-		private void button_findServerUrl_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+            }
+            */
 
-			dlg.Text = "请选择主服务器";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
-			dlg.ap = this.SearchPanel.ap;
-			dlg.ApCfgTitle = "findServerUrl_openresdlg";
-			dlg.MultiSelect = false;
-			dlg.Path = this.textBox_serverUrl.Text;
-			dlg.Initial( this.SearchPanel.Servers,
-				this.SearchPanel.Channels);	
-			dlg.ShowDialog(this);
+            OpenDetailEventArgs args = new OpenDetailEventArgs();
+            args.Paths = paths;
+            args.OpenNew = true;
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            this.listView_browse.Enabled = false;
+            this.OpenDetail(this, args);
+            this.listView_browse.Enabled = true;
+        }
 
-			textBox_serverUrl.Text = dlg.Path;		
-		}
+        private void button_findServerUrl_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
 
-		private void button_findProjectName_Click(object sender, System.EventArgs e)
-		{
+            dlg.Text = "请选择主服务器";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
+            dlg.ap = this.SearchPanel.ap;
+            dlg.ApCfgTitle = "findServerUrl_openresdlg";
+            dlg.MultiSelect = false;
+            dlg.Path = this.textBox_serverUrl.Text;
+            dlg.Initial(this.SearchPanel.Servers,
+                this.SearchPanel.Channels);
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            textBox_serverUrl.Text = dlg.Path;
+        }
+
+        private void button_findProjectName_Click(object sender, System.EventArgs e)
+        {
             FindProjectName();
-		}
+        }
 
         /// <summary>
         /// 打开"获得查重方案名"对话框,获得查重方案名和主服务器URL
@@ -1668,32 +1670,32 @@ namespace DigitalPlatform.Library
         /// <returns>DialogResult.OK对话框由OK按钮关闭;DialogResult.Cancel对话框由Cancel按钮关闭</returns>
         public DialogResult FindProjectName()
         {
-			GetDupProjectNameDlg dlg = new GetDupProjectNameDlg();
+            GetDupProjectNameDlg dlg = new GetDupProjectNameDlg();
 
             dlg.ServerUrl = this.ServerUrl;
             dlg.SearchPanel = this.SearchPanel;
-			dlg.DomDupCfg = this.domDupCfg;
-			dlg.ProjectName = this.textBox_projectName.Text;
-			dlg.ShowDialog(this);
+            dlg.DomDupCfg = this.domDupCfg;
+            dlg.ProjectName = this.textBox_projectName.Text;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
+            if (dlg.DialogResult != DialogResult.OK)
                 return dlg.DialogResult;
 
             this.ServerUrl = dlg.ServerUrl;
-			this.textBox_projectName.Text = dlg.ProjectName;
+            this.textBox_projectName.Text = dlg.ProjectName;
             return dlg.DialogResult;
         }
 
 
-		// Implements the manual sorting of items by columns.
-		class ListViewItemComparer : IComparer
-		{
-			public ListViewItemComparer()
-			{
-			}
+        // Implements the manual sorting of items by columns.
+        class ListViewItemComparer : IComparer
+        {
+            public ListViewItemComparer()
+            {
+            }
 
-			public int Compare(object x, object y)
-			{
+            public int Compare(object x, object y)
+            {
                 /*
 				string strNumber1 = ((ListViewItem)x).SubItems[1].Text;
 				string strNumber2 = ((ListViewItem)y).SubItems[1].Text;
@@ -1705,68 +1707,68 @@ namespace DigitalPlatform.Library
                 string strNumber2 = ListViewUtil.GetItemText(((ListViewItem)y), 1);
 
 
-				// 规整一下
-				if (strNumber1.Length > 0)
-				{
-					if (strNumber1[0] == '*')
-					{
-						strNumber1 = strNumber1.Remove(0, 1);
-					}
-				}
+                // 规整一下
+                if (strNumber1.Length > 0)
+                {
+                    if (strNumber1[0] == '*')
+                    {
+                        strNumber1 = strNumber1.Remove(0, 1);
+                    }
+                }
 
-				if (strNumber2.Length > 0)
-				{
-					if (strNumber2[0] == '*')
-					{
-						strNumber2 = strNumber2.Remove(0, 1);
-					}
-				}
+                if (strNumber2.Length > 0)
+                {
+                    if (strNumber2[0] == '*')
+                    {
+                        strNumber2 = strNumber2.Remove(0, 1);
+                    }
+                }
 
-				int nNumber1 = 0;
-				int nNumber2 = 0;
+                int nNumber1 = 0;
+                int nNumber2 = 0;
 
-				try 
-				{
-					nNumber1 = Convert.ToInt32(strNumber1);
-				}
-				catch
-				{
-				}
+                try
+                {
+                    nNumber1 = Convert.ToInt32(strNumber1);
+                }
+                catch
+                {
+                }
 
-				try 
-				{
-					nNumber2 = Convert.ToInt32(strNumber2);
-				}
-				catch
-				{
-				}
+                try
+                {
+                    nNumber2 = Convert.ToInt32(strNumber2);
+                }
+                catch
+                {
+                }
 
-				return -1*(nNumber1 - nNumber2);
-			}
-		}
+                return -1 * (nNumber1 - nNumber2);
+            }
+        }
 
-	}
+    }
 
     /// <summary>
     /// 浏览框中哪些行需要装载浏览信息列
     /// </summary>
-	public enum LoadBrowse
-	{
+    public enum LoadBrowse
+    {
         /// <summary>
         /// 全部
         /// </summary>
-		All = 0,
+        All = 0,
 
         /// <summary>
         /// 超过阈值的行
         /// </summary>
-		Dup = 1,
+        Dup = 1,
 
         /// <summary>
         /// 全部都不
         /// </summary>
-		None = 2,
-	}
+        None = 2,
+    }
 
     // 一次命中的信息
     class OneHit

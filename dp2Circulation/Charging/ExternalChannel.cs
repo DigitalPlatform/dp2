@@ -6,6 +6,7 @@ using System.Text;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using System.Windows.Forms;
 
 namespace dp2Circulation
 {
@@ -52,7 +53,11 @@ namespace dp2Circulation
 
         void Channel_Idle(object sender, IdleEventArgs e)
         {
-            e.bDoEvents = this._doEvents;
+            // e.bDoEvents = this._doEvents;
+
+            // 2016/1/26
+            if (this._doEvents)
+                Application.DoEvents();
         }
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)

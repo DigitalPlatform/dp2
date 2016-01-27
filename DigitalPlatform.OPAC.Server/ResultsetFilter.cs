@@ -15,7 +15,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
-using DigitalPlatform.rms;  // rmsutil
+// using DigitalPlatform.rms;  // rmsutil
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
@@ -352,6 +352,7 @@ namespace DigitalPlatform.OPAC.Server
 
             string[] names = new string[result_table.Keys.Count];
             result_table.Keys.CopyTo(names, 0);
+
             Array.Sort(names);
 
             foreach (string strName in names)
@@ -681,8 +682,11 @@ namespace DigitalPlatform.OPAC.Server
                         }
                     }
 
+#if NO
                     info.Children = new FilterInfo[sub_results.Count];
                     sub_results.CopyTo(info.Children);
+#endif
+                    info.Children = sub_results.ToArray();
                 }
             }
 
@@ -695,9 +699,12 @@ namespace DigitalPlatform.OPAC.Server
                 info.Name = RemoveHead(strName);
             }
 
+#if NO
             FilterInfo[] a = new FilterInfo[results.Count];
             results.CopyTo(a);
             return a;
+#endif
+            return results.ToArray();
         }
 
         static string RemoveHead(string strName)

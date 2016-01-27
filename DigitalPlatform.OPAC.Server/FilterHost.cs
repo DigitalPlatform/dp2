@@ -13,6 +13,12 @@ namespace DigitalPlatform.OPAC.Server
         public string RecPath = "";
         public string ResultString = "";
         public KeyValueCollection ResultParams = null;   // 2012/11/30
+
+        public void Clear()
+        {
+            if (this.ResultParams != null)
+                this.ResultParams.Clear();
+        }
     }
 
     public class LoanFilterDocument : FilterDocument
@@ -37,7 +43,9 @@ namespace DigitalPlatform.OPAC.Server
             return item;
         }
 
-        public KeyValue Insert(int index, string strKey, string strValue)
+        public KeyValue Insert(int index, 
+            string strKey, 
+            string strValue)
         {
             KeyValue item = new KeyValue();
             item.Key = strKey;
@@ -67,7 +75,7 @@ namespace DigitalPlatform.OPAC.Server
             return found_item;
         }
 
-        // 删除全部key匹配的项
+        // 删除全部 key 匹配的项
         // 返回已经删除的项
         public KeyValueCollection RemoveAll(string strKey)
         {
@@ -82,10 +90,17 @@ namespace DigitalPlatform.OPAC.Server
 
             if (items.Count > 0)
             {
+#if NO
                 for (int i = 0; i < items.Count; i++)
                 {
                     this.Remove(items[i]);
                     i--;
+                }
+#endif
+                // 2016/1/25
+                foreach(KeyValue item in items)
+                {
+                    this.Remove(item);
                 }
             }
 
@@ -147,6 +162,5 @@ namespace DigitalPlatform.OPAC.Server
 
             return String.Compare(x.Value, y.Value);
         }
-
     }
 }

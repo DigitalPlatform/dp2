@@ -75,11 +75,11 @@ namespace DigitalPlatform.AmazonInterface
                 if (disposing)
                 {
                     // Dispose managed resources.
+                    this.eventComplete.Dispose();
                 }
 
                 // 删除临时文件
                 DeleteTempFile();
-
             }
             disposed = true;
         }

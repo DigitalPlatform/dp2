@@ -5,12 +5,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
-using System.IO;
 using DigitalPlatform.IO;
 
 namespace dp2Circulation
@@ -18,7 +18,7 @@ namespace dp2Circulation
     /// <summary>
     /// 提供自动创建数据功能的类
     /// </summary>
-    public class GenerateData
+    public class GenerateData : IDisposable
     {
         public Type DetailHostType = null;
  
@@ -42,6 +42,12 @@ namespace dp2Circulation
             this._myForm = myform;
             this.MainForm = myform.MainForm;
             this.DetailWindow = detailWindow;
+        }
+
+        public void Dispose()
+        {
+            if (m_detailHostObj != null)
+                m_detailHostObj.Dispose();
         }
 
         public void Close()

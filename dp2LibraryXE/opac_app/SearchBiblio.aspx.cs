@@ -19,7 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 
@@ -222,10 +222,13 @@ ref sessioninfo) == false)
 
             string strResultSetName = GetResultSetName(strResultSetNamePrefix);
 
-            sessioninfo.Channel.Idle += new IdleEventHandler(channel_Idle);
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            //sessioninfo.Channel.
+            channel.Idle += new IdleEventHandler(channel_Idle);
             try
             {
-                long lRet = sessioninfo.Channel.Search(
+                long lRet = // sessioninfo.Channel.
+                    channel.Search(
                     null,
                     strXml,
                     strResultSetName,
@@ -286,7 +289,9 @@ ref sessioninfo) == false)
             }
             finally
             {
-                sessioninfo.Channel.Idle -= new IdleEventHandler(channel_Idle);
+                // sessioninfo.Channel.
+                channel.Idle -= new IdleEventHandler(channel_Idle);
+                sessioninfo.ReturnChannel(channel);
             }
         }
 
@@ -493,7 +498,7 @@ ref sessioninfo) == false)
             channel.Abort();
         }
 
-        e.bDoEvents = false;
+        // e.bDoEvents = false;
     }
 
     // 通过前缀字符串和Session中存储的号码，构造一个新的结果集名
@@ -528,10 +533,13 @@ ref sessioninfo) == false)
 
         string strResultSetName = GetResultSetName(strResultSetNamePrefix);
 
-        sessioninfo.Channel.Idle += new IdleEventHandler(channel_Idle);
+        LibraryChannel channel = sessioninfo.GetChannel(true);
+        // sessioninfo.Channel.
+        channel.Idle += new IdleEventHandler(channel_Idle);
         try
         {
-            long lRet = sessioninfo.Channel.Search(
+            long lRet = // sessioninfo.Channel.
+                channel.Search(
                 null,
                 e.QueryXml,
                 strResultSetName,
@@ -586,8 +594,9 @@ ref sessioninfo) == false)
         }
         finally
         {
-            sessioninfo.Channel.Idle -= new IdleEventHandler(channel_Idle);
-
+            //sessioninfo.Channel.
+            channel.Idle -= new IdleEventHandler(channel_Idle);
+            sessioninfo.ReturnChannel(channel);
         }
         return;
     ERROR1:

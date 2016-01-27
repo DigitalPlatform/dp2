@@ -8,6 +8,8 @@ using System.Threading;
 using System.Xml;
 using System.Globalization;
 using System.IO;
+using System.Drawing.Imaging;
+using System.Drawing;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -15,9 +17,7 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient;
-using System.Drawing.Imaging;
-using System.Drawing;
+// using DigitalPlatform.CirculationClient;
 
 public partial class GetPhoto : MyWebPage
 {
@@ -108,7 +108,7 @@ ref sessioninfo) == false)
                 string strCode = "";
                 // 获得读者证号二维码字符串
                 nRet = app.GetPatronTempId(
-                    sessioninfo,
+                    // sessioninfo,
                     strBarcode,
                     out strCode,
                     out strError);

@@ -830,7 +830,6 @@ strCertSN);
     EventLogEntryType.Information);
 
             this.m_thread.Start();
-
         }
 
         void m_host_Closing(object sender, EventArgs e)

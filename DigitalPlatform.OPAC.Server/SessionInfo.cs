@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define USE_SESSION_CHANNEL
+
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.IO;
@@ -19,12 +21,13 @@ namespace DigitalPlatform.OPAC.Server
     public class SessionInfo
     {
         public OpacApplication App = null;
+#if USE_SESSION_CHANNEL
         public LibraryChannel Channel = new LibraryChannel();
+#endif
 
         private string m_strTempDir = "";	// 临时文件目录 2008/3/31
 
         public PostedFileInfo PostedFileInfo = null;
-
 
         //public string UserName = "";
         //public string Rights = "";
@@ -74,6 +77,7 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+#if USE_SESSION_CHANNEL
         public string RightsOrigin
         {
             get
@@ -83,6 +87,16 @@ namespace DigitalPlatform.OPAC.Server
                 return this.Channel.Rights;
             }
         }
+#else
+        string _rights = "";    // 登录成功后这里记忆权限值
+        public string RightsOrigin
+        {
+            get
+            {
+                return _rights;
+            }
+        }
+#endif
 
         bool m_bIsReader = true;
 
@@ -113,6 +127,8 @@ namespace DigitalPlatform.OPAC.Server
                 string strOldValue = this.m_strChannelLang;
                 this.m_strChannelLang = value;
 
+                // TODO: 如何设置 channel 的语言 ?
+#if USE_SESSION_CHANNEL
                 if (strOldValue != value
                     && (string.IsNullOrEmpty(strOldValue) == false || string.IsNullOrEmpty(value) == false))    // 两个值至少一个非空
                 {
@@ -123,6 +139,7 @@ namespace DigitalPlatform.OPAC.Server
                         out strOldLang,
                         out strError);
                 }
+#endif
             }
         }
 
@@ -158,8 +175,10 @@ namespace DigitalPlatform.OPAC.Server
 
         public ReaderInfo ReaderInfo = null;
 
+#if NO
         public event ItemLoadEventHandler ItemLoad = null;
         public event SetStartEventHandler SetStart = null;
+#endif
 
         public string ClientIP = "";    // 前端的 IP 地址
 
@@ -167,6 +186,7 @@ namespace DigitalPlatform.OPAC.Server
         {
             Debug.Assert(app != null, "");
             this.App = app;
+#if USE_SESSION_CHANNEL
             this.Channel.Url = app.WsUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -174,10 +194,11 @@ namespace DigitalPlatform.OPAC.Server
 
             this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
-
+#endif
             this.m_strTempDir = PathUtil.MergePath(app.SessionDir, this.GetHashCode().ToString());
         }
 
+#if USE_SESSION_CHANNEL
         // 2015/1/22
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
@@ -227,16 +248,21 @@ namespace DigitalPlatform.OPAC.Server
 
             e.LibraryServerUrl = App.WsUrl;
         }
+#endif
 
         // 获得一个通道
         // 分为两种方式，一种是使用自己携带的通道，一种是从通道池中分配
         public LibraryChannel GetChannel(bool bPool, string strParam = "")
         {
+#if USE_SESSION_CHANNEL
             if (bPool == false)
                 return this.Channel;
+#endif
 
             LibraryChannel channel = this.App.ChannelPool.GetChannel(this.App.WsUrl, this.UserID);
             channel.Password = this.Password;
+            if (channel.UserName != this.UserID)    // 有可能会从 pool 中拿到 UserName 为空的 channel 2016/1/25
+                channel.UserName = this.UserID;
 
             // 2015/6/11
             if (string.IsNullOrEmpty(strParam) == true)
@@ -274,11 +300,13 @@ namespace DigitalPlatform.OPAC.Server
         {
             try
             {
+#if USE_SESSION_CHANNEL
                 if (this.Channel != null)
                 {
                     this.Channel.Close();
                     this.Channel = null;
                 }
+#endif
             }
             catch
             {
@@ -310,6 +338,7 @@ namespace DigitalPlatform.OPAC.Server
         //      0   成功
         public int ReLogin(out string strError)
         {
+#if USE_SESSION_CHANNEL
             // 尽量用已有的设施实现功能
             BeforeLoginEventArgs e = new BeforeLoginEventArgs();
             e.FirstTry = true;
@@ -327,6 +356,22 @@ namespace DigitalPlatform.OPAC.Server
             if (lRet == -1 || lRet == 0)
                 return -1;
             return 0;
+#else
+            LibraryChannel channel = this.GetChannel(true); //  this.GetChannel(true, this.m_strParameters);
+            // return:
+            //      -1  error
+            //      0   登录未成功
+            //      1   登录成功
+            //      >1  有多个账户符合条件。
+            long lRet = channel.Login(channel.UserName,
+                channel.Password,
+                this.m_strParameters,
+                out strError);
+            if (lRet == -1 || lRet == 0)
+                return -1;
+            _rights = channel.Rights;
+            return 0;
+#endif
         }
 
         // return:
@@ -371,46 +416,112 @@ namespace DigitalPlatform.OPAC.Server
                 strParameters = StringUtil.BuildParameterString(parameters);
             }
 
-            // return:
-            //      -1  error
-            //      0   登录未成功
-            //      1   登录成功
-            //      >1  有多个账户符合条件。
-            long lRet = this.Channel.Login(strUserName,
-                strPassword,
-                strParameters,
-                out strError);
-            if (lRet == 1)
+#if USE_SESSION_CHANNEL
+                            // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                //      >1  有多个账户符合条件。
+                long lRet = this.Channel.Login(strUserName,
+                    strPassword,
+                    strParameters,
+                    out strError);
+                if (lRet == 1)
+                {
+                    if (string.IsNullOrEmpty(this.Channel.UserName) == true)
+                        throw new Exception("SessionInfo.Login() this.Channel.UserName 为空 (此时 SessionInfo.m_strUserName 为 '" + this.m_strUserName + "')");
+
+                    this.m_strUserName = this.Channel.UserName; // 2011/7/29
+                    this.m_strPassword = strPassword;
+
+                    Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+                    // string strLocation = (string)parameters["location"];
+
+                    bool bReader = false;
+                    string strType = (string)parameters["type"];
+                    if (strType == null)
+                        strType = "";
+                    if (strType.ToLower() == "reader")
+                        bReader = true;
+
+                    // 2014/12/23
+                    string strSimulate = (string)parameters["simulate"];
+                    if (strSimulate == null)
+                        strSimulate = "";
+                    if (strSimulate == "yes")
+                        this.m_strParameters = strParameters;
+                    else
+                        this.m_strParameters = "";
+
+                    this.m_bIsReader = bReader;
+                }
+
+                return lRet;
+#else
+            this.m_strUserName = strUserName;   // 为了从 channelpool 中得到先前用过的此用户名的通道
+            LibraryChannel channel = this.GetChannel(true);
+            try
             {
-                if (string.IsNullOrEmpty(this.Channel.UserName) == true)
-                    throw new Exception("SessionInfo.Login() this.Channel.UserName 为空 (此时 SessionInfo.m_strUserName 为 '" + this.m_strUserName + "')");
+                // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                //      >1  有多个账户符合条件。
+                long lRet = //this.Channel.
+                    channel.Login(strUserName,
+                    strPassword,
+                    strParameters,
+                    out strError);
+                if (lRet == 1)
+                {
+                    if (string.IsNullOrEmpty(//this.Channel.
+                        channel.UserName) == true)
+                        throw new Exception("SessionInfo.Login() this.Channel.UserName 为空 (此时 SessionInfo.m_strUserName 为 '" + this.m_strUserName + "')");
 
-                this.m_strUserName = this.Channel.UserName; // 2011/7/29
-                this.m_strPassword = strPassword;
+                    this.m_strUserName = //this.Channel.
+                        channel.UserName; // 2011/7/29
+                    this.m_strPassword = strPassword;
 
-                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
-                // string strLocation = (string)parameters["location"];
+                    this._libraryCodeList = channel.LibraryCodeList;
+                    this._rights = channel.Rights;
 
-                bool bReader = false;
-                string strType = (string)parameters["type"];
-                if (strType == null)
-                    strType = "";
-                if (strType.ToLower() == "reader")
-                    bReader = true;
+                    Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+                    // string strLocation = (string)parameters["location"];
 
-                // 2014/12/23
-                string strSimulate = (string)parameters["simulate"];
-                if (strSimulate == null)
-                    strSimulate = "";
-                if (strSimulate == "yes")
-                    this.m_strParameters = strParameters;
+                    bool bReader = false;
+                    string strType = (string)parameters["type"];
+                    if (strType == null)
+                        strType = "";
+                    if (strType.ToLower() == "reader")
+                        bReader = true;
+
+                    // 2014/12/23
+                    string strSimulate = (string)parameters["simulate"];
+                    if (strSimulate == null)
+                        strSimulate = "";
+                    if (strSimulate == "yes")
+                        this.m_strParameters = strParameters;
+                    else
+                        this.m_strParameters = "";
+
+                    this.m_bIsReader = bReader;
+                }
                 else
+                {
+                    // 2016/1/26
+                    this.m_strUserName = "";
+                    this.m_strPassword = "";
                     this.m_strParameters = "";
-
-                this.m_bIsReader = bReader;
+                    this._libraryCodeList = "";
+                    this._rights = "";
+                }
+                return lRet;
             }
-
-            return lRet;
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+#endif
         }
 
         /// <summary>
@@ -425,6 +536,7 @@ namespace DigitalPlatform.OPAC.Server
             return false;
         }
 
+#if USE_SESSION_CHANNEL
         public bool GlobalUser
         {
             get
@@ -436,6 +548,27 @@ namespace DigitalPlatform.OPAC.Server
                 return IsGlobalUser(this.Channel.LibraryCodeList);
             }
         }
+#else
+        string _libraryCodeList = "";   // TODO: 登录成功后存储馆代码列表值
+
+        public string LibraryCodeList
+        {
+            get
+            {
+                return _libraryCodeList;
+            }
+        }
+
+        public bool GlobalUser
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.UserID) == true)
+                    return false;
+                return IsGlobalUser(this._libraryCodeList);
+            }
+        }
+#endif
 
         // readerdom发生变化后，刷新相关域
         public static void RefreshReaderAccount(ref ReaderInfo readerinfo,
@@ -512,10 +645,11 @@ namespace DigitalPlatform.OPAC.Server
             ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
 
             // 注：保存读者记录本来是为上传透着个性头像，修改 preference 等用途提供的。如果用代理帐户做这个操作，就要求代理帐户具有修改读者记录的权限，同时修改哪些字段就得不到限制了。可以考虑在 dp2library，增加一种功能，在代理帐户修改读者记录的时候，模仿读者权限来进行限制？
-            //TempChannel temp = GetTempChannel(this.Password);
+            LibraryChannel channel = this.GetChannel(true); // this.GetChannel(true, this.m_strParameters);
             try
             {
-                lRet = this.Channel.SetReaderInfo(
+                lRet = // this.Channel.
+                    channel.SetReaderInfo(
                     null,
                     "change",
                     this.ReaderInfo.ReaderDomPath,
@@ -530,7 +664,8 @@ namespace DigitalPlatform.OPAC.Server
                     out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.ErrorCode == ErrorCode.TimestampMismatch
+                    if (// this.Channel.
+                        channel.ErrorCode == ErrorCode.TimestampMismatch
                         || kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                         return -2;
                     return -1;
@@ -539,6 +674,7 @@ namespace DigitalPlatform.OPAC.Server
             finally
             {
                 //ReleaseTempChannel(temp);
+                this.ReturnChannel(channel);
             }
 
             int nRet = OpacApplication.LoadToDom(strOutputXml,
@@ -554,12 +690,7 @@ namespace DigitalPlatform.OPAC.Server
 
             this.ReaderInfo.ReaderDomChanged = false;
             this.ReaderInfo.ReaderDomTimestamp = output_timestamp;
-
             return 1;
-            /*
-        ERROR1:
-            return -1;
-             * */
         }
 
         // 管理员获得特定证条码号的读者记录DOM
@@ -611,10 +742,11 @@ namespace DigitalPlatform.OPAC.Server
 
                 string strResultTypeList = "advancexml";
                 string[] results = null;
-                //TempChannel temp = GetTempChannel(this.Password);
+                LibraryChannel channel = this.GetChannel(true); // this.GetChannel(true, this.m_strParameters);
                 try
                 {
-                    long lRet = this.Channel.GetReaderInfo(null,
+                    long lRet = // this.Channel.
+                        channel.GetReaderInfo(null,
                     strReaderBarcode,
                     strResultTypeList,
                     out results,
@@ -633,6 +765,7 @@ namespace DigitalPlatform.OPAC.Server
                 finally
                 {
                     //ReleaseTempChannel(temp);
+                    this.ReturnChannel(channel);
                 }
 
                 if (results.Length != 1)
@@ -642,26 +775,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
 
                 strXml = results[0];
-                // timestamp = ByteArray.GetTimeStampByteArray(results[1]);
-
-                /*
-                // 获得读者记录
-                int nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
-                    strBarcode,
-                    out strXml,
-                    out strOutputPath,
-                    out timestamp,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                if (nRet == 0)
-                    goto ERROR1;
-                 * */
-
                 readerdom = new XmlDocument();
-
                 try
                 {
                     readerdom.LoadXml(strXml);
@@ -757,10 +871,11 @@ namespace DigitalPlatform.OPAC.Server
                 string strResultTypeList = "advancexml";
                 string[] results = null;
 
-                //TempChannel temp = GetTempChannel(this.Password);
+                LibraryChannel channel = this.GetChannel(true); //  this.GetChannel(true, this.m_strParameters);
                 try
                 {
-                    long lRet = this.Channel.GetReaderInfo(null,
+                    long lRet = //this.Channel.
+                        channel.GetReaderInfo(null,
                         strBarcode,
                         strResultTypeList,
                         out results,
@@ -779,6 +894,7 @@ namespace DigitalPlatform.OPAC.Server
                 finally
                 {
                     //ReleaseTempChannel(temp);
+                    this.ReturnChannel(channel);
                 }
 
                 if (results.Length != 1)
@@ -787,26 +903,7 @@ namespace DigitalPlatform.OPAC.Server
                     goto ERROR1;
                 }
                 strXml = results[0];
-                // timestamp = ByteArray.GetTimeStampByteArray(results[1]);
-
-                /*
-                // 获得读者记录
-                int nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
-                    strBarcode,
-                    out strXml,
-                    out strOutputPath,
-                    out timestamp,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                if (nRet == 0)
-                    goto ERROR1;
-                 * */
-
                 readerdom = new XmlDocument();
-
                 try
                 {
                     readerdom.LoadXml(strXml);
@@ -838,10 +935,8 @@ namespace DigitalPlatform.OPAC.Server
         public void Clear()
         {
             this.ClearLoginReaderDomCache();
-
             this.ClearTempFiles();
         }
-
 
         // 清除当前已经登录的读者类型用户的读者记录DOM cache
         public void ClearLoginReaderDomCache()
@@ -873,160 +968,8 @@ namespace DigitalPlatform.OPAC.Server
             this.ReaderInfo.ReaderDom = null;
         }
 
-        // 检索出册数据
-        // 带有偏移量的版本
-        // 2009/6/9 
-        // return:
-        //      -2  实体库没有定义
-        //      -1  出错
-        //      其他  命中的全部结果数量。
-        //
-        public int OpacSearchItems(
-            OpacApplication app,
-            string strBiblioRecPath,
-            int nStart,
-            int nMaxCount,
-            string strLang,
-            string strLibraryCode,
-            out string strError)
-        {
-            strError = "";
-            // string strXml = "";
-
-            string strStyle = "opac";
-            if (string.IsNullOrEmpty(strLibraryCode) == true)
-                strStyle += ",getotherlibraryitem";
-            else
-                strStyle += ",librarycode:" + strLibraryCode;
-
-            long lStart = nStart;
-            long lCount = nMaxCount;
-            long lTotalCount = 0;
-            for (; ; )
-            {
-                EntityInfo[] iteminfos = null;
-                long lRet = this.Channel.GetEntities(
-                    null,
-                    strBiblioRecPath,
-                    lStart,
-                    lCount,
-                    strStyle,
-                    strLang,
-                    out iteminfos,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (this.Channel.ErrorCode == ErrorCode.ItemDbNotDef)
-                        return -2;
-                    return -1;
-                }
-
-                if (lRet == 0)
-                {
-                    strError = "没有找到";
-                    return 0;
-                }
-
-                lTotalCount = lRet;
-
-                if (lCount < 0)
-                    lCount = lTotalCount - lStart;
-
-                if (lStart + lCount > lTotalCount)
-                    lCount = lTotalCount - lStart;
-
-                // 处理
-                for (int i = 0; i < iteminfos.Length; i++)
-                {
-                    EntityInfo info = iteminfos[i];
-
-                    if (this.ItemLoad != null)
-                    {
-                        ItemLoadEventArgs e = new ItemLoadEventArgs();
-                        e.Path = info.OldRecPath;
-                        e.Index = i;    // +nStart;
-                        e.Count = nMaxCount;    // (int)lTotalCount - nStart;
-                        e.Timestamp = info.OldTimestamp;
-                        e.Xml = info.OldRecord;
-
-                        this.ItemLoad(this, e);
-                    }
-                }
-
-                lStart += iteminfos.Length;
-                lCount -= iteminfos.Length;
-
-                if (lStart >= lTotalCount)
-                    break;
-                if (lCount <= 0)
-                    break;
-            }
-
-            return (int)lTotalCount;
-        }
-
-        // 检索出评注数据
-        // return:
-        //      命中的全部结果数量。
-        public long SearchComments(
-            OpacApplication app,
-            string strBiblioRecPath,
-            out string strError)
-        {
-            strError = "";
-            // string strXml = "";
-
-            Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "");
-
-            //string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
-            string strBiblioDbName = StringUtil.GetDbName(strBiblioRecPath);
-
-            if (String.IsNullOrEmpty(strBiblioDbName) == true)
-            {
-                strError = "从书目记录路径 '" + strBiblioRecPath + "' 中无法获得库名部分";
-                return -1;
-            }
-
-            string strCommentDbName = "";
-            // 根据书目库名, 找到对应的评注库名
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            int nRet = this.App.GetCommentDbName(strBiblioDbName,
-                out strCommentDbName,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            //string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
-            string strBiblioRecId = StringUtil.GetRecordId(strBiblioRecPath);
-
-            string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14 
-                + "'><item><order>DESC</order><word>"
-                + strBiblioRecId
-                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
-
-            long lRet = this.Channel.Search(
-                null,
-                strQueryXml,
-                "default",
-                "", // strOuputStyle
-                out strError);
-            if (lRet == -1)
-                return -1;
-
-            // not found
-            if (lRet == 0)
-            {
-                strError = "没有找到";
-                return 0;
-            }
-
-            return lRet;
-        }
-
+#if NO
+        // TODO: 结果集是和 channel 在一起的。如果 channel 不确定，就需要用全局结果集
         // 获得一定范围的检索命中结果
         // return:
         public int GetCommentsSearchResult(
@@ -1061,7 +1004,6 @@ namespace DigitalPlatform.OPAC.Server
 
             for (int i = 0; i < aPath.Count; i++)
             {
-
                 if (bGetRecord == true)
                 {
                     string strXml = "";
@@ -1117,7 +1059,10 @@ namespace DigitalPlatform.OPAC.Server
         ERROR1:
             return -1;
         }
+#endif
 
+
+#if NO
         // 根据特性的评注记录路径，获得一定范围的检索命中结果
         // return:
         //      -1  出错
@@ -1249,7 +1194,7 @@ namespace DigitalPlatform.OPAC.Server
         ERROR1:
             return -1;
         }
-
+#endif
     }
 
     public class ReaderInfo
@@ -1296,6 +1241,8 @@ ItemLoadEventArgs e);
         public string Xml = ""; // 记录
 
         public byte[] Timestamp = null; // 2010/11/8
+
+        public LibraryChannel Channel = null;   // 2016/1/26
     }
 
     public delegate void SetStartEventHandler(object sender,

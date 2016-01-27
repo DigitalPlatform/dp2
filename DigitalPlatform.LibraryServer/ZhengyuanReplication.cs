@@ -20,8 +20,16 @@ namespace DigitalPlatform.LibraryServer
     public class ZhengyuanReplication : BatchTask
     {
         internal AutoResetEvent eventDownloadFinished = new AutoResetEvent(false);	// true : initial state is signaled 
+        
         bool DownloadCancelled = false;
         Exception DownloadException = null;
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            eventDownloadFinished.Dispose();
+        }
 
         // 构造函数
         public ZhengyuanReplication(LibraryApplication app, 

@@ -21,7 +21,7 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.dp2.Statis;
 
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 public partial class Report : MyWebPage
@@ -393,10 +393,10 @@ var data = [
             // 观察当前用户是否具有管辖这个分馆的权限
             if (
                 string.IsNullOrEmpty(strFirstLevel) == false &&
-                sessioninfo.Channel != null &&
+                // sessioninfo.Channel != null &&
                 (
                 sessioninfo.GlobalUser == true
-                || StringUtil.IsInList(strFirstLevel, sessioninfo.Channel.LibraryCodeList) == true)
+                || StringUtil.IsInList(strFirstLevel, sessioninfo.LibraryCodeList) == true)
                 )
             {
             }
@@ -651,10 +651,10 @@ DIV.createtime
             // 观察当前用户是否具有管辖这个分馆的权限
             if (
                 string.IsNullOrEmpty(strFirstLevel) == false &&
-                sessioninfo.Channel != null &&
+                // sessioninfo.Channel != null &&
                 (
                 sessioninfo.GlobalUser == true
-                || StringUtil.IsInList(strFirstLevel, sessioninfo.Channel.LibraryCodeList) == true)
+                || StringUtil.IsInList(strFirstLevel, sessioninfo.LibraryCodeList) == true)
                 )
             {
             }
@@ -739,10 +739,10 @@ DIV.createtime
                 if (string.IsNullOrEmpty(strSelectedLibraryCode) == false && sub.Name != strSelectedLibraryCode)
                     continue;
                 // 观察当前用户是否具有管辖这个分馆的权限
-                if (sessioninfo.Channel != null &&
+                if (//sessioninfo.Channel != null &&
                     (
                     sessioninfo.GlobalUser == true
-                    || StringUtil.IsInList(sub.Name, sessioninfo.Channel.LibraryCodeList) == true)
+                    || StringUtil.IsInList(sub.Name, sessioninfo.LibraryCodeList) == true)
                     )
                 {
                 }
@@ -915,10 +915,10 @@ DIV.createtime
             // 观察当前用户是否具有管辖这个分馆的权限
             if (
                 string.IsNullOrEmpty(strFirstLevel) == false &&
-                sessioninfo.Channel != null &&
+                // sessioninfo.Channel != null &&
                 (
                 sessioninfo.GlobalUser == true
-                || StringUtil.IsInList(strFirstLevel, sessioninfo.Channel.LibraryCodeList) == true)
+                || StringUtil.IsInList(strFirstLevel, sessioninfo.LibraryCodeList) == true)
                 )
             {
             }
@@ -1044,10 +1044,10 @@ DIV.createtime
                 if (string.IsNullOrEmpty(strSelectedLibraryCode) == false && sub.Name != strSelectedLibraryCode)
                     continue;
                 // 观察当前用户是否具有管辖这个分馆的权限
-                if (sessioninfo.Channel != null &&
+                if (//sessioninfo.Channel != null &&
                     (
                     sessioninfo.GlobalUser == true
-                    || StringUtil.IsInList(sub.Name, sessioninfo.Channel.LibraryCodeList) == true)
+                    || StringUtil.IsInList(sub.Name, sessioninfo.LibraryCodeList) == true)
                     )
                 {
                 }

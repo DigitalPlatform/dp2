@@ -22,6 +22,7 @@ using DigitalPlatform.Marc;
 
 // using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -243,132 +244,138 @@ namespace DigitalPlatform.OPAC.Server
                 page.Response.Flush();
             }
 
-            DateTime time = DateTime.Now;
-
-            long nRet = sessioninfo.Channel.Search(
-                null,
-                strQueryXml,
-                "default",
-                "", // outputstyle
-                out strError);
-            if (nRet == -1)
+            LibraryChannel channel = this.GetChannel();
+            try
             {
-                strError = "检索时出错: " + strError;
-                return -1;
-            }
+                DateTime time = DateTime.Now;
 
-            TimeSpan delta = DateTime.Now - time;
-            if (page != null)
-            {
-                page.Response.Write("search end. hitcount=" + nRet.ToString() + ", time=" + delta.ToString() + "<br/>");
-                page.Response.Flush();
-            }
-
-
-            if (nRet == 0)
-                return 0;	// not found
-
-
-
-            if (page != null
-                && page.Response.IsClientConnected == false)	// 灵敏中断
-            {
-                strError = "中断";
-                return -1;
-            }
-            if (page != null)
-            {
-                page.Response.Write("--- begin get search result ...<br/>");
-                page.Response.Flush();
-            }
-
-            time = DateTime.Now;
-
-            List<string> aPath = null;
-            nRet = sessioninfo.Channel.GetSearchResult(
-                null,
-                "default",
-                0,
-                -1,
-                "zh",
-                out aPath,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "获得检索结果时出错: " + strError;
-                return -1;
-            }
-
-            if (page != null)
-            {
-                delta = DateTime.Now - time;
-                page.Response.Write("get search result end. lines=" + aPath.Count.ToString() + ", time=" + delta.ToString() + "<br/>");
-                page.Response.Flush();
-            }
-
-            if (aPath.Count == 0)
-            {
-                strError = "获取的检索结果为空";
-                return -1;
-            }
-
-            if (page != null
-                && page.Response.IsClientConnected == false)	// 灵敏中断
-            {
-                strError = "中断";
-                return -1;
-            }
-
-
-            if (page != null)
-            {
-                page.Response.Write("--- begin build storage ...<br/>");
-                page.Response.Flush();
-            }
-
-            time = DateTime.Now;
-
-
-            this.CommentColumn.Clear();	// 清空集合
-
-            // 加入新行对象。新行对象中，只初始化了m_strRecPath参数
-            for (int i = 0; i < Math.Min(aPath.Count, 1000000); i++)	// <Math.Min(aPath.Count, 10)
-            {
-                Line line = new Line();
-                // line.Container = this;
-                line.m_strRecPath = aPath[i];
-
-                nRet = line.InitialInfo(
-                    page,
-                    sessioninfo.Channel,
+                long nRet = // sessioninfo.Channel.
+                    channel.Search(
+                    null,
+                    strQueryXml,
+                    "default",
+                    "", // outputstyle
                     out strError);
                 if (nRet == -1)
-                    return -1;
-                if (nRet == 1)
-                    return -1;	// 灵敏中断
-
-
-                TopArticleItem item = new TopArticleItem();
-                item.Line = line;
-                this.CommentColumn.Add(item);
-
-                if (page != null
-                    && (i % 100) == 0)
                 {
-                    page.Response.Write("process " + Convert.ToString(i) + "<br/>");
+                    strError = "检索时出错: " + strError;
+                    return -1;
+                }
+
+                TimeSpan delta = DateTime.Now - time;
+                if (page != null)
+                {
+                    page.Response.Write("search end. hitcount=" + nRet.ToString() + ", time=" + delta.ToString() + "<br/>");
                     page.Response.Flush();
                 }
 
-            }
 
-            if (page != null)
+                if (nRet == 0)
+                    return 0;	// not found
+
+                if (page != null
+                    && page.Response.IsClientConnected == false)	// 灵敏中断
+                {
+                    strError = "中断";
+                    return -1;
+                }
+                if (page != null)
+                {
+                    page.Response.Write("--- begin get search result ...<br/>");
+                    page.Response.Flush();
+                }
+
+                time = DateTime.Now;
+
+                List<string> aPath = null;
+                nRet = // sessioninfo.Channel.
+                    channel.GetSearchResult(
+                    null,
+                    "default",
+                    0,
+                    -1,
+                    "zh",
+                    out aPath,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "获得检索结果时出错: " + strError;
+                    return -1;
+                }
+
+                if (page != null)
+                {
+                    delta = DateTime.Now - time;
+                    page.Response.Write("get search result end. lines=" + aPath.Count.ToString() + ", time=" + delta.ToString() + "<br/>");
+                    page.Response.Flush();
+                }
+
+                if (aPath.Count == 0)
+                {
+                    strError = "获取的检索结果为空";
+                    return -1;
+                }
+
+                if (page != null
+                    && page.Response.IsClientConnected == false)	// 灵敏中断
+                {
+                    strError = "中断";
+                    return -1;
+                }
+
+                if (page != null)
+                {
+                    page.Response.Write("--- begin build storage ...<br/>");
+                    page.Response.Flush();
+                }
+
+                time = DateTime.Now;
+
+                this.CommentColumn.Clear();	// 清空集合
+
+                // 加入新行对象。新行对象中，只初始化了m_strRecPath参数
+                for (int i = 0; i < Math.Min(aPath.Count, 1000000); i++)	// <Math.Min(aPath.Count, 10)
+                {
+                    Line line = new Line();
+                    // line.Container = this;
+                    line.m_strRecPath = aPath[i];
+
+                    nRet = line.InitialInfo(
+                        page,
+                        channel,    // sessioninfo.Channel,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return -1;	// 灵敏中断
+
+
+                    TopArticleItem item = new TopArticleItem();
+                    item.Line = line;
+                    this.CommentColumn.Add(item);
+
+                    if (page != null
+                        && (i % 100) == 0)
+                    {
+                        page.Response.Write("process " + Convert.ToString(i) + "<br/>");
+                        page.Response.Flush();
+                    }
+
+                }
+
+                if (page != null)
+                {
+                    delta = DateTime.Now - time;
+                    page.Response.Write("build storage end. time=" + delta.ToString() + "<br/>");
+                    page.Response.Flush();
+                }
+
+                return 1;
+            }
+            finally
             {
-                delta = DateTime.Now - time;
-                page.Response.Write("build storage end. time=" + delta.ToString() + "<br/>");
-                page.Response.Flush();
+                this.ReturnChannel(channel);
             }
-
-            return 1;
         }
 
         // [外部调用]
@@ -399,8 +406,6 @@ namespace DigitalPlatform.OPAC.Server
             this.m_lockCommentColumn.AcquireWriterLock(m_nCommentColumnLockTimeout);
             try
             {
-
-
                 int nIndex = -1;
                 int i = 0;
                 Line line = null;

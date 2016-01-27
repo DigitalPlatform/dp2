@@ -42,12 +42,9 @@ namespace dp2Manager
 
         RmsChannel channel = null;	// 临时使用的channel对象
 
-	//	public AutoResetEvent eventClose = new AutoResetEvent(false);
-
 		public RmsChannelCollection	Channels = new RmsChannelCollection();	// 拥有
 
 		private ResTree treeView_res;
-
 
 		private System.Windows.Forms.MainMenu mainMenu1;
 		private System.Windows.Forms.MenuItem menuItem1;
@@ -93,6 +90,12 @@ namespace dp2Manager
 				{
 					components.Dispose();
 				}
+
+                if (this.LinkInfos != null)
+                    this.LinkInfos.Dispose();
+
+                if (this.Channels != null)
+                    this.Channels.Dispose();
 			}
 			base.Dispose( disposing );
 		}

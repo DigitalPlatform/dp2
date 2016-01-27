@@ -207,7 +207,7 @@ namespace DigitalPlatform.OPAC
                     }
                 }
             }
-            catch 
+            catch
             {
             }
             return false;
@@ -285,70 +285,72 @@ namespace DigitalPlatform.OPAC
                 return -1;
             }
 
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.textBox_dp2LibraryUrl.Text;
-
-            // Debug.Assert(false, "");
-            string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
-            long nRet = channel.Login(this.textBox_manageUserName.Text,
-                this.textBox_managePassword.Text,
-                strParameters,
-                out strError);
-            if (nRet == -1)
+            using (LibraryChannel channel = new LibraryChannel())
             {
-                strError = "以用户名 '" + this.textBox_manageUserName.Text + "' 和密码登录失败: " + strError;
-                return -1;
-            }
+                channel.Url = this.textBox_dp2LibraryUrl.Text;
 
-            if (nRet == 1)
-                this.ManageAccountRights = channel.Rights;
-
-            channel.Logout(out strError);
-
-            if (nRet == 0)
-            {
-                channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
-                channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
-
-                strError = "为确认代理帐户是否存在, 请用超级用户身份登录。";
-                nRet = channel.DoNotLogin(ref strError);
-                if (nRet == -1 || nRet == 0)
-                {
-                    strError = "以超级用户身份登录失败: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在";
-                    return -1;
-                }
-
-                UserInfo[] users = null;
-                nRet = channel.GetUser(
-                    null,
-                    "list",
-                    this.textBox_manageUserName.Text,
-                    0,
-                    -1,
-                    out users,
+                // Debug.Assert(false, "");
+                string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
+                long nRet = channel.Login(this.textBox_manageUserName.Text,
+                    this.textBox_managePassword.Text,
+                    strParameters,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在。";
+                    strError = "以用户名 '" + this.textBox_manageUserName.Text + "' 和密码登录失败: " + strError;
                     return -1;
                 }
+
                 if (nRet == 1)
+                    this.ManageAccountRights = channel.Rights;
+
+                channel.Logout(out strError);
+
+                if (nRet == 0)
                 {
-                    Debug.Assert(users != null, "");
-                    strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 已经存在, 但其密码和当前面板拟设置的密码不一致。";
-                    return 2;
-                }
-                if (nRet >= 1)
-                {
-                    Debug.Assert(users != null, "");
-                    strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请系统管理员启用dp2circulation尽快修正此错误。";
-                    return -1;
+                    channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                    channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
+
+                    strError = "为确认代理帐户是否存在, 请用超级用户身份登录。";
+                    nRet = channel.DoNotLogin(ref strError);
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        strError = "以超级用户身份登录失败: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在";
+                        return -1;
+                    }
+
+                    UserInfo[] users = null;
+                    nRet = channel.GetUser(
+                        null,
+                        "list",
+                        this.textBox_manageUserName.Text,
+                        0,
+                        -1,
+                        out users,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "获取用户 '" + this.textBox_manageUserName.Text + "' 信息时发生错误: " + strError + "\r\n\r\n因此无法确定代理帐户是否存在。";
+                        return -1;
+                    }
+                    if (nRet == 1)
+                    {
+                        Debug.Assert(users != null, "");
+                        strError = "代理帐户 '" + this.textBox_manageUserName.Text + "' 已经存在, 但其密码和当前面板拟设置的密码不一致。";
+                        return 2;
+                    }
+                    if (nRet >= 1)
+                    {
+                        Debug.Assert(users != null, "");
+                        strError = "以 '" + this.textBox_manageUserName.Text + "' 为用户名 的用户记录存在多条，这是一个严重错误，请系统管理员启用dp2circulation尽快修正此错误。";
+                        return -1;
+                    }
+
+                    return 0;
                 }
 
-                return 0;
+                return 1;
             }
-
-            return 1;
         }
 
         void channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
@@ -525,47 +527,49 @@ namespace DigitalPlatform.OPAC
                 return -1;
             }
 
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.textBox_dp2LibraryUrl.Text;
-
-            channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
-            channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
-
-            strError = "请用超级用户身份登录，以便创建代理帐户。";
-            int nRet = channel.DoNotLogin(ref strError);
-            if (nRet == -1 || nRet == 0)
+            using (LibraryChannel channel = new LibraryChannel())
             {
-                strError = "以超级用户身份登录失败: " + strError;
-                return -1;
+                channel.Url = this.textBox_dp2LibraryUrl.Text;
+
+                channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
+
+                strError = "请用超级用户身份登录，以便创建代理帐户。";
+                int nRet = channel.DoNotLogin(ref strError);
+                if (nRet == -1 || nRet == 0)
+                {
+                    strError = "以超级用户身份登录失败: " + strError;
+                    return -1;
+                }
+                UserInfo user = new UserInfo();
+                user.UserName = this.textBox_manageUserName.Text;
+                user.Password = this.textBox_managePassword.Text;
+                user.SetPassword = true;
+                user.Rights = "getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker";
+
+                /*
+    代理帐户:
+    getsystemparameter
+    getres
+    search
+    getbiblioinfo
+    getreaderinfo
+    writeobject * */
+
+                long lRet = channel.SetUser(
+        null,
+        "new",
+        user,
+        out strError);
+                if (lRet == -1)
+                {
+                    strError = "创建代理帐户时发生错误: " + strError;
+                    return -1;
+                }
+
+                channel.Logout(out strError);
+                return 0;
             }
-            UserInfo user = new UserInfo();
-            user.UserName = this.textBox_manageUserName.Text;
-            user.Password = this.textBox_managePassword.Text;
-            user.SetPassword = true;
-            user.Rights = "getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker";
-
-            /*
-代理帐户:
-getsystemparameter
-getres
-search
-getbiblioinfo
-getreaderinfo
-writeobject * */
-
-            long lRet = channel.SetUser(
-    null,
-    "new",
-    user,
-    out strError);
-            if (lRet == -1)
-            {
-                strError = "创建代理帐户时发生错误: " + strError;
-                return -1;
-            }
-
-            channel.Logout(out strError);
-            return 0;
         }
 
         // 重设置代理帐户密码
@@ -590,43 +594,45 @@ writeobject * */
                 return -1;
             }
 
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.textBox_dp2LibraryUrl.Text;
-
-            channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
-            channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
-
-            strError = "请用超级用户身份登录，以便重设代理帐户密码。";
-            int nRet = channel.DoNotLogin(ref strError);
-            if (nRet == -1 || nRet == 0)
+            using (LibraryChannel channel = new LibraryChannel())
             {
-                strError = "以超级用户身份登录失败: " + strError;
-                return -1;
+                channel.Url = this.textBox_dp2LibraryUrl.Text;
+
+                channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
+
+                strError = "请用超级用户身份登录，以便重设代理帐户密码。";
+                int nRet = channel.DoNotLogin(ref strError);
+                if (nRet == -1 || nRet == 0)
+                {
+                    strError = "以超级用户身份登录失败: " + strError;
+                    return -1;
+                }
+
+                if (StringUtil.IsInList("changeuserpassword", channel.Rights) == false)
+                {
+                    strError = "您所使用的超级用户 '" + this.SupervisorUserName + "' 不具备 changeuserpassword 权限，无法进行(为代理帐户 '" + this.textBox_manageUserName.Text + "' )重设密码的操作";
+                    return -1;
+                }
+
+                UserInfo user = new UserInfo();
+                user.UserName = this.textBox_manageUserName.Text;
+                user.Password = this.textBox_managePassword.Text;
+
+                long lRet = channel.SetUser(
+                    null,
+                    "resetpassword",
+                    user,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "重设密码时发生错误: " + strError;
+                    return -1;
+                }
+
+                channel.Logout(out strError);
+                return 0;
             }
-
-            if (StringUtil.IsInList("changeuserpassword", channel.Rights) == false)
-            {
-                strError = "您所使用的超级用户 '" + this.SupervisorUserName + "' 不具备 changeuserpassword 权限，无法进行(为代理帐户 '" + this.textBox_manageUserName.Text + "' )重设密码的操作";
-                return -1;
-            }
-
-            UserInfo user = new UserInfo();
-            user.UserName = this.textBox_manageUserName.Text;
-            user.Password = this.textBox_managePassword.Text;
-
-            long lRet = channel.SetUser(
-                null,
-                "resetpassword",
-                user,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "重设密码时发生错误: " + strError;
-                return -1;
-            }
-
-            channel.Logout(out strError);
-            return 0;
         }
 
         // 获得 dp2Library 数据目录
@@ -653,52 +659,54 @@ writeobject * */
                 return -1;
             }
 
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.textBox_dp2LibraryUrl.Text;
-
-            // Debug.Assert(false, "");
-            string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
-            long nRet = channel.Login(this.textBox_manageUserName.Text,
-                this.textBox_managePassword.Text,
-                strParameters,
-                out strError);
-            if (nRet == -1)
+            using (LibraryChannel channel = new LibraryChannel())
             {
-                strError = "以用户名 '" + this.textBox_manageUserName.Text + "' 和密码登录失败: " + strError;
-                return -1;
-            }
+                channel.Url = this.textBox_dp2LibraryUrl.Text;
 
-            try
-            {
-                if (nRet == 0 || StringUtil.IsInList("getsystemparameter", channel.Rights) == false)
+                // Debug.Assert(false, "");
+                string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
+                long nRet = channel.Login(this.textBox_manageUserName.Text,
+                    this.textBox_managePassword.Text,
+                    strParameters,
+                    out strError);
+                if (nRet == -1)
                 {
-                    channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
-                    channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
-
-                    strError = "为获取 dp2Library 数据目录配置信息, 请用超级用户身份登录。";
-                    nRet = channel.DoNotLogin(ref strError);
-                    if (nRet == -1 || nRet == 0)
-                    {
-                        strError = "以超级用户身份登录失败: " + strError + "\r\n\r\n因此无法获取 dp2Library 数据目录配置信息";
-                        return -1;
-                    }
+                    strError = "以用户名 '" + this.textBox_manageUserName.Text + "' 和密码登录失败: " + strError;
+                    return -1;
                 }
 
-                nRet = channel.GetSystemParameter(
-        null,
-        "cfgs",
-        "getDataDir",
-        out strDataDir,
-        out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            finally
-            {
-                channel.Logout(out strError);
-            }
+                try
+                {
+                    if (nRet == 0 || StringUtil.IsInList("getsystemparameter", channel.Rights) == false)
+                    {
+                        channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                        channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
-            return 0;
+                        strError = "为获取 dp2Library 数据目录配置信息, 请用超级用户身份登录。";
+                        nRet = channel.DoNotLogin(ref strError);
+                        if (nRet == -1 || nRet == 0)
+                        {
+                            strError = "以超级用户身份登录失败: " + strError + "\r\n\r\n因此无法获取 dp2Library 数据目录配置信息";
+                            return -1;
+                        }
+                    }
+
+                    nRet = channel.GetSystemParameter(
+            null,
+            "cfgs",
+            "getDataDir",
+            out strDataDir,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                finally
+                {
+                    channel.Logout(out strError);
+                }
+
+                return 0;
+            }
         }
 
 #if NO

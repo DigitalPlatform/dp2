@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+
+            if (this._counting != null)
+                this._counting.Dispose();
+
             base.Dispose(disposing);
         }
 

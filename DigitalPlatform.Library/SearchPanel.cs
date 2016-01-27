@@ -59,6 +59,7 @@ namespace DigitalPlatform.Library
         /// </summary>
 		public ServerCollection Servers = null;	// 引用
 
+        // TODO: 需要增加 IDisposeable 接口
         /// <summary>
         /// 通道集合
         /// </summary>
@@ -162,7 +163,6 @@ namespace DigitalPlatform.Library
 				{
 					Debug.Assert(true, "若要用ap保存和恢复窗口外观状态，必须先设置ApCfgTitle成员");
 				}
-
 			}
 		}
 

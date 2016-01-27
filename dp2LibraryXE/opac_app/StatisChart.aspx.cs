@@ -19,8 +19,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 public partial class StatisChart : MyWebPage
 {
@@ -692,13 +693,22 @@ string strNodePath)
 
             ModifyDateString(ref strDate);
 
-            long lRet = sessioninfo.Channel.GetStatisInfo(strDate,
-                "list",
-                out info,
-                out strXml,
-                out strError);
-            if (lRet == -1)
-                return -1;
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
+            {
+                long lRet = //sessioninfo.Channel.
+                    channel.GetStatisInfo(strDate,
+                    "list",
+                    out info,
+                    out strXml,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
 
             string strTemplateFilename = app.CfgDir + "\\statis_template.xml";
             if (File.Exists(strTemplateFilename) == true)
@@ -831,7 +841,6 @@ string strNodePath)
                 if (string.IsNullOrEmpty(v) == false)
                     double.TryParse(v, out d);
                 series.Points.AddXY(current_date, d);
-
 
                 current_date = current_date.AddDays(1);
             CONTINUE:

@@ -93,7 +93,6 @@ namespace dp2LibraryXE
             this.m_hosts.Clear();
         }
 
-
         int Start(string strDataDir,
             out string strError)
         {

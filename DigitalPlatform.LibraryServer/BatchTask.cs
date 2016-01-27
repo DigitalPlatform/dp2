@@ -15,7 +15,7 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.LibraryServer
 {
     // 批处理任务
-    public class BatchTask
+    public class BatchTask : IDisposable
     {
         public bool ManualStart = false;    // 本轮是否为手动启动？
 
@@ -56,6 +56,17 @@ namespace DigitalPlatform.LibraryServer
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
+
+        public virtual void Dispose()
+        {
+            this.Close();
+
+            RmsChannels.Dispose();
+
+            eventClose.Dispose();
+            eventActive.Dispose();
+            eventFinished.Dispose();
+        }
 
         public void Activate()
         {
@@ -428,7 +439,6 @@ namespace DigitalPlatform.LibraryServer
             }
              * */
         }
-
 
         public void Close()
         {

@@ -369,7 +369,7 @@ namespace DigitalPlatform.OPAC.Server
                 this.DataDir = strDataDir;
                 this.HostDir = strHostDir;
 
-                app.m_strFileName =  Path.Combine(strDataDir, "opac.xml");
+                app.m_strFileName = Path.Combine(strDataDir, "opac.xml");
 
                 // 配置文件目录
                 app.CfgDir = Path.Combine(strDataDir, "cfgs");
@@ -728,7 +728,7 @@ namespace DigitalPlatform.OPAC.Server
             return -1;
         }
 
-        void ChannelPool_BeforeLogin(object sender, BeforeLoginEventArgs e)
+        public void ChannelPool_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             if (e.FirstTry == false)
             {
@@ -737,6 +737,10 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             LibraryChannel channel = sender as LibraryChannel;
+
+            // 2016/1/25
+            if (string.IsNullOrEmpty(channel.UserName) == true)
+                throw new Exception("ChannelPool_BeforeLogin() channel.UserName is null");
 
             if (channel.UserName == this.ManagerUserName)
             {
@@ -2897,7 +2901,7 @@ System.Text.Encoding.UTF8))
         //      0   册记录没有找到(strError中有说明信息)
         //      1   找到
         public int GetBiblioRecPath(
-            SessionInfo sessioninfo,
+            // SessionInfo sessioninfo,
             string strItemBarcode,
             // string strReaderBarcode,
             out string strBiblioRecPath,
@@ -2916,28 +2920,37 @@ System.Text.Encoding.UTF8))
 
             int nResultCount = 0;
 
-            long lRet = sessioninfo.Channel.GetItemInfo(
-                null,
-                strItemBarcode,
-                "", // strResultType
-                out strItemXml,
-                out strOutputItemPath,
-                out item_timestamp,
-                "recpath",  // strBiblioType
-                out strBiblio,
-                out strBiblioRecPath,
-                out strError);
-
-            if (lRet == 0)
+            LibraryChannel channel = this.GetChannel();
+            try
             {
-                strError = "册条码号为 '" + strItemBarcode + "' 的册记录没有找到";
-                return 0;
-            }
-            if (lRet == -1)
-                return -1;
+                long lRet = // sessioninfo.Channel.
+                    channel.GetItemInfo(
+                    null,
+                    strItemBarcode,
+                    "", // strResultType
+                    out strItemXml,
+                    out strOutputItemPath,
+                    out item_timestamp,
+                    "recpath",  // strBiblioType
+                    out strBiblio,
+                    out strBiblioRecPath,
+                    out strError);
 
-            nResultCount = (int)lRet;
-            return nResultCount;
+                if (lRet == 0)
+                {
+                    strError = "册条码号为 '" + strItemBarcode + "' 的册记录没有找到";
+                    return 0;
+                }
+                if (lRet == -1)
+                    return -1;
+
+                nResultCount = (int)lRet;
+                return nResultCount;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
 
         // 通过评注记录路径得知从属的种记录路径
@@ -2947,7 +2960,7 @@ System.Text.Encoding.UTF8))
         //      0   评注记录没有找到(strError中有说明信息)
         //      1   找到
         public int GetBiblioRecPathByCommentRecPath(
-            SessionInfo sessioninfo,
+            // SessionInfo sessioninfo,
             string strCommentRecPath,
             out string strBiblioRecPath,
             out string strError)
@@ -2971,46 +2984,36 @@ System.Text.Encoding.UTF8))
                 }
             }
 
-            // string strMetaData = "";
-            // string strTempOutputPath = "";
-
-            // string strOutputPath = "";
-            string strBiblio = "";
-            long lRet = sessioninfo.Channel.GetCommentInfo(
-null,
-"@path:" + strCommentRecPath,
-                // null,
-"xml", // strResultType
-out strItemXml,
-out strOutputItemPath,
-out item_timestamp,
-"recpath",  // strBiblioType
-out strBiblio,
-out strBiblioRecPath,
-out strError);
-            if (lRet == -1)
+            LibraryChannel channel = this.GetChannel();
+            try
             {
-                strError = "获取评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
-                return -1;
-            }
+                string strBiblio = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.GetCommentInfo(
+    null,
+    "@path:" + strCommentRecPath,
+                    // null,
+    "xml", // strResultType
+    out strItemXml,
+    out strOutputItemPath,
+    out item_timestamp,
+    "recpath",  // strBiblioType
+    out strBiblio,
+    out strBiblioRecPath,
+    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获取评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
+                    return -1;
+                }
 
-            /*
-            long lRet = channel.GetRes(strCommentRecPath,
-                out strItemXml,
-                out strMetaData,
-                out item_timestamp,
-                out strOutputItemPath,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "获取评注记录 " + strCommentRecPath + " 时发生错误: " + strError;
-                return -1;
+                return 1;
             }
-             * */
-            return 1;
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
-
-
 
         // 通过册记录路径得知从属的种记录路径
         // parameters:
@@ -3019,7 +3022,7 @@ out strError);
         //      0   册记录没有找到(strError中有说明信息)
         //      1   找到
         public int GetBiblioRecPathByItemRecPath(
-            SessionInfo sessioninfo,
+            // SessionInfo sessioninfo,
             string strItemRecPath,
             out string strBiblioRecPath,
             out string strError)
@@ -3042,26 +3045,34 @@ out strError);
                 }
             }
 
-            string strBiblio = "";
-            long lRet = sessioninfo.Channel.GetItemInfo(
-null,
-"@path:" + strItemRecPath,
-"xml", // strResultType
-out strItemXml,
-out strOutputItemPath,
-out item_timestamp,
-"recpath",  // strBiblioType
-out strBiblio,
-out strBiblioRecPath,
-out strError);
-            if (lRet == -1)
+            LibraryChannel channel = this.GetChannel();
+            try
             {
-                strError = "获取册记录 '" + strItemRecPath + "' 时出错: " + strError;
-                return -1;
+                string strBiblio = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.GetItemInfo(
+    null,
+    "@path:" + strItemRecPath,
+    "xml", // strResultType
+    out strItemXml,
+    out strOutputItemPath,
+    out item_timestamp,
+    "recpath",  // strBiblioType
+    out strBiblio,
+    out strBiblioRecPath,
+    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获取册记录 '" + strItemRecPath + "' 时出错: " + strError;
+                    return -1;
+                }
+
+                return 1;
             }
-
-
-            return 1;
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
 
         public void ActivateCacheBuilder()
@@ -3194,6 +3205,42 @@ out strError);
 
         // 获得读者证号二维码字符串
         public int GetPatronTempId(
+            string strReaderBarcode,
+            out string strCode,
+            out string strError)
+        {
+            strError = "";
+            strCode = "";
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+
+                // 读入读者记录
+                long lRet = // session.Channel.
+                    channel.VerifyReaderPassword(null,
+                    "!getpatrontempid:" + strReaderBarcode,
+                    null,
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                {
+                    // text-level: 内部错误
+                    strError = "获得读者证号二维码时发生错误: " + strError;
+                    return -1;
+                }
+
+                strCode = strError;
+                return 0;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+#if NO
+        // 获得读者证号二维码字符串
+        public int GetPatronTempId(
             SessionInfo sessioninfo,
             string strReaderBarcode,
             out string strCode,
@@ -3249,6 +3296,7 @@ out strError);
                     this.ReturnChannel(channel);
             }
         }
+#endif
 
         // 根据读者证条码号找到头像资源路径
         // parameters:

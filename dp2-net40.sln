@@ -160,6 +160,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.LibraryClie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GcatServer", "GcatServer\GcatServer.csproj", "{E2CED56E-1207-43BA-8876-63AFF954FEA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.KernelClient", "DigitalPlatform.KernelClient\DigitalPlatform.KernelClient.csproj", "{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1235,6 +1237,21 @@ Global
 		{E2CED56E-1207-43BA-8876-63AFF954FEA4}.Test|Mixed Platforms.Build.0 = Release|x86
 		{E2CED56E-1207-43BA-8876-63AFF954FEA4}.Test|x86.ActiveCfg = Release|x86
 		{E2CED56E-1207-43BA-8876-63AFF954FEA4}.Test|x86.Build.0 = Release|x86
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Release|x86.ActiveCfg = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Test|Any CPU.Build.0 = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{CA11A59D-373D-4CA2-8C9F-CFCAE41190EF}.Test|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

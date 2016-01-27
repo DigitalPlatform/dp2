@@ -133,7 +133,7 @@ namespace DigitalPlatform.OPAC.Server
                         return assembly1;
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 assembly = null;
@@ -430,6 +430,90 @@ namespace DigitalPlatform.OPAC.Server
         //      0   成功，为.cs文件
         //      1   成功，为.fltx文件
         public int MapKernelScriptFile(
+            string strBiblioDbName,
+            string strScriptFileName,
+            out string strLocalPath,
+            out string strError)
+        {
+            strError = "";
+            strLocalPath = "";
+            int nRet = 0;
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                // 将种记录数据从XML格式转换为HTML格式
+                // 需要从内核映射过来文件
+                // string strScriptFileName = "./cfgs/loan_biblio.fltx";
+                // 将脚本文件名正规化
+                // 因为在定义脚本文件的时候, 有一个当前库名环境,
+                // 如果定义为 ./cfgs/filename 表示在当前库下的cfgs目录下,
+                // 而如果定义为 /cfgs/filename 则表示在同服务器的根下
+                string strRemotePath = OpacApplication.CanonicalizeScriptFileName(
+                    strBiblioDbName,
+                    strScriptFileName);
+
+                // TODO: 还可以考虑支持http://这样的配置文件。
+
+                nRet = this.CfgsMap.MapFileToLocal(
+                    channel,    // sessioninfo.Channel,
+                    strRemotePath,
+                    out strLocalPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "内核配置文件 " + strRemotePath + "没有找到，因此无法获得书目html格式数据";
+                    goto ERROR1;
+                }
+
+                bool bFltx = false;
+                // 如果是一般.cs文件, 还需要获得.cs.ref配置文件
+                if (OpacApplication.IsCsFileName(
+                    strScriptFileName) == true)
+                {
+                    string strTempPath = "";
+                    nRet = this.CfgsMap.MapFileToLocal(
+                        channel,    // sessioninfo_param.Channel,
+                        strRemotePath + ".ref",
+                        out strTempPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "内核配置文件 " + strRemotePath + ".ref" + "没有找到，因此无法获得书目html格式数据";
+                        goto ERROR1;
+                    }
+
+                    bFltx = false;
+                }
+                else
+                {
+                    bFltx = true;
+                }
+
+                if (bFltx == true)
+                    return 1;   // 为.fltx文件
+
+                return 0;
+            ERROR1:
+                return -1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+#if NO
+        // 映射内核脚本配置文件到本地
+        // parameters:
+        //      sessioninfo_param   如果为null，函数内部会自动创建一个SessionInfo对象，是管理员权限
+        // return:
+        //      -1  error
+        //      0   成功，为.cs文件
+        //      1   成功，为.fltx文件
+        public int MapKernelScriptFile(
             SessionInfo sessioninfo_param,
             string strBiblioDbName,
             string strScriptFileName,
@@ -534,6 +618,8 @@ namespace DigitalPlatform.OPAC.Server
                 }
             }
         }
+
+#endif
 
         // 将脚本文件名正规化
         // 因为在定义脚本文件的时候, 有一个当前库名环境,

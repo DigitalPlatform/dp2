@@ -196,8 +196,6 @@ namespace dp2ZServer
 
             return 0;
         }
-
-
     }
 
     public class HostInfo : IExtension<ServiceHostBase>, IDisposable

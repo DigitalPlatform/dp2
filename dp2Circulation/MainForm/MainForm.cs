@@ -2629,8 +2629,18 @@ Stack:
             }
         }
 
+        [Flags]
+        public enum GetChannelStyle
+        {
+            None = 0x0, // 
+            GUI = 0x01, // Idle 里面做 Application.DoEvents()
+        }
+
+        // parameters:
+        //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetChannel(string strServerUrl = ".",
-string strUserName = ".")
+            string strUserName = ".",
+            GetChannelStyle style = GetChannelStyle.GUI)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.LibraryServerUrl;
@@ -2638,13 +2648,22 @@ string strUserName = ".")
                 strUserName = this.DefaultUserName;
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            if ((style & GetChannelStyle.GUI) != 0)
+                channel.Idle += channel_Idle;
             _channelList.Add(channel);
             // TODO: 检查数组是否溢出
             return channel;
         }
 
+        void channel_Idle(object sender, IdleEventArgs e)
+        {
+            Application.DoEvents();
+        }
+
         public void ReturnChannel(LibraryChannel channel)
         {
+            channel.Idle -= channel_Idle;
+
             this._channelPool.ReturnChannel(channel);
             _channelList.Remove(channel);
         }

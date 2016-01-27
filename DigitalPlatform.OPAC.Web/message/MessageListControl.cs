@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -404,55 +405,63 @@ namespace DigitalPlatform.OPAC.Web
 
             int nInboxUntouchedCount = 0;   // 收件箱中的未读信件数目
 
-            for (int i = 0; i < app.BoxesInfo.Boxes.Count; i++)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                Box box = app.BoxesInfo.Boxes[i];
-
-                string strClass = "box";
-
-                if (/*box.Name == this.CurrentBoxType*/
-                    box.Type == this.CurrentBoxType)
-                    strClass = "box active";
-
-                literal = new LiteralControl();
-                literal.Text = "<tr class='" + strClass + "'><td class='" + strClass + "' nowrap>";
-                boxlist.Controls.Add(literal);
-
-                int nCount = 0;
-
-                if (bDetectFullCount == true)
+                for (int i = 0; i < app.BoxesInfo.Boxes.Count; i++)
                 {
-                    nCount = sessioninfo.Channel.GetUntouchedMessageCount(
-                        box.Name);
-                    if (nCount != -1)
-                    {
-                        // untouchedcountlist[box.Name] = (object)nCount;
+                    Box box = app.BoxesInfo.Boxes[i];
 
+                    string strClass = "box";
+
+                    if (/*box.Name == this.CurrentBoxType*/
+                        box.Type == this.CurrentBoxType)
+                        strClass = "box active";
+
+                    literal = new LiteralControl();
+                    literal.Text = "<tr class='" + strClass + "'><td class='" + strClass + "' nowrap>";
+                    boxlist.Controls.Add(literal);
+
+                    int nCount = 0;
+
+                    if (bDetectFullCount == true)
+                    {
+                        nCount = // sessioninfo.Channel.
+                            channel.GetUntouchedMessageCount(
+                            box.Name);
+                        if (nCount != -1)
+                        {
+                            // untouchedcountlist[box.Name] = (object)nCount;
+
+                        }
+
+                        if (box.Type == BoxesInfo.INBOX)
+                            nInboxUntouchedCount = nCount;
                     }
 
-                    if (box.Type == BoxesInfo.INBOX)
-                        nInboxUntouchedCount = nCount;
+
+                    linkbutton = new LinkButton();
+                    linkbutton.ID = box.Name;
+                    string strCaption = app.BoxesInfo.GetString(box.Type);   // 获得信箱对于当前语言的名字 2009/7/14 changed
+                    if (nCount != 0)
+                        linkbutton.Text = strCaption + "(" + Convert.ToString(nCount) + ")";
+                    else
+                        linkbutton.Text = strCaption;
+
+                    linkbutton.Click += new EventHandler(linkbutton_Click);
+                    boxlist.Controls.Add(linkbutton);
+
+                    literal = new LiteralControl();
+                    literal.Text = "</td></tr>";
+                    boxlist.Controls.Add(literal);
                 }
-
-
-                linkbutton = new LinkButton();
-                linkbutton.ID = box.Name;
-                string strCaption = app.BoxesInfo.GetString(box.Type);   // 获得信箱对于当前语言的名字 2009/7/14 changed
-                if (nCount != 0)
-                    linkbutton.Text = strCaption + "(" + Convert.ToString(nCount) + ")";
-                else
-                    linkbutton.Text = strCaption;
-
-                linkbutton.Click += new EventHandler(linkbutton_Click);
-                boxlist.Controls.Add(linkbutton);
-
-                literal = new LiteralControl();
-                literal.Text = "</td></tr>";
-                boxlist.Controls.Add(literal);
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
 
             // this.UntouchedCountList = untouchedcountlist;   // 更新内容
-
 
             literal = new LiteralControl();
             literal.Text = "<tr class='cmd'><td class='newmessage'>";
@@ -751,17 +760,25 @@ namespace DigitalPlatform.OPAC.Web
             if (bMoveToRecycleBin == true)
                 strStyle += ",movetorecyclebin";
 
-
-            MessageData[] output_messages = null;
-            nRet = sessioninfo.Channel.SetMessage("deleteall",
-                strStyle,
-                null,
-                out output_messages,
-                out strError);
-            if (nRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                this.SetDebugInfo("errorinfo", strError);
-                return;
+                MessageData[] output_messages = null;
+                nRet = // sessioninfo.Channel.
+                    channel.SetMessage("deleteall",
+                    strStyle,
+                    null,
+                    out output_messages,
+                    out strError);
+                if (nRet == -1)
+                {
+                    this.SetDebugInfo("errorinfo", strError);
+                    return;
+                }
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
 
             if (bMoveToRecycleBin == true)
@@ -831,37 +848,46 @@ namespace DigitalPlatform.OPAC.Web
                 messages[i].strRecordID = ids[i];
             }
 
-            MessageData[] output_messages = null;
-            string strError = "";
-            long nRet = sessioninfo.Channel.SetMessage("delete",
-                bMoveToRecycleBin == true ? "movetorecyclebin" : "",
-                messages,
-                out output_messages,
-                out strError);
-            if (nRet == -1)
-                this.SetDebugInfo("errorinfo", strError);
-            else
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                if (bMoveToRecycleBin == true)
-                {
-                    // text-level: 用户提示
-                    this.SetDebugInfo(
-                                            string.Format(this.GetString("已将s个消息移动到废件箱"),    // "已将 {0} 个消息移动到废件箱。"
-                                            ids.Count.ToString()));
-
-                    // "已将 " + ids.Count + " 个消息移动到废件箱。");
-                }
+                MessageData[] output_messages = null;
+                string strError = "";
+                long nRet = // sessioninfo.Channel.
+                    channel.SetMessage("delete",
+                    bMoveToRecycleBin == true ? "movetorecyclebin" : "",
+                    messages,
+                    out output_messages,
+                    out strError);
+                if (nRet == -1)
+                    this.SetDebugInfo("errorinfo", strError);
                 else
                 {
-                    // text-level: 用户提示
-                    this.SetDebugInfo(
-                                            string.Format(this.GetString("已将s个消息永久删除"),    // "已将 {0} 个消息永久删除。"
-                                            ids.Count.ToString()));
+                    if (bMoveToRecycleBin == true)
+                    {
+                        // text-level: 用户提示
+                        this.SetDebugInfo(
+                                                string.Format(this.GetString("已将s个消息移动到废件箱"),    // "已将 {0} 个消息移动到废件箱。"
+                                                ids.Count.ToString()));
 
-                    // "已将 " + ids.Count + " 个消息永久删除。");
+                        // "已将 " + ids.Count + " 个消息移动到废件箱。");
+                    }
+                    else
+                    {
+                        // text-level: 用户提示
+                        this.SetDebugInfo(
+                                                string.Format(this.GetString("已将s个消息永久删除"),    // "已将 {0} 个消息永久删除。"
+                                                ids.Count.ToString()));
+
+                        // "已将 " + ids.Count + " 个消息永久删除。");
+                    }
+
+                    this.RefreshList(); // 刷新当前结果集显示
                 }
-
-                this.RefreshList(); // 刷新当前结果集显示
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
         }
 
@@ -880,25 +906,34 @@ namespace DigitalPlatform.OPAC.Web
                 throw new Exception("UserID为空");
             }
 
-            // 重新发起检索，但暂不获取
-            long nRet = sessioninfo.Channel.ListMessage(
-                "search",   // true,
-                this.ResultSetName,
-                this.CurrentBoxType,
-                MessageLevel.Summary,
-                0,
-                0,
-                out nTotalCount,
-                out messages,
-                out strError);
-            if (nRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                // text-level: 内部错误
-                this.SetDebugInfo("errorinfo", "刷新时检索失败: " + strError);
+                // 重新发起检索，但暂不获取
+                long nRet = // sessioninfo.Channel.
+                    channel.ListMessage(
+                    "search",   // true,
+                    this.ResultSetName,
+                    this.CurrentBoxType,
+                    MessageLevel.Summary,
+                    0,
+                    0,
+                    out nTotalCount,
+                    out messages,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // text-level: 内部错误
+                    this.SetDebugInfo("errorinfo", "刷新时检索失败: " + strError);
+                }
+                else
+                {
+                    this.ResultCount = nTotalCount;
+                }
             }
-            else
+            finally
             {
-                this.ResultCount = nTotalCount;
+                sessioninfo.ReturnChannel(channel);
             }
         }
 
@@ -934,7 +969,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.StartIndex = (this.ResultCount / this.PageMaxLines) * this.PageMaxLines;
             else
                 this.StartIndex = Math.Max(0, (this.ResultCount / this.PageMaxLines) * this.PageMaxLines - 1);
-
         }
 
         void nextpage_Click(object sender, EventArgs e)
@@ -960,7 +994,6 @@ namespace DigitalPlatform.OPAC.Web
 
         #endregion
 
-
         protected override void Render(HtmlTextWriter writer)
         {
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
@@ -981,22 +1014,30 @@ namespace DigitalPlatform.OPAC.Web
 
             if (this.ResultCount != 0)
             {
-
-                int nTotalCount = 0;
-                MessageData[] messages = null;
-                nRet = sessioninfo.Channel.ListMessage(
-                    "", // false,
-                    this.ResultSetName,
-                    this.CurrentBoxType,
-                    MessageLevel.Summary,
-                    this.StartIndex,
-                    this.PageMaxLines,
-                    out nTotalCount,
-                    out messages,
-                    out strError);
-                if (nRet == -1)
+                    MessageData[] messages = null;
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
                 {
-                    throw new Exception(strError);
+                    int nTotalCount = 0;
+                    nRet = // sessioninfo.Channel.
+                        channel.ListMessage(
+                        "", // false,
+                        this.ResultSetName,
+                        this.CurrentBoxType,
+                        MessageLevel.Summary,
+                        this.StartIndex,
+                        this.PageMaxLines,
+                        out nTotalCount,
+                        out messages,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        throw new Exception(strError);
+                    }
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
                 }
 
                 // 显示本页中的浏览行
@@ -1024,7 +1065,6 @@ namespace DigitalPlatform.OPAC.Web
                     LiteralControl size = (LiteralControl)this.FindControl("line" + Convert.ToString(i) + "_size");
                     LiteralControl classname = (LiteralControl)this.FindControl("line" + Convert.ToString(i) + "_classname");
 
-
                     if (data == null)
                     {
                         checkbox.Visible = false;
@@ -1041,7 +1081,6 @@ namespace DigitalPlatform.OPAC.Web
                     strNo = Convert.ToString(i + this.StartIndex + 1);
 
                     no.Text = strNo;
-
 
                     string strDetailUrl = "./message.aspx?id=" + data.strRecordID;
                     if (data.strSubject == "")
@@ -1061,7 +1100,6 @@ namespace DigitalPlatform.OPAC.Web
                 } // end of for
 
                 this.LineCount = Math.Max(this.LineCount, this.PageMaxLines);
-
             }
             else
             {
@@ -1084,9 +1122,7 @@ namespace DigitalPlatform.OPAC.Web
 
                     LiteralControl subject = (LiteralControl)this.FindControl("line" + Convert.ToString(i) + "_subject");
                     subject.Text = "&nbsp;";
-
                 }
-
             }
 
             this.ItemIDs = tempids;
@@ -1106,7 +1142,6 @@ namespace DigitalPlatform.OPAC.Web
                 deleteallbutton.Text = this.GetString("永久删除全部消息");
             else
                 deleteallbutton.Text = this.GetString("将全部消息移至废件箱");
-
 
             base.Render(writer);
         }
@@ -1263,30 +1298,38 @@ namespace DigitalPlatform.OPAC.Web
 
             string strResultSetName = "messagelist_" + strBoxType;
 
-            int nTotalCount = 0;
-            MessageData[] messages = null;
-            long nRet = sessioninfo.Channel.ListMessage(
-                "search", // true,
-                strResultSetName,
-                strBoxType,
-                MessageLevel.Summary,
-                0,
-                0,
-                out nTotalCount,
-                out messages,
-                out strError);
-            if (nRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                return -1;
+
+                int nTotalCount = 0;
+                MessageData[] messages = null;
+                long nRet = // sessioninfo.Channel.
+                    channel.ListMessage(
+                    "search", // true,
+                    strResultSetName,
+                    strBoxType,
+                    MessageLevel.Summary,
+                    0,
+                    0,
+                    out nTotalCount,
+                    out messages,
+                    out strError);
+                if (nRet == -1)
+                {
+                    return -1;
+                }
+
+                this.ResultSetName = strResultSetName;
+                this.ResultCount = nTotalCount;
+                this.CurrentBoxType = strBoxType;
+                return 0;
             }
-
-            this.ResultSetName = strResultSetName;
-            this.ResultCount = nTotalCount;
-            this.CurrentBoxType = strBoxType;
-
-            return 0;
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
         }
-
 
         public string GetPrefixString(string strTitle,
             string strWrapperClass)

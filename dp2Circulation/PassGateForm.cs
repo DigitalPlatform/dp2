@@ -154,6 +154,7 @@ namespace dp2Circulation
                     "hide_readername",
                     this.checkBox_hideReaderName.Checked);
             }
+
         }
 
         void ClearList()

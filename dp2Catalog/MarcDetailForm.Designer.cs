@@ -17,6 +17,10 @@ namespace dp2Catalog
             {
                 components.Dispose();
             }
+
+            if (m_detailHostObj != null)
+                m_detailHostObj.Dispose();
+
             base.Dispose(disposing);
         }
 
