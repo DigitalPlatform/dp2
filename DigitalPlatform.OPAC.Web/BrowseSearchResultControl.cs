@@ -1823,6 +1823,7 @@ namespace DigitalPlatform.OPAC.Web
         // 兑现获取浏览记录
         protected override void Render(HtmlTextWriter writer)
         {
+            string strError = "";
             int nRet = 0;
 
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
@@ -1874,7 +1875,6 @@ namespace DigitalPlatform.OPAC.Web
             if (this.ResultCount != 0)
             {
                 // string strHash = channel.GetHashCode().ToString();
-                string strError = "";
                 ArrayList aLine = null;    // 各个记录的浏览列。数组的每个元素是string [] 类型
                 List<string> titles = new List<string>();   // 各个记录的标题
 
@@ -1886,7 +1886,7 @@ namespace DigitalPlatform.OPAC.Web
                 string strResultsetFilename = this.ResultsetFilename;
                 if (String.IsNullOrEmpty(strResultsetFilename) == false)
                     app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
-                LibraryChannel channel = sessioninfo.GetChannel(true); 
+                LibraryChannel channel = sessioninfo.GetChannel(true);
                 try
                 {
                     DpResultSet resultset = null;
@@ -1961,12 +1961,8 @@ namespace DigitalPlatform.OPAC.Web
                                     out searchresults,
                                     out strError);
                                 if (lRet == -1 && searchresults == null)
-                                {
-                                    // throw new Exception(strError);
-                                    SetDebugInfo("errorinfo", strError);
-                                    base.Render(writer);
-                                    return;
-                                }
+                                    goto ERROR1;
+
                                 if (lRet != -1)
                                     lTotalCount = lRet;
 
@@ -2588,6 +2584,10 @@ namespace DigitalPlatform.OPAC.Web
                 this.Button_RemoveFromMyBookshelf.Visible = false;
 
             base.Render(writer);
+            return;
+        ERROR1:
+            SetDebugInfo("errorinfo", strError);
+            base.Render(writer);    // 注: base.Render() 要放在使用 LibraryChannel 的 try finally 括号外边。因为 Render 页面中的其他控件的时候需要 GetChannel()。放在外边可以避免叠加获取通道导致的占用通道过多情况
         }
 
         public Button Button_AddToMyBookshelf
