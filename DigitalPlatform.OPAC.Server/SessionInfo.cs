@@ -259,7 +259,9 @@ namespace DigitalPlatform.OPAC.Server
                 return this.Channel;
 #endif
 
-            LibraryChannel channel = this.App.ChannelPool.GetChannel(this.App.WsUrl, this.UserID);
+            LibraryChannel channel = this.App.ChannelPool.GetChannel(this.App.WsUrl,
+                this.UserID,
+                this.ChannelLang);
             channel.Password = this.Password;
             if (channel.UserName != this.UserID)    // 有可能会从 pool 中拿到 UserName 为空的 channel 2016/1/25
                 channel.UserName = this.UserID;

@@ -22,6 +22,7 @@ using System.Security.Cryptography.X509Certificates;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Collections;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -141,6 +142,15 @@ namespace DigitalPlatform.LibraryClient
         /// 当前已登录用户所管辖的馆代码(列表)
         /// </summary>
         public string LibraryCodeList = ""; // 当前已登录用户所管辖的馆代码 2012/9/19
+
+        /// <summary>
+        /// 通道所使用的语言代码
+        /// </summary>
+        public string Lang
+        {
+            get;
+            set;
+        }
 
 #if NO
         /// <summary>
@@ -711,6 +721,13 @@ out strError);
             string strOutputUserName = "";
             string strLibraryCode = "";
 
+            if (string.IsNullOrEmpty(this.Lang) == false)
+            {
+                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+                parameters["lang"] = this.Lang;
+                strParameters = StringUtil.BuildParameterString(parameters);
+            }
+
             long lRet = this.IdleLogin(
                 strUserName,
                 strPassword,
@@ -753,6 +770,13 @@ out strError);
             string strRights = "";
             string strOutputUserName = "";
             string strLibraryCode = "";
+
+            if (string.IsNullOrEmpty(this.Lang) == false)
+            {
+                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+                parameters["lang"] = this.Lang;
+                strParameters = StringUtil.BuildParameterString(parameters);
+            }
 
             long lRet = this.Login(
                 strUserName,
@@ -1410,6 +1434,9 @@ out strError);
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
+
+                if (result.Value != -1)
+                    this.Lang = strLang;
                 return result.Value;
             }
             catch (Exception ex)

@@ -34,9 +34,11 @@ namespace DigitalPlatform.OPAC.Server
     /// </summary>
     public partial class OpacApplication
     {
-        public LibraryChannel GetChannel()
+        public LibraryChannel GetChannel(string strLang = "")
         {
-            LibraryChannel channel = this.ChannelPool.GetChannel(this.WsUrl, this.ManagerUserName);
+            LibraryChannel channel = this.ChannelPool.GetChannel(this.WsUrl,
+                this.ManagerUserName,
+                strLang);
             channel.Password = this.ManagerPassword;
             return channel;
         }
@@ -45,7 +47,6 @@ namespace DigitalPlatform.OPAC.Server
         {
             this.ChannelPool.ReturnChannel(channel);
         }
-
 
         // OPAC所用的浏览列定义缓存
         // 库名 --> List<BrowseColumnCaption>
@@ -120,7 +121,6 @@ namespace DigitalPlatform.OPAC.Server
             session.Parameters = "";    // 2014/12/23
 #endif
             LibraryChannel channel = this.GetChannel();
-
             try
             {
                 int nRet = this.CfgsMap.MapFileToLocal(

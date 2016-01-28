@@ -36,9 +36,11 @@ namespace DigitalPlatform.LibraryClient
         /// </summary>
         /// <param name="strUrl">服务器 URL</param>
         /// <param name="strUserName">用户名</param>
+        /// <param name="strLang">语言代码。如果为空，表示不在意通道的语言代码</param>
         /// <returns>返回通道对象</returns>
         public LibraryChannel GetChannel(string strUrl,
-            string strUserName)
+            string strUserName,
+            string strLang = "")
         {
             LibraryChannelWrapper wrapper = null;
 
@@ -46,7 +48,7 @@ namespace DigitalPlatform.LibraryClient
                 throw new LockException("锁定尝试中超时");
             try
             {
-                wrapper = this._findChannel(strUrl, strUserName, true);
+                wrapper = this._findChannel(strUrl, strUserName, strLang, true);
 
                 if (wrapper != null)
                     return wrapper.Channel;
@@ -66,6 +68,7 @@ namespace DigitalPlatform.LibraryClient
                 LibraryChannel inner_channel = new LibraryChannel();
                 inner_channel.Url = strUrl;
                 inner_channel.UserName = strUserName;
+                inner_channel.Lang = strLang;
                 inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                 inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
@@ -101,6 +104,7 @@ namespace DigitalPlatform.LibraryClient
         // 查找指定URL的LibraryChannel对象
         LibraryChannelWrapper _findChannel(string strUrl,
             string strUserName,
+            string strLang,
             bool bAutoSetUsing)
         {
             foreach (LibraryChannelWrapper wrapper in this)
@@ -109,6 +113,8 @@ namespace DigitalPlatform.LibraryClient
                     && wrapper.Channel.Url == strUrl
                     && (string.IsNullOrEmpty(wrapper.Channel.UserName) == true
                     || wrapper.Channel.UserName == strUserName)
+                    && (string.IsNullOrEmpty(strLang) == true
+                    || wrapper.Channel.Lang == strLang)
                     )
                 {
                     if (bAutoSetUsing == true)
