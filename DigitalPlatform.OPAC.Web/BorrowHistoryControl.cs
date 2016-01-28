@@ -257,6 +257,8 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(new LiteralControl(
                 "<tr class='columntitle'><td class='no'>"
                 + this.GetString("序号")
+                + "</td><td class='action'>"
+                + this.GetString("类型")
                 + "</td><td class='barcode'>"
                 + this.GetString("册条码号")
                 + "</td><td class='summary'>"
@@ -491,6 +493,7 @@ namespace DigitalPlatform.OPAC.Web
 
         class LineInfo
         {
+            public string strAction { get; set; }
             public string strBarcode { get; set; }
             public string strRecPath { get; set; }
             public string strBorrowDate { get; set; }
@@ -501,6 +504,8 @@ namespace DigitalPlatform.OPAC.Web
             public string strRenewComment { get; set; }
             public string strOperator { get; set; }
 
+            public string strBiblioRecPath { get; set; }
+
             public LineInfo()
             {
 
@@ -508,6 +513,7 @@ namespace DigitalPlatform.OPAC.Web
 
             public LineInfo(XmlElement node)
             {
+                this.strAction = DomUtil.GetAttr(node, "action");
                 this.strBarcode = DomUtil.GetAttr(node, "barcode");
                 this.strRecPath = DomUtil.GetAttr(node, "recPath");
                 this.strBorrowDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "borrowDate"));
@@ -520,6 +526,7 @@ namespace DigitalPlatform.OPAC.Web
 
             public LineInfo(ChargingItemWrapper wrapper)
             {
+                this.strAction = wrapper.Item.Action;
                 this.strBarcode = wrapper.Item.ItemBarcode;
                 this.strRecPath = "";
                 this.strBorrowDate = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.OperTime;
@@ -529,6 +536,7 @@ namespace DigitalPlatform.OPAC.Web
                 this.strNo = wrapper.RelatedItem == null ? "" : wrapper.RelatedItem.No;
                 if (this.strNo == "0")
                     this.strNo = "";
+                this.strBiblioRecPath = wrapper.Item.BiblioRecPath;
 
                 this.strRenewComment = "";
                 this.strOperator = wrapper.Item.Operator;
@@ -640,15 +648,23 @@ namespace DigitalPlatform.OPAC.Web
                         StringBuilder text = new StringBuilder();
 
                         string strBarcodeLink = "<a href='book.aspx?barcode=" + info.strBarcode + "&forcelogin=userid' target='_blank'>" + info.strBarcode + "</a>";
+                        if (info.strAction == "read")
+                        {
+                            string strTemp = info.strBarcode;
+                            if (string.IsNullOrEmpty(strTemp) == true)
+                                strTemp = "@biblioRecPath:" + info.strBiblioRecPath;
+                            strBarcodeLink = "<a href='book.aspx?barcode=" + strTemp + "&forcelogin=userid' target='_blank'>" + strTemp + "</a>";
+                        }
 
-                        string strTrClass = " class='dark content' ";
+                        string strTrClass = " class='dark content " + info.strAction + "' ";
 
                         if ((i % 2) == 1)
-                            strTrClass = " class='light content' ";
+                            strTrClass = " class='light content " + info.strAction + "' ";
 
                         text.Append("<tr " + strTrClass + ">");
 
                         text.Append("<td class='no'>" + (i + this.StartIndex + 1).ToString() + "</td>");
+                        text.Append("<td class='action'>" + GetActionName(info.strAction) + "</td>");
                         text.Append("<td class='barcode'>" + strBarcodeLink + "</td>");
                         text.Append("<td class='summary pending' >" + info.strBarcode + "</td>");
 
@@ -658,20 +674,27 @@ namespace DigitalPlatform.OPAC.Web
                             text.Append("<td class='borrowinfo'>" + "</td>");
                         else
                         {
-                            text.Append("<td class='borrowinfo'>"
-                                + "<div class='borrowno'>"
-                                + this.GetString("续借次")
-                                + "  :" + info.strNo + "</div>"
-                                + "<div class='borrowdate'>"
-                                + this.GetString("借阅日期")
-                                + ":" + info.strBorrowDate + "</div>"
-                                + "<div class='borrowperiod'>"
-                                + this.GetString("期限")
-                                + ":    " + info.strBorrowPeriod + "</div>"
-                                + "<div class='returndate'>"
-                                + this.GetString("还书日期")
-                                + ":" + info.strReturnDate + "</div>"
-                                + "</td>");
+                            if (info.strAction == "read")
+                                text.Append("<td class='borrowinfo'>"
+    + "<div class='returndate'>"
+    + this.GetString("操作日期")
+    + ":" + info.strReturnDate + "</div>"
+    + "</td>");
+                            else
+                                text.Append("<td class='borrowinfo'>"
+                                    + "<div class='borrowno'>"
+                                    + this.GetString("续借次")
+                                    + "  :" + info.strNo + "</div>"
+                                    + "<div class='borrowdate'>"
+                                    + this.GetString("借阅日期")
+                                    + ":" + info.strBorrowDate + "</div>"
+                                    + "<div class='borrowperiod'>"
+                                    + this.GetString("期限")
+                                    + ":    " + info.strBorrowPeriod + "</div>"
+                                    + "<div class='returndate'>"
+                                    + this.GetString("还书日期")
+                                    + ":" + info.strReturnDate + "</div>"
+                                    + "</td>");
                         }
 
                         text.Append("<td class='renewcomment'>" + info.strRenewComment + "</td>");
@@ -679,14 +702,21 @@ namespace DigitalPlatform.OPAC.Web
                         if (this.DatabaseMode == false || info.IsEmpty())
                             text.Append("<td class='operator'>" + info.strOperator + "</td>");
                         else
-                            text.Append("<td class='operator'>"
-    + "<div class='borrowoperator'>"
-    + this.GetString("借")
-    + ": " + info.strBorrowOperator + "</div>"
-    + "<div class='returnoperator'>"
-    + this.GetString("还")
-    + ": " + info.strOperator + "</div>"
-    + "</td>");
+                        {
+                            if (info.strAction == "read")
+                                text.Append("<td class='operator'>"
+                                    + info.strOperator
+                                    + "</td>");
+                            else
+                                text.Append("<td class='operator'>"
+        + "<div class='borrowoperator'>"
+        + this.GetString("借")
+        + ": " + info.strBorrowOperator + "</div>"
+        + "<div class='returnoperator'>"
+        + this.GetString("还")
+        + ": " + info.strOperator + "</div>"
+        + "</td>");
+                        }
 
                         text.Append("</tr>");
 
@@ -719,6 +749,15 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             base.Render(writer);
+        }
+
+        static string GetActionName(string strText)
+        {
+            if (strText == "return")
+                return "借阅";
+            if (strText == "read")
+                return "读过";
+            return strText;
         }
     }
 }
