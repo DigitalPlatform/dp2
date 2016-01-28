@@ -41,7 +41,6 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
-
         // 一次操作循环
         public override void Worker()
         {
@@ -667,116 +666,120 @@ namespace DigitalPlatform.OPAC.Server
 
             bool bError = false;
 
-            // 如果文件已经存在，就不要从rmsws获取了
-            if (File.Exists(strResultsetFilename) == true
-                && strPart == "rss")
+            LibraryChannel channel = this.App.GetChannel();
+            channel.Idle += new IdleEventHandler(channel_Idle);
+            try
             {
-                if (bRss == false)
+                // 如果文件已经存在，就不要从 dp2library 获取了
+                if (File.Exists(strResultsetFilename) == true
+                    && strPart == "rss")
                 {
-                    // TODO: 警告这种矛盾
-                }
-
-                // 复制文件，用临时文件为创建RSS文件的源用
-                // 这样可以减少锁定冲突
-                File.Copy(strResultsetFilename,
-                    strTempResultsetFilename,
-                    true);
-                File.Copy(
-                    strResultsetFilename + ".index",
-                    strTempResultsetFilename + ".index",
-                    true);
-                bool bDone = false;
-                try
-                {
-                    SetProgressText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename);
-                    this.AppendResultText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename + "\r\n");
-
-                    // 从结果集文件输出RSS内容
-                    nRet = BuildRssFile(strTempResultsetFilename,
-                        nMaxCount,
-                        strDirection,
-                        strPureCaption,
-                        strChannelLink,
-                        strSelfLink,
-                        strDescription,
-                        strTempResultsetFilename + ".rss",
-                        out nCount,
-                        out strError);
-                    if (nRet == -1)
+                    if (bRss == false)
                     {
-                        return -1;
+                        // TODO: 警告这种矛盾
                     }
-                    bDone = true;
-                    this.AppendResultText("  包含记录 " + nCount.ToString() + " 条\r\n");
-                    this.SetProgressText("");
-                }
-                finally
-                {
-                    // 替换
+
+                    // 复制文件，用临时文件为创建RSS文件的源用
+                    // 这样可以减少锁定冲突
+                    File.Copy(strResultsetFilename,
+                        strTempResultsetFilename,
+                        true);
+                    File.Copy(
+                        strResultsetFilename + ".index",
+                        strTempResultsetFilename + ".index",
+                        true);
+                    bool bDone = false;
                     try
                     {
-                        this.App.ResultsetLocks.LockForWrite(strResultsetFilename + ".rss",
-                            500);
+                        SetProgressText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename);
+                        this.AppendResultText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename + "\r\n");
+
+                        // 从结果集文件输出RSS内容
+                        nRet = BuildRssFile(
+                            channel,
+                            strTempResultsetFilename,
+                            nMaxCount,
+                            strDirection,
+                            strPureCaption,
+                            strChannelLink,
+                            strSelfLink,
+                            strDescription,
+                            strTempResultsetFilename + ".rss",
+                            out nCount,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            return -1;
+                        }
+                        bDone = true;
+                        this.AppendResultText("  包含记录 " + nCount.ToString() + " 条\r\n");
+                        this.SetProgressText("");
+                    }
+                    finally
+                    {
+                        // 替换
                         try
                         {
-                            if (bDone == true)
+                            this.App.ResultsetLocks.LockForWrite(strResultsetFilename + ".rss",
+                                500);
+                            try
                             {
-                                File.Delete(strResultsetFilename + ".rss");
-                                File.Move(strTempResultsetFilename + ".rss", strResultsetFilename + ".rss");
+                                if (bDone == true)
+                                {
+                                    File.Delete(strResultsetFilename + ".rss");
+                                    File.Move(strTempResultsetFilename + ".rss", strResultsetFilename + ".rss");
+                                }
+                                // 删除临时文件
+                                File.Delete(strTempResultsetFilename);
+                                File.Delete(strTempResultsetFilename + ".index");
                             }
-                            // 删除临时文件
-                            File.Delete(strTempResultsetFilename);
-                            File.Delete(strTempResultsetFilename + ".index");
+                            finally
+                            {
+                                this.App.ResultsetLocks.UnlockForWrite(strResultsetFilename + ".rss");
+                            }
                         }
-                        finally
+                        catch (System.ApplicationException)
                         {
-                            this.App.ResultsetLocks.UnlockForWrite(strResultsetFilename + ".rss");
+                            bError = true;
+                            strError = "相关文件被占用";
+                            // TODO: 怎么善后?
                         }
                     }
-                    catch (System.ApplicationException)
+
+                    if (bError == true)
+                        return 1;
+                }
+                else
+                {
+                    int nResultSetCount = 0;
+                    int nRssCount = 0;
+
+                    /*
+                    nRet = this.App.InitialVdbs(this.Channel,
+                out strError);
+                    if (nRet == -1)
                     {
-                        bError = true;
-                        strError = "相关文件被占用";
-                        // TODO: 怎么善后?
+                        strError = "InitialVdbs error : " + strError;
+                        return -1;
                     }
-                }
+                     * */
 
-                if (bError == true)
-                    return 1;
-            }
-            else
-            {
-                int nResultSetCount = 0;
-                int nRssCount = 0;
+                    string strXml = "";
+                    nRet = BuildXmlQuery(node,
+                        out strXml,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
-                /*
-                nRet = this.App.InitialVdbs(this.Channel,
-            out strError);
-                if (nRet == -1)
-                {
-                    strError = "InitialVdbs error : " + strError;
-                    return -1;
-                }
-                 * */
+                    if (string.IsNullOrEmpty(strXml) == true)
+                    {
+                        strError = "下列配置节点无法创建XML检索式: " + node.OuterXml;
+                        return -1;
+                    }
 
-                string strXml = "";
-                nRet = BuildXmlQuery(node,
-                    out strXml,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
+                    string strResultSetName = "opac_browse_" + strPureCaption;
 
-                if (string.IsNullOrEmpty(strXml) == true)
-                {
-                    strError = "下列配置节点无法创建XML检索式: " + node.OuterXml;
-                    return -1;
-                }
 
-                string strResultSetName = "opac_browse_" + strPureCaption;
-
-                this.Channel.Idle += new IdleEventHandler(channel_Idle);
-                try
-                {
                     long lRet = 0;
                     int nRedoCount = 0;
 
@@ -789,7 +792,7 @@ namespace DigitalPlatform.OPAC.Server
                     // TODO: 超时发生后输出耗费的时间?
                     DateTime start_time = DateTime.Now;
 
-                    lRet = this.Channel.Search(
+                    lRet = channel.Search(
                         null,
                         strXml,
                         strResultSetName,
@@ -800,16 +803,16 @@ namespace DigitalPlatform.OPAC.Server
                         TimeSpan delta = DateTime.Now - start_time;
 
                         // 超时处理
-                        if (this.Channel.ErrorCode == LibraryClient.localhost.ErrorCode.RequestTimeOut
+                        if (//this.Channel.
+                            channel.ErrorCode == LibraryClient.localhost.ErrorCode.RequestTimeOut
                             && nRedoCount < 5)
                         {
-                            this.Channel.Abort();
-                            this.Channel.Timeout = this.Channel.Timeout.Add(this.Channel.Timeout);
+                            channel.Abort();
+                            channel.Timeout = channel.Timeout.Add(channel.Timeout);
                             nRedoCount++;
                             this.AppendResultText("警告：检索发生超时(耗费时间 " + delta.TotalMilliseconds.ToString() + " 秒), 自动重试 (" + nRedoCount.ToString() + ")\r\n");
                             goto REDO_SEARCH;
                         }
-
 
                         strError = "DoSearch() error : " + strError;
                         return -1;
@@ -822,7 +825,7 @@ namespace DigitalPlatform.OPAC.Server
 
                     string strConvert = DomUtil.GetAttr(node, "convert");
 
-                    nRet = GetResultset(this.Channel,
+                    nRet = GetResultset(channel,
                         strResultSetName,
                         strTempResultsetFilename,
                         StringUtil.IsInList("tobiblio", strConvert) == true ? "tobibliorecpath" : "",
@@ -843,121 +846,123 @@ namespace DigitalPlatform.OPAC.Server
                     {
                         return 0;
                     }*/
-                }
-                finally
-                {
-                    this.Channel.Idle -= new IdleEventHandler(channel_Idle);
-                }
 
-                // 替换两个文件
-                try
-                {
-                    this.App.ResultsetLocks.LockForWrite(strResultsetFilename,
-                        500);
+                    // 替换两个文件
                     try
                     {
-                        File.Delete(strResultsetFilename);
-                        File.Delete(strResultsetFilename + ".index");
-
-                        if (bRss == true)
-                        {
-                            // 复制文件，留下临时文件为创建RSS文件作为源用
-                            // 这样可以减少锁定冲突
-                            File.Copy(strTempResultsetFilename,
-                                strResultsetFilename,
-                                true);
-                            File.Copy(strTempResultsetFilename + ".index",
-                                strResultsetFilename + ".index",
-                                true);
-                        }
-                        else
-                        {
-                            File.Move(strTempResultsetFilename, strResultsetFilename);
-                            File.Move(strTempResultsetFilename + ".index", strResultsetFilename + ".index");
-                        }
-                    }
-                    finally
-                    {
-                        this.App.ResultsetLocks.UnlockForWrite(strResultsetFilename);
-                    }
-                }
-                catch (System.ApplicationException)
-                {
-                    strError = "相关文件被占用1";
-                    // TODO: 怎么善后?
-                    return 1;
-                }
-
-                if (bRss == true)
-                {
-                    bool bDone = false;
-                    try
-                    {
-                        SetProgressText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename);
-                        this.AppendResultText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename + "\r\n");
-
-                        // 从结果集文件输出RSS内容
-                        nRet = BuildRssFile(strTempResultsetFilename,
-                            nMaxCount,
-                            strDirection,
-                            strPureCaption,
-                            strChannelLink,
-                            strSelfLink,
-                            strDescription,
-                            null,
-                            out nRssCount,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            return -1;
-                        }
-
-                        bDone = true;
-                        this.AppendResultText("  包含记录 " + nRssCount.ToString() + " 条\r\n");
-
-                    }
-                    finally
-                    {
-                        // 替换RSS文件
+                        this.App.ResultsetLocks.LockForWrite(strResultsetFilename,
+                            500);
                         try
                         {
-                            this.App.ResultsetLocks.LockForWrite(strResultsetFilename + ".rss",
-                                500);
-                            try
-                            {
-                                if (bDone == true)
-                                {
-                                    File.Delete(strResultsetFilename + ".rss");
-                                    File.Move(strTempResultsetFilename + ".rss",
-                                        strResultsetFilename + ".rss");
-                                }
+                            File.Delete(strResultsetFilename);
+                            File.Delete(strResultsetFilename + ".index");
 
-                                // 删除临时文件
-                                File.Delete(strTempResultsetFilename);
-                                File.Delete(strTempResultsetFilename + ".index");
-                            }
-                            finally
+                            if (bRss == true)
                             {
-                                this.App.ResultsetLocks.UnlockForWrite(strResultsetFilename + ".rss");
+                                // 复制文件，留下临时文件为创建RSS文件作为源用
+                                // 这样可以减少锁定冲突
+                                File.Copy(strTempResultsetFilename,
+                                    strResultsetFilename,
+                                    true);
+                                File.Copy(strTempResultsetFilename + ".index",
+                                    strResultsetFilename + ".index",
+                                    true);
+                            }
+                            else
+                            {
+                                File.Move(strTempResultsetFilename, strResultsetFilename);
+                                File.Move(strTempResultsetFilename + ".index", strResultsetFilename + ".index");
                             }
                         }
-                        catch (System.ApplicationException)
+                        finally
                         {
-                            bError = true;
-                            strError = "相关文件被占用2";
-                            // TODO: 怎么善后?
+                            this.App.ResultsetLocks.UnlockForWrite(strResultsetFilename);
                         }
                     }
-
-                    if (bError == true)
+                    catch (System.ApplicationException)
+                    {
+                        strError = "相关文件被占用1";
+                        // TODO: 怎么善后?
                         return 1;
+                    }
 
+                    if (bRss == true)
+                    {
+                        bool bDone = false;
+                        try
+                        {
+                            SetProgressText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename);
+                            this.AppendResultText("创建RSS文件" + " " + strPureCaption + " -- " + strResultsetFilename + "\r\n");
+
+                            // 从结果集文件输出RSS内容
+                            nRet = BuildRssFile(
+                                channel,
+                                strTempResultsetFilename,
+                                nMaxCount,
+                                strDirection,
+                                strPureCaption,
+                                strChannelLink,
+                                strSelfLink,
+                                strDescription,
+                                null,
+                                out nRssCount,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                return -1;
+                            }
+
+                            bDone = true;
+                            this.AppendResultText("  包含记录 " + nRssCount.ToString() + " 条\r\n");
+
+                        }
+                        finally
+                        {
+                            // 替换RSS文件
+                            try
+                            {
+                                this.App.ResultsetLocks.LockForWrite(strResultsetFilename + ".rss",
+                                    500);
+                                try
+                                {
+                                    if (bDone == true)
+                                    {
+                                        File.Delete(strResultsetFilename + ".rss");
+                                        File.Move(strTempResultsetFilename + ".rss",
+                                            strResultsetFilename + ".rss");
+                                    }
+
+                                    // 删除临时文件
+                                    File.Delete(strTempResultsetFilename);
+                                    File.Delete(strTempResultsetFilename + ".index");
+                                }
+                                finally
+                                {
+                                    this.App.ResultsetLocks.UnlockForWrite(strResultsetFilename + ".rss");
+                                }
+                            }
+                            catch (System.ApplicationException)
+                            {
+                                bError = true;
+                                strError = "相关文件被占用2";
+                                // TODO: 怎么善后?
+                            }
+                        }
+
+                        if (bError == true)
+                            return 1;
+
+                    }
+
+
+                    nCount = nResultSetCount + nRssCount;
                 }
-
-
-                nCount = nResultSetCount + nRssCount;
             }
-
+            finally
+            {
+                channel.Idle -= new IdleEventHandler(channel_Idle);
+                this.App.ReturnChannel(channel);
+            }
 
             return 0;
         }
@@ -1323,7 +1328,7 @@ namespace DigitalPlatform.OPAC.Server
 
             // e.bDoEvents = false;
 
-            System.Threading.Thread.Sleep(100);	// 避免CPU资源过度耗费
+            // System.Threading.Thread.Sleep(100);	// 避免CPU资源过度耗费
         }
 
         public static string GetMyBookshelfFilename(
@@ -1860,7 +1865,9 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
-        int BuildRssFile(string strResultsetFilename,
+        int BuildRssFile(
+            LibraryChannel channel,
+            string strResultsetFilename,
             long nMaxCount,
             string strDirection,
             string strChannelTitle,
@@ -2006,7 +2013,7 @@ namespace DigitalPlatform.OPAC.Server
                             byte[] item_timestamp = null;
                             string strItemOutputPath = "";
                             // TODO: 优化为成批获取
-                            lRet = this.Channel.GetRes(null,
+                            lRet = channel.GetRes(null,
                                 strPath,
                                 strStyle,
                                 out strItemXml,
@@ -2050,7 +2057,7 @@ namespace DigitalPlatform.OPAC.Server
 
                         string[] results = null;
 
-                        lRet = this.Channel.GetBiblioInfos(
+                        lRet = channel.GetBiblioInfos(
                             null,
                             strBiblioRecPath,
                             "",

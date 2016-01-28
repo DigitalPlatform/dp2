@@ -1514,8 +1514,8 @@ MessageBoxDefaultButton.Button1);
                     if (nRet < 2)
                     {
                         // 提示升级安装
-                        // 从以前的rmsws数据目录升级
-                        string strText = "数据目录 '" + strDataDir + "' 中已经存在以前的 V1 数据库内核版本遗留下来的数据文件。\r\n\r\n确实要利用这个数据目录来进行升级安装么?\r\n(注意：如果利用以前rmsws的数据目录来进行升级安装，则必须先行卸载rmsws，以避免它和(正在安装的)dp2Kernel同时运行引起冲突)\r\n\r\n(是)继续进行升级安装 (否)暂停安装，以重新指定数据目录";
+                        // 从以前的 rmsws 数据目录升级
+                        string strText = "数据目录 '" + strDataDir + "' 中已经存在以前的 V1 数据库内核版本遗留下来的数据文件。\r\n\r\n确实要利用这个数据目录来进行升级安装么?\r\n(注意：如果利用以前 rmsws 的数据目录来进行升级安装，则必须先行卸载 rmsws，以避免它和(正在安装的) dp2Kernel 同时运行引起冲突)\r\n\r\n(是)继续进行升级安装 (否)暂停安装，以重新指定数据目录";
                         DialogResult result = MessageBox.Show(
                             this,
             strText,
