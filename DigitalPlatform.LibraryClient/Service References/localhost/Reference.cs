@@ -2659,6 +2659,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private long CountField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LangField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string LibraryCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -2718,6 +2721,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((this.CountField.Equals(value) != true)) {
                     this.CountField = value;
                     this.RaisePropertyChanged("Count");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Lang {
+            get {
+                return this.LangField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LangField, value) != true)) {
+                    this.LangField = value;
+                    this.RaisePropertyChanged("Lang");
                 }
             }
         }

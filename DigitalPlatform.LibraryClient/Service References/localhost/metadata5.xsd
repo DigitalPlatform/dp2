@@ -1537,6 +1537,7 @@
       <xs:element minOccurs="0" name="CallCount" type="xs:long" />
       <xs:element minOccurs="0" name="ClientIP" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Count" type="xs:long" />
+      <xs:element minOccurs="0" name="Lang" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="LibraryCode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Location" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="SessionID" nillable="true" type="xs:string" />

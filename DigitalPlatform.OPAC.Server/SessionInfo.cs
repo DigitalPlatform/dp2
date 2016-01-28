@@ -300,19 +300,27 @@ namespace DigitalPlatform.OPAC.Server
 
         public void CloseSession()
         {
+
+#if USE_SESSION_CHANNEL
             try
             {
-#if USE_SESSION_CHANNEL
                 if (this.Channel != null)
                 {
                     this.Channel.Close();
                     this.Channel = null;
                 }
-#endif
             }
             catch
             {
             }
+#else
+            // 将通道池中匹配当前用户名的闲置通道释放
+            if (string.IsNullOrEmpty(this.m_strUserName) == false
+                && this.m_strUserName != "public")
+            {
+                this.App.ChannelPool.CleanChannel(this.m_strUserName);
+            }
+#endif
             // this.ClearFilterTask(); 后面一句 ClearTempFiles() 会删除所有临时文件
             this.ClearTempFiles();
         }

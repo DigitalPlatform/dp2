@@ -605,11 +605,13 @@ DIV.createtime
         this.Response.End();
     }
 
+#if NO
     bool MyFlushOutput()
     {
         Response.Flush();
         return Response.IsClientConnected;
     }
+#endif
 
     // 获得路径的第一级
     static string GetFirstLevel(string strPath)

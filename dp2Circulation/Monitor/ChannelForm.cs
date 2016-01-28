@@ -32,7 +32,8 @@ namespace dp2Circulation
         const int COLUMN_LOCATION = 4;
         const int COLUMN_CALLCOUNT = 5;
         const int COLUMN_LIBRARYCODE = 6;
-        const int COLUMN_SESSIONID = 7;
+        const int COLUMN_LANG = 7;
+        const int COLUMN_SESSIONID = 8;
 
         /// <summary>
         /// 构造函数
@@ -88,7 +89,6 @@ namespace dp2Circulation
                     strWidths);
             }
         }
-
 
         int DoSearch(
             string strUserName,
@@ -169,6 +169,7 @@ namespace dp2Circulation
 
                         ListViewUtil.ChangeItemText(item, COLUMN_SESSIONID, info.SessionID);
                         ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, info.Location);
+                        ListViewUtil.ChangeItemText(item, COLUMN_LANG, info.Lang);
 
                         item.SubItems[0].Font = new Font("Courier New", this.Font.Size);
 

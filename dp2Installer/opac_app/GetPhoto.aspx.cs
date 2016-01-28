@@ -221,9 +221,11 @@ ref sessioninfo) == false)
         }
     }
 
+#if NO
     bool MyFlushOutput()
     {
         Response.Flush();
         return Response.IsClientConnected;
     }
+#endif
 }

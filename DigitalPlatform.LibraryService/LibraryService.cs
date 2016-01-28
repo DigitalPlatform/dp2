@@ -149,7 +149,7 @@ namespace dp2Library
             if (prop.Via.Scheme == "net.pipe")
             {
                 // 没有 IP
-                strIP = "localhost";
+                strIP = "::1";  // "localhost";
                 return;
             }
             try
@@ -966,8 +966,12 @@ namespace dp2Library
                 return result;
 
             strOldLang = sessioninfo.Lang;
+#if NO
             if (String.IsNullOrEmpty(strLang) == false)
                 sessioninfo.Lang = strLang;
+#endif
+            // 2016/1/28
+            SetLang(strLang);
 
             // END1:
             result.Value = 0;
@@ -1283,6 +1287,9 @@ namespace dp2Library
     CultureInfo.CreateSpecificCulture(strLang);
             Thread.CurrentThread.CurrentUICulture = new
                 CultureInfo(strLang);
+
+            if (sessioninfo != null)
+                sessioninfo.Lang = strLang;
         }
 
         // 获得读者信息

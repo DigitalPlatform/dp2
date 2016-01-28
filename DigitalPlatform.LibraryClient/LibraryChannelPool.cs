@@ -56,7 +56,7 @@ namespace DigitalPlatform.LibraryClient
                 if (this.Count >= MaxCount)
                 {
                     // 清理不用的通道
-                    int nDeleteCount = CleanChannel(false);
+                    int nDeleteCount = _cleanChannel(false);
                     if (nDeleteCount == 0)
                     {
                         // 全部都在使用
@@ -162,10 +162,17 @@ namespace DigitalPlatform.LibraryClient
             }
         }
 
-        // 清理不用的通道
+        public int CleanChannel(string strUserName = "")
+        {
+            return _cleanChannel(true, strUserName);
+        }
+
+        // 清理处在未使用状态的通道
+        // parameters:
+        //      strUserName 希望清除用户名为此值的全部通道。如果本参数值为空，则表示清除全部通道
         // return:
         //      清理掉的通道数目
-        public int CleanChannel(bool bLock)
+        int _cleanChannel(bool bLock, string strUserName = "")
         {
             List<LibraryChannelWrapper> deletes = new List<LibraryChannelWrapper>();
 
@@ -179,7 +186,9 @@ namespace DigitalPlatform.LibraryClient
                 for (int i = 0; i < this.Count; i++)
                 {
                     LibraryChannelWrapper wrapper = this[i];
-                    if (wrapper.InUsing == false)
+                    if (wrapper.InUsing == false
+                        && (string.IsNullOrEmpty(strUserName) == true || wrapper.Channel.UserName == strUserName)
+                        )
                     {
                         this.RemoveAt(i);
                         i--;
