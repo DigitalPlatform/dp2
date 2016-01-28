@@ -3116,7 +3116,7 @@ namespace DigitalPlatform.LibraryServer
                         // <yczb>
                         /*
         <yczb>
-            <sso appID='CBPM_Library' validateWsUrl='http://portal.cbpmc.cbpm/AuthCenter/services/validate' />
+            <sso appID='CBPM_Library' validateWsUrl='http://.../AuthCenter/services/validate' />
         </yczb>
                          * */
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//yczb");

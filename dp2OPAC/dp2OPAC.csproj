@@ -1279,8 +1279,6 @@
     <None Include="Old_App_WebReferences\dp2libraryws\gcat_ws\gcat.discomap" />
     <None Include="Old_App_WebReferences\dp2libraryws\gcat_ws\gcat.wsdl" />
     <Content Include="Old_App_WebReferences\NanchangSso.zip" />
-    <None Include="Old_App_WebReferences\YczbSso\ValidatorImplService.discomap" />
-    <None Include="Old_App_WebReferences\YczbSso\ValidatorImplService.wsdl" />
     <None Include="jquery-ui-1.8.14\development-bundle\demos\autocomplete\search.php" />
     <None Include="jquery-ui-1.8.14\development-bundle\demos\tabs\ajax\content3-slow.php" />
     <None Include="jquery-ui-1.8.14\development-bundle\demos\tabs\ajax\content4-broken.php" />

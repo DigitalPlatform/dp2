@@ -16,8 +16,6 @@ using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-// using DigitalPlatform.OPAC.Server.YczbSso;
-
 public partial class Login : MyWebPage
 {
     //OpacApplication app = null;
@@ -188,7 +186,6 @@ ref this.sessioninfo) == false)
 
                 {
                     // 判断当前是不是yczb sso状态
-
                     HttpCookie cookie = Request.Cookies.Get("iPlanetDirectoryPro");
                     if (cookie == null)
                         goto DONE;
