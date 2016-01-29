@@ -1248,6 +1248,7 @@ SetStartEventArgs e);
             return true;
         }
 
+        // 读者记录发生修改后，要把和该读者登录的 Session 给清除，这样就避免后面用到旧的读者权限
         public int CloseSessionByReaderBarcode(string strReaderBarcode)
         {
             List<string> remove_keys = new List<string>();
@@ -1316,7 +1317,6 @@ SetStartEventArgs e);
                 info.CloseSession();
             }
             return nCount;
-
         }
 
         public void DeleteSession(SessionInfo sessioninfo,

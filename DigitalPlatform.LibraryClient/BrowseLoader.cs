@@ -57,8 +57,11 @@ namespace DigitalPlatform.LibraryClient
                     (index == m_recpaths.Count - 1 && batch.Count > 0))
                 {
                 REDO:
+#if NO
                     string[] paths = new string[batch.Count];
                     batch.CopyTo(paths);
+#endif
+                    string [] paths = batch.ToArray();
 
                     DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     string strError = "";
@@ -107,6 +110,10 @@ namespace DigitalPlatform.LibraryClient
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
+                        if (batch[i] != record.Path)
+                        {
+                            throw new Exception("下标 "+i+" 的 batch 元素 '"+batch[i]+"' 和返回的该下标位置 GetBrowseRecords() 结果路径 '"+record.Path+"' 不匹配");
+                        }
                         Debug.Assert(batch[i] == record.Path, "");
                         yield return record;
                     }

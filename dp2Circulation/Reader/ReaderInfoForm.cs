@@ -2053,6 +2053,8 @@ strSavedXml);
 
                         stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
+                        int nRedoCount = 0;
+                    REDO_LOAD_HTML:
                         string[] results = null;
                         lRet = Channel.GetReaderInfo(
                             stop,
@@ -2064,6 +2066,13 @@ strSavedXml);
                             out strError);
                         if (lRet == -1)
                         {
+                            // 以读者身份保存自己的读者记录后，dp2library 为了清除以前缓存的登录信息，强制释放了通道。所以这里需要能重试操作
+                            if (Channel.ErrorCode == ErrorCode.ChannelReleased
+                                && nRedoCount < 10)
+                            {
+                                nRedoCount++;
+                                goto REDO_LOAD_HTML;
+                            }
                             strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
                             // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
                             this.m_webExternalHost.SetTextString(strError);
@@ -2097,7 +2106,6 @@ strSavedXml);
 #endif
                         this.SetReaderHtmlString(strHtml);
                     }
-
                 }
 
                 // 更新指纹高速缓存

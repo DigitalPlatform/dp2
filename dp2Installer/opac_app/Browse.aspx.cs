@@ -457,7 +457,7 @@ ref sessioninfo) == false)
         bool bRedo = false;
 
     REDO:
-        // 如果文件已经存在，就不要从rmsws获取了
+        // 如果文件已经存在，就不要从 dp2library 获取了
         try
         {
             app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
@@ -832,7 +832,7 @@ ref sessioninfo) == false)
         string strResultsetFilename = strCacheDir + "/" + strPrefix;
 
 
-        // 如果RSS文件已经存在，就不要从rmsws获取了
+        // 如果RSS文件已经存在，就不要从 dp2library 获取了
         if (File.Exists(strResultsetFilename + ".rss") == true)
         {
             // return:

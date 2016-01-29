@@ -23,6 +23,7 @@ TABLE.borrowhistory TD
 TABLE.borrowhistory TR.columntitle
 {
 	font-weight: bolder;
+    white-space: nowrap;
 }
 
 TABLE.borrowhistory TD.no
@@ -36,7 +37,11 @@ TABLE.borrowhistory TR.content TD.no
     color: White;
     font-weight:bolder;
 	background-color: #999999;
-	
+}
+
+TABLE.borrowhistory TR.read TD.action
+{
+	background-color: #00f000;
 }
 
 TABLE.borrowhistory TD.barcode

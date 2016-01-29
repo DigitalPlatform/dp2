@@ -48,7 +48,7 @@ namespace dp2Circulation
         const int WM_LOADSIZE = API.WM_USER + 202;
 #endif
 
-        string [] type_names = new string[] {
+        string[] type_names = new string[] {
             "biblio","书目",
             "entity","实体",
             "order","订购",
@@ -82,7 +82,7 @@ namespace dp2Circulation
             for (int i = 0; i < type_names.Length / 2; i++)
             {
                 if (type_names[i * 2] == strTypeString)
-                    return type_names[i * 2+1];
+                    return type_names[i * 2 + 1];
             }
 
             return null;    // not found
@@ -945,7 +945,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在删除数据库 "+strDatabaseNames+"...");
+            stop.Initial("正在删除数据库 " + strDatabaseNames + "...");
             stop.BeginLoop();
 
             this.Update();
@@ -1162,7 +1162,7 @@ namespace dp2Circulation
 
             // 对话框警告
             DialogResult result = MessageBox.Show(this,
-                "确实要删除数据库 "+strDbNameList+"?\r\n\r\n警告：数据库一旦被删除后，其内的数据记录将全部丢失，并再也无法复原",
+                "确实要删除数据库 " + strDbNameList + "?\r\n\r\n警告：数据库一旦被删除后，其内的数据记录将全部丢失，并再也无法复原",
                 "ManagerForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -1727,14 +1727,14 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            
+
 
 
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("观察所选 "+this.listView_databases.SelectedItems.Count.ToString()+" 个数据库的定义(&D)");
+            menuItem = new MenuItem("观察所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库的定义(&D)");
             menuItem.Click += new System.EventHandler(this.menu_viewDatabaseDefine_Click);
             if (this.listView_databases.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -1748,7 +1748,7 @@ namespace dp2Circulation
             menuItem.Click += new System.EventHandler(this.toolStripButton_refresh_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_databases, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_databases, new Point(e.X, e.Y));
         }
 
         // 观察数据库定义XML
@@ -1998,14 +1998,14 @@ namespace dp2Circulation
             if (library_uri.IsLoopback == true)
                 return; // 说明前端和图书馆服务器同在一台机器，就不用替换了
 
-            string[] parts = strDbPaths.Split(new char[] {';'});
+            string[] parts = strDbPaths.Split(new char[] { ';' });
             string strResult = "";
             for (int i = 0; i < parts.Length; i++)
             {
                 string strDbPath = parts[i].Trim();
                 if (String.IsNullOrEmpty(strDbPaths) == true)
                     continue;
-                
+
                 Uri uri = new Uri(strDbPath);
                 if (uri.IsLoopback == true)
                 {
@@ -2172,7 +2172,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                 {
                     if (String.IsNullOrEmpty(strKeysChangedDbpaths) == false)
-                        strError += "。不过下列内核数据库的检索点定义已经发生修改:\r\n---\r\n" + strKeysChangedDbpaths.Replace(";","\r\n") 
+                        strError += "。不过下列内核数据库的检索点定义已经发生修改:\r\n---\r\n" + strKeysChangedDbpaths.Replace(";", "\r\n")
                             + strOtherComment;
                     if (style_dlg.AutoRebuildKeys == false)
                         Clipboard.SetDataObject(strKeysChangedDbpaths);
@@ -2583,7 +2583,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取数据库 "+strDbName+" 的定义...");
+            stop.Initial("正在获取数据库 " + strDbName + " 的定义...");
             stop.BeginLoop();
 
             this.Update();
@@ -2782,7 +2782,7 @@ namespace dp2Circulation
 
                             if (strExistName == strOneName)
                             {
-                                strError = "语言代码 '" + strOneLang + "' 下的虚拟库名 '" + strOneName + "' 和当前已经存在的列表中第 " + (j + 1).ToString() + " 行的语言 '"+strExistLang+"' 下的虚拟库名 '"+strExistName+"' 发生了重复";
+                                strError = "语言代码 '" + strOneLang + "' 下的虚拟库名 '" + strOneName + "' 和当前已经存在的列表中第 " + (j + 1).ToString() + " 行的语言 '" + strExistLang + "' 下的虚拟库名 '" + strExistName + "' 发生了重复";
                                 return 1;
                             }
                         }
@@ -2791,7 +2791,7 @@ namespace dp2Circulation
                     {
                         if (strName == strOneName)
                         {
-                            strError = "语言代码 '" + strOneLang + "' 下的虚拟库名 '" + strOneName + "' 和当前已经存在的普通库名(列表中第 "+(j+1).ToString()+" 行)发生了重复";
+                            strError = "语言代码 '" + strOneLang + "' 下的虚拟库名 '" + strOneName + "' 和当前已经存在的普通库名(列表中第 " + (j + 1).ToString() + " 行)发生了重复";
                             return 1;
                         }
                     }
@@ -2831,7 +2831,6 @@ namespace dp2Circulation
                 strType = ListViewUtil.GetItemText(this.listView_opacDatabases.SelectedItems[0], 1);
             }
 
-
             // 修改OPAC数据库
             {
                 menuItem = new MenuItem("修改" + strType + " " + strName + "(&M)");
@@ -2842,7 +2841,6 @@ namespace dp2Circulation
                 menuItem.DefaultItem = true;
                 contextMenu.MenuItems.Add(menuItem);
             }
-
 
             // ---
             menuItem = new MenuItem("-");
@@ -2919,7 +2917,7 @@ namespace dp2Circulation
             menuItem.Click += new System.EventHandler(this.toolStripButton_refreshOpacDatabaseList_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_opacDatabases, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_opacDatabases, new Point(e.X, e.Y));
 
         }
 
@@ -2948,7 +2946,7 @@ namespace dp2Circulation
             ListViewItem item = this.listView_opacDatabases.SelectedItems[0];
             int index = this.listView_opacDatabases.Items.IndexOf(item);
 
-            Debug.Assert(index >= 0 && index <= this.listView_opacDatabases.Items.Count - 1,"");
+            Debug.Assert(index >= 0 && index <= this.listView_opacDatabases.Items.Count - 1, "");
 
             bool bChanged = false;
 
@@ -3174,8 +3172,9 @@ namespace dp2Circulation
                 string strXml = (string)item.Tag;
 
                 XmlDocument dom = new XmlDocument();
-                try {
-                dom.LoadXml(strXml);
+                try
+                {
+                    dom.LoadXml(strXml);
                 }
                 catch (Exception ex)
                 {
@@ -3320,9 +3319,6 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
-
-
 
         // 提交OPAC数据库定义修改
         int SubmitOpacDatabaseDef(out string strError)
@@ -3718,7 +3714,7 @@ namespace dp2Circulation
                 index = this.treeView_opacBrowseFormats.Nodes.Count;
             else
                 index++;
-            
+
 
             // 当前已经存在的数据库名都是需要排除的
             List<string> existing_dbnames = new List<string>();
@@ -3816,7 +3812,7 @@ namespace dp2Circulation
 
                 index++;
 
-                current_treenode = current_treenode.Parent; 
+                current_treenode = current_treenode.Parent;
             }
 
             // 至此，current_treenode为数据库类型的节点了
@@ -4126,8 +4122,8 @@ namespace dp2Circulation
             }
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(treeView_opacBrowseFormats, new Point(e.X, e.Y));		
-			
+            contextMenu.Show(treeView_opacBrowseFormats, new Point(e.X, e.Y));
+
         }
 
         void menu_opacBrowseFormatNode_up_Click(object sender, EventArgs e)
@@ -5098,7 +5094,7 @@ namespace dp2Circulation
             dlg.ItemBarcodeNullable = true;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -5112,7 +5108,7 @@ namespace dp2Circulation
             {
                 ListViewUtil.SelectLine(dup, true);
                 dup.EnsureVisible();
-                MessageBox.Show(this, "拟新增的馆藏地事项 '"+GetLocationItemName(dup)+"' 已经存在了，请修改后重新创建");
+                MessageBox.Show(this, "拟新增的馆藏地事项 '" + GetLocationItemName(dup) + "' 已经存在了，请修改后重新创建");
                 dlg.CreateMode = false; // 避免 _load 再次填充空白值
                 goto REDO;
             }
@@ -5151,7 +5147,7 @@ namespace dp2Circulation
             dlg.ItemBarcodeNullable = (ListViewUtil.GetItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE) == "是") ? true : false;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -5406,7 +5402,7 @@ namespace dp2Circulation
             menuItem.Click += new System.EventHandler(this.toolStripButton_location_refresh_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_location_list, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_location_list, new Point(e.X, e.Y));
 
         }
 
@@ -5994,7 +5990,7 @@ namespace dp2Circulation
             this.textBox_script.DisableEmSetSelMsg = true;
             OnScriptTextCaretChanged();
             return;
-            ERROR1:
+        ERROR1:
             // 发出警告性的响声
             Console.Beep();
         }
@@ -6198,8 +6194,8 @@ namespace dp2Circulation
             }
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(treeView_zhongcihao, new Point(e.X, e.Y));		
-			
+            contextMenu.Show(treeView_zhongcihao, new Point(e.X, e.Y));
+
         }
 
         // 插入<group>类型节点。一级节点。
@@ -6388,11 +6384,11 @@ namespace dp2Circulation
 
             // 获得数据库syntax
             string strSyntax = "";
-                    // 获得书目库的syntax
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
+            // 获得书目库的syntax
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
             nRet = GetBiblioSyntax(dlg.SelectedDatabaseName,
                 out strSyntax,
                 out strError);
@@ -6440,7 +6436,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 if (nRet == 0)
                 {
-                    strError = "在名字表中没有找到与namespace URI '"+strUri+"' (来源于书目库格式 '"+strSyntax+"') 对应的prefix，无法创建该格式的书目库节点";
+                    strError = "在名字表中没有找到与namespace URI '" + strUri + "' (来源于书目库格式 '" + strSyntax + "') 对应的prefix，无法创建该格式的书目库节点";
                     goto ERROR1;
                 }
                 Debug.Assert(nRet == 1, "");
@@ -6485,7 +6481,7 @@ namespace dp2Circulation
 
             string strDatabaseCaption = MakeZhongcihaoDatabaseNodeName(dlg.SelectedDatabaseName);
 
-            TreeNode new_treenode = new TreeNode(strDatabaseCaption, 
+            TreeNode new_treenode = new TreeNode(strDatabaseCaption,
                 TYPE_ZHONGCIHAO_DATABASE, TYPE_ZHONGCIHAO_DATABASE);
             new_treenode.Tag = dom.DocumentElement.OuterXml;
 
@@ -6680,7 +6676,7 @@ namespace dp2Circulation
                     "name");
 
                 List<string> used_dbnames = Zhongcihao_GetAllUsedBiblioDbName(current_treenode);
-                
+
                 // 新的书目库名
                 GetOpacMemberDatabaseNameDialog dlg = new GetOpacMemberDatabaseNameDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
@@ -8140,7 +8136,7 @@ namespace dp2Circulation
             menuItem.Click += new System.EventHandler(this.toolStripButton_center_refresh_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_center, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_center, new Point(e.X, e.Y));
 
         }
 
@@ -8316,7 +8312,7 @@ namespace dp2Circulation
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_refresh_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_calendar, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_calendar, new Point(e.X, e.Y));
         }
 
         private void toolStripButton_calendar_modify_Click(object sender, EventArgs e)
@@ -8362,7 +8358,7 @@ namespace dp2Circulation
                 if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == false
                     && StringUtil.IsInList(strLibraryCode, this.Channel.LibraryCodeList) == false)
                     bOwner = false;
-           }
+            }
 
             CalendarDialog dlg = new CalendarDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -8421,7 +8417,7 @@ namespace dp2Circulation
             dlg.Comment = "";
             dlg.Content = "";
 
-            REDO:
+        REDO:
             this.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
             dlg.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -8434,7 +8430,7 @@ namespace dp2Circulation
             if (dup != null)
             {
                 ListViewUtil.SelectLine(dup, true);
-                MessageBox.Show(this, "日历名 '"+dlg.CalendarName+"' 和现有的日历名重复了，请修改");
+                MessageBox.Show(this, "日历名 '" + dlg.CalendarName + "' 和现有的日历名重复了，请修改");
                 goto REDO;
             }
 
@@ -8612,5 +8608,5 @@ namespace dp2Circulation
 
     }
 
-    #endregion // 查重
+        #endregion // 查重
 }

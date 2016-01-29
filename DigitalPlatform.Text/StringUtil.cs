@@ -60,6 +60,22 @@ namespace DigitalPlatform.Text
                 return strPath.Substring(nRet + 1).Trim();
         }
 
+        public static bool IsEqualOrSubPath(string strShort, string strLong)
+        {
+            string strDbName1 = GetFirstPartPath(ref strShort);
+            string strDbName2 = GetFirstPartPath(ref strLong);
+
+            if (strDbName1 != strDbName2)
+                return false;
+            string strRecordID1 = GetFirstPartPath(ref strShort);
+            string strRecordID2 = GetFirstPartPath(ref strLong);
+
+            if (strRecordID1 != strRecordID2)
+                return false;
+
+            return true;
+        }
+
         // 将 strMime 的左边部分和 strLeftParam 进行比较
         // return:
         //      false   不匹配
