@@ -648,12 +648,12 @@ namespace DigitalPlatform.OPAC.Web
                         StringBuilder text = new StringBuilder();
 
                         string strBarcodeLink = "<a href='book.aspx?barcode=" + info.strBarcode + "&forcelogin=userid' target='_blank'>" + info.strBarcode + "</a>";
+                        string strItemBarcode = info.strBarcode;
                         if (info.strAction == "read")
                         {
-                            string strTemp = info.strBarcode;
-                            if (string.IsNullOrEmpty(strTemp) == true)
-                                strTemp = "@biblioRecPath:" + info.strBiblioRecPath;
-                            strBarcodeLink = "<a href='book.aspx?barcode=" + strTemp + "&forcelogin=userid' target='_blank'>" + strTemp + "</a>";
+                            if (string.IsNullOrEmpty(strItemBarcode) == true)
+                                strItemBarcode = "@biblioRecPath:" + info.strBiblioRecPath;
+                            strBarcodeLink = "<a href='book.aspx?barcode=" + strItemBarcode + "&forcelogin=userid' target='_blank'>" + strItemBarcode + "</a>";
                         }
 
                         string strTrClass = " class='dark content " + info.strAction + "' ";
@@ -664,9 +664,9 @@ namespace DigitalPlatform.OPAC.Web
                         text.Append("<tr " + strTrClass + ">");
 
                         text.Append("<td class='no'>" + (i + this.StartIndex + 1).ToString() + "</td>");
-                        text.Append("<td class='action'>" + GetActionName(info.strAction) + "</td>");
+                        text.Append("<td class='action'>" + HttpUtility.HtmlEncode(GetActionName(info.strAction)) + "</td>");
                         text.Append("<td class='barcode'>" + strBarcodeLink + "</td>");
-                        text.Append("<td class='summary pending' >" + info.strBarcode + "</td>");
+                        text.Append("<td class='summary pending' >" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
 
                         info.strBorrowPeriod = app.GetDisplayTimePeriodStringEx(info.strBorrowPeriod);
 
@@ -697,7 +697,7 @@ namespace DigitalPlatform.OPAC.Web
                                     + "</td>");
                         }
 
-                        text.Append("<td class='renewcomment'>" + info.strRenewComment + "</td>");
+                        text.Append("<td class='renewcomment'>" + HttpUtility.HtmlEncode(info.strRenewComment) + "</td>");
 
                         if (this.DatabaseMode == false || info.IsEmpty())
                             text.Append("<td class='operator'>" + info.strOperator + "</td>");
@@ -705,16 +705,16 @@ namespace DigitalPlatform.OPAC.Web
                         {
                             if (info.strAction == "read")
                                 text.Append("<td class='operator'>"
-                                    + info.strOperator
+                                    + HttpUtility.HtmlEncode(info.strOperator)
                                     + "</td>");
                             else
                                 text.Append("<td class='operator'>"
         + "<div class='borrowoperator'>"
         + this.GetString("借")
-        + ": " + info.strBorrowOperator + "</div>"
+        + ": " + HttpUtility.HtmlEncode(info.strBorrowOperator) + "</div>"
         + "<div class='returnoperator'>"
         + this.GetString("还")
-        + ": " + info.strOperator + "</div>"
+        + ": " + HttpUtility.HtmlEncode(info.strOperator) + "</div>"
         + "</td>");
                         }
 

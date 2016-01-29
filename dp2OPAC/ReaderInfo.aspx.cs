@@ -16,17 +16,6 @@ using DigitalPlatform.OPAC.Web;
 
 public partial class ReaderInfo : MyWebPage
 {
-    //OpacApplication app = null;
-    //SessionInfo sessioninfo = null;
-
-#if NO
-    protected override void InitializeCulture()
-    {
-        WebUtil.InitLang(this);
-        base.InitializeCulture();
-    }
-#endif
-
     protected void Page_Init(object sender, EventArgs e)
     {
         if (WebUtil.PrepareEnvironment(this,
@@ -35,6 +24,9 @@ ref sessioninfo) == false)
             return;
 
         this.TitleBarControl1.CurrentColumn = TitleColumn.ReaderInfo;
+
+        if (app != null)
+            this.BorrowHistoryControl1.DatabaseMode = string.IsNullOrEmpty(app.ChargingHistoryType) == false;
     }
 
     protected void Page_Load(object sender, EventArgs e)
