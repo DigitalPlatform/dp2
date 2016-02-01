@@ -338,7 +338,6 @@ MessageBoxDefaultButton.Button1);
                     return true;
                 }
             }
-
         }
 
         /// <summary>

@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+
+            if (this.Channel != null)
+                this.Channel.Dispose();
+
             base.Dispose(disposing);
         }
 

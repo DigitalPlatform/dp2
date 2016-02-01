@@ -122,11 +122,18 @@ namespace DigitalPlatform.Script
                 dom.DocumentElement,
                 ".",
                 "defaultCodeFileDir");
-            if (DefaultCodeFileDir == "")
+            if (string.IsNullOrEmpty(DefaultCodeFileDir) == true)
             {
+#if NO
                 // 设置为执行程序目录之下clientcfgs目录
                 DefaultCodeFileDir =
                     Path.Combine(Environment.CurrentDirectory, "clientcfgs");
+#endif
+                if (String.IsNullOrEmpty(this.DataDir) == true)
+                    throw new Exception("当 defaultCodeFileDir 属性为空时，需要定义 this.DataDir 值");
+
+                DefaultCodeFileDir = Path.Combine(this.DataDir, "clientcfgs");
+
             }
             else
             {
@@ -1588,7 +1595,6 @@ namespace DigitalPlatform.Script
 
             // 2007/1/24
             strProjectLocate = UnMacroPath(strProjectLocate);
-
             return 1;
         }
 

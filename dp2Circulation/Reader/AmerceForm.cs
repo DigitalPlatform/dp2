@@ -1220,10 +1220,8 @@ this.splitContainer_lists,
             LibraryChannel channel = new LibraryChannel();
             channel.Url = this.MainForm.LibraryServerUrl;
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
-            channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             try
@@ -1319,7 +1317,6 @@ this.splitContainer_lists,
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
                 Record[] searchresults = null;
-
 
                 // 获得结果集，装入listview
                 for (; ; )
@@ -1449,6 +1446,8 @@ this.splitContainer_lists,
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
+                channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
                 channel.Close();
                 m_bStopFillAmerced = true;
             }
@@ -1457,7 +1456,6 @@ this.splitContainer_lists,
             Safe_setError(this.listView_amerced, strError);
             // Safe_errorBox(strError);
         }
-
 
         // FillAmercedLine
         delegate int Delegate_FillAmercedLine(Stop stop,
@@ -1660,7 +1658,6 @@ this.splitContainer_lists,
             LibraryChannel channel = new LibraryChannel();
             channel.Url = this.MainForm.LibraryServerUrl;
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             try
@@ -1837,6 +1834,7 @@ this.splitContainer_lists,
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
                 m_bStopFillAmercing = true;
             }

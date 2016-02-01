@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -813,16 +814,22 @@ namespace DigitalPlatform.OPAC.Web
             messages[0].strRecordID = strOldRecordID;   // string strOldRecordID,
             messages[0].TimeStamp = baOldTimeStamp;   // byte [] baOldTimeStamp,
 
-            long nRet = sessioninfo.Channel.SetMessage(
-                "save",
-                "",
-                messages,
-                out output_messages,
-                out strError);
-
-            if (nRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                return -1;
+                long nRet = // sessioninfo.Channel.
+                    channel.SetMessage(
+                    "save",
+                    "",
+                    messages,
+                    out output_messages,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
 
             if (output_messages == null || output_messages.Length < 1)
@@ -879,61 +886,49 @@ namespace DigitalPlatform.OPAC.Web
             //messages[0].strRecordID = strOldRecordID;   // string strOldRecordID,
             //messages[0].TimeStamp = baOldTimeStamp;   // byte [] baOldTimeStamp,
 
-            long nRet = sessioninfo.Channel.SetMessage(
-    "send",
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
+            {
+
+                long nRet = // sessioninfo.Channel.
+                    channel.SetMessage(
+        "send",
+        "",
+        messages,
+        out output_messages,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 如果来自草稿箱, 则需要从中永久删除
+                if (BoxesInfo.IsTemp(this.BoxName) == true)
+                {
+                    messages = new MessageData[1];
+                    output_messages = null;
+
+                    messages[0] = new MessageData();
+                    messages[0].strRecordID = this.RecordID;   // string strOldRecordID,
+                    messages[0].TimeStamp = this.TimeStamp;   // byte [] baOldTimeStamp,
+
+                    nRet = // sessioninfo.Channel.
+                        channel.SetMessage(
+    "delete",
     "",
     messages,
     out output_messages,
     out strError);
-            if (nRet == -1)
-                return -1;
+                    if (nRet == -1)
+                        return -1;
 
-            /*
-            int nRet = this.BoxesInfo.SendMessage(this.Channels,
-                recipient.Text,
-                sender.Text,
-                subject.Text,
-                "text",
-                content.Text,
-                true,
-                out strError);
-            if (nRet == -1)
-                return -1;
-             * */
+                    this.BoxName = null;    // 现在不属于任何信箱
+                }
 
-            // 如果来自草稿箱, 则需要从中永久删除
-            if (BoxesInfo.IsTemp(this.BoxName) == true)
-            {
-                messages = new MessageData[1];
-                output_messages = null;
-
-                messages[0] = new MessageData();
-                messages[0].strRecordID = this.RecordID;   // string strOldRecordID,
-                messages[0].TimeStamp = this.TimeStamp;   // byte [] baOldTimeStamp,
-
-                /*
-                nRet = this.BoxesInfo.DeleteMessage(
-                    false,
-                    this.Channels,
-                    this.RecordID,
-                    this.TimeStamp,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                 * */
-                nRet = sessioninfo.Channel.SetMessage(
-"delete",
-"",
-messages,
-out output_messages,
-out strError);
-                if (nRet == -1)
-                    return -1;
-
-                this.BoxName = null;    // 现在不属于任何信箱
+                return 0;
             }
-
-            return 0;
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
         }
 
         // 删除
@@ -953,50 +948,44 @@ out strError);
             messages[0].strRecordID = this.RecordID;
             messages[0].TimeStamp = this.TimeStamp;
 
-            if (String.IsNullOrEmpty(this.RecordID) == false)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                // 如果是废件箱内的消息, 彻底删除
-                if (BoxesInfo.IsRecycleBin(this.BoxName) == true)
+                if (String.IsNullOrEmpty(this.RecordID) == false)
                 {
-                    /*
-                    nRet = this.BoxesInfo.DeleteMessage(
-                        false,
-                        this.Channels,
-                        this.RecordID,
-                        this.TimeStamp,
-                        out strError);
-                     * */
-                    nRet = sessioninfo.Channel.SetMessage(
-"delete",
-"",
-messages,
-out output_messages,
-out strError);
+                    // 如果是废件箱内的消息, 彻底删除
+                    if (BoxesInfo.IsRecycleBin(this.BoxName) == true)
+                    {
+                        nRet = // sessioninfo.Channel.
+                            channel.SetMessage(
+    "delete",
+    "",
+    messages,
+    out output_messages,
+    out strError);
+                    }
+                    else
+                    {
+                        // 否则移动到废件箱
+                        nRet = // sessioninfo.Channel.
+                            channel.SetMessage(
+    "delete",
+    "movetorecyclebin",
+    messages,
+    out output_messages,
+    out strError);
+                    }
+                    if (nRet == -1)
+                        return -1;
+                    this.BoxName = null;    // 现在不属于任何信箱
                 }
-                else
-                {
-                    // 否则移动到废件箱
-                    /*
-                    nRet = this.BoxesInfo.DeleteMessage(
-                        true,
-                        this.Channels,
-                        this.RecordID,
-                        this.TimeStamp,
-                        out strError);
-                     * */
-                    nRet = sessioninfo.Channel.SetMessage(
-"delete",
-"movetorecyclebin",
-messages,
-out output_messages,
-out strError);
-                }
-                if (nRet == -1)
-                    return -1;
-                this.BoxName = null;    // 现在不属于任何信箱
-            }
 
-            return 0;
+                return 0;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
         }
 
         #region 按钮响应

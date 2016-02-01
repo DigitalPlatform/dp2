@@ -14,12 +14,16 @@ using System.Runtime.Serialization;
 
 namespace DigitalPlatform.rms
 {
-    public class BatchTaskCollection : List<BatchTask>
+    public class BatchTaskCollection : List<BatchTask>, IDisposable
     {
         // 数组锁
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
 
+        public void Dispose()
+        {
+            this.Clear();
+        }
 
         public new void Clear()
         {
@@ -32,6 +36,7 @@ namespace DigitalPlatform.rms
             {
                 BatchTask task = this[i];
                 task.Close();
+                task.Dispose();
             }
 
             base.Clear();
@@ -109,7 +114,7 @@ namespace DigitalPlatform.rms
     }
 
     // 批处理任务
-    public class BatchTask
+    public class BatchTask : IDisposable
     {
         public bool ManualStart = false;    // 本轮是否为手动启动？
 
@@ -118,7 +123,6 @@ namespace DigitalPlatform.rms
 
         // 启动参数
         public BatchTaskStartInfo StartInfo = null;
-
 
         // 任务名
         public string Name = "";
@@ -148,6 +152,15 @@ namespace DigitalPlatform.rms
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
+
+        public virtual void Dispose()
+        {
+            this.Close();
+
+            eventClose.Dispose();
+            eventActive.Dispose();
+            eventFinished.Dispose();
+        }
 
         public void Activate()
         {

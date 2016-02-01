@@ -84,13 +84,6 @@ namespace dp2Circulation
         const int TYPE_SOURCEBIBLIO = 3;   // 来自外源书目库 2009/11/5
         const int TYPE_NOT_ORDER = 4;   // 来自和采购无关的数据库 2009/11/5 changed
 
-        /*
-        /// <summary>
-        /// 装载结束信号
-        /// </summary>
-        public AutoResetEvent EventFinish = new AutoResetEvent(false);
-         * */
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -2596,7 +2589,9 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
 
                     // 看看是否已经装入下方的种册窗
-                    if (this.m_detailWindow != null && m_detailWindow.BiblioRecPath == strRecPath)
+                    if (this.m_detailWindow != null
+                        && m_detailWindow.IsDisposed == false
+                        && m_detailWindow.BiblioRecPath == strRecPath)
                     {
 #if NO
                         if (this.SingleClickLoadDetail == true)

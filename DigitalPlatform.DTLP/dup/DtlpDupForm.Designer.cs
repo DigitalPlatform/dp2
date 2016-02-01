@@ -17,6 +17,9 @@ namespace DigitalPlatform.DTLP
             {
                 components.Dispose();
             }
+
+            this.EventFinish.Dispose();
+
             base.Dispose(disposing);
         }
 

@@ -75,19 +75,22 @@ namespace DigitalPlatform.AmazonInterface
                 if (disposing)
                 {
                     // Dispose managed resources.
+                    this.eventComplete.Dispose();
                 }
 
                 // 删除临时文件
                 DeleteTempFile();
-
             }
             disposed = true;
         }
 
+#if NO
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         ~AmazonSearch()
         {
             Dispose(false);
         }
+#endif
 
         // 构造检索式
         int BuildQueryString(

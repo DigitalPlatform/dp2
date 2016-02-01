@@ -69,10 +69,6 @@ namespace dp2Circulation
         // 同一个读者连续借阅成功后所累积的册条码号集合
         List<string> oneReaderItemBarcodes = new List<string>();
 
-        // bool m_bVerifyReaderPassword = false;
-
-        // public AutoResetEvent eventReaderWebComplete = new AutoResetEvent(false);	// true : initial state is signaled 
-
         const int WM_SWITCH_FOCUS = API.WM_USER + 200;
         // const int WM_LOADSIZE = API.WM_USER + 201;
         const int WM_ENABLE_EDIT = API.WM_USER + 202;
@@ -1910,7 +1906,6 @@ dlg.UiState);
 
             if (this.DoubleItemInputAsEnd == true)
             {
-
                 // 取出上次输入的最后一个条码，和目前输入的条码比较，看是否一样。
                 if (this.m_itemBarcodes.Count > 0)
                 {
@@ -1937,7 +1932,6 @@ dlg.UiState);
                 barcodetime = new BarcodeAndTime();
                 barcodetime.Barcode = this.textBox_itemBarcode.Text;
                 barcodetime.Time = DateTime.Now;
-
 
                 this.m_itemBarcodes.Add(barcodetime);
                 // 仅仅保持一个条码就可以了
@@ -1983,7 +1977,6 @@ dlg.UiState);
             }
 
             this.ActiveItemBarcode = this.textBox_itemBarcode.Text;
-
 
             if (this.NeedVerifyBarcode == true)
             {
@@ -2060,7 +2053,6 @@ dlg.UiState);
 
             try
             {
-
                 if (this.NoBiblioAndItemInfo == false)
                 {
                     // 借阅操作前装入册记录
@@ -2075,7 +2067,6 @@ dlg.UiState);
                     if (nRet == -1)
                         goto ERROR1;
                 }
-
 
                 long lRet = 0;
 
@@ -2100,9 +2091,6 @@ dlg.UiState);
                     + " " + strOperName + " " + this.textBox_itemBarcode.Text + " ...");
                     stop.BeginLoop();
 
-                    // ??
-                    // SetReaderRenderString("(空)");
-
                     if (this.NoBiblioAndItemInfo == false)
                     {
                         // 清除书目和实体信息
@@ -2112,9 +2100,7 @@ dlg.UiState);
 
                     try
                     {
-                        //                   string strResult = "";
                         string strReaderRecord = "";
-                        // string strItemRecord = "";
                         string strConfirmItemRecPath = null;
 
                         bool bRenew = false;
@@ -2281,7 +2267,6 @@ dlg.UiState);
 
                         DateTime end_time = DateTime.Now;
 
-
                         string strReaderSummary = "";
                         if (reader_records != null && reader_records.Length > 1)
                         {
@@ -2380,17 +2365,12 @@ dlg.UiState);
                     + " 还 " + this.textBox_itemBarcode.Text + " ...");
                     stop.BeginLoop();
 
-
-                    // ??
-                    // SetReaderRenderString("(空)");
-
                     if (this.NoBiblioAndItemInfo == false)
                     {
                         // 清除书目和实体信息
                         SetBiblioRenderString("(空)");
                         SetItemRenderString("(空)");
                     }
-
 
                     try
                     {
@@ -2416,7 +2396,6 @@ dlg.UiState);
                                 strItemReturnFormats += ",";
                             strItemReturnFormats += "xml";
                         }
-
 
                         // biblio返回的格式
                         string strBiblioReturnFormats = "";

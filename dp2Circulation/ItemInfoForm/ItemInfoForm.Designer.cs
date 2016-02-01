@@ -17,6 +17,14 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            if (this.m_webExternalHost_biblio != null)
+                this.m_webExternalHost_biblio.Dispose();
+            if (this.m_webExternalHost_item != null)
+                this.m_webExternalHost_item.Dispose();
+            if (this.m_chargingInterface != null)
+                this.m_chargingInterface.Dispose();
+
             base.Dispose(disposing);
         }
 
@@ -60,8 +68,8 @@ namespace dp2Circulation
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(0, 37);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -170,7 +178,7 @@ namespace dp2Circulation
             // 
             // textBox_queryWord
             // 
-            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_queryWord.Location = new System.Drawing.Point(166, 10);
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(2);
@@ -192,7 +200,7 @@ namespace dp2Circulation
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.toolStrip1.AutoSize = false;
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -35,34 +35,34 @@ namespace DigitalPlatform.Library
         string ActionPrefix = "http://dp2003.com/";
 
         /// <summary>
-        /// ¸´ÖÆÖ÷ÌâÊÂ¼ş
+        /// å¤åˆ¶ä¸»é¢˜äº‹ä»¶
         /// </summary>
         public event CopySubjectEventHandler CopySubject = null;
 
         /// <summary>
-        /// ÓÅÏÈÖ¸¶¨µÄForm½á¹û±àÂë·½Ê½
+        /// ä¼˜å…ˆæŒ‡å®šçš„Formç»“æœç¼–ç æ–¹å¼
         /// </summary>
         public string FormEncoding = "";	// 
 
         /// <summary>
-        /// ä¯ÀÀÆ÷FormËùÌá½»µÄURL
+        /// æµè§ˆå™¨Formæ‰€æäº¤çš„URL
         /// </summary>
         public string SubmitUrl = "";
 
         /// <summary>
-        /// ä¯ÀÀÆ÷FormÌá½»µÄÃû-Öµ¶Ô¼¯ºÏ
+        /// æµè§ˆå™¨Formæäº¤çš„å-å€¼å¯¹é›†åˆ
         /// </summary>
         public NameValueCollection SubmitResult = new NameValueCollection();
 
         /// <summary>
-        /// cssÑùÊ½ÎÄ¼şURL
+        /// cssæ ·å¼æ–‡ä»¶URL
         /// </summary>
         public string CssUrl = "";
 
         /// <summary>
-        /// ·ÖÀàÖ÷Ìâ¶ÔÕÕ¿âÃû
+        /// åˆ†ç±»ä¸»é¢˜å¯¹ç…§åº“å
         /// </summary>
-        public string DbName = "·ÖÀàÖ÷Ìâ¶ÔÕÕ";
+        public string DbName = "åˆ†ç±»ä¸»é¢˜å¯¹ç…§";
 
 
         XmlDocument dom = new XmlDocument();
@@ -73,14 +73,15 @@ namespace DigitalPlatform.Library
         private int cookie = -1;
 
         /// <summary>
-        /// ÎÄµµ×°ÔØÍê³É
+        /// æ–‡æ¡£è£…è½½å®Œæˆ
         /// </summary>
         public AutoResetEvent eventDocumentComplete = new AutoResetEvent(false);
 
         /// <summary>
-        /// ´°¿Ú¹Ø±Õ
+        /// çª—å£å…³é—­
         /// </summary>
         public AutoResetEvent eventWindowClose = new AutoResetEvent(false);
+
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_queryWord;
         private System.Windows.Forms.Label label2;
@@ -98,7 +99,7 @@ namespace DigitalPlatform.Library
         private System.ComponentModel.Container components = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public Class2SubjectDlg()
         {
@@ -243,6 +244,9 @@ namespace DigitalPlatform.Library
                 {
                     components.Dispose();
                 }
+
+                this.eventDocumentComplete.Dispose();
+                this.eventWindowClose.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -275,11 +279,11 @@ namespace DigitalPlatform.Library
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 1;
-            this.label1.Text = "¼ìË÷´Ê(&Q):";
+            this.label1.Text = "æ£€ç´¢è¯(&Q):";
             // 
             // textBox_queryWord
             // 
-            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_queryWord.Location = new System.Drawing.Point(112, 39);
             this.textBox_queryWord.Name = "textBox_queryWord";
@@ -293,19 +297,19 @@ namespace DigitalPlatform.Library
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(53, 12);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Í¾¾¶(&F):";
+            this.label2.Text = "é€”å¾„(&F):";
             // 
             // comboBox_from
             // 
             this.comboBox_from.Items.AddRange(new object[] {
-            "ÀàºÅ",
-            "ÀàÃû",
-            "Ö÷Ìâ´Ê"});
+            "ç±»å·",
+            "ç±»å",
+            "ä¸»é¢˜è¯"});
             this.comboBox_from.Location = new System.Drawing.Point(112, 66);
             this.comboBox_from.Name = "comboBox_from";
             this.comboBox_from.Size = new System.Drawing.Size(144, 20);
             this.comboBox_from.TabIndex = 4;
-            this.comboBox_from.Text = "ÀàºÅ";
+            this.comboBox_from.Text = "ç±»å·";
             // 
             // button_search
             // 
@@ -314,7 +318,7 @@ namespace DigitalPlatform.Library
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(75, 23);
             this.button_search.TabIndex = 5;
-            this.button_search.Text = "¼ìË÷(&S)";
+            this.button_search.Text = "æ£€ç´¢(&S)";
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
             // button_stop
@@ -324,12 +328,12 @@ namespace DigitalPlatform.Library
             this.button_stop.Name = "button_stop";
             this.button_stop.Size = new System.Drawing.Size(75, 23);
             this.button_stop.TabIndex = 6;
-            this.button_stop.Text = "Í£Ö¹(&S)";
+            this.button_stop.Text = "åœæ­¢(&S)";
             this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
             // 
             // label_message
             // 
-            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_message.Location = new System.Drawing.Point(12, 353);
             this.label_message.Name = "label_message";
@@ -348,7 +352,7 @@ namespace DigitalPlatform.Library
             // 
             // textBox_serverUrl
             // 
-            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverUrl.Location = new System.Drawing.Point(112, 12);
             this.textBox_serverUrl.Name = "textBox_serverUrl";
@@ -363,12 +367,12 @@ namespace DigitalPlatform.Library
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 12);
             this.label3.TabIndex = 9;
-            this.label3.Text = "·şÎñÆ÷(&S):";
+            this.label3.Text = "æœåŠ¡å™¨(&S):";
             // 
             // webBrowser1
             // 
-            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webBrowser1.Location = new System.Drawing.Point(14, 92);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
@@ -393,7 +397,7 @@ namespace DigitalPlatform.Library
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Class2SubjectDlg";
-            this.Text = "·ÖÀàÖ÷Ìâ¶ÔÕÕ";
+            this.Text = "åˆ†ç±»ä¸»é¢˜å¯¹ç…§";
             this.Closed += new System.EventHandler(this.Class2SubjectDlg_Closed);
             this.Load += new System.EventHandler(this.Class2SubjectDlg_Load);
             this.ResumeLayout(false);
@@ -404,7 +408,7 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// HTML×Ö·û´®
+        /// HTMLå­—ç¬¦ä¸²
         /// </summary>
         public string HtmlString
         {
@@ -430,7 +434,7 @@ namespace DigitalPlatform.Library
 #if NO
                 IHTMLDocument2 doc = this.DocStream;
 
-                Debug.Assert(doc != null, "DocStreamÓ¦·µ»Ø·Çnull");
+                Debug.Assert(doc != null, "DocStreamåº”è¿”å›énull");
 
                 doc.clear();
                 doc.write(new object[] { value });
@@ -442,7 +446,7 @@ namespace DigitalPlatform.Library
 
 #if NO
         /// <summary>
-        /// µÃµ½Document¶ÔÏó£¬¿ÉÒÔÓÃwrite()Ğ´Èë
+        /// å¾—åˆ°Documentå¯¹è±¡ï¼Œå¯ä»¥ç”¨write()å†™å…¥
         /// </summary>
         public IHTMLDocument2 DocStream
         {
@@ -468,7 +472,7 @@ namespace DigitalPlatform.Library
 #endif
 
         /// <summary>
-        /// ·şÎñÆ÷URL
+        /// æœåŠ¡å™¨URL
         /// </summary>
         public string ServerUrl
         {
@@ -486,11 +490,11 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="searchpanel">¼ìË÷Ãæ°å</param>
-        /// <param name="strServerUrl">·şÎñÆ÷URL</param>
-        /// <param name="strDbName">·ÖÀàÖ÷Ìâ¶ÔÕÕ¿âÃû</param>
+        /// <param name="searchpanel">æ£€ç´¢é¢æ¿</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URL</param>
+        /// <param name="strDbName">åˆ†ç±»ä¸»é¢˜å¯¹ç…§åº“å</param>
         public void Initial(
             SearchPanel searchpanel,
             /*ServerCollection servers,
@@ -526,10 +530,10 @@ namespace DigitalPlatform.Library
 
             XmlDocument tempdom = null;
 
-            // ¼ìË÷ÊµÓÃ¿â
+            // æ£€ç´¢å®ç”¨åº“
             int nRet = 0;
 
-            this.SearchPanel.BeginLoop("ÕıÔÚ¼ìË÷ " + this.textBox_queryWord.Text + " ...");
+            this.SearchPanel.BeginLoop("æ­£åœ¨æ£€ç´¢ " + this.textBox_queryWord.Text + " ...");
 
             EnableControls(false);
 
@@ -563,7 +567,7 @@ namespace DigitalPlatform.Library
                 goto ERROR1;
             if (nRet == 0)
             {
-                strError = "Î´ÃüÖĞ";
+                strError = "æœªå‘½ä¸­";
                 goto ERROR1;
             }
 
@@ -579,7 +583,7 @@ namespace DigitalPlatform.Library
             if (nRet == -1)
                 goto ERROR1;
 
-            this.SearchPanel.BeginLoop("ÕıÔÚ×°Èë ...");
+            this.SearchPanel.BeginLoop("æ­£åœ¨è£…å…¥ ...");
             this.HtmlString = strHtml;
             this.SearchPanel.EndLoop();
 
@@ -631,7 +635,7 @@ namespace DigitalPlatform.Library
             mngr.AddNamespace("c2s", "http://dp2003.com/c2s");
 
 
-            // ÉÏ¼¶ÀàºÅ
+            // ä¸Šçº§ç±»å·
             //    <rdf:Description rdf:about="broaderTerm">
             //        <subject>
             //            <rdf:value>A</rdf:value>
@@ -640,9 +644,9 @@ namespace DigitalPlatform.Library
             /*
 	<rdf:Description rdf:about="broaderTerm">
 		<item>
-			<subject>ÉÏÎ»·ÖÀàºÅ</subject>
-			<rdfs:label>ÉÏÎ»·ÖÀàºÅ±êÇ©£¬¼òÌåÖĞÎÄ</rdfs:label>
-			<rdfs:label xml:lang="en">ÉÏÎ»·ÖÀàºÅ±êÇ©£¬Ó¢ÎÄ</rdfs:label>
+			<subject>ä¸Šä½åˆ†ç±»å·</subject>
+			<rdfs:label>ä¸Šä½åˆ†ç±»å·æ ‡ç­¾ï¼Œç®€ä½“ä¸­æ–‡</rdfs:label>
+			<rdfs:label xml:lang="en">ä¸Šä½åˆ†ç±»å·æ ‡ç­¾ï¼Œè‹±æ–‡</rdfs:label>
 		</item>
 	</rdf:Description>
              */
@@ -664,7 +668,7 @@ namespace DigitalPlatform.Library
 
                 strHtml += "<p class='parentlink'>";
                 string strUrl = this.ActionPrefix + "navi/" + strName;
-                strHtml += "ÉÏ¼¶Àà: <a class='parentlink' href='" + strUrl + "' >" + strName + "</a>" + " <span class='parentclassname'>" + strTitle + "</span></div>";
+                strHtml += "ä¸Šçº§ç±»: <a class='parentlink' href='" + strUrl + "' >" + strName + "</a>" + " <span class='parentclassname'>" + strTitle + "</span></div>";
 
                 // strHtml += "<div class='childrenclassline'><a class='childrenclasslink' href='" + strUrl + "' >" + strName + "</a>" + " <span class='childrenclassname'>" + strTitle + "</span></div>";
 
@@ -683,29 +687,29 @@ namespace DigitalPlatform.Library
 
 
 
-            // ÀàºÅ
+            // ç±»å·
             //    <rdf:Description rdf:about="entry">
             //        <subject>
             //            <rdf:value>A1</rdf:value>
-            //            <rdfs:label>Âí¿ËË¼¡¢¶÷¸ñË¹Öø×÷</rdfs:label>
+            //            <rdfs:label>é©¬å…‹æ€ã€æ©æ ¼æ–¯è‘—ä½œ</rdfs:label>
             //        </subject>
-            //        <description>È«¼¯Èë´Ë¡£</description>
+            //        <description>å…¨é›†å…¥æ­¤ã€‚</description>
             //    </rdf:Description>
             /*
 	<rdf:Description rdf:about="entry">
 		<item>
-			<subject>ÖĞÍ¼·¨·ÖÀàºÅ</subject>
-			<rdfs:label>ÖĞÍ¼·¨·ÖÀà±êÇ©£¬¼òÌåÖĞÎÄ</rdfs:label>
-			<rdfs:label xml:lang="en">ÖĞÍ¼·¨·ÖÀà±êÇ©£¬Ó¢ÎÄ</rdfs:label>
+			<subject>ä¸­å›¾æ³•åˆ†ç±»å·</subject>
+			<rdfs:label>ä¸­å›¾æ³•åˆ†ç±»æ ‡ç­¾ï¼Œç®€ä½“ä¸­æ–‡</rdfs:label>
+			<rdfs:label xml:lang="en">ä¸­å›¾æ³•åˆ†ç±»æ ‡ç­¾ï¼Œè‹±æ–‡</rdfs:label>
 		</item>
-		<description>ÖĞÍ¼·¨·ÖÀà¸½×¢ËµÃ÷</description>
+		<description>ä¸­å›¾æ³•åˆ†ç±»é™„æ³¨è¯´æ˜</description>
 	</rdf:Description>
              */
             node = dom.DocumentElement.SelectSingleNode(
                 "rdf:Description[@rdf:about='entry']/c2s:item/c2s:subject",
                 mngr);
             strHtml += "<tr class='classnumber'>";
-            strHtml += "<td class='classnumbertitle' valign='bottom' nowrap align='right' width='20%'>ÀàºÅ</td>";
+            strHtml += "<td class='classnumbertitle' valign='bottom' nowrap align='right' width='20%'>ç±»å·</td>";
 
             strHtml += "<td class='classnumbertext' width='80%'>";
 
@@ -719,11 +723,11 @@ namespace DigitalPlatform.Library
             strHtml += "</td>";
             strHtml += "</tr>";
 
-            // ÀàÃû
+            // ç±»å
             node = dom.DocumentElement.SelectSingleNode(
                 "rdf:Description[@rdf:about='entry']/c2s:subject/rdfs:label", mngr);
             strHtml += "<tr class='classname'>";
-            strHtml += "<td class='classnametitle'  nowrap align='right' width='20%'>ÀàÃû</td>";
+            strHtml += "<td class='classnametitle'  nowrap align='right' width='20%'>ç±»å</td>";
 
             strHtml += "<td class='classnametext' width='80%'>";
 
@@ -741,34 +745,34 @@ namespace DigitalPlatform.Library
 
             int i = 0;
 
-            // Ö÷Ìâ´ÊÈô¸É
+            // ä¸»é¢˜è¯è‹¥å¹²
             //    <rdf:Description rdf:about="CTofLabel">
             //        <subject>
-            //            <rdf:value>Âí¶÷Öø×÷</rdf:value>
+            //            <rdf:value>é©¬æ©è‘—ä½œ</rdf:value>
             //        </subject>
             //	  </rdf:Description>
             /*
 	<rdf:Description rdf:about="entryDescriptor">
 		<item>
-			<subject>ÀàÃû¶ÔÓ¦ººÓïÖ÷Ìâ´Ê(ÓÃºÚÌåÏÔÊ¾)</subject>
-			<subject refinement="subdivide">Ñ§¿Æ¸´·ÖÖ÷Ìâ´Ê</subject>
-			<subject refinement="geographic">µØÇø¸´·ÖÖ÷Ìâ´Ê</subject>
-			<subject refinement="chronological">Äê´ú¸´·ÖÖ÷Ìâ´Ê</subject>
+			<subject>ç±»åå¯¹åº”æ±‰è¯­ä¸»é¢˜è¯(ç”¨é»‘ä½“æ˜¾ç¤º)</subject>
+			<subject refinement="subdivide">å­¦ç§‘å¤åˆ†ä¸»é¢˜è¯</subject>
+			<subject refinement="geographic">åœ°åŒºå¤åˆ†ä¸»é¢˜è¯</subject>
+			<subject refinement="chronological">å¹´ä»£å¤åˆ†ä¸»é¢˜è¯</subject>
 			<subject refinement="ethnic" rdf:resource="ethnic" />
 			<!--
-			Ç°ÃæµÄ´øÏŞ¶¨´ÊµÄsubjectÖµ¶¼ÓÃ¡°-¡±Á¬×Ö·û´®ÆğÀ´£¬¼´ÅĞ¶ÏrefinementÊôĞÔÖµÎª£º
-			¡°subdivide¡¢geographic¡¢chronological¡¢chronological¡¢ethnic¡±
-			¶¼ÓÃ¡°-¡±Á¬ÔÚ²»¾ßrefinementÊôĞÔµÄsubjectÖµÖ®ºó¡£
+			å‰é¢çš„å¸¦é™å®šè¯çš„subjectå€¼éƒ½ç”¨â€œ-â€è¿å­—ç¬¦ä¸²èµ·æ¥ï¼Œå³åˆ¤æ–­refinementå±æ€§å€¼ä¸ºï¼š
+			â€œsubdivideã€geographicã€chronologicalã€chronologicalã€ethnicâ€
+			éƒ½ç”¨â€œ-â€è¿åœ¨ä¸å…·refinementå±æ€§çš„subjectå€¼ä¹‹åã€‚
 			-->
-			<subject refinement="modifier">Ö÷Ìâ´ÊĞŞÊÎ´Ê</subject>
+			<subject refinement="modifier">ä¸»é¢˜è¯ä¿®é¥°è¯</subject>
 			<!--
-			Ç°ÃæµÄ´øÏŞ¶¨´ÊµÄsubjectÖµ¶¼ÓÃ¡°,¡±×Ö·û´®ÆğÀ´£¬¼´ÅĞ¶ÏrefinementÊôĞÔÖµÎª£º
-			¡°modifier¡±Ê±£¬ÓÃ¡°,¡±Á¬ÔÚ²»¾ßrefinementÊôĞÔµÄsubjectÖµÖ®ºó¡£
+			å‰é¢çš„å¸¦é™å®šè¯çš„subjectå€¼éƒ½ç”¨â€œ,â€å­—ç¬¦ä¸²èµ·æ¥ï¼Œå³åˆ¤æ–­refinementå±æ€§å€¼ä¸ºï¼š
+			â€œmodifierâ€æ—¶ï¼Œç”¨â€œ,â€è¿åœ¨ä¸å…·refinementå±æ€§çš„subjectå€¼ä¹‹åã€‚
 			-->
-			<subject refinement="bond">×éÅäÖ÷Ìâ´Ê</subject>
+			<subject refinement="bond">ç»„é…ä¸»é¢˜è¯</subject>
 			<!--
-			Ç°ÃæµÄ´øÏŞ¶¨´ÊµÄsubjectÖµ¶¼ÓÃ¡°:¡±×Ö·û´®ÆğÀ´£¬¼´ÅĞ¶ÏrefinementÊôĞÔÖµÎª£º
-			¡°bond¡±Ê±£¬ÓÃ¡°:¡±Á¬ÔÚ²»¾ßrefinementÊôĞÔµÄsubjectÖµÖ®ºó¡£
+			å‰é¢çš„å¸¦é™å®šè¯çš„subjectå€¼éƒ½ç”¨â€œ:â€å­—ç¬¦ä¸²èµ·æ¥ï¼Œå³åˆ¤æ–­refinementå±æ€§å€¼ä¸ºï¼š
+			â€œbondâ€æ—¶ï¼Œç”¨â€œ:â€è¿åœ¨ä¸å…·refinementå±æ€§çš„subjectå€¼ä¹‹åã€‚
 			-->
 		</item>
 	</rdf:Description>
@@ -777,7 +781,7 @@ namespace DigitalPlatform.Library
                 "rdf:Description[@rdf:about='entryDescriptor']/c2s:item",
                 mngr);
             strHtml += "<tr class='subject'>";
-            strHtml += "<td class='subjecttitle'  nowrap align='right'>Ö÷Ìâ´Ê</td>";
+            strHtml += "<td class='subjecttitle'  nowrap align='right'>ä¸»é¢˜è¯</td>";
 
             strHtml += "<td class='subjecttext'>";
             for (i = 0; i < nodes.Count; i++)
@@ -797,22 +801,22 @@ namespace DigitalPlatform.Library
 
                 string strImg = "<img src='" + Environment.CurrentDirectory + "/copy.gif" + "' border='0'>";
 
-                // strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + DomUtil.GetNodeText(node) + "'/>" + " <a href='" + strSelectUrl + "' alt='Ñ¡ÓÃÖ÷Ìâ´Ê" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";
+                // strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + DomUtil.GetNodeText(node) + "'/>" + " <a href='" + strSelectUrl + "' alt='é€‰ç”¨ä¸»é¢˜è¯" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";
 
-                strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" +node.InnerText + "'/>" + " <a href='" + strSelectUrl + "' alt='Ñ¡ÓÃÖ÷Ìâ´Ê" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";
+                strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + node.InnerText + "'/>" + " <a href='" + strSelectUrl + "' alt='é€‰ç”¨ä¸»é¢˜è¯" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";
 
 
             }
             strHtml += "</td>";
             strHtml += "</tr>";
 
-            // Ïà¹ØÖ÷Ìâ´ÊÈô¸É
+            // ç›¸å…³ä¸»é¢˜è¯è‹¥å¹²
 
             nodes = dom.DocumentElement.SelectNodes(
                 "rdf:Description[@rdf:about='noteDescriptor']/c2s:item",
                 mngr);
             strHtml += "<tr class='relatesubject'>";
-            strHtml += "<td class='relatesubjecttitle'  nowrap align='right'>ÆäËûÖ÷Ìâ´Ê</td>";
+            strHtml += "<td class='relatesubjecttitle'  nowrap align='right'>å…¶ä»–ä¸»é¢˜è¯</td>";
 
             strHtml += "<td class='relatesubjecttext'>";
             for (i = 0; i < nodes.Count; i++)
@@ -832,18 +836,18 @@ namespace DigitalPlatform.Library
                 string strImg = "<img src='" + Environment.CurrentDirectory + "/copy.gif" + "' border='0'>";
 
 
-                // strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + DomUtil.GetNodeText(node) + "'/>" + " <a href='" + strSelectUrl + "' alt='Ñ¡ÓÃÖ÷Ìâ´Ê" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";
+                // strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + DomUtil.GetNodeText(node) + "'/>" + " <a href='" + strSelectUrl + "' alt='é€‰ç”¨ä¸»é¢˜è¯" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";
 
-                strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + node.InnerText + "'/>" + " <a href='" + strSelectUrl + "' alt='Ñ¡ÓÃÖ÷Ìâ´Ê" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";   // ?
+                strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='" + node.InnerText + "'/>" + " <a href='" + strSelectUrl + "' alt='é€‰ç”¨ä¸»é¢˜è¯" + strText + "'>" + strImg + "</a>" + strTempHtml + "</div>";   // ?
 
             }
             strHtml += "</td>";
             strHtml += "</tr>";
 
-            // ÃüÁî°´Å¥
+            // å‘½ä»¤æŒ‰é’®
             strHtml += "<tr class='command'>";
             strHtml += "<td class='command' colspan='2'>";
-            strHtml += "<input type='submit' value='Ñ¡ÓÃ´ò¹´µÄÖ÷Ìâ´Ê' />";
+            strHtml += "<input type='submit' value='é€‰ç”¨æ‰“å‹¾çš„ä¸»é¢˜è¯' />";
             strHtml += "</td></tr>";
 
 
@@ -853,26 +857,26 @@ namespace DigitalPlatform.Library
             strHtml += "</tr>";
 
 
-            // ÏÂ¼¶Àà
+            // ä¸‹çº§ç±»
             /*
                 <rdf:Description rdf:about="narrowerTerm">
                     <subject>
                         <rdf:value>A11</rdf:value>
-                        <rdfs:label>Ñ¡¼¯¡¢ÎÄ¼¯</rdfs:label>
+                        <rdfs:label>é€‰é›†ã€æ–‡é›†</rdfs:label>
                     </subject>
                     ...
             */
             /*
     <rdf:Description rdf:about="narrowerTerm">
 		<item>
-			<subject>ÏÂÎ»·ÖÀàºÅ</subject>
-			<rdfs:label>ÏÂÎ»·ÖÀàºÅ±êÇ©</rdfs:label>
-			<rdfs:label xml:lang="en">ÏÂÎ»·ÖÀàºÅ±êÇ©£¬Ó¢ÎÄ</rdfs:label>
+			<subject>ä¸‹ä½åˆ†ç±»å·</subject>
+			<rdfs:label>ä¸‹ä½åˆ†ç±»å·æ ‡ç­¾</rdfs:label>
+			<rdfs:label xml:lang="en">ä¸‹ä½åˆ†ç±»å·æ ‡ç­¾ï¼Œè‹±æ–‡</rdfs:label>
 		</item>
 		<item>
-			<subject refinement="disable">ÏÂÎ»·ÖÀàºÅ(Í£ÓÃ)</subject>
-			<rdfs:label>ÏÂÎ»·ÖÀàºÅ±êÇ©</rdfs:label>
-			<rdfs:label xml:lang="en">ÏÂÎ»·ÖÀàºÅ±êÇ©£¬Ó¢ÎÄ</rdfs:label>
+			<subject refinement="disable">ä¸‹ä½åˆ†ç±»å·(åœç”¨)</subject>
+			<rdfs:label>ä¸‹ä½åˆ†ç±»å·æ ‡ç­¾</rdfs:label>
+			<rdfs:label xml:lang="en">ä¸‹ä½åˆ†ç±»å·æ ‡ç­¾ï¼Œè‹±æ–‡</rdfs:label>
 		</item>
 	</rdf:Description>
              */
@@ -881,7 +885,7 @@ namespace DigitalPlatform.Library
                 "rdf:Description[@rdf:about='narrowerTerm']/c2s:item",
                 mngr);
             strHtml += "<tr class='childrenclass'>";
-            strHtml += "<td class='childrenclasstitle'  nowrap align='right'>ÏÂ¼¶Àà</td>";
+            strHtml += "<td class='childrenclasstitle'  nowrap align='right'>ä¸‹çº§ç±»</td>";
 
             strHtml += "<td class='childrenclasstext'>";
             for (i = 0; i < nodes.Count; i++)
@@ -917,33 +921,33 @@ namespace DigitalPlatform.Library
 
         /*
         <subject>
-            <rdf:value>Âí¿ËË¼Öø×÷</rdf:value>
+            <rdf:value>é©¬å…‹æ€è‘—ä½œ</rdf:value>
             <c2s:subdivide c2s:refinement="">
-                <rdf:value>ÎÄ¼¯</rdf:value>
+                <rdf:value>æ–‡é›†</rdf:value>
             </c2s:subdivide>
         </subject>
         */
         /*
 		<item>
-			<subject>ÀàÃû¶ÔÓ¦ººÓïÖ÷Ìâ´Ê(ÓÃºÚÌåÏÔÊ¾)</subject>
-			<subject refinement="subdivide">Ñ§¿Æ¸´·ÖÖ÷Ìâ´Ê</subject>
-			<subject refinement="geographic">µØÇø¸´·ÖÖ÷Ìâ´Ê</subject>
-			<subject refinement="chronological">Äê´ú¸´·ÖÖ÷Ìâ´Ê</subject>
+			<subject>ç±»åå¯¹åº”æ±‰è¯­ä¸»é¢˜è¯(ç”¨é»‘ä½“æ˜¾ç¤º)</subject>
+			<subject refinement="subdivide">å­¦ç§‘å¤åˆ†ä¸»é¢˜è¯</subject>
+			<subject refinement="geographic">åœ°åŒºå¤åˆ†ä¸»é¢˜è¯</subject>
+			<subject refinement="chronological">å¹´ä»£å¤åˆ†ä¸»é¢˜è¯</subject>
 			<subject refinement="ethnic" rdf:resource="ethnic" />
 			<!--
-			Ç°ÃæµÄ´øÏŞ¶¨´ÊµÄsubjectÖµ¶¼ÓÃ¡°-¡±Á¬×Ö·û´®ÆğÀ´£¬¼´ÅĞ¶ÏrefinementÊôĞÔÖµÎª£º
-			¡°subdivide¡¢geographic¡¢chronological¡¢chronological¡¢ethnic¡±
-			¶¼ÓÃ¡°-¡±Á¬ÔÚ²»¾ßrefinementÊôĞÔµÄsubjectÖµÖ®ºó¡£
+			å‰é¢çš„å¸¦é™å®šè¯çš„subjectå€¼éƒ½ç”¨â€œ-â€è¿å­—ç¬¦ä¸²èµ·æ¥ï¼Œå³åˆ¤æ–­refinementå±æ€§å€¼ä¸ºï¼š
+			â€œsubdivideã€geographicã€chronologicalã€chronologicalã€ethnicâ€
+			éƒ½ç”¨â€œ-â€è¿åœ¨ä¸å…·refinementå±æ€§çš„subjectå€¼ä¹‹åã€‚
 			-->
-			<subject refinement="modifier">Ö÷Ìâ´ÊĞŞÊÎ´Ê</subject>
+			<subject refinement="modifier">ä¸»é¢˜è¯ä¿®é¥°è¯</subject>
 			<!--
-			Ç°ÃæµÄ´øÏŞ¶¨´ÊµÄsubjectÖµ¶¼ÓÃ¡°,¡±×Ö·û´®ÆğÀ´£¬¼´ÅĞ¶ÏrefinementÊôĞÔÖµÎª£º
-			¡°modifier¡±Ê±£¬ÓÃ¡°,¡±Á¬ÔÚ²»¾ßrefinementÊôĞÔµÄsubjectÖµÖ®ºó¡£
+			å‰é¢çš„å¸¦é™å®šè¯çš„subjectå€¼éƒ½ç”¨â€œ,â€å­—ç¬¦ä¸²èµ·æ¥ï¼Œå³åˆ¤æ–­refinementå±æ€§å€¼ä¸ºï¼š
+			â€œmodifierâ€æ—¶ï¼Œç”¨â€œ,â€è¿åœ¨ä¸å…·refinementå±æ€§çš„subjectå€¼ä¹‹åã€‚
 			-->
-			<subject refinement="bond">×éÅäÖ÷Ìâ´Ê</subject>
+			<subject refinement="bond">ç»„é…ä¸»é¢˜è¯</subject>
 			<!--
-			Ç°ÃæµÄ´øÏŞ¶¨´ÊµÄsubjectÖµ¶¼ÓÃ¡°:¡±×Ö·û´®ÆğÀ´£¬¼´ÅĞ¶ÏrefinementÊôĞÔÖµÎª£º
-			¡°bond¡±Ê±£¬ÓÃ¡°:¡±Á¬ÔÚ²»¾ßrefinementÊôĞÔµÄsubjectÖµÖ®ºó¡£
+			å‰é¢çš„å¸¦é™å®šè¯çš„subjectå€¼éƒ½ç”¨â€œ:â€å­—ç¬¦ä¸²èµ·æ¥ï¼Œå³åˆ¤æ–­refinementå±æ€§å€¼ä¸ºï¼š
+			â€œbondâ€æ—¶ï¼Œç”¨â€œ:â€è¿åœ¨ä¸å…·refinementå±æ€§çš„subjectå€¼ä¹‹åã€‚
 			-->
 		</item>
          */
@@ -976,11 +980,11 @@ namespace DigitalPlatform.Library
 
 
 
-                    // Òıµ¼´Ê
+                    // å¼•å¯¼è¯
                     strHtml += strText;
 
                     if (nodes.Count > 1)
-                        strHtml += "<a href='" + strSelectUrl + "' alt='Ñ¡ÓÃÖ÷Ìâ´Ê" + strText + "'>" + strImg + "</a>";
+                        strHtml += "<a href='" + strSelectUrl + "' alt='é€‰ç”¨ä¸»é¢˜è¯" + strText + "'>" + strImg + "</a>";
                     else
                     {
                     }
@@ -990,7 +994,7 @@ namespace DigitalPlatform.Library
                 }
                 else
                 {
-                    // ±»Òıµ¼´Ê
+                    // è¢«å¼•å¯¼è¯
                     strHtml += "-" + DomUtil.GetNodeText(cur);
 
                     strPureText += "-" + DomUtil.GetNodeText(cur);
@@ -1021,8 +1025,8 @@ namespace DigitalPlatform.Library
 
             // MessageBox.Show(this, strText);
 
-            // ×¼±¸SubmitResultĞÅÏ¢
-            string strEncoding = "";    //  ((mshtml.HTMLDocumentClass)this.axWebBrowser.Document).charset; // Õâ¾ÍÊÇÒı·¢XPÏÂIE¿Ø¼şÌø×ªÒì³£µÄÎÊÌâÓï¾ä
+            // å‡†å¤‡SubmitResultä¿¡æ¯
+            string strEncoding = "";    //  ((mshtml.HTMLDocumentClass)this.axWebBrowser.Document).charset; // è¿™å°±æ˜¯å¼•å‘XPä¸‹IEæ§ä»¶è·³è½¬å¼‚å¸¸çš„é—®é¢˜è¯­å¥
 
             // MessageBox.Show(this, "1");
 
@@ -1048,7 +1052,7 @@ namespace DigitalPlatform.Library
             // MessageBox.Show(this, "strLead='" + strLead + "' ActionPrefix='" + this.ActionPrefix + "'");
 
 
-            // Ô¤¶¨ÒåµÄÃüÁî
+            // é¢„å®šä¹‰çš„å‘½ä»¤
             if (String.Compare(strLead, this.ActionPrefix, true) == 0)
             {
                 string strVerb = "";
@@ -1073,7 +1077,7 @@ namespace DigitalPlatform.Library
 
         }
 
-        // ¸´ÖÆ²¢½áÊø
+        // å¤åˆ¶å¹¶ç»“æŸ
         void DoCopyMulti()
         {
             /*
@@ -1094,7 +1098,7 @@ namespace DigitalPlatform.Library
 
         }
 
-        // ¸´ÖÆ²¢½áÊø
+        // å¤åˆ¶å¹¶ç»“æŸ
         void DoCopyOne(string strParam)
         {
             strParam = HttpUtility.UrlDecode(strParam);
@@ -1148,23 +1152,23 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// Ìø×ªµ½Ä³¸öÀàºÅ
+        /// è·³è½¬åˆ°æŸä¸ªç±»å·
         /// </summary>
-        /// <param name="strKey">ÀàºÅ</param>
+        /// <param name="strKey">ç±»å·</param>
         public void DoNavi(string strKey)
         {
             string strError = "";
             XmlDocument tempdom = null;
 
-            // ¼ìË÷ÊµÓÃ¿â
+            // æ£€ç´¢å®ç”¨åº“
             int nRet = 0;
 
-            this.SearchPanel.BeginLoop("ÕıÔÚ¼ìË÷ " + strKey + " ...");
+            this.SearchPanel.BeginLoop("æ­£åœ¨æ£€ç´¢ " + strKey + " ...");
             try
             {
                 nRet = this.SearchPanel.SearchUtilDb(
                     this.DbName,
-                    "ÀàºÅ",
+                    "ç±»å·",
                     strKey,
                     out tempdom,
                     out strError);
@@ -1178,7 +1182,7 @@ namespace DigitalPlatform.Library
                 goto ERROR1;
             if (nRet == 0)
             {
-                strError = "Î´ÃüÖĞ";
+                strError = "æœªå‘½ä¸­";
                 goto ERROR1;
             }
 
@@ -1212,7 +1216,7 @@ namespace DigitalPlatform.Library
                 }
                 else 
                 {
-                    Debug.Assert(true, "ÈôÒªÓÃap±£´æºÍ»Ö¸´´°¿ÚÍâ¹Û×´Ì¬£¬±ØĞëÏÈÉèÖÃApCfgTitle³ÉÔ±");
+                    Debug.Assert(true, "è‹¥è¦ç”¨apä¿å­˜å’Œæ¢å¤çª—å£å¤–è§‚çŠ¶æ€ï¼Œå¿…é¡»å…ˆè®¾ç½®ApCfgTitleæˆå‘˜");
                 }
 
             }
@@ -1234,7 +1238,7 @@ namespace DigitalPlatform.Library
                 }
                 else 
                 {
-                    Debug.Assert(true, "ÈôÒªÓÃap±£´æºÍ»Ö¸´´°¿ÚÍâ¹Û×´Ì¬£¬±ØĞëÏÈÉèÖÃApCfgTitle³ÉÔ±");
+                    Debug.Assert(true, "è‹¥è¦ç”¨apä¿å­˜å’Œæ¢å¤çª—å£å¤–è§‚çŠ¶æ€ï¼Œå¿…é¡»å…ˆè®¾ç½®ApCfgTitleæˆå‘˜");
                 }
 
             }
@@ -1268,7 +1272,7 @@ namespace DigitalPlatform.Library
 
             byte[] data1 = null;
 
-            // È¥µôÄ©Î²µÄ0
+            // å»æ‰æœ«å°¾çš„0
             if (data.Length > 1 && data[data.Length - 1] == 0)
             {
                 data1 = new byte[data.Length - 1];
@@ -1279,19 +1283,19 @@ namespace DigitalPlatform.Library
 
             string strData = encoding.GetString(data1);
 
-            // ÇĞ¸î &
+            // åˆ‡å‰² &
             string[] saItem = strData.Split(new Char[] { '&' });
 
             for (int i = 0; i < saItem.Length; i++)
             {
-                // ÇĞ¸î'='
+                // åˆ‡å‰²'='
                 int nRet = saItem[i].IndexOf('=', 0);
                 if (nRet == -1)
                     continue;	// invalid item
                 string strName = saItem[i].Substring(0, nRet);
                 string strValue = saItem[i].Substring(nRet + 1);
 
-                // ½âÂë
+                // è§£ç 
                 strName = HttpUtility.UrlDecode(strName,
                     encoding);
                 strValue = HttpUtility.UrlDecode(strValue,
@@ -1318,7 +1322,7 @@ namespace DigitalPlatform.Library
         {
             OpenResDlg dlg = new OpenResDlg();
 
-            dlg.Text = "ÇëÑ¡Ôñ·şÎñÆ÷";
+            dlg.Text = "è¯·é€‰æ‹©æœåŠ¡å™¨";
             dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
             dlg.Path = textBox_serverUrl.Text;
             dlg.Initial(this.SearchPanel.Servers,
@@ -1350,7 +1354,7 @@ namespace DigitalPlatform.Library
 
 
     /// <summary>
-    /// ¸´ÖÆÖ÷Ìâ´Ê
+    /// å¤åˆ¶ä¸»é¢˜è¯
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -1358,17 +1362,17 @@ namespace DigitalPlatform.Library
     CopySubjectEventArgs e);
 
     /// <summary>
-    /// ¸´ÖÆÖ÷Ìâ´ÊÊÂ¼ş²ÎÊı
+    /// å¤åˆ¶ä¸»é¢˜è¯äº‹ä»¶å‚æ•°
     /// </summary>
     public class CopySubjectEventArgs : EventArgs
     {
         /// <summary>
-        /// Ö÷Ìâ´Ê
+        /// ä¸»é¢˜è¯
         /// </summary>
         public string Subject = "";
 
         /// <summary>
-        /// ÊÇ·ñÎªµ¥¶ÀÒ»¸ö´Ê
+        /// æ˜¯å¦ä¸ºå•ç‹¬ä¸€ä¸ªè¯
         /// </summary>
         public bool Single = false;
     }

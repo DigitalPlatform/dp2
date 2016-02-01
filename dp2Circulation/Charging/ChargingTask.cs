@@ -251,18 +251,6 @@ namespace dp2Circulation
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         static int m_nLockTimeout = 5000;	// 5000=5秒
 
-#if NO
-
-        bool m_bStopThread = true;
-        internal Thread _thread = null;
-
-        internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
-        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
-        // internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
-
-        public int PerTime = 1000;   // 1 秒 5 * 60 * 1000;	// 5 分钟
-#endif
-
         public override void StopThread(bool bForce)
         {
             // this.Clear();

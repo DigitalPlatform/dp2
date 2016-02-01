@@ -21,7 +21,7 @@ using DigitalPlatform;
 
 namespace dp2LibraryXE
 {
-    public class HostBase
+    public class HostBase : IDisposable
     {
         internal ServiceHost _host = null;
 
@@ -33,6 +33,14 @@ namespace dp2LibraryXE
         internal AutoResetEvent _eventClosed = new AutoResetEvent(false);
 
         public string MetadataUrl = "";
+
+        public void Dispose()
+        {
+            CloseHosts();
+
+            _eventClosed.Dispose();
+            _eventStarted.Dispose();
+        }
 
         public int Start(out string strError)
         {
@@ -91,7 +99,6 @@ namespace dp2LibraryXE
 
     public class KernelHost : HostBase
     {
-
         public override void ThreadMethod()
         {
             string strError = "";
@@ -231,8 +238,6 @@ namespace dp2LibraryXE
 
             return binding;
         }
-
-
 
         void m_host_Closing(object sender, EventArgs e)
         {

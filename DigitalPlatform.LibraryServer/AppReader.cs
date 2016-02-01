@@ -1164,7 +1164,6 @@ namespace DigitalPlatform.LibraryServer
                 // 兑现一个命令
                 if (strAction == "new")
                 {
-                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
 
                     // 检查新记录的路径中的id部分是否正确
                     // 库名部分，前面已经统一检查过了
@@ -1314,14 +1313,14 @@ strLibraryCode);    // 读者所在的馆代码
                             "创建新记录数",
                             1);
                     }
+
+                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
                 }
                 else if (strAction == "change"
                     || strAction == "changestate"
                     || strAction == "changeforegift"
                     || strAction == "changereaderbarcode")
                 {
-                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
-
                     // DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue errorcode;
                     // 执行"change"操作
                     // 1) 操作成功后, NewRecord中有实际保存的新记录，NewTimeStamp为新的时间戳
@@ -1352,11 +1351,12 @@ strLibraryCode);    // 读者所在的馆代码
                         goto ERROR1;
                     }
 
+                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+
                     strSavedRecPath = strRecPath;   // 保存过程不会改变记录路径
                 }
                 else if (strAction == "delete")
                 {
-                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
 
                     // return:
                     //      -2  记录中有流通信息，不能删除
@@ -1398,6 +1398,8 @@ strLibraryCode);    // 读者所在的馆代码
                         result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                         return result;
                     }
+
+                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
                 }
                 else
                 {

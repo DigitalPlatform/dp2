@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -8,79 +8,82 @@ using DigitalPlatform.rms.Client;
 
 namespace dp2Batch11
 {
-	/// <summary>
-	/// Summary description for OriginNotFoundDlg.
-	/// </summary>
-	public class OriginNotFoundDlg : System.Windows.Forms.Form
-	{
-		public ServerCollection Servers = null;
-		public RmsChannelCollection	Channels =null;	
+    /// <summary>
+    /// Summary description for OriginNotFoundDlg.
+    /// </summary>
+    public class OriginNotFoundDlg : System.Windows.Forms.Form
+    {
+        public ServerCollection Servers = null;
+        public RmsChannelCollection Channels = null;
 
-		// MapÒ»°ãÊÇÒıÓÃÍâ²¿¶ÔÏó¡£ÔÚcheckBox_notAskWhenSameOrigin.Checked==false
-		// Çé¿öÏÂ£¬Map»á×Ô¶¯¸´ÖÆÒ»¸ö£¬½â³ıºÍÔ­¶ÔÏóµÄÒıÓÃ¹ØÏµ£¬È»ºóĞŞ¸Ä×Ô¼ºËùÓµÓĞµÄĞÂ¶ÔÏó¡£
-		// ¶Ô»°¿ò·µ»Øºó£¬¶Ô»°¿òµ÷Ö÷±ØĞëÊ¹ÓÃMapÖĞµÄ¶ÔÏóÖ¸Õë¡£Èç¹ûthis.Map±íÊ¾µÄ¶ÔÏóÊÇĞÂ¶ÔÏó£¬
-		// ÔÚ¶Ô»°¿ò´İ»ÙÊ±£¬×ÔÈ»»áÒ»Í¬±»¶ªÆú¡£
-		public DbNameMap Map = null;
+        // Mapä¸€èˆ¬æ˜¯å¼•ç”¨å¤–éƒ¨å¯¹è±¡ã€‚åœ¨checkBox_notAskWhenSameOrigin.Checked==false
+        // æƒ…å†µä¸‹ï¼ŒMapä¼šè‡ªåŠ¨å¤åˆ¶ä¸€ä¸ªï¼Œè§£é™¤å’ŒåŸå¯¹è±¡çš„å¼•ç”¨å…³ç³»ï¼Œç„¶åä¿®æ”¹è‡ªå·±æ‰€æ‹¥æœ‰çš„æ–°å¯¹è±¡ã€‚
+        // å¯¹è¯æ¡†è¿”å›åï¼Œå¯¹è¯æ¡†è°ƒä¸»å¿…é¡»ä½¿ç”¨Mapä¸­çš„å¯¹è±¡æŒ‡é’ˆã€‚å¦‚æœthis.Mapè¡¨ç¤ºçš„å¯¹è±¡æ˜¯æ–°å¯¹è±¡ï¼Œ
+        // åœ¨å¯¹è¯æ¡†æ‘§æ¯æ—¶ï¼Œè‡ªç„¶ä¼šä¸€åŒè¢«ä¸¢å¼ƒã€‚
+        public DbNameMap Map = null;
 
 
 
-		public string Message = "";
+        public string Message = "";
 
-		public string Origin = "";
+        public string Origin = "";
 
-		private System.Windows.Forms.RadioButton radioButton_skip;
-		private System.Windows.Forms.RadioButton radioButton_overwrite;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox textBox_appendDbName;
-		private System.Windows.Forms.Button button_findAppendDbName;
-		private System.Windows.Forms.Button button_findOverwriteDbName;
-		private System.Windows.Forms.TextBox textBox_overwriteDbName;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.Button button_editMap;
-		private System.Windows.Forms.Label label_message;
-		private System.Windows.Forms.RadioButton radioButton_append;
-		private System.Windows.Forms.CheckBox checkBox_notAskWhenSameOrigin;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        private System.Windows.Forms.RadioButton radioButton_skip;
+        private System.Windows.Forms.RadioButton radioButton_overwrite;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox_appendDbName;
+        private System.Windows.Forms.Button button_findAppendDbName;
+        private System.Windows.Forms.Button button_findOverwriteDbName;
+        private System.Windows.Forms.TextBox textBox_overwriteDbName;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_editMap;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.RadioButton radioButton_append;
+        private System.Windows.Forms.CheckBox checkBox_notAskWhenSameOrigin;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public OriginNotFoundDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public OriginNotFoundDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OriginNotFoundDlg));
             this.label_message = new System.Windows.Forms.Label();
             this.radioButton_skip = new System.Windows.Forms.RadioButton();
@@ -115,7 +118,7 @@ namespace dp2Batch11
             this.radioButton_skip.Name = "radioButton_skip";
             this.radioButton_skip.Size = new System.Drawing.Size(208, 24);
             this.radioButton_skip.TabIndex = 1;
-            this.radioButton_skip.Text = "ºöÂÔ[²»µ¼ÈëÈÎºÎÊı¾İ¿â] (&S)";
+            this.radioButton_skip.Text = "å¿½ç•¥[ä¸å¯¼å…¥ä»»ä½•æ•°æ®åº“] (&S)";
             this.radioButton_skip.CheckedChanged += new System.EventHandler(this.radioButton_skip_CheckedChanged);
             // 
             // radioButton_append
@@ -125,7 +128,7 @@ namespace dp2Batch11
             this.radioButton_append.Name = "radioButton_append";
             this.radioButton_append.Size = new System.Drawing.Size(208, 23);
             this.radioButton_append.TabIndex = 2;
-            this.radioButton_append.Text = "×·¼Óµ½ÏÂÁĞÊı¾İ¿â(&A)";
+            this.radioButton_append.Text = "è¿½åŠ åˆ°ä¸‹åˆ—æ•°æ®åº“(&A)";
             this.radioButton_append.CheckedChanged += new System.EventHandler(this.radioButton_append_CheckedChanged);
             // 
             // radioButton_overwrite
@@ -135,7 +138,7 @@ namespace dp2Batch11
             this.radioButton_overwrite.Name = "radioButton_overwrite";
             this.radioButton_overwrite.Size = new System.Drawing.Size(208, 23);
             this.radioButton_overwrite.TabIndex = 3;
-            this.radioButton_overwrite.Text = "¸²¸Çµ½ÏÂÁĞÊı¾İ¿â(&O)";
+            this.radioButton_overwrite.Text = "è¦†ç›–åˆ°ä¸‹åˆ—æ•°æ®åº“(&O)";
             this.radioButton_overwrite.CheckedChanged += new System.EventHandler(this.radioButton_overwrite_CheckedChanged);
             // 
             // label2
@@ -145,7 +148,7 @@ namespace dp2Batch11
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(64, 23);
             this.label2.TabIndex = 4;
-            this.label2.Text = "¿âÃû(&D):";
+            this.label2.Text = "åº“å(&D):";
             // 
             // textBox_appendDbName
             // 
@@ -192,7 +195,7 @@ namespace dp2Batch11
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(64, 23);
             this.label3.TabIndex = 7;
-            this.label3.Text = "¿âÃû(&D):";
+            this.label3.Text = "åº“å(&D):";
             // 
             // button_OK
             // 
@@ -201,7 +204,7 @@ namespace dp2Batch11
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
             this.button_OK.TabIndex = 10;
-            this.button_OK.Text = "¼ÌĞø";
+            this.button_OK.Text = "ç»§ç»­";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -211,7 +214,7 @@ namespace dp2Batch11
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 11;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_editMap
@@ -222,7 +225,7 @@ namespace dp2Batch11
             this.button_editMap.Name = "button_editMap";
             this.button_editMap.Size = new System.Drawing.Size(120, 21);
             this.button_editMap.TabIndex = 12;
-            this.button_editMap.Text = "¹Û²ì¶ÔÕÕ±í...";
+            this.button_editMap.Text = "è§‚å¯Ÿå¯¹ç…§è¡¨...";
             this.button_editMap.Click += new System.EventHandler(this.button_editMap_Click);
             // 
             // checkBox_notAskWhenSameOrigin
@@ -231,7 +234,7 @@ namespace dp2Batch11
             this.checkBox_notAskWhenSameOrigin.Name = "checkBox_notAskWhenSameOrigin";
             this.checkBox_notAskWhenSameOrigin.Size = new System.Drawing.Size(464, 24);
             this.checkBox_notAskWhenSameOrigin.TabIndex = 13;
-            this.checkBox_notAskWhenSameOrigin.Text = "ÒÔºóÈçÓöÏàÍ¬Çé¿ö²»ÔÙÑ¯ÎÊ(&N)";
+            this.checkBox_notAskWhenSameOrigin.Text = "ä»¥åå¦‚é‡ç›¸åŒæƒ…å†µä¸å†è¯¢é—®(&N)";
             // 
             // OriginNotFoundDlg
             // 
@@ -253,105 +256,105 @@ namespace dp2Batch11
             this.Controls.Add(this.label_message);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "OriginNotFoundDlg";
-            this.Text = "ÇëÖ¸¶¨¸²¸Ç·½Ê½";
+            this.Text = "è¯·æŒ‡å®šè¦†ç›–æ–¹å¼";
             this.Load += new System.EventHandler(this.OriginNotFoundDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void OriginNotFoundDlg_Load(object sender, System.EventArgs e)
-		{
-		
-			label_message.Text = this.Message;
-			radioButton_skip.Checked = true;
-			Checked();
-		}
+        private void OriginNotFoundDlg_Load(object sender, System.EventArgs e)
+        {
 
-		private void button_editMap_Click(object sender, System.EventArgs e)
-		{
-		
-		}
+            label_message.Text = this.Message;
+            radioButton_skip.Checked = true;
+            Checked();
+        }
 
-		private void button_findAppendDbName_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_editMap_Click(object sender, System.EventArgs e)
+        {
 
-			dlg.Text = "ÇëÑ¡ÔñÒª×·¼ÓµÄÄ¿±êÊı¾İ¿â";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			//dlg.ap = this.applicationInfo;
-			//dlg.ApCfgTitle = "pageimport_openresdlg";
-			dlg.MultiSelect = false;
-			dlg.Path = textBox_appendDbName.Text;
-			dlg.Initial( this.Servers,
-				this.Channels);	
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+        }
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+        private void button_findAppendDbName_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
 
-			textBox_appendDbName.Text = dlg.Path;
-		}
+            dlg.Text = "è¯·é€‰æ‹©è¦è¿½åŠ çš„ç›®æ ‡æ•°æ®åº“";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            //dlg.ap = this.applicationInfo;
+            //dlg.ApCfgTitle = "pageimport_openresdlg";
+            dlg.MultiSelect = false;
+            dlg.Path = textBox_appendDbName.Text;
+            dlg.Initial(this.Servers,
+                this.Channels);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-		private void button_findOverwriteDbName_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			dlg.Text = "ÇëÑ¡ÔñÒª¸²¸ÇµÄÄ¿±êÊı¾İ¿â";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			//dlg.ap = this.applicationInfo;
-			//dlg.ApCfgTitle = "pageimport_openresdlg";
-			dlg.MultiSelect = false;
-			dlg.Path = textBox_overwriteDbName.Text;
-			dlg.Initial( this.Servers,
-				this.Channels);	
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            textBox_appendDbName.Text = dlg.Path;
+        }
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+        private void button_findOverwriteDbName_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
 
-			textBox_overwriteDbName.Text = dlg.Path;
-		}
+            dlg.Text = "è¯·é€‰æ‹©è¦è¦†ç›–çš„ç›®æ ‡æ•°æ®åº“";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            //dlg.ap = this.applicationInfo;
+            //dlg.ApCfgTitle = "pageimport_openresdlg";
+            dlg.MultiSelect = false;
+            dlg.Path = textBox_overwriteDbName.Text;
+            dlg.Initial(this.Servers,
+                this.Channels);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			string strTarget = "";
-			string strStyle = "";
-			if (radioButton_skip.Checked == true) 
-			{
-				strStyle = "skip";
-			}
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			if (radioButton_append.Checked == true)
-			{
-				if (this.textBox_appendDbName.Text == "") 
-				{
-					MessageBox.Show(this, "ÔÚÑ¡ÔñÁË×·¼Ó·½Ê½µÄÇé¿öÏÂ£¬±ØĞëÑ¡ÔñÄ¿±ê¿â...");
-					return;
-				}
-				strTarget = this.textBox_appendDbName.Text;
-				strStyle = "append";
-			}
+            textBox_overwriteDbName.Text = dlg.Path;
+        }
 
-			if (radioButton_overwrite.Checked == true)
-			{
-				if (this.textBox_overwriteDbName.Text == "") 
-				{
-					MessageBox.Show(this, "ÔÚÑ¡ÔñÁË¸²¸Ç·½Ê½µÄÇé¿öÏÂ£¬±ØĞëÑ¡ÔñÄ¿±ê¿â...");
-					return;
-				}
-				strTarget = this.textBox_overwriteDbName.Text;
-				strStyle = "overwrite";
-			}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            string strTarget = "";
+            string strStyle = "";
+            if (radioButton_skip.Checked == true)
+            {
+                strStyle = "skip";
+            }
 
-			// Èç¹ûÒª½ö½öµ±´ÎÆğ×÷ÓÃ£¬ĞèÒªÉî¸´ÖÆMap£¬ÒÔ±ã¶Ô»°¿òµ÷Ö÷Ê¹ÓÃºó×Ô¶¯¶ªÆú
-			if (checkBox_notAskWhenSameOrigin.Checked == false) 
-			{
-				this.Map = this.Map.Clone();
-			}
+            if (radioButton_append.Checked == true)
+            {
+                if (this.textBox_appendDbName.Text == "")
+                {
+                    MessageBox.Show(this, "åœ¨é€‰æ‹©äº†è¿½åŠ æ–¹å¼çš„æƒ…å†µä¸‹ï¼Œå¿…é¡»é€‰æ‹©ç›®æ ‡åº“...");
+                    return;
+                }
+                strTarget = this.textBox_appendDbName.Text;
+                strStyle = "append";
+            }
+
+            if (radioButton_overwrite.Checked == true)
+            {
+                if (this.textBox_overwriteDbName.Text == "")
+                {
+                    MessageBox.Show(this, "åœ¨é€‰æ‹©äº†è¦†ç›–æ–¹å¼çš„æƒ…å†µä¸‹ï¼Œå¿…é¡»é€‰æ‹©ç›®æ ‡åº“...");
+                    return;
+                }
+                strTarget = this.textBox_overwriteDbName.Text;
+                strStyle = "overwrite";
+            }
+
+            // å¦‚æœè¦ä»…ä»…å½“æ¬¡èµ·ä½œç”¨ï¼Œéœ€è¦æ·±å¤åˆ¶Mapï¼Œä»¥ä¾¿å¯¹è¯æ¡†è°ƒä¸»ä½¿ç”¨åè‡ªåŠ¨ä¸¢å¼ƒ
+            if (checkBox_notAskWhenSameOrigin.Checked == false)
+            {
+                this.Map = this.Map.Clone();
+            }
 
             string strError = "";
             if (Map.NewItem(Origin, strTarget, strStyle, out strError) == null)
@@ -360,61 +363,61 @@ namespace dp2Batch11
                 return;
             }
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
 
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void radioButton_skip_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Checked();
-		}
+        private void radioButton_skip_CheckedChanged(object sender, System.EventArgs e)
+        {
+            Checked();
+        }
 
-		private void radioButton_append_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Checked();
-		}
+        private void radioButton_append_CheckedChanged(object sender, System.EventArgs e)
+        {
+            Checked();
+        }
 
-		private void radioButton_overwrite_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Checked();
-		}
+        private void radioButton_overwrite_CheckedChanged(object sender, System.EventArgs e)
+        {
+            Checked();
+        }
 
-		void Checked()
-		{
-			if (radioButton_skip.Checked == true)
-			{
-				textBox_appendDbName.Enabled = false;
-				textBox_overwriteDbName.Enabled = false;
+        void Checked()
+        {
+            if (radioButton_skip.Checked == true)
+            {
+                textBox_appendDbName.Enabled = false;
+                textBox_overwriteDbName.Enabled = false;
 
-				button_findAppendDbName.Enabled = false;
-				button_findOverwriteDbName.Enabled = false;
-			}
-			if (radioButton_append.Checked == true)
-			{
-				textBox_appendDbName.Enabled = true;
-				button_findAppendDbName.Enabled = true;
+                button_findAppendDbName.Enabled = false;
+                button_findOverwriteDbName.Enabled = false;
+            }
+            if (radioButton_append.Checked == true)
+            {
+                textBox_appendDbName.Enabled = true;
+                button_findAppendDbName.Enabled = true;
 
-				textBox_overwriteDbName.Enabled = false;
-				button_findOverwriteDbName.Enabled = false;
-			}
-			if (radioButton_overwrite.Checked == true)
-			{
-				textBox_appendDbName.Enabled = false;
-				button_findAppendDbName.Enabled = false;
+                textBox_overwriteDbName.Enabled = false;
+                button_findOverwriteDbName.Enabled = false;
+            }
+            if (radioButton_overwrite.Checked == true)
+            {
+                textBox_appendDbName.Enabled = false;
+                button_findAppendDbName.Enabled = false;
 
-				textBox_overwriteDbName.Enabled = true;
-				button_findOverwriteDbName.Enabled = true;
-			}
-		}
+                textBox_overwriteDbName.Enabled = true;
+                button_findOverwriteDbName.Enabled = true;
+            }
+        }
 
 
 
-	}
+    }
 }

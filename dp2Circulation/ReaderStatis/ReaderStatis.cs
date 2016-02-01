@@ -131,6 +131,7 @@ namespace dp2Circulation
         }
 
 #if NO
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         // Use C# destructor syntax for finalization code.
         // This destructor will run only if the Dispose method 
         // does not get called.

@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.GUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +12,7 @@ using System.Diagnostics;
 using DigitalPlatform.Install;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.OPAC
 {
@@ -155,7 +155,7 @@ namespace DigitalPlatform.OPAC
             foreach (string name in results)
             {
                 if (this.comboBox_site.Items.IndexOf(name) == -1)
-                this.comboBox_site.Items.Add(name);
+                    this.comboBox_site.Items.Add(name);
             }
 
             if (this.CreateMode == true
@@ -376,8 +376,8 @@ MessageBoxDefaultButton.Button1);
             for (int i = 0; ; i++)
             {
                 string strDateDir = "c:\\opac_data";
-                if ( i > 0)
-                    strDateDir = "c:\\opac_data_" + (i+1).ToString();
+                if (i > 0)
+                    strDateDir = "c:\\opac_data_" + (i + 1).ToString();
 
                 // 已经存在的物理目录不能使用
                 if (Directory.Exists(strDateDir) == true)
@@ -553,7 +553,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             string strVirtualDirRight = this.textBox_instanceName.Text.Substring(1);
-            if (strVirtualDirRight.IndexOfAny(new char [] {'/',' '}) != -1)
+            if (strVirtualDirRight.IndexOfAny(new char[] { '/', ' ' }) != -1)
             {
                 strError = "虚拟目录名第一字符以外的字符中，不允许包含 '/' 或空格字符";
                 goto ERROR1;

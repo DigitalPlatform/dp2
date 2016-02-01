@@ -22,6 +22,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.OPAC.Server;
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -42,6 +43,14 @@ namespace DigitalPlatform.OPAC.Web
         public bool Wrapper = false;    // 是否创建外围包裹的<div>
 
         ResourceManager m_rm = null;
+
+        public override void Dispose()
+        {
+            this.WantFocus = null;
+            this.Submited = null;
+
+            base.Dispose();
+        }
 
         ResourceManager GetRm()
         {
@@ -317,6 +326,7 @@ namespace DigitalPlatform.OPAC.Web
         public int Delete(out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             string strRecPath = this.CommentRecPath;
             string strTimestamp = this.Timestamp;
@@ -331,90 +341,100 @@ namespace DigitalPlatform.OPAC.Web
             else
                 bManager = true;
 
-            string strCommentRecPath = this.CommentRecPath;
-
-            // 获得旧记录
-            string strOldXml = "";
-            byte[] timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
-            if (String.IsNullOrEmpty(strCommentRecPath) == false)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                string strOutputPath = "";
-                byte[] temp_timestamp = null;
-                string strBiblio = "";
-                string strTempBiblioRecPath = "";
-                // return:
-                //      -1  出错
-                //      0   没有找到
-                //      1   找到
-                //      >1  命中多于1条
-                long lRet = sessioninfo.Channel.GetCommentInfo(
-null,
-"@path:" + strCommentRecPath,
-                    // null,
-"xml", // strResultType
-out strOldXml,
-out strOutputPath,
-out temp_timestamp,
-"recpath",  // strBiblioType
-out strBiblio,
-out strTempBiblioRecPath,
-out strError);
-                if (lRet == -1)
+                string strCommentRecPath = this.CommentRecPath;
+
+                // 获得旧记录
+                string strOldXml = "";
+                byte[] timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
+                if (String.IsNullOrEmpty(strCommentRecPath) == false)
                 {
-                    strError = "获得原有评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
+                    string strOutputPath = "";
+                    byte[] temp_timestamp = null;
+                    string strBiblio = "";
+                    string strTempBiblioRecPath = "";
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    //      >1  命中多于1条
+                    long lRet = // sessioninfo.Channel.
+                        channel.GetCommentInfo(
+    null,
+    "@path:" + strCommentRecPath,
+                        // null,
+    "xml", // strResultType
+    out strOldXml,
+    out strOutputPath,
+    out temp_timestamp,
+    "recpath",  // strBiblioType
+    out strBiblio,
+    out strTempBiblioRecPath,
+    out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "获得原有评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
+                        goto ERROR1;
+                    }
+                    if (lRet == 0)
+                    {
+                        // 评注记录本来就不存在
+                        goto END1;
+                    }
+
+                    if (ByteArray.Compare(temp_timestamp, timestamp) != 0)
+                    {
+                        strError = "删除被拒绝。因为记录 '" + strCommentRecPath + "' 在删除前已经被其他人修改过。请重新装载";
+                        goto ERROR1;
+                    }
+                }
+
+                XmlDocument dom = new XmlDocument();
+                if (String.IsNullOrEmpty(strOldXml) == false)
+                {
+                    try
+                    {
+                        dom.LoadXml(strOldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载记录XML进入DOM时发生错误: " + ex.Message;
+                        goto ERROR1;
+                    }
+                }
+                else
+                    dom.LoadXml("<root/>");
+
+                // 注：从dp2library角度，本来就限制了reader类型的帐户只能删除由自己创建的评注。
+                // 而这里进一步限制了(即便是图书馆工作人员)只有managecomment权限的用户才能删除其他人创建的评注
+                string strOriginCreator = DomUtil.GetElementText(dom.DocumentElement,
+        "creator");
+                if (bManager == false
+                    && strOriginCreator != sessioninfo.UserID)
+                {
+                    strError = "当前用户 '" + sessioninfo.UserID + "' 不能删除由另一用户 '" + strOriginCreator + "' 创建的评注记录";
                     goto ERROR1;
                 }
-                if (lRet == 0)
-                {
-                    // 评注记录本来就不存在
-                    goto END1;
-                }
 
-                if (ByteArray.Compare(temp_timestamp, timestamp) != 0)
-                {
-                    strError = "删除被拒绝。因为记录 '" + strCommentRecPath + "' 在删除前已经被其他人修改过。请重新装载";
+                HiddenField biblio_recpath = (HiddenField)this.FindControl("biblio_recpath");
+
+                // 删除一个评注记录
+                nRet = DeleteCommentInfo(
+                    this.Page,
+                    channel,
+                    this.BiblioRecPath,
+                    strRecPath,
+                    ByteArray.GetTimeStampByteArray(strTimestamp),
+                    out strError);
+                if (nRet == -1)
                     goto ERROR1;
-                }
             }
-
-            XmlDocument dom = new XmlDocument();
-            if (String.IsNullOrEmpty(strOldXml) == false)
+            finally
             {
-                try
-                {
-                    dom.LoadXml(strOldXml);
-                }
-                catch (Exception ex)
-                {
-                    strError = "装载记录XML进入DOM时发生错误: " + ex.Message;
-                    goto ERROR1;
-                }
+                sessioninfo.ReturnChannel(channel);
             }
-            else
-                dom.LoadXml("<root/>");
-
-            // 注：从dp2library角度，本来就限制了reader类型的帐户只能删除由自己创建的评注。
-            // 而这里进一步限制了(即便是图书馆工作人员)只有managecomment权限的用户才能删除其他人创建的评注
-            string strOriginCreator = DomUtil.GetElementText(dom.DocumentElement,
-    "creator");
-            if (bManager == false
-                && strOriginCreator != sessioninfo.UserID)
-            {
-                strError = "当前用户 '" + sessioninfo.UserID + "' 不能删除由另一用户 '" + strOriginCreator + "' 创建的评注记录";
-                goto ERROR1;
-            }
-
-            HiddenField biblio_recpath = (HiddenField)this.FindControl("biblio_recpath");
-
-            // 删除一个评注记录
-            int nRet = DeleteCommentInfo(
-                this.Page,
-                this.BiblioRecPath,
-                strRecPath,
-                ByteArray.GetTimeStampByteArray(strTimestamp),
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
 
         END1:
             // 修改评注记录后，更新栏目存储结构
@@ -442,6 +462,7 @@ out strError);
         // 删除一个评注记录
         public static int DeleteCommentInfo(
             Page page,
+            LibraryChannel channel,
             string strBiblioRecPath,
             string strCommentRecPath,
             byte[] timestamp,
@@ -487,7 +508,8 @@ out strError);
 
             EntityInfo[] errorinfos = null;
 
-            long lRet = sessioninfo.Channel.SetComments(
+            long lRet = // sessioninfo.Channel.
+                channel.SetComments(
                 null,
                 strBiblioRecPath,
                 comments,
@@ -497,17 +519,6 @@ out strError);
             {
                 return -1;
             }
-            /*
-            LibraryServerResult result = app.CommentItemDatabase.SetItems(sessioninfo,
-                strBiblioRecPath,
-                comments,
-                out errorinfos);
-            if (result.Value == -1)
-            {
-                strError = result.ErrorInfo;
-                return -1;
-            }
-             * */
 
             if (errorinfos != null && errorinfos.Length > 0)
             {
@@ -1117,80 +1128,57 @@ string strText)
                 strError = "strBiblioRecPath为空，无法进行修改记录状态的操作";
                 goto ERROR1;
             }
-            //HiddenField edit_type = (HiddenField)this.FindControl("edit_type");
-            //TextBox edit_title = (TextBox)this.FindControl("edit_title");
-            //TextBox edit_content = (TextBox)this.FindControl("edit_content");
-            //HiddenField biblio_recpath = (HiddenField)this.FindControl("biblio_recpath");
-            //RadioButton edit_yes = (RadioButton)this.FindControl("edit_yes");
-
-            /*
-            string strCreator = "";
-            if (sessioninfo.Account != null)
-                strCreator = sessioninfo.Account.UserID;
-             * */
 
             // 获得旧记录
-            string strOldXml = "";
             byte[] timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
-
-            string strOutputPath = "";
-            byte[] temp_timestamp = null;
-            string strBiblio = "";
-            string strTempBiblioRecPath = "";
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            //      >1  命中多于1条
-            long lRet = sessioninfo.Channel.GetCommentInfo(
-null,
-"@path:" + strCommentRecPath,
-                // null,
-"xml", // strResultType
-out strOldXml,
-out strOutputPath,
-out temp_timestamp,
-"recpath",  // strBiblioType
-out strBiblio,
-out strTempBiblioRecPath,
-out strError);
-            if (lRet == -1)
+            string strOldXml = "";
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                strError = "获得原有评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
-                goto ERROR1;
+
+                string strOutputPath = "";
+                byte[] temp_timestamp = null;
+                string strBiblio = "";
+                string strTempBiblioRecPath = "";
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                //      >1  命中多于1条
+                long lRet = // sessioninfo.Channel.
+                    channel.GetCommentInfo(
+    null,
+    "@path:" + strCommentRecPath,
+                    // null,
+    "xml", // strResultType
+    out strOldXml,
+    out strOutputPath,
+    out temp_timestamp,
+    "recpath",  // strBiblioType
+    out strBiblio,
+    out strTempBiblioRecPath,
+    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获得原有评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+                if (lRet == 0)
+                {
+                    strError = "评注记录 '" + strCommentRecPath + "' 没有找到";
+                    goto ERROR1;
+                }
+
+                if (ByteArray.Compare(temp_timestamp, timestamp) != 0)
+                {
+                    strError = "修改被拒绝。因为记录 '" + strCommentRecPath + "' 在保存前已经被其他人修改过。请重新装载";
+                    goto ERROR1;
+                }
             }
-            if (lRet == 0)
+            finally
             {
-                strError = "评注记录 '" + strCommentRecPath + "' 没有找到";
-                goto ERROR1;
+                sessioninfo.ReturnChannel(channel);
             }
-            /*
-            string strStyle = LibraryChannel.GETRES_ALL_STYLE;
-            string strMetaData = "";
-
-            long lRet = sessioninfo.Channel.GetRes(
-                null,
-                strCommentRecPath,
-                strStyle,
-                out strOldXml,
-                out strMetaData,
-                out temp_timestamp,
-                out strOutputPath,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "获得原有记录 '" + strCommentRecPath + "' 时出错: " + strError;
-                goto ERROR1;
-            }
-             * */
-
-
-            if (ByteArray.Compare(temp_timestamp, timestamp) != 0)
-            {
-                strError = "修改被拒绝。因为记录 '" + strCommentRecPath + "' 在保存前已经被其他人修改过。请重新装载";
-                goto ERROR1;
-            }
-
 
             XmlDocument dom = new XmlDocument();
             if (String.IsNullOrEmpty(strOldXml) == false)
@@ -1475,58 +1463,41 @@ out strError);
             byte[] timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
             if (String.IsNullOrEmpty(strCommentRecPath) == false)
             {
-                string strOutputPath = "";
-                byte[] temp_timestamp = null;
-                string strBiblio = "";
-                string strTempBiblioRecPath = "";
-                long lRet = sessioninfo.Channel.GetCommentInfo(
-null,
-"@path:" + strCommentRecPath,
-                    // null,
-"xml", // strResultType
-out strOldXml,
-out strOutputPath,
-out temp_timestamp,
-"recpath",  // strBiblioType
-out strBiblio,
-out strTempBiblioRecPath,
-out strError);
-                if (lRet == -1)
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
                 {
-                    strError = "获得原有评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
-                    goto ERROR1;
-                }
-#if NO
-                if (lRet == 0)
-                {
-                    strError = "原有评注记录 '" + strCommentRecPath + "' 没有找到";
-                    goto ERROR1;
-                }
-#endif
-                /*
-                string strStyle = LibraryChannel.GETRES_ALL_STYLE;
-                string strMetaData = "";
+                    string strOutputPath = "";
+                    byte[] temp_timestamp = null;
+                    string strBiblio = "";
+                    string strTempBiblioRecPath = "";
+                    long lRet = // sessioninfo.Channel.
+                        channel.GetCommentInfo(
+    null,
+    "@path:" + strCommentRecPath,
+                        // null,
+    "xml", // strResultType
+    out strOldXml,
+    out strOutputPath,
+    out temp_timestamp,
+    "recpath",  // strBiblioType
+    out strBiblio,
+    out strTempBiblioRecPath,
+    out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "获得原有评注记录 '" + strCommentRecPath + "' 时出错: " + strError;
+                        goto ERROR1;
+                    }
 
-                long lRet = sessioninfo.Channel.GetRes(
-                    null,
-                    strCommentRecPath,
-                    strStyle,
-                    out strOldXml,
-                    out strMetaData,
-                    out temp_timestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    strError = "获得原有记录 '" + strCommentRecPath + "' 时出错: " + strError;
-                    goto ERROR1;
+                    if (ByteArray.Compare(temp_timestamp, timestamp) != 0)
+                    {
+                        strError = "修改被拒绝。因为记录 '" + strCommentRecPath + "' 在保存前已经被其他人修改过。请重新装载";
+                        goto ERROR1;
+                    }
                 }
-                 * */
-
-                if (ByteArray.Compare(temp_timestamp, timestamp) != 0)
+                finally
                 {
-                    strError = "修改被拒绝。因为记录 '" + strCommentRecPath + "' 在保存前已经被其他人修改过。请重新装载";
-                    goto ERROR1;
+                    sessioninfo.ReturnChannel(channel);
                 }
             }
 
@@ -1584,7 +1555,6 @@ out strError);
             else
             {
                 // 修改全部字段，但是不修改状态
-
                 DomUtil.SetElementText(dom.DocumentElement,
                     "type", edit_type.Value);
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -1592,7 +1562,6 @@ out strError);
                 if (String.IsNullOrEmpty(strCommentRecPath) == false)
                 {
                     // 覆盖存回
-
                     string strOriginCreator = DomUtil.GetElementText(dom.DocumentElement,
                         "creator");
                     if (bManager == false
@@ -1886,7 +1855,6 @@ out strError);
 
             Debug.Assert(String.IsNullOrEmpty(sessioninfo.UserID) == false, "");
 
-
             EntityInfo info = new EntityInfo();
             info.RefID = Guid.NewGuid().ToString();
 
@@ -1920,27 +1888,25 @@ out strError);
 
             EntityInfo[] errorinfos = null;
 
-            long lRet = sessioninfo.Channel.SetComments(
-                null,
-                strBiblioRecPath,
-                comments,
-                out errorinfos,
-                out strError);
-            if (lRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                return -1;
+                long lRet = // sessioninfo.Channel.
+                    channel.SetComments(
+                    null,
+                    strBiblioRecPath,
+                    comments,
+                    out errorinfos,
+                    out strError);
+                if (lRet == -1)
+                {
+                    return -1;
+                }
             }
-            /*
-            LibraryServerResult result = app.CommentItemDatabase.SetItems(sessioninfo,
-                strBiblioRecPath,
-                comments,
-                out errorinfos);
-            if (result.Value == -1)
+            finally
             {
-                strError = result.ErrorInfo;
-                return -1;
+                sessioninfo.ReturnChannel(channel);
             }
-             * */
 
             if (errorinfos != null && errorinfos.Length > 0)
             {
@@ -2004,7 +1970,6 @@ out strError);
 
             Debug.Assert(string.IsNullOrEmpty(sessioninfo.UserID) == false, "");
 
-
             EntityInfo info = new EntityInfo();
             info.RefID = Guid.NewGuid().ToString();
 
@@ -2035,27 +2000,25 @@ out strError);
 
             EntityInfo[] errorinfos = null;
 
-            long lRet = sessioninfo.Channel.SetComments(
-    null,
-    strBiblioRecPath,
-    comments,
-    out errorinfos,
-    out strError);
-            if (lRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                return -1;
+                long lRet = // sessioninfo.Channel.
+                    channel.SetComments(
+        null,
+        strBiblioRecPath,
+        comments,
+        out errorinfos,
+        out strError);
+                if (lRet == -1)
+                {
+                    return -1;
+                }
             }
-            /*
-            LibraryServerResult result = app.CommentItemDatabase.SetItems(sessioninfo,
-                strBiblioRecPath,
-                comments,
-                out errorinfos);
-            if (result.Value == -1)
+            finally
             {
-                strError = result.ErrorInfo;
-                return -1;
+                sessioninfo.ReturnChannel(channel);
             }
-             * */
 
             if (errorinfos != null && errorinfos.Length > 0)
             {
@@ -2426,9 +2389,10 @@ string strWrapperClass)
                     //      -1  出错
                     //      0   没有找到
                     //      1   找到
-                    int nRet = GetRecord(
+                    int nRet = this.GetRecord(
                         app,
                         sessioninfo,
+                        null,
                         strRecPath,
                         out strXml,
                         out timestamp,
@@ -2443,7 +2407,6 @@ string strWrapperClass)
                 }
 
                 XmlDocument dom = new XmlDocument();
-
                 try
                 {
                     if (string.IsNullOrEmpty(strXml) == false)
@@ -2458,8 +2421,6 @@ string strWrapperClass)
                 }
 
                 string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
-
-
 
                 // 帖子状态：精华、...。
                 string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
@@ -2479,7 +2440,6 @@ string strWrapperClass)
                 string strContent = strOriginContent.Replace("\\r", "\r\n");
                 edit_content.Text = strContent;
                 edit_type.Value = strType;
-
 
                 if (strEditAction == "changestate")
                 {
@@ -2569,8 +2529,6 @@ string strWrapperClass)
                 state_holder.Visible = false;
             }
 
-
-
             return 0;
         }
 
@@ -2631,33 +2589,6 @@ string strWrapperClass)
 
             string strErrorComment = "";
             string strXml;
-            /*
-            RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
-            Debug.Assert(channel != null, "Channels.GetChannel 异常");
-            string strStyle = "content,data,timestamp";
-
-
-            string strMetaData;
-            string strOutputPath;
-
-            long nRet = channel.GetRes(strRecPath,
-                strStyle,
-                out strXml,
-                out strMetaData,
-                out timestamp,
-                out strOutputPath,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "获取记录 '" + strRecPath + "' 时出错: " + strError;
-                return -1;
-            }
-             * */
             if (String.IsNullOrEmpty(this.m_strXml) == true)
             {
                 // return:
@@ -2667,6 +2598,7 @@ string strWrapperClass)
                 int nRet = GetRecord(
                     app,
                     sessioninfo,
+                    null,
                     strRecPath,
                     out strXml,
                     out timestamp,
@@ -2683,7 +2615,6 @@ string strWrapperClass)
             }
 
             XmlDocument dom = new XmlDocument();
-
             try
             {
                 if (string.IsNullOrEmpty(strXml) == false)
@@ -2712,7 +2643,6 @@ string strWrapperClass)
             string strOriginCreator = DomUtil.GetElementText(dom.DocumentElement, "creator");
 
             string strOriginContent = DomUtil.GetElementText(dom.DocumentElement, "content");
-
 
             string strOperInfo = "";
             {
@@ -2760,11 +2690,8 @@ string strWrapperClass)
             bool bDisplayOriginContent = false;
             string strDisplayState = "";
 
-
             string strStateImage = "";
             {
-
-
                 if (StringUtil.IsInList("审查", strState) == true)
                 {
                     strStateImage = "<img src='" + MyWebPage.GetStylePath(app, "censor.gif") + "'/>";
@@ -2794,7 +2721,6 @@ string strWrapperClass)
             StringBuilder strResult = new StringBuilder(4096);
 
             // headbar
-
             {
                 string strUserInfoUrl = "";
                 string strImageUrl = "";
@@ -2865,7 +2791,6 @@ string strWrapperClass)
                 strResult.Append("<div class='clear'> </div>");
 
                 strResult.Append("</div>");  // of headbar
-
             }
 
             // 屏蔽原因
@@ -2978,7 +2903,6 @@ string strWrapperClass)
                 Button delete = (Button)this.FindControl("deletebutton");
                 Button state = (Button)this.FindControl("statebutton");
 
-
                 // 非编辑状态 
 
                 bool bChangable = false;
@@ -3024,7 +2948,6 @@ string strWrapperClass)
             }
 
             strResultParam = strResult.ToString();
-
             return 0;
         }
 
@@ -3047,6 +2970,7 @@ string strWrapperClass)
             int nRet = this.GetRecord(
                 app,
                 sessioninfo,
+                null,
                 strCommentRecPath,
                 out strXml,
                 out timestamp,
@@ -3075,6 +2999,7 @@ string strWrapperClass)
         public int GetRecord(
             OpacApplication app,
             SessionInfo sessioninfo,
+            LibraryChannel channel_param,
             string strRecPath,
             out string strXml,
             out byte[] timestamp,
@@ -3084,62 +3009,55 @@ string strWrapperClass)
             timestamp = null;
             strXml = "";
 
-            /*
-            string strStyle = "content,data,timestamp";
+            LibraryChannel channel = null;
 
-            string strMetaData;
-            string strOutputPath;
-
-            long nRet = sessioninfo.Channel.GetRes(
-                null,
-                strRecPath,
-                strStyle,
-                out strXml,
-                out strMetaData,
-                out timestamp,
-                out strOutputPath,
-                out strError);
-            if (nRet == -1)
+            if (channel_param != null)
+                channel = channel_param;
+            else
+                channel = sessioninfo.GetChannel(true);
+            try
             {
-                strError = "获取记录 '" + strRecPath + "' 时出错: " + strError;
-                return -1;
-            }
-             * */
-            string strOutputPath = "";
-            string strBiblio = "";
-            string strBiblioRecPath = "";
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            //      >1  命中多于1条
-            long lRet = sessioninfo.Channel.GetCommentInfo(
-null,
-"@path:" + strRecPath,
-                // null,
-"xml", // strResultType
-out strXml,
-out strOutputPath,
-out timestamp,
-"recpath",  // strBiblioType
-out strBiblio,
-out strBiblioRecPath,
-out strError);
-            if (lRet == -1)
-            {
-                strError = "获取评注记录 '" + strRecPath + "' 时出错: " + strError;
-                return -1;
-            }
-            if (lRet == 0)
-            {
-                strError = "评注记录 '" + strRecPath + "' 没有找到";
-                return 0;
-            }
+                string strOutputPath = "";
+                string strBiblio = "";
+                string strBiblioRecPath = "";
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                //      >1  命中多于1条
+                long lRet = // sessioninfo.Channel.
+                    channel.GetCommentInfo(
+    null,
+    "@path:" + strRecPath,
+                    // null,
+    "xml", // strResultType
+    out strXml,
+    out strOutputPath,
+    out timestamp,
+    "recpath",  // strBiblioType
+    out strBiblio,
+    out strBiblioRecPath,
+    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获取评注记录 '" + strRecPath + "' 时出错: " + strError;
+                    return -1;
+                }
+                if (lRet == 0)
+                {
+                    strError = "评注记录 '" + strRecPath + "' 没有找到";
+                    return 0;
+                }
 
-            m_strXml = strXml;
-            m_timestamp = timestamp;
-
-            return 1;
+                m_strXml = strXml;
+                m_timestamp = timestamp;
+                return 1;
+            }
+            finally
+            {
+                if (channel_param == null)
+                    sessioninfo.ReturnChannel(channel);
+            }
         }
 
         protected override void Render(HtmlTextWriter writer)

@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -629,32 +630,16 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            /*
-            // 临时的SessionInfo对象
-            SessionInfo temp_sessioninfo = new SessionInfo(app);
-
-            // 模拟一个账户
-            Account account = new Account();
-            account.LoginName = "neworderbiblio";
-            account.Password = "";
-            account.Rights = "setbiblioinfo";
-
-            account.Type = "";
-            account.Barcode = "";
-            account.Name = "neworderbiblio";
-            account.UserID = "neworderbiblio";
-            account.RmsUserName = app.ManagerUserName;
-            account.RmsPassword = app.ManagerPassword;
-
-            temp_sessioninfo.Account = account;
-             * */
+#if NO
             SessionInfo temp_sessioninfo = new SessionInfo(app);
             temp_sessioninfo.UserID = app.ManagerUserName;
             temp_sessioninfo.Password = app.ManagerPassword;
             temp_sessioninfo.IsReader = false;
+#endif
 
             string strOutputBiblioRecPath = "";
 
+            LibraryChannel channel = sessioninfo.GetChannel(true);
             try
             {
 
@@ -662,7 +647,8 @@ out strError);
 
                 byte[] baOutputTimestamp = null;
 
-                long lRet = temp_sessioninfo.Channel.SetBiblioInfo(
+                long lRet = // temp_sessioninfo.Channel.
+                    channel.SetBiblioInfo(
                     null,
                     "new",
                     strBiblioRecPath,
@@ -678,27 +664,14 @@ out strError);
                     strError = "创建书目记录发生错误: " + strError;
                     goto ERROR1;
                 }
-                /*
-                LibraryServerResult result = app.SetBiblioInfo(
-                    temp_sessioninfo,
-                    "new",
-                    strBiblioRecPath,
-            "xml",
-            strXml,
-            null,
-            out strOutputBiblioRecPath,
-            out baOutputTimestamp);
-                if (result.Value == -1)
-                {
-                    strError = result.ErrorInfo;
-                    goto ERROR1;
-                }
-                 * */
             }
             finally
             {
+#if NO
                 temp_sessioninfo.CloseSession();
                 temp_sessioninfo = null;
+#endif
+                sessioninfo.ReturnChannel(channel);
             }
 
             // 清除每个输入域的内容
@@ -708,7 +681,6 @@ out strError);
             biblio_isbn.Text = "";
             biblio_summary.Text = "";
             biblio_price.Text = "";
-
 
             strBiblioRecPath = strOutputBiblioRecPath;
 

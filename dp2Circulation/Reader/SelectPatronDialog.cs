@@ -27,20 +27,7 @@ namespace dp2Circulation
 
         WebExternalHost m_webExternalHost_patron = new WebExternalHost();
 
-#if NO
-        MainForm MainForm = null;
-
-        /// <summary>
-        /// 通讯通道
-        /// </summary>
-        LibraryChannel Channel = null;
-
-        Stop _stop = null;
-#endif
-
         DigitalPlatform.StopManager _stopManager = new DigitalPlatform.StopManager();
-
-        // const int WM_LOAD_ALL_DATA = API.WM_USER + 200;
 
         List<string> m_recpaths = new List<string>();
 

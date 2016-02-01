@@ -52,7 +52,6 @@ namespace dp2Circulation
         CommentViewerForm m_commentViewer = null;
 
         WebExternalHost m_webExternalHost_biblio = new WebExternalHost();
-        // WebExternalHost m_webExternalHost_comment = new WebExternalHost();
 
         // 存储书目和<dprms:file>以外的其它XML片断
         XmlDocument domXmlFragment = null;
@@ -8679,11 +8678,6 @@ MessageBoxDefaultButton.Button1);
                 "dp2Circulation.Host");
             if (entryClassType == null)
             {
-                /*
-                strError = "dp2Circulation.Host派生类没有找到";
-                return -1;
-                 * */
-
                 entryClassType = ScriptManager.GetDerivedClassType(
                     assembly,
                     "dp2Circulation.DetailHost");
@@ -8706,17 +8700,19 @@ MessageBoxDefaultButton.Button1);
                     return -1;
                 }
 
-                // 为DetailHost派生类设置参数
-                hostObj.DetailForm = this;
-                hostObj.Assembly = assembly;
+                using (hostObj)
+                {
+                    // 为DetailHost派生类设置参数
+                    hostObj.DetailForm = this;
+                    hostObj.Assembly = assembly;
 
-                // hostObj.Main(sender, e);
+                    // hostObj.Main(sender, e);
 
-                // 2009/2/27 
-                hostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
-                    sender,
-                    e);
-
+                    // 2009/2/27 
+                    hostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
+                        sender,
+                        e);
+                }
                 return 0;
             }
             else
@@ -8736,27 +8732,29 @@ MessageBoxDefaultButton.Button1);
                     return -1;
                 }
 
-                // 为Host派生类设置参数
-                hostObj.DetailForm = this;
-                hostObj.Assembly = assembly;
+                {
+                    // 为Host派生类设置参数
+                    hostObj.DetailForm = this;
+                    hostObj.Assembly = assembly;
 
-                HostEventArgs e1 = new HostEventArgs();
-                e1.e = e;   // 2009/2/24 
+                    HostEventArgs e1 = new HostEventArgs();
+                    e1.e = e;   // 2009/2/24 
 
-                /*
-                nRet = this.Flush(out strError);
-                if (nRet == -1)
-                    return -1;
-                 * */
+                    /*
+                    nRet = this.Flush(out strError);
+                    if (nRet == -1)
+                        return -1;
+                     * */
 
 
-                hostObj.Main(sender, e1);
+                    hostObj.Main(sender, e1);
 
-                /*
-                nRet = this.Flush(out strError);
-                if (nRet == -1)
-                    return -1;
-                 * */
+                    /*
+                    nRet = this.Flush(out strError);
+                    if (nRet == -1)
+                        return -1;
+                     * */
+                }
             }
 
             return 0;

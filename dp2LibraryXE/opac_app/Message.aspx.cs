@@ -12,8 +12,9 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 public partial class Message : MyWebPage
 {
@@ -57,9 +58,6 @@ ref sessioninfo) == false)
             return;
         }
 
-
-        // 
-
         string strSenderName = "";
         if (sessioninfo.ReaderInfo != null
             && sessioninfo.IsReader == true)
@@ -97,38 +95,46 @@ ref sessioninfo) == false)
                 this.MessageControl1.TimeStamp = null;
                 this.MessageControl1.RecordIDs = idlist;
                 this.MessageControl1.RecordIDsIndex = 0;
-
                 return;
             }
 
             // id参数不为空
             if (String.IsNullOrEmpty(strMessageID) == false)
             {
-                string strError = "";
-                MessageData [] messages = null;
-                string[] ids = new string[1];
-                ids[0] = strMessageID;
-                // 根据消息记录id获得消息详细内容
-                // 本函数还将检查消息是否属于strUserID指明的用户
-                // parameters:
-                //      strUserID   如果==null，表示不检查消息属于何用户
-                long nRet = sessioninfo.Channel.GetMessage(
-                    ids,
-                    MessageLevel.Full,
-                    out messages,
-                    out strError);
-                if (nRet == -1)
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
                 {
-                    this.Response.Write(strError);
-                    this.Response.End();
+                    string strError = "";
+                    MessageData[] messages = null;
+                    string[] ids = new string[1];
+                    ids[0] = strMessageID;
+                    // 根据消息记录id获得消息详细内容
+                    // 本函数还将检查消息是否属于strUserID指明的用户
+                    // parameters:
+                    //      strUserID   如果==null，表示不检查消息属于何用户
+                    long nRet = // sessioninfo.Channel.
+                        channel.GetMessage(
+                        ids,
+                        MessageLevel.Full,
+                        out messages,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.Response.Write(strError);
+                        this.Response.End();
+                    }
+                    if (messages == null || messages.Length < 1)
+                    {
+                        strError = "messages error";
+                        this.Response.Write(strError);
+                        this.Response.End();
+                    }
+                    this.MessageControl1.MessageData = messages[0];
                 }
-                if (messages == null || messages.Length < 1)
+                finally
                 {
-                    strError = "messages error";
-                    this.Response.Write(strError);
-                    this.Response.End();
+                    sessioninfo.ReturnChannel(channel);
                 }
-                this.MessageControl1.MessageData = messages[0];
             }
             else
             {

@@ -3501,7 +3501,6 @@ namespace DigitalPlatform.rms
                                 return 0;
                             }
 
-
                             int nLoopCount = 0;
                             while (reader.Read())
                             {
@@ -3561,8 +3560,11 @@ namespace DigitalPlatform.rms
                         }
                         finally
                         {
-                            if (task != null && reader != null)
+                            if (// task != null && 
+                                reader != null)
                                 reader.Close();
+                            if (task != null)
+                                task.Dispose();
                         }
                     } // end of using command
                     finally
@@ -3796,8 +3798,11 @@ namespace DigitalPlatform.rms
                         }
                         finally
                         {
-                            if (task != null && reader != null)
+                            if (// task != null && 
+                                reader != null)
                                 reader.Close();
+                            if (task != null)
+                                task.Dispose();
                         }
                     } // end of using command
                     finally
@@ -5153,6 +5158,8 @@ namespace DigitalPlatform.rms
                             {
                                 if (reader != null)
                                     reader.Close();
+                                if (task != null)
+                                    task.Dispose();
                             }
                         } // end of using command
                         finally
@@ -5451,6 +5458,8 @@ namespace DigitalPlatform.rms
                             {
                                 if (reader != null)
                                     reader.Close();
+                                if (task != null)
+                                    task.Dispose();
                             }
 
                         }

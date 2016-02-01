@@ -25,6 +25,14 @@ namespace DigitalPlatform.Message
     [ToolboxData("<{0}:MessageControl runat=server></{0}:MessageControl>")]
     public class MessageControl : WebControl, INamingContainer
     {
+        public override void Dispose()
+        {
+            if (this.Channels != null)
+                this.Channels.Dispose();
+
+            base.Dispose();
+        }
+
         ResourceManager m_rm = null;
 
         ResourceManager GetRm()

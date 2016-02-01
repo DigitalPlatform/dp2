@@ -17,6 +17,12 @@ namespace dp2Catalog
             {
                 components.Dispose();
             }
+
+            if (this.Channels != null)
+                this.Channels.Dispose();
+
+            this.EventLoadFinish.Dispose();
+
             base.Dispose(disposing);
         }
 

@@ -18,13 +18,29 @@ namespace DigitalPlatform.OPAC.Server
 {
 
     // 多个聊天室栏目的集合
-    public class ChatRoomCollection : List<ChatRoom>
+    public class ChatRoomCollection : List<ChatRoom>, IDisposable
     {
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         public string DataDirectory = "";
 
         public int PicMaxWidth = 800;
         public int PicMaxHeight = 8000;
+
+        public void Dispose()
+        {
+            this.Clear();
+        }
+
+        // 2016/1/23
+        public new void Clear()
+        {
+            foreach(ChatRoom room in this)
+            {
+                if (room != null)
+                    room.Close();
+            }
+            base.Clear();
+        }
 
         public ChatRoom GetChatRoom(
     string strRights,
@@ -929,8 +945,6 @@ bDisplayAllIP);
             return 0;   // not found
         }
     }
-
-
 
     // 批处理任务信息
     [DataContract(Namespace = "http://dp2003.com/dp2opac/")]

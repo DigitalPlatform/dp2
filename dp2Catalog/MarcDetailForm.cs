@@ -5432,7 +5432,12 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 || m_strAutogenDataCfgFilename != strAutogenDataCfgFilename)
             {
                 this.m_autogenDataAssembly = this.MainForm.AssemblyCache.FindObject(strAutogenDataCfgFilename);
-                this.m_detailHostObj = null;
+
+                if (this.m_detailHostObj != null)
+                {
+                    this.m_detailHostObj.Dispose();
+                    this.m_detailHostObj = null;
+                }
 
                 // 如果Cache中没有现成的Assembly
                 if (this.m_autogenDataAssembly == null)
@@ -5551,8 +5556,12 @@ out strError);
                         strError = "执行脚本文件 '" + m_strAutogenDataCfgFilename + "' 时出错：" + strError;
                         goto ERROR1;
                     }
+                    if (this.m_detailHostObj != null)
+                    {
+                        this.m_detailHostObj.Dispose();
+                        this.m_detailHostObj = null;
+                    }
                     this.m_detailHostObj = host;
-
                 }
                 catch (Exception ex)
                 {
@@ -6049,7 +6058,6 @@ Stack:
             // 为DetailHost派生类设置参数
             hostObj.DetailForm = this;
             hostObj.Assembly = this.m_autogenDataAssembly;
-
             return 0;
         }
 

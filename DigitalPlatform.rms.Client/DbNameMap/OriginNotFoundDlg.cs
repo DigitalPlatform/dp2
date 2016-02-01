@@ -8,79 +8,82 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.rms.Client
 {
-	/// <summary>
-	/// 对照关系
-	/// </summary>
-	public class OriginNotFoundDlg : System.Windows.Forms.Form
-	{
-		public ServerCollection Servers = null;
-		public RmsChannelCollection	Channels =null;	
+    /// <summary>
+    /// 对照关系
+    /// </summary>
+    public class OriginNotFoundDlg : System.Windows.Forms.Form
+    {
+        public ServerCollection Servers = null;
+        public RmsChannelCollection Channels = null;
 
-		// Map一般是引用外部对象。在checkBox_notAskWhenSameOrigin.Checked==false
-		// 情况下，Map会自动复制一个，解除和原对象的引用关系，然后修改自己所拥有的新对象。
-		// 对话框返回后，对话框调主必须使用Map中的对象指针。如果this.Map表示的对象是新对象，
-		// 在对话框摧毁时，自然会一同被丢弃。
-		public DbNameMap Map = null;
+        // Map一般是引用外部对象。在checkBox_notAskWhenSameOrigin.Checked==false
+        // 情况下，Map会自动复制一个，解除和原对象的引用关系，然后修改自己所拥有的新对象。
+        // 对话框返回后，对话框调主必须使用Map中的对象指针。如果this.Map表示的对象是新对象，
+        // 在对话框摧毁时，自然会一同被丢弃。
+        public DbNameMap Map = null;
 
 
 
-		public string Message = "";
+        public string Message = "";
 
-		public string Origin = "";
+        public string Origin = "";
 
-		private System.Windows.Forms.RadioButton radioButton_skip;
-		private System.Windows.Forms.RadioButton radioButton_overwrite;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox textBox_appendDbName;
-		private System.Windows.Forms.Button button_findAppendDbName;
-		private System.Windows.Forms.Button button_findOverwriteDbName;
-		private System.Windows.Forms.TextBox textBox_overwriteDbName;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.Button button_editMap;
-		private System.Windows.Forms.Label label_message;
-		private System.Windows.Forms.RadioButton radioButton_append;
-		private System.Windows.Forms.CheckBox checkBox_notAskWhenSameOrigin;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        private System.Windows.Forms.RadioButton radioButton_skip;
+        private System.Windows.Forms.RadioButton radioButton_overwrite;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox_appendDbName;
+        private System.Windows.Forms.Button button_findAppendDbName;
+        private System.Windows.Forms.Button button_findOverwriteDbName;
+        private System.Windows.Forms.TextBox textBox_overwriteDbName;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_editMap;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.RadioButton radioButton_append;
+        private System.Windows.Forms.CheckBox checkBox_notAskWhenSameOrigin;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public OriginNotFoundDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public OriginNotFoundDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OriginNotFoundDlg));
             this.label_message = new System.Windows.Forms.Label();
             this.radioButton_skip = new System.Windows.Forms.RadioButton();
@@ -258,106 +261,106 @@ namespace DigitalPlatform.rms.Client
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void OriginNotFoundDlg_Load(object sender, System.EventArgs e)
-		{
-		
-			label_message.Text = this.Message;
-			radioButton_skip.Checked = true;
-			Checked();
-		}
+        private void OriginNotFoundDlg_Load(object sender, System.EventArgs e)
+        {
 
-		private void button_editMap_Click(object sender, System.EventArgs e)
-		{
-		
-		}
+            label_message.Text = this.Message;
+            radioButton_skip.Checked = true;
+            Checked();
+        }
 
-		private void button_findAppendDbName_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_editMap_Click(object sender, System.EventArgs e)
+        {
+
+        }
+
+        private void button_findAppendDbName_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
             Font font = GuiUtil.GetDefaultFont();
             if (font != null)
                 dlg.Font = font;
 
-			dlg.Text = "请选择要追加的目标数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			//dlg.ap = this.applicationInfo;
-			//dlg.ApCfgTitle = "pageimport_openresdlg";
-			dlg.MultiSelect = false;
-			dlg.Path = textBox_appendDbName.Text;
-			dlg.Initial( this.Servers,
-				this.Channels);	
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择要追加的目标数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            //dlg.ap = this.applicationInfo;
+            //dlg.ApCfgTitle = "pageimport_openresdlg";
+            dlg.MultiSelect = false;
+            dlg.Path = textBox_appendDbName.Text;
+            dlg.Initial(this.Servers,
+                this.Channels);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			textBox_appendDbName.Text = dlg.Path;
-		}
+            textBox_appendDbName.Text = dlg.Path;
+        }
 
-		private void button_findOverwriteDbName_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_findOverwriteDbName_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
             Font font = GuiUtil.GetDefaultFont();
             if (font != null)
                 dlg.Font = font;
 
-			dlg.Text = "请选择要覆盖的目标数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			//dlg.ap = this.applicationInfo;
-			//dlg.ApCfgTitle = "pageimport_openresdlg";
-			dlg.MultiSelect = false;
-			dlg.Path = textBox_overwriteDbName.Text;
-			dlg.Initial( this.Servers,
-				this.Channels);	
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择要覆盖的目标数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            //dlg.ap = this.applicationInfo;
+            //dlg.ApCfgTitle = "pageimport_openresdlg";
+            dlg.MultiSelect = false;
+            dlg.Path = textBox_overwriteDbName.Text;
+            dlg.Initial(this.Servers,
+                this.Channels);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			textBox_overwriteDbName.Text = dlg.Path;
-		}
+            textBox_overwriteDbName.Text = dlg.Path;
+        }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			string strTarget = "";
-			string strStyle = "";
-			if (radioButton_skip.Checked == true) 
-			{
-				strStyle = "skip";
-			}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            string strTarget = "";
+            string strStyle = "";
+            if (radioButton_skip.Checked == true)
+            {
+                strStyle = "skip";
+            }
 
-			if (radioButton_append.Checked == true)
-			{
-				if (this.textBox_appendDbName.Text == "") 
-				{
-					MessageBox.Show(this, "在选择了追加方式的情况下，必须选择目标库...");
-					return;
-				}
-				strTarget = this.textBox_appendDbName.Text;
-				strStyle = "append";
-			}
+            if (radioButton_append.Checked == true)
+            {
+                if (this.textBox_appendDbName.Text == "")
+                {
+                    MessageBox.Show(this, "在选择了追加方式的情况下，必须选择目标库...");
+                    return;
+                }
+                strTarget = this.textBox_appendDbName.Text;
+                strStyle = "append";
+            }
 
-			if (radioButton_overwrite.Checked == true)
-			{
-				if (this.textBox_overwriteDbName.Text == "") 
-				{
-					MessageBox.Show(this, "在选择了覆盖方式的情况下，必须选择目标库...");
-					return;
-				}
-				strTarget = this.textBox_overwriteDbName.Text;
-				strStyle = "overwrite";
-			}
+            if (radioButton_overwrite.Checked == true)
+            {
+                if (this.textBox_overwriteDbName.Text == "")
+                {
+                    MessageBox.Show(this, "在选择了覆盖方式的情况下，必须选择目标库...");
+                    return;
+                }
+                strTarget = this.textBox_overwriteDbName.Text;
+                strStyle = "overwrite";
+            }
 
-			// 如果要仅仅当次起作用，需要深复制Map，以便对话框调主使用后自动丢弃
-			if (checkBox_notAskWhenSameOrigin.Checked == false) 
-			{
-				this.Map = this.Map.Clone();
-			}
+            // 如果要仅仅当次起作用，需要深复制Map，以便对话框调主使用后自动丢弃
+            if (checkBox_notAskWhenSameOrigin.Checked == false)
+            {
+                this.Map = this.Map.Clone();
+            }
 
             string strError = "";
             if (Map.NewItem(Origin, strTarget, strStyle, out strError) == null)
@@ -366,61 +369,61 @@ namespace DigitalPlatform.rms.Client
                 return;
             }
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
 
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void radioButton_skip_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Checked();
-		}
+        private void radioButton_skip_CheckedChanged(object sender, System.EventArgs e)
+        {
+            Checked();
+        }
 
-		private void radioButton_append_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Checked();
-		}
+        private void radioButton_append_CheckedChanged(object sender, System.EventArgs e)
+        {
+            Checked();
+        }
 
-		private void radioButton_overwrite_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Checked();
-		}
+        private void radioButton_overwrite_CheckedChanged(object sender, System.EventArgs e)
+        {
+            Checked();
+        }
 
-		void Checked()
-		{
-			if (radioButton_skip.Checked == true)
-			{
-				textBox_appendDbName.Enabled = false;
-				textBox_overwriteDbName.Enabled = false;
+        void Checked()
+        {
+            if (radioButton_skip.Checked == true)
+            {
+                textBox_appendDbName.Enabled = false;
+                textBox_overwriteDbName.Enabled = false;
 
-				button_findAppendDbName.Enabled = false;
-				button_findOverwriteDbName.Enabled = false;
-			}
-			if (radioButton_append.Checked == true)
-			{
-				textBox_appendDbName.Enabled = true;
-				button_findAppendDbName.Enabled = true;
+                button_findAppendDbName.Enabled = false;
+                button_findOverwriteDbName.Enabled = false;
+            }
+            if (radioButton_append.Checked == true)
+            {
+                textBox_appendDbName.Enabled = true;
+                button_findAppendDbName.Enabled = true;
 
-				textBox_overwriteDbName.Enabled = false;
-				button_findOverwriteDbName.Enabled = false;
-			}
-			if (radioButton_overwrite.Checked == true)
-			{
-				textBox_appendDbName.Enabled = false;
-				button_findAppendDbName.Enabled = false;
+                textBox_overwriteDbName.Enabled = false;
+                button_findOverwriteDbName.Enabled = false;
+            }
+            if (radioButton_overwrite.Checked == true)
+            {
+                textBox_appendDbName.Enabled = false;
+                button_findAppendDbName.Enabled = false;
 
-				textBox_overwriteDbName.Enabled = true;
-				button_findOverwriteDbName.Enabled = true;
-			}
-		}
+                textBox_overwriteDbName.Enabled = true;
+                button_findOverwriteDbName.Enabled = true;
+            }
+        }
 
 
 
-	}
+    }
 }

@@ -17,6 +17,13 @@ namespace dp2ZServer
             {
                 components.Dispose();
             }
+
+            eventClose.Dispose();
+            eventActive.Dispose();
+
+            if (this.Channel != null)
+                this.Channel.Dispose();
+
             base.Dispose(disposing);
         }
 

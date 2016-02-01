@@ -2398,6 +2398,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
             finally
             {
                 // 归还对象
+                filter.FilterHost = null;   // 2016/1/23
                 this.Filters.SetFilter(strFilterFileName, filter);
             }
 

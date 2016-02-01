@@ -120,6 +120,7 @@ namespace dp2Circulation
             if (this.m_webExternalHost != null)
             {
                 this.m_webExternalHost.Destroy();
+                this.m_webExternalHost.Dispose();
                 this.m_webExternalHost = null;
             }
         }

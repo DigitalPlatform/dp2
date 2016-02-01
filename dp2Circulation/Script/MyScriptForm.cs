@@ -91,7 +91,7 @@ namespace dp2Circulation
                 ScriptManager.CfgFilePath =
                     this.MainForm.DataDir + "\\biblio_statis_projects.xml";
                  * */
-                ScriptManager.DataDir = this.MainForm.DataDir;
+                ScriptManager.DataDir = this.MainForm.UserDir;
 
                 ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
                 ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);

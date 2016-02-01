@@ -91,8 +91,9 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            ScriptManager.CfgFilePath =
-    this.MainForm.DataDir + "\\statis_projects.xml";
+            ScriptManager.CfgFilePath = Path.Combine(
+    this.MainForm.UserDir,
+    "statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
@@ -928,7 +929,8 @@ out strError);
         }
 
         // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
-        /*public*/ static int RoundTime(string strUnit,
+        /*public*/
+        static int RoundTime(string strUnit,
             ref DateTime time,
             out string strError)
         {
@@ -1163,9 +1165,9 @@ out strError);
         /// <returns>-1: 出错; 0: 没有找到; 1: 找到; >1: 命中多于 1 条</returns>
         public int GetReaderInfo(string strReaderBarcode,
             string strResultTypeList,
-            out string [] results,
+            out string[] results,
             out string strRecPath,
-            out byte [] baTimestamp,
+            out byte[] baTimestamp,
             out string strError)
         {
             long lRet = Channel.GetReaderInfo(
@@ -1330,14 +1332,14 @@ out strError);
             out string strResultValue,
             out string strError)
         {
-                long lRet = Channel.GetBiblioInfo(
-                    stop,
-                    strBiblioRecPath,
-                    strBiblioXml,
-                    strPartName,    // 包含'@'符号
-                    out strResultValue,
-                    out strError);
-                return (int)lRet;
+            long lRet = Channel.GetBiblioInfo(
+                stop,
+                strBiblioRecPath,
+                strBiblioXml,
+                strPartName,    // 包含'@'符号
+                out strResultValue,
+                out strError);
+            return (int)lRet;
         }
 
         // 本函数是不是拿给C#二次开发脚本程序用的？

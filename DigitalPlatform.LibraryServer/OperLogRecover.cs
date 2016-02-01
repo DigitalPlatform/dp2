@@ -152,8 +152,8 @@ namespace DigitalPlatform.LibraryServer
         public override void Worker()
         {
             // 把系统挂起
-            this.App.HangupReason = HangupReason.LogRecover;
-
+            // this.App.HangupReason = HangupReason.LogRecover;
+            this.App.HangupList.Add("LogRecover");
             try
             {
                 string strError = "";
@@ -298,7 +298,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.App.HangupReason = HangupReason.None;
+                // this.App.HangupReason = HangupReason.None;
+                this.App.ClearHangup("LogRecover");
             }
         }
 

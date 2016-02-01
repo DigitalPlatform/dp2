@@ -919,7 +919,7 @@ value);
 
         void Channel_Idle(object sender, IdleEventArgs e)
         {
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
 
             if (_index != -1)
             {

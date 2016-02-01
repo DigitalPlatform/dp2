@@ -24,6 +24,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -171,6 +172,7 @@ namespace DigitalPlatform.OPAC.Web
                 try
                 {
                     sessioninfo = new SessionInfo(app);
+                    sessioninfo.ClientIP = strClientIP;
                     page.Session["sessioninfo"] = sessioninfo;
                 }
                 catch (Exception ex)
@@ -224,6 +226,15 @@ namespace DigitalPlatform.OPAC.Web
     {
         public OpacApplication app = null;
         public SessionInfo sessioninfo = null;
+
+        public bool MyFlushOutput()
+        {
+            // 2016/1/28
+            if (Response.IsClientConnected == false)
+                return false;
+            Response.Flush();
+            return Response.IsClientConnected;
+        }
 
         void PrepareSsoLogin()
         {
@@ -516,10 +527,19 @@ namespace DigitalPlatform.OPAC.Web
             base.InitializeCulture();
         }
 
+#if NO
+        protected override void OnUnload(EventArgs e)
+        {
+            base.OnUnload(e);
+        }
+#endif
+
         protected void Page_Unload(object sender, EventArgs e)
         {
+#if NO
             if (sessioninfo != null && sessioninfo.Channel != null)
                 sessioninfo.Channel.Close();
+#endif
         }
 
         protected void Page_PreInit(object sender, EventArgs e)
@@ -577,18 +597,27 @@ Stack:
     SessionInfo sessioninfo,
     string strResultsetName)
         {
-            string strError = "";
-            Record[] searchresults = null;
-            long lRet = sessioninfo.Channel.GetSearchResult(
-                null,
-                strResultsetName,
-                0,
-                0,
-                "id",
-                "zh",
-                out searchresults,
-                out strError);
-            return lRet;
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
+            {
+                string strError = "";
+                Record[] searchresults = null;
+                long lRet = // sessioninfo.Channel.
+                    channel.GetSearchResult(
+                    null,
+                    strResultsetName,
+                    0,
+                    0,
+                    "id",
+                    "zh",
+                    out searchresults,
+                    out strError);
+                return lRet;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
         }
 
         // 构造一个 style 目录中文件的路径

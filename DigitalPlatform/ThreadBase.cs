@@ -12,14 +12,13 @@ namespace DigitalPlatform
     /// </summary>
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    public class ThreadBase
+    public class ThreadBase : IDisposable
     {
         private bool m_bStopThread = true;
         protected Thread _thread = null;
 
         public AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
         public AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
-        // internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
         public int PerTime = 1000;   // 1 秒 5 * 60 * 1000;	// 5 分钟
 
@@ -28,6 +27,11 @@ namespace DigitalPlatform
         {
         }
 #endif
+        public virtual void Dispose()
+        {
+            eventActive.Dispose();
+            eventClose.Dispose();
+        }
 
         void ThreadMain()
         {

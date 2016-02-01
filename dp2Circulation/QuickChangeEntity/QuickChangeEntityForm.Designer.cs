@@ -17,6 +17,10 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            if (this.m_webExternalHost_biblio != null)
+                this.m_webExternalHost_biblio.Dispose();
+
             base.Dispose(disposing);
         }
 
@@ -128,8 +132,8 @@ namespace dp2Circulation
             // 
             // splitContainer_itemInfo
             // 
-            this.splitContainer_itemInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.splitContainer_itemInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_itemInfo.Location = new System.Drawing.Point(0, 19);
             this.splitContainer_itemInfo.Margin = new System.Windows.Forms.Padding(2);
@@ -197,7 +201,7 @@ namespace dp2Circulation
             // 
             // textBox_message
             // 
-            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_message.BackColor = System.Drawing.SystemColors.Info;
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -235,7 +239,7 @@ namespace dp2Circulation
             // 
             // tabControl_input
             // 
-            this.tabControl_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabControl_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_input.Controls.Add(this.tabPage_barcodeInput);
             this.tabControl_input.Controls.Add(this.tabPage_barcodeFile);
@@ -290,7 +294,7 @@ namespace dp2Circulation
             // 
             // textBox_barcodeFile
             // 
-            this.textBox_barcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_barcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_barcodeFile.Location = new System.Drawing.Point(4, 22);
             this.textBox_barcodeFile.Margin = new System.Windows.Forms.Padding(2);
@@ -323,8 +327,8 @@ namespace dp2Circulation
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(0, 88);
             this.splitContainer_main.Margin = new System.Windows.Forms.Padding(2);
@@ -373,8 +377,8 @@ namespace dp2Circulation
             // 
             // textBox_outputBarcodes
             // 
-            this.textBox_outputBarcodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_outputBarcodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_outputBarcodes.Location = new System.Drawing.Point(-1, 19);
             this.textBox_outputBarcodes.Margin = new System.Windows.Forms.Padding(2);
@@ -423,7 +427,7 @@ namespace dp2Circulation
             // 
             // textBox_recPathFile
             // 
-            this.textBox_recPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_recPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_recPathFile.Location = new System.Drawing.Point(7, 20);
             this.textBox_recPathFile.Margin = new System.Windows.Forms.Padding(2);

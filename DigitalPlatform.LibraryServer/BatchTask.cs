@@ -15,7 +15,7 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.LibraryServer
 {
     // 批处理任务
-    public class BatchTask
+    public class BatchTask : IDisposable
     {
         public bool ManualStart = false;    // 本轮是否为手动启动？
 
@@ -50,11 +50,23 @@ namespace DigitalPlatform.LibraryServer
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
 
         internal Thread threadWorker = null;
-        internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
+        // TODO: 似乎 eventClose 用 ManualResetEvent 更好
+        internal ManualResetEvent eventClose = new ManualResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
+
+        public virtual void Dispose()
+        {
+            this.Close();
+
+            RmsChannels.Dispose();
+
+            eventClose.Dispose();
+            eventActive.Dispose();
+            eventFinished.Dispose();
+        }
 
         public void Activate()
         {
@@ -66,8 +78,12 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
-                if (this.App.HangupReason == HangupReason.LogRecover)
+                //if (this.App.HangupReason == HangupReason.LogRecover)
+                //    return true;
+
+                if (this.App.ContainsHangup("LogRecover") == true)
                     return true;
+
                 if (this.App.PauseBatchTask == true)
                     return true;
                 return this.m_bClosed;
@@ -424,11 +440,13 @@ namespace DigitalPlatform.LibraryServer
              * */
         }
 
-
         public void Close()
         {
+#if NO
             this.eventClose.Set();
             this.m_bClosed = true;
+#endif
+            this.Stop();
 
             if (this.m_stream != null)
             {
@@ -466,7 +484,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.m_lock.ReleaseWriterLock();
             }
-
         }
 
         // 追加结果文本

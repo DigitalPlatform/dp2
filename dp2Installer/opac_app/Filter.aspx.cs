@@ -17,8 +17,9 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 public partial class Filter : System.Web.UI.Page
 {
@@ -54,16 +55,18 @@ ref sessioninfo) == false)
 
     protected void Page_Unload(object sender, EventArgs e)
     {
+#if NO
         if (sessioninfo != null && sessioninfo.Channel != null)
             sessioninfo.Channel.Close();
+#endif
     }
 
     // 根据记录数量的多少，少的时候可以立即返回结果，多的时候用线程后台处理，然后可以随时查询状态
     // 线程用线程池，避免过多耗用线程数目
 
-    // 根据结果集名，提取全部书目XML记录，然后批处理经过MarcFilter过滤，创建若干个子结果集
+    // 根据结果集名，提取全部书目 XML 记录，然后批处理经过 MarcFilter 过滤，创建若干个子结果集
     // 最基本的功能是返回子结果集的显示名，文件名，包含记录数量，供前端显示在界面上
-    // 较为深入的功能是，将子结果集按照key排序归并，而显示出二级条目和数量。二级结果集是子结果集的子结果集
+    // 较为深入的功能是，将子结果集按照 key 排序归并，而显示出二级条目和数量。二级结果集是子结果集的子结果集
 
     // TODO: 如何及时清理Task对象，避免内存过度膨胀? 是否仅保存最新10个Task对象?
     void GetFilterInfo(
@@ -79,26 +82,13 @@ ref sessioninfo) == false)
             strError = "结果集名不应为空";
             goto ERROR1;
         }
-#if NO
-        Hashtable result_table = null;
-        string strFilterFileName = PathUtil.MergePath(app.DataDir, "cfgs/facet.fltx");
-        int nRet = ResultsetFilter.DoFilter(
-            app,
-            sessioninfo.Channel,
-            strResultsetName,
-            strFilterFileName,
-            1000,
-            ref result_table,
-            out strError);
-        if (nRet == -1)
-            goto ERROR1;
-#endif
-        FilterTask t = sessioninfo.FindFilterTask(strResultsetName);    // Task对象是利用Session内结果集名来进行管理的
+
+        FilterTask t = app.FindFilterTask(strResultsetName);    // Task对象是利用 Session 内结果集名来进行管理的
         if (t == null)
         {
             // 如果一个结果集还没有被后台任务处理，就立即启动一个后台任务
             t = new FilterTask();
-            sessioninfo.SetFilterTask(strResultsetName, t);
+            app.SetFilterTask(strResultsetName, t);
 
             string strGlobalResultSetName = "";
             bool bShare = false;
@@ -110,28 +100,38 @@ ref sessioninfo) == false)
                 // 构造全局结果集名
                 strGlobalResultSetName = sessioninfo.GetHashCode() + "_" + strResultsetName;
 
-                // 先把结果集共享
-                // 管理结果集
-                // parameters:
-                //      strAction   share/remove 分别表示共享为全局结果集对象/删除全局结果集对象
-                long lRet = sessioninfo.Channel.ManageSearchResult(
-                    null,
-                    "share",
-                    strResultsetName,
-                    strGlobalResultSetName,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
+                {
+                    // 先把结果集共享
+                    // 管理结果集
+                    // parameters:
+                    //      strAction   share/remove 分别表示共享为全局结果集对象/删除全局结果集对象
+                    long lRet = // sessioninfo.Channel.
+                        channel.ManageSearchResult(
+                        null,
+                        "share",
+                        strResultsetName,
+                        strGlobalResultSetName,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
 
-                bShare = true;
+                    bShare = true;
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
+                }
             }
 
             FilterTaskInput i = new FilterTaskInput();
             i.App = app;
-            i.FilterFileName = PathUtil.MergePath(app.DataDir, "cfgs/facet.fltx");
+            i.FilterFileName = Path.Combine(app.DataDir, "cfgs/facet.fltx");
             i.ResultSetName = strGlobalResultSetName;
             i.ShareResultSet = bShare;
-            i.SessionInfo = sessioninfo;
+            // i.SessionInfo = sessioninfo;
+            i.TempDir = app.TempDir;
             i.TaskName = strResultsetName;  // Task对象是利用Session内结果集名来进行管理的
             i.MaxCount = 1000;
             // i.aggregation_names = new List<string>() {"author"};
@@ -160,43 +160,7 @@ ref sessioninfo) == false)
                 goto ERROR1;
             }
 
-#if NO
-            string[] names = new string[t.ResultTable.Keys.Count];
-            t.ResultTable.Keys.CopyTo(names, 0);
-            Array.Sort(names);
-
-            List<FilterInfo> infos = new List<FilterInfo>();
-            foreach (string strName in names)
-            {
-                KeyValueCollection items = (KeyValueCollection)t.ResultTable[strName];
-                FilterInfo info = new FilterInfo();
-                info.Name = strName;
-                if (items != null)
-                    info.Count = items.Count.ToString();
-                else
-                    info.Count = "0";
-
-                infos.Add(info);
-            }
-            result_info.Items = new FilterInfo[infos.Count];
-            infos.CopyTo(result_info.Items);
-#endif
-
-#if NO
-            Hashtable keyname_table = null;
-            // 获得名称对照表
-            // parameters:
-            //      keyname_table   keyname --> 当前语言的名称
-            int nRet = ResultsetFilter.GetKeyNameTable(
-                app,
-                PathUtil.MergePath(app.DataDir, "cfgs/facet.fltx"),
-                t.ResultItems,
-                string.IsNullOrEmpty(strLang) == true ? Thread.CurrentThread.CurrentUICulture.Name : strLang,
-                out keyname_table,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-#endif
+            GC.Collect();   // 试着释放 Hashtable 等
 
             long lHitCount = MyWebPage.GetServerResultCount(sessioninfo, strResultsetName);
 
@@ -204,7 +168,6 @@ ref sessioninfo) == false)
             if (def_dom == null)
                 goto ERROR1;
             this.m_facetDom = def_dom;
-
             this.m_strLang = strLang;
 
             try
@@ -216,8 +179,9 @@ ref sessioninfo) == false)
                     strSelected,
                     GetKeyNameCaption,
                     t.ResultItems,
-                    sessioninfo.GetTempDir(),
+                    app.TempDir,    // sessioninfo.GetTempDir(),
                     10);
+                // GC.Collect();    // 担心 DpResultSet 未能回收
             }
             catch (Exception ex)
             {

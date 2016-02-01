@@ -12,79 +12,84 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.rms.Client
 {
-	/// <summary>
-	/// Summary description for ChangePasswordDlg.
-	/// </summary>
-	public class ChangePasswordDlg : System.Windows.Forms.Form
-	{
-		public string Url = "";
-		public string UserName = "";
+    /// <summary>
+    /// Summary description for ChangePasswordDlg.
+    /// </summary>
+    public class ChangePasswordDlg : System.Windows.Forms.Form
+    {
+        public string Url = "";
+        public string UserName = "";
 
-		RmsChannel channel = null;	// 临时使用的channel对象
+        RmsChannel channel = null;	// 临时使用的channel对象
 
-		public AutoResetEvent eventClose = new AutoResetEvent(false);
+        public AutoResetEvent eventClose = new AutoResetEvent(false);
 
-		public RmsChannelCollection	Channels = null;
+        public RmsChannelCollection Channels = null;
 
-		public DigitalPlatform.StopManager	stopManager = new DigitalPlatform.StopManager();
-		DigitalPlatform.Stop stop = null;
+        public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
+        DigitalPlatform.Stop stop = null;
 
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_OK;
+        public System.Windows.Forms.TextBox textBox_oldPassword;
+        private System.Windows.Forms.Label label4;
+        public System.Windows.Forms.TextBox textBox_newPassword;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TextBox textBox_userName;
+        private System.Windows.Forms.TextBox textBox_url;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        public System.Windows.Forms.TextBox textBox_newPasswordConfirm;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.CheckBox checkBox_manager;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.Button button_OK;
-		public System.Windows.Forms.TextBox textBox_oldPassword;
-		private System.Windows.Forms.Label label4;
-		public System.Windows.Forms.TextBox textBox_newPassword;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.TextBox textBox_userName;
-		private System.Windows.Forms.TextBox textBox_url;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.GroupBox groupBox2;
-		public System.Windows.Forms.TextBox textBox_newPasswordConfirm;
-		private System.Windows.Forms.Label label_message;
-		private System.Windows.Forms.CheckBox checkBox_manager;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        public ChangePasswordDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-		public ChangePasswordDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+                if (this.channel != null)
+                    this.channel.Close();
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+                this.eventClose.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChangePasswordDlg));
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
@@ -200,7 +205,7 @@ namespace DigitalPlatform.rms.Client
             // 
             // textBox_url
             // 
-            this.textBox_url.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_url.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_url.Location = new System.Drawing.Point(112, 10);
             this.textBox_url.Name = "textBox_url";
@@ -282,162 +287,162 @@ namespace DigitalPlatform.rms.Client
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void ChangePasswordDlg_Load(object sender, System.EventArgs e)
-		{
-			textBox_url.Text = Url;
-			textBox_userName.Text = UserName;
-			stopManager.Initial(button_Cancel,
-				label_message,
+        private void ChangePasswordDlg_Load(object sender, System.EventArgs e)
+        {
+            textBox_url.Text = Url;
+            textBox_userName.Text = UserName;
+            stopManager.Initial(button_Cancel,
+                label_message,
                 null);
-			stopManager.LinkReverseButton(button_OK);
+            stopManager.LinkReverseButton(button_OK);
 
-			stop = new DigitalPlatform.Stop();
+            stop = new DigitalPlatform.Stop();
             stop.Register(this.stopManager, true);	// 和容器关联
-		}
+        }
 
-		private void ChangePasswordDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (channel == null)
-			{
-			}
-			else 
-			{
-				channel.Abort();
-				e.Cancel = true;
-			}
-		
-		}
+        private void ChangePasswordDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (channel == null)
+            {
+            }
+            else
+            {
+                channel.Abort();
+                e.Cancel = true;
+            }
 
-		private void ChangePasswordDlg_Closed(object sender, System.EventArgs e)
-		{
-			if (stop != null) // 脱离关联
-			{
-				stop.Unregister();	// 和容器关联
-				stop = null;
-			}
-		}
+        }
 
-		void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+        private void ChangePasswordDlg_Closed(object sender, System.EventArgs e)
+        {
+            if (stop != null) // 脱离关联
+            {
+                stop.Unregister();	// 和容器关联
+                stop = null;
+            }
+        }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (textBox_url.Text == "")
-			{
-				MessageBox.Show(this, "尚未指定服务器URL...");
-				return;
-			}
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-			if (textBox_newPassword.Text != textBox_newPasswordConfirm.Text)
-			{
-				MessageBox.Show(this, "新密码和确认密码不一致，请重新输入...");
-				return;
-			}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (textBox_url.Text == "")
+            {
+                MessageBox.Show(this, "尚未指定服务器URL...");
+                return;
+            }
 
-			if (textBox_userName.Text == "")
-			{
-				MessageBox.Show(this, "尚未输入用户名。");
-				return;
-			}
+            if (textBox_newPassword.Text != textBox_newPasswordConfirm.Text)
+            {
+                MessageBox.Show(this, "新密码和确认密码不一致，请重新输入...");
+                return;
+            }
 
-			channel = Channels.GetChannel(textBox_url.Text);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            if (textBox_userName.Text == "")
+            {
+                MessageBox.Show(this, "尚未输入用户名。");
+                return;
+            }
 
-            stop.OnStop +=new StopEventHandler(this.DoStop);
-			stop.Initial("正在修改密码...");
+            channel = Channels.GetChannel(textBox_url.Text);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			stop.BeginLoop();
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在修改密码...");
 
-			int nRet;
-			string strError;
+            stop.BeginLoop();
 
-			EnableControls(false);
-			button_Cancel.Text = "中断";
+            int nRet;
+            string strError;
+
+            EnableControls(false);
+            button_Cancel.Text = "中断";
 
 
-			nRet = channel.ChangePassword(
-				textBox_userName.Text,
-				textBox_oldPassword.Text,
-				textBox_newPassword.Text,
-				checkBox_manager.Checked,
-				out strError);
+            nRet = channel.ChangePassword(
+                textBox_userName.Text,
+                textBox_oldPassword.Text,
+                textBox_newPassword.Text,
+                checkBox_manager.Checked,
+                out strError);
 
-			EnableControls(true);
+            EnableControls(true);
 
-			stop.EndLoop();
+            stop.EndLoop();
 
             stop.OnStop -= new StopEventHandler(this.DoStop);
-			stop.Initial("");
+            stop.Initial("");
 
-			button_Cancel.Enabled = true;	// 因为Cancel按钮还有退出对话框的功能
-			button_Cancel.Text = "取消";
+            button_Cancel.Enabled = true;	// 因为Cancel按钮还有退出对话框的功能
+            button_Cancel.Text = "取消";
 
-			if (nRet == -1)
-				goto ERROR1;
+            if (nRet == -1)
+                goto ERROR1;
 
-			channel = null;
+            channel = null;
 
-			MessageBox.Show(this, "密码修改成功。");
-		
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-			return;
+            MessageBox.Show(this, "密码修改成功。");
 
-			ERROR1:
-				button_Cancel.Enabled = true;
-				button_Cancel.Text = "取消";
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+            return;
 
-				channel = null;
-				MessageBox.Show(this, "修改密码失败，原因：" + strError);
-		}
+        ERROR1:
+            button_Cancel.Enabled = true;
+            button_Cancel.Text = "取消";
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			if (channel == null)
-			{
-				this.DialogResult = DialogResult.Cancel;
-				this.Close();
-			}
-			else 
-			{
-				channel.Abort();
-			}
-		
-		}
+            channel = null;
+            MessageBox.Show(this, "修改密码失败，原因：" + strError);
+        }
 
-		void EnableControls(bool bEnable)
-		{
-			textBox_url.Enabled = bEnable;
-			textBox_userName.Enabled = bEnable;
-			textBox_oldPassword.Enabled = bEnable;
-			textBox_newPassword.Enabled = bEnable;
-			textBox_newPasswordConfirm.Enabled = bEnable;
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            if (channel == null)
+            {
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+            }
+            else
+            {
+                channel.Abort();
+            }
 
-			// button_OK.Enabled = bEnable;
-			// button_Cancel.Enabled = bEnable == true ? false : true;
-		}
+        }
 
-		private void checkBox_manager_CheckedChanged(object sender, System.EventArgs e)
-		{
-			if (checkBox_manager.Checked == true)
-			{
-				textBox_oldPassword.Text = "";
-				textBox_oldPassword.Enabled = false;
-			}
-			else 
-			{
-				textBox_oldPassword.Enabled = true;
-			}
+        void EnableControls(bool bEnable)
+        {
+            textBox_url.Enabled = bEnable;
+            textBox_userName.Enabled = bEnable;
+            textBox_oldPassword.Enabled = bEnable;
+            textBox_newPassword.Enabled = bEnable;
+            textBox_newPasswordConfirm.Enabled = bEnable;
 
-		
-		}
+            // button_OK.Enabled = bEnable;
+            // button_Cancel.Enabled = bEnable == true ? false : true;
+        }
 
-	
-	}
+        private void checkBox_manager_CheckedChanged(object sender, System.EventArgs e)
+        {
+            if (checkBox_manager.Checked == true)
+            {
+                textBox_oldPassword.Text = "";
+                textBox_oldPassword.Enabled = false;
+            }
+            else
+            {
+                textBox_oldPassword.Enabled = true;
+            }
+
+
+        }
+
+
+    }
 }

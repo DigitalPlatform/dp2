@@ -939,6 +939,55 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
+        // 迁移旧版本的统计方案目录和各种配套文件
+        void MigrateProjectDirectory()
+        {
+            string strError = "";
+
+            string strSourceDirectory = Path.Combine(this.DataDir, "clientcfgs");
+            if (Directory.Exists(strSourceDirectory) == false)
+                return;
+
+            string strTargetDirectory = Path.Combine(this.UserDir, "clientcfgs");
+            if (Directory.Exists(strTargetDirectory) == true)
+                return; // 如果目标目录已经存在，就不进行迁移了
+
+            int nRet = PathUtil.CopyDirectory(strSourceDirectory,
+                strTargetDirectory,
+                false,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 移动几个 xml 文件
+            DirectoryInfo di = new DirectoryInfo(this.DataDir);
+            FileInfo [] fis = di.GetFiles("*projects.xml");
+
+            foreach (FileInfo fi in fis)
+            {
+                string strSourcePath = Path.Combine(this.DataDir, fi.Name);
+                if (File.Exists(strSourcePath) == false)
+                    continue;
+                string strTargetPath = Path.Combine(this.UserDir, fi.Name);
+                File.Move(strSourcePath, strTargetPath);
+            }
+
+            try
+            {
+                PathUtil.DeleteDirectory(strSourceDirectory);
+            }
+            catch (Exception ex)
+            {
+                strError = "MigrateProjectDirectory() 删除源目录 '" + strSourceDirectory + "' 时发生异常: " + ex.Message;
+                goto ERROR1;
+            }
+
+            return;
+        ERROR1:
+            this.ReportError("dp2circulation 迁移统计方案目录时出错", strError);
+            MessageBox.Show(this, "迁移统计方案目录时出错: " + strError);
+        }
+
         // 程序启动时候需要执行的初始化操作
         // 这些操作只需要执行一次。也就是说，和登录和连接的服务器无关。如果有关，则要放在 InitialProperties() 中
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
@@ -1259,10 +1308,15 @@ MessageBoxDefaultButton.Button1);
 
             // GuiUtil.RegisterIE9DocMode();
 
+            // 迁移统计方案文件
+            MigrateProjectDirectory();
+
             #region 脚本支持
             ScriptManager.applicationInfo = this.AppInfo;
-            ScriptManager.CfgFilePath = Path.Combine(this.DataDir, "mainform_statis_projects.xml");
-            ScriptManager.DataDir = this.DataDir;
+            // ScriptManager.CfgFilePath = Path.Combine(this.DataDir, "mainform_statis_projects.xml");
+            // ScriptManager.DataDir = this.DataDir;
+            ScriptManager.CfgFilePath = Path.Combine(this.UserDir, "mainform_statis_projects.xml");
+            ScriptManager.DataDir = this.UserDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -1393,10 +1447,20 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
-                GreenProgram.CreateShortcutToDesktop(
-                   "内务绿色",
-                   Path.Combine(strTargetDir, "dp2circulation.exe"),
-                   false);
+                try
+                {
+                    GreenProgram.CreateShortcutToDesktop(
+                       "内务绿色",
+                       Path.Combine(strTargetDir, "dp2circulation.exe"),
+                       false);
+                }
+                catch (Exception ex)
+                {
+                    strError = "dp2circulation 创建备用绿色安装包快捷方式时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.ReportError("dp2circulation 创建备用绿色安装包快捷方式时出现异常", "(安静报错)" + strError);
+                    this.DisplayBackgroundText(strError + "\r\n");
+                }
+
                 this.DisplayBackgroundText("备用绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
             }
 

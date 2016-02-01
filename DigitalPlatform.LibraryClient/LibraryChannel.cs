@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Net;
 using System.Xml;
-using System.Windows.Forms;
+// using System.Windows.Forms;
 using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -22,6 +22,7 @@ using System.Security.Cryptography.X509Certificates;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Collections;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -47,10 +48,11 @@ namespace DigitalPlatform.LibraryClient
     /// <summary>
     /// 通讯通道
     /// </summary>
-    public class LibraryChannel
+    public class LibraryChannel : IDisposable
     {
-        internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5秒
+        //internal ReaderWriterLock m_lock = new ReaderWriterLock();
+        //internal static int m_nLockTimeout = 5000;	// 5000=5秒
+        private static readonly Object syncRoot = new Object();
 
         /// <summary>
         /// dp2Library 服务器的 URL
@@ -142,9 +144,20 @@ namespace DigitalPlatform.LibraryClient
         public string LibraryCodeList = ""; // 当前已登录用户所管辖的馆代码 2012/9/19
 
         /// <summary>
+        /// 通道所使用的语言代码
+        /// </summary>
+        public string Lang
+        {
+            get;
+            set;
+        }
+
+#if NO
+        /// <summary>
         /// 当前通道所使用的 HTTP Cookies
         /// </summary>
         public CookieContainer Cookies = new System.Net.CookieContainer();
+#endif
 
         /// <summary>
         /// 当前通道的登录前事件
@@ -164,9 +177,6 @@ namespace DigitalPlatform.LibraryClient
         /// 当前通道对象携带的扩展参数
         /// </summary>
         public object Param = null;
-
-        //object resultParam = null;
-        //AutoResetEvent eventComplete = new AutoResetEvent(false);
 
         /// <summary>
         /// 最近一次调用从 dp2Library 返回的错误码
@@ -190,6 +200,15 @@ namespace DigitalPlatform.LibraryClient
         /// 最大接收消息的尺寸
         /// </summary>
         public int MaxReceivedMessageSize = 1024 * 1024;
+
+        public void Dispose()
+        {
+            this.Close();
+
+            this.BeforeLogin = null;
+            this.AfterLogin = null;
+            this.Idle = null;
+        }
 
         // np0: namedpipe
         System.ServiceModel.Channels.Binding CreateNp0Binding()
@@ -702,6 +721,13 @@ out strError);
             string strOutputUserName = "";
             string strLibraryCode = "";
 
+            if (string.IsNullOrEmpty(this.Lang) == false)
+            {
+                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+                parameters["lang"] = this.Lang;
+                strParameters = StringUtil.BuildParameterString(parameters);
+            }
+
             long lRet = this.IdleLogin(
                 strUserName,
                 strPassword,
@@ -744,6 +770,13 @@ out strError);
             string strRights = "";
             string strOutputUserName = "";
             string strLibraryCode = "";
+
+            if (string.IsNullOrEmpty(this.Lang) == false)
+            {
+                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+                parameters["lang"] = this.Lang;
+                strParameters = StringUtil.BuildParameterString(parameters);
+            }
 
             long lRet = this.Login(
                 strUserName,
@@ -979,26 +1012,20 @@ out strError);
         {
             System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
 
-            bool bDoEvents = true;
+            // bool bDoEvents = true;
             if (this.Idle != null)
             {
                 IdleEventArgs e = new IdleEventArgs();
                 this.Idle(this, e);
-                bDoEvents = e.bDoEvents;
+                // bDoEvents = e.bDoEvents;
             }
 
+#if NO
             if (bDoEvents == true)
             {
-                /*
-                try
-                {
-                }
-                catch
-                {
-                }
-                 * */
                 Application.DoEvents();	// 出让界面控制权
             }
+#endif
 
             System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
         }
@@ -1407,6 +1434,9 @@ out strError);
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
+
+                if (result.Value != -1)
+                    this.Lang = strLang;
                 return result.Value;
             }
             catch (Exception ex)
@@ -6644,7 +6674,10 @@ out strError);
             for (; ; )
             {
                 if (stop != null)
-                    Application.DoEvents();	// 出让界面控制权
+                {
+                    DoIdle();
+                    // Application.DoEvents();	// 出让界面控制权
+                }
 
                 long lRet = this.GetRes(stop,
                         strPath,
@@ -7315,7 +7348,8 @@ out strError);
 
             for (; ; )
             {
-                Application.DoEvents();	// 出让界面控制权
+                // Application.DoEvents();	// 出让界面控制权
+                DoIdle();
 
                 // Debug.Assert(false, "");
 
@@ -9480,8 +9514,7 @@ Stack:
         // Close() 和 AbortIt() 很可能被不同的线程调用，其中一个设置 m_ws 为 null 可能会导致另外一个方法抛出异常
         public void Close()
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
-            try
+            lock (syncRoot)
             {
                 if (this.m_ws != null)
                 {
@@ -9500,10 +9533,6 @@ Stack:
                     this.m_ws = null;
                 }
             }
-            finally
-            {
-                this.m_lock.ReleaseWriterLock();
-            }
         }
 
         /// <summary>
@@ -9511,8 +9540,7 @@ Stack:
         /// </summary>
         public void AbortIt()
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
-            try
+            lock (syncRoot)
             {
                 if (this.m_ws != null)
                 {
@@ -9520,10 +9548,6 @@ Stack:
                     this.m_ws.Close();  // 2015/12/31
                     this.m_ws = null;
                 }
-            }
-            finally
-            {
-                this.m_lock.ReleaseWriterLock();
             }
         }
 

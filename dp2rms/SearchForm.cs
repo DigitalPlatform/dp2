@@ -17,74 +17,74 @@ using System.Runtime.InteropServices;
 
 namespace dp2rms
 {
-	/// <summary>
-	/// Summary description for SearchForm.
-	/// </summary>
-	public class SearchForm : System.Windows.Forms.Form
-	{
-		public Hashtable ParamTable = new Hashtable();
+    /// <summary>
+    /// Summary description for SearchForm.
+    /// </summary>
+    public class SearchForm : System.Windows.Forms.Form
+    {
+        public Hashtable ParamTable = new Hashtable();
 
-		public string Lang = "zh";
+        public string Lang = "zh";
 
-		RmsChannel channel = null;	// 临时使用的channel对象
+        RmsChannel channel = null;	// 临时使用的channel对象
 
-		public AutoResetEvent eventClose = new AutoResetEvent(false);
+        public AutoResetEvent eventClose = new AutoResetEvent(false);
 
-		RmsChannelCollection Channels = new RmsChannelCollection();	// 拥有
+        RmsChannelCollection Channels = new RmsChannelCollection();	// 拥有
 
-		DigitalPlatform.Stop stop = null;
+        DigitalPlatform.Stop stop = null;
 
         ArrayList m_aComplexServer = new ArrayList();	// 复杂检索中，服务器地址URL字符串的数组
-		private System.Windows.Forms.TabControl tabControl_query;
-		private BrowseList listView_browse;
-		private System.Windows.Forms.TabPage tabPage_querySimple;
-		private System.Windows.Forms.TabPage tabPage_queryAdvance;
-		private System.Windows.Forms.TabPage tabPage_queryXml;
-		private ResTree treeView_simpleQueryResTree;
-		private System.Windows.Forms.TextBox textBox_simpleQueryWord;
-		private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TabControl tabControl_query;
+        private BrowseList listView_browse;
+        private System.Windows.Forms.TabPage tabPage_querySimple;
+        private System.Windows.Forms.TabPage tabPage_queryAdvance;
+        private System.Windows.Forms.TabPage tabPage_queryXml;
+        private ResTree treeView_simpleQueryResTree;
+        private System.Windows.Forms.TextBox textBox_simpleQueryWord;
+        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_simpleQuerySearch;
-		private System.Windows.Forms.Panel panel_simpleQueryOther;
-		private System.Windows.Forms.TextBox textBox_simpleQuery_comment;
-		private System.Windows.Forms.Button button_simpleQueryProperty;
-		private System.Windows.Forms.TextBox textBox_xmlQueryString;
-		private System.Windows.Forms.Button button_xmlQuerySearch;
-		private System.Windows.Forms.TextBox textBox_complex_word1;
-		private System.Windows.Forms.ComboBox comboBox_complex_db1;
-		private System.Windows.Forms.ComboBox comboBox_complex_from1;
-		private System.Windows.Forms.ComboBox comboBox_complex_from2;
-		private System.Windows.Forms.ComboBox comboBox_complex_db2;
-		private System.Windows.Forms.TextBox textBox_complex_word2;
-		private System.Windows.Forms.ComboBox comboBox_complex_logic2;
-		private System.Windows.Forms.ComboBox comboBox_complex_logic3;
-		private System.Windows.Forms.ComboBox comboBox_complex_from3;
-		private System.Windows.Forms.ComboBox comboBox_complex_db3;
-		private System.Windows.Forms.TextBox textBox_complex_word3;
-		private System.Windows.Forms.ComboBox comboBox_complex_logic4;
-		private System.Windows.Forms.ComboBox comboBox_complex_from4;
-		private System.Windows.Forms.ComboBox comboBox_complex_db4;
-		private System.Windows.Forms.TextBox textBox_complex_word4;
-		private System.Windows.Forms.Button button_complex_server1;
-		private System.Windows.Forms.Button button_complex_server2;
-		private System.Windows.Forms.Button button_complex_server3;
-		private System.Windows.Forms.Button button_complex_server4;
-		private System.Windows.Forms.ImageList imageList_complex_serverButton;
-		private System.Windows.Forms.Button button_complexQuerySearch;
-		private System.Windows.Forms.TextBox textBox_complexQuery_comment;
-		private System.Windows.Forms.ToolTip toolTip_serverUrl;
+        private System.Windows.Forms.Panel panel_simpleQueryOther;
+        private System.Windows.Forms.TextBox textBox_simpleQuery_comment;
+        private System.Windows.Forms.Button button_simpleQueryProperty;
+        private System.Windows.Forms.TextBox textBox_xmlQueryString;
+        private System.Windows.Forms.Button button_xmlQuerySearch;
+        private System.Windows.Forms.TextBox textBox_complex_word1;
+        private System.Windows.Forms.ComboBox comboBox_complex_db1;
+        private System.Windows.Forms.ComboBox comboBox_complex_from1;
+        private System.Windows.Forms.ComboBox comboBox_complex_from2;
+        private System.Windows.Forms.ComboBox comboBox_complex_db2;
+        private System.Windows.Forms.TextBox textBox_complex_word2;
+        private System.Windows.Forms.ComboBox comboBox_complex_logic2;
+        private System.Windows.Forms.ComboBox comboBox_complex_logic3;
+        private System.Windows.Forms.ComboBox comboBox_complex_from3;
+        private System.Windows.Forms.ComboBox comboBox_complex_db3;
+        private System.Windows.Forms.TextBox textBox_complex_word3;
+        private System.Windows.Forms.ComboBox comboBox_complex_logic4;
+        private System.Windows.Forms.ComboBox comboBox_complex_from4;
+        private System.Windows.Forms.ComboBox comboBox_complex_db4;
+        private System.Windows.Forms.TextBox textBox_complex_word4;
+        private System.Windows.Forms.Button button_complex_server1;
+        private System.Windows.Forms.Button button_complex_server2;
+        private System.Windows.Forms.Button button_complex_server3;
+        private System.Windows.Forms.Button button_complex_server4;
+        private System.Windows.Forms.ImageList imageList_complex_serverButton;
+        private System.Windows.Forms.Button button_complexQuerySearch;
+        private System.Windows.Forms.TextBox textBox_complexQuery_comment;
+        private System.Windows.Forms.ToolTip toolTip_serverUrl;
         private Button button_test;
         private SplitContainer splitContainer_simpleQeury;
         private SplitContainer splitContainer_main;
         private SplitContainer splitContainer_xml;
         private TextBox textBox_xmlQuery_comment;
-		private System.ComponentModel.IContainer components;
+        private System.ComponentModel.IContainer components;
 
-		public SearchForm()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public SearchForm()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_browse.Tag = prop;
@@ -94,7 +94,7 @@ namespace dp2rms
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.ParsePath -= new ParsePathEventHandler(prop_ParsePath);
             prop.ParsePath += new ParsePathEventHandler(prop_ParsePath);
-		}
+        }
 
         void prop_ParsePath(object sender, ParsePathEventArgs e)
         {
@@ -165,28 +165,32 @@ namespace dp2rms
                 this.listView_browse.Columns[i].Text = i.ToString();
             }
         }
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+                this.eventClose.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SearchForm));
             this.tabControl_query = new System.Windows.Forms.TabControl();
@@ -340,8 +344,8 @@ namespace dp2rms
             // 
             // textBox_simpleQuery_comment
             // 
-            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQuery_comment.Location = new System.Drawing.Point(8, 88);
             this.textBox_simpleQuery_comment.Multiline = true;
@@ -360,7 +364,7 @@ namespace dp2rms
             // 
             // textBox_simpleQueryWord
             // 
-            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQueryWord.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_simpleQueryWord.Location = new System.Drawing.Point(6, 25);
@@ -412,8 +416,8 @@ namespace dp2rms
             // 
             // textBox_complexQuery_comment
             // 
-            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complexQuery_comment.Location = new System.Drawing.Point(13, 139);
             this.textBox_complexQuery_comment.Multiline = true;
@@ -511,7 +515,7 @@ namespace dp2rms
             // 
             // textBox_complex_word4
             // 
-            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word4.Location = new System.Drawing.Point(99, 83);
             this.textBox_complex_word4.Name = "textBox_complex_word4";
@@ -544,7 +548,7 @@ namespace dp2rms
             // 
             // textBox_complex_word3
             // 
-            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word3.Location = new System.Drawing.Point(99, 59);
             this.textBox_complex_word3.Name = "textBox_complex_word3";
@@ -577,7 +581,7 @@ namespace dp2rms
             // 
             // textBox_complex_word2
             // 
-            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word2.Location = new System.Drawing.Point(99, 35);
             this.textBox_complex_word2.Name = "textBox_complex_word2";
@@ -603,7 +607,7 @@ namespace dp2rms
             // 
             // textBox_complex_word1
             // 
-            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word1.Location = new System.Drawing.Point(99, 11);
             this.textBox_complex_word1.Name = "textBox_complex_word1";
@@ -742,11 +746,11 @@ namespace dp2rms
             this.splitContainer_xml.ResumeLayout(false);
             this.ResumeLayout(false);
 
-		}
-		#endregion
+        }
+        #endregion
 
 
-		/*
+        /*
 		public new void Show()
 		{
 			InitialSize();
@@ -760,12 +764,12 @@ namespace dp2rms
                 treeView_simpleQueryResTree.Refresh(ResTree.RefreshStyle.All);
         }
 
-		public void InitialSize()
-		{
-			// 设置窗口尺寸状态
-			if (MainForm.AppInfo != null) 
-			{
-				MainForm.AppInfo.LoadMdiChildFormStates(this,
+        public void InitialSize()
+        {
+            // 设置窗口尺寸状态
+            if (MainForm.AppInfo != null)
+            {
+                MainForm.AppInfo.LoadMdiChildFormStates(this,
                     "mdi_form_state");
 
 #if NO
@@ -781,21 +785,21 @@ namespace dp2rms
                     "splitter_simplequery_splitposition",
                     200);
 #endif
-			}
-		}
+            }
+        }
 
-		private void SearchForm_Load(object sender, System.EventArgs e)
-		{
+        private void SearchForm_Load(object sender, System.EventArgs e)
+        {
             this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
 
-			InitialSize();
+            InitialSize();
 
-			stop = new DigitalPlatform.Stop();
+            stop = new DigitalPlatform.Stop();
 
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 
-            this.Channels.AskAccountInfo +=new AskAccountInfoEventHandle(MainForm.Servers.OnAskAccountInfo);
+            this.Channels.AskAccountInfo += new AskAccountInfoEventHandle(MainForm.Servers.OnAskAccountInfo);
             /*
 			this.Channels.procAskAccountInfo = 
 				 new Delegate_AskAccountInfo(MainForm.Servers.AskAccountInfo);
@@ -811,96 +815,96 @@ namespace dp2rms
                     true);
             }
 
-			// 简单检索界面准备工作
-			treeView_simpleQueryResTree.AppInfo = MainForm.AppInfo;	// 便于treeview中popup菜单修改配置文件时保存dialog尺寸位置
+            // 简单检索界面准备工作
+            treeView_simpleQueryResTree.AppInfo = MainForm.AppInfo;	// 便于treeview中popup菜单修改配置文件时保存dialog尺寸位置
 
-			treeView_simpleQueryResTree.stopManager = MainForm.stopManager;
+            treeView_simpleQueryResTree.stopManager = MainForm.stopManager;
 
-			treeView_simpleQueryResTree.Servers = MainForm.Servers;	// 引用
+            treeView_simpleQueryResTree.Servers = MainForm.Servers;	// 引用
 
-			treeView_simpleQueryResTree.Channels = this.Channels;	// 引用
-		
-			treeView_simpleQueryResTree.Fill(null);
+            treeView_simpleQueryResTree.Channels = this.Channels;	// 引用
 
-			textBox_simpleQueryWord.Text = MainForm.AppInfo.GetString(
-				"search_simple_query",
-				"word",
-				"");
+            treeView_simpleQueryResTree.Fill(null);
 
-			// 按照上次保存的路径展开resdircontrol树
-			string strResDirPath = MainForm.AppInfo.GetString(
-				"search_simple_query",
-				"resdirpath",
-				"");
-			if (strResDirPath != null)
-			{
-				object[] pList = { strResDirPath };
+            textBox_simpleQueryWord.Text = MainForm.AppInfo.GetString(
+                "search_simple_query",
+                "word",
+                "");
 
-				this.BeginInvoke(new Delegate_ExpandResDir(ExpandResDir),
-					pList);
+            // 按照上次保存的路径展开resdircontrol树
+            string strResDirPath = MainForm.AppInfo.GetString(
+                "search_simple_query",
+                "resdirpath",
+                "");
+            if (strResDirPath != null)
+            {
+                object[] pList = { strResDirPath };
+
+                this.BeginInvoke(new Delegate_ExpandResDir(ExpandResDir),
+                    pList);
 
                 // this.ExpandResDir(strResDirPath);
-			}
+            }
 
-			InitialComplexSearchUI();
+            InitialComplexSearchUI();
 
-		}
+        }
 
-		public delegate void Delegate_ExpandResDir(string strResDirPath);
+        public delegate void Delegate_ExpandResDir(string strResDirPath);
 
-		void ExpandResDir(string strResDirPath)
-		{
-			//statusBar_main.Text = "正在展开资源目录 " + strResDirPath + ", 请稍候...";
-			this.Update();
+        void ExpandResDir(string strResDirPath)
+        {
+            //statusBar_main.Text = "正在展开资源目录 " + strResDirPath + ", 请稍候...";
+            this.Update();
 
-			ResPath respath = new ResPath(strResDirPath);
+            ResPath respath = new ResPath(strResDirPath);
 
-			this.EnableControlsInSearching(true);
+            this.EnableControlsInSearching(true);
 
-			// 展开到指定的节点
-			treeView_simpleQueryResTree.ExpandPath(respath);
+            // 展开到指定的节点
+            treeView_simpleQueryResTree.ExpandPath(respath);
 
-			this.EnableControlsInSearching(false);
+            this.EnableControlsInSearching(false);
 
-			//statusBar_main.Text = "";
+            //statusBar_main.Text = "";
 
 
-		}
+        }
 
-		private void SearchForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (stop != null) 
-			{
-				if (stop.State == 0 || stop.State == 1) 
-				{
+        private void SearchForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (stop != null)
+            {
+                if (stop.State == 0 || stop.State == 1)
+                {
                     if (this.channel != null)
                     {
                         this.channel.Abort();
                         e.Cancel = true;
                     }
-				}
-			}
-		}
+                }
+            }
+        }
 
-		private void SearchForm_Closed(object sender, System.EventArgs e)
-		{
-			eventClose.Set();
+        private void SearchForm_Closed(object sender, System.EventArgs e)
+        {
+            eventClose.Set();
 
-			if (stop != null) // 脱离关联
-			{
-				stop.Unregister();	// 和容器关联
+            if (stop != null) // 脱离关联
+            {
+                stop.Unregister();	// 和容器关联
 
-				// MainForm.stopManager.Remove(stop);
-				stop = null;
-			}
+                // MainForm.stopManager.Remove(stop);
+                stop = null;
+            }
 
 
             this.Channels.AskAccountInfo -= new AskAccountInfoEventHandle(MainForm.Servers.OnAskAccountInfo);
             this.Channels.Dispose();
 
-			if (MainForm.AppInfo != null) 
-			{
-				MainForm.AppInfo.SaveMdiChildFormStates(this,
+            if (MainForm.AppInfo != null)
+            {
+                MainForm.AppInfo.SaveMdiChildFormStates(this,
                     "mdi_form_state");
 
 #if NO
@@ -916,30 +920,30 @@ namespace dp2rms
                     this.splitter_simpleQuery.SplitPosition);
 #endif
 
-				MainForm.AppInfo.SetString(
-					"search_simple_query",
-					"word",
-					textBox_simpleQueryWord.Text);
+                MainForm.AppInfo.SetString(
+                    "search_simple_query",
+                    "word",
+                    textBox_simpleQueryWord.Text);
 
-				// 保存resdircontrol最后的选择
+                // 保存resdircontrol最后的选择
 
-				ResPath respath = new ResPath(treeView_simpleQueryResTree.SelectedNode);
-				MainForm.AppInfo.SetString(
-					"search_simple_query",
-					"resdirpath",
-					respath.FullPath);
+                ResPath respath = new ResPath(treeView_simpleQueryResTree.SelectedNode);
+                MainForm.AppInfo.SetString(
+                    "search_simple_query",
+                    "resdirpath",
+                    respath.FullPath);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
                 this.MainForm.AppInfo.SetString(
                     "searchform",
                     "record_list_column_width",
                     strWidths);
-			}
+            }
 
             this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
 
-		}
+        }
 
         public void AppInfo_LoadMdiSize(object sender, EventArgs e)
         {
@@ -997,40 +1001,40 @@ namespace dp2rms
         }
 
 
-		/*
-		public string GetQueryXml()
-		{
-			string strQuery = "";
-			TabPage page = tabControl1.SelectedTab ;
-			if (page != null)
-			{
-				if (page.Name == "tabPage_xmlQuery") //XML检索式界面，涉及到的服务器直接使用
-				{
-					strQuery = textBox_xmlQuery.Text;
-				}
-				else if (page.Name == "tabPage_simple") //简单界面,也涉及到服务，暂时按不涉及算
-				{
-					strQuery = QueryClient.ProcessQuery2Xml(GetQueryExpressionsOfSimpleUI(),
-						this.m_containerForm .GetLanguage ());
+        /*
+        public string GetQueryXml()
+        {
+            string strQuery = "";
+            TabPage page = tabControl1.SelectedTab ;
+            if (page != null)
+            {
+                if (page.Name == "tabPage_xmlQuery") //XML检索式界面，涉及到的服务器直接使用
+                {
+                    strQuery = textBox_xmlQuery.Text;
+                }
+                else if (page.Name == "tabPage_simple") //简单界面,也涉及到服务，暂时按不涉及算
+                {
+                    strQuery = QueryClient.ProcessQuery2Xml(GetQueryExpressionsOfSimpleUI(),
+                        this.m_containerForm .GetLanguage ());
 
-					//测试用
-					//textBox_xmlQuery.Text = strQuery;
-				}
-				else if (page.Name == "tabPage_complex")  //复杂界面，目录涉及到多个服务器，
-				{
-					int nRet = GetQueryXmlOfComplex(out strQuery);
-					//if (nRet == -1)
-					// goto ERROR1;
-					//textBox_xmlQuery.Text = strQuery;
-				}
-			}
-			else
-			{
-				MessageBox.Show ("环境不正确，不能检索，应改为相关按钮不能用");
-			}
-			return strQuery;
-		}
-		*/
+                    //测试用
+                    //textBox_xmlQuery.Text = strQuery;
+                }
+                else if (page.Name == "tabPage_complex")  //复杂界面，目录涉及到多个服务器，
+                {
+                    int nRet = GetQueryXmlOfComplex(out strQuery);
+                    //if (nRet == -1)
+                    // goto ERROR1;
+                    //textBox_xmlQuery.Text = strQuery;
+                }
+            }
+            else
+            {
+                MessageBox.Show ("环境不正确，不能检索，应改为相关按钮不能用");
+            }
+            return strQuery;
+        }
+        */
 
         private void button_simpleQuerySearch_Click(object sender, System.EventArgs e)
         {
@@ -1039,43 +1043,43 @@ namespace dp2rms
 
         bool m_bFirstColumnIsKey = false;
 
-		public void DoSimpleSearch(bool bOutputKeyID)
-		{
-			textBox_simpleQuery_comment.Text = "";
+        public void DoSimpleSearch(bool bOutputKeyID)
+        {
+            textBox_simpleQuery_comment.Text = "";
 
-			// 第一阶段
-			TargetItemCollection targets = treeView_simpleQueryResTree.
+            // 第一阶段
+            TargetItemCollection targets = treeView_simpleQueryResTree.
                 GetSearchTarget();
-			Debug.Assert(targets != null, "GetSearchTarget() 异常");
+            Debug.Assert(targets != null, "GetSearchTarget() 异常");
 
-			int i;
+            int i;
 
-			// 第二阶段
-			for(i=0;i<targets.Count;i++)
-			{
-				TargetItem item = (TargetItem)targets[i];
-				item.Words = textBox_simpleQueryWord.Text;
-			}
-			targets.MakeWordPhrases(
+            // 第二阶段
+            for (i = 0; i < targets.Count; i++)
+            {
+                TargetItem item = (TargetItem)targets[i];
+                item.Words = textBox_simpleQueryWord.Text;
+            }
+            targets.MakeWordPhrases(
                 Convert.ToBoolean(MainForm.AppInfo.GetInt("simple_query_property", "auto_split_words", 1)),
-				Convert.ToBoolean( MainForm.AppInfo.GetInt("simple_query_property", "auto_detect_range", 0) ),
-				Convert.ToBoolean( MainForm.AppInfo.GetInt("simple_query_property", "auto_detect_relation", 0) )
-				);
+                Convert.ToBoolean(MainForm.AppInfo.GetInt("simple_query_property", "auto_detect_range", 0)),
+                Convert.ToBoolean(MainForm.AppInfo.GetInt("simple_query_property", "auto_detect_relation", 0))
+                );
 
 
-			// 参数
-			for(i=0;i<targets.Count;i++)
-			{
-				TargetItem item = (TargetItem)targets[i];
-				item.MaxCount = MainForm.AppInfo.GetInt("simple_query_property", "maxcount", -1);
-			}
+            // 参数
+            for (i = 0; i < targets.Count; i++)
+            {
+                TargetItem item = (TargetItem)targets[i];
+                item.MaxCount = MainForm.AppInfo.GetInt("simple_query_property", "maxcount", -1);
+            }
 
-			// 第三阶段
-			targets.MakeXml();
+            // 第三阶段
+            targets.MakeXml();
 
-			// 正式检索
+            // 正式检索
 
-			string strError;
+            string strError;
 
             if (bOutputKeyID == true)
                 this.m_bFirstColumnIsKey = true;
@@ -1085,25 +1089,25 @@ namespace dp2rms
             this.ClearListViewItems();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-			stop.Initial("正在检索 ...");
-			stop.BeginLoop();
+            stop.Initial("正在检索 ...");
+            stop.BeginLoop();
 
-			EnableControlsInSearching(true);
+            EnableControlsInSearching(true);
 
 
-			long lTotalCount = 0;	// 命中记录总数
-			for(i=0;i<targets.Count;i++)
-			{
+            long lTotalCount = 0;	// 命中记录总数
+            for (i = 0; i < targets.Count; i++)
+            {
 
-				if (stop.State >= 1)
-					break;
+                if (stop.State >= 1)
+                    break;
 
-				TargetItem item = (TargetItem)targets[i];
+                TargetItem item = (TargetItem)targets[i];
 
-				channel = Channels.GetChannel(item.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                channel = Channels.GetChannel(item.Url);
+                Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-				textBox_simpleQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(item.Xml) + "\r\n";
+                textBox_simpleQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(item.Xml) + "\r\n";
 
                 // 2010/5/18
                 string strBrowseStyle = "id,cols";
@@ -1114,68 +1118,68 @@ namespace dp2rms
                     strBrowseStyle = "keyid,id,key,cols";
                 }
 
-				// MessageBox.Show(this, item.Xml);
-				long nRet = channel.DoSearch(item.Xml,
+                // MessageBox.Show(this, item.Xml);
+                long nRet = channel.DoSearch(item.Xml,
                     "default",
                     strOutputStyle,
                     out strError);
-				if (nRet == -1) 
-				{
-					textBox_simpleQuery_comment.Text += "出错: " + strError + "\r\n";
-					MessageBox.Show(this, strError);
-					continue;
-				}
-				lTotalCount += nRet;
-				textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                if (nRet == -1)
+                {
+                    textBox_simpleQuery_comment.Text += "出错: " + strError + "\r\n";
+                    MessageBox.Show(this, strError);
+                    continue;
+                }
+                lTotalCount += nRet;
+                textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
 
-				if (nRet == 0)
-					continue;
+                if (nRet == 0)
+                    continue;
 
-				// 获取结果集
-				nRet = channel.DoBrowse(listView_browse,
-					listView_browse.Lang,
-					stop,
+                // 获取结果集
+                nRet = channel.DoBrowse(listView_browse,
+                    listView_browse.Lang,
+                    stop,
                     "default",
                     strBrowseStyle,
                     out strError);
-				if (nRet == -1) 
-				{
-					textBox_simpleQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
-					MessageBox.Show(this, strError);
-					continue;
-				}
+                if (nRet == -1)
+                {
+                    textBox_simpleQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
+                    MessageBox.Show(this, strError);
+                    continue;
+                }
 
-			}
+            }
 
-			if (targets.Count > 1) 
-			{
-				textBox_simpleQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
-			}
+            if (targets.Count > 1)
+            {
+                textBox_simpleQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
+            }
 
-			stop.EndLoop();
+            stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
-			stop.Initial("");
+            stop.Initial("");
 
-			if (lTotalCount == 0) 
-			{
-				MessageBox.Show(this, "未命中");
-			}
+            if (lTotalCount == 0)
+            {
+                MessageBox.Show(this, "未命中");
+            }
 
-			EnableControlsInSearching(false);
+            EnableControlsInSearching(false);
 
-			channel = null;
-		}
+            channel = null;
+        }
 
-		void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-		private void SearchForm_Activated(object sender, System.EventArgs e)
-		{
-			if (stop != null)
-				MainForm.stopManager.Active(this.stop);
+        private void SearchForm_Activated(object sender, System.EventArgs e)
+        {
+            if (stop != null)
+                MainForm.stopManager.Active(this.stop);
 
             MainForm.SetMenuItemState();
 
@@ -1206,10 +1210,10 @@ namespace dp2rms
 			MainForm.MenuItem_saveToTemplate.Enabled = false;
 			MainForm.MenuItem_autoGenerate.Enabled = false;
              * */
-		}
+        }
 
-		void EnableControlsInSearching(bool bSearching)
-		{
+        void EnableControlsInSearching(bool bSearching)
+        {
             this.MainForm.Searching(bSearching);
 
             if (bSearching == true)
@@ -1238,225 +1242,225 @@ namespace dp2rms
             }
         }
 
-		private void listView_browse_DoubleClick(object sender, System.EventArgs e)
-		{
-			if (listView_browse.SelectedItems.Count != 0
-				|| listView_browse.FocusedItem != null)
-			{
-				string[] paths = BrowseList.GetSelectedRecordPaths(listView_browse, true);
+        private void listView_browse_DoubleClick(object sender, System.EventArgs e)
+        {
+            if (listView_browse.SelectedItems.Count != 0
+                || listView_browse.FocusedItem != null)
+            {
+                string[] paths = BrowseList.GetSelectedRecordPaths(listView_browse, true);
 
-				DetailForm child = null;
-				
-				if (!(Control.ModifierKeys == Keys.Control))
-					child = MainForm.TopDetailForm;
+                DetailForm child = null;
 
-				if (child == null)
-				{
-					child = new DetailForm();
-					child.MdiParent = MainForm;
-					child.Show();
-				}
-				else 
-				{
-					child.Activate();
-				}
+                if (!(Control.ModifierKeys == Keys.Control))
+                    child = MainForm.TopDetailForm;
 
-				this.listView_browse.Enabled = false;
-				child.LoadRecord(paths[0], null);
-				this.listView_browse.Enabled = true;
+                if (child == null)
+                {
+                    child = new DetailForm();
+                    child.MdiParent = MainForm;
+                    child.Show();
+                }
+                else
+                {
+                    child.Activate();
+                }
 
-			}
-		}
+                this.listView_browse.Enabled = false;
+                child.LoadRecord(paths[0], null);
+                this.listView_browse.Enabled = true;
 
-		void LoadRecordsToDetailForm(string [] paths,
-			bool bActivateEveryWindow)
-		{
-			this.listView_browse.Enabled = false;
+            }
+        }
 
-			for(int i=0;i<paths.Length;i++) 
-			{
-				DetailForm child = new DetailForm();
-				child.MdiParent = MainForm;
-				child.Show();
+        void LoadRecordsToDetailForm(string[] paths,
+            bool bActivateEveryWindow)
+        {
+            this.listView_browse.Enabled = false;
 
-				if (bActivateEveryWindow == true)
-					child.Activate();
+            for (int i = 0; i < paths.Length; i++)
+            {
+                DetailForm child = new DetailForm();
+                child.MdiParent = MainForm;
+                child.Show();
 
-				child.LoadRecord(paths[i], null);
-			}
+                if (bActivateEveryWindow == true)
+                    child.Activate();
 
-			this.listView_browse.Enabled = true;
+                child.LoadRecord(paths[i], null);
+            }
 
-		}
+            this.listView_browse.Enabled = true;
 
-		public string PropertiesText()
-		{
-			if (tabControl_query.SelectedTab == this.tabPage_querySimple)
-			{
-			}
+        }
 
-			return "";
-		}
+        public string PropertiesText()
+        {
+            if (tabControl_query.SelectedTab == this.tabPage_querySimple)
+            {
+            }
 
-		private void button_simpleQueryProperty_Click(object sender, System.EventArgs e)
-		{
-			SearchPropertyDlg dlg = new SearchPropertyDlg();
+            return "";
+        }
+
+        private void button_simpleQueryProperty_Click(object sender, System.EventArgs e)
+        {
+            SearchPropertyDlg dlg = new SearchPropertyDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.ap = MainForm.AppInfo;
-			dlg.CfgTitle = "simple_query_property";
-			dlg.ShowDialog(this);
+            dlg.ap = MainForm.AppInfo;
+            dlg.CfgTitle = "simple_query_property";
+            dlg.ShowDialog(this);
 
-		}
+        }
 
-		private void listView_browse_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			if(e.Button != MouseButtons.Right)
-				return;
+        private void listView_browse_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
 
-			ContextMenu contextMenu = new ContextMenu();
-			MenuItem menuItem = null;
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
 
-			bool bSelected = listView_browse.SelectedItems.Count > 0;
+            bool bSelected = listView_browse.SelectedItems.Count > 0;
 
-			//
-			menuItem = new MenuItem("装入新详细窗(&N)");
-			menuItem.Click += new System.EventHandler(this.menu_loadToNewDetailWindows);
-			if (bSelected == false) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            //
+            menuItem = new MenuItem("装入新详细窗(&N)");
+            menuItem.Click += new System.EventHandler(this.menu_loadToNewDetailWindows);
+            if (bSelected == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
 
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
-
-
-			menuItem = new MenuItem("装入活动的详细窗(&A)");
-			menuItem.Click += new System.EventHandler(this.menu_loadToActiveDetailWindows);
-			if (bSelected == false)
-				menuItem.Enabled = false;
-			contextMenu.MenuItems.Add(menuItem);
-
-			contextMenu.Show(listView_browse, new Point(e.X, e.Y) );		
-			
-		}
-	
-
-		// 装入新详细窗
-		void menu_loadToNewDetailWindows(object sender, System.EventArgs e)
-		{
-			// string[] paths = listView_browse.GetSelectedRecordPaths(false);
-			string[] paths = BrowseList.GetSelectedRecordPaths(listView_browse, false);
-
-			if (paths == null || paths.Length == 0)
-			{
-				MessageBox.Show(this, "尚未选择要装入的记录...");
-				return;
-			}
-
-			LoadRecordsToDetailForm(paths, true);
-
-		}
-
-		// 装入活动详细窗
-		void menu_loadToActiveDetailWindows(object sender, System.EventArgs e)
-		{
-			// string[] paths = listView_browse.GetSelectedRecordPaths(false);
-			string[] paths = BrowseList.GetSelectedRecordPaths(listView_browse, false);
-
-			if (paths == null || paths.Length == 0)
-			{
-				MessageBox.Show(this, "尚未选择要装入的记录...");
-				return;
-			}
-
-			DetailForm child = null;
-				
-			child = MainForm.TopDetailForm;
-
-			// 第一个装入活动窗口
-			if (child != null) 
-			{
-				child.Activate();
-				this.listView_browse.Enabled = false;
-				child.LoadRecord(paths[0], null);
-				this.listView_browse.Enabled = true;
-				if (paths.Length <= 1)
-					return;
-
-				string[] temp = new string[paths.Length - 1];
-				Array.Copy(paths, 1, temp, 0, paths.Length-1);
-				paths = temp;
-			}
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			// 余下的装入新开的详细窗
-			LoadRecordsToDetailForm(paths, true);
-		}
+            menuItem = new MenuItem("装入活动的详细窗(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_loadToActiveDetailWindows);
+            if (bSelected == false)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            contextMenu.Show(listView_browse, new Point(e.X, e.Y));
+
+        }
 
 
-		[StructLayout(LayoutKind.Sequential)]
-			internal struct CREATESTRUCTW
-		{
-			public IntPtr lpCreateParams;
-			public IntPtr hInstance;
-			public IntPtr hMenu;
-			public IntPtr hwndParent;
-			public int cy;
-			public int cx;
-			public int y;
-			public int x;
-			public Int32 style;
-			public string lpszName;
-			public string lpszClass;
-			public UInt32 dwExStyle;
-		}
+        // 装入新详细窗
+        void menu_loadToNewDetailWindows(object sender, System.EventArgs e)
+        {
+            // string[] paths = listView_browse.GetSelectedRecordPaths(false);
+            string[] paths = BrowseList.GetSelectedRecordPaths(listView_browse, false);
 
-		[StructLayout(LayoutKind.Sequential)]
-		internal struct MDICREATESTRUCT
-		{
-			public string szClass;
-			public string szTitle;
-			public IntPtr hOwner;
-			public int x;
-			public int y;
-			public int cx;
-			public int cy;
-			public UInt32 style;
-			public IntPtr lParam;
-		}
+            if (paths == null || paths.Length == 0)
+            {
+                MessageBox.Show(this, "尚未选择要装入的记录...");
+                return;
+            }
+
+            LoadRecordsToDetailForm(paths, true);
+
+        }
+
+        // 装入活动详细窗
+        void menu_loadToActiveDetailWindows(object sender, System.EventArgs e)
+        {
+            // string[] paths = listView_browse.GetSelectedRecordPaths(false);
+            string[] paths = BrowseList.GetSelectedRecordPaths(listView_browse, false);
+
+            if (paths == null || paths.Length == 0)
+            {
+                MessageBox.Show(this, "尚未选择要装入的记录...");
+                return;
+            }
+
+            DetailForm child = null;
+
+            child = MainForm.TopDetailForm;
+
+            // 第一个装入活动窗口
+            if (child != null)
+            {
+                child.Activate();
+                this.listView_browse.Enabled = false;
+                child.LoadRecord(paths[0], null);
+                this.listView_browse.Enabled = true;
+                if (paths.Length <= 1)
+                    return;
+
+                string[] temp = new string[paths.Length - 1];
+                Array.Copy(paths, 1, temp, 0, paths.Length - 1);
+                paths = temp;
+            }
 
 
-		protected override void DefWndProc(ref Message m)
-		{
-			switch (m.Msg) 
-			{
-					/*
-				case API.WM_CREATE:
-				{
-					CREATESTRUCTW lpcs;
+            // 余下的装入新开的详细窗
+            LoadRecordsToDetailForm(paths, true);
+        }
 
-					lpcs = (CREATESTRUCTW)Marshal.PtrToStructure(m.LParam,
-						typeof(CREATESTRUCTW));
 
-					MDICREATESTRUCT cs;
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct CREATESTRUCTW
+        {
+            public IntPtr lpCreateParams;
+            public IntPtr hInstance;
+            public IntPtr hMenu;
+            public IntPtr hwndParent;
+            public int cy;
+            public int cx;
+            public int y;
+            public int x;
+            public Int32 style;
+            public string lpszName;
+            public string lpszClass;
+            public UInt32 dwExStyle;
+        }
 
-					cs = (MDICREATESTRUCT)Marshal.PtrToStructure(lpcs.lpCreateParams,
-						typeof(MDICREATESTRUCT));
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct MDICREATESTRUCT
+        {
+            public string szClass;
+            public string szTitle;
+            public IntPtr hOwner;
+            public int x;
+            public int y;
+            public int cx;
+            public int cy;
+            public UInt32 style;
+            public IntPtr lParam;
+        }
 
-					cs.cy = 20;
-				}
-				break;
-				*/
 
-				default:
-					break;
-			}
+        protected override void DefWndProc(ref Message m)
+        {
+            switch (m.Msg)
+            {
+                /*
+            case API.WM_CREATE:
+            {
+                CREATESTRUCTW lpcs;
 
-			base.DefWndProc(ref m);
-		}
+                lpcs = (CREATESTRUCTW)Marshal.PtrToStructure(m.LParam,
+                    typeof(CREATESTRUCTW));
+
+                MDICREATESTRUCT cs;
+
+                cs = (MDICREATESTRUCT)Marshal.PtrToStructure(lpcs.lpCreateParams,
+                    typeof(MDICREATESTRUCT));
+
+                cs.cy = 20;
+            }
+            break;
+            */
+
+                default:
+                    break;
+            }
+
+            base.DefWndProc(ref m);
+        }
 
         public void DoSearch(bool bOutputKeyID)
         {
@@ -1484,17 +1488,17 @@ namespace dp2rms
             DoXmlSearch(false);
         }
 
-		public void DoXmlSearch(bool bOutputKeyID)
-		{
+        public void DoXmlSearch(bool bOutputKeyID)
+        {
             textBox_xmlQuery_comment.Text = "";
 
-			// 第一阶段
-			TargetItemCollection targets = treeView_simpleQueryResTree.
-				GetSearchTarget();
-			Debug.Assert(targets != null, "GetSearchTarget() 异常");
+            // 第一阶段
+            TargetItemCollection targets = treeView_simpleQueryResTree.
+                GetSearchTarget();
+            Debug.Assert(targets != null, "GetSearchTarget() 异常");
 
-			// 正式检索
-			string strError;
+            // 正式检索
+            string strError;
 
             if (bOutputKeyID == true)
                 this.m_bFirstColumnIsKey = true;
@@ -1504,10 +1508,10 @@ namespace dp2rms
             this.ClearListViewItems();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-			stop.Initial("正在检索 ...");
-			stop.BeginLoop();
+            stop.Initial("正在检索 ...");
+            stop.BeginLoop();
 
-			EnableControlsInSearching(true);
+            EnableControlsInSearching(true);
 
             // 2010/5/18
             string strBrowseStyle = "id,cols";
@@ -1518,186 +1522,186 @@ namespace dp2rms
                 strBrowseStyle = "keyid,id,key,cols";
             }
 
-			long lTotalCount = 0;	// 命中记录总数
-			for(int i=0;i<targets.Count;i++)
-			{
+            long lTotalCount = 0;	// 命中记录总数
+            for (int i = 0; i < targets.Count; i++)
+            {
 
-				if (stop.State >= 1)
-					break;
+                if (stop.State >= 1)
+                    break;
 
-				TargetItem item = (TargetItem)targets[i];
+                TargetItem item = (TargetItem)targets[i];
 
-				channel = Channels.GetChannel(item.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                channel = Channels.GetChannel(item.Url);
+                Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-				// MessageBox.Show(this, item.Xml);
-				long nRet = channel.DoSearch(textBox_xmlQueryString.Text,
+                // MessageBox.Show(this, item.Xml);
+                long nRet = channel.DoSearch(textBox_xmlQueryString.Text,
                     "default",
                     strOutputStyle,
                     out strError);
-				if (nRet == -1) 
-				{
+                if (nRet == -1)
+                {
                     textBox_xmlQuery_comment.Text += "出错: " + strError + "\r\n";
-					MessageBox.Show(this, strError);
-					continue;
-				}
-				lTotalCount += nRet;
-				textBox_xmlQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                    MessageBox.Show(this, strError);
+                    continue;
+                }
+                lTotalCount += nRet;
+                textBox_xmlQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
 
-				if (nRet == 0)
-					continue;
+                if (nRet == 0)
+                    continue;
 
-				// 获取结果集
+                // 获取结果集
 
-				nRet = channel.DoBrowse(listView_browse,
-					listView_browse.Lang,
-					stop,
+                nRet = channel.DoBrowse(listView_browse,
+                    listView_browse.Lang,
+                    stop,
                     "default",
                     strBrowseStyle,
-					out strError);
-				if (nRet == -1) 
-				{
+                    out strError);
+                if (nRet == -1)
+                {
                     textBox_xmlQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
-					MessageBox.Show(this, strError);
-					continue;
-				}
+                    MessageBox.Show(this, strError);
+                    continue;
+                }
 
-			}
+            }
 
-			if (targets.Count > 1) 
-			{
+            if (targets.Count > 1)
+            {
                 textBox_xmlQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
-			}
+            }
 
-			stop.EndLoop();
+            stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
-			stop.Initial("");
+            stop.Initial("");
 
-			if (lTotalCount == 0) 
-			{
-				MessageBox.Show(this, "未命中");
-			}
+            if (lTotalCount == 0)
+            {
+                MessageBox.Show(this, "未命中");
+            }
 
-			EnableControlsInSearching(false);
+            EnableControlsInSearching(false);
 
-			channel = null;
+            channel = null;
 
-		}
+        }
 
-		// 填充逻辑算子列表
-		void FillLogicComboBox(System.Windows.Forms.ComboBox list)
-		{
-			list.Items.Add("AND 与");
-			list.Items.Add("OR  或");
-			list.Items.Add("SUB 减");
-		}
+        // 填充逻辑算子列表
+        void FillLogicComboBox(System.Windows.Forms.ComboBox list)
+        {
+            list.Items.Add("AND 与");
+            list.Items.Add("OR  或");
+            list.Items.Add("SUB 减");
+        }
 
-		// 填充数据库名
-		int FillDbNames(string strServerUrl,
-			System.Windows.Forms.ComboBox list,
-			out string strError)
-		{
-			Debug.Assert(strServerUrl != "", "strServerUrl参数不能为空");
-			strError = "";
-			RmsChannel channel = Channels.GetChannel(strServerUrl);
+        // 填充数据库名
+        int FillDbNames(string strServerUrl,
+            System.Windows.Forms.ComboBox list,
+            out string strError)
+        {
+            Debug.Assert(strServerUrl != "", "strServerUrl参数不能为空");
+            strError = "";
+            RmsChannel channel = Channels.GetChannel(strServerUrl);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
-			list.Enabled = false;
+            list.Enabled = false;
 
-			string [] dbs = null;
-			long lRet = channel.DoDir("",
-				this.Lang,
+            string[] dbs = null;
+            long lRet = channel.DoDir("",
+                this.Lang,
                 null,   // 不要求返回所有语言的名字
                 0,	// 数据库类型
-				out dbs,
-				out strError);
+                out dbs,
+                out strError);
 
-			list.Enabled = true;
+            list.Enabled = true;
 
-			if (lRet == -1)
-				return -1;
+            if (lRet == -1)
+                return -1;
 
-			list.Items.Clear();
-			list.Items.AddRange(dbs);
-
-
-			return 0;
-		}
-
-		// 填充From名
-		int FillFromNames(string strServerUrl,
-			string strDbName,
-			System.Windows.Forms.ComboBox list,
-			out string strError)
-		{
-			Debug.Assert(strServerUrl != "", "strServerUrl参数不能为空");
-			Debug.Assert(strDbName != "", "strDbName参数不能为空");
-			strError = "";
-			RmsChannel channel = Channels.GetChannel(strServerUrl);
-
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
-
-			string [] froms = null;
-
-			list.Enabled = false;
+            list.Items.Clear();
+            list.Items.AddRange(dbs);
 
 
-			long lRet = channel.DoDir(strDbName,
-				this.Lang,
+            return 0;
+        }
+
+        // 填充From名
+        int FillFromNames(string strServerUrl,
+            string strDbName,
+            System.Windows.Forms.ComboBox list,
+            out string strError)
+        {
+            Debug.Assert(strServerUrl != "", "strServerUrl参数不能为空");
+            Debug.Assert(strDbName != "", "strDbName参数不能为空");
+            strError = "";
+            RmsChannel channel = Channels.GetChannel(strServerUrl);
+
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+
+            string[] froms = null;
+
+            list.Enabled = false;
+
+
+            long lRet = channel.DoDir(strDbName,
+                this.Lang,
                 null,   // 不要求返回所有语言的名字
-				1,	// From类型
-				out froms,
-				out strError);
+                1,	// From类型
+                out froms,
+                out strError);
 
-			list.Enabled = true;
+            list.Enabled = true;
 
-			if (lRet == -1)
-				return -1;
+            if (lRet == -1)
+                return -1;
 
-			list.Items.Clear();
-			list.Items.AddRange(froms);
-
-
-			return 0;
-		}
-
-		// 初始化复杂检索的界面
-		void InitialComplexSearchUI()
-		{
-			FillLogicComboBox(comboBox_complex_logic2);
-			FillLogicComboBox(comboBox_complex_logic3);
-			FillLogicComboBox(comboBox_complex_logic4);
-
-			comboBox_complex_logic2.SelectedIndex = 0;
-			comboBox_complex_logic3.SelectedIndex = 0;
-			comboBox_complex_logic4.SelectedIndex = 0;
+            list.Items.Clear();
+            list.Items.AddRange(froms);
 
 
-			/*
-			// 初始化服务器URL
-			ResPath respath = new ResPath(treeView_simpleQueryResTree.SelectedNode);
-			m_aComplexServer.Clear();
-			m_aComplexServer.Add(respath.Url);
-			m_aComplexServer.Add(respath.Url);
-			m_aComplexServer.Add(respath.Url);
-			m_aComplexServer.Add(respath.Url);
-			*/
+            return 0;
+        }
 
-			m_aComplexServer.Clear();
-			m_aComplexServer.Add("");
-			m_aComplexServer.Add("");
-			m_aComplexServer.Add("");
-			m_aComplexServer.Add("");
+        // 初始化复杂检索的界面
+        void InitialComplexSearchUI()
+        {
+            FillLogicComboBox(comboBox_complex_logic2);
+            FillLogicComboBox(comboBox_complex_logic3);
+            FillLogicComboBox(comboBox_complex_logic4);
+
+            comboBox_complex_logic2.SelectedIndex = 0;
+            comboBox_complex_logic3.SelectedIndex = 0;
+            comboBox_complex_logic4.SelectedIndex = 0;
 
 
-	
-			EnableComplexSearchControls();
-		}
+            /*
+            // 初始化服务器URL
+            ResPath respath = new ResPath(treeView_simpleQueryResTree.SelectedNode);
+            m_aComplexServer.Clear();
+            m_aComplexServer.Add(respath.Url);
+            m_aComplexServer.Add(respath.Url);
+            m_aComplexServer.Add(respath.Url);
+            m_aComplexServer.Add(respath.Url);
+            */
 
-		// 如果服务器发生改变，刷新库名、From名
-		void AfterServerChanged(int nIndex)
-		{
+            m_aComplexServer.Clear();
+            m_aComplexServer.Add("");
+            m_aComplexServer.Add("");
+            m_aComplexServer.Add("");
+            m_aComplexServer.Add("");
+
+
+
+            EnableComplexSearchControls();
+        }
+
+        // 如果服务器发生改变，刷新库名、From名
+        void AfterServerChanged(int nIndex)
+        {
             Cursor oldcurcor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
             try
@@ -1762,403 +1766,403 @@ namespace dp2rms
             {
                 this.Cursor = oldcurcor;
             }
-		}
+        }
 
 
-		// 如果库名发生改变，刷新From名
-		void AfterDbChanged(int nIndex)
-		{
-			string strUrl = (string)this.m_aComplexServer[nIndex];
+        // 如果库名发生改变，刷新From名
+        void AfterDbChanged(int nIndex)
+        {
+            string strUrl = (string)this.m_aComplexServer[nIndex];
 
-			System.Windows.Forms.ComboBox listDB = null;
-			if (nIndex == 0)
-				listDB = this.comboBox_complex_db1;
-			else if (nIndex == 1)
-				listDB = this.comboBox_complex_db2;
-			else if (nIndex == 2)
-				listDB = this.comboBox_complex_db3;
-			else if (nIndex == 3)
-				listDB = this.comboBox_complex_db4;
+            System.Windows.Forms.ComboBox listDB = null;
+            if (nIndex == 0)
+                listDB = this.comboBox_complex_db1;
+            else if (nIndex == 1)
+                listDB = this.comboBox_complex_db2;
+            else if (nIndex == 2)
+                listDB = this.comboBox_complex_db3;
+            else if (nIndex == 3)
+                listDB = this.comboBox_complex_db4;
 
-			System.Windows.Forms.ComboBox listFrom = null;
-			if (nIndex == 0)
-				listFrom = this.comboBox_complex_from1;
-			else if (nIndex == 1)
-				listFrom = this.comboBox_complex_from2;
-			else if (nIndex == 2)
-				listFrom = this.comboBox_complex_from3;
-			else if (nIndex == 3)
-				listFrom = this.comboBox_complex_from4;
+            System.Windows.Forms.ComboBox listFrom = null;
+            if (nIndex == 0)
+                listFrom = this.comboBox_complex_from1;
+            else if (nIndex == 1)
+                listFrom = this.comboBox_complex_from2;
+            else if (nIndex == 2)
+                listFrom = this.comboBox_complex_from3;
+            else if (nIndex == 3)
+                listFrom = this.comboBox_complex_from4;
 
 
-			if (listDB.Items.Count > 0)
-			{
-				int nSelected = listDB.SelectedIndex;
-				if (nSelected == -1)
-				{
-					listDB.SelectedIndex = 0;
-					nSelected = 0;
-				}
+            if (listDB.Items.Count > 0)
+            {
+                int nSelected = listDB.SelectedIndex;
+                if (nSelected == -1)
+                {
+                    listDB.SelectedIndex = 0;
+                    nSelected = 0;
+                }
 
-				string strError = "";
-				// 填充from列表
-				int nRet = FillFromNames((string)this.m_aComplexServer[nIndex],
-					(string)listDB.Items[nSelected],
-					listFrom,
-					out strError);
-				if (nRet == -1)
-				{
-					MessageBox.Show(strError);
-				}
+                string strError = "";
+                // 填充from列表
+                int nRet = FillFromNames((string)this.m_aComplexServer[nIndex],
+                    (string)listDB.Items[nSelected],
+                    listFrom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(strError);
+                }
 
-				if (listFrom.Items.Count > 0)
-					listFrom.SelectedIndex = 0;	// 默认选定第一项
+                if (listFrom.Items.Count > 0)
+                    listFrom.SelectedIndex = 0;	// 默认选定第一项
 
-			}
+            }
 
-		}
+        }
 
-		// 选定一个服务器
-		private void button_complex_server1_Click(object sender, System.EventArgs e)
-		{
-			string strOldUrl = (string)this.m_aComplexServer[0];
+        // 选定一个服务器
+        private void button_complex_server1_Click(object sender, System.EventArgs e)
+        {
+            string strOldUrl = (string)this.m_aComplexServer[0];
 
-			// 选择目标服务器
-			OpenResDlg dlg = new OpenResDlg();
+            // 选择目标服务器
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标服务器";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = strOldUrl;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标服务器";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = strOldUrl;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			if (strOldUrl != dlg.Path)
-			{
-				this.m_aComplexServer[0] = dlg.Path;
+            if (strOldUrl != dlg.Path)
+            {
+                this.m_aComplexServer[0] = dlg.Path;
 
-				AfterServerChanged(0);
-			}
-		}
+                AfterServerChanged(0);
+            }
+        }
 
-		private void button_complex_server2_Click(object sender, System.EventArgs e)
-		{
-			string strOldUrl = (string)this.m_aComplexServer[1];
+        private void button_complex_server2_Click(object sender, System.EventArgs e)
+        {
+            string strOldUrl = (string)this.m_aComplexServer[1];
 
-			// 选择目标服务器
-			OpenResDlg dlg = new OpenResDlg();
+            // 选择目标服务器
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标服务器";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = strOldUrl;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标服务器";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = strOldUrl;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			if (strOldUrl != dlg.Path)
-			{
-				this.m_aComplexServer[1] = dlg.Path;
+            if (strOldUrl != dlg.Path)
+            {
+                this.m_aComplexServer[1] = dlg.Path;
 
-				AfterServerChanged(1);
-			}
+                AfterServerChanged(1);
+            }
 
-		
-		}
 
-		private void button_complex_server3_Click(object sender, System.EventArgs e)
-		{
-			string strOldUrl = (string)this.m_aComplexServer[2];
+        }
 
-			// 选择目标服务器
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_complex_server3_Click(object sender, System.EventArgs e)
+        {
+            string strOldUrl = (string)this.m_aComplexServer[2];
+
+            // 选择目标服务器
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标服务器";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = strOldUrl;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标服务器";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = strOldUrl;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			if (strOldUrl != dlg.Path)
-			{
-				this.m_aComplexServer[2] = dlg.Path;
+            if (strOldUrl != dlg.Path)
+            {
+                this.m_aComplexServer[2] = dlg.Path;
 
-				AfterServerChanged(2);
-			}
-		
-		}
+                AfterServerChanged(2);
+            }
 
-		private void button_complex_server4_Click(object sender, System.EventArgs e)
-		{
-			string strOldUrl = (string)this.m_aComplexServer[3];
+        }
 
-			// 选择目标服务器
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_complex_server4_Click(object sender, System.EventArgs e)
+        {
+            string strOldUrl = (string)this.m_aComplexServer[3];
+
+            // 选择目标服务器
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标服务器";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = strOldUrl;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标服务器";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = strOldUrl;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			if (strOldUrl != dlg.Path)
-			{
-				this.m_aComplexServer[3] = dlg.Path;
+            if (strOldUrl != dlg.Path)
+            {
+                this.m_aComplexServer[3] = dlg.Path;
 
-				AfterServerChanged(3);
-			}
-		
-		}
+                AfterServerChanged(3);
+            }
 
-		private void comboBox_complex_db1_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			AfterDbChanged(0);
-		
-		}
+        }
 
-		private void comboBox_complex_db2_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			AfterDbChanged(1);
+        private void comboBox_complex_db1_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            AfterDbChanged(0);
 
-		}
+        }
 
-		private void comboBox_complex_db3_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			AfterDbChanged(2);
-		
-		}
+        private void comboBox_complex_db2_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            AfterDbChanged(1);
 
-		private void comboBox_complex_db4_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			AfterDbChanged(3);
-		
-		}
+        }
 
+        private void comboBox_complex_db3_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            AfterDbChanged(2);
 
-		// 构造dprms内核可以接受的xml检索式
-		public int BuildQueryXml(
-			out ArrayList aServer,
-			out ArrayList aQueryXml,
-			out string strError)
-		{
-			aServer = new ArrayList();
-			aQueryXml = new ArrayList();
-			strError = "";
+        }
 
-			// 收集检索词
-			ArrayList aWord = new ArrayList();
+        private void comboBox_complex_db4_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            AfterDbChanged(3);
 
-			aWord.Add(this.textBox_complex_word1.Text);
-			aWord.Add(this.textBox_complex_word2.Text);
-			aWord.Add(this.textBox_complex_word3.Text);
-			aWord.Add(this.textBox_complex_word4.Text);
-
-			// 收集逻辑算符
-
-			ArrayList aLogic = new ArrayList();
-
-			aLogic.Add(null);
-			aLogic.Add(this.comboBox_complex_logic2.SelectedItem);
-			aLogic.Add(this.comboBox_complex_logic3.SelectedItem);
-			aLogic.Add(this.comboBox_complex_logic4.SelectedItem);
-
-			// 收集目标库
-
-			ArrayList aDB = new ArrayList();
-			aDB.Add(this.comboBox_complex_db1.SelectedItem);
-			aDB.Add(this.comboBox_complex_db2.SelectedItem);
-			aDB.Add(this.comboBox_complex_db3.SelectedItem);
-			aDB.Add(this.comboBox_complex_db4.SelectedItem);
-
-			// 收集检索途径
-
-			ArrayList aFrom = new ArrayList();
-
-			aFrom.Add(this.comboBox_complex_from1.SelectedItem);
-			aFrom.Add(this.comboBox_complex_from2.SelectedItem);
-			aFrom.Add(this.comboBox_complex_from3.SelectedItem);
-			aFrom.Add(this.comboBox_complex_from4.SelectedItem);
+        }
 
 
-			int nLineCount = 0;
-			string strLastServer = "";
-			string strQueryXml = "";
+        // 构造dprms内核可以接受的xml检索式
+        public int BuildQueryXml(
+            out ArrayList aServer,
+            out ArrayList aQueryXml,
+            out string strError)
+        {
+            aServer = new ArrayList();
+            aQueryXml = new ArrayList();
+            strError = "";
 
-			// 构造检索式
-			for(int i=0;i<4;i++)
-			{
+            // 收集检索词
+            ArrayList aWord = new ArrayList();
 
-				if ((string)this.m_aComplexServer[i] != strLastServer
-					&& strQueryXml != "")
-				{
-					aServer.Add(strLastServer);
-					strLastServer = "";
-					aQueryXml.Add("<group>" + strQueryXml + "</group>");
-					strQueryXml = "";
-					nLineCount = 0;
-				}
+            aWord.Add(this.textBox_complex_word1.Text);
+            aWord.Add(this.textBox_complex_word2.Text);
+            aWord.Add(this.textBox_complex_word3.Text);
+            aWord.Add(this.textBox_complex_word4.Text);
 
-				if (this.m_aComplexServer[i] == null
-					|| (string) this.m_aComplexServer[i] == "")
-					continue;
+            // 收集逻辑算符
 
-				string strWord = (string)aWord[i];
-				string strDbName = (string)aDB[i];
+            ArrayList aLogic = new ArrayList();
 
-				if (strDbName == null)
-					strDbName = "";
+            aLogic.Add(null);
+            aLogic.Add(this.comboBox_complex_logic2.SelectedItem);
+            aLogic.Add(this.comboBox_complex_logic3.SelectedItem);
+            aLogic.Add(this.comboBox_complex_logic4.SelectedItem);
 
-				if (i>0) 
-				{
-					if ( strWord == "" && strDbName == "")
-						continue;
-				}
+            // 收集目标库
 
+            ArrayList aDB = new ArrayList();
+            aDB.Add(this.comboBox_complex_db1.SelectedItem);
+            aDB.Add(this.comboBox_complex_db2.SelectedItem);
+            aDB.Add(this.comboBox_complex_db3.SelectedItem);
+            aDB.Add(this.comboBox_complex_db4.SelectedItem);
 
+            // 收集检索途径
 
-				string strLogic = (string)aLogic[i];
-				if (strLogic != null)
-				{
-					int nRet = strLogic.IndexOf(" ", 0);
-					if (nRet != -1)
-						strLogic = strLogic.Substring(0, nRet).Trim();
-				}
+            ArrayList aFrom = new ArrayList();
 
-				string strTargetList = "";
-				string strFrom = (string)aFrom[i];
-				if (strFrom == null)
-					strFrom = "";
-				/*
-				if (strDbName == "全部" 
-					|| String.Compare(strDbName,"All",true) == 0)
-				{
-					int j=0;
-
-					for(j=0;j<boards.Count;j++)
-					{
-						Board board = (Board)boards[j];
-						if (board.IsRecycleBin == true)
-							continue;
-						if (strTargetList != "")
-							strTargetList += ";";
-						strTargetList += board.DbName + ":" + strFrom;
-					}
-
-				}
-				else 
-				*/
-				{
-					strTargetList = strDbName + ":" + strFrom;
-				}
-
-				string strMatchStyle = "left";
-
-				if (strWord.Length > 1)
-				{
-					if (strWord[strWord.Length-1] == '|') 
-					{
-						strWord = strWord.Substring(0, strWord.Length - 1);
-						strMatchStyle = "exact";
-					}
-
-					if (strWord[0] == '*') 
-					{
-						strWord = strWord.Substring(1);
-						if (strMatchStyle == "exact")	// 如果已经是精确匹配, 也就是右边出现了'|', 则加上左方的'*',就构成了右方一致
-							strMatchStyle = "right";
-						else
-							strMatchStyle = "middle";
-					}
-
-				}
-
-				string strOneDbQuery = 
-					"<target list='" + strTargetList + "'><item><word>"	// <order>DESC</order> 在<word>之前，表示倒序
-					+ StringUtil.GetXmlStringSimple(strWord)
-                    + "</word><match>"+strMatchStyle+"</match><relation>=</relation><dataType>string</dataType><maxCount>"
-					+ Convert.ToString(10000)
-					+ "</maxCount></item><lang>chi</lang></target>";
-
-				if (nLineCount > 0)
-					strQueryXml += "<operator value='"+ strLogic +"'/>";
-
-				strQueryXml += strOneDbQuery;
-				nLineCount ++;
-				strLastServer = (string)this.m_aComplexServer[i];
-			}
-
-			if (strQueryXml != "")
-			{
-				aServer.Add(strLastServer);
-				strLastServer = "";
-				aQueryXml.Add("<group>" + strQueryXml + "</group>");
-				strQueryXml = "";
-				nLineCount = 0;
-			}
+            aFrom.Add(this.comboBox_complex_from1.SelectedItem);
+            aFrom.Add(this.comboBox_complex_from2.SelectedItem);
+            aFrom.Add(this.comboBox_complex_from3.SelectedItem);
+            aFrom.Add(this.comboBox_complex_from4.SelectedItem);
 
 
-			return 0;
-		}
+            int nLineCount = 0;
+            string strLastServer = "";
+            string strQueryXml = "";
 
-        		// 复杂检索
+            // 构造检索式
+            for (int i = 0; i < 4; i++)
+            {
+
+                if ((string)this.m_aComplexServer[i] != strLastServer
+                    && strQueryXml != "")
+                {
+                    aServer.Add(strLastServer);
+                    strLastServer = "";
+                    aQueryXml.Add("<group>" + strQueryXml + "</group>");
+                    strQueryXml = "";
+                    nLineCount = 0;
+                }
+
+                if (this.m_aComplexServer[i] == null
+                    || (string)this.m_aComplexServer[i] == "")
+                    continue;
+
+                string strWord = (string)aWord[i];
+                string strDbName = (string)aDB[i];
+
+                if (strDbName == null)
+                    strDbName = "";
+
+                if (i > 0)
+                {
+                    if (strWord == "" && strDbName == "")
+                        continue;
+                }
+
+
+
+                string strLogic = (string)aLogic[i];
+                if (strLogic != null)
+                {
+                    int nRet = strLogic.IndexOf(" ", 0);
+                    if (nRet != -1)
+                        strLogic = strLogic.Substring(0, nRet).Trim();
+                }
+
+                string strTargetList = "";
+                string strFrom = (string)aFrom[i];
+                if (strFrom == null)
+                    strFrom = "";
+                /*
+                if (strDbName == "全部" 
+                    || String.Compare(strDbName,"All",true) == 0)
+                {
+                    int j=0;
+
+                    for(j=0;j<boards.Count;j++)
+                    {
+                        Board board = (Board)boards[j];
+                        if (board.IsRecycleBin == true)
+                            continue;
+                        if (strTargetList != "")
+                            strTargetList += ";";
+                        strTargetList += board.DbName + ":" + strFrom;
+                    }
+
+                }
+                else 
+                */
+                {
+                    strTargetList = strDbName + ":" + strFrom;
+                }
+
+                string strMatchStyle = "left";
+
+                if (strWord.Length > 1)
+                {
+                    if (strWord[strWord.Length - 1] == '|')
+                    {
+                        strWord = strWord.Substring(0, strWord.Length - 1);
+                        strMatchStyle = "exact";
+                    }
+
+                    if (strWord[0] == '*')
+                    {
+                        strWord = strWord.Substring(1);
+                        if (strMatchStyle == "exact")	// 如果已经是精确匹配, 也就是右边出现了'|', 则加上左方的'*',就构成了右方一致
+                            strMatchStyle = "right";
+                        else
+                            strMatchStyle = "middle";
+                    }
+
+                }
+
+                string strOneDbQuery =
+                    "<target list='" + strTargetList + "'><item><word>"	// <order>DESC</order> 在<word>之前，表示倒序
+                    + StringUtil.GetXmlStringSimple(strWord)
+                    + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
+                    + Convert.ToString(10000)
+                    + "</maxCount></item><lang>chi</lang></target>";
+
+                if (nLineCount > 0)
+                    strQueryXml += "<operator value='" + strLogic + "'/>";
+
+                strQueryXml += strOneDbQuery;
+                nLineCount++;
+                strLastServer = (string)this.m_aComplexServer[i];
+            }
+
+            if (strQueryXml != "")
+            {
+                aServer.Add(strLastServer);
+                strLastServer = "";
+                aQueryXml.Add("<group>" + strQueryXml + "</group>");
+                strQueryXml = "";
+                nLineCount = 0;
+            }
+
+
+            return 0;
+        }
+
+        // 复杂检索
         private void button_complexQuerySearch_Click(object sender, System.EventArgs e)
         {
             DoComplexSearch(false);
         }
 
-		// 复杂检索
-		public void DoComplexSearch(bool bOutputKeyID)
-		{
-			textBox_complexQuery_comment.Text = "";
+        // 复杂检索
+        public void DoComplexSearch(bool bOutputKeyID)
+        {
+            textBox_complexQuery_comment.Text = "";
 
-			ArrayList aServer = null;
-			ArrayList aQueryXml = null;
-			string strError = "";
+            ArrayList aServer = null;
+            ArrayList aQueryXml = null;
+            string strError = "";
 
-			long nRet = BuildQueryXml(
-				out aServer,
-				out aQueryXml,
-				out strError);
-			if (nRet == -1)
-			{
-				MessageBox.Show(strError);
-				return;
-			}
+            long nRet = BuildQueryXml(
+                out aServer,
+                out aQueryXml,
+                out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(strError);
+                return;
+            }
 
-			if (aServer.Count == 0)
-			{
-				MessageBox.Show("因没有选定任何服务器地址，无法进行检索");
-				return;
-			}
+            if (aServer.Count == 0)
+            {
+                MessageBox.Show("因没有选定任何服务器地址，无法进行检索");
+                return;
+            }
 
-			// 正式检索
+            // 正式检索
 
-			// string strError;
+            // string strError;
 
             if (bOutputKeyID == true)
                 this.m_bFirstColumnIsKey = true;
@@ -2168,10 +2172,10 @@ namespace dp2rms
             this.ClearListViewItems();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-			stop.Initial("正在检索 ...");
-			stop.BeginLoop();
+            stop.Initial("正在检索 ...");
+            stop.BeginLoop();
 
-			EnableControlsInSearching(true);
+            EnableControlsInSearching(true);
 
             // 2010/5/18
             string strBrowseStyle = "id,cols";
@@ -2182,172 +2186,172 @@ namespace dp2rms
                 strBrowseStyle = "keyid,id,key,cols";
             }
 
-			long lTotalCount = 0;	// 命中记录总数
-			int i=0;
-			for(i=0;i<aServer.Count;i++)
-			{
+            long lTotalCount = 0;	// 命中记录总数
+            int i = 0;
+            for (i = 0; i < aServer.Count; i++)
+            {
 
-				if (stop.State >= 1)
-					break;
+                if (stop.State >= 1)
+                    break;
 
-				string strServer = (string)aServer[i];
-				string strQueryXml = (string)aQueryXml[i];
+                string strServer = (string)aServer[i];
+                string strQueryXml = (string)aQueryXml[i];
 
-				channel = Channels.GetChannel(strServer);
-				Debug.Assert(channel != null, "Channels.GetChannel 异常");
-				textBox_complexQuery_comment.Text += "目标服务器:\t" + strServer + "\r\n";
+                channel = Channels.GetChannel(strServer);
+                Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                textBox_complexQuery_comment.Text += "目标服务器:\t" + strServer + "\r\n";
 
-				textBox_complexQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(strQueryXml) + "\r\n";
+                textBox_complexQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(strQueryXml) + "\r\n";
 
-				// MessageBox.Show(this, item.Xml);
-				nRet = channel.DoSearch(strQueryXml,
+                // MessageBox.Show(this, item.Xml);
+                nRet = channel.DoSearch(strQueryXml,
                     "default",
                     strOutputStyle,
                     out strError);
-				if (nRet == -1) 
-				{
-					textBox_complexQuery_comment.Text += "出错: " + strError + "\r\n";
-					MessageBox.Show(this, strError);
-					continue;
-				}
-				lTotalCount += nRet;
-				textBox_complexQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                if (nRet == -1)
+                {
+                    textBox_complexQuery_comment.Text += "出错: " + strError + "\r\n";
+                    MessageBox.Show(this, strError);
+                    continue;
+                }
+                lTotalCount += nRet;
+                textBox_complexQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
 
-				if (nRet == 0)
-					continue;
+                if (nRet == 0)
+                    continue;
 
-				// 获取结果集
+                // 获取结果集
 
-				nRet = channel.DoBrowse(listView_browse,
-					listView_browse.Lang,
-					stop,
+                nRet = channel.DoBrowse(listView_browse,
+                    listView_browse.Lang,
+                    stop,
                     "default",
                     strBrowseStyle,
-					out strError);
-				if (nRet == -1) 
-				{
-					textBox_complexQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
-					MessageBox.Show(this, strError);
-					continue;
-				}
-			}
+                    out strError);
+                if (nRet == -1)
+                {
+                    textBox_complexQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
+                    MessageBox.Show(this, strError);
+                    continue;
+                }
+            }
 
-			if (aServer.Count > 1) 
-			{
-				textBox_complexQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
-			}
+            if (aServer.Count > 1)
+            {
+                textBox_complexQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
+            }
 
-			stop.EndLoop();
+            stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
-			stop.Initial("");
+            stop.Initial("");
 
-			if (lTotalCount == 0) 
-			{
-				MessageBox.Show(this, "未命中");
-			}
+            if (lTotalCount == 0)
+            {
+                MessageBox.Show(this, "未命中");
+            }
 
-			EnableControlsInSearching(false);
+            EnableControlsInSearching(false);
 
-			channel = null;
-		}
+            channel = null;
+        }
 
-		void EnableComplexSearchLine1(bool bEnable)
-		{
-			this.textBox_complex_word1.Enabled = bEnable;
-			this.comboBox_complex_db1.Enabled = bEnable;
-			this.comboBox_complex_from1.Enabled = bEnable;
-		}
+        void EnableComplexSearchLine1(bool bEnable)
+        {
+            this.textBox_complex_word1.Enabled = bEnable;
+            this.comboBox_complex_db1.Enabled = bEnable;
+            this.comboBox_complex_from1.Enabled = bEnable;
+        }
 
-		void EnableComplexSearchLine2(bool bEnable)
-		{
-			this.comboBox_complex_logic2.Enabled = bEnable;
-			this.textBox_complex_word2.Enabled = bEnable;
-			this.comboBox_complex_db2.Enabled = bEnable;
-			this.comboBox_complex_from2.Enabled = bEnable;
-		}
+        void EnableComplexSearchLine2(bool bEnable)
+        {
+            this.comboBox_complex_logic2.Enabled = bEnable;
+            this.textBox_complex_word2.Enabled = bEnable;
+            this.comboBox_complex_db2.Enabled = bEnable;
+            this.comboBox_complex_from2.Enabled = bEnable;
+        }
 
-		void EnableComplexSearchLine3(bool bEnable)
-		{
-			this.comboBox_complex_logic3.Enabled = bEnable;
-			this.textBox_complex_word3.Enabled = bEnable;
-			this.comboBox_complex_db3.Enabled = bEnable;
-			this.comboBox_complex_from3.Enabled = bEnable;
-		}
+        void EnableComplexSearchLine3(bool bEnable)
+        {
+            this.comboBox_complex_logic3.Enabled = bEnable;
+            this.textBox_complex_word3.Enabled = bEnable;
+            this.comboBox_complex_db3.Enabled = bEnable;
+            this.comboBox_complex_from3.Enabled = bEnable;
+        }
 
-		void EnableComplexSearchLine4(bool bEnable)
-		{
-			this.comboBox_complex_logic4.Enabled = bEnable;
-			this.textBox_complex_word4.Enabled = bEnable;
-			this.comboBox_complex_db4.Enabled = bEnable;
-			this.comboBox_complex_from4.Enabled = bEnable;
-		}
+        void EnableComplexSearchLine4(bool bEnable)
+        {
+            this.comboBox_complex_logic4.Enabled = bEnable;
+            this.textBox_complex_word4.Enabled = bEnable;
+            this.comboBox_complex_db4.Enabled = bEnable;
+            this.comboBox_complex_from4.Enabled = bEnable;
+        }
 
 
-		void EnableComplexSearchControls()
-		{
-			for(int i=0;i<this.m_aComplexServer.Count;i++)
-			{
-				string strServer = (string)this.m_aComplexServer[i];
-				if (strServer == null || strServer == "")
-				{
-					if (i==0)
-						EnableComplexSearchLine1(false);
-					else if (i==1)
-						EnableComplexSearchLine2(false);
-					else if (i==2)
-						EnableComplexSearchLine3(false);
-					else if (i==3)
-						EnableComplexSearchLine4(false);
-				}
-				else 
-				{
-					if (i==0)
-						EnableComplexSearchLine1(true);
-					else if (i==1)
-						EnableComplexSearchLine2(true);
-					else if (i==2)
-						EnableComplexSearchLine3(true);
-					else if (i==3)
-						EnableComplexSearchLine4(true);
-				}
-			}
-		}
+        void EnableComplexSearchControls()
+        {
+            for (int i = 0; i < this.m_aComplexServer.Count; i++)
+            {
+                string strServer = (string)this.m_aComplexServer[i];
+                if (strServer == null || strServer == "")
+                {
+                    if (i == 0)
+                        EnableComplexSearchLine1(false);
+                    else if (i == 1)
+                        EnableComplexSearchLine2(false);
+                    else if (i == 2)
+                        EnableComplexSearchLine3(false);
+                    else if (i == 3)
+                        EnableComplexSearchLine4(false);
+                }
+                else
+                {
+                    if (i == 0)
+                        EnableComplexSearchLine1(true);
+                    else if (i == 1)
+                        EnableComplexSearchLine2(true);
+                    else if (i == 2)
+                        EnableComplexSearchLine3(true);
+                    else if (i == 3)
+                        EnableComplexSearchLine4(true);
+                }
+            }
+        }
 
-		private void button_complex_server1_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			string strServer = (string)this.m_aComplexServer[0];
+        private void button_complex_server1_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            string strServer = (string)this.m_aComplexServer[0];
 
-			toolTip_serverUrl.SetToolTip(this.button_complex_server1,
-				strServer);
-		
-		}
+            toolTip_serverUrl.SetToolTip(this.button_complex_server1,
+                strServer);
 
-		private void button_complex_server2_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			string strServer = (string)this.m_aComplexServer[1];
+        }
 
-			toolTip_serverUrl.SetToolTip(this.button_complex_server2,
-				strServer);
+        private void button_complex_server2_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            string strServer = (string)this.m_aComplexServer[1];
 
-		}
+            toolTip_serverUrl.SetToolTip(this.button_complex_server2,
+                strServer);
 
-		private void button_complex_server3_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			string strServer = (string)this.m_aComplexServer[2];
+        }
 
-			toolTip_serverUrl.SetToolTip(this.button_complex_server3,
-				strServer);
-		
-		}
+        private void button_complex_server3_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            string strServer = (string)this.m_aComplexServer[2];
 
-		private void button_complex_server4_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			string strServer = (string)this.m_aComplexServer[3];
+            toolTip_serverUrl.SetToolTip(this.button_complex_server3,
+                strServer);
 
-			toolTip_serverUrl.SetToolTip(this.button_complex_server4,
-				strServer);
-		
-		}
+        }
+
+        private void button_complex_server4_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            string strServer = (string)this.m_aComplexServer[3];
+
+            toolTip_serverUrl.SetToolTip(this.button_complex_server4,
+                strServer);
+
+        }
 
         // tab页切换的时候, 设置缺省按钮
         private void tabControl_query_SelectedIndexChanged(object sender, EventArgs e)
@@ -2513,5 +2517,5 @@ null);
         {
             this.MainForm.StatusLabel = strMessage;
         }
-	}
+    }
 }

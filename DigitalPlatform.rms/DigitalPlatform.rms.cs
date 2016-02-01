@@ -81,6 +81,7 @@ namespace DigitalPlatform.rms
 		}
 	}
 
+#if NO
 	//表示文件片断的类
 	public class FragmentItem
 	{
@@ -88,6 +89,7 @@ namespace DigitalPlatform.rms
 		public string strContentRange = "";		// 所对应的片断范围定义
 		public string strTempFileName = "";		// 临时文件名
 
+    // TODO: 容易造成 mem leak
 		~FragmentItem()
 		{
 			DeleteTempFile();
@@ -169,8 +171,6 @@ namespace DigitalPlatform.rms
 		}
 	} 
 
-
-
 	//FragmentItem的集合
 	public class FragmentList : ArrayList 
 	{
@@ -204,8 +204,10 @@ namespace DigitalPlatform.rms
 		}
 	} 
 
+#endif
 
-	//FileNameHolder里面的对象的类型为FileNameItem
+#if NO
+	// FileNameHolder 里面的对象的类型为 FileNameItem
 	public class FileNameHolder:ArrayList
 	{
 		//临时目录地址
@@ -287,6 +289,7 @@ namespace DigitalPlatform.rms
 			return strResult;
 		}
 
+    // TODO: 可能会造成 mem leak
 		//析构函数删除所有对象
 		~FileNameHolder()
 		{
@@ -333,7 +336,7 @@ namespace DigitalPlatform.rms
 			}
 		}
 	} //FileNameItem类结束
-
+#endif
 
 	// 设计意图:为了处理"数据库名:记录ID"以及ID长度设计的DbPath类
 	public class DbPath

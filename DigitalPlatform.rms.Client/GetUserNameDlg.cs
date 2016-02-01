@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -11,69 +11,72 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms.Client
 {
-	/// <summary>
-	/// Summary description for GetUserNameDlg.
-	/// </summary>
-	public class GetUserNameDlg : System.Windows.Forms.Form
-	{
-		public ServerCollection Servers = null;	// “˝”√
-		public RmsChannelCollection Channels = null;
+    /// <summary>
+    /// Summary description for GetUserNameDlg.
+    /// </summary>
+    public class GetUserNameDlg : System.Windows.Forms.Form
+    {
+        public ServerCollection Servers = null;	// ÂºïÁî®
+        public RmsChannelCollection Channels = null;
 
-		public DigitalPlatform.StopManager stopManager = null;
+        public DigitalPlatform.StopManager stopManager = null;
 
-		// Channel channel = null;
+        // Channel channel = null;
 
-		public string ServerUrl = "";
+        public string ServerUrl = "";
 
-		public string Lang = "zh";
+        public string Lang = "zh";
 
 
-		private System.Windows.Forms.ListView listView1;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox textBox_userName;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.ColumnHeader columnHeader_userName;
-		private System.Windows.Forms.ColumnHeader columnHeader_recPath;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox_userName;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.ColumnHeader columnHeader_userName;
+        private System.Windows.Forms.ColumnHeader columnHeader_recPath;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public GetUserNameDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public GetUserNameDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GetUserNameDlg));
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader_userName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -103,12 +106,12 @@ namespace DigitalPlatform.rms.Client
             // 
             // columnHeader_userName
             // 
-            this.columnHeader_userName.Text = "”√ªß√˚";
+            this.columnHeader_userName.Text = "Áî®Êà∑Âêç";
             this.columnHeader_userName.Width = 218;
             // 
             // columnHeader_recPath
             // 
-            this.columnHeader_recPath.Text = "’ ªßº«¬º¬∑æ∂";
+            this.columnHeader_recPath.Text = "Â∏êÊà∑ËÆ∞ÂΩïË∑ØÂæÑ";
             this.columnHeader_recPath.Width = 281;
             // 
             // label1
@@ -118,7 +121,7 @@ namespace DigitalPlatform.rms.Client
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 1;
-            this.label1.Text = "”√ªß√˚(&U):";
+            this.label1.Text = "Áî®Êà∑Âêç(&U):";
             // 
             // textBox_userName
             // 
@@ -133,7 +136,7 @@ namespace DigitalPlatform.rms.Client
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -143,7 +146,7 @@ namespace DigitalPlatform.rms.Client
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 4;
-            this.button_Cancel.Text = "»°œ˚";
+            this.button_Cancel.Text = "ÂèñÊ∂à";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // GetUserNameDlg
@@ -160,13 +163,13 @@ namespace DigitalPlatform.rms.Client
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GetUserNameDlg";
             this.ShowInTaskbar = false;
-            this.Text = "÷∏∂®”√ªß√˚";
+            this.Text = "ÊåáÂÆöÁî®Êà∑Âêç";
             this.Load += new System.EventHandler(this.GetUserNameDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
         public string SelectedUserName
         {
@@ -190,97 +193,97 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-		private void GetUserNameDlg_Load(object sender, System.EventArgs e)
-		{
-		
-		}
+        private void GetUserNameDlg_Load(object sender, System.EventArgs e)
+        {
 
-		public int Initial(ServerCollection servers,
-			RmsChannelCollection channels,
-			DigitalPlatform.StopManager stopManager,
-			string serverUrl,
-			out string strError)
-		{
-			this.Servers = servers;
-			this.Channels = channels;
-			this.stopManager = stopManager;
-			this.ServerUrl = serverUrl;
+        }
 
-			strError = "";
-			int nRet = Fill(this.Lang,
-				out strError);
+        public int Initial(ServerCollection servers,
+            RmsChannelCollection channels,
+            DigitalPlatform.StopManager stopManager,
+            string serverUrl,
+            out string strError)
+        {
+            this.Servers = servers;
+            this.Channels = channels;
+            this.stopManager = stopManager;
+            this.ServerUrl = serverUrl;
 
-			if (nRet == -1)
-				return -1;
-			return 0;
-		}
+            strError = "";
+            int nRet = Fill(this.Lang,
+                out strError);
 
-		// ÃÓ≥‰listview
-		public int Fill(
-			string strLang,
-			out string strError)
-		{
-			listView1.Items.Clear();
-			strError = "";
+            if (nRet == -1)
+                return -1;
+            return 0;
+        }
+
+        // Â°´ÂÖÖlistview
+        public int Fill(
+            string strLang,
+            out string strError)
+        {
+            listView1.Items.Clear();
+            strError = "";
 
             string strQueryXml = "<target list='"
                 + StringUtil.GetXmlStringSimple(Defs.DefaultUserDb.Name)      // 2007/9/14
                 + ":" + "__id'><item><word>"
-				+ "" + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+                + "" + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
-			RmsChannel channel = Channels.GetChannel(this.ServerUrl);
-			if (channel == null)
-			{
-				strError = "Channels.GetChannel “Ï≥£";
-				return -1;
-			}
+            RmsChannel channel = Channels.GetChannel(this.ServerUrl);
+            if (channel == null)
+            {
+                strError = "Channels.GetChannel ÂºÇÂ∏∏";
+                return -1;
+            }
 
-			long nRet = channel.DoSearch(strQueryXml,
+            long nRet = channel.DoSearch(strQueryXml,
                 "default",
                 "", // strOuputStyle
                 out strError);
-			if (nRet == -1) 
-			{
-				strError = "ºÏÀ˜’ ªßø‚ ±≥ˆ¥Ì: " + strError;
-				return -1;
-			}
+            if (nRet == -1)
+            {
+                strError = "Ê£ÄÁ¥¢Â∏êÊà∑Â∫ìÊó∂Âá∫Èîô: " + strError;
+                return -1;
+            }
 
-			if (nRet == 0)
-				return 0;	// not found
+            if (nRet == 0)
+                return 0;	// not found
 
-			long lTotalCount = nRet;	// ◊‹√¸÷– ˝
-			long lThisCount = lTotalCount;
-			long lStart = 0;
+            long lTotalCount = nRet;	// ÊÄªÂëΩ‰∏≠Êï∞
+            long lThisCount = lTotalCount;
+            long lStart = 0;
 
-			for(;;)
-			{
+            for (; ; )
+            {
 
-				ArrayList aLine = null;
-				nRet = channel.DoGetSearchFullResult(
+                ArrayList aLine = null;
+                nRet = channel.DoGetSearchFullResult(
                     "default",
-					lStart,
-					lThisCount,
-					strLang,
-					null,	// stop,
-					out aLine,
-					out strError);
-				if (nRet == -1) 
-				{
-					strError = "ºÏÀ˜◊¢≤·”√ªßø‚ªÒ»°ºÏÀ˜Ω·π˚ ±≥ˆ¥Ì: " + strError;
-					return -1;
-				}
+                    lStart,
+                    lThisCount,
+                    strLang,
+                    null,	// stop,
+                    out aLine,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "Ê£ÄÁ¥¢Ê≥®ÂÜåÁî®Êà∑Â∫ìËé∑ÂèñÊ£ÄÁ¥¢ÁªìÊûúÊó∂Âá∫Èîô: " + strError;
+                    return -1;
+                }
 
-				for(int i=0;i<aLine.Count;i++)
-				{
-					string[] acol = (string[])aLine[i];
-					if (acol.Length < 1)
-						continue;
+                for (int i = 0; i < aLine.Count; i++)
+                {
+                    string[] acol = (string[])aLine[i];
+                    if (acol.Length < 1)
+                        continue;
 
                     ListViewItem item = null;
 
                     if (acol.Length < 2)
                     {
-                        // ¡–÷–√ª”–”√ªß√˚, ”√ªÒ»°º«¬º¿¥≤πæ»?
+                        // Âàó‰∏≠Ê≤°ÊúâÁî®Êà∑Âêç, Áî®Ëé∑ÂèñËÆ∞ÂΩïÊù•Ë°•Êïë?
                         item = new ListViewItem("", 0);
                     }
                     else
@@ -288,63 +291,63 @@ namespace DigitalPlatform.rms.Client
                         item = new ListViewItem(acol[1], 0);
                     }
 
-					this.listView1.Items.Add(item);
-					item.SubItems.Add(acol[0]);
+                    this.listView1.Items.Add(item);
+                    item.SubItems.Add(acol[0]);
 
                     if (item.Text == this.SelectedUserName)
                         item.Selected = true;
-				}
+                }
 
 
-				if (lStart + aLine.Count >= lTotalCount)
-					break;
+                if (lStart + aLine.Count >= lTotalCount)
+                    break;
 
-				lStart += aLine.Count;
-				lThisCount -= aLine.Count;
-
-
-			}
+                lStart += aLine.Count;
+                lThisCount -= aLine.Count;
 
 
+            }
 
-			return 0;
-		}
 
-		private void listView1_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			if (this.listView1.SelectedItems.Count == 0)
-			{
-				textBox_userName.Text = "";
-				return;
-			}
 
-			textBox_userName.Text = this.listView1.SelectedItems[0].Text;
-		
-		}
+            return 0;
+        }
 
-		private void listView1_DoubleClick(object sender, System.EventArgs e)
-		{
-			button_OK_Click(null, null);
-		
-		}
+        private void listView1_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            if (this.listView1.SelectedItems.Count == 0)
+            {
+                textBox_userName.Text = "";
+                return;
+            }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (textBox_userName.Text == "")
-			{
-				MessageBox.Show("…–Œ¥÷∏∂®”√ªß√˚");
-				return;
-			}
-		
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            textBox_userName.Text = this.listView1.SelectedItems[0].Text;
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-		
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
-	}
+        }
+
+        private void listView1_DoubleClick(object sender, System.EventArgs e)
+        {
+            button_OK_Click(null, null);
+
+        }
+
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (textBox_userName.Text == "")
+            {
+                MessageBox.Show("Â∞öÊú™ÊåáÂÆöÁî®Êà∑Âêç");
+                return;
+            }
+
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+    }
 }

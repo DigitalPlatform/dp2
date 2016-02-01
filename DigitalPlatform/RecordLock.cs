@@ -95,7 +95,6 @@ namespace DigitalPlatform
             this._lockForWrite(m_nLockTimeout);
             try
             {
-
                 RecordLock reclock = (RecordLock)RecordLocks[strID];
 
                 if (reclock == null)

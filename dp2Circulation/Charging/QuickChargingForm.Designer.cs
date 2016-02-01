@@ -17,6 +17,16 @@
             {
                 components.Dispose();
             }
+
+            if (_taskList != null)
+                _taskList.Dispose();
+
+            if (_summaryList != null)
+                _summaryList.Dispose();
+
+            if (m_webExternalHost_readerInfo != null)
+                m_webExternalHost_readerInfo.Dispose();
+
             base.Dispose(disposing);
         }
 

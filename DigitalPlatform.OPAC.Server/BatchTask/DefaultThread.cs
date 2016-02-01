@@ -44,7 +44,6 @@ namespace DigitalPlatform.OPAC.Server
                 this.App.Flush();
             }
 
-
             if (this.App.ChatRooms != null)
             {
                 try
@@ -72,8 +71,19 @@ namespace DigitalPlatform.OPAC.Server
                 }
             }
 
+            // 清除过期的 FilterTask 对象
+            try
+            {
+                this.App.CleanFilterTask(new TimeSpan(24, 0, 0));   // TimeSpan(24, 0, 0)
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "DefaultTread中 CleanFilterTask() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.App.WriteErrorLog(strErrorText);
+            }
+
             if (this.App.XmlLoaded == false
-                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
+                && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
             {
                 try
                 {

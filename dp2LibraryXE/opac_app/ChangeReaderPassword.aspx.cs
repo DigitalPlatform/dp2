@@ -12,7 +12,8 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 public partial class ChangeReaderPassword : MyWebPage
 {
@@ -90,31 +91,27 @@ ref sessioninfo) == false)
             return;
         }
 
-        string strError = "";
-        long lRet = sessioninfo.Channel.ChangeReaderPassword(
-            null,
-            this.TextBox_readerBarcode.Text,
-            this.TextBox_oldPassword.Text,
-            this.TextBox_newPassword.Text,
-            out strError);
-        if (lRet != 1)  // 2008/9/12 changed
+        LibraryChannel channel = sessioninfo.GetChannel(true);
+        try
         {
-            this.Label_message.Text = strError;
-            return;
+            string strError = "";
+            long lRet = // sessioninfo.Channel.
+                channel.ChangeReaderPassword(
+                null,
+                this.TextBox_readerBarcode.Text,
+                this.TextBox_oldPassword.Text,
+                this.TextBox_newPassword.Text,
+                out strError);
+            if (lRet != 1)  // 2008/9/12 changed
+            {
+                this.Label_message.Text = strError;
+                return;
+            }
         }
-        /*
-        // Result.Value -1出错 0旧密码不正确 1旧密码正确,已修改为新密码
-        LibraryServerResult result = app.ChangeReaderPassword(
-            sessioninfo,
-            this.TextBox_readerBarcode.Text,
-            this.TextBox_oldPassword.Text,
-            this.TextBox_newPassword.Text);
-        if (result.Value != 1)  // 2008/9/12 changed
+        finally
         {
-            this.Label_message.Text = result.ErrorInfo;
-            return;
+            sessioninfo.ReturnChannel(channel);
         }
-         * */
 
         sessioninfo.Password = this.TextBox_newPassword.Text;
         // 注：这里登出，迫使读者重新登录，也是可以的做法

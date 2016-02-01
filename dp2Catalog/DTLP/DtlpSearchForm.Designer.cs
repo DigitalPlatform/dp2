@@ -17,6 +17,9 @@ namespace dp2Catalog
             {
                 components.Dispose();
             }
+
+            this.EventLoadFinish.Dispose();
+
             base.Dispose(disposing);
         }
 

@@ -12,7 +12,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 
 public partial class BorrowInfo : MyWebPage
 {
@@ -74,6 +74,11 @@ ref sessioninfo) == false)
         this.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
         this.Response.AddHeader("Expires", "0");
 
-
+        string strBarcode = this.Request["barcode"];
+        if (string.IsNullOrEmpty(strBarcode) == false)
+        {
+            this.BorrowHistoryControl1.ReaderBarcode = strBarcode;
+            this.BorrowInfoControl1.ReaderBarcode = strBarcode;
+        }
     }
 }

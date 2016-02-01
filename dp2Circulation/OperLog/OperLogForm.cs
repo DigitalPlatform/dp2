@@ -40,6 +40,7 @@ namespace dp2Circulation
         public bool AccessLog = false;  // 当前列表中是否为 accessLog 风格
 
         WebExternalHost m_webExternalHost = null;
+
         /// <summary>
         /// 获得摘要
         /// </summary>
@@ -102,45 +103,13 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
 
-#if NO
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-    "mdi_form_state");
-
-
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             this.AcceptButton = this.button_loadFromSingleFile;
 
 #if NO
-            this.textBox_logFileName.Text = MainForm.AppInfo.GetString(
-                "operlogform",
-                "logfilename",
-                "");
-
-            this.textBox_repair_sourceFilename.Text = MainForm.AppInfo.GetString(
-                "operlogform",
-                "repair_source_filename",
-                "");
-            this.textBox_repair_targetFilename.Text = MainForm.AppInfo.GetString(
-                "operlogform",
-                "repair_target_filename",
-                "");
-            this.textBox_repair_verifyFolderName.Text = MainForm.AppInfo.GetString(
-                "operlogform",
-                "repair_verify_foldername",
-                "");
-#endif
-
             this.Channels = new LibraryChannelCollection();
             this.Channels.BeforeLogin -= new BeforeLoginEventHandle(Channels_BeforeLogin);
             this.Channels.BeforeLogin += new BeforeLoginEventHandle(Channels_BeforeLogin);
+#endif
 
             /*
             if (this.MainForm.CanDisplayItemProperty() == true)
@@ -186,36 +155,20 @@ namespace dp2Circulation
             }
         }
 
+#if NO
         void Channels_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
+#endif
 
         private void OperLogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
 
-            }
-#endif
         }
 
         private void OperLogForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            if (stop != null) // 脱离关联
-            {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }
-#endif
             if (this.m_operlogViewer != null)
             {
                 this.m_operlogViewer.ExitWebBrowser();  // 虽然 CommentViwerForm 的 Dispose() 里面也作了释放，但为了保险起见，这里也释放一次
@@ -233,33 +186,7 @@ namespace dp2Circulation
     "operlog_form",
     "ui_state",
     this.UiState);
-
-#if NO
-            MainForm.AppInfo.SetString(
-                "operlogform",
-                "logfilename",
-                this.textBox_logFileName.Text);
-
-            MainForm.AppInfo.SetString(
-                "operlogform",
-                "repair_source_filename",
-                this.textBox_repair_sourceFilename.Text);
-            MainForm.AppInfo.SetString(
-                "operlogform",
-                "repair_target_filename",
-                this.textBox_repair_targetFilename.Text);
-            MainForm.AppInfo.SetString(
-                "operlogform",
-                "repair_verify_foldername",
-                this.textBox_repair_verifyFolderName.Text);
-#endif
-
-#if NO
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-    "mdi_form_state");
-#endif
             }
-
         }
 
         private void button_loadFromSingleFile_Click(object sender, EventArgs e)
@@ -3285,7 +3212,9 @@ out string strError)
             DoViewOperlog(false);
         }
 
+#if NO
         LibraryChannelCollection Channels = null;
+#endif
 
         // return:
         //      -1  出错
@@ -3301,10 +3230,15 @@ out string strError)
 
             OperLogItemInfo info = (OperLogItemInfo)item.Tag;
 
+#if NO
             this.Channels.Close();  // 中断前面的所有操作
+#endif
 
+#if NO
             LibraryChannel channel = this.Channels.NewChannel(MainForm.LibraryServerUrl);
             channel.Url = this.MainForm.LibraryServerUrl;
+#endif
+            LibraryChannel channel = this.GetChannel();
             try
             {
                 string strLogFileName = ListViewUtil.GetItemText(item, COLUMN_FILENAME);
@@ -3409,8 +3343,11 @@ FileShare.ReadWrite))
             }
             finally
             {
+#if NO
                 channel.Close();
                 this.Channels.RemoveChannel(channel);
+#endif
+                this.ReturnChannel(channel);
             }
         }
 

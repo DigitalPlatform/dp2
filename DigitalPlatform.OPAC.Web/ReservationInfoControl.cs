@@ -502,7 +502,6 @@ Control insertbefore)
             if (string.IsNullOrEmpty(strArrivedItemBarcode) == false)
                 strDisableClass = "deleted";
 
-
             bool bForceLogin = false;
             if (StringUtil.IsInList("forcelogin", strStyle) == true)
                 bForceLogin = true;
@@ -675,33 +674,31 @@ Control insertbefore)
                 this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号。操作失败"));  // "尚未指定读者证条码号。操作失败。"
                 return;
             }
-            string strError = "";
-            long lRet = sessioninfo.Channel.Reservation(
-                null,
-                "split",
-                strReaderBarcode,
-                strBarcodeList,
-                out strError);
-            if (lRet == -1)
-                this.SetDebugInfo("errorinfo", strError);
-            else
+
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                // text-level: 用户提示
-                this.SetDebugInfo(this.GetString("拆散预约信息成功。请看预约列表"));    // "拆散预约信息成功。请看预约列表。"
+
+                string strError = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.Reservation(
+                    null,
+                    "split",
+                    strReaderBarcode,
+                    strBarcodeList,
+                    out strError);
+                if (lRet == -1)
+                    this.SetDebugInfo("errorinfo", strError);
+                else
+                {
+                    // text-level: 用户提示
+                    this.SetDebugInfo(this.GetString("拆散预约信息成功。请看预约列表"));    // "拆散预约信息成功。请看预约列表。"
+                }
             }
-            /*
-            LibraryServerResult result = app.Reservation(sessioninfo,
-                "split",
-                strReaderBarcode,
-                strBarcodeList);
-            if (result.Value == -1)
-                this.SetDebugInfo("errorinfo", result.ErrorInfo);
-            else
+            finally
             {
-                // text-level: 用户提示
-                this.SetDebugInfo(this.GetString("拆散预约信息成功。请看预约列表"));    // "拆散预约信息成功。请看预约列表。"
+                sessioninfo.ReturnChannel(channel);
             }
-             * */
 
             // 清除读者记录缓存
             sessioninfo.ClearLoginReaderDomCache();
@@ -735,33 +732,29 @@ Control insertbefore)
                 return;
             }
 
-            string strError = "";
-            long lRet = sessioninfo.Channel.Reservation(
-                null,
-                "merge",
-                strReaderBarcode,
-                strBarcodeList,
-                out strError);
-            if (lRet == -1)
-                this.SetDebugInfo("errorinfo", strError);
-            else
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                // text-level: 用户提示
-                this.SetDebugInfo(this.GetString("合并预约信息成功。请看预约列表"));    // "合并预约信息成功。请看预约列表。"
+                string strError = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.Reservation(
+                    null,
+                    "merge",
+                    strReaderBarcode,
+                    strBarcodeList,
+                    out strError);
+                if (lRet == -1)
+                    this.SetDebugInfo("errorinfo", strError);
+                else
+                {
+                    // text-level: 用户提示
+                    this.SetDebugInfo(this.GetString("合并预约信息成功。请看预约列表"));    // "合并预约信息成功。请看预约列表。"
+                }
             }
-            /*
-            LibraryServerResult result = app.Reservation(sessioninfo,
-                "merge",
-                strReaderBarcode,
-                strBarcodeList);
-            if (result.Value == -1)
-                this.SetDebugInfo("errorinfo", result.ErrorInfo);
-            else
+            finally
             {
-                // text-level: 用户提示
-                this.SetDebugInfo(this.GetString("合并预约信息成功。请看预约列表"));    // "合并预约信息成功。请看预约列表。"
+                sessioninfo.ReturnChannel(channel);
             }
-             * */
 
             // 清除读者记录缓存
             sessioninfo.ClearLoginReaderDomCache();
@@ -796,47 +789,35 @@ Control insertbefore)
                 return;
             }
 
-            string strError = "";
-            long lRet = sessioninfo.Channel.Reservation(
-                null,
-                "delete",
-                strReaderBarcode,
-                strBarcodeList,
-                out strError);
-            if (lRet == -1)
-                this.SetDebugInfo("errorinfo", strError);
-            else
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                // text-level: 用户提示
-                string strMessage = this.GetString("删除预约信息成功。请看预约列表"); // "删除预约信息成功。请看预约列表。"
+                string strError = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.Reservation(
+                    null,
+                    "delete",
+                    strReaderBarcode,
+                    strBarcodeList,
+                    out strError);
+                if (lRet == -1)
+                    this.SetDebugInfo("errorinfo", strError);
+                else
+                {
+                    // text-level: 用户提示
+                    string strMessage = this.GetString("删除预约信息成功。请看预约列表"); // "删除预约信息成功。请看预约列表。"
 
-                // 成功时也可能有提示信息
-                if (String.IsNullOrEmpty(strError) == false)
-                    strMessage += "<br/><br/>" + strError;
+                    // 成功时也可能有提示信息
+                    if (String.IsNullOrEmpty(strError) == false)
+                        strMessage += "<br/><br/>" + strError;
 
-                this.SetDebugInfo(strMessage);
+                    this.SetDebugInfo(strMessage);
+                }
             }
-            /*
-            LibraryServerResult result = app.Reservation(sessioninfo,
-                "delete",
-                strReaderBarcode,
-                strBarcodeList);
-            if (result.Value == -1)
-                this.SetDebugInfo("errorinfo", result.ErrorInfo);
-            else
+            finally
             {
-                // text-level: 用户提示
-                string strMessage = this.GetString("删除预约信息成功。请看预约列表"); // "删除预约信息成功。请看预约列表。"
-
-                // 成功时也可能有提示信息
-                if (String.IsNullOrEmpty(result.ErrorInfo) == false)
-                    strMessage += "<br/><br/>" + result.ErrorInfo;
-
-                this.SetDebugInfo(strMessage);
+                sessioninfo.ReturnChannel(channel);
             }
-             * */
-
-            // Button button = (Button)FindControl("reservation_deletebutton");
 
             // 清除读者记录缓存
             sessioninfo.ClearLoginReaderDomCache();

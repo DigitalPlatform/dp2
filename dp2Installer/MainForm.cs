@@ -503,7 +503,7 @@ FormWindowState.Normal);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -631,7 +631,7 @@ FormWindowState.Normal);
         bool DetectChange(List<OpacAppInfo> infos,
             string strStyleZipFileName)
         {
-            foreach(OpacAppInfo info in infos)
+            foreach (OpacAppInfo info in infos)
             {
                 if (string.IsNullOrEmpty(info.PhysicalPath) == true)
                     continue;
@@ -776,9 +776,9 @@ FormWindowState.Normal);
             string strTargetPath = Path.Combine(strTargetDir, e.FileName);
 
             // string strOldValue = e.FileName;
-            
+
             // e.FileName = Path.GetFileName(e.FileName);
-            
+
             // e.Extract(strTempDir, ExtractExistingFileAction.OverwriteSilently);
             // e.FileName = strOldValue;
 
@@ -798,7 +798,7 @@ FormWindowState.Normal);
 
                     File.Copy(strTempPath, strTargetPath, true);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     if (nErrorCount > 10)
                     {
@@ -1165,7 +1165,7 @@ MessageBoxDefaultButton.Button2);
                     if (bRet == false)
                         break;
 
-                    AppendString("更新实例 '"+strInstanceName+"' 的数据目录 "+strDataDir+" ...\r\n");
+                    AppendString("更新实例 '" + strInstanceName + "' 的数据目录 " + strDataDir + " ...\r\n");
 
                     // 从 library_data.zip 中展开部分目录内容
                     nRet = dp2Library_extractPartDir(strDataDir,
@@ -1199,7 +1199,7 @@ MessageBoxDefaultButton.Button2);
         // 去掉第一级路经
         static string GetSubPath(string strPath)
         {
-            int nRet = strPath.IndexOfAny(new char[] {'/','\\' }, 0);
+            int nRet = strPath.IndexOfAny(new char[] { '/', '\\' }, 0);
             if (nRet == -1)
                 return "";
             return strPath.Substring(nRet + 1);
@@ -1231,7 +1231,7 @@ MessageBoxDefaultButton.Button2);
                 using (ZipFile zip = ZipFile.Read(strZipFileName))
                 {
                     // foreach (ZipEntry e in zip)
-                    for(int i = 0;i<zip.Count; i++)
+                    for (int i = 0; i < zip.Count; i++)
                     {
                         ZipEntry e = zip[i];
                         // string strFullPath = Path.Combine(this.UserDir, e.FileName);
@@ -1409,7 +1409,7 @@ MessageBoxDefaultButton.Button2);
             int nCount = 0;
 
             if (bDisplaySectionTitle)
-            AppendSectionTitle("检查序列号开始");
+                AppendSectionTitle("检查序列号开始");
 
             string strFirstMac = "";
             List<string> macs = SerialCodeForm.GetMacAddress();
@@ -1436,7 +1436,7 @@ MessageBoxDefaultButton.Button2);
                 if (bRet == false)
                     break;
 
-                AppendString("*** 检查实例 "+(i+1)+" '" + strInstanceName + "' 的序列号 '" + strSerialCode + "' ...\r\n");
+                AppendString("*** 检查实例 " + (i + 1) + " '" + strInstanceName + "' 的序列号 '" + strSerialCode + "' ...\r\n");
 
                 if (string.IsNullOrEmpty(strSerialCode) == true
                     || strSerialCode == "community")
@@ -1511,7 +1511,7 @@ MessageBoxDefaultButton.Button2);
 
             if (nRet > 0)
             {
-                AppendString("因重设了 "+nRet+" 个序列号， 正在自动重启 dp2library 服务 ...\r\n");
+                AppendString("因重设了 " + nRet + " 个序列号， 正在自动重启 dp2library 服务 ...\r\n");
                 nRet = StopService("dp2LibraryService",
                     out strError);
                 if (nRet == -1)
@@ -1622,7 +1622,6 @@ MessageBoxDefaultButton.Button2);
                     strError = "在本机的 IIS 中没有找到任何名为 dp2OPAC 的虚拟目录";
                     goto ERROR1;
                 }
-
 
                 AppendSectionTitle("升级 dp2OPAC 开始");
 
@@ -1852,12 +1851,12 @@ MessageBoxDefaultButton.Button1);
                 return;
             ERROR1:
                 menuItem.DropDownItems.Add(new ToolStripMenuItem(strError));
-            if (menuItem.DropDownItems.Count > 0)
-                menuItem.Enabled = true;
-            else
-                menuItem.Enabled = false;
+                if (menuItem.DropDownItems.Count > 0)
+                    menuItem.Enabled = true;
+                else
+                    menuItem.Enabled = false;
 
-            return;
+                return;
             }
 
             for (int i = 0; ; i++)
@@ -2053,7 +2052,7 @@ MessageBoxDefaultButton.Button1);
             try
             {
                 if (stop != null)
-                    stop.SetMessage("正在准备 Windows 事件日志 "+log.LogDisplayName+"...");
+                    stop.SetMessage("正在准备 Windows 事件日志 " + log.LogDisplayName + "...");
 
                 using (StreamWriter sw = new StreamWriter(strEventLogFilename, false, Encoding.UTF8))
                 {
@@ -2079,7 +2078,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "输出 Windows 日志 "+log.LogDisplayName+"的信息时出现异常: " + ex.Message;
+                strError = "输出 Windows 日志 " + log.LogDisplayName + "的信息时出现异常: " + ex.Message;
                 return -1;
             }
 
@@ -2115,7 +2114,7 @@ MessageBoxDefaultButton.Button1);
                 foreach (EventLog log in logs)
                 {
                     // 创建 eventlog_digitalplatform.txt 文件
-                    string strEventLogFilename = Path.Combine(strTempDir, "eventlog_"+log.LogDisplayName+".txt");
+                    string strEventLogFilename = Path.Combine(strTempDir, "eventlog_" + log.LogDisplayName + ".txt");
 
                     //
                     //
@@ -2773,7 +2772,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
 
             StringBuilder text = new StringBuilder();
-            text.Append("信息创建时间:\t"+DateTime.Now.ToString()+"\r\n");
+            text.Append("信息创建时间:\t" + DateTime.Now.ToString() + "\r\n");
             text.Append("当前操作系统信息:\t" + Environment.OSVersion.ToString() + "\r\n");
             text.Append("当前操作系统版本号:\t" + Environment.OSVersion.Version.ToString() + "\r\n");
             text.Append("本机 MAC 地址:\t" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress()) + "\r\n");
@@ -2806,7 +2805,7 @@ MessageBoxDefaultButton.Button1);
                     if (bRet == false)
                         break;
 
-                    text.Append("\r\n实例 "+(i+1)+"\r\n");
+                    text.Append("\r\n实例 " + (i + 1) + "\r\n");
                     text.Append("实例名:\t" + strInstanceName + "\r\n");
                     text.Append("数据目录:\t" + strDataDir + "\r\n");
                     text.Append("协议绑定:\t" + StringUtil.MakePathList(existing_urls) + "\r\n");
@@ -3019,7 +3018,7 @@ MessageBoxDefaultButton.Button1);
 
         }
 
-            // 刷新菜单状态
+        // 刷新菜单状态
         void Refresh_dp2library_MenuItems()
         {
             string strExePath = GetPathOfService("dp2LibraryService");
@@ -3048,8 +3047,8 @@ MessageBoxDefaultButton.Button1);
         {
             string strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
             if (string.IsNullOrEmpty(strProgramDir) == true)
-                strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);                
-                
+                strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+
             Debug.Assert(string.IsNullOrEmpty(strProgramDir) == false, "");
 
             return Path.Combine(strProgramDir, strCompany + "\\" + strProduct);
@@ -3792,10 +3791,8 @@ MessageBoxDefaultButton.Button2);
             }
 
             this._floatingMessage.Text = "正在安装 dp2OPAC - 读者公共查询...";
-
             try
             {
-
                 // 检查 IIS 是否已经启用
                 List<OpacAppInfo> infos = null;
                 nRet = OpacAppInfo.GetOpacInfo(out infos, out strError);
@@ -3968,7 +3965,7 @@ MessageBoxDefaultButton.Button2);
             string strFileName = "%WINDIR%\\SysNative\\dism.exe";
             strFileName = Environment.ExpandEnvironmentVariables(strFileName);
 
-            var featureNames = new [] 
+            var featureNames = new[] 
     {
         "IIS-ApplicationDevelopment",
         "IIS-CommonHttpFeatures",
@@ -3989,8 +3986,8 @@ MessageBoxDefaultButton.Button2);
             string strLine = string.Format(
             "/NoRestart /Online /Enable-Feature {0}",
             string.Join(
-                " ", 
-                featureNames.Select(name => string.Format("/FeatureName:{0}",name))));
+                " ",
+                featureNames.Select(name => string.Format("/FeatureName:{0}", name))));
 
             AppendSectionTitle("开始启用 IIS");
             AppendString("整个过程耗费的时间可能较长，请耐心等待 ...\r\n");
@@ -4038,7 +4035,7 @@ MessageBoxDefaultButton.Button2);
         bool PromptCreating(string strText)
         {
             DialogResult result = MessageBox.Show(this,
-"安装程序可自动为实例 '"+_info.InstanceName+"' "+strText+"\r\n\r\n请问要创建么? ",
+"安装程序可自动为实例 '" + _info.InstanceName + "' " + strText + "\r\n\r\n请问要创建么? ",
 "安装 dp2Library",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -4082,7 +4079,7 @@ MessageBoxDefaultButton.Button1);
                 //      -1  出错
                 //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
                 //      1   成功创建
-                nRet = ManageHelper.CreateDefaultDatabases(Channel, 
+                nRet = ManageHelper.CreateDefaultDatabases(Channel,
                     Stop,
                     PromptCreating,
                     out strError);
@@ -4194,7 +4191,7 @@ MessageBoxDefaultButton.Button1);
         // 当前正在使用的 dp2library instance 信息
         LibraryInstanceInfo _info = null;
 
-        static string GetFirstUrl(string [] urls)
+        static string GetFirstUrl(string[] urls)
         {
             if (urls == null || urls.Length == 0)
                 return "";
@@ -4219,13 +4216,13 @@ MessageBoxDefaultButton.Button1);
             out string strError)
         {
             strError = "";
-        // 从注册表和 library.xml 文件中获得实例信息
-        // parameters:
-        //      
-        // return:
-        //      -1  出错
-        //      0   实例没有找到
-        //      1   成功
+            // 从注册表和 library.xml 文件中获得实例信息
+            // parameters:
+            //      
+            // return:
+            //      -1  出错
+            //      0   实例没有找到
+            //      1   成功
             int nRet = LibraryInstallHelper.GetLibraryInstanceInfo(
                 strInstanceName,
                 out _info,
@@ -4248,7 +4245,6 @@ MessageBoxDefaultButton.Button1);
 
             return 0;
         }
-
 
         /// <summary>
         /// 结束检索
@@ -4438,7 +4434,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             return dlg;
         }
 
-#endregion
+        #endregion
 
         // 卸载 dp2library
         private void MenuItem_dp2library_uninstall_Click(object sender, EventArgs e)

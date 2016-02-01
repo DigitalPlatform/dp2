@@ -36,9 +36,11 @@ namespace DigitalPlatform.LibraryClient
         /// </summary>
         /// <param name="strUrl">服务器 URL</param>
         /// <param name="strUserName">用户名</param>
+        /// <param name="strLang">语言代码。如果为空，表示不在意通道的语言代码</param>
         /// <returns>返回通道对象</returns>
         public LibraryChannel GetChannel(string strUrl,
-            string strUserName)
+            string strUserName,
+            string strLang = "")
         {
             LibraryChannelWrapper wrapper = null;
 
@@ -46,7 +48,7 @@ namespace DigitalPlatform.LibraryClient
                 throw new LockException("锁定尝试中超时");
             try
             {
-                wrapper = this._findChannel(strUrl, strUserName, true);
+                wrapper = this._findChannel(strUrl, strUserName, strLang, true);
 
                 if (wrapper != null)
                     return wrapper.Channel;
@@ -54,19 +56,19 @@ namespace DigitalPlatform.LibraryClient
                 if (this.Count >= MaxCount)
                 {
                     // 清理不用的通道
-                    int nDeleteCount = CleanChannel(false);
+                    int nDeleteCount = _cleanChannel(false);
                     if (nDeleteCount == 0)
                     {
                         // 全部都在使用
-                        throw new Exception("通道池已满，请稍候重试获取通道");
+                        throw new Exception("通道池已满，请稍后重试获取通道");
                     }
                 }
 
                 // 如果没有找到
-
                 LibraryChannel inner_channel = new LibraryChannel();
                 inner_channel.Url = strUrl;
                 inner_channel.UserName = strUserName;
+                inner_channel.Lang = strLang;
                 inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                 inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
@@ -84,7 +86,6 @@ namespace DigitalPlatform.LibraryClient
             {
                 this.m_lock.ExitWriteLock();
             }
-
         }
 
         void inner_channel_AfterLogin(object sender, AfterLoginEventArgs e)
@@ -103,6 +104,7 @@ namespace DigitalPlatform.LibraryClient
         // 查找指定URL的LibraryChannel对象
         LibraryChannelWrapper _findChannel(string strUrl,
             string strUserName,
+            string strLang,
             bool bAutoSetUsing)
         {
             foreach (LibraryChannelWrapper wrapper in this)
@@ -111,6 +113,8 @@ namespace DigitalPlatform.LibraryClient
                     && wrapper.Channel.Url == strUrl
                     && (string.IsNullOrEmpty(wrapper.Channel.UserName) == true
                     || wrapper.Channel.UserName == strUserName)
+                    && (string.IsNullOrEmpty(strLang) == true
+                    || wrapper.Channel.Lang == strLang)
                     )
                 {
                     if (bAutoSetUsing == true)
@@ -158,10 +162,17 @@ namespace DigitalPlatform.LibraryClient
             }
         }
 
-        // 清理不用的通道
+        public int CleanChannel(string strUserName = "")
+        {
+            return _cleanChannel(true, strUserName);
+        }
+
+        // 清理处在未使用状态的通道
+        // parameters:
+        //      strUserName 希望清除用户名为此值的全部通道。如果本参数值为空，则表示清除全部通道
         // return:
         //      清理掉的通道数目
-        int CleanChannel(bool bLock)
+        int _cleanChannel(bool bLock, string strUserName = "")
         {
             List<LibraryChannelWrapper> deletes = new List<LibraryChannelWrapper>();
 
@@ -175,7 +186,9 @@ namespace DigitalPlatform.LibraryClient
                 for (int i = 0; i < this.Count; i++)
                 {
                     LibraryChannelWrapper wrapper = this[i];
-                    if (wrapper.InUsing == false)
+                    if (wrapper.InUsing == false
+                        && (string.IsNullOrEmpty(strUserName) == true || wrapper.Channel.UserName == strUserName)
+                        )
                     {
                         this.RemoveAt(i);
                         i--;
@@ -202,7 +215,7 @@ namespace DigitalPlatform.LibraryClient
         /// <summary>
         /// 关闭所有通道，清除集合
         /// </summary>
-        public void Close()
+        public new void Clear()
         {
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new LockException("锁定尝试中超时");
@@ -213,12 +226,17 @@ namespace DigitalPlatform.LibraryClient
                     wrapper.Channel.Close();
                 }
 
-                this.Clear();
+                base.Clear();
             }
             finally
             {
                 this.m_lock.ExitWriteLock();
             }
+        }
+
+        public void Close()
+        {
+            this.Clear();
         }
     }
 

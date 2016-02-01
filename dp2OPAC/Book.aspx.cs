@@ -12,7 +12,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 
 public partial class Book : MyWebPage
 {
@@ -63,6 +63,14 @@ ref sessioninfo) == false)
         else
             this.CommentsControl1.Active = true;
     }
+
+#if NO
+    protected void Page_Unload(object sender, EventArgs e)
+    {
+        this.BiblioControl1.WantFocus -= new WantFocusEventHandler(BiblioControl1_WantFocus);
+        this.CommentsControl1.WantFocus -= new WantFocusEventHandler(CommentsControl1_WantFocus);
+    }
+#endif
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -157,7 +165,7 @@ ref sessioninfo) == false)
             //      0   评注记录没有找到(strError中有说明信息)
             //      1   找到
             int nRet = app.GetBiblioRecPathByCommentRecPath(
-            sessioninfo,
+            // sessioninfo,
             strCommentRecPath,
             out strBiblioRecPath,
             out strError);
@@ -181,7 +189,7 @@ ref sessioninfo) == false)
             //      0   评注记录没有找到(strError中有说明信息)
             //      1   找到
             int nRet = app.GetBiblioRecPathByItemRecPath(
-            sessioninfo,
+            // sessioninfo,
             strItemRecPath,
             out strBiblioRecPath,
             out strError);

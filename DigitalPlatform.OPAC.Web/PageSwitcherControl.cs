@@ -35,6 +35,14 @@ namespace DigitalPlatform.OPAC.Web
         public event GetBaseUrlEventHandler GetBaseUrl = null;
         public event PageSwitchEventHandler PageSwitch = null;
 
+        public override void Dispose()
+        {
+            this.GetBaseUrl = null;
+            this.PageSwitch = null;
+
+            base.Dispose();
+        }
+
         public int TotalCount = 0;
         public int CurrentPageNo = 0;
 

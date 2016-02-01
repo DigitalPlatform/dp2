@@ -10,13 +10,12 @@ using System.Web;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Server
 {
     // 批处理任务
-    public class BatchTask
+    public class BatchTask : IDisposable
     {
         public bool ManualStart = false;    // 本轮是否为手动启动？
 
@@ -25,7 +24,6 @@ namespace DigitalPlatform.OPAC.Server
 
         // 启动参数
         public BatchTaskStartInfo StartInfo = null;
-
 
         // 任务名
         public string Name = "";
@@ -42,7 +40,7 @@ namespace DigitalPlatform.OPAC.Server
         internal bool m_bClosed = true;
 
         internal OpacApplication App = null;
-        internal LibraryChannel Channel = new LibraryChannel();
+        // internal LibraryChannel Channel = new LibraryChannel();
 
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
@@ -53,6 +51,20 @@ namespace DigitalPlatform.OPAC.Server
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
+
+        public virtual void Dispose()
+        {
+            this.Close();
+
+#if NO
+            if (this.Channel != null)
+                this.Channel.Dispose();
+#endif
+
+            eventClose.Dispose();
+            eventActive.Dispose();
+            eventFinished.Dispose();
+        }
 
         public void Activate()
         {
@@ -275,10 +287,12 @@ namespace DigitalPlatform.OPAC.Server
                 this.Name = strName;
 
             this.App = app;
+#if NO
             this.Channel.Url = app.WsUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
+#endif
 
             this.ProgressFileName = Path.GetTempFileName();
             try
@@ -338,6 +352,7 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+#if NO
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             if (e.FirstTry == false)
@@ -351,6 +366,7 @@ namespace DigitalPlatform.OPAC.Server
             e.Parameters = "location=#opac,type=worker,client=dp2OPAC|" + OpacApplication.ClientVersion;
             e.LibraryServerUrl = this.App.WsUrl;
         }
+#endif
 
         // 启动工作线程
         public void StartWorkerThread()
@@ -370,6 +386,7 @@ namespace DigitalPlatform.OPAC.Server
 
             this.threadWorker =
                 new Thread(new ThreadStart(this.ThreadMain));
+            this.threadWorker.Name = this.Name;
 
             // Thread.Sleep(1);
 
@@ -381,7 +398,7 @@ namespace DigitalPlatform.OPAC.Server
             }
             catch (Exception ex)
             {
-                string strErrorText = "StartWorkerThread()出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "StartWorkerThread() 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 this.App.WriteErrorLog(strErrorText);
 
                 try
@@ -447,12 +464,14 @@ namespace DigitalPlatform.OPAC.Server
             this.eventClose.Set();
             this.m_bClosed = true;
 
+#if NO
             // 2013/12/24
             if (this.Channel != null)
             {
                 this.Channel.Close();
                 this.Channel = null;
             }
+#endif
 
             if (this.m_stream != null)
             {

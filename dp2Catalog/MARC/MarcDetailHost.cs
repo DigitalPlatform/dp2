@@ -23,7 +23,7 @@ namespace dp2Catalog
     /// <summary>
     /// Summary description for Host.
     /// </summary>
-    public class MarcDetailHost
+    public class MarcDetailHost : IDisposable
     {
         public MarcDetailForm DetailForm = null;
         public Assembly Assembly = null;
@@ -34,6 +34,12 @@ namespace dp2Catalog
             //
             // TODO: Add constructor logic here
             //
+        }
+
+        public void Dispose()
+        {
+            if (this.GcatChannel != null)
+                this.GcatChannel.Dispose();
         }
 
         public void Invoke(string strFuncName)

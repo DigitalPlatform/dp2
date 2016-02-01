@@ -311,9 +311,10 @@ namespace dp2Circulation
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
 
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
-            ScriptManager.CfgFilePath =
-                this.MainForm.DataDir + "\\output_order_projects.xml";  // 导入的方案，是不分出版物类型的
-            ScriptManager.DataDir = this.MainForm.DataDir;
+            ScriptManager.CfgFilePath = Path.Combine(
+                this.MainForm.UserDir,
+                "output_order_projects.xml");  // 导入的方案，是不分出版物类型的
+            ScriptManager.DataDir = this.MainForm.UserDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -1345,7 +1346,8 @@ namespace dp2Circulation
 
         }
 
-        /*public*/ static ListViewItem AddToListView(
+        /*public*/
+        static ListViewItem AddToListView(
             string strPubType,
             bool bAccepted,
             ListView list,
@@ -1375,7 +1377,8 @@ namespace dp2Circulation
         // 根据订购记录DOM设置ListViewItem除第一列以外的文字
         // parameters:
         //      bSetBarcodeColumn   是否要设置第一列记录路径的内容
-        /*public*/ static void SetListViewItemText(
+        /*public*/
+        static void SetListViewItemText(
             string strPubType,
             bool bAccepted,
             XmlDocument dom,
@@ -2032,14 +2035,16 @@ namespace dp2Circulation
             }
         }
 
-        /*public*/ class NamedListViewItems : List<ListViewItem>
+        /*public*/
+        class NamedListViewItems : List<ListViewItem>
         {
             public string Seller = "";
             // List<ListViewItem> Items = new List<ListViewItem>();
         }
 
         // 根据渠道(书商)名分入多个不同的List<ListViewItem>
-        /*public*/ class NamedListViewItemsCollection : List<NamedListViewItems>
+        /*public*/
+        class NamedListViewItemsCollection : List<NamedListViewItems>
         {
             public void AddItem(string strSeller,
                 ListViewItem item)
@@ -2048,7 +2053,7 @@ namespace dp2Circulation
                 bool bFound = false;
 
                 // 定位
-                for(int i=0;i<this.Count;i++)
+                for (int i = 0; i < this.Count; i++)
                 {
                     list = this[i];
                     if (list.Seller == strSeller)
@@ -2519,7 +2524,7 @@ namespace dp2Circulation
             {
                 using (StreamReader sr = new StreamReader(strFilename))
                 {
-                    for (int i=0; ; i++)
+                    for (int i = 0; ; i++)
                     {
                         string strLine = "";
                         strLine = sr.ReadLine();
@@ -2550,7 +2555,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 strError = "读取文件 '" + strFilename + "' 出错：" + ex.Message;
-                    return -1;
+                return -1;
             }
 
             return 0;
@@ -2642,7 +2647,7 @@ namespace dp2Circulation
                     {
                         if (StringUtil.HasHead(strClass.ToLower().Replace(" ", ""), line.Class.ToLower().Replace(" ", "")) == true)
                             results.Add(line);
-                    } 
+                    }
                     else if (StringUtil.HasHead(strClass, line.Class) == true)
                     {
                         results.Add(line);
@@ -2863,7 +2868,7 @@ namespace dp2Circulation
             }
 
             strTableTitle = StringUtil.MacroString(macro_table,
-    strTableTitle); 
+    strTableTitle);
 
             Debug.Assert(String.IsNullOrEmpty(strStatisTemplateFilePath) == false, "");
 
@@ -2900,7 +2905,7 @@ namespace dp2Circulation
             Sheet sheet = null;
             if (doc != null)
                 sheet = doc.NewSheet(strSheetName);
-            
+
             bool bWiledMatched = false; // 是否遇到过通配符
 
             stop.SetProgressValue(0);
@@ -3418,7 +3423,7 @@ lItemCount.ToString());
                 doc.WriteExcelCell(
 nExcelLineIndex,
 nColIndex++,
-strOutputPrice); 
+strOutputPrice);
 
                 if (this.checkBox_print_accepted.Checked == true)
                 {
@@ -3445,7 +3450,7 @@ lAcceptItemCount.ToString());
                     doc.WriteExcelCell(
 nExcelLineIndex,
 nColIndex++,
-strAcceptOutputPrice); 
+strAcceptOutputPrice);
                 }
             }
             #endregion
@@ -3563,7 +3568,7 @@ strAcceptOutputPrice);
             // int nTitleColCount = 0; // 列标题行的列数
 
             List<StatisLine> first_lines = null;    // 第一个分类号行数组
-            foreach(InnerTableLine line in table)
+            foreach (InnerTableLine line in table)
             {
                 if (line.lines != null && line.lines.Count > 0)
                 {
@@ -3584,7 +3589,7 @@ strAcceptOutputPrice);
                 strTableContent.Append("<td class='class'>" + strStatisTypeName + "</td>");
 
                 // 类号标题列
-                foreach(StatisLine line in first_lines)
+                foreach (StatisLine line in first_lines)
                 {
                     strTableContent.Append("<td class='columntitle' colspan='2'>" + HttpUtility.HtmlEncode(line.Class) + "</td>");
                 }
@@ -3872,7 +3877,7 @@ true);
                 out strPostfix1,
                 out strError);
             if (nRet == -1)
-                return "strPrice1 '"+strPrice1+"' 格式错误: " + strError;
+                return "strPrice1 '" + strPrice1 + "' 格式错误: " + strError;
 
             decimal value1 = 0;
             try
@@ -3909,7 +3914,7 @@ true);
 
             if (strPrefix1 != strPrefix2)
             {
-                return "strPrice1 '"+strPrice1+"' 和 strPrice2 '"+strPrice2+"' 的前缀不一致，无法计算比率";
+                return "strPrice1 '" + strPrice1 + "' 和 strPrice2 '" + strPrice2 + "' 的前缀不一致，无法计算比率";
             }
 
             if (strPostfix1 != strPostfix2)
@@ -4110,7 +4115,7 @@ true);
                     "<div class='totalprice'>总价: " + HttpUtility.HtmlEncode(strTotalPrice) + "</div>");
 
                 int nLineIndex = 2;
-                
+
                 if (doc != null)
                 {
                     BuildMergedExcelPageTop(option,
@@ -4691,7 +4696,7 @@ nLineIndex++,
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-            END1:
+        END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -4771,10 +4776,10 @@ nLineIndex++,
 
 
 
-                        // 没有recpath记录路径。因为recpath已经归入“合并注释”栏
-                        // 没有state状态。因为state将被全部重设为“已订购”
-                        // 没有source经费来源。因为已经归入“合并注释”栏
-                        // 没有batchNo批次号，因为原始事项已经合并，多个原始事项不一定具有相同的批次号
+                    // 没有recpath记录路径。因为recpath已经归入“合并注释”栏
+                    // 没有state状态。因为state将被全部重设为“已订购”
+                    // 没有source经费来源。因为已经归入“合并注释”栏
+                    // 没有batchNo批次号，因为原始事项已经合并，多个原始事项不一定具有相同的批次号
 
                     case "range":
                     case "时间范围":
@@ -5200,7 +5205,7 @@ nLineIndex++,
                     }
                 }
 
-                total += nCopy*nSubCopy;
+                total += nCopy * nSubCopy;
             }
 
             return total;
@@ -5461,14 +5466,14 @@ nLineIndex++,
             if (nRet == -1)
                 return strError;
 
-                string strResult = "";
-                for (int i = 0; i < results.Count; i++)
-                {
-                    string strPrice = results[i];
-                    if (String.IsNullOrEmpty(strResult) == false)
-                        strResult += "+";
-                    strResult += strPrice;
-                }
+            string strResult = "";
+            for (int i = 0; i < results.Count; i++)
+            {
+                string strPrice = results[i];
+                if (String.IsNullOrEmpty(strResult) == false)
+                    strResult += "+";
+                strResult += strPrice;
+            }
 
             return strResult;
         }
@@ -5988,7 +5993,7 @@ nLineIndex++,
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_origin, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_origin, new Point(e.X, e.Y));
         }
 
         // 打开种册窗，观察订购记录
@@ -6217,7 +6222,8 @@ MessageBoxDefaultButton.Button2);
 
         }
 
-        /*public*/ int RefreshOneItem(ListViewItem item,
+        /*public*/
+        int RefreshOneItem(ListViewItem item,
             out string strError)
         {
             strError = "";
@@ -6348,7 +6354,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                throw new Exception("渠道地址XML字符串 '"+strXml1+"' 格式不正确: " + ex.Message);
+                throw new Exception("渠道地址XML字符串 '" + strXml1 + "' 格式不正确: " + ex.Message);
             }
 
             try
@@ -6820,7 +6826,7 @@ ORIGIN_COLUMN_COPY);
                     strDistributes);
 
                 string strAcceptSeries = "";
-                
+
                 if (string.IsNullOrEmpty(strDistributes) == false)
                 {
                     LocationCollection locations = new LocationCollection();
@@ -6828,7 +6834,7 @@ ORIGIN_COLUMN_COPY);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "馆藏分配字符串 '"+strDistributes+"' 格式错误: " + strError;
+                        strError = "馆藏分配字符串 '" + strDistributes + "' 格式错误: " + strError;
                         return -1;
                     }
 
@@ -7033,7 +7039,7 @@ ORIGIN_COLUMN_COPY);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_merged, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_merged, new Point(e.X, e.Y));
         }
 
         // 移除 合并后列表中选定的事项
@@ -7609,7 +7615,7 @@ MessageBoxDefaultButton.Button2);
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-            END1:
+        END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -7909,7 +7915,7 @@ MessageBoxDefaultButton.Button2);
 
                 string strCopy = "";
                 strCopy = item.SubItems[ORIGIN_COLUMN_COPY].Text;
-                    // TODO: 注意检查是否有[]符号?
+                // TODO: 注意检查是否有[]符号?
 
                 string strLeftCopy = OrderDesignControl.GetCopyFromCopyString(strCopy);
                 int nLeftCopy = 0;
@@ -8076,7 +8082,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (item.ImageIndex == TYPE_ERROR)
                     {
-                        strError = "原始数据列表中，第 " + (i+1).ToString() + " 个事项为错误状态。需要先排除问题才能进行保存。";
+                        strError = "原始数据列表中，第 " + (i + 1).ToString() + " 个事项为错误状态。需要先排除问题才能进行保存。";
                         return -1;
                     }
 
@@ -8147,7 +8153,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     DomUtil.SetElementText(dom.DocumentElement,
-                        "orderID", 
+                        "orderID",
                         ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERID));
 
                     EntityInfo info = new EntityInfo();
@@ -8361,7 +8367,7 @@ MessageBoxDefaultButton.Button2);
                     OutputOrder objOutputOrder = null;
                     Assembly AssemblyMain = null;
 
-                            // 准备脚本环境
+                    // 准备脚本环境
                     nRet = PrepareScript(format.ProjectName,
                         format.ProjectLocate,
                         out objOutputOrder,
@@ -8443,7 +8449,7 @@ MessageBoxDefaultButton.Button2);
 
             // 打开订单输出目录文件夹
             DialogResult result = MessageBox.Show(this,
-                "订单输出完成。共输出订单 "+nRet.ToString()+" 个。\r\n\r\n是否立即打开订单输出目录文件夹? ",
+                "订单输出完成。共输出订单 " + nRet.ToString() + " 个。\r\n\r\n是否立即打开订单输出目录文件夹? ",
                 "PrintOrderForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -8529,12 +8535,12 @@ MessageBoxDefaultButton.Button2);
                 CreateDefaultMainCsFile(e.FileName);
                 e.Created = true;
             }
-                /*
-            else if (String.Compare(strPureFileName, "marcfilter.fltx", true) == 0)
-            {
-                CreateDefaultMarcFilterFile(e.FileName);
-                e.Created = true;
-            }*/
+            /*
+        else if (String.Compare(strPureFileName, "marcfilter.fltx", true) == 0)
+        {
+            CreateDefaultMarcFilterFile(e.FileName);
+            e.Created = true;
+        }*/
             else
             {
                 e.Created = false;
@@ -8591,14 +8597,14 @@ MessageBoxDefaultButton.Button2);
 
                 // 警告要删除
                 DialogResult result = MessageBox.Show(this,
-                    "输出订单前，确实要删除输出目录 "+strDir+" 内已有的全部 "+fis.Length.ToString()+" 个文件?",
+                    "输出订单前，确实要删除输出目录 " + strDir + " 内已有的全部 " + fis.Length.ToString() + " 个文件?",
                     "PrintOrderForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.No)
                     return;
-  
+
                 for (int i = 0; i < fis.Length; i++)
                 {
                     try
@@ -8716,8 +8722,8 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             XmlTextWriter writer = new XmlTextWriter(strOutputFilename, Encoding.UTF8);
-			writer.Formatting = Formatting.Indented;
-			writer.Indentation = 4;
+            writer.Formatting = Formatting.Indented;
+            writer.Indentation = 4;
 
             writer.WriteStartDocument();
             writer.WriteStartElement("order");
@@ -9113,7 +9119,7 @@ MessageBoxDefaultButton.Button2);
 
             for (int AssemblyVersion = 0; ; AssemblyVersion++)
             {
-                strMainCsDllName = strProjectLocate + "\\~output_order_main_" + this.GetHashCode().ToString() + "_"+ Convert.ToString(AssemblyVersion++) + ".dll";    // ++
+                strMainCsDllName = strProjectLocate + "\\~output_order_main_" + this.GetHashCode().ToString() + "_" + Convert.ToString(AssemblyVersion++) + ".dll";    // ++
                 bool bFound = false;
                 for (int i = 0; i < UsedAssemblyFilenames.Count; i++)
                 {
@@ -9353,7 +9359,7 @@ MessageBoxDefaultButton.Button2);
                         }
                         catch (Exception ex)
                         {
-                            strError = "行 "+(i+1).ToString()+" 日期字符串 '" + strOrderTime + "' 格式错误：" + ex.Message;
+                            strError = "行 " + (i + 1).ToString() + " 日期字符串 '" + strOrderTime + "' 格式错误：" + ex.Message;
                             goto ERROR1;
                         }
 
@@ -9492,7 +9498,7 @@ MessageBoxDefaultButton.Button2);
             infos = new List<OneLine>();
             int nRet = 0;
 
-            foreach( ListViewItem item in items)
+            foreach (ListViewItem item in items)
             {
                 string strDistributes = item.SubItems[MERGED_COLUMN_DISTRIBUTE].Text;
                 if (string.IsNullOrEmpty(strDistributes) == true)
@@ -9527,7 +9533,7 @@ MessageBoxDefaultButton.Button2);
             {
                 if (line.Books == null)
                     continue;
-                foreach(OneBook book in line.Books)
+                foreach (OneBook book in line.Books)
                 {
                     if (string.IsNullOrEmpty(book.RefID) == true)
                         continue;
@@ -9626,9 +9632,9 @@ MessageBoxDefaultButton.Button2);
                     DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strTime);
                     result_table[key] = time;
                 }
-                catch(Exception /*ex*/)
+                catch (Exception /*ex*/)
                 {
-                    strError = "refid为 '"+key+"' 的记录中RFC1123字符串 '"+strTime+"' 格式不正确";
+                    strError = "refid为 '" + key + "' 的记录中RFC1123字符串 '" + strTime + "' 格式不正确";
                     return -1;
                 }
 
@@ -9670,7 +9676,7 @@ MessageBoxDefaultButton.Button2);
             List<string> recpaths = StringUtil.SplitList(strResult);
             Debug.Assert(refids.Count == recpaths.Count, "");
 
-            List<OneItemRecord> records = new List<OneItemRecord>(); 
+            List<OneItemRecord> records = new List<OneItemRecord>();
             List<string> notfound_refids = new List<string>();
             List<string> errors = new List<string>();
             {
@@ -10043,7 +10049,7 @@ false);
                     if (string.IsNullOrEmpty(slice.Style) == false)
                         strTrClass = " class='" + slice.Style + "' ";
 
-                    table_content.Append("<tr"+strTrClass+">");
+                    table_content.Append("<tr" + strTrClass + ">");
 
                     table_content.Append("<td class='slice'>" + HttpUtility.HtmlEncode(slice.Caption) + "</td>");
 
@@ -10203,7 +10209,7 @@ string strFileName)
             return 0;
         }
 
-#endregion
+        #endregion
 
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)

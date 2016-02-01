@@ -78,6 +78,13 @@ namespace dp2Circulation
         public LibraryChannel Channel = new LibraryChannel();
 #endif
 
+        public override void Dispose()
+        {
+            this.Close();
+
+            base.Dispose();
+        }
+
         int m_nCount = 0;
 
         /// <summary>
@@ -285,9 +292,14 @@ namespace dp2Circulation
              * */
 
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
+#if NO
             ScriptManager.CfgFilePath =
                 Path.Combine(this.MainForm.DataDir, "charging_print_projects.xml");
             ScriptManager.DataDir = this.MainForm.DataDir;
+#endif
+            ScriptManager.CfgFilePath =
+    Path.Combine(Program.MainForm.UserDir, "charging_print_projects.xml");
+            ScriptManager.DataDir = Program.MainForm.UserDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -364,7 +376,11 @@ namespace dp2Circulation
 #endif
 
             if (this.m_webExternalHost != null)
+            {
                 this.m_webExternalHost.Destroy();
+                this.m_webExternalHost.Dispose();
+                this.m_webExternalHost = null;
+            }
 
 #if USE_LOCAL_CHANNEL
             if (this.Channel != null)
@@ -373,7 +389,6 @@ namespace dp2Circulation
                 this.Channel = null;
             }
 #endif
-
         }
 
         private void scriptManager_CreateDefaultContent(object sender,

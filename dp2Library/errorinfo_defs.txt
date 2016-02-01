@@ -24,3 +24,12 @@ ERR004 初始化vdbs失败: (0)
 	defaultthread.cs
 	DefaultThread线程定期重试初始化vdbs时失败。
 	2011/1/29
+
+ERR005 首次初始化 mongodb database 时失败: (0)
+	libraryapplication.cs
+	LibraryApplication.Load()中首次初始化 mongodb 数据库相关设施时失败。这会导致出纳日志等相关功能的故障。此处报错，程序并没有停止Load()函数内的其他初始化，DefaultThread后面会自动重试初始化 mongodb database。
+	2016/1/20
+
+ERR006 初始化 mongodb database 失败: (0)
+	defaultthread.cs
+	DefaultThread线程定期重试初始化 mongodb database 时失败。

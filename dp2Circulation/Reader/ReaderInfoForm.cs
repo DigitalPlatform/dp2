@@ -59,28 +59,6 @@ namespace dp2Circulation
 
         string m_strSetAction = "new";  // new / change 之一
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
-        // byte[] timestamp = null;
-        // string m_strPath = "";
-
-        // bool m_bChanged = false;
-
-        // public byte[] Timestamp = null; // 读者记录的时间戳
-        // public string RecPath = ""; // 读者记录路径
-
-        // public string OldRecord = "";
-
         SelectedTemplateCollection selected_templates = new SelectedTemplateCollection();
 
         /// <summary>
@@ -2075,6 +2053,8 @@ strSavedXml);
 
                         stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
+                        int nRedoCount = 0;
+                    REDO_LOAD_HTML:
                         string[] results = null;
                         lRet = Channel.GetReaderInfo(
                             stop,
@@ -2086,6 +2066,13 @@ strSavedXml);
                             out strError);
                         if (lRet == -1)
                         {
+                            // 以读者身份保存自己的读者记录后，dp2library 为了清除以前缓存的登录信息，强制释放了通道。所以这里需要能重试操作
+                            if (Channel.ErrorCode == ErrorCode.ChannelReleased
+                                && nRedoCount < 10)
+                            {
+                                nRedoCount++;
+                                goto REDO_LOAD_HTML;
+                            }
                             strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
                             // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
                             this.m_webExternalHost.SetTextString(strError);
@@ -2119,7 +2106,6 @@ strSavedXml);
 #endif
                         this.SetReaderHtmlString(strHtml);
                     }
-
                 }
 
                 // 更新指纹高速缓存
@@ -5662,7 +5648,8 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 long lRet = 0;
-                this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
+                this.ChannelDoEvents = true;
+                // this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
                 try
                 {
                     lRet = this.Channel.LoadChargingHistory(
@@ -5680,7 +5667,8 @@ MessageBoxDefaultButton.Button1);
                 }
                 finally
                 {
-                    this.Channel.Idle -= Channel_Idle;
+                    // this.Channel.Idle -= Channel_Idle;
+                    this.ChannelDoEvents = true;
                 }
 
                 FillBorrowHistoryPage(total_results, nPageNo * _itemsPerPage, (int)lRet);
@@ -5781,10 +5769,12 @@ MessageBoxDefaultButton.Button1);
         }
 #endif
 
+#if NO
         void Channel_Idle(object sender, IdleEventArgs e)
         {
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
         }
+#endif
 
         void m_chargingInterface_CallFunc(object sender, EventArgs e)
         {

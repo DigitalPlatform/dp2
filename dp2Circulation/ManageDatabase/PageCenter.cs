@@ -145,8 +145,6 @@ namespace dp2Circulation
                     strError = "针对服务器 " + channel.Url + " 获得书目库信息过程发生错误：" + strError;
                     return -1;
                 }
-
-
             }
             finally
             {
@@ -337,7 +335,7 @@ namespace dp2Circulation
 
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

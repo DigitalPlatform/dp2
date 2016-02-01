@@ -10,7 +10,6 @@ using System.IO;
 using System.Xml;
 using System.ServiceModel;
 
-
 using System.ServiceModel.Security;
 using System.ServiceModel.Channels;
 using System.Security.Cryptography.X509Certificates;
@@ -73,9 +72,8 @@ namespace DigitalPlatform.rms.Client
 
     }
 
-
     // 一个通讯通道
-    public class RmsChannel
+    public class RmsChannel : IDisposable
     {
         /// <summary>
         /// RecieveTimeout
@@ -130,8 +128,6 @@ namespace DigitalPlatform.rms.Client
                 }
             }
         }
-        
-
 
         public const int MAX_RECEIVE_MESSAGE_SIZE = 2 * 1024 * 1024;
         public RmsChannelCollection Container = null;
@@ -142,7 +138,6 @@ namespace DigitalPlatform.rms.Client
         bool m_bStoped = false; // 检索是否被中断过一次
         int m_nInSearching = 0;
         int m_nRedoCount = 0;   // MessageSecurityException以后重试的次数
-        // public AutoResetEvent eventFinish = new AutoResetEvent(false);
 
         public ChannelErrorCode ErrorCode = ChannelErrorCode.None;
 
@@ -157,6 +152,16 @@ namespace DigitalPlatform.rms.Client
 
         // [NonSerialized]
         public CookieContainer Cookies = new System.Net.CookieContainer();
+
+        public void Dispose()
+        {
+            this.Close();
+
+            Idle = null;
+
+            if (this.m_ws != null)
+                this.m_ws.Close();
+        }
 
         static void SetTimeout(System.ServiceModel.Channels.Binding binding)
         {
@@ -647,12 +652,14 @@ namespace DigitalPlatform.rms.Client
 
         void DoIdle()
         {
+#if NO
             bool bDoEvents = true;
             // 2012/3/18
             // 2012/11/28
             if (this.Container != null
                 && this.Container.GUI == false)
                 bDoEvents = false;
+#endif
 
             // System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
 
@@ -660,9 +667,10 @@ namespace DigitalPlatform.rms.Client
             {
                 IdleEventArgs e = new IdleEventArgs();
                 this.Idle(this, e);
-                bDoEvents = e.bDoEvents;
+                // bDoEvents = e.bDoEvents;
             }
 
+#if NO
             if (bDoEvents == true)
             {
                 try
@@ -673,6 +681,7 @@ namespace DigitalPlatform.rms.Client
                 {
                 }
             }
+#endif
 
             // System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
         }

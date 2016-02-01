@@ -38,6 +38,7 @@ namespace System.Drawing {
             m_path = new GraphicsPath(new PointF[] { point1, point2, point3, point4 }, pointTypes);
         }
 
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         /// <summary>
         ///   <c>Finalize</c> method.
         /// </summary>

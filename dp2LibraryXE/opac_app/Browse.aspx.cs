@@ -9,6 +9,7 @@ using System.Xml;
 using System.Globalization;
 using System.IO;
 using System.Diagnostics;
+using System.Web.UI.HtmlControls;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -16,8 +17,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
-using System.Web.UI.HtmlControls;
+// using DigitalPlatform.CirculationClient;
 
 public partial class Browse2 : MyWebPage
 {
@@ -457,7 +457,7 @@ ref sessioninfo) == false)
         bool bRedo = false;
 
     REDO:
-        // 如果文件已经存在，就不要从rmsws获取了
+        // 如果文件已经存在，就不要从 dp2library 获取了
         try
         {
             app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
@@ -832,7 +832,7 @@ ref sessioninfo) == false)
         string strResultsetFilename = strCacheDir + "/" + strPrefix;
 
 
-        // 如果RSS文件已经存在，就不要从rmsws获取了
+        // 如果RSS文件已经存在，就不要从 dp2library 获取了
         if (File.Exists(strResultsetFilename + ".rss") == true)
         {
             // return:
@@ -870,12 +870,6 @@ ref sessioninfo) == false)
         this.Response.StatusDescription = strError;
         this.Response.Write(strError);
         return 0;
-    }
-
-    bool MyFlushOutput()
-    {
-        Response.Flush();
-        return Response.IsClientConnected;
     }
 
     // return:

@@ -13,6 +13,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 
 using DigitalPlatform.OPAC.Server;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -159,7 +160,7 @@ namespace DigitalPlatform.OPAC.Web
                 result.Append(ch);
             }
 
-            result.Append( "<span class='fieldend'>" + FieldEndChar + "</span>");
+            result.Append("<span class='fieldend'>" + FieldEndChar + "</span>");
 
             return result.ToString();
         }
@@ -181,28 +182,36 @@ namespace DigitalPlatform.OPAC.Web
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
             string strBiblioXml = "";
-
-            lRet = sessioninfo.Channel.GetBiblioInfo(
-                null,
-                this.RecPath,
-                "",
-                "xml",
-                out strBiblioXml,
-                out strError);
-            /*
-            string strMetaData = "";
-            byte[] timestamp = null;
-            lRet = channel.GetRes(this.RecPath,
-                out strBiblioXml,
-                out strMetaData,
-                out timestamp,
-                out strOutputPath,
-                out strError);
-             * */
-            if (lRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                strError = "获得书目记录 '" + this.RecPath + "' 时出错: " + strError;
-                goto ERROR1;
+                lRet = // sessioninfo.Channel.
+                    channel.GetBiblioInfo(
+                    null,
+                    this.RecPath,
+                    "",
+                    "xml",
+                    out strBiblioXml,
+                    out strError);
+                /*
+                string strMetaData = "";
+                byte[] timestamp = null;
+                lRet = channel.GetRes(this.RecPath,
+                    out strBiblioXml,
+                    out strMetaData,
+                    out timestamp,
+                    out strOutputPath,
+                    out strError);
+                 * */
+                if (lRet == -1)
+                {
+                    strError = "获得书目记录 '" + this.RecPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
 
             string strOutMarcSyntax = "";
@@ -222,9 +231,6 @@ namespace DigitalPlatform.OPAC.Web
                 goto ERROR1;
 
             // string strBiblioDbName = ResPath.GetDbName(this.RecPath);
-
-
-
             string strPrefix = "";
             if (this.Wrapper == true)
                 strPrefix = this.GetPrefixString("MARC", "content_wrapper")
@@ -240,12 +246,9 @@ namespace DigitalPlatform.OPAC.Web
             literal.Text = strPrefix + GetHtmlOfMarc(strMarc, this.SubfieldReturn) + strPostfix;
 
             base.Render(output);
-
             return;
-
         ERROR1:
             output.Write(strError);
-
         }
 
         public string GetPrefixString(string strTitle,

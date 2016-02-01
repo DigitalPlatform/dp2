@@ -41,7 +41,7 @@ namespace DigitalPlatform.CirculationClient
         public DigitalPlatform.StopManager stopManager = null;
 
         /// <summary>
-        /// 通讯通道
+        /// 通讯通道。引用外面的对象
         /// </summary>
         LibraryChannel channel = null;
 

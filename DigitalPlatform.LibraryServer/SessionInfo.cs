@@ -1248,6 +1248,7 @@ SetStartEventArgs e);
             return true;
         }
 
+        // 读者记录发生修改后，要把和该读者登录的 Session 给清除，这样就避免后面用到旧的读者权限
         public int CloseSessionByReaderBarcode(string strReaderBarcode)
         {
             List<string> remove_keys = new List<string>();
@@ -1316,7 +1317,6 @@ SetStartEventArgs e);
                 info.CloseSession();
             }
             return nCount;
-
         }
 
         public void DeleteSession(SessionInfo sessioninfo,
@@ -1591,6 +1591,7 @@ SetStartEventArgs e);
                     info.Via = session.Via;
                     info.Count = 1;
                     info.CallCount = session.CallCount;
+                    info.Lang = session.Lang;
                     if (session.Account != null)
                         info.Location = session.Account.Location;
 
@@ -1611,6 +1612,7 @@ SetStartEventArgs e);
             List<string> locations = new List<string>();
             List<string> librarycodes = new List<string>();
             List<string> vias = new List<string>();
+            List<string> langs = new List<string>();
             ChannelInfo current = null;
             foreach (ChannelInfo info in infos)
             {
@@ -1632,6 +1634,9 @@ SetStartEventArgs e);
                     StringUtil.RemoveDupNoSort(ref vias);
                     result.Via = StringUtil.MakePathList(vias);
 
+                    StringUtil.RemoveDupNoSort(ref langs);
+                    result.Lang = StringUtil.MakePathList(langs);
+
                     results.Add(result);
 
                     current = info;
@@ -1640,12 +1645,14 @@ SetStartEventArgs e);
                     locations.Clear();
                     librarycodes.Clear();
                     vias.Clear();
+                    langs.Clear();
                 }
 
                 usernames.Add(info.UserName);
                 locations.Add(info.Location);
                 librarycodes.Add(info.LibraryCode);
                 vias.Add(info.Via);
+                langs.Add(info.Lang);
 
                 if (current == null)
                     current = info;
@@ -1668,6 +1675,9 @@ SetStartEventArgs e);
 
                 StringUtil.RemoveDupNoSort(ref vias);
                 result.Via = StringUtil.MakePathList(vias);
+
+                StringUtil.RemoveDupNoSort(ref langs);
+                result.Lang = StringUtil.MakePathList(langs);
 
                 results.Add(result);
             }
@@ -1782,6 +1792,7 @@ SetStartEventArgs e);
                         info.Via = session.Via;
                         info.Count = 1;
                         info.CallCount = session.CallCount;
+                        info.Lang = session.Lang;
                         if (session.Account != null)
                             info.Location = session.Account.Location;
 
@@ -1851,5 +1862,8 @@ SetStartEventArgs e);
 
         [DataMember]
         public long CallCount = 0;    // 通道迄今被调用的次数
+
+        [DataMember]
+        public string Lang = "";  // 语言代码
     }
 }

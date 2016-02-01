@@ -310,7 +310,7 @@ namespace DigitalPlatform.Script
                 catch (System.Xml.XmlException ex)
                 {
                     MessageBox.Show(this,
-                        "装载" + scriptManager.CfgFilePath + "文件失败，原因:"
+                        "装载 " + scriptManager.CfgFilePath + " 文件失败，原因:"
                         + ex.Message);
                     return;
                 }
@@ -871,7 +871,6 @@ namespace DigitalPlatform.Script
             return;
         }
 
-
         private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
         {
             // 当前已选择的node
@@ -885,7 +884,6 @@ namespace DigitalPlatform.Script
                 button_export.Enabled = false;
                 return;
             }
-
 
             if (treeView1.SelectedNode.ImageIndex == 0) // 目录
             {
@@ -926,15 +924,14 @@ namespace DigitalPlatform.Script
 
         private void button_OK_Click(object sender, System.EventArgs e)
         {
-
-            this.Close();
             this.DialogResult = DialogResult.OK;
+            this.Close();
         }
 
         private void button_Cancel_Click(object sender, System.EventArgs e)
         {
-            this.Close();
             this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void treeView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -984,7 +981,6 @@ namespace DigitalPlatform.Script
             menuItem.Click += new System.EventHandler(this.button_newProject_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-
             {
                 TreeNode parent = null;
 
@@ -1022,8 +1018,6 @@ namespace DigitalPlatform.Script
             else
                 menuItem.Enabled = true;
             contextMenu.MenuItems.Add(menuItem);
-
-
 
             // 
             menuItem = new MenuItem("下移(&D)");
@@ -1196,7 +1190,6 @@ namespace DigitalPlatform.Script
                 if (nRet == -1)
                     goto ERROR1;
             }
-
 
             this.EnableControls(false);
             try
@@ -1790,8 +1783,6 @@ namespace DigitalPlatform.Script
                 MessageBox.Show(this, "source project " + strSourceProjectName + " not found error...");
                 return;
             }
-
-
 
             // 询问project*.xml文件全路径
             SaveFileDialog projectDefFileDlg = new SaveFileDialog();

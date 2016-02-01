@@ -211,9 +211,7 @@ namespace DigitalPlatform.rms
                 false); // 不要抛出异常，因为可能还有%binddir%宏现在还无法替换
                 refs[i] = strNew;
             }
-
         } 
-
 
         // 创建Assembly
         // parameters:

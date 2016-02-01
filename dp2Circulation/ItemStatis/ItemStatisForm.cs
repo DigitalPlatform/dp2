@@ -148,8 +148,9 @@ namespace dp2Circulation
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
-            ScriptManager.CfgFilePath =
-    this.MainForm.DataDir + "\\" + this.DbType + "_statis_projects.xml";
+            ScriptManager.CfgFilePath = Path.Combine(
+    this.MainForm.UserDir,
+    this.DbType + "_statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
@@ -249,33 +250,33 @@ namespace dp2Circulation
 
         void SetWindowTitle()
         {
-                this.Text = this.DbTypeCaption + "统计窗";
-                // this.label_entityDbName.Text = this.DbTypeCaption + "库(&D)";
+            this.Text = this.DbTypeCaption + "统计窗";
+            // this.label_entityDbName.Text = this.DbTypeCaption + "库(&D)";
 
-                if (this.DbType == "item")
+            if (this.DbType == "item")
+            {
+                this.radioButton_inputStyle_barcodeFile.Visible = true;
+                this.textBox_inputBarcodeFilename.Visible = true;
+                this.button_findInputBarcodeFilename.Visible = true;
+
+                if (this.tabControl_main.TabPages.IndexOf(this.tabPage_filter) == -1)
                 {
-                    this.radioButton_inputStyle_barcodeFile.Visible = true;
-                    this.textBox_inputBarcodeFilename.Visible = true;
-                    this.button_findInputBarcodeFilename.Visible = true;
-
-                    if (this.tabControl_main.TabPages.IndexOf(this.tabPage_filter) == -1)
-                    {
-                        this.tabControl_main.TabPages.Insert(1, this.tabPage_filter);
-                    }
-
-                    this.label_inputItemDbName.Text = "实体库名(&I)";
+                    this.tabControl_main.TabPages.Insert(1, this.tabPage_filter);
                 }
-                else
-                {
-                    this.radioButton_inputStyle_barcodeFile.Visible = false;
-                    this.textBox_inputBarcodeFilename.Visible = false;
-                    this.button_findInputBarcodeFilename.Visible = false;
 
-                    this.tabControl_main.TabPages.Remove(this.tabPage_filter);
-                    this.AddFreeControl(this.tabPage_filter);   // 2015/11/7
+                this.label_inputItemDbName.Text = "实体库名(&I)";
+            }
+            else
+            {
+                this.radioButton_inputStyle_barcodeFile.Visible = false;
+                this.textBox_inputBarcodeFilename.Visible = false;
+                this.button_findInputBarcodeFilename.Visible = false;
 
-                    this.label_inputItemDbName.Text = this.DbTypeCaption + "库名(&I)";
-                }
+                this.tabControl_main.TabPages.Remove(this.tabPage_filter);
+                this.AddFreeControl(this.tabPage_filter);   // 2015/11/7
+
+                this.label_inputItemDbName.Text = this.DbTypeCaption + "库名(&I)";
+            }
         }
 
         /// <summary>
@@ -1093,7 +1094,7 @@ namespace dp2Circulation
 
                         OutputDebugInfo("处理行" + (i + 1).ToString() + " '" + strRecPathOrBarcode + "'");
 
-                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个"+this.DbTypeCaption+"记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
+                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个" + this.DbTypeCaption + "记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得册记录
@@ -1180,10 +1181,10 @@ namespace dp2Circulation
                                 out strBiblio,
                                 out strBiblioRecPath,
                                 out strError);
-                        }                        
+                        }
                         if (lRet == -1)
                         {
-                            strError = "获得"+this.DbTypeCaption+"记录 " + strAccessPoint + " 时发生错误: " + strError;
+                            strError = "获得" + this.DbTypeCaption + "记录 " + strAccessPoint + " 时发生错误: " + strError;
                             GetErrorInfoForm().WriteHtml(strError + "\r\n");
                             continue;
                         }
@@ -1232,7 +1233,7 @@ namespace dp2Circulation
                                     "location");
                                 if (location_matchlist.Match(strLocation) == false)
                                 {
-                                    OutputDebugInfo("馆藏地 '"+strLocation+"' 被筛选去除");
+                                    OutputDebugInfo("馆藏地 '" + strLocation + "' 被筛选去除");
                                     continue;
                                 }
                             }
@@ -1588,7 +1589,7 @@ namespace dp2Circulation
                 {
                     if (this.comboBox_inputItemDbName.Text == "")
                     {
-                        strError = "尚未指定"+this.DbTypeCaption+"库名";
+                        strError = "尚未指定" + this.DbTypeCaption + "库名";
                         goto ERROR1;
                     }
                 }

@@ -117,7 +117,7 @@ namespace dp2Circulation
              * */
 
             ScriptManager.CfgFilePath =
-                Path.Combine(this.MainForm.DataDir, "biblio_statis_projects.xml");
+                Path.Combine(this.MainForm.UserDir, "biblio_statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;

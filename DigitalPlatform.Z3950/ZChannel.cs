@@ -30,6 +30,7 @@ namespace DigitalPlatform.Z3950
         public string strErrorString = "";
         public int nErrorCode = 0;
 
+        // TODO: 要实现 IDisposeable 接口，释放 ...
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 

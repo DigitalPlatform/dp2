@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NO
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -205,3 +207,5 @@ namespace DigitalPlatform.OPAC.Web
         }
     }
 }
+
+#endif

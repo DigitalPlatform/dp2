@@ -142,52 +142,36 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
-            assembly = null;
-            int nRet = 0;
 
-#if NO
-            // 看看是否已经存在
-            this.m_lockXml2HtmlAssemblyTable.AcquireReaderLock(m_nLockTimeout);
             try
             {
-                assembly = (Assembly)this.Xml2HtmlAssemblyTable[strCodeFileName.ToLower()];
-            }
-            finally
-            {
-                this.m_lockXml2HtmlAssemblyTable.ReleaseReaderLock();
-            }
-#endif
-            assembly = this.AssemblyCache.FindObject(strCodeFileName);
+                assembly = this.AssemblyCache.GetObject(strCodeFileName,
+                    () =>
+                    {
+                        int nRet = 0;
+                        string strError1 = "";
+                        string strCode = "";    // c#代码
 
-            // 优化
-            if (assembly != null)
-                return 1;
+                        try
+                        {
+                            using (StreamReader sr = new StreamReader(strCodeFileName, true))
+                            {
+                                strCode = sr.ReadToEnd();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError1 = ExceptionUtil.GetAutoText(ex);
+                            throw new Exception(strError1);
+                        }
 
-            string strCode = "";    // c#代码
-
-            // 装入code?
-            try
-            {
-                using (StreamReader sr = new StreamReader(strCodeFileName, true))
-                {
-                    strCode = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = ExceptionUtil.GetAutoText(ex);
-                return -1;
-            }
-
-            string[] saAddRef1 = {
-
+                        string[] saAddRef1 = {
                                     // 2011/9/3 增加
                                     "system.dll",
                                     "system.drawing.dll",
                                     "system.web.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
-
 										 strBinDir + "\\digitalplatform.marcdom.dll",
 										 strBinDir + "\\digitalplatform.marckernel.dll",
 										 strBinDir + "\\digitalplatform.rms.client.dll",
@@ -199,76 +183,61 @@ namespace DigitalPlatform.LibraryServer
 										 // strBinDir + "\\dp2rms.exe",
 										 };
 
-            string strWarning = "";
-            string strLibPaths = "";
+                        string strWarning = "";
+                        // string strLibPaths = "";
 
-            string[] saRef2 = null;
+                        string[] saRef2 = null;
 
-            if (String.IsNullOrEmpty(strRefFileName) == false)
+                        if (String.IsNullOrEmpty(strRefFileName) == false)
+                        {
+                            // 从references.xml文件中得到refs字符串数组
+                            // return:
+                            //		-1	error
+                            //		0	not found file
+                            //		1	found file
+                            nRet = ScriptManager.GetRefs(strRefFileName,
+                                out saRef2,
+                                out strError1);
+                            if (nRet == -1)
+                            {
+                                strError1 = "ref文件 '" + strRefFileName + "' 出错: " + strError1;
+                                throw new Exception(strError1);
+                            }
+                        }
+
+                        string[] saRef = StringUtil.Append(saRef2, saAddRef1);
+                        Assembly assembly1 = null;
+
+                        // 创建Script的Assembly
+                        // 本函数内对saRef不再进行宏替换
+                        nRet = ScriptManager.CreateAssembly_1(strCode,
+                            saRef,
+                            "", // strLibPaths,
+                            out assembly1,
+                            out strError1,
+                            out strWarning);
+                        if (nRet == -2)
+                            throw new Exception(strError1);
+                        if (nRet == -1)
+                        {
+                            strError1 = "文件 '" + strCodeFileName + "' 编译出错: " + strError1;
+                            if (string.IsNullOrEmpty(strWarning) == true)
+                                throw new Exception(strError1);
+                        }
+
+                        return assembly1;
+                    });
+            }
+            catch(Exception ex)
             {
-                // 从references.xml文件中得到refs字符串数组
-                // return:
-                //		-1	error
-                //		0	not found file
-                //		1	found file
-                nRet = ScriptManager.GetRefs(strRefFileName,
-                    out saRef2,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "ref文件 '" + strRefFileName + "' 出错: " + strError;
-                    return -1;
-                }
+                strError = ex.Message;
+                assembly = null;
+                return -1;
             }
 
-            string[] saRef = null;
-            if (saRef2 != null)
-            {
-                saRef = new string[saRef2.Length + saAddRef1.Length];
-                Array.Copy(saRef2, saRef, saRef2.Length);
-                Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
-            }
-            else
-                saRef = saAddRef1;
-
-            // 创建Script的Assembly
-            // 本函数内对saRef不再进行宏替换
-            nRet = ScriptManager.CreateAssembly_1(strCode,
-                saRef,
-                strLibPaths,
-                out assembly,
-                out strError,
-                out strWarning);
-
-            if (nRet == -2)
-                goto ERROR1;
-            if (nRet == -1)
-            {
-                strError = "文件 '" + strCodeFileName + "' 编译出错: " + strError;
-                if (strWarning == "")
-                {
-                    goto ERROR1;
-                }
-                // MessageBox.Show(this, strWarning);
-
-            }
-
-#if NO
-            // 加入hashtable
-            this.m_lockXml2HtmlAssemblyTable.AcquireWriterLock(m_nLockTimeout);
-            try
-            {
-                this.Xml2HtmlAssemblyTable[strCodeFileName.ToLower()] = assembly;
-            }
-            finally
-            {
-                this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
-            }
-#endif
-            this.AssemblyCache.SetObject(strCodeFileName, assembly);
+            if (assembly != null)
+                return 1;
             return 0;
-        ERROR1:
-            return -1;
         }
 
         // 从cs文件创建Assembly并new好ItemConverter派生对象
@@ -452,7 +421,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             obj.App = this;
 
-
             // 调用关键函数Item
             try
             {
@@ -478,33 +446,22 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-
-
         public int PrepareMarcFilter(
-    // FilterHost host,
-    string strFilterFileName,
-    out LoanFilterDocument filter,
-    out string strError)
+            string strFilterFileName,
+            out LoanFilterDocument filter,
+            out string strError)
         {
             strError = "";
 
             // 看看是否有现成可用的对象
             filter = (LoanFilterDocument)this.Filters.GetFilter(strFilterFileName);
-
             if (filter != null)
-            {
-                // filter.FilterHost = host;
                 return 1;
-            }
 
             // 新创建
-            // string strFilterFileContent = "";
-
             filter = new LoanFilterDocument();
 
-            // filter.FilterHost = host;
             filter.strOtherDef = "FilterHost Host = null;";
-
             filter.strPreInitial = " LoanFilterDocument doc = (LoanFilterDocument)this.Document;\r\n";
             filter.strPreInitial += " Host = ("
                 + "FilterHost" + ")doc.FilterHost;\r\n";
@@ -519,74 +476,76 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            Assembly assembly = null;
-            assembly = this.AssemblyCache.FindObject(strFilterFileName);
-            if (assembly != null)
-            {
-                filter.Assembly = assembly;
-                return 0;
-            }
-
             string strCode = "";    // c#代码
-
             int nRet = filter.BuildScriptFile(out strCode,
                 out strError);
             if (nRet == -1)
-                goto ERROR1;
+                return -1;
 
-            string[] saAddRef1 = {
-                                     
+            try
+            {
+                string[] saRef2 = filter.GetRefs();
+
+                filter.Assembly = this.AssemblyCache.GetObject(strFilterFileName,
+                    () =>
+                    {
+                        string strError1 = "";
+                        string[] saAddRef1 = {
                                     // 2011/9/3 增加
                                     "system.dll",
                                     "system.drawing.dll",
                                     "system.web.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
+									this.BinDir + "\\digitalplatform.marcdom.dll",
+									this.BinDir + "\\digitalplatform.marckernel.dll",
+									this.BinDir + "\\digitalplatform.libraryserver.dll",
+									this.BinDir + "\\digitalplatform.dll",
+									this.BinDir + "\\digitalplatform.Text.dll",
+									this.BinDir + "\\digitalplatform.IO.dll",
+									this.BinDir + "\\digitalplatform.Xml.dll",
+									this.BinDir + "\\digitalplatform.script.dll",
+									this.BinDir + "\\digitalplatform.marcquery.dll",
+									};
 
-										 this.BinDir + "\\digitalplatform.marcdom.dll",
-										 this.BinDir + "\\digitalplatform.marckernel.dll",
-										 this.BinDir + "\\digitalplatform.libraryserver.dll",
-										 this.BinDir + "\\digitalplatform.dll",
-										 this.BinDir + "\\digitalplatform.Text.dll",
-										 this.BinDir + "\\digitalplatform.IO.dll",
-										 this.BinDir + "\\digitalplatform.Xml.dll",
-										 this.BinDir + "\\digitalplatform.script.dll",
-										 this.BinDir + "\\digitalplatform.marcquery.dll",
-										 /*strMainCsDllName*/ };
+                        string strWarning = "";
+                        // string strLibPaths = "";
 
-            string strWarning = "";
-            string strLibPaths = "";
+                        string[] saRef = StringUtil.Append(saRef2, saAddRef1);
 
-            string[] saRef2 = filter.GetRefs();
+#if NO
+                    string[] saRef = new string[saRef2.Length + saAddRef1.Length];
+                    Array.Copy(saRef2, saRef, saRef2.Length);
+                    Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
+#endif
 
-            string[] saRef = new string[saRef2.Length + saAddRef1.Length];
-            Array.Copy(saRef2, saRef, saRef2.Length);
-            Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
+                        Assembly assembly1 = null;
+                        // 创建Script的Assembly
+                        // 本函数内对saRef不再进行宏替换
+                        nRet = ScriptManager.CreateAssembly_1(strCode,
+                            saRef,
+                            "", // strLibPaths,
+                            out assembly1,
+                            out strError1,
+                            out strWarning);
+                        if (nRet == -2)
+                            throw new Exception(strError1);
+                        if (nRet == -1)
+                        {
+                            if (strWarning == "")
+                                throw new Exception(strError1);
+                        }
 
-            // 创建Script的Assembly
-            // 本函数内对saRef不再进行宏替换
-            nRet = ScriptManager.CreateAssembly_1(strCode,
-                saRef,
-                strLibPaths,
-                out assembly,
-                out strError,
-                out strWarning);
-            if (nRet == -2)
-                goto ERROR1;
-            if (nRet == -1)
+                        return assembly1;
+                    });
+            }
+            catch(Exception ex)
             {
-                if (strWarning == "")
-                {
-                    goto ERROR1;
-                }
-                // MessageBox.Show(this, strWarning);
+                strError = ex.Message;
+                return -1;
             }
 
-            filter.Assembly = assembly;
-            this.AssemblyCache.SetObject(strFilterFileName, assembly);
             return 0;
-        ERROR1:
-            return -1;
         }
 
         // 将种记录数据从XML格式转换为HTML格式
@@ -678,6 +637,5 @@ namespace DigitalPlatform.LibraryServer
         ERROR1:
             return -1;
         }
-
     }
 }

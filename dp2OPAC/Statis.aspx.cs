@@ -17,7 +17,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -130,7 +130,8 @@ ref sessioninfo) == false)
 
             if (String.IsNullOrEmpty(strDate) == false)
             {
-                int nRet = GetResult(sessioninfo.Channel, strDate, out strError);
+                int nRet = GetResult(//sessioninfo.Channel, 
+                    strDate, out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
@@ -149,29 +150,38 @@ ref sessioninfo) == false)
 
     // TODO: 是否缓冲一下，提高速度?
     bool ExistStatisFile(
-        LibraryChannel channel,
+        // LibraryChannel channel,
         string strDate8)
     {
-        DateExist [] dates = null;
-        string strError = "";
-        long lRet = channel.ExistStatisInfo(
-            strDate8,
-            out dates,
-            out strError);
-        if (lRet == -1)
+        LibraryChannel channel = sessioninfo.GetChannel(true);
+        try
+        {
+            DateExist[] dates = null;
+            string strError = "";
+            long lRet = channel.ExistStatisInfo(
+                strDate8,
+                out dates,
+                out strError);
+            if (lRet == -1)
+                return false;
+            if (dates == null || dates.Length == 0)
+                return false;
+            if (dates[0].Exist == true)
+                return true;
             return false;
-        if (dates == null || dates.Length == 0)
-            return false;
-        if (dates[0].Exist == true)
-            return true;
-        return false;
+        }
+        finally
+        {
+            sessioninfo.ReturnChannel(channel);
+        }
     }
 
     protected void Calendar1_DayRender(object sender,
         DayRenderEventArgs e)
     {
         if (e.Day.Date <= DateTime.Now
-            && ExistStatisFile(sessioninfo.Channel, DateTimeUtil.DateTimeToString8(e.Day.Date)) == true)
+            && ExistStatisFile(//sessioninfo.Channel, 
+            DateTimeUtil.DateTimeToString8(e.Day.Date)) == true)
         {
             // e.SelectUrl = app.LibraryServerUrl + "/statis.aspx?date=" + DateTimeUtil.DateTimeToString8(e.Day.Date);
             e.Day.IsSelectable = true;
@@ -213,15 +223,23 @@ ref sessioninfo) == false)
         {
             RangeStatisInfo info = null;
             string strXml = "";
-
-            long lRet = sessioninfo.Channel.GetStatisInfo(strDate,
-                "",
-                out info,
-                out strXml,
-                out strError);
-            if (lRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                goto ERROR1;
+                long lRet = // sessioninfo.Channel.
+                    channel.GetStatisInfo(strDate,
+                    "",
+                    out info,
+                    out strXml,
+                    out strError);
+                if (lRet == -1)
+                {
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
             }
 
             this.StatisViewControl1.Xml = strXml;
@@ -244,31 +262,14 @@ ref sessioninfo) == false)
     {
         string strError = "";
 
-#if NO
-        RangeStatisInfo info = null;
-        string strXml = "";
-        string strDate = this.TextBox_dateRange.Text;
-        long lRet = sessioninfo.Channel.GetStatisInfo(strDate,
-            out info,
-            out strXml,
-            out strError);
-        if (lRet == -1)
-        {
-            goto ERROR1;
-        }
-
-        this.StatisViewControl1.RangeStatisInfo = info;
-        this.StatisViewControl1.DateRange = strDate;
-        // this.StatisViewControl1.XmlFilename = strOutputFilename;
-        this.StatisViewControl1.Xml = strXml;
-#endif
         // 如果时间范围为空，则等于当前月份
         if (string.IsNullOrEmpty(this.TextBox_dateRange.Text) == true)
         {
             this.TextBox_dateRange.Text = DateTimeUtil.DateTimeToString8(DateTime.Now).Substring(0, 6);
         }
 
-        int nRet = GetResult(sessioninfo.Channel, this.TextBox_dateRange.Text, out strError);
+        int nRet = GetResult(//sessioninfo.Channel, 
+            this.TextBox_dateRange.Text, out strError);
         if (nRet == -1)
             goto ERROR1;
         return;
@@ -279,37 +280,45 @@ ref sessioninfo) == false)
     }
 
     int GetResult(
-        LibraryChannel channel,
+        // LibraryChannel channel,
         string strDate,
         out string strError)
     {
         strError = "";
 
-        RangeStatisInfo info = null;
-        string strXml = "";
-        long lRet = channel.GetStatisInfo(strDate,
-            strDate.Length == 8 ? "" : "list",
-            out info,
-            out strXml,
-            out strError);
-        if (lRet == -1)
-            return -1;
-        this.StatisViewControl1.Xml = strXml;
-        this.StatisViewControl1.DateRange = strDate;
-
-        // 8字符的情况
-        if (strDate.Length == 8)
+        LibraryChannel channel = sessioninfo.GetChannel(true);
+        try
         {
-            DateTime current_date = DateTimeUtil.Long8ToDateTime(strDate);
-            this.Calendar1.SelectedDate = current_date;
-            this.Calendar1.TodaysDate = current_date;
-            this.StatisViewControl1.IsRange = false;
-        }
-        else
-            this.StatisViewControl1.IsRange = true;
+            RangeStatisInfo info = null;
+            string strXml = "";
+            long lRet = channel.GetStatisInfo(strDate,
+                strDate.Length == 8 ? "" : "list",
+                out info,
+                out strXml,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            this.StatisViewControl1.Xml = strXml;
+            this.StatisViewControl1.DateRange = strDate;
 
-        this.StatisViewControl1.RangeStatisInfo = info;
-        return 0;
+            // 8字符的情况
+            if (strDate.Length == 8)
+            {
+                DateTime current_date = DateTimeUtil.Long8ToDateTime(strDate);
+                this.Calendar1.SelectedDate = current_date;
+                this.Calendar1.TodaysDate = current_date;
+                this.StatisViewControl1.IsRange = false;
+            }
+            else
+                this.StatisViewControl1.IsRange = true;
+
+            this.StatisViewControl1.RangeStatisInfo = info;
+            return 0;
+        }
+        finally
+        {
+            sessioninfo.ReturnChannel(channel);
+        }
     }
 
 }

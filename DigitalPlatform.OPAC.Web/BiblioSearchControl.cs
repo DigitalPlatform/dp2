@@ -27,7 +27,16 @@ namespace DigitalPlatform.OPAC.Web
     [ToolboxData("<{0}:BiblioSearchControl runat=server></{0}:BiblioSearchControl>")]
     public class BiblioSearchControl : WebControl, INamingContainer
     {
+        public event SearchEventHandler Search;
+
         ResourceManager m_rm = null;
+
+        public override void Dispose()
+        {
+            this.Search = null;
+
+            base.Dispose();
+        }
 
         protected override HtmlTextWriterTag TagKey
         {
@@ -124,7 +133,6 @@ namespace DigitalPlatform.OPAC.Web
 
         // public int LineCount = 5;
 
-        public event SearchEventHandler Search;
 
         public int LineCount
         {
@@ -652,7 +660,13 @@ namespace DigitalPlatform.OPAC.Web
             PlaceHolder line = (PlaceHolder)FindControl("resultline");
             TableCell cell = (TableCell)line.FindControl("resultinfo");
             if (cell.Controls.Count > 0)
+            {
+                Control temp = cell.Controls[0];
+
                 cell.Controls.RemoveAt(0);
+
+                temp.Dispose(); // 2016/1/23
+            }
             LiteralControl literal = new LiteralControl();
             literal.Text = "<div>" + HttpUtility.HtmlEncode(strText) + "</div>";
             cell.Controls.Add(literal);

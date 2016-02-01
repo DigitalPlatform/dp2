@@ -49,11 +49,12 @@
             this.columnHeader_location = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_callCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_libraryCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_lang = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_sessionID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_channel = new System.Windows.Forms.TabPage();
-            this.tabPage_blackList = new System.Windows.Forms.TabPage();
             this.label_channel_message = new System.Windows.Forms.Label();
+            this.tabPage_blackList = new System.Windows.Forms.TabPage();
             this.toolStrip_channel.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_channel.SuspendLayout();
@@ -176,6 +177,7 @@
             this.columnHeader_location,
             this.columnHeader_callCount,
             this.columnHeader_libraryCode,
+            this.columnHeader_lang,
             this.columnHeader_sessionID});
             this.listView_channel.FullRowSelect = true;
             this.listView_channel.HideSelection = false;
@@ -226,6 +228,10 @@
             this.columnHeader_libraryCode.Text = "图书馆代码";
             this.columnHeader_libraryCode.Width = 96;
             // 
+            // columnHeader_lang
+            // 
+            this.columnHeader_lang.Text = "语言";
+            // 
             // columnHeader_sessionID
             // 
             this.columnHeader_sessionID.Text = "会话 ID";
@@ -255,6 +261,15 @@
             this.tabPage_channel.Text = "通道";
             this.tabPage_channel.UseVisualStyleBackColor = true;
             // 
+            // label_channel_message
+            // 
+            this.label_channel_message.AutoSize = true;
+            this.label_channel_message.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label_channel_message.Location = new System.Drawing.Point(3, 223);
+            this.label_channel_message.Name = "label_channel_message";
+            this.label_channel_message.Size = new System.Drawing.Size(0, 12);
+            this.label_channel_message.TabIndex = 2;
+            // 
             // tabPage_blackList
             // 
             this.tabPage_blackList.Location = new System.Drawing.Point(4, 22);
@@ -264,15 +279,6 @@
             this.tabPage_blackList.TabIndex = 1;
             this.tabPage_blackList.Text = "黑名单";
             this.tabPage_blackList.UseVisualStyleBackColor = true;
-            // 
-            // label_channel_message
-            // 
-            this.label_channel_message.AutoSize = true;
-            this.label_channel_message.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label_channel_message.Location = new System.Drawing.Point(3, 223);
-            this.label_channel_message.Name = "label_channel_message";
-            this.label_channel_message.Size = new System.Drawing.Size(0, 12);
-            this.label_channel_message.TabIndex = 2;
             // 
             // ChannelForm
             // 
@@ -323,5 +329,6 @@
         private System.Windows.Forms.TabPage tabPage_channel;
         private System.Windows.Forms.Label label_channel_message;
         private System.Windows.Forms.TabPage tabPage_blackList;
+        private System.Windows.Forms.ColumnHeader columnHeader_lang;
     }
 }

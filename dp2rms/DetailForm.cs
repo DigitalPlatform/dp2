@@ -26,93 +26,97 @@ using DigitalPlatform.CommonControl;
 
 namespace dp2rms
 {
-	/// <summary>
-	/// Summary description for DetailForm.
-	/// </summary>
-	public class DetailForm : System.Windows.Forms.Form
-	{
-		public Hashtable ParamTable = new Hashtable();
+    /// <summary>
+    /// Summary description for DetailForm.
+    /// </summary>
+    public class DetailForm : System.Windows.Forms.Form
+    {
+        public Hashtable ParamTable = new Hashtable();
 
-		public string MarcSyntax = "";
+        public string MarcSyntax = "";
 
-		public string Lang = "zh";
+        public string Lang = "zh";
 
-		RmsChannel channel = null;	// 临时使用的channel对象
+        RmsChannel channel = null;	// 临时使用的channel对象
 
-		public AutoResetEvent eventClose = new AutoResetEvent(false);
-		public RmsChannelCollection	Channels = new RmsChannelCollection();	// 拥有
-		DigitalPlatform.Stop stop = null;
+        public AutoResetEvent eventClose = new AutoResetEvent(false);
+        public RmsChannelCollection Channels = new RmsChannelCollection();	// 拥有
+        DigitalPlatform.Stop stop = null;
 
-		byte [] TimeStamp = null;	// 当前记录的时间戳
-		string	m_strMetaData = "";	// 当前记录的元数据
+        byte[] TimeStamp = null;	// 当前记录的时间戳
+        string m_strMetaData = "";	// 当前记录的元数据
 
         string strDatabaseOriginPath = ""; // 刚从数据库调入时候的全路径
 
-		// ViewAccessPointForm accessPointWindow = null;
+        // ViewAccessPointForm accessPointWindow = null;
 
-		private System.Windows.Forms.TextBox textBox_recPath;
+        private System.Windows.Forms.TextBox textBox_recPath;
         private System.Windows.Forms.Button button_findRecPath;
-		private System.Windows.Forms.TabControl tabControl_bottom;
-		private System.Windows.Forms.TabPage tabPage_resFiles;
-		private ResFileList listView_resFiles;
+        private System.Windows.Forms.TabControl tabControl_bottom;
+        private System.Windows.Forms.TabPage tabPage_resFiles;
+        private ResFileList listView_resFiles;
 
         public DigitalPlatform.Xml.XmlEditor XmlEditor;
-		private System.Windows.Forms.TabControl tabControl_record;
-		private System.Windows.Forms.TabPage tabPage_xml;
-		private System.Windows.Forms.TabPage tabPage_marc;
-		public MarcEditor MarcEditor;
+        private System.Windows.Forms.TabControl tabControl_record;
+        private System.Windows.Forms.TabPage tabPage_xml;
+        private System.Windows.Forms.TabPage tabPage_marc;
+        public MarcEditor MarcEditor;
 
-		int m_nChangeTextNest = 0;
+        int m_nChangeTextNest = 0;
 
-		ArrayList m_queueTextChanged = new ArrayList();
+        ArrayList m_queueTextChanged = new ArrayList();
 
         MacroUtil m_macroutil = new MacroUtil();   // 宏处理器
 
         SeedManager m_seedmanager = new SeedManager();
 
-		// int m_nTimeStampXml = 0;
-		// int m_nTimeStampMarc = 0;
-		private System.Windows.Forms.Timer timer_crossRefresh;
-		private System.Windows.Forms.TabPage tabPage_xmlText;
+        // int m_nTimeStampXml = 0;
+        // int m_nTimeStampMarc = 0;
+        private System.Windows.Forms.Timer timer_crossRefresh;
+        private System.Windows.Forms.TabPage tabPage_xmlText;
         private System.Windows.Forms.TextBox textBox_xmlPureText;
         private TableLayoutPanel tableLayoutPanel_recpath;
         private SplitContainer splitContainer_main;
-		private System.ComponentModel.IContainer components;
+        private System.ComponentModel.IContainer components;
 
-		public DetailForm()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public DetailForm()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+                this.eventClose.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DetailForm));
             this.textBox_recPath = new System.Windows.Forms.TextBox();
@@ -145,7 +149,7 @@ namespace dp2rms
             // 
             // textBox_recPath
             // 
-            this.textBox_recPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_recPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_recPath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_recPath.ImeMode = System.Windows.Forms.ImeMode.Off;
@@ -175,8 +179,8 @@ namespace dp2rms
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(0, 33);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -348,7 +352,7 @@ namespace dp2rms
             // 
             // tableLayoutPanel_recpath
             // 
-            this.tableLayoutPanel_recpath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tableLayoutPanel_recpath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel_recpath.AutoSize = true;
             this.tableLayoutPanel_recpath.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -395,26 +399,26 @@ namespace dp2rms
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		public MainForm MainForm
-		{
-			get 
-			{
-				return (MainForm)this.MdiParent;
-			}
-		}
+        public MainForm MainForm
+        {
+            get
+            {
+                return (MainForm)this.MdiParent;
+            }
+        }
 
-		private void DetailForm_Load(object sender, System.EventArgs e)
-		{
+        private void DetailForm_Load(object sender, System.EventArgs e)
+        {
             this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
 
-			// 设置窗口尺寸状态
-			if (MainForm.AppInfo != null) 
-			{
-				MainForm.AppInfo.LoadMdiChildFormStates(this,
+            // 设置窗口尺寸状态
+            if (MainForm.AppInfo != null)
+            {
+                MainForm.AppInfo.LoadMdiChildFormStates(this,
                     "mdi_form_state");
 
                 // 恢复tab状态
@@ -425,9 +429,9 @@ namespace dp2rms
 
                 // this.MarcEditor.Font = new Font("Fixedsys", 12);
                 LoadFontToMarcEditor();
-			}
+            }
 
-			stop = new DigitalPlatform.Stop();
+            stop = new DigitalPlatform.Stop();
 
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 
@@ -437,27 +441,27 @@ namespace dp2rms
 				new Delegate_AskAccountInfo(MainForm.Servers.AskAccountInfo);
              */
 
-		
-			XmlEditor.Xml = "<root/>";	// ?????
 
-            this.XmlEditor.GenerateData +=new GenerateDataEventHandler(XmlEditor_GenerateData);
+            XmlEditor.Xml = "<root/>";	// ?????
 
-			this.Changed = false;
+            this.XmlEditor.GenerateData += new GenerateDataEventHandler(XmlEditor_GenerateData);
 
-			this.listView_resFiles.procDownloadFiles = new Delegate_DownloadFiles(this.DownloadFiles);
-			this.listView_resFiles.procDownloadOneMetaData = new Delegate_DownloadOneMetaData(this.DownloadOneFileMetaData);
+            this.Changed = false;
 
-			this.listView_resFiles.editor = this.XmlEditor;
+            this.listView_resFiles.procDownloadFiles = new Delegate_DownloadFiles(this.DownloadFiles);
+            this.listView_resFiles.procDownloadOneMetaData = new Delegate_DownloadOneMetaData(this.DownloadOneFileMetaData);
 
-			// 最好当确知库有marcdef配置文件时,才打开时钟.
-			if (timer_crossRefresh.Enabled == false)
-				timer_crossRefresh.Enabled = true;
+            this.listView_resFiles.editor = this.XmlEditor;
+
+            // 最好当确知库有marcdef配置文件时,才打开时钟.
+            if (timer_crossRefresh.Enabled == false)
+                timer_crossRefresh.Enabled = true;
 
             this.MarcEditor.GenerateData += new GenerateDataEventHandler(MarcEditor_GenerateData);
             this.MarcEditor.ParseMacro += new ParseMacroEventHandler(MarcEditor_ParseMacro);
 
             this.m_macroutil.ParseOneMacro += new ParseOneMacroEventHandler(m_macroutil_ParseOneMacro);
-		}
+        }
 
         void XmlEditor_GenerateData(object sender, GenerateDataEventArgs e)
         {
@@ -501,7 +505,7 @@ namespace dp2rms
 
             if (String.Compare(strFuncName, "IncSeed", true) == 0)
             {
-                string[] aParam = strParams.Split(new char[] {','});
+                string[] aParam = strParams.Split(new char[] { ',' });
                 if (aParam.Length != 3 && aParam.Length != 2)
                 {
                     strError = "IncSeed需要2或3个参数。";
@@ -544,10 +548,11 @@ namespace dp2rms
                 if (aParam.Length == 3)
                 {
                     int nWidth = 0;
-                    try {
+                    try
+                    {
                         nWidth = Convert.ToInt32(aParam[2]);
                     }
-                    catch 
+                    catch
                     {
                         strError = "第三参数应当为纯数字（表示补足的宽度）";
                         goto ERROR1;
@@ -592,81 +597,81 @@ namespace dp2rms
             this.AutoGenerate();
         }
 
-		private void DetailForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (stop != null) 
-			{
-				if (stop.State == 0 || stop.State == 1) 
-				{
-					this.channel.Abort();
-					e.Cancel = true;
-					return;
-				}
-			}
+        private void DetailForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (stop != null)
+            {
+                if (stop.State == 0 || stop.State == 1)
+                {
+                    this.channel.Abort();
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
-			if (this.Changed == true)
-			{
+            if (this.Changed == true)
+            {
 
-				DialogResult result = MessageBox.Show(this, 
-					"当前窗口中内容修改后未保存。是否要放弃保存并关闭窗口?\r\n\r\n(是)放弃保存并关闭窗口 (否)不关闭窗口",
-					"dp2rms",
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-				if (result != DialogResult.Yes) 
-				{
-					e.Cancel = true;
-					return;
-				}
-			}
+                DialogResult result = MessageBox.Show(this,
+                    "当前窗口中内容修改后未保存。是否要放弃保存并关闭窗口?\r\n\r\n(是)放弃保存并关闭窗口 (否)不关闭窗口",
+                    "dp2rms",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
-		}
+        }
 
         bool m_bPureXmlChanged = false;
 
-		bool Changed
-		{
-			get 
-			{
-				if (XmlEditor.Changed == true
-					|| listView_resFiles.Changed == true)
-					return true;
+        bool Changed
+        {
+            get
+            {
+                if (XmlEditor.Changed == true
+                    || listView_resFiles.Changed == true)
+                    return true;
 
-				if (this.MarcEditor != null)
-				{
-					if (this.MarcEditor.Changed == true)
-						return true;
-				}
+                if (this.MarcEditor != null)
+                {
+                    if (this.MarcEditor.Changed == true)
+                        return true;
+                }
 
                 if (this.m_bPureXmlChanged == true)
                     return true;
 
                 return false;
-			}
+            }
 
-			set
-			{
-				XmlEditor.Changed = value;
+            set
+            {
+                XmlEditor.Changed = value;
                 listView_resFiles.Changed = value;
-				if (this.MarcEditor != null)
-				{
-					this.MarcEditor.Changed = value;
-				}
+                if (this.MarcEditor != null)
+                {
+                    this.MarcEditor.Changed = value;
+                }
                 this.m_bPureXmlChanged = value;
-			}
-		}
+            }
+        }
 
-		private void DetailForm_Closed(object sender, System.EventArgs e)
-		{
-			eventClose.Set();
+        private void DetailForm_Closed(object sender, System.EventArgs e)
+        {
+            eventClose.Set();
 
-			if (stop != null) // 脱离关联
-			{
-				stop.Unregister();	// 和容器关联
+            if (stop != null) // 脱离关联
+            {
+                stop.Unregister();	// 和容器关联
 
-				// MainForm.stopManager.Remove(stop);
-				stop = null;
-			}
+                // MainForm.stopManager.Remove(stop);
+                stop = null;
+            }
 
             /*
 			if (accessPointWindow != null)
@@ -687,7 +692,7 @@ namespace dp2rms
 
                 // 记忆tab状态
                 MainForm.AppInfo.SetInt("detailform",
-                "tab_state", 
+                "tab_state",
                 this.tabControl_record.SelectedIndex);
 
                 // 记忆MARC编辑器状态
@@ -710,7 +715,7 @@ namespace dp2rms
             this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
 
-		}
+        }
 
         public void AppInfo_LoadMdiSize(object sender, EventArgs e)
         {
@@ -747,366 +752,366 @@ namespace dp2rms
         }
 
 
-		public void LoadTemplate()
-		{
-			if (this.Changed == true)
-			{
+        public void LoadTemplate()
+        {
+            if (this.Changed == true)
+            {
 
-				DialogResult result = MessageBox.Show(this, 
-					"装载模板前,发现当前窗口中已有内容修改后未来得及保存。是否要继续装载模板到窗口中(这样将丢失先前修改的内容)?\r\n\r\n(是)继续装载模板 (否)不装载模板",
-					"dp2rms",
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question,
-					MessageBoxDefaultButton.Button2);
-				if (result != DialogResult.Yes) 
-				{
-					MessageBox.Show(this, "装载模板操作被放弃...");
-					return;
-				}
-			}
+                DialogResult result = MessageBox.Show(this,
+                    "装载模板前,发现当前窗口中已有内容修改后未来得及保存。是否要继续装载模板到窗口中(这样将丢失先前修改的内容)?\r\n\r\n(是)继续装载模板 (否)不装载模板",
+                    "dp2rms",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    MessageBox.Show(this, "装载模板操作被放弃...");
+                    return;
+                }
+            }
 
-			OpenResDlg dlg = new OpenResDlg();
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = textBox_recPath.Text;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			// dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = textBox_recPath.Text;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			textBox_recPath.Text = dlg.Path + "/?";	// 为了追加保存
+            textBox_recPath.Text = dlg.Path + "/?";	// 为了追加保存
 
-			// 下载配置文件
-			ResPath respath = new ResPath(dlg.Path);
+            // 下载配置文件
+            ResPath respath = new ResPath(dlg.Path);
 
 
-			// 使用Channel
+            // 使用Channel
 
-			RmsChannel channelSave = channel;
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
 
-				string strContent;
-				string strError;
+                string strContent;
+                string strError;
 
-				string strCfgFilePath = respath.Path + "/cfgs/template";
+                string strCfgFilePath = respath.Path + "/cfgs/template";
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在下载文件" + strCfgFilePath);
-				stop.BeginLoop();
+                stop.Initial("正在下载文件" + strCfgFilePath);
+                stop.BeginLoop();
 
-				byte[] baTimeStamp = null;
-				string strMetaData;
-				string strOutputPath;
+                byte[] baTimeStamp = null;
+                string strMetaData;
+                string strOutputPath;
 
-				long lRet = channel.GetRes(
-					MainForm.cfgCache,
-					strCfgFilePath,
-					// this.eventClose,
-					out strContent,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
+                long lRet = channel.GetRes(
+                    MainForm.cfgCache,
+                    strCfgFilePath,
+                    // this.eventClose,
+                    out strContent,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					this.TimeStamp = null;
-					MessageBox.Show(this, strError);
-					return;
-				}
-				else 
-				{
-					// MessageBox.Show(this, strContent);
-					SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
+                if (lRet == -1)
+                {
+                    this.TimeStamp = null;
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+                else
+                {
+                    // MessageBox.Show(this, strContent);
+                    SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
                     tempdlg.Font = GuiUtil.GetDefaultFont();
 
                     int nRet = tempdlg.Initial(strContent, out strError);
-					if (nRet == -1) 
-					{
-						MessageBox.Show(this, "装载配置文件 '" + strCfgFilePath + "' 发生错误: " + strError);
-						return;
-					}
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, "装载配置文件 '" + strCfgFilePath + "' 发生错误: " + strError);
+                        return;
+                    }
 
-					tempdlg.ap = this.MainForm.AppInfo;
-					tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
-					tempdlg.ShowDialog(this);
+                    tempdlg.ap = this.MainForm.AppInfo;
+                    tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
+                    tempdlg.ShowDialog(this);
 
-					if (tempdlg.DialogResult != DialogResult.OK)
-						return;
+                    if (tempdlg.DialogResult != DialogResult.OK)
+                        return;
 
 
-					this.TimeStamp = null;
-					this.m_strMetaData = "";	// 记忆XML记录的元数据
+                    this.TimeStamp = null;
+                    this.m_strMetaData = "";	// 记忆XML记录的元数据
 
                     this.strDatabaseOriginPath = ""; // 保存从数据库中来的原始path
 
-					nRet = this.SetRecordToControls(tempdlg.SelectedRecordXml,
-						out strError);
-					if (nRet == -1)
-					{
-						MessageBox.Show(this, strError);
-						return;
-					}
+                    nRet = this.SetRecordToControls(tempdlg.SelectedRecordXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, strError);
+                        return;
+                    }
 
 
-					this.TimeStamp = baTimeStamp;
+                    this.TimeStamp = baTimeStamp;
 
-					this.Text = respath.ReverseFullPath;
+                    this.Text = respath.ReverseFullPath;
 
-				}
+                }
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
-		}
+        }
 
-		private void button_findRecPath_Click(object sender, System.EventArgs e)
-		{
-			LoadTemplate();
-		}
+        private void button_findRecPath_Click(object sender, System.EventArgs e)
+        {
+            LoadTemplate();
+        }
 
-		void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-		private void DetailForm_Activated(object sender, System.EventArgs e)
-		{
-			if (stop != null)
-				MainForm.stopManager.Active(this.stop);
+        private void DetailForm_Activated(object sender, System.EventArgs e)
+        {
+            if (stop != null)
+                MainForm.stopManager.Active(this.stop);
 
             MainForm.SetMenuItemState();
 
-			// 菜单
-			MainForm.MenuItem_properties.Enabled = true;
-			MainForm.MenuItem_viewAccessPoint.Enabled = true;
-			MainForm.MenuItem_dup.Enabled = true;
-			MainForm.MenuItem_save.Enabled = true;
-			MainForm.MenuItem_saveas.Enabled = true;
-			MainForm.MenuItem_saveasToDB.Enabled = true;
-			MainForm.MenuItem_saveToTemplate.Enabled = true;
-			MainForm.MenuItem_autoGenerate.Enabled = true;
+            // 菜单
+            MainForm.MenuItem_properties.Enabled = true;
+            MainForm.MenuItem_viewAccessPoint.Enabled = true;
+            MainForm.MenuItem_dup.Enabled = true;
+            MainForm.MenuItem_save.Enabled = true;
+            MainForm.MenuItem_saveas.Enabled = true;
+            MainForm.MenuItem_saveasToDB.Enabled = true;
+            MainForm.MenuItem_saveToTemplate.Enabled = true;
+            MainForm.MenuItem_autoGenerate.Enabled = true;
 
             if (this.tabControl_record.SelectedTab == this.tabPage_marc)
                 MainForm.MenuItem_font.Enabled = true;  // ??
             else
                 MainForm.MenuItem_font.Enabled = false;  // ??
 
-			// 工具条按钮
-			MainForm.toolBarButton_save.Enabled = true;
-			MainForm.toolBarButton_refresh.Enabled = true;
-			MainForm.toolBarButton_loadTemplate.Enabled = true;
+            // 工具条按钮
+            MainForm.toolBarButton_save.Enabled = true;
+            MainForm.toolBarButton_refresh.Enabled = true;
+            MainForm.toolBarButton_loadTemplate.Enabled = true;
 
-			MainForm.toolBarButton_prev.Enabled = true;
-			MainForm.toolBarButton_next.Enabled = true;
+            MainForm.toolBarButton_prev.Enabled = true;
+            MainForm.toolBarButton_next.Enabled = true;
 
-			SetDeleteToolButton();
-		}
+            SetDeleteToolButton();
+        }
 
-		public void LoadRecord(string strRecordPath,
-			string strExtStyle)
-		{
-			string strError = "";
-			int nRet = LoadRecord(strRecordPath,
+        public void LoadRecord(string strRecordPath,
+            string strExtStyle)
+        {
+            string strError = "";
+            int nRet = LoadRecord(strRecordPath,
                 strExtStyle,
                 out strError);
-			if (nRet != 0)
-				MessageBox.Show(this, strError);
+            if (nRet != 0)
+                MessageBox.Show(this, strError);
 
-		}
+        }
 
-		// 装载记录
-		// 把strRecordPath表示的记录装载到窗口中，并且在窗口第一行
-		// 路径内容设置好
-		// parameters:
-		//		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
-		//		strExtStyle	如果为null，表示获取strRecordPath或textbox表示的记录。如果为"next"或"prev"，
-		//					则表示取其后或前一条记录
-		// return:
-		//		-2	放弃
-		//		-1	出错
-		//		0	正常
-		//		1	到头或者到尾
-		public int LoadRecord(string strRecordPath,
-			string strExtStyle,
-			out string strError)
-		{
-			strError = "";
+        // 装载记录
+        // 把strRecordPath表示的记录装载到窗口中，并且在窗口第一行
+        // 路径内容设置好
+        // parameters:
+        //		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
+        //		strExtStyle	如果为null，表示获取strRecordPath或textbox表示的记录。如果为"next"或"prev"，
+        //					则表示取其后或前一条记录
+        // return:
+        //		-2	放弃
+        //		-1	出错
+        //		0	正常
+        //		1	到头或者到尾
+        public int LoadRecord(string strRecordPath,
+            string strExtStyle,
+            out string strError)
+        {
+            strError = "";
 
-			EnableControlsInLoading(true);
+            EnableControlsInLoading(true);
 
-			try 
-			{
+            try
+            {
 
-				if (this.Changed == true)
-				{
+                if (this.Changed == true)
+                {
 
-					DialogResult result = MessageBox.Show(this, 
-						"装载新内容前, 发现当前窗口中已有内容修改后未来得及保存。是否要继续装载新内容到窗口中(这样将丢失先前修改过的内容)?\r\n\r\n(是)继续装载新内容 (否)不装载新内容",
-						"dp2rms",
-						MessageBoxButtons.YesNo,
-						MessageBoxIcon.Question,
-						MessageBoxDefaultButton.Button2);
-					if (result != DialogResult.Yes) 
-					{
-						strError = "装载新内容操作被放弃...";
-						return -2;
-					}
-				}
+                    DialogResult result = MessageBox.Show(this,
+                        "装载新内容前, 发现当前窗口中已有内容修改后未来得及保存。是否要继续装载新内容到窗口中(这样将丢失先前修改过的内容)?\r\n\r\n(是)继续装载新内容 (否)不装载新内容",
+                        "dp2rms",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                    {
+                        strError = "装载新内容操作被放弃...";
+                        return -2;
+                    }
+                }
 
-				if (strRecordPath != null)
-					textBox_recPath.Text = strRecordPath;
+                if (strRecordPath != null)
+                    textBox_recPath.Text = strRecordPath;
 
-				ResPath respath = new ResPath(textBox_recPath.Text);
+                ResPath respath = new ResPath(textBox_recPath.Text);
 
-				this.Text = respath.ReverseFullPath;
-
-
-				string strContent;
-				string strMetaData;
-				// string strError;
-				byte [] baTimeStamp = null;
-				string strOutputPath;
+                this.Text = respath.ReverseFullPath;
 
 
-				// 使用Channel
-				RmsChannel channelSave = channel;
+                string strContent;
+                string strMetaData;
+                // string strError;
+                byte[] baTimeStamp = null;
+                string strOutputPath;
 
-				channel = Channels.GetChannel(respath.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-				try 
-				{
+                // 使用Channel
+                RmsChannel channelSave = channel;
 
-					string strStyle = "content,data,metadata,timestamp,outputpath,withresmetadata";	// 
+                channel = Channels.GetChannel(respath.Url);
+                Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-					if (strExtStyle != null && strExtStyle != "")
-					{
-						strStyle += "," + strExtStyle;
-					}
+                try
+                {
+
+                    string strStyle = "content,data,metadata,timestamp,outputpath,withresmetadata";	// 
+
+                    if (strExtStyle != null && strExtStyle != "")
+                    {
+                        strStyle += "," + strExtStyle;
+                    }
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-					stop.Initial("正在装载记录" + respath.FullPath);
-					stop.BeginLoop();
+                    stop.Initial("正在装载记录" + respath.FullPath);
+                    stop.BeginLoop();
 
 
-            
-					long lRet = channel.GetRes(respath.Path,
-						strStyle,
-						// this.eventClose,
-						out strContent,
-						out strMetaData,
-						out baTimeStamp,
-						out strOutputPath,
-						out strError);
+
+                    long lRet = channel.GetRes(respath.Path,
+                        strStyle,
+                        // this.eventClose,
+                        out strContent,
+                        out strMetaData,
+                        out baTimeStamp,
+                        out strOutputPath,
+                        out strError);
 
 
-					stop.EndLoop();
+                    stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
-					stop.Initial("");
+                    stop.Initial("");
 
-					this.TimeStamp = baTimeStamp;	// 设置时间戳很重要。即便xml不合法，也应设置好时间戳，否则窗口无法进行正常删除。
+                    this.TimeStamp = baTimeStamp;	// 设置时间戳很重要。即便xml不合法，也应设置好时间戳，否则窗口无法进行正常删除。
 
-                    this.strDatabaseOriginPath = respath.Url+"?"+strOutputPath; // 保存从数据库中来的原始path
+                    this.strDatabaseOriginPath = respath.Url + "?" + strOutputPath; // 保存从数据库中来的原始path
 
-					if (lRet == -1) 
-					{
+                    if (lRet == -1)
+                    {
                         if (channel.ErrorCode == ChannelErrorCode.NotFoundSubRes)
                         {
                             // 下级资源不存在, 警告一下就行了
                             MessageBox.Show(this, strError);
                             goto CONTINUELOAD;
                         }
-						else if (channel.ErrorCode == ChannelErrorCode.NotFound) 
-						{
-							if (strExtStyle == "prev")
-								strError = "到头";
-							else if (strExtStyle == "next")
-								strError = "到尾";
-							return 1;
-						}
-						else 
-						{
-							// this.TimeStamp = null;
-							strError = "从路径 '"+respath.Path+"' 获取记录时出错: " + strError;
-							return -1;
-						}
-					}
+                        else if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        {
+                            if (strExtStyle == "prev")
+                                strError = "到头";
+                            else if (strExtStyle == "next")
+                                strError = "到尾";
+                            return 1;
+                        }
+                        else
+                        {
+                            // this.TimeStamp = null;
+                            strError = "从路径 '" + respath.Path + "' 获取记录时出错: " + strError;
+                            return -1;
+                        }
+                    }
 
-				}
-				finally 
-				{
-					channel = channelSave;
-				}
+                }
+                finally
+                {
+                    channel = channelSave;
+                }
 
-                CONTINUELOAD:
+            CONTINUELOAD:
 
-				respath.Path = strOutputPath;
-				textBox_recPath.Text = respath.FullPath;
+                respath.Path = strOutputPath;
+                textBox_recPath.Text = respath.FullPath;
 
-				//string strTemp = ByteArray.GetHexTimeStampString(baTimeStamp);
+                //string strTemp = ByteArray.GetHexTimeStampString(baTimeStamp);
 
-				this.m_strMetaData = strMetaData;	// 记忆XML记录的元数据
+                this.m_strMetaData = strMetaData;	// 记忆XML记录的元数据
 
-				int nRet = SetRecordToControls(strContent,
-					out strError);
-				if (nRet == -1)
-					return -1;
+                int nRet = SetRecordToControls(strContent,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
 
 
-				return 0;
-			}
-			finally
-			{
-				EnableControlsInLoading(false);
-			}
-		}
+                return 0;
+            }
+            finally
+            {
+                EnableControlsInLoading(false);
+            }
+        }
 
-		// 将XML记录装入各个控件
-		int SetRecordToControls(string strContent,
-			out string strError)
-		{
-			strError = "";
+        // 将XML记录装入各个控件
+        int SetRecordToControls(string strContent,
+            out string strError)
+        {
+            strError = "";
 
-			// 统一控件时间戳
-			//this.m_nTimeStampMarc = 0;
-			//this.m_nTimeStampXml = 0;
-			m_queueTextChanged.Clear();
+            // 统一控件时间戳
+            //this.m_nTimeStampMarc = 0;
+            //this.m_nTimeStampXml = 0;
+            m_queueTextChanged.Clear();
 
             // 清除MARC格式的缓存
             this.MarcSyntax = "";
 
 
-			listView_resFiles.Initial(XmlEditor);	// 把资源listview和XmlEditor勾连上
+            listView_resFiles.Initial(XmlEditor);	// 把资源listview和XmlEditor勾连上
 
-			try 
-			{
-				XmlEditor.BeginUpdate();
+            try
+            {
+                XmlEditor.BeginUpdate();
 
-				XmlEditor.Xml = strContent;
+                XmlEditor.Xml = strContent;
 
-				XmlEditor.EndUpdate();
+                XmlEditor.EndUpdate();
 
                 this.Changed = false;	// xml内容的变化,会导致ResFileList也变化,所以消除bChanged on标志,应当从总体入手
 
@@ -1116,29 +1121,29 @@ namespace dp2rms
                 dom.PreserveWhitespace = true;  // 在意空白符号
                 dom.LoadXml(strContent);
                  * */
-			}
-			catch (Exception ex)
-			{
-				// 装入普通textbox
-				this.textBox_xmlPureText.Text = strContent;
+            }
+            catch (Exception ex)
+            {
+                // 装入普通textbox
+                this.textBox_xmlPureText.Text = strContent;
 
-				if (strContent.Length < 4096)
-					strError = "装载XML记录内容 '"+strContent+"' 到DOM时出错: " + ex.Message;
-				else
-					strError = "装载XML记录到DOM时出错: " + ex.Message;
-				return -1;
-			}
+                if (strContent.Length < 4096)
+                    strError = "装载XML记录内容 '" + strContent + "' 到DOM时出错: " + ex.Message;
+                else
+                    strError = "装载XML记录到DOM时出错: " + ex.Message;
+                return -1;
+            }
 
             // 规整缩进
             if (SetPlainTextXml(strContent, out strError) == -1)
                 return -1;
 
-			this.Flush();
+            this.Flush();
 
-			this.Changed = false;
+            this.Changed = false;
 
-			return 0;
-		}
+            return 0;
+        }
 
         // 向XML文本编辑器设置内容。将规整格式
         int SetPlainTextXml(string strXml,
@@ -1147,7 +1152,7 @@ namespace dp2rms
             strError = "";
             string strOutXml = "";
             int nRet = DomUtil.GetIndentXml(strXml,
-                out strOutXml, 
+                out strOutXml,
                 out strError);
             if (nRet == -1)
             {
@@ -1158,340 +1163,340 @@ namespace dp2rms
             return 0;
         }
 
-		// 从marcdef配置文件中获得marc格式定义
-		// return:
-		//		-1	出错
-		//		0	没有找到
-		//		1	找到
-		int GetMarcSyntax(out string strMarcSyntax,
-			out string strError)
-		{
-			strError = "";
+        // 从marcdef配置文件中获得marc格式定义
+        // return:
+        //		-1	出错
+        //		0	没有找到
+        //		1	找到
+        int GetMarcSyntax(out string strMarcSyntax,
+            out string strError)
+        {
+            strError = "";
 
-			if (this.MarcSyntax != "")
-			{
+            if (this.MarcSyntax != "")
+            {
                 // 如果需要改变窗口的MARC格式，需要清除this.MarcSyntax
-				strMarcSyntax = this.MarcSyntax;
-				return 1;
-			}
+                strMarcSyntax = this.MarcSyntax;
+                return 1;
+            }
 
-			strMarcSyntax = "";
-			int nRet = 0;
-			Stream s = null;
+            strMarcSyntax = "";
+            int nRet = 0;
+            Stream s = null;
 
-			ResPath respath = new ResPath(textBox_recPath.Text);
+            ResPath respath = new ResPath(textBox_recPath.Text);
 
-			nRet = GetMarcDefCfgFile(respath.Url,
-				ResPath.GetDbName(respath.Path),
-				out s,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0)
-				return 0;
-
-
-			s.Seek(0, SeekOrigin.Begin);
-
-			// 从marcdef配置文件中得到marc格式字符串
-			// return:
-			//		-1	出错
-			//		0	没有找到
-			//		1	找到
-			nRet = MarcUtil.GetMarcSyntaxFromCfgFile(s,
-				out strMarcSyntax,
-				out strError);
-			if (nRet == -1)
-				return -1;
-
-			if (nRet == 1)
-				this.MarcSyntax = strMarcSyntax;
-			else 
-			{
-				this.MarcSyntax = "";
-			}
+            nRet = GetMarcDefCfgFile(respath.Url,
+                ResPath.GetDbName(respath.Path),
+                out s,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
 
 
-			return nRet;
-		}
+            s.Seek(0, SeekOrigin.Begin);
 
-		// 保存记录到另一数据库
-		// parameters:
-		public void SaveAsRecord()
-		{
-			OpenResDlg dlg = new OpenResDlg();
+            // 从marcdef配置文件中得到marc格式字符串
+            // return:
+            //		-1	出错
+            //		0	没有找到
+            //		1	找到
+            nRet = MarcUtil.GetMarcSyntaxFromCfgFile(s,
+                out strMarcSyntax,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 1)
+                this.MarcSyntax = strMarcSyntax;
+            else
+            {
+                this.MarcSyntax = "";
+            }
+
+
+            return nRet;
+        }
+
+        // 保存记录到另一数据库
+        // parameters:
+        public void SaveAsRecord()
+        {
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = textBox_recPath.Text;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			// dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = textBox_recPath.Text;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			SaveRecord(dlg.Path + "/?");
-		}
+            SaveRecord(dlg.Path + "/?");
+        }
 
-		// 保存记录到模板配置文件
-		// parameters:
-		public void SaveToTemplate()
-		{
-			// 选择目标数据库
-			OpenResDlg dlg = new OpenResDlg();
+        // 保存记录到模板配置文件
+        // parameters:
+        public void SaveToTemplate()
+        {
+            // 选择目标数据库
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			dlg.ap = this.MainForm.AppInfo;
-			dlg.ApCfgTitle = "detailform_openresdlg";
-			dlg.Path = textBox_recPath.Text;
-			dlg.Initial( MainForm.Servers,
-				this.Channels);	
-			// dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择目标数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            dlg.ap = this.MainForm.AppInfo;
+            dlg.ApCfgTitle = "detailform_openresdlg";
+            dlg.Path = textBox_recPath.Text;
+            dlg.Initial(MainForm.Servers,
+                this.Channels);
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
 
-			// 下载模板配置文件
-			ResPath respath = new ResPath(dlg.Path);
+            // 下载模板配置文件
+            ResPath respath = new ResPath(dlg.Path);
 
-			string strError;
-			string strContent;
-			byte[] baTimeStamp = null;
-			string strMetaData;
-			string strOutputPath;
+            string strError;
+            string strContent;
+            byte[] baTimeStamp = null;
+            string strMetaData;
+            string strOutputPath;
 
-			string strCfgFilePath = respath.Path + "/cfgs/template";
+            string strCfgFilePath = respath.Path + "/cfgs/template";
 
-			long lRet = 0;
+            long lRet = 0;
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            // 使用Channel
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在下载文件" + strCfgFilePath);
-				stop.BeginLoop();
+                stop.Initial("正在下载文件" + strCfgFilePath);
+                stop.BeginLoop();
 
 
 
-				lRet = channel.GetRes(
-					MainForm.cfgCache,
-					strCfgFilePath,
-					out strContent,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
+                lRet = channel.GetRes(
+                    MainForm.cfgCache,
+                    strCfgFilePath,
+                    out strContent,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
-				if (lRet == -1) 
-				{
-					this.TimeStamp = null;
-					MessageBox.Show(this, strError);
-					return;
-				}
+                if (lRet == -1)
+                {
+                    this.TimeStamp = null;
+                    MessageBox.Show(this, strError);
+                    return;
+                }
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
-			SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
+            SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
             tempdlg.Font = GuiUtil.GetDefaultFont();
 
             int nRet = tempdlg.Initial(strContent, out strError);
-			if (nRet == -1) 
-				goto ERROR1;
+            if (nRet == -1)
+                goto ERROR1;
 
 
-			tempdlg.Text = "请选择要修改的模板记录";
-			tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
-			tempdlg.ap = this.MainForm.AppInfo;
-			tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
-			tempdlg.ShowDialog(this);
+            tempdlg.Text = "请选择要修改的模板记录";
+            tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
+            tempdlg.ap = this.MainForm.AppInfo;
+            tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
+            tempdlg.ShowDialog(this);
 
-			if (tempdlg.DialogResult != DialogResult.OK)
-				return;
+            if (tempdlg.DialogResult != DialogResult.OK)
+                return;
 
-			string strXmlBody = "";
+            string strXmlBody = "";
             bool bHasUploadedFile = false;
 
 
-			nRet = GetXmlRecord(out strXmlBody,
+            nRet = GetXmlRecord(out strXmlBody,
                 out bHasUploadedFile,
                 out strError);
-			if (nRet == -1)
-				goto ERROR1;
+            if (nRet == -1)
+                goto ERROR1;
 
 
 
-			// 修改配置文件内容
-			if (tempdlg.textBox_name.Text != "")
-			{
-				// 替换或者追加一个记录
-				nRet = tempdlg.ReplaceRecord(tempdlg.textBox_name.Text,
-					strXmlBody,
-					out strError);
-				if (nRet == -1) 
-				{
-					goto ERROR1;
-				}
-			}
+            // 修改配置文件内容
+            if (tempdlg.textBox_name.Text != "")
+            {
+                // 替换或者追加一个记录
+                nRet = tempdlg.ReplaceRecord(tempdlg.textBox_name.Text,
+                    strXmlBody,
+                    out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
+            }
 
-			if (tempdlg.Changed == false)	// 没有必要保存回去
-				return;
+            if (tempdlg.Changed == false)	// 没有必要保存回去
+                return;
 
-			string strOutputXml = tempdlg.OutputXml;
-
-
-			// 使用Channel
-			channelSave = channel;
-
-			// 重新获得一次channel, 是因为前面GetXmlRecord()函数有可能摧毁这个变量
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
-
-			try 
-			{
+            string strOutputXml = tempdlg.OutputXml;
 
 
-				// 存回配置文件
+            // 使用Channel
+            channelSave = channel;
+
+            // 重新获得一次channel, 是因为前面GetXmlRecord()函数有可能摧毁这个变量
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
+
+            try
+            {
+
+
+                // 存回配置文件
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在保存配置文件 " + strCfgFilePath);
-				stop.BeginLoop();
+                stop.Initial("正在保存配置文件 " + strCfgFilePath);
+                stop.BeginLoop();
 
-				byte [] baOutputTimeStamp = null;
-				// string strOutputPath = "";
+                byte[] baOutputTimeStamp = null;
+                // string strOutputPath = "";
 
-				EnableControlsInLoading(true);
+                EnableControlsInLoading(true);
 
-				lRet = channel.DoSaveTextRes(strCfgFilePath,
-					strOutputXml,
-					true,	// bInlucdePreamble
-					"",	// style
-					baTimeStamp,
-					out baOutputTimeStamp,
-					out strOutputPath,
-					out strError);
+                lRet = channel.DoSaveTextRes(strCfgFilePath,
+                    strOutputXml,
+                    true,	// bInlucdePreamble
+                    "",	// style
+                    baTimeStamp,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				EnableControlsInLoading(false);
+                EnableControlsInLoading(false);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					strError = "保存配置文件"+ strCfgFilePath +"失败，原因: "+strError;
-					goto ERROR1;
-				}
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+                if (lRet == -1)
+                {
+                    strError = "保存配置文件" + strCfgFilePath + "失败，原因: " + strError;
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
-			MessageBox.Show(this, "修改模板配置文件成功。");
+            MessageBox.Show(this, "修改模板配置文件成功。");
 
-			return;
+            return;
 
-			ERROR1:
-				MessageBox.Show(this, strError);
+        ERROR1:
+            MessageBox.Show(this, strError);
 
-		}
-
-
-		// 保存记录
-		// parameters:
-		//		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
-		public void SaveRecord(string strRecordPath)
-		{
-			if (strRecordPath != null)
-				textBox_recPath.Text = strRecordPath;
-
-			if (textBox_recPath.Text == "")
-			{
-				MessageBox.Show(this, "路径不能为空");
-				return;
-			}
-
-			ResPath respath = new ResPath(textBox_recPath.Text);
-
-			Uri uri = null;
-			try 
-			{
-				uri = new Uri(respath.Url);
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(this, "路径错误: " + ex.Message);
-				return;
-			}
-			// 保存到文件
-			if (uri.IsFile)
-			{
-				MessageBox.Show(this, "暂时不支持保存到文件");
-				return;
-			}
+        }
 
 
-			string strError;
+        // 保存记录
+        // parameters:
+        //		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
+        public void SaveRecord(string strRecordPath)
+        {
+            if (strRecordPath != null)
+                textBox_recPath.Text = strRecordPath;
 
-			string strXml = "";
+            if (textBox_recPath.Text == "")
+            {
+                MessageBox.Show(this, "路径不能为空");
+                return;
+            }
+
+            ResPath respath = new ResPath(textBox_recPath.Text);
+
+            Uri uri = null;
+            try
+            {
+                uri = new Uri(respath.Url);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "路径错误: " + ex.Message);
+                return;
+            }
+            // 保存到文件
+            if (uri.IsFile)
+            {
+                MessageBox.Show(this, "暂时不支持保存到文件");
+                return;
+            }
+
+
+            string strError;
+
+            string strXml = "";
             bool bHasUploadedFile = false;
 
-			int nRet = GetXmlRecord(out strXml,
+            int nRet = GetXmlRecord(out strXml,
                 out bHasUploadedFile,
                 out strError);
-			if (nRet == -1)
-			{
-				MessageBox.Show(this, strError);
-				return;
-			}
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
 
 
-			byte [] baOutputTimeStamp = null;
-			string strOutputPath = "";
-			long lRet = 0;
+            byte[] baOutputTimeStamp = null;
+            string strOutputPath = "";
+            long lRet = 0;
 
             int nUploadCount = 0;
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            // 使用Channel
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在保存记录 " + respath.FullPath);
-				stop.BeginLoop();
+                stop.Initial("正在保存记录 " + respath.FullPath);
+                stop.BeginLoop();
 
 
-				EnableControlsInLoading(true);
+                EnableControlsInLoading(true);
 
-				//string strTemp = ByteArray.GetHexTimeStampString(this.TimeStamp);
+                //string strTemp = ByteArray.GetHexTimeStampString(this.TimeStamp);
 
                 if (String.IsNullOrEmpty(this.strDatabaseOriginPath) == false
                     && bHasUploadedFile == true
@@ -1525,29 +1530,29 @@ namespace dp2rms
                         this.TimeStamp = baOutputTimeStamp;
                     }
                 }
-                SKIPCOPYRECORD:
+            SKIPCOPYRECORD:
 
-				lRet = channel.DoSaveTextRes(respath.Path,
-					strXml,
-					false,	// bInlucdePreamble
-					"",	// style
-					this.TimeStamp,
-					out baOutputTimeStamp,
-					out strOutputPath,
-					out strError);
+                lRet = channel.DoSaveTextRes(respath.Path,
+                    strXml,
+                    false,	// bInlucdePreamble
+                    "",	// style
+                    this.TimeStamp,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
 
-				EnableControlsInLoading(false);
+                EnableControlsInLoading(false);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, "保存记录失败，原因: "+strError);
-					return;
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, "保存记录失败，原因: " + strError);
+                    return;
                 }
 
                 //
@@ -1584,199 +1589,199 @@ namespace dp2rms
                 channel = channelSave;
             }
 
-			if (nUploadCount == -1) 
-			{
-				MessageBox.Show(this, "XML记录保存成功, 但保存资源失败，原因: "+strError);
-				return;
-			}
+            if (nUploadCount == -1)
+            {
+                MessageBox.Show(this, "XML记录保存成功, 但保存资源失败，原因: " + strError);
+                return;
+            }
 
-			if (nUploadCount > 0)
-			{
-				// 使用Channel
-				channelSave = channel;
+            if (nUploadCount > 0)
+            {
+                // 使用Channel
+                channelSave = channel;
 
-				channel = Channels.GetChannel(respath.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel 异常");
-
-
-				// 需要重新获得时间戳
-				string strStyle = "timestamp,metadata";	// withresmetadata
-				string strMetaData = "";
-				string strContent = "";
-
-				try 
-				{
-					lRet = channel.GetRes(respath.Path,
-						strStyle,
-						out strContent,
-						out strMetaData,
-						out baOutputTimeStamp,
-						out strOutputPath,
-						out strError);
-					if (lRet == -1)
-					{
-						MessageBox.Show(this, "重新获得时间戳 '" + respath.FullPath + "' 失败。原因 : " + strError);
-						return;
-					}
-				}
-				finally 
-				{
-					channel = channelSave;
-				}
-				this.TimeStamp = baOutputTimeStamp;	// 设置时间戳很重要。即便xml不合法，也应设置好时间戳，否则窗口无法进行正常删除。
-				this.m_strMetaData = strMetaData;	// 记忆XML记录的元数据
+                channel = Channels.GetChannel(respath.Url);
+                Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
 
+                // 需要重新获得时间戳
+                string strStyle = "timestamp,metadata";	// withresmetadata
+                string strMetaData = "";
+                string strContent = "";
 
-			}
-
-			this.Changed = false;
-
-			MessageBox.Show(this, "保存记录 '" + respath.FullPath + "' 成功。");
-		}
-
-		// 删除记录
-		// parameters:
-		//		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
-		public void DeleteRecord(string strRecordPath)
-		{
-			if (strRecordPath != null)
-				textBox_recPath.Text = strRecordPath;
-
-			if (textBox_recPath.Text == "")
-			{
-				MessageBox.Show(this, "路径不能为空");
-				return;
-			}
-
-			ResPath respath = new ResPath(textBox_recPath.Text);
-
-			Uri uri = null;
-			try 
-			{
-				uri = new Uri(respath.Url);
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(this, "路径错误: " + ex.Message);
-				return;
-			}			// 保存到文件
-			if (uri.IsFile)
-			{
-				MessageBox.Show(this, "暂时不支持删除文件");
-				return;
-			}
+                try
+                {
+                    lRet = channel.GetRes(respath.Path,
+                        strStyle,
+                        out strContent,
+                        out strMetaData,
+                        out baOutputTimeStamp,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        MessageBox.Show(this, "重新获得时间戳 '" + respath.FullPath + "' 失败。原因 : " + strError);
+                        return;
+                    }
+                }
+                finally
+                {
+                    channel = channelSave;
+                }
+                this.TimeStamp = baOutputTimeStamp;	// 设置时间戳很重要。即便xml不合法，也应设置好时间戳，否则窗口无法进行正常删除。
+                this.m_strMetaData = strMetaData;	// 记忆XML记录的元数据
 
 
-			string strText = "你确实要删除位于服务器 '"+respath.Url+"' 上的记录 '"+respath.Path + "' 吗?";
 
-			DialogResult msgResult = MessageBox.Show(this,
-				strText,
-				"dp2rms",
-				MessageBoxButtons.OKCancel,
-				MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2);
-				
-			if (msgResult != DialogResult.OK) 
-			{
-				MessageBox.Show(this, "删除操作被放弃...");
-				return;
-			}
+            }
 
-			string strError;
-			byte [] baOutputTimeStamp = null;
+            this.Changed = false;
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            MessageBox.Show(this, "保存记录 '" + respath.FullPath + "' 成功。");
+        }
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+        // 删除记录
+        // parameters:
+        //		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
+        public void DeleteRecord(string strRecordPath)
+        {
+            if (strRecordPath != null)
+                textBox_recPath.Text = strRecordPath;
 
-			try 
-			{
+            if (textBox_recPath.Text == "")
+            {
+                MessageBox.Show(this, "路径不能为空");
+                return;
+            }
+
+            ResPath respath = new ResPath(textBox_recPath.Text);
+
+            Uri uri = null;
+            try
+            {
+                uri = new Uri(respath.Url);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "路径错误: " + ex.Message);
+                return;
+            }			// 保存到文件
+            if (uri.IsFile)
+            {
+                MessageBox.Show(this, "暂时不支持删除文件");
+                return;
+            }
+
+
+            string strText = "你确实要删除位于服务器 '" + respath.Url + "' 上的记录 '" + respath.Path + "' 吗?";
+
+            DialogResult msgResult = MessageBox.Show(this,
+                strText,
+                "dp2rms",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+
+            if (msgResult != DialogResult.OK)
+            {
+                MessageBox.Show(this, "删除操作被放弃...");
+                return;
+            }
+
+            string strError;
+            byte[] baOutputTimeStamp = null;
+
+            // 使用Channel
+            RmsChannel channelSave = channel;
+
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
+
+            try
+            {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在删除记录 " + respath.FullPath);
-				stop.BeginLoop();
+                stop.BeginLoop();
 
 
-				EnableControlsInLoading(true);
+                EnableControlsInLoading(true);
 
-				long lRet = channel.DoDeleteRes(respath.Path,
-					this.TimeStamp,
-					out baOutputTimeStamp,
-					out strError);
+                long lRet = channel.DoDeleteRes(respath.Path,
+                    this.TimeStamp,
+                    out baOutputTimeStamp,
+                    out strError);
 
-				EnableControlsInLoading(false);
+                EnableControlsInLoading(false);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, "删除记录 '"+respath.Path+"' 失败，原因: "+strError);
-					return;
-				}
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, "删除记录 '" + respath.Path + "' 失败，原因: " + strError);
+                    return;
+                }
 
-			}
-			finally
-			{
-				channel = channelSave;
-			}
-
-
-
-			// 如果删除成功,原来时间戳遗留在this.TimeStamp中,也无害
-
-			MessageBox.Show(this, "删除记录 '" + respath.FullPath + "' 成功。");
-
-		}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
 
-		// 观察检索点
-		// parameters:
-		//		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
-		public void ViewAccessPoint(string strRecordPath)
-		{
-			if (strRecordPath == null || strRecordPath == "")
-				strRecordPath = textBox_recPath.Text;
 
-			if (strRecordPath == "")
-			{
-				MessageBox.Show(this, "必须指定好路径后, 才能模拟创建检索点");
-				return;
-			}
+            // 如果删除成功,原来时间戳遗留在this.TimeStamp中,也无害
 
-			ResPath respath = new ResPath(strRecordPath);
+            MessageBox.Show(this, "删除记录 '" + respath.FullPath + "' 成功。");
 
-			string strError;
+        }
 
-			string strXml = "";
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+        // 观察检索点
+        // parameters:
+        //		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
+        public void ViewAccessPoint(string strRecordPath)
+        {
+            if (strRecordPath == null || strRecordPath == "")
+                strRecordPath = textBox_recPath.Text;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            if (strRecordPath == "")
+            {
+                MessageBox.Show(this, "必须指定好路径后, 才能模拟创建检索点");
+                return;
+            }
 
-			try 
-			{
+            ResPath respath = new ResPath(strRecordPath);
+
+            string strError;
+
+            string strXml = "";
+
+            // 使用Channel
+            RmsChannel channelSave = channel;
+
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
+
+            try
+            {
                 bool bHasUploadedFile = false;
 
-				int nRet = GetXmlRecord(out strXml, 
+                int nRet = GetXmlRecord(out strXml,
                     out bHasUploadedFile,
                     out strError);
-				if (nRet == -1)
-				{
-					MessageBox.Show(this, strError);
-					return;
-				}
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
             ViewAccessPointForm accessPointWindow = MainForm.TopViewAccessPointForm;
 
@@ -1790,16 +1795,16 @@ namespace dp2rms
             else
                 accessPointWindow.Activate();
 
-                /*
-			else 
-			{
-				accessPointWindow.Focus();
-				if (accessPointWindow.WindowState == FormWindowState.Minimized) 
-				{
-					accessPointWindow.WindowState = FormWindowState.Normal;
-				}
-			}
-                 */
+            /*
+        else 
+        {
+            accessPointWindow.Focus();
+            if (accessPointWindow.WindowState == FormWindowState.Minimized) 
+            {
+                accessPointWindow.WindowState = FormWindowState.Normal;
+            }
+        }
+             */
 
             /*
 			if (accessPointWindow.Visible == false) 
@@ -1818,143 +1823,143 @@ namespace dp2rms
              */
 
 
-			// 使用Channel
-			channelSave = channel;
+            // 使用Channel
+            channelSave = channel;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial("正在获取检索点 " + respath.FullPath);
-				stop.BeginLoop();
+                stop.Initial("正在获取检索点 " + respath.FullPath);
+                stop.BeginLoop();
 
 
-				EnableControlsInLoading(true);
+                EnableControlsInLoading(true);
 
-				long lRet = channel.DoGetKeys(
-					respath.Path,
-					strXml,
-					"zh",
-					// "",
-					accessPointWindow,
-					stop,
-					out strError);
+                long lRet = channel.DoGetKeys(
+                    respath.Path,
+                    strXml,
+                    "zh",
+                    // "",
+                    accessPointWindow,
+                    stop,
+                    out strError);
 
-				EnableControlsInLoading(false);
+                EnableControlsInLoading(false);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, "获取检索点失败，原因: "+strError);
-					return;
-				}
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, "获取检索点失败，原因: " + strError);
+                    return;
+                }
 
                 // 设置标题
                 // ResPath respath = new ResPath(this.textBox_recPath.Text);
                 accessPointWindow.Text = "观察检索点: " + respath.ReverseFullPath;
 
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
 
 
 
-		}
+        }
 
 
-		// 启动查重
-		// parameters:
-		//		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
-		public void SearchDup(string strRecordPath)
-		{
-			if (strRecordPath == null || strRecordPath == "")
-				strRecordPath = textBox_recPath.Text;
+        // 启动查重
+        // parameters:
+        //		strRecordPath	记录路径。如果==null，表示直接用textBox_recPath中当前的内容作为路径
+        public void SearchDup(string strRecordPath)
+        {
+            if (strRecordPath == null || strRecordPath == "")
+                strRecordPath = textBox_recPath.Text;
 
-			if (strRecordPath == "")
-			{
-				MessageBox.Show(this, "必须指定好路径后, 才能进行查重");
-				return;
-			}
+            if (strRecordPath == "")
+            {
+                MessageBox.Show(this, "必须指定好路径后, 才能进行查重");
+                return;
+            }
 
-			ResPath respath = new ResPath(strRecordPath);
+            ResPath respath = new ResPath(strRecordPath);
 
-			string strError;
+            string strError;
 
-			string strXml = "";
+            string strXml = "";
             bool bHasUploadedFile = false;
 
-			int nRet = GetXmlRecord(out strXml, 
+            int nRet = GetXmlRecord(out strXml,
                 out bHasUploadedFile,
                 out strError);
-			if (nRet == -1)
-			{
-				MessageBox.Show(this, strError);
-				return;
-			}
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
 
 
-			// 最好激活当前已经存在的查重mdi窗口
+            // 最好激活当前已经存在的查重mdi窗口
 
-			DupDlg dlg = new DupDlg();
+            DupDlg dlg = new DupDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			// dlg.TopMost = true;
-			dlg.OpenDetail -= new OpenDetailEventHandler(this.MainForm.OpenDetailCallBack);
-			dlg.OpenDetail += new OpenDetailEventHandler(this.MainForm.OpenDetailCallBack);
-			dlg.Closed -= new EventHandler(dupdlg_Closed);
-			dlg.Closed += new EventHandler(dupdlg_Closed);
+            // dlg.TopMost = true;
+            dlg.OpenDetail -= new OpenDetailEventHandler(this.MainForm.OpenDetailCallBack);
+            dlg.OpenDetail += new OpenDetailEventHandler(this.MainForm.OpenDetailCallBack);
+            dlg.Closed -= new EventHandler(dupdlg_Closed);
+            dlg.Closed += new EventHandler(dupdlg_Closed);
 
-			SearchPanel searchpanel = new SearchPanel();
-			searchpanel.Initial(this.MainForm.Servers,
-				this.MainForm.cfgCache);
+            SearchPanel searchpanel = new SearchPanel();
+            searchpanel.Initial(this.MainForm.Servers,
+                this.MainForm.cfgCache);
 
-			searchpanel.ap = this.MainForm.AppInfo;
-			searchpanel.ApCfgTitle = "detailform_dupdlg";
+            searchpanel.ap = this.MainForm.AppInfo;
+            searchpanel.ApCfgTitle = "detailform_dupdlg";
 
-			string strDbFullName = respath.Url + "?" + ResPath.GetDbName(respath.Path);
-			// 获得上次遗留的缺省查重方案名
-			string strDupProjectName = GetUsedDefaultDupProject(strDbFullName);
+            string strDbFullName = respath.Url + "?" + ResPath.GetDbName(respath.Path);
+            // 获得上次遗留的缺省查重方案名
+            string strDupProjectName = GetUsedDefaultDupProject(strDbFullName);
 
-			dlg.Initial(searchpanel,
-				respath.Url,
-				true);
-			dlg.ProjectName = strDupProjectName;
-			dlg.RecordFullPath = strRecordPath;
-			dlg.Record = strXml;
-			dlg.MdiParent = this.MainForm;	// MDI化
-			dlg.Show();
+            dlg.Initial(searchpanel,
+                respath.Url,
+                true);
+            dlg.ProjectName = strDupProjectName;
+            dlg.RecordFullPath = strRecordPath;
+            dlg.Record = strXml;
+            dlg.MdiParent = this.MainForm;	// MDI化
+            dlg.Show();
 
 
 
-			// this.MainForm.SetFirstMdiWindowState();
-		}
+            // this.MainForm.SetFirstMdiWindowState();
+        }
 
-		// 获得使用过的方案名
-		public string GetUsedDefaultDupProject(string strOriginDbFullPath)
-		{
-			string strEntry = AttrNameEncode(strOriginDbFullPath);
-			// 获得上次遗留的缺省查重方案名
-			string strDupProjectName = this.MainForm.AppInfo.GetString(
-				"origin_project_name",
-				strEntry,
-				"{default}");
-			return strDupProjectName;
-		}
+        // 获得使用过的方案名
+        public string GetUsedDefaultDupProject(string strOriginDbFullPath)
+        {
+            string strEntry = AttrNameEncode(strOriginDbFullPath);
+            // 获得上次遗留的缺省查重方案名
+            string strDupProjectName = this.MainForm.AppInfo.GetString(
+                "origin_project_name",
+                strEntry,
+                "{default}");
+            return strDupProjectName;
+        }
 
-		// 设置使用过的方案名
-		public void SetUsedDefaultDupProject(string strOriginDbFullPath,
-			string strDupProjectName)
-		{
-			string strEntry = AttrNameEncode(strOriginDbFullPath);
+        // 设置使用过的方案名
+        public void SetUsedDefaultDupProject(string strOriginDbFullPath,
+            string strDupProjectName)
+        {
+            string strEntry = AttrNameEncode(strOriginDbFullPath);
             try
             {
                 this.MainForm.AppInfo.SetString(
@@ -1962,343 +1967,343 @@ namespace dp2rms
                     strEntry,
                     strDupProjectName);
             }
-            catch 
-            { 
+            catch
+            {
             }
-		}
+        }
 
 
-		string AttrNameEncode(string strText)
-		{
-			strText = strText.Replace("/", "_");
-			strText = strText.Replace("+", "_");
-			strText = strText.Replace("?", "_");
-			strText = strText.Replace(":", "_");
-			strText = strText.Replace(" ", "_");
+        string AttrNameEncode(string strText)
+        {
+            strText = strText.Replace("/", "_");
+            strText = strText.Replace("+", "_");
+            strText = strText.Replace("?", "_");
+            strText = strText.Replace(":", "_");
+            strText = strText.Replace(" ", "_");
 
-			return strText;
-		}
+            return strText;
+        }
 
-		private void dupdlg_Closed(object sender, EventArgs e)
-		{
-			DupDlg dlg = (DupDlg)sender;
-			string strDbFullName = dlg.OriginDbFullPath;
+        private void dupdlg_Closed(object sender, EventArgs e)
+        {
+            DupDlg dlg = (DupDlg)sender;
+            string strDbFullName = dlg.OriginDbFullPath;
 
-			this.SetUsedDefaultDupProject(strDbFullName, dlg.ProjectName);
-		}
-
-
-		public string PropertiesText
-		{
-			get 
-			{
-				return "记录路径:\t" + this.textBox_recPath.Text + "\r\n"
-					+ "时间戳:\t" + (this.TimeStamp == null ? "(空)" : ByteArray.GetHexTimeStampString(this.TimeStamp)) + "\r\n";
-			}
-		}
-
-		// 在装载记录的时期, disable某些界面元素
-		void EnableControlsInLoading(bool bLoading)
-		{
-			if (bLoading == true) 
-			{
-				textBox_recPath.Enabled = false;
-				button_findRecPath.Enabled = false;
-				// XmlEditor.Enabled = false;	// 需要优化绘制过程
-				listView_resFiles.Enabled = false;
-
-				if (MainForm.ActiveMdiChild == this) 
-				{
-					// 工具条按钮
-					MainForm.toolBarButton_save.Enabled = false;
-					MainForm.toolBarButton_refresh.Enabled = false;
-					MainForm.toolBarButton_loadTemplate.Enabled = false;
-
-					MainForm.toolBarButton_prev.Enabled = false;
-					MainForm.toolBarButton_next.Enabled = false;
-				}
-
-			}
-			else 
-			{
-				textBox_recPath.Enabled = true;
-				button_findRecPath.Enabled = true;
-				XmlEditor.Enabled = true;
-				listView_resFiles.Enabled = true;
-
-				if (MainForm.ActiveMdiChild == this) 
-				{
-					// 工具条按钮
-					MainForm.toolBarButton_save.Enabled = true;
-					MainForm.toolBarButton_refresh.Enabled = true;
-					MainForm.toolBarButton_loadTemplate.Enabled = true;
-
-					MainForm.toolBarButton_prev.Enabled = true;
-					MainForm.toolBarButton_next.Enabled = true;
-				}
-			}
+            this.SetUsedDefaultDupProject(strDbFullName, dlg.ProjectName);
+        }
 
 
+        public string PropertiesText
+        {
+            get
+            {
+                return "记录路径:\t" + this.textBox_recPath.Text + "\r\n"
+                    + "时间戳:\t" + (this.TimeStamp == null ? "(空)" : ByteArray.GetHexTimeStampString(this.TimeStamp)) + "\r\n";
+            }
+        }
 
-		}
+        // 在装载记录的时期, disable某些界面元素
+        void EnableControlsInLoading(bool bLoading)
+        {
+            if (bLoading == true)
+            {
+                textBox_recPath.Enabled = false;
+                button_findRecPath.Enabled = false;
+                // XmlEditor.Enabled = false;	// 需要优化绘制过程
+                listView_resFiles.Enabled = false;
 
-		// 记录路径发生任何修改
-		private void textBox_recPath_TextChanged(object sender, System.EventArgs e)
-		{
-			SetDeleteToolButton();
-		}
+                if (MainForm.ActiveMdiChild == this)
+                {
+                    // 工具条按钮
+                    MainForm.toolBarButton_save.Enabled = false;
+                    MainForm.toolBarButton_refresh.Enabled = false;
+                    MainForm.toolBarButton_loadTemplate.Enabled = false;
 
-		void SetDeleteToolButton()
-		{
-			if (this == MainForm.ActiveMdiChild) 
-			{
-				if (textBox_recPath.Text != "")
-				{
-					MainForm.toolBarButton_delete.Enabled = true;
-				}
-				else 
-				{
-					MainForm.toolBarButton_delete.Enabled = false;
-				}
-			}
-		}
+                    MainForm.toolBarButton_prev.Enabled = false;
+                    MainForm.toolBarButton_next.Enabled = false;
+                }
 
+            }
+            else
+            {
+                textBox_recPath.Enabled = true;
+                button_findRecPath.Enabled = true;
+                XmlEditor.Enabled = true;
+                listView_resFiles.Enabled = true;
 
-		// 回调函数
-		public void DownloadFiles()
-		{
-			string[] ids = this.listView_resFiles.GetSelectedDownloadIds();
-			string strError;
+                if (MainForm.ActiveMdiChild == this)
+                {
+                    // 工具条按钮
+                    MainForm.toolBarButton_save.Enabled = true;
+                    MainForm.toolBarButton_refresh.Enabled = true;
+                    MainForm.toolBarButton_loadTemplate.Enabled = true;
 
-			for(int i=0;i<ids.Length;i++)
-			{
-				int nRet = DownloadOneFile(ids[i],
-					out strError);
-				if (nRet == -1)
-					goto ERROR1;
-
-			}
-
-			MessageBox.Show(this, "下载资源文件完成 ...");
-			return;
-
-			ERROR1:
-				MessageBox.Show(this, strError);
-		}
-
-		int DownloadOneFile(string strID,
-			out string strError)
-		{
-
-			strError = "";
-			ResPath respath = new ResPath(textBox_recPath.Text);
-			string strResPath = respath.Path + "/object/" + strID;
-
-			strResPath = strResPath.Replace(":", "/");
+                    MainForm.toolBarButton_prev.Enabled = true;
+                    MainForm.toolBarButton_next.Enabled = true;
+                }
+            }
 
 
-			string strLocalPath = this.listView_resFiles.GetLocalFileName(strID);
 
-			SaveFileDialog dlg = new SaveFileDialog();
+        }
 
-			dlg.Title = "请指定要保存的本地文件名";
-			dlg.CreatePrompt = false;
-			dlg.FileName = strLocalPath == "" ? strID + ".res" : strLocalPath;
-			dlg.InitialDirectory = Environment.CurrentDirectory;
-			// dlg.Filter = "projects files (outer*.xml)|outer*.xml|All files (*.*)|*.*" ;
+        // 记录路径发生任何修改
+        private void textBox_recPath_TextChanged(object sender, System.EventArgs e)
+        {
+            SetDeleteToolButton();
+        }
 
-			dlg.RestoreDirectory = true ;
+        void SetDeleteToolButton()
+        {
+            if (this == MainForm.ActiveMdiChild)
+            {
+                if (textBox_recPath.Text != "")
+                {
+                    MainForm.toolBarButton_delete.Enabled = true;
+                }
+                else
+                {
+                    MainForm.toolBarButton_delete.Enabled = false;
+                }
+            }
+        }
 
-			if(dlg.ShowDialog() != DialogResult.OK)
-			{
-				strError = "放弃";
-				return -1;
-			}
+
+        // 回调函数
+        public void DownloadFiles()
+        {
+            string[] ids = this.listView_resFiles.GetSelectedDownloadIds();
+            string strError;
+
+            for (int i = 0; i < ids.Length; i++)
+            {
+                int nRet = DownloadOneFile(ids[i],
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+            }
+
+            MessageBox.Show(this, "下载资源文件完成 ...");
+            return;
+
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        int DownloadOneFile(string strID,
+            out string strError)
+        {
+
+            strError = "";
+            ResPath respath = new ResPath(textBox_recPath.Text);
+            string strResPath = respath.Path + "/object/" + strID;
+
+            strResPath = strResPath.Replace(":", "/");
 
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            string strLocalPath = this.listView_resFiles.GetLocalFileName(strID);
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            SaveFileDialog dlg = new SaveFileDialog();
 
-			try 
-			{
+            dlg.Title = "请指定要保存的本地文件名";
+            dlg.CreatePrompt = false;
+            dlg.FileName = strLocalPath == "" ? strID + ".res" : strLocalPath;
+            dlg.InitialDirectory = Environment.CurrentDirectory;
+            // dlg.Filter = "projects files (outer*.xml)|outer*.xml|All files (*.*)|*.*" ;
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+            {
+                strError = "放弃";
+                return -1;
+            }
+
+
+            // 使用Channel
+            RmsChannel channelSave = channel;
+
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
+
+            try
+            {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在下载资源文件 " + strResPath);
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-				byte [] baOutputTimeStamp = null;
+                byte[] baOutputTimeStamp = null;
 
-				EnableControlsInLoading(true);
+                EnableControlsInLoading(true);
 
-				string strMetaData;
-				string strOutputPath = "";
+                string strMetaData;
+                string strOutputPath = "";
 
-				long lRet = channel.GetRes(strResPath,
-					dlg.FileName,
-					stop,
-					out strMetaData,
-					out baOutputTimeStamp,
-					out strOutputPath,
-					out strError);
+                long lRet = channel.GetRes(strResPath,
+                    dlg.FileName,
+                    stop,
+                    out strMetaData,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				EnableControlsInLoading(false);
+                EnableControlsInLoading(false);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, "下载资源文件失败，原因: "+strError);
-					goto ERROR1;
-				}
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, "下载资源文件失败，原因: " + strError);
+                    goto ERROR1;
+                }
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
-			return 0;
+            }
+            finally
+            {
+                channel = channelSave;
+            }
+            return 0;
 
-			ERROR1:
-			return -1;
+        ERROR1:
+            return -1;
 
-		}
+        }
 
-		// 回调函数
-		int DownloadOneFileMetaData(string strID,
-			out string strResultXml,
-			out byte[] timestamp,
-			out string strError)
-		{
-			timestamp = null;
-			strError = "";
-			ResPath respath = new ResPath(textBox_recPath.Text);
-			string strResPath = respath.Path + "/object/" + strID;
+        // 回调函数
+        int DownloadOneFileMetaData(string strID,
+            out string strResultXml,
+            out byte[] timestamp,
+            out string strError)
+        {
+            timestamp = null;
+            strError = "";
+            ResPath respath = new ResPath(textBox_recPath.Text);
+            string strResPath = respath.Path + "/object/" + strID;
 
-			strResPath = strResPath.Replace(":", "/");
+            strResPath = strResPath.Replace(":", "/");
 
-			// 使用Channel
+            // 使用Channel
 
-			RmsChannel channelSave = channel;
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在下载资源文件的元数据 " + strResPath);
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-				byte [] baOutputTimeStamp = null;
-				string strOutputPath = "";
+                byte[] baOutputTimeStamp = null;
+                string strOutputPath = "";
 
-				EnableControlsInLoading(true);
+                EnableControlsInLoading(true);
 
-				// 只得到metadata
-				long lRet = channel.GetRes(strResPath,
-					(Stream)null,
-					stop,
-					"metadata,timestamp,outputpath",
-					null,
-					out strResultXml,
-					out baOutputTimeStamp,
-					out strOutputPath,
-					out strError);
+                // 只得到metadata
+                long lRet = channel.GetRes(strResPath,
+                    (Stream)null,
+                    stop,
+                    "metadata,timestamp,outputpath",
+                    null,
+                    out strResultXml,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				EnableControlsInLoading(false);
+                EnableControlsInLoading(false);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, "下载资源文件元数据失败，原因: "+strError);
-					goto ERROR1;
-				}
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, "下载资源文件元数据失败，原因: " + strError);
+                    goto ERROR1;
+                }
 
-				timestamp = baOutputTimeStamp;
+                timestamp = baOutputTimeStamp;
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
-			return 0;
+            }
+            finally
+            {
+                channel = channelSave;
+            }
+            return 0;
 
-			ERROR1:
-			return -1;
-		}
+        ERROR1:
+            return -1;
+        }
 
-		// 获得Xml记录
-		// 本函数有修改this.channel的危险
+        // 获得Xml记录
+        // 本函数有修改this.channel的危险
         // parameters:
         //      bHasFile    是否具有已上载的资源文件?
-		int GetXmlRecord(out string strXml,
+        int GetXmlRecord(out string strXml,
             out bool bHasUploadedFile,
-			out string strError)
-		{
+            out string strError)
+        {
             bHasUploadedFile = false;
-			strXml = "";
+            strXml = "";
 
-			int nRet = 0;
+            int nRet = 0;
 
-			if (!(Control.ModifierKeys == Keys.Control))
-			{
-				// 确保控件内容同步
-				nRet = this.Flush(out strError);
-				if (nRet == -1)
-					return -1;
-			}
+            if (!(Control.ModifierKeys == Keys.Control))
+            {
+                // 确保控件内容同步
+                nRet = this.Flush(out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
 
-			// 从XML数据中移除工作用的临时属性
-			nRet = ResFileList.RemoveWorkingAttrs(XmlEditor.Xml,
-				out strXml,
+            // 从XML数据中移除工作用的临时属性
+            nRet = ResFileList.RemoveWorkingAttrs(XmlEditor.Xml,
+                out strXml,
                 out bHasUploadedFile,
-				out strError);
-			if (nRet == -1)
-			{
-				strError = "RemoveWorkingAttrs()失败，原因: "+strError;
-				return -1;
-			}
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "RemoveWorkingAttrs()失败，原因: " + strError;
+                return -1;
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
-		// 保存到备份格式
-		public void SaveToBackup(string strOutputFileName)
-		{
-			string strError;
+        // 保存到备份格式
+        public void SaveToBackup(string strOutputFileName)
+        {
+            string strError;
 
-			// 询问文件名
-			if (strOutputFileName == null)
-			{
-				SaveFileDialog dlg = new SaveFileDialog();
+            // 询问文件名
+            if (strOutputFileName == null)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
 
-				dlg.Title = "请指定要保存的备份文件名";
-				dlg.CreatePrompt = false;
-				dlg.OverwritePrompt = false;
+                dlg.Title = "请指定要保存的备份文件名";
+                dlg.CreatePrompt = false;
+                dlg.OverwritePrompt = false;
                 dlg.FileName = MainForm.UsedBackupFileName;  // "*.dp2bak";
-				dlg.InitialDirectory = Environment.CurrentDirectory;
-				dlg.Filter = "backup files (*.dp2bak)|*.dp2bak|All files (*.*)|*.*" ;
+                dlg.InitialDirectory = Environment.CurrentDirectory;
+                dlg.Filter = "backup files (*.dp2bak)|*.dp2bak|All files (*.*)|*.*";
 
-				dlg.RestoreDirectory = true;
+                dlg.RestoreDirectory = true;
 
-				if(dlg.ShowDialog() != DialogResult.OK)
-					return;
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return;
 
-				strOutputFileName = dlg.FileName;
+                strOutputFileName = dlg.FileName;
                 MainForm.UsedBackupFileName = strOutputFileName;    // 记忆下来
-			}
+            }
 
             bool bOverwrite = false;
 
@@ -2324,113 +2329,113 @@ namespace dp2rms
                 return; // 放弃
             }
 
-			// 打开文件
+            // 打开文件
 
-			FileStream fileTarget = File.Open(
-				strOutputFileName,
-				FileMode.OpenOrCreate,	// 原来是Open，后来修改为OpenOrCreate。这样对临时文件被系统管理员手动意外删除(但是xml文件中仍然记载了任务)的情况能够适应。否则会抛出FileNotFoundException异常
-				FileAccess.Write,
-				FileShare.ReadWrite);
+            FileStream fileTarget = File.Open(
+                strOutputFileName,
+                FileMode.OpenOrCreate,	// 原来是Open，后来修改为OpenOrCreate。这样对临时文件被系统管理员手动意外删除(但是xml文件中仍然记载了任务)的情况能够适应。否则会抛出FileNotFoundException异常
+                FileAccess.Write,
+                FileShare.ReadWrite);
 
             if (bOverwrite == true)
                 fileTarget.SetLength(0);
 
-			try 
-			{
+            try
+            {
 
-				fileTarget.Seek(0, SeekOrigin.End);	// 具有追加的能力
+                fileTarget.Seek(0, SeekOrigin.End);	// 具有追加的能力
 
-				long lStart = fileTarget.Position;	// 记忆起始位置
+                long lStart = fileTarget.Position;	// 记忆起始位置
 
-				byte [] length = new byte[8];
+                byte[] length = new byte[8];
 
-				fileTarget.Write(length, 0, 8);	// 临时写点数据,占据记录总长度位置
+                fileTarget.Write(length, 0, 8);	// 临时写点数据,占据记录总长度位置
 
                 bool bHasUploadedFile = false;
 
 
-				// 获得Xml记录
-				string strXmlBody;	
-				int nRet = GetXmlRecord(out strXmlBody,
+                // 获得Xml记录
+                string strXmlBody;
+                int nRet = GetXmlRecord(out strXmlBody,
                     out bHasUploadedFile,
                     out strError);
-				if (nRet == -1)
-				{
-					fileTarget.SetLength(lStart);	// 把本次追加写入的全部去掉
-					goto ERROR1;
-				}
+                if (nRet == -1)
+                {
+                    fileTarget.SetLength(lStart);	// 把本次追加写入的全部去掉
+                    goto ERROR1;
+                }
 
-				ResPath respath = new ResPath(textBox_recPath.Text);
+                ResPath respath = new ResPath(textBox_recPath.Text);
 
-				// 向backup文件中保存第一个 res
-				ExportUtil.ChangeMetaData(ref this.m_strMetaData, // ResFileList
-					null,
-					null,
-					null,
-					null,
-					respath.FullPath,
-					ByteArray.GetHexTimeStampString(this.TimeStamp));   // 任延华加 2005/6/11
+                // 向backup文件中保存第一个 res
+                ExportUtil.ChangeMetaData(ref this.m_strMetaData, // ResFileList
+                    null,
+                    null,
+                    null,
+                    null,
+                    respath.FullPath,
+                    ByteArray.GetHexTimeStampString(this.TimeStamp));   // 任延华加 2005/6/11
 
-				long lRet = Backup.WriteFirstResToBackupFile(
-					fileTarget,
-					this.m_strMetaData,
-					strXmlBody);
+                long lRet = Backup.WriteFirstResToBackupFile(
+                    fileTarget,
+                    this.m_strMetaData,
+                    strXmlBody);
 
-				// 使用Channel
-				RmsChannel channelSave = channel;
+                // 使用Channel
+                RmsChannel channelSave = channel;
 
-				channel = Channels.GetChannel(respath.Url);
-				Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                channel = Channels.GetChannel(respath.Url);
+                Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-				try 
-				{
+                try
+                {
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
                     stop.Initial("正在保存记录 " + respath.FullPath + "到备份文件 " + strOutputFileName);
-					stop.BeginLoop();
+                    stop.BeginLoop();
 
-					EnableControlsInLoading(true);
+                    EnableControlsInLoading(true);
 
-					nRet = this.listView_resFiles.DoSaveResToBackupFile(
-						fileTarget,
-						respath.Path,
-						channel,
-						stop,
-						out strError);
+                    nRet = this.listView_resFiles.DoSaveResToBackupFile(
+                        fileTarget,
+                        respath.Path,
+                        channel,
+                        stop,
+                        out strError);
 
-					EnableControlsInLoading(false);
+                    EnableControlsInLoading(false);
 
-					stop.EndLoop();
+                    stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
-					stop.Initial("");
+                    stop.Initial("");
 
-					if (nRet == -1) 
-					{
-						fileTarget.SetLength(lStart);	// 把本次追加写入的全部去掉
-						strError = "保存记录失败，原因: "+ strError;
-						goto ERROR1;
-					}
-				}
-				finally 
-				{
-					channel = channelSave;
-				}
+                    if (nRet == -1)
+                    {
+                        fileTarget.SetLength(lStart);	// 把本次追加写入的全部去掉
+                        strError = "保存记录失败，原因: " + strError;
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    channel = channelSave;
+                }
 
-				// 写入总长度
-				long lTotalLength = fileTarget.Position - lStart - 8;
-				byte[] data = BitConverter.GetBytes(lTotalLength);
+                // 写入总长度
+                long lTotalLength = fileTarget.Position - lStart - 8;
+                byte[] data = BitConverter.GetBytes(lTotalLength);
 
                 fileTarget.Seek(lStart - fileTarget.Position, SeekOrigin.Current);
                 Debug.Assert(fileTarget.Position == lStart, "");
 
-				// fileTarget.Seek(lStart, SeekOrigin.Begin);   // 性能
-				fileTarget.Write(data, 0, 8);
-			}
-			finally 
-			{
-				fileTarget.Close();
-				fileTarget = null;
-			}
+                // fileTarget.Seek(lStart, SeekOrigin.Begin);   // 性能
+                fileTarget.Write(data, 0, 8);
+            }
+            finally
+            {
+                fileTarget.Close();
+                fileTarget = null;
+            }
 
             string strText = "";
 
@@ -2439,125 +2444,125 @@ namespace dp2rms
             else
                 strText = "覆盖保存备份文件完成 ...";
 
-			MessageBox.Show(this, strText);
-			return;
+            MessageBox.Show(this, strText);
+            return;
 
-		
-			ERROR1:
-				MessageBox.Show(this, strError);
-		}
 
-		// 自动加工数据
-		public void AutoGenerate()
-		{
-			// 库名部分路径
-			ResPath respath = new ResPath(textBox_recPath.Text);
-			respath.MakeDbName();
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
-			string strError;
-			string strCode;
-			string strRef;
+        // 自动加工数据
+        public void AutoGenerate()
+        {
+            // 库名部分路径
+            ResPath respath = new ResPath(textBox_recPath.Text);
+            respath.MakeDbName();
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            string strError;
+            string strCode;
+            string strRef;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            // 使用Channel
+            RmsChannel channelSave = channel;
 
-			try 
-			{
-				string strCfgPath = respath.Path + "/cfgs/autoGenerate.cs";
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-				string strCfgRefPath = respath.Path + "/cfgs/autoGenerate.cs.ref";
+            try
+            {
+                string strCfgPath = respath.Path + "/cfgs/autoGenerate.cs";
+
+                string strCfgRefPath = respath.Path + "/cfgs/autoGenerate.cs.ref";
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在下载文件" + strCfgPath);
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-				byte[] baTimeStamp = null;
-				string strMetaData;
-				string strOutputPath;
+                byte[] baTimeStamp = null;
+                string strMetaData;
+                string strOutputPath;
 
-				long lRet = channel.GetRes(
-					MainForm.cfgCache,
-					strCfgPath,
-					out strCode,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
+                long lRet = channel.GetRes(
+                    MainForm.cfgCache,
+                    strCfgPath,
+                    out strCode,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, strError);
-					return;
-				}
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
 
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在下载文件" + strCfgRefPath);
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-				lRet = channel.GetRes(
-					MainForm.cfgCache,
-					strCfgRefPath,
-					out strRef,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
+                lRet = channel.GetRes(
+                    MainForm.cfgCache,
+                    strCfgRefPath,
+                    out strRef,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					MessageBox.Show(this, strError);
-					return;
-				}
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
 
 
-			// 执行代码
-			int nRet = RunScript(strCode,
+            // 执行代码
+            int nRet = RunScript(strCode,
                 strRef,
                 out strError);
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, strError);
-				return;
-			}
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
 
-		}
+        }
 
-		int RunScript(string strCode,
-			string strRef,
-			out string strError)
-		{
-			strError = "";
-			string [] saRef = null;
-			int nRet;
-			string strWarning = "";
-			
-			nRet = Script.GetRefs(strRef,
+        int RunScript(string strCode,
+            string strRef,
+            out string strError)
+        {
+            strError = "";
+            string[] saRef = null;
+            int nRet;
+            string strWarning = "";
+
+            nRet = Script.GetRefs(strRef,
                 out saRef,
                 out strError);
-			if (nRet == -1)
-				return -1;
+            if (nRet == -1)
+                return -1;
 
-			string[] saAddRef = {
+            string[] saAddRef = {
 									Environment.CurrentDirectory + "\\digitalplatform.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
@@ -2574,74 +2579,74 @@ namespace dp2rms
 									Environment.CurrentDirectory + "\\dp2rms.exe"
 								};
 
-			if (saAddRef != null)
-			{
-				string[] saTemp = new string[saRef.Length + saAddRef.Length];
-				Array.Copy(saRef,0, saTemp, 0, saRef.Length);
-				Array.Copy(saAddRef,0, saTemp, saRef.Length, saAddRef.Length);
-				saRef = saTemp;
-			}
+            if (saAddRef != null)
+            {
+                string[] saTemp = new string[saRef.Length + saAddRef.Length];
+                Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
+                Array.Copy(saAddRef, 0, saTemp, saRef.Length, saAddRef.Length);
+                saRef = saTemp;
+            }
 
-			Assembly assembly = Script.CreateAssembly(
-				strCode,
+            Assembly assembly = Script.CreateAssembly(
+                strCode,
                 saRef,
-				null,	// strLibPaths,
-				null,	// strOutputFile,
-				out strError,
-				out strWarning);
-			if (assembly == null)
-			{
-				strError = "脚本编译发现错误或警告:\r\n" + strError;
-				return -1;
-			}
+                null,	// strLibPaths,
+                null,	// strOutputFile,
+                out strError,
+                out strWarning);
+            if (assembly == null)
+            {
+                strError = "脚本编译发现错误或警告:\r\n" + strError;
+                return -1;
+            }
 
-			// 得到Assembly中Host派生类Type
-			Type entryClassType = Script.GetDerivedClassType(
-				assembly,
-				"dp2rms.Host");
+            // 得到Assembly中Host派生类Type
+            Type entryClassType = Script.GetDerivedClassType(
+                assembly,
+                "dp2rms.Host");
 
-			// new一个Host派生对象
-			Host hostObj = (Host)entryClassType.InvokeMember(null, 
-				BindingFlags.DeclaredOnly | 
-				BindingFlags.Public | BindingFlags.NonPublic | 
-				BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
-				null);
+            // new一个Host派生对象
+            Host hostObj = (Host)entryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
 
-			// 为Host派生类设置参数
-			hostObj.DetailForm = this;
-			hostObj.Assembly = assembly;
+            // 为Host派生类设置参数
+            hostObj.DetailForm = this;
+            hostObj.Assembly = assembly;
 
-			HostEventArgs e = new HostEventArgs();
+            HostEventArgs e = new HostEventArgs();
 
-			nRet = this.Flush(out strError);
-			if (nRet == -1)
-				return -1;
-
-
-			hostObj.Main(null, e);
-
-			nRet = this.Flush(out strError);
-			if (nRet == -1)
-				return -1;
-
-			return 0;
-		}
+            nRet = this.Flush(out strError);
+            if (nRet == -1)
+                return -1;
 
 
-		/*
-		public char[] GetSpecialChars()
-		{
-			string strChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’";
-			char[] result = new char[strChars.Length];
+            hostObj.Main(null, e);
 
-			for(int i=0;i<result.Length;i++)
-			{
-				result[i] = strChars[i];
-			}
+            nRet = this.Flush(out strError);
+            if (nRet == -1)
+                return -1;
 
-			return result;
-		}
-		*/
+            return 0;
+        }
+
+
+        /*
+        public char[] GetSpecialChars()
+        {
+            string strChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’";
+            char[] result = new char[strChars.Length];
+
+            for(int i=0;i<result.Length;i++)
+            {
+                result[i] = strChars[i];
+            }
+
+            return result;
+        }
+        */
 
         // 兼容以前版本
         public int HanziTextToPinyin(
@@ -2659,71 +2664,71 @@ namespace dp2rms
         }
 
 
-		// 把字符串中的汉字和拼音分离
+        // 把字符串中的汉字和拼音分离
         // parameters:
         //      bLocal  是否从本地获取拼音
         // return:
         //      -1  出错
         //      0   用户希望中断
         //      1   正常
-		public int HanziTextToPinyin(
+        public int HanziTextToPinyin(
             bool bLocal,
             string strText,
-			PinyinStyle style,
-			out string strPinyin,
-			out string strError)
-		{
-			strError = "";
-			strPinyin = "";
+            PinyinStyle style,
+            out string strPinyin,
+            out string strError)
+        {
+            strError = "";
+            strPinyin = "";
 
-			string strSpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’";
-
-
-			string strHanzi;
-			int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
+            string strSpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’";
 
 
-			for(int i=0;i<strText.Length;i++)
-			{
-				char ch = strText[i];
-
-				strHanzi = "";
-
-				if (ch >= 0 && ch <= 128) 
-				{
-					if (nStatus == 2)
-						strPinyin += " ";
-
-					strPinyin += ch;
-
-					if (ch == ' ')
-						nStatus = 1;
-					else
-						nStatus = 0;
-
-					continue;
-				}
-				else 
-				{	// 汉字
-					strHanzi += ch;
-				}
-
-				// 汉字前面出现了英文或者汉字，中间间隔空格
-				if (nStatus == 2 || nStatus == 0)
-					strPinyin += " ";
-
-				
-				// 看看是否特殊符号
-				if (strSpecialChars.IndexOf(strHanzi) != -1)
-				{
-					strPinyin += strHanzi;	// 放在本应是拼音的位置
-					nStatus = 2;
-					continue;
-				}
+            string strHanzi;
+            int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
 
 
-				// 获得拼音
-				string strResultPinyin = "";
+            for (int i = 0; i < strText.Length; i++)
+            {
+                char ch = strText[i];
+
+                strHanzi = "";
+
+                if (ch >= 0 && ch <= 128)
+                {
+                    if (nStatus == 2)
+                        strPinyin += " ";
+
+                    strPinyin += ch;
+
+                    if (ch == ' ')
+                        nStatus = 1;
+                    else
+                        nStatus = 0;
+
+                    continue;
+                }
+                else
+                {	// 汉字
+                    strHanzi += ch;
+                }
+
+                // 汉字前面出现了英文或者汉字，中间间隔空格
+                if (nStatus == 2 || nStatus == 0)
+                    strPinyin += " ";
+
+
+                // 看看是否特殊符号
+                if (strSpecialChars.IndexOf(strHanzi) != -1)
+                {
+                    strPinyin += strHanzi;	// 放在本应是拼音的位置
+                    nStatus = 2;
+                    continue;
+                }
+
+
+                // 获得拼音
+                string strResultPinyin = "";
 
                 int nRet = 0;
 
@@ -2743,46 +2748,46 @@ namespace dp2rms
                          out strResultPinyin,
                          out strError);
                 }
-				if (nRet == -1)
-					return -1;
-				if (nRet == 0) 
-				{	// canceld
-					strPinyin += strHanzi;	// 只好将汉字放在本应是拼音的位置
-					nStatus = 2;
-					continue;
-				}
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {	// canceld
+                    strPinyin += strHanzi;	// 只好将汉字放在本应是拼音的位置
+                    nStatus = 2;
+                    continue;
+                }
 
-				Debug.Assert(strResultPinyin != "", "");
+                Debug.Assert(strResultPinyin != "", "");
 
-				strResultPinyin = strResultPinyin.Trim();
-				if (strResultPinyin.IndexOf(";", 0) != -1)
-				{	// 如果是多个拼音
-					SelPinyinDlg dlg = new SelPinyinDlg();
+                strResultPinyin = strResultPinyin.Trim();
+                if (strResultPinyin.IndexOf(";", 0) != -1)
+                {	// 如果是多个拼音
+                    SelPinyinDlg dlg = new SelPinyinDlg();
                     dlg.Font = GuiUtil.GetDefaultFont();
 
-					dlg.SampleText = strText;
-					dlg.Offset = i;
-					dlg.Pinyins = strResultPinyin;
-					dlg.Hanzi = strHanzi;
+                    dlg.SampleText = strText;
+                    dlg.Offset = i;
+                    dlg.Pinyins = strResultPinyin;
+                    dlg.Hanzi = strHanzi;
 
-					MainForm.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
+                    MainForm.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
 
-					dlg.ShowDialog(this);
+                    dlg.ShowDialog(this);
 
-					MainForm.AppInfo.UnlinkFormState(dlg);
+                    MainForm.AppInfo.UnlinkFormState(dlg);
 
                     Debug.Assert(DialogResult.Cancel != DialogResult.Abort, "推断");
 
-					if (dlg.DialogResult == DialogResult.Cancel)
-					{
-						strPinyin += strHanzi;
-					}
-					else if (dlg.DialogResult == DialogResult.OK)
-					{
-						strPinyin += ConvertSinglePinyinByStyle(
-							dlg.ResultPinyin,
-							style);
-					}
+                    if (dlg.DialogResult == DialogResult.Cancel)
+                    {
+                        strPinyin += strHanzi;
+                    }
+                    else if (dlg.DialogResult == DialogResult.OK)
+                    {
+                        strPinyin += ConvertSinglePinyinByStyle(
+                            dlg.ResultPinyin,
+                            style);
+                    }
                     else if (dlg.DialogResult == DialogResult.Abort)
                     {
                         return 0;   // 用户希望整个中断
@@ -2791,38 +2796,38 @@ namespace dp2rms
                     {
                         Debug.Assert(false, "SelPinyinDlg返回时出现意外的DialogResult值");
                     }
-				}
-				else 
-				{ 
-					// 单个拼音
+                }
+                else
+                {
+                    // 单个拼音
 
-					strPinyin += ConvertSinglePinyinByStyle(
-						strResultPinyin,
-						style);
-				}
-				nStatus = 2;
-			}
+                    strPinyin += ConvertSinglePinyinByStyle(
+                        strResultPinyin,
+                        style);
+                }
+                nStatus = 2;
+            }
 
-			return 1;   // 正常结束
-		}
-		
-		// 获得一个汉字的拼音
-		// 所获得的拼音, 是一个分号间隔的字符串, 表示对应于这个汉字的多音
-		// return:
-		//		-1	error
-		//		1	found
-		//		0	not found
-		int GetOnePinyin(string strOneHanzi,
-			out string strPinyin,
-			out string strError)
-		{
-			strPinyin = "";
-			strError = "";
+            return 1;   // 正常结束
+        }
 
-			// 拼音库路径
-			string strPinyinDbPath = MainForm.AppInfo.GetString("pinyin",
-				"pinyin_db_path",
-				"");
+        // 获得一个汉字的拼音
+        // 所获得的拼音, 是一个分号间隔的字符串, 表示对应于这个汉字的多音
+        // return:
+        //		-1	error
+        //		1	found
+        //		0	not found
+        int GetOnePinyin(string strOneHanzi,
+            out string strPinyin,
+            out string strError)
+        {
+            strPinyin = "";
+            strError = "";
+
+            // 拼音库路径
+            string strPinyinDbPath = MainForm.AppInfo.GetString("pinyin",
+                "pinyin_db_path",
+                "");
 
             if (String.IsNullOrEmpty(strPinyinDbPath) == true)
             {
@@ -2830,128 +2835,128 @@ namespace dp2rms
                 return -1;
             }
 
-			ResPath respath = new ResPath(strPinyinDbPath);
+            ResPath respath = new ResPath(strPinyinDbPath);
 
-			string strDbName = respath.Path;
+            string strDbName = respath.Path;
 
             // 2007/4/5 改造 加上了 GetXmlStringSimple()
-			string strQueryXml = "<target list='" + strDbName + ":" + "汉字'><item><word>"
-				+ StringUtil.GetXmlStringSimple(strOneHanzi)
+            string strQueryXml = "<target list='" + strDbName + ":" + "汉字'><item><word>"
+                + StringUtil.GetXmlStringSimple(strOneHanzi)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>10</maxCount></item><lang>chi</lang></target>";
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            // 使用Channel
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(respath.Url);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在检索拼音 '" + strOneHanzi + "'");
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-				try 
-				{
+                try
+                {
 
-					long nRet = channel.DoSearch(strQueryXml,
+                    long nRet = channel.DoSearch(strQueryXml,
                         "default",
                         out strError);
-					if (nRet == -1) 
-					{
-						strError = "检索拼音库时出错: " + strError;
-						return -1;
-					}
-					if (nRet == 0)
-						return 0;	// not found
+                    if (nRet == -1)
+                    {
+                        strError = "检索拼音库时出错: " + strError;
+                        return -1;
+                    }
+                    if (nRet == 0)
+                        return 0;	// not found
 
-					List<string> aPath = null;
-					nRet = channel.DoGetSearchResult(
+                    List<string> aPath = null;
+                    nRet = channel.DoGetSearchResult(
                         "default",
-						1,
-						this.Lang,
-						stop,
-						out aPath,
-						out strError);
-					if (nRet == -1) 
-					{
-						strError = "检索拼音库获取检索结果时出错: " + strError;
-						return -1;
-					}
+                        1,
+                        this.Lang,
+                        stop,
+                        out aPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "检索拼音库获取检索结果时出错: " + strError;
+                        return -1;
+                    }
 
-					if (aPath.Count == 0)
-					{
-						strError = "检索拼音库获取的检索结果为空";
-						return -1;
-					}
+                    if (aPath.Count == 0)
+                    {
+                        strError = "检索拼音库获取的检索结果为空";
+                        return -1;
+                    }
 
-					string strStyle = "content,data";
+                    string strStyle = "content,data";
 
-					string strContent;
-					string strMetaData;
-					byte[] baTimeStamp;
-					string strOutputPath;
+                    string strContent;
+                    string strMetaData;
+                    byte[] baTimeStamp;
+                    string strOutputPath;
 
-					nRet = channel.GetRes((string)aPath[0],
-						strStyle,
-						// this.eventClose,
-						out strContent,
-						out strMetaData,
-						out baTimeStamp,
-						out strOutputPath,
-						out strError);
-					if (nRet == -1) 
-					{
-						strError = "获取拼音记录体时出错: " + strError;
-						return -1;
-					}
+                    nRet = channel.GetRes((string)aPath[0],
+                        strStyle,
+                        // this.eventClose,
+                        out strContent,
+                        out strMetaData,
+                        out baTimeStamp,
+                        out strOutputPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "获取拼音记录体时出错: " + strError;
+                        return -1;
+                    }
 
-					// 取出拼音字符串
-					XmlDocument dom = new XmlDocument();
+                    // 取出拼音字符串
+                    XmlDocument dom = new XmlDocument();
 
 
-					try
-					{
-						dom.LoadXml(strContent);
-					}
-					catch (Exception ex)
-					{
-						strError  = "汉字 '" + strOneHanzi + "' 所获取的拼音记录 " + strContent + " XML数据装载出错: " + ex.Message;
-						return -1;
-					}
+                    try
+                    {
+                        dom.LoadXml(strContent);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "汉字 '" + strOneHanzi + "' 所获取的拼音记录 " + strContent + " XML数据装载出错: " + ex.Message;
+                        return -1;
+                    }
 
-					strPinyin = DomUtil.GetAttr(dom.DocumentElement, "p");
+                    strPinyin = DomUtil.GetAttr(dom.DocumentElement, "p");
 
-					return 1;
+                    return 1;
 
-				}
-				finally 
-				{
-					stop.EndLoop();
+                }
+                finally
+                {
+                    stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
-					stop.Initial("");
-				}
+                    stop.Initial("");
+                }
 
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
-		}
+        }
 
-		// return:
-		//		-1	出错
-		//		0	没有找到
-		//		1	找到
-		int GetMarcDefCfgFile(string strUrl,
-			string strDbName,
-			out Stream s,
-			out string strError)
-		{
-			strError = "";
-			s = null;
+        // return:
+        //		-1	出错
+        //		0	没有找到
+        //		1	找到
+        int GetMarcDefCfgFile(string strUrl,
+            string strDbName,
+            out Stream s,
+            out string strError)
+        {
+            strError = "";
+            s = null;
 
             if (String.IsNullOrEmpty(strUrl) == true)
             {
@@ -2962,149 +2967,149 @@ namespace dp2rms
                 return 0;
             }
 
-			string strPath = strDbName + "/cfgs/marcdef";
+            string strPath = strDbName + "/cfgs/marcdef";
 
-			// 使用Channel
-			RmsChannel channelSave = channel;
+            // 使用Channel
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(strUrl);
-			Debug.Assert(channel != null, "Channels.GetChannel 异常");
+            channel = Channels.GetChannel(strUrl);
+            Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-			try 
-			{
+            try
+            {
 
-				string strContent;
-				// string strError;
+                string strContent;
+                // string strError;
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在下载文件" + strPath);
-				stop.BeginLoop();
+                stop.BeginLoop();
 
-				byte[] baTimeStamp = null;
-				string strMetaData;
-				string strOutputPath;
+                byte[] baTimeStamp = null;
+                string strMetaData;
+                string strOutputPath;
 
-				long lRet = channel.GetRes(
-					MainForm.cfgCache,
-					strPath,
-					out strContent,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
+                long lRet = channel.GetRes(
+                    MainForm.cfgCache,
+                    strPath,
+                    out strContent,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
 
-				stop.EndLoop();
+                stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
+                stop.Initial("");
 
 
-				if (lRet == -1) 
-				{
-					if (channel.ErrorCode == ChannelErrorCode.NotFound)
-						return 0;
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        return 0;
 
-					strError = "获得配置文件 '" +strPath+ "' 时出错：" + strError;
-					goto ERROR1;
-				}
-				else 
-				{
-					byte [] baContent = StringUtil.GetUtf8Bytes(strContent, true);
-					MemoryStream stream = new MemoryStream(baContent);
-					s = stream;
-				}
+                    strError = "获得配置文件 '" + strPath + "' 时出错：" + strError;
+                    goto ERROR1;
+                }
+                else
+                {
+                    byte[] baContent = StringUtil.GetUtf8Bytes(strContent, true);
+                    MemoryStream stream = new MemoryStream(baContent);
+                    s = stream;
+                }
 
-			}
-			finally 
-			{
-				channel = channelSave;		
-			}
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
-			return 1;
-			ERROR1:
-			return -1;
-		}
+            return 1;
+        ERROR1:
+            return -1;
+        }
 
-		// 保证控件内容同步
-		int CrossRefreshControls(out string strError)
-		{
-			strError = "";
-			int nRet = 0;
+        // 保证控件内容同步
+        int CrossRefreshControls(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
 
-			this.m_nChangeTextNest ++;
+            this.m_nChangeTextNest++;
 
-			try 
-			{
+            try
+            {
 
-				if (this.m_queueTextChanged.Count == 0)	// m_nTimeStampMarc == m_nTimeStampXml
-					return 0;
+                if (this.m_queueTextChanged.Count == 0)	// m_nTimeStampMarc == m_nTimeStampXml
+                    return 0;
 
-				TextChangedInfo tail = (TextChangedInfo)this.m_queueTextChanged[this.m_queueTextChanged.Count - 1];
+                TextChangedInfo tail = (TextChangedInfo)this.m_queueTextChanged[this.m_queueTextChanged.Count - 1];
 
-				if (tail.ControlChanged == this.MarcEditor)	// m_nTimeStampMarc > m_nTimeStampXml
-				{
-					// MARC控件中内容更新一些. 需要刷新到xml控件中
-					MemoryStream s = new MemoryStream();
+                if (tail.ControlChanged == this.MarcEditor)	// m_nTimeStampMarc > m_nTimeStampXml
+                {
+                    // MARC控件中内容更新一些. 需要刷新到xml控件中
+                    MemoryStream s = new MemoryStream();
 
-					MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8);
+                    MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8);
 
-					string strMarcSyntax = "";
-					nRet = GetMarcSyntax(out strMarcSyntax,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
+                    string strMarcSyntax = "";
+                    nRet = GetMarcSyntax(out strMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
                     // 在当前没有定义MARC语法的情况下，默认unimarc
                     if (nRet == 0 && strMarcSyntax == "")
                         strMarcSyntax = "unimarc";
-					
+
                     /*
-					if (strMarcSyntax == "unimarc")
-					{
-						writer.MarcNameSpaceUri = DpNs.unimarcxml;
-						writer.MarcPrefix = strMarcSyntax;
-					}
-					else if (strMarcSyntax == "usmarc")
-					{
-						writer.MarcNameSpaceUri = Ns.usmarcxml;
-						writer.MarcPrefix = strMarcSyntax;
-					}
-					else 
-					{
-						writer.MarcNameSpaceUri = DpNs.unimarcxml;
-						writer.MarcPrefix = "unimarc";
-					}
+                    if (strMarcSyntax == "unimarc")
+                    {
+                        writer.MarcNameSpaceUri = DpNs.unimarcxml;
+                        writer.MarcPrefix = strMarcSyntax;
+                    }
+                    else if (strMarcSyntax == "usmarc")
+                    {
+                        writer.MarcNameSpaceUri = Ns.usmarcxml;
+                        writer.MarcPrefix = strMarcSyntax;
+                    }
+                    else 
+                    {
+                        writer.MarcNameSpaceUri = DpNs.unimarcxml;
+                        writer.MarcPrefix = "unimarc";
+                    }
 
-					string strMARC = this.MarcEditor.Marc;
-					string strDebug = strMARC.Replace((char)Record.FLDEND, '#');
-					nRet = writer.WriteRecord(strMARC,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
+                    string strMARC = this.MarcEditor.Marc;
+                    string strDebug = strMARC.Replace((char)Record.FLDEND, '#');
+                    nRet = writer.WriteRecord(strMARC,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
-					writer.Flush();
-					s.Flush();
+                    writer.Flush();
+                    s.Flush();
 					
-					s.Seek(0, SeekOrigin.Begin);
+                    s.Seek(0, SeekOrigin.Begin);
 
-					XmlDocument domMarc = new XmlDocument();
-					try 
-					{
-						domMarc.Load(s);
-					}
-					catch (Exception ex)
-					{
+                    XmlDocument domMarc = new XmlDocument();
+                    try 
+                    {
+                        domMarc.Load(s);
+                    }
+                    catch (Exception ex)
+                    {
 
-						strError = ex.Message;
-						goto ERROR1;
-					}
-					finally 
-					{
-						//File.Delete(strTempFileName);
-						s.Close();
+                        strError = ex.Message;
+                        goto ERROR1;
+                    }
+                    finally 
+                    {
+                        //File.Delete(strTempFileName);
+                        s.Close();
 
-					}
+                    }
                      * */
-   					string strMARC = this.MarcEditor.Marc;
+                    string strMARC = this.MarcEditor.Marc;
                     XmlDocument domMarc = null;
                     nRet = MarcUtil.Marc2Xml(strMARC,
                         strMarcSyntax,
@@ -3113,18 +3118,18 @@ namespace dp2rms
                     if (nRet == -1)
                         goto ERROR1;
 
-					// this.XmlEditor.Xml = domMarc.DocumentElement.OuterXml;
+                    // this.XmlEditor.Xml = domMarc.DocumentElement.OuterXml;
 
-					Cursor oldcursor = this.Cursor;
-					this.Cursor = Cursors.WaitCursor;
+                    Cursor oldcursor = this.Cursor;
+                    this.Cursor = Cursors.WaitCursor;
 
-					XmlDocument dom = new XmlDocument();
-					dom.LoadXml(this.XmlEditor.Xml);
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(this.XmlEditor.Xml);
 
-					XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
-					mngr.AddNamespace("unimarc", DpNs.unimarcxml);
-					mngr.AddNamespace("usmarc", Ns.usmarcxml);
-					mngr.AddNamespace("dprms", DpNs.dprms);
+                    XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
+                    mngr.AddNamespace("unimarc", DpNs.unimarcxml);
+                    mngr.AddNamespace("usmarc", Ns.usmarcxml);
+                    mngr.AddNamespace("dprms", DpNs.dprms);
 
                     // 保护unimarc usmarc名字空间以外的元素
                     // XmlNodeList filenodes = dom.DocumentElement.SelectNodes("child::*[not(unimarc:controlfield) AND not(unimarc:datafield) AND not(unimarc:leader)]", mngr);    // "//dprms:file"
@@ -3140,20 +3145,20 @@ namespace dp2rms
 
                         filenodes.Add(node);
                     }
-			
-					XmlElement marcroot = null;
-					XmlNodeList recordItems = dom.DocumentElement.SelectNodes("//"+strMarcSyntax+":record",
-						mngr);
-					if (recordItems.Count == 0)
-					{
-						marcroot = dom.CreateElement(strMarcSyntax,
-							"record",
-							MarcUtil.GetMarcURI(strMarcSyntax));
-						marcroot = (XmlElement)dom.DocumentElement.AppendChild(marcroot);
-					}
-					else 
-					{
-						marcroot = (XmlElement)recordItems[0];
+
+                    XmlElement marcroot = null;
+                    XmlNodeList recordItems = dom.DocumentElement.SelectNodes("//" + strMarcSyntax + ":record",
+                        mngr);
+                    if (recordItems.Count == 0)
+                    {
+                        marcroot = dom.CreateElement(strMarcSyntax,
+                            "record",
+                            MarcUtil.GetMarcURI(strMarcSyntax));
+                        marcroot = (XmlElement)dom.DocumentElement.AppendChild(marcroot);
+                    }
+                    else
+                    {
+                        marcroot = (XmlElement)recordItems[0];
 
 #if NO
                         // 如果MARC根就是文档根,并且已经有<dprms:file>元素
@@ -3177,18 +3182,18 @@ namespace dp2rms
                             }
                         }
 #endif
-					}
+                    }
 
 
-					try 
-					{
-						marcroot.InnerXml = domMarc.DocumentElement.InnerXml;
-					}
-					catch (Exception ex)
-					{
+                    try
+                    {
+                        marcroot.InnerXml = domMarc.DocumentElement.InnerXml;
+                    }
+                    catch (Exception ex)
+                    {
                         strError = ExceptionUtil.GetAutoText(ex);
-						goto ERROR1;
-					}
+                        goto ERROR1;
+                    }
 
                     // 插入先前保存的<dprms:file>元素
                     for (int i = 0; i < filenodes.Count; i++)
@@ -3196,83 +3201,83 @@ namespace dp2rms
                         dom.DocumentElement.AppendChild(filenodes[i]);
                     }
 
-					this.XmlEditor.Xml = dom.DocumentElement.OuterXml;
+                    this.XmlEditor.Xml = dom.DocumentElement.OuterXml;
 
                     // 需要规整缩进
                     if (SetPlainTextXml(dom.DocumentElement.OuterXml, out strError) == -1)
                         goto ERROR1;
 
-					this.Cursor = oldcursor;
+                    this.Cursor = oldcursor;
 
-					/*
-						XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
-						mngr.AddNamespace("unimarc", DpNs.unimarcxml);
-						mngr.AddNamespace("usmarc", Ns.usmarcxml);
+                    /*
+                        XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
+                        mngr.AddNamespace("unimarc", DpNs.unimarcxml);
+                        mngr.AddNamespace("usmarc", Ns.usmarcxml);
 			
-						ElementItem marcroot = null;
-						ItemList recordItems = this.XmlEditor.DocumentElement.SelectItems("//"+strMarcSyntax+":record",
-							mngr);
-						if (recordItems.Count == 0)
-						{
-							marcroot = this.XmlEditor.CreateElementItem(strMarcSyntax,
-								"record",
-								MarcUtil.GetMarcURI(strMarcSyntax));
-							this.XmlEditor.DocumentElement.AppendChild(marcroot);
-						}
-						else 
-						{
-							marcroot = (ElementItem)recordItems[0];
-						}
+                        ElementItem marcroot = null;
+                        ItemList recordItems = this.XmlEditor.DocumentElement.SelectItems("//"+strMarcSyntax+":record",
+                            mngr);
+                        if (recordItems.Count == 0)
+                        {
+                            marcroot = this.XmlEditor.CreateElementItem(strMarcSyntax,
+                                "record",
+                                MarcUtil.GetMarcURI(strMarcSyntax));
+                            this.XmlEditor.DocumentElement.AppendChild(marcroot);
+                        }
+                        else 
+                        {
+                            marcroot = (ElementItem)recordItems[0];
+                        }
 
-						try 
-						{
-							marcroot.OuterXml = domMarc.DocumentElement.OuterXml;
-						}
-						catch (Exception ex)
-						{
-							strError = ex.Message;
-							goto ERROR1;
-						}
+                        try 
+                        {
+                            marcroot.OuterXml = domMarc.DocumentElement.OuterXml;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = ex.Message;
+                            goto ERROR1;
+                        }
 
-						*/
+                        */
 
 
-					// 统一控件时间戳
-					//this.m_nTimeStampMarc = 0;
-					//this.m_nTimeStampXml = 0;
+                    // 统一控件时间戳
+                    //this.m_nTimeStampMarc = 0;
+                    //this.m_nTimeStampXml = 0;
 
-				}
+                }
 
-				if (tail.ControlChanged == this.XmlEditor)	// m_nTimeStampXml > m_nTimeStampMarc
-				{
-					// xml控件中内容更新一些. 需要刷新到MARC控件中
-					// 从xml控件到marc控件
-					string strMarc = "";
-					string strMarcSyntax = "";
+                if (tail.ControlChanged == this.XmlEditor)	// m_nTimeStampXml > m_nTimeStampMarc
+                {
+                    // xml控件中内容更新一些. 需要刷新到MARC控件中
+                    // 从xml控件到marc控件
+                    string strMarc = "";
+                    string strMarcSyntax = "";
 
-					nRet = GetMarcSyntax(out strMarcSyntax,
-						out strError);
-					if (nRet == -1)
-						goto ERROR1;
+                    nRet = GetMarcSyntax(out strMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
-					string strOutMarcSyntax = "";
+                    string strOutMarcSyntax = "";
 
-					string strXml = this.XmlEditor.Xml;
-					if (strXml != "")
-					{
+                    string strXml = this.XmlEditor.Xml;
+                    if (strXml != "")
+                    {
 
-						nRet = MarcUtil.Xml2Marc(strXml,
-							true,
-							strMarcSyntax,
-							out strOutMarcSyntax,
-							out strMarc,
-							out strError);
-						if (nRet == -1)
-						{
-							strError = "XML转换到MARC记录时出错: " + strError;
-							goto ERROR1;
-						}
-					}
+                        nRet = MarcUtil.Xml2Marc(strXml,
+                            true,
+                            strMarcSyntax,
+                            out strOutMarcSyntax,
+                            out strMarc,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "XML转换到MARC记录时出错: " + strError;
+                            goto ERROR1;
+                        }
+                    }
 
                     try
                     {
@@ -3288,11 +3293,11 @@ namespace dp2rms
                     if (SetPlainTextXml(strXml, out strError) == -1)
                         return -1;
 
-					// 统一控件时间戳
-					//this.m_nTimeStampMarc = 0;
-					//this.m_nTimeStampXml = 0;
+                    // 统一控件时间戳
+                    //this.m_nTimeStampMarc = 0;
+                    //this.m_nTimeStampXml = 0;
 
-				}
+                }
 
                 if (tail.ControlChanged == this.textBox_xmlPureText)
                 {
@@ -3337,20 +3342,20 @@ namespace dp2rms
                     this.XmlEditor.Xml = strXml;
                 }
 
-				this.m_queueTextChanged.Clear();
+                this.m_queueTextChanged.Clear();
 
-				return 0;
-			ERROR1:
-				return -1;
-			}
-			finally 
-			{
-				this.m_nChangeTextNest --;
-			}
-		}
+                return 0;
+            ERROR1:
+                return -1;
+            }
+            finally
+            {
+                this.m_nChangeTextNest--;
+            }
+        }
 
-		private void tabControl_record_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
+        private void tabControl_record_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
             // 菜单有所变化
             if (this.tabControl_record.SelectedTab == this.tabPage_marc)
                 MainForm.MenuItem_font.Enabled = true;  // ??
@@ -3358,20 +3363,20 @@ namespace dp2rms
                 MainForm.MenuItem_font.Enabled = false;  // ??
 
 
-			string strError = "";
-			int nRet = 0;
+            string strError = "";
+            int nRet = 0;
 
-			//nRet = CrossRefreshControls(out strError);
-			nRet = PutTextChangedInfoToQueue(null,
-				out strError);
-			if (nRet == -1)
-				goto ERROR1;
-            
-			return;
-			ERROR1:
-				MessageBox.Show(this, strError);
-			return;
-		}
+            //nRet = CrossRefreshControls(out strError);
+            nRet = PutTextChangedInfoToQueue(null,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+        }
 
         private void MarcEditor_TextChanged(object sender, System.EventArgs e)
         {
@@ -3448,142 +3453,142 @@ namespace dp2rms
             //}
         }
 
-		int PutTextChangedInfoToQueue(object controlChanged,
-			out string strError)
-		{
-			strError = "";
+        int PutTextChangedInfoToQueue(object controlChanged,
+            out string strError)
+        {
+            strError = "";
 
-			if (controlChanged == null && this.m_queueTextChanged.Count == 0)
-			{
-				this.m_queueTextChanged.Clear();
-				return 0;
-			}
+            if (controlChanged == null && this.m_queueTextChanged.Count == 0)
+            {
+                this.m_queueTextChanged.Clear();
+                return 0;
+            }
 
 
-			TextChangedInfo info = new TextChangedInfo();
-			info.ControlChanged = controlChanged;
+            TextChangedInfo info = new TextChangedInfo();
+            info.ControlChanged = controlChanged;
 
-			// 看插入前, 队列尾部最后一个的方向是否相同
-			if (this.m_queueTextChanged.Count > 0)
-			{
-				TextChangedInfo tail = (TextChangedInfo)this.m_queueTextChanged[this.m_queueTextChanged.Count - 1];
-				if (tail.ControlChanged != controlChanged)
-				{
-					int nRet = 0;
+            // 看插入前, 队列尾部最后一个的方向是否相同
+            if (this.m_queueTextChanged.Count > 0)
+            {
+                TextChangedInfo tail = (TextChangedInfo)this.m_queueTextChanged[this.m_queueTextChanged.Count - 1];
+                if (tail.ControlChanged != controlChanged)
+                {
+                    int nRet = 0;
 
-					nRet = CrossRefreshControls(out strError);
-					if (nRet == -1) 
-					{
-						this.m_queueTextChanged.Clear();
-						this.m_queueTextChanged.Add(info);
-						return -1;
-					}
+                    nRet = CrossRefreshControls(out strError);
+                    if (nRet == -1)
+                    {
+                        this.m_queueTextChanged.Clear();
+                        this.m_queueTextChanged.Add(info);
+                        return -1;
+                    }
 
-					if (controlChanged == null)
-					{
-						this.m_queueTextChanged.Clear();
-						return 0;
-					}
+                    if (controlChanged == null)
+                    {
+                        this.m_queueTextChanged.Clear();
+                        return 0;
+                    }
 
-            
-				}
-			}
 
-			this.m_queueTextChanged.Clear();
+                }
+            }
+
+            this.m_queueTextChanged.Clear();
             if (controlChanged != null)
             {
                 this.m_queueTextChanged.Add(info);
             }
-			return 0;
-		}
+            return 0;
+        }
 
-		public int Flush(out string strError)
-		{
-			strError = "";
-			if (this.tabControl_record.SelectedTab == this.tabPage_marc)
-			{
-				this.MarcEditor.Flush();
-			}
+        public int Flush(out string strError)
+        {
+            strError = "";
+            if (this.tabControl_record.SelectedTab == this.tabPage_marc)
+            {
+                this.MarcEditor.Flush();
+            }
             else if (this.tabControl_record.SelectedTab == this.tabPage_xml)
-			{
-				this.XmlEditor.Flush();
-			}
+            {
+                this.XmlEditor.Flush();
+            }
 
-			int nRet = 0;
+            int nRet = 0;
 
-			nRet = PutTextChangedInfoToQueue(null,
-				out strError);
-			if (nRet == -1)
-				return -1;
+            nRet = PutTextChangedInfoToQueue(null,
+                out strError);
+            if (nRet == -1)
+                return -1;
 
             return 0;
-		}
+        }
 
-		public void Flush()
-		{
+        public void Flush()
+        {
 
-			string strError = "";
-			int nRet = 0;
+            string strError = "";
+            int nRet = 0;
 
-			nRet = this.Flush(out strError);
-			if (nRet == -1)
-				goto ERROR1;
-            
-			return;
-			ERROR1:
-				MessageBox.Show(this, strError);
-				return;
-		}
+            nRet = this.Flush(out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
-		private void timer_crossRefresh_Tick(object sender, System.EventArgs e)
-		{
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+        }
+
+        private void timer_crossRefresh_Tick(object sender, System.EventArgs e)
+        {
             /*
 			 Flush();   // 打开
              */
-		}
+        }
 
-		public class TextChangedInfo
-		{
-			public object ControlChanged = null;
-		}
-
-
-		static string ConvertSinglePinyinByStyle(string strPinyin,
-			PinyinStyle style)
-		{
-			if (style == PinyinStyle.None)
-				return strPinyin;
-			if (style == PinyinStyle.Upper)
-				return strPinyin.ToUpper();
-			if (style == PinyinStyle.Lower)
-				return strPinyin.ToLower();
-			if (style == PinyinStyle.UpperFirst)
-			{
-				if (strPinyin.Length > 1)
-				{
-					return strPinyin.Substring(0,1).ToUpper() + strPinyin.Substring(1).ToLower();
-				}
-
-				return strPinyin;
-			}
-
-			Debug.Assert(false,"未定义的拼音风格");
-			return strPinyin;
-		}
+        public class TextChangedInfo
+        {
+            public object ControlChanged = null;
+        }
 
 
-		// 当前窗口中记录的路径
-		public string RecPath
-		{
-			get 
-			{
-				return textBox_recPath.Text;
-			}
-			set 
-			{
-				textBox_recPath.Text = value;
-			}
-		}
+        static string ConvertSinglePinyinByStyle(string strPinyin,
+            PinyinStyle style)
+        {
+            if (style == PinyinStyle.None)
+                return strPinyin;
+            if (style == PinyinStyle.Upper)
+                return strPinyin.ToUpper();
+            if (style == PinyinStyle.Lower)
+                return strPinyin.ToLower();
+            if (style == PinyinStyle.UpperFirst)
+            {
+                if (strPinyin.Length > 1)
+                {
+                    return strPinyin.Substring(0, 1).ToUpper() + strPinyin.Substring(1).ToLower();
+                }
+
+                return strPinyin;
+            }
+
+            Debug.Assert(false, "未定义的拼音风格");
+            return strPinyin;
+        }
+
+
+        // 当前窗口中记录的路径
+        public string RecPath
+        {
+            get
+            {
+                return textBox_recPath.Text;
+            }
+            set
+            {
+                textBox_recPath.Text = value;
+            }
+        }
 
         // 设置字体
         public void SetFont()
@@ -3664,7 +3669,7 @@ namespace dp2rms
                 "fontsize",
                 Convert.ToString(this.MarcEditor.Font.Size));
 
-//            string strStyle = Enum.GetName(typeof(FontStyle), this.MarcEditor.Font.Style);
+            //            string strStyle = Enum.GetName(typeof(FontStyle), this.MarcEditor.Font.Style);
             string strStyle = this.MarcEditor.Font.Style.ToString();
 
 
@@ -3892,16 +3897,16 @@ namespace dp2rms
             return;
 
         }
-	
-	}
+
+    }
 
 
-	// 加拼音时的大小写风格
-	public enum PinyinStyle
-	{
-		None = 0,	// 不做任何改变
-		Upper = 1,	// 全部大写
-		Lower = 2,	// 全部小写
-		UpperFirst = 3,	// 首字母大写,其它小写
-	}
+    // 加拼音时的大小写风格
+    public enum PinyinStyle
+    {
+        None = 0,	// 不做任何改变
+        Upper = 1,	// 全部大写
+        Lower = 2,	// 全部小写
+        UpperFirst = 3,	// 首字母大写,其它小写
+    }
 }

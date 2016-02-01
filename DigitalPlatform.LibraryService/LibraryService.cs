@@ -107,7 +107,6 @@ namespace dp2Library
                 strDataDir = DomUtil.GetAttr(dom.DocumentElement, "datadir");
             }
 
-
         START:
             lock (info.LockObject)
             {
@@ -149,7 +148,7 @@ namespace dp2Library
             if (prop.Via.Scheme == "net.pipe")
             {
                 // 没有 IP
-                strIP = "localhost";
+                strIP = "::1";  // "localhost";
                 return;
             }
             try
@@ -379,14 +378,14 @@ namespace dp2Library
 
             if (bCheckHangup == true)
             {
-                if (app.HangupReason != HangupReason.None)
+                if (app.HangupList.Count > 0)
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCode.Hangup;
-                    if (app.HangupReason == HangupReason.Expire)
+                    if (app.ContainsHangup("Expire"))
                         result.ErrorInfo = "系统当前处于维护状态，本功能暂时不能使用。原因: dp2library 版本太旧，请立即升级到最新版本";
                     else
-                        result.ErrorInfo = "因系统处于维护状态 " + app.HangupReason.ToString() + "，本功能暂时不能使用";
+                        result.ErrorInfo = "因系统处于维护状态 " + StringUtil.MakePathList(app.HangupList) + "，本功能暂时不能使用";
                     return result;
                 }
             }
@@ -966,8 +965,12 @@ namespace dp2Library
                 return result;
 
             strOldLang = sessioninfo.Lang;
+#if NO
             if (String.IsNullOrEmpty(strLang) == false)
                 sessioninfo.Lang = strLang;
+#endif
+            // 2016/1/28
+            SetLang(strLang);
 
             // END1:
             result.Value = 0;
@@ -1283,6 +1286,9 @@ namespace dp2Library
     CultureInfo.CreateSpecificCulture(strLang);
             Thread.CurrentThread.CurrentUICulture = new
                 CultureInfo(strLang);
+
+            if (sessioninfo != null)
+                sessioninfo.Lang = strLang;
         }
 
         // 获得读者信息
@@ -1424,9 +1430,18 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            // 对读者身份的判断
+            if (sessioninfo.UserType == "reader")
+            {
+                result.Value = -1;
+                result.ErrorInfo = "移动读者记录被拒绝。作为读者不能进行此项操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
             try
             {
-                // 转移借阅信息
+                // 移动读者信息
                 // result.Value:
                 //      -1  error
                 //      0   已经成功移动
@@ -1465,6 +1480,15 @@ namespace dp2Library
             LibraryServerResult result = this.PrepareEnvironment("DevolveReaderInfo", true, true, true);
             if (result.Value == -1)
                 return result;
+
+            // 对读者身份的判断
+            if (sessioninfo.UserType == "reader")
+            {
+                result.Value = -1;
+                result.ErrorInfo = "转移借阅信息被拒绝。作为读者不能进行此项操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
 
             try
             {
@@ -2062,10 +2086,7 @@ namespace dp2Library
                 return result;
             }
 
-
             // 权限判断
-
-
 
             try
             {
@@ -2214,7 +2235,7 @@ namespace dp2Library
                 Thread.Sleep(10);
             }
 
-            e.bDoEvents = false;
+            // e.bDoEvents = false;
         }
 
         // 检索任意数据库
@@ -2358,7 +2379,6 @@ namespace dp2Library
 
             try
             {
-
                 // 权限判断
 
                 // 权限字符串
@@ -2778,9 +2798,13 @@ namespace dp2Library
                             if ((bIsReader == true || bHasGetReaderInfoRight == false)
                                 && bIsReaderRecord == true)
                             {
-                                record.Path = "";
-                                record.Cols = null;
-                                record.RecordBody = null;
+                                if (sessioninfo.Account == null
+                                    || StringUtil.IsEqualOrSubPath(sessioninfo.Account.ReaderDomPath, record.Path) == false)
+                                {
+                                    record.Path = "";
+                                    record.Cols = null;
+                                    record.RecordBody = null;
+                                }
                             }
                         }
                     }
@@ -3415,7 +3439,6 @@ namespace dp2Library
                 return result;
             }
         }
-
 
 #if NO
         // 获得书目信息(可以用html或xml两种格式之一) 2006/9/18 
@@ -4711,7 +4734,6 @@ namespace dp2Library
             }
         }
 
-
         // *** 此API已经废止 ***
         // 对册条码号进行查重
         // 2006/9/22 新增API
@@ -5105,6 +5127,15 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            // 对读者身份的附加判断
+            if (sessioninfo.UserType == "reader")
+            {
+                result.Value = -1;
+                result.ErrorInfo = "违约金操作被拒绝。作为读者不能进行此项操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
             try
             {
                 return app.Amerce(sessioninfo,
@@ -5125,7 +5156,6 @@ namespace dp2Library
                 return result;
             }
         }
-
 
         //
         // 获得期信息
@@ -5204,6 +5234,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改期记录被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限字符串
                 if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
@@ -5478,10 +5517,6 @@ namespace dp2Library
                     strError = "不支持的检索词格式: '" + strRefID + "'。目前仅支持'@path:'和'@refid:'引导的检索词";
                     goto ERROR1;
                 }
-                //
-
-
-                //
 
                 result.ErrorInfo = "";
                 result.Value = 1;
@@ -6548,7 +6583,6 @@ namespace dp2Library
         /// *** 订购相关功能
         /// 
 
-
         // 获得订购信息
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
@@ -6625,6 +6659,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改订购记录的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限字符串
                 if (StringUtil.IsInList("setorders", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
@@ -7288,7 +7331,6 @@ namespace dp2Library
         {
             string strError = "";
 
-
             LibraryServerResult result = this.PrepareEnvironment("SearchOrder", true, true);
             if (result.Value == -1)
                 return result;
@@ -7542,11 +7584,10 @@ namespace dp2Library
             try
             {
                 // 权限判断
-
                 if (sessioninfo.GlobalUser == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置时钟被拒绝。全局用户才能进行此操作。";
+                    result.ErrorInfo = "设置时钟被拒绝。全局用户才能进行此操作";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -7555,7 +7596,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("setclock", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置时钟被拒绝。不具备setclock权限。";
+                    result.ErrorInfo = "设置时钟被拒绝。不具备setclock权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -7564,7 +7605,7 @@ namespace dp2Library
                 if (sessioninfo.UserType == "reader")
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置时钟被拒绝。作为读者不能设置时钟。";
+                    result.ErrorInfo = "设置时钟被拒绝。作为读者不能设置时钟";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -7585,7 +7626,7 @@ namespace dp2Library
             }
             catch (Exception ex)
             {
-                string strErrorText = "dp2Library SetClock() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "dp2Library SetClock() API 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
 
                 result.Value = -1;
@@ -7609,7 +7650,6 @@ namespace dp2Library
 
             // 不需要登录?
             strTime = app.Clock.GetClock();
-
             return result;
         }
 
@@ -7717,7 +7757,15 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获取操作日志信息被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
 
                 // 权限字符串
                 if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false)
@@ -7835,7 +7883,14 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获取操作日志信息被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 权限字符串
                 if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false)
@@ -8049,7 +8104,14 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改日历的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 权限字符串
                 if (strAction == "new")
@@ -8148,6 +8210,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "批处理任务操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (sessioninfo.GlobalUser == false)
                 {
@@ -8245,6 +8316,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("clearalldbs", sessioninfo.RightsOrigin) == false)
                 {
@@ -8279,7 +8359,6 @@ namespace dp2Library
             }
         }
 
-
         // 管理数据库
         // parameters:
         //      strAction   动作。create delete initialize backup getinfo
@@ -8299,6 +8378,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "管理数据库的操作被拒绝。作为读者不能管理任何数据库";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // getinfo 动作 权限单独判断 2013/1/27
                 if (strAction == "getinfo")
                 {
@@ -8374,7 +8462,14 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获取用户信息的操作被拒绝。作为读者不能任何用户信息";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 权限字符串
                 if (StringUtil.IsInList("getuser", sessioninfo.RightsOrigin) == false)
@@ -8394,13 +8489,6 @@ namespace dp2Library
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
-                /*
-                if (result_contents != null)
-                {
-                    contents = new UserInfo[result_contents.Count];
-                    result_contents.CopyTo(contents);
-                }*/
 
                 result.Value = nRet;
                 return result;
@@ -8441,7 +8529,14 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改用户的操作被拒绝。作为读者不能修改任何用户信息";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 权限字符串
                 if (strAction == "new")
@@ -8554,7 +8649,14 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获得通道信息被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 权限字符串
                 if (StringUtil.IsInList("getchannelinfo", sessioninfo.RightsOrigin) == false)
@@ -8614,13 +8716,20 @@ namespace dp2Library
 
             try
             {
-                // 权限判断
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "管理通道操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 权限字符串
                 if (StringUtil.IsInList("managechannel", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得用户操作被拒绝。不具备 managechannel 权限。";
+                    result.ErrorInfo = "管理通道操作被拒绝。不具备 managechannel 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -8697,7 +8806,6 @@ namespace dp2Library
                     result.Value = nRet;
                     return result;
                 }
-
 
                 // 权限判断
 
@@ -9241,6 +9349,7 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            app.LockForRead();
             try
             {
                 // 权限判断
@@ -10341,6 +10450,10 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+            finally
+            {
+                app.UnlockForRead();
+            }
         }
 
 #if NO
@@ -10413,8 +10526,18 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            app.LockForWrite();
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "设置系统参数的操作被拒绝。作为读者不能设置任何系统参数";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("setsystemparameter", sessioninfo.RightsOrigin) == false)
                 {
@@ -10909,7 +11032,6 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
-
             END1:
                 result.Value = nRet;
                 return result;
@@ -10928,6 +11050,10 @@ namespace dp2Library
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strErrorText;
                 return result;
+            }
+            finally
+            {
+                app.UnlockForWrite();
             }
         }
 
@@ -10952,6 +11078,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的附加判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "紧急恢复操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("urgentrecover", sessioninfo.RightsOrigin) == false)
                 {
@@ -11009,7 +11144,6 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
-
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
@@ -11058,6 +11192,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修复借还信息的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("repairborrowinfo", sessioninfo.RightsOrigin) == false)
                 {
@@ -11166,13 +11309,6 @@ namespace dp2Library
                 result.Value = -1;
                 result.ErrorInfo = "不能识别的 strAction参数值 '" + strAction + "'。";
                 return result;
-                /*
-            ERROR1:
-                result.Value = -1;
-                result.ErrorCode = ErrorCode.SystemError;
-                result.ErrorInfo = strError;
-                return result;
-                 * */
             }
             catch (Exception ex)
             {
@@ -11206,6 +11342,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "入馆登记操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("passgate", sessioninfo.RightsOrigin) == false)
                 {
@@ -11221,13 +11366,6 @@ namespace dp2Library
                     strGateName,
                     strResultTypeList,
                     out results);
-                /*
-            ERROR1:
-                result.Value = -1;
-                result.ErrorCode = ErrorCode.SystemError;
-                result.ErrorInfo = strError;
-                return result;
-                 * */
             }
             catch (Exception ex)
             {
@@ -11261,6 +11399,15 @@ namespace dp2Library
             LibraryServerResult result = this.PrepareEnvironment("Foregift", true, true, true);
             if (result.Value == -1)
                 return result;
+
+            // 对读者身份的判断
+            if (sessioninfo.UserType == "reader")
+            {
+                result.Value = -1;
+                result.ErrorInfo = "押金操作被拒绝。作为读者不能进行此项操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
 
             try
             {
@@ -11310,6 +11457,15 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            // 对读者身份的判断
+            if (sessioninfo.UserType == "reader")
+            {
+                result.Value = -1;
+                result.ErrorInfo = "租金操作被拒绝。作为读者不能进行此项操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
             try
             {
                 return app.Hire(
@@ -11343,6 +11499,15 @@ namespace dp2Library
             LibraryServerResult result = this.PrepareEnvironment("Settlement", true, true, true);
             if (result.Value == -1)
                 return result;
+
+            // 对读者身份的判断
+            if (sessioninfo.UserType == "reader")
+            {
+                result.Value = -1;
+                result.ErrorInfo = "结算操作被拒绝。作为读者不能进行此项操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
 
             try
             {
@@ -11398,7 +11563,6 @@ namespace dp2Library
                 return result;
             }
         }
-
 
         // 获得索取号检索命中信息
         // parameters:
@@ -11497,6 +11661,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的附加判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("settailnumber", sessioninfo.RightsOrigin) == false)
                 {
@@ -11525,9 +11698,6 @@ namespace dp2Library
                 return result;
             }
         }
-
-
-        ///
 
         // 检索同类书记录，返回种次号和摘要信息
         // parameters:
@@ -11663,6 +11833,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("settailnumber", sessioninfo.RightsOrigin) == false)
                 {
@@ -11865,7 +12044,6 @@ namespace dp2Library
             }
         }
 
-
         // 设置实用库信息
         // parameters:
         //      strRootElementName  根元素名。如果为空，系统自会用<r>作为根元素
@@ -11885,6 +12063,15 @@ namespace dp2Library
 
             try
             {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "设置实用库记录信息的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
                 if (StringUtil.IsInList("setutilinfo", sessioninfo.RightsOrigin) == false)
                 {
@@ -11895,7 +12082,6 @@ namespace dp2Library
                 }
 
                 // TODO: 是否要检查数据库名确实属于当前已经定义的实用库
-
                 return app.SetUtilInfo(
                     sessioninfo,
                     strAction,
@@ -12465,7 +12651,6 @@ namespace dp2Library
                 string strLibraryCode = ""; // 实际写入操作的读者库馆代码
 
                 {
-
                     // 检查用户使用 WriteRes API 的权限
                     // return:
                     //      -1  error
@@ -12537,7 +12722,6 @@ namespace dp2Library
                 }
                 else
                 {
-
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     if (channel == null)
                     {
@@ -12680,10 +12864,8 @@ namespace dp2Library
             }
         }
 
-
         /// *** 评注相关功能
         /// 
-
 
         // TODO: 要能够获得一个特点范围的记录，或者根据指定的recpath集合获得若干评注记录
         // 获得评注信息
@@ -12838,10 +13020,8 @@ namespace dp2Library
             }
             string strBiblioRecPath = strBiblioDbName + "/" + strRootID;
             strOutputBiblioRecPath = strBiblioRecPath;
-
             return 0;
         }
-
 
         // TODO: 建议主体移动到ItemDatabase中，可以节省多种类的代码
         // 获得评注信息
@@ -13744,7 +13924,6 @@ out strError);
             }
         }
 
-
         // 获得消息
         public LibraryServerResult GetMessage(
             string[] message_ids,
@@ -14199,7 +14378,7 @@ out strError);
 
             try
             {
-                // TODO: 检查权限。至少 set 要求权限
+                // TODO: 检查权限。至少 set 要求权限。读者身份不应该能进行此项操作。如果功能需要，可以用代理账户身份进行
 
                 string strBiblioRecPath = "";
                 string strUrl = "";

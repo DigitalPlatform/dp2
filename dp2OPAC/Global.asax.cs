@@ -10,7 +10,6 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2OPAC
@@ -173,7 +172,6 @@ namespace dp2OPAC
                 // 增量计数
                 if (app != null)
                 {
-
                     long v = app.IpTable.IncIpCount(strClientIP, 1);
                     if (v >= app.IpTable.MAX_SESSIONS_PER_IP)
                     {
@@ -217,10 +215,12 @@ namespace dp2OPAC
         protected void Application_Error(Object sender, EventArgs e)
         {
             // OpacApplication app = (OpacApplication)Application["app"];
-
             Exception ex = HttpContext.Current.Server.GetLastError();
 
             string strText = ExceptionUtil.GetDebugText(ex)
+                + "\r\n\r\nRequest.RawUrl=" + HttpContext.Current.Request.RawUrl
+                + "\r\nForm Data=" + HttpContext.Current.Request.Form.ToString()
+                + "\r\nForm Data(Decoded)=" + HttpUtility.UrlDecode(HttpContext.Current.Request.Form.ToString())
                 + "\r\n\r\n版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString();
 
             string strError = "";

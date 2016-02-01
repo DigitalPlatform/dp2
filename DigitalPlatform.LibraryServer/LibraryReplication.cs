@@ -238,8 +238,11 @@ namespace DigitalPlatform.LibraryServer
         public override void Worker()
         {
             // 系统挂起的时候，不运行本线程
-            if (this.App.HangupReason == HangupReason.LogRecover)
+            //if (this.App.HangupReason == HangupReason.LogRecover)
+            //    return;
+            if (this.App.ContainsHangup("LogRecover") == true)
                 return;
+
             if (this.App.PauseBatchTask == true)
                 return;
 
@@ -587,7 +590,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_strUserName = DomUtil.GetAttr(server, "username");
             this.m_strPassword = LibraryApplication.DecryptPassword(DomUtil.GetAttr(server, "password"));
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             long lProcessCount = 0;
@@ -647,6 +649,7 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
                 this.AppendResultText("    共复制 " + lProcessCount.ToString() + " 条书目记录\r\n");
             }
@@ -973,7 +976,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_strUserName = DomUtil.GetAttr(server, "username");
             this.m_strPassword = LibraryApplication.DecryptPassword(DomUtil.GetAttr(server, "password"));
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             try
@@ -1067,6 +1069,7 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
             }
 
@@ -2042,7 +2045,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_strUserName = DomUtil.GetAttr(server, "username");
             this.m_strPassword = LibraryApplication.DecryptPassword(DomUtil.GetAttr(server, "password"));
 
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             try
@@ -2086,6 +2088,7 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
             }
         }

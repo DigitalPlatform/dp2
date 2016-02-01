@@ -16,7 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 
 public partial class sample : System.Web.UI.Page
 {
@@ -54,6 +54,7 @@ ref sessioninfo) == false)
     }
     protected void Button_search_Click(object sender, EventArgs e)
     {
+#if NO
         string strError = "";
         string strQueryXml = "";
         long lRet = sessioninfo.Channel.SearchBiblio(
@@ -90,5 +91,6 @@ ref sessioninfo) == false)
     ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         Response.End();
+#endif
     }
 }

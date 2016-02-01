@@ -17,6 +17,9 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            this.EventFinish.Dispose();
+
             base.Dispose(disposing);
         }
 

@@ -20,6 +20,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 
 using DigitalPlatform.OPAC.Server;
+using DigitalPlatform.LibraryClient;
 // using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.OPAC.Web
@@ -41,6 +42,13 @@ namespace DigitalPlatform.OPAC.Web
         public bool Wrapper = false;
 
         ResourceManager m_rm = null;
+
+        public override void Dispose()
+        {
+            this.WantFocus = null;
+
+            base.Dispose();
+        }
 
         ResourceManager GetRm()
         {
@@ -407,147 +415,120 @@ namespace DigitalPlatform.OPAC.Web
                 goto ERROR1;
             }
 
-
-            string strBiblioRecPath = this.BiblioRecPath;
-
-            byte[] timestamp = null;
-            string strBiblioXml = "";
-            /*
-            string strStyle = LibraryChannel.GETRES_ALL_STYLE;
-            // 先获得XML记录体，然后和时间戳进行比较
-            string strMetaData = "";
-            lRet = sessioninfo.Channel.GetRes(
-                null,
-                strBiblioRecPath,
-                strStyle,
-                out strBiblioXml,
-                out strMetaData,
-                out timestamp,
-                out strOutputPath,
-                out strError);
-            if (lRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
-                goto ERROR1;
-            }
-             * */
-            string[] formats = new string[1];
-            formats[0] = "xml";
+                string strBiblioRecPath = this.BiblioRecPath;
 
-            string[] results = null;
-            lRet = sessioninfo.Channel.GetBiblioInfos(
-                null,
-                strBiblioRecPath,
-                "",
-                formats,
-                out results,
-                out timestamp,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
-                goto ERROR1;
-            }
-            if (results == null || results.Length < 1)
-            {
-                strError = "results error ";
-                goto ERROR1;
-            }
-            strBiblioXml = results[0];
+                byte[] timestamp = null;
+                string strBiblioXml = "";
+                string[] formats = new string[1];
+                formats[0] = "xml";
 
-            byte[] old_timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
-            if (ByteArray.Compare(timestamp, old_timestamp) != 0)
-            {
-                strError = "修改被拒绝。因为记录 '" + strBiblioRecPath + "' 在保存前已经被其他人修改过。请重新装载";
-                goto ERROR1;
-            }
+                string[] results = null;
+                lRet = // sessioninfo.Channel.
+                    channel.GetBiblioInfos(
+                    null,
+                    strBiblioRecPath,
+                    "",
+                    formats,
+                    out results,
+                    out timestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+                if (results == null || results.Length < 1)
+                {
+                    strError = "results error ";
+                    goto ERROR1;
+                }
+                strBiblioXml = results[0];
 
-            string strOutMarcSyntax = "";
-            string strMarc = "";
-            // 将MARCXML格式的xml记录转换为marc机内格式字符串
-            // parameters:
-            //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
-            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
-            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
-            nRet = MarcUtil.Xml2Marc(strBiblioXml,
-                true,
-                "", // this.CurMarcSyntax,
-                out strOutMarcSyntax,
-                out strMarc,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                byte[] old_timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
+                if (ByteArray.Compare(timestamp, old_timestamp) != 0)
+                {
+                    strError = "修改被拒绝。因为记录 '" + strBiblioRecPath + "' 在保存前已经被其他人修改过。请重新装载";
+                    goto ERROR1;
+                }
 
-            string strBiblioState = MarcDocument.GetFirstSubfield(strMarc,
+                string strOutMarcSyntax = "";
+                string strMarc = "";
+                // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                // parameters:
+                //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                    true,
+                    "", // this.CurMarcSyntax,
+                    out strOutMarcSyntax,
+                    out strMarc,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                string strBiblioState = MarcDocument.GetFirstSubfield(strMarc,
+                        "998",
+                        "s");   // 状态
+
+                // 修改998字段
+                string strOldBiblioState = strBiblioState;
+
+                this.GetStateValueFromControls(ref strBiblioState);
+
+                if (strOldBiblioState == strBiblioState)
+                {
+                    // 也退出编辑态
+                    cancel_button_Click(this, new EventArgs());
+                    strError = "状态没有发生变化，放弃保存书目记录";
+                    goto ERROR1;
+                }
+
+                MarcUtil.SetFirstSubfield(ref strMarc,
                     "998",
-                    "s");   // 状态
+                    "s",
+                    strBiblioState);
 
-            // 修改998字段
-            string strOldBiblioState = strBiblioState;
+                // 保存
+                // 将MARC格式转换为XML格式
+                // 2015/10/12 从 Marc2Xml() 修改为 Marc2XmlEx()
+                string strXml = strBiblioXml;
+                nRet = MarcUtil.Marc2XmlEx(
+    strMarc,
+    strOutMarcSyntax,
+    ref strXml,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-            this.GetStateValueFromControls(ref strBiblioState);
+                string strOutputBiblioRecPath = "";
+                byte[] baOutputTimestamp = null;
 
-            if (strOldBiblioState == strBiblioState)
-            {
-                // 也退出编辑态
-                cancel_button_Click(this, new EventArgs());
-                strError = "状态没有发生变化，放弃保存书目记录";
-                goto ERROR1;
+                lRet = // sessioninfo.Channel.
+                    channel.SetBiblioInfo(
+                    null,
+                    "change",
+                    strBiblioRecPath,
+            "xml",
+            strXml,
+            timestamp,
+            "",
+            out strOutputBiblioRecPath,
+            out baOutputTimestamp,
+            out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                this.Timestamp = ByteArray.GetHexTimeStampString(baOutputTimestamp);
+                return;
             }
-
-            MarcUtil.SetFirstSubfield(ref strMarc,
-                "998",
-                "s",
-                strBiblioState);
-
-            // 保存
-            // 将MARC格式转换为XML格式
-            // 2015/10/12 从 Marc2Xml() 修改为 Marc2XmlEx()
-            string strXml = strBiblioXml;
-            nRet = MarcUtil.Marc2XmlEx(
-strMarc,
-strOutMarcSyntax,
-ref strXml,
-out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            string strOutputBiblioRecPath = "";
-            byte[] baOutputTimestamp = null;
-
-            lRet = sessioninfo.Channel.SetBiblioInfo(
-                null,
-                "change",
-                strBiblioRecPath,
-        "xml",
-        strXml,
-        timestamp,
-        "",
-        out strOutputBiblioRecPath,
-        out baOutputTimestamp,
-        out strError);
-            if (lRet == -1)
-                goto ERROR1;
-
-            /*
-            LibraryServerResult result = app.SetBiblioInfo(
-                sessioninfo,
-                "change",
-                strBiblioRecPath,
-        "xml",
-        strXml,
-        timestamp,
-        out strOutputBiblioRecPath,
-        out baOutputTimestamp);
-            if (result.Value == -1)
+            finally
             {
-                strError = result.ErrorInfo;
-                goto ERROR1;
+                sessioninfo.ReturnChannel(channel);
             }
-             * */
-            this.Timestamp = ByteArray.GetHexTimeStampString(baOutputTimestamp);
-
-            return;
         ERROR1:
             this.SetDebugInfo("errorinfo", strError);
         }
@@ -683,30 +664,45 @@ out strError);
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
             string strBiblioXml = "";
-            string strBiblioState = "";
-
-            byte[] timestamp = null;
-            string[] formats = new string[1];
-            formats[0] = "xml";
-
-            string[] results = null;
-            lRet = sessioninfo.Channel.GetBiblioInfos(
-                null,
-                this.RecPath,
-                "",
-                formats,
-                out results,
-                out timestamp,
-                out strError);
-            if (lRet == -1)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                strError = "获得种记录 '" + this.RecPath + "' 时出错: " + strError;
-                goto ERROR1;
+                // string strBiblioState = "";
+
+                byte[] timestamp = null;
+                string[] formats = new string[1];
+                formats[0] = "xml";
+
+                string[] results = null;
+                lRet = // sessioninfo.Channel.
+                    channel.GetBiblioInfos(
+                    null,
+                    this.RecPath,
+                    "",
+                    formats,
+                    out results,
+                    out timestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获得种记录 '" + this.RecPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+                if (results == null || results.Length < 1)
+                {
+                    strError = "results error ";
+                    goto ERROR1;
+                }
+
+                strBiblioXml = results[0];
+                this.m_strXml = strBiblioXml;
+
+                this.Timestamp = ByteArray.GetHexTimeStampString(timestamp);
+                this.BiblioRecPath = this.RecPath;
             }
-            if (results == null || results.Length < 1)
+            finally
             {
-                strError = "results error ";
-                goto ERROR1;
+                sessioninfo.ReturnChannel(channel);
             }
 
             if (app.SearchLog != null)
@@ -720,12 +716,6 @@ out strError);
                 log.RecPath = this.RecPath;
                 app.SearchLog.AddLogItem(log);
             }
-
-            strBiblioXml = results[0];
-            this.m_strXml = strBiblioXml;
-
-            this.Timestamp = ByteArray.GetHexTimeStampString(timestamp);
-            this.BiblioRecPath = this.RecPath;
 
             string strMarc = "";
 
@@ -780,14 +770,13 @@ out strError);
                 // 需要从内核映射过来文件
                 string strLocalPath = "";
                 nRet = app.MapKernelScriptFile(
-                    null,   // sessioninfo,
+                    // null,   // sessioninfo,
                     strBiblioDbName,
                     "./cfgs/opac_biblio.fltx",  // OPAC查询固定认这个角色的配置文件，作为公共查询书目格式创建的脚本。而流通前端，创建书目格式的时候，找的是loan_biblio.fltx配置文件
                     out strLocalPath,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
 
                 // 将种记录数据从XML格式转换为HTML格式
                 KeyValueCollection result_params = null;
@@ -861,29 +850,8 @@ out strError);
                     }
                 }
 
-                /*
-                string strPrefix = "";
-                if (this.Wrapper == true)
-                    strPrefix = this.GetPrefixString("书目信息", "content_wrapper")
-                        + "<div class='biblio_wrapper'>";
-
-                string strPostfix = "";
-                if (this.Wrapper == true)
-                    strPostfix = "</div>" + this.GetPostfixString();
-                 * */
-
-
-                /*
-                LiteralControl literal = (LiteralControl)FindControl("biblio");
-                literal.Text = strPrefix + strBiblio + strPostfix;
-                 * */
-
-                // strBiblio = strPrefix + strBiblio + strPostfix;
-
                 this.m_strOpacBiblio = strBiblio;
             }
-
-
             return 0;
         ERROR1:
             return -1;

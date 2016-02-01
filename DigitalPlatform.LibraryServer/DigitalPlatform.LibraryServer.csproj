@@ -245,10 +245,6 @@
     <Content Include="comment.txt" />
     <Content Include="deleted\deleted.txt" />
     <Content Include="unhandled.txt" />
-    <Content Include="validate.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="印钞造币公司单点登录.htm" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="res\LibraryApplication.en-US.resx">

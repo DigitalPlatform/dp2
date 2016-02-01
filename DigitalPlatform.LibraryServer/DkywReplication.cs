@@ -26,10 +26,6 @@ namespace DigitalPlatform.LibraryServer
         // 已经完成了黑名单同步的日期。如果设置了这个日期，就表明同一天内再也不用做了
         string BlackListDoneDate = "";
 
-        // internal AutoResetEvent eventDownloadFinished = new AutoResetEvent(false);	// true : initial state is signaled 
-        // bool DownloadCancelled = false;
-        // Exception DownloadException = null;
-
         // 构造函数
         public DkywReplication(LibraryApplication app,
             string strName)
@@ -187,8 +183,11 @@ namespace DigitalPlatform.LibraryServer
         {
             // 系统挂起的时候，不运行本线程
             // 2007/12/18
-            if (this.App.HangupReason == HangupReason.LogRecover)
+            //if (this.App.HangupReason == HangupReason.LogRecover)
+            //    return;
+            if (this.App.ContainsHangup("LogRecover") == true)
                 return;
+
             // 2012/2/4
             if (this.App.PauseBatchTask == true)
                 return;

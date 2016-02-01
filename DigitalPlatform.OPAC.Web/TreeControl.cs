@@ -22,8 +22,15 @@ namespace DigitalPlatform.OPAC.Web
     {
         public bool EventMode = false;
         public event TreeItemClickEventHandler TreeItemClick = null;
-
         public event GetNodeDataEventHandler GetNodeData = null;
+
+        public override void Dispose()
+        {
+            this.TreeItemClick = null;
+            this.GetNodeData = null;
+
+            base.Dispose();
+        }
 
         public string XmlFileName = "";
 

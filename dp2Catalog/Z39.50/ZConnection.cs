@@ -200,6 +200,8 @@ namespace dp2Catalog
     public class ZConnection
     {
         public bool OwnerStop = true;   // 是否拥有独立的Stop
+
+        // TODO: 需要实现 IDisposeable 接口，释放 CompleteEvent
         public AutoResetEvent CompleteEvent = new AutoResetEvent(false);
 
         public int Searching = 0;   // 0 还没有开始 1 开始了 2 结束了
@@ -228,7 +230,6 @@ namespace dp2Catalog
             get
             {
                 // return "1.2.840.1003.5.109.10";
-
 
                 if (String.IsNullOrEmpty(this.RecordSyntax) == true)
                     return ZTargetControl.GetLeftValue(this.TargetInfo.PreferredRecordSyntax);
@@ -366,7 +367,6 @@ namespace dp2Catalog
             {
                 ZTargetControl.OnlineServerNodeIcon(this.TreeNode, false);
             }
-
 
             // 设置当前树上已经选择的节点的扩展信息
             string strError = "";

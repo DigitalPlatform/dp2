@@ -11,78 +11,80 @@ using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.rms.Client
 {
-	public enum AskMode
-	{
-		None = 0,
-		AskNullOrigin = 1,
-		AskNotMatchOrigin = 2,
-	}
-	/// <summary>
-	/// Summary description for DbNameMapItemDlg.
-	/// </summary>
-	public class DbNameMapItemDlg : System.Windows.Forms.Form
-	{
+    public enum AskMode
+    {
+        None = 0,
+        AskNullOrigin = 1,
+        AskNotMatchOrigin = 2,
+    }
+    /// <summary>
+    /// Summary description for DbNameMapItemDlg.
+    /// </summary>
+    public class DbNameMapItemDlg : System.Windows.Forms.Form
+    {
         public ApplicationInfo AppInfo = null;
         public ServerCollection Servers = null;
         public RmsChannelCollection Channels = null;
 
+        public AskMode AskMode = AskMode.None;
 
-		public AskMode AskMode = AskMode.None;
-
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox textBox_origin;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox textBox_target;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.ComboBox comboBox_writeMode;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.Button button_findOrigin;
-		private System.Windows.Forms.Button button_findTarget;
-		private System.Windows.Forms.Button button_directAllServerMap;
-		private System.Windows.Forms.TextBox textBox_comment;
-		private System.Windows.Forms.Button button_explain;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox_origin;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox_target;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox comboBox_writeMode;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_findOrigin;
+        private System.Windows.Forms.Button button_findTarget;
+        private System.Windows.Forms.Button button_directAllServerMap;
+        private System.Windows.Forms.TextBox textBox_comment;
+        private System.Windows.Forms.Button button_explain;
         private Button button_directSingleServerMap;
         private Button button_directSingleDbMap;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public DbNameMapItemDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public DbNameMapItemDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+                if (this.Channels != null)
+                    this.Channels.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DbNameMapItemDlg));
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_origin = new System.Windows.Forms.TextBox();
@@ -113,7 +115,7 @@ namespace DigitalPlatform.rms.Client
             // 
             // textBox_origin
             // 
-            this.textBox_origin.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_origin.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_origin.Location = new System.Drawing.Point(12, 88);
             this.textBox_origin.Name = "textBox_origin";
@@ -132,7 +134,7 @@ namespace DigitalPlatform.rms.Client
             // 
             // textBox_target
             // 
-            this.textBox_target.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_target.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_target.Location = new System.Drawing.Point(12, 144);
             this.textBox_target.Name = "textBox_target";
@@ -216,8 +218,8 @@ namespace DigitalPlatform.rms.Client
             // 
             // textBox_comment
             // 
-            this.textBox_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_comment.Location = new System.Drawing.Point(12, 12);
             this.textBox_comment.Multiline = true;
@@ -287,126 +289,126 @@ namespace DigitalPlatform.rms.Client
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (this.textBox_origin.Text == "")
-			{
-				MessageBox.Show(this, "尚未指定源");
-				return;
-			}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (this.textBox_origin.Text == "")
+            {
+                MessageBox.Show(this, "尚未指定源");
+                return;
+            }
 
-			if (this.textBox_target.Text == ""
-				&& this.WriteMode != "skip")
-			{
-				MessageBox.Show(this, "尚未指定目标");
-				return;
-			}
+            if (this.textBox_target.Text == ""
+                && this.WriteMode != "skip")
+            {
+                MessageBox.Show(this, "尚未指定目标");
+                return;
+            }
 
-			if (this.comboBox_writeMode.Text == "")
-			{
-				MessageBox.Show(this, "尚未指定写入方式");
-				return;
-			}
-		
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            if (this.comboBox_writeMode.Text == "")
+            {
+                MessageBox.Show(this, "尚未指定写入方式");
+                return;
+            }
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_findOrigin_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+
+        private void button_findOrigin_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择源数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			dlg.ap = this.AppInfo;
-			dlg.ApCfgTitle = "dbnamemapitemdlg_origin";
-			dlg.MultiSelect = false;
-			dlg.Path = this.textBox_origin.Text;
-			dlg.Initial( this.Servers,
-				this.Channels);	
-			// dlg.StartPositon = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
+            dlg.Text = "请选择源数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            dlg.ap = this.AppInfo;
+            dlg.ApCfgTitle = "dbnamemapitemdlg_origin";
+            dlg.MultiSelect = false;
+            dlg.Path = this.textBox_origin.Text;
+            dlg.Initial(this.Servers,
+                this.Channels);
+            // dlg.StartPositon = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			textBox_origin.Text = dlg.Path;
-		}
+            textBox_origin.Text = dlg.Path;
+        }
 
-		private void button_findTarget_Click(object sender, System.EventArgs e)
-		{
-			OpenResDlg dlg = new OpenResDlg();
+        private void button_findTarget_Click(object sender, System.EventArgs e)
+        {
+            OpenResDlg dlg = new OpenResDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Text = "请选择目标数据库";
-			dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-			dlg.ap = this.AppInfo;
-			dlg.ApCfgTitle = "dbnamemapitemdlg_origin";
-			dlg.MultiSelect = false;
+            dlg.Text = "请选择目标数据库";
+            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
+            dlg.ap = this.AppInfo;
+            dlg.ApCfgTitle = "dbnamemapitemdlg_origin";
+            dlg.MultiSelect = false;
 
             // 如果目标textbox有内容，优先用它决定缺省选定的数据库节点。否则用源textbox的内容
             if (string.IsNullOrEmpty(this.textBox_target.Text) == false)
-			    dlg.Path = this.textBox_target.Text;
+                dlg.Path = this.textBox_target.Text;
             else if (string.IsNullOrEmpty(this.textBox_origin.Text) == false)
                 dlg.Path = this.textBox_origin.Text;
 
-			dlg.Initial( this.Servers,
-				this.Channels);	
-			// dlg.StartPositon = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);   // 对于数据库节点，不要主动展开其下一级
+            dlg.Initial(this.Servers,
+                this.Channels);
+            // dlg.StartPositon = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);   // 对于数据库节点，不要主动展开其下一级
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			textBox_target.Text = dlg.Path;		
-		}
+            textBox_target.Text = dlg.Path;
+        }
 
-		// 询问空源路径如何处理
-		// return:
+        // 询问空源路径如何处理
+        // return:
         //      -1  出错
-		//		0	cancel全部处理
-		//		1	已经选择处理办法
-		public static int AskNullOriginBox(
-			IWin32Window owner,
-			ApplicationInfo ap,
+        //		0	cancel全部处理
+        //		1	已经选择处理办法
+        public static int AskNullOriginBox(
+            IWin32Window owner,
+            ApplicationInfo ap,
                 ServerCollection Servers,
                 RmsChannelCollection Channels,
             string strComment,
             string strSelectedLongPath,
-			DbNameMap map)
-		{
-			DbNameMapItemDlg dlg = new DbNameMapItemDlg();
+            DbNameMap map)
+        {
+            DbNameMapItemDlg dlg = new DbNameMapItemDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
             dlg.Servers = Servers;
             dlg.Channels = Channels;
             dlg.Comment = strComment;
-			dlg.AskMode = AskMode.AskNullOrigin;
-			dlg.Origin = "{null}";
+            dlg.AskMode = AskMode.AskNullOrigin;
+            dlg.Origin = "{null}";
             dlg.Target = strSelectedLongPath;
-			dlg.WriteMode = "append";
+            dlg.WriteMode = "append";
 
-			dlg.Text = "请指定映射关系";
+            dlg.Text = "请指定映射关系";
 
-			if (ap != null)
-				ap.LinkFormState(dlg, "AskNotMatchOriginBox_state");
-			dlg.ShowDialog(owner);
-			if (ap != null)
-				ap.UnlinkFormState(dlg);
+            if (ap != null)
+                ap.LinkFormState(dlg, "AskNotMatchOriginBox_state");
+            dlg.ShowDialog(owner);
+            if (ap != null)
+                ap.UnlinkFormState(dlg);
 
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return 0;	// cancel
+            if (dlg.DialogResult != DialogResult.OK)
+                return 0;	// cancel
 
             string strError = "";
             if (map.NewItem(dlg.Origin, dlg.Target, dlg.WriteMode,
@@ -417,8 +419,8 @@ namespace DigitalPlatform.rms.Client
                 return -1;
             }
 
-			return 1;
-		}
+            return 1;
+        }
 
         // 询问无法匹配的源路径如何处理
         // return:
@@ -471,17 +473,17 @@ namespace DigitalPlatform.rms.Client
         }
 
         // 全部服务器直接对应
-		private void button_directAllServerMap_Click(object sender, System.EventArgs e)
-		{
-			this.textBox_origin.Text = "*";
-			this.textBox_origin.Enabled = true;
-			this.button_findOrigin.Enabled = true;
+        private void button_directAllServerMap_Click(object sender, System.EventArgs e)
+        {
+            this.textBox_origin.Text = "*";
+            this.textBox_origin.Enabled = true;
+            this.button_findOrigin.Enabled = true;
 
-			this.textBox_target.Text = "*";
-			this.textBox_target.Enabled = true;
-			this.button_findTarget.Enabled = true;
+            this.textBox_target.Text = "*";
+            this.textBox_target.Enabled = true;
+            this.button_findTarget.Enabled = true;
 
-		}
+        }
 
         // 当前服务器内直接对应
         private void button_directSingleServerMap_Click(object sender, EventArgs e)
@@ -517,127 +519,127 @@ namespace DigitalPlatform.rms.Client
             this.button_findTarget.Enabled = true;
         }
 
-		private void DbNameMapItemDlg_Load(object sender, System.EventArgs e)
-		{
-			if (this.AskMode == AskMode.AskNullOrigin)
-			{
-				this.textBox_origin.Enabled = false;
-				this.button_findOrigin.Enabled = false;
-				this.button_directAllServerMap.Enabled = false;
+        private void DbNameMapItemDlg_Load(object sender, System.EventArgs e)
+        {
+            if (this.AskMode == AskMode.AskNullOrigin)
+            {
+                this.textBox_origin.Enabled = false;
+                this.button_findOrigin.Enabled = false;
+                this.button_directAllServerMap.Enabled = false;
 
-				this.comboBox_writeMode.Items.Clear();
-				this.comboBox_writeMode.Items.Add("append -- 追加");
-				this.comboBox_writeMode.Items.Add("skip -- 跳过");
-			}
-			else if (this.AskMode == AskMode.AskNotMatchOrigin)
-			{
-				this.textBox_origin.Enabled = false;
-				this.button_findOrigin.Enabled = false;
+                this.comboBox_writeMode.Items.Clear();
+                this.comboBox_writeMode.Items.Add("append -- 追加");
+                this.comboBox_writeMode.Items.Add("skip -- 跳过");
+            }
+            else if (this.AskMode == AskMode.AskNotMatchOrigin)
+            {
+                this.textBox_origin.Enabled = false;
+                this.button_findOrigin.Enabled = false;
 
-				this.button_directAllServerMap.Enabled = true;
-			}
-		}
+                this.button_directAllServerMap.Enabled = true;
+            }
+        }
 
-		private void button_explain_Click(object sender, System.EventArgs e)
-		{
-			string strText = "";
+        private void button_explain_Click(object sender, System.EventArgs e)
+        {
+            string strText = "";
 
-			if (this.textBox_origin.Text == "{null}")
-			{
-				if (this.WriteMode == "skip")
-					strText = "将源数据文件中没有来源库信息的记录，全部跳过。";
-				else
-					strText = "将源数据文件中没有来源库信息的记录, 以 " +this.WriteModeCaption + "方式写入目标 数据库 "+this.textBox_target.Text+" 中。";
-				goto DONE;
-			}
+            if (this.textBox_origin.Text == "{null}")
+            {
+                if (this.WriteMode == "skip")
+                    strText = "将源数据文件中没有来源库信息的记录，全部跳过。";
+                else
+                    strText = "将源数据文件中没有来源库信息的记录, 以 " + this.WriteModeCaption + "方式写入目标 数据库 " + this.textBox_target.Text + " 中。";
+                goto DONE;
+            }
 
-			if (this.textBox_origin.Text == "*" 
-				&& this.textBox_target.Text == "*")
-			{
-				if (this.WriteMode == "skip")
-					strText = "将源数据文件中有来源数据库信息的记录, 全部跳过。";
-				else
+            if (this.textBox_origin.Text == "*"
+                && this.textBox_target.Text == "*")
+            {
+                if (this.WriteMode == "skip")
+                    strText = "将源数据文件中有来源数据库信息的记录, 全部跳过。";
+                else
                     strText = "将源数据文件中有来源数据库信息的记录, 以 " + this.WriteModeCaption + " 方式写入服务器端同样数据库中。";
-				goto DONE;
-			}
+                goto DONE;
+            }
 
-			if (this.textBox_origin.Text == "*" 
-				&& this.textBox_target.Text != "*")
-			{
-				if (this.WriteMode == "skip")
-					strText = "将源数据文件中有来源数据库信息的记录, 全部跳过。";
-				else
+            if (this.textBox_origin.Text == "*"
+                && this.textBox_target.Text != "*")
+            {
+                if (this.WriteMode == "skip")
+                    strText = "将源数据文件中有来源数据库信息的记录, 全部跳过。";
+                else
                     strText = "将源数据文件中有来源数据库信息的记录, 不管其来源数据库名是什么, 都以 " + this.WriteModeCaption + " 方式写入服务器端数据库 " + this.textBox_target.Text + " 中。";
-				goto DONE;
-			}
+                goto DONE;
+            }
 
-			if (this.textBox_origin.Text != "*" 
-				&& this.textBox_target.Text == "*")
-			{
-				if (this.WriteMode == "skip")
-					strText = "将源数据文件中的记录, 如果其随文件记载的来源数据库名是 "+this.textBox_origin.Text+" ，则跳过。";
-				else
+            if (this.textBox_origin.Text != "*"
+                && this.textBox_target.Text == "*")
+            {
+                if (this.WriteMode == "skip")
+                    strText = "将源数据文件中的记录, 如果其随文件记载的来源数据库名是 " + this.textBox_origin.Text + " ，则跳过。";
+                else
                     strText = "将源数据文件中的记录, 如果其随文件记载的来源数据库名是 " + this.textBox_origin.Text + " ，则以 " + this.WriteModeCaption + " 方式写入服务器端同名数据库中。";
-				goto DONE;
-			}
-	
-			if (this.WriteMode == "skip")
-				strText = "将源数据文件中的记录, 如果其随文件记载的来源数据库名是 "+this.textBox_origin.Text+" ，则跳过。";
-			else
+                goto DONE;
+            }
+
+            if (this.WriteMode == "skip")
+                strText = "将源数据文件中的记录, 如果其随文件记载的来源数据库名是 " + this.textBox_origin.Text + " ，则跳过。";
+            else
                 strText = "将源数据文件中的记录, 如果其随文件记载的来源数据库名是 " + this.textBox_origin.Text + " ，则以 " + this.WriteModeCaption + " 方式写入服务器端数据库 " + this.textBox_target.Text + " 中。";
 
-			DONE:
-			MessageBox.Show(this, strText);
-		}
+        DONE:
+            MessageBox.Show(this, strText);
+        }
 
-		private void comboBox_writeMode_TextChanged(object sender, System.EventArgs e)
-		{
-			if (this.WriteMode == "skip")
-			{
-				this.textBox_target.Text = "";
-				this.textBox_target.Enabled = false;
-			}
-			else 
-			{
-				this.textBox_target.Enabled = true;
-			}
-		}
+        private void comboBox_writeMode_TextChanged(object sender, System.EventArgs e)
+        {
+            if (this.WriteMode == "skip")
+            {
+                this.textBox_target.Text = "";
+                this.textBox_target.Enabled = false;
+            }
+            else
+            {
+                this.textBox_target.Enabled = true;
+            }
+        }
 
-		public string Comment
-		{
-			get 
-			{
-				return this.textBox_comment.Text;
-			}
-			set 
-			{
-				this.textBox_comment.Text = value;
-			}
-		}
+        public string Comment
+        {
+            get
+            {
+                return this.textBox_comment.Text;
+            }
+            set
+            {
+                this.textBox_comment.Text = value;
+            }
+        }
 
-		public string Origin
-		{
-			get
-			{
-				return this.textBox_origin.Text;
-			}
-			set 
-			{
-				this.textBox_origin.Text = value;
-			}
-		}
+        public string Origin
+        {
+            get
+            {
+                return this.textBox_origin.Text;
+            }
+            set
+            {
+                this.textBox_origin.Text = value;
+            }
+        }
 
-		public string Target
-		{
-			get 
-			{
-				return this.textBox_target.Text;
-			}
-			set 
-			{
-				this.textBox_target.Text = value;
-			}
-		}
+        public string Target
+        {
+            get
+            {
+                return this.textBox_target.Text;
+            }
+            set
+            {
+                this.textBox_target.Text = value;
+            }
+        }
 
         public string WriteModeCaption
         {
@@ -655,15 +657,15 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-		public string WriteMode
-		{
-			get 
-			{
-                
-				return StringUtil.GetLeft(this.comboBox_writeMode.Text);
-			}
-			set 
-			{
+        public string WriteMode
+        {
+            get
+            {
+
+                return StringUtil.GetLeft(this.comboBox_writeMode.Text);
+            }
+            set
+            {
                 string strValue = StringUtil.GetLeft(value);
                 foreach (string s in this.comboBox_writeMode.Items)
                 {
@@ -676,12 +678,12 @@ namespace DigitalPlatform.rms.Client
                 }
 
 
-				this.comboBox_writeMode.Text = value;
-			}
-		}
+                this.comboBox_writeMode.Text = value;
+            }
+        }
 
 
 
 
-	}
+    }
 }

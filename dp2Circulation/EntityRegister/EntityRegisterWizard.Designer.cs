@@ -17,7 +17,7 @@
             {
                 components.Dispose();
             }
-            // 205/6/7
+            // 2015/6/7
             if (this._imageManager != null)
             {
                 this._imageManager.StopThread(true);
@@ -30,8 +30,13 @@
 
                 }
                 this._imageManager.DeleteTempFiles();
+                this._imageManager.Dispose();
                 this._imageManager = null;
             }
+
+            if (this._genData != null)
+                this._genData.Dispose();
+
             base.Dispose(disposing);
         }
 

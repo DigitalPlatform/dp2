@@ -16,18 +16,54 @@ namespace DigitalPlatform.Script
     {
         Hashtable m_table = new Hashtable();
 
-        ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
+        ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         public ObjectItem<T> FindObjectItem(string strPath)
         {
-            this.m_lock.EnterReadLock();
+            this._lock.EnterReadLock();
             try
             {
                 return (ObjectItem<T>)this.m_table[strPath];
             }
             finally
             {
-                this.m_lock.ExitReadLock();
+                this._lock.ExitReadLock();
+            }
+        }
+
+        // 按照路径字符串来锁定。作用为在创建对象期间排斥相同名字的对象重叠创建
+        RecordLockCollection _pathLock = new RecordLockCollection();
+
+        // 获得一个对象。如果对象尚不存在，则用给定的 proc 方法创建它
+        public T GetObject(string strPath, CreateItem<T> proc)
+        {
+            this._lock.EnterUpgradeableReadLock();
+            try
+            {
+                ObjectItem<T> item = (ObjectItem<T>)this.m_table[strPath];
+                if (item != null)
+                    return item.Object;
+                this._pathLock.LockForWrite(strPath);
+                try
+                {
+                    // 再次确认。因为有可能一瞬间前别的线程刚好在写锁定过程中创建好了对象
+                    item = (ObjectItem<T>)this.m_table[strPath];
+                    if (item != null)
+                        return item.Object;
+
+                    item = new ObjectItem<T>();
+                    item.Object = proc();
+                    this.SetObjectItem(strPath, item); 
+                    return item.Object;
+                }
+                finally
+                {
+                    this._pathLock.UnlockForWrite(strPath);
+                }
+            }
+            finally
+            {
+                this._lock.ExitUpgradeableReadLock();
             }
         }
 
@@ -43,7 +79,7 @@ namespace DigitalPlatform.Script
         public void SetObjectItem(string strPath,
             ObjectItem<T> object_item)
         {
-            this.m_lock.EnterWriteLock();
+            this._lock.EnterWriteLock();
             try
             {
                 if (object_item == null)
@@ -55,7 +91,7 @@ namespace DigitalPlatform.Script
             }
             finally
             {
-                this.m_lock.ExitWriteLock();
+                this._lock.ExitWriteLock();
             }
         }
 
@@ -77,14 +113,14 @@ namespace DigitalPlatform.Script
 
         public void Clear()
         {
-            this.m_lock.EnterWriteLock();
+            this._lock.EnterWriteLock();
             try
             {
                 this.m_table.Clear();
             }
             finally
             {
-                this.m_lock.ExitWriteLock();
+                this._lock.ExitWriteLock();
             }
         }
 
@@ -111,4 +147,6 @@ namespace DigitalPlatform.Script
         public T Object = default(T);
         public string Timestamp = "";
     }
+
+    public delegate T CreateItem<T>();
 }

@@ -216,6 +216,7 @@ namespace System.Drawing.PieChart {
             m_texts = texts;
         }
 
+        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         /// <summary>
         ///   <c>Finalize</c> method.
         /// </summary>

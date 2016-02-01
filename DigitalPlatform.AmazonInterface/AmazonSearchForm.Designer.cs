@@ -17,6 +17,13 @@
             {
                 components.Dispose();
             }
+
+            this.eventClose.Dispose();
+            this.eventSelected.Dispose();
+
+            if (this._fillImageThread != null)
+                this._fillImageThread.Dispose();
+
             base.Dispose(disposing);
         }
 

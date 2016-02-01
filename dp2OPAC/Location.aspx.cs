@@ -15,7 +15,7 @@ using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 
 public partial class Location : MyWebPage
 {
@@ -116,11 +116,13 @@ ref sessioninfo) == false)
         this.Response.End();
     }
 
+#if NO
     bool MyFlushOutput()
     {
         Response.Flush();
         return Response.IsClientConnected;
     }
+#endif
 
 #if NO
     // 读取文件前256bytes

@@ -317,52 +317,35 @@ namespace DigitalPlatform.OPAC.Web
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
-            LibraryChannel channel = sessioninfo.Channel;
-
-            string strBiblio = "";
-            string strBiblioRecPath = "";
-
             string strXml = "";
-            byte[] timestamp = null;
-            string strOutputPath = "";
-            long lRet = sessioninfo.Channel.GetItemInfo(
-            null,
-            "@path:" + strItemRecPath,
-            "xml", // strResultType
-            out strXml,
-            out strOutputPath,
-            out timestamp,
-            "", // "recpath",  // strBiblioType
-            out strBiblio,
-            out strBiblioRecPath,
-            out strError);
+            // LibraryChannel channel = sessioninfo.Channel;
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
+            {
+                string strBiblio = "";
+                string strBiblioRecPath = "";
 
-            /*
-            string strMetaData = "";
-            string strStyle = LibraryChannel.GETRES_ALL_STYLE;
-
-            long lRet = channel.GetRes(
+                byte[] timestamp = null;
+                string strOutputPath = "";
+                long lRet = // sessioninfo.Channel.
+                    channel.GetItemInfo(
                 null,
-                strItemRecPath,
-                strStyle,
+                "@path:" + strItemRecPath,
+                "xml", // strResultType
                 out strXml,
-                out strMetaData,
-                out timestamp,
                 out strOutputPath,
+                out timestamp,
+                "", // "recpath",  // strBiblioType
+                out strBiblio,
+                out strBiblioRecPath,
                 out strError);
-             * */
-
-            /*
-            long lRet = channel.GetRes(strItemRecPath,
-    out strXml,
-    out strMetaData,
-    out timestamp,
-    out strOutputPath,
-    out strError);
-             * */
-            if (lRet == -1)
-                goto ERROR1;
-
+                if (lRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
 
             XmlDocument itemdom = null;
             nRet = OpacApplication.LoadToDom(strXml,

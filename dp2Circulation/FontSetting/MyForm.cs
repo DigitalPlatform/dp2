@@ -32,6 +32,17 @@ namespace dp2Circulation
     /// </summary>
     public class MyForm : Form, IMdiWindow
     {
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.Channel != null)
+                    this.Channel.Dispose();
+                CloseFloatingMessage();
+            }
+            base.Dispose(disposing);
+        }
+
         internal FloatingMessageForm _floatingMessage = null;
 
         public FloatingMessageForm FloatingMessageForm
@@ -172,6 +183,9 @@ namespace dp2Circulation
             this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
+            this.Channel.Idle -= Channel_Idle;
+            this.Channel.Idle += Channel_Idle;
+
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 
@@ -189,6 +203,25 @@ namespace dp2Circulation
                     this.MainForm.Move -= new EventHandler(MainForm_Move);
 
             }
+        }
+
+        bool _channelDoEvents = true;
+        public bool ChannelDoEvents
+        {
+            get
+            {
+                return _channelDoEvents;
+            }
+            set
+            {
+                _channelDoEvents = value;
+            }
+        }
+
+        void Channel_Idle(object sender, IdleEventArgs e)
+        {
+            if (_channelDoEvents)
+                Application.DoEvents();
         }
 
         /// <summary>
@@ -213,7 +246,13 @@ namespace dp2Circulation
         public virtual void OnMyFormClosed()
         {
             if (this.Channel != null)
+            {
+                this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
+                this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
+                this.Channel.Idle -= Channel_Idle;
+
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
+            }
 
             if (stop != null) // 脱离关联
             {
@@ -305,10 +344,13 @@ namespace dp2Circulation
 
         #region 新风格的 ChannelPool
 
+        // parameters:
+        //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetChannel(string strServerUrl = ".",
-string strUserName = ".")
+            string strUserName = ".",
+            MainForm.GetChannelStyle style = MainForm.GetChannelStyle.GUI)
         {
-            LibraryChannel channel = this.MainForm.GetChannel(strServerUrl, strUserName);
+            LibraryChannel channel = this.MainForm.GetChannel(strServerUrl, strUserName, style);
             _channelList.Add(channel);
             // TODO: 检查数组是否溢出
             return channel;
@@ -1146,6 +1188,7 @@ string strUserName = ".")
             finally
             {
                 // 归还对象
+                filter.FilterHost = null;   // 2016/1/23
                 this.MainForm.Filters.SetFilter(strFilterFileName, filter);
             }
 
@@ -1327,5 +1370,4 @@ out string strError)
     {
         public FilterHost FilterHost = null;
     }
-
 }

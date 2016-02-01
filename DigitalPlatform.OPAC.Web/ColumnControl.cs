@@ -21,6 +21,7 @@ using DigitalPlatform.OPAC.Server;
 
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -333,11 +334,9 @@ namespace DigitalPlatform.OPAC.Web
             bibliocontrol.WantFocus += new WantFocusEventHandler(bibliocontrol_WantFocus);
             biblioinfo_holder.Controls.Add(bibliocontrol);
 
-
             auto_literal = new AutoIndentLiteral();
             auto_literal.Text = "<%end%></td><%end%></tr>";
             line.Controls.Add(auto_literal);
-
             return line;
         }
 
@@ -1047,13 +1046,9 @@ bruce (sqlwork.com)
                 this.SetDebugInfo("errorinfo", "尚未创建栏目缓存...");
             }
 
-            /*
-            List<string> recpathlist = new List<string>();
-            this.RecPathList = "";
-             * */
-
             if (this.CommentColumn != null)
             {
+                LibraryChannel channel = sessioninfo.GetChannel(true);
                 app.m_lockCommentColumn.AcquireReaderLock(app.m_nCommentColumnLockTimeout);
                 try
                 {
@@ -1118,7 +1113,8 @@ bruce (sqlwork.com)
                         //      1   找到
                         nRet = commentcontrol.GetRecord(
                             app,
-                            sessioninfo,
+                            null,   // sessioninfo,
+                            channel,
                             strPath,
                             out strXml,
                             out timestamp,
@@ -1182,7 +1178,8 @@ bruce (sqlwork.com)
                                 string strBarcode = "@bibliorecpath:" + strBiblioRecPath;
                                 string strSummary = "";
                                 string strOutputBiblioRecPath = "";
-                                long lRet = sessioninfo.Channel.GetBiblioSummary(
+                                long lRet = //sessioninfo.Channel.
+                                    channel.GetBiblioSummary(
                                     null,
                                     strBarcode,
                                     null,
@@ -1192,18 +1189,6 @@ bruce (sqlwork.com)
                                     out strError);
                                 if (lRet == -1 || lRet == 0)
                                     strSummary = strError;
-
-                                /*
-                                LibraryServerResult result = app.GetBiblioSummary(
-                                    sessioninfo,
-                                    strBarcode,
-                                    null,
-                                    null,
-                                    out strOutputBiblioRecPath,
-                                    out strSummary);
-                                if (result.Value == -1 || result.Value == 0)
-                                    strSummary = result.ErrorInfo;
-                                 * */
 
                                 bibliosummarycontrol.Text = strSummary;
                                 bibliocontrol.Visible = false;
@@ -1221,6 +1206,7 @@ bruce (sqlwork.com)
                 finally
                 {
                     app.m_lockCommentColumn.ReleaseReaderLock();
+                    sessioninfo.ReturnChannel(channel);
                 }
             }
             else
@@ -1244,15 +1230,7 @@ bruce (sqlwork.com)
                 }
             }
 
-            // this.RecPathList = StringUtil.MakePathList(recpathlist);
-
             this.SetLineClassAndControlActive();
-
-            /*
-            if (this.m_bButtonSetted == false)
-                this.EnableCmdButtons(true);
-             * */
-
             base.Render(writer);
             return;
         ERROR1:

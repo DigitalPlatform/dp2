@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+
+            if (this.m_webExternalHost_patron != null)
+                this.m_webExternalHost_patron.Dispose();
+
             base.Dispose(disposing);
         }
 

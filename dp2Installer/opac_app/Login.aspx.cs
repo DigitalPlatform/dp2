@@ -16,8 +16,6 @@ using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-// using DigitalPlatform.OPAC.Server.YczbSso;
-
 public partial class Login : MyWebPage
 {
     //OpacApplication app = null;
@@ -139,7 +137,8 @@ ref this.sessioninfo) == false)
                     return;
 
                 // 登录成功后首次设置馆代码
-                this.TitleBarControl1.SelectedLibraryCode = sessioninfo.Channel.LibraryCodeList;
+                this.TitleBarControl1.SelectedLibraryCode = // sessioninfo.Channel.LibraryCodeList;
+                    sessioninfo.LibraryCodeList;
 
                 if (sessioninfo.LoginCallStack.Count != 0)
                 {
@@ -187,7 +186,6 @@ ref this.sessioninfo) == false)
 
                 {
                     // 判断当前是不是yczb sso状态
-
                     HttpCookie cookie = Request.Cookies.Get("iPlanetDirectoryPro");
                     if (cookie == null)
                         goto DONE;
@@ -592,7 +590,8 @@ ref this.sessioninfo) == false)
             return;
 
         // 首次设置馆代码
-        this.TitleBarControl1.SelectedLibraryCode = sessioninfo.Channel.LibraryCodeList;
+        this.TitleBarControl1.SelectedLibraryCode = // sessioninfo.Channel.LibraryCodeList;
+            sessioninfo.LibraryCodeList;
 
         if (sessioninfo.LoginCallStack.Count != 0)
         {

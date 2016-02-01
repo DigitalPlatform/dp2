@@ -109,7 +109,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.66 (2016/1/2) GetBiblioInfos() API 中当 strBiblioRecPath 参数在使用 @path-list: 引导的时候，其后部允许出现 @itemBarcode:xxxx|@itemBarcode:xxx 这样的内容
         //      2.67 (2016/1/6) GetItemInfo() API 的 @barcode-list:" "get-path-list" 功能允许间杂 @refID:前缀的号码。
         //      2.68 (2016/1/9) Return() API 增加了 read action。会将动作记入操作日志。ChargingOperDatabase 库也会自动更新
-        public static string Version = "2.68";
+        //      2.69 (2016/1/29) 各个 API 都对读者身份加强了检查，防止出现权限漏洞。
+        public static string Version = "2.69";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -209,7 +210,8 @@ namespace DigitalPlatform.LibraryServer
 
         public Semaphore PictureLimit = new Semaphore(10, 10);
 
-        public HangupReason HangupReason = HangupReason.None;
+        // public HangupReason HangupReason = HangupReason.None;
+        public List<string> HangupList = new List<string>();    // 具体的挂起原因。因为初始化和各种环节，可能会有不止一种令系统挂起的原因。如果在重试某些操作以后希望解除挂起状态，则需要检查是否消除了全部因素，才能决定是否解除
 
         public bool PauseBatchTask = false; // 是否暂停后台任务
 
@@ -273,6 +275,7 @@ namespace DigitalPlatform.LibraryServer
 
         // Application通用锁。可以用来管理GlobalCfgDom等
         public ReaderWriterLock m_lock = new ReaderWriterLock();
+        //public ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         public static int m_nLockTimeout = 5000;	// 5000=5秒
 
         // 读者记录锁。避免多线程改写同一读者记录造成的故障
@@ -399,7 +402,6 @@ namespace DigitalPlatform.LibraryServer
             Dispose(false);
         }
 
-
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
@@ -453,6 +455,23 @@ namespace DigitalPlatform.LibraryServer
             disposed = true;
         }
 
+        public bool ContainsHangup(string strText)
+        {
+            return this.HangupList.IndexOf(strText) != -1;
+        }
+
+        public void ClearHangup(string strText)
+        {
+            for (int i = 0; i < this.HangupList.Count; i++)
+            {
+                if (this.HangupList[i] == strText)
+                {
+                    this.HangupList.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
         public int LoadCfg(
             bool bReload,
             string strDataDir,
@@ -463,73 +482,83 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
             LibraryApplication app = this;  // new CirculationApplication();
 
-            // 装载配置文件的过程，只能消除以前的 StartError 挂起状态，其他状态是无法消除的
-            // 本函数过程也约定好，只进行 StartError 挂起，不做其他挂起
-            if (app.HangupReason == LibraryServer.HangupReason.StartingError)
-                app.HangupReason = LibraryServer.HangupReason.None;
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-                DateTime start = DateTime.Now;
 
-                this.DataDir = strDataDir;
-                this.HostDir = strHostDir;
-
-                string strFileName = PathUtil.MergePath(strDataDir, "library.xml");
-                string strBinDir = strHostDir;  //  PathUtil.MergePath(strHostDir, "bin");
-                string strCfgDir = PathUtil.MergePath(strDataDir, "cfgs");
-                string strCfgMapDir = PathUtil.MergePath(strDataDir, "cfgsmap");
-                string strLogDir = PathUtil.MergePath(strDataDir, "log");
-                string strOperLogDir = PathUtil.MergePath(strDataDir, "operlog");
-                string strZhengyuanDir = PathUtil.MergePath(strDataDir, "zhengyuan");
-                string strDkywDir = PathUtil.MergePath(strDataDir, "dkyw");
-                string strPatronReplicationDir = PathUtil.MergePath(strDataDir, "patronreplication");
-                string strStatisDir = PathUtil.MergePath(strDataDir, "statis");
-                string strSessionDir = PathUtil.MergePath(strDataDir, "session");
-                string strColumnDir = PathUtil.MergePath(strDataDir, "column");
-                string strTempDir = PathUtil.MergePath(strDataDir, "temp");
-
-                app.m_strFileName = strFileName;
-
-                app.CfgDir = strCfgDir;
-
-                app.CfgMapDir = strCfgMapDir;
-                PathUtil.CreateDirIfNeed(app.CfgMapDir);	// 确保目录创建
-
-
-                // log
-                app.LogDir = strLogDir;	// 日志存储目录
-                PathUtil.CreateDirIfNeed(app.LogDir);	// 确保目录创建
-
-                // zhengyuan 一卡通
-                app.ZhengyuanDir = strZhengyuanDir;
-                PathUtil.CreateDirIfNeed(app.ZhengyuanDir);	// 确保目录创建
-
-                // dkyw 一卡通
-                app.DkywDir = strDkywDir;
-                PathUtil.CreateDirIfNeed(app.DkywDir);	// 确保目录创建
-
-                // patron replication
-                app.PatronReplicationDir = strPatronReplicationDir;
-                PathUtil.CreateDirIfNeed(app.PatronReplicationDir);	// 确保目录创建
-
-
-                // statis 统计文件
-                app.StatisDir = strStatisDir;
-                PathUtil.CreateDirIfNeed(app.StatisDir);	// 确保目录创建
-
-                // session临时文件
-                app.SessionDir = strSessionDir;
-                PathUtil.CreateDirIfNeed(app.SessionDir);	// 确保目录创建
-
-                if (bReload == false)
-                    CleanSessionDir(this.SessionDir);
-
-                // 各种临时文件
-                app.TempDir = strTempDir;
-                PathUtil.CreateDirIfNeed(app.TempDir);	// 确保目录创建
-
-                if (bReload == false)
+                // 装载配置文件的过程，只能消除以前的 StartError 挂起状态，其他状态是无法消除的
+                // 本函数过程也约定好，只进行 StartError 挂起，不做其他挂起
+#if NO
+            if (app.HangupReason == LibraryServer.HangupReason.StartingError)
+                app.HangupReason = LibraryServer.HangupReason.None;
+#endif
+                if (app.HangupList.Count > 0)
                 {
+                    ClearHangup("StartingError");
+                }
+                try
+                {
+                    DateTime start = DateTime.Now;
+
+                    this.DataDir = strDataDir;
+                    this.HostDir = strHostDir;
+
+                    string strFileName = PathUtil.MergePath(strDataDir, "library.xml");
+                    string strBinDir = strHostDir;  //  PathUtil.MergePath(strHostDir, "bin");
+                    string strCfgDir = PathUtil.MergePath(strDataDir, "cfgs");
+                    string strCfgMapDir = PathUtil.MergePath(strDataDir, "cfgsmap");
+                    string strLogDir = PathUtil.MergePath(strDataDir, "log");
+                    string strOperLogDir = PathUtil.MergePath(strDataDir, "operlog");
+                    string strZhengyuanDir = PathUtil.MergePath(strDataDir, "zhengyuan");
+                    string strDkywDir = PathUtil.MergePath(strDataDir, "dkyw");
+                    string strPatronReplicationDir = PathUtil.MergePath(strDataDir, "patronreplication");
+                    string strStatisDir = PathUtil.MergePath(strDataDir, "statis");
+                    string strSessionDir = PathUtil.MergePath(strDataDir, "session");
+                    string strColumnDir = PathUtil.MergePath(strDataDir, "column");
+                    string strTempDir = PathUtil.MergePath(strDataDir, "temp");
+
+                    app.m_strFileName = strFileName;
+
+                    app.CfgDir = strCfgDir;
+
+                    app.CfgMapDir = strCfgMapDir;
+                    PathUtil.CreateDirIfNeed(app.CfgMapDir);	// 确保目录创建
+
+
+                    // log
+                    app.LogDir = strLogDir;	// 日志存储目录
+                    PathUtil.CreateDirIfNeed(app.LogDir);	// 确保目录创建
+
+                    // zhengyuan 一卡通
+                    app.ZhengyuanDir = strZhengyuanDir;
+                    PathUtil.CreateDirIfNeed(app.ZhengyuanDir);	// 确保目录创建
+
+                    // dkyw 一卡通
+                    app.DkywDir = strDkywDir;
+                    PathUtil.CreateDirIfNeed(app.DkywDir);	// 确保目录创建
+
+                    // patron replication
+                    app.PatronReplicationDir = strPatronReplicationDir;
+                    PathUtil.CreateDirIfNeed(app.PatronReplicationDir);	// 确保目录创建
+
+
+                    // statis 统计文件
+                    app.StatisDir = strStatisDir;
+                    PathUtil.CreateDirIfNeed(app.StatisDir);	// 确保目录创建
+
+                    // session临时文件
+                    app.SessionDir = strSessionDir;
+                    PathUtil.CreateDirIfNeed(app.SessionDir);	// 确保目录创建
+
+                    if (bReload == false)
+                        CleanSessionDir(this.SessionDir);
+
+                    // 各种临时文件
+                    app.TempDir = strTempDir;
+                    PathUtil.CreateDirIfNeed(app.TempDir);	// 确保目录创建
+
+                    if (bReload == false)
+                    {
 #if NO
                     try
                     {
@@ -549,35 +578,35 @@ namespace DigitalPlatform.LibraryServer
                     if (PathUtil.TryClearDir(app.TempDir) == false)
                         app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
 #endif
-                    try
-                    {
-                        PathUtil.ClearDir(app.TempDir);
+                        try
+                        {
+                            PathUtil.ClearDir(app.TempDir);
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出现异常: " + ExceptionUtil.GetDebugText(ex));
+                        }
                     }
-                    catch (Exception ex)
+
+                    this.InitialLoginCache();
+                    this.InitialBiblioSummaryCache();
+
+                    if (bReload == false)
                     {
-                        app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出现异常: " + ExceptionUtil.GetDebugText(ex));
+                        if (app.HasAppBeenKilled() == true)
+                        {
+                            app.WriteErrorLog("*** 发现library application先前曾被意外终止 ***");
+                        }
                     }
-                }
 
-                this.InitialLoginCache();
-                this.InitialBiblioSummaryCache();
+                    this.WriteErrorLog("*********");
 
-                if (bReload == false)
-                {
-                    if (app.HasAppBeenKilled() == true)
-                    {
-                        app.WriteErrorLog("*** 发现library application先前曾被意外终止 ***");
-                    }
-                }
+                    if (bReload == true)
+                        app.WriteErrorLog("library (" + Version + ") application 开始重新装载 " + this.m_strFileName);
+                    else
+                        app.WriteErrorLog("library (" + Version + ") application 开始初始化。");
 
-                this.WriteErrorLog("*********");
-
-                if (bReload == true)
-                    app.WriteErrorLog("library (" + Version + ") application 开始重新装载 " + this.m_strFileName);
-                else
-                    app.WriteErrorLog("library (" + Version + ") application 开始初始化。");
-
-                //
+                    //
 #if NO
             if (bReload == false)
             {
@@ -594,992 +623,936 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
 #if LOG_INFO
-                app.WriteErrorLog("INFO: 开始装载 " + strFileName + " 到 XMLDOM");
+                    app.WriteErrorLog("INFO: 开始装载 " + strFileName + " 到 XMLDOM");
 #endif
 
-                //
+                    //
 
-                XmlDocument dom = new XmlDocument();
-                try
-                {
-                    dom.Load(strFileName);
-                }
-                catch (FileNotFoundException)
-                {
-                    strError = "file '" + strFileName + "' not found ...";
-                    goto ERROR1;
-                }
-                catch (Exception ex)
-                {
-                    strError = "装载配置文件-- '" + strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
-                    app.WriteErrorLog(strError);
-                    // throw ex;
-                    goto ERROR1;
-                }
-
-                app.LibraryCfgDom = dom;
-
-#if LOG_INFO
-                app.WriteErrorLog("INFO: 初始化内存参数");
-#endif
-
-                // *** 进入内存的参数开始
-                // 注意修改了这些参数的结构后，必须相应修改Save()函数的相关片断
-
-                // 2011/1/7
-                bool bValue = false;
-                DomUtil.GetBooleanParam(app.LibraryCfgDom.DocumentElement,
-                    "debugMode",
-                    false,
-                    out bValue,
-                    out strError);
-                this.DebugMode = bValue;
-                WriteErrorLog("是否为调试态: " + this.DebugMode);
-
-                // 2013/4/10 
-                // uid
-                this.UID = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");
-                if (string.IsNullOrEmpty(this.UID) == true)
-                {
-                    this.UID = Guid.NewGuid().ToString();
-                    this.Changed = true;
-                    WriteErrorLog("自动为 library.xml 添加 uid '" + this.UID + "'");
-                }
-
-                // 内核参数
-                // 元素<rmsserver>
-                // 属性url/username/password
-                XmlElement node = dom.DocumentElement.SelectSingleNode("rmsserver") as XmlElement;
-                if (node != null)
-                {
-                    app.WsUrl = DomUtil.GetAttr(node, "url");
-
-                    if (app.WsUrl.IndexOf(".asmx") != -1)
+                    XmlDocument dom = new XmlDocument();
+                    try
                     {
-                        strError = "装载配置文件 '" + strFileName + "' 过程中发生错误: <rmsserver>元素url属性中的 dp2内核 服务器URL '" + app.WsUrl + "' 不正确，应当为非.asmx形态的地址...";
+                        dom.Load(strFileName);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        strError = "file '" + strFileName + "' not found ...";
+                        goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载配置文件-- '" + strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
                         app.WriteErrorLog(strError);
+                        // throw ex;
                         goto ERROR1;
                     }
 
-                    app.ManagerUserName = DomUtil.GetAttr(node,
-                        "username");
+                    app.LibraryCfgDom = dom;
 
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: 初始化内存参数");
+#endif
+
+                    // *** 进入内存的参数开始
+                    // 注意修改了这些参数的结构后，必须相应修改Save()函数的相关片断
+
+                    // 2011/1/7
+                    bool bValue = false;
+                    DomUtil.GetBooleanParam(app.LibraryCfgDom.DocumentElement,
+                        "debugMode",
+                        false,
+                        out bValue,
+                        out strError);
+                    this.DebugMode = bValue;
+                    WriteErrorLog("是否为调试态: " + this.DebugMode);
+
+                    // 2013/4/10 
+                    // uid
+                    this.UID = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");
+                    if (string.IsNullOrEmpty(this.UID) == true)
+                    {
+                        this.UID = Guid.NewGuid().ToString();
+                        this.Changed = true;
+                        WriteErrorLog("自动为 library.xml 添加 uid '" + this.UID + "'");
+                    }
+
+                    // 内核参数
+                    // 元素<rmsserver>
+                    // 属性url/username/password
+                    XmlElement node = dom.DocumentElement.SelectSingleNode("rmsserver") as XmlElement;
+                    if (node != null)
+                    {
+                        app.WsUrl = DomUtil.GetAttr(node, "url");
+
+                        if (app.WsUrl.IndexOf(".asmx") != -1)
+                        {
+                            strError = "装载配置文件 '" + strFileName + "' 过程中发生错误: <rmsserver>元素url属性中的 dp2内核 服务器URL '" + app.WsUrl + "' 不正确，应当为非.asmx形态的地址...";
+                            app.WriteErrorLog(strError);
+                            goto ERROR1;
+                        }
+
+                        app.ManagerUserName = DomUtil.GetAttr(node,
+                            "username");
+
+                        try
+                        {
+                            app.ManagerPassword = Cryptography.Decrypt(
+                                DomUtil.GetAttr(node, "password"),
+                                EncryptKey);
+                        }
+                        catch
+                        {
+                            strError = "<rmsserver>元素password属性中的密码设置不正确";
+                            // throw new Exception();
+                            goto ERROR1;
+                        }
+
+                        CfgsMap = new CfgsMap(this.CfgMapDir/*,
+                        this.WsUrl*/);
+                        CfgsMap.Clear();
+                    }
+                    else
+                    {
+                        app.WsUrl = "";
+                        app.ManagerUserName = "";
+                        app.ManagerPassword = "";
+                    }
+
+                    // 元素 <mongoDB>
+                    // 属性 connectionString / instancePrefix
+                    node = dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
+                    if (node != null)
+                    {
+                        this.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
+                        this.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
+                    }
+                    else
+                    {
+                        this.MongoDbConnStr = "";
+                        this.MongoDbInstancePrefix = "";
+                        this.AccessLogDatabase = new AccessLogDatabase();
+                        this.HitCountDatabase = new HitCountDatabase();
+                        this.ChargingOperDatabase = new ChargingOperDatabase();
+                    }
+
+                    // 预约到书
+                    // 元素<arrived>
+                    // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
+                    node = dom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
+                    if (node != null)
+                    {
+                        app.ArrivedDbName = DomUtil.GetAttr(node, "dbname");
+                        app.ArrivedReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
+
+                        int nValue = 0;
+                        nRet = DomUtil.GetIntegerParam(node,
+                            "outofReservationThreshold",
+                            10,
+                            out nValue,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("元素<arrived>属性outofReservationThreshold读入时发生错误: " + strError);
+                            goto ERROR1;
+                        }
+
+                        app.OutofReservationThreshold = nValue;
+
+                        bValue = false;
+                        nRet = DomUtil.GetBooleanParam(node,
+                            "canReserveOnshelf",
+                            true,
+                            out bValue,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("元素<arrived>属性canReserveOnshelf读入时发生错误: " + strError);
+                            goto ERROR1;
+                        }
+
+                        app.CanReserveOnshelf = bValue;
+                    }
+                    else
+                    {
+                        app.ArrivedDbName = "";
+                        app.ArrivedReserveTimeSpan = "";
+                        app.OutofReservationThreshold = 10;
+                        app.CanReserveOnshelf = true;
+                    }
+
+                    // 2013/9/24
+                    // 借期提醒通知定义
+                    // 元素 <monitors/readersMonitor>
+                    // 属性 notifyDef
+                    node = dom.DocumentElement.SelectSingleNode("monitors/readersMonitor") as XmlElement;
+                    if (node != null)
+                    {
+                        // 提醒通知的定义
+                        app.NotifyDef = DomUtil.GetAttr(node, "notifyDef");
+                    }
+                    else
+                    {
+                        app.NotifyDef = "";
+                    }
+
+                    // <login>
+                    node = dom.DocumentElement.SelectSingleNode("login") as XmlElement;
+                    if (node != null)
+                    {
+                        this.CheckClientVersion = DomUtil.GetBooleanParam(node,
+                            "checkClientVersion",
+                            false);
+                    }
+                    else
+                    {
+                        this.CheckClientVersion = false;
+                    }
+
+                    // <circulation>
+                    node = dom.DocumentElement.SelectSingleNode("circulation") as XmlElement;
+                    if (node != null)
+                    {
+                        {
+                            string strList = DomUtil.GetAttr(node, "patronAdditionalFroms");
+                            if (string.IsNullOrEmpty(strList) == false)
+                                this.PatronAdditionalFroms = StringUtil.SplitList(strList);
+                            else
+                                this.PatronAdditionalFroms = new List<string>();
+                        }
+
+                        {
+                            string strList = DomUtil.GetAttr(node, "patronAdditionalFields");
+                            if (string.IsNullOrEmpty(strList) == false)
+                                this.PatronAdditionalFields = StringUtil.SplitList(strList);
+                            else
+                                this.PatronAdditionalFields = new List<string>();
+                        }
+
+                        {
+                            string strList = DomUtil.GetAttr(node, "patronReplicationFields");
+                            if (string.IsNullOrEmpty(strList) == false)
+                                this.PatronReplicationFields = StringUtil.SplitList(strList);
+                            else
+                                this.PatronReplicationFields = StringUtil.SplitList(strList);
+                        }
+
+                        int v = 0;
+                        nRet = DomUtil.GetIntegerParam(node,
+                            "maxPatronHistoryItems",
+                            100,
+                            out v,
+                            out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        this.MaxPatronHistoryItems = v;
+
+                        nRet = DomUtil.GetIntegerParam(node,
+        "maxItemHistoryItems",
+        100,
+        out v,
+        out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        this.MaxItemHistoryItems = v;
+
+                        this.VerifyBarcode = DomUtil.GetBooleanParam(node, "verifyBarcode", false);
+
+                        this.AcceptBlankItemBarcode = DomUtil.GetBooleanParam(node, "acceptBlankItemBarcode", true);
+
+                        this.AcceptBlankReaderBarcode = DomUtil.GetBooleanParam(node, "acceptBlankReaderBarcode", true);
+
+                        this.VerifyBookType = DomUtil.GetBooleanParam(node, "verifyBookType", false);
+                        this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
+                        this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
+                    }
+                    else
+                    {
+                        this.PatronAdditionalFroms = new List<string>();
+                        this.PatronAdditionalFields = new List<string>();
+                        this.MaxPatronHistoryItems = 100;
+                        this.MaxItemHistoryItems = 100;
+                        this.VerifyBarcode = false;
+                        this.AcceptBlankItemBarcode = true;
+                        this.AcceptBlankReaderBarcode = true;
+                        this.VerifyBookType = false;
+                        this.VerifyReaderType = false;
+                        this.BorrowCheckOverdue = true;
+                    }
+
+                    // <channel>
+                    node = dom.DocumentElement.SelectSingleNode("channel") as XmlElement;
+                    if (node != null)
+                    {
+                        int v = 0;
+                        nRet = DomUtil.GetIntegerParam(node,
+                            "maxChannelsPerIP",
+                            50,
+                            out v,
+                            out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        if (this.SessionTable != null)
+                            this.SessionTable.MaxSessionsPerIp = v;
+
+                        nRet = DomUtil.GetIntegerParam(node,
+        "maxChannelsLocalhost",
+        150,
+        out v,
+        out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        if (this.SessionTable != null)
+                            this.SessionTable.MaxSessionsLocalHost = v;
+                    }
+                    else
+                    {
+                        if (this.SessionTable != null)
+                        {
+                            this.SessionTable.MaxSessionsPerIp = 50;
+                            this.SessionTable.MaxSessionsLocalHost = 150;
+                        }
+                    }
+
+                    // <cataloging>
+                    node = dom.DocumentElement.SelectSingleNode("cataloging") as XmlElement;
+                    if (node != null)
+                    {
+                        // 是否允许删除带有下级记录的书目记录
+                        bValue = true;
+                        nRet = DomUtil.GetBooleanParam(node,
+                            "deleteBiblioSubRecords",
+                            true,
+                            out bValue,
+                            out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        this.DeleteBiblioSubRecords = bValue;
+                    }
+                    else
+                    {
+                        this.DeleteBiblioSubRecords = true;
+                    }
+
+                    // 入馆登记
+                    // 元素<passgate>
+                    // 属性writeOperLog
+                    node = dom.DocumentElement.SelectSingleNode("passgate") as XmlElement;
+                    if (node != null)
+                    {
+                        string strWriteOperLog = DomUtil.GetAttr(node, "writeOperLog");
+
+                        this.PassgateWriteToOperLog = ToBoolean(strWriteOperLog,
+                            true);
+                    }
+                    else
+                    {
+                        this.PassgateWriteToOperLog = true;
+                    }
+
+                    // 对象管理
+                    // 元素<object>
+                    // 属性 writeOperLog
+                    node = dom.DocumentElement.SelectSingleNode("object") as XmlElement;
+                    if (node != null)
+                    {
+                        string strWriteOperLog = DomUtil.GetAttr(node, "writeGetResOperLog");
+
+                        this.GetObjectWriteToOperLog = ToBoolean(strWriteOperLog,
+                            false);
+                    }
+                    else
+                    {
+                        this.GetObjectWriteToOperLog = false;
+                    }
+
+                    // 2015/11/26
+                    // 日志特性
+                    // 元素<log>
+                    node = dom.DocumentElement.SelectSingleNode("log") as XmlElement;
+                    if (node != null)
+                    {
+                        int nValue = 0;
+                        DomUtil.GetIntegerParam(node,
+                            "accessLogMaxCountPerDay",
+                            10000,
+                            out nValue,
+                            out strError);
+                        this.AccessLogMaxCountPerDay = nValue;
+                    }
+                    else
+                    {
+                        this.AccessLogMaxCountPerDay = 10000;
+                    }
+                    // 消息
+                    // 元素<message>
+                    // 属性dbname/reserveTimeSpan
+                    node = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
+                    if (node != null)
+                    {
+                        app.MessageDbName = DomUtil.GetAttr(node, "dbname");
+                        app.MessageReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
+
+                        // 2010/12/31 add
+                        if (String.IsNullOrEmpty(app.MessageReserveTimeSpan) == true)
+                            app.MessageReserveTimeSpan = "365day";
+                    }
+                    else
+                    {
+                        app.MessageDbName = "";
+                        app.MessageReserveTimeSpan = "365day";
+                    }
+
+                    // OPAC服务器
+                    // 元素<opacServer>
+                    // 属性url
+                    node = dom.DocumentElement.SelectSingleNode("opacServer") as XmlElement;
+                    if (node != null)
+                    {
+                        app.OpacServerUrl = DomUtil.GetAttr(node, "url");
+                    }
+                    else
+                    {
+                        app.OpacServerUrl = "";
+                    }
+
+                    // 违约金
+                    // 元素<amerce>
+                    // 属性dbname/overdueStyle
+                    node = dom.DocumentElement.SelectSingleNode("amerce") as XmlElement;
+                    if (node != null)
+                    {
+                        app.AmerceDbName = DomUtil.GetAttr(node, "dbname");
+                        app.OverdueStyle = DomUtil.GetAttr(node, "overdueStyle");
+                    }
+                    else
+                    {
+                        app.AmerceDbName = "";
+                        app.OverdueStyle = "";
+                    }
+
+                    // 发票
+                    // 元素<invoice>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("invoice") as XmlElement;
+                    if (node != null)
+                    {
+                        app.InvoiceDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.InvoiceDbName = "";
+                    }
+
+                    // *** 进入内存的参数结束
+
+                    // bin dir
+                    app.BinDir = strBinDir;
+
+                    nRet = 0;
+
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: LoadReaderDbGroupParam");
+#endif
+                        // <readerdbgroup>
+                        app.LoadReaderDbGroupParam(dom);
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: LoadItemDbGroupParam");
+#endif
+
+                        // <itemdbgroup> 
+                        nRet = app.LoadItemDbGroupParam(dom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog(strError);
+                            goto ERROR1;
+                        }
+
+                        // 临时的SessionInfo对象
+                        SessionInfo session = new SessionInfo(this);
+                        try
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: InitialKdbs");
+#endif
+
+                            // 初始化kdbs
+                            nRet = InitialKdbs(session.Channels,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                app.WriteErrorLog("ERR001 首次初始化kdbs失败: " + strError);
+                                // DefaultThread可以重试初始化
+
+                                // session.Close();
+                                // goto ERROR1;
+                            }
+                            else
+                            {
+#if LOG_INFO
+                                app.WriteErrorLog("INFO: CheckKernelVersion");
+#endif
+
+                                // 检查 dpKernel 版本号
+                                nRet = CheckKernelVersion(session.Channels,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                            }
+
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: InitialVdbs");
+#endif
+
+                            // 2008/6/6  重新初始化虚拟库定义
+                            // 这样，其他地方调用的InitialVdbs()就可以去除了
+                            // TODO: 为了提高运行速度，可以优化为，只有当<virtualDatabases>元素下的内容有改变时，才重新进行这个初始化
+                            this.vdbs = null;
+                            nRet = app.InitialVdbs(session.Channels,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                app.WriteErrorLog("ERR002 首次初始化vdbs失败: " + strError);
+                            }
+
+                        }
+                        finally
+                        {
+                            session.CloseSession();
+                            session = null;
+
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: 临时 session 使用完毕");
+#endif
+                        }
+
+                    }
+
+                    // 时钟
+                    string strClock = DomUtil.GetElementText(dom.DocumentElement, "clock");
                     try
                     {
-                        app.ManagerPassword = Cryptography.Decrypt(
-                            DomUtil.GetAttr(node, "password"),
-                            EncryptKey);
+                        this.Clock.Delta = Convert.ToInt64(strClock);
                     }
                     catch
                     {
-                        strError = "<rmsserver>元素password属性中的密码设置不正确";
-                        // throw new Exception();
-                        goto ERROR1;
+                        // TODO: 写入错误日志
                     }
 
-                    CfgsMap = new CfgsMap(this.CfgMapDir/*,
-                        this.WsUrl*/);
-                    CfgsMap.Clear();
-                }
-                else
-                {
-                    app.WsUrl = "";
-                    app.ManagerUserName = "";
-                    app.ManagerPassword = "";
-                }
-
-                // 元素 <mongoDB>
-                // 属性 connectionString / instancePrefix
-                node = dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
-                if (node != null)
-                {
-                    this.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
-                    this.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
-                }
-                else
-                {
-                    this.MongoDbConnStr = "";
-                    this.MongoDbInstancePrefix = "";
-                    this.AccessLogDatabase = new AccessLogDatabase();
-                    this.HitCountDatabase = new HitCountDatabase();
-                    this.ChargingOperDatabase = new ChargingOperDatabase();
-                }
-
-                // 预约到书
-                // 元素<arrived>
-                // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
-                node = dom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
-                if (node != null)
-                {
-                    app.ArrivedDbName = DomUtil.GetAttr(node, "dbname");
-                    app.ArrivedReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
-
-                    int nValue = 0;
-                    nRet = DomUtil.GetIntegerParam(node,
-                        "outofReservationThreshold",
-                        10,
-                        out nValue,
-                        out strError);
-                    if (nRet == -1)
+                    // *** 初始化操作日志环境
+                    if (bReload == false)   // 2014/4/2
                     {
-                        app.WriteErrorLog("元素<arrived>属性outofReservationThreshold读入时发生错误: " + strError);
-                        goto ERROR1;
-                    }
-
-                    app.OutofReservationThreshold = nValue;
-
-                    bValue = false;
-                    nRet = DomUtil.GetBooleanParam(node,
-                        "canReserveOnshelf",
-                        true,
-                        out bValue,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog("元素<arrived>属性canReserveOnshelf读入时发生错误: " + strError);
-                        goto ERROR1;
-                    }
-
-                    app.CanReserveOnshelf = bValue;
-                }
-                else
-                {
-                    app.ArrivedDbName = "";
-                    app.ArrivedReserveTimeSpan = "";
-                    app.OutofReservationThreshold = 10;
-                    app.CanReserveOnshelf = true;
-                }
-
-                // 2013/9/24
-                // 借期提醒通知定义
-                // 元素 <monitors/readersMonitor>
-                // 属性 notifyDef
-                node = dom.DocumentElement.SelectSingleNode("monitors/readersMonitor") as XmlElement;
-                if (node != null)
-                {
-                    // 提醒通知的定义
-                    app.NotifyDef = DomUtil.GetAttr(node, "notifyDef");
-                }
-                else
-                {
-                    app.NotifyDef = "";
-                }
-
-                // <login>
-                node = dom.DocumentElement.SelectSingleNode("login") as XmlElement;
-                if (node != null)
-                {
-                    this.CheckClientVersion = DomUtil.GetBooleanParam(node,
-                        "checkClientVersion",
-                        false);
-                }
-                else
-                {
-                    this.CheckClientVersion = false;
-                }
-
-                // <circulation>
-                node = dom.DocumentElement.SelectSingleNode("circulation") as XmlElement;
-                if (node != null)
-                {
-                    {
-                        string strList = DomUtil.GetAttr(node, "patronAdditionalFroms");
-                        if (string.IsNullOrEmpty(strList) == false)
-                            this.PatronAdditionalFroms = StringUtil.SplitList(strList);
-                        else
-                            this.PatronAdditionalFroms = new List<string>();
-                    }
-
-                    {
-                        string strList = DomUtil.GetAttr(node, "patronAdditionalFields");
-                        if (string.IsNullOrEmpty(strList) == false)
-                            this.PatronAdditionalFields = StringUtil.SplitList(strList);
-                        else
-                            this.PatronAdditionalFields = new List<string>();
-                    }
-
-                    {
-                        string strList = DomUtil.GetAttr(node, "patronReplicationFields");
-                        if (string.IsNullOrEmpty(strList) == false)
-                            this.PatronReplicationFields = StringUtil.SplitList(strList);
-                        else
-                            this.PatronReplicationFields = StringUtil.SplitList(strList);
-                    }
-
-                    int v = 0;
-                    nRet = DomUtil.GetIntegerParam(node,
-                        "maxPatronHistoryItems",
-                        100,
-                        out v,
-                        out strError);
-                    if (nRet == -1)
-                        app.WriteErrorLog(strError);
-                    this.MaxPatronHistoryItems = v;
-
-                    nRet = DomUtil.GetIntegerParam(node,
-    "maxItemHistoryItems",
-    100,
-    out v,
-    out strError);
-                    if (nRet == -1)
-                        app.WriteErrorLog(strError);
-                    this.MaxItemHistoryItems = v;
-
-                    this.VerifyBarcode = DomUtil.GetBooleanParam(node, "verifyBarcode", false);
-
-                    this.AcceptBlankItemBarcode = DomUtil.GetBooleanParam(node, "acceptBlankItemBarcode", true);
-
-                    this.AcceptBlankReaderBarcode = DomUtil.GetBooleanParam(node, "acceptBlankReaderBarcode", true);
-
-                    this.VerifyBookType = DomUtil.GetBooleanParam(node, "verifyBookType", false);
-                    this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
-                    this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
-                }
-                else
-                {
-                    this.PatronAdditionalFroms = new List<string>();
-                    this.PatronAdditionalFields = new List<string>();
-                    this.MaxPatronHistoryItems = 100;
-                    this.MaxItemHistoryItems = 100;
-                    this.VerifyBarcode = false;
-                    this.AcceptBlankItemBarcode = true;
-                    this.AcceptBlankReaderBarcode = true;
-                    this.VerifyBookType = false;
-                    this.VerifyReaderType = false;
-                    this.BorrowCheckOverdue = true;
-                }
-
-                // <channel>
-                node = dom.DocumentElement.SelectSingleNode("channel") as XmlElement;
-                if (node != null)
-                {
-                    int v = 0;
-                    nRet = DomUtil.GetIntegerParam(node,
-                        "maxChannelsPerIP",
-                        50,
-                        out v,
-                        out strError);
-                    if (nRet == -1)
-                        app.WriteErrorLog(strError);
-                    if (this.SessionTable != null)
-                        this.SessionTable.MaxSessionsPerIp = v;
-
-                    nRet = DomUtil.GetIntegerParam(node,
-    "maxChannelsLocalhost",
-    150,
-    out v,
-    out strError);
-                    if (nRet == -1)
-                        app.WriteErrorLog(strError);
-                    if (this.SessionTable != null)
-                        this.SessionTable.MaxSessionsLocalHost = v;
-                }
-                else
-                {
-                    if (this.SessionTable != null)
-                    {
-                        this.SessionTable.MaxSessionsPerIp = 50;
-                        this.SessionTable.MaxSessionsLocalHost = 150;
-                    }
-                }
-
-                // <cataloging>
-                node = dom.DocumentElement.SelectSingleNode("cataloging") as XmlElement;
-                if (node != null)
-                {
-                    // 是否允许删除带有下级记录的书目记录
-                    bValue = true;
-                    nRet = DomUtil.GetBooleanParam(node,
-                        "deleteBiblioSubRecords",
-                        true,
-                        out bValue,
-                        out strError);
-                    if (nRet == -1)
-                        app.WriteErrorLog(strError);
-                    this.DeleteBiblioSubRecords = bValue;
-                }
-                else
-                {
-                    this.DeleteBiblioSubRecords = true;
-                }
-
-                // 入馆登记
-                // 元素<passgate>
-                // 属性writeOperLog
-                node = dom.DocumentElement.SelectSingleNode("passgate") as XmlElement;
-                if (node != null)
-                {
-                    string strWriteOperLog = DomUtil.GetAttr(node, "writeOperLog");
-
-                    this.PassgateWriteToOperLog = ToBoolean(strWriteOperLog,
-                        true);
-                }
-                else
-                {
-                    this.PassgateWriteToOperLog = true;
-                }
-
-                // 对象管理
-                // 元素<object>
-                // 属性 writeOperLog
-                node = dom.DocumentElement.SelectSingleNode("object") as XmlElement;
-                if (node != null)
-                {
-                    string strWriteOperLog = DomUtil.GetAttr(node, "writeGetResOperLog");
-
-                    this.GetObjectWriteToOperLog = ToBoolean(strWriteOperLog,
-                        false);
-                }
-                else
-                {
-                    this.GetObjectWriteToOperLog = false;
-                }
-
-                // 2015/11/26
-                // 日志特性
-                // 元素<log>
-                node = dom.DocumentElement.SelectSingleNode("log") as XmlElement;
-                if (node != null)
-                {
-                    int nValue = 0;
-                    DomUtil.GetIntegerParam(node,
-                        "accessLogMaxCountPerDay",
-                        10000,
-                        out nValue,
-                        out strError);
-                    this.AccessLogMaxCountPerDay = nValue;
-                }
-                else
-                {
-                    this.AccessLogMaxCountPerDay = 10000;
-                }
-                // 消息
-                // 元素<message>
-                // 属性dbname/reserveTimeSpan
-                node = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
-                if (node != null)
-                {
-                    app.MessageDbName = DomUtil.GetAttr(node, "dbname");
-                    app.MessageReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
-
-                    // 2010/12/31 add
-                    if (String.IsNullOrEmpty(app.MessageReserveTimeSpan) == true)
-                        app.MessageReserveTimeSpan = "365day";
-                }
-                else
-                {
-                    app.MessageDbName = "";
-                    app.MessageReserveTimeSpan = "365day";
-                }
-
-                // OPAC服务器
-                // 元素<opacServer>
-                // 属性url
-                node = dom.DocumentElement.SelectSingleNode("opacServer") as XmlElement;
-                if (node != null)
-                {
-                    app.OpacServerUrl = DomUtil.GetAttr(node, "url");
-                }
-                else
-                {
-                    app.OpacServerUrl = "";
-                }
-
-                // 违约金
-                // 元素<amerce>
-                // 属性dbname/overdueStyle
-                node = dom.DocumentElement.SelectSingleNode("amerce") as XmlElement;
-                if (node != null)
-                {
-                    app.AmerceDbName = DomUtil.GetAttr(node, "dbname");
-                    app.OverdueStyle = DomUtil.GetAttr(node, "overdueStyle");
-                }
-                else
-                {
-                    app.AmerceDbName = "";
-                    app.OverdueStyle = "";
-                }
-
-                // 发票
-                // 元素<invoice>
-                // 属性dbname
-                node = dom.DocumentElement.SelectSingleNode("invoice") as XmlElement;
-                if (node != null)
-                {
-                    app.InvoiceDbName = DomUtil.GetAttr(node, "dbname");
-                }
-                else
-                {
-                    app.InvoiceDbName = "";
-                }
-
-                // *** 进入内存的参数结束
-
-                // bin dir
-                app.BinDir = strBinDir;
-
-                nRet = 0;
-
-                {
+                        // this.OperLogDir = strOperLogDir;    // 2006/12/7 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: LoadReaderDbGroupParam");
-#endif
-                    // <readerdbgroup>
-                    app.LoadReaderDbGroupParam(dom);
-
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: LoadItemDbGroupParam");
+                        app.WriteErrorLog("INFO: OperLog.Initial");
 #endif
 
-                    // <itemdbgroup> 
-                    nRet = app.LoadItemDbGroupParam(dom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog(strError);
-                        goto ERROR1;
-                    }
-
-                    // 临时的SessionInfo对象
-                    SessionInfo session = new SessionInfo(this);
-                    try
-                    {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: InitialKdbs");
-#endif
-
-                        // 初始化kdbs
-                        nRet = InitialKdbs(session.Channels,
+                        // oper log
+                        nRet = this.OperLog.Initial(this,
+                            strOperLogDir,
                             out strError);
                         if (nRet == -1)
                         {
-                            app.WriteErrorLog("ERR001 首次初始化kdbs失败: " + strError);
-                            // DefaultThread可以重试初始化
-
-                            // session.Close();
-                            // goto ERROR1;
-                        }
-                        else
-                        {
-#if LOG_INFO
-                            app.WriteErrorLog("INFO: CheckKernelVersion");
-#endif
-
-                            // 检查 dpKernel 版本号
-                            nRet = CheckKernelVersion(session.Channels,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                        }
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: InitialVdbs");
-#endif
-
-                        // 2008/6/6  重新初始化虚拟库定义
-                        // 这样，其他地方调用的InitialVdbs()就可以去除了
-                        // TODO: 为了提高运行速度，可以优化为，只有当<virtualDatabases>元素下的内容有改变时，才重新进行这个初始化
-                        this.vdbs = null;
-                        nRet = app.InitialVdbs(session.Channels,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            app.WriteErrorLog("ERR002 首次初始化vdbs失败: " + strError);
-                        }
-
-                    }
-                    finally
-                    {
-                        session.CloseSession();
-                        session = null;
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: 临时 session 使用完毕");
-#endif
-                    }
-
-                }
-
-                // 时钟
-                string strClock = DomUtil.GetElementText(dom.DocumentElement, "clock");
-                try
-                {
-                    this.Clock.Delta = Convert.ToInt64(strClock);
-                }
-                catch
-                {
-                    // TODO: 写入错误日志
-                }
-
-                // *** 初始化操作日志环境
-                if (bReload == false)   // 2014/4/2
-                {
-                    // this.OperLogDir = strOperLogDir;    // 2006/12/7 
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: OperLog.Initial");
-#endif
-
-                    // oper log
-                    nRet = this.OperLog.Initial(this,
-                        strOperLogDir,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog(strError);
-                        goto ERROR1;
-                    }
-                }
-
-                // *** 初始化统计对象
-                // if (bReload == false)   // 2014/4/2
-                {
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: Statis.Initial");
-#endif
-
-                    this.Statis = new Statis();
-                    nRet = this.Statis.Initial(this, out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog(strError);
-                        goto ERROR1;
-                    }
-                }
-
-#if LOG_INFO
-                app.WriteErrorLog("INFO: InitialLibraryHostAssembly");
-#endif
-                // 初始化LibraryHostAssembly对象
-                // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
-                // return:
-                //		-1	出错
-                //		0	成功
-                nRet = this.InitialLibraryHostAssembly(out strError);
-                if (nRet == -1)
-                {
-                    app.WriteErrorLog(strError);
-                    goto ERROR1;
-                }
-
-#if LOG_INFO
-                app.WriteErrorLog("INFO: InitialExternalMessageInterfaces");
-#endif
-
-                // 初始化扩展消息接口
-                nRet = app.InitialExternalMessageInterfaces(
-                out strError);
-                if (nRet == -1)
-                {
-                    strError = "初始化扩展的消息接口时出错: " + strError;
-                    app.WriteErrorLog(strError);
-                    // goto ERROR1;
-                }
-
-                if (string.IsNullOrEmpty(this.MongoDbConnStr) == false)
-                {
-                    try
-                    {
-                        this._mongoClient = new MongoClient(this.MongoDbConnStr);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "初始化 MongoClient 时出错: " + ex.Message;
-                        app.WriteErrorLog(strError);
-                        this._mongoClient = null;
-                    }
-
-                    if (this._mongoClient != null)
-                    {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: OpenSummaryStorage");
-#endif
-                        nRet = OpenSummaryStorage(out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动书目摘要库时出错: " + strError;
                             app.WriteErrorLog(strError);
+                            goto ERROR1;
                         }
+                    }
 
+                    // *** 初始化统计对象
+                    // if (bReload == false)   // 2014/4/2
+                    {
 #if LOG_INFO
-                        app.WriteErrorLog("INFO: Open HitCountDatabase");
+                        app.WriteErrorLog("INFO: Statis.Initial");
 #endif
-                        nRet = this.HitCountDatabase.Open(//this.MongoDbConnStr,
-                            this._mongoClient,
-                            this.MongoDbInstancePrefix,
-                            out strError);
+
+                        this.Statis = new Statis();
+                        nRet = this.Statis.Initial(this, out strError);
                         if (nRet == -1)
                         {
-                            strError = "启动计数器库时出错: " + strError;
                             app.WriteErrorLog(strError);
-                        }
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: Open AccessLogDatabase");
-#endif
-                        nRet = this.AccessLogDatabase.Open(// this.MongoDbConnStr,
-                            this._mongoClient,
-                            this.MongoDbInstancePrefix,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动访问日志库时出错: " + strError;
-                            app.WriteErrorLog(strError);
-                        }
-
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: Open ChargingOperDatabase");
-#endif
-                        nRet = this.ChargingOperDatabase.Open(
-                            this._mongoClient,
-                            this.MongoDbInstancePrefix,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "启动出纳操作库时出错: " + strError;
-                            app.WriteErrorLog(strError);
+                            goto ERROR1;
                         }
                     }
-                }
-
-                if (this.BatchTasks == null)
-                    this.BatchTasks = new BatchTaskCollection();    // Close() 的时候会设置为 null。因此这里要准备重新 new
-
-                // 启动批处理任务
-                // TODO: 这一段考虑分离到一个函数中
-                if (bReload == false)
-                {
-                    string strBreakPoint = "";
 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: DefaultThread");
+                    app.WriteErrorLog("INFO: InitialLibraryHostAssembly");
 #endif
-                    // 启动DefaultThread
-                    try
+                    // 初始化LibraryHostAssembly对象
+                    // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
+                    // return:
+                    //		-1	出错
+                    //		0	成功
+                    nRet = this.InitialLibraryHostAssembly(out strError);
+                    if (nRet == -1)
                     {
-                        DefaultThread defaultThread = new DefaultThread(this, null);
-                        this.BatchTasks.Add(defaultThread);
-
-                        defaultThread.StartWorkerThread();
-
-                        this.defaultManagerThread = defaultThread;
-                    }
-                    catch (Exception ex)
-                    {
-                        app.WriteErrorLog("启动后台任务 DefaultThread 时出错：" + ex.Message);
+                        app.WriteErrorLog(strError);
                         goto ERROR1;
                     }
 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: OperLogThread");
+                    app.WriteErrorLog("INFO: InitialExternalMessageInterfaces");
 #endif
-                    // 启动 OperLogThread
-                    try
-                    {
-                        OperLogThread thread = new OperLogThread(this, null);
-                        this.BatchTasks.Add(thread);
 
-                        thread.StartWorkerThread();
-
-                        this.operLogThread = thread;
-                    }
-                    catch (Exception ex)
+                    // 初始化扩展消息接口
+                    nRet = app.InitialExternalMessageInterfaces(
+                    out strError);
+                    if (nRet == -1)
                     {
-                        app.WriteErrorLog("启动后台任务 OperLogThread 时出错：" + ex.Message);
-                        goto ERROR1;
+                        strError = "初始化扩展的消息接口时出错: " + strError;
+                        app.WriteErrorLog(strError);
+                        // goto ERROR1;
                     }
+
+
+                    // 初始化 mongodb 相关对象
+                    nRet = InitialMongoDatabases(out strError);
+                    if (nRet == -1)
+                    {
+                        // app.HangupReason = LibraryServer.HangupReason.StartingError;
+                        app.HangupList.Add("ERR002");
+                        app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
+                    }
+
+                    if (this.BatchTasks == null)
+                        this.BatchTasks = new BatchTaskCollection();    // Close() 的时候会设置为 null。因此这里要准备重新 new
+
+                    // 启动批处理任务
+                    // TODO: 这一段考虑分离到一个函数中
+                    if (bReload == false)
+                    {
+                        string strBreakPoint = "";
 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: ArriveMonitor");
+                        app.WriteErrorLog("INFO: DefaultThread");
 #endif
-                    // 启动ArriveMonitor
-                    try
-                    {
-                        ArriveMonitor arriveMonitor = new ArriveMonitor(this, null);
-                        this.BatchTasks.Add(arriveMonitor);
-
-                        arriveMonitor.StartWorkerThread();
-                    }
-                    catch (Exception ex)
-                    {
-                        app.WriteErrorLog("启动批处理任务ArriveMonitor时出错：" + ex.Message);
-                        goto ERROR1;
-                    }
-
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: ReadersMonitor");
-#endif
-                    // 启动ReadersMonitor
-                    try
-                    {
-                        ReadersMonitor readersMonitor = new ReadersMonitor(this, null);
-                        this.BatchTasks.Add(readersMonitor);
-
-                        readersMonitor.StartWorkerThread();
-                    }
-                    catch (Exception ex)
-                    {
-                        app.WriteErrorLog("启动批处理任务ReadersMonitor时出错：" + ex.Message);
-                        goto ERROR1;
-                    }
-
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: MessageMonitor");
-#endif
-                    // 启动MessageMonitor
-                    try
-                    {
-                        MessageMonitor messageMonitor = new MessageMonitor(this, null);
-                        this.BatchTasks.Add(messageMonitor);
-
-                        // 从断点记忆文件中读出信息
-                        // return:
-                        //      -1  error
-                        //      0   file not found
-                        //      1   found
-                        nRet = ReadBatchTaskBreakPointFile(messageMonitor.DefaultName,
-                            out strBreakPoint,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
-                        }
-
-                        if (messageMonitor.StartInfo == null)
-                            messageMonitor.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
-
-                        // 如果需要从断点启动
-                        if (nRet == 1)
-                            messageMonitor.StartInfo.Start = "!breakpoint";  //strBreakPoint;
-
-                        messageMonitor.ClearProgressFile();   // 清除进度文件内容
-                        messageMonitor.StartWorkerThread();
-                    }
-                    catch (Exception ex)
-                    {
-                        app.WriteErrorLog("启动批处理任务MessageMonitor时出错：" + ex.Message);
-                        goto ERROR1;
-                    }
-
-                    // 启动DkywReplication
-                    // <dkyw>
-                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dkyw") as XmlElement;
-                    if (node != null)
-                    {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: DkywReplication");
-#endif
+                        // 启动DefaultThread
                         try
                         {
-                            DkywReplication dkyw = new DkywReplication(this, null);
-                            this.BatchTasks.Add(dkyw);
+                            DefaultThread defaultThread = new DefaultThread(this, null);
+                            this.BatchTasks.Add(defaultThread);
 
-                            /*
+                            defaultThread.StartWorkerThread();
+
+                            this.defaultManagerThread = defaultThread;
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动后台任务 DefaultThread 时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: OperLogThread");
+#endif
+                        // 启动 OperLogThread
+                        try
+                        {
+                            OperLogThread thread = new OperLogThread(this, null);
+                            this.BatchTasks.Add(thread);
+
+                            thread.StartWorkerThread();
+
+                            this.operLogThread = thread;
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动后台任务 OperLogThread 时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: ArriveMonitor");
+#endif
+                        // 启动ArriveMonitor
+                        try
+                        {
+                            ArriveMonitor arriveMonitor = new ArriveMonitor(this, null);
+                            this.BatchTasks.Add(arriveMonitor);
+
+                            arriveMonitor.StartWorkerThread();
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务ArriveMonitor时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: ReadersMonitor");
+#endif
+                        // 启动ReadersMonitor
+                        try
+                        {
+                            ReadersMonitor readersMonitor = new ReadersMonitor(this, null);
+                            this.BatchTasks.Add(readersMonitor);
+
+                            readersMonitor.StartWorkerThread();
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务ReadersMonitor时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: MessageMonitor");
+#endif
+                        // 启动MessageMonitor
+                        try
+                        {
+                            MessageMonitor messageMonitor = new MessageMonitor(this, null);
+                            this.BatchTasks.Add(messageMonitor);
+
                             // 从断点记忆文件中读出信息
                             // return:
                             //      -1  error
                             //      0   file not found
                             //      1   found
-                            nRet = ReadBatchTaskBreakPointFile(dkyw.DefaultName,
+                            nRet = ReadBatchTaskBreakPointFile(messageMonitor.DefaultName,
                                 out strBreakPoint,
                                 out strError);
                             if (nRet == -1)
                             {
                                 app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
                             }
-                             * */
-                            bool bLoop = false;
-                            string strLastNumber = "";
 
-                            // return:
-                            //      -1  出错
-                            //      0   没有找到断点信息
-                            //      1   找到了断点信息
-                            nRet = dkyw.ReadLastNumber(
-                                out bLoop,
-                                out strLastNumber,
-                                out strError);
-                            if (nRet == -1)
+                            if (messageMonitor.StartInfo == null)
+                                messageMonitor.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+
+                            // 如果需要从断点启动
+                            if (nRet == 1)
+                                messageMonitor.StartInfo.Start = "!breakpoint";  //strBreakPoint;
+
+                            messageMonitor.ClearProgressFile();   // 清除进度文件内容
+                            messageMonitor.StartWorkerThread();
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务MessageMonitor时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+
+                        // 启动DkywReplication
+                        // <dkyw>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dkyw") as XmlElement;
+                        if (node != null)
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: DkywReplication");
+#endif
+                            try
                             {
-                                app.WriteErrorLog("ReadLastNumber时出错：" + strError);
+                                DkywReplication dkyw = new DkywReplication(this, null);
+                                this.BatchTasks.Add(dkyw);
+
+                                /*
+                                // 从断点记忆文件中读出信息
+                                // return:
+                                //      -1  error
+                                //      0   file not found
+                                //      1   found
+                                nRet = ReadBatchTaskBreakPointFile(dkyw.DefaultName,
+                                    out strBreakPoint,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
+                                }
+                                 * */
+                                bool bLoop = false;
+                                string strLastNumber = "";
+
+                                // return:
+                                //      -1  出错
+                                //      0   没有找到断点信息
+                                //      1   找到了断点信息
+                                nRet = dkyw.ReadLastNumber(
+                                    out bLoop,
+                                    out strLastNumber,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    app.WriteErrorLog("ReadLastNumber时出错：" + strError);
+                                }
+
+                                if (dkyw.StartInfo == null)
+                                    dkyw.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+
+                                if (bLoop == true)
+                                {
+                                    // 需要从断点启动
+                                    if (nRet == 1)
+                                        dkyw.StartInfo.Start = "!breakpoint";  //strBreakPoint;
+
+                                    dkyw.ClearProgressFile();   // 清除进度文件内容
+                                    dkyw.StartWorkerThread();
+                                }
                             }
-
-                            if (dkyw.StartInfo == null)
-                                dkyw.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
-
-                            if (bLoop == true)
+                            catch (Exception ex)
                             {
-                                // 需要从断点启动
-                                if (nRet == 1)
-                                    dkyw.StartInfo.Start = "!breakpoint";  //strBreakPoint;
-
-                                dkyw.ClearProgressFile();   // 清除进度文件内容
-                                dkyw.StartWorkerThread();
+                                app.WriteErrorLog("启动批处理任务DkywReplication时出错：" + ex.Message);
+                                goto ERROR1;
                             }
                         }
-                        catch (Exception ex)
+
+                        // 启动PatronReplication
+                        // <patronReplication>
+                        // 读者库数据同步 批处理任务
+                        // 从卡中心同步读者数据
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("patronReplication") as XmlElement;
+                        if (node != null)
                         {
-                            app.WriteErrorLog("启动批处理任务DkywReplication时出错：" + ex.Message);
-                            goto ERROR1;
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: PatronReplication");
+#endif
+                            try
+                            {
+                                PatronReplication patron_rep = new PatronReplication(this, null);
+                                this.BatchTasks.Add(patron_rep);
+
+                                patron_rep.StartWorkerThread();
+                            }
+                            catch (Exception ex)
+                            {
+                                app.WriteErrorLog("启动批处理任务PatronReplication时出错：" + ex.Message);
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 启动 LibraryReplication
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: LibraryReplication ReadBatchTaskBreakPointFile");
+#endif
+                        // 从断点记忆文件中读出信息
+                        // return:
+                        //      -1  error
+                        //      0   file not found
+                        //      1   found
+                        nRet = ReadBatchTaskBreakPointFile("dp2Library 同步",
+                            out strBreakPoint,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
+                        }
+                        // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+
+                        // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
+
+                        if (nRet == 1)
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: LibraryReplication");
+#endif
+                            try
+                            {
+
+                                // 从断点文件中取出断点字符串
+                                // 断点字符串格式：序号.偏移量@日志文件名
+                                //  或者：序号@日志文件名
+                                // 获得断点信息的整个过程的代码，是否适宜归入TraceDTLP类？
+                                // 如果成熟，可以归纳作为BatchTask基类的一个特性。
+
+                                LibraryReplication replication = new LibraryReplication(this, null);
+                                this.BatchTasks.Add(replication);
+
+                                if (replication.StartInfo == null)
+                                    replication.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+                                replication.StartInfo.Start = "date=continue";  // 从断点开始做
+                                replication.ClearProgressFile();   // 清除进度文件内容
+                                replication.StartWorkerThread();
+                            }
+                            catch (Exception ex)
+                            {
+                                app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 启动 RebuildKeys
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: RebuildKeys ReadBatchTaskBreakPointFile");
+#endif
+                        // 从断点记忆文件中读出信息
+                        // return:
+                        //      -1  error
+                        //      0   file not found
+                        //      1   found
+                        nRet = ReadBatchTaskBreakPointFile("重建检索点",
+                            out strBreakPoint,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
+                        }
+                        // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+
+                        // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
+
+                        if (nRet == 1)
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: RebuildKeys");
+#endif
+                            try
+                            {
+
+                                // 从断点文件中取出断点字符串
+                                RebuildKeys replication = new RebuildKeys(this, null);
+                                this.BatchTasks.Add(replication);
+
+                                if (replication.StartInfo == null)
+                                    replication.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+                                replication.StartInfo.Start = "dbnamelist=continue";  // 从断点开始做
+                                replication.ClearProgressFile();   // 清除进度文件内容
+                                replication.StartWorkerThread();
+                            }
+                            catch (Exception ex)
+                            {
+                                app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
+                                goto ERROR1;
+                            }
                         }
                     }
 
-                    // 启动PatronReplication
-                    // <patronReplication>
-                    // 读者库数据同步 批处理任务
-                    // 从卡中心同步读者数据
-                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("patronReplication") as XmlElement;
-                    if (node != null)
+                    // 公共查询最大命中数
                     {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: PatronReplication");
-#endif
-                        try
+                        XmlNode nodeTemp = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                        if (nodeTemp != null)
                         {
-                            PatronReplication patron_rep = new PatronReplication(this, null);
-                            this.BatchTasks.Add(patron_rep);
-
-                            patron_rep.StartWorkerThread();
-                        }
-                        catch (Exception ex)
-                        {
-                            app.WriteErrorLog("启动批处理任务PatronReplication时出错：" + ex.Message);
-                            goto ERROR1;
+                            try
+                            {
+                                string strMaxCount = DomUtil.GetAttr(nodeTemp, "searchMaxResultCount");
+                                if (String.IsNullOrEmpty(strMaxCount) == false)
+                                    this.SearchMaxResultCount = Convert.ToInt32(strMaxCount);
+                            }
+                            catch
+                            {
+                            }
                         }
                     }
 
-                    // 启动 LibraryReplication
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: 准备下属数据库对象");
+#endif
+                    //
+                    this.IssueItemDatabase = new IssueItemDatabase(this);
+                    this.OrderItemDatabase = new OrderItemDatabase(this);
+                    this.CommentItemDatabase = new CommentItemDatabase(this);
 
 #if LOG_INFO
-                    app.WriteErrorLog("INFO: LibraryReplication ReadBatchTaskBreakPointFile");
+                    app.WriteErrorLog("INFO: MessageCenter");
 #endif
-                    // 从断点记忆文件中读出信息
-                    // return:
-                    //      -1  error
-                    //      0   file not found
-                    //      1   found
-                    nRet = ReadBatchTaskBreakPointFile("dp2Library 同步",
-                        out strBreakPoint,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
-                    }
-                    // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+                    // 
+                    this.MessageCenter = new MessageCenter();
+                    this.MessageCenter.ServerUrl = this.WsUrl;
+                    this.MessageCenter.MessageDbName = this.MessageDbName;
 
-                    // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
-
-                    if (nRet == 1)
-                    {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: LibraryReplication");
-#endif
-                        try
-                        {
-
-                            // 从断点文件中取出断点字符串
-                            // 断点字符串格式：序号.偏移量@日志文件名
-                            //  或者：序号@日志文件名
-                            // 获得断点信息的整个过程的代码，是否适宜归入TraceDTLP类？
-                            // 如果成熟，可以归纳作为BatchTask基类的一个特性。
-
-                            LibraryReplication replication = new LibraryReplication(this, null);
-                            this.BatchTasks.Add(replication);
-
-                            if (replication.StartInfo == null)
-                                replication.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
-                            replication.StartInfo.Start = "date=continue";  // 从断点开始做
-                            replication.ClearProgressFile();   // 清除进度文件内容
-                            replication.StartWorkerThread();
-                        }
-                        catch (Exception ex)
-                        {
-                            app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
-                            goto ERROR1;
-                        }
-                    }
-
-                    // 启动 RebuildKeys
-
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: RebuildKeys ReadBatchTaskBreakPointFile");
-#endif
-                    // 从断点记忆文件中读出信息
-                    // return:
-                    //      -1  error
-                    //      0   file not found
-                    //      1   found
-                    nRet = ReadBatchTaskBreakPointFile("重建检索点",
-                        out strBreakPoint,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
-                    }
-                    // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
-
-                    // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
-
-                    if (nRet == 1)
-                    {
-#if LOG_INFO
-                        app.WriteErrorLog("INFO: RebuildKeys");
-#endif
-                        try
-                        {
-
-                            // 从断点文件中取出断点字符串
-                            RebuildKeys replication = new RebuildKeys(this, null);
-                            this.BatchTasks.Add(replication);
-
-                            if (replication.StartInfo == null)
-                                replication.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
-                            replication.StartInfo.Start = "dbnamelist=continue";  // 从断点开始做
-                            replication.ClearProgressFile();   // 清除进度文件内容
-                            replication.StartWorkerThread();
-                        }
-                        catch (Exception ex)
-                        {
-                            app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
-                            goto ERROR1;
-                        }
-                    }
-                }
-
-                // 公共查询最大命中数
-                {
-                    XmlNode nodeTemp = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
-                    if (nodeTemp != null)
-                    {
-                        try
-                        {
-                            string strMaxCount = DomUtil.GetAttr(nodeTemp, "searchMaxResultCount");
-                            if (String.IsNullOrEmpty(strMaxCount) == false)
-                                this.SearchMaxResultCount = Convert.ToInt32(strMaxCount);
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-
-#if LOG_INFO
-                app.WriteErrorLog("INFO: 准备下属数据库对象");
-#endif
-                //
-                this.IssueItemDatabase = new IssueItemDatabase(this);
-                this.OrderItemDatabase = new OrderItemDatabase(this);
-                this.CommentItemDatabase = new CommentItemDatabase(this);
-
-#if LOG_INFO
-                app.WriteErrorLog("INFO: MessageCenter");
-#endif
-                // 
-                this.MessageCenter = new MessageCenter();
-                this.MessageCenter.ServerUrl = this.WsUrl;
-                this.MessageCenter.MessageDbName = this.MessageDbName;
-
-                this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 
-                this.MessageCenter.VerifyAccount += new VerifyAccountEventHandler(MessageCenter_VerifyAccount);
+                    this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 
+                    this.MessageCenter.VerifyAccount += new VerifyAccountEventHandler(MessageCenter_VerifyAccount);
 
 #if NO
             if (bReload == false)
@@ -1595,65 +1568,71 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-                // 升级library.xml文件版本
-                if (bReload == false)
-                {
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: UpgradeLibraryXml");
-#endif
-                    nRet = this.UpgradeLibraryXml(out strError);
-                    if (nRet == -1)
-                    {
-                        app.WriteErrorLog("升级library.xml时出错：" + strError);
-                    }
-                }
-
-                if (bReload == true)
-                    app.WriteErrorLog("library application结束重新装载 " + this.m_strFileName);
-                else
-                {
-                    TimeSpan delta = DateTime.Now - start;
-                    app.WriteErrorLog("library application成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
-
-                    // 写入down机检测文件
-                    app.WriteAppDownDetectFile("library application成功初始化。");
-
-                    if (this.watcher == null)
+                    // 升级library.xml文件版本
+                    if (bReload == false)
                     {
 #if LOG_INFO
-                        app.WriteErrorLog("INFO: BeginWatcher");
+                        app.WriteErrorLog("INFO: UpgradeLibraryXml");
+#endif
+                        nRet = this.UpgradeLibraryXml(out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("升级library.xml时出错：" + strError);
+                        }
+                    }
+
+                    if (bReload == true)
+                        app.WriteErrorLog("library application结束重新装载 " + this.m_strFileName);
+                    else
+                    {
+                        TimeSpan delta = DateTime.Now - start;
+                        app.WriteErrorLog("library application成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
+
+                        // 写入down机检测文件
+                        app.WriteAppDownDetectFile("library application成功初始化。");
+
+                        if (this.watcher == null)
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: BeginWatcher");
 #endif
 
-                        BeginWatcher();
+                            BeginWatcher();
 #if LOG_INFO
-                        app.WriteErrorLog("INFO: End BeginWatcher");
+                            app.WriteErrorLog("INFO: End BeginWatcher");
 #endif
-                    }
+                        }
 
 #if NO
                 if (this.virtual_watcher == null)
                     BeginVirtualDirWatcher();
 #endif
-                }
+                    }
 
-                if (DateTime.Now > new DateTime(2016, 2, 1))
+                    if (DateTime.Now > new DateTime(2016, 5, 1))
+                    {
+                        // 通知系统挂起
+                        // this.HangupReason = HangupReason.Expire;
+                        app.HangupList.Add("Expire");
+                        this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                    }
+
+                    // 2013/4/10
+                    if (this.Changed == true)
+                        this.ActivateManagerThread();
+                }
+                catch (Exception ex)
                 {
-                    // 通知系统挂起
-                    this.HangupReason = HangupReason.Expire;
-                    this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                    strError = "LoadCfg() 抛出异常: " + ExceptionUtil.GetDebugText(ex);
+                    goto ERROR1;
                 }
 
-                // 2013/4/10
-                if (this.Changed == true)
-                    this.ActivateManagerThread();
+                return 0;
             }
-            catch (Exception ex)
+            finally
             {
-                strError = "LoadCfg() 抛出异常: " + ExceptionUtil.GetDebugText(ex);
-                goto ERROR1;
+                this.m_lock.ReleaseWriterLock();
             }
-
-            return 0;
         // 2008/10/13 
         ERROR1:
             if (bReload == false)
@@ -1680,7 +1659,8 @@ namespace DigitalPlatform.LibraryServer
                 app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
             else
             {
-                app.HangupReason = LibraryServer.HangupReason.StartingError;
+                // app.HangupReason = LibraryServer.HangupReason.StartingError;
+                app.HangupList.Add("StartingError");
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
             }
             return -1;
@@ -2066,6 +2046,110 @@ namespace DigitalPlatform.LibraryServer
                     out infos,
                     out strError);
                 this.ArrivedDbFroms = infos;
+
+                return 0;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+        }
+
+        public void LockForWrite()
+        {
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+        }
+
+        public void UnlockForWrite()
+        {
+            this.m_lock.ReleaseWriterLock();
+        }
+
+        public void LockForRead()
+        {
+            this.m_lock.AcquireReaderLock(m_nLockTimeout);
+        }
+
+        public void UnlockForRead()
+        {
+            this.m_lock.ReleaseReaderLock();
+        }
+
+        // 初始化和 mongodb 有关的数据库
+        public int InitialMongoDatabases(out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
+                return 0;
+
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+                try
+                {
+                    this._mongoClient = new MongoClient(this.MongoDbConnStr);
+                    var server = this._mongoClient.GetServer();
+                    server.Connect();
+                }
+                catch (Exception ex)
+                {
+                    this._mongoClient = null;
+                    strError = "初始化 MongoClient 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                int nRet = 0;
+                if (this._mongoClient != null)
+                {
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: OpenSummaryStorage");
+#endif
+                    nRet = OpenSummaryStorage(out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动书目摘要库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: Open HitCountDatabase");
+#endif
+                    nRet = this.HitCountDatabase.Open(//this.MongoDbConnStr,
+                        this._mongoClient,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动计数器库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: Open AccessLogDatabase");
+#endif
+                    nRet = this.AccessLogDatabase.Open(// this.MongoDbConnStr,
+                        this._mongoClient,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动访问日志库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+
+#if LOG_INFO
+                    this.WriteErrorLog("INFO: Open ChargingOperDatabase");
+#endif
+                    nRet = this.ChargingOperDatabase.Open(
+                        this._mongoClient,
+                        this.MongoDbInstancePrefix,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "启动出纳操作库时出错: " + strError;
+                        this.WriteErrorLog(strError);
+                    }
+                }
 
                 return 0;
             }
@@ -3062,7 +3146,7 @@ namespace DigitalPlatform.LibraryServer
                         // <yczb>
                         /*
         <yczb>
-            <sso appID='CBPM_Library' validateWsUrl='http://portal.cbpmc.cbpm/AuthCenter/services/validate' />
+            <sso appID='CBPM_Library' validateWsUrl='http://.../AuthCenter/services/validate' />
         </yczb>
                          * */
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//yczb");
@@ -3251,6 +3335,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
         }
+
         public StopState BeginLoop(string strTitle)
         {
             lock (this.StopTable)
@@ -3289,7 +3374,8 @@ namespace DigitalPlatform.LibraryServer
         {
             this.EndWather();
 
-            this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
+            //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
+            this.HangupList.Add("Exit");
 
             this.WriteErrorLog("LibraryApplication 开始下降");
 
@@ -13727,6 +13813,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
     }
 
+#if NO
     // 系统挂起的理由
     public enum HangupReason
     {
@@ -13739,6 +13826,7 @@ strLibraryCode);    // 读者所在的馆代码
         Exit = 6,  // 系统正在退出
         Expire = 7, // 因长期没有升级版本，当前版本已经失效
     }
+#endif
 
     // API错误码
     public enum ErrorCode

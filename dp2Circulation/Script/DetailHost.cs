@@ -226,6 +226,12 @@ namespace dp2Circulation
             //
         }
 
+        public void Dispose()
+        {
+            if (this.GcatChannel != null)
+                this.GcatChannel.Dispose();
+        }
+
         /// <summary>
         /// 入口函数
         /// </summary>

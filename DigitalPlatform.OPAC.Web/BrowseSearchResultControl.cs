@@ -32,11 +32,9 @@ namespace DigitalPlatform.OPAC.Web
     {
         public bool PageNoUrlMode = false;  // pager 是否采用URL方式定位 pageno
 
-        // public event EventHandler AddToMyshelf = null;
         public bool EnableAddToMyBookshelf = true;  // 允许"加入我的书架"按钮
         public bool EnableRemoveFromMyBookshelf = false;  // 允许"从我的书架移除"按钮
         public bool EnableExport = true;    // 允许"导出"按钮
-
 
         public bool MinimizeNewReviewEdtior = true;  // 初始时是否隐藏新创建评注编辑区域
 
@@ -565,7 +563,6 @@ namespace DigitalPlatform.OPAC.Web
             content.ID = "content";
             this.Controls.Add(content);
 
-
             // 内容行
             for (int i = 0;
 #if USE_LINECOUNT
@@ -598,8 +595,6 @@ namespace DigitalPlatform.OPAC.Web
                 // "</table></div>"
                "</table>" + this.GetPostfixString()
                ));
-
-
         }
 
         void pager_GetBaseUrl(object sender, GetBaseUrlEventArgs e)
@@ -811,7 +806,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(sep);
              * */
 
-
             CommentsControl commentscontrol = new CommentsControl();
             commentscontrol.MinimizeNewReviewEdtior = this.MinimizeNewReviewEdtior;
             commentscontrol.ID = "line" + Convert.ToString(nLineNo) + "_comments";
@@ -840,7 +834,6 @@ namespace DigitalPlatform.OPAC.Web
             literal = new LiteralControl();
             literal.Text = "</td></tr>";
             line.Controls.Add(literal);
-
 
             return line;
         }
@@ -955,7 +948,6 @@ namespace DigitalPlatform.OPAC.Web
 
         void CreateCmdLine()
         {
-
             this.Controls.Add(new LiteralControl(
                 "<tr class='cmdline'><td colspan='2'>"
             ));
@@ -963,8 +955,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(new LiteralControl(
                 "<table border='0' width='100%'><tr>"
             ));
-
-
 
             this.Controls.Add(new LiteralControl(
                 "<td>"
@@ -989,14 +979,11 @@ namespace DigitalPlatform.OPAC.Web
             open_export_dialog.OnClientClick = "$( '#export-dialog-form' ).dialog({ modal: true }); return cancelClick();";
             this.Controls.Add(open_export_dialog);
 
-
             // 修改状态 对话框
             this.Controls.Add(new AutoIndentLiteral("<%begin%><div id='export-dialog-form' title='" + this.GetString("请指定导出特性") + "' style='DISPLAY:NONE'>"));
 
-
             {
                 this.Controls.Add(new AutoIndentLiteral("<%begin%><div>" + this.GetString("导出范围") + ": "));
-
 
                 RadioButton selected = new RadioButton();
                 selected.ID = "selected";
@@ -1048,7 +1035,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.Controls.Add(new AutoIndentLiteral("</div><%end%>"));
             }
 
-
             {
                 this.Controls.Add(new AutoIndentLiteral("<%begin%><div>" + this.GetString("编码方式") + ": "));
 
@@ -1070,7 +1056,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.Controls.Add(new AutoIndentLiteral("</div><%end%>"));
             }
 
-
             // 导出 按钮
             Button export_button = new Button();
             export_button.OnClientClick = "$( \"#export-dialog-form\" ).parent().appendTo($(\"form:first\"));$( \"#export-dialog-form\" ).dialog('close'); ";
@@ -1080,9 +1065,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(export_button);
 
             this.Controls.Add(new AutoIndentLiteral("<%end%></div>"));
-
-
-
 
 #if NO
             LiteralControl literal = new LiteralControl();
@@ -1135,16 +1117,13 @@ namespace DigitalPlatform.OPAC.Web
             }
 #endif
 
-
             this.Controls.Add(new LiteralControl(
                 "</td>"
             ));
 
-
             this.Controls.Add(new LiteralControl(
                 "<td align='right'> "
             ));
-
 #if NO
             PlaceHolder pageswitcher = new PlaceHolder();
             pageswitcher.ID = "pageswitcher";
@@ -1267,7 +1246,6 @@ namespace DigitalPlatform.OPAC.Web
             string strError = "";
             int nRet = 0;
 
-
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
@@ -1294,269 +1272,262 @@ namespace DigitalPlatform.OPAC.Web
                 }
             }
 
-            // 如果都没有选，则认selected items
-            if (all.Checked == false)
+            LibraryChannel channel = sessioninfo.GetChannel(true);
+            try
             {
-                paths = this.GetCheckedPath();
-                if (paths.Count == 0)
-                {
-                    strError = "尚未选择要导出的事项";
-                    goto ERROR1;
-                }
-            }
-            else
-            {
-                if (this.AllowExportAllMarc == false)
-                {
-                    strError = "不允许导出结果集的全部记录";
-                    goto ERROR1;
-                }
 
-                paths = new List<string>();
-
-                string strResultsetFilename = this.ResultsetFilename;
-                if (String.IsNullOrEmpty(strResultsetFilename) == false)
+                // 如果都没有选，则认selected items
+                if (all.Checked == false)
                 {
-                    app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
-                    try
+                    paths = this.GetCheckedPath();
+                    if (paths.Count == 0)
                     {
-                        DpResultSet resultset = new DpResultSet(false, false);
+                        strError = "尚未选择要导出的事项";
+                        goto ERROR1;
+                    }
+                }
+                else
+                {
+                    if (this.AllowExportAllMarc == false)
+                    {
+                        strError = "不允许导出结果集的全部记录";
+                        goto ERROR1;
+                    }
+
+                    paths = new List<string>();
+
+                    string strResultsetFilename = this.ResultsetFilename;
+                    if (String.IsNullOrEmpty(strResultsetFilename) == false)
+                    {
+                        app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
                         try
                         {
-                            resultset.Attach(this.ResultsetFilename,
-                                this.ResultsetFilename + ".index");
-                        }
-                        catch (Exception ex)
-                        {
-                            this.SetErrorInfo(ex.Message); // 显示出错信息
-                            goto ERROR1;
-                        }
-                        try
-                        {
-                            for (int i = 0; i < resultset.Count; i++)
+                            DpResultSet resultset = new DpResultSet(false, false);
+                            try
                             {
-                                Thread.Sleep(1);
-                                if (this.Page.Response.IsClientConnected == false)
+                                resultset.Attach(this.ResultsetFilename,
+                                    this.ResultsetFilename + ".index");
+                            }
+                            catch (Exception ex)
+                            {
+                                this.SetErrorInfo(ex.Message); // 显示出错信息
+                                goto ERROR1;
+                            }
+
+                            try
+                            {
+                                for (int i = 0; i < resultset.Count; i++)
                                 {
-                                    strError = "中断";
-                                    goto ERROR1;
+                                    Thread.Sleep(1);
+                                    if (this.Page.Response.IsClientConnected == false)
+                                    {
+                                        strError = "中断";
+                                        goto ERROR1;
+                                    }
+                                    paths.Add(resultset[i].ID);
                                 }
-                                paths.Add(resultset[i].ID);
+                            }
+                            finally
+                            {
+                                string strTemp1 = "";
+                                string strTemp2 = "";
+                                resultset.Detach(out strTemp1, out strTemp2);
                             }
                         }
                         finally
                         {
-
-                            string strTemp1 = "";
-                            string strTemp2 = "";
-                            resultset.Detach(out strTemp1, out strTemp2);
+                            app.ResultsetLocks.UnlockForRead(strResultsetFilename);
                         }
-
                     }
-                    finally
+                    else
                     {
-                        app.ResultsetLocks.UnlockForRead(strResultsetFilename);
-                    }
-
-                }
-                else
-                {
-                    Record[] records = null;
-                    long lStart = 0;
-                    for (; ; )
-                    {
-                        Thread.Sleep(1);
-                        if (this.Page.Response.IsClientConnected == false)
+                        Record[] records = null;
+                        long lStart = 0;
+                        for (; ; )
                         {
-                            strError = "中断";
-                            goto ERROR1;
+                            Thread.Sleep(1);
+                            if (this.Page.Response.IsClientConnected == false)
+                            {
+                                strError = "中断";
+                                goto ERROR1;
+                            }
+                            long lRet = // sessioninfo.Channel.
+                                channel.GetSearchResult(
+                                null,
+                                this.ResultSetName,
+                                lStart,
+                                100,
+                                "id",
+                                this.Lang,
+                                out records,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                strError = "获得结果集时出错: " + strError;
+                                goto ERROR1;
+                            }
+
+                            for (int i = 0; i < records.Length; i++)
+                            {
+                                paths.Add(records[i].Path);
+
+                            }
+                            lStart += records.Length;
+                            if (lStart >= lRet)
+                                break;
+
                         }
-                        long lRet = sessioninfo.Channel.GetSearchResult(
+                    }
+
+                    if (paths.Count == 0)
+                    {
+                        strError = "结果集为空，放弃导出";
+                        goto ERROR1;
+                    }
+                }
+
+                // 不让浏览器缓存页面
+                this.Page.Response.AddHeader("Pragma", "no-cache");
+                this.Page.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+                this.Page.Response.AddHeader("Expires", "0");
+
+                if (pathfile.Checked == false)
+                {
+                    // ISO2709文件
+                    this.Page.Response.ContentType = "application/iso2709";
+                    string strEncodedFileName = HttpUtility.UrlEncode("书目.mrc", Encoding.UTF8);
+                    this.Page.Response.AddHeader("content-disposition", "attachment; filename=" + strEncodedFileName);
+
+                    Encoding targetEncoding = null;
+
+                    // 如果都没有选，则认utf-8
+                    if (gb2312.Checked == true)
+                    {
+                        targetEncoding = Encoding.GetEncoding(936);
+                        this.Page.Response.Charset = "gb2312";
+                    }
+                    else
+                    {
+                        targetEncoding = Encoding.UTF8;
+                        this.Page.Response.Charset = "utf-8";
+                    }
+
+                    for (int i = 0; i < paths.Count; i++)
+                    {
+                        if (this.Page.Response.IsClientConnected == false)
+                            break;
+
+                        string strPath = paths[i];
+
+                        string strDbName = StringUtil.GetDbName(strPath);
+                        if (app.IsBiblioDbName(strDbName) == false)
+                            continue;
+
+                        string[] formats = new string[1];
+                        formats[0] = "xml";
+                        string[] results = null;
+                        byte[] timestamp = null;
+
+                        long lRet = // sessioninfo.Channel.
+                            channel.GetBiblioInfos(
                             null,
-                            this.ResultSetName,
-                            lStart,
-                            100,
-                            "id",
-                            this.Lang,
-                            out records,
+                            strPath,
+                            "",
+                            formats,
+                            out results,
+                            out timestamp,
                             out strError);
                         if (lRet == -1)
                         {
-                            strError = "获得结果集时出错: " + strError;
+                            strError = "获得书目记录 '" + strPath + "' 时发生错误: " + strError;
                             goto ERROR1;
                         }
 
-                        for (int i = 0; i < records.Length; i++)
+                        if (lRet == 0)
+                            continue;
+
+                        if (results == null || results.Length < 1)
                         {
-                            paths.Add(records[i].Path);
-
+                            strError = "results error";
+                            goto ERROR1;
                         }
-                        lStart += records.Length;
-                        if (lStart >= lRet)
-                            break;
 
+                        string strXml = results[0];
+
+                        // 将XML书目记录转换为MARC格式
+                        string strMarc = "";
+                        string strOutMarcSyntax = "";
+
+                        // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                        // parameters:
+                        //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                        //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                        //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                        nRet = MarcUtil.Xml2Marc(strXml,
+                            false,
+                            "", // strMarcSyntax
+                            out strOutMarcSyntax,
+                            out strMarc,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "记录从XML格式转换为MARC格式时出错: " + strError;
+                            goto ERROR1;
+                        }
+
+                        byte[] baResult = null;
+                        // 将MARC机内格式转换为ISO2709格式
+                        // parameters:
+                        //      strSourceMARC   [in]机内格式MARC记录。
+                        //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                        //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                        //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                        // return:
+                        //      -1  出错
+                        //      0   成功
+                        nRet = MarcUtil.CvtJineiToISO2709(
+                            strMarc,
+                            strOutMarcSyntax,
+                            targetEncoding,
+                            out baResult,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "将MARC字符串转换为ISO2709记录时出错: " + strError;
+                            goto ERROR1;
+                        }
+
+                        this.Page.Response.OutputStream.Write(baResult, 0, baResult.Length);
                     }
-                }
-
-                if (paths.Count == 0)
-                {
-                    strError = "结果集为空，放弃导出";
-                    goto ERROR1;
-                }
-            }
-
-            // 不让浏览器缓存页面
-            this.Page.Response.AddHeader("Pragma", "no-cache");
-            this.Page.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
-            this.Page.Response.AddHeader("Expires", "0");
-
-            if (pathfile.Checked == false)
-            {
-                // ISO2709文件
-                this.Page.Response.ContentType = "application/iso2709";
-                string strEncodedFileName = HttpUtility.UrlEncode("书目.mrc", Encoding.UTF8);
-                this.Page.Response.AddHeader("content-disposition", "attachment; filename=" + strEncodedFileName);
-
-
-                Encoding targetEncoding = null;
-
-                // 如果都没有选，则认utf-8
-                if (gb2312.Checked == true)
-                {
-                    targetEncoding = Encoding.GetEncoding(936);
-                    this.Page.Response.Charset = "gb2312";
                 }
                 else
                 {
-                    targetEncoding = Encoding.UTF8;
+                    // 记录路径文件
+                    this.Page.Response.ContentType = "text/recpath";
+                    string strEncodedFileName = HttpUtility.UrlEncode("记录路径.txt", Encoding.UTF8);
+                    this.Page.Response.AddHeader("content-disposition", "attachment; filename=" + strEncodedFileName);
+
                     this.Page.Response.Charset = "utf-8";
+
+                    for (int i = 0; i < paths.Count; i++)
+                    {
+                        if (this.Page.Response.IsClientConnected == false)
+                            break;
+
+                        string strPath = paths[i];
+                        byte[] baResult = Encoding.UTF8.GetBytes(strPath + (i < paths.Count - 1 ? "\r\n" : ""));
+
+                        this.Page.Response.OutputStream.Write(baResult, 0, baResult.Length);
+                    }
                 }
 
-                for (int i = 0; i < paths.Count; i++)
-                {
-                    if (this.Page.Response.IsClientConnected == false)
-                        break;
-
-                    string strPath = paths[i];
-
-                    string strDbName = StringUtil.GetDbName(strPath);
-                    if (app.IsBiblioDbName(strDbName) == false)
-                        continue;
-
-                    string[] formats = new string[1];
-                    formats[0] = "xml";
-                    string[] results = null;
-                    byte[] timestamp = null;
-
-                    long lRet = sessioninfo.Channel.GetBiblioInfos(
-                        null,
-                        strPath,
-                        "",
-                        formats,
-                        out results,
-                        out timestamp,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "获得书目记录 '" + strPath + "' 时发生错误: " + strError;
-                        goto ERROR1;
-                    }
-
-                    if (lRet == 0)
-                        continue;
-                    /*
-                    LibraryServerResult result = app.GetBiblioInfos(sessioninfo,
-                        strPath,
-                        formats,
-                        out results,
-                        out timestamp);
-                    if (result.Value == -1)
-                    {
-                        strError = "获得书目记录 '" + strPath + "' 时发生错误: " + result.ErrorInfo;
-                        goto ERROR1;
-                    }
-
-                    if (result.Value == 0)
-                        continue;
-                    */
-
-                    if (results == null || results.Length < 1)
-                    {
-                        strError = "results error";
-                        goto ERROR1;
-                    }
-
-                    string strXml = results[0];
-
-                    // 将XML书目记录转换为MARC格式
-                    string strMarc = "";
-                    string strOutMarcSyntax = "";
-
-                    // 将MARCXML格式的xml记录转换为marc机内格式字符串
-                    // parameters:
-                    //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
-                    //		strMarcSyntax	指示marc语法,如果==""，则自动识别
-                    //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
-                    nRet = MarcUtil.Xml2Marc(strXml,
-                        false,
-                        "", // strMarcSyntax
-                        out strOutMarcSyntax,
-                        out strMarc,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "记录从XML格式转换为MARC格式时出错: " + strError;
-                        goto ERROR1;
-                    }
-
-                    byte[] baResult = null;
-                    // 将MARC机内格式转换为ISO2709格式
-                    // parameters:
-                    //      strSourceMARC   [in]机内格式MARC记录。
-                    //      strMarcSyntax   [in]为"unimarc"或"usmarc"
-                    //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
-                    //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
-                    // return:
-                    //      -1  出错
-                    //      0   成功
-                    nRet = MarcUtil.CvtJineiToISO2709(
-                        strMarc,
-                        strOutMarcSyntax,
-                        targetEncoding,
-                        out baResult,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "将MARC字符串转换为ISO2709记录时出错: " + strError;
-                        goto ERROR1;
-                    }
-
-                    this.Page.Response.OutputStream.Write(baResult, 0, baResult.Length);
-                }
+                this.Page.Response.End();
+                return;
             }
-            else
+            finally
             {
-                // 记录路径文件
-                this.Page.Response.ContentType = "text/recpath";
-                string strEncodedFileName = HttpUtility.UrlEncode("记录路径.txt", Encoding.UTF8);
-                this.Page.Response.AddHeader("content-disposition", "attachment; filename=" + strEncodedFileName);
-
-                this.Page.Response.Charset = "utf-8";
-
-                for (int i = 0; i < paths.Count; i++)
-                {
-                    if (this.Page.Response.IsClientConnected == false)
-                        break;
-
-                    string strPath = paths[i];
-                    byte[] baResult = Encoding.UTF8.GetBytes(strPath + (i < paths.Count - 1 ? "\r\n" : ""));
-
-                    this.Page.Response.OutputStream.Write(baResult, 0, baResult.Length);
-                }
+                sessioninfo.ReturnChannel(channel);
             }
-
-            this.Page.Response.End();
-            return;
         ERROR1:
             this.Page.Response.ContentType = "text/html";
             this.Page.Response.Charset = "utf-8";
@@ -1652,10 +1623,10 @@ namespace DigitalPlatform.OPAC.Web
             }
             //this.SetDebugInfo("succeedinfo", "共有 " + recpathlist.Count.ToString()
             //    + " 个事项成功加入“我的书架”。<a href='./mybookshelf.aspx'>点这里可去“我的书架”</a>");
-            string strText = string.Format(this.GetString("共有n个事项成功加入我的书架"), 
+            string strText = string.Format(this.GetString("共有n个事项成功加入我的书架"),
                 recpathlist.Count.ToString());
-            strText += "<a href='./mybookshelf.aspx'>"+this.GetString("点这里可去我的书架")+"</a>";
-            this.SetDebugInfo("succeedinfo", 
+            strText += "<a href='./mybookshelf.aspx'>" + this.GetString("点这里可去我的书架") + "</a>";
+            this.SetDebugInfo("succeedinfo",
                 strText);
             return;
         ERROR1:
@@ -1740,7 +1711,7 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             // TODO: 一次调用的数目不一定能满足
-            Record[]  search_results = null;
+            Record[] search_results = null;
             long lRet = channel.GetBrowseRecords(
                 null,
                 paths,
@@ -1754,7 +1725,7 @@ namespace DigitalPlatform.OPAC.Web
             for (int i = 0; i < search_results.Length; i++)
             {
                 Record record = search_results[i];
-                string [] cols = new string[record.Cols.Length + 1];
+                string[] cols = new string[record.Cols.Length + 1];
                 cols[0] = record.Path;
                 Array.Copy(record.Cols,
                     0,
@@ -1765,7 +1736,6 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             aLine = results;
-
             return 0;
         }
 
@@ -1802,6 +1772,7 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
+#if NO
         SessionInfo m_managerSession = null;
 
         SessionInfo GetManagerSession(OpacApplication app)
@@ -1826,6 +1797,7 @@ namespace DigitalPlatform.OPAC.Web
                 m_managerSession = null;
             }
         }
+#endif
 
         public static void ParseOffsetString(string strText,
             out int nStart,
@@ -1851,6 +1823,7 @@ namespace DigitalPlatform.OPAC.Web
         // 兑现获取浏览记录
         protected override void Render(HtmlTextWriter writer)
         {
+            string strError = "";
             int nRet = 0;
 
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
@@ -1876,7 +1849,7 @@ namespace DigitalPlatform.OPAC.Web
             if (String.IsNullOrEmpty(format_control.ActiveTab) == true)
                 format_control.ActiveTab = this.DefaultFormatName;
 
-                // 换算为语言相关的字符串
+            // 换算为语言相关的字符串
             if (String.IsNullOrEmpty(format_control.ActiveTab) == false)
             {
                 format_control.ActiveTab = app.GetBrowseFormatName(format_control.ActiveTab,
@@ -1902,12 +1875,10 @@ namespace DigitalPlatform.OPAC.Web
             if (this.ResultCount != 0)
             {
                 // string strHash = channel.GetHashCode().ToString();
-                string strError = "";
                 ArrayList aLine = null;    // 各个记录的浏览列。数组的每个元素是string [] 类型
                 List<string> titles = new List<string>();   // 各个记录的标题
 
                 long lRet = 0;
-                DpResultSet resultset = null;
                 bool bFillBrowse = false;   // 浏览列是否填充过
 
             REDO:
@@ -1915,13 +1886,13 @@ namespace DigitalPlatform.OPAC.Web
                 string strResultsetFilename = this.ResultsetFilename;
                 if (String.IsNullOrEmpty(strResultsetFilename) == false)
                     app.ResultsetLocks.LockForRead(strResultsetFilename, 500);
-
+                LibraryChannel channel = sessioninfo.GetChannel(true);
                 try
                 {
+                    DpResultSet resultset = null;
 
                     try
                     {
-
                         if (String.IsNullOrEmpty(this.ResultsetFilename) == false)
                         {
                             int nOffsetStart = 0;
@@ -1939,6 +1910,10 @@ namespace DigitalPlatform.OPAC.Web
                             {
                                 this.SetErrorInfo(ex.Message); // 显示出错信息
                                 this.ResultsetFilename = "";
+
+                                // 2016/1/23
+                                resultset.Dispose();
+                                resultset = null;
                                 goto REDO;
                             }
 
@@ -1975,7 +1950,8 @@ namespace DigitalPlatform.OPAC.Web
                             long lTotalCount = 0;
                             for (; ; )
                             {
-                                lRet = sessioninfo.Channel.GetSearchResult(
+                                lRet = // sessioninfo.Channel.
+                                    channel.GetSearchResult(
                                     null,
                                     this.ResultSetName,
                                     this.StartIndex,
@@ -1985,12 +1961,8 @@ namespace DigitalPlatform.OPAC.Web
                                     out searchresults,
                                     out strError);
                                 if (lRet == -1 && searchresults == null)
-                                {
-                                    // throw new Exception(strError);
-                                    SetDebugInfo("errorinfo", strError);
-                                    base.Render(writer);
-                                    return;
-                                }
+                                    goto ERROR1;
+
                                 if (lRet != -1)
                                     lTotalCount = lRet;
 
@@ -2016,22 +1988,6 @@ namespace DigitalPlatform.OPAC.Web
                                 if (lCount <= 0)
                                     break;
                             }
-                            /*
-                            lRet = channel.DoGetSearchFullResult(
-                                this.ResultSetName,
-                                this.StartIndex,
-                                this.PageMaxLines,
-                                this.Lang,
-                                null,
-                                out aLine,
-                                out strError);
-                            if (lRet == -1)
-                            {
-                                // 虽然返回-1,但是aLine中仍然有内容了
-                                if (aLine == null)
-                                    throw new Exception(strError);
-                            }
-                             * */
                         }
 
                         // 本页出现的数据库名字列表
@@ -2079,7 +2035,6 @@ namespace DigitalPlatform.OPAC.Web
                             LiteralControl contentcontrol = (LiteralControl)this.FindControl("line" + Convert.ToString(i) + "_content");
 
                             CheckBox checkbox = (CheckBox)this.FindControl("line" + Convert.ToString(i) + "_checkbox");
-
 
                             // 序号
                             string strNo = "&nbsp;";
@@ -2143,7 +2098,6 @@ namespace DigitalPlatform.OPAC.Web
                                     this.Controls.Remove(itemcontrol);
                                     this.Controls.Remove(bibliocontrol);
 
-
                                     layout_holder.Controls.Add(new LiteralControl("<table class='item_and_biblio'><tr><td class='item'>"));
                                     layout_holder.Controls.Add(itemcontrol);
                                     layout_holder.Controls.Add(new LiteralControl("</td><td class='biblio'>"));
@@ -2172,7 +2126,6 @@ namespace DigitalPlatform.OPAC.Web
                                         "<td class='comment'>"
                                     ));
 
-
                                     string strParentID = "";
                                     nRet = commentcontrol.LoadRecord(strItemPath,
                                         out strParentID,
@@ -2182,7 +2135,6 @@ namespace DigitalPlatform.OPAC.Web
                                         strContent = "ERROR : " + strError;
                                         goto SKIP0;
                                     }
-
 
                                     string strBiblioDbName = "";
 
@@ -2206,7 +2158,6 @@ namespace DigitalPlatform.OPAC.Web
                                     this.Controls.Remove(commentcontrol);
                                     this.Controls.Remove(bibliocontrol);
 
-
                                     layout_holder.Controls.Add(new LiteralControl("<table class='comment_and_biblio'><tr><td class='comment'>"));
                                     layout_holder.Controls.Add(commentcontrol);
                                     layout_holder.Controls.Add(new LiteralControl("</td><td class='biblio'>"));
@@ -2226,23 +2177,6 @@ namespace DigitalPlatform.OPAC.Web
                             if (cols != null)
                             {
                                 string strDbName = StringUtil.GetDbName(cols[0]);
-#if NO
-                                // 判断一个数据库名是不是合法的书目库名
-                                if (app.IsBiblioDbName(strDbName) == false)
-                                {
-                                    // 数据库名需要换算为"zh"语言的数据库名
-                                    VirtualDatabase vdb = app.vdbs[strDbName];
-                                    if (vdb == null)
-                                    {
-                                        strError = "数据库 '" + strDbName + "' 没有定义";
-                                        strContent = "ERROR : " + strError;
-                                        goto SKIP0;
-                                    }
-                                    string strTempDbName = vdb.GetName("zh");
-                                    if (String.IsNullOrEmpty(strTempDbName) == false)
-                                        strDbName = strTempDbName;
-                                }
-#endif
 
                                 // 2012/7/9
                                 string strTempName = app.GetCfgBiblioDbName(strDbName);
@@ -2288,33 +2222,11 @@ namespace DigitalPlatform.OPAC.Web
                             else
                                 pathcontrol.NavigateUrl = "";
 
-
-
                             // 内容
 
                             if (cols != null)
                             {
                                 string strDbName = StringUtil.GetDbName(cols[0]);
-
-#if NO
-                                // 判断一个数据库名是不是合法的书目库名
-                                if (app.IsBiblioDbName(strDbName) == false)
-                                {  
-                                    // 数据库名需要换算为"zh"的数据库名
-                                    VirtualDatabase vdb = app.vdbs[strDbName];
-                                    if (vdb == null)
-                                    {
-                                        strError = "数据库 '" + strDbName + "' 没有定义";
-                                        strContent = "ERROR : " + strError;
-                                        goto SKIP0;
-                                    } 
-                                    string strTempDbName = vdb.GetName("zh");
-                                    if (String.IsNullOrEmpty(strTempDbName) == false)
-                                        strDbName = strTempDbName;
-                                }
-#endif
-
-
                                 string strLang = "";
 
                                 // 2012/7/9
@@ -2341,7 +2253,8 @@ namespace DigitalPlatform.OPAC.Web
                                     if (resultset != null
                                         && bFillBrowse == false)
                                     {
-                                        nRet = FillBrowseCols(sessioninfo.Channel,
+                                        nRet = FillBrowseCols(//sessioninfo.Channel,
+                                            channel,
                                             ref aLine,
                                             out strError);
                                         if (nRet == -1)
@@ -2391,7 +2304,8 @@ namespace DigitalPlatform.OPAC.Web
                                         if (resultset != null
                                             && bFillBrowse == false)
                                         {
-                                            nRet = FillBrowseCols(sessioninfo.Channel,
+                                            nRet = FillBrowseCols(// sessioninfo.Channel,
+                                                channel,
                                                 ref aLine,
                                                 out strError);
                                             if (nRet == -1)
@@ -2401,16 +2315,12 @@ namespace DigitalPlatform.OPAC.Web
                                             bFillBrowse = true;
                                         }
 
-
                                         // 显示格式不存在, 只好用浏览格式了
                                         strContent = BuildBrowseContent(app, sessioninfo,
                                             strDbName,
                                             cols);
                                         goto SKIP0;
                                     }
-
-
-
 
                                     if (format.Type == "biblio")
                                     {
@@ -2460,10 +2370,8 @@ namespace DigitalPlatform.OPAC.Web
                                         strDbName,
                                         format.ScriptFileName);
 
-
-
                                     nRet = app.CfgsMap.MapFileToLocal(
-                                            GetManagerSession(app).Channel,
+                                        channel,    // GetManagerSession(app).Channel,
                                         strRemotePath,
                                         out strLocalPath,
                                         out strError);
@@ -2485,7 +2393,7 @@ namespace DigitalPlatform.OPAC.Web
 
                                         string strTempPath = "";
                                         nRet = app.CfgsMap.MapFileToLocal(
-                                            GetManagerSession(app).Channel,
+                                            channel,    // GetManagerSession(app).Channel,
                                             strRemotePath + ".ref",
                                             out strTempPath,
                                             out strError);
@@ -2500,38 +2408,14 @@ namespace DigitalPlatform.OPAC.Web
 
                                     // 将种记录数据从XML格式转换为HTML格式
                                     string strBiblioXml = "";
-                                    /*
-                                    byte[] timestamp = null;
-                                    string strMetaData = "";
-                                    string strOutputPath = "";
-                                    string strStyle = LibraryChannel.GETRES_ALL_STYLE;
-
-
-                                    lRet = sessioninfo.Channel.GetRes(
-                                        null,
-                                        cols[0],
-                                        strStyle,
-                                        out strBiblioXml,
-                                        out strMetaData,
-                                        out timestamp,
-                                        out strOutputPath,
-                                        out strError);
-                                    if (lRet == -1)
-                                    {
-                                        strError = "获得种记录 '" + cols[0] + "' 时出错: " + strError;
-                                        strContent = strError;
-                                        goto SKIP0;
-                                    }
-                                     * */
-
-
-                                    lRet = sessioninfo.Channel.GetBiblioInfo(
-                                        null,
-                                        cols[0],
-                                        "",
-                                        "xml",
-                                        out strBiblioXml,
-                                        out strError);
+                                    lRet = // sessioninfo.Channel.
+                                        channel.GetBiblioInfo(
+                                       null,
+                                       cols[0],
+                                       "",
+                                       "xml",
+                                       out strBiblioXml,
+                                       out strError);
                                     if (lRet == -1)
                                     {
                                         strError = "获得种记录 '" + cols[0] + "' 时出错: " + strError;
@@ -2553,7 +2437,6 @@ namespace DigitalPlatform.OPAC.Web
                                     }
                                     else
                                     {
-
                                         nRet = app.ConvertRecordXmlToHtml(
                                             strLocalPath,
                                             strLocalPath + ".ref",
@@ -2597,16 +2480,12 @@ namespace DigitalPlatform.OPAC.Web
                             itemcontrol.Visible = false;
                             commentcontrol.Visible = false;
 
-
                         SKIP1:
 
                             if (cols == null)
                                 checkbox.Visible = false;
                             continue;
-
                         } // end of for
-
-
                     }
                     finally
                     {
@@ -2617,14 +2496,16 @@ namespace DigitalPlatform.OPAC.Web
                             resultset.Detach(out strTemp1, out strTemp2);
                         }
                     }
-
                 }
                 finally
                 {
                     if (String.IsNullOrEmpty(strResultsetFilename) == false)
                         app.ResultsetLocks.UnlockForRead(strResultsetFilename);
 
+#if NO
                     CloseManagerSession();
+#endif
+                    sessioninfo.ReturnChannel(channel);
                 }
 
 #if USE_LINECOUNT
@@ -2666,7 +2547,6 @@ namespace DigitalPlatform.OPAC.Web
 
                     CheckBox checkbox = (CheckBox)this.FindControl("line" + Convert.ToString(i) + "_checkbox");
 
-
                     if (bibliocontrol != null)
                         bibliocontrol.Visible = false;
                     if (marccontrol != null)
@@ -2704,6 +2584,10 @@ namespace DigitalPlatform.OPAC.Web
                 this.Button_RemoveFromMyBookshelf.Visible = false;
 
             base.Render(writer);
+            return;
+        ERROR1:
+            SetDebugInfo("errorinfo", strError);
+            base.Render(writer);    // 注: base.Render() 要放在使用 LibraryChannel 的 try finally 括号外边。因为 Render 页面中的其他控件的时候需要 GetChannel()。放在外边可以避免叠加获取通道导致的占用通道过多情况
         }
 
         public Button Button_AddToMyBookshelf
@@ -2734,7 +2618,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.StartIndex = (this.ResultCount / this.PageMaxLines) * this.PageMaxLines;
             else
                 this.StartIndex = Math.Max(0, (this.ResultCount / this.PageMaxLines) * this.PageMaxLines - 1);
-
         }
 
         void nextpage_Click(object sender, EventArgs e)

@@ -41,7 +41,9 @@ namespace dp2LibraryXE
     {
         FloatingMessageForm _floatingMessage = null;
 
-        const string default_opac_rights = "denychangemypassword,getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker";
+        const string default_opac_rights = "denychangemypassword,getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker"
+                                + ",getiteminfo,getorderinfo,getissueinfo,getcommentinfo";  // 2016/1/27
+
         const string localhost_opac_url = "http://localhost:8081/dp2OPAC";
 
         /// <summary>

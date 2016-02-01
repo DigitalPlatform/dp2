@@ -157,7 +157,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 2007/12/18
-            if (this.HangupReason == HangupReason.LogRecover)
+            if (this.ContainsHangup("LogRecover") == true)
             {
                 strError = "当前系统正处在LogRecover挂起状态，无法启动新的批处理任务";
                 return -1;

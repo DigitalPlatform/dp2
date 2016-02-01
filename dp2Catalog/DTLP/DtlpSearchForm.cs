@@ -56,7 +56,6 @@ namespace dp2Catalog
         /// </summary>
         public AutoResetEvent EventLoadFinish = new AutoResetEvent(false);
 
-
         public DtlpSearchForm()
         {
             InitializeComponent();
