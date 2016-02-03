@@ -5374,6 +5374,9 @@ out strError);
             // 获得读者库名列表
             // parameters:
             //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+            // return:
+            //      -1  出错
+            //      >=0 dbnames 中包含的读者库名数量
             nRet = GetDbNameList("",
                 strLibraryCodeList,
                 out dbnames,
@@ -5732,6 +5735,9 @@ out strError);
         // 获得读者库名列表
         // parameters:
         //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+        // return:
+        //      -1  出错
+        //      >=0 dbnames 中包含的读者库名数量
         int GetDbNameList(string strReaderDbNames,
             string strLibraryCodeList,
             out List<string> dbnames,
@@ -5765,7 +5771,7 @@ out strError);
                 if (dbnames.Count == 0)
                 {
                     strError = "当前尚没有配置读者库";
-                    return -1;
+                    return 0;
                 }
             }
             else
@@ -5793,7 +5799,7 @@ out strError);
                 dbnames = results;
             }
 
-            return 0;
+            return dbnames.Count;
         }
 
         // 2012/1/6 改造为PiggyBack检索
@@ -5876,6 +5882,9 @@ out strError);
             // 获得读者库名列表
             // parameters:
             //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+            // return:
+            //      -1  出错
+            //      >=0 dbnames 中包含的读者库名数量
             nRet = GetDbNameList(strReaderDbNames,
                 strLibraryCodeList,
                 out dbnames,
@@ -8394,6 +8403,9 @@ out strError);
             // 获得读者库名列表
             // parameters:
             //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+            // return:
+            //      -1  出错
+            //      >=0 dbnames 中包含的读者库名数量
             nRet = GetDbNameList("",
                 strLibraryCodeList,
                 out dbnames,
