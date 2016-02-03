@@ -385,13 +385,6 @@ namespace dp2Circulation
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            /*
-            this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-
-            this.BackColor = Color.Transparent;
-            this.toolStrip_main.BackColor = Color.Transparent;
-             * */
-
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
             this.BeginInvoke(new Action(FirstInitial));
@@ -8014,7 +8007,6 @@ Keys keyData)
             }
             OpenWindow<ReservationListForm>();
         }
-
 
         // 写入日志文件。每天创建一个单独的日志文件
         public void WriteErrorLog(string strText)

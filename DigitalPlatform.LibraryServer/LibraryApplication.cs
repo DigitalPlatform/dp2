@@ -2237,7 +2237,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 e.Exist = false;
                 e.Error = true;
-                e.ErrorInfo = "系统禁止对public用户发消息。";
+                e.ErrorInfo = "系统禁止对 public 用户发消息。";
                 return;
             }
 
@@ -8295,6 +8295,7 @@ out strError);
         //          6) 否则用证条码号进行检索
         //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
         // return:
+        //      -2  当前没有配置任何读者库，或者可以操作的读者库
         //      -1  error
         //      0   not found
         //      1   命中1条
@@ -8406,7 +8407,7 @@ out strError);
                     strError = "当前尚没有配置读者库";
                 else
                     strError = "当前没有可以操作的读者库";
-                return -1;
+                return -2;
             }
 
             {
@@ -8788,6 +8789,7 @@ out strError);
                 string strToken = "";
                 // 获得读者记录
                 // return:
+                //      -2  当前没有配置任何读者库，或者可以操作的读者库
                 //      -1  error
                 //      0   not found
                 //      1   命中1条
@@ -8807,7 +8809,7 @@ out strError);
                     out timestamp,
                     out strToken,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == -2)
                 {
                     strError = "以登录名 '" + strLoginName + "' 检索读者记录出错: " + strError;
                     return -1;
@@ -9073,6 +9075,7 @@ out strError);
 
             // 获得读者记录
             // return:
+            //      -2  当前没有配置任何读者库，或者可以操作的读者库
             //      -1  error
             //      0   not found
             //      1   命中1条
@@ -9097,7 +9100,7 @@ out strError);
                 strError = "以登录名 '" + strLoginName + "' 检索读者记录出错: " + strError;
                 return -1;
             }
-            if (nRet == 0)
+            if (nRet == 0 || nRet == -2)
             {
                 strError = "帐户 '" + strLoginName + "' 不存在";
                 return 0;
@@ -9344,6 +9347,7 @@ out strError);
             //          6) 否则用证条码号进行检索
             //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
             // return:
+            //      -2  当前没有配置任何读者库，或者可以操作的读者库
             //      -1  error
             //      0   not found
             //      1   命中1条
@@ -9363,7 +9367,7 @@ out strError);
                 out timestamp,
                 out strToken,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == -2)
             {
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("以登录名s登录时, 检索读者帐户记录出错s"),  // "以登录名 '{0}' 登录时, 检索读者帐户记录出错: {1}";
@@ -9404,9 +9408,7 @@ out strError);
                 return -1;
             }
 
-
             // 获得一个参考帐户
-
             Account accountref = null;
             // 从library.xml文件定义 获得一个帐户的信息
             // return:

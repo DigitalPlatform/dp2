@@ -8378,15 +8378,6 @@ namespace dp2Library
 
             try
             {
-                // 对读者身份的判断
-                if (sessioninfo.UserType == "reader")
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = "管理数据库的操作被拒绝。作为读者不能管理任何数据库";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-                    return result;
-                }
-
                 // getinfo 动作 权限单独判断 2013/1/27
                 if (strAction == "getinfo")
                 {
@@ -8402,6 +8393,15 @@ namespace dp2Library
                 }
                 else
                 {
+                    // 对读者身份的判断
+                    if (sessioninfo.UserType == "reader")
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "管理数据库的操作被拒绝。作为读者不能管理任何数据库(strAction='getinfo' 除外)";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
                     // 权限判断
                     if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
                     {

@@ -136,7 +136,8 @@ namespace dp2Circulation
 
         void CancelTask(PropertyTask task)
         {
-            task.Cancel();
+            if (task != null)
+                task.Cancel();
         }
 
         // 加入一个任务到列表中

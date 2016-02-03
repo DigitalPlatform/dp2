@@ -522,17 +522,21 @@ dp2Library XE
 dp2 图书馆集成系统 图书馆应用服务器 "
                 + (this.IsServer == false ? "单机" : "小型服务器")
                 + (this.TestMode == false ? " [专业版]" : " [社区版]")
+                + "\r\n版本: " + Program.ClientVersion
                 +
 @"
 ---
 (C) 版权所有 2014-2015 数字平台(北京)软件有限责任公司
-http://dp2003.com" + (this.IsServer == false ? "" : @"
+http://dp2003.com
+2015 年以 Apache License Version 2.0 方式开源
+http://github.com/digitalplatform/dp2"
++ (this.IsServer == false ? "" : @"
 ---
 最大通道数： " + this.MaxClients.ToString())
      + @"
 本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress()) + "\r\n---\r\n"
-            + "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
-            + "\r\n本软件: " + myAssembly.FullName + "\r\n\r\n";
+            + "环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
+            + "\r\n\r\n";
 
             AppendString(strContent);
         }
@@ -3177,7 +3181,9 @@ miniServer	-- enterprise mini
         {
             throw new Exception("test exception");
 
-            MessageBox.Show(this, "dp2Library XE\r\ndp2 图书馆集成系统 图书馆应用服务器 单机版/小型版\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)软件有限责任公司");
+            MessageBox.Show(this, "dp2Library XE\r\ndp2 图书馆集成系统 图书馆应用服务器 单机版/小型版\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)软件有限责任公司\r\n"
+                + "2015 年以 Apache License Version 2.0 方式开源\r\n"
+                + "http://github.com/digitalplatform/dp2\r\n");
         }
 
         private void MenuItem_setListeningUrl_Click(object sender, EventArgs e)
