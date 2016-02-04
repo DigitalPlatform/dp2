@@ -168,7 +168,7 @@ namespace dp2OPAC
                     throw new Exception("app == null while Session_Start(). global error info : " + (string)Application["errorinfo"]);
                 }
 
-                string strClientIP = HttpContext.Current.Request.UserHostAddress.ToString();
+                string strClientIP = HttpContext.Current.Request.UserHostAddress;
                 // 增量计数
                 if (app != null)
                 {
@@ -218,7 +218,9 @@ namespace dp2OPAC
             Exception ex = HttpContext.Current.Server.GetLastError();
 
             string strText = ExceptionUtil.GetDebugText(ex)
-                + "\r\n\r\nRequest.RawUrl=" + HttpContext.Current.Request.RawUrl
+                + "\r\n"
+                + "\r\nUserHostAddres=" + HttpContext.Current.Request.UserHostAddress
+                + "\r\nRequest.RawUrl=" + HttpContext.Current.Request.RawUrl
                 + "\r\nForm Data=" + HttpContext.Current.Request.Form.ToString()
                 + "\r\nForm Data(Decoded)=" + HttpUtility.UrlDecode(HttpContext.Current.Request.Form.ToString())
                 + "\r\n\r\n版本: " + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString();

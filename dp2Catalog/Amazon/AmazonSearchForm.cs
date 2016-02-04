@@ -267,7 +267,6 @@ namespace dp2Catalog
             bool bHilightBrowseLine = StringUtil.IsInList("hilight_browse_line", strParameters);
             bool bForceFullElementSet = StringUtil.IsInList("force_full", strParameters);
 
-
             if (bHilightBrowseLine == true)
             {
                 // 修改listview中事项的选定状态
@@ -376,25 +375,6 @@ MessageBoxDefaultButton.Button1);
                 strOutStyle = "xml";
                 return 0;
             }
-
-            /*
-            return GetOneRecord(
-                true,
-                strStyle,
-                strPath,
-                "",
-                out strRecord,
-                out strXmlFragment,
-                out strOutputPath,
-                out strOutStyle,
-                out baTimestamp,
-                out record,
-                out currrentEncoding,
-                out strError);
-             * */
-
-            return 0;
-
         }
 
         // 得到通用格式

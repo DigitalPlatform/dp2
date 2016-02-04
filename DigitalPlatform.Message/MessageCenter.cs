@@ -246,7 +246,7 @@ namespace DigitalPlatform.Message
             if (this.VerifyAccount == null)
             {
                 // text-level: 内部错误
-                strError = "尚未挂接VerifyRecipient事件，无法校验收件人的存在与否。";
+                strError = "MessageCenter 尚未挂接 VerifyRecipient 事件，无法校验收件人的存在与否。";
                 return -1;
             }
 

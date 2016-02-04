@@ -386,6 +386,9 @@ namespace DigitalPlatform.OPAC.Server
                 app.SessionDir = Path.Combine(strDataDir, "session");
                 PathUtil.CreateDirIfNeed(app.SessionDir);
 
+                if (PathUtil.TryClearDir(app.SessionDir) == false)
+                    this.WriteErrorLog("清除 Session 文件目录 " + app.SessionDir + " 时出错");
+
                 // 临时文件目录
                 app.TempDir = Path.Combine(strDataDir, "temp");
                 PathUtil.CreateDirIfNeed(app.TempDir);

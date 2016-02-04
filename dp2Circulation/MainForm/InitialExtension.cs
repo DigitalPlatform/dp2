@@ -961,7 +961,7 @@ MessageBoxDefaultButton.Button1);
 
             // 移动几个 xml 文件
             DirectoryInfo di = new DirectoryInfo(this.DataDir);
-            FileInfo [] fis = di.GetFiles("*projects.xml");
+            FileInfo[] fis = di.GetFiles("*projects.xml");
 
             foreach (FileInfo fi in fis)
             {
@@ -2477,16 +2477,28 @@ Culture=neutral, PublicKeyToken=null
             return -1;  // 出错，不希望继续以后的操作
         }
 
+        string _serverVersion = "0.0";
+
         // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public string ServerVersion { get; set; }    // = 0
+        public string ServerVersion
+        {
+            get
+            {
+                return this._serverVersion;
+            }
+            set
+            {
+                this._serverVersion = value;
+            }
+        }
 
         /// <summary>
         /// 当前连接的 dp2library 的 uid
         /// </summary>
-        public string ServerUID { get; set; }
+        public string ServerUID { get; set; }   // 注意初始值为 null
 
         // return:
         //      -2  出现严重错误，希望退出 Application
