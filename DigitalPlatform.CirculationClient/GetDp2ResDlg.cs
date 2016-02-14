@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,7 +13,7 @@ namespace DigitalPlatform.CirculationClient
     public partial class GetDp2ResDlg : Form
     {
         const int WM_AUTO_CLOSE = API.WM_USER + 200;
-        public bool AutoClose = false;  // ¶Ô»°¿ò¿Ú´ò¿ªºóÁ¢¼´¹Ø±Õ?
+        public bool AutoClose = false;  // å¯¹è¯æ¡†å£æ‰“å¼€åç«‹å³å…³é—­?
 
         public bool EnableNotAsk = false;
 
@@ -21,7 +21,7 @@ namespace DigitalPlatform.CirculationClient
 
         public LibraryChannelCollection dp2Channels = null;
 
-        // dp2library·şÎñÆ÷Êı×é(È±Ê¡ÓÃ»§Ãû/ÃÜÂëµÈ)
+        // dp2libraryæœåŠ¡å™¨æ•°ç»„(ç¼ºçœç”¨æˆ·å/å¯†ç ç­‰)
         public dp2ServerCollection Servers = null;
 
         public int[] EnabledIndices = null;
@@ -33,7 +33,7 @@ namespace DigitalPlatform.CirculationClient
 
         private void GetDp2ResDlg_Load(object sender, EventArgs e)
         {
-            this.dp2ResTree1.Servers = this.Servers;	// ÒıÓÃ
+            this.dp2ResTree1.Servers = this.Servers;	// å¼•ç”¨
             this.dp2ResTree1.Channels = this.dp2Channels;
             this.dp2ResTree1.EnabledIndices = this.EnabledIndices;  // new int[] { dp2ResTree.RESTYPE_DB };
             this.dp2ResTree1.Fill(null);
@@ -62,7 +62,7 @@ namespace DigitalPlatform.CirculationClient
         {
             if (this.textBox_path.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨¶ÔÏó");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šå¯¹è±¡");
                 return;
             }
 
@@ -78,9 +78,9 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)

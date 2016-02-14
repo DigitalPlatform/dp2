@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -15,7 +15,7 @@ namespace DigitalPlatform.CirculationClient
 	{
         public bool FirstRun = false;
 
-		public dp2ServerCollection Servers = null;	// ÒıÓÃ
+		public dp2ServerCollection Servers = null;	// å¼•ç”¨
 
 		bool m_bChanged = false;
 
@@ -99,22 +99,22 @@ namespace DigitalPlatform.CirculationClient
             // 
             // columnHeader_name
             // 
-            this.columnHeader_name.Text = "·şÎñÆ÷Ãû";
+            this.columnHeader_name.Text = "æœåŠ¡å™¨å";
             this.columnHeader_name.Width = 200;
             // 
             // columnHeader_url
             // 
-            this.columnHeader_url.Text = "·şÎñÆ÷URL";
+            this.columnHeader_url.Text = "æœåŠ¡å™¨URL";
             this.columnHeader_url.Width = 300;
             // 
             // columnHeader_userName
             // 
-            this.columnHeader_userName.Text = "ÓÃ»§Ãû";
+            this.columnHeader_userName.Text = "ç”¨æˆ·å";
             this.columnHeader_userName.Width = 150;
             // 
             // columnHeader_savePassword
             // 
-            this.columnHeader_savePassword.Text = "ÊÇ·ñ±£´æÃÜÂë";
+            this.columnHeader_savePassword.Text = "æ˜¯å¦ä¿å­˜å¯†ç ";
             this.columnHeader_savePassword.Width = 150;
             // 
             // button_OK
@@ -124,7 +124,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
             this.button_OK.TabIndex = 1;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -134,7 +134,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 21);
             this.button_Cancel.TabIndex = 2;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_newServer
@@ -144,7 +144,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_newServer.Name = "button_newServer";
             this.button_newServer.Size = new System.Drawing.Size(113, 22);
             this.button_newServer.TabIndex = 3;
-            this.button_newServer.Text = "ĞÂÔö·şÎñÆ÷(&N)";
+            this.button_newServer.Text = "æ–°å¢æœåŠ¡å™¨(&N)";
             this.button_newServer.UseVisualStyleBackColor = true;
             this.button_newServer.Click += new System.EventHandler(this.button_newServer_Click);
             // 
@@ -160,7 +160,7 @@ namespace DigitalPlatform.CirculationClient
             this.Name = "ServersDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "dp2library ·şÎñÆ÷ºÍÈ±Ê¡ÕÊ»§¹ÜÀí";
+            this.Text = "dp2library æœåŠ¡å™¨å’Œç¼ºçœå¸æˆ·ç®¡ç†";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.ServersDlg_Closing);
             this.Load += new System.EventHandler(this.ServersDlg_Load);
             this.ResumeLayout(false);
@@ -174,16 +174,16 @@ namespace DigitalPlatform.CirculationClient
 
             if (this.FirstRun == true)
             {
-                // this.toolTip_firstUse.Show("Çë°´´Ë°´Å¥´´½¨Ò»¸öĞÂµÄ·şÎñÆ÷Ä¿±ê", this.button_newServer);
+                // this.toolTip_firstUse.Show("è¯·æŒ‰æ­¤æŒ‰é’®åˆ›å»ºä¸€ä¸ªæ–°çš„æœåŠ¡å™¨ç›®æ ‡", this.button_newServer);
                 ShowMessageTip();
             }
 		}
 
 		private void button_OK_Click(object sender, System.EventArgs e)
 		{
-			// OKºÍCancelÍË³ö±¾¶Ô»°¿ò,ÆäÊµ ServersÖĞµÄÄÚÈİÒÑ¾­ĞŞ¸Ä¡£
-			// ÎªÁËÈÃCancelÍË³öÓĞ·ÅÆúÕûÌåĞŞ¸ÄµÄĞ§¹û£¬Çëµ÷Ö÷ÔÚ³õÊ¼»¯Servers
-			// ÊôĞÔµÄÊ±ºòÓÃÒ»¸ö¿ËÂ¡µÄServerCollection¶ÔÏó¡£
+			// OKå’ŒCancelé€€å‡ºæœ¬å¯¹è¯æ¡†,å…¶å® Serversä¸­çš„å†…å®¹å·²ç»ä¿®æ”¹ã€‚
+			// ä¸ºäº†è®©Cancelé€€å‡ºæœ‰æ”¾å¼ƒæ•´ä½“ä¿®æ”¹çš„æ•ˆæœï¼Œè¯·è°ƒä¸»åœ¨åˆå§‹åŒ–Servers
+			// å±æ€§çš„æ—¶å€™ç”¨ä¸€ä¸ªå…‹éš†çš„ServerCollectionå¯¹è±¡ã€‚
 		
 			this.DialogResult = DialogResult.OK;
 			this.Close();
@@ -212,7 +212,7 @@ namespace DigitalPlatform.CirculationClient
 
                 item.SubItems.Add(server.Url);
 				item.SubItems.Add(server.DefaultUserName);
-				item.SubItems.Add(server.SavePassword == true ? "ÊÇ" : "·ñ");
+				item.SubItems.Add(server.SavePassword == true ? "æ˜¯" : "å¦");
 
 			}
 
@@ -230,7 +230,7 @@ namespace DigitalPlatform.CirculationClient
 			bool bSelected = listView1.SelectedItems.Count > 0;
 
 			//
-			menuItem = new MenuItem("ĞŞ¸Ä(&M)");
+			menuItem = new MenuItem("ä¿®æ”¹(&M)");
 			menuItem.Click += new System.EventHandler(this.menu_modifyServer);
 			if (bSelected == false) 
 			{
@@ -244,7 +244,7 @@ namespace DigitalPlatform.CirculationClient
 			contextMenu.MenuItems.Add(menuItem);
 
 
-			menuItem = new MenuItem("É¾³ı(&D)");
+			menuItem = new MenuItem("åˆ é™¤(&D)");
 			menuItem.Click += new System.EventHandler(this.menu_deleteServer);
 			if (bSelected == false)
 				menuItem.Enabled = false;
@@ -256,7 +256,7 @@ namespace DigitalPlatform.CirculationClient
 
 
 			//
-			menuItem = new MenuItem("ĞÂÔö(&N)");
+			menuItem = new MenuItem("æ–°å¢(&N)");
 			menuItem.Click += new System.EventHandler(this.menu_newServer);
 			contextMenu.MenuItems.Add(menuItem);
 
@@ -268,12 +268,12 @@ namespace DigitalPlatform.CirculationClient
 		{
 			if (listView1.SelectedIndices.Count == 0)
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄÊÂÏî ...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦åˆ é™¤çš„äº‹é¡¹ ...");
 				return;
 			}
 
 			DialogResult msgResult = MessageBox.Show(this,
-				"È·ÊµÒªÉ¾³ıËùÑ¡ÔñµÄÊÂÏî",
+				"ç¡®å®è¦åˆ é™¤æ‰€é€‰æ‹©çš„äº‹é¡¹",
 				"ServersDlg",
 				MessageBoxButtons.YesNo,
 				MessageBoxIcon.Question,
@@ -301,7 +301,7 @@ namespace DigitalPlatform.CirculationClient
 		{
 			if (listView1.SelectedIndices.Count == 0)
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªĞŞ¸ÄµÄÊÂÏî ...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦ä¿®æ”¹çš„äº‹é¡¹ ...");
 				return;
 			}
 
@@ -313,7 +313,7 @@ namespace DigitalPlatform.CirculationClient
             // GuiUtil.AutoSetDefaultFont(dlg); 
             GuiUtil.SetControlFont(dlg, this.Font);
 
-			dlg.Text = "ĞŞ¸ÄÈ±Ê¡ÕÊ»§²ÎÊı";
+			dlg.Text = "ä¿®æ”¹ç¼ºçœå¸æˆ·å‚æ•°";
 
             dlg.ServerName = ((dp2Server)Servers[nActiveLine]).Name;
             dlg.Password = ((dp2Server)Servers[nActiveLine]).DefaultPassword;
@@ -336,10 +336,10 @@ namespace DigitalPlatform.CirculationClient
 
 			FillList();
 
-		// Ñ¡ÔñÒ»ĞĞ
+		// é€‰æ‹©ä¸€è¡Œ
 		// parameters:
-		//		nIndex	ÒªÉèÖÃÑ¡Ôñ±ê¼ÇµÄĞĞ¡£Èç¹û==-1£¬±íÊ¾Çå³ıÈ«²¿Ñ¡Ôñ±ê¼Çµ«²»Ñ¡Ôñ¡£
-		//		bMoveFocus	ÊÇ·ñÍ¬Ê±ÒÆ¶¯focus±êÖ¾µ½ËùÑ¡ÔñĞĞ
+		//		nIndex	è¦è®¾ç½®é€‰æ‹©æ ‡è®°çš„è¡Œã€‚å¦‚æœ==-1ï¼Œè¡¨ç¤ºæ¸…é™¤å…¨éƒ¨é€‰æ‹©æ ‡è®°ä½†ä¸é€‰æ‹©ã€‚
+		//		bMoveFocus	æ˜¯å¦åŒæ—¶ç§»åŠ¨focusæ ‡å¿—åˆ°æ‰€é€‰æ‹©è¡Œ
 			ListViewUtil.SelectLine(listView1, 
 				nActiveLine,
 				true);
@@ -361,12 +361,12 @@ namespace DigitalPlatform.CirculationClient
             // GuiUtil.AutoSetDefaultFont(dlg); 
             GuiUtil.SetControlFont(dlg, this.Font);
 
-			dlg.Text = "ĞÂÔö·şÎñÆ÷µØÖ·ºÍÈ±Ê¡ÕÊ»§";
+			dlg.Text = "æ–°å¢æœåŠ¡å™¨åœ°å€å’Œç¼ºçœå¸æˆ·";
 
             if (nActiveLine == -1)
             {   
-                // ÎŞ²Î¿¼ÊÂÏîÇéĞÎµÄĞÂÔö
-                dlg.ServerName = "Éç¿ÆÔºÁªºÏ±àÄ¿ÖĞĞÄ";
+                // æ— å‚è€ƒäº‹é¡¹æƒ…å½¢çš„æ–°å¢
+                dlg.ServerName = "ç¤¾ç§‘é™¢è”åˆç¼–ç›®ä¸­å¿ƒ";
                 dlg.ServerUrl = "http://ssucs.org/dp2library";
                 dlg.UserName = "test";
             }
@@ -395,10 +395,10 @@ namespace DigitalPlatform.CirculationClient
 
 			FillList();
 
-			// Ñ¡ÔñÒ»ĞĞ
+			// é€‰æ‹©ä¸€è¡Œ
 			// parameters:
-			//		nIndex	ÒªÉèÖÃÑ¡Ôñ±ê¼ÇµÄĞĞ¡£Èç¹û==-1£¬±íÊ¾Çå³ıÈ«²¿Ñ¡Ôñ±ê¼Çµ«²»Ñ¡Ôñ¡£
-			//		bMoveFocus	ÊÇ·ñÍ¬Ê±ÒÆ¶¯focus±êÖ¾µ½ËùÑ¡ÔñĞĞ
+			//		nIndex	è¦è®¾ç½®é€‰æ‹©æ ‡è®°çš„è¡Œã€‚å¦‚æœ==-1ï¼Œè¡¨ç¤ºæ¸…é™¤å…¨éƒ¨é€‰æ‹©æ ‡è®°ä½†ä¸é€‰æ‹©ã€‚
+			//		bMoveFocus	æ˜¯å¦åŒæ—¶ç§»åŠ¨focusæ ‡å¿—åˆ°æ‰€é€‰æ‹©è¡Œ
 			ListViewUtil.SelectLine(listView1, 
 				Servers.Count - 1,
 				true);
@@ -420,7 +420,7 @@ namespace DigitalPlatform.CirculationClient
 				if (m_bChanged == true)
 				{
 					DialogResult msgResult = MessageBox.Show(this,
-						"Òª·ÅÆúÔÚ¶Ô»°¿òÖĞËù×öµÄÈ«²¿ĞŞ¸ÄÃ´?",
+						"è¦æ”¾å¼ƒåœ¨å¯¹è¯æ¡†ä¸­æ‰€åšçš„å…¨éƒ¨ä¿®æ”¹ä¹ˆ?",
 						"ServersDlg",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
@@ -446,9 +446,9 @@ namespace DigitalPlatform.CirculationClient
         {
             m_firstUseBalloon = new MessageBalloon();
             m_firstUseBalloon.Parent = this.button_newServer;
-            m_firstUseBalloon.Title = "»¶Ó­Ê¹ÓÃdp2±àÄ¿Ç°¶Ë";
+            m_firstUseBalloon.Title = "æ¬¢è¿ä½¿ç”¨dp2ç¼–ç›®å‰ç«¯";
             m_firstUseBalloon.TitleIcon = TooltipIcon.Info;
-            m_firstUseBalloon.Text = "Çë°´´Ë°´Å¥´´½¨µÚÒ»¸ö dp2library ·şÎñÆ÷Ä¿±ê";
+            m_firstUseBalloon.Text = "è¯·æŒ‰æ­¤æŒ‰é’®åˆ›å»ºç¬¬ä¸€ä¸ª dp2library æœåŠ¡å™¨ç›®æ ‡";
 
             m_firstUseBalloon.Align = BalloonAlignment.BottomRight;
             m_firstUseBalloon.CenterStem = false;

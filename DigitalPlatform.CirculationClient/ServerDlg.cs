@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,12 +22,12 @@ namespace DigitalPlatform.CirculationClient
             if (textBox_serverAddr.Text == ""
     && textBox_serverAddr.Enabled == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈë·şÎñÆ÷µØÖ·");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥æœåŠ¡å™¨åœ°å€");
                 return;
             }
             if (textBox_userName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈëÓÃ»§Ãû");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥ç”¨æˆ·å");
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public string¡¡ServerName
+        public stringã€€ServerName
         {
             get
             {
@@ -123,7 +123,7 @@ namespace DigitalPlatform.CirculationClient
             if (bRet == true)
                 return true;
 
-            // ½øÒ»²½±È½Ï host ÊÇ·ñÊµ¼ÊÒ»ÖÂ
+            // è¿›ä¸€æ­¥æ¯”è¾ƒ host æ˜¯å¦å®é™…ä¸€è‡´
             if (IsSameHost(uri1.Host, uri2.Host) == true)
             {
                 if (uri1.Scheme == uri2.Scheme
@@ -158,7 +158,7 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
             }
             catch(Exception ex)
             {
-                throw new Exception("½âÎöÖ÷»úÃû '"+strHost1+"' Ê±³ö´í: " + ex.Message + "\r\nÇë¼ì²éÍøÂç×´Ì¬ÊÇ·ñÕı³£");
+                throw new Exception("è§£æä¸»æœºå '"+strHost1+"' æ—¶å‡ºé”™: " + ex.Message + "\r\nè¯·æ£€æŸ¥ç½‘ç»œçŠ¶æ€æ˜¯å¦æ­£å¸¸");
             }
 
             try
@@ -167,7 +167,7 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
             }
             catch (Exception ex)
             {
-                throw new Exception("½âÎöÖ÷»úÃû '" + strHost2 + "' Ê±³ö´í: " + ex.Message + "\r\n¼ì²éÍøÂç×´Ì¬ÊÇ·ñÕı³£");
+                throw new Exception("è§£æä¸»æœºå '" + strHost2 + "' æ—¶å‡ºé”™: " + ex.Message + "\r\næ£€æŸ¥ç½‘ç»œçŠ¶æ€æ˜¯å¦æ­£å¸¸");
             }
 
             foreach(IPAddress address1 in address_list1)
@@ -188,7 +188,7 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
         {
             if (this.textBox_serverAddr.Text != HnbUrl)
             {
-                this.textBox_serverName.Text = "ºìÄà°Í.Êı×ÖÆ½Ì¨·şÎñÆ÷";
+                this.textBox_serverName.Text = "çº¢æ³¥å·´.æ•°å­—å¹³å°æœåŠ¡å™¨";
                 this.textBox_serverAddr.Text = HnbUrl;
 
                 this.textBox_userName.Text = "";
@@ -200,7 +200,7 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
         {
             if (this.textBox_serverAddr.Text != "net.pipe://localhost/dp2library/xe")
             {
-                this.textBox_serverName.Text = "µ¥»ú°æ·şÎñÆ÷";
+                this.textBox_serverName.Text = "å•æœºç‰ˆæœåŠ¡å™¨";
                 this.textBox_serverAddr.Text = "net.pipe://localhost/dp2library/xe";
 
                 this.textBox_userName.Text = "supervisor";
