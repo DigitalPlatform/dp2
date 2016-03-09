@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -7,12 +7,12 @@ using System.Diagnostics;
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// ±íÏÖÒ»¸ö×ÊÔ´Ê÷½ÚµãµÄÂ·¾¶ÖĞ ·şÎñÆ÷ ºÍ ÏÂ¼¶Â·¾¶ 2²¿·Ö
+    /// è¡¨ç°ä¸€ä¸ªèµ„æºæ ‘èŠ‚ç‚¹çš„è·¯å¾„ä¸­ æœåŠ¡å™¨ å’Œ ä¸‹çº§è·¯å¾„ 2éƒ¨åˆ†
     /// </summary>
     public class ResPath
     {
-        public string Url = "";	// ·şÎñÆ÷URL²¿·Ö
-        public string Path = "";	// ·şÎñÆ÷ÄÚµÄ×ÊÔ´½ÚµãÂ·¾¶¡£µÚÒ»¼¶ÊÇ¿âÃû
+        public string Url = "";	// æœåŠ¡å™¨URLéƒ¨åˆ†
+        public string Path = "";	// æœåŠ¡å™¨å†…çš„èµ„æºèŠ‚ç‚¹è·¯å¾„ã€‚ç¬¬ä¸€çº§æ˜¯åº“å
 
         public ResPath()
         {
@@ -29,7 +29,7 @@ namespace DigitalPlatform.CirculationClient
             return newobj;
         }
 
-        // ¸ù¾İÊ÷½Úµã¹¹Ôì£¬°ÑµÚÒ»¼¶×÷ÎªUrlÄÚÈİ£¬ÒÔÏÂÆäËü¼¶ºÏ²¢ÆğÀ´µ±×÷Path£¬¼ä¸ôÒÔ'/'
+        // æ ¹æ®æ ‘èŠ‚ç‚¹æ„é€ ï¼ŒæŠŠç¬¬ä¸€çº§ä½œä¸ºUrlå†…å®¹ï¼Œä»¥ä¸‹å…¶å®ƒçº§åˆå¹¶èµ·æ¥å½“ä½œPathï¼Œé—´éš”ä»¥'/'
         public ResPath(TreeNode node)
         {
             string strFullPath = "";
@@ -54,19 +54,19 @@ namespace DigitalPlatform.CirculationClient
             Path = strFullPath;
         }
 
-        // ÒÔÈ«Â·¾¶¹¹Ôì
+        // ä»¥å…¨è·¯å¾„æ„é€ 
         public ResPath(string strFullPath)
         {
             SetFullPath(strFullPath);
         }
 
-        // Ö»ÁôÏÂÊı¾İ¿âÃû²¿·Ö
+        // åªç•™ä¸‹æ•°æ®åº“åéƒ¨åˆ†
         public void MakeDbName()
         {
             this.Path = GetDbName(this.Path);
         }
 
-        // ´ÓÒ»¸ö´¿Â·¾¶(²»º¬url²¿·Ö)ÖĞ½ØÈ¡¿âÃû²¿·Ö
+        // ä»ä¸€ä¸ªçº¯è·¯å¾„(ä¸å«urléƒ¨åˆ†)ä¸­æˆªå–åº“åéƒ¨åˆ†
         public static string GetDbName(string strLongPath)
         {
             int nRet = strLongPath.IndexOf("/");
@@ -76,7 +76,7 @@ namespace DigitalPlatform.CirculationClient
                 return strLongPath.Substring(0, nRet);
         }
 
-        // ´ÓÒ»¸ö´¿Â·¾¶(²»º¬url²¿·Ö)ÖĞ½ØÈ¡¼ÇÂ¼id²¿·Ö
+        // ä»ä¸€ä¸ªçº¯è·¯å¾„(ä¸å«urléƒ¨åˆ†)ä¸­æˆªå–è®°å½•idéƒ¨åˆ†
         public static string GetRecordId(string strLongPath)
         {
             int nRet = strLongPath.IndexOf("/");
@@ -86,7 +86,7 @@ namespace DigitalPlatform.CirculationClient
                 return strLongPath.Substring(nRet + 1).Trim();
         }
 
-        // ÌáÈ¡´¿´âÂ·¾¶ÖĞµÄid²¿·Ö¡£ÀıÈç this.PathÎª"Êı¾İ¿â/1"£¬Ó¦ÌáÈ¡³ö"1"
+        // æå–çº¯ç²¹è·¯å¾„ä¸­çš„idéƒ¨åˆ†ã€‚ä¾‹å¦‚ this.Pathä¸º"æ•°æ®åº“/1"ï¼Œåº”æå–å‡º"1"
         public string GetRecordId()
         {
             string[] aPart = this.Path.Split(new char[] { '/' });
@@ -96,7 +96,7 @@ namespace DigitalPlatform.CirculationClient
             return aPart[1];
         }
 
-        // ÌáÈ¡´¿´âÂ·¾¶ÖĞµÄobject id²¿·Ö¡£ÀıÈç this.PathÎª"Êı¾İ¿â/1/object/0"£¬Ó¦ÌáÈ¡³ö"1"
+        // æå–çº¯ç²¹è·¯å¾„ä¸­çš„object idéƒ¨åˆ†ã€‚ä¾‹å¦‚ this.Pathä¸º"æ•°æ®åº“/1/object/0"ï¼Œåº”æå–å‡º"1"
         public string GetObjectId()
         {
             string[] aPart = this.Path.Split(new char[] { '/' });
@@ -107,7 +107,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         // parameters:
-        //		strPath	ÕâÊÇ·şÎñÆ÷URLºÍ¿âÒÔ¼°ÆäÏÂÂ·¾¶ºÏ³ÉµÄ,ÖĞ¼ä¼ä¸ô'?'
+        //		strPath	è¿™æ˜¯æœåŠ¡å™¨URLå’Œåº“ä»¥åŠå…¶ä¸‹è·¯å¾„åˆæˆçš„,ä¸­é—´é—´éš”'?'
         public void SetFullPath(string strPath)
         {
             int nRet = strPath.IndexOf('?');
@@ -123,9 +123,9 @@ namespace DigitalPlatform.CirculationClient
             Path = strPath.Substring(nRet + 1).Trim();
         }
 
-        // ½«·´ĞòµÄÈ«Â·¾¶¹àÈë±¾¶ÔÏó
+        // å°†ååºçš„å…¨è·¯å¾„çŒå…¥æœ¬å¯¹è±¡
         // parameters:
-        //		strPath	ÕâÊÇ¿âÒÔ¼°ÆäÏÂÂ·¾¶ ºÍ ·şÎñÆ÷URL ºÏ³ÉµÄ,ÖĞ¼ä¼ä¸ô'@'
+        //		strPath	è¿™æ˜¯åº“ä»¥åŠå…¶ä¸‹è·¯å¾„ å’Œ æœåŠ¡å™¨URL åˆæˆçš„,ä¸­é—´é—´éš”'@'
         public void SetReverseFullPath(string strPath)
         {
             int nRet = strPath.IndexOf('@');
@@ -141,7 +141,7 @@ namespace DigitalPlatform.CirculationClient
             Url = strPath.Substring(nRet + 1).Trim();
         }
 
-        // È«Â·¾¶¡£ÕâÊÇ·şÎñÆ÷URLºÍ¿âÒÔ¼°ÆäÏÂÂ·¾¶ºÏ³ÉµÄ,ÖĞ¼ä¼ä¸ô'?'
+        // å…¨è·¯å¾„ã€‚è¿™æ˜¯æœåŠ¡å™¨URLå’Œåº“ä»¥åŠå…¶ä¸‹è·¯å¾„åˆæˆçš„,ä¸­é—´é—´éš”'?'
         public string FullPath
         {
             get
@@ -169,7 +169,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
 
-        // °Ñ·´ĞòÈ«Â·¾¶¼Ó¹¤ÎªÕıĞòÈ«Â·¾¶ĞÎÌ¬
+        // æŠŠååºå…¨è·¯å¾„åŠ å·¥ä¸ºæ­£åºå…¨è·¯å¾„å½¢æ€
         public static string GetRegularRecordPath(string strReverseRecordPath)
         {
             int nRet = strReverseRecordPath.IndexOf("@");
@@ -178,7 +178,7 @@ namespace DigitalPlatform.CirculationClient
             return strReverseRecordPath.Substring(nRet + 1).Trim() + "?" + strReverseRecordPath.Substring(0, nRet).Trim();
         }
 
-        // °ÑÕıĞòÈ«Â·¾¶ĞÎÌ¬¼Ó¹¤Îª·´ĞòÈ«Â·¾¶ĞÎÌ¬
+        // æŠŠæ­£åºå…¨è·¯å¾„å½¢æ€åŠ å·¥ä¸ºååºå…¨è·¯å¾„å½¢æ€
         public static string GetReverseRecordPath(string strRegularRecordPath)
         {
             int nRet = strRegularRecordPath.IndexOf("?");

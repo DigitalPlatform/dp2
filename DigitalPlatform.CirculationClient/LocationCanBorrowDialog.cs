@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,15 +14,15 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// ¹İ²ØµØÔÊĞíÍâ½èÌØĞÔ±à¼­ ¶Ô»°¿ò
-    /// ±» UpgradeDt1000ToDp2 µ÷ÓÃ
+    /// é¦†è—åœ°å…è®¸å¤–å€Ÿç‰¹æ€§ç¼–è¾‘ å¯¹è¯æ¡†
+    /// è¢« UpgradeDt1000ToDp2 è°ƒç”¨
     /// </summary>
     public partial class LocationCanBorrowDialog : Form
     {
         /*
     <locationTypes>
-        <item canborrow="yes">Á÷Í¨¿â</item>
-        <item canborrow="no">ÔÄÀÀÊÒ</item>
+        <item canborrow="yes">æµé€šåº“</item>
+        <item canborrow="no">é˜…è§ˆå®¤</item>
         <item canborrow="yes">test</item>
     </locationTypes>
          * */
@@ -52,13 +52,13 @@ namespace DigitalPlatform.CirculationClient
 
             if (this.listView_location_list.Items.Count == 0)
             {
-                strError = "ÉĞÎ´ÊäÈë¹İ²ØµØµãÊÂÏî";
+                strError = "å°šæœªè¾“å…¥é¦†è—åœ°ç‚¹äº‹é¡¹";
                 goto ERROR1;
             }
 
             string strLocationDef = "";
-            // ¹¹Ôì<locationTypes>¶¨ÒåµÄXMLÆ¬¶Î
-            // ×¢Òâ°üº¬ÁË<locationTypes>ÔªËØ×÷Îª¸ù¡£
+            // æ„é€ <locationTypes>å®šä¹‰çš„XMLç‰‡æ®µ
+            // æ³¨æ„åŒ…å«äº†<locationTypes>å…ƒç´ ä½œä¸ºæ ¹ã€‚
             int nRet = BuildLocationTypesDef(out strLocationDef,
                 out strError);
             if (nRet == -1)
@@ -110,7 +110,7 @@ namespace DigitalPlatform.CirculationClient
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -121,11 +121,11 @@ namespace DigitalPlatform.CirculationClient
                 string strText = node.InnerText.Trim();
 
                 bool bCanBorrow = false;
-                // »ñµÃ²¼¶ûĞÍµÄÊôĞÔ²ÎÊıÖµ
+                // è·å¾—å¸ƒå°”å‹çš„å±æ€§å‚æ•°å€¼
                 // return:
-                //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                 nRet = DomUtil.GetBooleanParam(node,
                     "canborrow",
                     false,
@@ -136,7 +136,7 @@ namespace DigitalPlatform.CirculationClient
 
                 ListViewItem item = new ListViewItem();
                 item.Text = strText;
-                item.SubItems.Add(bCanBorrow == true ? "ÊÇ" : "·ñ");
+                item.SubItems.Add(bCanBorrow == true ? "æ˜¯" : "å¦");
 
                 this.listView_location_list.Items.Add(item);
             }
@@ -156,7 +156,7 @@ namespace DigitalPlatform.CirculationClient
                 return;
 
             ListViewItem item = new ListViewItem(dlg.LocationString, 0);
-            item.SubItems.Add(dlg.CanBorrow == true ? "ÊÇ" : "·ñ");
+            item.SubItems.Add(dlg.CanBorrow == true ? "æ˜¯" : "å¦");
 
             this.listView_location_list.Items.Add(item);
             ListViewUtil.SelectLine(item, true);
@@ -167,7 +167,7 @@ namespace DigitalPlatform.CirculationClient
             string strError = "";
             if (this.listView_location_list.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªĞŞ¸ÄµÄ¹İ²ØµØµãÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦ä¿®æ”¹çš„é¦†è—åœ°ç‚¹äº‹é¡¹";
                 goto ERROR1;
             }
             ListViewItem item = this.listView_location_list.SelectedItems[0];
@@ -175,7 +175,7 @@ namespace DigitalPlatform.CirculationClient
             LocationItemDialog dlg = new LocationItemDialog();
 
             dlg.LocationString = ListViewUtil.GetItemText(item, 0);
-            dlg.CanBorrow = (ListViewUtil.GetItemText(item, 1) == "ÊÇ") ? true : false;
+            dlg.CanBorrow = (ListViewUtil.GetItemText(item, 1) == "æ˜¯") ? true : false;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
 
@@ -183,7 +183,7 @@ namespace DigitalPlatform.CirculationClient
                 return;
 
             ListViewUtil.ChangeItemText(item, 0, dlg.LocationString);
-            ListViewUtil.ChangeItemText(item, 1, dlg.CanBorrow == true ? "ÊÇ" : "·ñ");
+            ListViewUtil.ChangeItemText(item, 1, dlg.CanBorrow == true ? "æ˜¯" : "å¦");
 
             ListViewUtil.SelectLine(item, true);
             return;
@@ -196,7 +196,7 @@ namespace DigitalPlatform.CirculationClient
             string strError = "";
             if (this.listView_location_list.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄ¹İ²ØµØµãÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦åˆ é™¤çš„é¦†è—åœ°ç‚¹äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -210,9 +210,9 @@ namespace DigitalPlatform.CirculationClient
             }
              * */
 
-            // ¶Ô»°¿ò¾¯¸æ
+            // å¯¹è¯æ¡†è­¦å‘Š
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ı¹İ²ØµØµãÊÂÏî " + strItemNameList + "?",
+                "ç¡®å®è¦åˆ é™¤é¦†è—åœ°ç‚¹äº‹é¡¹ " + strItemNameList + "?",
                 "ManagerForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -256,7 +256,7 @@ namespace DigitalPlatform.CirculationClient
 
             if (this.listView_location_list.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª½øĞĞÉÏÏÂÒÆ¶¯µÄ¹İ²ØµØµãÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦è¿›è¡Œä¸Šä¸‹ç§»åŠ¨çš„é¦†è—åœ°ç‚¹äº‹é¡¹");
                 return;
             }
 
@@ -271,7 +271,7 @@ namespace DigitalPlatform.CirculationClient
             {
                 if (index == 0)
                 {
-                    strError = "µ½Í·";
+                    strError = "åˆ°å¤´";
                     goto ERROR1;
                 }
 
@@ -287,7 +287,7 @@ namespace DigitalPlatform.CirculationClient
             {
                 if (index >= this.listView_location_list.Items.Count - 1)
                 {
-                    strError = "µ½Î²";
+                    strError = "åˆ°å°¾";
                     goto ERROR1;
                 }
                 this.listView_location_list.Items.RemoveAt(index);
@@ -320,13 +320,13 @@ namespace DigitalPlatform.CirculationClient
             }
 
 
-            // ĞŞ¸Ä¹İ²ØÊÂÏî
+            // ä¿®æ”¹é¦†è—äº‹é¡¹
             {
-                menuItem = new MenuItem("ĞŞ¸Ä " + strName + "(&M)");
+                menuItem = new MenuItem("ä¿®æ”¹ " + strName + "(&M)");
                 menuItem.Click += new System.EventHandler(this.toolStripButton_location_modify_Click);
                 if (this.listView_location_list.SelectedItems.Count == 0)
                     menuItem.Enabled = false;
-                // È±Ê¡ÃüÁî
+                // ç¼ºçœå‘½ä»¤
                 menuItem.DefaultItem = true;
                 contextMenu.MenuItems.Add(menuItem);
             }
@@ -336,7 +336,7 @@ namespace DigitalPlatform.CirculationClient
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("ĞÂÔö(&N)");
+            menuItem = new MenuItem("æ–°å¢(&N)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_location_new_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -349,9 +349,9 @@ namespace DigitalPlatform.CirculationClient
 
             string strText = "";
             if (this.listView_location_list.SelectedItems.Count == 1)
-                strText = "É¾³ı " + strName + "(&D)";
+                strText = "åˆ é™¤ " + strName + "(&D)";
             else
-                strText = "É¾³ıËùÑ¡ " + this.listView_location_list.SelectedItems.Count.ToString() + " ¸ö¹İ²ØµØµãÊÂÏî(&D)";
+                strText = "åˆ é™¤æ‰€é€‰ " + this.listView_location_list.SelectedItems.Count.ToString() + " ä¸ªé¦†è—åœ°ç‚¹äº‹é¡¹(&D)";
 
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.toolStripButton_location_delete_Click);
@@ -364,7 +364,7 @@ namespace DigitalPlatform.CirculationClient
             contextMenu.MenuItems.Add(menuItem);
 
             /*
-            menuItem = new MenuItem("¹Û²ìËùÑ¡ " + this.listView_location_list.SelectedItems.Count.ToString() + " ¸ö¹İ²ØÊÂÏîµÄ¶¨Òå(&D)");
+            menuItem = new MenuItem("è§‚å¯Ÿæ‰€é€‰ " + this.listView_location_list.SelectedItems.Count.ToString() + " ä¸ªé¦†è—äº‹é¡¹çš„å®šä¹‰(&D)");
             menuItem.Click += new System.EventHandler(this.menu_viewOpacDatabaseDefine_Click);
             if (this.listView_location_list.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -377,7 +377,7 @@ namespace DigitalPlatform.CirculationClient
 
 
             // 
-            menuItem = new MenuItem("ÉÏÒÆ(&U)");
+            menuItem = new MenuItem("ä¸Šç§»(&U)");
             menuItem.Click += new System.EventHandler(this.menu_location_up_Click);
             if (this.listView_location_list.SelectedItems.Count == 0
                 || this.listView_location_list.Items.IndexOf(this.listView_location_list.SelectedItems[0]) == 0)
@@ -389,7 +389,7 @@ namespace DigitalPlatform.CirculationClient
 
 
             // 
-            menuItem = new MenuItem("ÏÂÒÆ(&D)");
+            menuItem = new MenuItem("ä¸‹ç§»(&D)");
             menuItem.Click += new System.EventHandler(this.menu_location_down_Click);
             if (this.listView_location_list.SelectedItems.Count == 0
                 || this.listView_location_list.Items.IndexOf(this.listView_location_list.SelectedItems[0]) >= this.listView_location_list.Items.Count - 1)
@@ -438,8 +438,8 @@ namespace DigitalPlatform.CirculationClient
             MoveLocationItemUpDown(false);
         }
 
-        // ¹¹Ôì<locationTypes>¶¨ÒåµÄXMLÆ¬¶Î
-        // ×¢Òâ°üº¬ÁË<locationTypes>ÔªËØ×÷Îª¸ù¡£
+        // æ„é€ <locationTypes>å®šä¹‰çš„XMLç‰‡æ®µ
+        // æ³¨æ„åŒ…å«äº†<locationTypes>å…ƒç´ ä½œä¸ºæ ¹ã€‚
         int BuildLocationTypesDef(out string strLocationDef,
             out string strError)
         {
@@ -457,7 +457,7 @@ namespace DigitalPlatform.CirculationClient
 
                 bool bCanBorrow = false;
 
-                if (strCanBorrow == "ÊÇ" || strCanBorrow == "yes")
+                if (strCanBorrow == "æ˜¯" || strCanBorrow == "yes")
                     bCanBorrow = true;
 
                 XmlNode nodeItem = dom.CreateElement("item");
@@ -472,7 +472,7 @@ namespace DigitalPlatform.CirculationClient
             return 0;
         }
 
-        // Ë«»÷
+        // åŒå‡»
         private void listView_location_list_DoubleClick(object sender, EventArgs e)
         {
             toolStripButton_location_modify_Click(sender, e);

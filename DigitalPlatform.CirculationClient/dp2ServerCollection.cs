@@ -10,7 +10,6 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 
-
 namespace DigitalPlatform.CirculationClient
 {
     [Serializable()]

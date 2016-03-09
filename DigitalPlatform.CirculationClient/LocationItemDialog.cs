@@ -1,26 +1,27 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// ¹İ²Øµã¶Ô»°¿ò
+    /// é¦†è—ç‚¹å¯¹è¯æ¡†
     /// </summary>
     public partial class LocationItemDialog : Form
     {
         /// <summary>
-        /// ÊÇ·ñÎª´´½¨Ä£Ê½
+        /// æ˜¯å¦ä¸ºåˆ›å»ºæ¨¡å¼
         /// </summary>
-        public bool CreateMode = false; // ÊÇ·ñÎª´´½¨Ä£Ê½£¿==trueÎª´´½¨Ä£Ê½£»==falseÎªĞŞ¸ÄÄ£Ê½
+        public bool CreateMode = false; // æ˜¯å¦ä¸ºåˆ›å»ºæ¨¡å¼ï¼Ÿ==trueä¸ºåˆ›å»ºæ¨¡å¼ï¼›==falseä¸ºä¿®æ”¹æ¨¡å¼
 
         /// <summary>
-        /// Í¼Êé¹İ´úÂëÁĞ±í×Ö·û´®¡£Ìá¹©¸ø combobox Ê¹ÓÃ
+        /// å›¾ä¹¦é¦†ä»£ç åˆ—è¡¨å­—ç¬¦ä¸²ã€‚æä¾›ç»™ combobox ä½¿ç”¨
         /// </summary>
         public string LibraryCodeList
         {
@@ -47,7 +48,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public LocationItemDialog()
         {
@@ -56,7 +57,7 @@ namespace DigitalPlatform.CirculationClient
 
         private void LocationItemDialog_Load(object sender, EventArgs e)
         {
-            // Èç¹ûÖ»ÓĞÒ»ÏîÁĞ±íÊÂÏî£¬¶øµ±Ç°Îª¿Õ°×£¬Ôò×Ô¶¯ÉèÖÃºÃÕâÒ»Ïî
+            // å¦‚æœåªæœ‰ä¸€é¡¹åˆ—è¡¨äº‹é¡¹ï¼Œè€Œå½“å‰ä¸ºç©ºç™½ï¼Œåˆ™è‡ªåŠ¨è®¾ç½®å¥½è¿™ä¸€é¡¹
             if (this.CreateMode == true
                 && string.IsNullOrEmpty(this.comboBox_libraryCode.Text) == true
                 && this.comboBox_libraryCode.Items.Count > 0)
@@ -67,10 +68,10 @@ namespace DigitalPlatform.CirculationClient
         {
             if (this.textBox_location.Text == "")
             {
-                // ÔÊĞí¹İ²ØµØµãÎª¿Õ£¬µ«ÊÇÒªÈ·ÈÏÒ»ÏÂ
+                // å…è®¸é¦†è—åœ°ç‚¹ä¸ºç©ºï¼Œä½†æ˜¯è¦ç¡®è®¤ä¸€ä¸‹
 
                 DialogResult msgResult = MessageBox.Show(this,
-                    "È·ÊµÒª°Ñ¹İ²ØµØµãÃû³ÆÉèÖÃÎª¿Õ?",
+                    "ç¡®å®è¦æŠŠé¦†è—åœ°ç‚¹åç§°è®¾ç½®ä¸ºç©º?",
                     "LocationItemDialog",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -90,7 +91,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ¹İ´úÂë
+        /// é¦†ä»£ç 
         /// </summary>
         public string LibraryCode
         {
@@ -105,7 +106,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ¹İ²Øµã×Ö·û´®
+        /// é¦†è—ç‚¹å­—ç¬¦ä¸²
         /// </summary>
         public string LocationString
         {
@@ -120,7 +121,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ÊÇ·ñÔÊĞíÍâ½è
+        /// æ˜¯å¦å…è®¸å¤–å€Ÿ
         /// </summary>
         public bool CanBorrow
         {
@@ -135,7 +136,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         /// <summary>
-        /// ²áÌõÂëºÅ¿ÉÎª¿Õ
+        /// å†Œæ¡ç å·å¯ä¸ºç©º
         /// </summary>
         public bool ItemBarcodeNullable
         {

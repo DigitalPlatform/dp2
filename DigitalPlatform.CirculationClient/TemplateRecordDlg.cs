@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -72,7 +72,7 @@ namespace DigitalPlatform.CirculationClient
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Ä£°åÃû(&N):";
+            this.label1.Text = "æ¨¡æ¿å(&N):";
             // 
             // label2
             // 
@@ -81,7 +81,7 @@ namespace DigitalPlatform.CirculationClient
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(53, 12);
             this.label2.TabIndex = 1;
-            this.label2.Text = "ËµÃ÷(&C):";
+            this.label2.Text = "è¯´æ˜(&C):";
             // 
             // textBox_name
             // 
@@ -108,7 +108,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 21);
             this.button_OK.TabIndex = 4;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -119,7 +119,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 21);
             this.button_Cancel.TabIndex = 5;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // TemplateRecordDlg
@@ -137,7 +137,7 @@ namespace DigitalPlatform.CirculationClient
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TemplateRecordDlg";
             this.ShowInTaskbar = false;
-            this.Text = "Ä£°å¼ÇÂ¼ÊôĞÔ";
+            this.Text = "æ¨¡æ¿è®°å½•å±æ€§";
             this.Load += new System.EventHandler(this.TemplateRecordDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -155,7 +155,7 @@ namespace DigitalPlatform.CirculationClient
 
 			if (textBox_name.Text == "")
 			{
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Ä£°å¼ÇÂ¼Ãû...");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ¨¡æ¿è®°å½•å...");
 				return;
 			}
 		
