@@ -2924,6 +2924,8 @@ namespace dp2Circulation
 
                 ListViewItem item = items[i];
 
+                this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
                 // 获得种记录中的主要分类依据。分类号或者出版社名
                 string strKey = ""; // 主要分类依据
                 string strSecondaryKey = "";    // 次要分类依据
@@ -2934,38 +2936,40 @@ namespace dp2Circulation
 
                     // 获得MARC格式书目记录
                     string strBiblioRecPath = ListViewUtil.GetItemText(item, MERGED_COLUMN_BIBLIORECPATH);
-                    // 获得MARC格式书目记录
-                    // return:
-                    //      -1  出错
-                    //      0   空记录
-                    //      1   成功
-                    nRet = GetMarc(strBiblioRecPath,
-                        out strMARC,
-                        out strOutMarcSyntax,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
 
-                    this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-
-                    if (nRet != 0)
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                     {
-                        // 触发filter中的Record相关动作
-                        nRet = this.MarcFilter.DoRecord(
-                            null,
-                            strMARC,
-                            strOutMarcSyntax,
-                            i,
+                        // 获得MARC格式书目记录
+                        // return:
+                        //      -1  出错
+                        //      0   空记录
+                        //      1   成功
+                        nRet = GetMarc(strBiblioRecPath,
+                            out strMARC,
+                            out strOutMarcSyntax,
                             out strError);
                         if (nRet == -1)
                             return -1;
 
-                        if (strStatisType == "class")
-                            strKey = (string)this.ColumnTable["biblioclass"];
-                        else if (strStatisType == "publisher")
+                        if (nRet != 0)
                         {
-                            strKey = (string)this.ColumnTable["bibliopublisher"];
-                            strSecondaryKey = (string)this.ColumnTable["biblioclass"];
+                            // 触发filter中的Record相关动作
+                            nRet = this.MarcFilter.DoRecord(
+                                null,
+                                strMARC,
+                                strOutMarcSyntax,
+                                i,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            if (strStatisType == "class")
+                                strKey = (string)this.ColumnTable["biblioclass"];
+                            else if (strStatisType == "publisher")
+                            {
+                                strKey = (string)this.ColumnTable["bibliopublisher"];
+                                strSecondaryKey = (string)this.ColumnTable["biblioclass"];
+                            }
                         }
                     }
 
@@ -4569,6 +4573,8 @@ nLineIndex++,
 
             ListViewItem item = items[nIndex];
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null)
             {
                 string strError = "";
@@ -4580,32 +4586,32 @@ nLineIndex++,
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, MERGED_COLUMN_BIBLIORECPATH);
 
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    strHtmlLineContent = strError;
-                    goto END1;
-                }
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strHtmlLineContent = strError;
+                        goto END1;
+                    }
 
-                this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-
-                // 触发filter中的Record相关动作
-                nRet = this.MarcFilter.DoRecord(
-                    null,
-                    strMARC,
-                    strOutMarcSyntax,
-                    nIndex,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strHtmlLineContent = strError;
-                    goto END1;
+                    // 触发filter中的Record相关动作
+                    nRet = this.MarcFilter.DoRecord(
+                        null,
+                        strMARC,
+                        strOutMarcSyntax,
+                        nIndex,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strHtmlLineContent = strError;
+                        goto END1;
+                    }
                 }
             }
-
 
             for (int i = 0; i < option.Columns.Count; i++)
             {
@@ -7507,6 +7513,8 @@ MessageBoxDefaultButton.Button2);
 
             ListViewItem item = items[nIndex];
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null)
             {
                 string strError = "";
@@ -7518,32 +7526,32 @@ MessageBoxDefaultButton.Button2);
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_BIBLIORECPATH);
 
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    strLineContent = strError;
-                    goto END1;
-                }
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
 
-                this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-
-                // 触发filter中的Record相关动作
-                nRet = this.MarcFilter.DoRecord(
-                    null,
-                    strMARC,
-                    strOutMarcSyntax,
-                    nIndex,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strLineContent = strError;
-                    goto END1;
+                    // 触发filter中的Record相关动作
+                    nRet = this.MarcFilter.DoRecord(
+                        null,
+                        strMARC,
+                        strOutMarcSyntax,
+                        nIndex,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
                 }
             }
-
 
             for (int i = 0; i < option.Columns.Count; i++)
             {

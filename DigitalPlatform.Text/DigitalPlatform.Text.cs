@@ -99,8 +99,6 @@ namespace DigitalPlatform.Text
 			return Convert.ToBase64String(baOutput);
 		}
 
-
-
 		public static string Decrypt(string strSource, string strKey)
 		{
 			byte[] baInput = Convert.FromBase64String(strSource);

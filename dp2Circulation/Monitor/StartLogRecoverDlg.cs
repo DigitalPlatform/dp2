@@ -32,6 +32,7 @@ namespace dp2Circulation
                 if (value == "创建 MongoDB 日志库")
                 {
                     this.comboBox_recoverLevel.Visible = false;
+                    this.label_recoverLevel.Visible = false;
                 }
             }
         }
@@ -69,16 +70,19 @@ namespace dp2Circulation
             // 通用启动参数
             string strRecoverLevel = "";
             bool bClearFirst = false;
+            bool bContinueWhenError = false;
 
             nRet = ParseLogRecoverParam(this.StartInfo.Param,
                 out strRecoverLevel,
                 out bClearFirst,
+                out bContinueWhenError,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             this.comboBox_recoverLevel.Text = strRecoverLevel;
             this.checkBox_clearBefore.Checked = bClearFirst;
+            this.checkBox_clearBefore.Checked = bContinueWhenError;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -137,6 +141,10 @@ namespace dp2Circulation
             DomUtil.SetAttr(dom.DocumentElement,
                 "clearFirst",
                 (this.checkBox_clearBefore.Checked == true ? "yes" : "no"));
+
+            DomUtil.SetAttr(dom.DocumentElement,
+    "continueWhenError",
+    (this.checkBox_continueWhenError.Checked == true ? "yes" : "no"));
 
             this.StartInfo.Param = dom.OuterXml;
             this.DialogResult = DialogResult.OK;
@@ -198,15 +206,18 @@ namespace dp2Circulation
         /// <param name="strParam">待解析的参数字符串</param>
         /// <param name="strRecoverLevel">日志恢复级别</param>
         /// <param name="bClearFirst">在恢复前是否清除现有的数据库记录</param>
+        /// <param name="bContinueWhenError">出错后是否继续批处理</param>
         /// <param name="strError">错误信息。当本方法发生错误时</param>
         /// <returns>-1: 出错。错误信息在 strError 参数中返回；0: 成功</returns>
         public static int ParseLogRecoverParam(string strParam,
             out string strRecoverLevel,
             out bool bClearFirst,
+            out bool bContinueWhenError,
             out string strError)
         {
             strError = "";
             bClearFirst = false;
+            bContinueWhenError = false;
             strRecoverLevel = "";
 
             if (String.IsNullOrEmpty(strParam) == true)
@@ -240,6 +251,11 @@ namespace dp2Circulation
                 bClearFirst = true;
             else
                 bClearFirst = false;
+
+            // 2016/3/8
+            bContinueWhenError = DomUtil.GetBooleanParam(dom.DocumentElement,
+                "continueWhenError",
+                false);
 
             return 0;
         }

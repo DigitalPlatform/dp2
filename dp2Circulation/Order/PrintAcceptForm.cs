@@ -370,7 +370,8 @@ namespace dp2Circulation
             SaveSize();
         }
 
-        /*public*/ void LoadSize()
+        /*public*/
+        void LoadSize()
         {
 #if NO
             // 设置窗口尺寸状态
@@ -401,7 +402,8 @@ namespace dp2Circulation
             }
         }
 
-        /*public*/ void SaveSize()
+        /*public*/
+        void SaveSize()
         {
 #if NO
             MainForm.AppInfo.SaveMdiChildFormStates(this,
@@ -744,7 +746,7 @@ namespace dp2Circulation
 
                     sr = new StreamReader(strFilename);
 
-                    for (int i = 0; ;)
+                    for (int i = 0; ; )
                     {
                         if (stop != null)
                         {
@@ -896,7 +898,7 @@ namespace dp2Circulation
 
             long lRet = Channel.GetItemInfo(
                 stop,
-                
+
                 (strRecPath[0] != '@' ? "@path:" + strRecPath : strRecPath),
                 // "",
                 "xml",
@@ -1545,7 +1547,7 @@ namespace dp2Circulation
 
             if (lRet > 1)
             {
-                strError = "参考ID '" + strRefID + "' 命中多条("+lRet.ToString()+")订购记录";
+                strError = "参考ID '" + strRefID + "' 命中多条(" + lRet.ToString() + ")订购记录";
                 return -1;
             }
 
@@ -1688,7 +1690,8 @@ namespace dp2Circulation
         //      -1  出错
         //      0   一般册，不是套内的册。strResult中为空
         //      1   套内册。strResult中返回了值
-        /*public*/ static int GetCopyDetail(string strDistribute,
+        /*public*/
+        static int GetCopyDetail(string strDistribute,
             string strRefID,
             out string strResult,
             out string strError)
@@ -1730,7 +1733,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strPart) == true)
                     continue;
 
-                string[] ids = strPart.Split(new char[] { ','});
+                string[] ids = strPart.Split(new char[] { ',' });
                 for (int j = 0; j < ids.Length; j++)
                 {
                     string strID = ids[j].Trim();
@@ -1754,7 +1757,7 @@ namespace dp2Circulation
                 else
                 {
                     bTao = true;
-                    iTao ++;
+                    iTao++;
                 }
 
                 if (bTao == false)
@@ -1779,7 +1782,7 @@ namespace dp2Circulation
                 }
             }
 
-            strError = "refid '"+strRefID+"' 在字符串 '"+strDistribute+"' 中没有找到";
+            strError = "refid '" + strRefID + "' 在字符串 '" + strDistribute + "' 中没有找到";
             return -1;    // not found
         }
 
@@ -1883,12 +1886,13 @@ namespace dp2Circulation
 
         }
 
-        /*public*/ static ListViewItem AddToListView(ListView list,
-    XmlDocument dom,
-    string strRecPath,
-    string strBiblioSummary,
-    string strISBnISSN,
-    string strBiblioRecPath)
+        /*public*/
+        static ListViewItem AddToListView(ListView list,
+            XmlDocument dom,
+            string strRecPath,
+            string strBiblioSummary,
+            string strISBnISSN,
+            string strBiblioRecPath)
         {
             ListViewItem item = new ListViewItem(strRecPath, TYPE_NORMAL);
 
@@ -1907,7 +1911,8 @@ namespace dp2Circulation
         // 根据订购记录DOM设置ListViewItem除第一列以外的文字
         // parameters:
         //      bSetBarcodeColumn   是否要设置第一列记录路径的内容
-        /*public*/ static void SetListViewItemText(XmlDocument dom,
+        /*public*/
+        static void SetListViewItemText(XmlDocument dom,
             bool bSetRecPathColumn,
             string strRecPath,
             string strBiblioSummary,
@@ -2428,14 +2433,16 @@ namespace dp2Circulation
         }
 
 
-        /*public*/ class NamedListViewItems : List<ListViewItem>
+        /*public*/
+        class NamedListViewItems : List<ListViewItem>
         {
             public string Seller = "";
             List<ListViewItem> Items = new List<ListViewItem>();
         }
 
         // 根据渠道(书商)名分入多个不同的List<ListViewItem>
-        /*public*/ class NamedListViewItemsCollection : List<NamedListViewItems>
+        /*public*/
+        class NamedListViewItemsCollection : List<NamedListViewItems>
         {
             public void AddItem(string strSeller,
                 ListViewItem item)
@@ -3043,6 +3050,8 @@ namespace dp2Circulation
 
             ListViewItem item = items[nIndex];
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null)
             {
                 string strError = "";
@@ -3054,29 +3063,30 @@ namespace dp2Circulation
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, MERGED_COLUMN_BIBLIORECPATH);
 
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    strLineContent = strError;
-                    goto END1;
-                }
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
 
-                this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-
-                // 触发filter中的Record相关动作
-                nRet = this.MarcFilter.DoRecord(
-                    null,
-                    strMARC,
-                    strOutMarcSyntax,
-                    nIndex,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strLineContent = strError;
-                    goto END1;
+                    // 触发filter中的Record相关动作
+                    nRet = this.MarcFilter.DoRecord(
+                        null,
+                        strMARC,
+                        strOutMarcSyntax,
+                        nIndex,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
                 }
             }
 
@@ -3084,14 +3094,14 @@ namespace dp2Circulation
             {
                 Column column = option.Columns[i];
 
-            /*
-                int nIndex = nPage * option.LinesPerPage + nLine;
+                /*
+                    int nIndex = nPage * option.LinesPerPage + nLine;
 
-                if (nIndex >= items.Count)
-                    break;
+                    if (nIndex >= items.Count)
+                        break;
 
-                ListViewItem item = items[nIndex];
-             * */
+                    ListViewItem item = items[nIndex];
+                 * */
 
                 string strContent = GetMergedColumnContent(item,
                     column.Name);
@@ -3233,7 +3243,7 @@ namespace dp2Circulation
                     case "总价格":
                         return ListViewUtil.GetItemText(item, MERGED_COLUMN_TOTALPRICE);
 
-                        // 2013/5/31
+                    // 2013/5/31
                     case "itemPrice":
                     case "实体单价":
                         return ListViewUtil.GetItemText(item, MERGED_COLUMN_ITEMPRICE);
@@ -3493,7 +3503,7 @@ namespace dp2Circulation
                     }
                 }
 
-                total += nCopy*nSubCopy;
+                total += nCopy * nSubCopy;
             }
 
             return total;
@@ -4193,7 +4203,7 @@ out strError);
 
                 if (nItemRecCount == 0)
                 {
-                    MessageBox.Show(this, "未装入任何已验收的册记录 (处理订购记录 "+nOrderRecCount.ToString()+" 条)");
+                    MessageBox.Show(this, "未装入任何已验收的册记录 (处理订购记录 " + nOrderRecCount.ToString() + " 条)");
                 }
             }
             finally
@@ -4258,7 +4268,7 @@ out strError);
                 data.Timestamp = item_timestamp;
                 data.Xml = strOrderXml;
 
-                item.SubItems.Add("获取订购记录 "+strRecPath+" 时出错: " + strError);
+                item.SubItems.Add("获取订购记录 " + strRecPath + " 时出错: " + strError);
 
                 SetItemColor(item, TYPE_ERROR);
                 list.Items.Add(item);
@@ -4604,7 +4614,7 @@ out strError);
             {
                 strItemRecPath = ListViewUtil.GetItemText(this.listView_origin.SelectedItems[0], ORIGIN_COLUMN_RECPATH);
             }
-            menuItem = new MenuItem("打开种册窗，观察册记录 '"+strItemRecPath+"' (&I)");
+            menuItem = new MenuItem("打开种册窗，观察册记录 '" + strItemRecPath + "' (&I)");
             menuItem.Tag = this.listView_origin;
             menuItem.Click += new System.EventHandler(this.menu_loadItemRecord_Click);
             if (this.listView_origin.SelectedItems.Count == 0)
@@ -4614,7 +4624,7 @@ out strError);
             string strOrderRecPath = "";
             if (this.listView_origin.SelectedItems.Count > 0)
             {
-                strOrderRecPath = ListViewUtil.GetItemText(this.listView_origin.SelectedItems[0],ORIGIN_COLUMN_ORDERRECPATH);
+                strOrderRecPath = ListViewUtil.GetItemText(this.listView_origin.SelectedItems[0], ORIGIN_COLUMN_ORDERRECPATH);
             }
             menuItem = new MenuItem("打开种册窗，观察订购记录 '" + strOrderRecPath + "' (&O)");
             menuItem.Tag = this.listView_origin;
@@ -4964,7 +4974,8 @@ out strError);
 
         }
 
-        /*public*/ int RefreshOneItem(ListViewItem item,
+        /*public*/
+        int RefreshOneItem(ListViewItem item,
             out string strError)
         {
             strError = "";
@@ -5081,7 +5092,8 @@ out strError);
             return this.listView_origin.Items.IndexOf(item);
         }
 
-        /*public*/ class Tao
+        /*public*/
+        class Tao
         {
             public string OrderRecPath = "";    // 订购记录路径
             public string No = "";  // 套序号 从1开始计数
@@ -5100,7 +5112,7 @@ out strError);
             strError = "";
 
             Tao tao = null;
-            for(int i=0;i<taos.Count;i++)
+            for (int i = 0; i < taos.Count; i++)
             {
                 Tao current_tao = taos[i];
                 if (current_tao.OrderRecPath == strOrderRecPath
@@ -5127,7 +5139,7 @@ out strError);
             }
             catch
             {
-                strError = "strCount '"+strCount+"' 格式不正确。应当为整数";
+                strError = "strCount '" + strCount + "' 格式不正确。应当为整数";
                 return -1;
             }
 
@@ -5136,7 +5148,7 @@ out strError);
             else
             {
                 if (nCount != tao.Count)
-                    tao.ErrorInfo = "出现不一致的册数 '"+strCount+"'";
+                    tao.ErrorInfo = "出现不一致的册数 '" + strCount + "'";
             }
 
             tao.IDs.Add(strID);
@@ -5220,7 +5232,7 @@ out strError);
                         }
                         catch
                         {
-                            strError = "序号 '"+strID1+"' 格式错误";
+                            strError = "序号 '" + strID1 + "' 格式错误";
                             return -1;
                         }
                         try
@@ -5243,7 +5255,7 @@ out strError);
 
                 if (tao.Count != tao.IDs.Count)
                 {
-                    strError = "订购记录 '"+tao.OrderRecPath+"' 内第 "+tao.No+" 套应有 "+tao.Count.ToString()+" 册，但当前只有 "+tao.IDs.Count.ToString()+" 册，出现了不完整情况";
+                    strError = "订购记录 '" + tao.OrderRecPath + "' 内第 " + tao.No + " 套应有 " + tao.Count.ToString() + " 册，但当前只有 " + tao.IDs.Count.ToString() + " 册，出现了不完整情况";
                     return -1;
                 }
 
@@ -5348,13 +5360,13 @@ out strError);
                 // 2013/5/31
                 // 单价，实体价
                 string strItemPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ITEMPRICE); 
+                    ORIGIN_COLUMN_ITEMPRICE);
 
 
                 // 2013/5/31
                 // 单价，订购价
                 string strOrderPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ORDERPRICE); 
+                    ORIGIN_COLUMN_ORDERPRICE);
 
 
                 // 单价，到书价
@@ -6459,6 +6471,8 @@ out strError);
 
             ListViewItem item = items[nIndex];
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null)
             {
                 string strError = "";
@@ -6470,29 +6484,30 @@ out strError);
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_BIBLIORECPATH);
 
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    strLineContent = strError;
-                    goto END1;
-                }
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
 
-                this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-
-                // 触发filter中的Record相关动作
-                nRet = this.MarcFilter.DoRecord(
-                    null,
-                    strMARC,
-                    strOutMarcSyntax,
-                    nIndex,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strLineContent = strError;
-                    goto END1;
+                    // 触发filter中的Record相关动作
+                    nRet = this.MarcFilter.DoRecord(
+                        null,
+                        strMARC,
+                        strOutMarcSyntax,
+                        nIndex,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
                 }
             }
 
@@ -6536,7 +6551,7 @@ out strError);
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-            END1:
+        END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -6625,7 +6640,7 @@ out strError);
                     case "经费来源":
                         return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_SOURCE);
 
-                        // 验收价
+                    // 验收价
                     case "price":
                     case "acceptprice":
                     case "acceptPrice":
@@ -6634,13 +6649,13 @@ out strError);
                     case "到书价":
                         return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTPRICE);
 
-                        // 实体记录中的价格
+                    // 实体记录中的价格
                     case "itemprice":
                     case "itemPrice":
                     case "实体单价":
                         return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ITEMPRICE);
 
-                        // 订购价
+                    // 订购价
                     case "orderprice":
                     case "orderPrice":
                     case "订购单价":
@@ -6882,7 +6897,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
                 // 不是各套的第一册，就跳过
                 if (strIndex == "1")
-                    total ++;
+                    total++;
             }
 
             return total;
@@ -7718,10 +7733,10 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 if (string.IsNullOrEmpty(strOrderRecPath) == true)
                     continue;
 
-                string strOrderPrice = ListViewUtil.GetItemText(item,ORIGIN_COLUMN_ORDERPRICE);
-                string strAcceptPrice = ListViewUtil.GetItemText(item,ORIGIN_COLUMN_ACCEPTPRICE);
+                string strOrderPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERPRICE);
+                string strAcceptPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTPRICE);
 
-                string strOrderSubCopy = ListViewUtil.GetItemText(item,ORIGIN_COLUMN_ORDERSUBCOPY);
+                string strOrderSubCopy = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERSUBCOPY);
                 string strAcceptSubCopy = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
                 // ACCEPTSUBCOPY需要加工一下。原始形态为 1:1/3 需要取出'/'右边的数字
@@ -7812,7 +7827,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             }
 
             // 排序事项?
-            string [] keys = new string[this.m_exchangeTable.Keys.Count];
+            string[] keys = new string[this.m_exchangeTable.Keys.Count];
             this.m_exchangeTable.Keys.CopyTo(keys, 0);
             Array.Sort(keys);
 
@@ -8166,7 +8181,8 @@ false);
     }
 
     // 原始数据listviewitem的Tag所携带的数据结构
-    /*public*/ class OriginAcceptItemData
+    /*public*/
+    class OriginAcceptItemData
     {
         /// <summary>
         /// 内容是否发生过修改
@@ -8220,7 +8236,8 @@ false);
     }
 
 
-    /*public*/ class ExchangeInfo
+    /*public*/
+    class ExchangeInfo
     {
         // 源货币
         public string OriginCurrency = "";

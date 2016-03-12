@@ -94,15 +94,18 @@ namespace DigitalPlatform.LibraryServer
         // 解析通用启动参数
         // 格式
         /*
-         * <root clearFirst='...'/>
-         * clearFirst缺省为false
+         * <root clearFirst='...' continueWhenError='...' />
+         * clearFirst 缺省为 false
+         * continueWhenError 缺省值为 false
          * */
         public static int ParseLogRecoverParam(string strParam,
             out bool bClearFirst,
+            out bool bContinueWhenError,
             out string strError)
         {
             strError = "";
             bClearFirst = false;
+            bContinueWhenError = false;
 
             if (String.IsNullOrEmpty(strParam) == true)
                 return 0;
@@ -120,6 +123,10 @@ namespace DigitalPlatform.LibraryServer
 
             bClearFirst = DomUtil.GetBooleanParam(dom.DocumentElement,
                 "clearFirst",
+                false);
+            // 2016/3/8
+            bContinueWhenError = DomUtil.GetBooleanParam(dom.DocumentElement,
+                "continueWhenError",
                 false);
             return 0;
         }
@@ -157,8 +164,11 @@ namespace DigitalPlatform.LibraryServer
 
             //
             bool bClearFirst = false;
+            bool bContinueWhenError = false;
+
             nRet = ParseLogRecoverParam(startinfo.Param,
                 out bClearFirst,
+                out bContinueWhenError,
                 out strError);
             if (nRet == -1)
             {
@@ -241,6 +251,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = DoOneLogFile(strFileName,
                         lStartIndex,
                         lMax,
+                        bContinueWhenError,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -306,6 +317,7 @@ namespace DigitalPlatform.LibraryServer
         int DoOneLogFile(string strFileName,
             long lStartIndex,
             long lMax,
+            bool bContinueWhenError,
             out string strError)
         {
             strError = "";
@@ -381,8 +393,9 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    this.AppendResultText("发生错误：" + strError + "\r\n");
-                    return -1;
+                    this.AppendResultText("*** 做日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
+                    if (bContinueWhenError == false)
+                        return -1;
                 }
             }
 

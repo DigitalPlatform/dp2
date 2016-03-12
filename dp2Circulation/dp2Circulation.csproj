@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>26</ApplicationRevision>
+    <ApplicationRevision>29</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -377,6 +377,12 @@
       <DependentUpon>ChatLoginDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="IM\MessageHub.cs" />
+    <Compile Include="IO\ImportExportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IO\ImportExportForm.Designer.cs">
+      <DependentUpon>ImportExportForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1562,6 +1568,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="IM\ChatLoginDialog.resx">
       <DependentUpon>ChatLoginDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IO\ImportExportForm.resx">
+      <DependentUpon>ImportExportForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
       <DependentUpon>ScanBarcodeForm.cs</DependentUpon>

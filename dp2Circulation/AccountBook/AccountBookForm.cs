@@ -4182,6 +4182,8 @@ null,
             string strMARC = "";
             string strOutMarcSyntax = "";
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null
                 || option.HasEvalue() == true)
             {
@@ -4190,27 +4192,30 @@ null,
 
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
 
-                if (this.MarcFilter != null)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-                    this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
-
-                    // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    if (this.MarcFilter != null)
+                    {
+                        this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
+
+                        // 触发filter中的Record相关动作
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
                 }
             }
 
@@ -4963,6 +4968,8 @@ strTotalPrice);
             string strMARC = "";
             string strOutMarcSyntax = "";
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null
                 || option.HasEvalue() == true)
             {
@@ -4971,27 +4978,30 @@ strTotalPrice);
 
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
 
-                if (this.MarcFilter != null)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-                    this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
-
-                    // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    if (this.MarcFilter != null)
+                    {
+                        this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
+
+                        // 触发filter中的Record相关动作
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
                 }
             }
 
@@ -5722,6 +5732,8 @@ strTotalPrice);
             string strMARC = "";
             string strOutMarcSyntax = "";
 
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
             if (this.MarcFilter != null
                 || option.HasEvalue() == true)
             {
@@ -5732,33 +5744,35 @@ strTotalPrice);
                 // 获得MARC格式书目记录
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
 
-                // TODO: 可以 cache，提高速度
-                nRet = GetMarc(strBiblioRecPath,
-                    out strMARC,
-                    out strOutMarcSyntax,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    strLineContent = strError;
-                    goto END1;
-                }
-
-                if (this.MarcFilter != null)
-                {
-                    this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
-                    this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
-
-                    // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
+                    // TODO: 可以 cache，提高速度
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
                         out strError);
                     if (nRet == -1)
                     {
                         strLineContent = strError;
                         goto END1;
+                    }
+
+                    if (this.MarcFilter != null)
+                    {
+                        this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
+
+                        // 触发filter中的Record相关动作
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strLineContent = strError;
+                            goto END1;
+                        }
                     }
                 }
             }
@@ -6007,7 +6021,6 @@ strTotalPrice);
                         }
                 }
             }
-
             catch
             {
                 return null;    // 表示没有这个subitem下标

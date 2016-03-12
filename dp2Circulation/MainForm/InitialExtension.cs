@@ -1524,8 +1524,11 @@ MessageBoxDefaultButton.Button1);
                     if (ApplicationDeployment.IsNetworkDeployed == false)
                         strBodyClass = " class='green' ";
 
+                    string strHead = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>";
+
                     Global.WriteHtml(m_backgroundForm.WebBrowser,
-                        "<html><head>" + strLink + "</head><body" + strBodyClass + ">");
+                        // "<html><head>" 
+                        strHead + strLink + "</head><body" + strBodyClass + ">");
                 }
                 catch (Exception ex)
                 {

@@ -243,7 +243,7 @@ namespace dp2Circulation
                 "location_string",
                 "");
 
-            this.checkBox_verify_autoUppercaseBarcode.Checked = 
+            this.checkBox_verify_autoUppercaseBarcode.Checked =
                 this.MainForm.AppInfo.GetBoolean(
                 "itemhandoverform",
                 "auto_uppercase_barcode",
@@ -252,7 +252,7 @@ namespace dp2Circulation
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
         }
 
-        private void ItemHandoverForm_FormClosing(object sender, 
+        private void ItemHandoverForm_FormClosing(object sender,
             FormClosingEventArgs e)
         {
 #if NO
@@ -334,7 +334,8 @@ namespace dp2Circulation
             SaveSize();
         }
 
-        /*public*/ void LoadSize()
+        /*public*/
+        void LoadSize()
         {
 #if NO
             // 设置窗口尺寸状态
@@ -375,7 +376,8 @@ this.splitContainer_inAndOutof,
 "splitContainer_inandoutof_ratio");
         }
 
-        /*public*/ void SaveSize()
+        /*public*/
+        void SaveSize()
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
@@ -443,16 +445,14 @@ this.splitContainer_inAndOutof,
             this.button_verify_load.Enabled = bEnable;
             this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
 
-
             // print page
             this.button_print_option.Enabled = bEnable;
             this.button_print_printCheckedList.Enabled = bEnable;
 
             this.button_print_printNormalList.Enabled = bEnable;
-
         }
 
-                /// <summary>
+        /// <summary>
         /// 清除列表中现存的内容，准备装入新内容
         /// </summary>
         public override void ClearBefore()
@@ -467,7 +467,6 @@ this.splitContainer_inAndOutof,
             this.SortColumns_outof.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_outof.Columns);
         }
-
 
         // 根据条码号文件装载
         private void button_load_loadFromBarcodeFile_Click(object sender, EventArgs e)
@@ -841,7 +840,6 @@ this.splitContainer_inAndOutof,
                 this.listView_in.BeginUpdate();
             try
             {
-
                 for (int i = 0; i < infos.Count; i++)
                 {
                     if (stop != null)
@@ -861,7 +859,6 @@ this.splitContainer_inAndOutof,
                         return -1;
                     }
                     // stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
-
 
                     string strOutputItemRecPath = "";
                     ListViewItem item = null;
@@ -950,7 +947,6 @@ this.splitContainer_inAndOutof,
             // 2009/10/27
             ColumnHeader columnHeader_targetRecpath = new ColumnHeader();
 
-
             list.Columns.Clear();
 
             list.Columns.AddRange(new ColumnHeader[] {
@@ -972,7 +968,6 @@ this.splitContainer_inAndOutof,
             columnHeader_biblioRecpath,
             columnHeader_accessno,
             columnHeader_targetRecpath});
-
 
             // 
             // columnHeader_barcode
@@ -1521,7 +1516,7 @@ this.splitContainer_inAndOutof,
         }
 
         internal override void SetListViewItemText(XmlDocument dom,
-            byte [] baTimestamp,
+            byte[] baTimestamp,
             bool bSetBarcodeColumn,
             string strRecPath,
             string strBiblioRecPath,
@@ -1653,8 +1648,6 @@ this.splitContainer_inAndOutof,
             return item;
         }
 
-
-
         void SetNextButtonEnable()
         {
             string strError = "";
@@ -1718,7 +1711,7 @@ this.splitContainer_inAndOutof,
                     if (nNeedMoveCount > 0)
                     {
                         this.button_move_moveAll.Enabled = true;
-                        this.button_move_moveAll.Text = "转移到目标库 ["+nNeedMoveCount.ToString()+"] (&M)...";
+                        this.button_move_moveAll.Text = "转移到目标库 [" + nNeedMoveCount.ToString() + "] (&M)...";
                     }
                     else
                     {
@@ -1748,7 +1741,7 @@ this.splitContainer_inAndOutof,
                     if (nProcessiingCount > 0)
                     {
                         this.button_move_changeStateAll.Enabled = true;
-                        this.button_move_changeStateAll.Text = "清除“加工中”状态 ["+nProcessiingCount.ToString()+"] (&C)...";
+                        this.button_move_changeStateAll.Text = "清除“加工中”状态 [" + nProcessiingCount.ToString() + "] (&C)...";
                     }
                     else
                     {
@@ -1760,7 +1753,7 @@ this.splitContainer_inAndOutof,
                 if (this.listView_in.Items.Count > 0)
                 {
                     this.button_move_notifyReader.Enabled = true;
-                    this.button_move_notifyReader.Text = "通知荐购读者 [" + this.listView_in.Items.Count .ToString()+ "] (&N)...";
+                    this.button_move_notifyReader.Text = "通知荐购读者 [" + this.listView_in.Items.Count.ToString() + "] (&N)...";
                 }
                 else
                 {
@@ -1842,13 +1835,13 @@ this.splitContainer_inAndOutof,
 
                 if (item.ImageIndex == TYPE_ERROR)
                     nRedCount++;
-                else 
+                else
                     nWhiteCount++;
             }
 
             if (nRedCount != 0)
             {
-                strError = "列表中有 " +nRedCount+ " 个错误事项(红色行)。请修改数据后重新装载。";
+                strError = "列表中有 " + nRedCount + " 个错误事项(红色行)。请修改数据后重新装载。";
                 return 2;
             }
 
@@ -1892,7 +1885,7 @@ this.splitContainer_inAndOutof,
                 && this.listView_outof.Items.Count == 0)
                 return true;
 
-            strError = "验证尚未完成。\r\n\r\n列表中有:\r\n已验证事项(绿色) "+nGreenCount.ToString()+" 个\r\n错误事项(红色) " +nRedCount.ToString()+ "个\r\n未验证事项(白色) " +nWhiteCount.ToString()+ "个\r\n集合外事项(位于下方列表内) " +this.listView_outof.Items.Count+ "个\r\n\r\n(只有全部事项都为已验证状态(绿色)，才表明验证已经完成)";
+            strError = "验证尚未完成。\r\n\r\n列表中有:\r\n已验证事项(绿色) " + nGreenCount.ToString() + " 个\r\n错误事项(红色) " + nRedCount.ToString() + "个\r\n未验证事项(白色) " + nWhiteCount.ToString() + "个\r\n集合外事项(位于下方列表内) " + this.listView_outof.Items.Count + "个\r\n\r\n(只有全部事项都为已验证状态(绿色)，才表明验证已经完成)";
             return false;
         }
 
@@ -1962,8 +1955,8 @@ this.splitContainer_inAndOutof,
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在装载册 "
-                    +this.textBox_verify_itemBarcode.Text
-                    +" ...");
+                    + this.textBox_verify_itemBarcode.Text
+                    + " ...");
                 stop.BeginLoop();
 
                 try
@@ -2009,7 +2002,7 @@ this.splitContainer_inAndOutof,
                 if (this.listView_outof.Items.Count != 0)
                     this.listView_outof.EnsureVisible(this.listView_outof.Items.Count - 1);
 
-                strError = "条码为 " 
+                strError = "条码为 "
                     + this.textBox_verify_itemBarcode.Text
                     + " 的册记录不在集合内。已加入到集合外列表。";
                 goto ERROR1;
@@ -2025,7 +2018,7 @@ this.splitContainer_inAndOutof,
                 {
                     strError = "条码 "
                         + this.textBox_verify_itemBarcode.Text
-                        +" 所对应的事项虽然已经包含在集合内，但数据有误，无法通过验证。\r\n\r\n请对该条码相关数据进行修改，然后刷新事项，并重新扫入条码进行验证。";
+                        + " 所对应的事项虽然已经包含在集合内，但数据有误，无法通过验证。\r\n\r\n请对该条码相关数据进行修改，然后刷新事项，并重新扫入条码进行验证。";
                     // 选定该事项
                     item.Selected = true;
                     // 将事项滚入视野
@@ -2135,7 +2128,7 @@ this.splitContainer_inAndOutof,
 
             if (bOK == false)
             {
-                string strWarning = strError + "\r\n\r\n" 
+                string strWarning = strError + "\r\n\r\n"
                     + "是否仍要打印已验证的部分(绿色行)?";
                 DialogResult result = MessageBox.Show(this,
 strWarning,
@@ -2165,7 +2158,6 @@ MessageBoxDefaultButton.Button2);
             }
 
             PrintList("已验证清单", items);
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2300,10 +2292,7 @@ MessageBoxDefaultButton.Button2);
                     MessageBox.Show(this, "由于当前打印用到了 “种价格”列，为保证打印结果的准确，程序自动按 ‘种记录路径’ 列对全部列表事项进行一次自动排序。\r\n\r\n为避免这里的自动排序，可在打印前用鼠标左键点栏标题进行符合自己意愿的排序，只要最后一次点的是‘种记录路径’栏标题即可。");
                     ForceSortColumnsIn(COLUMN_BIBLIORECPATH);
                 }
-
-
             }
-
 
             // 计算出页总数
             int nTablePageCount = items.Count / option.LinesPerPage;
@@ -2345,7 +2334,6 @@ MessageBoxDefaultButton.Button2);
                 macro_table["%recpathfilepath%"] = this.RecPathFilePath;
                 macro_table["%recpathfilename%"] = Path.GetFileName(this.RecPathFilePath);
             }
-
 
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
@@ -2473,13 +2461,20 @@ MessageBoxDefaultButton.Button2);
                     StreamUtil.WriteText(strFileName,
                         "<div class='recipient'>接受者: </div>");
 
-
                     BuildPageBottom(option,
                         macro_table,
                         strFileName,
                         false);
                 }
 
+            }
+
+            string strMarcFilterFilePath = option.GetTemplatePageFilePath("MARC过滤器");
+            if (String.IsNullOrEmpty(strMarcFilterFilePath) == false)
+            {
+                int nRet = PrepareMarcFilter(strMarcFilterFilePath, out strError);
+                if (nRet == -1)
+                    return -1;
             }
 
             // 表格页循环
@@ -2508,14 +2503,6 @@ MessageBoxDefaultButton.Button2);
                     strFileName,
                     true);
             }
-
-            /*
-            for (int i = 0; i < this.listView_in.Items.Count; i++)
-            {
-
-            }
-             * */
-
 
             return 0;
         }
@@ -2570,7 +2557,7 @@ MessageBoxDefaultButton.Button2);
             StreamUtil.WriteText(strFileName,
                 "<html><head>" + strLink + "</head><body>");
 
-           
+
             // 页眉
             string strPageHeaderText = option.PageHeader;
 
@@ -2603,7 +2590,6 @@ MessageBoxDefaultButton.Button2);
 
             if (bOutputTable == true)
             {
-
                 // 表格开始
                 StreamUtil.WriteText(strFileName,
                     "<table class='table'>");   //   border='1'
@@ -2637,12 +2623,12 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 汇总种价格。假定nIndex处在切换行(同一种内最后一行)
-        static decimal ComputeBiblioPrice(List<ListViewItem> items,
+        decimal ComputeBiblioPrice(List<ListViewItem> items,
             int nIndex)
         {
             decimal total = 0;
             string strBiblioRecPath = GetColumnContent(items[nIndex], "biblioRecpath");
-            for (int i = nIndex; i>=0; i--)
+            for (int i = nIndex; i >= 0; i--)
             {
                 ListViewItem item = items[i];
 
@@ -2691,54 +2677,124 @@ MessageBoxDefaultButton.Button2);
         {
             // 栏目内容
             string strLineContent = "";
+            int nRet = 0;
 
             bool bBiblioSumLine = false;    // 是否为种的最后一行(汇总行)
+
+            int nIndex = nPage * option.LinesPerPage + nLine;
+
+            if (nIndex >= items.Count)
+                goto END1;
+
+            ListViewItem item = items[nIndex];
+
+            string strMARC = "";
+            string strOutMarcSyntax = "";
+
+            this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
+
+            if (this.MarcFilter != null
+                || option.HasEvalue() == true)
+            {
+                string strError = "";
+
+                // TODO: 有错误要明显报出来，否则容易在打印出来后才发现，就晚了
+
+                // 获得MARC格式书目记录
+                string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
+
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
+                {
+                    // TODO: 可以 cache，提高速度
+                    nRet = GetMarc(strBiblioRecPath,
+                        out strMARC,
+                        out strOutMarcSyntax,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strLineContent = strError;
+                        goto END1;
+                    }
+
+                    if (this.MarcFilter != null)
+                    {
+                        this.MarcFilter.Host.UiItem = item; // 当前正在处理的 ListViewItem
+
+                        // 触发filter中的Record相关动作
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strLineContent = strError;
+                            goto END1;
+                        }
+                    }
+                }
+            }
 
             for (int i = 0; i < option.Columns.Count; i++)
             {
                 Column column = option.Columns[i];
 
+#if NO
                 int nIndex = nPage * option.LinesPerPage + nLine;
 
                 if (nIndex >= items.Count)
                     break;
 
                 ListViewItem item = items[nIndex];
+#endif
 
-                string strContent = GetColumnContent(item,
-                    column.Name);
+                string strContent = "";
 
-                if (strContent == "!!!#")
-                    strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
-
-                if (strContent == "!!!biblioPrice")
+                if (string.IsNullOrEmpty(column.Evalue) == false)
                 {
-                    // 看看自己是不是处在切换边沿
-                    string strCurLineBiblioRecPath = GetColumnContent(item, "biblioRecpath");
+                    Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
+                    engine.EnableExposedClrTypes = true;
+                    engine.SetGlobalValue("syntax", strOutMarcSyntax);
+                    engine.SetGlobalValue("biblio", new MarcRecord(strMARC));
+                    strContent = engine.Evaluate(column.Evalue).ToString();
+                }
+                else
+                {
+                    strContent = GetColumnContent(item,
+                        column.Name);
 
-                    string strNextLineBiblioRecPath = "";
+                    if (strContent == "!!!#")
+                        strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
 
-                    if (nIndex < items.Count - 1)
+                    if (strContent == "!!!biblioPrice")
                     {
-                        ListViewItem next_item = items[nIndex + 1];
-                        strNextLineBiblioRecPath = GetColumnContent(next_item, "biblioRecpath");
+                        // 看看自己是不是处在切换边沿
+                        string strCurLineBiblioRecPath = GetColumnContent(item, "biblioRecpath");
+
+                        string strNextLineBiblioRecPath = "";
+
+                        if (nIndex < items.Count - 1)
+                        {
+                            ListViewItem next_item = items[nIndex + 1];
+                            strNextLineBiblioRecPath = GetColumnContent(next_item, "biblioRecpath");
+                        }
+
+                        if (strCurLineBiblioRecPath != strNextLineBiblioRecPath)
+                        {
+                            // 处在切换边沿
+
+                            // 汇总前面的册价格
+                            strContent = ComputeBiblioPrice(items, nIndex).ToString();
+                            bBiblioSumLine = true;
+                        }
+                        else
+                        {
+                            // 其他普通行
+                            strContent = "&nbsp;";
+                        }
+
                     }
-
-                    if (strCurLineBiblioRecPath != strNextLineBiblioRecPath)
-                    {
-                        // 处在切换边沿
-
-                        // 汇总前面的册价格
-                        strContent = ComputeBiblioPrice(items, nIndex).ToString();
-                        bBiblioSumLine = true;
-                    }
-                    else
-                    {
-                        // 其他普通行
-                        strContent = "&nbsp;";
-                    }
-
-
                 }
 
                 // 截断字符串
@@ -2760,6 +2816,8 @@ MessageBoxDefaultButton.Button2);
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
+        END1:
+
             if (bBiblioSumLine == false)
             {
                 StreamUtil.WriteText(strFileName,
@@ -2780,9 +2838,8 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-
         // 获得栏目内容
-        static string GetColumnContent(ListViewItem item,
+        string GetColumnContent(ListViewItem item,
             string strColumnName)
         {
             // 去掉"-- ?????"部分
@@ -2794,6 +2851,20 @@ MessageBoxDefaultButton.Button2);
              * */
 
             string strText = StringUtil.GetLeft(strColumnName);
+
+            // 2009/10/8
+            // 要求ColumnTable值
+            if (strText.Length > 0 && strText[0] == '@')
+            {
+                strText = strText.Substring(1);
+
+                /*
+                if (this.ColumnTable.Contains(strText) == false)
+                    return "error:列 '" + strText + "' 在ColumnTable中没有找到";
+                 * */
+
+                return (string)this.ColumnTable[strText];
+            }
 
             try
             {
@@ -2852,10 +2923,14 @@ MessageBoxDefaultButton.Button2);
                     case "种价格":
                         return "!!!biblioPrice";  // 特殊值，表示种价格
                     default:
-                        return "undefined column";
+                        {
+                            if (this.ColumnTable.Contains(strText) == false)
+                                return "未知栏目 '" + strText + "'";
+
+                            return (string)this.ColumnTable[strText];
+                        }
                 }
             }
-
             catch
             {
                 return null;    // 表示没有这个subitem下标
@@ -3527,7 +3602,7 @@ MessageBoxDefaultButton.Button2);
         {
             string strPrevText = "";
             bool bDark = false;
-            for(int i=0;i<list.Items.Count;i++)
+            for (int i = 0; i < list.Items.Count; i++)
             {
                 ListViewItem item = list.Items[i];
 
@@ -3708,7 +3783,7 @@ MessageBoxDefaultButton.Button2);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_in, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_in, new Point(e.X, e.Y));
         }
 
         static List<ListViewItem> GetSelectedItems(ListView list)
@@ -4135,7 +4210,7 @@ MessageBoxDefaultButton.Button2);
             RefreshLines(COLUMN_RECPATH,
                 items,
                 true,
-                new string[] { "summary", "@isbnissn", "targetrecpath"});
+                new string[] { "summary", "@isbnissn", "targetrecpath" });
             if (this.tabControl_main.SelectedTab == this.tabPage_verify)
             {
                 SetVerifyPageNextButtonEnabled();
@@ -4182,7 +4257,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             DialogResult result = MessageBox.Show(this,
-"确实要移除选定的 "+items.Count.ToString()+" 个事项?",
+"确实要移除选定的 " + items.Count.ToString() + " 个事项?",
 this.FormCaption,
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -4477,7 +4552,7 @@ MessageBoxDefaultButton.Button2);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_outof, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_outof, new Point(e.X, e.Y));
         }
 
         private void ItemHandoverForm_Activated(object sender, EventArgs e)
@@ -4583,7 +4658,7 @@ MessageBoxDefaultButton.Button2);
                     nMovedCount++;
                     item.Selected = true;
 
-                    stop.SetProgressValue(i+1);
+                    stop.SetProgressValue(i + 1);
                 }
             }
             finally
@@ -4746,7 +4821,7 @@ MessageBoxDefaultButton.Button2);
                 out strError);
             if (nRet == -1)
             {
-                strError = "将记录 '"+strTargetBiblioRecPath+"' 的XML转换到MARC记录时出错: " + strError;
+                strError = "将记录 '" + strTargetBiblioRecPath + "' 的XML转换到MARC记录时出错: " + strError;
                 return -1;
             }
 
@@ -4781,7 +4856,7 @@ MessageBoxDefaultButton.Button2);
             string strTargetBiblioDbName = Global.GetDbName(strTargetBiblioRecPath);
             if (String.IsNullOrEmpty(strTargetBiblioDbName) == true)
             {
-                strError = "从路径 '"+strTargetBiblioRecPath+"' 中获得数据库名时出错";
+                strError = "从路径 '" + strTargetBiblioRecPath + "' 中获得数据库名时出错";
                 return -1;
             }
 
@@ -4791,7 +4866,7 @@ MessageBoxDefaultButton.Button2);
 
             if (strSourceSyntax.ToLower() != strTargetSyntax.ToLower())
             {
-                strError = "源书目记录 '"+strSourceBiblioRecPath+"' 所在库的格式 '"+strSourceSyntax+"' 和 目标数据记录 '"+strTargetBiblioRecPath+"' 所在库的格式 '"+strTargetSyntax+"' 不同";
+                strError = "源书目记录 '" + strSourceBiblioRecPath + "' 所在库的格式 '" + strSourceSyntax + "' 和 目标数据记录 '" + strTargetBiblioRecPath + "' 所在库的格式 '" + strTargetSyntax + "' 不同";
                 return -1;
             }
 
@@ -4805,7 +4880,7 @@ MessageBoxDefaultButton.Button2);
                 out strError);
             if (nRet == -1)
             {
-                strError = "将记录 '"+strTargetBiblioRecPath+"' 的XML转换到MARC记录时出错: " + strError;
+                strError = "将记录 '" + strTargetBiblioRecPath + "' 的XML转换到MARC记录时出错: " + strError;
                 return -1;
             }
 
@@ -5264,14 +5339,14 @@ MessageBoxDefaultButton.Button2);
                 if (source_node.NamespaceURI != strNamespaceURI)
                     continue;
 
-                XmlNode new_node = source.CreateElement(strPrefix, 
+                XmlNode new_node = source.CreateElement(strPrefix,
                     source_node.LocalName,
                     strNamespaceURI);
                 source.DocumentElement.AppendChild(new_node);
                 DomUtil.SetElementOuterXml(new_node, source_node.OuterXml);
             }
 
-            
+
 
             return 0;
         }
@@ -5488,7 +5563,7 @@ MessageBoxDefaultButton.Button2);
                 out strError);
             if (lRet == -1)
                 return -1;
-            
+
             if (errorinfos != null && errorinfos.Length > 0)
             {
                 int nErrorCount = 0;
@@ -5606,7 +5681,7 @@ MessageBoxDefaultButton.Button2);
             int nClearCount = ClearProcessingState(items);
 
             ListViewUtil.ClearSelection(this.listView_in);  // 清除全部选择标志
-            
+
             // TODO: 记忆下所有的书目记录路径，然后去重。对这些书目记录通知推荐者 
 
 
@@ -5927,7 +6002,7 @@ MessageBoxDefaultButton.Button2);
                     strErrorText += "事项 '" + ListViewUtil.GetItemText(item, COLUMN_RECPATH) + "' 在保存过程中发生错误: " + errorinfo.ErrorInfo;
                 }
 
-                ListViewUtil.ChangeItemText(item, 
+                ListViewUtil.ChangeItemText(item,
                     COLUMN_ERRORINFO,
                     errorinfo.ErrorInfo);
                 SetItemColor(item, TYPE_ERROR);
@@ -5971,7 +6046,7 @@ MessageBoxDefaultButton.Button2);
                 if (data == null)   // 2015/9/15
                     continue;
                 if (data.Changed == true)
-                    nCount ++;
+                    nCount++;
             }
 
             return nCount;
@@ -6016,7 +6091,7 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 goto ERROR1;
 
-            MessageBox.Show(this, "成功通知书目记录 "+nNotifiedCount+" 个");
+            MessageBox.Show(this, "成功通知书目记录 " + nNotifiedCount + " 个");
             return;
         ERROR1:
             this.SetNextButtonEnable();
@@ -6367,7 +6442,7 @@ MessageBoxDefaultButton.Button2);
             {
                 Console.Beep();
                 ListViewUtil.SelectLine(dup, true);
-                MessageBox.Show(this, "您扫入的册条码号 ‘"+e.Barcode+"’ 在列表中已经存在了，请注意不要重复扫入");
+                MessageBox.Show(this, "您扫入的册条码号 ‘" + e.Barcode + "’ 在列表中已经存在了，请注意不要重复扫入");
                 this._scanBarcodeForm.Activate();
                 return;
             }

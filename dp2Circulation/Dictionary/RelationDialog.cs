@@ -258,13 +258,16 @@ bool bClickClose = false)
                 text.Append(" 源分类号(缩位后的)=[" + control.SourceText + "] \r\n");
                 text.Append(" 目标分类号(自动选定)=[" + control.TargetText + "] \r\n");
 
-                text.Append(" 命中事项("+info.Rows.Count+"):\r\n");
-                int j = 0;
-                foreach(DpRow row in info.Rows)
+                if (info.Rows != null)
                 {
-                    text.Append(
-                        "   " + (j+1).ToString() + ") " + BuildRowLine(row) + "\r\n");
-                    j++;
+                    text.Append(" 命中事项(" + info.Rows.Count + "):\r\n");
+                    int j = 0;
+                    foreach (DpRow row in info.Rows)
+                    {
+                        text.Append(
+                            "   " + (j + 1).ToString() + ") " + BuildRowLine(row) + "\r\n");
+                        j++;
+                    }
                 }
 
                 i++;
@@ -283,6 +286,22 @@ bool bClickClose = false)
             text.Append("weight权值 =[" + row[RelationDialog.COLUMN_WEIGHT].Text + "] ");
             text.Append("level级别 =[" + row[RelationDialog.COLUMN_LEVEL].Text + "] ");
             return text.ToString();
+        }
+
+        static string BuildRowLines(List<DpRow> rows)
+        {
+            StringBuilder text = new StringBuilder();
+
+                text.Append(" 命中事项(" + rows.Count + "):\r\n");
+                int j = 0;
+                foreach (DpRow row in rows)
+                {
+                    text.Append(
+                        "   " + (j + 1).ToString() + ") " + BuildRowLine(row) + "\r\n");
+                    j++;
+                }
+
+                return text.ToString();
         }
 
         #endregion
@@ -1182,27 +1201,47 @@ bool bClickClose = false)
             return false;
         }
 
+        static void VerifyLevelString(string strLevel)
+        {
+            int index = Int32.Parse(strLevel);
+            if (index <= 0)
+                throw new Exception("strLevel 字符串 '" + strLevel + "' 不合法。应为大于等于 1 的数字");
+        }
+
         static List<string> BuildHitCountList(List<DpRow> rows, string strSourceKey)
         {
-            List<string> list = new List<string>();
-            Hashtable table = new Hashtable();  // strKey --> int
-            foreach(DpRow row in rows)
+            try
             {
-                string strLevel = row[COLUMN_LEVEL].Text;
-                int value = 0;
-                if (table.ContainsKey(strLevel) == true)
-                    value = (int)table[strLevel];
-                table[strLevel] = value + 1;
-            }
+                List<string> list = new List<string>();
+                Hashtable table = new Hashtable();  // strKey --> int
+                foreach (DpRow row in rows)
+                {
+                    string strLevel = row[COLUMN_LEVEL].Text;
 
-            foreach(string key in table.Keys)
+                    // throw new Exception("test");
+                    VerifyLevelString(strLevel);
+
+                    int value = 0;
+                    if (table.ContainsKey(strLevel) == true)
+                        value = (int)table[strLevel];
+                    table[strLevel] = value + 1;
+                }
+
+                foreach (string key in table.Keys)
+                {
+                    int index = Int32.Parse(key);
+                    int value = (int)table[key];
+                    SetValue(list, index - 1, value);
+                }
+
+                return list;
+            }
+            catch(Exception ex)
             {
-                int index = Int32.Parse(key);
-                int value = (int)table[key];
-                SetValue(list, index-1, value);
+                throw new Exception("BuildHitCountList() 出现异常: "
+                    + "strSourceKey=["+strSourceKey+"]"
+                    + BuildRowLines(rows), ex);
             }
-
-            return list;
         }
 
         static void SetValue(List<string> list, int index, int value)
@@ -1365,6 +1404,13 @@ bool bClickClose = false)
                         return -2;
                     return nCount;
                 }
+#if NO
+                catch (Exception ex)
+                {
+                    string strContent = BuildDebugInfo(this);
+                    throw new Exception(strContent, ex);
+                }
+#endif
                 finally
                 {
                     _stop.EndLoop();
