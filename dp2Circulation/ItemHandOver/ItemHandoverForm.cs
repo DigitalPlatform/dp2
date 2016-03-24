@@ -202,6 +202,7 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
+
             CreateColumnHeader(this.listView_in);
 
             CreateColumnHeader(this.listView_outof);

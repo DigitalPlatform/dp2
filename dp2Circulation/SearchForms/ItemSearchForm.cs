@@ -68,6 +68,11 @@ namespace dp2Circulation
         public string ExportItemRecPathFilename = "";
 
         /// <summary>
+        /// 最近一次导出到书目转储文件时使用过的文件名
+        /// </summary>
+        public string ExportBiblioDumpFilename = "";
+
+        /// <summary>
         /// 浏览框。显示检索命中记录的浏览格式
         /// </summary>
         public ListView ListViewRecords
@@ -1623,6 +1628,9 @@ this.DbType + "_search_form",
             this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             // this.MainForm.MenuItem_font.Enabled = false;
             // this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+
+            this.MainForm.toolStripDropDownButton_barcodeLoadStyle.Enabled = true;
+            this.MainForm.toolStripTextBox_barcode.Enabled = true;
         }
 
         // 装入种册窗/实体窗，用册条码号/记录路径
@@ -2332,6 +2340,15 @@ out strError);
                 if (nSelectedItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
+
+                if (this.DbType == "item")
+                {
+                    subMenuItem = new MenuItem("到书目转储文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                    subMenuItem.Click += new System.EventHandler(this.menu_exportBiblioDumpFile_Click);
+                    if (nPathItemCount == 0)
+                        subMenuItem.Enabled = false;
+                    menuItemExport.MenuItems.Add(subMenuItem);
+                }
 
                 // ---
                 subMenuItem = new MenuItem("-");
@@ -4951,6 +4968,129 @@ MessageBoxDefaultButton.Button1);
             listView_records_SelectedIndexChanged(null, null);
         }
 
+        // 往列表中追加若干册条码号
+        // return:
+        //      -1  出错
+        //      0   成功
+        //      1   成功，但有警告，警告在 strError 中返回
+        public int AppendBarcodes(List<string> barcodes,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            SetStatusMessage("");   // 清除以前残留的显示
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导入条码号 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                // 准备查重
+                Hashtable table = new Hashtable();
+                foreach (ListViewItem item in this.listView_records.Items)
+                {
+                    string strBarcode = "";
+                    // 根据 ListViewItem 对象，获得册条码号列的内容
+                    nRet = GetItemBarcodeOrRefID(
+                        item,
+                        true,
+                        out strBarcode,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    table[strBarcode] = 1;
+                }
+
+                List<string> dups = new List<string>();
+                List<string> errors = new List<string>();
+
+                // 导入的事项是没有序的，因此需要清除已有的排序标志
+                ListViewUtil.ClearSortColumns(this.listView_records);
+
+                stop.SetProgressRange(0, barcodes.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+
+                int i = 0;
+                foreach (string strBarcode in barcodes)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    stop.SetProgressValue(i);
+
+                    if (strBarcode == null)
+                        break;
+
+                    if (table.ContainsKey(strBarcode) == true)
+                    {
+                        dups.Add(strBarcode);
+                        continue;
+                    }
+
+                    ListViewItem item = new ListViewItem();
+                    item.Text = "";
+
+                    // return:
+                    //      false   出现错误
+                    //      true    成功
+                    if (FillLineByBarcode(strBarcode, item) == true)
+                    {
+                        this.listView_records.Items.Add(item);
+                        items.Add(item);
+                    }
+                    else
+                        errors.Add(item.SubItems[2].Text);
+
+                    i++;
+                }
+
+                // 刷新浏览行
+                nRet = RefreshListViewLines(items,
+                    "",
+                    false,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 刷新书目摘要
+                nRet = FillBiblioSummaryColumn(items,
+                    false,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(errors, "\r\n");
+                    return -1;
+                }
+
+                if (dups.Count > 0)
+                {
+                    strError = "下列册条码号已经在列表中存在了: " + StringUtil.MakePathList(dups);
+                    return 1;
+                }
+                return 0;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+            }
+        }
+
+
         // TODO: 优化速度
         void menu_importFromBarcodeFile_Click(object sender, EventArgs e)
         {
@@ -4991,7 +5131,6 @@ MessageBoxDefaultButton.Button1);
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_records);
 
-
                 if (this.listView_records.Items.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
@@ -5016,25 +5155,18 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
 
                     string strBarcode = sr.ReadLine();
 
                     stop.SetProgressValue(sr.BaseStream.Position);
 
-
                     if (strBarcode == null)
                         break;
-
-                    // 
-
 
                     ListViewItem item = new ListViewItem();
                     item.Text = "";
@@ -5143,8 +5275,6 @@ MessageBoxDefaultButton.Button1);
 
             return 0;
         }
-
-
 
         // 导出选择的行中有路径的部分行 的条码栏内容 为条码号文件
         void menu_exportBarcodeFile_Click(object sender, EventArgs e)
@@ -5409,6 +5539,227 @@ MessageBoxDefaultButton.Button1);
 
             return 1;
         }
+
+        int GetSelectedBiblioRecPath(
+            ref List<string> biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
+            ref Hashtable groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+            int i = 0;
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                stop.SetProgressValue(i++);
+
+                Application.DoEvents();	// 出让界面控制权
+
+                if (stop != null
+                    && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
+                if (string.IsNullOrEmpty(item.Text) == true)
+                    continue;
+
+                int nCol = -1;
+                string strBiblioRecPath = "";
+                // 获得事项所从属的书目记录的路径
+                // return:
+                //      -1  出错
+                //      0   相关数据库没有配置 parent id 浏览列
+                //      1   找到
+                nRet = GetBiblioRecPath(item,
+                    true,
+                    out nCol,
+                    out strBiblioRecPath,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                    return -1;
+
+                List<string> item_recpaths = (List<string>)groupTable[strBiblioRecPath];
+                if (item_recpaths == null)
+                {
+                    biblioRecPathList.Add(strBiblioRecPath);
+                    item_recpaths = new List<string>();
+                    groupTable[strBiblioRecPath] = item_recpaths;
+                }
+
+                item_recpaths.Add(item.Text);
+            }
+
+            return 0;
+        }
+
+        // 保存选择的行中的有路径的部分行 到书目转储文件
+        // 需要先将册记录按照书目记录路径聚集
+        void menu_exportBiblioDumpFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            List<string> biblioRecPathList = new List<string>();   // 按照出现先后的顺序存储书目记录路径
+
+            Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
+
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的书目转储文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = this.ExportBiblioDumpFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "书目转储文件 (*.bdf)|*.bdf|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.ExportBiblioDumpFilename = dlg.FileName;
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出书目转储记录 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                using (XmlTextWriter w = new XmlTextWriter(
+                    this.ExportBiblioDumpFilename, Encoding.UTF8))
+                {
+                    w.Formatting = Formatting.Indented;
+                    w.Indentation = 4;
+
+                    w.WriteStartDocument();
+                    w.WriteStartElement("dprms", "collection", DpNs.dprms);
+                    w.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+
+                    nRet = GetSelectedBiblioRecPath(
+                        ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
+                        ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    foreach (string strBiblioRecPath in biblioRecPathList)
+                    {
+                        Application.DoEvents();
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        string[] results = null;
+                        byte[] baTimestamp = null;
+
+                        stop.SetMessage("正在获取书目记录 " + strBiblioRecPath);
+
+                        long lRet = Channel.GetBiblioInfos(
+                            stop,
+                            strBiblioRecPath,
+                            "",
+                            new string[] { "xml" },   // formats
+                            out results,
+                            out baTimestamp,
+                            out strError);
+                        if (lRet == 0)
+                            goto ERROR1;
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        if (results == null || results.Length == 0)
+                        {
+                            strError = "results error";
+                            goto ERROR1;
+                        }
+
+                        string strXml = results[0];
+                        XmlDocument domBiblio = new XmlDocument();
+                        domBiblio.LoadXml(strXml);
+
+                        // 写入 dprms:record 元素
+                        w.WriteStartElement("dprms", "record", DpNs.dprms);
+
+                        // 写入 dprms:biblio 元素
+                        w.WriteStartElement("dprms", "biblio", DpNs.dprms);
+
+#if NO
+                        // 给根元素设置几个参数
+                        DomUtil.SetAttr(domBiblio.DocumentElement, "path", DpNs.dprms, this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                        DomUtil.SetAttr(domBiblio.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
+#endif
+
+                        w.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + strBiblioRecPath);
+                        w.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(baTimestamp));
+                        
+                        domBiblio.DocumentElement.WriteTo(w);
+                        w.WriteEndElement();
+
+                        w.WriteStartElement("dprms", "itemCollection", DpNs.dprms);
+                        List<string> item_recpaths = (List<string>)groupTable[strBiblioRecPath];
+                        foreach (string item_recpath in item_recpaths)
+                        {
+
+                            string strItemXml = "";
+                            byte[] baItemTimestamp = null;
+                            // 获得一条记录
+                            //return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = GetRecord(
+            item_recpath,
+            out strItemXml,
+            out baItemTimestamp,
+            out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            XmlDocument item_dom = new XmlDocument();
+                            item_dom.LoadXml(strItemXml);
+
+                            w.WriteStartElement("dprms", "item", DpNs.dprms);
+                            w.WriteAttributeString("path", item_recpath);
+                            w.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(baItemTimestamp));
+                            DomUtil.RemoveEmptyElements(item_dom.DocumentElement);
+                            item_dom.DocumentElement.WriteContentTo(w);
+                            w.WriteEndElement();
+                        }
+                        w.WriteEndElement();
+
+                        // 收尾 dprms:record 元素
+                        w.WriteEndElement();
+                    }
+
+                    w.WriteEndElement();
+                    w.WriteEndDocument();
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+            }
+
+            this.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         // 将从属的书目记录保存到MARC文件
         void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)

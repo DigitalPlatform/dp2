@@ -131,7 +131,6 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-
         // 一次操作循环
         public override void Worker()
         {

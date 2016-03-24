@@ -2106,6 +2106,12 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("导出书目转储文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_saveToBiblioDumpFile_Click);
+                if (this.listView_records.SelectedItems.Count == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
             }
 
             // 装入其它查询窗
@@ -4284,6 +4290,10 @@ MessageBoxDefaultButton.Button1);
 
                     stop.SetMessage("正在" + strActionName + "书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
 
+                    // 2016/3/23
+                    channel.Timeout = new TimeSpan(0, 40, 0);   // 复制的时候可能需要复制对象，所需时间一般很长
+
+                REDO:
                     // result.Value:
                     //      -1  出错
                     //      0   成功，没有警告信息。
@@ -4303,11 +4313,24 @@ MessageBoxDefaultButton.Button1);
                         out baOutputTimestamp,
                         out strError);
                     if (lRet == -1)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+"复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + strError + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                        if (result == System.Windows.Forms.DialogResult.Yes)
+                            goto REDO;
+                        if (result == System.Windows.Forms.DialogResult.No)
+                            goto CONTINUE;
                         goto ERROR1;
+                    }
 
                     if (bCopy == false)
                         moved_items.Add(item);
 
+                CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
@@ -5771,6 +5794,7 @@ MessageBoxDefaultButton.Button2);
 
                     byte[] baNewTimestamp = null;
 
+                    channel.Timeout = new TimeSpan(0, 5, 0);
                     lRet = channel.SetBiblioInfo(
                         stop,
                         "delete",
@@ -5950,6 +5974,362 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        // 导出到书目转储文件
+        void menu_saveToBiblioDumpFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的书目转储件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "书目转储文件 (*.bdf)|*.bdf|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出到 XML 文件 ...");
+            stop.BeginLoop();
+
+            XmlTextWriter writer = null;
+
+            try
+            {
+                writer = new XmlTextWriter(dlg.FileName, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                strError = "创建文件 " + dlg.FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("dprms", "collection", DpNs.dprms);
+
+                writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+#if NO
+                writer.WriteAttributeString("xmlns", "unimarc", null, DigitalPlatform.Xml.Ns.unimarcxml);
+                writer.WriteAttributeString("xmlns", "marc21", null, DigitalPlatform.Xml.Ns.usmarcxml);
+#endif
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    string strXml = "";
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
+
+                    if (string.IsNullOrEmpty(strXml) == true)
+                        goto CONTINUE;
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "XML 装入 DOM 时出错: " + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    if (dom.DocumentElement == null)
+                        goto CONTINUE;
+
+                    // 写入 dprms:record 元素
+                    writer.WriteStartElement("dprms", "record", DpNs.dprms);
+
+                    {
+                        // 写入 dprms:biblio 元素
+                        writer.WriteStartElement("dprms", "biblio", DpNs.dprms);
+
+                        writer.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);
+                        writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));
+
+                        dom.DocumentElement.WriteTo(writer);
+                        writer.WriteEndElement();
+                    }
+
+                    string strBiblioDbName = StringUtil.GetDbName(item.BiblioInfo.RecPath);
+                    BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
+                    if (prop == null)
+                    {
+                        strError = "数据库名 '"+strBiblioDbName+"' 没有找到属性定义";
+                        goto ERROR1;
+                    }
+
+                    if (string.IsNullOrEmpty(prop.OrderDbName) == false)
+                    {
+                        // dprms:orderCollection
+                        nRet = OutputEntities(
+                            stop,
+                            channel,
+                            item.BiblioInfo.RecPath,
+                            "order",
+                            writer,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    if (string.IsNullOrEmpty(prop.IssueDbName) == false)
+                    {
+                        // dprms:issueCollection
+                        nRet = OutputEntities(
+                            stop,
+                            channel,
+                            item.BiblioInfo.RecPath,
+                            "issue",
+                            writer,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    if (string.IsNullOrEmpty(prop.ItemDbName) == false)
+                    {
+                        // dprms:itemCollection
+                        nRet = OutputEntities(
+                            stop,
+                            channel,
+                            item.BiblioInfo.RecPath,
+                            "item",
+                            writer,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    if (string.IsNullOrEmpty(prop.CommentDbName) == false)
+                    {
+                        // dprms:commentCollection
+                        nRet = OutputEntities(
+                            stop,
+                            channel,
+                            item.BiblioInfo.RecPath,
+                            "comment",
+                            writer,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    // 收尾 dprms:record 元素
+                    writer.WriteEndElement();
+
+                CONTINUE:
+                    stop.SetProgressValue(++i);
+                }
+
+                writer.WriteEndElement();   // </collection>
+                writer.WriteEndDocument();
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + dlg.FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                writer.Close();
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.ReturnChannel(channel);
+
+                this.EnableControls(true);
+            }
+
+            MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+                + "条记录成功保存到文件 " + dlg.FileName;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        public static int OutputEntities(
+            Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            string strDbType,
+            XmlTextWriter writer,
+            out string strError)
+        {
+            strError = "";
+
+            bool bBegin = false;
+
+            long lPerCount = 100; // 每批获得多少个
+            long lStart = 0;
+            long lResultCount = 0;
+            long lCount = -1;
+            for (; ; )
+            {
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
+                EntityInfo[] entities = null;
+
+                long lRet = 0;
+
+                channel.Timeout = new TimeSpan(0, 5, 0);
+                if (strDbType == "item")
+                {
+                    lRet = channel.GetEntities(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (strDbType == "order")
+                {
+                    lRet = channel.GetOrders(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (strDbType == "issue")
+                {
+                    lRet = channel.GetIssues(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (strDbType == "comment")
+                {
+                    lRet = channel.GetComments(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (lRet == -1)
+                    return -1;
+
+                lResultCount = lRet;
+
+                if (lRet == 0)
+                    return 0;
+
+                Debug.Assert(entities != null, "");
+
+                foreach (EntityInfo info in entities)
+                {
+                    if (info.ErrorCode != ErrorCodeValue.NoError)
+                    {
+                        strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                        return -1;
+                    }
+
+                    if (bBegin == false)
+                    {
+                        writer.WriteStartElement("dprms", strDbType + "Collection", DpNs.dprms);
+                        bBegin = true;
+                    }
+
+                    XmlDocument item_dom = new XmlDocument();
+                    item_dom.LoadXml(info.OldRecord);
+
+                    writer.WriteStartElement("dprms", strDbType, DpNs.dprms);
+                    writer.WriteAttributeString("path", info.OldRecPath);
+                    writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(info.OldTimestamp));
+                    DomUtil.RemoveEmptyElements(item_dom.DocumentElement);
+                    item_dom.DocumentElement.WriteContentTo(writer);
+                    writer.WriteEndElement();
+                }
+
+                lStart += entities.Length;
+                if (lStart >= lResultCount)
+                    break;
+
+                if (lCount == -1)
+                    lCount = lPerCount;
+
+                if (lStart + lCount > lResultCount)
+                    lCount = lResultCount - lStart;
+            }
+
+            if (bBegin == true)
+                writer.WriteEndElement();
+
+            return 1;
+        }
+
         void menu_saveToXmlFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5961,11 +6341,13 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+#if NO
             Encoding preferredEncoding = this.CurrentEncoding;
 
             {
                 // 观察要保存的第一条记录的marc syntax
             }
+#endif
 
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
@@ -7190,6 +7572,7 @@ MessageBoxDefaultButton.Button2);
                             strStyle = "id,cols";
                     }
 
+                    channel.Timeout = new TimeSpan(0, 5, 0);
                     long lRet = channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName

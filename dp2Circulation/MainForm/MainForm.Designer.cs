@@ -216,6 +216,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
+            this.MenuItem_importExport = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -959,6 +960,7 @@ namespace dp2Circulation
             this.MenuItem_printAccountBook,
             this.MenuItem_printBindingList,
             this.MenuItem_inventory,
+            this.MenuItem_importExport,
             this.toolStripSeparator17,
             this.MenuItem_openTestSearch});
             this.MenuItem_batch.Name = "MenuItem_batch";
@@ -1744,6 +1746,13 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_importExport
+            // 
+            this.MenuItem_importExport.Name = "MenuItem_importExport";
+            this.MenuItem_importExport.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_importExport.Text = "导入导出(&I)";
+            this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1972,6 +1981,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_userManage;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_messageHub;
         private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_relogin;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_importExport;
     }
 }
 
