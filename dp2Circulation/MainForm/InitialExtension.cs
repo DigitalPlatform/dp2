@@ -1834,6 +1834,44 @@ MessageBoxDefaultButton.Button1);
             return false;
         }
 
+        // 判断两个文件的版本号是否一致
+        static bool VersionChanged(string filename1, string filename2)
+        {
+            if (File.Exists(filename1) == false)
+                return false;
+            if (File.Exists(filename2) == false)
+                return false;
+            string strVersion1 = GetVersion(filename1);
+            string strVersion2 = GetVersion(filename2);
+            if (strVersion1 == strVersion2)
+                return false;
+            return true;
+        }
+
+        // 获得一个文件的版本号
+        static string GetVersion(string filename)
+        {
+            string strExt = Path.GetExtension(filename).ToLower();
+            if (strExt == ".xml")
+            {
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.Load(filename);
+                }
+                catch
+                {
+                    return null;
+                }
+
+                if (dom.DocumentElement == null)
+                    return null;
+                return dom.DocumentElement.GetAttribute("version");
+            }
+
+            return null;
+        }
+
         // 从数据目录 default 子目录复制配置文件到用户目录
         // 如果用户目录中已经有同名文件存在，则不复制了
         // 这种做法，是为了让用户可以修改实际使用的配置文件，并且在升级安装的时候，用户目录内的文件不会被安装修改原始的配置文件过程所覆盖
@@ -1868,6 +1906,7 @@ MessageBoxDefaultButton.Button1);
             filenames.Add("patron_change_actions.xml");
             filenames.Add("856_change_actions.xml");
 #endif
+            filenames.Add("patronrights.xml");
 
             FileInfo[] fis = di.GetFiles("*.*");
             foreach (FileInfo fi in fis)
@@ -1875,10 +1914,11 @@ MessageBoxDefaultButton.Button1);
                 if (filenames.IndexOf(fi.Name.ToLower()) != -1)
                     filenames.Remove(fi.Name.ToLower());
 
-                string strTargetFileName = Path.Combine(this.UserDir, fi.Name);
-                if (File.Exists(strTargetFileName) == false)    // 偶尔会出现判断错误
-                {
                     string strSourceFileName = fi.FullName;
+                string strTargetFileName = Path.Combine(this.UserDir, fi.Name);
+                if (File.Exists(strTargetFileName) == false    // 偶尔会出现判断错误
+                    || VersionChanged(strSourceFileName, strTargetFileName) == true)
+                {
 #if DEBUG
                     if (File.Exists(strSourceFileName) == false)
                     {
@@ -1888,7 +1928,7 @@ MessageBoxDefaultButton.Button1);
 #endif
                     try
                     {
-                        File.Copy(strSourceFileName, strTargetFileName, false);
+                        File.Copy(strSourceFileName, strTargetFileName, true);
                     }
                     catch (IOException)
                     {

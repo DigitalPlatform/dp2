@@ -1,27 +1,27 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<root>
+<root version='0.01'>
   <property name='level-1'>
-    <comment lang='chi'>第一级</comment>
-    <comment lang='eng'>Level 1</comment>
+    <comment lang='zh'>第一级</comment>
+    <comment lang='en'>Level 1</comment>
   </property>
   <property name='level-2'>
-    <comment lang='chi'>第二级</comment>
-    <comment lang='eng'>Level 2</comment>
+    <comment lang='zh'>第二级</comment>
+    <comment lang='en'>Level 2</comment>
   </property>
   <property name='level-3'>
-    <comment lang='chi'>第三级</comment>
-    <comment lang='eng'>Level 3</comment>
+    <comment lang='zh'>第三级</comment>
+    <comment lang='en'>Level 3</comment>
   </property>
   <property name='level-4'>
-    <comment lang='chi'>第四级</comment>
-    <comment lang='eng'>Level 4</comment>
+    <comment lang='zh'>第四级</comment>
+    <comment lang='en'>Level 4</comment>
   </property>
   <property name='patron'>
-    <comment lang='chi'>读者</comment>
-    <comment lang='eng'>Patron</comment>
+    <comment lang='zh'>读者</comment>
+    <comment lang='en'>Patron</comment>
   </property>
   <property name='librarian'>
-    <comment lang='chi'>工作人员</comment>
-    <comment lang='eng'>Librarian</comment>
+    <comment lang='zh'>工作人员</comment>
+    <comment lang='en'>Librarian</comment>
   </property>
 </root>

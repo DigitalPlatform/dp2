@@ -94,6 +94,11 @@ ref sessioninfo) == false)
             {
                 this.Response.StatusCode = 403;
                 this.Response.StatusDescription = strError + "。请重新登录";
+                // 2016/3/26
+                this.Response.Write("<html><body><p>"+HttpUtility.HtmlEncode(strError)+"</p>"
+                    + "<p><a href='./searchbiblio.aspx'>返回主页</a></p>"
+                    + "<p><a href='./login.aspx?loginstyle=librarian&redirect=./report.aspx'>重新登录</a></p>"
+                    + "</body></html>");
                 this.Response.End();
                 return;
             }

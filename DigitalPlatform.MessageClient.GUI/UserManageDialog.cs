@@ -113,7 +113,12 @@ namespace DigitalPlatform.MessageClient
             this.EnableControls(false);
             try
             {
-                this.Connection.SetUsers("create", users);
+                MessageResult result = this.Connection.SetUsers("create", users);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
             }
             catch (AggregateException ex)
             {
@@ -195,11 +200,18 @@ namespace DigitalPlatform.MessageClient
             ListViewItem item = this.listView1.SelectedItems[0];
             UserDialog dlg = new UserDialog();
             dlg.Font = this.Font;
+            dlg.ChangeMode = true;
             dlg.UserItem = (UserItem)item.Tag;
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
+
+            if (dlg.Changed == false && dlg.ChangePassword == false)
+            {
+                MessageBox.Show(this, "没有发生修改");
+                return;
+            }
 
             List<UserItem> users = new List<UserItem>();
             UserItem user = dlg.UserItem;
@@ -208,7 +220,32 @@ namespace DigitalPlatform.MessageClient
             this.EnableControls(false);
             try
             {
-                this.Connection.SetUsers("change", users);
+                if (dlg.Changed == true)
+                {
+                    MessageResult result = this.Connection.SetUsers("change", users);
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        // 如果这里返回出错仅仅是因为权限不够，还需要尝试继续执行后面的修改密码的操作
+                        if (result.String != "Denied")
+                            goto ERROR1;
+                    }
+                }
+
+                if (dlg.ChangePassword)
+                {
+                    MessageResult result = this.Connection.SetUsers("changePassword", users);
+                    if (result.Value == -1)
+                    {
+                        if (string.IsNullOrEmpty(strError) == false)
+                            strError += "; ";
+                        strError += result.ErrorInfo;
+                        goto ERROR1;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strError) == false)
+                    goto ERROR1;
             }
             catch (AggregateException ex)
             {
@@ -248,14 +285,16 @@ namespace DigitalPlatform.MessageClient
                 goto ERROR1;
             }
 
-            DialogResult result = MessageBox.Show(this,
-"确实要删除选定的 " + this.listView1.SelectedItems.Count.ToString() + " 个用户?",
-"UserManageDialog",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-            if (result != DialogResult.Yes)
-                return;
+            {
+                DialogResult result = MessageBox.Show(this,
+    "确实要删除选定的 " + this.listView1.SelectedItems.Count.ToString() + " 个用户?",
+    "UserManageDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+            }
 
             List<UserItem> users = new List<UserItem>();
             foreach (ListViewItem item in this.listView1.SelectedItems)
@@ -267,7 +306,12 @@ MessageBoxDefaultButton.Button2);
             this.EnableControls(false);
             try
             {
-                this.Connection.SetUsers("delete", users);
+                MessageResult result = this.Connection.SetUsers("delete", users);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
             }
             catch (AggregateException ex)
             {

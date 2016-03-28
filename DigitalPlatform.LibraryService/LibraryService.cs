@@ -2380,7 +2380,7 @@ namespace dp2Library
             try
             {
                 // test
-                Thread.Sleep(new TimeSpan(0, 0, 30));
+                // Thread.Sleep(new TimeSpan(0, 0, 30));
 
                 // 权限判断
 

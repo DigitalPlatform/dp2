@@ -1297,7 +1297,9 @@ namespace DigitalPlatform.LibraryServer
             // 执行函数
             try
             {
-                return host.VerifyReader(strAction,
+                return host.VerifyReader(
+                    sessioninfo,
+                    strAction,
                     itemdom,
                     out strError);
             }
@@ -1335,7 +1337,9 @@ namespace DigitalPlatform.LibraryServer
         //      -1  调用出错
         //      0   校验正确
         //      1   校验发现错误
-        public virtual int VerifyReader(string strAction,
+        public virtual int VerifyReader(
+            SessionInfo sessioninfo,
+            string strAction,
             XmlDocument readerdom,
             out string strError)
         {
@@ -1363,7 +1367,49 @@ namespace DigitalPlatform.LibraryServer
 #endif
             }
 
+            string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+
+            // 检查读者权限。要求不能大于当前用户的权限
+            List<string> warning_rights = null;
+            if (IsLessOrEqualThan(strRights, sessioninfo.Rights, out warning_rights) == false)
+            {
+                strError = "读者记录中的权限超出了当前用户的权限，这是不允许的。超出的部分权限值 '" + StringUtil.MakePathList(warning_rights) + "'";
+                return 1;
+            }
+
             return 0;
+        }
+
+        // strLeft 包含的权限是否小于等于 strRight
+        static bool IsLessOrEqualThan(string strLeft, 
+            string strRight,
+            out List<string> warning_rights)
+        {
+            warning_rights = new List<string>();
+
+            if (string.IsNullOrEmpty(strLeft) && string.IsNullOrEmpty(strRight))
+                return true;
+            if (string.IsNullOrEmpty(strLeft))
+                return true;   // strLeft == 空 && strRight != 空
+            if (string.IsNullOrEmpty(strRight))
+            {
+                warning_rights = StringUtil.SplitList(strRight);
+                return false;   // strLeft != 空 && strRight == 空
+            }
+
+            string[] left = strLeft.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            string[] right = strRight.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach(string s in left)
+            {
+                if (Array.IndexOf<string>(right, s) == -1)
+                    warning_rights.Add(s);
+            }
+
+            if (warning_rights.Count > 0)
+                return false;
+
+            return true;
         }
 
         // return:

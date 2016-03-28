@@ -220,7 +220,6 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
                 }
             }
 
-
             if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
             {
                 ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
