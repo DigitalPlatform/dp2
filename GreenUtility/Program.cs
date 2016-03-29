@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using Ionic.Zip;
+using System.Collections;
 
 /*
  * 制作和解压绿色更新安装包的实用工具程序
@@ -700,6 +701,9 @@ namespace GreenUtility
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
+            _referenceTable.Clear();
+            BuildReferenceTable(dom, nsmgr, ref _referenceTable);
+
             XmlNodeList contents = dom.DocumentElement.SelectNodes("//ns:Content", nsmgr);
             foreach (XmlElement content in contents)
             {
@@ -735,20 +739,99 @@ namespace GreenUtility
                 return -1;
 
             // .exe .exe.config .exe.manifest
-            string strBinSourceDir = Path.Combine(strSourceDir, "bin/debug");
+            string strBinSourceDir = Path.Combine(strSourceDir, "bin\\debug");
             strZipFileName = Path.Combine(strTargetDir, "app.zip");
 
             filenames = GetExeFileNames(strBinSourceDir);
+
+            // Debug.Assert(false, "");
+            // 添加一些可能遗漏的文件 2016/3/29
+            /*
+    <PublishFile Include="DocumentFormat.OpenXml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+             * */
+            XmlNodeList publishFiles = dom.DocumentElement.SelectNodes("//ns:PublishFile", nsmgr);
+            foreach(XmlElement publishFile in publishFiles)
+            {
+                string strFileType = GetNodeInnerText(publishFile.SelectSingleNode("ns:FileType", nsmgr));
+                string strPublishState = GetNodeInnerText(publishFile.SelectSingleNode("ns:PublishState", nsmgr));
+                if (strFileType != "Assembly" || strPublishState != "Include")
+                    continue;
+                string strFileName = publishFile.GetAttribute("Include") + ".dll";
+                string strHintPath = (string)_referenceTable[strFileName];
+                if (string.IsNullOrEmpty(strHintPath))
+                    continue;
+                string strFilePath = Path.Combine(strSourceDir, strHintPath);
+
+                // 复制文件到 bin 目录
+                string strTargetPath = Path.Combine(strBinSourceDir, strFileName);
+                File.Copy(strFilePath, strTargetPath, true);
+
+                Console.WriteLine("追加文件: " + strTargetPath);
+                strFilePath = new FileInfo(strTargetPath).FullName;
+                if (filenames.IndexOf(strTargetPath) == -1)
+                    filenames.Add(strTargetPath);
+            }
+
             nRet = Compress(
-    strBinSourceDir,
-    filenames,
-    Encoding.UTF8,
-    strZipFileName,
-    out strError);
+strBinSourceDir,
+filenames,
+Encoding.UTF8,
+strZipFileName,
+out strError);
             if (nRet == -1)
                 return -1;
 
             return 0;
+        }
+
+        static Hashtable _referenceTable = new Hashtable(); // Reference 对照表。纯文件名 --> 相对路径
+
+        static void BuildReferenceTable(XmlDocument dom,
+            XmlNamespaceManager nsmgr,
+            ref Hashtable referenceTable)
+        {
+            /*
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+             * */
+            XmlNodeList references = dom.DocumentElement.SelectNodes("//ns:Reference", nsmgr);
+            foreach (XmlElement reference in references)
+            {
+                string strHintPath = GetNodeInnerText(reference.SelectSingleNode("ns:HintPath", nsmgr));
+                if (string.IsNullOrEmpty(strHintPath))
+                    continue;
+                string strFileName = GetLeft(reference.GetAttribute("Include")) + ".dll";
+                referenceTable[strFileName] = strHintPath;
+            }
+        }
+
+        // 获得逗号左边的字符串
+        static string GetLeft(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+            int nRet = strText.IndexOf(",");
+            if (nRet == -1)
+                return strText;
+            return strText.Substring(0, nRet).Trim();
+        }
+
+        static string GetNodeInnerText(XmlNode node)
+        {
+            if (node == null)
+                return "";
+            return node.InnerText.Trim();
         }
 
         static int Compress(
