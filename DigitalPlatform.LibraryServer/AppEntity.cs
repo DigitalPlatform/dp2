@@ -2201,7 +2201,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                if (strError != "")
+                if (string.IsNullOrEmpty(strError) == false)
                 {
                     EntityInfo error = new EntityInfo(info);
                     error.ErrorInfo = strError;

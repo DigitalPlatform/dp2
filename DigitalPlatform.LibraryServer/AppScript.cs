@@ -410,6 +410,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            // TODO: 如果两个版本的函数都定义了，会发生什么?
             MethodInfo mi = hostEntryClassType.GetMethod("VerifyBarcode");
             if (mi == null)
             {

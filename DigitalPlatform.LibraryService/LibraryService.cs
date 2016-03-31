@@ -858,7 +858,7 @@ namespace dp2Library
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version.CompareTo(new Version("2.8")) < 0)
+                if (version.CompareTo(new Version("2.13")) < 0)
                     return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
             }
 

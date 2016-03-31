@@ -2178,6 +2178,14 @@ out strError);
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
+
+                    subMenuItem = new MenuItem("校验册记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
+                    subMenuItem.Click += new System.EventHandler(this.menu_verifyItemRecord_Click);
+                    if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItem.MenuItems.Add(subMenuItem);
+
+
                     // ---
                     subMenuItem = new MenuItem("-");
                     menuItem.MenuItems.Add(subMenuItem);
@@ -2458,6 +2466,20 @@ out strError);
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
+        void menu_verifyItemRecord_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            nRet = VerifyItemRecord(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         void menu_borrow_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2499,6 +2521,139 @@ out strError);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        int VerifyItemRecord(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            Debug.Assert(this.DbType == "item", "");
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要进行批处理的事项";
+                return -1;
+            }
+
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            {
+                strError = "目前有长操作正在进行，无法进行校验册记录的操作";
+                return -1;
+            }
+
+            // 切换到“操作历史”属性页
+            this.MainForm.ActivateFixPage("history");
+
+            int nCount = 0;
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行校验册记录的操作 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    XmlDocument itemdom = new XmlDocument();
+                    try
+                    {
+                        itemdom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+
+                    string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+                    if (string.IsNullOrEmpty(strBarcode) == false)
+                    {
+
+                        string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+                        strLocation = StringUtil.GetPureLocationString(strLocation);
+
+                        string strLibraryCode = "";
+                        string strRoom = "";
+                        // 解析
+                        Global.ParseCalendarName(strLocation,
+                    out strLibraryCode,
+                    out strRoom);
+
+
+                        // <para>-2  服务器没有配置校验方法，无法校验</para>
+                        // <para>-1  出错</para>
+                        // <para>0   不是合法的条码号</para>
+                        // <para>1   是合法的读者证条码号</para>
+                        // <para>2   是合法的册条码号</para>
+                        nRet = this.MainForm.VerifyBarcode(
+        this.stop,
+        this.Channel,
+        strLibraryCode,
+        strBarcode,
+        null,
+        out strError);
+                        if (nRet == -2)
+                            return -1;
+                        if (nRet != 2)
+                        {
+                            if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
+                                strError = strLibraryCode + ": 这看起来是一个证条码号";
+
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + "册条码号 '" + strBarcode + "' 不合法: " + strError + "</div>");
+                        }
+
+                        nCount++;
+                    }
+
+                    stop.SetProgressValue(++i);
+                }
+
+                return nCount;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+            }
         }
 
 
@@ -5702,7 +5857,7 @@ MessageBoxDefaultButton.Button1);
 
                         w.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + strBiblioRecPath);
                         w.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(baTimestamp));
-                        
+
                         domBiblio.DocumentElement.WriteTo(w);
                         w.WriteEndElement();
 

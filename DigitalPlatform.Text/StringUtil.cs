@@ -16,6 +16,59 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static bool IsValidCMIS(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return false;
+            if (strText.Length == 16)
+            {
+                if (IsPureNumber(strText))
+                    return true;
+                return false;
+            }
+
+            if (strText.Length == 19)
+            {
+                char ch = strText[0];
+                if (ch == 'G' || ch == 'J' || ch == 'L')
+                {
+                    string strMiddle = strText.Substring(1, 16);    // 中间 16 位
+                    if (IsPureNumber(strMiddle) == false)
+                        return false;
+                    // 最后两位可能是数字或者大写字母
+                    if (char.IsLetterOrDigit(strText[18]) == false
+                        || char.IsLower(strText[18]) == true
+                        || char.IsLetterOrDigit(strText[17]) == false
+                        || char.IsLower(strText[17]) == true)
+                        return false;
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            return false;
+        }
+
+        // 检测一个号码字符串是否在指定的范围内
+        public static bool Between(string strNumber,
+            string strStart,
+            string strEnd)
+        {
+            if (strStart.Length != strEnd.Length)
+                throw new ArgumentException("strStart 和 strEnd 应当字符数相同");
+            if (strNumber == null)
+                throw new ArgumentException("strNumber 参数值不能为 null");
+
+            if (strNumber.Length != strStart.Length)
+                return false;
+            if (string.Compare(strNumber, strStart) < 0)
+                return false;
+            if (string.Compare(strNumber, strEnd) > 0)
+                return false;
+            return true;
+        }
+
         public static int CompareVersion(string strVersion1, string strVersion2)
         {
             if (string.IsNullOrEmpty(strVersion1) == true)
