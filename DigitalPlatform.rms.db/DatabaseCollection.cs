@@ -6218,6 +6218,30 @@ ChannelIdleEventArgs e);
 
         }
 
+        /*
+dp2LibraryXE 发生未知的异常:
+
+发生未捕获的异常: 
+Type: System.ObjectDisposedException
+Message: 已关闭 Safe handle
+Stack:
+   在 System.Runtime.InteropServices.SafeHandle.DangerousAddRef(Boolean& success)
+   在 System.StubHelpers.StubHelpers.SafeHandleAddRef(SafeHandle pHandle, Boolean& success)
+   在 Microsoft.Win32.Win32Native.SetEvent(SafeWaitHandle handle)
+   在 System.Threading.EventWaitHandle.Set()
+   在 DigitalPlatform.rms.DatabaseCommandTask.ThreadMain() 位置 c:\dp2-master\dp2\DigitalPlatform.rms.db\DatabaseCollection.cs:行号 6279
+   在 System.Threading.ThreadHelper.ThreadStart_Context(Object state)
+   在 System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+   在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+   在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+   在 System.Threading.ThreadHelper.ThreadStart()
+
+
+dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.2.9200.0
+本机 MAC 地址: F0DEF174382F,CC52AFE3CF21,8CA982C371DB,8CA982C371DA
+---
+         * */
         // 主函数
         public void ThreadMain()
         {
@@ -6276,7 +6300,15 @@ ChannelIdleEventArgs e);
             }
             finally  // 一定要返回信号
             {
-                m_event.Set();
+
+                try
+                {
+                    m_event.Set();
+                }
+                catch
+                {
+
+                }
 
                 // 本线程负责释放资源
                 CloseReader();

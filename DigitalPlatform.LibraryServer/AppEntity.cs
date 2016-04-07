@@ -3015,6 +3015,7 @@ namespace DigitalPlatform.LibraryServer
             return CheckItemLibraryCode(dom, strLibraryCodeList, out strLibraryCode, out strError);
         }
 
+        // TODO: location 海淀分馆/阅览室 应该属于 libraryCodeList 海淀分馆/*
         // 检查一个册记录的馆藏地点是否符合馆代码列表要求
         // parameters:
         //      strLibraryCodeList  当前用户管辖的馆代码列表
@@ -3055,20 +3056,21 @@ namespace DigitalPlatform.LibraryServer
 #endif
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
-            // 先试探一下，馆藏地点字符串是否和 strLibraryCodeList 完全一致。
-            // 这种检测主要是为了处理 strLibraryCodeList 传来 "西城分馆/集贤斋" 这样的个人书斋全路径的情况
-            if (strLocation == strLibraryCodeList)
-            {
-                // 在管辖范围内
-                return 0;
-            }
-
             string strPureName = "";
 
             // 将馆藏地点字符串分解为 馆代码+地点名 两个部分
             ParseCalendarName(strLocation,
         out strLibraryCode,
         out strPureName);
+
+            // 先试探一下，馆藏地点字符串是否和 strLibraryCodeList 完全一致。
+            // 这种检测主要是为了处理 strLibraryCodeList 传来 "西城分馆/集贤斋" 这样的个人书斋全路径的情况
+            if (strLocation == strLibraryCodeList)
+            {
+                // TODO: 2016/4/3 适当时候需要让 strLibrayCode = strLocation，以表示尽量精确的(读者所在馆代码)身份
+                // 在管辖范围内
+                return 0;
+            }
 
             // 即便是全局用户，也要到得到馆代码后函数才能返回
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
@@ -3845,6 +3847,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
+                // *** 检查旧记录的馆藏地点
                 // 检查一个册记录的馆藏地点是否符合馆代码列表要求
                 // return:
                 //      -1  检查过程出错
@@ -4093,7 +4096,6 @@ namespace DigitalPlatform.LibraryServer
                 // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
             }
 
-
             // 合并新旧记录
             string strNewXml = "";
             if (bForce == false)
@@ -4127,18 +4129,31 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strTargetLibraryCode = "";
-            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
-            // return:
-            //      -1  检查过程出错
-            //      0   符合要求
-            //      1   不符合要求
-            nRet = CheckItemLibraryCode(strNewXml,
-                sessioninfo,
-                // sessioninfo.LibraryCodeList,
-                        out strTargetLibraryCode,
-                        out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            {
+                // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+                // return:
+                //      -1  检查过程出错
+                //      0   符合要求
+                //      1   不符合要求
+                nRet = CheckItemLibraryCode(strNewXml,
+                    sessioninfo,
+                    // sessioninfo.LibraryCodeList,
+                    out strTargetLibraryCode,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 检查新记录是否属于管辖范围
+                if (sessioninfo.GlobalUser == false
+                    || sessioninfo.UserType == "reader")
+                {
+                    if (nRet != 0)
+                    {
+                        strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                        goto ERROR1;
+                    }
+                }
+            }
 
             // 2014/7/3
             if (this.VerifyBookType == true)
@@ -4164,17 +4179,6 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1 || nRet == 1)
                     goto ERROR1;
-            }
-
-            // 检查新记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false
-                || sessioninfo.UserType == "reader")
-            {
-                if (nRet != 0)
-                {
-                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
-                    goto ERROR1;
-                }
             }
 
             // 保存新记录

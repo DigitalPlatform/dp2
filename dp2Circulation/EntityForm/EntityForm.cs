@@ -4421,7 +4421,10 @@ true);
             }
             finally
             {
-                this.ShowMessage("记录保存成功", "green", true);
+                if (nErrorCount == 0)
+                    this.ShowMessage("记录保存成功", "green", true);
+                else
+                    this.ShowMessage("记录保存失败", "red", true);
 
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);

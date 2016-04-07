@@ -10,7 +10,6 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-
 namespace DigitalPlatform.ResultSet
 {
     //设计意图:

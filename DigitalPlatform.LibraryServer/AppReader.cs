@@ -863,25 +863,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                if (strAction == "new"
-        || strAction == "change"
-        || strAction == "changereaderbarcode"
-        || strAction == "move")
-                {
-                    nRet = this.DoVerifyReaderFunction(
-                        sessioninfo,
-                        strAction,
-                        domNewRec,
-                        out strError);
-                    if (nRet != 0)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
-                }
-
                 // 对读者证条码号查重，如果必要，并获得strRecPath
                 if ( // bBarcodeChanged == true &&
                     (strAction == "new"
@@ -892,7 +873,7 @@ namespace DigitalPlatform.LibraryServer
                     && String.IsNullOrEmpty(strNewBarcode) == false
                     )
                 {
-
+#if NO
                     // 验证条码号
                     if (this.VerifyBarcode == true)
                     {
@@ -932,6 +913,7 @@ namespace DigitalPlatform.LibraryServer
                             return result;
                         }
                     }
+#endif
 
                     List<string> aPath = null;
 
@@ -1004,6 +986,35 @@ namespace DigitalPlatform.LibraryServer
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.ReaderBarcodeDup;
+                        return result;
+                    }
+                }
+
+                if (strAction == "new"
+|| strAction == "change"
+|| strAction == "changereaderbarcode"
+|| strAction == "move")
+                {
+                    // 注：要在 strRecPath 决定后再进行此调用
+                    // return:
+                    //      -3  条码号错误
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = this.DoVerifyReaderFunction(
+                        sessioninfo,
+                        strAction,
+                        strRecPath,
+                        domNewRec,
+                        out strError);
+                    if (nRet != 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError + "。保存操作失败";
+                        if (nRet == -1)
+                            result.ErrorCode = ErrorCode.InvalidReaderBarcode;
+                        else
+                            result.ErrorCode = ErrorCode.SystemError;
                         return result;
                     }
                 }

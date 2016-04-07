@@ -63,7 +63,7 @@ namespace DigitalPlatform.LibraryServer
             byte[] baPathLength = BitConverter.GetBytes((Int32)nPathBytes);
             Debug.Assert(baPathLength.Length == 4, "");
 
-            this.Length = 4/*weight*/ + 4/*threshold*/ +  4/*length of path content */ + nPathBytes;
+            this.Length = 4/*weight*/ + 4/*threshold*/ + 4/*length of path content */ + nPathBytes;
 
 
             m_buffer = new byte[this.Length];
@@ -216,7 +216,7 @@ namespace DigitalPlatform.LibraryServer
 
             int delta = this.Weight - item.Weight;
             if (delta != 0)
-                return -1*delta;    // 大在前
+                return -1 * delta;    // 大在前
 
             // 如权值相同，再按照路径排序
             // 小在前
@@ -233,7 +233,7 @@ namespace DigitalPlatform.LibraryServer
 
             int delta = over1 - over2;
             if (delta != 0)
-                return -1*delta;    // 大在前
+                return -1 * delta;    // 大在前
 
             // 如差额相同，再按照路径排序
             // 小在前
@@ -250,12 +250,10 @@ namespace DigitalPlatform.LibraryServer
         // 排序风格
         public DupResultSetSortStyle SortStyle = DupResultSetSortStyle.Path;
 
-
         public DupResultSet()
         {
 
         }
-
 
         public override Item NewItem()
         {
@@ -291,9 +289,7 @@ namespace DigitalPlatform.LibraryServer
                 Debug.Assert(false, "invalid sort style");
                 return 0;
             }
-
         }
-
 
         // 功能: 合并两个数组
         // parameters:
@@ -438,7 +434,6 @@ namespace DigitalPlatform.LibraryServer
                         strDebugInfo += "dpRecordLeft与dpRecordRight均不为null，比较两条记录得到ret等于" + Convert.ToString(ret) + "<br/>";
                     }
                 }
-
 
                 if (String.Compare(strStyle, "OR", true) == 0
                     && targetMiddle != null)

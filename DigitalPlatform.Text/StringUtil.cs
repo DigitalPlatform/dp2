@@ -30,7 +30,10 @@ namespace DigitalPlatform.Text
             if (strText.Length == 19)
             {
                 char ch = strText[0];
-                if (ch == 'G' || ch == 'J' || ch == 'L')
+                if (
+                    // ch == 'G' || ch == 'J' || ch == 'L'
+                    char.IsLetter(ch) && char.IsUpper(ch)
+                    )
                 {
                     string strMiddle = strText.Substring(1, 16);    // 中间 16 位
                     if (IsPureNumber(strMiddle) == false)

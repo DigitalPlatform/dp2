@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
+using System.IO;
 
 // using DigitalPlatform.rms.Client.rmsws_localhost;   // Record
 
@@ -56,7 +57,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            dupset.EnsureCreateIndex();
+            dupset.EnsureCreateIndex(getTempFileName);
 
             int nCount = (int)lCount;
             int nStart = (int)lStart;
@@ -81,7 +82,6 @@ namespace DigitalPlatform.LibraryServer
             bool bExcludeCols = (StringUtil.IsInList("excludecolsoflowthreshold", strBrowseInfoStyle) == true);
 
             bool bCols = (StringUtil.IsInList("cols", strBrowseInfoStyle) == true);
-
 
             List<string> pathlist = new List<string>();
 
@@ -151,7 +151,6 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
             return result;
-
         }
 
         // 列出查重方案信息
@@ -296,9 +295,9 @@ namespace DigitalPlatform.LibraryServer
 
                 List<AccessKeyInfo> aKeyLine = null;
                 // 模拟创建检索点，以获得检索点列表
-        // return:
-        //      -1  error
-        //      0   succeed
+                // return:
+                //      -1  error
+                //      0   succeed
                 nRet = GetKeys(
                     // sessioninfo.Channels,
                     channel,
@@ -310,104 +309,151 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
 
                 DupResultSet onedatabase_set = null;    // 一个库的结果集
-
-
-                XmlNodeList accesspoints = nodeDatabase.SelectNodes("accessPoint");
-                // <accessPoint>循环
-                for (int j = 0; j < accesspoints.Count; j++)
+                try
                 {
-                    XmlNode accesspoint = accesspoints[j];
+                    XmlNodeList accesspoints = nodeDatabase.SelectNodes("accessPoint");
+                    // <accessPoint>循环
+                    for (int j = 0; j < accesspoints.Count; j++)
+                    {
+                        XmlNode accesspoint = accesspoints[j];
 
-                    string strFrom = DomUtil.GetAttr(accesspoint, "name");
+                        string strFrom = DomUtil.GetAttr(accesspoint, "name");
 
-                    // 获得from所对应的key
-                    List<string> keys = GetKeyByFrom(aKeyLine,
-                        strFrom);
-                    if (keys.Count == 0)
+                        // 获得from所对应的key
+                        List<string> keys = GetKeyByFrom(aKeyLine,
+                            strFrom);
+                        if (keys.Count == 0)
+                            continue;
+
+                        string strWeight = DomUtil.GetAttr(accesspoint, "weight");
+                        string strSearchStyle = DomUtil.GetAttr(accesspoint, "searchStyle");
+
+                        int nWeight = 0;
+                        try
+                        {
+                            nWeight = Convert.ToInt32(strWeight);
+                        }
+                        catch
+                        {
+                            // 警告定义问题?
+                        }
+
+                        for (int k = 0; k < keys.Count; k++)
+                        {
+                            string strKey = (string)keys[k];
+                            if (strKey == "")
+                                continue;
+
+                            DupResultSet dupset = null;
+                            try
+                            {
+                                // 针对一个from进行检索
+                                // return:
+                                //      -1  error
+                                //      0   not found
+                                //      1   found
+                                nRet = SearchOneFrom(
+                                    // sessioninfo.Channels,
+                                    channel,
+                                    strDatabaseName,
+                                    strFrom,
+                                    strKey,
+                                    strSearchStyle,
+                                    nWeight,
+                                    nThreshold,
+                                    5000,   // ???
+                                    (bIncludeOriginRecord == false) ? strOriginBiblioRecPath : null,
+                                    out dupset,
+                                    out strError);
+
+                                if (nRet == -1)
+                                {
+                                    // ??? 警告检索错误?
+                                    continue;
+                                }
+
+                                if (onedatabase_set == null)
+                                {
+                                    onedatabase_set = dupset;
+                                    dupset = null;  // 避免出 try 范围时被释放。因为内容已经转移给 onedatabase_set 了
+                                    continue;
+                                }
+
+                                if (nRet == 0)
+                                    continue;
+
+                                Debug.Assert(dupset != null, "");
+
+                                onedatabase_set.EnsureCreateIndex(getTempFileName);
+                                dupset.EnsureCreateIndex(getTempFileName);
+
+                                // 将dupset和前一个set归并
+                                // 归并可以参考ResultSet中的Merge算法
+                                DupResultSet tempset = new DupResultSet();
+                                tempset.Open(false, getTempFileName);
+                                // 功能: 合并两个数组
+                                // parameters:
+                                //		strStyle	运算风格 OR , AND , SUB
+                                //		sourceLeft	源左边结果集
+                                //		sourceRight	源右边结果集
+                                //		targetLeft	目标左边结果集
+                                //		targetMiddle	目标中间结果集
+                                //		targetRight	目标右边结果集
+                                //		bOutputDebugInfo	是否输出处理信息
+                                //		strDebugInfo	处理信息
+                                // return
+                                //		-1	出错
+                                //		0	成功
+                                nRet = DupResultSet.Merge("OR",
+                                    onedatabase_set,
+                                    dupset,
+                                    null,   // targetLeft,
+                                    tempset,
+                                    null,   // targetRight,
+                                    false,
+                                    out strDebugInfo,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+
+                                {
+                                    if (onedatabase_set != null)
+                                        onedatabase_set.Dispose();
+                                    onedatabase_set = tempset;
+                                }
+
+                            }
+                            finally
+                            {
+                                if (dupset != null)
+                                    dupset.Dispose();
+                            }
+                        } // end of k loop
+
+                    } // end of j loop
+
+
+                    if (alldatabase_set == null)
+                    {
+                        alldatabase_set = onedatabase_set;
+                        onedatabase_set = null; // 避免出 try 范围时被释放。因为内容已经转移给 alldatabase_set 了
                         continue;
-
-                    string strWeight = DomUtil.GetAttr(accesspoint, "weight");
-                    string strSearchStyle = DomUtil.GetAttr(accesspoint, "searchStyle");
-
-                    int nWeight = 0;
-                    try
-                    {
-                        nWeight = Convert.ToInt32(strWeight);
-                    }
-                    catch
-                    {
-                        // 警告定义问题?
                     }
 
-                    for (int k = 0; k < keys.Count; k++)
+                    // 合并
+                    if (onedatabase_set != null)
                     {
-                        string strKey = (string)keys[k];
-                        if (strKey == "")
-                            continue;
+                        DupResultSet tempset0 = new DupResultSet();
+                        tempset0.Open(false, getTempFileName);
 
-                        DupResultSet dupset = null;
+                        alldatabase_set.EnsureCreateIndex(getTempFileName);
+                        onedatabase_set.EnsureCreateIndex(getTempFileName);
 
-                        // 针对一个from进行检索
-                        // return:
-                        //      -1  error
-                        //      0   not found
-                        //      1   found
-                        nRet = SearchOneFrom(
-                            // sessioninfo.Channels,
-                            channel,
-                            strDatabaseName,
-                            strFrom,
-                            strKey,
-                            strSearchStyle,
-                            nWeight,
-                            nThreshold,
-                            5000,   // ???
-                            (bIncludeOriginRecord == false) ? strOriginBiblioRecPath : null,
-                            out dupset,
-                            out strError);
-
-                        if (nRet == -1)
-                        {
-                            // ??? 警告检索错误?
-                            continue;
-                        }
-
-                        if (onedatabase_set == null)
-                        {
-                            onedatabase_set = dupset;
-                            continue;
-                        }
-
-                        if (nRet == 0)
-                            continue;
-
-                        Debug.Assert(dupset != null, "");
-
-                        onedatabase_set.EnsureCreateIndex();
-                        dupset.EnsureCreateIndex();
-
-                        // 将dupset和前一个set归并
-                        // 归并可以参考ResultSet中的Merge算法
-                        DupResultSet tempset = new DupResultSet();
-                        tempset.Open(false);
-                        // 功能: 合并两个数组
-                        // parameters:
-                        //		strStyle	运算风格 OR , AND , SUB
-                        //		sourceLeft	源左边结果集
-                        //		sourceRight	源右边结果集
-                        //		targetLeft	目标左边结果集
-                        //		targetMiddle	目标中间结果集
-                        //		targetRight	目标右边结果集
-                        //		bOutputDebugInfo	是否输出处理信息
-                        //		strDebugInfo	处理信息
-                        // return
-                        //		-1	出错
-                        //		0	成功
                         nRet = DupResultSet.Merge("OR",
+                            alldatabase_set,
                             onedatabase_set,
-                            dupset,
                             null,   // targetLeft,
-                            tempset,
+                            tempset0,
                             null,   // targetRight,
                             false,
                             out strDebugInfo,
@@ -415,43 +461,18 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                             goto ERROR1;
 
-                        onedatabase_set = tempset;
+                        {
+                            if (alldatabase_set != null)
+                                alldatabase_set.Dispose();
 
-                    } // end of k loop
-
-                } // end of j loop
-
-
-                if (alldatabase_set == null)
-                {
-                    alldatabase_set = onedatabase_set;
-                    continue;
+                            alldatabase_set = tempset0;
+                        }
+                    }
                 }
-
-                // 合并
-                if (onedatabase_set != null)
+                finally
                 {
-                    DupResultSet tempset0 = new DupResultSet();
-                    tempset0.Open(false);
-
-
-                    alldatabase_set.EnsureCreateIndex();
-                    onedatabase_set.EnsureCreateIndex();
-
-
-                    nRet = DupResultSet.Merge("OR",
-                        alldatabase_set,
-                        onedatabase_set,
-                        null,   // targetLeft,
-                        tempset0,
-                        null,   // targetRight,
-                        false,
-                        out strDebugInfo,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    alldatabase_set = tempset0;
+                    if (onedatabase_set != null)
+                        onedatabase_set.Dispose();
                 }
             }
 
@@ -459,11 +480,14 @@ namespace DigitalPlatform.LibraryServer
             if (alldatabase_set != null)
             {
                 alldatabase_set.SortStyle = DupResultSetSortStyle.OverThreshold;
-                alldatabase_set.Sort();
+                alldatabase_set.Sort(getTempFileName);
             }
 
-
-            sessioninfo1.DupResultSet = alldatabase_set;
+            {
+                if (sessioninfo1.DupResultSet != null)
+                    sessioninfo1.DupResultSet.Dispose();
+                sessioninfo1.DupResultSet = alldatabase_set;
+            }
 
             if (alldatabase_set != null)
                 result.Value = alldatabase_set.Count;
@@ -475,6 +499,12 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
             return result;
+        }
+
+        string getTempFileName()
+        {
+            Debug.Assert(string.IsNullOrEmpty(this.TempDir) == false, "");
+            return Path.Combine(this.TempDir, "~dup_" + Guid.NewGuid().ToString());
         }
 
         // 针对一个from进行检索
@@ -540,13 +570,12 @@ namespace DigitalPlatform.LibraryServer
             List<string> aPath = null;
 
             dupset = new DupResultSet();
-            dupset.Open(false);
+            dupset.Open(false, getTempFileName);
 
             // 获得结果集，对逐个记录进行处理
             for (; ; )
             {
                 // TODO: 中间要可以中断
-
 
                 lRet = channel.DoGetSearchResult(
                     "dup",   // strResultSetName
@@ -591,7 +620,6 @@ namespace DigitalPlatform.LibraryServer
         ERROR1:
             return -1;
         }
-
 
         // 从模拟keys中根据from获得对应的key
         static List<string> GetKeyByFrom(List<AccessKeyInfo> aKeyLine,
@@ -668,10 +696,10 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            node = root.SelectSingleNode("project[@name='"+strProjectName+"']");
+            node = root.SelectSingleNode("project[@name='" + strProjectName + "']");
             if (node == null)
             {
-                strError = "查重方案 '" +strProjectName+ "' 的定义不存在";
+                strError = "查重方案 '" + strProjectName + "' 的定义不存在";
                 return 0;
             }
 

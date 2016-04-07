@@ -3359,7 +3359,7 @@ namespace dp2Library
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "复制书目信息被拒绝。不具备order或setbiblioinfo权限。";
+                    result.ErrorInfo = "复制书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9589,6 +9589,16 @@ namespace dp2Library
 
                 if (strCategory == "system")
                 {
+                    // 2016/4/6
+                    // 获得系统的临时文件目录
+                    if (strName == "systemTempDir")
+                    {
+                        string strTempFileName = Path.GetTempFileName();
+                        File.Delete(strTempFileName);
+                        strValue = Path.GetDirectoryName(strTempFileName);
+                        goto END1;
+                    }
+
                     if (strName == "libraryCodes")
                     {
                         List<string> librarycodes = new List<string>();

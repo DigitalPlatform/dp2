@@ -3564,8 +3564,6 @@ namespace DigitalPlatform.LibraryServer
                 {
                     IsInCirculation = this.ReaderDbs[i].InCirculation;
                     strLibraryCode = this.ReaderDbs[i].LibraryCode;
-
-
                     return true;
                 }
             }

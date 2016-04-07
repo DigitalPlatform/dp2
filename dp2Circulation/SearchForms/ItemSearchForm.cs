@@ -2547,6 +2547,8 @@ out strError);
 
             int nCount = 0;
 
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行册记录校验</div>");
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在进行校验册记录的操作 ...");
@@ -2634,6 +2636,11 @@ out strError);
 
                             this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
                             this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + "册条码号 '" + strBarcode + "' 不合法: " + strError + "</div>");
+
+                            {
+                                item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                                item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                            }
                         }
 
                         nCount++;
@@ -2653,6 +2660,8 @@ out strError);
                 stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行读者记录校验</div>");
             }
         }
 

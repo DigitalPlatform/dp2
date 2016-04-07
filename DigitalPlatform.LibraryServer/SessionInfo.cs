@@ -252,7 +252,6 @@ namespace DigitalPlatform.LibraryServer
             return this.m_strTempDir;
         }
 
-
         public void CloseSession()
         {
             if (this._closed == true)
@@ -275,6 +274,10 @@ namespace DigitalPlatform.LibraryServer
 
             if (this.Channels != null)
                 this.Channels.Dispose();
+
+            // 2016/4/5
+            if (this.DupResultSet != null)
+                this.DupResultSet.Dispose();
 
             this.ClientIP = "";
         }

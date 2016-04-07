@@ -3782,7 +3782,7 @@ nsmgr);
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备order或setbiblioinfo权限。";
+                    result.ErrorInfo = "设置书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
