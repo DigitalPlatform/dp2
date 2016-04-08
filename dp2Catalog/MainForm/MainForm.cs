@@ -4412,7 +4412,31 @@ out string strError)
         // 用亚马逊检索当前记录
         private void toolStripButton_searchA_Click(object sender, EventArgs e)
         {
+            // 从当前记录窗得到检索词
+            Form active = this.ActiveMdiChild;
+            if (active == null)
+                return;
+
+            string strUse = "";
+            string strQueryWord = "";
+            if (active is MarcDetailForm)
+            {
+                MarcDetailForm detailform = active as MarcDetailForm;
+                bool bRet = detailform.GetQueryContent(out strUse,
+                    out strQueryWord);
+                if (bRet == false)
+                {
+                    MessageBox.Show(this, "无法从当前记录窗 MARC 记录中获得检索词");
+                    return;
+                }
+            }
+
             AmazonSearchForm searchform = GetAmazonSearchForm();
+            if (searchform.WindowState == FormWindowState.Minimized)
+                searchform.WindowState = FormWindowState.Normal;
+            searchform.SetQueryContent(strUse, strQueryWord);
+            searchform.Activate();
+            searchform.DoSearch();
         }
 
         // 从当前窗口复制到固定窗口
