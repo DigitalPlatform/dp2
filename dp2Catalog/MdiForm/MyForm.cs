@@ -1,11 +1,12 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CommonControl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Catalog
 {
@@ -47,6 +48,15 @@ namespace dp2Catalog
         /// 窗口是否为浮动状态
         /// </summary>
         public virtual bool Floating
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 窗口是否为固定窗口。所谓固定窗口就是固定在某一侧的窗口
+        /// </summary>
+        public virtual bool Fixed
         {
             get;
             set;

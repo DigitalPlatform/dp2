@@ -263,7 +263,7 @@ namespace dp2Catalog
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = Path.Combine(this.DataDir, "servers.bin");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(this, "servers.bin 装载出现异常: " + ex.Message);
             }
@@ -373,7 +373,7 @@ namespace dp2Catalog
                 }
             }
 
-            string[] types = strOpenedMdiWindow.Split(new char[] {','});
+            string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
             for (int i = 0; i < types.Length; i++)
             {
                 string strType = types[i];
@@ -726,7 +726,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = "装载文件 " +strFileName+ " 到XMLDOM时出错: " + ex.Message;
+                strError = "装载文件 " + strFileName + " 到XMLDOM时出错: " + ex.Message;
                 return -1;
             }
 
@@ -1062,7 +1062,7 @@ namespace dp2Catalog
             finally
             {
                 save.RestoreAll();
-            } 
+            }
         }
 
         private void toolButton_save_Click(object sender, EventArgs e)
@@ -1257,6 +1257,55 @@ namespace dp2Catalog
             }
         }
 
+        public void SetMdiToNormal()
+        {
+            if (this.ActiveMdiChild != null)
+            {
+                if (this.ActiveMdiChild.WindowState != FormWindowState.Normal)
+                    this.ActiveMdiChild.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        MdiClient GetMdiClient()
+        {
+            Type t = typeof(Form);
+            PropertyInfo pi = t.GetProperty("MdiClient", BindingFlags.Instance | BindingFlags.NonPublic);
+            return (MdiClient)pi.GetValue(this, null);
+        }
+
+        // 设置窗口到左侧固定位置
+        public void SetFixedPosition(Form form, string strStyle)
+        {
+            MdiClient client = GetMdiClient();
+            if (strStyle == "left")
+            {
+                form.Location = new Point(0, 0);
+                form.Size = new Size((client.ClientSize.Width / 2) - 1, client.ClientSize.Height - 1);
+            }
+            else
+            {
+                form.Location = new Point(client.ClientSize.Width / 2, 0);
+                form.Size = new Size((client.ClientSize.Width / 2) - 1, client.ClientSize.Height - 1);
+            }
+        }
+
+        public MarcDetailForm FixedMarcDetailForm
+        {
+            get
+            {
+                foreach (Form form in this.MdiChildren)
+                {
+                    if (form is MarcDetailForm)
+                    {
+                        MarcDetailForm detail = form as MarcDetailForm;
+                        if (detail.Fixed)
+                            return detail;
+                    }
+                }
+                return null;
+            }
+        }
+
 
         // 当前顶层的DcForm
         public DcForm TopDcForm
@@ -1267,7 +1316,7 @@ namespace dp2Catalog
             }
         }
 
-        // 得到特定类型的顶层MDI窗口
+        // 得到特定类型的顶层MDI窗口。注，会忽略 fixed 类型的窗口
         Form GetTopChildWindow(Type type)
         {
             if (ActiveMdiChild == null)
@@ -1285,11 +1334,11 @@ namespace dp2Catalog
                     break;
 
                 Form child = null;
-                for (int j = 0; j < this.MdiChildren.Length; j++)
+                foreach (Form form in this.MdiChildren)
                 {
-                    if (hwnd == this.MdiChildren[j].Handle)
+                    if (hwnd == form.Handle)
                     {
-                        child = this.MdiChildren[j];
+                        child = form;
                         goto FOUND;
                     }
                 }
@@ -1298,7 +1347,14 @@ namespace dp2Catalog
             FOUND:
 
                 if (child.GetType().Equals(type) == true)
+                {
+                    if (child is MyForm)
+                    {
+                        if (((MyForm)child).Fixed)
+                            goto CONTINUE;
+                    }
                     return child;
+                }
 
             CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
@@ -1401,7 +1457,7 @@ namespace dp2Catalog
                 dp2SearchForm search = (dp2SearchForm)this.ActiveMdiChild;
                 search.SaveOriginRecordToIso2709();
             }
-            
+
         }
 
         private void MenuItem_openZhongcihaoForm_Click(object sender, EventArgs e)
@@ -1802,7 +1858,7 @@ namespace dp2Catalog
             strError = "";
 
             string strUrl = "http://dp2003.com/dp2Catalog/" + strFileName;
-            string strLocalFileName = Path.Combine(this.DataDir , strFileName);
+            string strLocalFileName = Path.Combine(this.DataDir, strFileName);
             string strTempFileName = Path.Combine(this.DataDir, "~temp_download_webfile");
 
             int nRet = WebFileDownloadDialog.DownloadWebFile(
@@ -2059,7 +2115,7 @@ out string strError)
                 // dcform.VerifyData();
             }
         }
-        
+
 
         // 连接MARC文件
         private void MenuItem_linkMarcFile_Click(object sender, EventArgs e)
@@ -2150,6 +2206,32 @@ out string strError)
             return searchform;
         }
 
+        public ZSearchForm GetZSearchForm()
+        {
+            ZSearchForm searchform = null;
+
+            searchform = this.TopZSearchForm;
+
+            if (searchform == null)
+            {
+                // 新开一个dp2检索窗
+                // FormWindowState old_state = this.WindowState;
+
+                searchform = new ZSearchForm();
+                searchform.MainForm = this;
+                searchform.MdiParent = this;
+                // searchform.WindowState = FormWindowState.Minimized;
+                searchform.Show();
+
+                // this.WindowState = old_state;
+                this.Activate();
+
+                // 需要等待初始化操作彻底完成
+                // searchform.WaitLoadFinish();
+            }
+
+            return searchform;
+        }
 
         public dp2SearchForm GetDp2SearchForm()
         {
@@ -3061,10 +3143,10 @@ out string strError)
     out string strPinyin,
     out string strError)
         {
-            return SmartHanziTextToPinyin(owner, 
-                strText, 
-                style, 
-               ( bAutoSel ? "auto" : "" ),
+            return SmartHanziTextToPinyin(owner,
+                strText,
+                style,
+               (bAutoSel ? "auto" : ""),
                 out strPinyin,
                 out strError);
         }
@@ -3465,7 +3547,7 @@ out string strError)
             string strCfgXml,
             PinyinStyle style = PinyinStyle.None,
             string strPrefix = "",
-            string strDuoyinStyle=""
+            string strDuoyinStyle = ""
             /*bool bAutoSel = false*/)
         {
             string strError = "";
@@ -3981,10 +4063,10 @@ out string strError)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-        if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
                 // strSha1 != GetCheckCode(strSerialCode) 
-                MatchLocalString(strSerialCode) == false
-                || String.IsNullOrEmpty(strSerialCode) == true)
+                    MatchLocalString(strSerialCode) == false
+                    || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (bReinput == false)
                 {
@@ -4119,7 +4201,7 @@ out string strError)
             string strMAC = (string)ext_table["mac"];
             if (string.IsNullOrEmpty(strMAC) == true)
                 strOriginCode = "!error";
-            else 
+            else
                 strOriginCode = Cryptography.Encrypt(strOriginCode,
                 this.CopyrightKey);
             SerialCodeForm dlg = new SerialCodeForm();
@@ -4297,6 +4379,50 @@ out string strError)
                 strText,
                 "log_",
                 ".txt");
+        }
+
+        // 用 Z39.50 检索当前记录
+        private void toolStripButton_searchZ_Click(object sender, EventArgs e)
+        {
+            // 从当前记录窗得到检索词
+            Form active = this.ActiveMdiChild;
+            if (active == null)
+                return;
+
+            string strUse = "";
+            string strQueryWord = "";
+            if (active is MarcDetailForm)
+            {
+                MarcDetailForm detailform = active as MarcDetailForm;
+                bool bRet = detailform.GetQueryContent(out strUse,
+                    out strQueryWord);
+                if (bRet == false)
+                {
+                    MessageBox.Show(this, "无法从当前记录窗 MARC 记录中获得检索词");
+                    return;
+                }
+            }
+
+            ZSearchForm searchform = GetZSearchForm();
+            searchform.SetQueryContent(strUse, strQueryWord);
+            searchform.Activate();
+            searchform.DoSearch();
+        }
+
+        // 用亚马逊检索当前记录
+        private void toolStripButton_searchA_Click(object sender, EventArgs e)
+        {
+            AmazonSearchForm searchform = GetAmazonSearchForm();
+        }
+
+        // 从当前窗口复制到固定窗口
+        private void toolStripButton_copyToFixed_Click(object sender, EventArgs e)
+        {
+            if (this.ActiveMdiChild is MarcDetailForm)
+            {
+                MarcDetailForm detailform = (MarcDetailForm)this.ActiveMdiChild;
+                detailform.CopyMarcToFixed();
+            }
         }
     }
 

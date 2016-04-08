@@ -103,7 +103,7 @@ namespace dp2Catalog
             return strText.Trim();
         }
 
-        // 将XML检索式变化为简明格式检索式
+        // 将 XML 检索式变化为简明格式检索式
         public static int GetQueryString(
             FromCollection Froms,
             string strQueryXml,
@@ -212,6 +212,7 @@ namespace dp2Catalog
             return 1;
         }
 
+        // 获得 XML 检索式
         // paramers:
         //      bOptimize   是否优化？
         public string GetContent(bool bOptimize)
@@ -260,6 +261,37 @@ namespace dp2Catalog
             }
         }
 
+        public void SetContent(string strUse, string strWord)
+        {
+            this.Clear();
+            {
+                Line line = this.Lines[0];
+
+                // line.comboBox_logicOperator.Text = "";
+                line.textBox_word.Text = strWord;
+                SelectComboBoxValue(line.comboBox_from, strUse);
+            }
+        }
+
+        static void SelectComboBoxValue(ComboBox combobox, string strValue)
+        {
+            strValue = strValue.ToLower();
+            foreach(string s in combobox.Items)
+            {
+                string strLeft;
+                string strRight;
+                StringUtil.ParseTwoPart(s, "-", out strLeft, out strRight);
+                strLeft = strLeft.Trim();
+                strRight = strRight.Trim();
+                if (strLeft.ToLower() == strValue)
+                {
+                    combobox.Text = s;
+                    return;
+                }
+            }
+        }
+
+        // 将 XML 检索式设置到控件中
         // 可能会抛出异常
         public void SetContent(string strContentXml)
         {
@@ -280,7 +312,6 @@ namespace dp2Catalog
                 Line line = this.Lines[i];
 
                 XmlNode node = nodes[i];
-
 
                 line.comboBox_logicOperator.Text = DomUtil.GetAttr(node, "logic");
                 line.textBox_word.Text = DomUtil.GetAttr(node, "word");
@@ -310,9 +341,7 @@ namespace dp2Catalog
                 return false;
             }
         }
-
     }
-
 
     public class Line
     {

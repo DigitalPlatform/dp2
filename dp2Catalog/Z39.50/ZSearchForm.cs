@@ -844,6 +844,12 @@ this.splitContainer_queryAndResultInfo,
             return -1;
         }
 
+        // 2016/4/8
+        public void SetQueryContent(string strUse, string strWord)
+        {
+            this.queryControl1.SetContent(strUse, strWord);
+        }
+
         // 准备检索一个服务器
         // 并不启动检索
         // thread:
@@ -876,7 +882,6 @@ this.splitContainer_queryAndResultInfo,
                 + (connection.TargetInfo.IsbnForce10 == true ? "force10," : "")
                 + (connection.TargetInfo.IsbnForce13 == true ? "force13," : "")
                 + (connection.TargetInfo.IsbnWild == true ? "wild," : "");
-
 
             nRet = ZQueryControl.GetQueryString(
                 this.MainForm.Froms,
@@ -3469,11 +3474,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 return;
             }
 
+            MarcDetailForm exist_fixed = this.MainForm.FixedMarcDetailForm;
             MarcDetailForm form = new MarcDetailForm();
 
             form.MdiParent = this.MainForm;
             form.MainForm = this.MainForm;
-
 
             // 继承自动识别的OID
             if (connection.TargetInfo != null
@@ -3482,7 +3487,22 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 //form.AutoDetectedMarcSyntaxOID = record.AutoDetectedSyntaxOID;
                 form.UseAutoDetectedMarcSyntaxOID = true;
             }
+
+            // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+            if (exist_fixed != null)
+            {
+                if (exist_fixed != null)
+                    exist_fixed.Activate();
+
+                form.SupressSizeSetting = true;
+                this.MainForm.SetMdiToNormal();
+            }
             form.Show();
+            // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+            if (exist_fixed != null)
+            {
+                this.MainForm.SetFixedPosition(form, "right");
+            }
 
             form.LoadRecord(this, index);
         }
@@ -3651,8 +3671,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             }
 
             {
+                MarcDetailForm exist_fixed = this.MainForm.FixedMarcDetailForm;
                 MarcDetailForm form = new MarcDetailForm();
-
 
                 form.MdiParent = this.MainForm;
                 form.MainForm = this.MainForm;
@@ -3665,7 +3685,22 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
 
                     form.UseAutoDetectedMarcSyntaxOID = true;
                 }
+
+                // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                if (exist_fixed != null)
+                {
+                    if (exist_fixed != null)
+                        exist_fixed.Activate();
+
+                    form.SupressSizeSetting = true;
+                    this.MainForm.SetMdiToNormal();
+                }
                 form.Show();
+                // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                if (exist_fixed != null)
+                {
+                    this.MainForm.SetFixedPosition(form, "right");
+                }
 
                 form.LoadRecord(this, index);
             }
@@ -3758,6 +3793,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             this.MainForm.toolButton_dup.Enabled = false;
             this.MainForm.toolButton_verify.Enabled = false;
             this.MainForm.toolButton_refresh.Enabled = false;
+
+            MainForm.toolStripButton_copyToFixed.Enabled = false;
         }
 
 

@@ -469,11 +469,13 @@ namespace dp2Catalog
 
         public void LoadSize()
         {
-            // 设置窗口尺寸状态
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-                "mdi_form_state",
-                MainForm.DefaultMdiWindowWidth,
-                MainForm.DefaultMdiWindowHeight);
+            if (this.SupressSizeSetting == false)
+            {
+                // 设置窗口尺寸状态
+                MainForm.AppInfo.LoadMdiChildFormStates(this,
+                    "mdi_form_state",
+                    MainForm.DefaultMdiWindowWidth,
+                    MainForm.DefaultMdiWindowHeight);
 
 #if NO
             // 获得splitContainer_originDataMain的状态
@@ -484,6 +486,8 @@ namespace dp2Catalog
             if (nValue != -1)
                 this.splitContainer_originDataMain.SplitterDistance = nValue;
 #endif
+            }
+
             this.UiState = MainForm.AppInfo.GetString(
             "marcdetailform",
             "ui_state",
@@ -495,8 +499,10 @@ namespace dp2Catalog
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                MainForm.AppInfo.SaveMdiChildFormStates(this,
-                    "mdi_form_state");
+                if (this.SupressSizeSetting == false)
+                {
+                    MainForm.AppInfo.SaveMdiChildFormStates(this,
+                        "mdi_form_state");
 
 #if NO
             // 保存splitContainer_originDataMain的状态
@@ -505,6 +511,8 @@ namespace dp2Catalog
                 "splitContainer_originDataMain",
                 this.splitContainer_originDataMain.SplitterDistance);
 #endif
+                }
+
                 MainForm.AppInfo.SetString(
     "marcdetailform",
     "ui_state",
@@ -976,7 +984,7 @@ namespace dp2Catalog
                 goto ERROR1;
             }
 
-            _processing ++;
+            _processing++;
             try
             {
 
@@ -1581,7 +1589,7 @@ namespace dp2Catalog
 
             }
 
-            this.textBox_originData.Text = (baOrigin == null? "" : encoding.GetString(baOrigin));
+            this.textBox_originData.Text = (baOrigin == null ? "" : encoding.GetString(baOrigin));
 
             return 0;
         }
@@ -1852,6 +1860,13 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 this.MainForm.CurrentVerifyResultControl = null;
             }
 
+            MarcDetailForm exist_fixed = this.MainForm.FixedMarcDetailForm;
+
+            if (this.Fixed == false && exist_fixed != null)
+                MainForm.toolStripButton_copyToFixed.Enabled = true;
+            else
+                MainForm.toolStripButton_copyToFixed.Enabled = false;
+
             SyncRecord();
         }
 
@@ -1965,7 +1980,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
-
 
             bool bExist = File.Exists(dlg.FileName);
             bool bAppend = false;
@@ -2092,7 +2106,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             dlg.CrLf = MainForm.LastCrLfIso2709;
             dlg.RemoveField998 = MainForm.LastRemoveField998;
             dlg.EncodingListItems = Global.GetEncodingList(true);
-            dlg.EncodingName = 
+            dlg.EncodingName =
                 (String.IsNullOrEmpty(MainForm.LastEncodingName) == true ? GetEncodingForm.GetEncodingName(preferredEncoding) : MainForm.LastEncodingName);
             dlg.EncodingComment = "注: 原始编码方式为 " + GetEncodingForm.GetEncodingName(preferredEncoding);
             dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
@@ -2288,7 +2302,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 }
 
                 if (bAppend == true)
-                    MainForm.MessageText = 
+                    MainForm.MessageText =
                         "1条记录成功追加到文件 " + MainForm.LastIso2709FileName + " 尾部";
                 else
                     MainForm.MessageText =
@@ -2477,7 +2491,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     return;
                 }
 
-                string strPath = this.MainForm.DataDir + "\\" +  strMarcSyntaxOID.Replace(".", "_") + "\\" + strCfgFileName;
+                string strPath = this.MainForm.DataDir + "\\" + strMarcSyntaxOID.Replace(".", "_") + "\\" + strCfgFileName;
 
                 try
                 {
@@ -2608,7 +2622,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 }
                 catch (Exception ex)
                 {
-                    e.ErrorInfo = "装载配置文件 '"+strCfgFilePath+"' 到 XMLDOM 的过程中出现错误: " + ex.Message;
+                    e.ErrorInfo = "装载配置文件 '" + strCfgFilePath + "' 到 XMLDOM 的过程中出现错误: " + ex.Message;
                     return;
                 }
                 e.XmlDocument = dom;
@@ -2814,7 +2828,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
         }
 
         void LoadLinkedMarcRecord(string strMarc,
-            byte [] baRecord)
+            byte[] baRecord)
         {
             int nRet = 0;
             string strError = "";
@@ -2840,7 +2854,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
 
             this.CurrentRecord = null;
-            
+
             DigitalPlatform.Z3950.Record record = new DigitalPlatform.Z3950.Record();
             if (strMarcSyntax == "unimarc" || strMarcSyntax == "")
                 record.m_strSyntaxOID = "1.2.840.10003.5.1";
@@ -2908,7 +2922,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
             this.MarcEditor.Focus();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2920,7 +2934,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             string strError = "";
             int nRet = 0;
 
-            Debug.Assert(strSender == "toolbar" || strSender == "ctrl_d","");
+            Debug.Assert(strSender == "toolbar" || strSender == "ctrl_d", "");
 
             string strStartPath = this.SavePath;
 
@@ -3012,13 +3026,13 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 }
                 else if (strProtocol.ToLower() == "dp2library")
                 {
-                        dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
+                    dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
-                        if (dp2_searchform == null)
-                        {
-                            strError = "没有连接的或者打开的dp2检索窗，无法进行查重";
-                            goto ERROR1;
-                        } 
+                    if (dp2_searchform == null)
+                    {
+                        strError = "没有连接的或者打开的dp2检索窗，无法进行查重";
+                        goto ERROR1;
+                    }
                     if (String.IsNullOrEmpty(strStartPath) == true)
                     {
                         /*
@@ -3068,15 +3082,15 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     }
 
 
-                        //// 
-                        /*
-                        dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
+                    //// 
+                    /*
+                    dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
-                        if (dp2_searchform == null)
-                        {
-                            strError = "没有连接的或者打开的dp2检索窗，无法进行查重";
-                            goto ERROR1;
-                        }*/
+                    if (dp2_searchform == null)
+                    {
+                        strError = "没有连接的或者打开的dp2检索窗，无法进行查重";
+                        goto ERROR1;
+                    }*/
 
                     // 将strPath解析为server url和local path两个部分
                     string strServerName = "";
@@ -5422,7 +5436,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
             else
             {
-                strError = "暂不支持来自 '"+strProtocol+"'  协议的数据自动创建功能";
+                strError = "暂不支持来自 '" + strProtocol + "'  协议的数据自动创建功能";
                 goto ERROR1;
             }
 
@@ -5954,10 +5968,10 @@ Stack:
                             e.sender,
                             e.e);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         // 2015/8/24
-                        strError = "MARC记录窗的记录 '"+this.SavePath+"' 在执行创建数据脚本的时候出现异常: " + ExceptionUtil.GetDebugText(ex)
+                        strError = "MARC记录窗的记录 '" + this.SavePath + "' 在执行创建数据脚本的时候出现异常: " + ExceptionUtil.GetDebugText(ex)
                             + "\r\n\r\n建议检查此书目记录相关的 dp2catalog_marc_autogen.cs 配置文件，试着刷新相关书目库定义，或者与数字平台的工程师取得联系";
                         goto ERROR1;
                     }
@@ -6526,7 +6540,7 @@ Stack:
         // 将形态为 “本地服务器/中文图书”这样的路径转换为“中文图书@本地服务器”
         static string CanonicalizePath(string strPath)
         {
-            string[] parts = strPath.Split(new char[] {'/'});
+            string[] parts = strPath.Split(new char[] { '/' });
             if (parts.Length < 2)
                 return "";
 
@@ -6624,7 +6638,7 @@ Stack:
 
                 if (this.IsValid() == false)
                     return -1;
-                    dbname_dlg.ShowDialog(this);    ////
+                dbname_dlg.ShowDialog(this);    ////
 
 
                 if (dbname_dlg.DialogResult != DialogResult.OK)
@@ -6733,7 +6747,7 @@ Stack:
                 temp_dlg.ApCfgTitle = "marcdetailform_selecttemplatedlg";
                 if (this.IsValid() == false)
                     return -1;
-                    temp_dlg.ShowDialog(this);  ////
+                temp_dlg.ShowDialog(this);  ////
 
 
                 if (temp_dlg.DialogResult != DialogResult.OK)
@@ -7104,7 +7118,7 @@ Stack:
             if (nRet == -1)
                 goto ERROR1;
 
-            MessageBox.Show(this, "修改模板 '"+strCfgFilePath+"' 成功");
+            MessageBox.Show(this, "修改模板 '" + strCfgFilePath + "' 成功");
             return 0;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -7296,7 +7310,7 @@ Keys keyData)
                     {
                         strError = "服务器上没有定义路径为 '" + strCfgPath + "' 的配置文件(或.fltx配置文件)，数据校验无法进行";
                         goto ERROR1;
-                    } 
+                    }
                     if (nRet == -1)
                         goto ERROR1;
 
@@ -7630,7 +7644,7 @@ Keys keyData)
 
             m_verifyViewer.FormClosed -= new FormClosedEventHandler(m_viewer_FormClosed);
             m_verifyViewer.FormClosed += new FormClosedEventHandler(m_viewer_FormClosed);
-            
+
             m_verifyViewer.Locate -= new LocateEventHandler(m_viewer_Locate);
             m_verifyViewer.Locate += new LocateEventHandler(m_viewer_Locate);
 
@@ -7907,7 +7921,7 @@ Keys keyData)
                 return;
             }
 
-            ERROR1:
+        ERROR1:
             e.Canceled = true;  // 不能解释处理
             return;
         }
@@ -8104,10 +8118,10 @@ Keys keyData)
         {
             string strError = "";
             string strHtmlString = "";
-                    // return:
-        //      -1  出错
-        //      0   .fltx 文件没有找到
-        //      1   成功
+            // return:
+            //      -1  出错
+            //      0   .fltx 文件没有找到
+            //      1   成功
             int nRet = this.MainForm.BuildMarcHtmlText(
                 strSytaxOID,
                 strMARC,
@@ -8340,7 +8354,7 @@ Keys keyData)
             if (nRet == -1)
                 return -1;
 
-            text.Append("<html>" + GetHeadString (false)+ "<body><table class='biblio'>");
+            text.Append("<html>" + GetHeadString(false) + "<body><table class='biblio'>");
             foreach (NameValueLine line in results)
             {
                 text.Append("<tr class='content'>");
@@ -8730,7 +8744,79 @@ Keys keyData)
 
         #endregion
 
+        public bool GetQueryContent(out string strUse, 
+            out string strWord)
+        {
+            strUse = "";
+            strWord = "";
 
+            string strError = "";
+            string strMarcSyntax = "";
+            string strMarcSyntaxOID = this.GetCurrentMarcSyntaxOID(out strError);
+            if (String.IsNullOrEmpty(strMarcSyntaxOID) == true)
+            {
+                /*
+                strError = "当前MARC syntax OID为空，无法判断MARC具体格式";
+                goto ERROR1;
+                 * */
+                return false;
+            }
+
+            if (strMarcSyntaxOID == "1.2.840.10003.5.1")
+                strMarcSyntax = "unimarc";
+            if (strMarcSyntaxOID == "1.2.840.10003.5.10")
+                strMarcSyntax = "usmarc";
+
+            string strMARC = this.MarcEditor.Marc;
+            MarcRecord record = new MarcRecord(strMARC);
+
+            if (strMarcSyntax == "unimarc")
+            {
+                strWord = record.select("field[@name='010']/subfield[@name='a']").FirstContent;
+                if (string.IsNullOrEmpty(strWord) == true)
+                {
+                    strWord = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                    strUse = "title";
+                }
+                else
+                    strUse = "ISBN";
+                if (string.IsNullOrEmpty(strWord) == true)
+                    return false;
+
+                return true;
+            }
+            if (strMarcSyntax == "usmarc")
+            {
+                strWord = record.select("field[@name='020']/subfield[@name='a']").FirstContent;
+                if (string.IsNullOrEmpty(strWord) == true)
+                { 
+                    strWord = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
+                    strUse = "title";
+                }
+                else
+                    strUse = "ISBN";
+                if (string.IsNullOrEmpty(strWord) == true)
+                    return false;
+
+                return true;
+            }
+            return false;
+        }
+
+        public void CopyMarcToFixed()
+        {
+            MarcDetailForm exist_fixed = this.MainForm.FixedMarcDetailForm;
+            if (exist_fixed == null)
+            {
+                MessageBox.Show(this, "固定记录窗不存在，无法进行复制操作");
+                return;
+            }
+
+            string strMARC = this.MarcEditor.Marc;
+            // TODO: 需要检查 MARC 格式是否一致
+            exist_fixed.MarcEditor.Marc = strMARC;
+            exist_fixed.ShowMessage("MARC 编辑器中已成功复制了新内容", "green", true);
+        }
     }
 
     public class VerifyHost

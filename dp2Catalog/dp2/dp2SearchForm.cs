@@ -3346,7 +3346,7 @@ namespace dp2Catalog
                 }
 
                 LoadDetail(nIndex,
-                    LoadToExistDetailWindow == true ? false : true);
+                    LoadToExistDetailWindow == true ? "exist" : "new");
             }
             finally
             {
@@ -3520,9 +3520,12 @@ namespace dp2Catalog
         }
 
         // parameters:
+        //      strStyle    打开的风格 new/exist/fixed
         //      bOpendNew   是否打开新的详细窗
         void LoadDetail(int index,
-            bool bOpenNew = true)
+            string strStyle = "new"
+            // bool bOpenNew = true
+                )
         {
             // 取出记录路径，析出书目库名，然后看这个书目库的syntax
             // 可能装入MARC和DC两种不同的窗口
@@ -3551,9 +3554,15 @@ namespace dp2Catalog
             {
 
                 MarcDetailForm form = null;
+                MarcDetailForm exist_fixed = this.MainForm.FixedMarcDetailForm;
 
-                if (bOpenNew == false)
+                if (strStyle == "exist")
                     form = this.MainForm.TopMarcDetailForm;
+                else if (strStyle == "fixed")
+                    form = exist_fixed;
+
+                if (exist_fixed != null)
+                    exist_fixed.Activate();
 
                 if (form == null)
                 {
@@ -3562,11 +3571,49 @@ namespace dp2Catalog
                     form.MdiParent = this.MainForm;
                     form.MainForm = this.MainForm;
 
+                    if (strStyle == "fixed")
+                    {
+                        form.Fixed = true;
+                        form.SupressSizeSetting = true;
+                        this.MainForm.SetMdiToNormal();
+                    }
+                    else
+                    {
+                        // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                        if (exist_fixed != null)
+                        {
+                            form.SupressSizeSetting = true;
+                            this.MainForm.SetMdiToNormal();
+                        }
+                    }
                     form.Show();
+                    if (strStyle == "fixed")
+                        this.MainForm.SetFixedPosition(form, "left");
+                    else
+                    {
+                        // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                        if (exist_fixed != null)
+                        {
+                            this.MainForm.SetFixedPosition(form, "right");
+                        }
+                    }
                 }
                 else
+                {
                     form.Activate();
-
+                    if (strStyle == "fixed")
+                    {
+                        this.MainForm.SetMdiToNormal();
+                    }
+                    else
+                    {
+                        // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                        if (exist_fixed != null)
+                        {
+                            this.MainForm.SetMdiToNormal();
+                        }
+                    }
+                }
 
                 // MARC Syntax OID
                 // 需要建立数据库配置参数，从中得到MARC格式
@@ -3576,10 +3623,9 @@ namespace dp2Catalog
             }
             else if (strSyntax.ToLower() == "dc")
             {
-
                 DcForm form = null;
 
-                if (bOpenNew == false)
+                if (strStyle == "exist")
                     form = this.MainForm.TopDcForm;
 
                 if (form == null)
@@ -3606,6 +3652,7 @@ namespace dp2Catalog
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
 
 
         /*
@@ -4889,6 +4936,8 @@ namespace dp2Catalog
 
             MainForm.toolButton_refresh.Enabled = true;
             MainForm.toolButton_loadFullRecord.Enabled = false;
+
+            MainForm.toolStripButton_copyToFixed.Enabled = false;
         }
 
         private void listView_browse_SelectedIndexChanged(object sender, EventArgs e)
@@ -5485,6 +5534,16 @@ MessageBoxDefaultButton.Button2);
 
             // ---
             ToolStripSeparator sep = new ToolStripSeparator();
+            contextMenu.Items.Add(sep);
+
+            menuItem = new ToolStripMenuItem("装入左侧固定记录窗(&L)");
+            menuItem.Click += new System.EventHandler(this.menu_loadToFixedDetailForm_Click);
+            if (nSelectedCount == 0)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            // ---
+            sep = new ToolStripSeparator();
             contextMenu.Items.Add(sep);
 
             menuItem = new ToolStripMenuItem("剪切(&T)");
@@ -8102,6 +8161,21 @@ out string strError)
             MessageBox.Show(this, strError);
         }
 
+        // 装入左侧固定的记录窗
+        void menu_loadToFixedDetailForm_Click(object sender, EventArgs e)
+        {
+            int nIndex = -1;
+            if (this.listView_browse.SelectedIndices.Count > 0)
+                nIndex = this.listView_browse.SelectedIndices[0];
+            else
+            {
+                if (this.listView_browse.FocusedItem == null)
+                    return;
+                nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
+            }
+            LoadDetail(nIndex, "fixed");
+        }
+
         void menu_loadToOpenedDetailForm_Click(object sender, EventArgs e)
         {
             int nIndex = -1;
@@ -8113,8 +8187,7 @@ out string strError)
                     return;
                 nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
             }
-            LoadDetail(nIndex,
-        false);
+            LoadDetail(nIndex, "exist");
         }
 
 
@@ -8129,8 +8202,7 @@ out string strError)
                     return;
                 nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
             }
-            LoadDetail(nIndex,
-        true);
+            LoadDetail(nIndex, "new");
         }
 
         void menuItem_selectAll_Click(object sender,
