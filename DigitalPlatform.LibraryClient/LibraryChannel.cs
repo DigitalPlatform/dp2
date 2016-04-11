@@ -4217,6 +4217,69 @@ out strError);
             }
         }
 
+        public long BindPatron(
+            DigitalPlatform.Stop stop,
+            string strAction,
+            string strQueryWord,
+            string strPassword,
+            string strBindingID,
+            string strStyle,
+            string strResultTypeList,
+            out string[] results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginBindPatron(
+                    strAction,
+                    strQueryWord,
+                    strPassword,
+                    strBindingID,
+                    strStyle,
+                    strResultTypeList,
+                    null,
+                    null);
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndBindPatron(
+                    out results,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
         // 清除所有数据库内的数据
         /// <summary>
         /// 清除所有数据库的记录

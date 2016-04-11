@@ -5986,6 +5986,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+#if NO
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
 
@@ -5999,6 +6000,16 @@ MessageBoxDefaultButton.Button2);
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+#endif
+            OpenBiblioDumpFileDialog dlg = new OpenBiblioDumpFileDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+
+            this.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
+            dlg.ShowDialog(this);
+            this.MainForm.AppInfo.UnlinkFormState(dlg);
+
+            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
 
             this.EnableControls(false);
@@ -6077,19 +6088,41 @@ MessageBoxDefaultButton.Button2);
                     if (string.IsNullOrEmpty(strXml) == true)
                         goto CONTINUE;
 
-                    XmlDocument dom = new XmlDocument();
+                    XmlDocument biblio_dom = new XmlDocument();
                     try
                     {
-                        dom.LoadXml(strXml);
+                        biblio_dom.LoadXml(strXml);
                     }
                     catch (Exception ex)
                     {
-                        strError = "XML 装入 DOM 时出错: " + ex.Message;
+                        strError = "书目记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
                         goto ERROR1;
                     }
 
-                    if (dom.DocumentElement == null)
+                    if (biblio_dom.DocumentElement == null)
                         goto CONTINUE;
+
+                    if (dlg.IncludeObjectFile)
+                    {
+                        // 将书目记录中的对象资源写入外部文件
+                        nRet = WriteObjectFiles(stop,
+                channel,
+                info.RecPath,
+                ref biblio_dom,
+                dlg.ObjectDirectoryName,
+                out strError);
+                        if (nRet == -1)
+                        {
+                            DialogResult temp_result = MessageBox.Show(this,
+strError + "\r\n\r\n是否继续处理?",
+"BiblioSearchForm",
+MessageBoxButtons.OKCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                            if (temp_result == DialogResult.Cancel)
+                                goto ERROR1;
+                        }
+                    }
 
                     // 写入 dprms:record 元素
                     writer.WriteStartElement("dprms", "record", DpNs.dprms);
@@ -6101,15 +6134,16 @@ MessageBoxDefaultButton.Button2);
                         writer.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);
                         writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));
 
-                        dom.DocumentElement.WriteTo(writer);
+                        biblio_dom.DocumentElement.WriteTo(writer);
                         writer.WriteEndElement();
                     }
+
 
                     string strBiblioDbName = StringUtil.GetDbName(item.BiblioInfo.RecPath);
                     BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
                     if (prop == null)
                     {
-                        strError = "数据库名 '"+strBiblioDbName+"' 没有找到属性定义";
+                        strError = "数据库名 '" + strBiblioDbName + "' 没有找到属性定义";
                         goto ERROR1;
                     }
 
@@ -6199,6 +6233,196 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 将书目记录中的对象资源写入外部文件
+        public static int WriteObjectFiles(Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            ref XmlDocument biblio_dom,
+            string strOutputDir,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> recpaths = new List<string>();
+            List<string> errors = new List<string>();
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = biblio_dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+
+            foreach (XmlElement node in nodes)
+            {
+                string strID = DomUtil.GetAttr(node, "id");
+                string strUsage = DomUtil.GetAttr(node, "usage");
+                string strRights = DomUtil.GetAttr(node, "rights");
+
+                string strResPath = strBiblioRecPath + "/object/" + strID;
+                strResPath = strResPath.Replace(":", "/");
+                recpaths.Add(strResPath);
+            }
+
+            try
+            {
+                BrowseLoader loader = new BrowseLoader();
+                loader.Channel = channel;
+                loader.Stop = stop;
+                loader.RecPaths = recpaths;
+                loader.Format = "id,metadata,timestamp";
+
+                int i = 0;
+                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                {
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    Debug.Assert(record.Path == recpaths[i], "");
+                    XmlElement file = nodes[i] as XmlElement;
+
+                    if (record.RecordBody.Result != null
+                        && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                    {
+                        if (record.RecordBody.Result.ErrorCode == ErrorCodeValue.NotFound)
+                            goto CONTINUE;
+                        strError = record.RecordBody.Result.ErrorString;
+                        file.SetAttribute("_error", strError);
+                        errors.Add(strError);
+                        goto CONTINUE;
+                    }
+
+                    string strMetadataXml = record.RecordBody.Metadata;
+                    byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
+
+                    file.SetAttribute("_timestamp", ByteArray.GetHexTimeStampString(baMetadataTimestamp));
+
+                    // TODO: 另一种方法是用 URL 数据库名 ObjectID 等共同构造一个文件名
+                    string strGUID = Guid.NewGuid().ToString();
+                    string strMetadataFileName = Path.Combine(strOutputDir, strGUID + ".met");
+                    string strObjectFileName = Path.Combine(strOutputDir, strGUID + ".bin");
+
+                    // metadata 写入外部文件
+                    if (string.IsNullOrEmpty(strMetadataXml) == false)
+                    {
+                        PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strMetadataFileName));
+                        using (StreamWriter sw = new StreamWriter(strMetadataFileName))
+                        {
+                            sw.Write(strMetadataXml);
+                        }
+                    }
+
+                    file.SetAttribute("_metadataFile", Path.GetFileName(strMetadataFileName));
+
+                    // 对象内容写入外部文件
+                    int nRet = DownloadObject(stop,
+            channel,
+            record.Path,
+            strObjectFileName,
+            out strError);
+                    if (nRet == -1)
+                    {
+                        // TODO: 是否要重试几次?
+                        file.SetAttribute("error", strError);
+                        errors.Add(strError);
+                        goto CONTINUE;
+                    }
+
+                    file.SetAttribute("_objectFile", Path.GetFileName(strObjectFileName));
+
+#if NO
+                    // 取metadata值
+                    Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
+                        out strError);
+                    if (values == null)
+                    {
+                        file.SetAttribute("error", strError);
+                        errors.Add(strError);
+                        continue;
+                    }
+
+                    // metadata 中的一些属性，写入 file 元素属性？ _ 打头
+                    // localpath
+                    ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, (string)values["localpath"]);
+
+                    // size
+                    ListViewUtil.ChangeItemText(item, COLUMN_SIZE, (string)values["size"]);
+
+                    // mime
+                    ListViewUtil.ChangeItemText(item, COLUMN_MIME, (string)values["mimetype"]);
+
+                    // tiemstamp
+                    string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
+                    ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
+#endif
+
+                CONTINUE:
+                    i++;
+                }
+
+                if (errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(errors, "; ");
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                // TODO: 出现异常后，是否改为用原来的方法一个一个对象地获取 metadata?
+                strError = ex.Message;
+                return -1;
+            }
+        }
+
+        static int DownloadObject(Stop stop,
+            LibraryChannel channel,
+            string strResPath,
+            string strOutputFileName,
+            out string strError)
+        {
+            strError = "";
+
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strOutputFileName));
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+            if (stop != null)
+                stop.Initial("正在下载对象 " + strResPath);
+            try
+            {
+                byte[] baOutputTimeStamp = null;
+                string strMetaData = "";
+                string strOutputPath = "";
+
+                long lRet = channel.GetRes(
+                    stop,
+                    strResPath,
+                    strOutputFileName,
+                    out strMetaData,
+                    out baOutputTimeStamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "下载对象 '" + strResPath + "' 到文件失败，原因: " + strError;
+                    return -1;
+                }
+                return 0;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                if (stop != null)
+                    stop.Initial("");
+            }
         }
 
         public static int OutputEntities(

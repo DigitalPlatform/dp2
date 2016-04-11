@@ -52,8 +52,7 @@ namespace DigitalPlatform.LibraryServer
 
             this.m_externalMessageInterfaces = null;
 
-            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
-    "externalMessageInterface");
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
             if (root == null)
             {
                 strError = "在library.xml中没有找到<externalMessageInterface>元素";
@@ -1365,7 +1364,7 @@ namespace DigitalPlatform.LibraryServer
                     string strDbName = ResPath.GetDbName(strRecPath);
                     if (string.IsNullOrEmpty(strDbName) == true)
                     {
-                        strError = "从读者库记录路径 '"+strRecPath+"' 获得数据库名时出错。验证读者记录失败";
+                        strError = "从读者库记录路径 '" + strRecPath + "' 获得数据库名时出错。验证读者记录失败";
                         return -1;
                     }
 
@@ -1375,7 +1374,7 @@ namespace DigitalPlatform.LibraryServer
                         strError = "数据库名 '" + strDbName + "' 不是读者库。验证读者记录失败";
                         return -1;
                     }
-                    
+
                     // return:
                     //      -1  调用出错
                     //      0   校验正确
@@ -1481,7 +1480,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // strLeft 包含的权限是否小于等于 strRight
-        static bool IsLessOrEqualThan(string strLeft, 
+        static bool IsLessOrEqualThan(string strLeft,
             string strRight,
             out List<string> warning_rights)
         {
@@ -1497,10 +1496,10 @@ namespace DigitalPlatform.LibraryServer
                 return false;   // strLeft != 空 && strRight == 空
             }
 
-            string[] left = strLeft.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            string[] left = strLeft.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] right = strRight.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach(string s in left)
+            foreach (string s in left)
             {
                 if (Array.IndexOf<string>(right, s) == -1)
                     warning_rights.Add(s);
@@ -1937,6 +1936,17 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
             }
 
+            if (strBodyType == "mq")
+            {
+                return NotifyReaderSMS(
+                    readerdom,
+                    calendar,
+                    strBodyType,
+                    out strBody,
+                    out strMime,
+                    out strError);
+            }
+
             strBody = "";
             strError = "";
             // wantNotifyBarcodes = new List<string>();
@@ -2017,8 +2027,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             bOverdue = true;
                             strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
-                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
-                                ;
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
                         }
                     }
                 }
@@ -2190,14 +2199,14 @@ namespace DigitalPlatform.LibraryServer
 
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
         public int NotifyReaderSMS(
-    XmlDocument readerdom,
-    Calendar calendar,
-    // List<string> notifiedBarcodes,
-    string strBodyType,
-    out string strBody,
-    out string strMime,
-    // out List<string> wantNotifyBarcodes,
-    out string strError)
+            XmlDocument readerdom,
+            Calendar calendar,
+            // List<string> notifiedBarcodes,
+            string strBodyType,
+            out string strBody,
+            out string strMime,
+            // out List<string> wantNotifyBarcodes,
+            out string strError)
         {
             strBody = "";
             strError = "";
@@ -2236,7 +2245,6 @@ namespace DigitalPlatform.LibraryServer
                 bool bOverdue = false;  // 是否超期
                 DateTime timeReturning = DateTime.MinValue;
                 {
-
                     DateTime timeNextWorkingDay;
                     long lOver = 0;
                     string strPeriodUnit = "";
@@ -2264,8 +2272,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             bOverdue = true;
                             strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
-                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
-                                ;
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
                         }
                     }
                 }
@@ -2278,7 +2285,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bOverdue == true)
                 {
-
                     // 看看是不是已经通知过
                     if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
                         continue;

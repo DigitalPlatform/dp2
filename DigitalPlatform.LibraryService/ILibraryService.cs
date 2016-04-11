@@ -798,5 +798,15 @@ namespace dp2Library
             long start,
             long count,
             out ChargingItemWrapper[] results);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult BindPatron(
+    string strAction,
+    string strQueryWord,
+    string strPassword,
+    string strBindingID,
+    string strStyle,
+    string strResultTypeList,
+    out string[] results);
     }
 }

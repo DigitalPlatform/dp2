@@ -2148,6 +2148,9 @@
     <EmbeddedResource Include="SearchForms\OneActionDialog.resx">
       <DependentUpon>OneActionDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\OpenBiblioDumpFileDialog.resx">
+      <DependentUpon>OpenBiblioDumpFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SettlementForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SettlementForm.cs</DependentUpon>
@@ -2327,6 +2330,12 @@
     </Compile>
     <Compile Include="SearchForms\OneActionDialog.Designer.cs">
       <DependentUpon>OneActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\OpenBiblioDumpFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\OpenBiblioDumpFileDialog.Designer.cs">
+      <DependentUpon>OpenBiblioDumpFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\OrderSearchForm.cs">
       <SubType>Form</SubType>

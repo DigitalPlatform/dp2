@@ -31,6 +31,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Messaging;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -110,7 +111,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.67 (2016/1/6) GetItemInfo() API 的 @barcode-list:" "get-path-list" 功能允许间杂 @refID:前缀的号码。
         //      2.68 (2016/1/9) Return() API 增加了 read action。会将动作记入操作日志。ChargingOperDatabase 库也会自动更新
         //      2.69 (2016/1/29) 各个 API 都对读者身份加强了检查，防止出现权限漏洞。
-        public static string Version = "2.69";
+        //      2.70 (2016/4/10) 增加 MSMQ 消息队列功能，读者记录的修改、dp2mail 消息都自动发送到这个消息队列。dp2library 失效日期从 5.1 变为 7.1。ReadersMonitor 后台任务会自动给没有 refID 元素的读者记录增加此元素
+        public static string Version = "2.70";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -144,6 +146,11 @@ namespace DigitalPlatform.LibraryServer
         /// 在登录阶段是否强制检查前端的版本号？(对几个特殊的代理账户不做此项检查)
         /// </summary>
         public bool CheckClientVersion = false;
+
+        /// <summary>
+        /// dp2library 用于输出消息的队列路径。
+        /// </summary>
+        public string OutgoingQueue = "";
 
         // 存储各种参数信息
         // 为C#脚本所准备
@@ -982,23 +989,27 @@ namespace DigitalPlatform.LibraryServer
                     {
                         this.AccessLogMaxCountPerDay = 10000;
                     }
+
                     // 消息
                     // 元素<message>
-                    // 属性dbname/reserveTimeSpan
+                    // 属性dbname/reserveTimeSpan/defaultQueue
                     node = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
                     if (node != null)
                     {
-                        app.MessageDbName = DomUtil.GetAttr(node, "dbname");
-                        app.MessageReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
+                        this.MessageDbName = DomUtil.GetAttr(node, "dbname");
+                        this.MessageReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
+                        // 2016/4/10
+                        this.OutgoingQueue = DomUtil.GetAttr(node, "defaultQueue");
 
                         // 2010/12/31 add
-                        if (String.IsNullOrEmpty(app.MessageReserveTimeSpan) == true)
-                            app.MessageReserveTimeSpan = "365day";
+                        if (String.IsNullOrEmpty(this.MessageReserveTimeSpan) == true)
+                            this.MessageReserveTimeSpan = "365day";
                     }
                     else
                     {
-                        app.MessageDbName = "";
-                        app.MessageReserveTimeSpan = "365day";
+                        this.MessageDbName = "";
+                        this.MessageReserveTimeSpan = "365day";
+                        this.OutgoingQueue = "";
                     }
 
                     // OPAC服务器
@@ -1202,6 +1213,29 @@ namespace DigitalPlatform.LibraryServer
                         strError = "初始化扩展的消息接口时出错: " + strError;
                         app.WriteErrorLog(strError);
                         // goto ERROR1;
+                    }
+
+                    // 创建 MSMQ 消息队列
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: Message Queue");
+#endif
+                    if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
+                    {
+                        try
+                        {
+                            if (!MessageQueue.Exists(this.OutgoingQueue))
+                                MessageQueue.Create(this.OutgoingQueue);
+                        }
+                        catch (Exception ex)
+                        {
+                            app.HangupList.Add("MessageQueueCreateFail");
+                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ex.Message
+                                + " 系统被挂起。");
+                        }
+                    }
+                    else
+                    {
+
                     }
 
 
@@ -1609,7 +1643,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
                     }
 
-                    if (DateTime.Now > new DateTime(2016, 5, 1))
+                    if (DateTime.Now > new DateTime(2016, 7, 1))
                     {
                         // 通知系统挂起
                         // this.HangupReason = HangupReason.Expire;
@@ -2990,6 +3024,8 @@ namespace DigitalPlatform.LibraryServer
                     writer.WriteStartElement("message");
                     writer.WriteAttributeString("dbname", this.MessageDbName);
                     writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 
+                    if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
+                        writer.WriteAttributeString("defaultQueue", this.OutgoingQueue);
                     writer.WriteEndElement();
 
                     /*
@@ -4700,7 +4736,7 @@ namespace DigitalPlatform.LibraryServer
             // 2015/9/9
             if (this.LibraryCfgDom == null || LibraryCfgDom.DocumentElement == null)
             {
-                strError = "LibraryCfgDom 尚未初始化";
+                strError = "LibraryCfgDom 尚未初始化。请检查 dp2library 错误日志";
                 return -1;
             }
 
@@ -8294,8 +8330,9 @@ out strError);
         // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
         // parameters:
         //      strQueryWord 登录名
+        //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
         //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
-        //          2) 如果以"EM:"开头，表示利用email地址进行检索
+        //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
         //          3) 如果以"TP:"开头，表示利用电话号码进行检索
         //          4) 如果以"ID:"开头，表示利用身份证号进行检索
         //          5) 如果以"CN:"开头，表示利用证件号码进行检索
@@ -8368,7 +8405,7 @@ out strError);
                 bBarcode = false;
                 strFrom = "Email";
                 strMatch = "exact";
-                strQueryWord = strName;
+                strQueryWord = strName;  // 2016/4/11 注 strName 内容应为 email:xxxxx
             }
             else if (strPrefix == "TP:")
             {
@@ -8388,6 +8425,14 @@ out strError);
             {
                 bBarcode = false;
                 strFrom = "证号";
+                strMatch = "exact";
+                strQueryWord = strName;
+            }
+            else if (strPrefix == "RI:")
+            {
+                // 2016/4/11
+                bBarcode = false;
+                strFrom = "参考ID";
                 strMatch = "exact";
                 strQueryWord = strName;
             }
@@ -8682,8 +8727,6 @@ out strError);
             return (int)lHitCount;
              * */
         }
-
-
 
         // 将XML装入DOM
         public static int LoadToDom(string strXml,

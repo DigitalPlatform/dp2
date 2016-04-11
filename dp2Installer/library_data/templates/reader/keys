@@ -152,7 +152,7 @@ public class MyKeysHost : KeysHost
   </key>
   <table name="email" id="6">
     <convert>
-      <string style="upper" />
+      <string style="upper,split" />
     </convert>
     <convertquery>
       <string style="upper" />

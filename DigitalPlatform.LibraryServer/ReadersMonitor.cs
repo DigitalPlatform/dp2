@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.Diagnostics;
+using System.Collections;
+using System.Messaging;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Collections;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -31,6 +32,8 @@ namespace DigitalPlatform.LibraryServer
                 return "超期通知";
             }
         }
+
+        MessageQueue _queue = null;
 
         // 一次操作循环
         // TODO: 是否需要对读者记录加锁？
@@ -136,10 +139,47 @@ namespace DigitalPlatform.LibraryServer
 
             recpath_table.Clear();
 
+            if (string.IsNullOrEmpty(this.App.OutgoingQueue) == false)
+            {
+                try
+                {
+                    _queue = new MessageQueue(this.App.OutgoingQueue);
+                }
+                catch (Exception ex)
+                {
+                    strError = "创建路径为 '" + this.App.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ex.Message;
+                    goto ERROR1;
+                }
+            }
+            else
+                this._queue = null;
+            List<string> bodytypes = new List<string>();
+
+            string strBodyTypesDef = GetBodyTypesDef();
+
+            if (string.IsNullOrEmpty(strBodyTypesDef) == true)
+                strBodyTypesDef = "dpmail,email";   // 空表示只使用两种保守的类型
+            else if (strBodyTypesDef == "[all]")
+            {
+                // 全部类型。包括 mq 和外部接口
+                bodytypes.Add("dpmail");
+                bodytypes.Add("email");
+                if (string.IsNullOrEmpty(this.App.OutgoingQueue) == false)
+                    bodytypes.Add("mq");    // MSMQ 消息队列
+                if (this.App.m_externalMessageInterfaces != null)
+                {
+                    foreach (MessageInterface message_interface in this.App.m_externalMessageInterfaces)
+                    {
+                        bodytypes.Add(message_interface.Type);
+                    }
+                }
+            }
+            else
+                bodytypes = StringUtil.SplitList(strBodyTypesDef);
+
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
             int nTotalRecCount = 0;
-
             for (int i = 0; i < this.App.ReaderDbs.Count; i++)
             {
 #if NO
@@ -261,6 +301,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 处理
                     nRet = DoOneRecord(
+                        bodytypes,
                         strOutputPath,
                         strLibraryCode,
                         strXmlBody,
@@ -309,8 +350,21 @@ namespace DigitalPlatform.LibraryServer
             return;
         }
 
+        // 获得通知类型的定义
+        // monitors/readersMonitor 元素的 types 属性。缺省为空
+        string GetBodyTypesDef()
+        {
+            if (this.App.LibraryCfgDom == null || this.App.LibraryCfgDom.DocumentElement == null)
+                return "";
+            XmlElement def_node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("monitors/readersMonitor") as XmlElement;
+            if (def_node == null)
+                return "";
+            return def_node.GetAttribute("types");
+        }
+
         // 处理一条记录
         int DoOneRecord(
+            List<string> bodytypes,
             string strPath,
             string strLibraryCode,
             string strReaderXml,
@@ -325,7 +379,6 @@ namespace DigitalPlatform.LibraryServer
             int nRedoCount = 0;
 
         REDO:
-
             byte[] output_timestamp = null;
 
             XmlDocument readerdom = new XmlDocument();
@@ -335,12 +388,14 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "装载XML到DOM出错: " + ex.Message;
+                strError = "装载 XML 到 DOM 出错: " + ex.Message;
                 return -1;
             }
 
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
+            string strRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+                "refID");
 
             string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
                 "readerType");
@@ -356,22 +411,15 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
+                // 注: 借书和还书是否需要工作日历参数? 如果也需要，则在相关读者借书或者还书时候就会遇到报错，管理员会及时处理
+                // TODO: 将来在这里增加通知系统管理员的动作
                 strError = "获得读者类型 '" + strReaderType + "' 的相关日历过程失败: " + strError;
                 return -1;
             }
 
             bool bChanged = false;
 
-            List<string> bodytypes = new List<string>();
-            bodytypes.Add("dpmail");
-            bodytypes.Add("email");
-            if (this.App.m_externalMessageInterfaces != null)
-            {
-                foreach (MessageInterface message_interface in this.App.m_externalMessageInterfaces)
-                {
-                    bodytypes.Add(message_interface.Type);
-                }
-            }
+
 
             // 每种 bodytype 做一次
             for (int i = 0; i < bodytypes.Count; i++)
@@ -468,6 +516,40 @@ namespace DigitalPlatform.LibraryServer
                 if (nResultValue == 1 && nRedoCount == 0)   // 2008/5/27 changed 重做的时候，不再发送消息，以免消息库记录爆满
                 {
                     // 发送邮件
+
+                    // 2016/4/10
+                    if (strBodyType == "mq")
+                    {
+                        // 向 MSMQ 消息队列发送消息
+                        nRet = SendToQueue(this._queue,
+                            string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "@refID:" + strRefID,
+                            strBody,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "发送 MQ 出错: " + strError;
+                            if (this.App.Statis != null)
+                                this.App.Statis.IncreaseEntryValue(strLibraryCode,
+                                "超期通知",
+                                "MQ超期通知消息发送错误数",
+                                1);
+                            this.AppendResultText(strError + "\r\n");
+                            bSendMessageError = true;
+
+                            this.App.WriteErrorLog(strError);
+                            readerdom = new XmlDocument();
+                            readerdom.LoadXml(strOldReaderXml);
+                        }
+                        else
+                        {
+                            if (this.App.Statis != null)
+                                this.App.Statis.IncreaseEntryValue(
+                                strLibraryCode,
+                                "超期通知",
+                                "MQ超期通知人数",
+                                1);
+                        }
+                    }
 
                     if (strBodyType == "dpmail")
                     {
@@ -606,7 +688,6 @@ namespace DigitalPlatform.LibraryServer
                                 1);
                         }
                     }
-
                 }
 
                 if (bSendMessageError == false)
@@ -691,6 +772,22 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
                 bChanged = true;
 
+            // 2016/4/10
+            // 如果读者记录中没有 refID 元素，自动创建它
+            // return:
+            //      -1  出错
+            //      0   读者记录没有改变
+            //      1   读者记录发生改变
+            nRet = AddRefID(readerdom,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = "在为读者记录添加 refID 元素时发生错误: " + strError;
+                this.AppendResultText(strError + "\r\n");
+            }
+            if (nRet == 1)
+                bChanged = true;
+
             // 修改读者记录后存回
             if (bChanged == true)
             {
@@ -738,6 +835,59 @@ namespace DigitalPlatform.LibraryServer
                     strError = "写回读者库记录 '" + strPath + "' 时发生错误: " + strError;
                     return -1;
                 }
+            }
+
+            return 0;
+        }
+
+        // 向 MSMQ 消息队列发送消息
+        // parameters:
+        //      strRecipient    应优先用读者记录的 refID 字段(格式为 @refID:xxxxxx)，如果没有则用 barcode 字段
+        static int SendToQueue(MessageQueue myQueue,
+            string strRecipient,
+            string strBody,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+            DomUtil.SetElementText(dom.DocumentElement, "type", "patronNotify");
+            DomUtil.SetElementText(dom.DocumentElement, "recipient", strRecipient);
+            DomUtil.SetElementText(dom.DocumentElement, "body", strBody);
+            DomUtil.SetElementText(dom.DocumentElement, "mime", "text");
+
+            try
+            {
+                System.Messaging.Message myMessage = new System.Messaging.Message();
+                myMessage.Body = dom.DocumentElement.OuterXml;
+                myMessage.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
+                myQueue.Send(myMessage);
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "发送消息到 MQ 失败: " + ex.Message;
+                return -1;
+            }
+        }
+
+        // 2016/4/10
+        // 如果读者记录中没有 refID 元素，自动创建它
+        // return:
+        //      -1  出错
+        //      0   读者记录没有改变
+        //      1   读者记录发生改变
+        int AddRefID(XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+
+            string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID) == true)
+            {
+                DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                return 1;
             }
 
             return 0;
@@ -1043,6 +1193,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 index = 1;
             }
+            else if (strBodyType == "mq")
+            {
+                index = 2;
+            }
             else
             {
                 MessageInterface external_interface = app.GetMessageInterface(strBodyType);
@@ -1058,7 +1212,7 @@ namespace DigitalPlatform.LibraryServer
                     strError = "external_interface (type '" + external_interface.Type + "') 没有在 m_externalMessageInterfaces 数组中找到";
                     return -1;
                 }
-                index += 2;
+                index += 3; // 原来是 2
             }
 
             for (int i = 0; i < strChars.Length; i++)
