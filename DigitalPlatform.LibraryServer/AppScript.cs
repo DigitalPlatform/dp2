@@ -1420,6 +1420,15 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
+            // 2016/4/11
+            // 检查 access 元素里面的星号
+            string strAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
+            if (strAccess != null && strAccess.Trim() == "*")
+            {
+                strError = "读者记录中 access 元素值不允许使用 * 形态";
+                return -1;
+            }
+
             return 0;
         }
 

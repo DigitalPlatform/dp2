@@ -9461,6 +9461,14 @@ out strError);
                 return -1;
             }
 
+            // 检查 access 元素里面的星号
+            string strAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
+            if (strAccess != null && strAccess.Trim() == "*")
+            {
+                strError = "读者记录中 access 元素值不允许使用 * 形态";
+                return -1;
+            }
+
             // 获得一个参考帐户
             Account accountref = null;
             // 从library.xml文件定义 获得一个帐户的信息
