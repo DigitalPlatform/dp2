@@ -685,6 +685,13 @@ MessageBoxDefaultButton.Button1);
 
         }
 
+        // 2016/4/8
+        public void SetQueryContent(string strUse, string strWord)
+        {
+            this.tabControl_query.SelectedTab = this.tabPage_simple;
+            this.amazonSimpleQueryControl_simple.SetContent(strUse, strWord);
+        }
+
         // 准备用于首次检索的 URL
         int GetSimpleSearchRequestUrl(out string strUrl,
             out string strError)
@@ -2058,6 +2065,8 @@ nsmgr,
             }
 
             {
+                MarcDetailForm exist_fixed = this.MainForm.FixedMarcDetailForm;
+
                 MarcDetailForm form = new MarcDetailForm();
 
                 form.MdiParent = this.m_mainForm;
@@ -2071,7 +2080,21 @@ nsmgr,
                     form.AutoDetectedMarcSyntaxOID = record.AutoDetectedSyntaxOID;
                 }
 #endif
+                // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                if (exist_fixed != null)
+                {
+                    if (exist_fixed != null)
+                        exist_fixed.Activate();
+
+                    form.SupressSizeSetting = true;
+                    this.MainForm.SetMdiToNormal();
+                }
                 form.Show();
+                // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                if (exist_fixed != null)
+                {
+                    this.MainForm.SetFixedPosition(form, "right");
+                }
 
                 form.LoadRecord(this, index);
             }

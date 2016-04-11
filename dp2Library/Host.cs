@@ -25,6 +25,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.IO;
 
 namespace dp2Library
 {
@@ -33,7 +34,7 @@ namespace dp2Library
         // ServiceHost m_host = null;
         List<ServiceHost> m_hosts = new List<ServiceHost>();
 
-        Thread m_thread = null; 
+        Thread m_thread = null;
 
         public EventLog Log = null;
 
@@ -53,6 +54,11 @@ namespace dp2Library
             if (args.Length == 1 && args[0].Equals("console"))
             {
                 new LibraryServiceHost().ConsoleRun();
+            }
+            else if (args.Length == 1 && args[0].Equals("cleartemp"))
+            {
+                // 清除临时文件目录中的临时文件
+                ClearTempFiles();
             }
             else
             {
@@ -130,7 +136,7 @@ namespace dp2Library
             }
         }
 
-#endif 
+#endif
 
         // 获得instance信息
         // parameters:
@@ -277,14 +283,14 @@ namespace dp2Library
         }
 
         // 将本地字符串匹配序列号
-        static bool MatchLocalString(string strSerialNumber, 
+        static bool MatchLocalString(string strSerialNumber,
             string strInstanceName,
             out string strDebugInfo)
         {
             strDebugInfo = "";
 
             StringBuilder debuginfo = new StringBuilder();
-            debuginfo.Append("序列号 '" + strSerialNumber + "' 实例名 '"+strInstanceName+"'\r\n");
+            debuginfo.Append("序列号 '" + strSerialNumber + "' 实例名 '" + strInstanceName + "'\r\n");
 
             List<string> macs = SerialCodeForm.GetMacAddress();
             debuginfo.Append("本机 MAC 地址: " + StringUtil.MakePathList(macs) + "\r\n");
@@ -298,7 +304,7 @@ namespace dp2Library
                     strInstanceName);
 
                 string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
-                debuginfo.Append("MAC 地址 '" + mac + "' 环境字符串 '"+strLocalString+"' SHA '"+strSha1+"'\r\n");
+                debuginfo.Append("MAC 地址 '" + mac + "' 环境字符串 '" + strLocalString + "' SHA '" + strSha1 + "'\r\n");
                 if (strSha1 == SerialCodeForm.GetCheckCode(strSerialNumber))
                 {
                     debuginfo.Append("匹配\r\n");
@@ -374,7 +380,7 @@ namespace dp2Library
                     if (MatchLocalString(strSerialNumber, strInstanceName, out strDebugInfo) == false)
                     //if (strSha1 != SerialCodeForm.GetCheckCode(strSerialNumber))
                     {
-                        this.Log.WriteEntry("dp2Library 实例 '"+strInstanceName+"' 序列号不合法，无法启动。\r\n调试信息如下：\r\n" + strDebugInfo,
+                        this.Log.WriteEntry("dp2Library 实例 '" + strInstanceName + "' 序列号不合法，无法启动。\r\n调试信息如下：\r\n" + strDebugInfo,
     EventLogEntryType.Error);
                         continue;
                     }
@@ -643,7 +649,7 @@ EventLogEntryType.Information);
             quotas.MaxStringContentLength = 1024 * 1024;
             binding.ReaderQuotas = quotas;
             SetTimeout(binding);
-            binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0); 
+            binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
 
             // binding.ReliableSession.Enabled = true;
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
@@ -988,6 +994,32 @@ strCertSN);
                 this.m_thread.Abort();
                 this.m_thread = null;
             }
+        }
+
+        // 清除以前残留的临时文件
+        static void ClearTempFiles()
+        {
+            string strTempFileName = Path.GetTempFileName();
+            File.Delete(strTempFileName);
+            string strTempDir = Path.GetDirectoryName(strTempFileName);
+
+            int nCount = 0;
+            DirectoryInfo di = new DirectoryInfo(strTempDir);
+            FileInfo [] fis = di.GetFiles("*.tmp");
+            foreach(FileInfo fi in fis)
+            {
+                try
+                {
+                    Console.WriteLine(fi.FullName);
+                    File.Delete(fi.FullName);
+                    nCount++;
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("删除出现异常: " + ex.Message);
+                }
+            }
+            Console.WriteLine("共删除 "+nCount.ToString()+" 个临时文件");
         }
     }
 

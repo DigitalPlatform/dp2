@@ -863,25 +863,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                if (strAction == "new"
-        || strAction == "change"
-        || strAction == "changereaderbarcode"
-        || strAction == "move")
-                {
-                    nRet = this.DoVerifyReaderFunction(
-                        sessioninfo,
-                        strAction,
-                        domNewRec,
-                        out strError);
-                    if (nRet != 0)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
-                }
-
                 // 对读者证条码号查重，如果必要，并获得strRecPath
                 if ( // bBarcodeChanged == true &&
                     (strAction == "new"
@@ -892,7 +873,7 @@ namespace DigitalPlatform.LibraryServer
                     && String.IsNullOrEmpty(strNewBarcode) == false
                     )
                 {
-
+#if NO
                     // 验证条码号
                     if (this.VerifyBarcode == true)
                     {
@@ -932,6 +913,7 @@ namespace DigitalPlatform.LibraryServer
                             return result;
                         }
                     }
+#endif
 
                     List<string> aPath = null;
 
@@ -1004,6 +986,35 @@ namespace DigitalPlatform.LibraryServer
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.ReaderBarcodeDup;
+                        return result;
+                    }
+                }
+
+                if (strAction == "new"
+|| strAction == "change"
+|| strAction == "changereaderbarcode"
+|| strAction == "move")
+                {
+                    // 注：要在 strRecPath 决定后再进行此调用
+                    // return:
+                    //      -3  条码号错误
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = this.DoVerifyReaderFunction(
+                        sessioninfo,
+                        strAction,
+                        strRecPath,
+                        domNewRec,
+                        out strError);
+                    if (nRet != 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError + "。保存操作失败";
+                        if (nRet == -1)
+                            result.ErrorCode = ErrorCode.InvalidReaderBarcode;
+                        else
+                            result.ErrorCode = ErrorCode.SystemError;
                         return result;
                     }
                 }
@@ -4016,7 +4027,7 @@ out strError);
             string strOutputPath,   // recpaths 时需要
             byte[] baTimestamp,    // timestamp 时需要
             OperType operType,  // html 时需要
-            string [] saBorrowedItemBarcode,
+            string[] saBorrowedItemBarcode,
             string strCurrentItemBarcode,
             ref string[] results,
             out string strError)
@@ -4801,5 +4812,271 @@ out strError);
 
             return 0;
         }
+
+        // 为读者记录绑定新的号码，或者解除绑定
+        // parameters:
+        //      strAction   动作。有 bind/unbind
+        //      strQueryWord    用于定位读者记录的检索词。
+        //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
+        //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+        //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
+        //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+        //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+        //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+        //          6) 否则用证条码号进行检索
+        //      strPassword     读者记录的密码
+        //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
+        //      strStyle    风格。multiple/single。默认 single
+        //                  multiple 表示允许多次绑定同一类型号码；sigle 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
+        //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
+        //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary
+        //      results 返回操作成功后的读者记录
+        // return:
+        //      -1  出错
+        //      0   因为条件不具备功能没有成功执行
+        //      1   功能成功执行
+        public int BindPatron(
+            SessionInfo sessioninfo,
+            string strAction,
+            string strQueryWord,
+            string strPassword,
+            string strBindingID,
+            string strStyle,
+            string strResultTypeList,
+            out string[] results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            int nRedoCount = 0;
+        REDO:
+            bool bTempPassword = false;
+            string strXml = "";
+            string strOutputPath = "";
+            byte[] timestamp = null;
+            string strToken = "";
+
+            // 获得读者记录, 并检查密码是否符合。为登录用途
+            // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
+            // parameters:
+            //      strQueryWord 登录名
+            //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
+            //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+            //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
+            //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+            //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+            //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+            //          6) 否则用证条码号进行检索
+            //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+            // return:
+            //      -2  当前没有配置任何读者库，或者可以操作的读者库
+            //      -1  error
+            //      0   not found
+            //      1   命中1条
+            //      >1  命中多于1条
+            int nRet = this.GetReaderRecXmlForLogin(
+                channel,
+                "", // strLibraryCodeList,
+                strQueryWord,
+                strPassword,
+                -1,  // nIndex,
+                sessioninfo.ClientIP,
+                null, // strGetToken,
+                out bTempPassword,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strToken,
+                out strError);
+            if (nRet == -1 || nRet == -2)
+            {
+                strError = "以 '" + strQueryWord + "' 检索读者帐户记录出错: " + strError;
+                return -1;
+            }
+
+            if (nRet == 0)
+            {
+                strError = "帐户不存在或密码不正确";
+                return -1;
+            }
+
+            if (nRet > 1)
+            {
+                strError = "以 '" + strQueryWord + "' 检索读者记录时, 因所匹配的帐户多于一个，无法确认读者记录。可改用证条码号进行绑定操作。";
+                return -1;
+            }
+
+            XmlDocument readerdom = null;
+            nRet = LibraryApplication.LoadToDom(strXml,
+                out readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                return -1;
+            }
+
+            bool bChanged = false;
+
+            bool bMultiple = strStyle == "multiple";
+
+            // 修改读者记录的 email 字段
+            string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
+            string strNewEmail = "";
+            if (strAction == "bind")
+            {
+                strNewEmail = AddBindingString(strEmail,
+                    strBindingID,
+                    bMultiple);
+            }
+            else if (strAction == "unbind")
+            {
+                strNewEmail = RemoveBindingString(strEmail, strBindingID);
+            }
+            else
+            {
+                strError = "未知的 strAction 参数值 '" + strAction + "'";
+                return -1;
+            }
+
+            // 如果记录中没有 refID 字段，则主动填充
+            string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID) == true)
+            {
+                DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                m_bChanged = true;
+            }
+
+            if (strNewEmail != strEmail)
+            {
+                DomUtil.SetElementText(readerdom.DocumentElement, "email", strEmail);
+                m_bChanged = true;
+            }
+
+            if (bChanged == true)
+            {
+                string strRecPath = strOutputPath;
+                byte[] output_timestamp = null;
+                // 保存读者记录
+                long lRet = channel.DoSaveTextRes(strRecPath,
+                    readerdom.OuterXml,
+                    false,
+                    "content", // "content,ignorechecktimestamp",
+                    timestamp,   // timestamp,
+                    out output_timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                        && nRedoCount < 10)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    return -1;
+                }
+
+                timestamp = output_timestamp;
+
+                // 让缓存失效
+                string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
+            }
+
+            List<string> recpaths = new List<string>();
+            recpaths.Add(strOutputPath);
+
+            // 构造读者记录的返回格式
+            nRet = BuildReaderResults(
+    sessioninfo,
+    readerdom,
+    strXml,
+    strResultTypeList,
+    "", // strLibraryCode,
+    recpaths,
+    strOutputPath,
+    timestamp,
+    OperType.None,
+    null,
+    "",
+    ref results,
+    out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (bChanged)
+                return 1;
+            return 0;
+        }
+
+        // 加入一个绑定号码
+        static string AddBindingString(string strText,
+            string strBinding,
+            bool bMultiple)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return strBinding;
+
+            if (bMultiple == false)
+            {
+                string strName = "";
+                string strValue = "";
+                StringUtil.ParseTwoPart(strBinding, ":", out strName, out strValue);
+
+                List<string> results = new List<string>();
+                string[] parts = strText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string s in parts)
+                {
+                    string strLine = s.Trim();
+                    if (string.IsNullOrEmpty(strLine))
+                        continue;
+                    string strLeft = "";
+                    string strRight = "";
+                    StringUtil.ParseTwoPart(strLine, ":", out strLeft, out strRight);
+                    if (strName == strLeft)
+                        continue;   // 忽视所有同类型的号码
+                    results.Add(strLine);
+                }
+
+                results.Add(strBinding);
+                return StringUtil.MakePathList(results);
+            }
+            else
+                return strText + "," + strBinding;
+        }
+
+        // 去掉一个绑定号码
+        static string RemoveBindingString(string strText,
+            string strBinding)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+
+            List<string> results = new List<string>();
+
+            string[] parts = strText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in parts)
+            {
+                string strLine = s.Trim();
+                if (string.IsNullOrEmpty(strLine))
+                    continue;
+                if (strLine == strBinding)
+                    continue;   // 忽视发现的号码
+                results.Add(strLine);
+            }
+
+            return StringUtil.MakePathList(results);
+        }
+
     }
 }

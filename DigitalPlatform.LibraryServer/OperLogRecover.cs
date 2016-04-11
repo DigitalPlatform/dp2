@@ -97,20 +97,21 @@ namespace DigitalPlatform.LibraryServer
         // 解析通用启动参数
         // 格式
         /*
-         * <root recoverLevel='...' clearFirst='...'/>
-         * recoverLevel缺省为Snapshot
-         * clearFirst缺省为false
-         * 
-         * 
+         * <root recoverLevel='...' clearFirst='...' continueWhenError='...'/>
+         * recoverLevel 缺省为 Snapshot
+         * clearFirst 缺省为 false
+         * continueWhenError 缺省值为 false
          * */
         public static int ParseLogRecoverParam(string strParam,
             out string strRecoverLevel,
             out bool bClearFirst,
+            out bool bContinueWhenError,
             out string strError)
         {
             strError = "";
             bClearFirst = false;
             strRecoverLevel = "";
+            bContinueWhenError = false;
 
             if (String.IsNullOrEmpty(strParam) == true)
                 return 0;
@@ -143,6 +144,11 @@ namespace DigitalPlatform.LibraryServer
                 bClearFirst = true;
             else
                 bClearFirst = false;
+
+            // 2016/3/8
+            bContinueWhenError = DomUtil.GetBooleanParam(dom.DocumentElement,
+                "continueWhenError",
+                false);
 
             return 0;
         }
@@ -177,9 +183,12 @@ namespace DigitalPlatform.LibraryServer
                 //
                 string strRecoverLevel = "";
                 bool bClearFirst = false;
+                bool bContinueWhenError = false;
+
                 nRet = ParseLogRecoverParam(startinfo.Param,
                     out strRecoverLevel,
                     out bClearFirst,
+                    out bContinueWhenError,
                     out strError);
                 if (nRet == -1)
                 {
@@ -279,6 +288,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         nRet = DoOneLogFile(strFileName,
                             lStartIndex,
+                            bContinueWhenError,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -318,12 +328,13 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strFileName 纯文件名
         //      lStartIndex 开始的记录（从0开始计数）
-        // return:
+        // return:DoOperLogRecord(
         //      -1  error
         //      0   file not found
         //      1   succeed
         int DoOneLogFile(string strFileName,
             long lStartIndex,
+            bool bContinueWhenError,
             out string strError)
         {
             strError = "";
@@ -407,11 +418,13 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                         {
-                            this.AppendResultText("发生错误：" + strError + "\r\n");
+                            this.AppendResultText("*** 做日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
+
                             // 2007/6/25
-                            // 如果为纯逻辑恢复，遇到错误就停下来。这便于进行测试。
-                            // 若不想停下来，可以选择“逻辑+快照”型
-                            if (this.RecoverLevel == RecoverLevel.Logic)
+                            // 如果为纯逻辑恢复(并且 bContinueWhenError 为 false)，遇到错误就停下来。这便于进行测试。
+                            // 若不想停下来，可以选择“逻辑+快照”型，或者设置 bContinueWhenError 为 true
+                            if (this.RecoverLevel == RecoverLevel.Logic
+                                && bContinueWhenError == false)
                                 return -1;
                         }
                     }

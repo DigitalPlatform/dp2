@@ -1469,9 +1469,10 @@ MessageBoxDefaultButton.Button2);
                         AppendString("放弃设置实例 '" + strInstanceName + "' 的序列号\r\n");
                         continue;
                     }
-                    if (DigitalPlatform.LibraryServer.OneInstanceDialog.MatchLocalString(strSerialCode, strInstanceName) == false)
+                    if (DigitalPlatform.LibraryServer.OneInstanceDialog.MatchLocalString(strSerialCode, strInstanceName) == false
+                        && strSerialCode != "community")
                     {
-                        MessageBox.Show(this, "实例 '" + strInstanceName + "' 的序列号序列号 '" + strSerialCode + "' 经验证无效。请重新输入");
+                        MessageBox.Show(this, "实例 '" + strInstanceName + "' 的序列号 '" + strSerialCode + "' 经验证无效。请重新输入");
                         goto REDO_INPUT;
                     }
 

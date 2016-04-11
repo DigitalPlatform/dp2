@@ -1028,7 +1028,10 @@ namespace dp2Circulation
             return 1;
         }
 
-        internal void FillLineByBarcode(
+        // return:
+        //      false   出现错误
+        //      true    成功
+        internal bool FillLineByBarcode(
     string strBarcode,
     ListViewItem item)
         {
@@ -1049,12 +1052,12 @@ namespace dp2Circulation
             if (nRet == -1)
             {
                 ListViewUtil.ChangeItemText(item, 2, strError);
-                return;
+                return false;
             }
             else if (nRet == 0)
             {
                 ListViewUtil.ChangeItemText(item, 2, "条码号 '" + strBarcode + "' 没有找到记录");
-                return;
+                return false;
             }
             else if (nRet == 1)
             {
@@ -1063,7 +1066,7 @@ namespace dp2Circulation
             else if (nRet > 1) // 命中发生重复
             {
                 ListViewUtil.ChangeItemText(item, 2, "条码号 '" + strBarcode + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误");
-                return;
+                return false;
             }
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
@@ -1074,6 +1077,7 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, index, strBarcode);
 
             // TODO: 将书目记录路径放入item.Tag中备用
+            return true;
         }
 
         // 根据册条码号，检索出其册记录路径和从属的书目记录路径，以及馆藏地点信息。

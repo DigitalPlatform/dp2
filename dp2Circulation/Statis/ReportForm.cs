@@ -2758,9 +2758,14 @@ MessageBoxDefaultButton.Button1);
                 string strName = line.GetString(0);
                 string strDepartment = line.GetString(1);
 
+#if NO
                 string strDepartmentName = strDepartment.Replace(" ", "_");
                 if (string.IsNullOrEmpty(strDepartmentName) == true)
                     strDepartmentName = "其他部门";
+#endif
+
+                // 2016/4/7
+                string strDepartmentName = GetValidDepartmentString(strDepartment);
 
                 string strPureFileName = GetValidPathString(strDepartmentName) + "\\" + GetValidPathString(strReaderBarcode + "_" + strName) + ".rml";
                 string strOutputFileName = "";
@@ -2819,7 +2824,7 @@ MessageBoxDefaultButton.Button1);
     writer,
     strOutputFileName,
     macro_table,
-    "创建 "+strReportType+" 表时",
+    "创建 " + strReportType + " 表时",
     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2922,6 +2927,31 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
+        public static string GetValidDepartmentString(string strText, string strReplaceChar = "_")
+        {
+            if (strText != null)
+                strText = strText.Trim();
+            if (string.IsNullOrEmpty(strText) == true)
+                return "其他部门";
+
+            // 文件名非法字符
+            string department_invalid_chars = " /";
+
+            StringBuilder result = new StringBuilder();
+            foreach (char c in strText)
+            {
+                if (c == ' ')
+                    continue;
+                if (department_invalid_chars.IndexOf(c) != -1)
+                    result.Append(strReplaceChar);
+                else
+                    result.Append(c);
+            }
+
+            return result.ToString();
+        }
+
+
         // 101 111 121 122
         // 121 表 按照读者 *姓名* 分类的借书册数表
         // 122 表 按照读者 *姓名* 没有借书的读者
@@ -3016,7 +3046,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 "+strReportType+" 表时",
+    "创建 " + strReportType + " 表时",
 out strError);
         }
 
@@ -3064,7 +3094,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
-    "创建 "+strReportType+" 表时",
+    "创建 " + strReportType + " 表时",
 out strError);
         }
 
@@ -7246,7 +7276,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetAutoText(ex);
+                strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally
@@ -10928,7 +10958,6 @@ MessageBoxDefaultButton.Button1);
             // 延迟到创建表格的时候创建子目录
 
             string strOutputDir = Path.Combine(strReportsDir, GetValidPathString(GetSubDirName(time.Time)));
-
 
             // 看看目录是否已经存在
             if (time.Detect)

@@ -878,7 +878,6 @@ MessageBoxDefaultButton.Button1);
             return false;
         }
 
-
         private void button_setSerialNumber_Click(object sender, EventArgs e)
         {
             string strError = "";

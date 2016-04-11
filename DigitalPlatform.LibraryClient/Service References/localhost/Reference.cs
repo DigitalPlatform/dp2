@@ -3277,6 +3277,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItemWrapper[] results, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatron", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatronResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult BindPatron(out string[] results, string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatron", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatronResponse")]
+        System.IAsyncResult BeginBindPatron(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBindPatron(out string[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -4353,6 +4361,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.ChargingItemWrapper[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class BindPatronCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public BindPatronCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public string[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results1[0]));
             }
         }
         
@@ -6819,6 +6853,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onSearchChargingCompletedDelegate;
         
+        private BeginOperationDelegate onBeginBindPatronDelegate;
+        
+        private EndOperationDelegate onEndBindPatronDelegate;
+        
+        private System.Threading.SendOrPostCallback onBindPatronCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -7373,6 +7413,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<HitCounterCompletedEventArgs> HitCounterCompleted;
         
         public event System.EventHandler<SearchChargingCompletedEventArgs> SearchChargingCompleted;
+        
+        public event System.EventHandler<BindPatronCompletedEventArgs> BindPatronCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -8304,6 +8346,68 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         order,
                         start,
                         count}, this.onEndSearchChargingDelegate, this.onSearchChargingCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult BindPatron(out string[] results, string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList) {
+            return base.Channel.BindPatron(out results, strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginBindPatron(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginBindPatron(strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBindPatron(out string[] results, System.IAsyncResult result) {
+            return base.Channel.EndBindPatron(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginBindPatron(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strQueryWord = ((string)(inValues[1]));
+            string strPassword = ((string)(inValues[2]));
+            string strBindingID = ((string)(inValues[3]));
+            string strStyle = ((string)(inValues[4]));
+            string strResultTypeList = ((string)(inValues[5]));
+            return this.BeginBindPatron(strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList, callback, asyncState);
+        }
+        
+        private object[] OnEndBindPatron(System.IAsyncResult result) {
+            string[] results = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBindPatron(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnBindPatronCompleted(object state) {
+            if ((this.BindPatronCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.BindPatronCompleted(this, new BindPatronCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void BindPatronAsync(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList) {
+            this.BindPatronAsync(strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList, null);
+        }
+        
+        public void BindPatronAsync(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList, object userState) {
+            if ((this.onBeginBindPatronDelegate == null)) {
+                this.onBeginBindPatronDelegate = new BeginOperationDelegate(this.OnBeginBindPatron);
+            }
+            if ((this.onEndBindPatronDelegate == null)) {
+                this.onEndBindPatronDelegate = new EndOperationDelegate(this.OnEndBindPatron);
+            }
+            if ((this.onBindPatronCompletedDelegate == null)) {
+                this.onBindPatronCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnBindPatronCompleted);
+            }
+            base.InvokeAsync(this.onBeginBindPatronDelegate, new object[] {
+                        strAction,
+                        strQueryWord,
+                        strPassword,
+                        strBindingID,
+                        strStyle,
+                        strResultTypeList}, this.onEndBindPatronDelegate, this.onBindPatronCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -13362,6 +13466,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchCharging(out DigitalPlatform.LibraryClient.localhost.ChargingItemWrapper[] results, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/BindPatron", ReplyAction="http://dp2003.com/dp2library/dp2library/BindPatronResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult BindPatron(out string[] results, string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/BindPatron", ReplyAction="http://dp2003.com/dp2library/dp2library/BindPatronResponse")]
+        System.IAsyncResult BeginBindPatron(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBindPatron(out string[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -14432,6 +14544,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.ChargingItemWrapper[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class BindPatronCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public BindPatronCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public string[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results1[0]));
             }
         }
         
@@ -16898,6 +17036,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onSearchChargingCompletedDelegate;
         
+        private BeginOperationDelegate onBeginBindPatronDelegate;
+        
+        private EndOperationDelegate onEndBindPatronDelegate;
+        
+        private System.Threading.SendOrPostCallback onBindPatronCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -17452,6 +17596,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<HitCounterCompletedEventArgs1> HitCounterCompleted;
         
         public event System.EventHandler<SearchChargingCompletedEventArgs1> SearchChargingCompleted;
+        
+        public event System.EventHandler<BindPatronCompletedEventArgs1> BindPatronCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -18383,6 +18529,68 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         order,
                         start,
                         count}, this.onEndSearchChargingDelegate, this.onSearchChargingCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult BindPatron(out string[] results, string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList) {
+            return base.Channel.BindPatron(out results, strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginBindPatron(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginBindPatron(strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBindPatron(out string[] results, System.IAsyncResult result) {
+            return base.Channel.EndBindPatron(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginBindPatron(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strQueryWord = ((string)(inValues[1]));
+            string strPassword = ((string)(inValues[2]));
+            string strBindingID = ((string)(inValues[3]));
+            string strStyle = ((string)(inValues[4]));
+            string strResultTypeList = ((string)(inValues[5]));
+            return this.BeginBindPatron(strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList, callback, asyncState);
+        }
+        
+        private object[] OnEndBindPatron(System.IAsyncResult result) {
+            string[] results = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBindPatron(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnBindPatronCompleted(object state) {
+            if ((this.BindPatronCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.BindPatronCompleted(this, new BindPatronCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void BindPatronAsync(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList) {
+            this.BindPatronAsync(strAction, strQueryWord, strPassword, strBindingID, strStyle, strResultTypeList, null);
+        }
+        
+        public void BindPatronAsync(string strAction, string strQueryWord, string strPassword, string strBindingID, string strStyle, string strResultTypeList, object userState) {
+            if ((this.onBeginBindPatronDelegate == null)) {
+                this.onBeginBindPatronDelegate = new BeginOperationDelegate(this.OnBeginBindPatron);
+            }
+            if ((this.onEndBindPatronDelegate == null)) {
+                this.onEndBindPatronDelegate = new EndOperationDelegate(this.OnEndBindPatron);
+            }
+            if ((this.onBindPatronCompletedDelegate == null)) {
+                this.onBindPatronCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnBindPatronCompleted);
+            }
+            base.InvokeAsync(this.onBeginBindPatronDelegate, new object[] {
+                        strAction,
+                        strQueryWord,
+                        strPassword,
+                        strBindingID,
+                        strStyle,
+                        strResultTypeList}, this.onEndBindPatronDelegate, this.onBindPatronCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {

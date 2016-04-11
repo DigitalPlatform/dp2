@@ -858,7 +858,7 @@ namespace dp2Library
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version.CompareTo(new Version("2.8")) < 0)
+                if (version.CompareTo(new Version("2.13")) < 0)
                     return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
             }
 
@@ -2379,6 +2379,9 @@ namespace dp2Library
 
             try
             {
+                // test
+                // Thread.Sleep(new TimeSpan(0, 0, 30));
+
                 // 权限判断
 
                 // 权限字符串
@@ -3356,7 +3359,7 @@ namespace dp2Library
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "复制书目信息被拒绝。不具备order或setbiblioinfo权限。";
+                    result.ErrorInfo = "复制书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -7683,6 +7686,61 @@ namespace dp2Library
             return result;
         }
 
+        // 为读者记录绑定新的号码
+        // parameters:
+        //      strAction   动作。有 bind/unbind
+        //      strQueryWord    用于定位读者记录的检索词。
+        //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
+        //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+        //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
+        //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+        //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+        //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+        //          6) 否则用证条码号进行检索
+        //      strPassword     读者记录的密码
+        //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
+        //      strStyle    风格。multiple/single。默认 single
+        //                  multiple 表示允许多次绑定同一类型号码；sigle 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
+        //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
+        //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary
+        //      results 返回操作成功后的读者记录
+        public LibraryServerResult BindPatron(
+            string strAction,
+            string strQueryWord,
+            string strPassword,
+            string strBindingID,
+            string strStyle,
+            string strResultTypeList,
+            out string[] results)
+        {
+            results = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", false);
+            if (result.Value == -1)
+                return result;
+
+            string strError = "";
+            // 不需要登录
+            // return:
+            //      -1  出错
+            //      0   因为条件不具备功能没有成功执行
+            //      1   功能成功执行
+            int nRet = app.BindPatron(
+                sessioninfo,
+                strAction,
+                strQueryWord,
+                strPassword,
+                strBindingID,
+                strStyle,
+                strResultTypeList,
+                out results,
+                out strError);
+            result.Value = nRet;
+            result.ErrorInfo = strError;
+            return result;
+        }
+
         // 获得值列表
         // parameters:
         //      values 返回值列表。
@@ -9586,6 +9644,16 @@ namespace dp2Library
 
                 if (strCategory == "system")
                 {
+                    // 2016/4/6
+                    // 获得系统的临时文件目录
+                    if (strName == "systemTempDir")
+                    {
+                        string strTempFileName = Path.GetTempFileName();
+                        File.Delete(strTempFileName);
+                        strValue = Path.GetDirectoryName(strTempFileName);
+                        goto END1;
+                    }
+
                     if (strName == "libraryCodes")
                     {
                         List<string> librarycodes = new List<string>();

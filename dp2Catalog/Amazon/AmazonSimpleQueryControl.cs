@@ -198,6 +198,11 @@ namespace dp2Catalog
                 this.tabComboBox_match.Text = matchs[0];
         }
 
+        public void SetContent(string strUse, string strWord)
+        {
+            SetContentString(strWord + "^" + strUse);
+        }
+
         // 构造检索式
         public int BuildQueryString(out string strText,
             out string strError)

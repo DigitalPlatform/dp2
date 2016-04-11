@@ -7,6 +7,7 @@ using System.Xml;
 using System.Collections.Generic;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -20,7 +21,8 @@ namespace DigitalPlatform.CommonControl
 
         public string PropertyString = "";
 
-        List<string> _propertyNameList = null;	// 配置中出现过的属性名
+        // List<string> _propertyNameList = null;	// 配置中出现过的属性名
+        Hashtable _propertyNameTable = new Hashtable(); // 配置中出现过的属性名。属性名 --> ListViewItem
 
         List<string> _langNameList = null;	// 配置中出现过的语言类型
 
@@ -37,6 +39,8 @@ namespace DigitalPlatform.CommonControl
         private SplitContainer splitContainer_main;
         private Panel panel_up;
         private Panel panel_down;
+        private ToolStrip toolStrip1;
+        private ToolStripDropDownButton toolStripDropDownButton_quickSet;
         private System.ComponentModel.IContainer components;
 
         public PropertyDlg()
@@ -86,12 +90,15 @@ namespace DigitalPlatform.CommonControl
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.panel_up = new System.Windows.Forms.Panel();
             this.panel_down = new System.Windows.Forms.Panel();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripDropDownButton_quickSet = new System.Windows.Forms.ToolStripDropDownButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
             this.panel_up.SuspendLayout();
             this.panel_down.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label_property
@@ -214,6 +221,7 @@ namespace DigitalPlatform.CommonControl
             // 
             // panel_up
             // 
+            this.panel_up.Controls.Add(this.toolStrip1);
             this.panel_up.Controls.Add(this.listView_property);
             this.panel_up.Controls.Add(this.button_uncheckAll);
             this.panel_up.Controls.Add(this.button_checkAll);
@@ -232,6 +240,27 @@ namespace DigitalPlatform.CommonControl
             this.panel_down.Name = "panel_down";
             this.panel_down.Size = new System.Drawing.Size(586, 99);
             this.panel_down.TabIndex = 0;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripDropDownButton_quickSet});
+            this.toolStrip1.Location = new System.Drawing.Point(474, 209);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(112, 25);
+            this.toolStrip1.TabIndex = 7;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripDropDownButton_quickSet
+            // 
+            this.toolStripDropDownButton_quickSet.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_quickSet.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_quickSet.Image")));
+            this.toolStripDropDownButton_quickSet.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_quickSet.Name = "toolStripDropDownButton_quickSet";
+            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(69, 22);
+            this.toolStripDropDownButton_quickSet.Text = "快速设定";
             // 
             // PropertyDlg
             // 
@@ -253,6 +282,8 @@ namespace DigitalPlatform.CommonControl
             this.panel_up.PerformLayout();
             this.panel_down.ResumeLayout(false);
             this.panel_down.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -262,11 +293,19 @@ namespace DigitalPlatform.CommonControl
         private void PropertyDlg_Load(object sender, System.EventArgs e)
         {
             SetListViewTitle(listView_property);
+
+            toolTip_comment.SetToolTip(this.listView_property, "tool tip text");
+
+            this.BeginInvoke(new Action(Initial));
+        }
+
+        void Initial()
+        {
             LoadXml();
 
             textBox_property.Text = PropertyString;
 
-            toolTip_comment.SetToolTip(this.listView_property, "tool tip text");
+            ChangeColor();
         }
 
         public void SetListViewTitle(ListView listView)
@@ -282,7 +321,6 @@ namespace DigitalPlatform.CommonControl
             strError = "";
 
             XmlDocument dom = new XmlDocument();
-
             try
             {
                 dom.Load(strFileName);
@@ -295,11 +333,11 @@ namespace DigitalPlatform.CommonControl
 
             XmlNodeList propertyList = dom.SelectNodes("root/property");
 
-            int i, j;
-            for (i = 0; i < propertyList.Count; i++)
+            // int j;
+            foreach (XmlNode node in propertyList)
             {
                 // 找到事项名字
-                string strName = DomUtil.GetAttr(propertyList[i], "name");
+                string strName = DomUtil.GetAttr(node, "name");
 
                 if (strName == "")
                     continue;
@@ -308,12 +346,12 @@ namespace DigitalPlatform.CommonControl
                 XmlNode nodeComment = null;
 
                 if (Lang == "")
-                    nodeComment = propertyList[i].SelectSingleNode("comment");
+                    nodeComment = node.SelectSingleNode("comment");
                 else
                 {
-                    nodeComment = propertyList[i].SelectSingleNode("comment[@lang='" + Lang + "']");
+                    nodeComment = node.SelectSingleNode("comment[@lang='" + Lang + "']");
                     if (nodeComment == null)	// 按照指定的语言找，但是没有找到
-                        nodeComment = propertyList[i].SelectSingleNode("comment");
+                        nodeComment = node.SelectSingleNode("comment");
                 }
 
                 string strComment = "";
@@ -330,22 +368,22 @@ namespace DigitalPlatform.CommonControl
                 item.SubItems.Add(strComment);
 
                 listView_property.Items.Add(item);
-
             }
 
             // 创建语言数组
-            XmlNodeList commentList = dom.SelectNodes("//property/comment");
+            XmlNodeList commentList = dom.SelectNodes("root/property/comment");
 
             _langNameList = new List<string>(); // = new ArrayList();
 
-            for (i = 0; i < propertyList.Count; i++)
+            foreach (XmlNode node in commentList)
             {
                 // 找到事项名字
-                string strLang = DomUtil.GetAttr(commentList[i], "lang");
+                string strLang = DomUtil.GetAttr(node, "lang");
 
                 if (strLang == "")
                     continue;
 
+#if NO
                 bool bFound = false;
                 for (j = 0; j < _langNameList.Count; j++)
                 {
@@ -358,6 +396,9 @@ namespace DigitalPlatform.CommonControl
 
                 if (bFound == false)
                     _langNameList.Add(strLang);
+#endif
+                if (_langNameList.IndexOf(strLang) == -1)
+                    _langNameList.Add(strLang);
 
             }
 
@@ -367,9 +408,11 @@ namespace DigitalPlatform.CommonControl
         void LoadXml()
         {
             _langNameList = new List<string>();
-            _propertyNameList = new List<string>(); // = new string[listView_property.Items.Count];
+            // _propertyNameList = new List<string>(); // = new string[listView_property.Items.Count];
+            _propertyNameTable = new Hashtable();
 
             listView_property.Items.Clear();
+            this.toolStripDropDownButton_quickSet.DropDownItems.Clear();
 
             string strError = "";
 
@@ -378,6 +421,7 @@ namespace DigitalPlatform.CommonControl
 
             string[] filenames = this.CfgFileName.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
+            this.listView_property.BeginUpdate();
             foreach (string filename in filenames)
             {
                 // 装载一个 XML 文件
@@ -385,7 +429,12 @@ namespace DigitalPlatform.CommonControl
             out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                nRet = FillQuickSetMenu(filename,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
             }
+            this.listView_property.EndUpdate();
 
 #if NO
 			XmlDocument dom = new XmlDocument();
@@ -446,7 +495,10 @@ namespace DigitalPlatform.CommonControl
             foreach (ListViewItem item in listView_property.Items)
             {
                 // _propertyNameList[j] = listView_property.Items[j].Text;
-                _propertyNameList.Add(item.Text);
+
+                // _propertyNameList.Add(item.Text);
+
+                _propertyNameTable[item.Text.ToLower()] = item;
             }
 
 #if NO
@@ -479,11 +531,16 @@ namespace DigitalPlatform.CommonControl
 			}
 #endif
 
+            if (this.toolStripDropDownButton_quickSet.DropDownItems.Count == 0)
+                this.toolStripDropDownButton_quickSet.Visible = false;
+            else
+                this.toolStripDropDownButton_quickSet.Visible = true;
             return;
         ERROR1:
             MessageBox.Show(strError);
         }
 
+#if NO
         // 是否为已经定义的属性名
         bool IsDefinedPropertyName(string strName)
         {
@@ -497,6 +554,15 @@ namespace DigitalPlatform.CommonControl
             }
 
             return false;
+        }
+#endif
+        // 是否为已经定义的属性名
+        bool IsDefinedPropertyName(string strName)
+        {
+            if (this._propertyNameTable == null)
+                return false;
+
+            return _propertyNameTable.ContainsKey(strName.ToLower());
         }
 
         // 获得一个列表中属于当前没有定义的属性名
@@ -523,15 +589,15 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 获得一个列表中属于当前定义的属性名
-        ArrayList GetDefinedPropertyNames(string strList)
+        List<string> GetDefinedPropertyNames(string strList)
         {
-            ArrayList aResult = new ArrayList();
+            List<string> aResult = new List<string>();
             string[] aName = strList.Split(new Char[] { ',' });
 
-            for (int i = 0; i < aName.Length; i++)
+            foreach (string s in aName)
             {
-                string strName = aName[i];
-                strName = strName.Trim();
+                // string strName = aName[i];
+                string strName = s.Trim();
                 if (strName == "")
                     continue;
 
@@ -544,8 +610,13 @@ namespace DigitalPlatform.CommonControl
             return aResult;
         }
 
+        int _skipItemChecked = 0;   // 2016/3/26
+
         private void listView_property_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)
         {
+            if (_skipItemChecked > 0)
+                return;
+
             // 得到checked事项
             ArrayList checkedItems = GetCheckedItems(listView_property, e);
 
@@ -586,9 +657,7 @@ namespace DigitalPlatform.CommonControl
             }
 
             ChangeColor();
-
         }
-
 
         void ChangeColor()
         {
@@ -604,7 +673,6 @@ namespace DigitalPlatform.CommonControl
                     this.listView_property.Items[i].ForeColor = SystemColors.MenuText;
                     this.listView_property.Items[i].BackColor = SystemColors.Menu;
                 }
-
             }
         }
 
@@ -612,12 +680,12 @@ namespace DigitalPlatform.CommonControl
         {
             //bool bChanged = false;
             // 提取已定义的部分
-            ArrayList aDefined = GetDefinedPropertyNames(textBox_property.Text);
+            List<string> aDefined = GetDefinedPropertyNames(textBox_property.Text);
 
             // check
-            for (int i = 0; i < aDefined.Count; i++)
+            foreach (string strName in aDefined)
             {
-                string strName = (string)aDefined[i];
+                // string strName = (string)aDefined[i];
 
                 //bool bRet = 
                 CheckItem(strName, true);
@@ -626,9 +694,9 @@ namespace DigitalPlatform.CommonControl
             }
 
             // uncheck
-            for (int j = 0; j < listView_property.Items.Count; j++)
+            foreach (ListViewItem item in listView_property.Items)
             {
-                string strItemName = listView_property.Items[j].Text;
+                string strItemName = item.Text;
 
                 bool bFound = false;
                 for (int k = 0; k < aDefined.Count; k++)
@@ -643,9 +711,9 @@ namespace DigitalPlatform.CommonControl
                 // 属于需要off的事项
                 if (bFound == false)
                 {
-                    if (listView_property.Items[j].Checked == false)
+                    if (item.Checked == false)
                         continue;
-                    listView_property.Items[j].Checked = false;
+                    item.Checked = false;
                     //bChanged = true;
                 }
 
@@ -653,24 +721,43 @@ namespace DigitalPlatform.CommonControl
 
         }
 
+#if NO
         bool CheckItem(string strName, bool bChecked)
         {
-            for (int i = 0; i < listView_property.Items.Count; i++)
+            foreach (ListViewItem item in listView_property.Items)
             {
-                if (String.Compare(strName, listView_property.Items[i].Text, true) == 0)
+                if (String.Compare(strName, item.Text, true) == 0)
                 {
-                    if (listView_property.Items[i].Checked == bChecked)
+                    if (item.Checked == bChecked)
                         return false;	// 没有改变状态
                     else
                     {
-                        listView_property.Items[i].Checked = bChecked;
+                        item.Checked = bChecked;
                         return true;	// 改变了状态
                     }
-
                 }
             }
 
             return false;	// 没有找到事项
+        }
+#endif
+
+        // 2016/3/26 优化速度
+        bool CheckItem(string strName, bool bChecked)
+        {
+            ListViewItem item = (ListViewItem)_propertyNameTable[strName.ToLower()];
+            if (item == null)
+                return false;	// 没有找到事项
+
+            if (item.Checked == bChecked)
+                return false;	// 没有改变状态
+            else
+            {
+                _skipItemChecked++;
+                item.Checked = bChecked;
+                _skipItemChecked--;
+                return true;	// 改变了状态
+            }
         }
 
         // 得到所有checked Item
@@ -708,7 +795,6 @@ namespace DigitalPlatform.CommonControl
             this.Close();
         }
 
-
         private void listView_property_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             ListViewItem selection = listView_property.GetItemAt(e.X, e.Y);
@@ -728,7 +814,6 @@ namespace DigitalPlatform.CommonControl
             }
 
             tipsItem = selection;
-
         }
 
         private void listView_property_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -745,7 +830,6 @@ namespace DigitalPlatform.CommonControl
             // 子菜单
             for (int i = 0; i < _langNameList.Count; i++)
             {
-
                 MenuItem menuItemSub = new MenuItem(_langNameList[i]);
                 menuItemSub.Click += new System.EventHandler(this.menu_selectLanguage_Click);
 
@@ -765,7 +849,6 @@ namespace DigitalPlatform.CommonControl
         // 选择了语言
         private void menu_selectLanguage_Click(object sender, System.EventArgs e)
         {
-
             if (sender is MenuItem)
             {
                 string strSave = textBox_property.Text;
@@ -812,5 +895,41 @@ namespace DigitalPlatform.CommonControl
             this.listView_property.ListViewItemSorter = null;
         }
 
+        int FillQuickSetMenu(string strFileName, out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "装载文件 '" + strFileName + "' 时出错: " + ex.Message;
+                return -1;
+            }
+
+            XmlNodeList groups = dom.DocumentElement.SelectNodes("groups/group");
+            foreach (XmlElement group in groups)
+            {
+                string strCaption = DomUtil.GetCaption(this.Lang, group);
+                ToolStripItem item = new ToolStripMenuItem(strCaption);
+                item.Tag = group.GetAttribute("value");
+                item.Click += item_Click;
+                this.toolStripDropDownButton_quickSet.DropDownItems.Add(item);
+            }
+            return 0;
+        }
+
+        void item_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            string strValue = item.Tag as string;
+            if (Control.ModifierKeys == Keys.Control)
+                textBox_property.Text = StringUtil.MergeList(textBox_property.Text, strValue, false);
+            else
+                textBox_property.Text = strValue;
+        }
     }
 }

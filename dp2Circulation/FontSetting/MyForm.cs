@@ -425,6 +425,26 @@ namespace dp2Circulation
             this.MainForm.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
         }
 
+        // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
+        public int GetAllLibraryCodes(out List<string> library_codes,
+            out string strError)
+        {
+            strError = "";
+            library_codes = new List<string>();
+
+            string strValue = "";
+            long lRet = this.Channel.GetSystemParameter(stop,
+                "system", 
+                "libraryCodes",
+                out strValue, 
+                out strError);
+            if (lRet == -1)
+                return -1;
+            library_codes = StringUtil.SplitList(strValue);
+
+            return 0;
+        }
+
         #endregion
 
         /// <summary>

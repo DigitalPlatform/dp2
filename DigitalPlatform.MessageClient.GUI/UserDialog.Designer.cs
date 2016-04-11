@@ -46,6 +46,7 @@
             this.button_OK = new System.Windows.Forms.Button();
             this.textBox_duty = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.checkBox_changePassword = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -63,11 +64,13 @@
             this.textBox_userName.Name = "textBox_userName";
             this.textBox_userName.Size = new System.Drawing.Size(204, 21);
             this.textBox_userName.TabIndex = 1;
+            this.textBox_userName.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // textBox_password
             // 
             this.textBox_password.Location = new System.Drawing.Point(119, 39);
             this.textBox_password.Name = "textBox_password";
+            this.textBox_password.PasswordChar = '*';
             this.textBox_password.Size = new System.Drawing.Size(204, 21);
             this.textBox_password.TabIndex = 3;
             // 
@@ -84,6 +87,7 @@
             // 
             this.textBox_confirmPassword.Location = new System.Drawing.Point(119, 66);
             this.textBox_confirmPassword.Name = "textBox_confirmPassword";
+            this.textBox_confirmPassword.PasswordChar = '*';
             this.textBox_confirmPassword.Size = new System.Drawing.Size(204, 21);
             this.textBox_confirmPassword.TabIndex = 5;
             // 
@@ -104,6 +108,7 @@
             this.textBox_department.Name = "textBox_department";
             this.textBox_department.Size = new System.Drawing.Size(289, 21);
             this.textBox_department.TabIndex = 7;
+            this.textBox_department.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // label4
             // 
@@ -122,6 +127,7 @@
             this.textBox_rights.Name = "textBox_rights";
             this.textBox_rights.Size = new System.Drawing.Size(289, 21);
             this.textBox_rights.TabIndex = 9;
+            this.textBox_rights.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // label5
             // 
@@ -138,6 +144,7 @@
             this.textBox_tel.Name = "textBox_tel";
             this.textBox_tel.Size = new System.Drawing.Size(204, 21);
             this.textBox_tel.TabIndex = 13;
+            this.textBox_tel.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // label6
             // 
@@ -158,6 +165,7 @@
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_comment.Size = new System.Drawing.Size(289, 89);
             this.textBox_comment.TabIndex = 15;
+            this.textBox_comment.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // label7
             // 
@@ -198,6 +206,7 @@
             this.textBox_duty.Name = "textBox_duty";
             this.textBox_duty.Size = new System.Drawing.Size(289, 21);
             this.textBox_duty.TabIndex = 11;
+            this.textBox_duty.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // label8
             // 
@@ -208,11 +217,23 @@
             this.label8.TabIndex = 10;
             this.label8.Text = "义务(&D):";
             // 
+            // checkBox_changePassword
+            // 
+            this.checkBox_changePassword.AutoSize = true;
+            this.checkBox_changePassword.Location = new System.Drawing.Point(329, 41);
+            this.checkBox_changePassword.Name = "checkBox_changePassword";
+            this.checkBox_changePassword.Size = new System.Drawing.Size(72, 16);
+            this.checkBox_changePassword.TabIndex = 18;
+            this.checkBox_changePassword.Text = "修改密码";
+            this.checkBox_changePassword.UseVisualStyleBackColor = true;
+            this.checkBox_changePassword.CheckedChanged += new System.EventHandler(this.checkBox_changePassword_CheckedChanged);
+            // 
             // UserDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(420, 360);
+            this.Controls.Add(this.checkBox_changePassword);
             this.Controls.Add(this.textBox_duty);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.button_OK);
@@ -261,5 +282,6 @@
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.TextBox textBox_duty;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.CheckBox checkBox_changePassword;
     }
 }

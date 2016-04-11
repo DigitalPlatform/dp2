@@ -88,6 +88,12 @@
   <wsdl:message name="dp2libraryREST_SearchCharging_OutputMessage">
     <wsdl:part name="parameters" element="tns:SearchChargingResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2libraryREST_BindPatron_InputMessage">
+    <wsdl:part name="parameters" element="tns:BindPatron" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_BindPatron_OutputMessage">
+    <wsdl:part name="parameters" element="tns:BindPatronResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2libraryREST_GetVersion_InputMessage">
     <wsdl:part name="parameters" element="tns:GetVersion" />
   </wsdl:message>
@@ -647,6 +653,10 @@
     <wsdl:operation name="SearchCharging">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCharging" message="tns:dp2libraryREST_SearchCharging_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchChargingResponse" message="tns:dp2libraryREST_SearchCharging_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="BindPatron">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatron" message="tns:dp2libraryREST_BindPatron_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatronResponse" message="tns:dp2libraryREST_BindPatron_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetVersion">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion" message="tns:dp2libraryREST_GetVersion_InputMessage" />

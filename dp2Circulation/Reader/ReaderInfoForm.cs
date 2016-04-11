@@ -5450,13 +5450,18 @@ MessageBoxDefaultButton.Button1);
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            string strRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
+            string strPatronRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "patronrights.xml");
 
+            string strRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.Text = "当前读者的权限";
             dlg.PropertyString = this.readerEditControl1.Rights;
-            dlg.CfgFileName = Path.Combine(this.MainForm.DataDir, "userrightsdef.xml");
+            if (File.Exists(strPatronRightsCfgFileName) == true
+                && Control.ModifierKeys != Keys.Control)
+                dlg.CfgFileName = strPatronRightsCfgFileName;   // 优先用读者权限定义配置文件
+            else
+                dlg.CfgFileName = Path.Combine(this.MainForm.DataDir, "userrightsdef.xml");
             if (File.Exists(strRightsCfgFileName) == true)
                 dlg.CfgFileName += "," + strRightsCfgFileName;
             dlg.ShowDialog(this);
@@ -5836,7 +5841,7 @@ MessageBoxDefaultButton.Button1);
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
-                + "<script type='text/javascript' charset='UTF-8' src='"+strSummaryJs+"'></script>";
+                + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
             string strStyle = @"<style type='text/css'>
 </style>";
             text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
@@ -5875,7 +5880,7 @@ MessageBoxDefaultButton.Button1);
             foreach (ChargingItemWrapper wrapper in items)
             {
                 ChargingItem item = wrapper.Item;
-                text.Append("<tr class='"+HttpUtility.HtmlEncode(item.Action)+"'>");
+                text.Append("<tr class='" + HttpUtility.HtmlEncode(item.Action) + "'>");
                 text.Append("<td>" + (nStart + 1).ToString() + "</td>");
                 text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(GetOperTypeName(item.Action)) + "</td>");
 

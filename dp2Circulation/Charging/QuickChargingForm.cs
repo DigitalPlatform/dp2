@@ -160,6 +160,69 @@ namespace dp2Circulation
             {
                 SetReaderHtmlString("(空)");
             }
+
+            this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+        }
+
+        string _focusLibraryCode = "";
+
+        // 当前操作所针对的分馆 代码
+        // 注: 全局用户可以操作任何分管，和总馆，通过此成员，可以明确它当前正在操作哪个分馆，这样可以明确 VerifyBarcode() 的 strLibraryCodeList 参数值
+        public string FocusLibraryCode
+        {
+            get
+            {
+                return _focusLibraryCode;
+            }
+            set
+            {
+                this._focusLibraryCode = value;
+                this.Text = "快捷出纳 - " + (string.IsNullOrEmpty(value) == true ? "[总馆]" : value);
+            }
+        }
+
+        void FillLibraryCodeListMenu()
+        {
+            string strError = "";
+            List<string> all_library_codes = null;
+            int nRet = this.GetAllLibraryCodes(out all_library_codes, out strError);
+
+            List<string> library_codes = null;
+            if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == true)
+            {
+                library_codes = all_library_codes;
+                library_codes.Insert(0, "");
+            }
+            else
+                library_codes = StringUtil.SplitList(this.Channel.LibraryCodeList);
+
+            this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Clear();
+            foreach (string library_code in library_codes)
+            {
+                string strName = library_code;
+                if (string.IsNullOrEmpty(strName) == true)
+                    strName = "[总馆]";
+                ToolStripItem item = new ToolStripMenuItem(strName);
+                item.Tag = library_code;
+                item.Click += item_Click;
+                this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
+            }
+
+            // 默认选定第一项
+            if (this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Count > 0)
+                item_Click(this.toolStripDropDownButton_selectLibraryCode.DropDownItems[0], new EventArgs());
+        }
+
+        void item_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = (ToolStripMenuItem)sender;
+            foreach (ToolStripMenuItem current in this.toolStripDropDownButton_selectLibraryCode.DropDownItems)
+            {
+                if (current != item && current.Checked == true)
+                    current.Checked = false;
+            }
+            item.Checked = true;
+            FocusLibraryCode = item.Tag as string;
         }
 
         void m_webExternalHost_readerInfo_OutputDebugInfo(object sender, OutputDebugInfoEventArgs e)
@@ -1485,7 +1548,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     //      1   是合法的读者证条码号
                     //      2   是合法的册条码号
                     int nRet = VerifyBarcode(
-                        this.Channel.LibraryCodeList,
+                        this.FocusLibraryCode,  // this.Channel.LibraryCodeList,
                         strText,
                         out strError);
                     if (nRet == -2)
@@ -1508,7 +1571,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     {
                         // TODO: 语音提示
                         // TODO: 红色对话框
-                        MessageBox.Show(this, "'" + strText + "' 不是合法的条码号");
+                        MessageBox.Show(this, "'" + strText + "' 不是合法的条码号: " + strError);
                         this.textBox_input.SelectAll();
                         this.textBox_input.Focus();
                         return;

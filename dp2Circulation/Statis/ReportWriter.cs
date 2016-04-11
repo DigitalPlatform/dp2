@@ -9,16 +9,17 @@ using System.IO;
 // using System.Data.SQLite;
 using System.Collections;
 using System.Diagnostics;
-using DigitalPlatform.IO;
 using System.Globalization;
 using System.Data.Common;
-
-using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.Text;
 using System.Data;
 using System.Collections.Specialized;
-using DigitalPlatform.Xml;
 using System.Data.SQLite;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -281,7 +282,7 @@ namespace dp2Circulation
 #endif
 
         public int OutputRmlReport(
-            DbDataReader data_reader, 
+            DbDataReader data_reader,
             Hashtable macro_table,
             string strOutputFileName,
             out string strError)
@@ -604,7 +605,7 @@ namespace dp2Circulation
                             // if (column.DataType != DataType.Currency)
                             {
                                 object v = null;
-                                    
+
                                 if (column.ColumnNumber < data_reader.FieldCount)
                                     v = data_reader.GetValue(column.ColumnNumber);
 #if NO
@@ -637,7 +638,7 @@ namespace dp2Circulation
                         }
                         catch (Exception ex)	// 俘获可能因字符串转换为整数抛出的异常
                         {
-                            throw new Exception("在累加 行 " + i.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，抛出异常: " + ex.Message);
+                            throw new Exception("在累加 行 " + i.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，抛出异常: " + ExceptionUtil.GetAutoText(ex));
                         }
                     }
                 }
@@ -762,7 +763,16 @@ object o2)
                 if (o1 is Int32)
                     return (Int32)o1 + (Int32)o2;
                 if (o1 is double)
+                {
+#if NO
+                    if (o2 is long)
+                    {
+                        return (double)o1 + Convert.ToDouble(o2);
+                    }
                     return (double)o1 + (double)o2;
+#endif
+                    return (double)o1 + Convert.ToDouble(o2);
+                }
                 if (o1 is decimal)
                     return (decimal)o1 + (decimal)o2;
                 if (o1 is string)
@@ -914,7 +924,8 @@ object o2)
 
         // 摘要:
         //     Not implemented. Returns 0
-        public override int Depth {
+        public override int Depth
+        {
             get
             {
                 return 0;
@@ -923,7 +934,8 @@ object o2)
         //
         // 摘要:
         //     Returns the number of columns in the current resultset
-        public override int FieldCount {
+        public override int FieldCount
+        {
             get
             {
                 if (this.FieldValues == null)
@@ -936,7 +948,8 @@ object o2)
         // 摘要:
         //     Retrieve the count of records affected by an update/insert command. Only
         //     valid once the data reader is closed!
-        public override int RecordsAffected {
+        public override int RecordsAffected
+        {
             get
             {
                 if (this._fetched == true)
@@ -954,7 +967,8 @@ object o2)
         //
         // 返回结果:
         //     The value contained in the column
-        public override object this[int i] {
+        public override object this[int i]
+        {
             get
             {
                 return this.FieldValues[i];
@@ -970,7 +984,8 @@ object o2)
         //
         // 返回结果:
         //     The value contained in the column
-        public override object this[string name] {
+        public override object this[string name]
+        {
             get
             {
                 throw new Exception("尚未实现");
@@ -1014,7 +1029,8 @@ object o2)
         //
         // 摘要:
         //     Returns True if the data reader is closed
-        public override bool IsClosed {
+        public override bool IsClosed
+        {
             get
             {
                 return false;
@@ -1049,9 +1065,9 @@ object o2)
         public override bool GetBoolean(int i)
         {
             object o = this.FieldValues[i];
-            if ( o is bool)
+            if (o is bool)
                 return (bool)o;
-            throw new Exception("列 "+i.ToString()+" 不是 bool 类型");
+            throw new Exception("列 " + i.ToString() + " 不是 bool 类型");
         }
 
         //
@@ -1067,9 +1083,9 @@ object o2)
         public override byte GetByte(int i)
         {
             object o = this.FieldValues[i];
-            if ( o is byte)
+            if (o is byte)
                 return (byte)o;
-            throw new Exception("列 "+i.ToString()+" 不是 byte 类型");
+            throw new Exception("列 " + i.ToString() + " 不是 byte 类型");
         }
 
         //
@@ -1152,14 +1168,14 @@ object o2)
         public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
         {
             object o = this.FieldValues[i];
-            if ( o is string)
+            if (o is string)
             {
                 string strText = (string)o;
                 if (buffer != null)
                     strText.CopyTo((int)fieldoffset, buffer, bufferoffset, length);
                 return strText.Length;
             }
-            throw new Exception("列 "+i.ToString()+" 不是 byte 类型");
+            throw new Exception("列 " + i.ToString() + " 不是 byte 类型");
         }
 
         //
@@ -1205,22 +1221,22 @@ object o2)
         public override decimal GetDecimal(int i)
         {
             object o = this.FieldValues[i];
-            if ( o is double)
+            if (o is double)
                 return (decimal)(double)o;
-                        if ( o is decimal)
+            if (o is decimal)
                 return (decimal)o;
-                                    if ( o is int)
+            if (o is int)
                 return (decimal)o;
-                                    if ( o is long)
+            if (o is long)
                 return (decimal)o;
-                                    if ( o is string)
-                                    {
-                                        decimal v = 0;
-                                        decimal.TryParse((string)o, out v);
-                                        return v;
-                                    }
+            if (o is string)
+            {
+                decimal v = 0;
+                decimal.TryParse((string)o, out v);
+                return v;
+            }
 
-            throw new Exception("列 "+i.ToString()+" 不是 decimal 类型");
+            throw new Exception("列 " + i.ToString() + " 不是 decimal 类型");
         }
 
         //
@@ -1236,22 +1252,22 @@ object o2)
         public override double GetDouble(int i)
         {
             object o = this.FieldValues[i];
-            if ( o is double)
+            if (o is double)
                 return (double)o;
-                        if ( o is decimal)
+            if (o is decimal)
                 return (double)o;
-                                    if ( o is int)
+            if (o is int)
                 return (double)o;
-                                    if ( o is long)
+            if (o is long)
                 return (double)o;
-                                    if ( o is string)
-                                    {
-                                        double v = 0;
-                                        double.TryParse((string)o, out v);
-                                        return v;
-                                    }
+            if (o is string)
+            {
+                double v = 0;
+                double.TryParse((string)o, out v);
+                return v;
+            }
 
-            throw new Exception("列 "+i.ToString()+" 不是 decimal 类型");
+            throw new Exception("列 " + i.ToString() + " 不是 decimal 类型");
         }
 
         //
@@ -1290,23 +1306,23 @@ object o2)
         //     float
         public override float GetFloat(int i)
         {
-                        object o = this.FieldValues[i];
-            if ( o is float)
+            object o = this.FieldValues[i];
+            if (o is float)
                 return (float)o;
-                        if ( o is decimal)
+            if (o is decimal)
                 return (float)o;
-                                    if ( o is int)
+            if (o is int)
                 return (float)o;
-                                    if ( o is long)
+            if (o is long)
                 return (float)o;
-                                    if ( o is string)
-                                    {
-                                        float v = 0;
-                                        float.TryParse((string)o, out v);
-                                        return v;
-                                    }
+            if (o is string)
+            {
+                float v = 0;
+                float.TryParse((string)o, out v);
+                return v;
+            }
 
-            throw new Exception("列 "+i.ToString()+" 不是 float 类型");
+            throw new Exception("列 " + i.ToString() + " 不是 float 类型");
 
         }
 

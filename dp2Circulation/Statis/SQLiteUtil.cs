@@ -1423,7 +1423,16 @@ out borrowdate) == false)
                 return -1;
 
             strUnit = item.Prefix + item.Postfix;
-            value = (long)(item.Value * 100);
+            try
+            {
+                value = (long)(item.Value * 100);
+            }
+            catch(Exception ex)
+            {
+                // 2016/3/31
+                strError = "元值 '"+item.Value.ToString()+"' 折算为分值的时候出现异常：" + ex.Message;
+                return -1;
+            }
             return 0;
         }
 

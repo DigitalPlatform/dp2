@@ -56,9 +56,25 @@ namespace dp2Circulation
             this.Opacity = 1.0;
         }
 
+        /*
+System.ComponentModel.Win32Exception (0x80004005): 参数错误。
+   在 System.Windows.Forms.Form.UpdateLayered()
+   在 System.Windows.Forms.Form.set_Opacity(Double value)
+   在 dp2Circulation.ScanBarcodeForm.ScanBarcodeForm_Deactivate(Object sender, EventArgs e) 位置 c:\dp2-master\dp2\dp2Circulation\ItemHandOver\ScanBarcodeForm.cs:行号 61
+   在 System.Windows.Forms.Form.OnDeactivate(EventArgs e)
+   在 System.Windows.Forms.Form.set_Active(Boolean value)
+   在 System.Windows.Forms.Form.WmActivate(Message& m)
+   在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+         * */
         private void ScanBarcodeForm_Deactivate(object sender, EventArgs e)
         {
-            this.Opacity = 0.8;
+            try
+            {
+                this.Opacity = 0.8;
+            }
+            catch 
+            {
+            }
         }
     }
 

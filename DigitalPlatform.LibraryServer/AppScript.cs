@@ -21,6 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.Interfaces;
 using System.Web;
+using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -51,8 +52,7 @@ namespace DigitalPlatform.LibraryServer
 
             this.m_externalMessageInterfaces = null;
 
-            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
-    "externalMessageInterface");
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
             if (root == null)
             {
                 strError = "在library.xml中没有找到<externalMessageInterface>元素";
@@ -410,6 +410,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            // TODO: 如果两个版本的函数都定义了，会发生什么?
             MethodInfo mi = hostEntryClassType.GetMethod("VerifyBarcode");
             if (mi == null)
             {
@@ -1249,12 +1250,14 @@ namespace DigitalPlatform.LibraryServer
         // 执行脚本函数 VerifyReader
         // parameters:
         // return:
+        //      -3  条码号错误
         //      -2  not found script
         //      -1  出错
         //      0   成功
         public int DoVerifyReaderFunction(
             SessionInfo sessioninfo,
             string strAction,
+            string strRecPath,
             XmlDocument itemdom,
             out string strError)
         {
@@ -1297,7 +1300,10 @@ namespace DigitalPlatform.LibraryServer
             // 执行函数
             try
             {
-                return host.VerifyReader(strAction,
+                return host.VerifyReader(
+                    sessioninfo,
+                    strAction,
+                    strRecPath,
                     itemdom,
                     out strError);
             }
@@ -1332,15 +1338,56 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // return:
+        //      -3  条码号错误
         //      -1  调用出错
         //      0   校验正确
         //      1   校验发现错误
-        public virtual int VerifyReader(string strAction,
+        public virtual int VerifyReader(
+            SessionInfo sessioninfo,
+            string strAction,
+            string strRecPath,
             XmlDocument readerdom,
             out string strError)
         {
             strError = "";
-            // int nRet = 0;
+            int nRet = 0;
+
+            string strNewBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "changereaderbarcode"
+|| strAction == "move")
+            {
+                if (string.IsNullOrEmpty(strNewBarcode) == false)
+                {
+                    string strDbName = ResPath.GetDbName(strRecPath);
+                    if (string.IsNullOrEmpty(strDbName) == true)
+                    {
+                        strError = "从读者库记录路径 '" + strRecPath + "' 获得数据库名时出错。验证读者记录失败";
+                        return -1;
+                    }
+
+                    string strLibraryCode = "";
+                    if (this.App.IsReaderDbName(strDbName, out strLibraryCode) == false)
+                    {
+                        strError = "数据库名 '" + strDbName + "' 不是读者库。验证读者记录失败";
+                        return -1;
+                    }
+
+                    // return:
+                    //      -1  调用出错
+                    //      0   校验正确
+                    //      1   校验发现错误
+                    nRet = VerifyPatronBarcode(strLibraryCode, strNewBarcode, out strError);
+                    if (nRet != 0)
+                    {
+                        if (nRet == 1)
+                            return -3;
+                        return nRet;
+                    }
+                }
+            }
 
             string strPersonalLibrary = DomUtil.GetElementText(readerdom.DocumentElement, "personalLibrary");
 
@@ -1363,7 +1410,114 @@ namespace DigitalPlatform.LibraryServer
 #endif
             }
 
+            string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+
+            // 检查读者权限。要求不能大于当前用户的权限
+            List<string> warning_rights = null;
+            if (IsLessOrEqualThan(strRights, sessioninfo.Rights, out warning_rights) == false)
+            {
+                strError = "读者记录中的权限超出了当前用户的权限，这是不允许的。超出的部分权限值 '" + StringUtil.MakePathList(warning_rights) + "'";
+                return 1;
+            }
+
+            // 2016/4/11
+            // 检查 access 元素里面的星号
+            string strAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
+            if (strAccess != null && strAccess.Trim() == "*")
+            {
+                strError = "读者记录中 access 元素值不允许使用 * 形态";
+                return -1;
+            }
+
             return 0;
+        }
+
+        // 2016/4/3
+        // 按照缺省行为，验证读者记录中的证条码号
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public int VerifyPatronBarcode(
+            string strLibraryCode,
+            string strNewBarcode,
+            out string strError)
+        {
+            strError = "";
+            // 验证条码号
+            if (this.App.VerifyBarcode == true)
+            {
+                // return:
+                //	0	invalid barcode
+                //	1	is valid reader barcode
+                //	2	is valid item barcode
+                int nResultValue = 0;
+
+                // return:
+                //      -2  not found script
+                //      -1  出错
+                //      0   成功
+                int nRet = this.App.DoVerifyBarcodeScriptFunction(
+                    this,
+                    strLibraryCode,
+                    strNewBarcode,
+                    out nResultValue,
+                    out strError);
+                if (nRet == -2 || nRet == -1 || nResultValue != 1)
+                {
+                    if (nRet == -2)
+                    {
+                        strError = "library.xml 中没有配置条码号验证函数，无法进行条码号验证";
+                        return -1;
+                    }
+                    else if (nRet == -1)
+                    {
+                        strError = "验证册条码号的过程中出错"
+                           + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
+                        return -1;
+                    }
+                    else if (nResultValue != 1)
+                    {
+                        strError = "条码号 '" + strNewBarcode + "' 经验证发现不是一个合法的证条码号"
+                           + (string.IsNullOrEmpty(strError) == true ? "" : "(" + strError + ")");
+                    }
+
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        // strLeft 包含的权限是否小于等于 strRight
+        static bool IsLessOrEqualThan(string strLeft,
+            string strRight,
+            out List<string> warning_rights)
+        {
+            warning_rights = new List<string>();
+
+            if (string.IsNullOrEmpty(strLeft) && string.IsNullOrEmpty(strRight))
+                return true;
+            if (string.IsNullOrEmpty(strLeft))
+                return true;   // strLeft == 空 && strRight != 空
+            if (string.IsNullOrEmpty(strRight))
+            {
+                warning_rights = StringUtil.SplitList(strRight);
+                return false;   // strLeft != 空 && strRight == 空
+            }
+
+            string[] left = strLeft.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] right = strRight.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string s in left)
+            {
+                if (Array.IndexOf<string>(right, s) == -1)
+                    warning_rights.Add(s);
+            }
+
+            if (warning_rights.Count > 0)
+                return false;
+
+            return true;
         }
 
         // return:
@@ -1791,6 +1945,17 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
             }
 
+            if (strBodyType == "mq")
+            {
+                return NotifyReaderSMS(
+                    readerdom,
+                    calendar,
+                    strBodyType,
+                    out strBody,
+                    out strMime,
+                    out strError);
+            }
+
             strBody = "";
             strError = "";
             // wantNotifyBarcodes = new List<string>();
@@ -1871,8 +2036,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             bOverdue = true;
                             strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
-                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
-                                ;
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
                         }
                     }
                 }
@@ -2044,14 +2208,14 @@ namespace DigitalPlatform.LibraryServer
 
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
         public int NotifyReaderSMS(
-    XmlDocument readerdom,
-    Calendar calendar,
-    // List<string> notifiedBarcodes,
-    string strBodyType,
-    out string strBody,
-    out string strMime,
-    // out List<string> wantNotifyBarcodes,
-    out string strError)
+            XmlDocument readerdom,
+            Calendar calendar,
+            // List<string> notifiedBarcodes,
+            string strBodyType,
+            out string strBody,
+            out string strMime,
+            // out List<string> wantNotifyBarcodes,
+            out string strError)
         {
             strBody = "";
             strError = "";
@@ -2090,7 +2254,6 @@ namespace DigitalPlatform.LibraryServer
                 bool bOverdue = false;  // 是否超期
                 DateTime timeReturning = DateTime.MinValue;
                 {
-
                     DateTime timeNextWorkingDay;
                     long lOver = 0;
                     string strPeriodUnit = "";
@@ -2118,8 +2281,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             bOverdue = true;
                             strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
-                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
-                                ;
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
                         }
                     }
                 }
@@ -2132,7 +2294,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bOverdue == true)
                 {
-
                     // 看看是不是已经通知过
                     if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
                         continue;

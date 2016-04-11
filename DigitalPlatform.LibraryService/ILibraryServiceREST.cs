@@ -818,5 +818,15 @@ SessionMode = SessionMode.NotAllowed)]
             long start,
             long count,
             out ChargingItemWrapper[] results);
+
+        [OperationContract]
+        LibraryServerResult BindPatron(
+    string strAction,
+    string strQueryWord,
+    string strPassword,
+    string strBindingID,
+    string strStyle,
+    string strResultTypeList,
+    out string[] results);
     }
 }

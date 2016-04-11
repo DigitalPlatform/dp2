@@ -12,6 +12,41 @@ namespace DigitalPlatform.Xml
     // DomUtil类包含XML DOM的一些扩展功能函数
     public class DomUtil
     {
+        // 删除 start 元素下的所有空元素
+        // parameters:
+        //      bCheckStart 是否检查 start。如果本参数为 true, 当 start 为空元素时，要删除 start 元素
+        public static void RemoveEmptyElements(XmlElement start,
+            bool bCheckStart = false)
+        {
+            List<XmlElement> delete = new List<XmlElement>();
+            foreach (XmlNode node in start.ChildNodes)
+            {
+                if (node.NodeType != XmlNodeType.Element)
+                    continue;
+                XmlElement element = node as XmlElement;
+                if (element.HasAttributes == false
+                    && string.IsNullOrEmpty(element.InnerText.Trim()) == true)
+                {
+                    delete.Add(element);
+                }
+                else
+                    RemoveEmptyElements(element, true);
+            }
+
+            foreach (XmlElement element in delete)
+            {
+                element.ParentNode.RemoveChild(element);
+            }
+
+            if (bCheckStart == true && start.ParentNode != null)
+            {
+                XmlElement element = start;
+                if (element.HasAttributes == false
+                    && string.IsNullOrEmpty(element.InnerText.Trim()) == true)
+                    element.ParentNode.RemoveChild(element);
+            }
+        }
+
         public static XmlNode RenameNode(XmlNode node,
             string namespaceURI,
             string qualifiedName)

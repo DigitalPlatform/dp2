@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>26</ApplicationRevision>
+    <ApplicationRevision>40</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -377,6 +377,12 @@
       <DependentUpon>ChatLoginDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="IM\MessageHub.cs" />
+    <Compile Include="IO\ImportExportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IO\ImportExportForm.Designer.cs">
+      <DependentUpon>ImportExportForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1360,6 +1366,10 @@
     <Content Include="default\fieldhtml.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="default\patronrights.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Docs\deleted.txt" />
     <Content Include="EntityRegister\servers.xml" />
     <Content Include="eula.txt">
@@ -1562,6 +1572,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="IM\ChatLoginDialog.resx">
       <DependentUpon>ChatLoginDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IO\ImportExportForm.resx">
+      <DependentUpon>ImportExportForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
       <DependentUpon>ScanBarcodeForm.cs</DependentUpon>
@@ -2135,6 +2148,9 @@
     <EmbeddedResource Include="SearchForms\OneActionDialog.resx">
       <DependentUpon>OneActionDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\OpenBiblioDumpFileDialog.resx">
+      <DependentUpon>OpenBiblioDumpFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SettlementForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SettlementForm.cs</DependentUpon>
@@ -2314,6 +2330,12 @@
     </Compile>
     <Compile Include="SearchForms\OneActionDialog.Designer.cs">
       <DependentUpon>OneActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\OpenBiblioDumpFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\OpenBiblioDumpFileDialog.Designer.cs">
+      <DependentUpon>OpenBiblioDumpFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\OrderSearchForm.cs">
       <SubType>Form</SubType>
@@ -2817,9 +2839,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0,KB2468871">
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29与 .NET Framework 4 的更新%28KB2468871%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -76,7 +76,6 @@ ref sessioninfo) == false)
         this.BrowseSearchResultControl1.ResetAllItemsControlPager();
     }
 
-
     protected void Page_Load(object sender, EventArgs e)
     {
         // 是否登录?
@@ -107,7 +106,6 @@ ref sessioninfo) == false)
         else
             this.SideBarControl1.CfgFile = app.DataDir + "\\browse\\" + strCfgFileName;
 
-
         string strDataFileName = this.Request["datafile"];
 
         if (String.IsNullOrEmpty(strDataFileName) == true)
@@ -136,7 +134,7 @@ ref sessioninfo) == false)
                 return;
             }
 
-            this.Response.Flush();
+            // this.Response.Flush();
             this.Response.End();
             return;
         }
@@ -831,7 +829,6 @@ ref sessioninfo) == false)
         PathUtil.CreateDirIfNeed(strCacheDir);
         string strResultsetFilename = strCacheDir + "/" + strPrefix;
 
-
         // 如果RSS文件已经存在，就不要从 dp2library 获取了
         if (File.Exists(strResultsetFilename + ".rss") == true)
         {
@@ -843,7 +840,6 @@ ref sessioninfo) == false)
                 out strError);
             if (nRet == -1)
                 return -1;
-
             return 0;
         }
 
@@ -890,11 +886,13 @@ ref sessioninfo) == false)
 
         try
         {
+            // http://stackoverflow.com/questions/904952/whats-causing-session-state-has-created-a-session-id-but-cannot-save-it-becau
+            string sessionId = Session.SessionID;
+
             app.ResultsetLocks.LockForRead(strRssFile, 500);
 
             try
             {
-
                 using (Stream stream = File.Open(strRssFile,
                     FileMode.Open,
                     FileAccess.ReadWrite,

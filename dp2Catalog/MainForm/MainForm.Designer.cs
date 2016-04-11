@@ -80,6 +80,7 @@ namespace dp2Catalog
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_cfg = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator19 = new System.Windows.Forms.ToolStripSeparator();
@@ -102,6 +103,10 @@ namespace dp2Catalog
             this.toolButton_refresh = new System.Windows.Forms.ToolStripButton();
             this.toolButton_loadTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_searchZ = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_searchA = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_copyToFixed = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.toolButton_dup = new System.Windows.Forms.ToolStripButton();
             this.toolButton_verify = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
@@ -121,7 +126,6 @@ namespace dp2Catalog
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
-            this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -524,6 +528,13 @@ namespace dp2Catalog
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(174, 6);
             // 
+            // MenuItem_openUserFolder
+            // 
+            this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
+            this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
+            // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
@@ -576,6 +587,10 @@ namespace dp2Catalog
             this.toolButton_refresh,
             this.toolButton_loadTemplate,
             this.toolStripSeparator10,
+            this.toolStripButton_searchZ,
+            this.toolStripButton_searchA,
+            this.toolStripButton_copyToFixed,
+            this.toolStripSeparator20,
             this.toolButton_dup,
             this.toolButton_verify,
             this.toolStripSeparator11,
@@ -735,6 +750,44 @@ namespace dp2Catalog
             this.toolStripSeparator10.Name = "toolStripSeparator10";
             this.toolStripSeparator10.Size = new System.Drawing.Size(6, 29);
             // 
+            // toolStripButton_searchZ
+            // 
+            this.toolStripButton_searchZ.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_searchZ.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_searchZ.Image")));
+            this.toolStripButton_searchZ.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_searchZ.Name = "toolStripButton_searchZ";
+            this.toolStripButton_searchZ.Size = new System.Drawing.Size(23, 26);
+            this.toolStripButton_searchZ.Text = "Z";
+            this.toolStripButton_searchZ.ToolTipText = "用 Z39.50 检索当前记录";
+            this.toolStripButton_searchZ.Click += new System.EventHandler(this.toolStripButton_searchZ_Click);
+            // 
+            // toolStripButton_searchA
+            // 
+            this.toolStripButton_searchA.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_searchA.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_searchA.Image")));
+            this.toolStripButton_searchA.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_searchA.Name = "toolStripButton_searchA";
+            this.toolStripButton_searchA.Size = new System.Drawing.Size(23, 26);
+            this.toolStripButton_searchA.Text = "A";
+            this.toolStripButton_searchA.ToolTipText = "用亚马逊检索当前记录";
+            this.toolStripButton_searchA.Click += new System.EventHandler(this.toolStripButton_searchA_Click);
+            // 
+            // toolStripButton_copyToFixed
+            // 
+            this.toolStripButton_copyToFixed.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_copyToFixed.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copyToFixed.Image")));
+            this.toolStripButton_copyToFixed.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_copyToFixed.Name = "toolStripButton_copyToFixed";
+            this.toolStripButton_copyToFixed.Size = new System.Drawing.Size(45, 26);
+            this.toolStripButton_copyToFixed.Text = "<复制";
+            this.toolStripButton_copyToFixed.ToolTipText = "从当前窗口复制到固定窗口";
+            this.toolStripButton_copyToFixed.Click += new System.EventHandler(this.toolStripButton_copyToFixed_Click);
+            // 
+            // toolStripSeparator20
+            // 
+            this.toolStripSeparator20.Name = "toolStripSeparator20";
+            this.toolStripSeparator20.Size = new System.Drawing.Size(6, 29);
+            // 
             // toolButton_dup
             // 
             this.toolButton_dup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -793,7 +846,7 @@ namespace dp2Catalog
             this.toolStripButton_testSearch.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_testSearch.Image")));
             this.toolStripButton_testSearch.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_testSearch.Name = "toolStripButton_testSearch";
-            this.toolStripButton_testSearch.Size = new System.Drawing.Size(79, 26);
+            this.toolStripButton_testSearch.Size = new System.Drawing.Size(79, 21);
             this.toolStripButton_testSearch.Text = "Test Search";
             this.toolStripButton_testSearch.Visible = false;
             this.toolStripButton_testSearch.Click += new System.EventHandler(this.toolStripButton_testSearch_Click);
@@ -937,13 +990,6 @@ namespace dp2Catalog
             this.splitter_fixed.TabIndex = 7;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_openUserFolder
-            // 
-            this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(177, 22);
-            this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
-            this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1079,6 +1125,10 @@ namespace dp2Catalog
         private System.Windows.Forms.ToolStripMenuItem MenuItem_resetSerialCode;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openAdvertiseForm;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openUserFolder;
+        private System.Windows.Forms.ToolStripButton toolStripButton_searchZ;
+        private System.Windows.Forms.ToolStripButton toolStripButton_searchA;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator20;
+        public System.Windows.Forms.ToolStripButton toolStripButton_copyToFixed;
     }
 }
 

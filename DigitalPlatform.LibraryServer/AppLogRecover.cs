@@ -67,14 +67,14 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            DO_SNAPSHOT:
+        DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
             {
                 XmlNode node = null;
                 string strReaderXml = DomUtil.GetElementText(domLog.DocumentElement,
-                    "readerRecord", 
+                    "readerRecord",
                     out node);
                 if (node == null)
                 {
@@ -659,7 +659,7 @@ out strError);
 
 
             return 0;
-            ERROR1:
+        ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 level = RecoverLevel.Snapshot;
@@ -875,7 +875,7 @@ strElementName);
             XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
             if (nodeBorrow == null)
             {
-                strError = "在读者记录 '"+strReaderBarcode+"' 中没有找到关于册条码号 '"+strItemBarcode+"' 的链";
+                strError = "在读者记录 '" + strReaderBarcode + "' 中没有找到关于册条码号 '" + strItemBarcode + "' 的链";
                 return 0;
             }
 
@@ -1160,7 +1160,7 @@ strElementName);
 
             string strBorrower0 = DomUtil.GetElementInnerText(itemdom.DocumentElement,
                 "borrower");
-            if (string.IsNullOrEmpty(strBorrower0) == false 
+            if (string.IsNullOrEmpty(strBorrower0) == false
                 && strBorrower0 != strReaderBarcode)
             {
                 string strRemovedInfo = "";
@@ -1183,7 +1183,7 @@ strElementName);
                 }
                 else
                 {
-                    this.WriteErrorLog("册条码号为 '"+strItemBarcodeParam+"' 的册记录，在进行借书操作(拟被读者 '"+strReaderBarcode+"' 借阅)以前，发现它被另一读者 '"+strBorrower0+"' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '"+strRemovedInfo+"'");
+                    this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行借书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '" + strRemovedInfo + "'");
                 }
             }
 
@@ -1476,7 +1476,7 @@ strElementName);
                                 }
                                 else
                                 {
-                                    strRecoverComment += "经过筛选，仍然有 " + aFoundPath.Count.ToString() + " 条册记录含有借阅者 '"+strReaderBarcode+"' 信息，那么就只好选择其中第一个册记录 " + strOutputItemRecPath + " 进行还书操作。";
+                                    strRecoverComment += "经过筛选，仍然有 " + aFoundPath.Count.ToString() + " 条册记录含有借阅者 '" + strReaderBarcode + "' 信息，那么就只好选择其中第一个册记录 " + strOutputItemRecPath + " 进行还书操作。";
                                 }
                             }
                             else
@@ -1750,7 +1750,7 @@ strElementName);
                                 // 需要把根据“所借册条码号”清除读者记录中借阅信息的动作提前进行? 这样遇到特殊情况范围时，至少读者记录中的信息是被清除了的，这是容错的需要
                                 string strError_1 = "";
                                 nRet = ReturnAllReader(
-                                        // Channels,
+                                    // Channels,
                                         channel,
                                         strItemBarcode,
                                         "",
@@ -1921,7 +1921,7 @@ strElementName);
                 if (bDupItemBarcode == false)
                 {
                     nRet = ReturnAllReader(
-                            // Channels,
+                        // Channels,
                             channel,
                             strItemBarcode,
                             strOutputReaderRecPath,
@@ -2105,8 +2105,8 @@ strElementName);
                 }
 
                 bool bChanged = false;
-                XmlNodeList nodes = dom.DocumentElement.SelectNodes("//borrows/borrow[@barcode='"+strBorrowItemBarcode+"']");
-                for(int j=0;j<nodes.Count;j++)
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("//borrows/borrow[@barcode='" + strBorrowItemBarcode + "']");
+                for (int j = 0; j < nodes.Count; j++)
                 {
                     XmlNode node = nodes[j];
                     if (node.ParentNode != null)
@@ -2611,7 +2611,7 @@ strElementName);
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                if (strAction == "new" 
+                if (strAction == "new"
                     || strAction == "change"
                     || strAction == "move")
                 {
@@ -2688,7 +2688,7 @@ strElementName);
 
                         }
                     }
-                     
+
                 }
                 else if (strAction == "delete")
                 {
@@ -2798,7 +2798,7 @@ strElementName);
                     byte[] exist_timestamp = null;
                     string strOutputPath = "";
 
-                    if ((strAction == "change" 
+                    if ((strAction == "change"
                         || strAction == "move")
                         && bForce == false) // 2008/10/6
                     {
@@ -2828,7 +2828,7 @@ strElementName);
                             }
                             else
                             {
-                                strError = "在读入原有记录 '"+strNewRecPath+"' 时失败: " + strError;
+                                strError = "在读入原有记录 '" + strNewRecPath + "' 时失败: " + strError;
                                 goto ERROR1;
                             }
                         }
@@ -3486,13 +3486,13 @@ strElementName);
                     if (bHasCirculationInfo == true
                         && bForce == false)
                     {
-                        strError = "拟删除的册记录 '" + strOutputItemRecPath + "' 中包含有流通信息("+strDetail+")，不能删除。";
+                        strError = "拟删除的册记录 '" + strOutputItemRecPath + "' 中包含有流通信息(" + strDetail + ")，不能删除。";
                         goto ERROR1;
                     }
 
                     int nRedoCount = 0;
                     byte[] timestamp = exist_timestamp;
-                    byte[] output_timestamp = null; 
+                    byte[] output_timestamp = null;
 
                 REDO:
                     // 删除册记录
@@ -3709,7 +3709,6 @@ strElementName);
                     return -1;
                 }
 
-
                 return 0;
             }
 
@@ -3772,7 +3771,7 @@ strElementName);
 
                     if ((strAction == "change"
                         || strAction == "move")
-                        && bForce == false) 
+                        && bForce == false)
                     {
                         string strSourceRecPath = "";
 
@@ -3841,8 +3840,18 @@ strElementName);
 
                     if (bForce == false)
                     {
+                        // 模拟一个 SessionInfo
+                        string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
+        "libraryCode");
+                        string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+        "operator");
+                        SessionInfo temp_sessioninfo = new SessionInfo(this);
+                        temp_sessioninfo.Account = new Account();
+                        temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
+                        temp_sessioninfo.Account.UserID = strOperator;
+
                         nRet = this.OrderItemDatabase.MergeTwoItemXml(
-                            null,
+                            temp_sessioninfo,
                             domExist,
                             domNew,
                             out strNewXml,
@@ -4219,8 +4228,18 @@ strElementName);
 
                     if (bForce == false)
                     {
+                        // 模拟一个 SessionInfo
+                        string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
+        "libraryCode");
+                        string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+        "operator");
+                        SessionInfo temp_sessioninfo = new SessionInfo(this);
+                        temp_sessioninfo.Account = new Account();
+                        temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
+                        temp_sessioninfo.Account.UserID = strOperator;
+
                         nRet = this.IssueItemDatabase.MergeTwoItemXml(
-                            null,
+                            temp_sessioninfo,
                             domExist,
                             domNew,
                             out strNewXml,
@@ -4593,8 +4612,18 @@ strElementName);
 
                     if (bForce == false)
                     {
+                        // 模拟一个 SessionInfo
+                        string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
+        "libraryCode");
+                        string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+        "operator");
+                        SessionInfo temp_sessioninfo = new SessionInfo(this);
+                        temp_sessioninfo.Account = new Account();
+                        temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
+                        temp_sessioninfo.Account.UserID = strOperator;
+
                         nRet = this.CommentItemDatabase.MergeTwoItemXml(
-                            null,
+                            temp_sessioninfo,
                             domExist,
                             domNew,
                             out strNewXml,
@@ -4720,7 +4749,7 @@ strElementName);
                 return -1;
             }
 
-            DO_SNAPSHOT:
+        DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -4932,7 +4961,7 @@ strElementName);
 
                     // 2015/9/11
                     XmlNodeList nodes = domLog.DocumentElement.SelectNodes("changedEntityRecord");
-                    foreach(XmlElement item in nodes)
+                    foreach (XmlElement item in nodes)
                     {
                         string strItemBarcode = item.GetAttribute("itemBarcode");
                         string strItemRecPath = item.GetAttribute("recPath");
@@ -5347,7 +5376,7 @@ strElementName);
                 return -1;
             }
 
-            DO_SNAPSHOT:
+        DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -5768,7 +5797,7 @@ strElementName);
                             continue;
 
                         // 从读者记录中去掉这个id的<overdue>元素
-                        XmlNode nodeOverdue = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='"+strID+"']");
+                        XmlNode nodeOverdue = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='" + strID + "']");
                         if (nodeOverdue != null)
                         {
                             if (nodeOverdue.ParentNode != null)
@@ -5790,7 +5819,7 @@ strElementName);
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
- 
+
             }
 
             return 0;
@@ -5847,7 +5876,7 @@ strElementName);
                     continue;
                 }
 
-                strResult += "id: " +strID + " -- " + records[index] + "\r\n";
+                strResult += "id: " + strID + " -- " + records[index] + "\r\n";
             }
 
             return strResult;
@@ -5880,7 +5909,7 @@ strElementName);
             long lLength = 0;
 
             // 找到记录开头
-            for (int i=0; i<=nAttachmentIndex; i++)
+            for (int i = 0; i <= nAttachmentIndex; i++)
             {
                 byte[] length = new byte[8];
                 int nRet = attachment.Read(length, 0, 8);
@@ -6063,7 +6092,7 @@ strElementName);
                         }
                         catch
                         {
-                            strError = "<changedEntityRecord>元素的attachmentIndex属性值'"+strAttachmentIndex+"'格式不正确，应当为>=0的纯数字";
+                            strError = "<changedEntityRecord>元素的attachmentIndex属性值'" + strAttachmentIndex + "'格式不正确，应当为>=0的纯数字";
                             return -1;
                         }
 
@@ -6075,7 +6104,7 @@ strElementName);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "获得 index 为 "+nAttachmentIndex.ToString()+" 的日志附件记录时出错：" + strError;
+                            strError = "获得 index 为 " + nAttachmentIndex.ToString() + " 的日志附件记录时出错：" + strError;
                             return -1;
                         }
                         strItemXml = Encoding.UTF8.GetString(baItem);
@@ -6342,7 +6371,7 @@ strElementName);
                 "action");
 
             // 快照恢复
-            if (level == RecoverLevel.Snapshot 
+            if (level == RecoverLevel.Snapshot
                 || bReuse == true)
             {
                 byte[] timestamp = null;
@@ -7691,7 +7720,7 @@ domLog.DocumentElement,
                 }
                 catch
                 {
-                    strError = "lTotalLength值 '"+strTotalLength+"' 格式不正确";
+                    strError = "lTotalLength值 '" + strTotalLength + "' 格式不正确";
                     return -1;
                 }
                 string strMetadata = DomUtil.GetElementText(
@@ -7874,7 +7903,7 @@ DO_SNAPSHOT:
                         goto ERROR1;
                     }
                 }
-                
+
                 // 读入册记录
                 string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
                     "confirmItemRecPath");
@@ -8085,7 +8114,7 @@ DO_SNAPSHOT:
                 }
                 else
                 {
-                    strError = "不可识别的strAction值 '"+strAction+"'";
+                    strError = "不可识别的strAction值 '" + strAction + "'";
                     goto ERROR1;
                 }
 

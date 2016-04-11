@@ -2365,6 +2365,72 @@ Stack:
             return null;
         }
 
+        // 得到顶层MDI窗口
+        // 注： this.ActiveMdiChild 不一定在最顶层
+        Form GetTopChildWindow()
+        {
+            if (this.MdiChildren.Length == 0)
+                return null;
+            List<IntPtr> handles = new List<IntPtr>();
+            foreach (Form mdi in this.MdiChildren)
+            {
+                handles.Add(mdi.Handle);
+            }
+
+            IntPtr hwnd = this.ActiveMdiChild.Handle;
+            IntPtr top = hwnd;
+            while (hwnd != IntPtr.Zero)
+            {
+                if (handles.IndexOf(hwnd) != -1)
+                    top = hwnd;
+
+                hwnd = API.GetWindow(hwnd, API.GW_HWNDPREV);
+            }
+
+            foreach (Form mdi in this.MdiChildren)
+            {
+                if (mdi.Handle == top)
+                    return mdi;
+            }
+
+            return null;
+        }
+#if NO
+        // 得到顶层MDI窗口
+        // 注： this.ActiveMdiChild 不一定在最顶层
+        Form GetTopChildWindow()
+        {
+            if (ActiveMdiChild == null)
+                return null;
+
+            // 得到顶层的MDI Child
+            IntPtr hwnd = this.ActiveMdiChild.Handle;
+            if (hwnd == IntPtr.Zero)
+                return null;
+
+            for (; ; )
+            {
+                if (hwnd == IntPtr.Zero)
+                    break;
+
+                Form child = null;
+                for (int j = 0; j < this.MdiChildren.Length; j++)
+                {
+                    if (hwnd == this.MdiChildren[j].Handle)
+                    {
+                        child = this.MdiChildren[j];
+                        return child;
+                    }
+                }
+
+                hwnd = API.GetWindow(hwnd, API.GW_HWNDPREV);
+            }
+
+            return this.ActiveMdiChild;
+        }
+
+#endif
+
         // 是否为MDI子窗口中最顶层的2个之一?
         // 2008/9/8
         internal bool IsTopTwoChildWindow(Form form)
@@ -4016,6 +4082,41 @@ Stack:
 
         }
 
+        // return:
+        //      true    已经装载
+        //      false   没有装载
+        bool TryLoadItemBarcodeToItemSearchForm()
+        {
+            Form top = this.GetTopChildWindow();
+            if (top != null && top is ItemSearchForm)
+            {
+                ItemSearchForm form = top as ItemSearchForm;
+                form.Activate();
+                List<string> barcodes = new List<string>();
+                barcodes.Add(this.toolStripTextBox_barcode.Text);
+
+                form.ClearMessage();
+                string strError = "";
+                // 往列表中追加若干册条码号
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      1   成功，但有警告，警告在 strError 中返回
+                int nRet = form.AppendBarcodes(barcodes, out strError);
+                if (nRet == -1 || nRet == 1)
+                {
+                    // MessageBox.Show(this, strError);
+                    form.ShowMessage(strError, "red", true);
+                }
+
+                this.toolStripTextBox_barcode.SelectAll();
+                this.toolStripTextBox_barcode.Focus();
+                return true;
+            }
+
+            return false;
+        }
+
         // 装入册条码号相关记录
         // 尽量占用当前已经打开的种册窗
         void LoadItemBarcode()
@@ -4026,20 +4127,8 @@ Stack:
                 return;
             }
 
-            /*
-            ItemInfoForm form = this.TopItemInfoForm;
-
-            if (form == null)
-            {
-                // 新开一个实体窗
-                form = new ItemInfoForm();
-                form.MdiParent = this;
-                form.MainForm = this;
-                form.Show();
-            }
-
-            form.LoadRecord(this.toolStripTextBox_barcode.Text);
-             * */
+            if (TryLoadItemBarcodeToItemSearchForm() == true)
+                return;
 
             EntityForm form = this.GetTopChildWindow<EntityForm>();
 
@@ -4134,35 +4223,11 @@ Stack:
             }
 
             if (nRet == 1)
-            {
-                /*
-                ReaderInfoForm form = this.TopReaderInfoForm;
-
-                if (form == null)
-                {
-                    // 新开一个读者窗
-                    form = new ReaderInfoForm();
-                    form.MdiParent = this;
-                    form.MainForm = this;
-                    form.Show();
-                }
-                else
-                    Global.Activate(form);
-
-
-                form.LoadRecord(this.toolStripTextBox_barcode.Text,
-                    false);
-                 * */
                 LoadReaderBarcode();
-            }
 
             if (nRet == 2)
-            {
                 LoadItemBarcode();
-            }
-
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -7119,18 +7184,17 @@ out strError);
 
         private void MenuItem_inventory_Click(object sender, EventArgs e)
         {
-#if NO
-            NewInventoryForm form = new NewInventoryForm();
-            form.MdiParent = this;
-            form.Show();
-#endif
-            // OpenWindow<NewInventoryForm>();
             if (StringUtil.CompareVersion(this.ServerVersion, "2.50") < 0)
             {
                 MessageBox.Show(this, "dp2library 版本 2.50 和以上才能使用 盘点窗");
                 return;
             }
             OpenWindow<InventoryForm>();
+        }
+
+        private void MenuItem_importExport_Click(object sender, EventArgs e)
+        {
+            OpenWindow<ImportExportForm>();
         }
 
         private void tabControl_panelFixed_SizeChanged(object sender, EventArgs e)
@@ -8298,6 +8362,8 @@ Keys keyData)
             this.MessageHub.Connect();
             this.MessageHub.Login();
         }
+
+
     }
 
     /// <summary>

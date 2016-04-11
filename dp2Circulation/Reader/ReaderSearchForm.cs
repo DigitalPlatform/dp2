@@ -1312,6 +1312,20 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            bool bLooping = (stop != null && stop.State == 0);    // 0 表示正在处理
+
+            {
+                menuItem = new MenuItem("功能(&F)");
+                contextMenu.MenuItems.Add(menuItem);
+
+                MenuItem subMenuItem = null;
+
+                subMenuItem = new MenuItem("校验读者记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
+                subMenuItem.Click += new System.EventHandler(this.menu_verifyPatronRecord_Click);
+                if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+            }
 
             // 批处理
             // 正在检索的时候，不允许进行批处理操作。因为stop.BeginLoop()嵌套后的Min Max Value之间的保存恢复问题还没有解决
@@ -1480,6 +1494,144 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        void menu_verifyPatronRecord_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要校验的读者记录事项";
+                goto ERROR1;
+            }
+
+            // 读者信息缓存
+            // 如果已经初始化，则保持
+            if (this.m_biblioTable == null)
+                this.m_biblioTable = new Hashtable();
+
+            int nCount = 0;
+
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行读者记录校验</div>");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在校验读者记录 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+
+            this.listView_records.Enabled = false;
+            try
+            {
+                if (stop != null)
+                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    stop.SetProgressValue(i);
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    // this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(info.OldXml);
+
+                    string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+                    if (string.IsNullOrEmpty(strBarcode) == false)
+                    {
+                        string strReaderDbName = Global.GetDbName(info.RecPath);
+                        string strLibraryCode = this.MainForm.GetReaderDbLibraryCode(strReaderDbName);
+
+                        // <para>-2  服务器没有配置校验方法，无法校验</para>
+                        // <para>-1  出错</para>
+                        // <para>0   不是合法的条码号</para>
+                        // <para>1   是合法的读者证条码号</para>
+                        // <para>2   是合法的册条码号</para>
+                        nRet = this.MainForm.VerifyBarcode(
+        this.stop,
+        this.Channel,
+        strLibraryCode,
+        strBarcode,
+        null,
+        out strError);
+                        if (nRet == -2)
+                            goto ERROR1;
+                        if (nRet != 1)
+                        {
+                            if (nRet == 2 && string.IsNullOrEmpty(strError) == true)
+                                strError = strLibraryCode + ": 这看起来是一个册条码号";
+
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + "证条码号 '" + strBarcode + "' 不合法: " + strError + "</div>");
+
+                            {
+                                item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                                item.ListViewItem.ForeColor = Color.FromArgb(255,255,255);
+                            }
+                        }
+
+                        nCount++;
+                    }
+
+
+
+                    i++;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                strError = "校验读者记录的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                this.listView_records.Enabled = true;
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行读者记录校验</div>");
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 借阅历史 --> 实体查询窗
