@@ -499,9 +499,17 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
+                    int i = 0;
+                    foreach(DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
-                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+                        // DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+
+                        // 2016/4/12
+                        // 检查事项状态。主动抛出异常，避免后面出现 index 异常
+                        if (searchresult.Cols == null)
+                            throw new Exception("浏览事项 Cols 为空: (lStart="+lStart+" index="+i+")  " + DumpResultItem(searchresult));
+                        if (searchresult.Cols.Length < 11)
+                            throw new Exception("浏览事项异常: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
 
                         ItemLine line = new ItemLine();
                         line.ItemRecPath = searchresult.Path;
@@ -577,6 +585,8 @@ MessageBoxDefaultButton.Button1);
 
                         line.BiblioRecPath = strBiblioRecPath;
                         lines.Add(line);
+
+                        i++;
                     }
 
                     if (true)
@@ -635,6 +645,13 @@ MessageBoxDefaultButton.Button1);
 
                 return 0;
             }
+        }
+
+        static string DumpResultItem(DigitalPlatform.LibraryClient.localhost.Record searchresult)
+        {
+            if (searchresult.Cols == null)
+                return "path=" + searchresult.Path + ";cols=[null]";
+            return "path=" + searchresult.Path + ";cols("+searchresult.Cols.Length.ToString()+")=" + string.Join("|", searchresult.Cols);
         }
 
         // safe set progress value, between max and min
