@@ -427,7 +427,7 @@ namespace DigitalPlatform.OPAC.Web
             get
             {
                 OpacApplication app = (OpacApplication)this.Page.Application["app"];
-                bool bValue = true;
+                bool bValue = false;    // 2016/4/12 修改
                 XmlNode node = app.WebUiDom.DocumentElement.SelectSingleNode("loginControl");
                 if (node != null)
                 {

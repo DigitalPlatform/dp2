@@ -187,6 +187,15 @@ namespace DigitalPlatform.dp2.Statis
 
             doc.SaveAs(dlg.FileName);
             doc.Dispose();
+
+            try
+            {
+                System.Diagnostics.Process.Start(dlg.FileName);
+            }
+            catch
+            {
+
+            }
             return 1;
         }
     }

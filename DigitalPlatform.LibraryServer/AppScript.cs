@@ -1425,7 +1425,7 @@ namespace DigitalPlatform.LibraryServer
             string strAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
             if (strAccess != null && strAccess.Trim() == "*")
             {
-                strError = "读者记录中 access 元素值不允许使用 * 形态";
+                strError = "读者记录中的存取定义(access 元素值)不允许使用 * 形态";
                 return -1;
             }
 

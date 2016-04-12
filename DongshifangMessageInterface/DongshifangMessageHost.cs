@@ -69,7 +69,7 @@ namespace DongshifangMessageInterface
                     out strError);
                 if (nRet <= 0)
                 {
-                    strError = "发送出错，错误码 [" + nRet.ToString() + "]";
+                    strError = "发送出错，错误码 [" + nRet.ToString() + "]，错误信息:" + strError;
                     return -1;
                 }
 

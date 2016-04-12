@@ -8294,7 +8294,6 @@ out strError);
             return -1;
         }
 
-
         // 将登录名切割为前缀和名字值两个部分
         void SplitLoginName(string strLoginName,
             out string strPrefix,
@@ -8771,6 +8770,7 @@ out strError);
         }
          */
 
+        // 重设密码
         // parameters:
         //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
         // return:
@@ -8904,12 +8904,64 @@ out strError);
 
                 // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
 
-                // 核对 barcode
-                string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
-                if (strBarcode.Trim() != strLoginName.Trim())
+                        string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
                 {
-                    strError = "证条码号不匹配";
-                    return -1;
+                    string strPrefix = "";
+                    string strValue = "";
+                    // 将登录名切割为前缀和名字值两个部分
+                    SplitLoginName(strLoginName,
+                out strPrefix,
+                out strValue);
+
+                    if (string.IsNullOrEmpty(strPrefix) == true)
+                    {
+                        // 核对 barcode
+                        if (strBarcode.Trim() != strLoginName.Trim())
+                        {
+                            strError = "证条码号不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "EM:") // 注意，整个 strLoginName 应该是 EM:email:xxxxx 这样的形态
+                    {
+                        // 核对 Email
+                        string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
+                        if (StringUtil.SplitList(strEmail).IndexOf(strValue) == -1)
+                        {
+                            strError = "地址 '"+strValue+"' 不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "TP:") 
+                    {
+                        // 核对 电话号码
+                        string strTel1 = DomUtil.GetElementText(readerdom.DocumentElement, "tel");
+                        if (StringUtil.SplitList(strTel1).IndexOf(strValue) == -1)
+                        {
+                            strError = "电话号码不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "ID:")
+                    {
+                        // 核对 身份证号
+                        string strID = DomUtil.GetElementText(readerdom.DocumentElement, "idCardNumber");
+                        if (strID != strValue)
+                        {
+                            strError = "身份证号不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "CN:")
+                    {
+                        // 核对 身份证号
+                        string strCN = DomUtil.GetElementText(readerdom.DocumentElement, "cardNumber");
+                        if (strCN != strValue)
+                        {
+                            strError = "证号不匹配";
+                            return -1;
+                        }
+                    }
                 }
 
                 // 核对 name
@@ -8974,13 +9026,13 @@ out strError);
                 string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(expire);
 
                 if (string.IsNullOrEmpty(strMessageTemplate) == true)
-                    strMessageTemplate = "尊敬的 %name% 您好！\n您的读者帐户(证条码号为 %barcode%)已设临时密码 %temppassword%，若您在 %period% 内用它登录会自动变为正式密码";
+                    strMessageTemplate = "%name% 您好！\n您的读者帐户(证条码号为 %barcode%)已设临时密码 %temppassword%，在 %period% 内登录会成为正式密码";
 
                 string strBody = strMessageTemplate.Replace("%barcode%", strBarcode)
                     .Replace("%name%", strName)
                     .Replace("%temppassword%", strReaderTempPassword)
                     .Replace("%expiretime%", expire.ToLongTimeString())
-                    .Replace("%period%", "一个小时");
+                    .Replace("%period%", "一小时");
                 // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
 
                 // 向手机号码发送短信
@@ -9309,7 +9361,7 @@ out strError);
         //              还可以为 token: 形态
         //      nIndex  如果有多个匹配的读者记录，此参数表示要选择其中哪一个。
         //              如果为-1，表示首次调用此函数，还不知如何选择。如此时命中多个，函数会返回>1的值
-        //      strGetToken 是否要获得 token ，和有效期。 空 /  day / month / year
+        //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
         //      strOutputUserName   返回读者证条码号
         // return:
         //      -1  error
@@ -9457,7 +9509,7 @@ out strError);
                 out strError);
             if (nRet == -1)
             {
-                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                strError = "装载读者记录进入 XML DOM 时发生错误: " + strError;
                 return -1;
             }
 
@@ -9465,7 +9517,7 @@ out strError);
             string strAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
             if (strAccess != null && strAccess.Trim() == "*")
             {
-                strError = "读者记录中 access 元素值不允许使用 * 形态";
+                strError = "读者记录中的存取定义(access 元素值)不允许使用 * 形态";
                 return -1;
             }
 
