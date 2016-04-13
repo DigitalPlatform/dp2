@@ -1238,6 +1238,13 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     // 刷新显示
                     task.RefreshDisplay(line);
 
+                    if (this.StateSpeak != "[不朗读]")
+                    {
+                        string strContent = task.GetSpeakContent(line, this.StateSpeak);
+                        if (string.IsNullOrEmpty(strContent) == false)
+                            this.MainForm.Speak(strContent);
+                    }
+
                     if (task.Action == "load_reader_info" && string.IsNullOrEmpty(task.ReaderXml) == false)
                         task.RefreshPatronCardDisplay(line);
 
@@ -1856,6 +1863,16 @@ false);
             }
         }
 
+        // 朗读状态
+        public string StateSpeak
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("quickcharging_form",
+        "state_speak",
+        "[不朗读]");
+            }
+        }
         /// <summary>
         /// 显示读者信息的格式。为 text html 之一
         /// </summary>

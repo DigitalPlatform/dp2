@@ -277,6 +277,11 @@ ap.GetString("quickcharging_form",
                 "speak_book_title",
                 false);
 
+            // 朗读状态
+            this.comboBox_quickCharging_stateSpeak.Text = ap.GetString("quickcharging_form",
+    "state_speak",
+    "[不朗读]");
+
             // 启用 ISBN 借书还书功能
             this.checkBox_quickCharging_isbnBorrow.Checked = ap.GetBoolean(
                 "quickcharging_form",
@@ -874,6 +879,12 @@ this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
                 "quickcharging_form",
                 "speak_book_title",
                 this.checkBox_quickCharging_speakBookTitle.Checked);
+
+            // 朗读状态
+            ap.SetString("quickcharging_form",
+    "state_speak",
+    this.comboBox_quickCharging_stateSpeak.Text);
+
 
             // 启用 ISBN 借书还书功能
             ap.SetBoolean(
