@@ -11273,7 +11273,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("repairborrowinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修复借还信息的操作被拒绝。不具备repairborrowinfo权限。";
+                    result.ErrorInfo = "修复借还信息的操作被拒绝。不具备 repairborrowinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

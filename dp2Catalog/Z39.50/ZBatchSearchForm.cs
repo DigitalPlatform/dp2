@@ -538,6 +538,11 @@ MessageBoxDefaultButton.Button1);
                 this.dpTable_records.Rows.Clear(); // TODO: 清除前，如果发现未保存，要警告
 
                 TreeNode node = this.zTargetControl1.SelectedNode;
+                if (node == null)
+                {
+                    strError = "当前尚未选择检索目标节点，无法启动检索";
+                    return -1;
+                }
 
                 node.Expand();
 
