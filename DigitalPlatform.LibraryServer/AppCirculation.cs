@@ -3111,7 +3111,6 @@ start_time_1,
                 }
             }
 
-
             // 2008/4/14
             string strBookState = DomUtil.GetElementText(itemdom.DocumentElement, "state");
             if (String.IsNullOrEmpty(strBookState) == false)
@@ -3135,7 +3134,6 @@ start_time_1,
                     strItemBarcodeParam);
                 return 0;
             }
-
 
             // 从想要借阅的册信息中，找到图书类型
             string strBookType = DomUtil.GetElementText(itemdom.DocumentElement, "bookType");
@@ -3221,7 +3219,6 @@ start_time_1,
                     strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 尚未定义 可借总册数 参数, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
-
 
                 // 然后看看总册数是否已经超过限制
                 int nMax = 0;
@@ -11744,11 +11741,9 @@ out string strError)
 
                 for (; ; )
                 {
-
                     XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                     if (nodes.Count == 0)
                         break;
-
 
                     // 找到第一个已启动事项
                     XmlNode node = null;
@@ -14486,8 +14481,6 @@ strBookPrice);    // 图书价格
                         strOverdueItemBarcodeList += strBarcode;
                         nOverCount++;
                     }
-
-
                 }
 
                 // 发现未归还的册中出现了超期情况

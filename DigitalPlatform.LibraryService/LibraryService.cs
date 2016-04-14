@@ -7716,29 +7716,42 @@ namespace dp2Library
         {
             results = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", false);
+            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", true);
             if (result.Value == -1)
                 return result;
 
-            string strError = "";
-            // 不需要登录
-            // return:
-            //      -1  出错
-            //      0   因为条件不具备功能没有成功执行
-            //      1   功能成功执行
-            int nRet = app.BindPatron(
-                sessioninfo,
-                strAction,
-                strQueryWord,
-                strPassword,
-                strBindingID,
-                strStyle,
-                strResultTypeList,
-                out results,
-                out strError);
-            result.Value = nRet;
-            result.ErrorInfo = strError;
-            return result;
+            try
+            {
+                string strError = "";
+                // 不需要登录
+                // return:
+                //      -1  出错
+                //      0   因为条件不具备功能没有成功执行
+                //      1   功能成功执行
+                int nRet = app.BindPatron(
+                    sessioninfo,
+                    strAction,
+                    strQueryWord,
+                    strPassword,
+                    strBindingID,
+                    strStyle,
+                    strResultTypeList,
+                    out results,
+                    out strError);
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library BindPatron() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
         }
 
         // 获得值列表

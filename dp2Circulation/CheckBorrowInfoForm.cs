@@ -417,7 +417,9 @@ namespace dp2Circulation
                         }
                     }
 
-                    if (bFoundError && string.IsNullOrEmpty(strReaderXml) == false)
+                    if (bFoundError 
+                        && bAutoRepair
+                        && string.IsNullOrEmpty(strReaderXml) == false)
                     {
                         int nRet = RepairAllErrorFromReaderSide(strReaderRecPath,
                             strReaderXml,
@@ -890,6 +892,7 @@ namespace dp2Circulation
                                     Global.WriteHtml(this.webBrowser_resultInfo,
                                         strText);
 
+                                    if (bAutoRepair)
                                     {
                                         int nRet = RepairErrorFromItemSide(strItemBarcode,
                                     aDupPath[j],
@@ -926,6 +929,8 @@ namespace dp2Circulation
                         {
                             Global.WriteHtml(this.webBrowser_resultInfo,
                                 "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n");
+                            
+                            if (bAutoRepair)
                             {
                                 int nRet = RepairErrorFromItemSide(strItemBarcode,
                                     "",

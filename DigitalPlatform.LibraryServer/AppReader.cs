@@ -4850,6 +4850,24 @@ out strError);
             strError = "";
             results = null;
 
+            // 检查 strBindID 参数
+            {
+                if (strBindingID.IndexOf(",") != -1)
+                {
+                    strError = "strBindID 参数值 '" + strBindingID + "' 不合法。不允许包含逗号";
+                    return -1;
+                }
+                string strLeft = "";
+                string strRight = "";
+                StringUtil.ParseTwoPart(strBindingID, ":", out strLeft, out strRight);
+                if (string.IsNullOrEmpty(strLeft)
+                    || string.IsNullOrEmpty(strRight))
+                {
+                    strError = "strBindID 参数值 '"+strBindingID+"' 不合法。应为 xxxx:xxxx 形态";
+                    return -1;
+                }
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -4905,7 +4923,7 @@ out strError);
 
             if (nRet == 0)
             {
-                strError = "帐户不存在或密码不正确";
+                strError = "帐户 '"+strQueryWord+"' 不存在或密码不正确";
                 return -1;
             }
 
@@ -4953,13 +4971,13 @@ out strError);
             if (string.IsNullOrEmpty(strRefID) == true)
             {
                 DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
-                m_bChanged = true;
+                bChanged = true;
             }
 
             if (strNewEmail != strEmail)
             {
-                DomUtil.SetElementText(readerdom.DocumentElement, "email", strEmail);
-                m_bChanged = true;
+                DomUtil.SetElementText(readerdom.DocumentElement, "email", strNewEmail);
+                bChanged = true;
             }
 
             if (bChanged == true)
@@ -5000,7 +5018,7 @@ out strError);
             nRet = BuildReaderResults(
     sessioninfo,
     readerdom,
-    strXml,
+    readerdom.OuterXml,
     strResultTypeList,
     "", // strLibraryCode,
     recpaths,
@@ -5052,7 +5070,33 @@ out strError);
                 return StringUtil.MakePathList(results);
             }
             else
-                return strText + "," + strBinding;
+            {
+                // 查重
+                if (FindBindingString(strText, strBinding) != -1)
+                    return strText;
+                return strText + "," + strBinding; 
+            }
+        }
+
+        static int FindBindingString(string strText,
+            string strBinding)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return -1;
+
+            string[] parts = strText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            int i = 0;
+            foreach (string s in parts)
+            {
+                string strLine = s.Trim();
+                if (string.IsNullOrEmpty(strLine))
+                    continue;
+                if (strLine == strBinding)
+                    return i;   // 忽视发现的号码
+                i++;
+            }
+
+            return -1;
         }
 
         // 去掉一个绑定号码
