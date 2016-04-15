@@ -167,12 +167,20 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 获得书目信息
-        // 可以用多种格式：xml html text @??? summary outputpath
+        // 
         // TODO: 将来可以增加在strBiblioRecPath中允许多种检索入口的能力，比方说允许使用itembarcode和itemconfirmpath(甚至和excludebibliopath)结合起来定位种。这样就完全可以取代原有GetBiblioSummary API的功能
         // parameters:
         //      strBiblioRecPath    种记录路径。如果在最后接续"$prev" "$next"，表示前一条或后一条。
         //      formats     希望获得信息的若干格式。如果 == null，表示希望只返回timestamp (results返回空)
+        //                  可以用多种格式：xml html text @??? summary outputpath
         // Result.Value -1出错 0没有找到 1找到
+        // 附注:
+        //      1)
+        //      如果 strBiblioRecPath 为 @path-list: 引导的成批检索式，并且 formats 为唯一一个 "summary" 元素，则表示希望批获取摘要
+        //      批检索式，为逗号间隔的元素列表，每个元素为 @itemBarcode: 或 @bibliorecpath 引导的内容
+        //      results 中每个元素为一个 summary 内容
+        //      2)
+        //      如果 strBiblioRecPath 为 @path-list: 引导的成批检索式，format 为多种格式，则 results 中会返回 格式个数 X 检索词数量 这么多的元素
         public LibraryServerResult GetBiblioInfos(
             SessionInfo sessioninfo,
             string strBiblioRecPath,
@@ -197,6 +205,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (formats != null && formats.Length == 1 && formats[0] == "summary"
+                && strBiblioRecPath.StartsWith("@path-list:")   // 2016/4/15 增加
                 && string.IsNullOrEmpty(strBiblioXmlParam) == true)
             {
                 List<String> temp_results = null;
@@ -236,9 +245,13 @@ namespace DigitalPlatform.LibraryServer
             List<string> commands = new List<string>();
             List<string> biblio_records = new List<string>();
 
-            if (StringUtil.HasHead(strBiblioRecPath, "@path-list:") == true)
+            if (StringUtil.HasHead(strBiblioRecPath, "@path-list:") == true
+                || strBiblioRecPath.IndexOf(",") != -1) // 2016/4/15 增加
             {
-                string strText = strBiblioRecPath.Substring("@path-list:".Length);
+                string strText = strBiblioRecPath;
+                if (StringUtil.HasHead(strBiblioRecPath, "@path-list:") == true)
+                    strText = strBiblioRecPath.Substring("@path-list:".Length);
+
                 commands = StringUtil.SplitList(strText);
 
                 // 如果前端发来记录，需要切割为独立的字符串

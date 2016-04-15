@@ -136,16 +136,19 @@ namespace DigitalPlatform.MessageClient
     long,
     long,
     IList<Record>,
-        string>("responseSearch", (searchID,
+        string,
+            string>("responseSearch", (searchID,
     resultCount,
     start,
     records,
-    errorInfo) =>
+    errorInfo,
+    errorCode) =>
  OnSearchResponseRecieved(searchID,
     resultCount,
     start,
     records,
-    errorInfo)
+    errorInfo,
+    errorCode)
 );
             HubProxy.On<SetInfoRequest>("setInfo",
             (searchParam) => OnSetInfoRecieved(searchParam)
@@ -285,7 +288,8 @@ SearchRequest param
     long resultCount,
     long start,
     IList<Record> records,
-    string errorInfo)
+    string errorInfo,
+            string errorCode)
         {
         }
 
@@ -546,7 +550,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             long resultCount,
             long start,
             IList<Record> records,
-            string errorInfo)
+            string errorInfo,
+            string errorCode)
         {
             try
             {
@@ -555,7 +560,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
     resultCount,
     start,
     records,
-    errorInfo);
+    errorInfo,
+    errorCode);
                 if (result.Value == -1)
                 {
                     AddErrorLine(result.ErrorInfo);

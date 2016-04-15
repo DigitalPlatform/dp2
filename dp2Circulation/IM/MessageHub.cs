@@ -288,6 +288,7 @@ SearchRequest searchParam
         void GetPatronInfo(SearchRequest searchParam)
         {
             string strError = "";
+            string strErrorCode = "";
             IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
 
             if (string.IsNullOrEmpty(searchParam.FormatList) == true)
@@ -310,6 +311,7 @@ SearchRequest searchParam
                     out strRecPath,
                     out baTimestamp,
                     out strError);
+                strErrorCode = channel.ErrorCode.ToString();
                 if (lRet == -1 || lRet == 0)
                 {
                     if (lRet == 0
@@ -321,7 +323,8 @@ searchParam.TaskID,
 0,
 0,
 records,
-strError);  // 出错信息大概为 not found。
+strError,  // 出错信息大概为 not found。
+strErrorCode);
                         return;
                     }
                     goto ERROR1;
@@ -348,7 +351,8 @@ strError);  // 出错信息大概为 not found。
                     records.Count,  // lHitCount,
                     0, // lStart,
                     records,
-                    "");
+                    "",
+                    strErrorCode);
             }
             catch (Exception ex)
             {
@@ -370,7 +374,8 @@ searchParam.TaskID,
 -1,
 0,
 records,
-strError);
+strError,
+strErrorCode);
         }
 
         static void SetValue(Entity entity, EntityInfo info)
@@ -428,6 +433,7 @@ strError);
             }
 
             string strError = "";
+            string strErrorCode = "";
             IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
 
             string strResultSetName = searchParam.ResultSetName;
@@ -482,6 +488,8 @@ strError);
                         strError = "无法识别的 Operation 值 '" + searchParam.Operation + "'";
                     }
 
+                    strErrorCode = channel.ErrorCode.ToString();
+
                     if (lRet == -1 || lRet == 0)
                     {
                         if (lRet == 0
@@ -493,7 +501,8 @@ strError);
     0,
     0,
     records,
-    strError);  // 出错信息大概为 not found。
+    strError,  // 出错信息大概为 not found。
+    strErrorCode);
                             return;
                         }
                         goto ERROR1;
@@ -512,7 +521,8 @@ strError);
                             lHitCount,
 0,
 records,
-"本次没有返回任何记录");
+"本次没有返回任何记录",
+strErrorCode);
                         return;
                     }
 
@@ -549,6 +559,7 @@ records,
             "zh", // this.Lang,
             out searchresults,
             out strError);
+                        strErrorCode = channel.ErrorCode.ToString();
                         if (lRet == -1)
                             goto ERROR1;
 
@@ -575,7 +586,8 @@ records,
                             lHitCount,
                             lStart,
                             records,
-                            "");
+                            "",
+                            strErrorCode);
 
                         lStart += searchresults.Length;
 
@@ -607,7 +619,8 @@ searchParam.TaskID,
 -1,
 0,
 records,
-strError);
+strError,
+strErrorCode);
         }
 
         // 写入实体库
@@ -686,7 +699,8 @@ strError);
             long resultCount,
             long start,
             IList<DigitalPlatform.MessageClient.Record> records,
-            string errorInfo)
+            string errorInfo,
+            string errorCode)
         {
 #if NO
             int i = 0;
@@ -705,6 +719,7 @@ strError);
                 e.Start = start;
                 e.Records = records;
                 e.ErrorInfo = errorInfo;
+                e.ErrorCode = errorCode;
                 this.SearchResponseEvent(this, e);
             }
         }
@@ -791,5 +806,6 @@ strError);
         public long Start = 0;  // Records 从整个结果集的何处开始
         public IList<DigitalPlatform.MessageClient.Record> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
+        public string ErrorCode = "";   // 错误代码。2016/4/15 增加
     }
 }

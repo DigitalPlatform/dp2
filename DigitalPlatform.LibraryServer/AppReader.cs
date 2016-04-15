@@ -5078,6 +5078,10 @@ out strError);
             }
         }
 
+        // 在一个绑定信息字符串里面，找到一个特定的 xxxx:xxxx 部分的下标
+        // return:
+        //      -1  没有找到
+        //      其他  找到的位置下标。注，元素数量没有把空字符串元素计算在内
         static int FindBindingString(string strText,
             string strBinding)
         {
@@ -5092,7 +5096,7 @@ out strError);
                 if (string.IsNullOrEmpty(strLine))
                     continue;
                 if (strLine == strBinding)
-                    return i;   // 忽视发现的号码
+                    return i;
                 i++;
             }
 

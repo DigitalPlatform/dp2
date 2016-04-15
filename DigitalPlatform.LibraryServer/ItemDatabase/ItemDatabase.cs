@@ -825,10 +825,10 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 观察已存在的记录中，唯一性字段是否和要求的一致
-        // return:
-        //      -1  出错
-        //      0   一致
-        //      1   不一致。报错信息在strError中
+            // return:
+            //      -1  出错
+            //      0   一致
+            //      1   不一致。报错信息在strError中
             nRet = IsLocateInfoCorrect(
                 oldLocateParams,
                 domExist,
@@ -1701,7 +1701,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'force' 的修改"+this.ItemName+"信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'force' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备restore权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1713,7 +1713,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改"+this.ItemName+"信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备restore权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1725,7 +1725,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'noeventlog' 的修改"+this.ItemName+"信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'noeventlog' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备restore权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1831,7 +1831,7 @@ out strError);
                             {
                                 // 再看strDbName是否至少是一个实体库
                                 if (this.IsItemDbName(strDbName) == false)
-                                    strError = "RecPath中数据库名 '" + strDbName + "' 不正确，应为"+this.ItemName+"库名";
+                                    strError = "RecPath中数据库名 '" + strDbName + "' 不正确，应为" + this.ItemName + "库名";
                             }
                             else
                                 strError = "RecPath中数据库名 '" + strDbName + "' 不正确，应为 '" + strItemDbName + "'。(因为书目库名为 '" + strBiblioDbName + "'，其对应的" + this.ItemName + "库名应为 '" + strItemDbName + "' )";
@@ -1841,7 +1841,7 @@ out strError);
                     {
                         // 要检查看看 strDbName 是否为一个实体库名
                         if (this.IsItemDbName(strDbName) == false)
-                            strError = "RecPath中数据库名 '" + strDbName + "' 不正确，应为"+this.ItemName+"库名";
+                            strError = "RecPath中数据库名 '" + strDbName + "' 不正确，应为" + this.ItemName + "库名";
                     }
 
                     if (strError != "")
@@ -1978,7 +1978,7 @@ out strError);
                         }
 
                         nRet = this.IsLocateParamNullOrEmpty(
-                            lockLocateParam, 
+                            lockLocateParam,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -2153,7 +2153,7 @@ out strError);
                     Debug.Assert(Char.IsLower(this.OperLogSetName[0]) == true, this.OperLogSetName + " 的第一个字符应当为小写字母，这是惯例");
                     // 和馆代码模糊有关。如果要写入馆代码，可以考虑滞后写入
                     DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "operation", 
+                        "operation",
                         OperLogSetName /*"setIssue"*/);
 
                     // 兑现一个命令
@@ -2383,7 +2383,7 @@ out strError);
                         DomUtil.SetElementText(domOperLog.DocumentElement,
                             "operator",
                             sessioninfo.UserID);   // 操作者
-                        DomUtil.SetElementText(domOperLog.DocumentElement, 
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
                             "operTime",
                             strOperTime);   // 操作时间
 
@@ -2551,8 +2551,11 @@ out strError);
 
             if (String.IsNullOrEmpty(strItemDbName) == true)
             {
-                strError = "书目库名 '" + strBiblioDbName + "' 对应的"+this.ItemName+"库名没有定义";
-                goto ERROR1;
+                strError = "书目库名 '" + strBiblioDbName + "' 对应的" + this.ItemName + "库名没有定义";
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.ItemDbNotDef;  // 2016/4/15
+                return result;
             }
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.App.WsUrl);
@@ -2832,7 +2835,7 @@ out strError);
             // 检索实体库中全部从属于特定id的记录
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录") 
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
@@ -2846,7 +2849,7 @@ out strError);
 
             if (lRet == 0)
             {
-                strError = "没有找到属于书目记录 '" + strBiblioRecPath + "' 的任何"+this.ItemName+"记录";
+                strError = "没有找到属于书目记录 '" + strBiblioRecPath + "' 的任何" + this.ItemName + "记录";
                 return 0;
             }
 
@@ -2860,7 +2863,7 @@ out strError);
             int nMaxCount = 10000;
             if (nResultCount > nMaxCount)
             {
-                strError = "命中"+this.ItemName+"记录数 " + nResultCount.ToString() + " 超过 "+nMaxCount.ToString()+", 暂时不支持针对它们的删除操作";
+                strError = "命中" + this.ItemName + "记录数 " + nResultCount.ToString() + " 超过 " + nMaxCount.ToString() + ", 暂时不支持针对它们的删除操作";
                 goto ERROR1;
             }
 
@@ -2918,7 +2921,7 @@ out strError);
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                             continue;
 
-                        strError = "获取"+this.ItemName+"记录 '" + aPath[i] + "' 时发生错误: " + strError;
+                        strError = "获取" + this.ItemName + "记录 '" + aPath[i] + "' 时发生错误: " + strError;
                         goto ERROR1;
                         // goto CONTINUE;
                     }
@@ -3205,7 +3208,7 @@ out strError);
 
             if (domOperLog != null)
             {
-                root = domOperLog.CreateElement("deleted"+this.ItemNameInternal+"Records");
+                root = domOperLog.CreateElement("deleted" + this.ItemNameInternal + "Records");
                 domOperLog.DocumentElement.AppendChild(root);
             }
 
@@ -3248,7 +3251,7 @@ out strError);
                         {
                             if (nRedoCount > 10)
                             {
-                                strError = "重试了10次还不行。删除"+this.ItemName+"记录 '" + info.RecPath + "' 时发生错误: " + strError;
+                                strError = "重试了10次还不行。删除" + this.ItemName + "记录 '" + info.RecPath + "' 时发生错误: " + strError;
                                 goto ERROR1;
                             }
                             nRedoCount++;
@@ -3270,7 +3273,7 @@ out strError);
                                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                                     continue;
 
-                                strError = "在删除"+this.ItemName+"记录 '" + info.RecPath + "' 时发生时间戳冲突，于是自动重新获取记录，但又发生错误: " + strError_1;
+                                strError = "在删除" + this.ItemName + "记录 '" + info.RecPath + "' 时发生时间戳冲突，于是自动重新获取记录，但又发生错误: " + strError_1;
                                 goto ERROR1;
                                 // goto CONTINUE;
                             }
@@ -3288,7 +3291,7 @@ out strError);
                             }
                             catch (Exception ex)
                             {
-                                strError = this.ItemName+"记录 '" + info.RecPath + "' XML装载进入DOM时发生错误: " + ex.Message;
+                                strError = this.ItemName + "记录 '" + info.RecPath + "' XML装载进入DOM时发生错误: " + ex.Message;
                                 goto ERROR1;
                             }
 
@@ -3307,7 +3310,7 @@ out strError);
                                 goto ERROR1;
                             if (nRet == 1)
                             {
-                                strError = "拟删除的"+this.ItemName+"记录 '" + info.RecPath + "' 中"+strError+"(此种情况可能不限于这一条)，不能删除。";
+                                strError = "拟删除的" + this.ItemName + "记录 '" + info.RecPath + "' 中" + strError + "(此种情况可能不限于这一条)，不能删除。";
                                 goto ERROR1;
                             }
 
@@ -3315,7 +3318,7 @@ out strError);
                             goto REDO_DELETE;
                         }
 
-                        strError = "删除"+this.ItemName+"记录 '" + info.RecPath + "' 时发生错误: " + strError;
+                        strError = "删除" + this.ItemName + "记录 '" + info.RecPath + "' 时发生错误: " + strError;
                         goto ERROR1;
                     }
                 }
