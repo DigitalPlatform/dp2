@@ -3337,9 +3337,9 @@ nsmgr);
                             return -1;
                         }
                     }
-                    strReaderEmailAddress = DomUtil.GetElementText(readerdom.DocumentElement,
+                    string strValue = DomUtil.GetElementText(readerdom.DocumentElement,
                         "email");
-
+                    strReaderEmailAddress = LibraryApplication.GetEmailAddress(strValue);
                     if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
                         continue;
                 }

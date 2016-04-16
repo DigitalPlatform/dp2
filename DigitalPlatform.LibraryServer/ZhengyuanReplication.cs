@@ -20,7 +20,7 @@ namespace DigitalPlatform.LibraryServer
     public class ZhengyuanReplication : BatchTask
     {
         internal AutoResetEvent eventDownloadFinished = new AutoResetEvent(false);	// true : initial state is signaled 
-        
+
         bool DownloadCancelled = false;
         Exception DownloadException = null;
 
@@ -32,7 +32,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 构造函数
-        public ZhengyuanReplication(LibraryApplication app, 
+        public ZhengyuanReplication(LibraryApplication app,
             string strName)
             : base(app, strName)
         {
@@ -343,7 +343,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     if (nRet == 1)
                     {
-                        this.AppendResultText("下载数据文件"+strDataFileName+"被中断\r\n");
+                        this.AppendResultText("下载数据文件" + strDataFileName + "被中断\r\n");
                         this.Loop = false;
                         return;
                     }
@@ -854,7 +854,7 @@ namespace DigitalPlatform.LibraryServer
             string strExistingXml = "";
             string strSavedXml = "";
             string strSavedRecPath = "";
-            byte [] baNewTimestamp = null;
+            byte[] baNewTimestamp = null;
             DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
             LibraryServerResult result = this.App.SetReaderInfo(
@@ -932,7 +932,7 @@ out string strError)
             strError = "";
             int nRet = 0;
 
-            
+
             /*
     <Person>
         <ACCNUM>100</ACCNUM>
@@ -1047,9 +1047,12 @@ out string strError)
             // email地址
             string strEmail = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "EMAIL");
-            DomUtil.SetElementText(readerdom.DocumentElement,
-                "email",
-                strEmail);
+            if (string.IsNullOrEmpty(strEmail) == false)
+            {
+                DomUtil.SetElementText(readerdom.DocumentElement,
+                    "email",
+                    "email:" + strEmail);
+            }
 
             string strRfcTime = "";
 
@@ -1178,7 +1181,7 @@ out string strError)
             out string strError)
         {
             strError = "";
-            strServerUrl = 
+            strServerUrl =
             strUserName = "";
             strPassword = "";
 
@@ -1259,7 +1262,7 @@ out string strError)
             }
             catch (WebException ex)
             {
-                strError = "下载数据文件 " + strPath+ " 失败: " + ex.ToString();
+                strError = "下载数据文件 " + strPath + " 失败: " + ex.ToString();
                 return -1;
             }
 
@@ -1322,7 +1325,7 @@ out string strError)
 
         void request_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            if ((e.BytesReceived % 1024*100) == 0)
+            if ((e.BytesReceived % 1024 * 100) == 0)
                 this.AppendResultText("已下载: " + e.BytesReceived + "\r\n");
         }
 

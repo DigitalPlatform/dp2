@@ -58,7 +58,7 @@ namespace DigitalPlatform.LibraryServer
                 // text-level: 内部错误
                 result.ErrorInfo = string.Format(this.GetString("未知的strFunction参数值s"),    // "未知的strFunction参数值 '{0}'"
                     strFunction);
-                    // "未知的strFunction参数值 '" + strFunction + "'";
+                // "未知的strFunction参数值 '" + strFunction + "'";
                 result.ErrorCode = ErrorCode.InvalidParameter;
                 return result;
             }
@@ -75,7 +75,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 被删除的已到书状态册集合
             List<string> ArriveItemBarcodes = new List<string>();
-            
+
             // 加读者记录锁
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("Reservation 开始为读者加写锁 '" + strReaderBarcode + "'");
@@ -113,7 +113,7 @@ namespace DigitalPlatform.LibraryServer
                     // text-level: 内部错误
                     strError = string.Format(this.GetString("读入读者记录时发生错误s"), // "读入读者记录时发生错误: {0}"
                         strError);
-                        // "读入读者记录时发生错误: " + strError;
+                    // "读入读者记录时发生错误: " + strError;
                     goto ERROR1;
                 }
 
@@ -163,7 +163,7 @@ namespace DigitalPlatform.LibraryServer
                     // text-level: 内部错误
                     strError = string.Format(this.GetString("装载读者记录进入XMLDOM时发生错误s"),   // "装载读者记录进入XML DOM时发生错误: {0}"
                         strError);
-                        // "装载读者记录进入XML DOM时发生错误: " + strError;
+                    // "装载读者记录进入XML DOM时发生错误: " + strError;
                     goto ERROR1;
                 }
 
@@ -316,7 +316,7 @@ namespace DigitalPlatform.LibraryServer
                             // text-level: 内部错误
                             strError = string.Format(this.GetString("读入册记录时发生错误s"),   // "读入册记录时发生错误: {0}"
                                 strError);
-                                // "读入册记录时发生错误: " + strError;
+                            // "读入册记录时发生错误: " + strError;
                             goto ERROR1;
                         }
 
@@ -508,7 +508,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (string.IsNullOrEmpty(strItemBarcode) == true)
                     {
-                        strError = "内部错误：OnShelfItemBarcodes 的第一个元素为空。数组情况 '"+StringUtil.MakePathList(OnShelfItemBarcodes)+"'";
+                        strError = "内部错误：OnShelfItemBarcodes 的第一个元素为空。数组情况 '" + StringUtil.MakePathList(OnShelfItemBarcodes) + "'";
                         goto ERROR1;
                     }
 
@@ -533,7 +533,7 @@ namespace DigitalPlatform.LibraryServer
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("预约操作已经成功, 但是在架立即通知功能失败, 原因s"),  // "预约操作已经成功, 但是在架立即通知功能失败, 原因: {0}"
                             strError);
-                            // "预约操作已经成功, 但是在架立即通知功能失败, 原因: " + strError;
+                        // "预约操作已经成功, 但是在架立即通知功能失败, 原因: " + strError;
                         goto ERROR1;
                     }
 
@@ -550,17 +550,17 @@ namespace DigitalPlatform.LibraryServer
                     // text-level: 用户提示
                     string strMessage = string.Format(this.GetString("请注意，您刚提交的预约请求立即就得到了兑现"), // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 {0} 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。"
                         strItemBarcode);
-                        // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 " + strItemBarcode + " 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。";
+                    // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 " + strItemBarcode + " 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。";
                     if (OnShelfItemBarcodes.Count > 1)
                     {
                         OnShelfItemBarcodes.Remove(strItemBarcode);
-                        string [] barcodelist = new string[OnShelfItemBarcodes.Count];
+                        string[] barcodelist = new string[OnShelfItemBarcodes.Count];
                         OnShelfItemBarcodes.CopyTo(barcodelist);
                         // text-level: 用户提示
                         strMessage += string.Format(this.GetString("您在同一预约请求中也同时提交了其他在架状态的册"),   // "您在同一预约请求中也同时提交了其他在架状态的册: {0}。因同一集合中的前述册 {1} 的生效，这些册同时被忽略。(如确要预约多个在架的册让它们都独立生效，请每次勾选一个后单独提交，而不要把多个册一次性提交。)"
                             String.Join(",", barcodelist),
                             strItemBarcode);
-                            // "您在同一预约请求中也同时提交了其他在架状态的册: " + String.Join(",", barcodelist) + "。因同一集合中的前述册 " + strItemBarcode + " 的生效，这些册同时被忽略。(如确要预约多个在架的册让它们都独立生效，请每次勾选一个后单独提交，而不要把多个册一次性提交。)";
+                        // "您在同一预约请求中也同时提交了其他在架状态的册: " + String.Join(",", barcodelist) + "。因同一集合中的前述册 " + strItemBarcode + " 的生效，这些册同时被忽略。(如确要预约多个在架的册让它们都独立生效，请每次勾选一个后单独提交，而不要把多个册一次性提交。)";
                     }
 
                     result.ErrorInfo = strMessage;
@@ -574,7 +574,7 @@ namespace DigitalPlatform.LibraryServer
                     // text-level: 用户提示
                     result.ErrorInfo += string.Format(this.GetString("册s在删除前已经处在到书状态"),    // "册 {0} 在删除前已经处在“到书”状态。您刚刚删除了这(些)请求，这意味着您已经放弃取书。图书馆将顺次满足后面排队等待的预约者的请求，或允许其他读者借阅此书。(若您意图要去图书馆正常取书，请一定不要去删除这样的状态为“已到书”的请求，软件会在您取书后自动删除)"
                         String.Join(",", barcodelist));
-                        // "册 " + String.Join(",", barcodelist) + " 在删除前已经处在“到书”状态。您刚刚删除了这(些)请求，这意味着您已经放弃取书。图书馆将顺次满足后面排队等待的预约者的请求，或允许其他读者借阅此书。(若您意图要去图书馆正常取书，请一定不要去删除这样的状态为“已到书”的请求，软件会在您取书后自动删除)";
+                    // "册 " + String.Join(",", barcodelist) + " 在删除前已经处在“到书”状态。您刚刚删除了这(些)请求，这意味着您已经放弃取书。图书馆将顺次满足后面排队等待的预约者的请求，或允许其他读者借阅此书。(若您意图要去图书馆正常取书，请一定不要去删除这样的状态为“已到书”的请求，软件会在您取书后自动删除)";
                 }
             }
             finally
@@ -641,7 +641,7 @@ namespace DigitalPlatform.LibraryServer
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("读者类型s尚未定义可预约册数参数"),  // "读者类型 '{0}' 尚未定义 可预约册数 参数, 预约操作被拒绝"
                     strReaderType);
-                    // "读者类型 '" + strReaderType + "' 尚未定义 可预约册数 参数, 预约操作被拒绝";
+                // "读者类型 '" + strReaderType + "' 尚未定义 可预约册数 参数, 预约操作被拒绝";
                 return -1;
             }
 
@@ -670,7 +670,7 @@ namespace DigitalPlatform.LibraryServer
                     nodes.Count,
                     strReaderType,
                     nMaxReserveItems.ToString());
-                    // "本次预约前已经预约的事项数已经达到 " + nodes.Count + "，已经超过 读者类型 '" + strReaderType + "' 允许的可预约册数 " + nMaxReserveItems.ToString() + "，预约操作被拒绝";
+                // "本次预约前已经预约的事项数已经达到 " + nodes.Count + "，已经超过 读者类型 '" + strReaderType + "' 允许的可预约册数 " + nMaxReserveItems.ToString() + "，预约操作被拒绝";
                 return -1;
             }
 
@@ -729,7 +729,7 @@ namespace DigitalPlatform.LibraryServer
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("册s已经被当前读者借阅"),   // "册 '{0}' 已被当前读者借阅，因此不能被预约..."
                             strNewBarcode);
-                            // "册 '" + strNewBarcode + "' 已被当前读者借阅，因此不能被预约...";
+                        // "册 '" + strNewBarcode + "' 已被当前读者借阅，因此不能被预约...";
                         return 1;
                     }
 
@@ -809,7 +809,7 @@ namespace DigitalPlatform.LibraryServer
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("不能预约在架的册s"), // "不能预约在架(未被借出的)册 {0}"
                             strItemBarcode);
-                            // "不能预约在架(未被借出的)册 " + strItemBarcode;
+                        // "不能预约在架(未被借出的)册 " + strItemBarcode;
                         return -1;
                     }
 
@@ -1486,7 +1486,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
             DeletedNotifyRecPaths = new List<string>();
-            
+
             // 2010/12/31
             if (String.IsNullOrEmpty(this.ArrivedDbName) == true)
             {
@@ -1574,7 +1574,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "装载册记录 '"+strItemBarcode+"' 的 XML 进入 DOM 时发生错误: " + strError;
+                strError = "装载册记录 '" + strItemBarcode + "' 的 XML 进入 DOM 时发生错误: " + strError;
                 return -1;
             }
 
@@ -1910,7 +1910,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        strTotalError += "发送"+message_interface.Type+"消息时出错: " + strError + "\r\n";
+                        strTotalError += "发送" + message_interface.Type + "消息时出错: " + strError + "\r\n";
                     }
                 }
             }
@@ -1946,8 +1946,10 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            strReaderEmailAddress = DomUtil.GetElementText(readerdom.DocumentElement,
-                "email");
+            strReaderEmailAddress =
+                LibraryApplication.GetEmailAddress(
+                DomUtil.GetElementText(readerdom.DocumentElement, "email")
+                );
 
             strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
