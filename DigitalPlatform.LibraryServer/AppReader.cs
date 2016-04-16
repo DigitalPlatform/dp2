@@ -3503,7 +3503,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 try
                 {
-                    // 测试读者记录
+                    // 返回测试读者记录
                     if (IsTestReaderBarcode(strBarcode))
                     {
                         nRet = 1;
@@ -3808,10 +3808,11 @@ out strError);
                     goto ERROR1;
             }
 
+            DomUtil.DeleteElement(readerdom.DocumentElement, "password");
             nRet = BuildReaderResults(
                 sessioninfo,
                 readerdom,
-                strXml,
+                readerdom.OuterXml, // strXml, 2016/4/16 被改掉
                 strResultTypeList,
                 strLibraryCode,
                 recpaths,
@@ -4014,6 +4015,8 @@ out strError);
             return result;
         }
 
+        // 创建读者记录返回格式
+        // 注：出于安全需要，readerdom 和 strXml 在调用前就应该把里面的 barcode 元素删除
         // parameters:
         //      readerdom   读者 XMLDocument 对象。如果为空，则 strXml 参数中应该有读者记录
         //      strXml      读者 XML 记录。如果 readerdom 为空，可以用这里的值
@@ -5015,6 +5018,7 @@ out strError);
             recpaths.Add(strOutputPath);
 
             // 构造读者记录的返回格式
+            DomUtil.DeleteElement(readerdom.DocumentElement, "password");
             nRet = BuildReaderResults(
     sessioninfo,
     readerdom,

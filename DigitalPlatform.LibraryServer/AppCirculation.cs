@@ -1704,9 +1704,12 @@ namespace DigitalPlatform.LibraryServer
                         "Borrow() 中写统计指标 耗时 ");
 
                     strOutputItemXml = itemdom.OuterXml;
-                    strOutputReaderXml = readerdom.OuterXml;
-                    strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
 
+                    // strOutputReaderXml 将用于构造读者记录返回格式
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                    strOutputReaderXml = readerdom.OuterXml;
+
+                    strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
                 } // 册记录锁定范围结束
                 finally
                 {
@@ -4658,7 +4661,15 @@ start_time_1,
                             goto ERROR1;
 
                         strOutputItemXml = itemdom.OuterXml;
+
                         strOutputReaderXml = strOldReaderXml;   // strReaderXml;
+                        nRet = RemovePassword(ref strOutputReaderXml, out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "从读者记录中去除 password 阶段出错: " + strError;
+                            goto ERROR1;
+                        }
+
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
 
                         SetReturnInfo(ref return_info, itemdom);
@@ -5350,7 +5361,11 @@ start_time_1,
 
                     if (itemdom != null)
                         strOutputItemXml = itemdom.OuterXml;
+
+                    // strOutputReaderXml 将用于构造读者记录返回格式
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                     strOutputReaderXml = readerdom.OuterXml;
+
                     if (itemdom != null)
                     {
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
@@ -5879,6 +5894,25 @@ start_time_1,
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 从读者记录中删除 password 元素
+        static int RemovePassword(ref string strReaderXml, out string strError)
+        {
+            strError = "";
+            XmlDocument readerdom = new XmlDocument();
+            try
+            {
+                readerdom.LoadXml(strReaderXml);
+            }
+            catch(Exception ex)
+            {
+                strError = "读者记录 XML 装入 DOM 时出错:" + ex.Message;
+                return -1;
+            }
+
+            DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+            return 0;
         }
 
         // 构造用于提示“读过”卷册的文字
