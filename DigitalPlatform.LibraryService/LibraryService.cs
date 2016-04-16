@@ -7873,6 +7873,9 @@ namespace dp2Library
                 }
                 else
                 {
+                    // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
+                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+
                     // return:
                     //      -1  error
                     //      0   file not found
@@ -7911,7 +7914,6 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         // 获得日志记录
@@ -7996,6 +7998,9 @@ namespace dp2Library
                         result.ErrorInfo = "访问日志尚未启用";
                         return result;
                     }
+
+                    // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
+                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
 
                     OperLogInfo[] records = null;
                     nRet = app.AccessLogDatabase.GetOperLogs(
