@@ -1870,13 +1870,13 @@ out strTargetLibraryCode);
             // operation:borrow -- readerRecord
             // operation:return -- readerRecord
             // operation:changeReaderPassword -- readerRecord 注意 newPassword 元素里面有新密码的 hash 字符串
-            // operation:setReaderInfo -- record 和 newRecord 元素
+            // operation:setReaderInfo -- record 和 oldRecord 元素
             // operation:amerce -- readerRecord 和 oldReaderRecord 元素
             // operation:devolveReaderInfo -- sourceReaderRecord 和 targetRecordRecord 元素
             // operation:hire -- readerRecord
             // operation:foregift -- readerRecord
             // !TODO: operation:writeRes 要留意它是不是写入了读者库。如果是，则要防范泄露 password 元素内容
-
+            // operation:setUser -- account 和 oldAccount 元素里面的 password 元素; 根元素的 newPassword 元素
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             if (strOperation == "borrow"
     || strOperation == "return"
@@ -1895,7 +1895,7 @@ out strTargetLibraryCode);
             if (strOperation == "setReaderInfo")
             {
                 RemoveReaderPassword(ref dom, "record");
-                RemoveReaderPassword(ref dom, "newRecord");
+                RemoveReaderPassword(ref dom, "oldRecord");
                 return;
             }
             if (strOperation == "amerce")
@@ -1908,6 +1908,16 @@ out strTargetLibraryCode);
             {
                 RemoveReaderPassword(ref dom, "sourceReaderRecord");
                 RemoveReaderPassword(ref dom, "targetReaderRecord");
+                return;
+            }
+            if (strOperation == "setUser")
+            {
+                DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("account | oldAccount");
+                foreach(XmlElement account in nodes)
+                {
+                    account.RemoveAttribute("password");
+                }
                 return;
             }
         }
